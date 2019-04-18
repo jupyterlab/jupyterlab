@@ -425,6 +425,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       sections.push(section);
     }
 
+    // NEW VERSION
     // Now create the sections for each category
     /* orderedCategories.forEach(cat => {
       const item = categories[cat][0] as ILauncher.IItemOptions;
@@ -723,11 +724,12 @@ function Card(
   launcherCallback: (widget: Widget) => void
 ): React.ReactElement<any> {
   // Get some properties of the command
-  const command = item.commands[item.options[0]];
   const args = { ...item.args, cwd: launcher.cwd };
-  const caption = commands.caption(command, args);
+
+  // NEW VERSION
+  /* const caption = commands.caption(command, args);
   const label = commands.label(command, args);
-  const title = kernel ? label : caption || label;
+  const title = kernel ? label : caption || label; */
 
   // Build the onclick handler.
   let onclickFactory = (currentCommand: string) => {
@@ -794,6 +796,7 @@ function Card(
     return options;
   };
 
+  // NEW VERSION
   // With tabindex working, you can now pick a kernel by tabbing around and
   // pressing Enter.
   /* let onkeypress = (event: React.KeyboardEvent) => {
@@ -850,19 +853,25 @@ function Card(
       key={Private.keyProperty.get(item)}
     >
       <div className="jp-LauncherCard-icon">
-        {item.kernelIconUrl && kernel && (
-          <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
-        )}
-        {!item.kernelIconUrl && !kernel && (
-          <div
-            className={`${commands.iconClass(command, args)} jp-Launcher-icon`}
-          />
-        )}
-        {!item.kernelIconUrl && kernel && (
-          <div className="jp-LauncherCard-noKernelIcon">
-            {label[0].toUpperCase()}
-          </div>
-        )}
+        {item.kernelIconUrl &&
+          kernel && (
+            <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
+          )}
+        {!item.kernelIconUrl &&
+          !kernel && (
+            <div
+              className={`${commands.iconClass(
+                item.commands[item.options[0]],
+                args
+              )} jp-Launcher-icon`}
+            />
+          )}
+        {!item.kernelIconUrl &&
+          kernel && (
+            <div className="jp-LauncherCard-noKernelIcon">
+              {label[0].toUpperCase()}
+            </div>
+          )}
       </div>
       <div className="jp-LauncherCard-label" title={label}>
         {label}
@@ -892,6 +901,22 @@ namespace Private {
     name: 'key',
     create: () => id++
   });
+
+  export function getLabel(
+    args: any,
+    item: ILauncher.IGroupedItemOptions,
+    commands: CommandRegistry
+  ): string {
+    return commands.label(item.commands[item.options[0]], args);
+  }
+
+  export function getCaption(
+    args: any,
+    item: ILauncher.IGroupedItemOptions,
+    commands: CommandRegistry
+  ): string {
+    return commands.caption(item.commands[item.options[0]], args);
+  }
 
   export function getDisplayName(
     item: ILauncher.IGroupedItemOptions,

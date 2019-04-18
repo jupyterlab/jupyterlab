@@ -1,0 +1,2249 @@
+{
+  "program": {
+    "fileInfos": {
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es5.d.ts": {
+        "version": "c8665e66018917580e71792b91022bcaf53fb946fab4aaf8dfb0738ed564db88",
+        "signature": "c8665e66018917580e71792b91022bcaf53fb946fab4aaf8dfb0738ed564db88"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.d.ts": {
+        "version": "7994d44005046d1413ea31d046577cdda33b8b2470f30281fd9c8b3c99fe2d96",
+        "signature": "7994d44005046d1413ea31d046577cdda33b8b2470f30281fd9c8b3c99fe2d96"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.dom.d.ts": {
+        "version": "6994c583b66862deca24d7bbf77297d95b9d3da8160dbd9beef6b847cf7c1376",
+        "signature": "6994c583b66862deca24d7bbf77297d95b9d3da8160dbd9beef6b847cf7c1376"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.core.d.ts": {
+        "version": "384f66a3422d80014c51de2682159bb26f1e35854029880ccd5f6d1f00e6a36d",
+        "signature": "384f66a3422d80014c51de2682159bb26f1e35854029880ccd5f6d1f00e6a36d"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.collection.d.ts": {
+        "version": "dd94d8ef48c562389eb58af8df3a3a34d11367f7c818192aa5f16470d469e3f0",
+        "signature": "dd94d8ef48c562389eb58af8df3a3a34d11367f7c818192aa5f16470d469e3f0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.generator.d.ts": {
+        "version": "828413486bdcaa342558e8e4570b1b287b776cb61b4b70b0214bd10c5d9a94c3",
+        "signature": "828413486bdcaa342558e8e4570b1b287b776cb61b4b70b0214bd10c5d9a94c3"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.iterable.d.ts": {
+        "version": "4d1f39313a169b8599b8817688f504b56ba8204c2ebafd03f66ff77ddb1899a4",
+        "signature": "4d1f39313a169b8599b8817688f504b56ba8204c2ebafd03f66ff77ddb1899a4"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.promise.d.ts": {
+        "version": "7c07d934680d0e33275a44d22fb11a4ff31d46c8c26a8d056828a478753f1efe",
+        "signature": "7c07d934680d0e33275a44d22fb11a4ff31d46c8c26a8d056828a478753f1efe"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.proxy.d.ts": {
+        "version": "5e72f949a89717db444e3bd9433468890068bb21a5638d8ab15a1359e05e54fe",
+        "signature": "5e72f949a89717db444e3bd9433468890068bb21a5638d8ab15a1359e05e54fe"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.reflect.d.ts": {
+        "version": "f5b242136ae9bfb1cc99a5971cccc44e99947ae6b5ef6fd8aa54b5ade553b976",
+        "signature": "f5b242136ae9bfb1cc99a5971cccc44e99947ae6b5ef6fd8aa54b5ade553b976"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.symbol.d.ts": {
+        "version": "9ae2860252d6b5f16e2026d8a2c2069db7b2a3295e98b6031d01337b96437230",
+        "signature": "9ae2860252d6b5f16e2026d8a2c2069db7b2a3295e98b6031d01337b96437230"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts": {
+        "version": "3e0a459888f32b42138d5a39f706ff2d55d500ab1031e0988b5568b0f67c2303",
+        "signature": "3e0a459888f32b42138d5a39f706ff2d55d500ab1031e0988b5568b0f67c2303"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/json.d.ts": {
+        "version": "ba7019a8788c81131b5bcbfc888894b09c9443695fbb5d77f91691f8790c5d87",
+        "signature": "ba7019a8788c81131b5bcbfc888894b09c9443695fbb5d77f91691f8790c5d87"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/mime.d.ts": {
+        "version": "e5c65cf9fff8db2c8be24db16baf1e546687aad33b66fe2980ae1ce3d4a36dd1",
+        "signature": "e5c65cf9fff8db2c8be24db16baf1e546687aad33b66fe2980ae1ce3d4a36dd1"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/promise.d.ts": {
+        "version": "d74f7bd9a9ff0678b1e79e27d3c6b5eac329a9c687315ab3cd21aa423a9a44e3",
+        "signature": "d74f7bd9a9ff0678b1e79e27d3c6b5eac329a9c687315ab3cd21aa423a9a44e3"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/random.d.ts": {
+        "version": "f58339fa857a8f3f3a826e46c1821596b9b62becf20c5511d88961b073dcfc01",
+        "signature": "f58339fa857a8f3f3a826e46c1821596b9b62becf20c5511d88961b073dcfc01"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/token.d.ts": {
+        "version": "b78b2eb7c212fc4e52cbb3a062e157ca79a7b25939b51a88d82cfd8020e9d47d",
+        "signature": "b78b2eb7c212fc4e52cbb3a062e157ca79a7b25939b51a88d82cfd8020e9d47d"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/uuid.d.ts": {
+        "version": "b76145ed1fa2cb5f8046cc30e89d1d1e03623e13d96f180730af757e42dc6300",
+        "signature": "b76145ed1fa2cb5f8046cc30e89d1d1e03623e13d96f180730af757e42dc6300"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts": {
+        "version": "adeae5b75b38d80a69a97b65dc6c2ba01cc08a637b3cb1c0d4c278dc3dafb633",
+        "signature": "adeae5b75b38d80a69a97b65dc6c2ba01cc08a637b3cb1c0d4c278dc3dafb633"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxengine.d.ts": {
+        "version": "f654ea3b882ce71f203fd785673e48e365008940c094c922c4d503c1f3b358f0",
+        "signature": "f654ea3b882ce71f203fd785673e48e365008940c094c922c4d503c1f3b358f0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts": {
+        "version": "6d4bce054cce22306edccc85e738a800ea0364a82e85f9bf61156ed03604d24f",
+        "signature": "6d4bce054cce22306edccc85e738a800ea0364a82e85f9bf61156ed03604d24f"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/array.d.ts": {
+        "version": "7c8adf0d13cee0b26c590d825463bd9d1e85cc7403fddcef10b6c813f19e9d2f",
+        "signature": "7c8adf0d13cee0b26c590d825463bd9d1e85cc7403fddcef10b6c813f19e9d2f"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts": {
+        "version": "2ec396db3f92fb5138c035df3694795c2159f1ccc57ea0acf165bcd762739eca",
+        "signature": "2ec396db3f92fb5138c035df3694795c2159f1ccc57ea0acf165bcd762739eca"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts": {
+        "version": "5d3db7107b3138edf0ddb9851bbba99caeb6b3e32074da4c7b45e751c296183b",
+        "signature": "5d3db7107b3138edf0ddb9851bbba99caeb6b3e32074da4c7b45e751c296183b"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts": {
+        "version": "b86137c60e0c62f7acfd8f0e761170bc6920c105ef03868c0518be562a5c5908",
+        "signature": "b86137c60e0c62f7acfd8f0e761170bc6920c105ef03868c0518be562a5c5908"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts": {
+        "version": "69d5afc46850b54ef3388769cd339f8dc88e15cd74a189bf71dac3937b4e8850",
+        "signature": "69d5afc46850b54ef3388769cd339f8dc88e15cd74a189bf71dac3937b4e8850"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts": {
+        "version": "052a7d0d927a2a307bda1b069a497e2a95263e6b412ed7db9bac6ef8a1b42015",
+        "signature": "052a7d0d927a2a307bda1b069a497e2a95263e6b412ed7db9bac6ef8a1b42015"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts": {
+        "version": "6256ad6e7c41a9f9ecb6349b5d5be72ea2c60ba1c6c6b3954929eb59a6980688",
+        "signature": "6256ad6e7c41a9f9ecb6349b5d5be72ea2c60ba1c6c6b3954929eb59a6980688"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts": {
+        "version": "77596a948c8deffc8f059fa0f3c38688f3b05caefa303506074034b5cb1a56ae",
+        "signature": "77596a948c8deffc8f059fa0f3c38688f3b05caefa303506074034b5cb1a56ae"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts": {
+        "version": "81ef0fab583499ba45dab44490620e7b870597d90c5e562ec5a9b38b6bd3fcdf",
+        "signature": "81ef0fab583499ba45dab44490620e7b870597d90c5e562ec5a9b38b6bd3fcdf"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts": {
+        "version": "f2b309d4f1bdf8e9f4fa03bf2183eb1b2f7cb66efb5b16da52e378ce75ac17bb",
+        "signature": "f2b309d4f1bdf8e9f4fa03bf2183eb1b2f7cb66efb5b16da52e378ce75ac17bb"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts": {
+        "version": "9cbaf0317ec49acb6c84d142077670a301015979260c4ecded7705fd2141379c",
+        "signature": "9cbaf0317ec49acb6c84d142077670a301015979260c4ecded7705fd2141379c"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts": {
+        "version": "5a49d16b6f7d3ca5c66569784290c0ed7a3d74821095e2ab91e17ea444ac4657",
+        "signature": "5a49d16b6f7d3ca5c66569784290c0ed7a3d74821095e2ab91e17ea444ac4657"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts": {
+        "version": "2e5fab5fe6e398cb14f695da07044a65f4e32c8d0fe9b31f5fe52d2cc7656230",
+        "signature": "2e5fab5fe6e398cb14f695da07044a65f4e32c8d0fe9b31f5fe52d2cc7656230"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/string.d.ts": {
+        "version": "f38d20ee516a6f12db2a988462a01589cc2375abe677fbb1236104948e4f86b5",
+        "signature": "f38d20ee516a6f12db2a988462a01589cc2375abe677fbb1236104948e4f86b5"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts": {
+        "version": "c9deb61903fd8318e6845e4e0f03b3bd813cdae1778f8dc9ee0ec05f9ca22094",
+        "signature": "c9deb61903fd8318e6845e4e0f03b3bd813cdae1778f8dc9ee0ec05f9ca22094"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts": {
+        "version": "7bc3152a4c8adf395ad486da44acb6e8c98dedd2becc83810b076114338a5045",
+        "signature": "7bc3152a4c8adf395ad486da44acb6e8c98dedd2becc83810b076114338a5045"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts": {
+        "version": "41375f954c8d8923153356307de4264c5f256da6b619b6e2823db1f6109d0931",
+        "signature": "41375f954c8d8923153356307de4264c5f256da6b619b6e2823db1f6109d0931"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts": {
+        "version": "d3323295ba67f1642899f5cc11dc9cccba82d9d46ec458cfdd3128775eb3d1b0",
+        "signature": "d3323295ba67f1642899f5cc11dc9cccba82d9d46ec458cfdd3128775eb3d1b0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts": {
+        "version": "c8a24a2440a34aea602f23947c59ce8d9d3bbd5301fd80160e9067b3ac3cce6b",
+        "signature": "c8a24a2440a34aea602f23947c59ce8d9d3bbd5301fd80160e9067b3ac3cce6b"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts": {
+        "version": "69154ab5c792b00111a4fb5a9f581c947b763305dc1c0c8fcf7e38d9b994da90",
+        "signature": "69154ab5c792b00111a4fb5a9f581c947b763305dc1c0c8fcf7e38d9b994da90"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts": {
+        "version": "cff8cce2b6396e6c5aba7ec4dcece82afeede3fc50338712de1590127018afc0",
+        "signature": "cff8cce2b6396e6c5aba7ec4dcece82afeede3fc50338712de1590127018afc0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts": {
+        "version": "2fb7a8f52040298e730c188642413fdba3c6db06549884dd9ebd3fd65ed947a6",
+        "signature": "2fb7a8f52040298e730c188642413fdba3c6db06549884dd9ebd3fd65ed947a6"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts": {
+        "version": "5a551464af396163e4a5e1f021ec84e41220e3dee5a064d9f8fcbf0e9868c782",
+        "signature": "5a551464af396163e4a5e1f021ec84e41220e3dee5a064d9f8fcbf0e9868c782"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts": {
+        "version": "a398a52d6789836e74dfa3470405958bd06dd82390b8f504e7e535e528911efc",
+        "signature": "a398a52d6789836e74dfa3470405958bd06dd82390b8f504e7e535e528911efc"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts": {
+        "version": "4a3eb9a99acb58ac24836b48cb880a78bca288670c75e71f3c1b94985df9b16e",
+        "signature": "4a3eb9a99acb58ac24836b48cb880a78bca288670c75e71f3c1b94985df9b16e"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts": {
+        "version": "e1a9cc40ab1817f6cba3ace1b0a670ea682737ad427ee8925466d3d8ed185c56",
+        "signature": "e1a9cc40ab1817f6cba3ace1b0a670ea682737ad427ee8925466d3d8ed185c56"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts": {
+        "version": "8692a758393b38b0460ab58a45fa7d0521d5223fef7133a5c9bc10bb1be309c0",
+        "signature": "8692a758393b38b0460ab58a45fa7d0521d5223fef7133a5c9bc10bb1be309c0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts": {
+        "version": "e582863f95c72400f8ddadeee51f6339c484aad6815b62a646b6bbedf4f579e2",
+        "signature": "e582863f95c72400f8ddadeee51f6339c484aad6815b62a646b6bbedf4f579e2"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts": {
+        "version": "c42b40b78808046ef81771edfcee3f443c31f299ab5c1286e551295a05c27cbf",
+        "signature": "c42b40b78808046ef81771edfcee3f443c31f299ab5c1286e551295a05c27cbf"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts": {
+        "version": "a55b0bb921749e3b0ed5a2c75449c9930dbece34dbe34c53c195920515743f46",
+        "signature": "a55b0bb921749e3b0ed5a2c75449c9930dbece34dbe34c53c195920515743f46"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts": {
+        "version": "7b78666949a8481e61619c4ae2450196ad42ee22b7260358a2ef8ccd5c489b25",
+        "signature": "7b78666949a8481e61619c4ae2450196ad42ee22b7260358a2ef8ccd5c489b25"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts": {
+        "version": "17e2ad38f5e2cec77ef265c2e87b9ae4143ff0d4666cc927533eb51f1a8bef6a",
+        "signature": "17e2ad38f5e2cec77ef265c2e87b9ae4143ff0d4666cc927533eb51f1a8bef6a"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts": {
+        "version": "ffe0e8d5fda270812a7256d40a9136de2abe40b78b8c1cdde337e7f63dc8e4c3",
+        "signature": "ffe0e8d5fda270812a7256d40a9136de2abe40b78b8c1cdde337e7f63dc8e4c3"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts": {
+        "version": "e37a382b0b15966b4daec5724cea815258732fe5006121e3bec69a67e25dc070",
+        "signature": "e37a382b0b15966b4daec5724cea815258732fe5006121e3bec69a67e25dc070"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts": {
+        "version": "41f45b1f8fe99c6bf177cb7256a1bd34fa367b406827817b7db3db1a3064dd39",
+        "signature": "41f45b1f8fe99c6bf177cb7256a1bd34fa367b406827817b7db3db1a3064dd39"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts": {
+        "version": "40fb364ece96b043dc62d8c5689e73373be5fdce5af6eba86e534fff1bcea2be",
+        "signature": "40fb364ece96b043dc62d8c5689e73373be5fdce5af6eba86e534fff1bcea2be"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts": {
+        "version": "1a122d5a933ad55a6d601effc385098d0ffc1a63f8ea7940cf5d8142ee55e19b",
+        "signature": "1a122d5a933ad55a6d601effc385098d0ffc1a63f8ea7940cf5d8142ee55e19b"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts": {
+        "version": "fa9674f9cd1a9b034c052fd7a3e47c7103fdd108f662cb96028ac70409222adf",
+        "signature": "fa9674f9cd1a9b034c052fd7a3e47c7103fdd108f662cb96028ac70409222adf"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts": {
+        "version": "edf93ecb3f4edcec45f9803418a9728110d7100f08070cb8be7af30ad34f7884",
+        "signature": "edf93ecb3f4edcec45f9803418a9728110d7100f08070cb8be7af30ad34f7884"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts": {
+        "version": "ff817eff62c578f72eee0feffa8178c8be79d750073010424768a41072530bfb",
+        "signature": "ff817eff62c578f72eee0feffa8178c8be79d750073010424768a41072530bfb"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts": {
+        "version": "d736803304297faf56f9bfaf41726451628acfd69fe2c311d790617b7ee0c677",
+        "signature": "d736803304297faf56f9bfaf41726451628acfd69fe2c311d790617b7ee0c677"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts": {
+        "version": "63693f0ba36b294a9b08d7aa7a36d22096fe4aba04a1c02750a35ae595daa9d4",
+        "signature": "63693f0ba36b294a9b08d7aa7a36d22096fe4aba04a1c02750a35ae595daa9d4"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts": {
+        "version": "7894ddb7d425ca0c26875609161a8969ac9f83d2da589bc605d90b493e2ef48b",
+        "signature": "7894ddb7d425ca0c26875609161a8969ac9f83d2da589bc605d90b493e2ef48b"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts": {
+        "version": "1a7ebdfed5b5b3f2e8587de3625fe8e977cdbb3216fa35b86eb2dae0de4ad265",
+        "signature": "1a7ebdfed5b5b3f2e8587de3625fe8e977cdbb3216fa35b86eb2dae0de4ad265"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts": {
+        "version": "69af5e5e6908d7756c6e1b13cbdfd74e1b9dbc18fe6c39710e62ed9dfb5d8322",
+        "signature": "69af5e5e6908d7756c6e1b13cbdfd74e1b9dbc18fe6c39710e62ed9dfb5d8322"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts": {
+        "version": "98189a1965d81f3d2cffbef6684783e271184812135bf33d664abc72e25ec85b",
+        "signature": "98189a1965d81f3d2cffbef6684783e271184812135bf33d664abc72e25ec85b"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/autosize.d.ts": {
+        "version": "628d14ee66689ebd1d56106bd4255c794ac70cfc4d42f1ba194bb16a9b3aba27",
+        "signature": "628d14ee66689ebd1d56106bd4255c794ac70cfc4d42f1ba194bb16a9b3aba27"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/background.d.ts": {
+        "version": "c5418632538b9aad9e5e6831b3c43e47ece9d827136291b664f78e8e1f2a8757",
+        "signature": "c5418632538b9aad9e5e6831b3c43e47ece9d827136291b664f78e8e1f2a8757"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/layout.d.ts": {
+        "version": "af5aabcf8375d042b7d6d1e56036ee679bff7f3d08e8d6d3836c0a3eb46d44d1",
+        "signature": "af5aabcf8375d042b7d6d1e56036ee679bff7f3d08e8d6d3836c0a3eb46d44d1"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/title.d.ts": {
+        "version": "058e418d324de45cad9e31d0dde0b9944f4ac81b991e284644324b5aece3cab1",
+        "signature": "058e418d324de45cad9e31d0dde0b9944f4ac81b991e284644324b5aece3cab1"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/encode.d.ts": {
+        "version": "52a4ceeaf65a8d84845326567d29abdd52fa1bcd5c4116779d6cb905e80cf6c6",
+        "signature": "52a4ceeaf65a8d84845326567d29abdd52fa1bcd5c4116779d6cb905e80cf6c6"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts": {
+        "version": "708d243dd24cfbfdf3f07a1fc9e5e696b52bec6246aeaeddc21c98a2c18b26fc",
+        "signature": "708d243dd24cfbfdf3f07a1fc9e5e696b52bec6246aeaeddc21c98a2c18b26fc"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/axis.d.ts": {
+        "version": "28f3ce72c444478b86f8b762f6a37674de9121cda58e42c8f46d593a93d8d802",
+        "signature": "28f3ce72c444478b86f8b762f6a37674de9121cda58e42c8f46d593a93d8d802"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/legend.d.ts": {
+        "version": "3aa1f0d96479cbce31fd4f79a59a3efef45ed5427179412ff60a79cef30bb7cc",
+        "signature": "3aa1f0d96479cbce31fd4f79a59a3efef45ed5427179412ff60a79cef30bb7cc"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/signal.d.ts": {
+        "version": "45e10079c9a6ea6f5ce563e33985faa85c6642e13f3ca6be8bfc17736885e165",
+        "signature": "45e10079c9a6ea6f5ce563e33985faa85c6642e13f3ca6be8bfc17736885e165"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/config.d.ts": {
+        "version": "5c428c387b8ae9e48d63f5b350a881ce95fa112d824c8da229b51763f6906aae",
+        "signature": "5c428c387b8ae9e48d63f5b350a881ce95fa112d824c8da229b51763f6906aae"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/padding.d.ts": {
+        "version": "b5bcc31379b6d7c23d8052ef4d9ca78de629ba8cad5d73c3d1928594e39680cc",
+        "signature": "b5bcc31379b6d7c23d8052ef4d9ca78de629ba8cad5d73c3d1928594e39680cc"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scope.d.ts": {
+        "version": "38ed16737e96c3114fcf15a0eeaed312d3b079a0ec19afd0430a480106979fb2",
+        "signature": "38ed16737e96c3114fcf15a0eeaed312d3b079a0ec19afd0430a480106979fb2"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/bind.d.ts": {
+        "version": "c12407a7ac2f0ba848c804f8e8544d7e3d9ef0bec647a82a099d4182fb9d2584",
+        "signature": "c12407a7ac2f0ba848c804f8e8544d7e3d9ef0bec647a82a099d4182fb9d2584"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/data.d.ts": {
+        "version": "7711ec0dfaaa8483867c297e754c843626d1e6c68a8e27c27244653a59b9e1ef",
+        "signature": "7711ec0dfaaa8483867c297e754c843626d1e6c68a8e27c27244653a59b9e1ef"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/expr.d.ts": {
+        "version": "820f7ebd2d6d52bddb8ac52e7bcf0732b5ffde231dc31a94f249a2d1500a6e54",
+        "signature": "820f7ebd2d6d52bddb8ac52e7bcf0732b5ffde231dc31a94f249a2d1500a6e54"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/mark.d.ts": {
+        "version": "98f088a9b3e9396bfb1c62a945dc6fb6c0466b8167c73d83922f3047adabb174",
+        "signature": "98f088a9b3e9396bfb1c62a945dc6fb6c0466b8167c73d83922f3047adabb174"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/marktype.d.ts": {
+        "version": "f2c6fa01fc31acb908767ebfc851fd30b09314207d1ad9c28e47abbe9fac3c8d",
+        "signature": "f2c6fa01fc31acb908767ebfc851fd30b09314207d1ad9c28e47abbe9fac3c8d"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/on-events.d.ts": {
+        "version": "60f6dcefb84039ea7a53a9faf527764020d20e2eab92e224b3a87a2e0f7249f0",
+        "signature": "60f6dcefb84039ea7a53a9faf527764020d20e2eab92e224b3a87a2e0f7249f0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/on-trigger.d.ts": {
+        "version": "849ac95d75ea8823b5c47582e5908d49e94ea755f4adfae8c8ab93bc64e02eb5",
+        "signature": "849ac95d75ea8823b5c47582e5908d49e94ea755f4adfae8c8ab93bc64e02eb5"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/projection.d.ts": {
+        "version": "c35e089becd74c520ecf4ef1b6af91835c7f1a58c6d4cbf09828359affd0ce2d",
+        "signature": "c35e089becd74c520ecf4ef1b6af91835c7f1a58c6d4cbf09828359affd0ce2d"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scheme.d.ts": {
+        "version": "a8a8714857202dbac933f39529fe1390acebda70d548bf56dd8ceb5f5c6824a5",
+        "signature": "a8a8714857202dbac933f39529fe1390acebda70d548bf56dd8ceb5f5c6824a5"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scale.d.ts": {
+        "version": "14d54bb4badaa4986acda9cb735f86ac82a39b4ecfb0f2b901895bf7422f6f84",
+        "signature": "14d54bb4badaa4986acda9cb735f86ac82a39b4ecfb0f2b901895bf7422f6f84"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/selector.d.ts": {
+        "version": "55d51c001dbea6cc93d87f7397c858bd360a6aa0dd930e3d3ca3ab584448529a",
+        "signature": "55d51c001dbea6cc93d87f7397c858bd360a6aa0dd930e3d3ca3ab584448529a"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/stream.d.ts": {
+        "version": "162188addba6478e80494768df2da178cfb4a7138e42cd567f7271601b2b53da",
+        "signature": "162188addba6478e80494768df2da178cfb4a7138e42cd567f7271601b2b53da"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/transform.d.ts": {
+        "version": "83c8052a44c624a0407028e0fee91d284ec69f7fb70ce195b6a1a7084fc01939",
+        "signature": "83c8052a44c624a0407028e0fee91d284ec69f7fb70ce195b6a1a7084fc01939"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/util.d.ts": {
+        "version": "f575e18e6906b3338680da741e6c6bd1f7dbfab43a4190860172104319bc5624",
+        "signature": "f575e18e6906b3338680da741e6c6bd1f7dbfab43a4190860172104319bc5624"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts": {
+        "version": "929891e4676fdbe9c7f5cdda3b4a5685755411372ab8224596816f12b8b331f3",
+        "signature": "929891e4676fdbe9c7f5cdda3b4a5685755411372ab8224596816f12b8b331f3"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/scene.d.ts": {
+        "version": "ca0f8b4329915dc05cf3d8ba8b964a48b490f0d7ff1c720b24b21730d288d614",
+        "signature": "ca0f8b4329915dc05cf3d8ba8b964a48b490f0d7ff1c720b24b21730d288d614"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/renderer.d.ts": {
+        "version": "3cd2dfd69a683e0c692afbc13da53602062ea34f5c92449c17a5fb00e094490a",
+        "signature": "3cd2dfd69a683e0c692afbc13da53602062ea34f5c92449c17a5fb00e094490a"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-util/index.d.ts": {
+        "version": "bf377dae804e865a85c2c3df40a37015fd2b7c3ab1c5f88057ecfd5a8be61d13",
+        "signature": "bf377dae804e865a85c2c3df40a37015fd2b7c3ab1c5f88057ecfd5a8be61d13"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/index.d.ts": {
+        "version": "2a8cea1490397f7965fff57712ddd6c3931597995d3c3559fef6793c51d8eba1",
+        "signature": "2a8cea1490397f7965fff57712ddd6c3931597995d3c3559fef6793c51d8eba1"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/index.d.ts": {
+        "version": "adb55de921e92ba0f611f46fa53f1a8bc1abe80473af7fc1ab97e8f9b3e1fdb8",
+        "signature": "adb55de921e92ba0f611f46fa53f1a8bc1abe80473af7fc1ab97e8f9b3e1fdb8"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts": {
+        "version": "47bc42fa5fcd4ef358e7cfafab9aaae3e8f18f0686db5d147f4c0194b33ede7f",
+        "signature": "47bc42fa5fcd4ef358e7cfafab9aaae3e8f18f0686db5d147f4c0194b33ede7f"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts": {
+        "version": "e726f762dd9f3ac74bbed1858d60f2933d1c9b68a8d075bd1f40938f68d6f150",
+        "signature": "e726f762dd9f3ac74bbed1858d60f2933d1c9b68a8d075bd1f40938f68d6f150"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/header.d.ts": {
+        "version": "ca7143d6f1534015c132aec4753b8cdd20cfa09ac7e0d9731df0b86f77591252",
+        "signature": "ca7143d6f1534015c132aec4753b8cdd20cfa09ac7e0d9731df0b86f77591252"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/sort.d.ts": {
+        "version": "615cdd79d04c3a8012d0a36c431d62a34dda971408130e59591461ad3fd9d5a9",
+        "signature": "615cdd79d04c3a8012d0a36c431d62a34dda971408130e59591461ad3fd9d5a9"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/clone/index.d.ts": {
+        "version": "9b1b35d8f7e9063fe1980c595338a67e47e345f82b677005ffc425094d96ecf5",
+        "signature": "9b1b35d8f7e9063fe1980c595338a67e47e345f82b677005ffc425094d96ecf5"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/fast-json-stable-stringify/index.d.ts": {
+        "version": "74934468bdfc94d16d85221e66aafd556356457d4ce49660724a9fddde23e38b",
+        "signature": "74934468bdfc94d16d85221e66aafd556356457d4ce49660724a9fddde23e38b"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/logical.d.ts": {
+        "version": "c9c831f01e782aca977d1e33fbfbcab5f286a5f71247916ece2a3cc4261c4e33",
+        "signature": "c9c831f01e782aca977d1e33fbfbcab5f286a5f71247916ece2a3cc4261c4e33"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/util.d.ts": {
+        "version": "8609c2fe126da5c3d323ab145b10d326ac1b19cb2d0985144da7355d0944f435",
+        "signature": "8609c2fe126da5c3d323ab145b10d326ac1b19cb2d0985144da7355d0944f435"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/type.d.ts": {
+        "version": "ba0ebd1441d74b3864f51eeb1950be71469cbfb357be58023a6c14f141a659a0",
+        "signature": "ba0ebd1441d74b3864f51eeb1950be71469cbfb357be58023a6c14f141a659a0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/scale.d.ts": {
+        "version": "97fdc8e421ef7564f8fac1360b26e14eb4243b4accf0de7e42a15af1b2b66537",
+        "signature": "97fdc8e421ef7564f8fac1360b26e14eb4243b4accf0de7e42a15af1b2b66537"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/stack.d.ts": {
+        "version": "365d6c223ba7c7c1ec8e882dbfe25ee59bb52d66d7e5c45dc9c3a3c5a49fd3f0",
+        "signature": "365d6c223ba7c7c1ec8e882dbfe25ee59bb52d66d7e5c45dc9c3a3c5a49fd3f0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/impute.d.ts": {
+        "version": "830a68c2b8a4c408281dfd3ba31acdae14396708dcea80755df3759096467521",
+        "signature": "830a68c2b8a4c408281dfd3ba31acdae14396708dcea80755df3759096467521"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/timeunit.d.ts": {
+        "version": "a26d12d2a2a9f5d5e75a6bc1b54b8701e51607607a9d42c279582a9e9b6fe963",
+        "signature": "a26d12d2a2a9f5d5e75a6bc1b54b8701e51607607a9d42c279582a9e9b6fe963"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/predicate.d.ts": {
+        "version": "117b5c9908ed30f067df55c1c1df7a390d41902b92d59c14b109ac7128f651be",
+        "signature": "117b5c9908ed30f067df55c1c1df7a390d41902b92d59c14b109ac7128f651be"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts": {
+        "version": "75c1e4ea30ab8b0c01d293a9f191c314459f7839950b0221961a1424257d1c25",
+        "signature": "75c1e4ea30ab8b0c01d293a9f191c314459f7839950b0221961a1424257d1c25"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts": {
+        "version": "b43c3f9d4f36a9604759a2b586c6fd715e1e67b3b98e73440afbdf836de348f1",
+        "signature": "b43c3f9d4f36a9604759a2b586c6fd715e1e67b3b98e73440afbdf836de348f1"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/data.d.ts": {
+        "version": "5705747d03a0981f80a411f280a90c0c8d231331d87bfde3d0103b5d6349b472",
+        "signature": "5705747d03a0981f80a411f280a90c0c8d231331d87bfde3d0103b5d6349b472"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/resolve.d.ts": {
+        "version": "d1714f1ecc84c7df432555eef33cb8e74f6a3ac087ffb7c76e3e2cc595aec5ae",
+        "signature": "d1714f1ecc84c7df432555eef33cb8e74f6a3ac087ffb7c76e3e2cc595aec5ae"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/title.d.ts": {
+        "version": "fc1b4252dc0ff63bd31fb8f185c869649bd9e9e64aed3f3fbc266f5b4ea5fb94",
+        "signature": "fc1b4252dc0ff63bd31fb8f185c869649bd9e9e64aed3f3fbc266f5b4ea5fb94"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/projection.d.ts": {
+        "version": "8f47a3528d4ab4bd0f7fab03752ea8144875c9d9229385454ade1fb3027de3f3",
+        "signature": "8f47a3528d4ab4bd0f7fab03752ea8144875c9d9229385454ade1fb3027de3f3"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/selection.d.ts": {
+        "version": "d9e5570a81cce8729ece1343c94bc591979a8c58a911cb13e9d51a3499e294b1",
+        "signature": "d9e5570a81cce8729ece1343c94bc591979a8c58a911cb13e9d51a3499e294b1"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/toplevel.d.ts": {
+        "version": "c1fa9e9aef96d55fe298bcbd0da4ed8f78a1e65311e23e418af0ad7042dd98b3",
+        "signature": "c1fa9e9aef96d55fe298bcbd0da4ed8f78a1e65311e23e418af0ad7042dd98b3"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts": {
+        "version": "a2bf2e62b4a57ff42be42dd54e743d9e20096f415b8b853631ceec5793928331",
+        "signature": "a2bf2e62b4a57ff42be42dd54e743d9e20096f415b8b853631ceec5793928331"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts": {
+        "version": "888e88895c574838dc71e444bdda9c730522cb8c3bfc0a00e3a4e354b60ac815",
+        "signature": "888e88895c574838dc71e444bdda9c730522cb8c3bfc0a00e3a4e354b60ac815"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/concat.d.ts": {
+        "version": "772ac1f226bdb215e4a7e4e576111b37934060e37abc62fc81d1f6358dd1f868",
+        "signature": "772ac1f226bdb215e4a7e4e576111b37934060e37abc62fc81d1f6358dd1f868"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/repeat.d.ts": {
+        "version": "c874c90d0be226b75775d44ff16a975ed2f5a156a7017dc63df97940a10c67a4",
+        "signature": "c874c90d0be226b75775d44ff16a975ed2f5a156a7017dc63df97940a10c67a4"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts": {
+        "version": "f39332abcd4c10ad6d9768425fedda19fa2c92202fbe1e47cbfa485cb21b3476",
+        "signature": "f39332abcd4c10ad6d9768425fedda19fa2c92202fbe1e47cbfa485cb21b3476"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts": {
+        "version": "b87362445ea7d14e31e17b066e37b1a555f60b48d82e734013b418762adf04ee",
+        "signature": "b87362445ea7d14e31e17b066e37b1a555f60b48d82e734013b418762adf04ee"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/facet.d.ts": {
+        "version": "8299ce7fdf2fda7cc6037f7dfde4ac94fc8c0588d49c3860108b0fd278db9ac5",
+        "signature": "8299ce7fdf2fda7cc6037f7dfde4ac94fc8c0588d49c3860108b0fd278db9ac5"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts": {
+        "version": "ffaed657869bfb0d0285aa3f28c25cb1620037a050fb5123e6c7ee1e5b3aa263",
+        "signature": "ffaed657869bfb0d0285aa3f28c25cb1620037a050fb5123e6c7ee1e5b3aa263"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/base.d.ts": {
+        "version": "fc0347a3c03faeb1e812a013e9596d6fcf1225fa88bcf5a4a161f70bca4b684c",
+        "signature": "fc0347a3c03faeb1e812a013e9596d6fcf1225fa88bcf5a4a161f70bca4b684c"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/base.d.ts": {
+        "version": "9709e4d01a1e66b232e76c1652bf09c091af25af03034c0ce9ce57e30b3f81cc",
+        "signature": "9709e4d01a1e66b232e76c1652bf09c091af25af03034c0ce9ce57e30b3f81cc"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/common.d.ts": {
+        "version": "36a22afc106388f9c06c80a5f744ee7ae08657301d0124f8ae1ddbde675ffa4e",
+        "signature": "36a22afc106388f9c06c80a5f744ee7ae08657301d0124f8ae1ddbde675ffa4e"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/boxplot.d.ts": {
+        "version": "52a2eb9a92fc75e1eec827322b817d70c39ca0039019ce748014fa3f60fcda0d",
+        "signature": "52a2eb9a92fc75e1eec827322b817d70c39ca0039019ce748014fa3f60fcda0d"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorbar.d.ts": {
+        "version": "9c426ddb435646de9d6dbbcf06046754c04d787ba061f6e8cff2ddfe993e3f86",
+        "signature": "9c426ddb435646de9d6dbbcf06046754c04d787ba061f6e8cff2ddfe993e3f86"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorband.d.ts": {
+        "version": "63cac1f89da1331cffd7ec40026403d23021b2abd041f8b5fe7a3860398aab4e",
+        "signature": "63cac1f89da1331cffd7ec40026403d23021b2abd041f8b5fe7a3860398aab4e"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts": {
+        "version": "d01a1dfcb89dc0b258365c0a0c73111a19be249f369d34ba040baa2038c6a0c7",
+        "signature": "d01a1dfcb89dc0b258365c0a0c73111a19be249f369d34ba040baa2038c6a0c7"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts": {
+        "version": "03502f9d552ac5acc733cb5387e9313d12050de687d06aeb59d3387460d11276",
+        "signature": "03502f9d552ac5acc733cb5387e9313d12050de687d06aeb59d3387460d11276"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compile/scale/type.d.ts": {
+        "version": "0b4134bfdb6915f07562f79e2b8b5ea733563e0e82518068371f1af6363539f8",
+        "signature": "0b4134bfdb6915f07562f79e2b8b5ea733563e0e82518068371f1af6363539f8"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts": {
+        "version": "160d2df8ee10315ba265eb8bb545328e1c036213d97c9a4ad1d6b4cb8c20a2d5",
+        "signature": "160d2df8ee10315ba265eb8bb545328e1c036213d97c9a4ad1d6b4cb8c20a2d5"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/bin.d.ts": {
+        "version": "e084b973012c947fc3bcdd898025e4ce4a660d92fed36b26b590ae326bc14a08",
+        "signature": "e084b973012c947fc3bcdd898025e4ce4a660d92fed36b26b590ae326bc14a08"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/legend.d.ts": {
+        "version": "667360d51281f8dbfa3ec11f66002a5d9883f43b80341bfaaf5ca51265d3a23a",
+        "signature": "667360d51281f8dbfa3ec11f66002a5d9883f43b80341bfaaf5ca51265d3a23a"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts": {
+        "version": "5cec19c5b8fe67a9f659162b0057aa437844b119c4812d60625a088aba0cba62",
+        "signature": "5cec19c5b8fe67a9f659162b0057aa437844b119c4812d60625a088aba0cba62"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/guide.d.ts": {
+        "version": "6e6e8b6e8c257d2ca177fc77ce46de968b3c1e3a2462158ce2d5940c42d82c06",
+        "signature": "6e6e8b6e8c257d2ca177fc77ce46de968b3c1e3a2462158ce2d5940c42d82c06"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/axis.d.ts": {
+        "version": "bc30c289dda3313d51dcd69e12b2e3bc33e6632754813e6aff21b05c13f136c7",
+        "signature": "bc30c289dda3313d51dcd69e12b2e3bc33e6632754813e6aff21b05c13f136c7"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts": {
+        "version": "a506aaf9b7a3a01c1bce5c11ef536d8948dc87495b8ccc475e086fa00efc8111",
+        "signature": "a506aaf9b7a3a01c1bce5c11ef536d8948dc87495b8ccc475e086fa00efc8111"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/index.d.ts": {
+        "version": "f38f59173d1984164a10ebd2aed257aa0d43a8f187ab5e50df08f39bdc673116",
+        "signature": "f38f59173d1984164a10ebd2aed257aa0d43a8f187ab5e50df08f39bdc673116"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/log.d.ts": {
+        "version": "6c9319a36f4e82065ea0326987feea6ac4b790e5c8d5917aca1aead624e412be",
+        "signature": "6c9319a36f4e82065ea0326987feea6ac4b790e5c8d5917aca1aead624e412be"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compile/compile.d.ts": {
+        "version": "6caac3a3a943650201774b0da8e85341d6df6c87d65094b6090b48f87ba15e9c",
+        "signature": "6caac3a3a943650201774b0da8e85341d6df6c87d65094b6090b48f87ba15e9c"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transformextract.d.ts": {
+        "version": "653e200d57ef8caa222aa5bd63b9a03986ab3a37f9d71d8741bd04cc94b38f4a",
+        "signature": "653e200d57ef8caa222aa5bd63b9a03986ab3a37f9d71d8741bd04cc94b38f4a"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/index.d.ts": {
+        "version": "837274f3fb20b8e8eb8383b44989d9662b50fa4ef34d697146acfef5e064e34e",
+        "signature": "837274f3fb20b8e8eb8383b44989d9662b50fa4ef34d697146acfef5e064e34e"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/defaults.d.ts": {
+        "version": "d569d8e189998b487f97f769741c1d20c8912c519386e598792f23dcc021a98a",
+        "signature": "d569d8e189998b487f97f769741c1d20c8912c519386e598792f23dcc021a98a"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/handler.d.ts": {
+        "version": "e2c7fc44c0d56f0d3b5a612a3d4621a0a67549f93439cffbf8747a88918f3f11",
+        "signature": "e2c7fc44c0d56f0d3b5a612a3d4621a0a67549f93439cffbf8747a88918f3f11"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/formatvalue.d.ts": {
+        "version": "9c2a12db0861be076ad3cb88d1f1215eda44c9a2a50313d63edb0a28ba184548",
+        "signature": "9c2a12db0861be076ad3cb88d1f1215eda44c9a2a50313d63edb0a28ba184548"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/position.d.ts": {
+        "version": "4b64f10945094bdba5ce14cf4dc01359930e895e770cea3f27399043cf7cea92",
+        "signature": "4b64f10945094bdba5ce14cf4dc01359930e895e770cea3f27399043cf7cea92"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/index.d.ts": {
+        "version": "b61de5304682f45e7c716773bae24de6c8c686ca6e8195f64c57f683c9e2ea93",
+        "signature": "b61de5304682f45e7c716773bae24de6c8c686ca6e8195f64c57f683c9e2ea93"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/types.d.ts": {
+        "version": "9cde79a2f7775044170027f2db8f5d0e933be97db4a62eb1605f276c6d008dcb",
+        "signature": "9cde79a2f7775044170027f2db8f5d0e933be97db4a62eb1605f276c6d008dcb"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/util.d.ts": {
+        "version": "821e182d37731105eaaa036d7eeb4474e0013906b32e9d79f39ef32afe5eb6ab",
+        "signature": "821e182d37731105eaaa036d7eeb4474e0013906b32e9d79f39ef32afe5eb6ab"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/embed.d.ts": {
+        "version": "6f3d1883156aa0c0060f46c29228c54c56869a9888448244671f59037b7f4518",
+        "signature": "6f3d1883156aa0c0060f46c29228c54c56869a9888448244671f59037b7f4518"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/packages/vega5-extension/src/index.ts": {
+        "version": "9a6dac1763cd76153cdf68a417fda1fecd6619b67e4062f04870c875f9453310",
+        "signature": "40144704b9b66764fd88e11c2a5fc101639a5801c77be1c170872ce029f6c52f"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/packages/vega5-extension/src/json.d.ts": {
+        "version": "9f592c44210f9e66e9b3f313e35019db6d97986a8c46f05622ff25537d120bb9",
+        "signature": "9f592c44210f9e66e9b3f313e35019db6d97986a8c46f05622ff25537d120bb9"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/webpack-env/index.d.ts": {
+        "version": "060e00506c96705e1f4f5722631fd1c2ccb997ae1c18ad7cf7a8296b46a70b08",
+        "signature": "060e00506c96705e1f4f5722631fd1c2ccb997ae1c18ad7cf7a8296b46a70b08"
+      }
+    },
+    "options": {
+      "allowSyntheticDefaultImports": true,
+      "composite": true,
+      "declaration": true,
+      "esModuleInterop": true,
+      "incremental": true,
+      "jsx": 2,
+      "lib": [
+        "lib.dom.d.ts",
+        "lib.es2015.d.ts"
+      ],
+      "module": 1,
+      "moduleResolution": 2,
+      "noEmitOnError": true,
+      "noImplicitAny": true,
+      "noUnusedLocals": true,
+      "resolveJsonModule": true,
+      "target": 2,
+      "types": [
+        "webpack-env"
+      ],
+      "outDir": "/Users/David/github/jupyterlab/jupyterlab/packages/vega5-extension/lib",
+      "rootDir": "/Users/David/github/jupyterlab/jupyterlab/packages/vega5-extension/src",
+      "configFilePath": "/Users/David/github/jupyterlab/jupyterlab/packages/vega5-extension/tsconfig.json"
+    },
+    "referencedMap": {
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/json.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/mime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/promise.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/random.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/token.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/uuid.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/array.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/string.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxengine.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/layout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/title.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/encode.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/title.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/encode.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/title.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/axis.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/legend.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/axis.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/signal.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/config.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/axis.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/legend.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/signal.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scope.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/data.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/mark.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/encode.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/on-events.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/on-trigger.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/projection.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scale.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scheme.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/stream.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/transform.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/autosize.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/background.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/encode.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/padding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scope.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/axis.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/bind.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/data.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/expr.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/legend.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/marktype.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/on-events.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/on-trigger.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/projection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scale.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scheme.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/selector.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/signal.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/stream.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/transform.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/util.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/renderer.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/scene.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/renderer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-util/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/scene.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/header.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/guide.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/sort.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/util.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/clone/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/fast-json-stable-stringify/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/logical.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/type.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/util.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/scale.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/type.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/stack.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/impute.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/predicate.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/logical.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/timeunit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/bin.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/data.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/impute.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/logical.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/predicate.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/sort.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/timeunit.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/bin.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/scale.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/stack.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/data.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/resolve.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/title.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/projection.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/selection.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/toplevel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/data.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/util.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/projection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/selection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/toplevel.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/projection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/concat.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/repeat.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/repeat.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/concat.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/facet.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/repeat.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/toplevel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/data.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/resolve.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/toplevel.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/facet.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/header.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/sort.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/facet.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/facet.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/base.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/projection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/base.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/common.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/type.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/boxplot.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/common.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorbar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/data.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/common.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorband.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorband.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/common.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorbar.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/facet.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/boxplot.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorband.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorbar.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compile/scale/type.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/scale.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compile/scale/type.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/facet.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/util.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/bin.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/bin.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/legend.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/guide.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/axis.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/bin.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/guide.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/impute.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/legend.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/logical.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/predicate.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/scale.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/sort.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/stack.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/timeunit.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/type.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/guide.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/legend.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/axis.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/guide.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/axis.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/header.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/legend.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/projection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/scale.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/selection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/toplevel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/stack.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/toplevel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/base.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/log.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-util/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/projection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/scale.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/type.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compile/compile.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/log.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transformextract.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compile/compile.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transformextract.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/handler.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/defaults.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/defaults.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/handler.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/formatvalue.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/position.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/types.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/embed.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/types.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/util.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/vega5-extension/src/index.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/embed.d.ts"
+      ]
+    },
+    "exportedModulesMap": {
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/json.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/mime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/promise.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/random.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/token.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/uuid.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/vega5-extension/src/index.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxengine.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/array.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/string.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/autosize.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/background.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/encode.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/padding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scope.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/axis.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/bind.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/data.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/expr.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/legend.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/marktype.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/on-events.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/on-trigger.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/projection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scale.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scheme.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/selector.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/signal.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/stream.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/transform.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/util.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/defaults.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/handler.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/formatvalue.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/position.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/embed.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/types.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/util.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/handler.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/defaults.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/types.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compile/compile.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/log.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compile/compile.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transformextract.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/log.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-util/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/projection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/scale.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/type.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/axis.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/guide.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/axis.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/header.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/legend.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/projection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/scale.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/selection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/toplevel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/stack.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transformextract.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/toplevel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/base.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/facet.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/boxplot.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorband.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorbar.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/axis.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/bin.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/guide.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/impute.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/legend.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/logical.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/predicate.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/scale.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/sort.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/stack.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/timeunit.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/type.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/guide.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/legend.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/legend.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/guide.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/header.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/guide.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/facet.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/header.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/sort.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/facet.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compile/scale/type.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/facet.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/util.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/bin.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/bin.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/bin.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/scale.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/stack.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compile/scale/type.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/scale.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/common.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/type.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorband.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/common.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorbar.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorbar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/data.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/common.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorband.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/boxplot.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/common.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/base.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/facet.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/base.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/projection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/projection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/selection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/toplevel.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/concat.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/facet.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/repeat.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/toplevel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/data.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/resolve.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/toplevel.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/repeat.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/repeat.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/concat.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/projection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/toplevel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/data.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/util.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/stack.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/selection.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/projection.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/title.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/data.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/bin.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/data.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/impute.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/logical.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/predicate.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/sort.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/timeunit.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/impute.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/scale.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/type.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/resolve.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/sort.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/renderer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-util/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/scene.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/renderer.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/scene.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/transform.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/stream.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scale.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scheme.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/projection.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/on-trigger.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/on-events.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/mark.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/encode.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/data.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scope.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/config.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/axis.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/legend.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/signal.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/signal.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/legend.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/axis.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/axis.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/encode.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/title.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/encode.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/title.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/title.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/layout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/predicate.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/logical.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/timeunit.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/util.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/clone/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/fast-json-stable-stringify/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/logical.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/type.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/util.d.ts"
+      ]
+    },
+    "semanticDiagnosticsPerFile": [
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es5.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.dom.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.core.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.collection.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.generator.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.iterable.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.promise.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.proxy.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.reflect.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.symbol.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/json.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/mime.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/promise.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/random.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/token.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/uuid.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxengine.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/array.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/string.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/autosize.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/background.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/layout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/title.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/encode.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/values.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/axis.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/legend.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/signal.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/config.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/padding.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scope.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/bind.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/data.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/expr.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/mark.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/marktype.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/on-events.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/on-trigger.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/projection.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scheme.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/scale.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/selector.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/stream.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/transform.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/util.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/spec/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/scene.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/renderer.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-util/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/runtime/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-typings/types/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/datetime.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/header.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/sort.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/clone/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/fast-json-stable-stringify/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/logical.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/util.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/type.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/scale.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/stack.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/impute.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/timeunit.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/predicate.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transform.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/vega.schema.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/data.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/resolve.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/title.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/projection.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/selection.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/toplevel.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/unit.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/layer.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/concat.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/repeat.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/base.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/spec/facet.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/encoding.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/base.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/base.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/common.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/boxplot.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorbar.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/errorband.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compositemark/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/mark.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compile/scale/type.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/channel.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/bin.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/legend.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/fielddef.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/guide.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/axis.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/config.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/normalize/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/log.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/compile/compile.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/transformextract.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-lite/build/src/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/defaults.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/handler.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/formatvalue.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/position.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-tooltip/build/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/types.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/util.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/vega-embed/build/src/embed.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/packages/vega5-extension/src/index.ts",
+      "/users/david/github/jupyterlab/jupyterlab/packages/vega5-extension/src/json.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/webpack-env/index.d.ts"
+    ]
+  },
+  "version": "3.4.3"
+}
