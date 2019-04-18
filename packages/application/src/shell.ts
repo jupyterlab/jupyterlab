@@ -253,11 +253,20 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     this.layout = rootLayout;
 
     // Connect change listeners.
-    this._tracker.currentChanged.connect(this._onCurrentChanged, this);
-    this._tracker.activeChanged.connect(this._onActiveChanged, this);
+    this._tracker.currentChanged.connect(
+      this._onCurrentChanged,
+      this
+    );
+    this._tracker.activeChanged.connect(
+      this._onActiveChanged,
+      this
+    );
 
     // Connect main layout change listener.
-    this._dockPanel.layoutModified.connect(this._onLayoutModified, this);
+    this._dockPanel.layoutModified.connect(
+      this._onLayoutModified,
+      this
+    );
 
     // Catch current changed events on the side handlers.
     this._leftHandler.sideBar.currentChanged.connect(
@@ -735,6 +744,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       ref = find(dock.widgets(), value => value.id === options.ref!) || null;
     }
 
+    // Add widget ID to tab so that we can get a handle on the tab's widget
+    // (for context menu support)
     widget.title.dataset = { ...widget.title.dataset, id: widget.id };
 
     dock.addWidget(widget, { mode, ref });
@@ -860,8 +871,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     return index < len - 1
       ? bars[index + 1]
       : index === len - 1
-      ? bars[0]
-      : null;
+        ? bars[0]
+        : null;
   }
 
   /*
@@ -1035,12 +1046,18 @@ namespace Private {
       this._sideBar.hide();
       this._stackedPanel.hide();
       this._lastCurrent = null;
-      this._sideBar.currentChanged.connect(this._onCurrentChanged, this);
+      this._sideBar.currentChanged.connect(
+        this._onCurrentChanged,
+        this
+      );
       this._sideBar.tabActivateRequested.connect(
         this._onTabActivateRequested,
         this
       );
-      this._stackedPanel.widgetRemoved.connect(this._onWidgetRemoved, this);
+      this._stackedPanel.widgetRemoved.connect(
+        this._onWidgetRemoved,
+        this
+      );
     }
 
     /**
