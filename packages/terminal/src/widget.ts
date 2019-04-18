@@ -164,42 +164,6 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   }
 
   /**
-   * Handle the setting of, connecting to, and sending of (if configured)
-   * initial command on a non-null server session
-   *
-   * @param session - the server session to bind to the terminal
-   * @retuns whether successfully connected to server session
-   *
-   * #### Notes
-   * Subclasses may reimplement this method as needed, but must
-   * `await super.setSession(session)` for proper initialization
-   */
-  protected async setSession(
-    session: TerminalSession.ISession
-  ): Promise<boolean> {
-    try {
-      await session.ready;
-    } catch (err) {
-      console.error(`Terminal session failed to start: ${err}`);
-      return false;
-    }
-
-    if (this.isDisposed || session !== this._session) {
-      return false;
-    }
-    session.messageReceived.connect(this._onMessage, this);
-    this.title.label = `Terminal ${session.name}`;
-    this._setSessionSize();
-    if (this._options.initialCommand) {
-      this._session.send({
-        type: 'stdin',
-        content: [this._options.initialCommand + '\r']
-      });
-    }
-    return true;
-  }
-
-  /**
    * Set the size of the terminal when attached if dirty.
    */
   protected onAfterAttach(msg: Message): void {
