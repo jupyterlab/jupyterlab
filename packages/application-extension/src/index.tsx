@@ -544,6 +544,11 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     }
   });
   palette.addItem({ command: CommandIDs.close, category });
+  contextMenu.addItem({
+    command: CommandIDs.close,
+    selector: '.p-TabBar-tab',
+    rank: 4
+  });
 
   commands.addCommand(CommandIDs.closeAll, {
     label: 'Close All Tabs',
