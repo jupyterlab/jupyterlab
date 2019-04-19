@@ -340,10 +340,8 @@ export class CodeConsole extends Widget {
   inject(code: string, metadata: JSONObject = {}): Promise<void> {
     let cell = this.createCodeCell();
     cell.model.value.text = code;
-    if (metadata) {
-      for (let key in metadata) {
-        cell.model.metadata.set(key, metadata[key]);
-      }
+    for (let key of Object.keys(metadata)) {
+      cell.model.metadata.set(key, metadata[key]);
     }
     this.addCell(cell);
     return this._execute(cell);
