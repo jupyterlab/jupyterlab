@@ -101,9 +101,7 @@
     "@jupyterlab/ui-components": "^1.0.0-alpha.6",
     "@jupyterlab/vdom": "^1.0.0-alpha.6",
     "@jupyterlab/vdom-extension": "^1.0.0-alpha.6",
-    "@jupyterlab/vega5-extension": "^1.0.0-alpha.6",
-    "jupyterlab-sos": "^0.4.3",
-    "transient-display-data": "^0.2.2"
+    "@jupyterlab/vega5-extension": "^1.0.0-alpha.6"
   },
   "devDependencies": {
     "fs-extra": "~4.0.2",
