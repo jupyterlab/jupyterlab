@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray, iter, some, map, each } from '@phosphor/algorithm';
+import { some, map, each } from '@phosphor/algorithm';
 
-import { Widget, DockLayout } from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
 import {
   ILabShell,
@@ -45,14 +45,6 @@ import { IDisposable } from '@phosphor/disposable';
  */
 namespace CommandIDs {
   export const clone = 'docmanager:clone';
-
-  export const close = 'docmanager:close';
-
-  export const closeAllFiles = 'docmanager:close-all-files';
-
-  export const closeOtherTabs = 'docmanager:close-other-tabs';
-
-  export const closeRightTabs = 'docmanager:close-right-tabs';
 
   export const deleteFile = 'docmanager:delete-file';
 
@@ -304,25 +296,6 @@ function addCommands(
   if (labShell) {
     addLabCommands(app, docManager, labShell, opener, palette);
   }
-
-  commands.addCommand(CommandIDs.close, {
-    label: () => {
-      const widget = shell.currentWidget;
-      let name = 'File';
-      if (widget) {
-        const typeName = fileType(widget, docManager);
-        name = typeName || widget.title.label;
-      }
-      return `Close ${name}`;
-    },
-    isEnabled: () =>
-      !!shell.currentWidget && !!shell.currentWidget.title.closable,
-    execute: () => {
-      if (shell.currentWidget) {
-        shell.currentWidget.close();
-      }
-    }
-  });
 
   commands.addCommand(CommandIDs.deleteFile, {
     label: () => `Delete ${fileType(shell.currentWidget, docManager)}`,
@@ -576,7 +549,6 @@ function addCommands(
 
   if (palette) {
     [
-      CommandIDs.close,
       CommandIDs.openDirect,
       CommandIDs.reload,
       CommandIDs.restoreCheckpoint,
@@ -601,7 +573,6 @@ function addLabCommands(
   palette: ICommandPalette | null
 ): void {
   const { commands } = app;
-  const category = 'File Operations';
 
   // Returns the doc widget associated with the most recent contextmenu event.
   const contextMenuWidget = (): Widget => {
@@ -618,65 +589,10 @@ function addLabCommands(
     return docManager.findWidget(pathMatch[1]);
   };
 
-  // Closes an array of widgets.
-  const closeWidgets = (widgets: Array<Widget>): void => {
-    widgets.forEach(widget => widget.close());
-  };
-
-  // Find the tab area for a widget within a specific dock area.
-  const findTab = (
-    area: DockLayout.AreaConfig,
-    widget: Widget
-  ): DockLayout.ITabAreaConfig | null => {
-    switch (area.type) {
-      case 'split-area':
-        const iterator = iter(area.children);
-        let tab: DockLayout.ITabAreaConfig | null = null;
-        let value: DockLayout.AreaConfig | null = null;
-        do {
-          value = iterator.next();
-          if (value) {
-            tab = findTab(value, widget);
-          }
-        } while (!tab && value);
-        return tab;
-      case 'tab-area':
-        const { id } = widget;
-        return area.widgets.some(widget => widget.id === id) ? area : null;
-      default:
-        return null;
-    }
-  };
-
   // Returns `true` if the current widget has a document context.
   const isEnabled = () => {
     const { currentWidget } = labShell;
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
-  };
-
-  // Find the tab area for a widget within the main dock area.
-  const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
-    const { mainArea } = labShell.saveLayout();
-    if (mainArea.mode !== 'multiple-document') {
-      return null;
-    }
-    let area = mainArea.dock.main;
-    if (!area) {
-      return null;
-    }
-    return findTab(area, widget);
-  };
-
-  // Returns an array of all widgets to the right of a widget in a tab area.
-  const widgetsRightOf = (widget: Widget): Array<Widget> => {
-    const { id } = widget;
-    const tabArea = tabAreaFor(widget);
-    const widgets = tabArea ? tabArea.widgets || [] : [];
-    const index = widgets.findIndex(widget => widget.id === id);
-    if (index < 0) {
-      return [];
-    }
-    return widgets.slice(index + 1);
   };
 
   commands.addCommand(CommandIDs.clone, {
@@ -695,45 +611,6 @@ function addLabCommands(
       if (child) {
         opener.open(child, options);
       }
-    }
-  });
-  commands.addCommand(CommandIDs.closeAllFiles, {
-    label: 'Close All',
-    execute: () => {
-      labShell.closeAll();
-    }
-  });
-
-  commands.addCommand(CommandIDs.closeOtherTabs, {
-    label: () => `Close Other Tabs`,
-    isEnabled: () => {
-      // Ensure there are at least two widgets.
-      const iterator = labShell.widgets('main');
-      return !!iterator.next() && !!iterator.next();
-    },
-    execute: () => {
-      const widget = contextMenuWidget();
-      if (!widget) {
-        return;
-      }
-      const { id } = widget;
-      const otherWidgets = toArray(labShell.widgets('main')).filter(
-        widget => widget.id !== id
-      );
-      closeWidgets(otherWidgets);
-    }
-  });
-
-  commands.addCommand(CommandIDs.closeRightTabs, {
-    label: () => `Close Tabs to Right`,
-    isEnabled: () =>
-      contextMenuWidget() && widgetsRightOf(contextMenuWidget()).length > 0,
-    execute: () => {
-      const widget = contextMenuWidget();
-      if (!widget) {
-        return;
-      }
-      closeWidgets(widgetsRightOf(widget));
     }
   });
 
@@ -764,11 +641,6 @@ function addLabCommands(
   });
 
   app.contextMenu.addItem({
-    command: CommandIDs.closeRightTabs,
-    selector: '[data-type="document-title"]',
-    rank: 5
-  });
-  app.contextMenu.addItem({
     command: CommandIDs.rename,
     selector: '[data-type="document-title"]',
     rank: 1
@@ -783,21 +655,6 @@ function addLabCommands(
     selector: '[data-type="document-title"]',
     rank: 3
   });
-  app.contextMenu.addItem({
-    command: CommandIDs.closeOtherTabs,
-    selector: '[data-type="document-title"]',
-    rank: 4
-  });
-
-  if (palette) {
-    [
-      CommandIDs.closeAllFiles,
-      CommandIDs.closeOtherTabs,
-      CommandIDs.closeRightTabs
-    ].forEach(command => {
-      palette.addItem({ command, category });
-    });
-  }
 }
 
 /**
