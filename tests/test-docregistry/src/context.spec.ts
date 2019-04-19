@@ -13,7 +13,7 @@ import {
   Context,
   DocumentRegistry,
   TextModelFactory
-} from '@jupyterlab/docregistry/src';
+} from '@jupyterlab/docregistry';
 
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -30,7 +30,7 @@ describe('docregistry/context', () => {
   const factory = new TextModelFactory();
 
   beforeAll(() => {
-    manager = new ServiceManager();
+    manager = new ServiceManager({ standby: 'never' });
     return manager.ready;
   });
 
@@ -251,7 +251,7 @@ describe('docregistry/context', () => {
       it('should be set after population', async () => {
         const { path } = context;
 
-        context.initialize(true);
+        void context.initialize(true);
         await context.ready;
         expect(context.contentsModel.path).to.equal(path);
       });

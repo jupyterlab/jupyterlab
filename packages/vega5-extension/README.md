@@ -1,6 +1,6 @@
-# vega4-extension
+# vega5-extension
 
-A JupyterLab extension for rendering [Vega](https://vega.github.io/vega) 4 and [Vega-Lite](https://vega.github.io/vega-lite) 2.
+A JupyterLab extension for rendering [Vega](https://vega.github.io/vega) 5 and [Vega-Lite](https://vega.github.io/vega-lite) 3.
 
 ![demo](http://g.recordit.co/USoTkuCOfR.gif)
 
@@ -16,8 +16,8 @@ To render Vega-Lite output in IPython:
 from IPython.display import display
 
 display({
-    "application/vnd.vegalite.v2+json": {
-        "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+    "application/vnd.vegalite.v3+json": {
+        "$schema": "https://vega.github.io/schema/vega-lite/v3.json",
         "description": "A simple bar chart with embedded data.",
         "data": {
             "values": [
@@ -57,8 +57,8 @@ Provide vega-embed options via metadata:
 from IPython.display import display
 
 display({
-    "application/vnd.vegalite.v2+json": {
-        "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+    "application/vnd.vegalite.v3+json": {
+        "$schema": "https://vega.github.io/schema/vega-lite/v3.json",
         "description": "A simple bar chart with embedded data.",
         "data": {
             "values": [

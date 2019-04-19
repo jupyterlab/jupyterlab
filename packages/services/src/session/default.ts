@@ -312,22 +312,10 @@ export class DefaultSession implements Session.ISession {
    */
   protected setupKernel(kernel: Kernel.IKernel): void {
     this._kernel = kernel;
-    kernel.statusChanged.connect(
-      this.onKernelStatus,
-      this
-    );
-    kernel.unhandledMessage.connect(
-      this.onUnhandledMessage,
-      this
-    );
-    kernel.iopubMessage.connect(
-      this.onIOPubMessage,
-      this
-    );
-    kernel.anyMessage.connect(
-      this.onAnyMessage,
-      this
-    );
+    kernel.statusChanged.connect(this.onKernelStatus, this);
+    kernel.unhandledMessage.connect(this.onUnhandledMessage, this);
+    kernel.iopubMessage.connect(this.onIOPubMessage, this);
+    kernel.anyMessage.connect(this.onAnyMessage, this);
   }
 
   /**
@@ -693,7 +681,7 @@ namespace Private {
     let init = { method: 'DELETE' };
     return ServerConnection.makeRequest(url, init, settings).then(response => {
       if (response.status === 404) {
-        response.json().then(data => {
+        return response.json().then(data => {
           let msg =
             data.message || `The session "${id}"" does not exist on the server`;
           console.warn(msg);
@@ -713,15 +701,12 @@ namespace Private {
   /**
    * Shut down all sessions.
    */
-  export function shutdownAll(
+  export async function shutdownAll(
     settings?: ServerConnection.ISettings
   ): Promise<void> {
     settings = settings || ServerConnection.makeSettings();
-    return listRunning(settings).then(running => {
-      each(running, s => {
-        shutdownSession(s.id, settings);
-      });
-    });
+    const running = await listRunning(settings);
+    await Promise.all(running.map(s => shutdownSession(s.id, settings)));
   }
 
   /**

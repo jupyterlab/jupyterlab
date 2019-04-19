@@ -9,7 +9,7 @@ import { JSONExt } from '@phosphor/coreutils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { CompleterModel, Completer } from '@jupyterlab/completer/src';
+import { CompleterModel, Completer } from '@jupyterlab/completer';
 
 function makeState(text: string): Completer.ITextState {
   return {

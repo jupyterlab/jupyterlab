@@ -12,11 +12,12 @@ import {
   RawCellModel,
   MarkdownCellModel,
   CodeCellModel
-} from '@jupyterlab/cells/src';
+} from '@jupyterlab/cells';
 
 import { OutputAreaModel } from '@jupyterlab/outputarea';
 
 import { NBTestUtils } from '@jupyterlab/testutils';
+import { JSONObject } from '@phosphor/coreutils';
 
 class TestModel extends CellModel {
   get type(): 'raw' {
@@ -294,6 +295,43 @@ describe('cells/model', () => {
         model.outputs.add(data);
         expect(called).to.equal(true);
       });
+
+      it('should sync collapsed and jupyter.outputs_hidden metadata on construction', () => {
+        let model: CodeCellModel;
+        let jupyter: JSONObject | undefined;
+
+        // Setting `collapsed` works
+        model = new CodeCellModel({
+          cell: { cell_type: 'code', source: '', metadata: { collapsed: true } }
+        });
+        expect(model.metadata.get('collapsed')).to.be.true;
+        jupyter = model.metadata.get('jupyter') as JSONObject;
+        expect(jupyter.outputs_hidden).to.be.true;
+
+        // Setting `jupyter.outputs_hidden` works
+        model = new CodeCellModel({
+          cell: {
+            cell_type: 'code',
+            source: '',
+            metadata: { jupyter: { outputs_hidden: true } }
+          }
+        });
+        expect(model.metadata.get('collapsed')).to.be.true;
+        jupyter = model.metadata.get('jupyter') as JSONObject;
+        expect(jupyter.outputs_hidden).to.be.true;
+
+        // `collapsed` takes precedence
+        model = new CodeCellModel({
+          cell: {
+            cell_type: 'code',
+            source: '',
+            metadata: { collapsed: false, jupyter: { outputs_hidden: true } }
+          }
+        });
+        expect(model.metadata.get('collapsed')).to.be.false;
+        jupyter = model.metadata.get('jupyter') as JSONObject;
+        expect(jupyter.outputs_hidden).to.be.false;
+      });
     });
 
     describe('#type', () => {
@@ -399,6 +437,75 @@ describe('cells/model', () => {
         expect(serialized).to.deep.equal(cell);
         const output = serialized.outputs[0] as any;
         expect(output.data['application/json']['bar']).to.equal(1);
+      });
+    });
+
+    describe('.metadata', () => {
+      it('should sync collapsed and jupyter.outputs_hidden metadata when changed', () => {
+        const metadata = new CodeCellModel({}).metadata;
+
+        expect(metadata.get('collapsed')).to.be.undefined;
+        expect(metadata.get('jupyter')).to.be.undefined;
+
+        // Setting collapsed sets jupyter.outputs_hidden
+        metadata.set('collapsed', true);
+        expect(metadata.get('collapsed')).to.be.true;
+        expect(metadata.get('jupyter')).to.deep.equal({
+          outputs_hidden: true
+        });
+
+        metadata.set('collapsed', false);
+        expect(metadata.get('collapsed')).to.be.false;
+        expect(metadata.get('jupyter')).to.deep.equal({
+          outputs_hidden: false
+        });
+
+        metadata.delete('collapsed');
+        expect(metadata.get('collapsed')).to.be.undefined;
+        expect(metadata.get('jupyter')).to.be.undefined;
+
+        // Setting jupyter.outputs_hidden sets collapsed
+        metadata.set('jupyter', { outputs_hidden: true });
+        expect(metadata.get('collapsed')).to.be.true;
+        expect(metadata.get('jupyter')).to.deep.equal({
+          outputs_hidden: true
+        });
+
+        metadata.set('jupyter', { outputs_hidden: false });
+        expect(metadata.get('collapsed')).to.be.false;
+        expect(metadata.get('jupyter')).to.deep.equal({
+          outputs_hidden: false
+        });
+
+        metadata.delete('jupyter');
+        expect(metadata.get('collapsed')).to.be.undefined;
+        expect(metadata.get('jupyter')).to.be.undefined;
+
+        // Deleting jupyter.outputs_hidden preserves other jupyter fields
+        metadata.set('jupyter', { outputs_hidden: true, other: true });
+        expect(metadata.get('collapsed')).to.be.true;
+        expect(metadata.get('jupyter')).to.deep.equal({
+          outputs_hidden: true,
+          other: true
+        });
+        metadata.set('jupyter', { other: true });
+        expect(metadata.get('collapsed')).to.be.undefined;
+        expect(metadata.get('jupyter')).to.deep.equal({
+          other: true
+        });
+
+        // Deleting collapsed preserves other jupyter fields
+        metadata.set('jupyter', { outputs_hidden: true, other: true });
+        expect(metadata.get('collapsed')).to.be.true;
+        expect(metadata.get('jupyter')).to.deep.equal({
+          outputs_hidden: true,
+          other: true
+        });
+        metadata.delete('collapsed');
+        expect(metadata.get('collapsed')).to.be.undefined;
+        expect(metadata.get('jupyter')).to.deep.equal({
+          other: true
+        });
       });
     });
 

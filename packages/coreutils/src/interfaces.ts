@@ -24,18 +24,15 @@ export interface IChangedArgs<T> {
 /**
  * The description of a general purpose data connector.
  *
- * #### Notes
- * The generic type arguments <T, U = T, V = string> semantics are:
+ * @typeparam T - The basic entity response type a service's connector.
  *
- * T - is the basic entity response type a particular service's connector.
+ * @typeparam U - The basic entity request type, which is conventionally the
+ * same as the response type but may be different if a service's implementation
+ * requires input data to be different from output responses. Defaults to `T`.
  *
- * U = T - is the basic entity request type, which is conventionally the same as
- * the response type but may be different if a service's implementation requires
- * input data to be different from output responses.
- *
- * V = string - is the basic token applied to a request, conventionally a string
+ * @typeparam V - The basic token applied to a request, conventionally a string
  * ID or filter, but may be set to a different type when an implementation
- * requires it.
+ * requires it. Defaults to `string`.
  */
 export interface IDataConnector<T, U = T, V = string> {
   /**

@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { InstanceTracker } from '@jupyterlab/apputils/src';
+import { InstanceTracker } from '@jupyterlab/apputils';
 
 import { signalToPromise, testEmission } from '@jupyterlab/testutils';
 
@@ -50,7 +50,7 @@ describe('@jupyterlab/apputils', () => {
         Widget.attach(widget, document.body);
         widget.node.focus();
         simulate(widget.node, 'focus');
-        tracker.add(widget);
+        void tracker.add(widget);
         await promise;
         Widget.detach(widget);
       });
@@ -61,7 +61,7 @@ describe('@jupyterlab/apputils', () => {
         const tracker = new InstanceTracker<Widget>({ namespace });
         const widget = new Widget();
         let promise = signalToPromise(tracker.widgetAdded);
-        tracker.add(widget);
+        void tracker.add(widget);
         const [sender, args] = await promise;
         expect(sender).to.equal(tracker);
         expect(args).to.equal(widget);
@@ -81,7 +81,7 @@ describe('@jupyterlab/apputils', () => {
             return total === 1;
           }
         });
-        tracker.add(one);
+        void tracker.add(one);
         tracker.inject(two);
         Widget.attach(two, document.body);
         two.node.focus();
@@ -101,7 +101,7 @@ describe('@jupyterlab/apputils', () => {
         const tracker = new InstanceTracker<Widget>({ namespace });
         const widget = new Widget();
         widget.node.tabIndex = -1;
-        tracker.add(widget);
+        void tracker.add(widget);
         expect(tracker.currentWidget).to.equal(widget);
         widget.dispose();
       });
@@ -110,9 +110,9 @@ describe('@jupyterlab/apputils', () => {
         const tracker = new InstanceTracker<Widget>({ namespace });
         const panel = new Panel();
         const widget0 = createWidget();
-        tracker.add(widget0);
+        void tracker.add(widget0);
         const widget1 = createWidget();
-        tracker.add(widget1);
+        void tracker.add(widget1);
         panel.addWidget(widget0);
         panel.addWidget(widget1);
         Widget.attach(panel, document.body);
@@ -128,9 +128,9 @@ describe('@jupyterlab/apputils', () => {
       it('should revert to the previously added widget on widget disposal', () => {
         const tracker = new TestTracker<Widget>({ namespace });
         const widget0 = new Widget();
-        tracker.add(widget0);
+        void tracker.add(widget0);
         const widget1 = new Widget();
-        tracker.add(widget1);
+        void tracker.add(widget1);
         expect(tracker.currentWidget).to.equal(widget1);
         widget1.dispose();
         expect(tracker.currentWidget).to.equal(widget0);
@@ -141,7 +141,7 @@ describe('@jupyterlab/apputils', () => {
         const tracker = new InstanceTracker<Widget>({ namespace });
         const widgets = [createWidget(), createWidget(), createWidget()];
         each(widgets, widget => {
-          tracker.add(widget);
+          void tracker.add(widget);
           panel.addWidget(widget);
         });
         Widget.attach(panel, document.body);
@@ -168,7 +168,7 @@ describe('@jupyterlab/apputils', () => {
         const tracker = new InstanceTracker<Widget>({ namespace });
         const widgets = [createWidget(), createWidget(), createWidget()];
         each(widgets, widget => {
-          tracker.add(widget);
+          void tracker.add(widget);
           panel.addWidget(widget);
         });
         Widget.attach(panel, document.body);
@@ -270,9 +270,9 @@ describe('@jupyterlab/apputils', () => {
         widgetA.id = 'A';
         widgetB.id = 'B';
         widgetC.id = 'C';
-        tracker.add(widgetA);
-        tracker.add(widgetB);
-        tracker.add(widgetC);
+        void tracker.add(widgetA);
+        void tracker.add(widgetB);
+        void tracker.add(widgetC);
         expect(tracker.find(widget => widget.id === 'B')).to.equal(widgetB);
       });
 
@@ -284,9 +284,9 @@ describe('@jupyterlab/apputils', () => {
         widgetA.id = 'A';
         widgetB.id = 'B';
         widgetC.id = 'C';
-        tracker.add(widgetA);
-        tracker.add(widgetB);
-        tracker.add(widgetC);
+        void tracker.add(widgetA);
+        void tracker.add(widgetB);
+        void tracker.add(widgetC);
         expect(tracker.find(widget => widget.id === 'D')).to.not.be.ok;
       });
     });
@@ -300,9 +300,9 @@ describe('@jupyterlab/apputils', () => {
         widgetA.id = 'include-A';
         widgetB.id = 'include-B';
         widgetC.id = 'exclude-C';
-        tracker.add(widgetA);
-        tracker.add(widgetB);
-        tracker.add(widgetC);
+        void tracker.add(widgetA);
+        void tracker.add(widgetB);
+        void tracker.add(widgetC);
         const list = tracker.filter(
           widget => widget.id.indexOf('include') !== -1
         );
@@ -319,9 +319,9 @@ describe('@jupyterlab/apputils', () => {
         widgetA.id = 'A';
         widgetB.id = 'B';
         widgetC.id = 'C';
-        tracker.add(widgetA);
-        tracker.add(widgetB);
-        tracker.add(widgetC);
+        void tracker.add(widgetA);
+        void tracker.add(widgetB);
+        void tracker.add(widgetC);
         expect(tracker.filter(widget => widget.id === 'D').length).to.equal(0);
       });
     });
@@ -335,9 +335,9 @@ describe('@jupyterlab/apputils', () => {
         widgetA.id = 'A';
         widgetB.id = 'B';
         widgetC.id = 'C';
-        tracker.add(widgetA);
-        tracker.add(widgetB);
-        tracker.add(widgetC);
+        void tracker.add(widgetA);
+        void tracker.add(widgetB);
+        void tracker.add(widgetC);
         tracker.forEach(widget => {
           visited += widget.id;
         });
@@ -350,7 +350,7 @@ describe('@jupyterlab/apputils', () => {
         const tracker = new InstanceTracker<Widget>({ namespace });
         const widget = new Widget();
         expect(tracker.has(widget)).to.equal(false);
-        tracker.add(widget);
+        void tracker.add(widget);
         expect(tracker.has(widget)).to.equal(true);
       });
     });
@@ -378,7 +378,7 @@ describe('@jupyterlab/apputils', () => {
       it('should be called when the current widget is changed', () => {
         const tracker = new TestTracker<Widget>({ namespace });
         const widget = new Widget();
-        tracker.add(widget);
+        void tracker.add(widget);
         expect(tracker.methods).to.contain('onCurrentChanged');
       });
     });

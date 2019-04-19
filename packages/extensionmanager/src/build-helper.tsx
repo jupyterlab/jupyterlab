@@ -32,7 +32,7 @@ export function doBuild(builder: Builder.IManager): Promise<void> {
         }
       })
       .catch(err => {
-        showDialog({
+        void showDialog({
           title: 'Build Failed',
           body: <pre>{err.message}</pre>
         });

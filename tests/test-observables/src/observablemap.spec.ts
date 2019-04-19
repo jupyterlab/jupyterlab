@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { ObservableMap } from '@jupyterlab/observables/src';
+import { ObservableMap } from '@jupyterlab/observables';
 
 describe('@jupyterlab/observables', () => {
   describe('ObservableMap', () => {
@@ -169,7 +169,7 @@ describe('@jupyterlab/observables', () => {
         expect(value.delete('one')).to.be.undefined;
       });
 
-      it('should trigger a changed signal', () => {
+      it('should trigger a changed signal if actually removed', () => {
         const value = new ObservableMap<number>();
         value.set('one', 1);
         value.set('two', 2);
@@ -186,6 +186,26 @@ describe('@jupyterlab/observables', () => {
         });
         value.delete('two');
         expect(called).to.equal(true);
+      });
+
+      it('should not trigger a changed signal if not actually removed', () => {
+        const value = new ObservableMap<number>();
+        value.set('one', 1);
+        value.set('three', 3);
+        let called = false;
+
+        value.changed.connect((sender, args) => {
+          expect(sender).to.equal(value);
+          expect(args.type).to.equal('remove');
+          expect(args.key).to.equal('two');
+          expect(args.oldValue).to.equal(2);
+          expect(args.newValue).to.be.undefined;
+          called = true;
+        });
+
+        // 'two' is not in the map
+        value.delete('two');
+        expect(called).to.equal(false);
       });
     });
 

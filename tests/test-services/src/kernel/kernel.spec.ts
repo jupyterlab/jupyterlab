@@ -7,7 +7,7 @@ import { UUID } from '@phosphor/coreutils';
 
 import { toArray } from '@phosphor/algorithm';
 
-import { Kernel } from '@jupyterlab/services/src/kernel';
+import { Kernel } from '@jupyterlab/services';
 
 import {
   expectFailure,
@@ -144,7 +144,7 @@ describe('kernel', () => {
       const emission = testEmission(kernel.statusChanged, {
         find: (k, status) => status === 'reconnecting'
       });
-      tester.close();
+      await tester.close();
       await emission;
     });
   });

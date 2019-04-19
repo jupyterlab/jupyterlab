@@ -4,10 +4,10 @@
 import '../style/index.css';
 
 export * from './actions';
-export * from './celltools';
 export * from './default-toolbar';
 export * from './model';
 export * from './modelfactory';
+export * from './notebooktools';
 export * from './panel';
 export * from './tracker';
 export * from './widget';

@@ -77,10 +77,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     if (!this._cells.length) {
       this._cells.push(factory.createCodeCell({}));
     }
-    this._cells.changed.connect(
-      this._onCellsChanged,
-      this
-    );
+    this._cells.changed.connect(this._onCellsChanged, this);
 
     // Handle initial metadata.
     let metadata = this.modelDB.createMap('metadata');
@@ -89,10 +86,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       metadata.set('language_info', { name });
     }
     this._ensureMetadata();
-    metadata.changed.connect(
-      this.triggerContentChange,
-      this
-    );
+    metadata.changed.connect(this.triggerContentChange, this);
     this._deletedCells = [];
   }
 
@@ -281,20 +275,14 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     switch (change.type) {
       case 'add':
         change.newValues.forEach(cell => {
-          cell.contentChanged.connect(
-            this.triggerContentChange,
-            this
-          );
+          cell.contentChanged.connect(this.triggerContentChange, this);
         });
         break;
       case 'remove':
         break;
       case 'set':
         change.newValues.forEach(cell => {
-          cell.contentChanged.connect(
-            this.triggerContentChange,
-            this
-          );
+          cell.contentChanged.connect(this.triggerContentChange, this);
         });
         break;
       default:

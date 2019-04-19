@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { Router } from '@jupyterlab/application/src';
+import { Router } from '@jupyterlab/application';
 
 import { CommandRegistry } from '@phosphor/commands';
 

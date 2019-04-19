@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { HelpMenu } from '@jupyterlab/mainmenu/src';
+import { HelpMenu } from '@jupyterlab/mainmenu';
 
 describe('@jupyterlab/mainmenu', () => {
   describe('HelpMenu', () => {

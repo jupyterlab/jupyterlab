@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
-import { KernelMessage, Kernel } from '@jupyterlab/services/src/kernel';
+import { KernelMessage, Kernel } from '@jupyterlab/services';
 
 import { init } from '../utils';
 

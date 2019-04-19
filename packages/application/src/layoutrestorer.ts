@@ -154,7 +154,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     this._state = options.state;
     this._first = options.first;
 
-    this._first
+    void this._first
       .then(() => {
         this._firstDone = true;
       })
@@ -183,10 +183,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   add(widget: Widget, name: string): void {
     Private.nameProperty.set(widget, name);
     this._widgets.set(name, widget);
-    widget.disposed.connect(
-      this._onWidgetDisposed,
-      this
-    );
+    widget.disposed.connect(this._onWidgetDisposed, this);
   }
 
   /**
@@ -261,15 +258,12 @@ export class LayoutRestorer implements ILayoutRestorer {
     this._trackers.add(namespace);
 
     // Whenever a new widget is added to the tracker, record its name.
-    tracker.widgetAdded.connect(
-      (sender: any, widget: Widget) => {
-        const widgetName = name(widget);
-        if (widgetName) {
-          this.add(widget, `${namespace}:${widgetName}`);
-        }
-      },
-      this
-    );
+    tracker.widgetAdded.connect((sender: any, widget: Widget) => {
+      const widgetName = name(widget);
+      if (widgetName) {
+        this.add(widget, `${namespace}:${widgetName}`);
+      }
+    }, this);
 
     // Whenever a widget is updated, get its new name.
     tracker.widgetUpdated.connect((sender, widget) => {
@@ -400,8 +394,8 @@ export class LayoutRestorer implements ILayoutRestorer {
     const widgets = !Array.isArray(area.widgets)
       ? null
       : area.widgets
-          .map(
-            name => (internal.has(`${name}`) ? internal.get(`${name}`) : null)
+          .map(name =>
+            internal.has(`${name}`) ? internal.get(`${name}`) : null
           )
           .filter(widget => !!widget);
     return {

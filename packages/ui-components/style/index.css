@@ -15,7 +15,7 @@ html {
 }
 
 body {
-  color: #182026;
+  color: unset;
   font-family: var(--jp-ui-font-family);
 }
 
@@ -32,6 +32,7 @@ strong {
   font-weight: unset;
 }
 
+/* Override Blueprint's _typography.scss styles */
 a {
   text-decoration: unset;
   color: unset;
@@ -42,12 +43,14 @@ a:hover {
   color: unset;
 }
 
+/* Override Blueprint's _accessibility.scss styles */
 :focus {
   outline: unset;
   outline-offset: unset;
   -moz-outline-radius: unset;
 }
 
+/* Styles for ui-components */
 .jp-Button {
   border-radius: var(--jp-border-radius);
   padding: 0px 12px;
@@ -63,10 +66,6 @@ a:hover {
   text-transform: none;
 }
 
-/* .jp-InputGroup {
-
-} */
-
 .jp-InputGroup input {
   box-sizing: border-box;
   border-radius: 0;
@@ -76,10 +75,9 @@ a:hover {
 }
 
 .jp-InputGroup input:focus {
-  /* box-shadow: inset 0 0 0 var(--jp-border-width) var(--jp-input-active-border-color),
-    inset 0 0 0 3px rgba(19, 124, 189, 0.3); */
-  box-shadow: inset 0 0 0 var(--jp-border-width) rgba(19, 124, 189, 0.3),
-    inset 0 0 0 3px rgba(19, 124, 189, 0.3);
+  box-shadow: inset 0 0 0 var(--jp-border-width)
+      var(--jp-input-active-box-shadow-color),
+    inset 0 0 0 3px var(--jp-input-active-box-shadow-color);
 }
 
 .jp-InputGroup input::placeholder,
@@ -107,10 +105,6 @@ input::placeholder {
 .jp-HTMLSelect select:hover {
   color: var(--jp-ui-font-color0);
 }
-
-/* .jp-Select {
-
-} */
 
 select {
   box-sizing: border-box;

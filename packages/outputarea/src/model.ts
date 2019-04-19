@@ -152,10 +152,7 @@ export class OutputAreaModel implements IOutputAreaModel {
         this._add(value);
       });
     }
-    this.list.changed.connect(
-      this._onListChanged,
-      this
-    );
+    this.list.changed.connect(this._onListChanged, this);
 
     // If we are given a IModelDB, keep an up-to-date
     // serialized copy of the OutputAreaModel in it.
@@ -167,10 +164,7 @@ export class OutputAreaModel implements IOutputAreaModel {
       } else {
         this._serialized.set(this.toJSON());
       }
-      this._serialized.changed.connect(
-        this._onSerializedChanged,
-        this
-      );
+      this._serialized.changed.connect(this._onSerializedChanged, this);
     }
   }
 
@@ -421,10 +415,7 @@ export class OutputAreaModel implements IOutputAreaModel {
   private _createItem(options: IOutputModel.IOptions): IOutputModel {
     let factory = this.contentFactory;
     let item = factory.createOutputModel(options);
-    item.changed.connect(
-      this._onGenericChange,
-      this
-    );
+    item.changed.connect(this._onGenericChange, this);
     return item;
   }
 
