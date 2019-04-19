@@ -7,7 +7,7 @@
     "incremental": true,
     "jsx": "react",
     "lib": ["dom", "es2015"],
-    "module": "commonjs",
+    "module": "esnext",
     "moduleResolution": "node",
     "noEmitOnError": true,
     "noImplicitAny": true,
