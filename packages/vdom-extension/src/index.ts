@@ -91,9 +91,9 @@ const plugin: JupyterFrontEndPlugin<IVDOMTracker> = {
 
     factory.widgetCreated.connect((sender, widget) => {
       widget.context.pathChanged.connect(() => {
-        tracker.save(widget);
+        void tracker.save(widget);
       });
-      tracker.add(widget);
+      void tracker.add(widget);
     });
 
     // Add widget factory to document registry.

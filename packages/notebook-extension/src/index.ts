@@ -421,7 +421,7 @@ function activateNotebookTools(
   };
   let optionsMap: { [key: string]: JSONValue } = {};
   optionsMap.None = null;
-  services.nbconvert.getExportFormats().then(response => {
+  void services.nbconvert.getExportFormats().then(response => {
     if (response) {
       // convert exportList to palette and menu items
       const formatList = Object.keys(response);
