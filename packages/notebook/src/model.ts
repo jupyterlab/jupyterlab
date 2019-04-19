@@ -246,8 +246,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       this.triggerStateChange({ name: 'nbformatMinor', oldValue, newValue });
     }
 
-    // Alert the user if the format changes. hi
-    debugger;
+    // Alert the user if the format changes.
     if (origNbformat !== undefined && this._nbformat !== origNbformat) {
       let src;
       if (this._nbformat > origNbformat) {
