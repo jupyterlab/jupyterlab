@@ -5,7 +5,7 @@ import { UseSignal, ReactWidget } from './vdom';
 
 import { Button } from '@jupyterlab/ui-components';
 
-import { IIterator, find, map, some, toArray } from '@phosphor/algorithm';
+import { IIterator, find, map, some } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -217,7 +217,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   }
 
   /**
-   * Remove an item from the toolbar.
+   * Remove an item from the toolbar given a name.
    *
    * @param name - The name of the widget to remove from the toolbar.
    *
@@ -226,12 +226,32 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    *
    */
   removeItem(name: string): boolean {
-    const pos = toArray(this.names()).indexOf(name);
-    if (pos === -1) {
+    let widget = find(
+      this.children(),
+      widget => Private.nameProperty.get(widget) === name
+    );
+    if (!widget) {
       return false;
     }
-    let layout = this.layout as ToolbarLayout;
-    layout.removeWidgetAt(pos);
+    widget.parent = null;
+    return true;
+  }
+
+  /**
+   * Remove an item from the toolbar given a position.
+   *
+   * @param index - The position of the widget to remove from the toolbar.
+   *
+   * @returns Whether the item was removed from the toolbar. Returns false if
+   *   the item is not in the toolbar.
+   *
+   */
+  removeItemAt(index: number): boolean {
+    let widget = find(this.children(), (_, i) => i === index);
+    if (!widget) {
+      return false;
+    }
+    widget.parent = null;
     return true;
   }
 

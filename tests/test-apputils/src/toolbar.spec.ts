@@ -95,6 +95,22 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
+    describe('#removeItemAt()', () => {
+      it('should remove an item from the toolbar given an index', () => {
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        widget.addItem('c', new Widget());
+        expect(widget.removeItemAt(1)).to.equal(true);
+        expect(toArray(widget.names())).to.deep.equal(['a', 'c']);
+      });
+
+      it('should return false if the index is out of bounds', () => {
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        expect(widget.removeItemAt(2)).to.equal(false);
+      });
+    });
+
     describe('#insertItem()', () => {
       it('should insert the item into the toolbar', () => {
         widget.addItem('a', new Widget());
