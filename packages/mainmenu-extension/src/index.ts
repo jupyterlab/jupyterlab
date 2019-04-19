@@ -398,9 +398,9 @@ export function createFileMenu(
 
   // Add the close group
   const closeGroup = [
-    'docmanager:close',
+    'application:close',
     'filemenu:close-and-cleanup',
-    'docmanager:close-all-files'
+    'application:close-all'
   ].map(command => {
     return { command };
   });
