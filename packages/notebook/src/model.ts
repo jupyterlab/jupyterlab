@@ -275,7 +275,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       msg +=
         ' To preserve the original version, close the ' +
         'notebook without saving it.';
-      showDialog({
+      void showDialog({
         title: 'Notebook converted',
         body: msg
       });
