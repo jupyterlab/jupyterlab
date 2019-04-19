@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { iter, some, map, each } from '@phosphor/algorithm';
+import { some, map, each } from '@phosphor/algorithm';
 
-import { Widget, DockLayout } from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
 import {
   ILabShell,
@@ -587,31 +587,6 @@ function addLabCommands(
     }
     const pathMatch = node['title'].match(pathRe);
     return docManager.findWidget(pathMatch[1]);
-  };
-
-  // Find the tab area for a widget within a specific dock area.
-  const findTab = (
-    area: DockLayout.AreaConfig,
-    widget: Widget
-  ): DockLayout.ITabAreaConfig | null => {
-    switch (area.type) {
-      case 'split-area':
-        const iterator = iter(area.children);
-        let tab: DockLayout.ITabAreaConfig | null = null;
-        let value: DockLayout.AreaConfig | null = null;
-        do {
-          value = iterator.next();
-          if (value) {
-            tab = findTab(value, widget);
-          }
-        } while (!tab && value);
-        return tab;
-      case 'tab-area':
-        const { id } = widget;
-        return area.widgets.some(widget => widget.id === id) ? area : null;
-      default:
-        return null;
-    }
   };
 
   // Returns `true` if the current widget has a document context.
