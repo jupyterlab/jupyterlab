@@ -26,6 +26,7 @@ import {
 } from '@jupyterlab/observables';
 
 import { CellList } from './celllist';
+import { showDialog } from '@jupyterlab/apputils';
 
 /**
  * The definition of a model object for a notebook widget.
@@ -232,6 +233,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     let newValue = 0;
     this._nbformatMinor = nbformat.MINOR_VERSION;
     this._nbformat = nbformat.MAJOR_VERSION;
+    const origNbformat = value.metadata.orig_nbformat;
 
     if (value.nbformat !== this._nbformat) {
       oldValue = this._nbformat;
@@ -243,6 +245,43 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       this._nbformatMinor = newValue = value.nbformat_minor;
       this.triggerStateChange({ name: 'nbformatMinor', oldValue, newValue });
     }
+
+    // Alert the user if the format changes. hi
+    debugger;
+    if (origNbformat !== undefined && this._nbformat !== origNbformat) {
+      let src;
+      if (this._nbformat > origNbformat) {
+        src = ' an older notebook format ';
+      } else {
+        src = ' a newer notebook format ';
+      }
+
+      let msg =
+        'This notebook has been converted from' +
+        src +
+        '(v' +
+        origNbformat +
+        ') to the current notebook ' +
+        'format (v' +
+        this._nbformat +
+        '). The next time you save this notebook, the ' +
+        'current notebook format will be used.';
+
+      if (this._nbformat > origNbformat) {
+        msg +=
+          ' Older versions of Jupyter may not be able to read the new format.';
+      } else {
+        msg += ' Some features of the original notebook may not be available.';
+      }
+      msg +=
+        ' To preserve the original version, close the ' +
+        'notebook without saving it.';
+      showDialog({
+        title: 'Notebook converted',
+        body: msg
+      });
+    }
+
     // Update the metadata.
     this.metadata.clear();
     let metadata = value.metadata;
