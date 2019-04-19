@@ -221,6 +221,12 @@
     },
     {
       "path": "../vega5-extension"
+    },
+    {
+      "path": "../jupyterlab-sos"
+    },
+    {
+      "path": "../transient-display-data"
     }
   ]
 }
