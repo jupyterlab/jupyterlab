@@ -15,7 +15,7 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { toArray } from '@phosphor/algorithm';
 
-import escape = require('lodash.escape');
+import escape from 'lodash.escape';
 
 import { removeMath, replaceMath } from './latex';
 
