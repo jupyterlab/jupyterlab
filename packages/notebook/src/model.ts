@@ -256,16 +256,9 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       }
 
       let msg =
-        'This notebook has been converted from' +
-        src +
-        '(v' +
-        origNbformat +
-        ') to the current notebook ' +
-        'format (v' +
-        this._nbformat +
-        '). The next time you save this notebook, the ' +
-        'current notebook format will be used.';
-
+        `This notebook has been converted from ${src} (v${origNbformat})` +
+        `to the current notebook format (v${this._nbformat}).  ` +
+        'The next time you save this notebook, the current notebook format will be used.';
       if (this._nbformat > origNbformat) {
         msg +=
           ' Older versions of Jupyter may not be able to read the new format.';
@@ -273,8 +266,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
         msg += ' Some features of the original notebook may not be available.';
       }
       msg +=
-        ' To preserve the original version, close the ' +
-        'notebook without saving it.';
+        ' To preserve the original version, close the notebook without saving it.';
       void showDialog({
         title: 'Notebook converted',
         body: msg
