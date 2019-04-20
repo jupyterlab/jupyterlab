@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/observables';
 
 import { CellList } from './celllist';
-import { showDialog } from '@jupyterlab/apputils';
+import { showDialog, Dialog } from '@jupyterlab/apputils';
 
 /**
  * The definition of a model object for a notebook widget.
@@ -256,7 +256,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       }
 
       let msg =
-        `This notebook has been converted from ${src} (v${origNbformat})` +
+        `This notebook has been converted from ${src} (v${origNbformat}) ` +
         `to the current notebook format (v${this._nbformat}).  ` +
         'The next time you save this notebook, the current notebook format will be used.';
       if (this._nbformat > origNbformat) {
@@ -269,7 +269,8 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
         ' To preserve the original version, close the notebook without saving it.';
       void showDialog({
         title: 'Notebook converted',
-        body: msg
+        body: msg,
+        buttons: [Dialog.okButton()]
       });
     }
 
