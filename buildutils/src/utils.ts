@@ -1,9 +1,9 @@
-import path from 'path';
-import glob from 'glob';
-import fs from 'fs-extra';
-import childProcess from 'child_process';
-import sortPackageJson from 'sort-package-json';
-import coreutils from '@phosphor/coreutils';
+import path = require('path');
+import glob = require('glob');
+import fs = require('fs-extra');
+import childProcess = require('child_process');
+import sortPackageJson = require('sort-package-json');
+import coreutils = require('@phosphor/coreutils');
 
 /**
  * Get all of the lerna package paths.
