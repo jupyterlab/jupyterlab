@@ -6,7 +6,7 @@
 
 import * as path from 'path';
 import * as utils from './utils';
-import packageJson = require('package-json');
+import packageJson from 'package-json';
 
 let allDeps: string[] = [];
 let allDevDeps: string[] = [];

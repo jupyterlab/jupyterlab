@@ -1,7 +1,6 @@
 {
   "extends": "../tsconfigbase",
   "compilerOptions": {
-    "module": "commonjs",
     "outDir": "lib",
     "rootDir": "src"
   },
