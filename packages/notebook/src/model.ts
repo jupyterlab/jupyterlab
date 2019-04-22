@@ -248,25 +248,18 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
 
     // Alert the user if the format changes.
     if (origNbformat !== undefined && this._nbformat !== origNbformat) {
-      let src;
-      if (this._nbformat > origNbformat) {
-        src = ' an older notebook format ';
-      } else {
-        src = ' a newer notebook format ';
-      }
-
-      let msg =
-        `This notebook has been converted from ${src} (v${origNbformat}) ` +
-        `to the current notebook format (v${this._nbformat}).  ` +
-        'The next time you save this notebook, the current notebook format will be used.';
-      if (this._nbformat > origNbformat) {
-        msg +=
-          ' Older versions of Jupyter may not be able to read the new format.';
-      } else {
-        msg += ' Some features of the original notebook may not be available.';
-      }
-      msg +=
-        ' To preserve the original version, close the notebook without saving it.';
+      const newer = this._nbformat > origNbformat;
+      const msg = `This notebook has been converted from ${
+        newer ? 'an older' : 'a newer'
+      } notebook format (v${origNbformat}) to the current notebook format (v${
+        this._nbformat
+      }). The next time you save this notebook, the current notebook format (v${
+        this._nbformat
+      }) will be used. ${
+        newer
+          ? 'Older versions of Jupyter may not be able to read the new format.'
+          : 'Some features of the original notebook may not be available.'
+      }  To preserve the original format version, close the notebook without saving it.`;
       void showDialog({
         title: 'Notebook converted',
         body: msg,
