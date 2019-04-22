@@ -28,7 +28,7 @@ import { KernelMessage } from '@jupyterlab/services';
 
 import { each } from '@phosphor/algorithm';
 
-import { MimeData } from '@phosphor/coreutils';
+import { MimeData, JSONObject } from '@phosphor/coreutils';
 
 import { Drag } from '@phosphor/dragdrop';
 
@@ -337,9 +337,12 @@ export class CodeConsole extends Widget {
    *
    * @returns A promise that indicates when the injected cell's execution ends.
    */
-  inject(code: string): Promise<void> {
+  inject(code: string, metadata: JSONObject = {}): Promise<void> {
     let cell = this.createCodeCell();
     cell.model.value.text = code;
+    for (let key of Object.keys(metadata)) {
+      cell.model.metadata.set(key, metadata[key]);
+    }
     this.addCell(cell);
     return this._execute(cell);
   }
