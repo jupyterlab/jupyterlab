@@ -276,7 +276,20 @@ export namespace JupyterFrontEnd {
     };
 
     /**
-     * The local directories used by the application.
+     * The server directories used by the application, for user information
+     * only.
+     *
+     * #### Notes
+     * These are for user information and user interface hints only and should
+     * not be relied on in code. A server may set these to empty strings if it
+     * does not want to expose this information.
+     *
+     * Examples of appropriate use include displaying a help dialog for a user
+     * listing the paths, or a tooltip in a filebrowser displaying the server
+     * root. Examples of inapproriate use include using one of these paths in a
+     * terminal command, generating code using these paths, or using one of
+     * these paths in a request to the server (it would be better to write a
+     * server extension to handle these cases).
      */
     readonly directories: {
       readonly appSettings: string;
