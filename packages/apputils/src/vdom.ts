@@ -26,11 +26,11 @@ export abstract class ReactWidget extends Widget {
    * @param element React element to render.
    */
   static create(element: ReactRenderElement): ReactWidget {
-    return new class extends ReactWidget {
+    return new (class extends ReactWidget {
       render() {
         return element;
       }
-    }();
+    })();
   }
 
   /**
