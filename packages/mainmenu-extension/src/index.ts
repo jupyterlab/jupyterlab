@@ -10,7 +10,8 @@ import { Menu, Widget } from '@phosphor/widgets';
 import {
   ILabShell,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  IRouter
 } from '@jupyterlab/application';
 
 import { ICommandPalette, showDialog, Dialog } from '@jupyterlab/apputils';
@@ -60,7 +61,9 @@ export namespace CommandIDs {
 
   export const createConsole = 'filemenu:create-console';
 
-  export const quit = 'filemenu:quit';
+  export const shutdown = 'filemenu:shutdown';
+
+  export const logout = 'filemenu:logout';
 
   export const openKernel = 'kernelmenu:open';
 
@@ -115,12 +118,13 @@ export namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
-  requires: [ICommandPalette],
+  requires: [ICommandPalette, IRouter],
   optional: [IInspector, ILabShell],
   provides: IMainMenu,
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
+    router: IRouter,
     inspector: IInspector | null,
     labShell: ILabShell | null
   ): IMainMenu => {
@@ -140,7 +144,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 
     // Create the application menus.
     createEditMenu(app, menu.editMenu);
-    createFileMenu(app, menu.fileMenu, inspector);
+    createFileMenu(app, menu.fileMenu, router, inspector);
     createKernelMenu(app, menu.kernelMenu);
     createRunMenu(app, menu.runMenu);
     createSettingsMenu(app, menu.settingsMenu);
@@ -200,7 +204,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     // Add some of the commands defined here to the command palette.
     if (menu.fileMenu.quitEntry) {
       palette.addItem({
-        command: CommandIDs.quit,
+        command: CommandIDs.shutdown,
         category: 'Main Area'
       });
     }
@@ -300,6 +304,7 @@ export function createEditMenu(app: JupyterFrontEnd, menu: EditMenu): void {
 export function createFileMenu(
   app: JupyterFrontEnd,
   menu: FileMenu,
+  router: IRouter,
   inspector: IInspector | null
 ): void {
   const commands = menu.menu.commands;
@@ -342,14 +347,17 @@ export function createFileMenu(
     execute: Private.delegateExecute(app, menu.consoleCreators, 'createConsole')
   });
 
-  commands.addCommand(CommandIDs.quit, {
-    label: 'Quit',
-    caption: 'Quit JupyterLab',
+  commands.addCommand(CommandIDs.shutdown, {
+    label: 'Shutdown',
+    caption: 'Shut down JupyterLab',
     execute: () => {
       return showDialog({
-        title: 'Quit confirmation',
-        body: 'Please confirm you want to quit JupyterLab.',
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Quit' })]
+        title: 'Shut down confirmation',
+        body: 'Please confirm you want to shut down JupyterLab.',
+        buttons: [
+          Dialog.cancelButton(),
+          Dialog.warnButton({ label: 'Shut Down' })
+        ]
       }).then(result => {
         if (result.button.accept) {
           let setting = ServerConnection.makeSettings();
@@ -380,6 +388,14 @@ export function createFileMenu(
             });
         }
       });
+    }
+  });
+
+  commands.addCommand(CommandIDs.logout, {
+    label: 'Logout',
+    caption: 'Log out of JupyterLab',
+    execute: () => {
+      router.navigate('/logout', { hard: true });
     }
   });
 
@@ -424,7 +440,10 @@ export function createFileMenu(
   });
 
   // Add the quit group.
-  const quitGroup = [{ command: 'filemenu:quit' }];
+  const quitGroup = [
+    { command: 'filemenu:logout' },
+    { command: 'filemenu:shutdown' }
+  ];
 
   menu.addGroup(newGroup, 0);
   menu.addGroup(newViewGroup, 1);
