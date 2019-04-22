@@ -6,7 +6,6 @@
     "esModuleInterop": true,
     "incremental": true,
     "jsx": "react",
-    "lib": ["dom", "es2015"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noEmitOnError": true,
@@ -14,7 +13,7 @@
     "noUnusedLocals": true,
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
-    "target": "es2015",
+    "target": "es2017",
     "types": []
   }
 }
