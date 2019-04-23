@@ -2,9 +2,7 @@ import path = require('path');
 
 module.exports = function(name: string, baseDir: string) {
   return {
-    transform: {
-      '^.+\\.tsx?$': 'ts-jest'
-    },
+    preset: 'ts-jest/presets/js-with-babel',
     moduleNameMapper: {
       '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
       '\\.(gif|ttf|eot|svg)$': '@jupyterlab/testutils/lib/jest-file-mock.js'

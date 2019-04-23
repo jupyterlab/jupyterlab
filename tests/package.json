@@ -3,6 +3,7 @@
   "version": "1.0.0-alpha.6",
   "private": true,
   "dependencies": {
+    "@babel/preset-env": "^7.4.3",
     "@jupyterlab/apputils": "^1.0.0-alpha.6",
     "@jupyterlab/cells": "^1.0.0-alpha.7",
     "@jupyterlab/codeeditor": "^1.0.0-alpha.6",
