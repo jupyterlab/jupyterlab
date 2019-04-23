@@ -230,6 +230,14 @@ rebuild, you can run the command:
 
     jupyter lab build
 
+
+**Note**
+If using Windows, you may encounter a `FileNotFoundError` due to the default PATH length on
+Windows.  Node modules are stored in a nested file structure, so the path can get quite
+long.  If you have administrative access and are on Windows 8 or 10, you can update the
+registry setting using these instructions: https://stackoverflow.com/a/37528731.
+
+
 Disabling Extensions
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -335,16 +343,16 @@ The following configurations may be present in this file:
 
 1. ``terminalsAvailable`` identifies whether a terminal (i.e. ``bash/tsch``
    on Mac/Linux OR ``PowerShell`` on Windows) is available to be launched
-   via the Launcher. (This configuration was predominantly required for 
+   via the Launcher. (This configuration was predominantly required for
    Windows prior to PowerShell access being enabled in Jupyter Lab.) The
    value for this field is a Boolean: ``true`` or ``false``.
 2. ``disabledExtensions`` controls which extensions should not load at all.
-3. ``deferredExtensions`` controls which extensions should not load until 
-   they are required by something, irrespective of whether they set 
+3. ``deferredExtensions`` controls which extensions should not load until
+   they are required by something, irrespective of whether they set
    ``autostart`` to ``true``.
 
 The value for the ``disabledExtensions`` and ``deferredExtensions`` fields
-are an array of strings. The following sequence of checks are performed 
+are an array of strings. The following sequence of checks are performed
 against the patterns in ``disabledExtensions`` and ``deferredExtensions``.
 
 -  If an identical string match occurs between a config value and a

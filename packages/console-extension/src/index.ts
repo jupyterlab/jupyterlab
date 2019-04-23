@@ -39,7 +39,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { find } from '@phosphor/algorithm';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, JSONObject } from '@phosphor/coreutils';
 
 import { DisposableSet } from '@phosphor/disposable';
 
@@ -460,7 +460,10 @@ async function activateConsole(
           if (args['activate'] !== false) {
             shell.activateById(widget.id);
           }
-          void widget.console.inject(args['code'] as string);
+          void widget.console.inject(
+            args['code'] as string,
+            args['metadata'] as JSONObject
+          );
           return true;
         }
         return false;
