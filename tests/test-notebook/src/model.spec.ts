@@ -211,8 +211,13 @@ describe('@jupyterlab/notebook', () => {
 
       it('should present a dialog when the format changes', () => {
         const model = new NotebookModel();
-        const content = { ...NBTestUtils.DEFAULT_CONTENT };
-        content.metadata.orig_nbformat = 1;
+        const content = {
+          ...NBTestUtils.DEFAULT_CONTENT,
+          metadata: {
+            ...NBTestUtils.DEFAULT_CONTENT.metadata,
+            orig_nbformat: 1
+          }
+        };
         model.fromJSON(content);
         expect(model.nbformat).to.equal(nbformat.MAJOR_VERSION);
         return acceptDialog();
