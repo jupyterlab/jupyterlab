@@ -1,1 +1,1 @@
-module.exports = require('@jupyterlab/testutils/lib/jest-config');
+module.exports = require('@jupyterlab/testutils/lib/babel.config');
