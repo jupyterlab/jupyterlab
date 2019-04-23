@@ -334,7 +334,7 @@ function activateShareFile(
       const path = encodeURI(widget.selectedItems().next().path);
       const tree = PageConfig.getTreeUrl({ workspace: resolver.name });
 
-      Clipboard.copyToSystem(URLExt.join(tree, path));
+      Clipboard.copyToSystem(URLExt.join(tree, path, '?resolve-workspace'));
     },
     isVisible: () =>
       tracker.currentWidget &&
