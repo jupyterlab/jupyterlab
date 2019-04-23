@@ -75,7 +75,6 @@ export namespace NBTestUtils {
   ];
 
   export const DEFAULT_CONTENT: nbformat.INotebookContent = require('../default.json') as nbformat.INotebookContent;
-  DEFAULT_CONTENT.metadata = { orig_nbformat: 1 };
 
   export const defaultEditorConfig = { ...StaticNotebook.defaultEditorConfig };
 
