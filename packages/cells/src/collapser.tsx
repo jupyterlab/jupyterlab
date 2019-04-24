@@ -30,11 +30,6 @@ const INPUT_COLLAPSER = 'jp-InputCollapser';
 const OUTPUT_COLLAPSER = 'jp-OutputCollapser';
 
 /**
- * The CSS class added the collapser child when collapsed.
- */
-const MOD_COLLAPSED_CLASS = 'jp-mod-collapsed';
-
-/**
  * Abstract collapser base class.
  *
  * ### Notes
@@ -63,9 +58,6 @@ export abstract class Collapser extends ReactWidget {
    */
   protected render(): React.ReactElement<any> {
     let childClass = COLLAPSER_CHILD_CLASS;
-    if (this.collapsed) {
-      childClass += ` ${MOD_COLLAPSED_CLASS}`;
-    }
     return <div className={childClass} onClick={e => this.handleClick(e)} />;
   }
 

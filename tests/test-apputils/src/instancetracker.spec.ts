@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { InstanceTracker } from '@jupyterlab/apputils/src';
+import { InstanceTracker } from '@jupyterlab/apputils';
 
 import { signalToPromise, testEmission } from '@jupyterlab/testutils';
 

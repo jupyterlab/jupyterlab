@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/observables",
-  "version": "2.2.0-alpha.3",
+  "version": "2.2.0-alpha.6",
   "description": "Data structures which may be observed for changes.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,10 +38,9 @@
   "devDependencies": {
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
-    "typescript": "~3.3.1"
+    "typescript": "~3.4.3"
   },
   "publishConfig": {
     "access": "public"
-  },
-  "gitHead": "31f68f6d1717b58c344a5fb4f4baf3b123b7c75c"
+  }
 }

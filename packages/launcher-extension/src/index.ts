@@ -75,13 +75,10 @@ function activate(
 
       labShell.add(main, 'main', { activate: args['activate'] as boolean });
 
-      labShell.layoutModified.connect(
-        () => {
-          // If there is only a launcher open, remove the close icon.
-          main.title.closable = toArray(labShell.widgets('main')).length > 1;
-        },
-        main
-      );
+      labShell.layoutModified.connect(() => {
+        // If there is only a launcher open, remove the close icon.
+        main.title.closable = toArray(labShell.widgets('main')).length > 1;
+      }, main);
 
       return main;
     }

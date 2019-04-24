@@ -82,10 +82,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
         signal: this.context.model.contentChanged,
         timeout: RENDER_TIMEOUT
       });
-      this._monitor.activityStopped.connect(
-        this.update,
-        this
-      );
+      this._monitor.activityStopped.connect(this.update, this);
     });
 
     // Make a refresh button for the toolbar.

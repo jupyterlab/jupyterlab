@@ -7,7 +7,7 @@ import { toArray } from '@phosphor/algorithm';
 
 import { JSONExt } from '@phosphor/coreutils';
 
-import { KernelManager, Kernel } from '@jupyterlab/services/src/kernel';
+import { KernelManager, Kernel } from '@jupyterlab/services';
 
 import {
   PYTHON_SPEC,
@@ -16,6 +16,16 @@ import {
   makeSettings,
   testEmission
 } from '../utils';
+
+class TestManager extends KernelManager {
+  intercept: Kernel.ISpecModels | null = null;
+  protected async requestSpecs(): Promise<void> {
+    if (this.intercept) {
+      handleRequest(this, 200, this.intercept);
+    }
+    return super.requestSpecs();
+  }
+}
 
 const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
 PYTHON3_SPEC.name = 'Python3';
@@ -30,7 +40,7 @@ describe('kernel/manager', () => {
   });
 
   beforeEach(() => {
-    manager = new KernelManager();
+    manager = new KernelManager({ standby: 'never' });
     expect(manager.specs).to.be.null;
     return manager.ready;
   });
@@ -47,7 +57,10 @@ describe('kernel/manager', () => {
     describe('#constructor()', () => {
       it('should take the options as an argument', () => {
         manager.dispose();
-        manager = new KernelManager({ serverSettings: makeSettings() });
+        manager = new KernelManager({
+          serverSettings: makeSettings(),
+          standby: 'never'
+        });
         expect(manager instanceof KernelManager).to.equal(true);
       });
     });
@@ -56,8 +69,9 @@ describe('kernel/manager', () => {
       it('should get the server settings', () => {
         manager.dispose();
         const serverSettings = makeSettings();
+        const standby = 'never';
         const token = serverSettings.token;
-        manager = new KernelManager({ serverSettings });
+        manager = new KernelManager({ serverSettings, standby });
         expect(manager.serverSettings.token).to.equal(token);
       });
     });
@@ -78,16 +92,18 @@ describe('kernel/manager', () => {
 
     describe('#specsChanged', () => {
       it('should be emitted when the specs change', async () => {
+        const manager = new TestManager({ standby: 'never' });
         const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
-        specs.default = 'shell';
-        handleRequest(manager, 200, specs);
         let called = false;
-        manager.specsChanged.connect((sender, args) => {
-          expect(sender).to.equal(manager);
-          expect(args.default).to.equal(specs.default);
+        manager.specsChanged.connect(() => {
           called = true;
         });
+        await manager.ready;
+        expect(manager.specs.default).to.equal('echo');
+        specs.default = 'shell';
+        manager.intercept = specs;
         await manager.refreshSpecs();
+        expect(manager.specs.default).to.equal('shell');
         expect(called).to.equal(true);
       });
     });
@@ -109,7 +125,6 @@ describe('kernel/manager', () => {
         const kernel = await manager.startNew();
         let called = false;
         manager.runningChanged.connect(() => {
-          manager.dispose();
           called = true;
         });
         await kernel.shutdown();
@@ -120,7 +135,7 @@ describe('kernel/manager', () => {
     describe('#isReady', () => {
       it('should test whether the manager is ready', async () => {
         manager.dispose();
-        manager = new KernelManager();
+        manager = new KernelManager({ standby: 'never' });
         expect(manager.isReady).to.equal(false);
         await manager.ready;
         expect(manager.isReady).to.equal(true);
@@ -135,11 +150,14 @@ describe('kernel/manager', () => {
 
     describe('#refreshSpecs()', () => {
       it('should update list of kernel specs', async () => {
+        const manager = new TestManager({ standby: 'never' });
         const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
+        await manager.ready;
         specs.default = 'shell';
-        handleRequest(manager, 200, specs);
+        manager.intercept = specs;
+        expect(manager.specs.default).not.to.equal('shell');
         await manager.refreshSpecs();
-        expect(manager.specs.default).to.equal(specs.default);
+        expect(manager.specs.default).to.equal('shell');
       });
     });
 

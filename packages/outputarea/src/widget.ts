@@ -106,14 +106,8 @@ export class OutputArea extends Widget {
       let output = model.get(i);
       this._insertOutput(i, output);
     }
-    model.changed.connect(
-      this.onModelChanged,
-      this
-    );
-    model.stateChanged.connect(
-      this.onStateChanged,
-      this
-    );
+    model.changed.connect(this.onModelChanged, this);
+    model.stateChanged.connect(this.onStateChanged, this);
   }
 
   /**
@@ -616,8 +610,8 @@ export interface IOutputPrompt extends Widget {
  */
 export class OutputPrompt extends Widget implements IOutputPrompt {
   /*
-    * Create an output prompt widget.
-    */
+   * Create an output prompt widget.
+   */
   constructor() {
     super();
     this.addClass(OUTPUT_PROMPT_CLASS);

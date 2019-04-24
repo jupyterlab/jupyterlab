@@ -68,7 +68,7 @@ export namespace ObservableJSON {
    */
   export interface IOptions {
     /**
-     * The optional intitial value for the object.
+     * The optional initial value for the object.
      */
     values?: JSONObject;
   }
@@ -80,8 +80,8 @@ export namespace ObservableJSON {
     /**
      * Create a new metadata changed message.
      */
-    constructor(args: IObservableJSON.IChangedArgs) {
-      super('jsonvalue-changed');
+    constructor(type: string, args: IObservableJSON.IChangedArgs) {
+      super(type);
       this.args = args;
     }
 

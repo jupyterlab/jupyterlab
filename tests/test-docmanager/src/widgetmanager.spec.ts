@@ -70,7 +70,7 @@ describe('@jupyterlab/docmanager', () => {
   });
 
   before(() => {
-    services = new ServiceManager();
+    services = new ServiceManager({ standby: 'never' });
   });
 
   beforeEach(() => {

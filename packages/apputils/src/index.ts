@@ -5,6 +5,7 @@ import '../style/index.css';
 
 export * from './clientsession';
 export * from './clipboard';
+export * from './collapse';
 export * from './commandlinker';
 export * from './commandpalette';
 export * from './dialog';

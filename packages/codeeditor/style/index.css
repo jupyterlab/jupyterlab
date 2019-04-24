@@ -16,8 +16,6 @@
   border-radius: 0px;
   background: var(--jp-layout-color0);
   min-height: 50px;
-  margin-left: 12px;
-  margin-right: 12px;
   padding: 1px;
 }
 
@@ -29,8 +27,7 @@
 .jp-JSONEditor-header {
   display: flex;
   flex: 1 0 auto;
-  min-height: 13px;
-  padding: 12px;
+  padding: 0 0 0 12px;
 }
 
 .jp-JSONEditor-header label {
@@ -38,8 +35,7 @@
 }
 
 .jp-JSONEditor-commitButton,
-.jp-JSONEditor-revertButton,
-.jp-JSONEditor-collapser.jp-mod-collapse-enabled {
+.jp-JSONEditor-revertButton {
   height: 16px;
   width: 16px;
   background-size: 18px;
@@ -54,20 +50,6 @@
 
 .jp-JSONEditor-revertButton {
   background-image: var(--jp-icon-undo);
-}
-
-.jp-JSONEditor-collapser.jp-mod-collapse-enabled {
-  margin-left: 6px;
-  background-image: var(--jp-icon-caretup);
-}
-
-.jp-JSONEditor-collapser.jp-mod-collapse-enabled.jp-mod-collapsed {
-  margin-left: 6px;
-  background-image: var(--jp-icon-caretdown);
-}
-
-.jp-JSONEditor-host.jp-mod-collapsed {
-  display: none;
 }
 
 .jp-JSONEditor-host.jp-mod-focused {

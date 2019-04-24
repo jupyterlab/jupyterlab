@@ -5,7 +5,7 @@ import React from 'react';
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
-import { URLExt } from '@jupyterlab/coreutils';
+import { URLExt, Poll } from '@jupyterlab/coreutils';
 
 import { TextItem } from '..';
 
@@ -20,9 +20,7 @@ export class MemoryUsage extends VDomRenderer<MemoryUsage.Model> {
    */
   constructor() {
     super();
-    this.model = new MemoryUsage.Model({
-      refreshRate: 5000
-    });
+    this.model = new MemoryUsage.Model({ refreshRate: 5000 });
   }
 
   /**
@@ -63,13 +61,33 @@ export namespace MemoryUsage {
      */
     constructor(options: Model.IOptions) {
       super();
+      this._poll = new Poll<Private.IMetricRequestResult | null>({
+        factory: () => Private.factory(),
+        frequency: {
+          interval: options.refreshRate,
+          backoff: true
+        },
+        name: '@jupyterlab/statusbar:MemoryUsage#metrics'
+      });
+      this._poll.ticked.connect(poll => {
+        const { payload, phase } = poll.state;
+        if (phase === 'resolved') {
+          this._updateMetricsValues(payload);
+          return;
+        }
+        if (phase === 'rejected') {
+          const oldMetricsAvailable = this._metricsAvailable;
+          this._metricsAvailable = false;
+          this._currentMemory = 0;
+          this._memoryLimit = null;
+          this._units = 'B';
 
-      this._refreshRate = options.refreshRate;
-
-      this._intervalId = setInterval(
-        () => this._makeMetricRequest(),
-        this._refreshRate
-      );
+          if (oldMetricsAvailable) {
+            this.stateChanged.emit();
+          }
+          return;
+        }
+      });
     }
 
     /**
@@ -105,43 +123,11 @@ export namespace MemoryUsage {
      */
     dispose(): void {
       super.dispose();
-      clearInterval(this._intervalId);
+      this._poll.dispose();
     }
 
     /**
-     * Make a request to the metrics backend and update the model.
-     */
-    private _makeMetricRequest(): Promise<void> {
-      return Private.makeMetricsRequest()
-        .then(response => {
-          if (response.ok) {
-            try {
-              return response.json();
-            } catch (err) {
-              return null;
-            }
-          } else {
-            return null;
-          }
-        })
-        .then(data => this._updateMetricsValues(data))
-        .catch(err => {
-          const oldMetricsAvailable = this._metricsAvailable;
-          this._metricsAvailable = false;
-          this._currentMemory = 0;
-          this._memoryLimit = null;
-          this._units = 'B';
-          clearInterval(this._intervalId);
-
-          if (oldMetricsAvailable) {
-            this.stateChanged.emit(void 0);
-          }
-        });
-    }
-
-    /**
-     * Given the results of the metrics request, update
-     * model values.
+     * Given the results of the metrics request, update model values.
      */
     private _updateMetricsValues(
       value: Private.IMetricRequestResult | null
@@ -156,8 +142,6 @@ export namespace MemoryUsage {
         this._currentMemory = 0;
         this._memoryLimit = null;
         this._units = 'B';
-
-        clearInterval(this._intervalId);
       } else {
         const numBytes = value.rss;
         const memoryLimit = value.limits.memory
@@ -171,13 +155,6 @@ export namespace MemoryUsage {
         this._memoryLimit = memoryLimit
           ? memoryLimit / Private.MEMORY_UNIT_LIMITS[units]
           : null;
-
-        if (!oldMetricsAvailable) {
-          this._intervalId = setInterval(
-            () => this._makeMetricRequest(),
-            this._refreshRate
-          );
-        }
       }
 
       if (
@@ -190,12 +167,11 @@ export namespace MemoryUsage {
       }
     }
 
-    private _metricsAvailable: boolean = false;
     private _currentMemory: number = 0;
     private _memoryLimit: number | null = null;
+    private _metricsAvailable: boolean = false;
+    private _poll: Poll<Private.IMetricRequestResult>;
     private _units: MemoryUnit = 'B';
-    private _intervalId: any;
-    private _refreshRate: number;
   }
 
   /**
@@ -302,13 +278,22 @@ namespace Private {
   /**
    * Make a request to the backend.
    */
-  export function makeMetricsRequest(): Promise<Response> {
+  export async function factory(): Promise<IMetricRequestResult | null> {
     const request = ServerConnection.makeRequest(
       METRIC_URL,
       {},
       SERVER_CONNECTION_SETTINGS
     );
+    const response = await request;
 
-    return request;
+    if (response.ok) {
+      try {
+        return await response.json();
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    return null;
   }
 }

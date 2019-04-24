@@ -387,25 +387,19 @@ function Card(
       key={Private.keyProperty.get(item)}
     >
       <div className="jp-LauncherCard-icon">
-        {item.kernelIconUrl &&
-          kernel && (
-            <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
-          )}
-        {!item.kernelIconUrl &&
-          !kernel && (
-            <div
-              className={`${commands.iconClass(
-                command,
-                args
-              )} jp-Launcher-icon`}
-            />
-          )}
-        {!item.kernelIconUrl &&
-          kernel && (
-            <div className="jp-LauncherCard-noKernelIcon">
-              {label[0].toUpperCase()}
-            </div>
-          )}
+        {item.kernelIconUrl && kernel && (
+          <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
+        )}
+        {!item.kernelIconUrl && !kernel && (
+          <div
+            className={`${commands.iconClass(command, args)} jp-Launcher-icon`}
+          />
+        )}
+        {!item.kernelIconUrl && kernel && (
+          <div className="jp-LauncherCard-noKernelIcon">
+            {label[0].toUpperCase()}
+          </div>
+        )}
       </div>
       <div className="jp-LauncherCard-label" title={title}>
         {label}

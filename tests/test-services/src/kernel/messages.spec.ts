@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { KernelMessage } from '@jupyterlab/services/src/kernel';
+import { KernelMessage } from '@jupyterlab/services';
 
 describe('kernel/messages', () => {
   describe('KernelMessage.isStreamMsg()', () => {

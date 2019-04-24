@@ -540,9 +540,9 @@ export function CommandToolbarButtonComponent(
 }
 
 /*
-  * Adds the command toolbar button class to the command toolbar widget.
-  * @param w Command toolbar button widget.
-  */
+ * Adds the command toolbar button class to the command toolbar widget.
+ * @param w Command toolbar button widget.
+ */
 export function addCommandToolbarButtonClass(w: Widget): Widget {
   w.addClass('jp-CommandToolbarButton');
   return w;
@@ -668,10 +668,7 @@ namespace Private {
       super();
       this.addClass(TOOLBAR_KERNEL_STATUS_CLASS);
       this._onStatusChanged(session);
-      session.statusChanged.connect(
-        this._onStatusChanged,
-        this
-      );
+      session.statusChanged.connect(this._onStatusChanged, this);
     }
 
     /**

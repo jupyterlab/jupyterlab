@@ -71,7 +71,7 @@ describe('filebrowser/model', () => {
     registry = new DocumentRegistry({
       textModelFactory: new TextModelFactory()
     });
-    serviceManager = new ServiceManager();
+    serviceManager = new ServiceManager({ standby: 'never' });
     manager = new DocumentManager({
       registry,
       opener,
@@ -252,7 +252,7 @@ describe('filebrowser/model', () => {
       });
 
       it('should be resilient to a slow initial fetch', async () => {
-        let delayedServiceManager = new ServiceManager();
+        let delayedServiceManager = new ServiceManager({ standby: 'never' });
         (delayedServiceManager as any).contents = new DelayedContentsManager();
         let manager = new DocumentManager({
           registry,

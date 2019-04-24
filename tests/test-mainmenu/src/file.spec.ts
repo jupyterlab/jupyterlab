@@ -9,7 +9,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { InstanceTracker } from '@jupyterlab/apputils';
 
-import { FileMenu, IFileMenu } from '@jupyterlab/mainmenu/src';
+import { FileMenu, IFileMenu } from '@jupyterlab/mainmenu';
 
 import { delegateExecute } from './util';
 
@@ -68,23 +68,6 @@ describe('@jupyterlab/mainmenu', () => {
         menu.closeAndCleaners.add(cleaner);
         void delegateExecute(wodget, menu.closeAndCleaners, 'closeAndCleanup');
         expect(wodget.state).to.equal('clean');
-      });
-    });
-
-    describe('#persistAndSavers', () => {
-      it('should allow setting of an IPersistAndSave', () => {
-        const persistAndSaver: IFileMenu.IPersistAndSave<Wodget> = {
-          tracker,
-          name: 'Wodget',
-          action: 'with Save',
-          persistAndSave: widget => {
-            widget.state = 'saved';
-            return Promise.resolve(void 0);
-          }
-        };
-        menu.persistAndSavers.add(persistAndSaver);
-        void delegateExecute(wodget, menu.persistAndSavers, 'persistAndSave');
-        expect(wodget.state).to.equal('saved');
       });
     });
 

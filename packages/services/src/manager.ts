@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Poll } from '@jupyterlab/coreutils';
+
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -31,18 +33,22 @@ export class ServiceManager implements ServiceManager.IManager {
    * Construct a new services provider.
    */
   constructor(options: ServiceManager.IOptions = {}) {
-    this.serverSettings =
+    const defaultDrive = options.defaultDrive;
+    const serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
+    const standby = options.standby || 'when-hidden';
+    const normalized = { defaultDrive, serverSettings, standby };
 
-    this.contents = new ContentsManager(options);
-    this.sessions = new SessionManager(options);
-    this.settings = new SettingManager(options);
-    this.terminals = new TerminalManager(options);
-    this.builder = new BuildManager(options);
-    this.workspaces = new WorkspaceManager(options);
-    this.nbconvert = new NbConvertManager(options);
+    this.serverSettings = serverSettings;
+    this.contents = new ContentsManager(normalized);
+    this.sessions = new SessionManager(normalized);
+    this.settings = new SettingManager(normalized);
+    this.terminals = new TerminalManager(normalized);
+    this.builder = new BuildManager(normalized);
+    this.workspaces = new WorkspaceManager(normalized);
+    this.nbconvert = new NbConvertManager(normalized);
 
-    this.sessions.specsChanged.connect((sender, specs) => {
+    this.sessions.specsChanged.connect((_, specs) => {
       this._specsChanged.emit(specs);
     });
     this._readyPromise = this.sessions.ready.then(() => {
@@ -234,5 +240,10 @@ export namespace ServiceManager {
      * The default drive for the contents manager.
      */
     readonly defaultDrive?: Contents.IDrive;
+
+    /**
+     * When the manager stops polling the API. Defaults to `when-hidden`.
+     */
+    standby?: Poll.Standby;
   }
 }

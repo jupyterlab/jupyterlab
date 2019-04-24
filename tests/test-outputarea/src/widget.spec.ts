@@ -15,7 +15,7 @@ import {
   IOutputAreaModel,
   OutputAreaModel,
   OutputArea
-} from '@jupyterlab/outputarea/src';
+} from '@jupyterlab/outputarea';
 
 import {
   createClientSession,

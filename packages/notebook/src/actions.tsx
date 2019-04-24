@@ -526,6 +526,32 @@ export namespace NotebookActions {
     return promise;
   }
 
+  export function renderAllMarkdown(
+    notebook: Notebook,
+    session?: IClientSession
+  ): Promise<boolean> {
+    if (!notebook.model || !notebook.activeCell) {
+      return Promise.resolve(false);
+    }
+    const previousIndex = notebook.activeCellIndex;
+    const state = Private.getState(notebook);
+    notebook.widgets.forEach((child, index) => {
+      if (child.model.type === 'markdown') {
+        notebook.select(child);
+        // This is to make sure that the activeCell
+        // does not get executed
+        notebook.activeCellIndex = index;
+      }
+    });
+    if (notebook.activeCell.model.type !== 'markdown') {
+      return Promise.resolve(true);
+    }
+    const promise = Private.runSelected(notebook, session);
+    notebook.activeCellIndex = previousIndex;
+    Private.handleRunState(notebook, state, true);
+    return promise;
+  }
+
   /**
    * Run all of the cells before the currently active cell (exclusive).
    *
@@ -1162,58 +1188,6 @@ export namespace NotebookActions {
     notebook.widgets.forEach(cell => {
       if (notebook.isSelectedOrActive(cell) && cell.model.type === 'code') {
         (cell as CodeCell).outputsScrolled = false;
-      }
-    });
-    Private.handleState(notebook, state);
-  }
-
-  /**
-   * Persists the collapsed state of all code cell outputs to the model.
-   *
-   * @param notebook - The target notebook widget.
-   */
-  export function persistViewState(notebook: Notebook): void {
-    if (!notebook.model) {
-      return;
-    }
-
-    const state = Private.getState(notebook);
-
-    notebook.widgets.forEach(cell => {
-      const { model, inputHidden } = cell;
-      const metadata = model.metadata;
-      const jupyter = (metadata.get('jupyter') as any) || {};
-
-      if (inputHidden) {
-        jupyter.source_hidden = true;
-      } else {
-        delete jupyter.source_hidden;
-      }
-
-      if (cell.model.type === 'code') {
-        const { outputHidden, outputsScrolled } = cell as CodeCell;
-
-        // set both metadata keys
-        // https://github.com/jupyterlab/jupyterlab/pull/3981#issuecomment-391139167
-        if (outputHidden) {
-          model.metadata.set('collapsed', true);
-          jupyter.outputs_hidden = true;
-        } else {
-          model.metadata.delete('collapsed');
-          delete jupyter.outputs_hidden;
-        }
-
-        if (outputsScrolled) {
-          model.metadata.set('scrolled', true);
-        } else {
-          model.metadata.delete('scrolled');
-        }
-      }
-
-      if (Object.keys(jupyter).length === 0) {
-        metadata.delete('jupyter');
-      } else {
-        metadata.set('jupyter', jupyter);
       }
     });
     Private.handleState(notebook, state);

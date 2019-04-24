@@ -16,8 +16,6 @@ As an example: Add a leaflet viewer plugin for geoJSON files.
 -  If there are no typings, we must create our own. An example typings
    file that exports functions is
    `codemirror <https://github.com/jupyterlab/jupyterlab/blob/master/packages/codemirror/typings/codemirror/codemirror.d.ts>`__.
-   An example with a class is
-   `vdom <https://github.com/jupyterlab/jupyterlab/blob/master/packages/vdom-extension/src/transform-vdom.d.ts>`__.
 
 -  Add a reference to the new library in ``src/typings.d.ts``.
 

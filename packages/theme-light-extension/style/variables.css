@@ -369,8 +369,8 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Search-related styles */
 
-  --jp-search-toggle-off-opacity: 0.4;
-  --jp-search-toggle-hover-opacity: 0.65;
+  --jp-search-toggle-off-opacity: 0.5;
+  --jp-search-toggle-hover-opacity: 0.8;
   --jp-search-toggle-on-opacity: 1;
   --jp-search-selected-match-background-color: rgb(245, 200, 0);
   --jp-search-selected-match-color: black;

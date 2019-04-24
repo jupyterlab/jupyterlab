@@ -60,10 +60,7 @@ export class MarkdownViewer extends Widget {
         signal: this.context.model.contentChanged,
         timeout: this._config.renderTimeout
       });
-      this._monitor.activityStopped.connect(
-        this.update,
-        this
-      );
+      this._monitor.activityStopped.connect(this.update, this);
 
       this._ready.resolve(undefined);
     });

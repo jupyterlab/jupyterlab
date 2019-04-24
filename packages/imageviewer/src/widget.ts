@@ -40,10 +40,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     this.node.appendChild(this._img);
 
     this._onTitleChanged();
-    context.pathChanged.connect(
-      this._onTitleChanged,
-      this
-    );
+    context.pathChanged.connect(this._onTitleChanged, this);
 
     void context.ready.then(() => {
       if (this.isDisposed) {
@@ -53,14 +50,8 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
       this._format = contents.format === 'base64' ? ';base64' : '';
       this._mimeType = contents.mimetype;
       this._render();
-      context.model.contentChanged.connect(
-        this.update,
-        this
-      );
-      context.fileChanged.connect(
-        this.update,
-        this
-      );
+      context.model.contentChanged.connect(this.update, this);
+      context.fileChanged.connect(this.update, this);
       this._ready.resolve(void 0);
     });
   }

@@ -29,7 +29,7 @@ describe('docregistry/savehandler', () => {
   let handler: SaveHandler;
 
   before(() => {
-    manager = new ServiceManager();
+    manager = new ServiceManager({ standby: 'never' });
     return manager.ready;
   });
 

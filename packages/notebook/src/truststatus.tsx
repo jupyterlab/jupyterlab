@@ -177,10 +177,7 @@ export namespace NotebookTrustStatus {
           this._onActiveCellChanged,
           this
         );
-        this._notebook.modelContentChanged.connect(
-          this._onModelChanged,
-          this
-        );
+        this._notebook.modelContentChanged.connect(this._onModelChanged, this);
 
         // Derive values
         if (this._notebook.activeCell !== undefined) {

@@ -14,7 +14,7 @@ import {
   CompletionHandler,
   CompleterModel,
   KernelConnector
-} from '@jupyterlab/completer/src';
+} from '@jupyterlab/completer';
 
 import { createClientSession } from '@jupyterlab/testutils';
 

@@ -8,7 +8,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   CodeMirrorEditorFactory,
   CodeMirrorEditor
-} from '@jupyterlab/codemirror/src';
+} from '@jupyterlab/codemirror';
 
 class ExposeCodeMirrorEditorFactory extends CodeMirrorEditorFactory {
   public inlineCodeMirrorConfig: CodeMirrorEditor.IConfig;

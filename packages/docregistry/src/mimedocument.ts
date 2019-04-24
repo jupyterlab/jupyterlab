@@ -57,10 +57,7 @@ export class MimeContent extends Widget {
           signal: this._context.model.contentChanged,
           timeout: options.renderTimeout
         });
-        this._monitor.activityStopped.connect(
-          this.update,
-          this
-        );
+        this._monitor.activityStopped.connect(this.update, this);
 
         this._ready.resolve(undefined);
       })

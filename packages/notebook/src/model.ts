@@ -26,6 +26,7 @@ import {
 } from '@jupyterlab/observables';
 
 import { CellList } from './celllist';
+import { showDialog, Dialog } from '@jupyterlab/apputils';
 
 /**
  * The definition of a model object for a notebook widget.
@@ -77,10 +78,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     if (!this._cells.length) {
       this._cells.push(factory.createCodeCell({}));
     }
-    this._cells.changed.connect(
-      this._onCellsChanged,
-      this
-    );
+    this._cells.changed.connect(this._onCellsChanged, this);
 
     // Handle initial metadata.
     let metadata = this.modelDB.createMap('metadata');
@@ -89,10 +87,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       metadata.set('language_info', { name });
     }
     this._ensureMetadata();
-    metadata.changed.connect(
-      this.triggerContentChange,
-      this
-    );
+    metadata.changed.connect(this.triggerContentChange, this);
     this._deletedCells = [];
   }
 
@@ -238,6 +233,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     let newValue = 0;
     this._nbformatMinor = nbformat.MINOR_VERSION;
     this._nbformat = nbformat.MAJOR_VERSION;
+    const origNbformat = value.metadata.orig_nbformat;
 
     if (value.nbformat !== this._nbformat) {
       oldValue = this._nbformat;
@@ -249,6 +245,28 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       this._nbformatMinor = newValue = value.nbformat_minor;
       this.triggerStateChange({ name: 'nbformatMinor', oldValue, newValue });
     }
+
+    // Alert the user if the format changes.
+    if (origNbformat !== undefined && this._nbformat !== origNbformat) {
+      const newer = this._nbformat > origNbformat;
+      const msg = `This notebook has been converted from ${
+        newer ? 'an older' : 'a newer'
+      } notebook format (v${origNbformat}) to the current notebook format (v${
+        this._nbformat
+      }). The next time you save this notebook, the current notebook format (v${
+        this._nbformat
+      }) will be used. ${
+        newer
+          ? 'Older versions of Jupyter may not be able to read the new format.'
+          : 'Some features of the original notebook may not be available.'
+      }  To preserve the original format version, close the notebook without saving it.`;
+      void showDialog({
+        title: 'Notebook converted',
+        body: msg,
+        buttons: [Dialog.okButton()]
+      });
+    }
+
     // Update the metadata.
     this.metadata.clear();
     let metadata = value.metadata;
@@ -281,20 +299,14 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     switch (change.type) {
       case 'add':
         change.newValues.forEach(cell => {
-          cell.contentChanged.connect(
-            this.triggerContentChange,
-            this
-          );
+          cell.contentChanged.connect(this.triggerContentChange, this);
         });
         break;
       case 'remove':
         break;
       case 'set':
         change.newValues.forEach(cell => {
-          cell.contentChanged.connect(
-            this.triggerContentChange,
-            this
-          );
+          cell.contentChanged.connect(this.triggerContentChange, this);
         });
         break;
       default:
