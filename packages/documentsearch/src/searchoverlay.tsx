@@ -73,7 +73,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
   }
 
   componentDidUpdate() {
-    if (this.props.forceFocus && this.props.inputFocused) {
+    if (this.props.forceFocus) {
       this.focusInput();
     }
   }
