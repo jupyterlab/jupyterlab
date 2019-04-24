@@ -3,7 +3,8 @@
 
 import {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  ILabShell
 } from '@jupyterlab/application';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
@@ -16,18 +17,21 @@ import {
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
+const SEARCHABLE_CLASS = 'jp-mod-searchable';
+
 /**
  * Initialization data for the document-search extension.
  */
 const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   id: '@jupyterlab/documentsearch:plugin',
   provides: ISearchProviderRegistry,
-  requires: [ICommandPalette],
+  requires: [ICommandPalette, ILabShell],
   optional: [IMainMenu],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
+    labShell: ILabShell,
     mainMenu: IMainMenu | null
   ) => {
     // Create registry, retrieve all default providers
@@ -36,6 +40,17 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     // enabler.
 
     const activeSearches = new Map<string, SearchInstance>();
+
+    labShell.activeChanged.connect((_, args) => {
+      const newWidget = args.newValue;
+      if (
+        newWidget &&
+        !newWidget.hasClass(SEARCHABLE_CLASS) &&
+        registry.getProviderForWidget(newWidget) !== undefined
+      ) {
+        newWidget.addClass(SEARCHABLE_CLASS);
+      }
+    });
 
     const startCommand: string = 'documentsearch:start';
     const nextCommand: string = 'documentsearch:highlightNext';
