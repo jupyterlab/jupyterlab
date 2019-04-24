@@ -6916,6 +6916,11 @@ jstransform@^11.0.3:
     object-assign "^2.0.0"
     source-map "^0.4.2"
 
+karma-babel-preprocessor@^8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/karma-babel-preprocessor/-/karma-babel-preprocessor-8.0.0.tgz#40639fa968bb14da65c2ccd507a68a5b398068cd"
+  integrity sha512-eeSSJgEtIVV7qKg/e+BG4RDTo+yglrGgBtuX+IHHGyhXEs4Vaqz8wSePXTiHyERvfxPfHRpxnKb5movoh62ekw==
+
 karma-chrome-launcher@~2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/karma-chrome-launcher/-/karma-chrome-launcher-2.2.0.tgz#cf1b9d07136cc18fe239327d24654c3dbc368acf"

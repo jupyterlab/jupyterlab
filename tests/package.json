@@ -39,6 +39,7 @@
     "chai": "~4.1.2",
     "expect.js": "~0.3.1",
     "json-to-html": "~0.1.2",
+    "karma-babel-preprocessor": "^8.0.0",
     "react": "~16.8.4",
     "simulate-event": "~1.4.0"
   },
