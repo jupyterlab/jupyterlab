@@ -26,8 +26,18 @@ module.exports = function(config) {
     },
     babelPreprocessor: {
       options: {
-        presets: ['@babel/preset-env'],
-        sourceMap: 'inline'
+        babelrc: false,
+        presets: [
+          [
+            '@babel/preset-env',
+            {
+              targets: {
+                node: 6
+              },
+              modules: 'commonjs'
+            }
+          ]
+        ]
       }
     },
     mime: {
