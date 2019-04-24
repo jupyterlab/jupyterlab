@@ -24,6 +24,12 @@ module.exports = function(config) {
       'src/*.spec.{ts,tsx}': ['webpack', 'sourcemap'],
       './../../packages/**/*.js': ['babel']
     },
+    babelPreprocessor: {
+      options: {
+        presets: ['@babel/preset-env'],
+        sourceMap: 'inline'
+      }
+    },
     mime: {
       'text/x-typescript': ['ts', 'tsx']
     },
