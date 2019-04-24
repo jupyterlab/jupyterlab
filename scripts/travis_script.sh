@@ -169,6 +169,6 @@ if [[ $GROUP == cli ]]; then
     ln -s real_app_dir link_app_dir
     # verify that app directory is not resolved
     env JUPYTERLAB_DIR=./link_app_dir jupyter lab path | grep link_app_dir
-    popd tmp
+    popd
 
 fi
