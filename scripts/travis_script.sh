@@ -161,4 +161,14 @@ if [[ $GROUP == cli ]]; then
     python -m jupyterlab.browser_check --dev-mode
     rm -rf packages/foo
     jlpm run integrity
+
+    ## Test app directory support being a symlink
+    mkdir tmp
+    pushd tmp
+    mkdir real_app_dir
+    ln -s real_app_dir link_app_dir
+    # verify that app directory is not resolved
+    env JUPYTERLAB_DIR=./link_app_dir jupyter lab path | grep link_app_dir
+    popd tmp
+
 fi
