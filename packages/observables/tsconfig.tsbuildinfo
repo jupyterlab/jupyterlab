@@ -9,9 +9,29 @@
         "version": "7994d44005046d1413ea31d046577cdda33b8b2470f30281fd9c8b3c99fe2d96",
         "signature": "7994d44005046d1413ea31d046577cdda33b8b2470f30281fd9c8b3c99fe2d96"
       },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2016.d.ts": {
+        "version": "5f217838d25704474d9ef93774f04164889169ca31475fe423a9de6758f058d1",
+        "signature": "5f217838d25704474d9ef93774f04164889169ca31475fe423a9de6758f058d1"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.d.ts": {
+        "version": "459097c7bdd88fc5731367e56591e4f465f2c9de81a35427a7bd473165c34743",
+        "signature": "459097c7bdd88fc5731367e56591e4f465f2c9de81a35427a7bd473165c34743"
+      },
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.dom.d.ts": {
         "version": "6994c583b66862deca24d7bbf77297d95b9d3da8160dbd9beef6b847cf7c1376",
         "signature": "6994c583b66862deca24d7bbf77297d95b9d3da8160dbd9beef6b847cf7c1376"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.dom.iterable.d.ts": {
+        "version": "4c892766803cef795d73d69aee436dc7a80157163e0cf35e6d0e86917cbd42f3",
+        "signature": "4c892766803cef795d73d69aee436dc7a80157163e0cf35e6d0e86917cbd42f3"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.webworker.importscripts.d.ts": {
+        "version": "fe4e59403e34c7ff747abe4ff6abbc7718229556d7c1a5b93473fb53156c913b",
+        "signature": "fe4e59403e34c7ff747abe4ff6abbc7718229556d7c1a5b93473fb53156c913b"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.scripthost.d.ts": {
+        "version": "b9faa17292f17d2ad75e34fac77dd63a6403af1dba02d39cd0cbb9ffdf3de8b9",
+        "signature": "b9faa17292f17d2ad75e34fac77dd63a6403af1dba02d39cd0cbb9ffdf3de8b9"
       },
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.core.d.ts": {
         "version": "384f66a3422d80014c51de2682159bb26f1e35854029880ccd5f6d1f00e6a36d",
@@ -48,6 +68,34 @@
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts": {
         "version": "3e0a459888f32b42138d5a39f706ff2d55d500ab1031e0988b5568b0f67c2303",
         "signature": "3e0a459888f32b42138d5a39f706ff2d55d500ab1031e0988b5568b0f67c2303"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2016.array.include.d.ts": {
+        "version": "3f96f1e570aedbd97bf818c246727151e873125d0512e4ae904330286c721bc0",
+        "signature": "3f96f1e570aedbd97bf818c246727151e873125d0512e4ae904330286c721bc0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.object.d.ts": {
+        "version": "ff8ad203e83338289b0f5defc1a5b5c253fb7d251b464db497383f915a0df3f4",
+        "signature": "ff8ad203e83338289b0f5defc1a5b5c253fb7d251b464db497383f915a0df3f4"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts": {
+        "version": "b8667586a618c5cf64523d4e500ae39e781428abfb28f3de441fc66b56144b6f",
+        "signature": "b8667586a618c5cf64523d4e500ae39e781428abfb28f3de441fc66b56144b6f"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.string.d.ts": {
+        "version": "21df2e0059f14dcb4c3a0e125859f6b6ff01332ee24b0065a741d121250bc71c",
+        "signature": "21df2e0059f14dcb4c3a0e125859f6b6ff01332ee24b0065a741d121250bc71c"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.intl.d.ts": {
+        "version": "c1759cb171c7619af0d2234f2f8fb2a871ee88e956e2ed91bb61778e41f272c6",
+        "signature": "c1759cb171c7619af0d2234f2f8fb2a871ee88e956e2ed91bb61778e41f272c6"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.typedarrays.d.ts": {
+        "version": "28569d59e07d4378cb3d54979c4c60f9f06305c9bb6999ffe6cab758957adc46",
+        "signature": "28569d59e07d4378cb3d54979c4c60f9f06305c9bb6999ffe6cab758957adc46"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.full.d.ts": {
+        "version": "873c09f1c309389742d98b7b67419a8e0a5fa6f10ce59fd5149ecd31a2818594",
+        "signature": "873c09f1c309389742d98b7b67419a8e0a5fa6f10ce59fd5149ecd31a2818594"
       },
       "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/array.d.ts": {
         "version": "7c8adf0d13cee0b26c590d825463bd9d1e85cc7403fddcef10b6c813f19e9d2f",
@@ -174,7 +222,7 @@
         "signature": "1e9a923f625ca265408e4203f41db916114644b53353217013ab68ba273f3279"
       },
       "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/undoablelist.ts": {
-        "version": "2ab6c036bce3e1e3a4257d833231d1e3567ebc1cac01a4fde56e3d5497c0efcd",
+        "version": "1d5b0544c76720fed597d312be6118cfe8c355ae72120950ccfb713b20c1ec46",
         "signature": "fea1edc0ab1b80addbae760d8cffc1f3d41dea37c0f69eb79e65306d74b33a43"
       },
       "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/modeldb.ts": {
@@ -193,17 +241,13 @@
       "esModuleInterop": true,
       "incremental": true,
       "jsx": 2,
-      "lib": [
-        "lib.dom.d.ts",
-        "lib.es2015.d.ts"
-      ],
       "module": 1,
       "moduleResolution": 2,
       "noEmitOnError": true,
       "noImplicitAny": true,
       "noUnusedLocals": true,
       "resolveJsonModule": true,
-      "target": 2,
+      "target": 4,
       "types": [],
       "outDir": "/Users/David/github/jupyterlab/jupyterlab/packages/observables/lib",
       "rootDir": "/Users/David/github/jupyterlab/jupyterlab/packages/observables/src",
@@ -322,6 +366,45 @@
       ]
     },
     "exportedModulesMap": {
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
       "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts": [
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/array.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts",
@@ -340,31 +423,16 @@
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts"
       ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/undoablelist.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablelist.ts"
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts"
       ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/index.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/modeldb.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablejson.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablelist.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablemap.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablestring.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/undoablelist.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/modeldb.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablemap.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablestring.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/undoablelist.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablejson.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablestring.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/modeldb.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/json.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/mime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/promise.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/random.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/token.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/uuid.d.ts"
       ],
       "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablemap.ts": [
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
@@ -376,66 +444,47 @@
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts"
       ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablestring.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/modeldb.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
       "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablelist.ts": [
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts"
       ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts"
+      "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/undoablelist.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablelist.ts"
       ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/modeldb.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablemap.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablestring.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/undoablelist.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablejson.ts"
       ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/json.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/mime.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/promise.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/random.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/token.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/uuid.d.ts"
+      "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/index.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/modeldb.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablejson.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablelist.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablemap.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/observablestring.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/src/undoablelist.ts"
       ]
     },
     "semanticDiagnosticsPerFile": [
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es5.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2016.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.dom.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.dom.iterable.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.webworker.importscripts.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.scripthost.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.core.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.collection.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.generator.d.ts",
@@ -445,6 +494,13 @@
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.reflect.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.symbol.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2016.array.include.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.object.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.string.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.intl.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.typedarrays.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.full.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/array.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts",

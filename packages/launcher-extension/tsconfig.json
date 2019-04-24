@@ -13,10 +13,10 @@
       "path": "../apputils"
     },
     {
-      "path": "../coreutils"
+      "path": "../launcher"
     },
     {
-      "path": "../launcher"
+      "path": "../coreutils"
     }
   ]
 }

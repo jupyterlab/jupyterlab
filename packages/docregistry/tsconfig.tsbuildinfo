@@ -9,9 +9,29 @@
         "version": "7994d44005046d1413ea31d046577cdda33b8b2470f30281fd9c8b3c99fe2d96",
         "signature": "7994d44005046d1413ea31d046577cdda33b8b2470f30281fd9c8b3c99fe2d96"
       },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2016.d.ts": {
+        "version": "5f217838d25704474d9ef93774f04164889169ca31475fe423a9de6758f058d1",
+        "signature": "5f217838d25704474d9ef93774f04164889169ca31475fe423a9de6758f058d1"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.d.ts": {
+        "version": "459097c7bdd88fc5731367e56591e4f465f2c9de81a35427a7bd473165c34743",
+        "signature": "459097c7bdd88fc5731367e56591e4f465f2c9de81a35427a7bd473165c34743"
+      },
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.dom.d.ts": {
         "version": "6994c583b66862deca24d7bbf77297d95b9d3da8160dbd9beef6b847cf7c1376",
         "signature": "6994c583b66862deca24d7bbf77297d95b9d3da8160dbd9beef6b847cf7c1376"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.dom.iterable.d.ts": {
+        "version": "4c892766803cef795d73d69aee436dc7a80157163e0cf35e6d0e86917cbd42f3",
+        "signature": "4c892766803cef795d73d69aee436dc7a80157163e0cf35e6d0e86917cbd42f3"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.webworker.importscripts.d.ts": {
+        "version": "fe4e59403e34c7ff747abe4ff6abbc7718229556d7c1a5b93473fb53156c913b",
+        "signature": "fe4e59403e34c7ff747abe4ff6abbc7718229556d7c1a5b93473fb53156c913b"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.scripthost.d.ts": {
+        "version": "b9faa17292f17d2ad75e34fac77dd63a6403af1dba02d39cd0cbb9ffdf3de8b9",
+        "signature": "b9faa17292f17d2ad75e34fac77dd63a6403af1dba02d39cd0cbb9ffdf3de8b9"
       },
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.core.d.ts": {
         "version": "384f66a3422d80014c51de2682159bb26f1e35854029880ccd5f6d1f00e6a36d",
@@ -48,6 +68,34 @@
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts": {
         "version": "3e0a459888f32b42138d5a39f706ff2d55d500ab1031e0988b5568b0f67c2303",
         "signature": "3e0a459888f32b42138d5a39f706ff2d55d500ab1031e0988b5568b0f67c2303"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2016.array.include.d.ts": {
+        "version": "3f96f1e570aedbd97bf818c246727151e873125d0512e4ae904330286c721bc0",
+        "signature": "3f96f1e570aedbd97bf818c246727151e873125d0512e4ae904330286c721bc0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.object.d.ts": {
+        "version": "ff8ad203e83338289b0f5defc1a5b5c253fb7d251b464db497383f915a0df3f4",
+        "signature": "ff8ad203e83338289b0f5defc1a5b5c253fb7d251b464db497383f915a0df3f4"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts": {
+        "version": "b8667586a618c5cf64523d4e500ae39e781428abfb28f3de441fc66b56144b6f",
+        "signature": "b8667586a618c5cf64523d4e500ae39e781428abfb28f3de441fc66b56144b6f"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.string.d.ts": {
+        "version": "21df2e0059f14dcb4c3a0e125859f6b6ff01332ee24b0065a741d121250bc71c",
+        "signature": "21df2e0059f14dcb4c3a0e125859f6b6ff01332ee24b0065a741d121250bc71c"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.intl.d.ts": {
+        "version": "c1759cb171c7619af0d2234f2f8fb2a871ee88e956e2ed91bb61778e41f272c6",
+        "signature": "c1759cb171c7619af0d2234f2f8fb2a871ee88e956e2ed91bb61778e41f272c6"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.typedarrays.d.ts": {
+        "version": "28569d59e07d4378cb3d54979c4c60f9f06305c9bb6999ffe6cab758957adc46",
+        "signature": "28569d59e07d4378cb3d54979c4c60f9f06305c9bb6999ffe6cab758957adc46"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.full.d.ts": {
+        "version": "873c09f1c309389742d98b7b67419a8e0a5fa6f10ce59fd5149ecd31a2818594",
+        "signature": "873c09f1c309389742d98b7b67419a8e0a5fa6f10ce59fd5149ecd31a2818594"
       },
       "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/json.d.ts": {
         "version": "ba7019a8788c81131b5bcbfc888894b09c9443695fbb5d77f91691f8790c5d87",
@@ -222,8 +270,8 @@
         "signature": "6baff3e4e3aca45d2879a6b26369316430f8756d85319898c64c69019036ab61"
       },
       "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/poll.d.ts": {
-        "version": "98d13353413cf991fec1ff4bd9de513cf7dbcf7c705b676cb25acf187cd8b8f5",
-        "signature": "98d13353413cf991fec1ff4bd9de513cf7dbcf7c705b676cb25acf187cd8b8f5"
+        "version": "e3c2f440cae9dcbb4e9504b477b72afe5606e4080e0861e831a4923dd11fcfa0",
+        "signature": "e3c2f440cae9dcbb4e9504b477b72afe5606e4080e0861e831a4923dd11fcfa0"
       },
       "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/settingregistry.d.ts": {
         "version": "6b2daa945bf3f68bd9ee9a6503cc2709cd5d0255b4e6d11c14b69c738e91af84",
@@ -626,7 +674,7 @@
         "signature": "d6c7fcbea48283113679253b4c83cae4c0e60fa0d87baac08efa32c0ad301c1e"
       },
       "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/mimedocument.ts": {
-        "version": "ec7ee34183eedd63c4ea0660adc2d750ddfdf9ed00ec3a12b01ec8fda8cdb548",
+        "version": "ab92451ba5d1b9a6035714f48eca7cd300102e8c294f01751e649a2385ed3c81",
         "signature": "7bc02ec2bc159edced776e7722948ca02338fa5e40aa2a394952757ad32ec2af"
       },
       "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/index.ts": {
@@ -634,7 +682,7 @@
         "signature": "a561750e2b74d4b9d71a4e87dfc98d2f8bde5d26e57c1bc66f3029db115408bc"
       },
       "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/default.ts": {
-        "version": "de3f80722194935ab156e565fbde091d4b3f188e71635c7382d251bb5ee55b72",
+        "version": "fd25de7d5bd0edb6b5e219c610299c4f4272b8994add64d2caa67c7d8a186631",
         "signature": "d7d5ec82123efcaa6278c0505e16a65a590d3ae7cc93c54149afcfe253e360b2"
       },
       "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/registry.ts": {
@@ -642,7 +690,7 @@
         "signature": "e83b257efc117c3606cbabeee594b8ddb818e6e5b5c84276c3f889f1017bb99f"
       },
       "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/context.ts": {
-        "version": "76f7d6f6c48c14767e3e11361263bee2c325034084c4656f715929b34a8f7bcf",
+        "version": "98634f43815ec91ebc649057d3d2f4239e04a6a0328b5ee4e41ab1eae0bc65e4",
         "signature": "2137f0faa1c2aec3bfb6ae8a775035f8ec909f1ca69935824ba95be104243a64"
       }
     },
@@ -653,17 +701,13 @@
       "esModuleInterop": true,
       "incremental": true,
       "jsx": 2,
-      "lib": [
-        "lib.dom.d.ts",
-        "lib.es2015.d.ts"
-      ],
       "module": 1,
       "moduleResolution": 2,
       "noEmitOnError": true,
       "noImplicitAny": true,
       "noUnusedLocals": true,
       "resolveJsonModule": true,
-      "target": 2,
+      "target": 4,
       "types": [],
       "outDir": "/Users/David/github/jupyterlab/jupyterlab/packages/docregistry/lib",
       "rootDir": "/Users/David/github/jupyterlab/jupyterlab/packages/docregistry/src",
@@ -1398,15 +1442,667 @@
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/token.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/uuid.d.ts"
       ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/context.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/registry.ts",
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/config/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/array.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/string.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablemap.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/modeldb.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablejson.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablemap.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablestring.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/modeldb.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablelist.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/undoablelist.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablelist.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/modeldb.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablejson.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablestring.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/undoablelist.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablemap.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/modeldb.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablejson.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablelist.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablemap.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablestring.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/undoablelist.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/contents/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/activitymonitor.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/dataconnector.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/interfaces.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/nbformat.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/poll.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/settingregistry.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/interfaces.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/statedb.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/interfaces.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/url.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/activitymonitor.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/dataconnector.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/interfaces.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/markdowncodeblocks.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/nbformat.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/pageconfig.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/path.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/poll.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/settingregistry.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/statedb.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/text.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/time.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/url.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/messages.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/kernel.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/kernel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/messages.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/manager.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/kernel.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/kernel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/manager.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/messages.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/builder/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/serverconnection.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/nbconvert/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/serverconnection.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/session.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/manager.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/serverconnection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/session.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/manager.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/session.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/setting/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/serverconnection.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/terminal.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/manager.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/terminal.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/manager.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/terminal.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/workspace/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/serverconnection.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/manager.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/builder/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/nbconvert/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/contents/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/setting/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/serverconnection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/workspace/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/config/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/contents/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/manager.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/serverconnection.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/setting/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/workspace/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/nbconvert/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/builder/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxengine.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/clientsession.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/clipboard.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/collapse.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/commandlinker.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/commandpalette.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/prop-types/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/react/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/react/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/csstype/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/prop-types/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/react/global.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/instancetracker.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/dialog.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/react/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/instancetracker.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/iframe.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/vdom.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/react/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/toolbar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/vdom.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/clientsession.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/react/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/mainareawidget.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/toolbar.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/spinner.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/splash.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/thememanager.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/splash.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/windowresolver.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/clientsession.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/clipboard.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/collapse.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/commandlinker.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/commandpalette.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/dialog.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/domutils.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/hoverbox.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/iframe.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/instancetracker.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/mainareawidget.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/sanitizer.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/spinner.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/splash.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/styling.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/thememanager.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/toolbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/vdom.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/windowresolver.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/attachmentmodel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/factories.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/mimemodel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/outputmodel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/registry.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/mimemodel.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/renderers.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/widgets.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/attachmentmodel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/factories.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/latex.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/mimemodel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/outputmodel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/registry.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/renderers.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/widgets.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/editor.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/factory.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/editor.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/mimetype.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/jsoneditor.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/editor.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/widget.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/factory.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/mimetype.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/editor.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/jsoneditor.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/mode.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/codemirror-ipython.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/codemirror-ipythongfm.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/codemirror/searchcursor.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/codemirror/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/editor.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/codemirror/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/mode.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/codemirror/searchcursor.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/factory.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/editor.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/mimetype.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/syntaxstatus.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/react/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/mode.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/editor.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/factory.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/mimetype.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/syntaxstatus.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/mimedocument.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/registry.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/default.ts"
       ],
       "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/index.ts": [
         "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/context.ts",
@@ -1438,673 +2134,26 @@
         "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts"
       ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/mimedocument.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/context.ts": [
         "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/registry.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/docregistry/src/default.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/mode.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/codemirror-ipython.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/codemirror-ipythongfm.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/mode.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/editor.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/factory.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/mimetype.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/syntaxstatus.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/editor.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/codemirror/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/mode.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/codemirror/searchcursor.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/factory.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/editor.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/factory.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/mimetype.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/editor.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/jsoneditor.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/syntaxstatus.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/react/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/codemirror/lib/mimetype.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/widget.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/editor.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
         "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/jsoneditor.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/editor.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/factory.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/editor.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/registry.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/mimemodel.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/attachmentmodel.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/factories.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/latex.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/mimemodel.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/outputmodel.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/registry.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/renderers.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/widgets.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/outputmodel.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/mimemodel.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/attachmentmodel.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/widgets.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/renderers.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime/lib/factories.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/windowresolver.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/clientsession.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/clipboard.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/collapse.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/commandlinker.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/commandpalette.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/dialog.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/domutils.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/hoverbox.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/iframe.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/instancetracker.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/mainareawidget.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/sanitizer.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/spinner.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/splash.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/styling.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/thememanager.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/toolbar.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/vdom.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/windowresolver.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/thememanager.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/splash.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/splash.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/instancetracker.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/dialog.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/react/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/instancetracker.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/commandpalette.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/commandlinker.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/clipboard.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxengine.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/spinner.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/mainareawidget.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/toolbar.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/toolbar.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/vdom.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/clientsession.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/react/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/vdom.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/react/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/iframe.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/collapse.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/workspace/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/serverconnection.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/config/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/contents/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/manager.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/serverconnection.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/setting/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/workspace/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/nbconvert/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/builder/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/apputils/lib/clientsession.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/manager.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/terminal.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/manager.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/terminal.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/manager.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/builder/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/nbconvert/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/contents/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/setting/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/serverconnection.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/workspace/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/terminal/terminal.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/session.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/manager.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/session.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/manager.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/serverconnection.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/session/session.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/manager.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/kernel.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/kernel.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/manager.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/messages.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/kernel.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/messages.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/messages.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/kernel/kernel.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/contents/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/config/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/url.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/activitymonitor.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/dataconnector.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/interfaces.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/markdowncodeblocks.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/nbformat.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/pageconfig.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/path.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/poll.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/settingregistry.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/statedb.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/text.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/time.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/url.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/codeeditor/lib/mimetype.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/setting/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/serverconnection.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/statedb.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/interfaces.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/settingregistry.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/interfaces.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/nbformat.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/modeldb.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablejson.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablestring.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/undoablelist.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablemap.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/modeldb.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablejson.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablelist.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablemap.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablestring.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/undoablelist.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablestring.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/modeldb.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablemap.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/modeldb.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablejson.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablemap.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/undoablelist.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablelist.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/array.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/string.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/observables/lib/observablelist.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/poll.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/activitymonitor.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/dataconnector.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/coreutils/lib/interfaces.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/nbconvert/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/serverconnection.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/builder/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/packages/services/lib/serverconnection.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/react/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/csstype/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/prop-types/index.d.ts",
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/react/global.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/prop-types/index.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/react/index.d.ts"
-      ],
-      "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/codemirror/searchcursor.d.ts": [
-        "/users/david/github/jupyterlab/jupyterlab/node_modules/@types/codemirror/index.d.ts"
       ]
     },
     "semanticDiagnosticsPerFile": [
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es5.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2016.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.dom.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.dom.iterable.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.webworker.importscripts.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.scripthost.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.core.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.collection.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.generator.d.ts",
@@ -2114,6 +2163,13 @@
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.reflect.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.symbol.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2016.array.include.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.object.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.string.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.intl.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.typedarrays.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.full.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/json.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/mime.d.ts",
       "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/promise.d.ts",
