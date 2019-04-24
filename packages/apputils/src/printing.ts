@@ -100,14 +100,11 @@ export namespace Printing {
    *
    * Modified from
    * https://github.com/joseluisq/printd/blob/eb7948d602583c055ab6dee3ee294b6a421da4b6/src/index.ts#L24
-   *
-   * Made source a parameter
    */
   function createIFrame(): HTMLIFrameElement {
     const el = window.document.createElement('iframe');
     const css =
       'visibility:hidden;width:0;height:0;position:absolute;z-index:-9999;bottom:0;';
-
     el.setAttribute('style', css);
     el.setAttribute('width', '0');
     el.setAttribute('height', '0');
@@ -120,17 +117,6 @@ export namespace Printing {
    * Copies a node from the base document to the iframe.
    */
   function setIFrameNode(iframe: HTMLIFrameElement, node: HTMLElement) {
-    // https://developer.mozilla.org/en-US/docs/Web/API/DOMImplementation/createHTMLDocument
-
-    // Create new document
-    // const newDocument = iframe.contentDocument.implementation.createHTMLDocument(
-    //   'JupyterLab'
-    // );
-    // // Copy node into document
-    // newDocument.body.appendChild(newDocument.importNode(node, true));
-
-    // Copy document node into iframe document.
-    console.log(node);
     iframe.contentDocument.body.appendChild(node.cloneNode(true));
     iframe.contentDocument.close();
   }
