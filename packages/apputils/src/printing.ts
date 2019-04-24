@@ -68,38 +68,31 @@ export namespace Printing {
    * @param url URL to load into an iframe.
    */
   export async function printURL(url: string): Promise<void> {
-    return printContent(url);
-
-    //   const myWindow = window.open(url);
-    //   myWindow.focus();
-    //   myWindow.document.attachEvent("load", function() {
-    //     window.print();
-    //     alert("called")
-    // })
-
-    //   myWindow.addEventListener('load', () => {
-    //     myWindow.print();
-    //     myWindow.close();
-    // })
+    const text = await (await fetch(url)).text();
+    return printContent(text);
   }
 
   /**
    * Prints a URL or an element in an iframe and then removes the iframe after printing.
    */
-  async function printContent(urlOrEl: string | HTMLElement): Promise<void> {
-    const isURL = typeof urlOrEl === 'string';
+  async function printContent(textOrEl: string | HTMLElement): Promise<void> {
+    const isText = typeof textOrEl === 'string';
+    const iframe = createIFrame();
+
     const parent = window.document.body;
-    const iframe = createIFrame(isURL ? (urlOrEl as string) : 'about:blank');
     parent.appendChild(iframe);
 
-    if (!isURL) {
-      setIFrameNode(iframe, urlOrEl as HTMLElement);
+    if (isText) {
+      iframe.srcdoc = textOrEl as string;
+      await resolveWhenLoaded(iframe);
+    } else {
+      iframe.src = 'about:blank';
+      setIFrameNode(iframe, textOrEl as HTMLElement);
     }
 
-    await resolveWhenLoaded(iframe.contentWindow);
     launchPrint(iframe.contentWindow);
 
-    // parent.removeChild(iframe);
+    parent.removeChild(iframe);
   }
 
   /**
@@ -110,12 +103,11 @@ export namespace Printing {
    *
    * Made source a parameter
    */
-  function createIFrame(src: string): HTMLIFrameElement {
+  function createIFrame(): HTMLIFrameElement {
     const el = window.document.createElement('iframe');
     const css =
       'visibility:hidden;width:0;height:0;position:absolute;z-index:-9999;bottom:0;';
 
-    el.setAttribute('src', src);
     el.setAttribute('style', css);
     el.setAttribute('width', '0');
     el.setAttribute('height', '0');
@@ -131,37 +123,24 @@ export namespace Printing {
     // https://developer.mozilla.org/en-US/docs/Web/API/DOMImplementation/createHTMLDocument
 
     // Create new document
-    const newDocument = iframe.contentDocument.implementation.createHTMLDocument(
-      'JupyterLab'
-    );
-    // Copy node into document
-    newDocument.body.appendChild(newDocument.importNode(node, true));
+    // const newDocument = iframe.contentDocument.implementation.createHTMLDocument(
+    //   'JupyterLab'
+    // );
+    // // Copy node into document
+    // newDocument.body.appendChild(newDocument.importNode(node, true));
 
     // Copy document node into iframe document.
-    iframe.contentDocument.replaceChild(
-      iframe.contentDocument.importNode(newDocument.documentElement, true),
-      iframe.contentDocument.documentElement
-    );
+    console.log(node);
+    iframe.contentDocument.body.appendChild(node.cloneNode(true));
+    iframe.contentDocument.close();
   }
 
   /**
    * Promise that resolves when all resources are loaded in the window.
    */
-  function resolveWhenLoaded(contentWindow: Window): Promise<void> {
-    // If document is already loaded, the load event won't be fired
-    // again, so just return immediately.
-    // if (contentWindow.document.readyState === 'complete') {
-    //   return Promise.resolve();
-    // }
-    return new Promise((resolve, reject) => {
-      contentWindow.addEventListener(
-        'load',
-        () => {
-          console.log('loaded');
-          resolve();
-        },
-        false
-      );
+  function resolveWhenLoaded(iframe: HTMLIFrameElement): Promise<void> {
+    return new Promise(resolve => {
+      iframe.addEventListener('load', () => resolve(), false);
     });
   }
 
