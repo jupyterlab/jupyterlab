@@ -35,13 +35,13 @@ from .jlpmapp import YARN_PATH, HERE
 WEBPACK_EXPECT = re.compile(r'.*/index.out.js')
 
 # The dev mode directory.
-DEV_DIR = osp.realpath(os.path.join(HERE, '..', 'dev_mode'))
+DEV_DIR = osp.abspath(os.path.join(HERE, '..', 'dev_mode'))
 
 
 def pjoin(*args):
     """Join paths to create a real path.
     """
-    return osp.realpath(osp.join(*args))
+    return osp.abspath(osp.join(*args))
 
 
 def get_user_settings_dir():
@@ -51,7 +51,7 @@ def get_user_settings_dir():
     settings_dir = settings_dir or pjoin(
         jupyter_config_path()[0], 'lab', 'user-settings'
     )
-    return osp.realpath(settings_dir)
+    return osp.abspath(settings_dir)
 
 
 def get_workspaces_dir():
@@ -61,7 +61,7 @@ def get_workspaces_dir():
     workspaces_dir = workspaces_dir or pjoin(
         jupyter_config_path()[0], 'lab', 'workspaces'
     )
-    return osp.realpath(workspaces_dir)
+    return osp.abspath(workspaces_dir)
 
 
 def get_app_dir():
@@ -69,7 +69,7 @@ def get_app_dir():
     """
     # Default to the override environment variable.
     if os.environ.get('JUPYTERLAB_DIR'):
-        return osp.realpath(os.environ['JUPYTERLAB_DIR'])
+        return osp.abspath(os.environ['JUPYTERLAB_DIR'])
 
     # Use the default locations for data_files.
     app_dir = pjoin(sys.prefix, 'share', 'jupyter', 'lab')
@@ -87,8 +87,7 @@ def get_app_dir():
           osp.exists(app_dir) and
           osp.exists('/usr/local/share/jupyter/lab')):
         app_dir = '/usr/local/share/jupyter/lab'
-
-    return osp.realpath(app_dir)
+    return osp.abspath(app_dir)
 
 
 def ensure_dev(logger=None):
@@ -144,7 +143,7 @@ def watch_packages(logger=None):
         yarn_proc.wait()
 
     logger = _ensure_logger(logger)
-    ts_dir = osp.realpath(osp.join(HERE, '..', 'packages', 'metapackage'))
+    ts_dir = osp.abspath(osp.join(HERE, '..', 'packages', 'metapackage'))
 
     # Run typescript watch and wait for the string indicating it is done.
     ts_regex = r'.* Found 0 errors\. Watching for file changes\.'
@@ -1087,7 +1086,7 @@ class _AppHandler(object):
             deps = data.get('dependencies', dict())
             name = data['name']
             jlab = data.get('jupyterlab', dict())
-            path = osp.realpath(target)
+            path = osp.abspath(target)
             # homepage, repository  are optional
             if 'homepage' in data:
                 url = data['homepage']
@@ -1132,7 +1131,7 @@ class _AppHandler(object):
             return info
 
         for path in glob.glob(pjoin(dname, '*.tgz')):
-            path = osp.realpath(path)
+            path = osp.abspath(path)
             data = read_package(path)
             name = data['name']
             if name not in info:
