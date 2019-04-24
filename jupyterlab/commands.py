@@ -69,7 +69,7 @@ def get_app_dir():
     """
     # Default to the override environment variable.
     if os.environ.get('JUPYTERLAB_DIR'):
-        return os.environ['JUPYTERLAB_DIR']
+        return osp.abspath(os.environ['JUPYTERLAB_DIR'])
 
     # Use the default locations for data_files.
     app_dir = pjoin(sys.prefix, 'share', 'jupyter', 'lab')
@@ -87,7 +87,7 @@ def get_app_dir():
           osp.exists(app_dir) and
           osp.exists('/usr/local/share/jupyter/lab')):
         app_dir = '/usr/local/share/jupyter/lab'
-    return app_dir
+    return osp.abspath(app_dir)
 
 
 def ensure_dev(logger=None):
