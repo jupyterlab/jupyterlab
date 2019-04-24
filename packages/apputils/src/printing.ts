@@ -67,8 +67,20 @@ export namespace Printing {
    *
    * @param url URL to load into an iframe.
    */
-  export function printURL(url: string): Promise<void> {
+  export async function printURL(url: string): Promise<void> {
     return printContent(url);
+
+    //   const myWindow = window.open(url);
+    //   myWindow.focus();
+    //   myWindow.document.attachEvent("load", function() {
+    //     window.print();
+    //     alert("called")
+    // })
+
+    //   myWindow.addEventListener('load', () => {
+    //     myWindow.print();
+    //     myWindow.close();
+    // })
   }
 
   /**
