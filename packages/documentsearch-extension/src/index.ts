@@ -19,19 +19,39 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 const SEARCHABLE_CLASS = 'jp-mod-searchable';
 
+const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/documentsearch:labShellWidgetListener',
+  requires: [ILabShell, ISearchProviderRegistry],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    labShell: ILabShell,
+    registry: ISearchProviderRegistry
+  ) => {
+    labShell.activeChanged.connect((_, args) => {
+      const oldWidget = args.oldValue;
+      const newWidget = args.newValue;
+      if (newWidget && registry.getProviderForWidget(newWidget) !== undefined) {
+        newWidget.addClass(SEARCHABLE_CLASS);
+      }
+      if (oldWidget) {
+        oldWidget.removeClass(SEARCHABLE_CLASS);
+      }
+    });
+  }
+};
+
 /**
  * Initialization data for the document-search extension.
  */
 const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   id: '@jupyterlab/documentsearch:plugin',
   provides: ISearchProviderRegistry,
-  requires: [ICommandPalette, ILabShell],
-  optional: [IMainMenu],
+  optional: [ICommandPalette, IMainMenu],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
-    labShell: ILabShell,
     mainMenu: IMainMenu | null
   ) => {
     // Create registry, retrieve all default providers
@@ -40,17 +60,6 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     // enabler.
 
     const activeSearches = new Map<string, SearchInstance>();
-
-    labShell.activeChanged.connect((_, args) => {
-      const newWidget = args.newValue;
-      if (
-        newWidget &&
-        !newWidget.hasClass(SEARCHABLE_CLASS) &&
-        registry.getProviderForWidget(newWidget) !== undefined
-      ) {
-        newWidget.addClass(SEARCHABLE_CLASS);
-      }
-    });
 
     const startCommand: string = 'documentsearch:start';
     const nextCommand: string = 'documentsearch:highlightNext';
@@ -141,10 +150,11 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     });
 
     // Add the command to the palette.
-    palette.addItem({ command: startCommand, category: 'Main Area' });
-    palette.addItem({ command: nextCommand, category: 'Main Area' });
-    palette.addItem({ command: prevCommand, category: 'Main Area' });
-
+    if (palette) {
+      palette.addItem({ command: startCommand, category: 'Main Area' });
+      palette.addItem({ command: nextCommand, category: 'Main Area' });
+      palette.addItem({ command: prevCommand, category: 'Main Area' });
+    }
     // Add main menu notebook menu.
     if (mainMenu) {
       mainMenu.editMenu.addGroup(
@@ -162,4 +172,4 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   }
 };
 
-export default extension;
+export default [extension, labShellWidgetListener];
