@@ -784,8 +784,7 @@ export class CodeConsole extends Widget {
       if (!kernel) {
         return;
       }
-      kernel
-        .requestKernelInfo()
+      kernel.ready
         .then(() => {
           if (this.isDisposed || !kernel || !kernel.info) {
             return;
