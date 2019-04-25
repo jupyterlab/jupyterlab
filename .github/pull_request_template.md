@@ -16,6 +16,6 @@
 
 <!-- For user interface changes, include before/after screenshots here. -->
 
-## Backwards incompatibe changes
+## Backwards-incompatible changes
 
 <!-- Describe here any backwards-incompatible changes to JupyterLab public APIs. -->
