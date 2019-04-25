@@ -403,19 +403,7 @@ namespace Private {
       return widgetReady;
     }
 
-    widgetReady = new Promise((resolve, reject) => {
-      require.ensure(
-        ['@jupyterlab/terminal/lib/widget'],
-        // see https://webpack.js.org/api/module-methods/#require-ensure
-        // this argument MUST be named `require` for the WebPack parser
-        require => resolve(require('@jupyterlab/terminal/lib/widget')),
-        (error: any) => {
-          showErrorMessage(error);
-          reject();
-        },
-        'terminal'
-      );
-    });
+    widgetReady = import('@jupyterlab/terminal/lib/widget');
 
     return widgetReady;
   }

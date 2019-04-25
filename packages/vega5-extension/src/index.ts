@@ -188,22 +188,7 @@ namespace Private {
       return vegaReady;
     }
 
-    vegaReady = new Promise((resolve, reject) => {
-      require.ensure(
-        ['vega-embed'],
-        // see https://webpack.js.org/api/module-methods/#require-ensure
-        // this argument MUST be named `require` for the WebPack parser
-        require => {
-          vega = require('vega-embed') as typeof VegaModuleType;
-          resolve(vega);
-        },
-        (error: any) => {
-          console.error(error);
-          reject();
-        },
-        'vega'
-      );
-    });
+    vegaReady = import('vega-embed');
 
     return vegaReady;
   }
