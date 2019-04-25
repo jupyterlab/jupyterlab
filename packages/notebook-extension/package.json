@@ -36,7 +36,7 @@
     "@jupyterlab/cells": "^0.19.1",
     "@jupyterlab/codeeditor": "^0.19.1",
     "@jupyterlab/coreutils": "^2.2.1",
-    "@jupyterlab/filebrowser": "^0.19.3",
+    "@jupyterlab/filebrowser": "^0.19.4",
     "@jupyterlab/launcher": "^0.19.1",
     "@jupyterlab/mainmenu": "^0.8.1",
     "@jupyterlab/notebook": "^0.19.2",

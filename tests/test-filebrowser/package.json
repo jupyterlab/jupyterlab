@@ -19,7 +19,7 @@
     "@jupyterlab/coreutils": "^2.2.1",
     "@jupyterlab/docmanager": "^0.19.1",
     "@jupyterlab/docregistry": "^0.19.1",
-    "@jupyterlab/filebrowser": "^0.19.3",
+    "@jupyterlab/filebrowser": "^0.19.4",
     "@jupyterlab/services": "^3.2.1",
     "@jupyterlab/testutils": "^0.3.1",
     "@phosphor/algorithm": "^1.1.2",

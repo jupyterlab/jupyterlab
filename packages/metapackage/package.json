@@ -52,7 +52,7 @@
     "@jupyterlab/extensionmanager": "^0.19.1",
     "@jupyterlab/extensionmanager-extension": "^0.19.1",
     "@jupyterlab/faq-extension": "^0.19.1",
-    "@jupyterlab/filebrowser": "^0.19.3",
+    "@jupyterlab/filebrowser": "^0.19.4",
     "@jupyterlab/filebrowser-extension": "^0.19.2",
     "@jupyterlab/fileeditor": "^0.19.1",
     "@jupyterlab/fileeditor-extension": "^0.19.1",

@@ -34,7 +34,7 @@
     "@jupyterlab/extensionmanager": "^0.19.1",
     "@jupyterlab/extensionmanager-extension": "^0.19.1",
     "@jupyterlab/faq-extension": "^0.19.1",
-    "@jupyterlab/filebrowser": "^0.19.3",
+    "@jupyterlab/filebrowser": "^0.19.4",
     "@jupyterlab/filebrowser-extension": "^0.19.2",
     "@jupyterlab/fileeditor": "^0.19.1",
     "@jupyterlab/fileeditor-extension": "^0.19.1",
@@ -219,7 +219,7 @@
       "url-parse",
       "xterm"
     ],
-    "version": "0.35.4",
+    "version": "0.35.5",
     "linkedPackages": {
       "@jupyterlab/application": "../packages/application",
       "@jupyterlab/application-extension": "../packages/application-extension",
