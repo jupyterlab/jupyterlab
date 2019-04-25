@@ -12,6 +12,7 @@
     "@jupyterlab/completer": "^1.0.0-alpha.6",
     "@jupyterlab/docmanager": "^1.0.0-alpha.6",
     "@jupyterlab/docregistry": "^1.0.0-alpha.6",
+    "@jupyterlab/documentsearch": "^1.0.0-alpha.7",
     "@jupyterlab/mathjax2": "^1.0.0-alpha.6",
     "@jupyterlab/notebook": "^1.0.0-alpha.7",
     "@jupyterlab/rendermime": "^1.0.0-alpha.6",
