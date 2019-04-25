@@ -321,7 +321,7 @@ export class FileBrowserModel implements IDisposable {
       let element = document.createElement('a');
       document.body.appendChild(element);
       element.setAttribute('href', url);
-      element.setAttribute('download', '');
+      element.setAttribute('target', '_blank');
       element.click();
       document.body.removeChild(element);
       return void 0;
