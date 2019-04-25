@@ -14,7 +14,7 @@
 
 <!-- Describe here any visual or user interaction changes and how they address the issue. -->
 
-<!-- For user interface changes, include before/after screenshots here. -->
+<!-- For visual changes, include before and after screenshots here. -->
 
 ## Backwards-incompatible changes
 
