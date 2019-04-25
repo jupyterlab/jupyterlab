@@ -54,16 +54,18 @@ function activate(
   const { commands } = app;
   const model = new LauncherModel();
 
-  Promise.all([settingRegistry.load(plugin.id), app.restored]).then(
-    ([settings]) => {
+  Promise.all([settingRegistry.load(plugin.id), app.restored])
+    .then(([settings]) => {
       let usageData = settings.get('usage-data').composite || {};
       model.fromJSON(usageData as JSONValue);
       settings.changed.connect(settings => {
         usageData = settings.get('usage-data').composite || {};
         model.fromJSON(usageData as JSONValue);
       });
-    }
-  );
+    })
+    .catch(err => {
+      console.log('error while saving recent usage');
+    });
 
   commands.addCommand(CommandIDs.create, {
     label: 'New Launcher',

@@ -755,7 +755,7 @@ function Card(
         ].toString();
       }
 
-      commands
+      void commands
         .execute(currentCommand, {
           ...item.args,
           kernelName: kernelName,
@@ -770,7 +770,7 @@ function Card(
         })
         .catch(err => {
           launcher.pending = false;
-          showErrorMessage('Launcher Error', err);
+          void showErrorMessage('Launcher Error', err);
         });
     };
     return onclick;
@@ -853,25 +853,22 @@ function Card(
       key={Private.keyProperty.get(item)}
     >
       <div className="jp-LauncherCard-icon">
-        {item.kernelIconUrl &&
-          kernel && (
-            <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
-          )}
-        {!item.kernelIconUrl &&
-          !kernel && (
-            <div
-              className={`${commands.iconClass(
-                item.commands[item.options[0]],
-                args
-              )} jp-Launcher-icon`}
-            />
-          )}
-        {!item.kernelIconUrl &&
-          kernel && (
-            <div className="jp-LauncherCard-noKernelIcon">
-              {label[0].toUpperCase()}
-            </div>
-          )}
+        {item.kernelIconUrl && kernel && (
+          <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
+        )}
+        {!item.kernelIconUrl && !kernel && (
+          <div
+            className={`${commands.iconClass(
+              item.commands[item.options[0]],
+              args
+            )} jp-Launcher-icon`}
+          />
+        )}
+        {!item.kernelIconUrl && kernel && (
+          <div className="jp-LauncherCard-noKernelIcon">
+            {label[0].toUpperCase()}
+          </div>
+        )}
       </div>
       <div className="jp-LauncherCard-label" title={label}>
         {label}

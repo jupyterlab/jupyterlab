@@ -694,7 +694,7 @@
         "signature": "d6a85c169457b787a81c73633f4c6f7d6d6b619ecc51e93033648e9d3067ea74"
       },
       "/users/david/github/jupyterlab/jupyterlab/packages/launcher-extension/src/index.ts": {
-        "version": "1c33b742bf1254212a51ee6d0f034d08b99a2346ff78cd0e3f0e6cc8be3a8bf1",
+        "version": "95e0ce22638328f0688b7df5b07d3a206de6f3cff331afe724bf28ef80609a6b",
         "signature": "948e6c44ad431eeb53a61bd1cf4d58e38d02067d5d68cec34d1bf9339d08e3f6"
       }
     },
