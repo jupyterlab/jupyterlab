@@ -814,6 +814,7 @@ export class DefaultKernel implements Kernel.IKernel {
         this._isReady = true;
         break;
       case 'restarting':
+      case 'autorestarting':
       case 'reconnecting':
       case 'dead':
         this._isReady = false;
@@ -1121,9 +1122,26 @@ export class DefaultKernel implements Kernel.IKernel {
       switch (msg.header.msg_type) {
         case 'status':
           // Updating the status is synchronous, and we call no async user code
-          this._updateStatus(
-            (msg as KernelMessage.IStatusMsg).content.execution_state
-          );
+          let executionState = (msg as KernelMessage.IStatusMsg).content
+            .execution_state;
+          this._updateStatus(executionState);
+          if (executionState === 'restarting') {
+            // After processing for this message is completely done, we want to
+            // handle this restart, so we don't await, but instead schedule the
+            // work as a microtask. We schedule this here so that it comes
+            // before any microtasks scheduled in the signal emission below.
+            void Promise.resolve().then(async () => {
+              // handleRestart changes the status to 'restarting', so we call it
+              // first so that the status won't flip back and forth between
+              // 'restarting' and 'autorestarting'.
+              await this.handleRestart();
+              this._updateStatus('autorestarting');
+              // handleRestart above disconnects the websocket, so reconnect,
+              // which ensures that we come back up in a ready state. This
+              // follows the logic in the restartKernel method.
+              await this.reconnect();
+            });
+          }
           break;
         case 'comm_open':
           await this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);
