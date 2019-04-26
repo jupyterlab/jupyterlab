@@ -5,6 +5,7 @@
 
 .jp-PDFContainer iframe {
   position: absolute;
+  z-index: 0;
   top: 0;
   right: 0;
   width: 100%;
@@ -27,6 +28,7 @@ body.p-mod-override-cursor .jp-PDFContainer {
 body.p-mod-override-cursor .jp-PDFContainer:before {
   content: '';
   position: absolute;
+  z-index: 10;
   top: 0;
   left: 0;
   right: 0;
