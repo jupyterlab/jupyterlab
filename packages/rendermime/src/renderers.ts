@@ -15,6 +15,8 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { toArray } from '@phosphor/algorithm';
 
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+
 import escape from 'lodash.escape';
 
 import { removeMath, replaceMath } from './latex';
@@ -495,6 +497,51 @@ export namespace renderText {
 
     /**
      * The source text to render.
+     */
+    source: string;
+  }
+}
+
+/**
+ * Render a PDF into a host node.
+ *
+ * @params options - The options for rendering.
+ *
+ * @returns A promise which resolves with an Object URL to the PDF in memory.
+ */
+export async function renderPDF(
+  options: renderPDF.IRenderOptions
+): Promise<IDisposable> {
+  // Unpack the options.
+  let { host, source } = options;
+
+  const blob = Private.b64toBlob(source, 'application/pdf');
+  let objectUrl = URL.createObjectURL(blob);
+  host.src = objectUrl;
+  return new DisposableDelegate(() => {
+    try {
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      /* no-op */
+    }
+  });
+}
+
+/**
+ * The namespace for the `renderPDF` function statics.
+ */
+export namespace renderPDF {
+  /**
+   * The options for the `renderPDF` function.
+   */
+  export interface IRenderOptions {
+    /**
+     * The host iframe node for the rendered PDF.
+     */
+    host: HTMLIFrameElement;
+
+    /**
+     * The PDF source.
      */
     source: string;
   }
@@ -1070,5 +1117,40 @@ namespace Private {
       }
     }
     return out.join('');
+  }
+
+  /**
+   * Convert a base64 encoded string to a Blob object.
+   * Modified from a snippet found here:
+   * https://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript
+   *
+   * @param b64Data - The base64 encoded data.
+   *
+   * @param contentType - The mime type of the data.
+   *
+   * @param sliceSize - The size to chunk the data into for processing.
+   *
+   * @returns a Blob for the data.
+   */
+  export function b64toBlob(
+    b64Data: string,
+    contentType: string = '',
+    sliceSize: number = 512
+  ): Blob {
+    const byteCharacters = atob(b64Data);
+    let byteArrays: Uint8Array[] = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      let slice = byteCharacters.slice(offset, offset + sliceSize);
+
+      let byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+      let byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+
+    return new Blob(byteArrays, { type: contentType });
   }
 }

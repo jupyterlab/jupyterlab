@@ -6,6 +6,8 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
+import { IDisposable } from '@phosphor/disposable';
+
 import { Message } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
@@ -386,4 +388,62 @@ export class RenderedJavaScript extends RenderedCommon {
       source: 'JavaScript output is disabled in JupyterLab'
     });
   }
+}
+
+/**
+ * A class for rendering a PDF document.
+ */
+export class RenderedPDF extends RenderedCommon {
+  constructor(options: IRenderMime.IRendererOptions) {
+    super(options);
+    this.addClass('jp-PDFContainer');
+    this._iframe = document.createElement('iframe');
+    this._iframe.className = 'jp-PDFViewer';
+    this.node.appendChild(this._iframe);
+  }
+
+  /**
+   * Render PDF into this widget's node.
+   */
+  async render(model: IRenderMime.IMimeModel): Promise<void> {
+    const source = model.data['application/pdf'] as string;
+    // If there is no data, or if the string has not changed, do nothing.
+    if (
+      !source ||
+      (source.length === this._base64.length && source === this._base64)
+    ) {
+      return Promise.resolve(void 0);
+    }
+    this._base64 = source;
+
+    if (this._disposable) {
+      this._disposable.dispose();
+    }
+    this._disposable = await renderers.renderPDF({
+      host: this._iframe,
+      source
+    });
+
+    return;
+  }
+
+  protected setFragment(fragment: string): void {
+    if (!this._iframe.src) {
+      return;
+    }
+    this._iframe.src = `${this._iframe.src.split('#')[0]}${fragment}`;
+  }
+
+  /**
+   * Dispose of the resources held by the pdf widget.
+   */
+  dispose() {
+    this._disposable.dispose();
+    this._base64 = '';
+    super.dispose();
+  }
+
+  private _disposable: IDisposable | null = null;
+  private _base64 = '';
+  private _iframe: HTMLIFrameElement;
 }

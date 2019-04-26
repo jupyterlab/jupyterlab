@@ -1281,6 +1281,13 @@ export namespace DocumentRegistry {
       extensions: ['.bmp'],
       iconClass: 'jp-MaterialIcon jp-ImageIcon',
       fileFormat: 'base64'
+    },
+    {
+      name: 'PDF',
+      displayName: 'PDF',
+      fileFormat: 'base64',
+      mimeTypes: ['application/pdf'],
+      extensions: ['.pdf']
     }
   ];
 }

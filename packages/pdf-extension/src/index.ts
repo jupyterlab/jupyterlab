@@ -1,163 +1,91 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget } from '@phosphor/widgets';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin,
+  ILayoutRestorer
+} from '@jupyterlab/application';
 
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { IInstanceTracker, InstanceTracker } from '@jupyterlab/apputils';
 
-import '../style/index.css';
+import { MimeDocumentFactory, MimeDocument } from '@jupyterlab/docregistry';
+
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+
+import { Token } from '@phosphor/coreutils';
+
+/**
+ * A class that tracks PDF widgets.
+ */
+export interface IPDFTracker extends IInstanceTracker<MimeDocument> {}
+
+/**
+ * The PDF tracker token.
+ */
+export const IPDFTracker = new Token<IPDFTracker>(
+  '@jupyterlab/pdf-extension:IPDFTracker'
+);
 
 /**
  * The MIME type for PDF.
  */
 export const MIME_TYPE = 'application/pdf';
 
-export const PDF_CLASS = 'jp-PDFViewer';
-
-export const PDF_CONTAINER_CLASS = 'jp-PDFContainer';
-
 /**
- * A class for rendering a PDF document.
+ * The name of the factory that creates PDF widgets.
  */
-export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
-  constructor() {
-    super({ node: Private.createNode() });
-  }
+const FACTORY_NAME = 'PDF';
 
-  /**
-   * Render PDF into this widget's node.
-   */
-  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    let data = model.data[MIME_TYPE] as string;
-    // If there is no data, or if the string has not changed, do nothing.
-    if (
-      !data ||
-      (data.length === this._base64.length && data === this._base64)
-    ) {
-      return Promise.resolve(void 0);
-    }
-    this._base64 = data;
-    const blob = Private.b64toBlob(data, MIME_TYPE);
+const plugin: JupyterFrontEndPlugin<IPDFTracker> = {
+  id: '@jupyterlab/pdf-extension:factory',
+  requires: [IRenderMimeRegistry],
+  optional: [ILayoutRestorer],
+  provides: IPDFTracker,
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    rendermime: IRenderMimeRegistry,
+    restorer: ILayoutRestorer | null
+  ) => {
+    const tracker = new InstanceTracker<MimeDocument>({
+      namespace: 'pdf-widget'
+    });
 
-    let oldUrl = this._objectUrl;
-    this._objectUrl = URL.createObjectURL(blob);
-    if (model.metadata.fragment) {
-      this._objectUrl += model.metadata.fragment;
-    }
-    this.node.querySelector('iframe').setAttribute('src', this._objectUrl);
-
-    // Release reference to any previous object url.
-    if (oldUrl) {
-      try {
-        URL.revokeObjectURL(oldUrl);
-      } catch (error) {
-        /* no-op */
-      }
-    }
-    return Promise.resolve(void 0);
-  }
-
-  /**
-   * Dispose of the resources held by the pdf widget.
-   */
-  dispose() {
-    this._base64 = '';
-    try {
-      URL.revokeObjectURL(this._objectUrl);
-    } catch (error) {
-      /* no-op */
-    }
-    super.dispose();
-  }
-
-  private _base64 = '';
-  private _objectUrl = '';
-}
-
-/**
- * A mime renderer factory for PDF data.
- */
-export const rendererFactory: IRenderMime.IRendererFactory = {
-  safe: false,
-  mimeTypes: [MIME_TYPE],
-  defaultRank: 100,
-  createRenderer: options => new RenderedPDF()
-};
-
-const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
-  {
-    id: '@jupyterlab/pdf-extension:factory',
-    rendererFactory,
-    dataType: 'string',
-    fileTypes: [
-      {
-        name: 'PDF',
-        displayName: 'PDF',
-        fileFormat: 'base64',
-        mimeTypes: [MIME_TYPE],
-        extensions: ['.pdf']
-      }
-    ],
-    documentWidgetFactoryOptions: {
-      name: 'PDF',
+    const factory = new MimeDocumentFactory({
+      renderTimeout: 1000,
+      rendermime,
+      name: FACTORY_NAME,
       modelName: 'base64',
-      primaryFileType: 'PDF',
+      primaryFileType: app.docRegistry.getFileType('PDF'),
       fileTypes: ['PDF'],
       defaultFor: ['PDF']
-    }
-  }
-];
+    });
 
-export default extensions;
+    factory.widgetCreated.connect((sender, widget) => {
+      widget.context.pathChanged.connect(() => {
+        tracker.save(widget);
+      });
+      tracker.add(widget);
+    });
 
-/**
- * A namespace for PDF widget private data.
- */
-namespace Private {
-  /**
-   * Create the node for the PDF widget.
-   */
-  export function createNode(): HTMLElement {
-    let node = document.createElement('div');
-    node.className = PDF_CONTAINER_CLASS;
-    let pdf = document.createElement('iframe');
-    pdf.className = PDF_CLASS;
-    node.appendChild(pdf);
-    return node;
-  }
+    // Add widget factory to document registry.
+    app.docRegistry.addWidgetFactory(factory);
 
-  /**
-   * Convert a base64 encoded string to a Blob object.
-   * Modified from a snippet found here:
-   * https://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript
-   *
-   * @param b64Data - The base64 encoded data.
-   *
-   * @param contentType - The mime type of the data.
-   *
-   * @param sliceSize - The size to chunk the data into for processing.
-   *
-   * @returns a Blob for the data.
-   */
-  export function b64toBlob(
-    b64Data: string,
-    contentType: string = '',
-    sliceSize: number = 512
-  ): Blob {
-    const byteCharacters = atob(b64Data);
-    let byteArrays: Uint8Array[] = [];
-
-    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-      let slice = byteCharacters.slice(offset, offset + sliceSize);
-
-      let byteNumbers = new Array(slice.length);
-      for (let i = 0; i < slice.length; i++) {
-        byteNumbers[i] = slice.charCodeAt(i);
-      }
-      let byteArray = new Uint8Array(byteNumbers);
-      byteArrays.push(byteArray);
+    if (restorer) {
+      // Handle state restoration.
+      restorer.restore(tracker, {
+        command: 'docmanager:open',
+        args: widget => ({
+          path: widget.context.path,
+          factory: FACTORY_NAME
+        }),
+        name: widget => widget.context.path
+      });
     }
 
-    return new Blob(byteArrays, { type: contentType });
+    return tracker;
   }
-}
+};
+
+export default plugin;

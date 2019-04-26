@@ -81,6 +81,16 @@ export const javaScriptRendererFactory: IRenderMime.IRendererFactory = {
 };
 
 /**
+ * A mime renderer factory for PDF data.
+ */
+export const pdfRendererFactory: IRenderMime.IRendererFactory = {
+  safe: false,
+  mimeTypes: ['application/pdf'],
+  defaultRank: 100,
+  createRenderer: options => new widgets.RenderedPDF(options)
+};
+
+/**
  * The standard factories provided by the rendermime package.
  */
 export const standardRendererFactories: ReadonlyArray<
@@ -92,5 +102,6 @@ export const standardRendererFactories: ReadonlyArray<
   svgRendererFactory,
   imageRendererFactory,
   javaScriptRendererFactory,
-  textRendererFactory
+  textRendererFactory,
+  pdfRendererFactory
 ];
