@@ -139,7 +139,7 @@ function activateCsv(
 
   addMenuEntries(mainMenu, tracker);
   if (searchregistry) {
-    searchregistry.registerProvider('csv', CSVSearchProvider);
+    searchregistry.register('csv', CSVSearchProvider);
   }
 }
 
@@ -209,7 +209,7 @@ function activateTsv(
 
   addMenuEntries(mainMenu, tracker);
   if (searchregistry) {
-    searchregistry.registerProvider('tsv', CSVSearchProvider);
+    searchregistry.register('tsv', CSVSearchProvider);
   }
 }
 

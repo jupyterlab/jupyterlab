@@ -6,6 +6,7 @@ import { NotebookSearchProvider } from './providers/notebooksearchprovider';
 
 import { Token } from '@phosphor/coreutils';
 import { Widget } from '@phosphor/widgets';
+import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
 
 /* tslint:disable */
 /**
@@ -22,15 +23,7 @@ export interface ISearchProviderRegistry {
    *
    * @param key - The provider key.
    */
-  registerProvider(key: string, provider: ISearchProviderConstructor): void;
-
-  /**
-   * Remove provider from registry.
-   *
-   * @param key - The provider key.
-   * @returns true if removed, false if key did not exist in map.
-   */
-  deregisterProvider(key: string): boolean;
+  register(key: string, provider: ISearchProviderConstructor): IDisposable;
 
   /**
    * Returns a matching provider for the widget.
@@ -58,18 +51,11 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
    *
    * @param key - The provider key.
    */
-  registerProvider(key: string, provider: ISearchProviderConstructor): void {
+  register(key: string, provider: ISearchProviderConstructor): IDisposable {
     this._customProviders.set(key, provider);
-  }
-
-  /**
-   * Remove provider from registry.
-   *
-   * @param key - The provider key.
-   * @returns true if removed, false if key did not exist in map.
-   */
-  deregisterProvider(key: string): boolean {
-    return this._customProviders.delete(key);
+    return new DisposableDelegate(() => {
+      this._customProviders.delete(key);
+    });
   }
 
   /**
