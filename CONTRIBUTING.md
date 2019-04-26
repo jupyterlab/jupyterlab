@@ -55,7 +55,6 @@ Users without the commit rights to the JupyterLab repository can tag issues with
 labels using the `@meeseeksdev` bot. For example: To apply the label `foo` and
 `bar baz` to an issue, comment `@meeseeksdev tag foo "bar baz"` on the issue.
 
-
 ## Setting Up a Development Environment
 
 You can launch a binder with the latest JupyterLab master to test something (this may take a few minutes to load): [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/)
