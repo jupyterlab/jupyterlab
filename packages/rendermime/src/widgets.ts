@@ -420,7 +420,7 @@ export class RenderedPDF extends RenderedCommon {
    * Render PDF into this widget's node.
    */
   async render(model: IRenderMime.IMimeModel): Promise<void> {
-    await this._ready;
+    await this._ready.promise;
     const source = model.data['application/pdf'] as string;
     // If there is no data, or if the string has not changed, do nothing.
     if (
