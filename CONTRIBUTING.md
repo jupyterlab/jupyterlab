@@ -4,9 +4,9 @@ If you're reading this section, you're probably interested in contributing to
 JupyterLab. Welcome and thanks for your interest in contributing!
 
 Please take a look at the Contributor documentation, familiarize yourself with
-using JupyterLab, and introduce yourself on the mailing list and share
-what area of the project you are interested in working on. Please see also the
-Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
+using JupyterLab, and introduce yourself to the community (on the mailing list
+or discourse) and share what area of the project you are interested in working
+on. Please also see the Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
 
 We have labeled some issues as [good first issue](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) or [help wanted](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
 that we believe are good examples of small, self-contained changes.
@@ -19,11 +19,7 @@ Jupyter project, please report it to
 security reports, you can use [this PGP public
 key](https://jupyter-notebook.readthedocs.io/en/stable/_downloads/ipython_security.asc).
 
-## Tag Issues with Labels
-
-Users without the commit rights to the jupyterlab repository can also tag the issues with labels. For example: To apply the label `foo` and `bar baz` to an issue, comment `@meeseeksdev tag foo "bar baz"` on the issue.
-
-## General Guidelines
+## General Guidelines for Contributing
 
 For general documentation about contributing to Jupyter projects, see the
 [Project Jupyter Contributor Documentation](https://jupyter.readthedocs.io/en/latest/contributor/content-contributor.html) and [Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
@@ -44,6 +40,21 @@ You may also use the prettier npm script (e.g. `npm run prettier` or `yarn prett
 installing a prettier
 extension for your code editor and configuring it to format your code with
 a keyboard shortcut or automatically on save.
+
+## Submitting a Pull Request Contribution
+
+Generally, an issue should be opened describing a piece of proposed work and the
+issues it solves before a pull request is opened. This lets community members
+participate in the design discussion, makes others aware of work being done, and
+sets the stage for a fruitful community interaction. A pull request should
+reference the issue it is addressing.
+
+### Tag Issues with Labels
+
+Users without the commit rights to the JupyterLab repository can tag issues with
+labels using the `@meeseeksdev` bot. For example: To apply the label `foo` and
+`bar baz` to an issue, comment `@meeseeksdev tag foo "bar baz"` on the issue.
+
 
 ## Setting Up a Development Environment
 
