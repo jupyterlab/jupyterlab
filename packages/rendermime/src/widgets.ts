@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -397,15 +397,30 @@ export class RenderedPDF extends RenderedCommon {
   constructor(options: IRenderMime.IRendererOptions) {
     super(options);
     this.addClass('jp-PDFContainer');
-    this._iframe = document.createElement('iframe');
-    this._iframe.className = 'jp-PDFViewer';
-    this.node.appendChild(this._iframe);
+    // We put the object in an iframe, which seems to have a better chance
+    // of retaining its scroll position upon tab focusing, moving around etc.
+    const iframe = document.createElement('iframe');
+    this.node.appendChild(iframe);
+    // The iframe content window is not available until the onload event.
+    iframe.onload = () => {
+      const body = iframe.contentWindow.document.createElement('body');
+      body.style.margin = '0px';
+      iframe.contentWindow.document.body = body;
+      this._object = iframe.contentWindow.document.createElement('object');
+      this._object.type = 'application/pdf';
+      this._object.width = '100%';
+      this._object.height = '100%';
+      this._object.className = 'jp-PDFViewer';
+      body.appendChild(this._object);
+      this._ready.resolve(void 0);
+    };
   }
 
   /**
    * Render PDF into this widget's node.
    */
   async render(model: IRenderMime.IMimeModel): Promise<void> {
+    await this._ready;
     const source = model.data['application/pdf'] as string;
     // If there is no data, or if the string has not changed, do nothing.
     if (
@@ -420,7 +435,7 @@ export class RenderedPDF extends RenderedCommon {
       this._disposable.dispose();
     }
     this._disposable = await renderers.renderPDF({
-      host: this._iframe,
+      host: this._object,
       source
     });
 
@@ -428,10 +443,10 @@ export class RenderedPDF extends RenderedCommon {
   }
 
   protected setFragment(fragment: string): void {
-    if (!this._iframe.src) {
+    if (!this._object.data) {
       return;
     }
-    this._iframe.src = `${this._iframe.src.split('#')[0]}${fragment}`;
+    this._object.data = `${this._object.data.split('#')[0]}${fragment}`;
   }
 
   /**
@@ -445,5 +460,6 @@ export class RenderedPDF extends RenderedCommon {
 
   private _disposable: IDisposable | null = null;
   private _base64 = '';
-  private _iframe: HTMLIFrameElement;
+  private _object: HTMLObjectElement;
+  private _ready = new PromiseDelegate<void>();
 }

@@ -517,7 +517,7 @@ export async function renderPDF(
 
   const blob = Private.b64toBlob(source, 'application/pdf');
   let objectUrl = URL.createObjectURL(blob);
-  host.src = objectUrl;
+  host.data = objectUrl;
   return new DisposableDelegate(() => {
     try {
       URL.revokeObjectURL(objectUrl);
@@ -536,9 +536,9 @@ export namespace renderPDF {
    */
   export interface IRenderOptions {
     /**
-     * The host iframe node for the rendered PDF.
+     * The host object node for the rendered PDF.
      */
-    host: HTMLIFrameElement;
+    host: HTMLObjectElement;
 
     /**
      * The PDF source.
