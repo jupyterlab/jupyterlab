@@ -29,10 +29,14 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     let data = model.data[MIME_TYPE] as string;
-    // If there is no data, do nothing.
-    if (!data) {
+    // If there is no data, or if the string has not changed, do nothing.
+    if (
+      !data ||
+      (data.length === this._base64.length && data === this._base64)
+    ) {
       return Promise.resolve(void 0);
     }
+    this._base64 = data;
     const blob = Private.b64toBlob(data, MIME_TYPE);
 
     let oldUrl = this._objectUrl;
@@ -40,7 +44,7 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
     if (model.metadata.fragment) {
       this._objectUrl += model.metadata.fragment;
     }
-    this.node.querySelector('embed').setAttribute('src', this._objectUrl);
+    this.node.querySelector('iframe').setAttribute('src', this._objectUrl);
 
     // Release reference to any previous object url.
     if (oldUrl) {
@@ -57,6 +61,7 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
    * Dispose of the resources held by the pdf widget.
    */
   dispose() {
+    this._base64 = '';
     try {
       URL.revokeObjectURL(this._objectUrl);
     } catch (error) {
@@ -65,6 +70,7 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
     super.dispose();
   }
 
+  private _base64 = '';
   private _objectUrl = '';
 }
 
@@ -114,9 +120,8 @@ namespace Private {
   export function createNode(): HTMLElement {
     let node = document.createElement('div');
     node.className = PDF_CONTAINER_CLASS;
-    let pdf = document.createElement('embed');
+    let pdf = document.createElement('iframe');
     pdf.className = PDF_CLASS;
-    pdf.setAttribute('type', MIME_TYPE);
     node.appendChild(pdf);
     return node;
   }
