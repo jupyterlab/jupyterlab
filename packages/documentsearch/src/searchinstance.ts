@@ -67,9 +67,11 @@ export class SearchInstance implements IDisposable {
    */
   focusInput(): void {
     this._displayState.forceFocus = true;
+    this._displayState.searchInputFocused = true;
 
     // Trigger a rerender without resetting the forceFocus.
     this._displayUpdateSignal.emit(this._displayState);
+    this._displayState.forceFocus = false;
   }
 
   /**
