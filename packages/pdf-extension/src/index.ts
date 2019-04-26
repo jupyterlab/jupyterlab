@@ -1,77 +1,103 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget } from '@phosphor/widgets';
-
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
+import { PromiseDelegate } from '@phosphor/coreutils';
+
+import { DisposableDelegate } from '@phosphor/disposable';
+
+import { Widget } from '@phosphor/widgets';
 
 import '../style/index.css';
 
 /**
  * The MIME type for PDF.
  */
-export const MIME_TYPE = 'application/pdf';
-
-export const PDF_CLASS = 'jp-PDFViewer';
-
-export const PDF_CONTAINER_CLASS = 'jp-PDFContainer';
+const MIME_TYPE = 'application/pdf';
 
 /**
  * A class for rendering a PDF document.
  */
 export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
   constructor() {
-    super({ node: Private.createNode() });
+    super();
+    this.addClass('jp-PDFContainer');
+    // We put the object in an iframe, which seems to have a better chance
+    // of retaining its scroll position upon tab focusing, moving around etc.
+    const iframe = document.createElement('iframe');
+    this.node.appendChild(iframe);
+    // The iframe content window is not available until the onload event.
+    iframe.onload = () => {
+      const body = iframe.contentWindow.document.createElement('body');
+      body.style.margin = '0px';
+      iframe.contentWindow.document.body = body;
+      this._object = iframe.contentWindow.document.createElement('object');
+      this._object.type = MIME_TYPE;
+      this._object.width = '100%';
+      this._object.height = '100%';
+      body.appendChild(this._object);
+      this._ready.resolve(void 0);
+    };
   }
 
   /**
    * Render PDF into this widget's node.
    */
-  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+  async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    await this._ready.promise;
     let data = model.data[MIME_TYPE] as string;
-    // If there is no data, or if the string has not changed, do nothing.
     if (
       !data ||
       (data.length === this._base64.length && data === this._base64)
     ) {
+      // If there is no data, or if the string has not changed, we do not
+      // need to re-parse the data and rerender. We do, however, check
+      // for a fragment if the user wants to scroll the output.
+      if (model.metadata.fragment && this._object.data) {
+        const url = this._object.data;
+        this._object.data = `${url.split('#')[0]}${model.metadata.fragment}`;
+      }
       return Promise.resolve(void 0);
     }
     this._base64 = data;
     const blob = Private.b64toBlob(data, MIME_TYPE);
 
-    let oldUrl = this._objectUrl;
-    this._objectUrl = URL.createObjectURL(blob);
-    if (model.metadata.fragment) {
-      this._objectUrl += model.metadata.fragment;
-    }
-    this.node.querySelector('iframe').setAttribute('src', this._objectUrl);
-
     // Release reference to any previous object url.
-    if (oldUrl) {
+    if (this._disposable) {
+      this._disposable.dispose();
+    }
+    let objectUrl = URL.createObjectURL(blob);
+    if (model.metadata.fragment) {
+      objectUrl += model.metadata.fragment;
+    }
+    this._object.data = objectUrl;
+
+    // Set the disposable release the object URL.
+    this._disposable = new DisposableDelegate(() => {
       try {
-        URL.revokeObjectURL(oldUrl);
+        URL.revokeObjectURL(objectUrl);
       } catch (error) {
         /* no-op */
       }
-    }
-    return Promise.resolve(void 0);
+    });
+    return;
   }
 
   /**
    * Dispose of the resources held by the pdf widget.
    */
   dispose() {
-    this._base64 = '';
-    try {
-      URL.revokeObjectURL(this._objectUrl);
-    } catch (error) {
-      /* no-op */
+    if (this._disposable) {
+      this._disposable.dispose();
     }
     super.dispose();
   }
 
   private _base64 = '';
-  private _objectUrl = '';
+  private _disposable: DisposableDelegate | null = null;
+  private _object: HTMLObjectElement;
+  private _ready = new PromiseDelegate<void>();
 }
 
 /**
@@ -114,18 +140,6 @@ export default extensions;
  * A namespace for PDF widget private data.
  */
 namespace Private {
-  /**
-   * Create the node for the PDF widget.
-   */
-  export function createNode(): HTMLElement {
-    let node = document.createElement('div');
-    node.className = PDF_CONTAINER_CLASS;
-    let pdf = document.createElement('iframe');
-    pdf.className = PDF_CLASS;
-    node.appendChild(pdf);
-    return node;
-  }
-
   /**
    * Convert a base64 encoded string to a Blob object.
    * Modified from a snippet found here:
