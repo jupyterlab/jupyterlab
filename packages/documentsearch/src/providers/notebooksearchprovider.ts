@@ -18,6 +18,19 @@ interface ICellSearchPair {
 
 export class NotebookSearchProvider implements ISearchProvider {
   /**
+   * Get an initial query value if applicable so that it can be entered
+   * into the search box as an initial query
+   *
+   * @returns Initial value used to populate the search box.
+   */
+  getInitialQuery(searchTarget: NotebookPanel): any {
+    const activeCell = searchTarget.content.activeCell;
+    const selection = (activeCell.editor as CodeMirrorEditor).doc.getSelection();
+    // if there are newlines, just return empty string
+    return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
+  }
+
+  /**
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
    *

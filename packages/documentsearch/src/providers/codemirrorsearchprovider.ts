@@ -45,6 +45,21 @@ type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
 export class CodeMirrorSearchProvider implements ISearchProvider {
   /**
+   * Get an initial query value if applicable so that it can be entered
+   * into the search box as an initial query
+   *
+   * @returns Initial value used to populate the search box.
+   */
+  getInitialQuery(searchTarget: Widget): any {
+    const target = searchTarget as MainAreaWidget;
+    const content = target.content as FileEditor;
+    const cm = content.editor as CodeMirrorEditor;
+    const selection = cm.doc.getSelection();
+    // if there are newlines, just return empty string
+    return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
+  }
+
+  /**
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
    *
@@ -63,8 +78,8 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
 
     // Extract the codemirror object from the editor widget. Each of these casts
     // is justified by the canSearchOn call above.
-    let target = searchTarget as MainAreaWidget;
-    let content = target.content as FileEditor;
+    const target = searchTarget as MainAreaWidget;
+    const content = target.content as FileEditor;
     this._cm = content.editor as CodeMirrorEditor;
     return this._startQuery(query);
   }

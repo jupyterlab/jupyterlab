@@ -243,6 +243,12 @@ class SearchOverlay extends React.Component<
     this.state = props.overlayState;
   }
 
+  componentDidMount() {
+    if (this.state.searchText) {
+      this._executeSearch(true, this.state.searchText);
+    }
+  }
+
   private _onSearchChange(event: React.ChangeEvent) {
     const searchText = (event.target as HTMLInputElement).value;
     this.setState({ searchText: searchText });
