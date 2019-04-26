@@ -80,7 +80,7 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
 export const rendererFactory: IRenderMime.IRendererFactory = {
   safe: false,
   mimeTypes: [MIME_TYPE],
-  defaultRank: 75,
+  defaultRank: 100,
   createRenderer: options => new RenderedPDF()
 };
 
