@@ -545,11 +545,3 @@ h6:hover .jp-InternalAnchorLink {
 .jp-RenderedHTMLCommon > *:last-child {
   margin-bottom: 0.5em;
 }
-
-/*-----------------------------------------------------------------------------
-| RenderedPDF
-|----------------------------------------------------------------------------*/
-
-.jp-RenderedPDF {
-  font-size: var(--jp-ui-font-size1);
-}
