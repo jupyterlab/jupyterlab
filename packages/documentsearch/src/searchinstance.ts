@@ -17,6 +17,9 @@ export class SearchInstance implements IDisposable {
     this._widget = widget;
     this._activeProvider = searchProvider;
 
+    const initialQuery = this._activeProvider.getInitialQuery(this._widget);
+    this._displayState.searchText = initialQuery || '';
+
     this._searchWidget = createSearchOverlay({
       widgetChanged: this._displayUpdateSignal,
       overlayState: this._displayState,
