@@ -3,7 +3,8 @@
 
 import {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  ILabShell
 } from '@jupyterlab/application';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
@@ -16,14 +17,37 @@ import {
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
+const SEARCHABLE_CLASS = 'jp-mod-searchable';
+
+const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/documentsearch:labShellWidgetListener',
+  requires: [ILabShell, ISearchProviderRegistry],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    labShell: ILabShell,
+    registry: ISearchProviderRegistry
+  ) => {
+    labShell.activeChanged.connect((_, args) => {
+      const oldWidget = args.oldValue;
+      const newWidget = args.newValue;
+      if (newWidget && registry.getProviderForWidget(newWidget) !== undefined) {
+        newWidget.addClass(SEARCHABLE_CLASS);
+      }
+      if (oldWidget) {
+        oldWidget.removeClass(SEARCHABLE_CLASS);
+      }
+    });
+  }
+};
+
 /**
  * Initialization data for the document-search extension.
  */
 const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   id: '@jupyterlab/documentsearch:plugin',
   provides: ISearchProviderRegistry,
-  requires: [ICommandPalette],
-  optional: [IMainMenu],
+  optional: [ICommandPalette, IMainMenu],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
@@ -126,10 +150,11 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     });
 
     // Add the command to the palette.
-    palette.addItem({ command: startCommand, category: 'Main Area' });
-    palette.addItem({ command: nextCommand, category: 'Main Area' });
-    palette.addItem({ command: prevCommand, category: 'Main Area' });
-
+    if (palette) {
+      palette.addItem({ command: startCommand, category: 'Main Area' });
+      palette.addItem({ command: nextCommand, category: 'Main Area' });
+      palette.addItem({ command: prevCommand, category: 'Main Area' });
+    }
     // Add main menu notebook menu.
     if (mainMenu) {
       mainMenu.editMenu.addGroup(
@@ -147,4 +172,4 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   }
 };
 
-export default extension;
+export default [extension, labShellWidgetListener];

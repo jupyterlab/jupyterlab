@@ -35,6 +35,7 @@ export class SearchInstance implements IDisposable {
       this.dispose();
     });
     this._searchWidget.disposed.connect(() => {
+      this._widget.activate();
       this.dispose();
     });
 
