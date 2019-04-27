@@ -509,43 +509,43 @@ class _AppHandler(object):
         logger = self.logger
         info = self.info
 
-        logger.info('JupyterLab v%s' % info['version'])
+        print('JupyterLab v%s' % info['version'])
 
         if info['extensions']:
             info['compat_errors'] = self._get_extension_compat()
-            logger.info('Known labextensions:')
+            print('Known labextensions:')
             self._list_extensions(info, 'app')
             self._list_extensions(info, 'sys')
         else:
-            logger.info('No installed extensions')
+            print('No installed extensions')
 
         local = info['local_extensions']
         if local:
-            logger.info('\n   local extensions:')
+            print('\n   local extensions:')
             for name in sorted(local):
-                logger.info('        %s: %s' % (name, local[name]))
+                print('        %s: %s' % (name, local[name]))
 
         linked_packages = info['linked_packages']
         if linked_packages:
-            logger.info('\n   linked packages:')
+            print('\n   linked packages:')
             for key in sorted(linked_packages):
                 source = linked_packages[key]['source']
-                logger.info('        %s: %s' % (key, source))
+                print('        %s: %s' % (key, source))
 
         uninstalled_core = info['uninstalled_core']
         if uninstalled_core:
-            logger.info('\nUninstalled core extensions:')
-            [logger.info('    %s' % item) for item in sorted(uninstalled_core)]
+            print('\nUninstalled core extensions:')
+            [print('    %s' % item) for item in sorted(uninstalled_core)]
 
         disabled_core = info['disabled_core']
         if disabled_core:
-            logger.info('\nDisabled core extensions:')
-            [logger.info('    %s' % item) for item in sorted(disabled_core)]
+            print('\nDisabled core extensions:')
+            [print('    %s' % item) for item in sorted(disabled_core)]
 
         messages = self.build_check(fast=True)
         if messages:
-            logger.info('\nBuild recommended, please run `jupyter lab build`:')
-            [logger.info('    %s' % item) for item in messages]
+            print('\nBuild recommended, please run `jupyter lab build`:')
+            [print('    %s' % item) for item in messages]
 
     def build_check(self, fast=False):
         """Determine whether JupyterLab should be built.
