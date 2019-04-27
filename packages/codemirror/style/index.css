@@ -249,3 +249,8 @@ pre.CodeMirror-line {
   background-position: right;
   background-repeat: no-repeat;
 }
+
+.cm-s-jupyter .CodeMirror-activeline-background,
+.cm-s-jupyter .CodeMirror-gutter {
+  background-color: var(--jp-layout-color2);
+}
