@@ -332,9 +332,7 @@ function activateShareFile(
         return;
       }
       const path = encodeURI(widget.selectedItems().next().path);
-      const tree = PageConfig.getTreeUrl({ workspace: resolver.name });
-
-      Clipboard.copyToSystem(URLExt.join(tree, path));
+      Clipboard.copyToSystem(URLExt.join(PageConfig.getTreeUrl(), path));
     },
     isVisible: () =>
       tracker.currentWidget &&
