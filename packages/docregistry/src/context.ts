@@ -695,7 +695,7 @@ export class Context<T extends DocumentRegistry.IModel>
         `${tDisk}`
     );
     let body =
-      `The file has changed on disk since the last time it ` +
+      `"${this.path}" has changed on disk since the last time it ` +
       `was opened or saved. ` +
       `Do you want to overwrite the file on disk with the version ` +
       ` open here, or load the version on disk (revert)?`;
