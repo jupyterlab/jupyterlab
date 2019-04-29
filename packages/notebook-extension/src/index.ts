@@ -618,9 +618,10 @@ function activateNotebookHandler(
     });
     factory.editorConfig = editorConfig = { code, markdown, raw };
     factory.notebookConfig = notebookConfig = {
-      scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
-      kernelShutdown: settings.get('kernelShutdown').composite as boolean
+      scrollPastEnd: settings.get('scrollPastEnd').composite as boolean
     };
+    factory.shutdownOnClose = settings.get('kernelShutdown')
+      .composite as boolean;
   }
 
   /**
@@ -630,6 +631,12 @@ function activateNotebookHandler(
     tracker.forEach(widget => {
       widget.content.editorConfig = editorConfig;
       widget.content.notebookConfig = notebookConfig;
+      // Update kernel shutdown behavior
+      const kernelPreference = widget.context.session.kernelPreference;
+      widget.context.session.kernelPreference = {
+        ...kernelPreference,
+        shutdownOnClose: factory.shutdownOnClose
+      };
     });
   }
 
