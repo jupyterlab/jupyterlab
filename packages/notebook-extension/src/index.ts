@@ -618,7 +618,8 @@ function activateNotebookHandler(
     });
     factory.editorConfig = editorConfig = { code, markdown, raw };
     factory.notebookConfig = notebookConfig = {
-      scrollPastEnd: settings.get('scrollPastEnd').composite as boolean
+      scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
+      kernelShutdown: settings.get('kernelShutdown').composite as boolean
     };
   }
 

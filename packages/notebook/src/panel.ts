@@ -9,7 +9,7 @@ import { Message } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { IClientSession, showErrorMessage } from '@jupyterlab/apputils';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
@@ -121,6 +121,11 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Dispose of the resources used by the widget.
    */
   dispose(): void {
+    if (this.content.notebookConfig.kernelShutdown) {
+      this.context.session.shutdown().catch(reason => {
+        showErrorMessage('Kernel not shutdown', reason);
+      });
+    }
     this.content.dispose();
     super.dispose();
   }

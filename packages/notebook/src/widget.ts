@@ -730,12 +730,17 @@ export namespace StaticNotebook {
      * Enable scrolling past the last cell
      */
     scrollPastEnd: boolean;
+    /**
+     * Enable shutdown kernel when closing the notebook
+     */
+    kernelShutdown: boolean;
   }
   /**
    * Default configuration options for notebooks.
    */
   export const defaultNotebookConfig: INotebookConfig = {
-    scrollPastEnd: true
+    scrollPastEnd: true,
+    kernelShutdown: false
   };
 
   /**
@@ -942,6 +947,7 @@ export class Notebook extends StaticNotebook {
     if (this.isDisposed) {
       return;
     }
+    
     this._activeCell = null;
     super.dispose();
   }
