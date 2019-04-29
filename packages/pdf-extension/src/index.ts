@@ -95,7 +95,7 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
    */
   protected onBeforeHide(): void {
     // Dispose of any URL fragment before hiding the widget
-    // so that it is not rememberd upon show. Only Firefox
+    // so that it is not remembered upon show. Only Firefox
     // seems to have a problem with this.
     if (Private.IS_FIREFOX) {
       this._object.data = this._object.data.split('#')[0];
