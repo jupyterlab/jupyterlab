@@ -285,8 +285,8 @@
       }
     },
     "kernelShutdown": {
-      "title": "Shutdown kernel",
-      "description": "Whether to shutdown or not the kernel when closing a notebook.",
+      "title": "Shut down kernel",
+      "description": "Whether to shut down or not the kernel when closing a notebook.",
       "type": "boolean",
       "default": false
     },
