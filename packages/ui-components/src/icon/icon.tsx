@@ -29,6 +29,8 @@ export function SvgIcon(
       offset: { x: number; y: number };
     }
 ): React.ReactElement<SvgIcon.IProps> {
+  // const { SVG, ...rest } = props;
+  // return <SVG {...rest} />;
   const { SVG, className, offset, ...rest } = props;
   return <SVG className={classes(className, style(icon(offset)))} {...rest} />;
 }
