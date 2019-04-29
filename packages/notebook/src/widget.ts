@@ -942,7 +942,6 @@ export class Notebook extends StaticNotebook {
     if (this.isDisposed) {
       return;
     }
-
     this._activeCell = null;
     super.dispose();
   }
