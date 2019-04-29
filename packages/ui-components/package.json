@@ -13,10 +13,8 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "files": [
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js",
-    "style/*.css"
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
   ],
   "sideEffects": [
     "style/**/*"
@@ -38,7 +36,8 @@
     "@blueprintjs/core": "^3.9.0",
     "@blueprintjs/icons": "^3.3.0",
     "@blueprintjs/select": "^3.3.0",
-    "react": "~16.8.4"
+    "react": "~16.8.4",
+    "typestyle": "^2.0.1"
   },
   "devDependencies": {
     "@types/react": "~16.8.18",
