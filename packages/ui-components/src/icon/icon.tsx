@@ -6,7 +6,9 @@ import React, { ComponentType, HTMLAttributes } from 'react';
 import { classes, style } from 'typestyle/lib';
 
 import icon from '../style/icon';
+
 import KernelSvg from '../../style/icons/kernel-icon.svg';
+import TerminalSvg from '../../style/icons/terminal-icon.svg';
 
 /**
  * A namespace for SvgIcon statics.
@@ -19,26 +21,34 @@ export namespace SvgIcon {
     /**
      * The inline svg
      */
-    SVG: ComponentType<HTMLAttributes<SVGElement>>;
+    Svg: ComponentType<HTMLAttributes<SVGElement>>;
   }
 }
 
-export function SvgIcon(
-  props: SvgIcon.IProps &
-    React.HTMLAttributes<SVGElement> & {
-      offset: { x: number; y: number };
-    }
-): React.ReactElement<SvgIcon.IProps> {
-  // const { SVG, ...rest } = props;
-  // return <SVG {...rest} />;
-  const { SVG, className, offset, ...rest } = props;
-  return <SVG className={classes(className, style(icon(offset)))} {...rest} />;
+type IconProps = React.HTMLAttributes<SVGElement> & {
+  offset: { x: number; y: number };
+};
+type IconElem = React.ReactElement<SvgIcon.IProps>;
+
+export function SvgIcon(props: SvgIcon.IProps & IconProps): IconElem {
+  const { Svg, className, offset, ...rest } = props;
+  return <Svg className={classes(className, style(icon(offset)))} {...rest} />;
 }
 
-export function KernelIcon(
-  props: React.HTMLAttributes<SVGElement> & {
-    offset: { x: number; y: number };
-  }
-): React.ReactElement<SvgIcon.IProps> {
-  return <SvgIcon SVG={KernelSvg} {...props} />;
+export function IconFactory(
+  props: SvgIcon.IProps
+): (props: IconProps) => IconElem {
+  const { Svg } = props;
+  return (props: IconProps) => <SvgIcon Svg={Svg} {...props} />;
 }
+
+// export function KernelIcon(props: IconProps): IconElem {
+//   return <SvgIcon Svg={KernelSvg} {...props} />;
+// }
+
+// export function TerminalIcon(props: IconProps): IconElem {
+//   return <SvgIcon Svg={TerminalSvg} {...props} />;
+// }
+
+export const KernelIcon = IconFactory({ Svg: KernelSvg });
+export const TerminalIcon = IconFactory({ Svg: TerminalSvg });

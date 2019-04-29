@@ -60,7 +60,7 @@ export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
         className={combineClassNames(props.className, 'jp-InputGroup')}
         rightElement={
           <div className="jp-InputGroupAction">
-            <BPIcon className="jp-Icon" icon={props.rightIcon} />
+            <Icon className="jp-Icon" icon={props.rightIcon} />
           </div>
         }
       />
@@ -73,6 +73,13 @@ export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
     />
   );
 };
+
+export const Icon = (props: IIconProps) => (
+  <BPIcon
+    {...props}
+    className={combineClassNames(props.className, 'jp-Icon')}
+  />
+);
 
 export const Collapse = (props: ICollapseProps & CommonProps<any>) => (
   <BPCollapse {...props} />
