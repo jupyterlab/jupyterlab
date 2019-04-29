@@ -42,6 +42,7 @@ import { Message, MessageLoop } from '@phosphor/messaging';
 import { Widget } from '@phosphor/widgets';
 
 import { FileBrowserModel } from './model';
+import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
  * The class name added to DirListing widget.
@@ -177,6 +178,7 @@ const FACTORY_MIME = 'application/vnd.phosphor.widget-factory';
  * A widget which hosts a file list area.
  */
 export class DirListing extends Widget {
+  onItemOpened: Signal<DirListing, Contents.IModel>;
   /**
    * Construct a new file browser directory listing widget.
    *
@@ -188,9 +190,18 @@ export class DirListing extends Widget {
     });
     this.addClass(DIR_LISTING_CLASS);
     this._model = options.model;
-    this._model.fileChanged.connect(this._onFileChanged, this);
-    this._model.refreshed.connect(this._onModelRefreshed, this);
-    this._model.pathChanged.connect(this._onPathChanged, this);
+    this._model.fileChanged.connect(
+      this._onFileChanged,
+      this
+    );
+    this._model.refreshed.connect(
+      this._onModelRefreshed,
+      this
+    );
+    this._model.pathChanged.connect(
+      this._onPathChanged,
+      this
+    );
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
     this._manager = this._model.manager;
@@ -198,7 +209,12 @@ export class DirListing extends Widget {
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
-    this._manager.activateRequested.connect(this._onActivateRequested, this);
+    this._manager.activateRequested.connect(
+      this._onActivateRequested,
+      this
+    );
+
+    this.onItemOpened = new Signal<DirListing, Contents.IModel>(this);
   }
 
   /**
@@ -897,6 +913,17 @@ export class DirListing extends Widget {
     this._startDrag(data.index, event.clientX, event.clientY);
   }
 
+  private emitOpenEvent(item: Contents.IModel): void {
+    this.onItemOpened.emit(item);
+    if (item.type === 'directory') {
+      this._model
+        .cd(item.name)
+        .catch(error => showErrorMessage('Open directory', error));
+    } else {
+      let path = item.path;
+      this._manager.openOrReveal(path);
+    }
+  }
   /**
    * Handle the `'keydown'` event for the widget.
    */
@@ -918,17 +945,8 @@ export class DirListing extends Widget {
           return;
         }
 
-        let model = this._model;
         let item = this._sortedItems[i];
-        if (item.type === 'directory') {
-          model
-            .cd(item.name)
-            .catch(error => showErrorMessage('Open directory', error));
-        } else {
-          let path = item.path;
-          this._manager.openOrReveal(path);
-        }
-
+        this.emitOpenEvent(item);
         break;
       case 38: // Up arrow
         this.selectPrevious(event.shiftKey);
@@ -989,16 +1007,8 @@ export class DirListing extends Widget {
       return;
     }
 
-    let model = this._model;
     let item = this._sortedItems[i];
-    if (item.type === 'directory') {
-      model
-        .cd(item.name)
-        .catch(error => showErrorMessage('Open directory', error));
-    } else {
-      let path = item.path;
-      this._manager.openOrReveal(path);
-    }
+    this.emitOpenEvent(item);
   }
 
   /**
