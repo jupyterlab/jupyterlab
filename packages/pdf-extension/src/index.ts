@@ -58,6 +58,12 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
         const url = this._object.data;
         this._object.data = `${url.split('#')[0]}${model.metadata.fragment}`;
       }
+      // For some opaque reason, Firefox seems to loose its scroll position
+      // upon unhiding a PDF. But triggering a refresh of the URL makes it
+      // find it again. No idea what the reason for this is.
+      if (Private.IS_FIREFOX) {
+        this._object.data = this._object.data;
+      }
       return Promise.resolve(void 0);
     }
     this._base64 = data;
@@ -82,6 +88,18 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
       }
     });
     return;
+  }
+
+  /**
+   * Handle a `before-hide` message.
+   */
+  protected onBeforeHide(): void {
+    // Dispose of any URL fragment before hiding the widget
+    // so that it is not remembered upon show. Only Firefox
+    // seems to have a problem with this.
+    if (Private.IS_FIREFOX) {
+      this._object.data = this._object.data.split('#')[0];
+    }
   }
 
   /**
@@ -140,6 +158,14 @@ export default extensions;
  * A namespace for PDF widget private data.
  */
 namespace Private {
+  /**
+   * A flag for determining whether the user is using Firefox.
+   * There are some different PDF viewer behaviors on Firefox,
+   * and we try to address them with this. User agent string parsing
+   * is *not* reliable, so this should be considered a best-effort test.
+   */
+  export const IS_FIREFOX: boolean = /Firefox/.test(navigator.userAgent);
+
   /**
    * Convert a base64 encoded string to a Blob object.
    * Modified from a snippet found here:
