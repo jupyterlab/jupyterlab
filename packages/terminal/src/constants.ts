@@ -83,6 +83,11 @@ export namespace ITerminal {
     scrollback: number | null;
 
     /**
+     * Whether to shut down the session when closing a terminal or not.
+     */
+    shutdownOnClose: boolean;
+
+    /**
      * Whether to blink the cursor.  Can only be set at startup.
      */
     cursorBlink: boolean;
@@ -102,6 +107,7 @@ export namespace ITerminal {
     fontSize: 13,
     lineHeight: 1.0,
     scrollback: 1000,
+    shutdownOnClose: false,
     cursorBlink: true,
     initialCommand: ''
   };
