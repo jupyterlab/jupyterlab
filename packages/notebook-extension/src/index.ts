@@ -74,6 +74,7 @@ import { ReadonlyJSONObject, JSONValue } from '@phosphor/coreutils';
 import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Panel, Menu } from '@phosphor/widgets';
+import { CommandRegistry } from '@phosphor/commands';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -1604,21 +1605,14 @@ function addCommands(
     label: 'New Console for Notebook',
     execute: args => {
       const current = getCurrent({ ...args, activate: false });
-      const widget = tracker.currentWidget;
 
-      if (!current || !widget) {
+      if (!current) {
         return;
       }
 
-      const options: ReadonlyJSONObject = {
-        path: widget.context.path,
-        preferredLanguage: widget.context.model.defaultKernelLanguage,
-        activate: args['activate'],
-        ref: current.id,
-        insertMode: 'split-bottom'
-      };
-
-      return commands.execute('console:create', options);
+      return Private.createConsole(commands, current, args[
+        'activate'
+      ] as boolean);
     },
     isEnabled
   });
@@ -2012,16 +2006,7 @@ function populateMenus(
   mainMenu.fileMenu.consoleCreators.add({
     tracker,
     name: 'Notebook',
-    createConsole: current => {
-      const options: ReadonlyJSONObject = {
-        path: current.context.path,
-        preferredLanguage: current.context.model.defaultKernelLanguage,
-        activate: true,
-        ref: current.id,
-        insertMode: 'split-bottom'
-      };
-      return commands.execute('console:create', options);
-    }
+    createConsole: current => Private.createConsole(commands, current, true)
   } as IFileMenu.IConsoleCreator<NotebookPanel>);
 
   // Add some commands to the application view menu.
@@ -2164,6 +2149,29 @@ function populateMenus(
  * A namespace for module private functionality.
  */
 namespace Private {
+  /**
+   * Create a console connected with a notebook kernel
+   *
+   * @param commands Commands registry
+   * @param widget Notebook panel
+   * @param activate Should the console be activated
+   */
+  export function createConsole(
+    commands: CommandRegistry,
+    widget: NotebookPanel,
+    activate?: boolean
+  ): Promise<void> {
+    const options = {
+      path: widget.context.path,
+      preferredLanguage: widget.context.model.defaultKernelLanguage,
+      activate: activate,
+      ref: widget.id,
+      insertMode: 'split-bottom'
+    };
+
+    return commands.execute('console:create', options);
+  }
+
   /**
    * A widget hosting a cloned output area.
    */
