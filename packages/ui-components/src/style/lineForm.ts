@@ -35,6 +35,29 @@ export const baseLineForm: NestedCSSProperties = {
   right: '0px'
 };
 
+export const lineFormButtonDiv = style(baseLineForm, {
+  top: '4px',
+  right: '8px',
+  height: '24px',
+  padding: '0px 12px',
+  width: '12px'
+});
+
+export const lineFormButtonIcon = style(baseLineForm, {
+  backgroundColor: 'var(--jp-brand-color1)',
+  height: '100%',
+  width: '100%',
+  boxSizing: 'border-box',
+  padding: '4px 6px'
+});
+
+export const lineFormButton = style(baseLineForm, {
+  backgroundColor: 'transparent',
+  height: '100%',
+  width: '100%',
+  boxSizing: 'border-box'
+});
+
 export const lineFormWrapper = style({
   overflow: 'hidden',
   padding: '0px 8px',

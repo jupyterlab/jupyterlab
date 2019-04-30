@@ -7,8 +7,12 @@ import { classes, style } from 'typestyle/lib';
 
 import icon from '../style/icon';
 
+// icon svg imports
+
 import KernelSvg from '../../style/icons/kernel-icon.svg';
 import TerminalSvg from '../../style/icons/terminal-icon.svg';
+
+// functions for setting up icons
 
 /**
  * A namespace for SvgIcon statics.
@@ -42,13 +46,7 @@ export function IconFactory(
   return (props: IconProps) => <SvgIcon Svg={Svg} {...props} />;
 }
 
-// export function KernelIcon(props: IconProps): IconElem {
-//   return <SvgIcon Svg={KernelSvg} {...props} />;
-// }
-
-// export function TerminalIcon(props: IconProps): IconElem {
-//   return <SvgIcon Svg={TerminalSvg} {...props} />;
-// }
+// functions that produce the actual icon React elements
 
 export const KernelIcon = IconFactory({ Svg: KernelSvg });
 export const TerminalIcon = IconFactory({ Svg: TerminalSvg });
