@@ -19,6 +19,8 @@ import {
   IHTMLViewerTracker
 } from '@jupyterlab/htmlviewer';
 
+import { HTML5Icon } from '@jupyterlab/ui-components';
+
 /**
  * The CSS class for an HTML5 icon.
  */
@@ -58,7 +60,8 @@ function activateHTMLViewer(
     displayName: 'HTML File',
     extensions: ['.html'],
     mimeTypes: ['text/html'],
-    iconClass: CSS_ICON_CLASS
+    iconClass: CSS_ICON_CLASS,
+    icon: HTML5Icon
   };
   app.docRegistry.addFileType(ft);
 
@@ -100,6 +103,7 @@ function activateHTMLViewer(
 
     widget.title.iconClass = ft.iconClass;
     widget.title.iconLabel = ft.iconLabel;
+    widget.node.appendChild(HTML5Icon);
   });
 
   // Add a command to trust the active HTML document,

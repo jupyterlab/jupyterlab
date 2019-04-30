@@ -1103,6 +1103,11 @@ export namespace DocumentRegistry {
     readonly iconLabel?: string;
 
     /**
+     * A parsed inline SVG icon.
+     */
+    readonly icon?: Document;
+
+    /**
      * The content type of the new file.
      */
     readonly contentType: Contents.ContentType;
@@ -1122,6 +1127,7 @@ export namespace DocumentRegistry {
     mimeTypes: [],
     iconClass: 'jp-MaterialIcon jp-FileIcon',
     iconLabel: '',
+    icon: null,
     contentType: 'file',
     fileFormat: 'text'
   };

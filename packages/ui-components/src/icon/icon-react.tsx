@@ -9,19 +9,23 @@ import icon from '../style/icon';
 
 // icon svg imports
 
-import KernelSvg from '../../style/icons/kernel-icon.svg';
-import _LineFormSvg from '../../style/icons/line-form.svg';
-import NotTrustedSvg from '../../style/icons/not-trusted-icon.svg';
-import TerminalSvg from '../../style/icons/terminal-icon.svg';
-import TrustedSvg from '../../style/icons/trusted-icon.svg';
+import HTML5SvgX from '../../style/icons/html5-icon.svg';
+import KernelSvgX from '../../style/icons/kernel-icon.svg';
+import NotTrustedSvgX from '../../style/icons/not-trusted-icon.svg';
+import TerminalSvgX from '../../style/icons/terminal-icon.svg';
+import TrustedSvgX from '../../style/icons/trusted-icon.svg';
+
+import _LineFormSvgX from '../../style/icons/line-form.svg';
 
 // functions that produce/export React icons
 
-export const KernelIcon = IconFactory({ Svg: KernelSvg });
-export const LineFormSvg = _LineFormSvg;
-export const NotTrustedIcon = IconFactory({ Svg: NotTrustedSvg });
-export const TerminalIcon = IconFactory({ Svg: TerminalSvg });
-export const TrustedIcon = IconFactory({ Svg: TrustedSvg });
+export const HTML5IconX = IconFactory({ Svg: HTML5SvgX });
+export const KernelIconX = IconFactory({ Svg: KernelSvgX });
+export const NotTrustedIconX = IconFactory({ Svg: NotTrustedSvgX });
+export const TerminalIconX = IconFactory({ Svg: TerminalSvgX });
+export const TrustedIconX = IconFactory({ Svg: TrustedSvgX });
+
+export const LineFormSvgX = _LineFormSvgX;
 
 // functions for setting up icons
 
