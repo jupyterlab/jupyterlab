@@ -10,6 +10,7 @@ import icon from '../style/icon';
 // icon svg imports
 
 import KernelSvg from '../../style/icons/kernel-icon.svg';
+import _LineFormSvg from '../../style/icons/line-form.svg';
 import TerminalSvg from '../../style/icons/terminal-icon.svg';
 
 // functions for setting up icons
@@ -49,4 +50,5 @@ export function IconFactory(
 // functions that produce the actual icon React elements
 
 export const KernelIcon = IconFactory({ Svg: KernelSvg });
+export const LineFormSvg = _LineFormSvg;
 export const TerminalIcon = IconFactory({ Svg: TerminalSvg });

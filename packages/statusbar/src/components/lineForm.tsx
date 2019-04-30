@@ -9,8 +9,6 @@ import {
   lineFormButton
 } from '../style/lineForm';
 
-import LineFormSvg from '../../style/icons/line-form.svg';
-
 /**
  * A namespace for LineFormButtonItem statics.
  */
@@ -36,7 +34,7 @@ export namespace LineFormButtonItem {
   }
 }
 
-export function GenericButton(
+export function LineFormButtonItem(
   props: LineFormButtonItem.IProps &
     React.HTMLAttributes<SVGElement> &
     React.HTMLAttributes<HTMLInputElement>
@@ -48,11 +46,4 @@ export function GenericButton(
       <input type={type} className={lineFormButton} value={value} />
     </div>
   );
-}
-
-export function LineFormButton(
-  props: { type: string; value: string } & React.HTMLAttributes<SVGElement> &
-    React.HTMLAttributes<HTMLInputElement>
-): React.ReactElement<LineFormButtonItem.IProps> {
-  return <GenericButton SVG={LineFormSvg} {...props} />;
 }
