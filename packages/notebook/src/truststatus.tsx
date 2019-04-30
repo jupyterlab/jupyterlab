@@ -6,12 +6,9 @@ import { INotebookModel, Notebook } from '.';
 
 import { Cell } from '@jupyterlab/cells';
 
-import { SVGIconItem } from '@jupyterlab/statusbar';
+import { NotTrustedIcon, TrustedIcon } from '@jupyterlab/ui-components';
 
 import { toArray } from '@phosphor/algorithm';
-
-import NotTrustedIcon from '../style/not-trusted-icon.svg';
-import TrustedIcon from '../style/trusted-icon.svg';
 
 /**
  * Determine the notebook trust status message.
@@ -48,9 +45,9 @@ function NotebookTrustComponent(
   props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> {
   if (props.allCellsTrusted) {
-    return <SVGIconItem SVG={TrustedIcon} offset={{ x: 0, y: 2 }} />;
+    return <TrustedIcon offset={{ x: 0, y: 2 }} />;
   } else {
-    return <SVGIconItem SVG={NotTrustedIcon} offset={{ x: 0, y: 2 }} />;
+    return <NotTrustedIcon offset={{ x: 0, y: 2 }} />;
   }
 }
 

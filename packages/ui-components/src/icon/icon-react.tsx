@@ -11,7 +11,17 @@ import icon from '../style/icon';
 
 import KernelSvg from '../../style/icons/kernel-icon.svg';
 import _LineFormSvg from '../../style/icons/line-form.svg';
+import NotTrustedSvg from '../../style/icons/not-trusted-icon.svg';
 import TerminalSvg from '../../style/icons/terminal-icon.svg';
+import TrustedSvg from '../../style/icons/trusted-icon.svg';
+
+// functions that produce/export React icons
+
+export const KernelIcon = IconFactory({ Svg: KernelSvg });
+export const LineFormSvg = _LineFormSvg;
+export const NotTrustedIcon = IconFactory({ Svg: NotTrustedSvg });
+export const TerminalIcon = IconFactory({ Svg: TerminalSvg });
+export const TrustedIcon = IconFactory({ Svg: TrustedSvg });
 
 // functions for setting up icons
 
@@ -46,9 +56,3 @@ export function IconFactory(
   const { Svg } = props;
   return (props: IconProps) => <SvgIcon Svg={Svg} {...props} />;
 }
-
-// functions that produce the actual icon React elements
-
-export const KernelIcon = IconFactory({ Svg: KernelSvg });
-export const LineFormSvg = _LineFormSvg;
-export const TerminalIcon = IconFactory({ Svg: TerminalSvg });
