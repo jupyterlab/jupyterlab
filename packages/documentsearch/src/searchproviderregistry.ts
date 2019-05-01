@@ -23,6 +23,7 @@ export interface ISearchProviderRegistry {
    * Add a provider to the registry.
    *
    * @param key - The provider key.
+   * @returns A disposable delegate that, when disposed, deregisters the given search provider
    */
   register(key: string, provider: ISearchProviderConstructor): IDisposable;
 
@@ -57,6 +58,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
    * Add a provider to the registry.
    *
    * @param key - The provider key.
+   * @returns A disposable delegate that, when disposed, deregisters the given search provider
    */
   register(key: string, provider: ISearchProviderConstructor): IDisposable {
     this._customProviders.set(key, provider);
@@ -80,6 +82,10 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
     );
   }
 
+  /**
+   * Signal that emits when a new search provider has been registered
+   * or removed.
+   */
   get changed(): ISignal<this, void> {
     return this._changed;
   }
