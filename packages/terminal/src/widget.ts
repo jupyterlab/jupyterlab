@@ -107,6 +107,8 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     this._options[option] = value;
 
     switch (option) {
+      case 'shutdownOnClose': // Do not transmit to XTerm
+        break;
       case 'theme':
         this._term.setOption(
           'theme',
@@ -126,6 +128,13 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Dispose of the resources held by the terminal widget.
    */
   dispose(): void {
+    if (this._session) {
+      if (this.getOption('shutdownOnClose')) {
+        this._session.shutdown().catch(reason => {
+          console.error(`Terminal not shut down: ${reason}`);
+        });
+      }
+    }
     this._session = null;
     this._term.dispose();
     super.dispose();
