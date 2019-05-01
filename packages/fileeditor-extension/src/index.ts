@@ -42,7 +42,7 @@ import {
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject, ReadonlyJSONObject } from '@phosphor/coreutils';
 
 import { Menu } from '@phosphor/widgets';
 
@@ -400,6 +400,26 @@ function activate(
     isToggled: () => config.autoClosingBrackets
   });
 
+  async function createConsole(
+    widget: IDocumentWidget<FileEditor>,
+    args?: ReadonlyJSONObject
+  ): Promise<void> {
+    const options = args || {};
+    const console = await commands.execute('console:create', {
+      activate: options['activate'],
+      name: widget.context.contentsModel.name,
+      path: widget.context.path,
+      preferredLanguage: widget.context.model.defaultKernelLanguage,
+      ref: widget.id,
+      insertMode: 'split-bottom'
+    });
+
+    widget.context.pathChanged.connect((sender, value) => {
+      console.session.setPath(value);
+      console.session.setName(widget.context.contentsModel.name);
+    });
+  }
+
   commands.addCommand(CommandIDs.createConsole, {
     execute: args => {
       const widget = tracker.currentWidget;
@@ -408,21 +428,7 @@ function activate(
         return;
       }
 
-      return commands
-        .execute('console:create', {
-          activate: args['activate'],
-          name: widget.context.contentsModel.name,
-          path: widget.context.path,
-          preferredLanguage: widget.context.model.defaultKernelLanguage,
-          ref: widget.id,
-          insertMode: 'split-bottom'
-        })
-        .then(console => {
-          widget.context.pathChanged.connect((sender, value) => {
-            console.session.setPath(value);
-            console.session.setName(widget.context.contentsModel.name);
-          });
-        });
+      return createConsole(widget, args);
     },
     isEnabled,
     label: 'Create Console for Editor'
@@ -722,13 +728,7 @@ function activate(
     menu.fileMenu.consoleCreators.add({
       tracker,
       name: 'Editor',
-      createConsole: current => {
-        const options = {
-          path: current.context.path,
-          preferredLanguage: current.context.model.defaultKernelLanguage
-        };
-        return commands.execute('console:create', options);
-      }
+      createConsole
     } as IFileMenu.IConsoleCreator<IDocumentWidget<FileEditor>>);
 
     // Add a code runner to the Run menu.
