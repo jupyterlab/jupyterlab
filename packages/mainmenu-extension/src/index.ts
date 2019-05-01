@@ -352,7 +352,7 @@ export function createFileMenu(
     caption: 'Shut down JupyterLab',
     execute: () => {
       return showDialog({
-        title: 'Shut down confirmation',
+        title: 'Shutdown confirmation',
         body: 'Please confirm you want to shut down JupyterLab.',
         buttons: [
           Dialog.cancelButton(),
