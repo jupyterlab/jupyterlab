@@ -796,6 +796,7 @@ export class CodeConsole extends Widget {
         });
     } else if (this.session.status === 'restarting') {
       this.addBanner();
+      this._handleInfo(this.session.kernel.info);
     }
   }
 
