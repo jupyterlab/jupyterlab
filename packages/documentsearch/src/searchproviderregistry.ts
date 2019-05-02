@@ -6,6 +6,8 @@ import { NotebookSearchProvider } from './providers/notebooksearchprovider';
 
 import { Token } from '@phosphor/coreutils';
 import { Widget } from '@phosphor/widgets';
+import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
+import { ISignal, Signal } from '@phosphor/signaling';
 
 /* tslint:disable */
 /**
@@ -21,16 +23,9 @@ export interface ISearchProviderRegistry {
    * Add a provider to the registry.
    *
    * @param key - The provider key.
+   * @returns A disposable delegate that, when disposed, deregisters the given search provider
    */
-  registerProvider(key: string, provider: ISearchProviderConstructor): void;
-
-  /**
-   * Remove provider from registry.
-   *
-   * @param key - The provider key.
-   * @returns true if removed, false if key did not exist in map.
-   */
-  deregisterProvider(key: string): boolean;
+  register(key: string, provider: ISearchProviderConstructor): IDisposable;
 
   /**
    * Returns a matching provider for the widget.
@@ -39,6 +34,12 @@ export interface ISearchProviderRegistry {
    * @returns the search provider, or undefined if none exists.
    */
   getProviderForWidget(widget: any): ISearchProvider | undefined;
+
+  /**
+   * Signal that emits when a new search provider has been registered
+   * or removed.
+   */
+  changed: ISignal<ISearchProviderRegistry, void>;
 }
 
 export class SearchProviderRegistry implements ISearchProviderRegistry {
@@ -57,19 +58,15 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
    * Add a provider to the registry.
    *
    * @param key - The provider key.
+   * @returns A disposable delegate that, when disposed, deregisters the given search provider
    */
-  registerProvider(key: string, provider: ISearchProviderConstructor): void {
+  register(key: string, provider: ISearchProviderConstructor): IDisposable {
     this._customProviders.set(key, provider);
-  }
-
-  /**
-   * Remove provider from registry.
-   *
-   * @param key - The provider key.
-   * @returns true if removed, false if key did not exist in map.
-   */
-  deregisterProvider(key: string): boolean {
-    return this._customProviders.delete(key);
+    this._changed.emit();
+    return new DisposableDelegate(() => {
+      this._customProviders.delete(key);
+      this._changed.emit();
+    });
   }
 
   /**
@@ -83,6 +80,14 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
       this._findMatchingProvider(this._customProviders, widget) ||
       this._findMatchingProvider(this._defaultProviders, widget)
     );
+  }
+
+  /**
+   * Signal that emits when a new search provider has been registered
+   * or removed.
+   */
+  get changed(): ISignal<this, void> {
+    return this._changed;
   }
 
   private _registerDefaultProviders(
@@ -106,6 +111,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
     return undefined;
   }
 
+  private _changed = new Signal<this, void>(this);
   private _defaultProviders: Private.ProviderMap = new Map<
     string,
     ISearchProviderConstructor

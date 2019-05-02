@@ -16,6 +16,7 @@ import {
 } from '@jupyterlab/documentsearch';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
+import { Widget } from '@phosphor/widgets';
 
 const SEARCHABLE_CLASS = 'jp-mod-searchable';
 
@@ -28,15 +29,37 @@ const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
     labShell: ILabShell,
     registry: ISearchProviderRegistry
   ) => {
+    // If a given widget is searchable, apply the searchable class.
+    // If it's not searchable, remove the class.
+    const transformWidgetSearchability = (widget: Widget) => {
+      if (!widget) {
+        return;
+      }
+      const providerForWidget = registry.getProviderForWidget(widget);
+      if (providerForWidget) {
+        widget.addClass(SEARCHABLE_CLASS);
+      }
+      if (!providerForWidget) {
+        widget.removeClass(SEARCHABLE_CLASS);
+      }
+    };
+
+    // Update searchability of the active widget when the registry
+    // changes, in case a provider for the current widget was added
+    // or removed
+    registry.changed.connect(() =>
+      transformWidgetSearchability(labShell.activeWidget)
+    );
+
+    // Apply the searchable class only to the active widget if it is actually
+    // searchable. Remove the searchable class from a widget when it's
+    // no longer active.
     labShell.activeChanged.connect((_, args) => {
       const oldWidget = args.oldValue;
-      const newWidget = args.newValue;
-      if (newWidget && registry.getProviderForWidget(newWidget) !== undefined) {
-        newWidget.addClass(SEARCHABLE_CLASS);
-      }
       if (oldWidget) {
         oldWidget.removeClass(SEARCHABLE_CLASS);
       }
+      transformWidgetSearchability(args.newValue);
     });
   }
 };
