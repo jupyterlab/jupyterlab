@@ -211,7 +211,6 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
         command: CommandIDs.logout,
         category: 'Main Area'
       });
-
     }
 
     palette.addItem({
@@ -511,23 +510,23 @@ export function createKernelMenu(app: JupyterFrontEnd, menu: KernelMenu): void {
   });
 
   commands.addCommand(CommandIDs.shutdownKernel, {
-    label: 'Shutdown Kernel',
+    label: 'Shut Down Kernel',
     isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'shutdownKernel'),
     execute: Private.delegateExecute(app, menu.kernelUsers, 'shutdownKernel')
   });
 
   commands.addCommand(CommandIDs.shutdownAllKernels, {
-    label: 'Shutdown All Kernels…',
+    label: 'Shut Down All Kernels…',
     isEnabled: () => {
       return app.serviceManager.sessions.running().next() !== undefined;
     },
     execute: () => {
       return showDialog({
-        title: 'Shutdown All?',
+        title: 'Shut Down All?',
         body: 'Shut down all kernels?',
         buttons: [
           Dialog.cancelButton(),
-          Dialog.warnButton({ label: 'SHUTDOWN' })
+          Dialog.warnButton({ label: 'SHUT DOWN ALL' })
         ]
       }).then(result => {
         if (result.button.accept) {

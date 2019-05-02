@@ -509,7 +509,7 @@ async function activateConsole(
     name: 'Console',
     closeAndCleanup: (current: ConsolePanel) => {
       return showDialog({
-        title: 'Shut Down the console?',
+        title: 'Shut down the console?',
         body: `Are you sure you want to close "${current.title.label}"?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {

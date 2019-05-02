@@ -173,7 +173,7 @@ function Item<M>(props: SessionProps<M> & { model: M }) {
         className={`${SHUTDOWN_BUTTON_CLASS} jp-mod-styled`}
         onClick={() => props.shutdown(model)}
       >
-        SHUTDOWN
+        SHUT DOWN
       </button>
     </li>
   );
@@ -221,7 +221,7 @@ function Section<M>(props: SessionProps<M>) {
       title: `Shut Down All ${props.name} Sessions?`,
       buttons: [
         Dialog.cancelButton(),
-        Dialog.warnButton({ label: 'SHUT DOWN' })
+        Dialog.warnButton({ label: 'SHUT DOWN ALL' })
       ]
     }).then(result => {
       if (result.button.accept) {
