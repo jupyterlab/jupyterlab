@@ -207,6 +207,11 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
         command: CommandIDs.shutdown,
         category: 'Main Area'
       });
+      palette.addItem({
+        command: CommandIDs.logout,
+        category: 'Main Area'
+      });
+
     }
 
     palette.addItem({
