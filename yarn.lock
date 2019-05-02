@@ -11216,9 +11216,10 @@ vega-embed@^4.0.0:
     vega-themes "^2.3.0"
     vega-tooltip "^0.17.0"
 
-vega-encode@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/vega-encode/-/vega-encode-4.2.0.tgz#53c8c885f782562dfe99baf68d69ae7a9fb86d39"
+vega-encode@^4.2.2:
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/vega-encode/-/vega-encode-4.2.2.tgz#8995766766837f6c438cfc4fb9735d29ca92d207"
+  integrity sha512-3f/c8muUod75w5ieClKGrwtFgLPbfPQBkUat40Bi4FYj9eQ42uYbeecUso4h4D7Z9Vmksclp06ESpVLtv66tag==
   dependencies:
     d3-array "^2.0.3"
     d3-format "^1.3.2"
@@ -11263,14 +11264,15 @@ vega-functions@^5.2.0:
     vega-statistics "^1.3.0"
     vega-util "^1.9.0"
 
-vega-geo@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/vega-geo/-/vega-geo-4.0.1.tgz#ddc88c480d14041499938788b96debdea664c1dd"
+vega-geo@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/vega-geo/-/vega-geo-4.0.2.tgz#78b74b393165eb0c0d07b3bd6110afd48aba5461"
+  integrity sha512-WCc7xckvw9cZS+FZvObY9VXQQwOzFnMkYKjZXQkYnz1tE82WbLa9gFqkteBq2o1pVL5cXnS61x5behzMvLDKMA==
   dependencies:
     d3-array "^2.0.3"
     d3-contour "^1.3.2"
     d3-geo "^1.11.3"
-    vega-dataflow "^5.1.0"
+    vega-dataflow "^5.1.1"
     vega-projection "^1.2.1"
     vega-util "^1.8.0"
 
@@ -11282,9 +11284,10 @@ vega-hierarchy@^4.0.1:
     vega-dataflow "^5.1.0"
     vega-util "^1.8.0"
 
-vega-lite@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-3.0.0.tgz#1993085be1517cfd2fa35860731f821518cb4eda"
+vega-lite@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-3.2.1.tgz#d9aa3edbfd0886cedebe606f070bbf5c33998ba7"
+  integrity sha512-Q8ZWodSo5Q3ovLrtqHt9nR7ooRnN9rJzT74JKDPcyGTwqV6kpqFApQxyHYfIj4s4CAZs4pGdpBQaa2M4pKVeyw==
   dependencies:
     "@types/clone" "~0.1.30"
     "@types/fast-json-stable-stringify" "^2.0.0"
@@ -11309,9 +11312,10 @@ vega-loader@^4.0.0:
     topojson-client "^3.0.0"
     vega-util "^1.8.0"
 
-vega-parser@^5.6.1:
-  version "5.6.1"
-  resolved "https://registry.yarnpkg.com/vega-parser/-/vega-parser-5.6.1.tgz#856dd51c4f49489f1636bb5f6d86c03e5d75a61b"
+vega-parser@^5.6.2:
+  version "5.6.2"
+  resolved "https://registry.yarnpkg.com/vega-parser/-/vega-parser-5.6.2.tgz#d51b9fba56feb9302e17b9c8ec7490dda017ac29"
+  integrity sha512-3FIYzHEoPL0lU/cN9WLEvWz89/VFiVvHVaqDAb9manDl/xHEBQbjz62za5K3YsMC1iHh+aSItcHqj8fGFtj2ag==
   dependencies:
     vega-dataflow "^5.2.1"
     vega-event-selector "^2.0.0"
@@ -11380,16 +11384,17 @@ vega-tooltip@^0.17.0:
   dependencies:
     vega-util "^1.10.0"
 
-vega-transforms@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/vega-transforms/-/vega-transforms-4.0.2.tgz#67969776bc9c62b1c7ef5c42a53af351e17da73a"
+vega-transforms@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/vega-transforms/-/vega-transforms-4.0.3.tgz#3a0aaa946b937f39110322722f0e2823bbb64fff"
+  integrity sha512-SRBtj2bVuI4SlkSiflxaMtiFl9ZyEJGy6CHPt20snV5JnDgBUOthcnPNbVCCdRN4mxz864UM/k1Johs9oI6gNg==
   dependencies:
     d3-array "^2.0.3"
     vega-dataflow "^5.2.1"
     vega-statistics "^1.3.1"
     vega-util "^1.10.0"
 
-vega-typings@*, vega-typings@0.6.2:
+vega-typings@0.6.2, vega-typings@^0.6.2:
   version "0.6.2"
   resolved "https://registry.yarnpkg.com/vega-typings/-/vega-typings-0.6.2.tgz#2951bf7a4208a5aca3aa8e1316c4df81e759b02b"
   dependencies:
@@ -11399,9 +11404,10 @@ vega-util@^1.10.0, vega-util@^1.8.0, vega-util@^1.9.0, vega-util@~1.10.0:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.10.0.tgz#edfd8c04f1d269f903976c228820153902c270d4"
 
-vega-view-transforms@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/vega-view-transforms/-/vega-view-transforms-4.3.0.tgz#980def550ef75b33fededb81e261456cff7e2c8a"
+vega-view-transforms@^4.3.1:
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/vega-view-transforms/-/vega-view-transforms-4.3.1.tgz#2c9529b9c5efc15221fea43d6440e28031149353"
+  integrity sha512-myhG7Y3oCvAKpu9hjdlFoiJmAZAQ0SChDZ0fmR01eBjP9XMw2D9E3+VJKpdWzfJfyfKW0c+505FZBQ9QW4YQgg==
   dependencies:
     vega-dataflow "^5.1.1"
     vega-scenegraph "^4.1.0"
@@ -11427,43 +11433,45 @@ vega-voronoi@^4.0.1:
     vega-dataflow "^5.1.0"
     vega-util "^1.8.0"
 
-vega-wordcloud@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/vega-wordcloud/-/vega-wordcloud-4.0.1.tgz#2302e2c5c8ab080b2a3a70555fc31273ea7373be"
+vega-wordcloud@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/vega-wordcloud/-/vega-wordcloud-4.0.2.tgz#6e6f711e83195f764e1b0ace80f98091af94a3a6"
+  integrity sha512-nV9bRKjRGcmcQV5wXvOvWes4T5937t3RF+Rm1d03YVAzZpOcVKk9uBuVSeFYBLX2XcDBVe4HK54qDoOTFftHMw==
   dependencies:
     vega-canvas "^1.2.0"
-    vega-dataflow "^5.1.0"
+    vega-dataflow "^5.1.1"
     vega-scale "^4.0.0"
     vega-statistics "^1.2.5"
     vega-util "^1.8.0"
 
-vega@^5.3.1:
-  version "5.3.1"
-  resolved "https://registry.yarnpkg.com/vega/-/vega-5.3.1.tgz#62d2b795d5a38c8153713b59814b24356fd5a2bb"
+vega@^5.3.5:
+  version "5.3.5"
+  resolved "https://registry.yarnpkg.com/vega/-/vega-5.3.5.tgz#7cae2458589187cad8f716e0d345283ffed0df1b"
+  integrity sha512-AOGZJz7+eWFahs//mIh2n+7ArmCveNPgEjEHNEI1IiDlVeEGmvQDT3y2cM0QM+bGHvSSYxZK6Y8dBcQpLvJgUQ==
   dependencies:
     vega-crossfilter "^4.0.1"
     vega-dataflow "^5.2.1"
-    vega-encode "^4.2.0"
+    vega-encode "^4.2.2"
     vega-event-selector "^2.0.0"
     vega-expression "^2.6.0"
     vega-force "^4.0.1"
     vega-functions "^5.2.0"
-    vega-geo "^4.0.1"
+    vega-geo "^4.0.2"
     vega-hierarchy "^4.0.1"
     vega-loader "^4.0.0"
-    vega-parser "^5.6.1"
+    vega-parser "^5.6.2"
     vega-projection "^1.2.1"
     vega-runtime "^5.0.1"
     vega-scale "^4.1.1"
     vega-scenegraph "^4.1.0"
     vega-statistics "^1.3.1"
-    vega-transforms "^4.0.2"
-    vega-typings "*"
+    vega-transforms "^4.0.3"
+    vega-typings "^0.6.2"
     vega-util "^1.10.0"
     vega-view "^5.2.1"
-    vega-view-transforms "^4.3.0"
+    vega-view-transforms "^4.3.1"
     vega-voronoi "^4.0.1"
-    vega-wordcloud "^4.0.1"
+    vega-wordcloud "^4.0.2"
 
 verror@1.10.0:
   version "1.10.0"
