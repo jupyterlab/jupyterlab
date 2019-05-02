@@ -194,7 +194,7 @@ function createApp(manager: ServiceManager.IManager): void {
     }
   });
   commands.addCommand('file-shutdown-kernel', {
-    label: 'Shutdown Kernel',
+    label: 'Shut Down Kernel',
     icon: 'fa fa-stop-circle-o',
     execute: () => {
       return fbWidget.shutdownKernels();
