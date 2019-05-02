@@ -12,7 +12,9 @@ import { ICommandPalette } from '@jupyterlab/apputils';
 import {
   ISearchProviderRegistry,
   SearchInstance,
-  SearchProviderRegistry
+  SearchProviderRegistry,
+  CodeMirrorSearchProvider,
+  NotebookSearchProvider
 } from '@jupyterlab/documentsearch';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -79,8 +81,10 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   ) => {
     // Create registry, retrieve all default providers
     const registry: SearchProviderRegistry = new SearchProviderRegistry();
-    // TODO: Should register the default providers, with an application-specific
-    // enabler.
+
+    // Register default implementations of the Notebook and CodeMirror search providers
+    registry.register('jp-notebookSearchProvider', NotebookSearchProvider);
+    registry.register('jp-codeMirrorSearchProvider', CodeMirrorSearchProvider);
 
     const activeSearches = new Map<string, SearchInstance>();
 
