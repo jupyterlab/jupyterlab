@@ -91,6 +91,13 @@ def get_app_dir():
 
 
 def dedupe_yarn(path, logger=None):
+    """ `yarn-deduplicate` with the `fewer` strategy to minimize total
+        packages installed in a given staging directory
+
+        This means a extension (or dependency) _could_ cause a downgrade of an
+        version expected at publication time, but core should aggressively set
+        pins above, for example, known-bad versions
+    """
     had_dupes = Process(
         ['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
         cwd=path, logger=logger
