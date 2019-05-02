@@ -370,7 +370,7 @@ export class ClientSession implements IClientSession {
     if (this._session) {
       if (this.kernelPreference.shutdownOnClose) {
         this._session.shutdown().catch(reason => {
-          console.error(`Kernel not shutdown ${reason}`);
+          console.error(`Kernel not shut down ${reason}`);
         });
       }
       this._session = null;

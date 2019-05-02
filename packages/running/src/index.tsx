@@ -218,8 +218,11 @@ function List<M>(props: SessionProps<M>) {
 function Section<M>(props: SessionProps<M>) {
   function onShutdown() {
     void showDialog({
-      title: `Shutdown All ${props.name} Sessions?`,
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })]
+      title: `Shut Down All ${props.name} Sessions?`,
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({ label: 'SHUT DOWN' })
+      ]
     }).then(result => {
       if (result.button.accept) {
         props.manager.shutdownAll();
@@ -233,7 +236,7 @@ function Section<M>(props: SessionProps<M>) {
           <header className={SECTION_HEADER_CLASS}>
             <h2>{props.name} Sessions</h2>
             <ToolbarButtonComponent
-              tooltip={`Shutdown All ${props.name} Sessions…`}
+              tooltip={`Shut Down All ${props.name} Sessions…`}
               iconClassName="jp-CloseIcon"
               onClick={onShutdown}
             />

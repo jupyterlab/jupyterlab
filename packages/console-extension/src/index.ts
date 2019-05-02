@@ -428,14 +428,14 @@ async function activateConsole(
   });
 
   commands.addCommand(CommandIDs.closeAndShutdown, {
-    label: 'Close and Shutdown…',
+    label: 'Close and Shut Down…',
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
         return;
       }
       return showDialog({
-        title: 'Shutdown the console?',
+        title: 'Shut down the console?',
         body: `Are you sure you want to close "${current.title.label}"?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
@@ -509,7 +509,7 @@ async function activateConsole(
     name: 'Console',
     closeAndCleanup: (current: ConsolePanel) => {
       return showDialog({
-        title: 'Shutdown the console?',
+        title: 'Shut Down the console?',
         body: `Are you sure you want to close "${current.title.label}"?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {

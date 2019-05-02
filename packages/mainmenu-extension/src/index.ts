@@ -348,7 +348,7 @@ export function createFileMenu(
   });
 
   commands.addCommand(CommandIDs.shutdown, {
-    label: 'Shutdown',
+    label: 'Shut Down',
     caption: 'Shut down JupyterLab',
     execute: () => {
       return showDialog({
@@ -392,7 +392,7 @@ export function createFileMenu(
   });
 
   commands.addCommand(CommandIDs.logout, {
-    label: 'Logout',
+    label: 'Log Out',
     caption: 'Log out of JupyterLab',
     execute: () => {
       router.navigate('/logout', { hard: true });

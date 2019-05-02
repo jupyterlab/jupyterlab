@@ -625,7 +625,7 @@ function addCommands(
       }
     },
     iconClass: 'jp-MaterialIcon jp-StopIcon',
-    label: 'Shutdown Kernel'
+    label: 'Shut Down Kernel'
   });
 
   commands.addCommand(CommandIDs.toggleBrowser, {
