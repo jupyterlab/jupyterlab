@@ -191,17 +191,27 @@ module.exports = [
         {
           // in css files, svg is loaded as a url formatted string
           test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-          issuer: { test: /\.css?$/ },
+          issuer: { test: /\.css$/ },
           use: {
             loader: 'svg-url-loader',
             options: { encoding: 'none', limit: 10000 }
           }
         },
+        // {
+        //   // in react files, svg is loaded as a react component
+        //   test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+        //   issuer: { test: /\.jsx$/ },
+        //   use: 'svg-react-loader'
+        // }
         {
-          // in react files, svg is loaded as a react component
+          // in ts and tsx files (both of which compile to js),
+          // svg is loaded as a url formatted string
           test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-          issuer: { test: /\.jsx?$/ },
-          use: 'svg-react-loader'
+          issuer: { test: /\.js$/ },
+          use: {
+            loader: 'raw-loader'
+            // options: { encoding: 'none', limit: 10000 }
+          }
         }
       ]
     },

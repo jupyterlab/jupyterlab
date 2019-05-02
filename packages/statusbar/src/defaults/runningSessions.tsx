@@ -13,7 +13,7 @@ import {
   SessionManager
 } from '@jupyterlab/services';
 
-import { KernelIconX, TerminalIconX } from '@jupyterlab/ui-components';
+import { IconX } from '@jupyterlab/ui-components';
 
 import { GroupItem, interactiveItem, TextItem } from '..';
 
@@ -36,11 +36,11 @@ function RunningSessionsComponent(
     <GroupItem spacing={HALF_SPACING} onClick={props.handleClick}>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
-        <TerminalIconX offset={{ x: 1, y: 3 }} />
+        <IconX name={'terminal'} offset={{ x: 1, y: 3 }} />
       </GroupItem>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.kernels} />
-        <KernelIconX offset={{ x: 0, y: 2 }} />
+        <IconX name={'kernel'} offset={{ x: 0, y: 2 }} />
       </GroupItem>
     </GroupItem>
   );

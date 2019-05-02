@@ -30,24 +30,35 @@
   stroke: var(--jp-ui-font-color3);
 }
 
-.jp-icon-accent0 {
+.jp-icon-fill-accent0 {
   fill: var(--jp-layout-color0);
+}
+.jp-icon-fill-accent1 {
+  fill: var(--jp-layout-color1);
+}
+.jp-icon-fill-accent2 {
+  fill: var(--jp-layout-color2);
+}
+.jp-icon-fill-accent3 {
+  fill: var(--jp-layout-color3);
+}
+.jp-icon-fill-accent4 {
+  fill: var(--jp-layout-color4);
+}
+
+.jp-icon-stroke-accent0 {
   stroke: var(--jp-layout-color0);
 }
-.jp-icon-accent1 {
-  fill: var(--jp-layout-color1);
+.jp-icon-stroke-accent1 {
   stroke: var(--jp-layout-color1);
 }
-.jp-icon-accent2 {
-  fill: var(--jp-layout-color2);
+.jp-icon-stroke-accent2 {
   stroke: var(--jp-layout-color2);
 }
-.jp-icon-accent3 {
-  fill: var(--jp-layout-color3);
+.jp-icon-stroke-accent3 {
   stroke: var(--jp-layout-color3);
 }
-.jp-icon-accent4 {
-  fill: var(--jp-layout-color4);
+.jp-icon-stroke-accent4 {
   stroke: var(--jp-layout-color4);
 }
 

@@ -1103,9 +1103,9 @@ export namespace DocumentRegistry {
     readonly iconLabel?: string;
 
     /**
-     * A parsed inline SVG icon.
+     * Icon name, as per the icon registry.
      */
-    readonly icon?: Document;
+    readonly iconName?: string;
 
     /**
      * The content type of the new file.
@@ -1127,7 +1127,7 @@ export namespace DocumentRegistry {
     mimeTypes: [],
     iconClass: 'jp-MaterialIcon jp-FileIcon',
     iconLabel: '',
-    icon: null,
+    iconName: '',
     contentType: 'file',
     fileFormat: 'text'
   };

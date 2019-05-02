@@ -1,62 +1,70 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React, { ComponentType, HTMLAttributes } from 'react';
+// import React, { ComponentType, HTMLAttributes } from 'react';
+import React from 'react';
 
 import { classes, style } from 'typestyle/lib';
 
+// import { IconRegistry, defaultIconRegistry } from './icon';
+import { defaultIconRegistry } from './icon';
 import icon from '../style/icon';
-
-// icon svg imports
-
-import HTML5SvgX from '../../style/icons/html5-icon.svg';
-import KernelSvgX from '../../style/icons/kernel-icon.svg';
-import NotTrustedSvgX from '../../style/icons/not-trusted-icon.svg';
-import TerminalSvgX from '../../style/icons/terminal-icon.svg';
-import TrustedSvgX from '../../style/icons/trusted-icon.svg';
-
-import _LineFormSvgX from '../../style/icons/line-form.svg';
-
-// functions that produce/export React icons
-
-export const HTML5IconX = IconFactory({ Svg: HTML5SvgX });
-export const KernelIconX = IconFactory({ Svg: KernelSvgX });
-export const NotTrustedIconX = IconFactory({ Svg: NotTrustedSvgX });
-export const TerminalIconX = IconFactory({ Svg: TerminalSvgX });
-export const TrustedIconX = IconFactory({ Svg: TrustedSvgX });
-
-export const LineFormSvgX = _LineFormSvgX;
 
 // functions for setting up icons
 
-/**
- * A namespace for SvgIcon statics.
- */
-export namespace SvgIcon {
-  /**
-   * Props for an SvgIcon
-   */
-  export interface IProps {
-    /**
-     * The inline svg
-     */
-    Svg: ComponentType<HTMLAttributes<SVGElement>>;
-  }
+type SvgPropsX = { name: string } & React.HTMLAttributes<SVGElement>;
+
+export function SvgX(props: SvgPropsX): React.ReactElement {
+  const { name, className } = props;
+  return (
+    <div
+      className={className}
+      dangerouslySetInnerHTML={{ __html: defaultIconRegistry.svg(name) }}
+    />
+  );
+  // return <div className={className}>{defaultIconRegistry.svg(name)}</div>;
 }
 
-type IconProps = React.HTMLAttributes<SVGElement> & {
-  offset: { x: number; y: number };
-};
-type IconElem = React.ReactElement<SvgIcon.IProps>;
-
-export function SvgIcon(props: SvgIcon.IProps & IconProps): IconElem {
-  const { Svg, className, offset, ...rest } = props;
-  return <Svg className={classes(className, style(icon(offset)))} {...rest} />;
+export function IconX(
+  props: { offset: { x: number; y: number } } & SvgPropsX
+): React.ReactElement {
+  const { className, offset, ...rest } = props;
+  return <SvgX className={classes(className, style(icon(offset)))} {...rest} />;
+  // return <div className={ classes(className, style(icon(offset))) }>{defaultIconRegistry.svg(name)}</div>;
 }
 
-export function IconFactory(
-  props: SvgIcon.IProps
-): (props: IconProps) => IconElem {
-  const { Svg } = props;
-  return (props: IconProps) => <SvgIcon Svg={Svg} {...props} />;
-}
+// export class IconRegistryX extends IconRegistry {
+//   iconX(props: IconPropsX): React.ReactElement {
+//     const {name, className, offset} = props;
+//     return <div className={ classes(className, style(icon(offset))) }>{this.svg(name)}</div>;
+//   }
+// }
+//
+// export const defaultIconRegistryX: IconRegistryX = new IconRegistryX();
+//
+// /**
+//  * A namespace for SvgIcon statics.
+//  */
+// export namespace SvgIcon {
+//   /**
+//    * Props for an SvgIcon
+//    */
+//   export interface IProps {
+//     /**
+//      * The inline svg
+//      */
+//     Svg: ComponentType<HTMLAttributes<SVGElement>>;
+//   }
+// }
+//
+// export function SvgIcon(props: SvgIcon.IProps & IconPropsX): React.ReactElement<SvgIcon.IProps> {
+//   const { Svg, className, offset, ...rest } = props;
+//   return <Svg className={classes(className, style(icon(offset)))} {...rest} />;
+// }
+//
+// export function IconFactory(
+//   props: SvgIcon.IProps
+// ): (props: IconPropsX) => React.ReactElement<SvgIcon.IProps> {
+//   const { Svg } = props;
+//   return (props: IconPropsX) => <SvgIcon Svg={Svg} {...props} />;
+// }

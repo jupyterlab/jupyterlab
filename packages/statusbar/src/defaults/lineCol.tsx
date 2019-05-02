@@ -7,7 +7,7 @@ import { VDomRenderer, VDomModel, ReactWidget } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { LineFormSvgX } from '@jupyterlab/ui-components';
+import { SvgX } from '@jupyterlab/ui-components';
 
 import { classes } from 'typestyle/lib';
 
@@ -18,10 +18,11 @@ import {
   lineFormInput,
   lineFormSearch,
   lineFormWrapperFocusWithin,
-  lineFormCaption
+  lineFormCaption,
+  lineFormButtonDiv,
+  lineFormButtonIcon,
+  lineFormButton
 } from '../style/lineForm';
-
-import { LineFormButtonItem } from '../components/lineForm';
 
 /**
  * A namespace for LineFormComponent statics.
@@ -114,7 +115,10 @@ class LineFormComponent extends React.Component<
                 this._textInput = input;
               }}
             />
-            <LineFormButtonItem SVG={LineFormSvgX} type="submit" value="" />
+            <div className={lineFormButtonDiv}>
+              <SvgX name="line-form" className={lineFormButtonIcon} />
+              <input type="submit" className={lineFormButton} value="" />
+            </div>
           </div>
           <label className={lineFormCaption}>
             Go to line number between 1 and {this.props.maxLine}

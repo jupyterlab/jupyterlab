@@ -6,7 +6,7 @@ import { INotebookModel, Notebook } from '.';
 
 import { Cell } from '@jupyterlab/cells';
 
-import { NotTrustedIconX, TrustedIconX } from '@jupyterlab/ui-components';
+import { IconX } from '@jupyterlab/ui-components';
 
 import { toArray } from '@phosphor/algorithm';
 
@@ -45,9 +45,9 @@ function NotebookTrustComponent(
   props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> {
   if (props.allCellsTrusted) {
-    return <TrustedIconX offset={{ x: 0, y: 2 }} />;
+    return <IconX name="trusted" offset={{ x: 0, y: 2 }} />;
   } else {
-    return <NotTrustedIconX offset={{ x: 0, y: 2 }} />;
+    return <IconX name="not-trusted" offset={{ x: 0, y: 2 }} />;
   }
 }
 

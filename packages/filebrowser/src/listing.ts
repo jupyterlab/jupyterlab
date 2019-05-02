@@ -1757,6 +1757,9 @@ export namespace DirListing {
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       if (fileType) {
+        // if (fileType.iconName) {
+        //   icon.appendChild(fileType.icon.documentElement);
+        // }
         icon.textContent = fileType.iconLabel || '';
         icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
       } else {
