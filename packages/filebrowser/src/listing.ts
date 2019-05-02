@@ -20,6 +20,8 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { Contents } from '@jupyterlab/services';
 
+import { defaultIconRegistry } from '@jupyterlab/ui-components';
+
 import {
   ArrayExt,
   ArrayIterator,
@@ -1757,10 +1759,25 @@ export namespace DirListing {
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       if (fileType) {
-        // if (fileType.iconName) {
-        //   icon.appendChild(fileType.icon.documentElement);
-        // }
-        icon.textContent = fileType.iconLabel || '';
+        if (fileType.iconName) {
+          defaultIconRegistry.setIcon(
+            icon,
+            fileType.iconName,
+            fileType.iconLabel
+          );
+          // filthy hack to get the tab icons
+          for (let iconNode of document.getElementsByClassName(
+            fileType.iconClass
+          ) as HTMLCollectionOf<HTMLElement>) {
+            defaultIconRegistry.setIcon(
+              iconNode,
+              fileType.iconName,
+              fileType.iconLabel
+            );
+          }
+        } else {
+          icon.textContent = fileType.iconLabel || '';
+        }
         icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
       } else {
         icon.textContent = '';
