@@ -1,23 +1,44 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import vars from './variables';
-import { NestedCSSProperties } from 'typestyle/lib/types';
+import { style } from 'typestyle/lib';
 
-export default (props: {
-  left?: number;
-  top?: number;
-}): NestedCSSProperties => {
-  return {
-    minHeight: vars.iconMinHeight,
+export interface IIconStyle {
+  left?: string;
+  top?: string;
+  height?: string;
+  width?: string;
+}
+
+export const defaultIconStyle: IIconStyle = {
+  left: '0px',
+  top: '0px',
+  height: '18px',
+  width: '20px'
+};
+
+export const iconStyle = (props: IIconStyle): string => {
+  const { left, top, height, width } = { ...defaultIconStyle, ...props };
+  return style({
+    height: height,
+    width: width,
+    position: 'relative',
+    left: left,
+    top: top
+  });
+};
+
+export const iconNestedStyle = (props: IIconStyle): string => {
+  const { left, top, height, width } = { ...defaultIconStyle, ...props };
+  return style({
     $nest: {
       ['svg']: {
-        height: vars.iconHeight,
-        width: vars.iconWidth,
+        height: height,
+        width: width,
         position: 'relative',
-        left: `${props.left ? props.left : 0}px`,
-        top: `${props.top ? props.top : 0}px`
+        left: left,
+        top: top
       }
     }
-  };
+  });
 };

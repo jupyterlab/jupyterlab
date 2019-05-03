@@ -5,7 +5,7 @@
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-import { IconX } from '@jupyterlab/ui-components';
+import { IconReact } from '@jupyterlab/ui-components';
 
 import { Message } from '@phosphor/messaging';
 
@@ -274,7 +274,7 @@ namespace Private {
           title={itemTitle}
         >
           {iconName ? (
-            <IconX
+            <IconReact
               tag={'span'}
               name={iconName}
               className={iconClass}

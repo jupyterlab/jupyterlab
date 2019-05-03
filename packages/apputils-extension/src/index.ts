@@ -293,7 +293,7 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
     galaxy.id = 'galaxy';
     logo.id = 'main-logo';
 
-    defaultIconRegistry.attachIcon(logo, 'jupyter-favicon');
+    defaultIconRegistry.icon({ node: logo, name: 'jupyter-favicon' });
 
     galaxy.appendChild(logo);
     ['1', '2', '3'].forEach(id => {

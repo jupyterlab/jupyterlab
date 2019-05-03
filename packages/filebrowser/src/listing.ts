@@ -1760,20 +1760,20 @@ export namespace DirListing {
 
       if (fileType) {
         if (fileType.iconName) {
-          defaultIconRegistry.setIcon(
-            icon,
-            fileType.iconName,
-            fileType.iconLabel
-          );
+          defaultIconRegistry.icon({
+            name: fileType.iconName,
+            title: fileType.iconLabel,
+            parent: icon
+          });
           // filthy hack to get the tab icons
           for (let iconNode of document.getElementsByClassName(
             fileType.iconClass
           ) as HTMLCollectionOf<HTMLElement>) {
-            defaultIconRegistry.setIcon(
-              iconNode,
-              fileType.iconName,
-              fileType.iconLabel
-            );
+            defaultIconRegistry.icon({
+              name: fileType.iconName,
+              title: fileType.iconLabel,
+              parent: iconNode
+            });
           }
         } else {
           icon.textContent = fileType.iconLabel || '';

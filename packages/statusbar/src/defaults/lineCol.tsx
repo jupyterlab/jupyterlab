@@ -7,7 +7,7 @@ import { VDomRenderer, VDomModel, ReactWidget } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { SvgX } from '@jupyterlab/ui-components';
+import { IconReact } from '@jupyterlab/ui-components';
 
 import { classes } from 'typestyle/lib';
 
@@ -116,7 +116,7 @@ class LineFormComponent extends React.Component<
               }}
             />
             <div className={lineFormButtonDiv}>
-              <SvgX name="line-form" className={lineFormButtonIcon} />
+              <IconReact name="line-form" className={lineFormButtonIcon} />
               <input type="submit" className={lineFormButton} value="" />
             </div>
           </div>
