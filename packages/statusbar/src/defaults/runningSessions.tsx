@@ -36,11 +36,11 @@ function RunningSessionsComponent(
     <GroupItem spacing={HALF_SPACING} onClick={props.handleClick}>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
-        <IconX name={'terminal'} offset={{ x: 1, y: 3 }} />
+        <IconX name={'terminal'} left={1} top={3} />
       </GroupItem>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.kernels} />
-        <IconX name={'kernel'} offset={{ x: 0, y: 2 }} />
+        <IconX name={'kernel'} top={2} />
       </GroupItem>
     </GroupItem>
   );

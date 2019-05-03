@@ -82,7 +82,8 @@ const plugin: JupyterFrontEndPlugin<IVDOMTracker> = {
       name: 'vdom',
       mimeTypes: [MIME_TYPE],
       extensions: ['.vdom', '.vdom.json'],
-      iconClass: CSS_ICON_CLASS
+      iconClass: CSS_ICON_CLASS,
+      iconName: 'react'
     });
 
     const factory = new MimeDocumentFactory({

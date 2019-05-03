@@ -5,6 +5,8 @@
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
+import { IconX } from '@jupyterlab/ui-components';
+
 import { Message } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -194,6 +196,12 @@ namespace Private {
    */
   const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
 
+  /**e
+   * The JupyterLab plugin schema key for IconRegistry name
+   * of the setting editor icon of a plugin
+   */
+  const ICON_NAME_KEY = 'jupyter.lab.setting-icon-name';
+
   /**
    * Check the plugin for a rendering hint's value.
    *
@@ -253,7 +261,7 @@ namespace Private {
       const { id, schema, version } = plugin;
       const itemTitle = `${schema.description}\n${id}\n${version}`;
       const image = getHint(ICON_CLASS_KEY, registry, plugin);
-      const iconClass = `jp-MaterialIcon jp-PluginList-icon${
+      const iconClass = `jp-PluginList-icon${
         image ? ' ' + image : ''
       }`;
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
@@ -265,7 +273,16 @@ namespace Private {
           key={id}
           title={itemTitle}
         >
-          <span className={iconClass} title={iconTitle} />
+          {iconName ? (
+            <IconX
+              tag={'span'}
+              name={iconName}
+              className={iconClass}
+              title={iconTitle}
+            />
+          ) : (
+            <span className={iconClass} title={iconTitle} />
+          )}
           <span>{schema.title || id}</span>
         </li>
       );

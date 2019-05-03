@@ -4,7 +4,10 @@
 import vars from './variables';
 import { NestedCSSProperties } from 'typestyle/lib/types';
 
-export default ({ x, y }: { x: number; y: number }): NestedCSSProperties => {
+export default (props: {
+  left?: number;
+  top?: number;
+}): NestedCSSProperties => {
   return {
     minHeight: vars.iconMinHeight,
     $nest: {
@@ -12,8 +15,8 @@ export default ({ x, y }: { x: number; y: number }): NestedCSSProperties => {
         height: vars.iconHeight,
         width: vars.iconWidth,
         position: 'relative',
-        left: `${x}px`,
-        top: `${y}px`
+        left: `${props.left ? props.left : 0}px`,
+        top: `${props.top ? props.top : 0}px`
       }
     }
   };

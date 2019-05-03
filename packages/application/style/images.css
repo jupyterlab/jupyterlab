@@ -4,62 +4,91 @@
 |----------------------------------------------------------------------------*/
 
 /* CSS for generic svg icons */
-.jp-icon-fill0 {
+/* recolor the primary elements of an icon */
+.jp-icon0[fill] {
   fill: var(--jp-ui-font-color0);
 }
-.jp-icon-fill1 {
+.jp-icon1[fill] {
   fill: var(--jp-ui-font-color1);
 }
-.jp-icon-fill2 {
+.jp-icon2[fill] {
   fill: var(--jp-ui-font-color2);
 }
-.jp-icon-fill3 {
+.jp-icon3[fill] {
   fill: var(--jp-ui-font-color3);
 }
 
-.jp-icon-stroke0 {
+.jp-icon0[stroke] {
   stroke: var(--jp-ui-font-color0);
 }
-.jp-icon-stroke1 {
+.jp-icon1[stroke] {
   stroke: var(--jp-ui-font-color1);
 }
-.jp-icon-stroke2 {
+.jp-icon2[stroke] {
   stroke: var(--jp-ui-font-color2);
 }
-.jp-icon-stroke3 {
+.jp-icon3[stroke] {
   stroke: var(--jp-ui-font-color3);
 }
 
-.jp-icon-fill-accent0 {
+/* recolor the accent elements of an icon */
+.jp-icon-accent0[fill] {
   fill: var(--jp-layout-color0);
 }
-.jp-icon-fill-accent1 {
+.jp-icon-accent1[fill] {
   fill: var(--jp-layout-color1);
 }
-.jp-icon-fill-accent2 {
+.jp-icon-accent2[fill] {
   fill: var(--jp-layout-color2);
 }
-.jp-icon-fill-accent3 {
+.jp-icon-accent3[fill] {
   fill: var(--jp-layout-color3);
 }
-.jp-icon-fill-accent4 {
+.jp-icon-accent4[fill] {
   fill: var(--jp-layout-color4);
 }
 
-.jp-icon-stroke-accent0 {
+.jp-icon-accent0[stroke] {
   stroke: var(--jp-layout-color0);
 }
-.jp-icon-stroke-accent1 {
+.jp-icon-accent1[stroke] {
   stroke: var(--jp-layout-color1);
 }
-.jp-icon-stroke-accent2 {
+.jp-icon-accent2[stroke] {
   stroke: var(--jp-layout-color2);
 }
-.jp-icon-stroke-accent3 {
+.jp-icon-accent3[stroke] {
   stroke: var(--jp-layout-color3);
 }
-.jp-icon-stroke-accent4 {
+.jp-icon-accent4[stroke] {
   stroke: var(--jp-layout-color4);
+}
+
+/* misc icons colors taken from the theme stylesheets */
+.jp-icon-brand0[fill] {
+  fill: var(--jp-brand-color0);
+}
+.jp-icon-brand1[fill] {
+  fill: var(--jp-brand-color1);
+}
+.jp-icon-brand2[fill] {
+  fill: var(--jp-brand-color2);
+}
+.jp-icon-brand3[fill] {
+  fill: var(--jp-brand-color3);
+}
+
+.jp-icon-brand0[stroke] {
+  stroke: var(--jp-brand-color0);
+}
+.jp-icon-brand1[stroke] {
+  stroke: var(--jp-brand-color1);
+}
+.jp-icon-brand2[stroke] {
+  stroke: var(--jp-brand-color2);
+}
+.jp-icon-brand3[stroke] {
+  stroke: var(--jp-brand-color3);
 }
 
 /* CSS for specific icons */

@@ -270,6 +270,11 @@ export namespace ISettingRegistry {
     'jupyter.lab.setting-icon-label'?: string;
 
     /**
+     * The JupyterLab icon name, for loading through IconRegistry.
+     */
+    'jupyter.lab.setting-icon-name'?: string;
+
+    /**
      * A flag that indicates plugin should be transformed before being used by
      * the setting registry.
      *

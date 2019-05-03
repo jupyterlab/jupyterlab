@@ -45,9 +45,9 @@ function NotebookTrustComponent(
   props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> {
   if (props.allCellsTrusted) {
-    return <IconX name="trusted" offset={{ x: 0, y: 2 }} />;
+    return <IconX name="trusted" top={2} />;
   } else {
-    return <IconX name="not-trusted" offset={{ x: 0, y: 2 }} />;
+    return <IconX name="not-trusted" top={2} />;
   }
 }
 

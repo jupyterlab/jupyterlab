@@ -10,5 +10,3 @@
 @import url('~@jupyterlab/application/style/index.css');
 @import url('~@jupyterlab/notebook/style/index.css');
 @import url('~@jupyterlab/vdom/style/index.css');
-
-@import url('./base.css');
