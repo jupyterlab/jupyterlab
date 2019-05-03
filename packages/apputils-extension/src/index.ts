@@ -34,6 +34,8 @@ import {
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
+import { defaultIconRegistry } from '@jupyterlab/ui-components';
+
 import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { DisposableDelegate } from '@phosphor/disposable';
@@ -290,6 +292,8 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
     splash.id = 'jupyterlab-splash';
     galaxy.id = 'galaxy';
     logo.id = 'main-logo';
+
+    defaultIconRegistry.attachIcon(logo, 'jupyter-favicon');
 
     galaxy.appendChild(logo);
     ['1', '2', '3'].forEach(id => {

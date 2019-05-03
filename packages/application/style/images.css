@@ -91,6 +91,14 @@
   stroke: var(--jp-brand-color3);
 }
 
+.jp-icon-warn0[fill] {
+  fill: var(--jp-warn-color0);
+}
+
+.jp-icon-warn0[stroke] {
+  stroke: var(--jp-warn-color0);
+}
+
 /* CSS for specific icons */
 
 .jp-ImageJupyterLab {

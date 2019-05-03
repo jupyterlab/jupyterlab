@@ -8,17 +8,19 @@
  */
 
 /* tslint:disable */
-import html5Svg from '../../style/icons/html5-icon.svg';
-import kernelSvg from '../../style/icons/kernel-icon.svg';
-import lineFormSvg from '../../style/icons/line-form-icon.svg';
-import notTrustedSvg from '../../style/icons/not-trusted-icon.svg';
-import statusBarSvg from '../../style/icons/status-bar-icon.svg';
-import terminalSvg from '../../style/icons/terminal-icon.svg';
-import trustedSvg from '../../style/icons/trusted-icon.svg';
+import html5Svg from '../../style/icons/html5.svg';
+import kernelSvg from '../../style/icons/kernel.svg';
+import jupyterFaviconSvg from '../../style/icons/jupyter-favicon.svg';
+import lineFormSvg from '../../style/icons/line-form.svg';
+import notTrustedSvg from '../../style/icons/not-trusted.svg';
+import statusBarSvg from '../../style/icons/status-bar.svg';
+import terminalSvg from '../../style/icons/terminal.svg';
+import trustedSvg from '../../style/icons/trusted.svg';
 
 const _defaultIcons: ReadonlyArray<IconRegistry.IModel> = [
   { name: 'html5', svg: html5Svg },
   { name: 'kernel', svg: kernelSvg },
+  { name: 'jupyter-favicon', svg: jupyterFaviconSvg },
   { name: 'line-form', svg: lineFormSvg },
   { name: 'not-trusted', svg: notTrustedSvg },
   { name: 'status-bar', svg: statusBarSvg },
