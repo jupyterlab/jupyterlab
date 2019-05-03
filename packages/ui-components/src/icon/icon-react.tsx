@@ -1,20 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-// import React, { ComponentType, HTMLAttributes } from 'react';
 import React from 'react';
 
 import { classes, style } from 'typestyle/lib';
 
-// import { IconRegistry, defaultIconRegistry } from './icon';
 import { defaultIconRegistry } from './icon';
 import icon from '../style/icon';
 
-// functions for setting up icons
-
 type SvgPropsX = { name: string; tag?: 'div' | 'span' } & React.HTMLAttributes<
   HTMLDivElement
->; //& React.HTMLAttributes<SVGElement>;
+>;
+
+// functions that return an icon in the form of a React element
 
 export function SvgX(props: SvgPropsX): React.ReactElement {
   const { name, tag, ...rest } = props;
