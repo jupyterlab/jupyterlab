@@ -811,16 +811,24 @@ export class DefaultKernel implements Kernel.IKernel {
    */
   private _updateStatus(status: Kernel.Status): void {
     switch (status) {
-      case 'starting':
       case 'idle':
       case 'busy':
-      case 'connected':
-      case 'restarting':
-      case 'autorestarting':
         if (!this._isReady && this._initialized) {
           this._isReady = true;
           this._readyPromise.resolve();
         }
+        break;
+      case 'connected':
+      case 'restarting':
+        // Send a kernel_info_request to get to a known kernel state.
+        void this.requestKernelInfo();
+        break;
+      case 'starting':
+      case 'autorestarting':
+        // 'starting' can happen at initialization or 'restarting'.
+        // 'autorestarting' is always preceded by 'restarting'. In either case,
+        // the 'restarting' handler above is fine, so we do nothing here.
+        /* no-op */
         break;
       case 'reconnecting':
         if (this._isReady) {

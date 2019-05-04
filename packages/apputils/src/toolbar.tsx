@@ -691,7 +691,9 @@ namespace Private {
      * Check if status should be shown as busy.
      */
     private _isBusy(status: Kernel.Status): boolean {
-      return status === 'busy';
+      return (
+        status === 'busy' || status === 'starting' || status === 'restarting'
+      );
     }
   }
 }
