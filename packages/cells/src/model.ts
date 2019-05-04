@@ -469,11 +469,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     }
     executionCount.changed.connect(this._onExecutionCountChanged, this);
 
-    this._outputs = factory.createOutputArea({
-      trusted,
-      values: outputs,
-      modelDB: this.modelDB
-    });
+    this._outputs = factory.createOutputArea({ trusted, values: outputs });
     this._outputs.changed.connect(this.onGenericChange, this);
 
     // We keep `collapsed` and `jupyter.outputs_hidden` metadata in sync, since
