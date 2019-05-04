@@ -9,11 +9,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import {
-  IObservableList,
-  ObservableList,
-  IModelDB
-} from '@jupyterlab/observables';
+import { IObservableList, ObservableList } from '@jupyterlab/observables';
 
 import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
 
@@ -110,11 +106,6 @@ export namespace IOutputAreaModel {
      * If not given, a default factory will be used.
      */
     contentFactory?: IContentFactory;
-
-    /**
-     * An optional IModelDB to store the output area model.
-     */
-    modelDB?: IModelDB;
   }
 
   /**
