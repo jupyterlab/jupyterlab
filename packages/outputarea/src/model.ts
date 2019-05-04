@@ -338,6 +338,7 @@ export class OutputAreaModel implements IOutputAreaModel {
       this._lastStream += value.text as string;
       value.text = this._lastStream;
       this._removeOverwrittenChars(value);
+      this._lastStream = value.text;
       let item = this._createItem({ value, trusted });
       let index = this.length - 1;
       let prev = this.list.get(index);
