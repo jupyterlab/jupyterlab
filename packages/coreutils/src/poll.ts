@@ -309,6 +309,11 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
    * Refreshes the poll. Schedules `refreshed` tick if necessary.
    *
    * @returns A promise that resolves after tick is scheduled and never rejects.
+   *
+   * #### Notes
+   * The returned promise resolves after the tick is scheduled, but before
+   * the polling action is run. To wait until after the poll action executes,
+   * await the `poll.tick` promise: `await poll.refresh(); await poll.tick;`
    */
   refresh(): Promise<void> {
     return this.schedule({
