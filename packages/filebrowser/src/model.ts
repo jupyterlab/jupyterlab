@@ -228,7 +228,8 @@ export class FileBrowserModel implements IDisposable {
    * Force a refresh of the directory contents.
    */
   async refresh(): Promise<void> {
-    await this.cd('.');
+    await this._poll.refresh();
+    await this._poll.tick;
   }
 
   /**
