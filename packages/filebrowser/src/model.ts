@@ -227,8 +227,8 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Force a refresh of the directory contents.
    */
-  refresh(): Promise<void> {
-    return this._poll.refresh();
+  async refresh(): Promise<void> {
+    await this.cd('.');
   }
 
   /**
@@ -271,6 +271,7 @@ export class FileBrowserModel implements IDisposable {
         }
         this._handleContents(contents);
         this._pendingPath = null;
+        this._pending = null;
         if (oldValue !== newValue) {
           // If there is a state database and a unique key, save the new path.
           // We don't need to wait on the save to continue.
