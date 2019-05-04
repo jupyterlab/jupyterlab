@@ -36,11 +36,6 @@ import { showDialog, Dialog } from '@jupyterlab/apputils';
 const DEFAULT_REFRESH_INTERVAL = 10000;
 
 /**
- * The enforced time between refreshes in ms.
- */
-const MIN_REFRESH = 1000;
-
-/**
  * The maximum upload size (in bytes) for notebook version < 5.1.0
  */
 export const LARGE_FILE_SIZE = 15 * 1024 * 1024;
@@ -104,13 +99,7 @@ export class FileBrowserModel implements IDisposable {
     };
     window.addEventListener('beforeunload', this._unloadEventListener);
     this._poll = new Poll({
-      factory: async () => {
-        const date = new Date().getTime();
-        if (date - this._lastRefresh < MIN_REFRESH) {
-          return;
-        }
-        return this.refresh();
-      },
+      factory: () => this.cd('.'),
       frequency: {
         interval: refreshInterval,
         backoff: true,
@@ -239,8 +228,7 @@ export class FileBrowserModel implements IDisposable {
    * Force a refresh of the directory contents.
    */
   refresh(): Promise<void> {
-    this._lastRefresh = new Date().getTime();
-    return this.cd('.');
+    return this._poll.refresh();
   }
 
   /**
@@ -625,7 +613,6 @@ export class FileBrowserModel implements IDisposable {
   private _pending: Promise<void> | null = null;
   private _pendingPath: string | null = null;
   private _refreshed = new Signal<this, void>(this);
-  private _lastRefresh = -1;
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;
   private _driveName: string;
