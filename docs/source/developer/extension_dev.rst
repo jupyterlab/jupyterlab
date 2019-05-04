@@ -191,9 +191,8 @@ subsequently reversed by running
 
     jlpm run remove:package <extension-dir-name>
 
-This will remove the package metadata from the source tree, but will
-**not** remove any files added by the ``addsibling`` script, which
-should be removed manually.
+This will remove the package metadata from the source tree and remove any
+files added by the ``addsibling`` script.
 
 The package should export EMCAScript 5 compatible JavaScript. It can
 import CSS using the syntax ``require('foo.css')``. The CSS files can
