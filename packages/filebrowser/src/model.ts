@@ -103,16 +103,13 @@ export class FileBrowserModel implements IDisposable {
       }
     };
     window.addEventListener('beforeunload', this._unloadEventListener);
-    this._scheduleUpdate();
     this._poll = new Poll({
       factory: async () => {
-        if (this._requested) {
-          return this.refresh();
+        const date = new Date().getTime();
+        if (date - this._lastRefresh < MIN_REFRESH) {
+          return;
         }
-        let date = new Date().getTime();
-        if (date - this._lastRefresh > refreshInterval) {
-          return this.refresh();
-        }
+        return this.refresh();
       },
       frequency: {
         interval: refreshInterval,
@@ -243,7 +240,6 @@ export class FileBrowserModel implements IDisposable {
    */
   refresh(): Promise<void> {
     this._lastRefresh = new Date().getTime();
-    this._requested = false;
     return this.cd('.');
   }
 
@@ -600,7 +596,7 @@ export class FileBrowserModel implements IDisposable {
 
     // If either the old value or the new value is in the current path, update.
     if (value) {
-      this._scheduleUpdate();
+      this._poll.refresh();
       this._populateSessions(sessions.running());
       this._fileChanged.emit(change);
       return;
@@ -619,18 +615,6 @@ export class FileBrowserModel implements IDisposable {
     });
   }
 
-  /**
-   * Handle internal model refresh logic.
-   */
-  private _scheduleUpdate(): void {
-    let date = new Date().getTime();
-    if (date - this._lastRefresh > MIN_REFRESH) {
-      void this.refresh();
-    } else {
-      this._requested = true;
-    }
-  }
-
   private _connectionFailure = new Signal<this, Error>(this);
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _items: Contents.IModel[] = [];
@@ -642,7 +626,6 @@ export class FileBrowserModel implements IDisposable {
   private _pendingPath: string | null = null;
   private _refreshed = new Signal<this, void>(this);
   private _lastRefresh = -1;
-  private _requested = false;
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;
   private _driveName: string;
