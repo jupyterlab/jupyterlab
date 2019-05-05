@@ -322,7 +322,7 @@
 .jp-RenderedHTMLCommon pre,
 .jp-RenderedHTMLCommon code {
   border: 0;
-  background-color: var(--jp-line-color0);
+  background-color: var(--jp-layout-color0);
   color: var(--jp-content-font-color1);
   font-family: var(--jp-code-font-family);
   font-size: inherit;
@@ -331,8 +331,8 @@
   white-space: pre-wrap;
 }
 
-.jp-RenderedHTMLCommon code {
-  background-color: var(--jp-line-color2);
+.jp-RenderedHTMLCommon :not(pre) > code {
+  background-color: var(--jp-layout-color2);
   padding: 1px 5px;
 }
 
