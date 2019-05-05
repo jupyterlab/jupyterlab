@@ -21,7 +21,7 @@
     "@jupyterlab/mathjax2-extension": "^0.7.1",
     "@jupyterlab/notebook": "^0.19.2",
     "@jupyterlab/observables": "^2.1.1",
-    "@jupyterlab/outputarea": "^0.19.1",
+    "@jupyterlab/outputarea": "^0.19.2",
     "@jupyterlab/rendermime": "^0.19.1",
     "@jupyterlab/services": "^3.2.1",
     "@jupyterlab/terminal": "^0.19.1",

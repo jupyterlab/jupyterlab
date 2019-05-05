@@ -73,7 +73,7 @@
     "@jupyterlab/notebook": "^0.19.2",
     "@jupyterlab/notebook-extension": "^0.19.1",
     "@jupyterlab/observables": "^2.1.1",
-    "@jupyterlab/outputarea": "^0.19.1",
+    "@jupyterlab/outputarea": "^0.19.2",
     "@jupyterlab/pdf-extension": "^0.10.1",
     "@jupyterlab/rendermime": "^0.19.1",
     "@jupyterlab/rendermime-extension": "^0.13.1",

@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^0.19.1",
-    "@jupyterlab/outputarea": "^0.19.1",
+    "@jupyterlab/outputarea": "^0.19.2",
     "@jupyterlab/rendermime": "^0.19.1",
     "@jupyterlab/services": "^3.2.1",
     "@jupyterlab/testutils": "^0.3.1",
