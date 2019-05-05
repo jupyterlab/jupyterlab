@@ -994,6 +994,11 @@ export namespace DocumentRegistry {
      * It should emit the [widgetCreated] signal with the new widget.
      */
     createNew(context: IContext<U>): T;
+
+    /**
+     * Clone an existing widget given a context
+     */
+    clone(widget: T, context: IContext<U>): T;
   }
 
   /**
