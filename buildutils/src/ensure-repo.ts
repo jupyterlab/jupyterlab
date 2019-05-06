@@ -95,17 +95,12 @@ function ensureMetaPackage(): string[] {
  * Ensure the jupyterlab application package.
  */
 function ensureJupyterlab(): string[] {
-  // Get the current version of JupyterLab
-  let cmd = 'python setup.py --version';
-  let version = utils.run(cmd, { stdio: 'pipe' }, true);
-
   let basePath = path.resolve('.');
   let corePath = path.join(basePath, 'dev_mode', 'package.json');
   let corePackage = utils.readJSONFile(corePath);
 
   corePackage.jupyterlab.extensions = {};
   corePackage.jupyterlab.mimeExtensions = {};
-  corePackage.jupyterlab.version = version;
   corePackage.jupyterlab.linkedPackages = {};
   corePackage.dependencies = {};
 
