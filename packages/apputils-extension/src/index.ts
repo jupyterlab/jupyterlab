@@ -40,8 +40,6 @@ import { Menu } from '@phosphor/widgets';
 
 import { Palette } from './palette';
 
-import { createRedirectForm } from './redirect';
-
 import '../style/index.css';
 
 /**
@@ -50,12 +48,6 @@ import '../style/index.css';
  * workspace save operation.
  */
 const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 750;
-
-/**
- * The query string parameter indicating that a workspace name should be
- * automatically generated if the current request collides with an open session.
- */
-const WORKSPACE_RESOLVE = 'resolve-workspace';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -259,47 +251,32 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
     const match = path.match(new RegExp(`^${paths.urls.workspaces}([^?\/]+)`));
     const workspace = (match && decodeURIComponent(match[1])) || '';
     const candidate = Private.candidate(paths, workspace);
+    const rest = workspace
+      ? path.replace(new RegExp(`^${paths.urls.workspaces}${workspace}`), '')
+      : path.replace(new RegExp(`^${paths.urls.page}`), '');
 
     try {
       await solver.resolve(candidate);
+      return solver;
     } catch (error) {
       // Window resolution has failed so the URL must change. Return a promise
       // that never resolves to prevent the application from loading plugins
       // that rely on `IWindowResolver`.
       return new Promise<IWindowResolver>(() => {
-        // If the user has requested workspace resolution create a new one.
-        if (WORKSPACE_RESOLVE in query) {
-          const { base, workspaces } = paths.urls;
-          const pool =
-            'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-          const random = pool[Math.floor(Math.random() * pool.length)];
-          const path = URLExt.join(base, workspaces, `auto-${random}`);
+        const { base, workspaces } = paths.urls;
+        const pool =
+          'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const random = pool[Math.floor(Math.random() * pool.length)];
+        const path = URLExt.join(base, workspaces, `auto-${random}`) + rest;
 
-          // Clone the originally requested workspace after redirecting.
-          query['clone'] = workspace;
+        // Clone the originally requested workspace after redirecting.
+        query['clone'] = workspace;
 
-          // Change the URL and trigger a hard reload to re-route.
-          const url = path + URLExt.objectToQueryString(query) + (hash || '');
-          router.navigate(url, { hard: true, silent: true });
-          return;
-        }
-
-        // Launch a dialog to ask the user for a new workspace name.
-        console.warn('Window resolution failed:', error);
-        return Private.redirect(router, paths, workspace);
+        // Change the URL and trigger a hard reload to re-route.
+        const url = path + URLExt.objectToQueryString(query) + (hash || '');
+        router.navigate(url, { hard: true, silent: true });
       });
     }
-
-    // If the user has requested workspace resolution remove the query param.
-    if (WORKSPACE_RESOLVE in query) {
-      delete query[WORKSPACE_RESOLVE];
-
-      // Silently scrub the URL.
-      const url = path + URLExt.objectToQueryString(query) + (hash || '');
-      router.navigate(url, { silent: true });
-    }
-
-    return solver;
   }
 };
 
@@ -399,18 +376,17 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         }
 
         debouncer = window.setTimeout(async () => {
-          // Prevent a race condition between the timeout and saving.
-          if (!conflated) {
-            return;
-          }
-
           const data = await db.toJSON();
 
           try {
             await workspaces.save(id, { data, metadata });
-            conflated.resolve(undefined);
+            if (conflated) {
+              conflated.resolve(undefined);
+            }
           } catch (error) {
-            conflated.reject(error);
+            if (conflated) {
+              conflated.reject(error);
+            }
           }
           conflated = null;
         }, timeout);
@@ -463,9 +439,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         }
 
         // Any time the local state database changes, save the workspace.
-        if (workspace) {
-          db.changed.connect(listener, db);
-        }
+        db.changed.connect(listener, db);
 
         const immediate = true;
 
@@ -693,44 +667,6 @@ namespace Private {
       .catch(() => {
         /* no-op */
       });
-  }
-
-  /**
-   * Allows the user to clear state if splash screen takes too long.
-   */
-  export async function redirect(
-    router: IRouter,
-    paths: JupyterFrontEnd.IPaths,
-    workspace: string,
-    warn = false
-  ): Promise<void> {
-    const form = createRedirectForm(warn);
-    const dialog = new Dialog({
-      title: 'Please use a different workspace.',
-      body: form,
-      focusNodeSelector: 'input',
-      buttons: [Dialog.okButton({ label: 'Switch Workspace' })]
-    });
-    const result = await dialog.launch();
-
-    dialog.dispose();
-    if (!result.value) {
-      return redirect(router, paths, workspace, true);
-    }
-
-    // Navigate to a new workspace URL and abandon this session altogether.
-    const page = paths.urls.page;
-    const workspaces = paths.urls.workspaces;
-    const prefix = (workspace ? workspaces : page).length + workspace.length;
-    const rest = router.current.request.substring(prefix);
-    const url = URLExt.join(workspaces, result.value, rest);
-
-    router.navigate(url, { hard: true, silent: true });
-
-    // This promise will never resolve because the application navigates
-    // away to a new location. It only exists to satisfy the return type
-    // of the `redirect` function.
-    return new Promise<void>(() => undefined);
   }
 
   /**

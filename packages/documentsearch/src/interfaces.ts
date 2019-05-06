@@ -107,6 +107,15 @@ export interface ISearchProviderConstructor {
 
 export interface ISearchProvider {
   /**
+   * Get an initial query value if applicable so that it can be entered
+   * into the search box as an initial query
+   *
+   * @param searchTarget The widget to be searched
+   *
+   * @returns Initial value used to populate the search box.
+   */
+  getInitialQuery(searchTarget: Widget): any;
+  /**
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
    *

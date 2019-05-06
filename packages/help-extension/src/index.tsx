@@ -74,9 +74,7 @@ const RESOURCES = [
   },
   {
     text: 'Markdown Reference',
-    url:
-      'https://help.github.com/articles/' +
-      'getting-started-with-writing-and-formatting-on-github/'
+    url: 'https://commonmark.org/help/'
   }
 ];
 

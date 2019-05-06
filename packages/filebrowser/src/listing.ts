@@ -440,7 +440,7 @@ export class DirListing extends Widget {
         return undefined;
       })
       .catch(error => {
-        void showErrorMessage('Shutdown kernel', error);
+        void showErrorMessage('Shut down kernel', error);
       });
   }
 

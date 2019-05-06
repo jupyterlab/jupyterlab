@@ -101,6 +101,7 @@ function createApp(manager: ServiceManager.IManager): void {
   let notebookPath = PageConfig.getOption('notebookPath');
   let nbWidget = docManager.open(notebookPath) as NotebookPanel;
   let palette = new CommandPalette({ commands });
+  palette.addClass('notebookCommandPalette');
 
   const editor =
     nbWidget.content.activeCell && nbWidget.content.activeCell.editor;

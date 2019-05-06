@@ -64,6 +64,7 @@ export class Tooltip extends Widget {
 
     this.anchor = options.anchor;
     this.addClass(TOOLTIP_CLASS);
+    this.hide();
     this._editor = options.editor;
     this._rendermime = options.rendermime;
 
@@ -168,6 +169,9 @@ export class Tooltip extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
+    if (this.isHidden) {
+      this.show();
+    }
     this._setGeometry();
     super.onUpdateRequest(msg);
   }

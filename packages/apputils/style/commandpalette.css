@@ -114,6 +114,7 @@
 .p-CommandPalette-header > mark {
   background-color: transparent;
   font-weight: bold;
+  color: var(--jp-ui-font-color1);
 }
 
 .p-CommandPalette-item {

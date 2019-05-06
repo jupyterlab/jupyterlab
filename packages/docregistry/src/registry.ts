@@ -522,7 +522,8 @@ export class DocumentRegistry implements IDisposable {
       name,
       language,
       shouldStart: widgetFactory.preferKernel,
-      canStart: widgetFactory.canStartKernel
+      canStart: widgetFactory.canStartKernel,
+      shutdownOnClose: widgetFactory.shutdownOnClose
     };
   }
 
@@ -930,6 +931,11 @@ export namespace DocumentRegistry {
      * Whether the widgets can start a kernel when opened.
      */
     readonly canStartKernel?: boolean;
+
+    /**
+     * Whether the kernel should be shutdown when the widget is closed.
+     */
+    readonly shutdownOnClose?: boolean;
 
     /**
      * A function producing toolbar widgets, overriding the default toolbar widgets.

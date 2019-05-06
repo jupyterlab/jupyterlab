@@ -73,7 +73,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
   }
 
   componentDidUpdate() {
-    if (this.props.forceFocus && this.props.inputFocused) {
+    if (this.props.forceFocus) {
       this.focusInput();
     }
   }
@@ -241,6 +241,12 @@ class SearchOverlay extends React.Component<
   constructor(props: ISearchOverlayProps) {
     super(props);
     this.state = props.overlayState;
+  }
+
+  componentDidMount() {
+    if (this.state.searchText) {
+      this._executeSearch(true, this.state.searchText);
+    }
   }
 
   private _onSearchChange(event: React.ChangeEvent) {

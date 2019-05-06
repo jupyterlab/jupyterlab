@@ -17,6 +17,9 @@ export class SearchInstance implements IDisposable {
     this._widget = widget;
     this._activeProvider = searchProvider;
 
+    const initialQuery = this._activeProvider.getInitialQuery(this._widget);
+    this._displayState.searchText = initialQuery || '';
+
     this._searchWidget = createSearchOverlay({
       widgetChanged: this._displayUpdateSignal,
       overlayState: this._displayState,
@@ -35,6 +38,7 @@ export class SearchInstance implements IDisposable {
       this.dispose();
     });
     this._searchWidget.disposed.connect(() => {
+      this._widget.activate();
       this.dispose();
     });
 
@@ -67,9 +71,11 @@ export class SearchInstance implements IDisposable {
    */
   focusInput(): void {
     this._displayState.forceFocus = true;
+    this._displayState.searchInputFocused = true;
 
     // Trigger a rerender without resetting the forceFocus.
     this._displayUpdateSignal.emit(this._displayState);
+    this._displayState.forceFocus = false;
   }
 
   /**

@@ -17,7 +17,7 @@ import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { INotebookModel } from './model';
 
-import { Notebook } from './widget';
+import { Notebook, StaticNotebook } from './widget';
 import { PageConfig } from '@jupyterlab/coreutils';
 
 /**
@@ -107,6 +107,22 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   get model(): INotebookModel {
     return this.content ? this.content.model : null;
+  }
+
+  /**
+   * Update the options for the current notebook panel.
+   *
+   * @param config new options to set
+   */
+  setConfig(config: NotebookPanel.IConfig): void {
+    this.content.editorConfig = config.editorConfig;
+    this.content.notebookConfig = config.notebookConfig;
+    // Update kernel shutdown behavior
+    const kernelPreference = this.context.session.kernelPreference;
+    this.context.session.kernelPreference = {
+      ...kernelPreference,
+      shutdownOnClose: config.kernelShutdown
+    };
   }
 
   /**
@@ -205,6 +221,24 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
  * A namespace for `NotebookPanel` statics.
  */
 export namespace NotebookPanel {
+  /**
+   * Notebook config interface for NotebookPanel
+   */
+  export interface IConfig {
+    /**
+     * A config object for cell editors
+     */
+    editorConfig: StaticNotebook.IEditorConfig;
+    /**
+     * A config object for notebook widget
+     */
+    notebookConfig: StaticNotebook.INotebookConfig;
+    /**
+     * Whether to shut down the kernel when closing the panel or not
+     */
+    kernelShutdown: boolean;
+  }
+
   /**
    * A content factory interface for NotebookPanel.
    */

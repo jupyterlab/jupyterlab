@@ -3,8 +3,17 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-Notebook .jp-Cell .jp-OutputArea .jp-PDFViewer {
-  min-height: 500px;
+.jp-PDFContainer iframe {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.jp-OutputArea .jp-PDFContainer {
+  min-height: 512px;
 }
 
 /*
@@ -19,14 +28,10 @@ body.p-mod-override-cursor .jp-PDFContainer {
 body.p-mod-override-cursor .jp-PDFContainer:before {
   content: '';
   position: absolute;
+  z-index: 10;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background: transparent;
-}
-
-.jp-PDFViewer {
-  width: 100%;
-  height: 100%;
 }

@@ -69,6 +69,7 @@ import { ReadonlyJSONObject, JSONValue } from '@phosphor/coreutils';
 import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Panel, Menu } from '@phosphor/widgets';
+import { CommandRegistry } from '@phosphor/commands';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -511,9 +512,7 @@ function activateNotebookHandler(
   settingRegistry: ISettingRegistry | null
 ): INotebookTracker {
   const services = app.serviceManager;
-  // An object for tracking the current notebook settings.
-  let editorConfig = StaticNotebook.defaultEditorConfig;
-  let notebookConfig = StaticNotebook.defaultNotebookConfig;
+
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileTypes: ['notebook'],
@@ -523,8 +522,8 @@ function activateNotebookHandler(
     canStartKernel: true,
     rendermime: rendermime,
     contentFactory,
-    editorConfig,
-    notebookConfig,
+    editorConfig: StaticNotebook.defaultEditorConfig,
+    notebookConfig: StaticNotebook.defaultNotebookConfig,
     mimeTypeService: editorServices.mimeTypeService
   });
   const { commands } = app;
@@ -578,6 +577,15 @@ function activateNotebookHandler(
   });
 
   /**
+   * Update the settings of the current tracker.
+   */
+  function updateTracker(options: NotebookPanel.IConfig): void {
+    tracker.forEach(widget => {
+      widget.setConfig(options);
+    });
+  }
+
+  /**
    * Update the setting values.
    */
   function updateConfig(settings: ISettingRegistry.ISettings): void {
@@ -611,19 +619,17 @@ function activateNotebookHandler(
           ? raw[key]
           : cached[key];
     });
-    factory.editorConfig = editorConfig = { code, markdown, raw };
-    factory.notebookConfig = notebookConfig = {
+    factory.editorConfig = { code, markdown, raw };
+    factory.notebookConfig = {
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean
     };
-  }
+    factory.shutdownOnClose = settings.get('kernelShutdown')
+      .composite as boolean;
 
-  /**
-   * Update the settings of the current tracker.
-   */
-  function updateTracker(settings: ISettingRegistry.ISettings | null): void {
-    tracker.forEach(widget => {
-      widget.content.editorConfig = editorConfig;
-      widget.content.notebookConfig = notebookConfig;
+    updateTracker({
+      editorConfig: factory.editorConfig,
+      notebookConfig: factory.notebookConfig,
+      kernelShutdown: factory.shutdownOnClose
     });
   }
 
@@ -635,15 +641,17 @@ function activateNotebookHandler(
     .then(() => fetchSettings)
     .then(settings => {
       updateConfig(settings);
-      updateTracker(settings);
       settings.changed.connect(() => {
         updateConfig(settings);
-        updateTracker(settings);
       });
     })
     .catch((reason: Error) => {
       console.warn(reason.message);
-      updateTracker(null);
+      updateTracker({
+        editorConfig: factory.editorConfig,
+        notebookConfig: factory.notebookConfig,
+        kernelShutdown: factory.shutdownOnClose
+      });
     });
 
   // Add main menu notebook menu.
@@ -1076,7 +1084,7 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.closeAndShutdown, {
-    label: 'Close and Shutdown',
+    label: 'Close and Shut Down',
     execute: args => {
       const current = getCurrent(args);
 
@@ -1087,7 +1095,7 @@ function addCommands(
       const fileName = current.title.label;
 
       return showDialog({
-        title: 'Shutdown the notebook?',
+        title: 'Shut down the notebook?',
         body: `Are you sure you want to close "${fileName}"?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
@@ -1588,21 +1596,14 @@ function addCommands(
     label: 'New Console for Notebook',
     execute: args => {
       const current = getCurrent({ ...args, activate: false });
-      const widget = tracker.currentWidget;
 
-      if (!current || !widget) {
+      if (!current) {
         return;
       }
 
-      const options: ReadonlyJSONObject = {
-        path: widget.context.path,
-        preferredLanguage: widget.context.model.defaultKernelLanguage,
-        activate: args['activate'],
-        ref: current.id,
-        insertMode: 'split-bottom'
-      };
-
-      return commands.execute('console:create', options);
+      return Private.createConsole(commands, current, args[
+        'activate'
+      ] as boolean);
     },
     isEnabled
   });
@@ -1918,7 +1919,7 @@ function populateMenus(
     closeAndCleanup: (current: NotebookPanel) => {
       const fileName = current.title.label;
       return showDialog({
-        title: 'Shutdown the notebook?',
+        title: 'Shut down the notebook?',
         body: `Are you sure you want to close "${fileName}"?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
@@ -1996,16 +1997,7 @@ function populateMenus(
   mainMenu.fileMenu.consoleCreators.add({
     tracker,
     name: 'Notebook',
-    createConsole: current => {
-      const options: ReadonlyJSONObject = {
-        path: current.context.path,
-        preferredLanguage: current.context.model.defaultKernelLanguage,
-        activate: true,
-        ref: current.id,
-        insertMode: 'split-bottom'
-      };
-      return commands.execute('console:create', options);
-    }
+    createConsole: current => Private.createConsole(commands, current, true)
   } as IFileMenu.IConsoleCreator<NotebookPanel>);
 
   // Add some commands to the application view menu.
@@ -2148,6 +2140,29 @@ function populateMenus(
  * A namespace for module private functionality.
  */
 namespace Private {
+  /**
+   * Create a console connected with a notebook kernel
+   *
+   * @param commands Commands registry
+   * @param widget Notebook panel
+   * @param activate Should the console be activated
+   */
+  export function createConsole(
+    commands: CommandRegistry,
+    widget: NotebookPanel,
+    activate?: boolean
+  ): Promise<void> {
+    const options = {
+      path: widget.context.path,
+      preferredLanguage: widget.context.model.defaultKernelLanguage,
+      activate: activate,
+      ref: widget.id,
+      insertMode: 'split-bottom'
+    };
+
+    return commands.execute('console:create', options);
+  }
+
   /**
    * A widget hosting a cloned output area.
    */

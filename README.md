@@ -79,7 +79,7 @@ Adding `--user` after `pip install` will install the files to a local user insta
 
 #### pipenv
 
-`Pipenv` provides users and developers of applications with an easy method to setup a working environment, however Python must be installed first. See the [pipenv installation documentation](https://docs.pipenv.org/install) to use Pipenv if it is not installed.
+`Pipenv` provides users and developers of applications with an easy method to setup a working environment, however Python must be installed first. See the [pipenv installation documentation](https://docs.pipenv.org/en/latest/install/) to use Pipenv if it is not installed.
 
 `pipenv` can be installed as:
 
