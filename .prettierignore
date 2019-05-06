@@ -20,3 +20,4 @@ tests/**/coverage
 docs/_build
 docs/api
 **/package.json
+.eggs
