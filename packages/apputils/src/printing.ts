@@ -11,6 +11,7 @@
  */
 
 import { Widget } from '@phosphor/widgets';
+import { ServerConnection } from '@jupyterlab/services';
 
 export namespace Printing {
   /**
@@ -68,7 +69,11 @@ export namespace Printing {
    * @param url URL to load into an iframe.
    */
   export async function printURL(url: string): Promise<void> {
-    const text = await (await fetch(url)).text();
+    const text = await (await ServerConnection.makeRequest(
+      url,
+      {},
+      ServerConnection.makeSettings()
+    )).text();
     return printContent(text);
   }
 
