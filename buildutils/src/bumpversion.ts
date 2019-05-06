@@ -8,7 +8,7 @@ import * as utils from './utils';
 
 // Specify the program signature.
 program
-  .arguments('<type>')
+  .command('bumpversion <type>')
   .option('--dry-run', 'Dry run')
   .parse(process.argv);
 
