@@ -14,9 +14,6 @@ if (process.argv.length < 3) {
   process.exit(1);
 }
 
-// Use npm here so this file can be used outside of JupyterLab.
-utils.run('npm run build:packages');
-
 // Extract the desired package target(s).
 process.argv.slice(2).forEach(target => {
   let packagePath = path.resolve(path.join('packages', target));
@@ -42,11 +39,8 @@ process.argv.slice(2).forEach(target => {
   utils.run('git tag ' + name + '@' + version);
 });
 
-// Update the static folder.
-utils.run('npm run build:update');
-
-// Integrity update
-utils.run('npm run integrity');
-utils.run('git commit -a -m "Integrity update"');
+// Patch the python version and build
+utils.run('jlpm bumpversion patch'); // makes an alpha version
+utils.run('node buildutils/lib/update-core-mode.js'); // update staging
 
 console.log('\n\nFinished, make sure to push the commit(s) and tag(s).');

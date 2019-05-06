@@ -79,7 +79,8 @@ git push origin master --tags
 
 ### Publish the Python package
 
-- Update `jupyterlab/_version.py` with an `rc` version
+- Run `jlpm bumpversion release` to switch to an `rc` version
+  (run `jlpm bumpversion build` to increment `rc` versions).
 - Prep the static assets for release:
 
 ```bash
@@ -126,7 +127,7 @@ twine upload dist/*
 
 Now do the actual final release:
 
-- [ ] Update `jupyterlab/_version.py` with a final version
+- [ ] Run `jlpm bumpversion release` to switch to final release
 - [ ] Make a final Python release
 - [ ] Create a branch for the release and push to GitHub
 - [ ] Merge the PRs on the other repos and set the default branch of the
@@ -137,8 +138,7 @@ Now do the actual final release:
 After a few days (to allow for possible patch releases), set up development for
 the next release:
 
-- [ ] Update `jupyterlab/_version.py` with a `dev` version
-- [ ] Run `jlpm integrity` to update the `dev_mode` version
+- [ ] Run `jlpm bumpversion minor` to bump to alpha for the next release
 - [ ] Commit and push the version update to master
 - [ ] Release the other repos as appropriate
 - [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#update-version-for-binder)
@@ -239,7 +239,6 @@ shasum -a 256 dist/*.tar.gz
 ## Making a patch release JavaScript package(s)
 
 - Backport the change to the previous release branch
-- Make a new PR against the previous branch
 - Run the following script, where the package is in `/packages/package-folder-name` (note that multiple packages can be given):
 
 ```bash
@@ -247,10 +246,7 @@ jlpm run patch:release package-folder-name
 ```
 
 - Push the resulting commit and tag.
-- Create a new Python release on the previous branch
-- Cherry pick the patch commit to the master branch
-- Update the dev version of the master branch in `_version.py`
-- Update the `package.json` file in `dev_mode` with the new JupyterLab version in the `jupyterlab` metadata section.
+- Create a [Python release](#Publish-the-Python-package) from the release branch
 
 ## Update version for binder
 

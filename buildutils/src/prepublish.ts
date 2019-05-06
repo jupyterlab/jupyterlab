@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 import * as utils from './utils';
 
+utils.run('npm whoami');
 utils.run('npm run clean:slate');
 utils.run('jlpm run build:packages');
 utils.run('jlpm integrity');

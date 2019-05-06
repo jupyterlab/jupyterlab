@@ -100,6 +100,16 @@ if [[ $GROUP == integrity ]]; then
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
+
+    # Make sure we can bump the version
+    jlpm bumpversion minor
+    jlpm bumpversion major
+    jlpm bumpversion patch
+    jlpm bumpversion release
+    jlpm bumpversion build
+    VERSION=$(python setup.py --version)
+    if [[ $VERSION != *rc1 ]]; then exit 1; fi
+
 fi
 
 
