@@ -13,11 +13,6 @@
       "command": "docmanager:save-as",
       "keys": ["Accel Shift S"],
       "selector": "body"
-    },
-    {
-      "command": "docmanager:print",
-      "keys": ["Accel P"],
-      "selector": "body"
     }
   ],
   "properties": {

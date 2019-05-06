@@ -134,10 +134,10 @@ export namespace Printing {
    * Prints a content window.
    */
   function launchPrint(contentWindow: Window) {
-    // execCommand works on all but firefox
-    //  https://github.com/joseluisq/printd/blob/eb7948d602583c055ab6dee3ee294b6a421da4b6/src/index.ts#L148
     const result = contentWindow.document.execCommand('print', false, null);
 
+    // exeCommand won't work in firefox so we call the `print` method instead if it fails
+    // https://github.com/joseluisq/printd/blob/eb7948d602583c055ab6dee3ee294b6a421da4b6/src/index.ts#L148
     if (!result) {
       contentWindow.print();
     }

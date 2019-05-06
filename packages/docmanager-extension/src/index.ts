@@ -16,8 +16,7 @@ import {
   showDialog,
   showErrorMessage,
   Dialog,
-  ICommandPalette,
-  Printing
+  ICommandPalette
 } from '@jupyterlab/apputils';
 
 import { IChangedArgs, ISettingRegistry, Time } from '@jupyterlab/coreutils';
@@ -72,8 +71,6 @@ namespace CommandIDs {
   export const toggleAutosave = 'docmanager:toggle-autosave';
 
   export const showInFileBrowser = 'docmanager:show-in-file-browser';
-
-  export const print = 'docmanager:print';
 }
 
 const pluginId = '@jupyterlab/docmanager-extension:plugin';
@@ -640,21 +637,6 @@ function addLabCommands(
       // 'activate' is needed if this command is selected in the "open tabs" sidebar
       await commands.execute('filebrowser:activate', { path: context.path });
       await commands.execute('filebrowser:navigate', { path: context.path });
-    }
-  });
-
-  commands.addCommand(CommandIDs.print, {
-    label: 'Print...',
-    isEnabled: () => {
-      const { currentWidget } = labShell;
-      return Printing.getPrintFunction(currentWidget) !== null;
-    },
-    execute: async () => {
-      const widget = contextMenuWidget();
-      const printFunction = Printing.getPrintFunction(widget);
-      if (printFunction) {
-        await printFunction();
-      }
     }
   });
 

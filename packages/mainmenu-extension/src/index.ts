@@ -391,9 +391,9 @@ export function createFileMenu(
               throw new ServerConnection.NetworkError(data);
             });
         }
-            });
-        }
       });
+    }
+  });
 
   commands.addCommand(CommandIDs.logout, {
     label: 'Log Out',
@@ -448,6 +448,7 @@ export function createFileMenu(
     { command: 'filemenu:logout' },
     { command: 'filemenu:shutdown' }
   ];
+  const printGroup = [{ command: 'apputils:print' }];
 
   menu.addGroup(newGroup, 0);
   menu.addGroup(newViewGroup, 1);

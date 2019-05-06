@@ -7,7 +7,8 @@ import {
   ILayoutRestorer,
   IRouter,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  ILabShell
 } from '@jupyterlab/application';
 
 import {
@@ -17,7 +18,8 @@ import {
   IThemeManager,
   IWindowResolver,
   ThemeManager,
-  WindowResolver
+  WindowResolver,
+  Printing
 } from '@jupyterlab/apputils';
 
 import {
@@ -36,11 +38,12 @@ import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu, Widget } from '@phosphor/widgets';
 
 import { Palette } from './palette';
 
 import '../style/index.css';
+import { toArray } from '@phosphor/algorithm';
 
 /**
  * The interval in milliseconds that calls to save a workspace are debounced
@@ -69,6 +72,8 @@ namespace CommandIDs {
   export const resetOnLoad = 'apputils:reset-on-load';
 
   export const saveState = 'apputils:save-statedb';
+
+  export const print = 'apputils:print';
 }
 
 /**
@@ -295,6 +300,51 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
         return Private.showSplash(restored, commands, CommandIDs.reset, light);
       }
     };
+  }
+};
+
+const print: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:print',
+  autoStart: true,
+  requires: [ILabShell],
+  activate: (app: JupyterFrontEnd, labShell: ILabShell) => {
+    // TODO: This was copied out of application-extension/src/index.tsx
+    // This should be refactored to not duplicate the code.
+    // Returns the widget associated with the most recent contextmenu event.
+    const contextMenuWidget = (): Widget => {
+      const test = (node: HTMLElement) => !!node.dataset.id;
+      const node = app.contextMenuHitTest(test);
+
+      if (!node) {
+        // Fall back to active widget if path cannot be obtained from event.
+        return app.shell.currentWidget;
+      }
+
+      const matches = toArray(app.shell.widgets('main')).filter(
+        widget => widget.id === node.dataset.id
+      );
+
+      if (matches.length < 1) {
+        return app.shell.currentWidget;
+      }
+
+      return matches[0];
+    };
+
+    app.commands.addCommand(CommandIDs.print, {
+      label: 'Print...',
+      isEnabled: () => {
+        const { currentWidget } = labShell;
+        return Printing.getPrintFunction(currentWidget) !== null;
+      },
+      execute: async () => {
+        const widget = contextMenuWidget();
+        const printFunction = Printing.getPrintFunction(widget);
+        if (printFunction) {
+          await printFunction();
+        }
+      }
+    });
   }
 };
 
@@ -567,7 +617,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   state,
   splash,
   themes,
-  themesPaletteMenu
+  themesPaletteMenu,
+  print
 ];
 export default plugins;
 
