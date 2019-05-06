@@ -34,7 +34,7 @@ if (v === 'major' || v === 'minor') {
 // Bump the version.
 utils.run(`bumpversion ${v}`);
 
-// For patch releases, skip alpha and beta
+// For patch releases, skip alpha and rc
 if (v === 'patch') {
   utils.run('bumpversion release');
   utils.run('bumpversion release');
