@@ -86,7 +86,6 @@ export namespace Printing {
 
     const parent = window.document.body;
     parent.appendChild(iframe);
-    const printed = resolveAfterPrint(iframe);
     if (isText) {
       iframe.srcdoc = textOrEl as string;
       await resolveWhenLoaded(iframe);
@@ -94,9 +93,9 @@ export namespace Printing {
       iframe.src = 'about:blank';
       setIFrameNode(iframe, textOrEl as HTMLElement);
     }
+    const printed = resolveAfterPrint(iframe);
 
     launchPrint(iframe.contentWindow);
-
     await printed;
     parent.removeChild(iframe);
   }
@@ -109,12 +108,17 @@ export namespace Printing {
    */
   function createIFrame(): HTMLIFrameElement {
     const el = window.document.createElement('iframe');
+
+    // We need both allow-modals and allow-same-origin to be able to
+    // call print in the iframe.
+    // We intentionally do not allow scripts:
+    // https://github.com/jupyterlab/jupyterlab/pull/5850#pullrequestreview-230899790
+    el.setAttribute('sandbox', 'allow-modals allow-same-origin');
     const css =
       'visibility:hidden;width:0;height:0;position:absolute;z-index:-9999;bottom:0;';
     el.setAttribute('style', css);
     el.setAttribute('width', '0');
     el.setAttribute('height', '0');
-    el.setAttribute('wmode', 'opaque');
 
     return el;
   }
@@ -132,16 +136,13 @@ export namespace Printing {
    */
   function resolveWhenLoaded(iframe: HTMLIFrameElement): Promise<void> {
     return new Promise(resolve => {
-      iframe.addEventListener('load', () => resolve());
+      iframe.onload = () => resolve();
     });
   }
 
   function resolveAfterPrint(iframe: HTMLIFrameElement): Promise<void> {
     return new Promise(resolve => {
-      window.addEventListener('afterprint', () => {
-        console.log('on after print');
-        resolve();
-      });
+      iframe.contentWindow.onafterprint = () => resolve();
     });
   }
 
