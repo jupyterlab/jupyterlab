@@ -93,9 +93,10 @@ export namespace Printing {
       iframe.src = 'about:blank';
       setIFrameNode(iframe, textOrEl as HTMLElement);
     }
-    const printed = resolveAfterPrint(iframe);
-
+    const printed = resolveAfterEvent();
     launchPrint(iframe.contentWindow);
+    // Once the print dialog has been dismissed, we regain event handling,
+    // and it should be safe to discard the hidden iframe.
     await printed;
     parent.removeChild(iframe);
   }
@@ -140,9 +141,25 @@ export namespace Printing {
     });
   }
 
-  function resolveAfterPrint(iframe: HTMLIFrameElement): Promise<void> {
+  /**
+   * A promise that resolves after the next mousedown, mousemove, or
+   * keydown event. We use this as a proxy for determining when the
+   * main window has regained control after the print dialog is removed.
+   *
+   * We can't use the usual window.onafterprint handler because we
+   * disallow Javascript execution in the print iframe.
+   */
+  function resolveAfterEvent(): Promise<void> {
     return new Promise(resolve => {
-      iframe.contentWindow.onafterprint = () => resolve();
+      const onEvent = () => {
+        document.removeEventListener('mousemove', onEvent, true);
+        document.removeEventListener('mousedown', onEvent, true);
+        document.removeEventListener('keydown', onEvent, true);
+        resolve();
+      };
+      document.addEventListener('mousemove', onEvent, true);
+      document.addEventListener('mousedown', onEvent, true);
+      document.addEventListener('keydown', onEvent, true);
     });
   }
 
@@ -151,8 +168,7 @@ export namespace Printing {
    */
   function launchPrint(contentWindow: Window) {
     const result = contentWindow.document.execCommand('print', false, null);
-
-    // exeCommand won't work in firefox so we call the `print` method instead if it fails
+    // execCommand won't work in firefox so we call the `print` method instead if it fails
     // https://github.com/joseluisq/printd/blob/eb7948d602583c055ab6dee3ee294b6a421da4b6/src/index.ts#L148
     if (!result) {
       contentWindow.print();
