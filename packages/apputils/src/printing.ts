@@ -86,7 +86,7 @@ export namespace Printing {
 
     const parent = window.document.body;
     parent.appendChild(iframe);
-
+    const printed = resolveAfterPrint(iframe);
     if (isText) {
       iframe.srcdoc = textOrEl as string;
       await resolveWhenLoaded(iframe);
@@ -97,6 +97,7 @@ export namespace Printing {
 
     launchPrint(iframe.contentWindow);
 
+    await printed;
     parent.removeChild(iframe);
   }
 
@@ -131,7 +132,16 @@ export namespace Printing {
    */
   function resolveWhenLoaded(iframe: HTMLIFrameElement): Promise<void> {
     return new Promise(resolve => {
-      iframe.addEventListener('load', () => resolve(), false);
+      iframe.addEventListener('load', () => resolve());
+    });
+  }
+
+  function resolveAfterPrint(iframe: HTMLIFrameElement): Promise<void> {
+    return new Promise(resolve => {
+      window.addEventListener('afterprint', () => {
+        console.log('on after print');
+        resolve();
+      });
     });
   }
 
