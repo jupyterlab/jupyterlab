@@ -79,6 +79,10 @@ git push origin master --tags
 
 ### Publish the Python package
 
+We use [bump2version](https://github.com/c4urself/bump2version) to manage the Python
+versions, with a helper node script in `buildutils` that has some JupyterLab-specific
+functionality.
+
 - Run `jlpm bumpversion release` to switch to an `rc` version
   (run `jlpm bumpversion build` to increment `rc` versions).
 - Prep the static assets for release:
@@ -138,7 +142,7 @@ Now do the actual final release:
 After a few days (to allow for possible patch releases), set up development for
 the next release:
 
-- [ ] Run `jlpm bumpversion minor` to bump to alpha for the next release
+- [ ] Run `jlpm bumpversion minor` to bump to alpha for the next alpha release
 - [ ] Commit and push the version update to master
 - [ ] Release the other repos as appropriate
 - [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#update-version-for-binder)

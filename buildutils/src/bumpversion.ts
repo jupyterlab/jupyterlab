@@ -21,7 +21,7 @@ if (options.indexOf(v) === -1) {
 }
 
 if (program['dry-run']) {
-  utils.run(`bumpversion --dry-run ${v}`);
+  utils.run(`bumpversion --dry-run --verbose ${v}`);
   process.exit(0);
 }
 
