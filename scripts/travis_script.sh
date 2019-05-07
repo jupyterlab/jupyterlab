@@ -53,6 +53,8 @@ if [[ $GROUP == integrity ]]; then
     jlpm run integrity --force
 
     # Make sure we can bump the version
+    git config --global user.email "you@example.com"
+    git config --global user.name "Travis CI"
     jlpm bumpversion minor
     jlpm bumpversion major
     jlpm bumpversion patch
