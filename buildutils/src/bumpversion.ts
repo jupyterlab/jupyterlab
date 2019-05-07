@@ -20,7 +20,7 @@ commander
     }
 
     // Ensure bump2version is installed (active fork of bumpversion).
-    utils.run('python -m pip install -y bump2version');
+    utils.run('python -m pip install bump2version');
 
     // Handle dry runs.
     if (opts.dryRun) {
