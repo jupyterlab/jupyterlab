@@ -39,8 +39,7 @@ process.argv.slice(2).forEach(target => {
   utils.run('git tag ' + name + '@' + version);
 });
 
-// Patch the python version and build
-utils.run('jlpm bumpversion patch'); // makes an alpha version
-utils.run('node buildutils/lib/update-core-mode.js'); // update staging
+// Patch the python version
+utils.run('jlpm bumpversion patch');
 
 console.log('\n\nFinished, make sure to push the commit(s) and tag(s).');

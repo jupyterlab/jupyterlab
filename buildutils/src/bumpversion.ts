@@ -19,8 +19,7 @@ commander
     }
 
     // Make sure we start in a clean git state.
-    const val = utils.run('git diff', { stdio: 'pipe' });
-    if (val) {
+    if (utils.checkStatus('git diff --quiet') !== 0) {
       throw new Error('Must be in a clean git state');
     }
 
@@ -48,6 +47,11 @@ commander
       utils.run('bumpversion release');
       utils.run('bumpversion release');
     }
+
+    // Get the current version from dev_mode/package.json
+
+    utils.run('node buildutils/lib/update-core-mode.js'); // update staging
+    utils.run(`git tag v${version}`);
   });
 
 commander.parse(process.argv);

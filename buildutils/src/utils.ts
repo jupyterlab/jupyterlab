@@ -90,6 +90,20 @@ export function writeJSONFile(filePath: string, data: any): boolean {
 }
 
 /**
+ *
+ * Call a command, checking its status.
+ */
+export function checkStatus(cmd: string) {
+  const data = childProcess.spawnSync(cmd);
+  return data.status;
+}
+
+/**
+ * Get the current version of the application
+ */
+export function getCurrentVersion() {}
+
+/**
  * Run a command with terminal output.
  *
  * @param cmd - The command to run.
