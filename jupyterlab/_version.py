@@ -15,10 +15,6 @@ VersionInfo = namedtuple('VersionInfo', [
 __version__ = '1.0.0a3'
 
 parts = __version__.split('.')
-if len(parts) < 2:
-    parts.append(0)
-if len(parts) < 3:
-    parts.append(0)
 if len(parts) < 4:
     parts.append('final')
 if len(parts) < 5:
