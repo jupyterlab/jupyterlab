@@ -19,6 +19,7 @@ commander
     }
 
     // Make sure we start in a clean git state.
+    console.log('***', utils.checkStatus('git diff --quiet'));
     if (utils.checkStatus('git diff --quiet') !== 0) {
       throw new Error('Must be in a clean git state');
     }
