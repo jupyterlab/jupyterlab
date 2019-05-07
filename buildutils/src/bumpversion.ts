@@ -49,8 +49,10 @@ commander
     }
 
     // Get the current version from dev_mode/package.json
+    let cmd = 'python setup.py --version';
+    let version = utils.run(cmd, { stdio: 'pipe' });
 
-    utils.run('node buildutils/lib/update-core-mode.js'); // update staging
+    utils.run('node buildutils/lib/update-core-mode.js');
     utils.run(`git tag v${version}`);
   });
 
