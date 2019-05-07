@@ -1060,6 +1060,7 @@ export class DefaultKernel implements Kernel.IKernel {
     this.requestKernelInfo()
       .then(() => {
         this._initialized = true;
+        this._isReady = true;
         this._readyPromise.resolve(void 0);
       })
       .catch(err => {
