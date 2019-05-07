@@ -99,11 +99,6 @@ export function checkStatus(cmd: string) {
 }
 
 /**
- * Get the current version of the application
- */
-export function getCurrentVersion() {}
-
-/**
  * Run a command with terminal output.
  *
  * @param cmd - The command to run.
