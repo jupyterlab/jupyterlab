@@ -24,4 +24,4 @@ if len(parts) < 4:
 if len(parts) < 5:
     parts.append(0)
 
-version_info = VersionInfo(**parts)
+version_info = VersionInfo(*parts)
