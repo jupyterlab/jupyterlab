@@ -94,7 +94,7 @@ export function writeJSONFile(filePath: string, data: any): boolean {
  * Call a command, checking its status.
  */
 export function checkStatus(cmd: string) {
-  const data = childProcess.spawnSync(cmd);
+  const data = childProcess.spawnSync(cmd, { shell: true });
   return data.status;
 }
 
