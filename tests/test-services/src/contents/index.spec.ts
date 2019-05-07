@@ -782,7 +782,7 @@ describe('drive', () => {
     });
   });
 
-  describe('#newUntitled()', async () => {
+  describe('#newUntitled()', () => {
     it('should create a file', async () => {
       const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);

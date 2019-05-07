@@ -68,7 +68,7 @@ describe('Kernel.IKernel', () => {
     });
   });
 
-  describe('#iopubMessage', async () => {
+  describe('#iopubMessage', () => {
     it('should be emitted for an iopub message', async () => {
       let called = false;
       defaultKernel.iopubMessage.connect((k, msg) => {
