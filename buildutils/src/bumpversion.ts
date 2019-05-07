@@ -19,6 +19,12 @@ commander
       process.exit(1);
     }
 
+    // Make sure we start in a clean git state.
+    const val = utils.run('git diff', { stdio: 'pipe' });
+    if (val) {
+      throw new Error('Must be in a clean git state');
+    }
+
     // Ensure bump2version is installed (active fork of bumpversion).
     utils.run('python -m pip install bump2version');
 
@@ -32,6 +38,7 @@ commander
     if (v === 'major' || v === 'minor') {
       let cmd = `lerna version preminor --yes --no-git-tag-version --force-publish=* -m \"Prerelease version\" --no-push`;
       utils.run(cmd);
+      utils.run('git commit -a -m "bump packages to preminor"');
     }
 
     // Bump the version.
