@@ -25,7 +25,7 @@ commander
 
     // For major or minor bumps, bump all of the JS packages as well to alpha
     if (v === 'major' || v === 'minor') {
-      let cmd = `lerna version preminor --canary --force-publish=* -m \"Prerelease version\" --no-push`;
+      let cmd = `lerna version preminor --no-git-tag-version --force-publish=* -m \"Prerelease version\" --no-push`;
       utils.run(cmd);
     }
 
