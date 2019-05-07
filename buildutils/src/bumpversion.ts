@@ -4,7 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 import commander from 'commander';
-import * as path from 'path';
 import * as utils from './utils';
 
 // Specify the program signature.
