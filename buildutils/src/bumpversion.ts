@@ -49,15 +49,6 @@ commander
       utils.run('bumpversion release');
       utils.run('bumpversion release');
     }
-
-    // Update the dev_mode version
-    let cmd = 'python setup.py --version';
-    let version = utils.run(cmd, { stdio: 'pipe' }, true);
-    let basePath = path.resolve('.');
-    let corePath = path.join(basePath, 'dev_mode', 'package.json');
-    let corePackage = utils.readJSONFile(corePath);
-    corePackage.jupyterlab.version = version;
-    utils.writePackageData(corePath, corePackage);
   });
 
 commander.parse(process.argv);
