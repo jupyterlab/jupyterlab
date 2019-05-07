@@ -153,7 +153,6 @@ setup_args['extras_require'] = {
 
 setup_args['include_package_data'] = True
 setup_args['python_requires'] = '>=3.5'
-setup_args['setup_requires'] = ['bump2version']
 
 # Force entrypoints with setuptools (needed for Windows, unconditional
 # because of wheels)

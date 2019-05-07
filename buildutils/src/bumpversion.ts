@@ -12,12 +12,17 @@ commander
   .option('--dry-run', 'Dry run')
   .arguments('<version>')
   .action((v: any, opts: any) => {
+    // Make sure we have a valid version spec.
     const options = ['major', 'minor', 'patch', 'release', 'build'];
     if (options.indexOf(v) === -1) {
       console.error('Version type must be one of:', options);
       process.exit(1);
     }
 
+    // Ensure bump2version is installed (active fork of bumpversion).
+    utils.run('python -m pip install -y bump2version');
+
+    // Handle dry runs.
     if (opts.dryRun) {
       utils.run(`bumpversion --dry-run --verbose ${v}`);
       return;
