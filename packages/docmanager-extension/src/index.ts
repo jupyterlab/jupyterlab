@@ -586,7 +586,7 @@ function addLabCommands(
       return labShell.currentWidget;
     }
     const pathMatch = node['title'].match(pathRe);
-    return docManager.findWidget(pathMatch[1]);
+    return docManager.findWidget(pathMatch[1], null);
   };
 
   // Returns `true` if the current widget has a document context.
