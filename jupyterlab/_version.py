@@ -20,11 +20,11 @@ __version__ = '1.0.0a3'
 patt = r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)((?P<release>\S+)(?P<build>\d+))?'
 match = re.match(patt, __version__)
 
-major = match['major']
-minor = match['minor']
-micro = match['patch']
-release = match['release'] or 'final'
-build = match['build'] or 0
+major = int(match.group('major'))
+minor = int(match.group('minor'))
+patch = int(match.group('patch'))
+release = match.group('release') or 'final'
+build = int(match.group('build') or 0)
 
 if release == 'a':
     release = 'alpha'
@@ -32,4 +32,4 @@ elif release == 'rc':
     release = 'candidate'
 
 # Create the version info
-version_info = VersionInfo(major, minor, micro, release, build)
+version_info = VersionInfo(major, minor, patch, release, build)
