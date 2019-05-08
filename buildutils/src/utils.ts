@@ -102,9 +102,8 @@ export function checkStatus(cmd: string) {
  * Get the current version of JupyterLab
  */
 export function getVersion() {
-  let filePath = path.resolve(path.join('.', 'dev_mode', 'package.json'));
-  let data = readJSONFile(filePath);
-  return data.jupyterlab.version;
+  const cmd = 'python setup.py --version';
+  return run(cmd, { stdio: 'pipe' });
 }
 
 /**
@@ -124,11 +123,19 @@ export function prebump() {
  * Post-bump.
  */
 export function postbump() {
-  // Update the core mode.
+  // Get the current version.
+  const curr = getVersion();
+
+  // Update the dev mode version.
+  let filePath = path.resolve(path.join('.', 'dev_mode', 'package.json'));
+  let data = readJSONFile(filePath);
+  data.jupyterlab.version = curr;
+  writeJSONFile(filePath, data);
+
+  // Update core mode.
   run('node buildutils/lib/update-core-mode.js');
 
   // Create a git tag and commit.
-  const curr = getVersion();
   run(`git tag v${curr}`);
   run(`git commit -am "Publish ${curr}"`);
 }
