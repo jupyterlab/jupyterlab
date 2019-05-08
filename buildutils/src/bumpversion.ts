@@ -22,15 +22,15 @@ commander
       throw new Error(`Version spec must be one of: ${options}`);
     }
     if (
-      prev.indexOf('a') === 0 &&
-      prev.indexOf('rc') === 0 &&
+      prev.indexOf('a') === -1 &&
+      prev.indexOf('rc') === -1 &&
       spec === 'release'
     ) {
       throw new Error('Use "major" or "minor" to switch back to alpha release');
     }
     if (
-      prev.indexOf('a') === 0 &&
-      prev.indexOf('rc') === 0 &&
+      prev.indexOf('a') === -1 &&
+      prev.indexOf('rc') === -1 &&
       spec === 'build'
     ) {
       throw new Error('Cannot increment a build on a final release');
@@ -55,10 +55,10 @@ commander
     if (spec === 'build') {
       lernaVersion = 'prerelease';
       // a -> rc
-    } else if (spec === 'release' && prev.indexOf('a') !== 0) {
+    } else if (spec === 'release' && prev.indexOf('a') !== -1) {
       lernaVersion = 'prerelease --pre-id=rc';
       // rc -> final
-    } else if (spec === 'release' && prev.indexOf('rc') !== 0) {
+    } else if (spec === 'release' && prev.indexOf('rc') !== -1) {
       lernaVersion = 'patch';
     }
     let cmd = `lerna version -m \"New version\" --no-push ${lernaVersion}`;
