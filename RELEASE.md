@@ -85,12 +85,6 @@ functionality.
 
 - Run `jlpm bumpversion release` to switch to an `rc` version
   (run `jlpm bumpversion build` to increment `rc` versions).
-- Prep the static assets for release:
-
-```bash
-jlpm run build:update
-```
-
 - Commit and tag and push the tag
 - Create the Python release artifacts:
 

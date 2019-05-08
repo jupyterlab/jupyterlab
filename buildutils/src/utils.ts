@@ -99,6 +99,15 @@ export function checkStatus(cmd: string) {
 }
 
 /**
+ * Get the current version of JupyterLab
+ */
+export function getVersion() {
+  let filePath = path.resolve(path.join('.', 'dev_mode', 'package.json'));
+  let data = readJSONFile(filePath);
+  return data.jupyterlab.version;
+}
+
+/**
  * Run a command with terminal output.
  *
  * @param cmd - The command to run.

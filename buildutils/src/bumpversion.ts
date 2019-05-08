@@ -4,57 +4,72 @@
 |----------------------------------------------------------------------------*/
 
 import commander from 'commander';
+import { prepublish, publish } from './publish';
 import * as utils from './utils';
 
 // Specify the program signature.
 commander
+  .description('Update the version and publish')
   .option('--dry-run', 'Dry run')
-  .arguments('<version>')
-  .action((v: any, opts: any) => {
+  .arguments('<spec>')
+  .action((spec: any, opts: any) => {
+    // Get the previous version.
+    const prev = utils.getVersion();
+
     // Make sure we have a valid version spec.
-    const options = ['major', 'minor', 'patch', 'release', 'build'];
-    if (options.indexOf(v) === -1) {
-      console.error('Version type must be one of:', options);
-      process.exit(1);
+    const options = ['major', 'minor', 'release', 'build'];
+    if (options.indexOf(spec) === -1) {
+      throw new Error(`Version spec must be one of: ${options}`);
+    }
+    if (
+      prev.indexOf('a') === 0 &&
+      prev.indexOf('rc') === 0 &&
+      spec === 'release'
+    ) {
+      throw new Error('Use "major" or "minor" to switch back to alpha release');
+    }
+    if (
+      prev.indexOf('a') === 0 &&
+      prev.indexOf('rc') === 0 &&
+      spec === 'build'
+    ) {
+      throw new Error('Cannot increment a build on a final release');
     }
 
-    // Make sure we start in a clean git state.
-    console.log('***', utils.checkStatus('git diff --quiet'));
-    if (utils.checkStatus('git diff --quiet') !== 0) {
-      throw new Error('Must be in a clean git state');
-    }
-
-    // Ensure bump2version is installed (active fork of bumpversion).
+    // Ensure bump2version is installed (active fork of bumpversion)
     utils.run('python -m pip install bump2version');
 
     // Handle dry runs.
     if (opts.dryRun) {
-      utils.run(`bumpversion --dry-run --verbose ${v}`);
+      utils.run(`bumpversion --dry-run --verbose ${spec}`);
       return;
     }
 
-    // For major or minor bumps, bump all of the JS packages as well to alpha
-    if (v === 'major' || v === 'minor') {
-      let cmd = `lerna version preminor --yes --no-git-tag-version --force-publish=* -m \"Prerelease version\" --no-push`;
-      utils.run(cmd);
-      utils.run('git commit -a -m "bump packages to preminor"');
-    }
+    prepublish();
 
     // Bump the version.
-    utils.run(`bumpversion ${v}`);
+    utils.run(`bumpversion ${spec}`);
 
-    // For patch releases, skip alpha and rc
-    if (v === 'patch') {
-      utils.run('bumpversion release');
-      utils.run('bumpversion release');
+    // Determine the version spec to use for lerna.
+    let lernaVersion = 'preminor';
+    if (spec === 'build') {
+      lernaVersion = 'prerelease';
+      // a -> rc
+    } else if (spec === 'release' && prev.indexOf('a') !== 0) {
+      lernaVersion = 'prerelease --pre-id=rc';
+      // rc -> final
+    } else if (spec === 'release' && prev.indexOf('rc') !== 0) {
+      lernaVersion = 'patch';
+    }
+    let cmd = `lerna version -m \"New version\" --no-push ${lernaVersion}`;
+    utils.run(cmd);
+
+    // Our work is done if this is a major or minor bump.
+    if (spec in ['major', 'minor']) {
+      return;
     }
 
-    // Get the current version from dev_mode/package.json
-    let cmd = 'python setup.py --version';
-    let version = utils.run(cmd, { stdio: 'pipe' });
-
-    utils.run('node buildutils/lib/update-core-mode.js');
-    utils.run(`git tag v${version}`);
+    publish();
   });
 
 commander.parse(process.argv);

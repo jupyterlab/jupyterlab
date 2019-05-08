@@ -6,6 +6,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
+import { publish, prepublish } from './publish';
 
 // Make sure we have required command line arguments.
 if (process.argv.length < 3) {
@@ -13,6 +14,8 @@ if (process.argv.length < 3) {
   process.stderr.write(msg);
   process.exit(1);
 }
+
+prepublish();
 
 // Extract the desired package target(s).
 process.argv.slice(2).forEach(target => {
@@ -40,6 +43,11 @@ process.argv.slice(2).forEach(target => {
 });
 
 // Patch the python version
-utils.run('jlpm bumpversion patch');
+// Ensure bump2version is installed (active fork of bumpversion)
+utils.run('python -m pip install bump2version');
+utils.run('bumpversion patch'); // switches to alpha
+utils.run('bumpversion release'); // switches to rc
+utils.run('bumpversion release'); // switches to final.
 
-console.log('\n\nFinished, make sure to push the commit(s) and tag(s).');
+// Publish the python package.
+publish();
