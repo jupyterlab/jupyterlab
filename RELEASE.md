@@ -32,25 +32,27 @@ conda deactivate
 conda remove --all -y -n jlabrelease
 rm -rf jupyterlab
 
-conda create -c conda-forge -y -n jlabrelease notebook nodejs twine 'tornado<6'
+conda create -c conda-forge -y -n jlabrelease notebook nodejs
 conda activate jlabrelease
 git clone git@github.com:jupyterlab/jupyterlab.git
 cd jupyterlab
 pip install -ve .
 ```
 
-### Publish the Packages
+### Publishing Packages
 
 We use [bump2version](https://github.com/c4urself/bump2version) to manage the Python
 version, and we keep the JS versions and tags in sync with the release cycle.
 For a backwards-incompatible changes to JS packages, bump the major version number(s)
 using `jlpm run bump:js:major` with the package name(s). For a major release of
-JupyterLab itself, run `jlpm bumpversion major`.
+JupyterLab itself, run `jlpm run bumpversion major`.
 
-- Run `jlpm bumversion build` to release a new `alpha` version.
-  Push the commits and tags as prompted.
-- Run `jlpm bumpversion release` to switch to an `rc` version.
-- (running `jlpm bumpversion build` will then increment `rc` versions).
+- Run `jlpm run bumpversion build` to create a new `alpha` version.
+- Push the commits and tags as prompted.
+- Run `jlpm run publish:all` to publish the JS and Python packages.
+
+- Run `jlpm run bumpversion release` to switch to an `rc` version.
+  (running `jlpm run bumpversion build` will then increment `rc` versions).
 
 ### Post release candidate checklist
 
@@ -81,8 +83,9 @@ JupyterLab itself, run `jlpm bumpversion major`.
 
 Now do the actual final release:
 
-- [ ] Run `jlpm bumpversion release` to switch to final release
+- [ ] Run `jlpm run bumpversion release` to switch to final release
 - [ ] Push the commit and tags to master
+- [ ] Run `jlpm run publish:all` to publish the packages
 - [ ] Create a branch for the release and push to GitHub
 - [ ] Merge the PRs on the other repos and set the default branch of the
       xckd repo
@@ -91,8 +94,9 @@ Now do the actual final release:
 After a few days (to allow for possible patch releases), set up development for
 the next release:
 
-- [ ] Run `jlpm bumpversion minor` to bump to alpha for the next alpha release
+- [ ] Run `jlpm run bumpversion minor` to bump to alpha for the next alpha release
 - [ ] Put the commit and tags to master
+- [ ] Run `jlpm run publish:all` to publish the packages
 - [ ] Release the other repos as appropriate
 - [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#update-version-for-binder)
 

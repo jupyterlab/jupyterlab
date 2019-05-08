@@ -108,6 +108,32 @@ export function getVersion() {
 }
 
 /**
+ * Pre-bump.
+ */
+export function prebump() {
+  // Ensure bump2version is installed (active fork of bumpversion)
+  run('python -m pip install bump2version');
+
+  // Make sure we start in a clean git state.
+  if (checkStatus('git diff --quiet') !== 0) {
+    throw new Error('Must be in a clean git state');
+  }
+}
+
+/**
+ * Post-bump.
+ */
+export function postbump() {
+  // Update the core mode.
+  run('node buildutils/lib/update-core-mode.js');
+
+  // Create a git tag and commit.
+  const curr = getVersion();
+  run(`git tag v${curr}`);
+  run(`git commit -am "Publish ${curr}"`);
+}
+
+/**
  * Run a command with terminal output.
  *
  * @param cmd - The command to run.

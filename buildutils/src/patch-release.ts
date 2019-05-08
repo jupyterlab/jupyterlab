@@ -4,9 +4,9 @@
 |----------------------------------------------------------------------------*/
 
 import * as utils from './utils';
-import { publish, prepublish } from './publish';
 
-prepublish();
+// Run pre-bump actions.
+utils.prebump();
 
 // Version the desired packages
 const pkgs = process.argv.slice(2).join(',');
@@ -16,11 +16,9 @@ if (pkgs) {
 }
 
 // Patch the python version
-// Ensure bump2version is installed (active fork of bumpversion)
-utils.run('python -m pip install bump2version');
 utils.run('bumpversion patch'); // switches to alpha
 utils.run('bumpversion release'); // switches to rc
 utils.run('bumpversion release'); // switches to final.
 
-// Publish the packages.
-publish();
+// Run post-bump actions.
+utils.postbump();

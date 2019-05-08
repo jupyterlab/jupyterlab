@@ -4,7 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 import commander from 'commander';
-import { prepublish, publish } from './publish';
 import * as utils from './utils';
 
 // Specify the program signature.
@@ -36,16 +35,14 @@ commander
       throw new Error('Cannot increment a build on a final release');
     }
 
-    // Ensure bump2version is installed (active fork of bumpversion)
-    utils.run('python -m pip install bump2version');
+    // Run pre-bump script.
+    utils.prebump();
 
     // Handle dry runs.
     if (opts.dryRun) {
       utils.run(`bumpversion --dry-run --verbose ${spec}`);
       return;
     }
-
-    prepublish();
 
     // Bump the version.
     utils.run(`bumpversion ${spec}`);
@@ -69,7 +66,8 @@ commander
       return;
     }
 
-    publish();
+    // Run the post-bump script.
+    utils.postbump();
   });
 
 commander.parse(process.argv);
