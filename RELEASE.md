@@ -78,7 +78,6 @@ JupyterLab itself, run `jlpm bumpversion major`.
   - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/developer/notebook.rst#adding-a-button-to-the-toolbar)
 - [ ] Update the [xkcd tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-xkcd-tutorial)
 - [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
-- [ ] Publish the final (not prerelease) JavaScript packages using `jlpm run publish:next` at some point.
 
 Now do the actual final release:
 
