@@ -56,7 +56,7 @@ if [[ $GROUP == integrity ]]; then
     git config --global user.email "you@example.com"
     git config --global user.name "Travis CI"
     git stash
-    git checkout ${TRAVIS_BRANCH}
+    git checkout ${BUILD_SOURCEBRANCHNAME}
     jlpm bumpversion minor
     jlpm bumpversion major
     jlpm bumpversion patch

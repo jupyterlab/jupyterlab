@@ -9,6 +9,11 @@ import * as utils from './utils';
  * Publish
  */
 export function publish() {
+  // Bail if on azure.
+  if (process.env.AGENT_WORKFOLDER) {
+    return;
+  }
+
   const curr = utils.getVersion();
 
   // Publish JS to the appropriate tag.
@@ -37,6 +42,11 @@ export function publish() {
  * Prepublish.
  */
 export function prepublish() {
+  // Bail if on azure.
+  if (process.env.AGENT_WORKFOLDER) {
+    return;
+  }
+
   // Make sure we start in a clean git state.
   if (utils.checkStatus('git diff --quiet') !== 0) {
     throw new Error('Must be in a clean git state');
