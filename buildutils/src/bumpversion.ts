@@ -44,9 +44,6 @@ commander
       return;
     }
 
-    // Bump the version.
-    utils.run(`bumpversion ${spec}`);
-
     // Determine the version spec to use for lerna.
     let lernaVersion = 'preminor';
     if (spec === 'build') {
@@ -65,6 +62,9 @@ commander
     if (spec in ['major', 'minor']) {
       return;
     }
+
+    // Bump the version.
+    utils.run(`bumpversion ${spec}`);
 
     // Run the post-bump script.
     utils.postbump();

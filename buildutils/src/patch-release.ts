@@ -17,8 +17,8 @@ if (pkgs) {
 
 // Patch the python version
 utils.run('bumpversion patch'); // switches to alpha
-utils.run('bumpversion release'); // switches to rc
-utils.run('bumpversion release'); // switches to final.
+utils.run('bumpversion release --allow-dirty'); // switches to rc
+utils.run('bumpversion release --allow-dirty'); // switches to final.
 
 // Run post-bump actions.
 utils.postbump();

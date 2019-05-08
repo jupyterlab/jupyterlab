@@ -65,6 +65,11 @@ if [[ $GROUP == integrity ]]; then
     VERSION=$(python setup.py --version)
     if [[ $VERSION != *rc1 ]]; then exit 1; fi
 
+    # make sure we can patch release
+    jlpm patch:release
+    jlpm patch:release console
+    jlpm patch:release filebrowser notebook
+
     # Check yarn.lock file
     jlpm check --integrity
 
