@@ -90,6 +90,24 @@ def get_app_dir():
     return osp.abspath(app_dir)
 
 
+def dedupe_yarn(path, logger=None):
+    """ `yarn-deduplicate` with the `fewer` strategy to minimize total
+        packages installed in a given staging directory
+
+        This means a extension (or dependency) _could_ cause a downgrade of an
+        version expected at publication time, but core should aggressively set
+        pins above, for example, known-bad versions
+    """
+    had_dupes = Process(
+        ['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
+        cwd=path, logger=logger
+    ).wait() != 0
+
+    if had_dupes:
+        yarn_proc = Process(['node', YARN_PATH], cwd=path, logger=logger)
+        yarn_proc.wait()
+
+
 def ensure_dev(logger=None):
     """Ensure that the dev assets are available.
     """
@@ -99,12 +117,7 @@ def ensure_dev(logger=None):
         yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
         yarn_proc.wait()
 
-        yarn_proc = Process(['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
-                            cwd=parent, logger=logger)
-        had_dupes = yarn_proc.wait() != 0
-        if had_dupes:
-            yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
-            yarn_proc.wait()
+        dedupe_yarn(parent, logger)
 
     if not osp.exists(pjoin(parent, 'dev_mode', 'static')):
         yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=parent,
@@ -125,12 +138,7 @@ def ensure_core(logger=None):
         yarn_proc = Process(['node', YARN_PATH], cwd=staging, logger=logger)
         yarn_proc.wait()
 
-        yarn_proc = Process(['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
-                            cwd=staging, logger=logger)
-        had_dupes = yarn_proc.wait() != 0
-        if had_dupes:
-            yarn_proc = Process(['node', YARN_PATH], cwd=staging, logger=logger)
-            yarn_proc.wait()
+        dedupe_yarn(staging, logger)
 
     if not osp.exists(pjoin(HERE, 'static')):
         yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=staging,
@@ -156,12 +164,7 @@ def watch_packages(logger=None):
         yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
         yarn_proc.wait()
 
-        yarn_proc = Process(['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
-                            cwd=parent, logger=logger)
-        had_dupes = yarn_proc.wait() != 0
-        if had_dupes:
-            yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
-            yarn_proc.wait()
+        dedupe_yarn(parent, logger)
 
     logger = _ensure_logger(logger)
     ts_dir = osp.abspath(osp.join(HERE, '..', 'packages', 'metapackage'))
@@ -468,11 +471,8 @@ class _AppHandler(object):
             msg = 'npm dependencies failed to install'
             self.logger.error(msg)
             raise RuntimeError(msg)
-        had_dupes = 0 != self._run(
-            ['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
-            cwd=staging)
-        if had_dupes:
-            self._run(['node', YARN_PATH, 'install'], cwd=staging)
+
+        dedupe_yarn(staging, self.logger)
 
         # Build the app.
         ret = self._run(['node', YARN_PATH, 'run', command], cwd=staging)
@@ -491,11 +491,7 @@ class _AppHandler(object):
 
         # Make sure packages are installed.
         self._run(['node', YARN_PATH, 'install'], cwd=staging)
-        had_dupes = 0 != self._run(
-            ['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
-            cwd=staging)
-        if had_dupes:
-            self._run(['node', YARN_PATH, 'install'], cwd=staging)
+        dedupe_yarn(staging, self.logger)
 
         proc = WatchHelper(['node', YARN_PATH, 'run', 'watch'],
                            cwd=pjoin(self.app_dir, 'staging'),
@@ -978,6 +974,11 @@ class _AppHandler(object):
         pkg_path = pjoin(staging, 'package.json')
         with open(pkg_path, 'w') as fid:
             json.dump(data, fid, indent=4)
+
+        # copy known-good yarn.lock if missing
+        lock_path = pjoin(staging, 'yarn.lock')
+        if not osp.exists(lock_path):
+            shutil.copy(pjoin(HERE, 'staging', 'yarn.lock'), lock_path)
 
     def _get_package_template(self, silent=False):
         """Get the template the for staging package.json file.
