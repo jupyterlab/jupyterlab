@@ -23,4 +23,6 @@ https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md
 
 ## Backwards-incompatible changes
 
-<!-- Describe any backwards-incompatible changes to JupyterLab public APIs. -->
+<!-- Describe any backwards-incompatible changes to JupyterLab public APIs.
+     For a backwards-incompatible change, bump the major version number(s) using
+     `jlpm run bump:js:major` with the package name(s) -->

@@ -8,13 +8,6 @@ import * as path from 'path';
 import * as utils from './utils';
 import { publish, prepublish } from './publish';
 
-// Make sure we have required command line arguments.
-if (process.argv.length < 3) {
-  let msg = '** Must supply a target package';
-  process.stderr.write(msg);
-  process.exit(1);
-}
-
 prepublish();
 
 // Extract the desired package target(s).

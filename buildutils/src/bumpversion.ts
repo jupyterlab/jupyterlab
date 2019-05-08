@@ -61,7 +61,7 @@ commander
     } else if (spec === 'release' && prev.indexOf('rc') !== -1) {
       lernaVersion = 'patch';
     }
-    let cmd = `lerna version -m \"New version\" --no-push ${lernaVersion}`;
+    let cmd = `lerna version -m \"New version\" --force-publish=* --no-push ${lernaVersion}`;
     utils.run(cmd);
 
     // Our work is done if this is a major or minor bump.
