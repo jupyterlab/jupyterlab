@@ -18,9 +18,9 @@ export function publish() {
 
   // Publish JS to the appropriate tag.
   if (curr.indexOf('rc') === -1 && curr.indexOf('a') === -1) {
-    utils.run('lerna publish from-git -m "Publish"');
+    utils.run('lerna publish from-package -m "Publish"');
   } else {
-    utils.run('lerna publish from-git --npm-tag=next -m "Publish"');
+    utils.run('lerna publish from-package --npm-tag=next -m "Publish"');
   }
 
   // Update the core mode.
@@ -36,6 +36,9 @@ export function publish() {
   utils.run('python setup.py bdist_wheel --universal');
   utils.run('python -m pip install twine');
   utils.run('twine upload dist/*');
+
+  console.log('\n**************');
+  console.log('Publish complete!  Push commits and tags');
 }
 
 /**
@@ -58,6 +61,4 @@ export function prepublish() {
   }
 
   utils.run('npm run clean:slate');
-  utils.run('jlpm run build:packages');
-  utils.run('jlpm integrity');
 }

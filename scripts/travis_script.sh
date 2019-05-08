@@ -54,9 +54,9 @@ if [[ $GROUP == integrity ]]; then
 
     # Make sure we can bump the version
     git config --global user.email "you@example.com"
-    git config --global user.name "Travis CI"
+    git config --global user.name "CI"
     git stash
-    git checkout ${BUILD_SOURCEBRANCHNAME}
+    git checkout -b commit_${BUILD_SOURCEVERSION}
     jlpm bumpversion minor
     jlpm bumpversion major
     jlpm bumpversion patch
