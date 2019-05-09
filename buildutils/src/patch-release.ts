@@ -5,6 +5,12 @@
 
 import * as utils from './utils';
 
+// Make sure we can patch release.
+const pyVersion = utils.getPythonVersion();
+if (pyVersion.includes('a') || pyVersion.includes('rc')) {
+  throw new Error('Can only make a patch release from a final version');
+}
+
 // Run pre-bump actions.
 utils.prebump();
 
