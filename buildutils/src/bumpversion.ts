@@ -13,7 +13,7 @@ commander
   .arguments('<spec>')
   .action((spec: any, opts: any) => {
     // Get the previous version.
-    const prev = utils.getVersion();
+    const prev = utils.getPythonVersion();
 
     // Make sure we have a valid version spec.
     const options = ['major', 'minor', 'release', 'build'];

@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import commander from 'commander';
+import semver from 'semver';
 import * as utils from './utils';
 
 // Specify the program signature.
@@ -12,8 +13,28 @@ commander
   .arguments('<package> [others...]')
   .action((pkg: string, others: Array<string>) => {
     others.push(pkg);
-    const pkgs = others.join(',');
-    const cmd = `lerna premajor --force-publish=${pkgs} --no-push`;
+    const toBump: string[] = [];
+    others.forEach(pkg => {
+      const version = utils.getJSVersion(pkg);
+      if (semver.minor(version) === 0 && semver.prerelease(version)) {
+        console.warn(`${pkg} has already been bumped`);
+      } else {
+        toBump.push(pkg);
+      }
+    });
+    const pyVersion = utils.getPythonVersion();
+    let preId = '';
+    if (pyVersion.includes('a')) {
+      preId = 'alpha';
+    } else if (pyVersion.includes('rc')) {
+      preId = 'rc';
+    } else {
+      throw new Error(
+        'Cannot bump JS packages until we switch to prerelease mode'
+      );
+    }
+    const pkgs = toBump.join(',');
+    const cmd = `lerna version premajor --preid=${preId} --force-publish=${pkgs} --no-push`;
     utils.run(cmd);
   });
 

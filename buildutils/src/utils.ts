@@ -101,9 +101,20 @@ export function checkStatus(cmd: string) {
 /**
  * Get the current version of JupyterLab
  */
-export function getVersion() {
+export function getPythonVersion() {
   const cmd = 'python setup.py --version';
   return run(cmd, { stdio: 'pipe' });
+}
+
+/**
+ * Get the current version of a package
+ */
+export function getJSVersion(pkg: string) {
+  const filePath = path.resolve(
+    path.join('.', 'packages', pkg, 'package.json')
+  );
+  const data = readJSONFile(filePath);
+  return data.version;
 }
 
 /**
@@ -124,7 +135,7 @@ export function prebump() {
  */
 export function postbump() {
   // Get the current version.
-  const curr = getVersion();
+  const curr = getPythonVersion();
 
   // Update the dev mode version.
   let filePath = path.resolve(path.join('.', 'dev_mode', 'package.json'));
