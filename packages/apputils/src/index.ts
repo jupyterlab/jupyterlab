@@ -12,6 +12,7 @@ export * from './dialog';
 export * from './domutils';
 export * from './hoverbox';
 export * from './iframe';
+export * from './inputDialog';
 export * from './instancetracker';
 export * from './mainareawidget';
 export * from './sanitizer';
