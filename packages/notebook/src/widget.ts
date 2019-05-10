@@ -443,6 +443,9 @@ export class StaticNotebook extends Widget {
         break;
       case 'markdown':
         widget = this._createMarkdownCell(cell as IMarkdownCellModel);
+        if (cell.value.text === '') {
+          (widget as MarkdownCell).rendered = false;
+        }
         break;
       default:
         widget = this._createRawCell(cell as IRawCellModel);
