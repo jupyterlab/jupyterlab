@@ -1,49 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IInstanceTracker, InstanceTracker } from '@jupyterlab/apputils';
+import { InstanceTracker } from '@jupyterlab/apputils';
 import { Cell } from '@jupyterlab/cells';
 
-import { Token } from '@phosphor/coreutils';
 import { ISignal, Signal } from '@phosphor/signaling';
 
+import { INotebookTracker } from './tokens';
 import { NotebookPanel } from './panel';
 import { Notebook } from './widget';
-
-/**
- * An object that tracks notebook widgets.
- */
-export interface INotebookTracker extends IInstanceTracker<NotebookPanel> {
-  /**
-   * The currently focused cell.
-   *
-   * #### Notes
-   * If there is no cell with the focus, then this value is `null`.
-   */
-  readonly activeCell: Cell;
-
-  /**
-   * A signal emitted when the current active cell changes.
-   *
-   * #### Notes
-   * If there is no cell with the focus, then `null` will be emitted.
-   */
-  readonly activeCellChanged: ISignal<this, Cell>;
-
-  /**
-   * A signal emitted when the selection state changes.
-   */
-  readonly selectionChanged: ISignal<this, void>;
-}
-
-/* tslint:disable */
-/**
- * The notebook tracker token.
- */
-export const INotebookTracker = new Token<INotebookTracker>(
-  '@jupyterlab/notebook:INotebookTracker'
-);
-/* tslint:enable */
 
 export class NotebookTracker extends InstanceTracker<NotebookPanel>
   implements INotebookTracker {

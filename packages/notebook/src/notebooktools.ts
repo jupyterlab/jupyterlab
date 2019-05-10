@@ -3,7 +3,7 @@
 
 import { ArrayExt, each, chain } from '@phosphor/algorithm';
 
-import { JSONObject, JSONValue, Token } from '@phosphor/coreutils';
+import { JSONObject, JSONValue } from '@phosphor/coreutils';
 
 import { ConflatableMessage, Message, MessageLoop } from '@phosphor/messaging';
 
@@ -25,28 +25,9 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 
-import { INotebookTracker } from './';
 import { NotebookPanel } from './panel';
 import { INotebookModel } from './model';
-
-/* tslint:disable */
-/**
- * The notebook tools token.
- */
-export const INotebookTools = new Token<INotebookTools>(
-  '@jupyterlab/notebook:INotebookTools'
-);
-/* tslint:enable */
-
-/**
- * The interface for notebook metadata tools.
- */
-export interface INotebookTools extends Widget {
-  activeNotebookPanel: NotebookPanel | null;
-  activeCell: Cell | null;
-  selectedCells: Cell[];
-  addItem(options: NotebookTools.IAddOptions): void;
-}
+import { INotebookTools, INotebookTracker } from './tokens';
 
 class RankedPanel<T extends Widget = Widget> extends Widget {
   constructor() {
@@ -321,7 +302,7 @@ export namespace NotebookTools {
   /**
    * The base notebook tool, meant to be subclassed.
    */
-  export class Tool extends Widget {
+  export class Tool extends Widget implements INotebookTools.ITool {
     /**
      * The notebook tools object.
      */
