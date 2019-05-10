@@ -214,7 +214,6 @@ export class StaticNotebook extends Widget {
     }
     let oldValue = this._model;
     this._model = newValue;
-    this._model.defaultCell = this._notebookConfig.defaultCell;
 
     if (oldValue && oldValue.modelDB.isCollaborative) {
       void oldValue.modelDB.connected.then(() => {
@@ -383,6 +382,11 @@ export class StaticNotebook extends Widget {
     }
     this._updateMimetype();
     let cells = newValue.cells;
+    if (!cells.length) {
+      cells.push(
+        newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {})
+      );
+    }
     each(cells, (cell: ICellModel, i: number) => {
       this._insertCell(i, cell);
     });
@@ -413,6 +417,22 @@ export class StaticNotebook extends Widget {
         each(args.oldValues, value => {
           this._removeCell(args.oldIndex);
         });
+        // Add code cell if there are no cells remaining.
+        if (!sender.length) {
+          const model = this.model;
+          // Add the cell in a new context to avoid triggering another
+          // cell changed event during the handling of this signal.
+          requestAnimationFrame(() => {
+            if (!model.isDisposed && !model.cells.length) {
+              model.cells.push(
+                model.contentFactory.createCell(
+                  this.notebookConfig.defaultCell,
+                  {}
+                )
+              );
+            }
+          });
+        }
         break;
       case 'set':
         // TODO: reuse existing widgets if possible.
@@ -603,9 +623,6 @@ export class StaticNotebook extends Widget {
       'jp-mod-scrollPastEnd',
       this._notebookConfig.scrollPastEnd
     );
-    if (this._model) {
-      this._model.defaultCell = this._notebookConfig.defaultCell;
-    }
   }
 
   private _editorConfig = StaticNotebook.defaultEditorConfig;
