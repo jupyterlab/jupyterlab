@@ -23,7 +23,7 @@ import {
   Mode
 } from '@jupyterlab/codemirror';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/coreutils/lib/tokens';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
