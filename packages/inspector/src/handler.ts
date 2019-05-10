@@ -13,7 +13,7 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { IInspector } from './inspector';
+import { IInspector } from './tokens';
 
 /**
  * An object that handles code inspection.

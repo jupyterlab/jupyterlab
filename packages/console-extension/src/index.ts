@@ -16,13 +16,13 @@ import {
   showDialog
 } from '@jupyterlab/apputils';
 
-import { IEditorServices } from '@jupyterlab/codeeditor';
+import { IEditorServices } from '@jupyterlab/codeeditor/lib/tokens';
 
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
 import { ISettingRegistry, PageConfig } from '@jupyterlab/coreutils';
 
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser/lib/tokens';
 
 import { ILauncher } from '@jupyterlab/launcher';
 

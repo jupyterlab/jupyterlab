@@ -18,7 +18,9 @@ import {
 
 import { CodeCell } from '@jupyterlab/cells';
 
-import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
+import { CodeEditor } from '@jupyterlab/codeeditor/lib/editor';
+
+import { IEditorServices } from '@jupyterlab/codeeditor/lib/tokens';
 
 import {
   ISettingRegistry,
@@ -27,7 +29,7 @@ import {
   PageConfig
 } from '@jupyterlab/coreutils';
 
-import { IDocumentManager } from '@jupyterlab/docmanager';
+import { IDocumentManager } from '@jupyterlab/docmanager/lib/tokens';
 
 import { ArrayExt } from '@phosphor/algorithm';
 
@@ -35,7 +37,7 @@ import { UUID } from '@phosphor/coreutils';
 
 import { DisposableSet } from '@phosphor/disposable';
 
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser/lib/tokens';
 
 import { ILauncher } from '@jupyterlab/launcher';
 

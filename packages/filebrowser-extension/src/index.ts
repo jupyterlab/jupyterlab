@@ -24,7 +24,7 @@ import {
   ISettingRegistry
 } from '@jupyterlab/coreutils';
 
-import { IDocumentManager } from '@jupyterlab/docmanager';
+import { IDocumentManager } from '@jupyterlab/docmanager/lib/tokens';
 
 import {
   FileBrowserModel,

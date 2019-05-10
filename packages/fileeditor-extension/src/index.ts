@@ -9,9 +9,11 @@ import {
 
 import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
 
-import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
+import { CodeEditor } from '@jupyterlab/codeeditor/lib/editor';
 
-import { IConsoleTracker } from '@jupyterlab/console';
+import { IEditorServices } from '@jupyterlab/codeeditor/lib/tokens';
+
+import { IConsoleTracker } from '@jupyterlab/console/lib/tokens';
 
 import {
   ISettingRegistry,
@@ -21,7 +23,7 @@ import {
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser/lib/tokens';
 
 import {
   FileEditor,

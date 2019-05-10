@@ -14,31 +14,11 @@ import {
   defaultSanitizer
 } from '@jupyterlab/apputils';
 
-import { ReadonlyJSONObject, Token } from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
 import { MimeModel } from './mimemodel';
 
-/* tslint:disable */
-/**
- * The rendermime token.
- */
-export const IRenderMimeRegistry = new Token<IRenderMimeRegistry>(
-  '@jupyterlab/rendermime:IRenderMimeRegistry'
-);
-
-export interface IRenderMimeRegistry extends RenderMimeRegistry {}
-/* tslint:enable */
-
-/* tslint:disable */
-/**
- * The latex typesetter token.
- */
-export const ILatexTypesetter = new Token<IRenderMime.ILatexTypesetter>(
-  '@jupyterlab/rendermime:ILatexTypesetter'
-);
-
-export interface ILatexTypesetter extends IRenderMime.ILatexTypesetter {}
-/* tslint:enable */
+import { IRenderMimeRegistry } from './tokens';
 
 /**
  * An object which manages mime renderer factories.
@@ -50,7 +30,7 @@ export interface ILatexTypesetter extends IRenderMime.ILatexTypesetter {}
  * #### Notes
  * This class is not intended to be subclassed.
  */
-export class RenderMimeRegistry {
+export class RenderMimeRegistry implements IRenderMimeRegistry {
   /**
    * Construct a new rendermime.
    *
@@ -180,7 +160,7 @@ export class RenderMimeRegistry {
    *
    * @returns A new independent clone of the rendermime.
    */
-  clone(options: RenderMimeRegistry.ICloneOptions = {}): RenderMimeRegistry {
+  clone(options: IRenderMimeRegistry.ICloneOptions = {}): RenderMimeRegistry {
     // Create the clone.
     let clone = new RenderMimeRegistry({
       resolver: options.resolver || this.resolver || undefined,
@@ -319,31 +299,6 @@ export namespace RenderMimeRegistry {
 
     /**
      * An optional LaTeX typesetter.
-     */
-    latexTypesetter?: IRenderMime.ILatexTypesetter;
-  }
-
-  /**
-   * The options used to clone a rendermime instance.
-   */
-  export interface ICloneOptions {
-    /**
-     * The new sanitizer used to sanitize untrusted html inputs.
-     */
-    sanitizer?: IRenderMime.ISanitizer;
-
-    /**
-     * The new resolver object.
-     */
-    resolver?: IRenderMime.IResolver;
-
-    /**
-     * The new path handler.
-     */
-    linkHandler?: IRenderMime.ILinkHandler;
-
-    /**
-     * The new LaTeX typesetter.
      */
     latexTypesetter?: IRenderMime.ILatexTypesetter;
   }

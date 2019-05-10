@@ -11,15 +11,14 @@ import { IClientSession, ICommandPalette } from '@jupyterlab/apputils';
 
 import { Cell, CodeCell } from '@jupyterlab/cells';
 
-import {
-  CodeConsole,
-  ConsolePanel,
-  IConsoleTracker
-} from '@jupyterlab/console';
+import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
+
+import { IConsoleTracker } from '@jupyterlab/console/lib/tokens';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
-import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
+import { IEditorTracker } from '@jupyterlab/fileeditor/lib/tokens';
+import { FileEditor } from '@jupyterlab/fileeditor';
 
 import {
   INotebookTracker,

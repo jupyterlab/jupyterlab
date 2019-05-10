@@ -13,7 +13,7 @@ import {
 
 import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
 
-import { IEditorServices } from '@jupyterlab/codeeditor';
+import { IEditorServices } from '@jupyterlab/codeeditor/lib/tokens';
 
 import {
   editorServices,
@@ -26,7 +26,8 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
-import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
+import { IEditorTracker } from '@jupyterlab/fileeditor/lib/tokens';
+import { FileEditor } from '@jupyterlab/fileeditor';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 

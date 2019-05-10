@@ -9,7 +9,7 @@ import {
 
 import { InstanceTracker, IThemeManager, Dialog } from '@jupyterlab/apputils';
 
-import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch/lib/tokens';
 
 import {
   CSVViewer,

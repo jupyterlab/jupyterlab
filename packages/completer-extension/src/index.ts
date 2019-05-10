@@ -15,9 +15,9 @@ import {
   ICompletionManager
 } from '@jupyterlab/completer';
 
-import { IConsoleTracker } from '@jupyterlab/console';
+import { IConsoleTracker } from '@jupyterlab/console/lib/tokens';
 
-import { IEditorTracker } from '@jupyterlab/fileeditor';
+import { IEditorTracker } from '@jupyterlab/fileeditor/lib/tokens';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
