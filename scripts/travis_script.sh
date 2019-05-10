@@ -59,12 +59,13 @@ if [[ $GROUP == integrity ]]; then
     git checkout -b commit_${BUILD_SOURCEVERSION}
     jlpm bumpversion minor --force
     jlpm bumpversion major --force
-    jlpm bumpversion release --force
+    jlpm bumpversion release --force # switch to rc
     jlpm bumpversion build --force
     VERSION=$(python setup.py --version)
     if [[ $VERSION != *rc1 ]]; then exit 1; fi
 
     # make sure we can patch release
+    jlpm bumpversion release --force  # switch to final
     jlpm patch:release --force
     jlpm patch:release console --force
     jlpm patch:release filebrowser notebook --force
