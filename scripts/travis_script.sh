@@ -59,7 +59,6 @@ if [[ $GROUP == integrity ]]; then
     git checkout -b commit_${BUILD_SOURCEVERSION}
     jlpm bumpversion minor --force
     jlpm bumpversion major --force
-    jlpm bumpversion patch --force
     jlpm bumpversion release --force
     jlpm bumpversion build --force
     VERSION=$(python setup.py --version)
