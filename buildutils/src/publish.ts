@@ -39,4 +39,4 @@ async function main() {
   utils.run('twine upload dist/*');
 }
 
-main();
+void main();
