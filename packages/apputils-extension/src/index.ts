@@ -29,7 +29,7 @@ import {
   URLExt
 } from '@jupyterlab/coreutils';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu/lib/tokens';
 
 import { CommandRegistry } from '@phosphor/commands';
 

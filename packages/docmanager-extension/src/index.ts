@@ -32,7 +32,7 @@ import {
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu/lib/tokens';
 
 import { Contents, Kernel } from '@jupyterlab/services';
 

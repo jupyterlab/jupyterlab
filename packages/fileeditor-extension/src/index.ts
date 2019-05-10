@@ -37,10 +37,11 @@ import { ILauncher } from '@jupyterlab/launcher';
 import {
   IEditMenu,
   IFileMenu,
-  IMainMenu,
   IRunMenu,
   IViewMenu
 } from '@jupyterlab/mainmenu';
+
+import { IMainMenu } from '@jupyterlab/mainmenu/lib/tokens';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 

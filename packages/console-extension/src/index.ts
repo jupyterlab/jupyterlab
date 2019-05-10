@@ -31,9 +31,10 @@ import {
   IFileMenu,
   IHelpMenu,
   IKernelMenu,
-  IMainMenu,
   IRunMenu
 } from '@jupyterlab/mainmenu';
+
+import { IMainMenu } from '@jupyterlab/mainmenu/lib/tokens';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 

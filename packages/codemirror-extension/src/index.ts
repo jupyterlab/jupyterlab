@@ -11,7 +11,8 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
+import { IEditMenu } from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu/lib/tokens';
 
 import { IEditorServices } from '@jupyterlab/codeeditor/lib/tokens';
 

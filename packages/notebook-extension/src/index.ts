@@ -42,7 +42,6 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser/lib/tokens';
 import { ILauncher } from '@jupyterlab/launcher';
 
 import {
-  IMainMenu,
   IEditMenu,
   IFileMenu,
   IHelpMenu,
@@ -50,6 +49,8 @@ import {
   IRunMenu,
   IViewMenu
 } from '@jupyterlab/mainmenu';
+
+import { IMainMenu } from '@jupyterlab/mainmenu/lib/tokens';
 
 import {
   NotebookTools,

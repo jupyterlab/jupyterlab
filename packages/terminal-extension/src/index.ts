@@ -18,7 +18,7 @@ import {
 
 import { ILauncher } from '@jupyterlab/launcher';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu/lib/tokens';
 
 import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal/lib/tokens';
 
