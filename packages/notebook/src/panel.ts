@@ -18,7 +18,7 @@ import {
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { INotebookModel } from './model';
 
@@ -102,7 +102,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * TODO: deprecate this in favor of the .content attribute
    *
    */
-  get rendermime(): RenderMimeRegistry {
+  get rendermime(): IRenderMimeRegistry {
     return this.content.rendermime;
   }
 

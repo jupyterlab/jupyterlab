@@ -7,7 +7,7 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -388,7 +388,7 @@ export namespace RawEditor {
     /**
      * The optional MIME renderer to use for rendering debug messages.
      */
-    rendermime?: RenderMimeRegistry;
+    rendermime?: IRenderMimeRegistry;
   }
 }
 

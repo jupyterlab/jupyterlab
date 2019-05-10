@@ -25,7 +25,7 @@ import {
 import {
   IRenderMime,
   MimeModel,
-  RenderMimeRegistry
+  IRenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
 import { KernelMessage } from '@jupyterlab/services';
@@ -974,7 +974,7 @@ export class CodeCell extends Cell {
     this.toggleClass(NO_OUTPUTS_CLASS, force);
   }
 
-  private _rendermime: RenderMimeRegistry = null;
+  private _rendermime: IRenderMimeRegistry = null;
   private _outputHidden = false;
   private _outputsScrolled: boolean;
   private _outputWrapper: Widget = null;
@@ -1000,7 +1000,7 @@ export namespace CodeCell {
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
   }
 
   /**
@@ -1189,7 +1189,7 @@ export class MarkdownCell extends Cell {
 
   private _monitor: ActivityMonitor<any, any> = null;
   private _renderer: IRenderMime.IRenderer = null;
-  private _rendermime: RenderMimeRegistry;
+  private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
   private _prevText = '';
   private _ready = new PromiseDelegate<void>();
@@ -1211,7 +1211,7 @@ export namespace MarkdownCell {
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
   }
 }
 
