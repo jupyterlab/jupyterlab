@@ -214,6 +214,7 @@ export class StaticNotebook extends Widget {
     }
     let oldValue = this._model;
     this._model = newValue;
+    this._model.defaultCell = this._notebookConfig.defaultCell;
 
     if (oldValue && oldValue.modelDB.isCollaborative) {
       void oldValue.modelDB.connected.then(() => {
@@ -599,7 +600,9 @@ export class StaticNotebook extends Widget {
       'jp-mod-scrollPastEnd',
       this._notebookConfig.scrollPastEnd
     );
-    this._model.defaultCell = this._notebookConfig.defaultCell;
+    if (this._model) {
+      this._model.defaultCell = this._notebookConfig.defaultCell;
+    }
   }
 
   private _editorConfig = StaticNotebook.defaultEditorConfig;

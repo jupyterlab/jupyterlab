@@ -262,7 +262,10 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
     const model = notebook.model;
-    const cell = model.contentFactory.createCell(model.defaultCell, {});
+    const cell = model.contentFactory.createCell(
+      notebook.notebookConfig.defaultCell,
+      {}
+    );
     const active = notebook.activeCellIndex;
 
     model.cells.insert(active, cell);
