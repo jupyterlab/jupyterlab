@@ -224,17 +224,17 @@ class InputItemsDialog extends InputDialog<string> {
       current = '';
     }
 
-    let selectEl = document.createElement('select');
+    this._list = document.createElement('select');
     options.items.forEach((item, index) => {
       let option = document.createElement('option');
       if (index === defaultIndex) {
         option.selected = true;
+        current = item;
       }
       option.value = item;
       option.textContent = item;
-      selectEl.appendChild(option);
+      this._list.appendChild(option);
     });
-    this._list = Styling.wrapSelect(selectEl);
 
     if (options.editable) {
       /* Use of list and datalist */
@@ -254,7 +254,7 @@ class InputItemsDialog extends InputDialog<string> {
       this.node.appendChild(data);
     } else {
       /* Use select directly */
-      this.node.appendChild(this._list);
+      this.node.appendChild(Styling.wrapSelect(this._list));
     }
   }
 
@@ -265,10 +265,10 @@ class InputItemsDialog extends InputDialog<string> {
     if (this._editable) {
       return this._input.value;
     } else {
-      return (this._list as HTMLSelectElement).value;
+      return this._list.value;
     }
   }
 
-  private _list: HTMLElement;
+  private _list: HTMLSelectElement;
   private _editable: boolean;
 }
