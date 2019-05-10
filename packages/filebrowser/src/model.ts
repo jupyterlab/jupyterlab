@@ -586,7 +586,7 @@ export class FileBrowserModel implements IDisposable {
 
     // If either the old value or the new value is in the current path, update.
     if (value) {
-      this._poll.refresh();
+      void this._poll.refresh();
       this._populateSessions(sessions.running());
       this._fileChanged.emit(change);
       return;
