@@ -70,7 +70,7 @@ export function getExistingDirectory(
 /**
  * File browser model with optional filter on element.
  */
-class FilterFileBrowserModel extends FileBrowserModel {
+export class FilterFileBrowserModel extends FileBrowserModel {
   constructor(options: FilterFileBrowserModel.IOptions) {
     super(options);
 
@@ -126,7 +126,6 @@ class OpenDialog extends Widget
    */
   async getValue(): Promise<Contents.IModel[]> {
     const selection = toArray(this._browser.selectedItems());
-    console.log(selection);
     if (selection.length === 0) {
       // Return current path
       return [
