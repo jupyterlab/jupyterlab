@@ -5,8 +5,6 @@ import { IChangedArgs, ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
 
 import { each } from '@phosphor/algorithm';
 
-import { Token } from '@phosphor/coreutils';
-
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { Widget } from '@phosphor/widgets';
@@ -17,19 +15,7 @@ import { Dialog, showDialog } from './dialog';
 
 import { ISplashScreen } from './splash';
 
-/* tslint:disable */
-/**
- * The theme manager token.
- */
-export const IThemeManager = new Token<IThemeManager>(
-  '@jupyterlab/apputils:IThemeManager'
-);
-/* tslint:enable */
-
-/**
- * An interface for a theme manager.
- */
-export interface IThemeManager extends ThemeManager {}
+import { IThemeManager } from './tokens';
 
 /**
  * The number of milliseconds between theme loading attempts.
@@ -44,7 +30,7 @@ const REQUEST_THRESHOLD = 20;
 /**
  * A class that provides theme management.
  */
-export class ThemeManager {
+export class ThemeManager implements IThemeManager {
   /**
    * Construct a new theme manager.
    */
@@ -119,7 +105,7 @@ export class ThemeManager {
    *
    * @returns A disposable that can be used to unregister the theme.
    */
-  register(theme: ThemeManager.ITheme): IDisposable {
+  register(theme: IThemeManager.ITheme): IDisposable {
     const { name } = theme;
     const themes = this._themes;
 
@@ -297,13 +283,10 @@ export class ThemeManager {
   private _requests: { [theme: string]: number } = {};
   private _settings: ISettingRegistry.ISettings;
   private _splash: ISplashScreen | null;
-  private _themes: { [key: string]: ThemeManager.ITheme } = {};
+  private _themes: { [key: string]: IThemeManager.ITheme } = {};
   private _themeChanged = new Signal<this, IChangedArgs<string>>(this);
 }
 
-/**
- * A namespace for `ThemeManager` statics.
- */
 export namespace ThemeManager {
   /**
    * The options used to create a theme manager.
@@ -333,43 +316,6 @@ export namespace ThemeManager {
      * The url for local theme loading.
      */
     url: string;
-  }
-
-  /**
-   * An interface for a theme.
-   */
-  export interface ITheme {
-    /**
-     * The display name of the theme.
-     */
-    name: string;
-
-    /**
-     * Whether the theme is light or dark. Downstream authors
-     * of extensions can use this information to customize their
-     * UI depending upon the current theme.
-     */
-    isLight: boolean;
-
-    /**
-     * Whether the theme includes styling for the scrollbar.
-     * If set to false, this theme will leave the native scrollbar untouched.
-     */
-    themeScrollbars?: boolean;
-
-    /**
-     * Load the theme.
-     *
-     * @returns A promise that resolves when the theme has loaded.
-     */
-    load(): Promise<void>;
-
-    /**
-     * Unload the theme.
-     *
-     * @returns A promise that resolves when the theme has unloaded.
-     */
-    unload(): Promise<void>;
   }
 }
 
