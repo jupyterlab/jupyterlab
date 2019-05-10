@@ -262,7 +262,7 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
     const model = notebook.model;
-    const cell = model.contentFactory.createCodeCell({});
+    const cell = model.contentFactory.createCell(model.defaultCell, {});
     const active = notebook.activeCellIndex;
 
     model.cells.insert(active, cell);
@@ -291,7 +291,7 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
     const model = notebook.model;
-    const cell = model.contentFactory.createCodeCell({});
+    const cell = model.contentFactory.createCell(model.defaultCell, {});
 
     model.cells.insert(notebook.activeCellIndex + 1, cell);
 
@@ -446,7 +446,7 @@ export namespace NotebookActions {
     const model = notebook.model;
 
     if (notebook.activeCellIndex === notebook.widgets.length - 1) {
-      const cell = model.contentFactory.createCodeCell({});
+      const cell = model.contentFactory.createCell(model.defaultCell, {});
 
       model.cells.push(cell);
       notebook.activeCellIndex++;
@@ -484,7 +484,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
     const promise = Private.runSelected(notebook, session);
     const model = notebook.model;
-    const cell = model.contentFactory.createCodeCell({});
+    const cell = model.contentFactory.createCell(model.defaultCell, {});
 
     model.cells.insert(notebook.activeCellIndex + 1, cell);
     notebook.activeCellIndex++;
@@ -1658,7 +1658,7 @@ namespace Private {
       // within the compound operation to make the deletion of
       // a notebook's last cell undoable.
       if (!cells.length) {
-        cells.push(model.contentFactory.createCodeCell({}));
+        cells.push(model.contentFactory.createCell(model.defaultCell, {}));
       }
       cells.endCompoundOperation();
 

@@ -599,6 +599,7 @@ export class StaticNotebook extends Widget {
       'jp-mod-scrollPastEnd',
       this._notebookConfig.scrollPastEnd
     );
+    this._model.defaultCell = this._notebookConfig.defaultCell;
   }
 
   private _editorConfig = StaticNotebook.defaultEditorConfig;

@@ -56,10 +56,16 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * The metadata associated with the notebook.
    */
   readonly metadata: IObservableJSON;
+
   /**
    * The array of deleted cells since the notebook was last run.
    */
   readonly deletedCells: string[];
+
+  /**
+   * The default cell type for new cells.
+   */
+  defaultCell: nbformat.CellType;
 }
 
 /**
@@ -72,11 +78,12 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   constructor(options: NotebookModel.IOptions = {}) {
     super(options.languagePreference, options.modelDB);
     let factory = options.contentFactory || NotebookModel.defaultContentFactory;
+    this._defaultCell = options.defaultCell || 'code';
     this.contentFactory = factory.clone(this.modelDB.view('cells'));
     this._cells = new CellList(this.modelDB, this.contentFactory);
     // Add an initial code cell by default.
     if (!this._cells.length) {
-      this._cells.push(factory.createCodeCell({}));
+      this._cells.push(factory.createCell(this.defaultCell, {}));
     }
     this._cells.changed.connect(this._onCellsChanged, this);
 
@@ -131,12 +138,14 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     let spec = this.metadata.get('kernelspec') as nbformat.IKernelspecMetadata;
     return spec ? spec.name : '';
   }
+
   /**
-   * The default kernel name of the document.
+   * A list of deleted cells for the notebook..
    */
   get deletedCells(): string[] {
     return this._deletedCells;
   }
+
   /**
    * The default kernel language of the document.
    */
@@ -145,6 +154,19 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       'language_info'
     ) as nbformat.ILanguageInfoMetadata;
     return info ? info.name : '';
+  }
+
+  /**
+   * The default cell type for new cells.
+   */
+  get defaultCell(): nbformat.CellType {
+    return this._defaultCell;
+  }
+  set defaultCell(value: nbformat.CellType) {
+    if (this._defaultCell === value) {
+      return;
+    }
+    this._defaultCell = value;
   }
 
   /**
@@ -319,7 +341,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       // cell changed event during the handling of this signal.
       requestAnimationFrame(() => {
         if (!this.isDisposed && !this.cells.length) {
-          this.cells.push(factory.createCodeCell({}));
+          this.cells.push(factory.createCell(this.defaultCell, {}));
         }
       });
     }
@@ -340,6 +362,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   private _cells: CellList;
+  private _defaultCell: nbformat.CellType = 'code';
   private _nbformat = nbformat.MAJOR_VERSION;
   private _nbformatMinor = nbformat.MINOR_VERSION;
   private _deletedCells: string[];
@@ -369,6 +392,11 @@ export namespace NotebookModel {
      * A modelDB for storing notebook data.
      */
     modelDB?: IModelDB;
+
+    /**
+     * A default cell type for new cells.
+     */
+    defaultCell?: nbformat.CellType;
   }
 
   /**
