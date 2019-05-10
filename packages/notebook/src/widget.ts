@@ -730,12 +730,18 @@ export namespace StaticNotebook {
      * Enable scrolling past the last cell
      */
     scrollPastEnd: boolean;
+
+    /**
+     * The default type for new notebook cells.
+     */
+    defaultCell: nbformat.CellType;
   }
   /**
    * Default configuration options for notebooks.
    */
   export const defaultNotebookConfig: INotebookConfig = {
-    scrollPastEnd: true
+    scrollPastEnd: true,
+    defaultCell: 'code'
   };
 
   /**
