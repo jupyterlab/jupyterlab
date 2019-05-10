@@ -386,6 +386,19 @@ export namespace NotebookModel {
     modelDB: IModelDB;
 
     /**
+     * Create a new cell by cell type.
+     *
+     * @param type:  the type of the cell to create.
+     *
+     * @param options: the cell creation options.
+     *
+     * #### Notes
+     * This method is intended to be a convenience method to programmaticaly
+     * call the other cell creation methods in the factory.
+     */
+    createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel;
+
+    /**
      * Create a new code cell.
      *
      * @param options - The options used to create the cell.
@@ -443,6 +456,31 @@ export namespace NotebookModel {
      * The IModelDB in which to put the notebook data.
      */
     readonly modelDB: IModelDB | undefined;
+
+    /**
+     * Create a new cell by cell type.
+     *
+     * @param type:  the type of the cell to create.
+     *
+     * @param options: the cell creation options.
+     *
+     * #### Notes
+     * This method is intended to be a convenience method to programmaticaly
+     * call the other cell creation methods in the factory.
+     */
+    createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel {
+      switch (type) {
+        case 'code':
+          return this.createCodeCell(opts);
+          break;
+        case 'markdown':
+          return this.createMarkdownCell(opts);
+          break;
+        case 'raw':
+        default:
+          return this.createRawCell(opts);
+      }
+    }
 
     /**
      * Create a new code cell.
