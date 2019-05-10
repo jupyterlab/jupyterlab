@@ -10,6 +10,7 @@ import * as utils from './utils';
 commander
   .description('Update the version and publish')
   .option('--dry-run', 'Dry run')
+  .option('--force', 'Force the upgrade')
   .arguments('<spec>')
   .action((spec: any, opts: any) => {
     // Get the previous version.
@@ -56,6 +57,9 @@ commander
       lernaVersion = 'patch';
     }
     let cmd = `lerna version -m \"New version\" --force-publish=* --no-push ${lernaVersion}`;
+    if (opts.force) {
+      cmd += '--yes';
+    }
     utils.run(cmd);
 
     // Our work is done if this is a major or minor bump.

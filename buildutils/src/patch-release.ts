@@ -3,28 +3,41 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import commander from 'commander';
 import * as utils from './utils';
 
-// Make sure we can patch release.
-const pyVersion = utils.getPythonVersion();
-if (pyVersion.includes('a') || pyVersion.includes('rc')) {
-  throw new Error('Can only make a patch release from a final version');
-}
+// Specify the program signature.
+commander
+  .description('Create a patch release with optional patch JS releases')
+  .arguments('[pkgs...]')
+  .option('--force', 'Force the upgrade')
+  .action((pkgNames: Array<string>, options: any) => {
+    // Make sure we can patch release.
+    const pyVersion = utils.getPythonVersion();
+    if (pyVersion.includes('a') || pyVersion.includes('rc')) {
+      throw new Error('Can only make a patch release from a final version');
+    }
 
-// Run pre-bump actions.
-utils.prebump();
+    // Run pre-bump actions.
+    utils.prebump();
 
-// Version the desired packages
-const pkgs = process.argv.slice(2).join(',');
-if (pkgs) {
-  const cmd = `lerna version patch -m \"New version\" --force-publish=${pkgs} --no-push`;
-  utils.run(cmd);
-}
+    // Version the desired packages
+    const pkgs = pkgNames.join(',');
+    if (pkgs) {
+      let cmd = `lerna version patch -m \"New version\" --force-publish=${pkgs} --no-push`;
+      if (options.force) {
+        cmd += '--yes';
+      }
+      utils.run(cmd);
+    }
 
-// Patch the python version
-utils.run('bumpversion patch'); // switches to alpha
-utils.run('bumpversion release --allow-dirty'); // switches to rc
-utils.run('bumpversion release --allow-dirty'); // switches to final.
+    // Patch the python version
+    utils.run('bumpversion patch'); // switches to alpha
+    utils.run('bumpversion release --allow-dirty'); // switches to rc
+    utils.run('bumpversion release --allow-dirty'); // switches to final.
 
-// Run post-bump actions.
-utils.postbump();
+    // Run post-bump actions.
+    utils.postbump();
+  });
+
+commander.parse(process.argv);

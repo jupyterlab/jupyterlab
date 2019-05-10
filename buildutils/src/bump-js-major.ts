@@ -11,7 +11,8 @@ import * as utils from './utils';
 commander
   .description('Bump the major version of JS package(s)')
   .arguments('<package> [others...]')
-  .action((pkg: string, others: Array<string>) => {
+  .option('--force', 'Force the upgrade')
+  .action((pkg: string, others: Array<string>, options: any) => {
     others.push(pkg);
     const toBump: string[] = [];
     others.forEach(pkg => {
@@ -34,7 +35,10 @@ commander
       );
     }
     const pkgs = toBump.join(',');
-    const cmd = `lerna version premajor --preid=${preId} --force-publish=${pkgs} --no-push`;
+    let cmd = `lerna version premajor --preid=${preId} --force-publish=${pkgs} --no-push`;
+    if (options.force) {
+      cmd += '--yes';
+    }
     utils.run(cmd);
   });
 

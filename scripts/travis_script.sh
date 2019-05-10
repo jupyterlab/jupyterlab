@@ -57,18 +57,23 @@ if [[ $GROUP == integrity ]]; then
     git config --global user.name "CI"
     git stash
     git checkout -b commit_${BUILD_SOURCEVERSION}
-    jlpm bumpversion minor
-    jlpm bumpversion major
-    jlpm bumpversion patch
-    jlpm bumpversion release
-    jlpm bumpversion build
+    jlpm bumpversion minor --force
+    jlpm bumpversion major --force
+    jlpm bumpversion patch --force
+    jlpm bumpversion release --force
+    jlpm bumpversion build --force
     VERSION=$(python setup.py --version)
     if [[ $VERSION != *rc1 ]]; then exit 1; fi
 
     # make sure we can patch release
-    jlpm patch:release
-    jlpm patch:release console
-    jlpm patch:release filebrowser notebook
+    jlpm patch:release --force
+    jlpm patch:release console --force
+    jlpm patch:release filebrowser notebook --force
+
+    # make sure we can bump major JS releases
+    jlpm bumpversion minor --force
+    jlpm bump:js:major console --force
+    jlpm bump:js:major console notebook --force
 
     # Check yarn.lock file
     jlpm check --integrity
