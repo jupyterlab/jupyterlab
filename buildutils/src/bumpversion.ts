@@ -58,7 +58,7 @@ commander
     }
     let cmd = `lerna version -m \"New version\" --force-publish=* --no-push ${lernaVersion}`;
     if (opts.force) {
-      cmd += '--yes';
+      cmd += ' --yes';
     }
     utils.run(cmd);
 

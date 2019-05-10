@@ -37,7 +37,7 @@ commander
     const pkgs = toBump.join(',');
     let cmd = `lerna version premajor --preid=${preId} --force-publish=${pkgs} --no-push`;
     if (options.force) {
-      cmd += '--yes';
+      cmd += ' --yes';
     }
     utils.run(cmd);
   });

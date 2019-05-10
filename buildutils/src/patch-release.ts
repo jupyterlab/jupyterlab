@@ -26,7 +26,7 @@ commander
     if (pkgs) {
       let cmd = `lerna version patch -m \"New version\" --force-publish=${pkgs} --no-push`;
       if (options.force) {
-        cmd += '--yes';
+        cmd += ' --yes';
       }
       utils.run(cmd);
     }
