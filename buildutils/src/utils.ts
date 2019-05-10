@@ -143,9 +143,6 @@ export function postbump() {
   data.jupyterlab.version = curr;
   writeJSONFile(filePath, data);
 
-  // Update core mode.
-  run('node buildutils/lib/update-core-mode.js');
-
   // Create a git tag and commit.
   run(`git tag v${curr}`);
   run(`git commit -am "Publish ${curr}"`);

@@ -29,6 +29,9 @@ async function main() {
     });
   });
 
+  // Update core mode.
+  utils.run('node buildutils/lib/update-core-mode.js');
+
   // Make the Python release.
   utils.run('python setup.py sdist');
   utils.run('python setup.py bdist_wheel --universal');
