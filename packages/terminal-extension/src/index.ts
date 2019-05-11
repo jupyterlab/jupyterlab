@@ -185,10 +185,6 @@ function activate(
       command: CommandIDs.setTheme,
       args: { theme: 'dark', isPalette: false }
     });
-    mainMenu.settingsMenu.addGroup(
-      [{ type: 'submenu', submenu: themeMenu }],
-      2
-    );
 
     // Add some commands to the "View" menu.
     mainMenu.settingsMenu.addGroup(
