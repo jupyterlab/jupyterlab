@@ -1,6 +1,6 @@
 {
   "name": "typescript-browser-with-output",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.6",
   "private": true,
   "scripts": {
     "build": "tsc && webpack",
@@ -8,18 +8,17 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/outputarea": "^1.0.0-alpha.3",
-    "@jupyterlab/rendermime": "^1.0.0-alpha.3",
-    "@jupyterlab/services": "^4.0.0-alpha.3",
+    "@jupyterlab/outputarea": "^1.0.0-alpha.6",
+    "@jupyterlab/rendermime": "^1.0.0-alpha.6",
+    "@jupyterlab/services": "^4.0.0-alpha.6",
     "es6-promise": "~4.1.1"
   },
   "devDependencies": {
-    "css-loader": "~0.28.7",
+    "css-loader": "~2.1.1",
     "rimraf": "~2.6.2",
-    "style-loader": "~0.21.0",
-    "tslint": "~5.10.0",
-    "typescript": "~3.3.1",
-    "webpack": "~4.12.0",
-    "webpack-cli": "^3.0.3"
+    "style-loader": "~0.23.1",
+    "typescript": "~3.4.3",
+    "webpack": "~4.29.6",
+    "webpack-cli": "^3.3.0"
   }
 }

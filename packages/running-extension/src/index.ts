@@ -33,7 +33,7 @@ function activate(
 ): void {
   let running = new RunningSessions({ manager: app.serviceManager });
   running.id = 'jp-running-sessions';
-  running.title.iconClass = 'jp-DirectionsRunIcon jp-SideBar-tabIcon';
+  running.title.iconClass = 'jp-RunningIcon jp-SideBar-tabIcon';
   running.title.caption = 'Running Terminals and Kernels';
 
   // Let the application restorer track the running panel for restoration of
@@ -46,14 +46,14 @@ function activate(
   running.sessionOpenRequested.connect((sender, model) => {
     let path = model.path;
     if (model.type.toLowerCase() === 'console') {
-      app.commands.execute('console:open', { path });
+      void app.commands.execute('console:open', { path });
     } else {
-      app.commands.execute('docmanager:open', { path });
+      void app.commands.execute('docmanager:open', { path });
     }
   });
 
   running.terminalOpenRequested.connect((sender, model) => {
-    app.commands.execute('terminal:open', { name: model.name });
+    void app.commands.execute('terminal:open', { name: model.name });
   });
 
   // Rank has been chosen somewhat arbitrarily to give priority to the running

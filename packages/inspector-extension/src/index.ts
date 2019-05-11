@@ -64,7 +64,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         inspector = new MainAreaWidget({ content: new InspectorPanel() });
         inspector.id = 'jp-inspector';
         inspector.title.label = title;
-        tracker.add(inspector);
+        void tracker.add(inspector);
         source = source && !source.isDisposed ? source : null;
         inspector.content.source = source;
       }

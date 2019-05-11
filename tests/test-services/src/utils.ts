@@ -21,16 +21,16 @@ import {
   Contents,
   TerminalSession,
   ServerConnection
-} from '@jupyterlab/services/src';
+} from '@jupyterlab/services';
 
-import { Kernel, KernelMessage } from '@jupyterlab/services/src/kernel';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 
 import {
   deserialize,
   serialize
-} from '@jupyterlab/services/src/kernel/serialize';
+} from '@jupyterlab/services/lib/kernel/serialize';
 
-import { Session } from '@jupyterlab/services/src/session';
+import { Session } from '@jupyterlab/services';
 
 // stub for node global
 declare var global: any;
@@ -749,22 +749,19 @@ export async function testEmission<T, U, V>(
 ): Promise<V> {
   const done = new PromiseDelegate<V>();
   const object = {};
-  signal.connect(
-    (sender: T, args: U) => {
-      if (!options.find || options.find(sender, args)) {
-        try {
-          Signal.disconnectReceiver(object);
-          if (options.test) {
-            options.test(sender, args);
-          }
-        } catch (e) {
-          done.reject(e);
+  signal.connect((sender: T, args: U) => {
+    if (!options.find || options.find(sender, args)) {
+      try {
+        Signal.disconnectReceiver(object);
+        if (options.test) {
+          options.test(sender, args);
         }
-        done.resolve(options.value || undefined);
+      } catch (e) {
+        done.reject(e);
       }
-    },
-    object
-  );
+      done.resolve(options.value || undefined);
+    }
+  }, object);
   return done.promise;
 }
 

@@ -57,7 +57,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
 export default plugin;
 `;
 
-inquirer.prompt(questions).then(answers => {
+void inquirer.prompt(questions).then(answers => {
   let { name, title, description } = answers;
   let dest = path.resolve(path.join('.', name));
   if (fs.existsSync(dest)) {
@@ -81,7 +81,7 @@ inquirer.prompt(questions).then(answers => {
   ['lib', 'node_modules', 'static'].forEach(folder => {
     let folderPath = path.join('.', name, folder);
     if (fs.existsSync(folderPath)) {
-      fs.remove(folderPath);
+      fs.removeSync(folderPath);
     }
   });
 

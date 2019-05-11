@@ -331,7 +331,7 @@
   white-space: pre-wrap;
 }
 
-.jp-RenderedHTMLCommon code {
+.jp-RenderedHTMLCommon :not(pre) > code {
   background-color: var(--jp-layout-color2);
   padding: 1px 5px;
 }
@@ -544,12 +544,4 @@ h6:hover .jp-InternalAnchorLink {
  */
 .jp-RenderedHTMLCommon > *:last-child {
   margin-bottom: 0.5em;
-}
-
-/*-----------------------------------------------------------------------------
-| RenderedPDF
-|----------------------------------------------------------------------------*/
-
-.jp-RenderedPDF {
-  font-size: var(--jp-ui-font-size1);
 }

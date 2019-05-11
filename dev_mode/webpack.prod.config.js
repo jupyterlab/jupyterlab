@@ -1,4 +1,4 @@
-var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 var merge = require('webpack-merge');
 var config = require('./webpack.config');
 
@@ -7,15 +7,17 @@ config[0] = merge(config[0], {
   devtool: 'source-map',
   optimization: {
     minimizer: [
-      new UglifyJsPlugin({
+      new TerserPlugin({
         parallel: true,
         sourceMap: true,
-        uglifyOptions: {
-          beautify: false,
-          comments: false,
+        terserOptions: {
           compress: false,
           ecma: 6,
-          mangle: true
+          mangle: true,
+          output: {
+            beautify: false,
+            comments: false
+          }
         },
         cache: process.platform !== 'win32'
       })

@@ -92,32 +92,68 @@ const FILE_ICON_CLASS = 'jp-mod-file';
 const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
 
 /**
- * Props for a Session, with items of type M
+ * Properties for a session list displaying items of generic type `M`.
  */
 type SessionProps<M> = {
-  // A signal that ttracks when the `open` is clicked on a session item
+  /**
+   * A signal that tracks when the `open` is clicked on a session item.
+   */
   openRequested: Signal<RunningSessions, M>;
+
+  /**
+   * The session manager.
+   */
   manager: {
-    // called when the shutdown all button is pressed
+    /**
+     * The function called when the shutdown all button is pressed.
+     */
     shutdownAll(): void;
-    // A signal that should emit a new list of items whenever they are changed
+
+    /**
+     * A signal that should emit a new list of items whenever they are changed.
+     */
     runningChanged: ISignal<any, M[]>;
-    // list the running models.
+
+    /**
+     * Returns a list the running models.
+     */
     running(): IIterator<M>;
   };
-  // called when the shutdown button is pressed on a particular item
+
+  /**
+   * The function called when the shutdown button is pressed on an item.
+   */
   shutdown: (model: M) => void;
-  // optitonal filter that is applied to the items from `runningChanged`
+
+  /**
+   * The filter that is applied to the items from `runningChanged`.
+   */
   filterRunning?: (model: M) => boolean;
-  // Name that is shown to the user
+
+  /**
+   * The name displayed to the user.
+   */
   name: string;
-  // Class for the icon
+
+  /**
+   * Returns the icon class for an item.
+   */
   iconClass: (model: M) => string;
-  // called to determine the label for each item
+
+  /**
+   * Returns the label for an item.
+   */
   label: (model: M) => string;
-  // called to determine the `title` attribute for each item, which is revealed on hover
+
+  /**
+   * Called to determine the `title` attribute for each item, which is revealed
+   * on hover.
+   */
   labelTitle?: (model: M) => string;
-  // flag that set's whether it should display
+
+  /**
+   * Flag that sets whether it sessions should be displayed.
+   */
   available: boolean;
 };
 
@@ -137,7 +173,7 @@ function Item<M>(props: SessionProps<M> & { model: M }) {
         className={`${SHUTDOWN_BUTTON_CLASS} jp-mod-styled`}
         onClick={() => props.shutdown(model)}
       >
-        SHUTDOWN
+        SHUT DOWN
       </button>
     </li>
   );
@@ -174,15 +210,19 @@ function List<M>(props: SessionProps<M>) {
 }
 
 /**
- * The Section component contains the shared look and feel for an interactive list of kernels and sessions.
+ * The Section component contains the shared look and feel for an interactive
+ * list of kernels and sessions.
  *
  * It is specialized for each based on it's props.
  */
 function Section<M>(props: SessionProps<M>) {
   function onShutdown() {
-    showDialog({
-      title: `Shutdown All ${props.name} Sessions?`,
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })]
+    void showDialog({
+      title: `Shut Down All ${props.name} Sessions?`,
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({ label: 'SHUT DOWN ALL' })
+      ]
     }).then(result => {
       if (result.button.accept) {
         props.manager.shutdownAll();
@@ -196,8 +236,8 @@ function Section<M>(props: SessionProps<M>) {
           <header className={SECTION_HEADER_CLASS}>
             <h2>{props.name} Sessions</h2>
             <ToolbarButtonComponent
-              tooltip={`Shutdown All ${props.name} Sessions…`}
-              iconClassName="jp-CloseIcon jp-Icon jp-Icon-16"
+              tooltip={`Shut Down All ${props.name} Sessions…`}
+              iconClassName="jp-CloseIcon"
               onClick={onShutdown}
             />
           </header>
@@ -229,12 +269,12 @@ function RunningSessionsComponent({
       <div className={HEADER_CLASS}>
         <ToolbarButtonComponent
           tooltip="Refresh List"
-          iconClassName="jp-RefreshIcon jp-Icon jp-Icon-16"
+          iconClassName="jp-RefreshIcon"
           onClick={() => {
             if (terminalsAvailable) {
-              manager.terminals.refreshRunning();
+              void manager.terminals.refreshRunning();
             }
-            manager.sessions.refreshRunning();
+            void manager.sessions.refreshRunning();
           }}
         />
       </div>

@@ -26,10 +26,6 @@ flags['no-build'] = (
     {'BaseExtensionApp': {'should_build': False}},
     "Defer building the app after the action."
 )
-flags['dev-build'] = (
-    {'BaseExtensionApp': {'dev_build': True}},
-    "Build in Development mode"
-)
 flags['clean'] = (
     {'BaseExtensionApp': {'should_clean': True}},
     "Cleanup intermediate files after the action."
@@ -47,8 +43,15 @@ update_flags['all'] = (
     "Update all extensions"
 )
 
+uninstall_flags = copy(flags)
+uninstall_flags['all'] = (
+    {'UninstallLabExtensionApp': {'all': True}},
+    "Uninstall all extensions"
+)
+
 aliases = dict(base_aliases)
 aliases['app-dir'] = 'BaseExtensionApp.app_dir'
+aliases['dev-build'] = 'BaseExtensionApp.dev_build'
 
 VERSION = get_app_version()
 
@@ -158,11 +161,15 @@ class UnlinkLabExtensionApp(BaseExtensionApp):
 
 class UninstallLabExtensionApp(BaseExtensionApp):
     description = "Uninstall labextension(s) by name"
+    flags = uninstall_flags
+
+    all = Bool(False, config=True,
+        help="Whether to uninstall all extensions")
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
         return any([
-            uninstall_extension(arg, self.app_dir, logger=self.log)
+            uninstall_extension(arg, all_=self.all, app_dir=self.app_dir, logger=self.log)
             for arg in self.extra_args
         ])
 

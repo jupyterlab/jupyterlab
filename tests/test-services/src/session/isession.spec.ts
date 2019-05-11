@@ -9,9 +9,9 @@ import { UUID } from '@phosphor/coreutils';
 
 import { Signal } from '@phosphor/signaling';
 
-import { Kernel, KernelMessage } from '@jupyterlab/services/src/kernel';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import { Session } from '@jupyterlab/services/src/session';
+import { Session } from '@jupyterlab/services';
 
 import {
   expectFailure,
@@ -70,13 +70,10 @@ describe('session', () => {
       it('should emit when the kernel changes', async () => {
         let called: Session.IKernelChangedArgs | null = null;
         const object = {};
-        defaultSession.kernelChanged.connect(
-          (s, args) => {
-            called = args;
-            Signal.disconnectReceiver(object);
-          },
-          object
-        );
+        defaultSession.kernelChanged.connect((s, args) => {
+          called = args;
+          Signal.disconnectReceiver(object);
+        }, object);
         const previous = defaultSession.kernel;
         await defaultSession.changeKernel({ name: previous.name });
         await defaultSession.kernel.ready;
@@ -143,15 +140,12 @@ describe('session', () => {
         const newPath = UUID.uuid4();
         let called = false;
         const object = {};
-        defaultSession.propertyChanged.connect(
-          (s, type) => {
-            expect(defaultSession.path).to.equal(newPath);
-            expect(type).to.equal('path');
-            called = true;
-            Signal.disconnectReceiver(object);
-          },
-          object
-        );
+        defaultSession.propertyChanged.connect((s, type) => {
+          expect(defaultSession.path).to.equal(newPath);
+          expect(type).to.equal('path');
+          called = true;
+          Signal.disconnectReceiver(object);
+        }, object);
         await defaultSession.setPath(newPath);
         expect(called).to.equal(true);
       });

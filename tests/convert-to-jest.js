@@ -77,8 +77,10 @@ utils.writeJSONFile(path.join(testSrc, 'tsconfig.json'), tsData);
   utils.run(`git rm -f ./test-${name}/${fname}`);
 });
 
-// Copy run.py from coreutils
-fs.copySync(path.join(coreUtils, 'run.py'), path.join(testSrc, 'run.py'));
+// Copy common files from coreutils
+['run.py', 'babel.config.js'].forEach(fname => {
+  fs.copySync(path.join(coreUtils, fname, path.join(testSrc, fname)));
+});
 
 // Add new files to git
 utils.run(`git add ./test-${name}/run.py ./test-${name}/jest.config.js`);

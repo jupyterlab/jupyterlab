@@ -10,7 +10,8 @@ import { Menu, Widget } from '@phosphor/widgets';
 import {
   ILabShell,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  IRouter
 } from '@jupyterlab/application';
 
 import { ICommandPalette, showDialog, Dialog } from '@jupyterlab/apputils';
@@ -58,11 +59,11 @@ export namespace CommandIDs {
 
   export const closeAndCleanup = 'filemenu:close-and-cleanup';
 
-  export const persistAndSave = 'filemenu:persist-and-save';
-
   export const createConsole = 'filemenu:create-console';
 
-  export const quit = 'filemenu:quit';
+  export const shutdown = 'filemenu:shutdown';
+
+  export const logout = 'filemenu:logout';
 
   export const openKernel = 'kernelmenu:open';
 
@@ -117,12 +118,13 @@ export namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
-  requires: [ICommandPalette],
+  requires: [ICommandPalette, IRouter],
   optional: [IInspector, ILabShell],
   provides: IMainMenu,
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
+    router: IRouter,
     inspector: IInspector | null,
     labShell: ILabShell | null
   ): IMainMenu => {
@@ -142,7 +144,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 
     // Create the application menus.
     createEditMenu(app, menu.editMenu);
-    createFileMenu(app, menu.fileMenu, inspector);
+    createFileMenu(app, menu.fileMenu, router, inspector);
     createKernelMenu(app, menu.kernelMenu);
     createRunMenu(app, menu.runMenu);
     createSettingsMenu(app, menu.settingsMenu);
@@ -202,7 +204,11 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     // Add some of the commands defined here to the command palette.
     if (menu.fileMenu.quitEntry) {
       palette.addItem({
-        command: CommandIDs.quit,
+        command: CommandIDs.shutdown,
+        category: 'Main Area'
+      });
+      palette.addItem({
+        command: CommandIDs.logout,
         category: 'Main Area'
       });
     }
@@ -302,6 +308,7 @@ export function createEditMenu(app: JupyterFrontEnd, menu: EditMenu): void {
 export function createFileMenu(
   app: JupyterFrontEnd,
   menu: FileMenu,
+  router: IRouter,
   inspector: IInspector | null
 ): void {
   const commands = menu.menu.commands;
@@ -329,33 +336,6 @@ export function createFileMenu(
     )
   });
 
-  // Add a delegator command for persisting data then saving.
-  commands.addCommand(CommandIDs.persistAndSave, {
-    label: () => {
-      const action = Private.delegateLabel(
-        app,
-        menu.persistAndSavers,
-        'action'
-      );
-      const name = Private.delegateLabel(app, menu.persistAndSavers, 'name');
-      return `Save ${name} ${action || 'with Extras'}`;
-    },
-    isEnabled: args => {
-      return (
-        Private.delegateEnabled(
-          app,
-          menu.persistAndSavers,
-          'persistAndSave'
-        )() && commands.isEnabled('docmanager:save', args)
-      );
-    },
-    execute: Private.delegateExecute(
-      app,
-      menu.persistAndSavers,
-      'persistAndSave'
-    )
-  });
-
   // Add a delegator command for creating a console for an activity.
   commands.addCommand(CommandIDs.createConsole, {
     label: () => {
@@ -371,26 +351,33 @@ export function createFileMenu(
     execute: Private.delegateExecute(app, menu.consoleCreators, 'createConsole')
   });
 
-  commands.addCommand(CommandIDs.quit, {
-    label: 'Quit',
-    caption: 'Quit JupyterLab',
+  commands.addCommand(CommandIDs.shutdown, {
+    label: 'Shut Down',
+    caption: 'Shut down JupyterLab',
     execute: () => {
-      showDialog({
-        title: 'Quit confirmation',
-        body: 'Please confirm you want to quit JupyterLab.',
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Quit' })]
+      return showDialog({
+        title: 'Shutdown confirmation',
+        body: 'Please confirm you want to shut down JupyterLab.',
+        buttons: [
+          Dialog.cancelButton(),
+          Dialog.warnButton({ label: 'Shut Down' })
+        ]
       }).then(result => {
         if (result.button.accept) {
           let setting = ServerConnection.makeSettings();
           let apiURL = URLExt.join(setting.baseUrl, 'api/shutdown');
-          ServerConnection.makeRequest(apiURL, { method: 'POST' }, setting)
+          return ServerConnection.makeRequest(
+            apiURL,
+            { method: 'POST' },
+            setting
+          )
             .then(result => {
               if (result.ok) {
                 // Close this window if the shutdown request has been successful
                 let body = document.createElement('div');
                 body.innerHTML = `<p>You have shut down the Jupyter server. You can now close this tab.</p>
                   <p>To use JupyterLab again, you will need to relaunch it.</p>`;
-                showDialog({
+                void showDialog({
                   title: 'Server stopped',
                   body: new Widget({ node: body }),
                   buttons: []
@@ -405,6 +392,14 @@ export function createFileMenu(
             });
         }
       });
+    }
+  });
+
+  commands.addCommand(CommandIDs.logout, {
+    label: 'Log Out',
+    caption: 'Log out of JupyterLab',
+    execute: () => {
+      router.navigate('/logout', { hard: true });
     }
   });
 
@@ -423,9 +418,9 @@ export function createFileMenu(
 
   // Add the close group
   const closeGroup = [
-    'docmanager:close',
+    'application:close',
     'filemenu:close-and-cleanup',
-    'docmanager:close-all-files'
+    'application:close-all'
   ].map(command => {
     return { command };
   });
@@ -433,7 +428,6 @@ export function createFileMenu(
   // Add save group.
   const saveGroup = [
     'docmanager:save',
-    'filemenu:persist-and-save',
     'docmanager:save-as',
     'docmanager:save-all'
   ].map(command => {
@@ -450,7 +444,10 @@ export function createFileMenu(
   });
 
   // Add the quit group.
-  const quitGroup = [{ command: 'filemenu:quit' }];
+  const quitGroup = [
+    { command: 'filemenu:logout' },
+    { command: 'filemenu:shutdown' }
+  ];
 
   menu.addGroup(newGroup, 0);
   menu.addGroup(newViewGroup, 1);
@@ -513,23 +510,23 @@ export function createKernelMenu(app: JupyterFrontEnd, menu: KernelMenu): void {
   });
 
   commands.addCommand(CommandIDs.shutdownKernel, {
-    label: 'Shutdown Kernel',
+    label: 'Shut Down Kernel',
     isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'shutdownKernel'),
     execute: Private.delegateExecute(app, menu.kernelUsers, 'shutdownKernel')
   });
 
   commands.addCommand(CommandIDs.shutdownAllKernels, {
-    label: 'Shutdown All Kernels…',
+    label: 'Shut Down All Kernels…',
     isEnabled: () => {
       return app.serviceManager.sessions.running().next() !== undefined;
     },
     execute: () => {
-      showDialog({
-        title: 'Shutdown All?',
+      return showDialog({
+        title: 'Shut Down All?',
         body: 'Shut down all kernels?',
         buttons: [
           Dialog.cancelButton(),
-          Dialog.warnButton({ label: 'SHUTDOWN' })
+          Dialog.warnButton({ label: 'SHUT DOWN ALL' })
         ]
       }).then(result => {
         if (result.button.accept) {
@@ -674,7 +671,6 @@ export function createRunMenu(app: JupyterFrontEnd, menu: RunMenu): void {
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAll'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAll')
   });
-
   commands.addCommand(CommandIDs.restartAndRunAll, {
     label: () => {
       const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
@@ -762,7 +758,7 @@ export function createTabsMenu(
   });
 
   if (labShell) {
-    app.restored.then(() => {
+    void app.restored.then(() => {
       // Iterate over the current widgets in the
       // main area, and add them to the tab group
       // of the menu.
@@ -904,7 +900,7 @@ namespace Private {
       return (
         !!extender &&
         !!extender[toggled] &&
-        !!((extender[toggled] as any) as (w: Widget) => (() => boolean))(widget)
+        !!((extender[toggled] as any) as (w: Widget) => () => boolean)(widget)
       );
     };
   }

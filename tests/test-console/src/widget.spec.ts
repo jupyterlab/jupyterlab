@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { Message } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
 
@@ -18,11 +18,7 @@ import {
   RawCell
 } from '@jupyterlab/cells';
 
-import {
-  createClientSession,
-  framePromise,
-  NBTestUtils
-} from '@jupyterlab/testutils';
+import { createClientSession, NBTestUtils } from '@jupyterlab/testutils';
 
 import {
   createConsoleFactory,
@@ -35,23 +31,23 @@ class TestConsole extends CodeConsole {
   methods: string[] = [];
 
   protected newPromptCell(): void {
-    super.newPromptCell();
     this.methods.push('newPromptCell');
+    super.newPromptCell();
   }
 
   protected onActivateRequest(msg: Message): void {
-    super.onActivateRequest(msg);
     this.methods.push('onActivateRequest');
+    super.onActivateRequest(msg);
   }
 
   protected onAfterAttach(msg: Message): void {
-    super.onAfterAttach(msg);
     this.methods.push('onAfterAttach');
+    super.onAfterAttach(msg);
   }
 
   protected onUpdateRequest(msg: Message): void {
-    super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
+    super.onUpdateRequest(msg);
   }
 }
 
@@ -153,7 +149,11 @@ describe('console/widget', () => {
       it('should add a code cell to the content widget', () => {
         const contentFactory = NBTestUtils.createCodeCellFactory();
         const model = new CodeCellModel({});
-        const cell = new CodeCell({ model, contentFactory, rendermime });
+        const cell = new CodeCell({
+          model,
+          contentFactory,
+          rendermime
+        }).initializeState();
         Widget.attach(widget, document.body);
         expect(widget.cells.length).to.equal(0);
         widget.addCell(cell);
@@ -277,13 +277,11 @@ describe('console/widget', () => {
     });
 
     describe('#onActivateRequest()', () => {
-      it('should focus the prompt editor', async () => {
+      it('should focus the prompt editor', () => {
         expect(widget.promptCell).to.not.be.ok;
         expect(widget.methods).to.not.contain('onActivateRequest');
         Widget.attach(widget, document.body);
-        await framePromise();
-        widget.activate();
-        await framePromise();
+        MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
         expect(widget.promptCell.editor.hasFocus()).to.equal(true);
       });

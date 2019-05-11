@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { MainAreaWidget, Toolbar } from '@jupyterlab/apputils/src';
+import { MainAreaWidget, Toolbar } from '@jupyterlab/apputils';
 
 import { MessageLoop } from '@phosphor/messaging';
 

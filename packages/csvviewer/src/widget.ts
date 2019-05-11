@@ -247,7 +247,7 @@ export class CSVViewer extends Widget {
 
     this._searchService = new GridSearchService(this._grid);
 
-    this._context.ready.then(() => {
+    void this._context.ready.then(() => {
       this._updateGrid();
       this._revealed.resolve(undefined);
       // Throttle the rendering rate of the widget.
@@ -255,10 +255,7 @@ export class CSVViewer extends Widget {
         signal: context.model.contentChanged,
         timeout: RENDER_TIMEOUT
       });
-      this._monitor.activityStopped.connect(
-        this._updateGrid,
-        this
-      );
+      this._monitor.activityStopped.connect(this._updateGrid, this);
     });
   }
 
@@ -431,7 +428,7 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
     topRow = topRow.split('-')[0];
 
     // go to that row
-    this.context.ready.then(() => {
+    void this.context.ready.then(() => {
       this.content.goToLine(Number(topRow));
     });
   }

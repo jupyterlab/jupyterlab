@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import CodeMirror from 'codemirror';
 
-import { Mode } from '@jupyterlab/codemirror/src/mode';
+import { Mode } from '@jupyterlab/codemirror';
 
 function fakeMode(name: string) {
   return {

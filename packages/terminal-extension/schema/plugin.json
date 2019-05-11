@@ -17,7 +17,7 @@
       "minimum": 1.0
     },
     "theme": {
-      "enum": ["dark", "light"]
+      "enum": ["dark", "light", "inherit"]
     },
     "scrollback": {
       "type": "number"
@@ -46,13 +46,19 @@
       "title": "Theme",
       "description": "The theme for the terminal.",
       "$ref": "#/definitions/theme",
-      "default": "dark"
+      "default": "inherit"
     },
     "scrollback": {
       "title": "Scrollback Buffer",
       "description": "The amount of scrollback beyond initial viewport",
       "$ref": "#/definitions/lineHeight",
       "default": 1000
+    },
+    "shutdownOnClose": {
+      "title": "Shut down on close",
+      "description": "Whether to shut down or not the session when closing the terminal.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

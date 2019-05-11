@@ -245,22 +245,24 @@ namespace Private {
 
     // Use explicit cache buster when `no-store` is set since
     // not all browsers use it properly.
-    let cache = init.cache || settings.init.cache;
+    const cache = init.cache || settings.init.cache;
     if (cache === 'no-store') {
       // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Bypassing_the_cache
       url += (/\?/.test(url) ? '&' : '?') + new Date().getTime();
     }
 
-    let request = new settings.Request(url, { ...settings.init, ...init });
+    const request = new settings.Request(url, { ...settings.init, ...init });
 
-    // Handle authentication.
+    // Handle authentication. Authentication can be overdetermined by
+    // settings token and XSRF token.
     let authenticated = false;
     if (settings.token) {
       authenticated = true;
       request.headers.append('Authorization', `token ${settings.token}`);
-    } else if (typeof document !== 'undefined' && document.cookie) {
-      let xsrfToken = getCookie('_xsrf');
-      if (xsrfToken !== void 0) {
+    }
+    if (typeof document !== 'undefined' && document && document.cookie) {
+      const xsrfToken = getCookie('_xsrf');
+      if (xsrfToken !== undefined) {
         authenticated = true;
         request.headers.append('X-XSRFToken', xsrfToken);
       }
@@ -282,9 +284,9 @@ namespace Private {
   /**
    * Get a cookie from the document.
    */
-  function getCookie(name: string) {
-    // from tornado docs: http://www.tornadoweb.org/en/stable/guide/security.html
-    let r = document.cookie.match('\\b' + name + '=([^;]*)\\b');
-    return r ? r[1] : void 0;
+  function getCookie(name: string): string | undefined {
+    // From http://www.tornadoweb.org/en/stable/guide/security.html
+    const matches = document.cookie.match('\\b' + name + '=([^;]*)\\b');
+    return matches ? matches[1] : undefined;
   }
 }

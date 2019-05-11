@@ -4,6 +4,10 @@
 import { CommandRegistry } from '@phosphor/commands';
 import { CompletionHandler } from '@jupyterlab/completer';
 import { NotebookPanel, NotebookActions } from '@jupyterlab/notebook';
+import {
+  SearchInstance,
+  NotebookSearchProvider
+} from '@jupyterlab/documentsearch';
 import { CommandPalette } from '@phosphor/widgets';
 
 /**
@@ -14,6 +18,9 @@ const cmdIds = {
   select: 'completer:select',
   invokeNotebook: 'completer:invoke-notebook',
   selectNotebook: 'completer:select-notebook',
+  startSearch: 'documentsearch:start-search',
+  findNext: 'documentsearch:find-next',
+  findPrevious: 'documentsearch:find-previous',
   save: 'notebook:save',
   interrupt: 'notebook:interrupt-kernel',
   restart: 'notebook:restart-kernel',
@@ -67,11 +74,54 @@ export const SetupCommands = (
     label: 'Save',
     execute: () => nbWidget.context.save()
   });
+
+  let searchInstance: SearchInstance;
+  commands.addCommand(cmdIds.startSearch, {
+    label: 'Find...',
+    execute: () => {
+      if (searchInstance) {
+        searchInstance.focusInput();
+        return;
+      }
+      const provider = new NotebookSearchProvider();
+      searchInstance = new SearchInstance(nbWidget, provider);
+      searchInstance.disposed.connect(() => {
+        searchInstance = undefined;
+        // find next and previous are now not enabled
+        commands.notifyCommandChanged();
+      });
+      // find next and previous are now enabled
+      commands.notifyCommandChanged();
+      searchInstance.focusInput();
+    }
+  });
+  commands.addCommand(cmdIds.findNext, {
+    label: 'Find Next',
+    isEnabled: () => !!searchInstance,
+    execute: async () => {
+      if (!searchInstance) {
+        return;
+      }
+      await searchInstance.provider.highlightNext();
+      searchInstance.updateIndices();
+    }
+  });
+  commands.addCommand(cmdIds.findPrevious, {
+    label: 'Find Previous',
+    isEnabled: () => !!searchInstance,
+    execute: async () => {
+      if (!searchInstance) {
+        return;
+      }
+      await searchInstance.provider.highlightPrevious();
+      searchInstance.updateIndices();
+    }
+  });
   commands.addCommand(cmdIds.interrupt, {
     label: 'Interrupt',
-    execute: () => {
+    execute: async () => {
       if (nbWidget.context.session.kernel) {
-        nbWidget.context.session.kernel.interrupt();
+        await nbWidget.context.session.kernel.interrupt();
       }
     }
   });
@@ -86,7 +136,10 @@ export const SetupCommands = (
   commands.addCommand(cmdIds.runAndAdvance, {
     label: 'Run and Advance',
     execute: () => {
-      NotebookActions.runAndAdvance(nbWidget.content, nbWidget.context.session);
+      return NotebookActions.runAndAdvance(
+        nbWidget.content,
+        nbWidget.context.session
+      );
     }
   });
   commands.addCommand(cmdIds.editMode, {
@@ -140,7 +193,10 @@ export const SetupCommands = (
     cmdIds.restart,
     cmdIds.editMode,
     cmdIds.commandMode,
-    cmdIds.switchKernel
+    cmdIds.switchKernel,
+    cmdIds.startSearch,
+    cmdIds.findNext,
+    cmdIds.findPrevious
   ].forEach(command => palette.addItem({ command, category }));
 
   category = 'Notebook Cell Operations';
@@ -176,6 +232,21 @@ export const SetupCommands = (
       selector: '.jp-Notebook',
       keys: ['Accel S'],
       command: cmdIds.save
+    },
+    {
+      selector: '.jp-Notebook',
+      keys: ['Accel F'],
+      command: cmdIds.startSearch
+    },
+    {
+      selector: '.jp-Notebook',
+      keys: ['Accel G'],
+      command: cmdIds.findNext
+    },
+    {
+      selector: '.jp-Notebook',
+      keys: ['Accel Shift G'],
+      command: cmdIds.findPrevious
     },
     {
       selector: '.jp-Notebook.jp-mod-commandMode:focus',

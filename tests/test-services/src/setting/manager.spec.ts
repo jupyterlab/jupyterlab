@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { ServerConnection, SettingManager } from '@jupyterlab/services/src';
+import { ServerConnection, SettingManager } from '@jupyterlab/services';
 
 import { init } from '../utils';
 

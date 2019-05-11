@@ -5,11 +5,6 @@
   "jupyter.lab.setting-icon-label": "Document Manager",
   "jupyter.lab.shortcuts": [
     {
-      "command": "docmanager:close",
-      "keys": ["Ctrl Q"],
-      "selector": ".jp-Activity"
-    },
-    {
       "command": "docmanager:save",
       "keys": ["Accel S"],
       "selector": "body"

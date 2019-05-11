@@ -32,10 +32,7 @@ export class DocumentModel extends CodeEditor.Model
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     super({ modelDB });
     this._defaultLang = languagePreference || '';
-    this.value.changed.connect(
-      this.triggerContentChange,
-      this
-    );
+    this.value.changed.connect(this.triggerContentChange, this);
   }
 
   /**
@@ -290,6 +287,7 @@ export abstract class ABCWidgetFactory<
     this._modelName = options.modelName || 'text';
     this._preferKernel = !!options.preferKernel;
     this._canStartKernel = !!options.canStartKernel;
+    this._shutdownOnClose = !!options.shutdownOnClose;
     this._toolbarFactory = options.toolbarFactory;
   }
 
@@ -372,6 +370,16 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
+   * Whether the kernel should be shutdown when the widget is closed.
+   */
+  get shutdownOnClose(): boolean {
+    return this._shutdownOnClose;
+  }
+  set shutdownOnClose(value: boolean) {
+    this._shutdownOnClose = value;
+  }
+
+  /**
    * Create a new widget given a document model and a context.
    *
    * #### Notes
@@ -417,6 +425,7 @@ export abstract class ABCWidgetFactory<
   private _name: string;
   private _readOnly: boolean;
   private _canStartKernel: boolean;
+  private _shutdownOnClose: boolean;
   private _preferKernel: boolean;
   private _modelName: string;
   private _fileTypes: string[];
@@ -447,18 +456,12 @@ export class DocumentWidget<
     this.context = options.context;
 
     // Handle context path changes
-    this.context.pathChanged.connect(
-      this._onPathChanged,
-      this
-    );
+    this.context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged(this.context, this.context.path);
 
     // Listen for changes in the dirty state.
-    this.context.model.stateChanged.connect(
-      this._onModelStateChanged,
-      this
-    );
-    this.context.ready.then(() => {
+    this.context.model.stateChanged.connect(this._onModelStateChanged, this);
+    void this.context.ready.then(() => {
       this._handleDirtyState();
     });
   }

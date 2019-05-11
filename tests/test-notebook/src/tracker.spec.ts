@@ -56,14 +56,14 @@ describe('@jupyterlab/notebook', () => {
         const tracker = new NotebookTracker({ namespace });
         const panel = NBTestUtils.createNotebookPanel(context);
         panel.content.model.cells.clear();
-        tracker.add(panel);
+        void tracker.add(panel);
         expect(tracker.activeCell).to.be.null;
       });
 
       it('should be the active cell if a tracked notebook has one', () => {
         const tracker = new NotebookTracker({ namespace });
         const panel = NBTestUtils.createNotebookPanel(context);
-        tracker.add(panel);
+        void tracker.add(panel);
         panel.content.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(tracker.activeCell).to.be.an.instanceof(Cell);
         panel.dispose();
@@ -79,7 +79,7 @@ describe('@jupyterlab/notebook', () => {
           count++;
         });
         panel.content.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
-        tracker.add(panel);
+        void tracker.add(panel);
         expect(count).to.equal(1);
         panel.content.activeCellIndex = 1;
         expect(count).to.equal(2);
@@ -91,7 +91,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be called when the active cell changes', () => {
         const tracker = new TestTracker({ namespace });
         const panel = NBTestUtils.createNotebookPanel(context);
-        tracker.add(panel);
+        void tracker.add(panel);
         expect(tracker.methods).to.contain('onCurrentChanged');
       });
     });

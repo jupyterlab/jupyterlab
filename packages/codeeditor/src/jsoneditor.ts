@@ -32,21 +32,6 @@ const HOST_CLASS = 'jp-JSONEditor-host';
 const HEADER_CLASS = 'jp-JSONEditor-header';
 
 /**
- * The class name added to the title node.
- */
-const TITLE_CLASS = 'jp-JSONEditor-title';
-
-/**
- * The class name added to the collapser node.
- */
-const COLLAPSER_CLASS = 'jp-JSONEditor-collapser';
-
-/**
- * The class name added to the collapser node that is enabled.
- */
-const COLLAPSE_ENABLED_CLASS = 'jp-mod-collapse-enabled';
-
-/**
  * The class name added to the revert button.
  */
 const REVERT_CLASS = 'jp-JSONEditor-revertButton';
@@ -55,11 +40,6 @@ const REVERT_CLASS = 'jp-JSONEditor-revertButton';
  * The class name added to the commit button.
  */
 const COMMIT_CLASS = 'jp-JSONEditor-commitButton';
-
-/**
- * The class name added to collapsed items.
- */
-const COLLAPSED_CLASS = 'jp-mod-collapsed';
 
 /**
  * A widget for editing observable JSON.
@@ -76,16 +56,6 @@ export class JSONEditor extends Widget {
     this.headerNode = document.createElement('div');
     this.headerNode.className = HEADER_CLASS;
 
-    this.titleNode = document.createElement('span');
-    this.titleNode.className = TITLE_CLASS;
-    this.titleNode.textContent = options.title || '';
-
-    this.collapserNode = document.createElement('span');
-    this.collapserNode.className = COLLAPSER_CLASS;
-    if (options.collapsible) {
-      this.collapserNode.classList.add(COLLAPSE_ENABLED_CLASS);
-    }
-
     this.revertButtonNode = document.createElement('span');
     this.revertButtonNode.className = REVERT_CLASS;
     this.revertButtonNode.title = 'Revert changes to data';
@@ -97,8 +67,6 @@ export class JSONEditor extends Widget {
     this.editorHostNode = document.createElement('div');
     this.editorHostNode.className = HOST_CLASS;
 
-    this.headerNode.appendChild(this.titleNode);
-    this.headerNode.appendChild(this.collapserNode);
     this.headerNode.appendChild(this.revertButtonNode);
     this.headerNode.appendChild(this.commitButtonNode);
 
@@ -109,14 +77,10 @@ export class JSONEditor extends Widget {
 
     model.value.text = 'No data!';
     model.mimeType = 'application/json';
-    model.value.changed.connect(
-      this._onValueChanged,
-      this
-    );
+    model.value.changed.connect(this._onValueChanged, this);
     this.model = model;
     this.editor = options.editorFactory({ host: this.editorHostNode, model });
     this.editor.setOption('readOnly', true);
-    this.collapsible = !!options.collapsible;
   }
 
   /**
@@ -130,11 +94,6 @@ export class JSONEditor extends Widget {
   readonly model: CodeEditor.IModel;
 
   /**
-   * Whether the editor is collapsible.
-   */
-  readonly collapsible: boolean;
-
-  /**
    * The editor host node used by the JSON editor.
    */
   readonly headerNode: HTMLDivElement;
@@ -145,16 +104,6 @@ export class JSONEditor extends Widget {
   readonly editorHostNode: HTMLDivElement;
 
   /**
-   * The title node used by the JSON editor.
-   */
-  readonly titleNode: HTMLSpanElement;
-
-  /**
-   * Get the collapser node used by the JSON editor.
-   */
-  readonly collapserNode: HTMLSpanElement;
-
-  /**
    * The revert button used by the JSON editor.
    */
   readonly revertButtonNode: HTMLSpanElement;
@@ -163,16 +112,6 @@ export class JSONEditor extends Widget {
    * The commit button used by the JSON editor.
    */
   readonly commitButtonNode: HTMLSpanElement;
-
-  /**
-   * The title of the editor.
-   */
-  get editorTitle(): string {
-    return this.titleNode.textContent || '';
-  }
-  set editorTitle(value: string) {
-    this.titleNode.textContent = value;
-  }
 
   /**
    * The observable source.
@@ -190,10 +129,7 @@ export class JSONEditor extends Widget {
     this._source = value;
     this.editor.setOption('readOnly', value === null);
     if (value) {
-      value.changed.connect(
-        this._onSourceChanged,
-        this
-      );
+      value.changed.connect(this._onSourceChanged, this);
     }
     this._setValue();
   }
@@ -330,19 +266,6 @@ export class JSONEditor extends Widget {
           this._setValue();
         }
         break;
-      case this.titleNode:
-      case this.collapserNode:
-        if (this.collapsible) {
-          let collapser = this.collapserNode;
-          if (collapser.classList.contains(COLLAPSED_CLASS)) {
-            collapser.classList.remove(COLLAPSED_CLASS);
-            this.editorHostNode.classList.remove(COLLAPSED_CLASS);
-          } else {
-            collapser.classList.add(COLLAPSED_CLASS);
-            this.editorHostNode.classList.add(COLLAPSED_CLASS);
-          }
-        }
-        break;
       case this.editorHostNode:
         this.editor.focus();
         break;
@@ -356,7 +279,6 @@ export class JSONEditor extends Widget {
    */
   private _mergeContent(): void {
     let model = this.editor.model;
-    let current = this._source ? this._source.toJSON() : {};
     let old = this._originalValue;
     let user = JSON.parse(model.value.text) as JSONObject;
     let source = this.source;
@@ -364,22 +286,18 @@ export class JSONEditor extends Widget {
       return;
     }
 
-    // If it is in user and has changed from old, set in current.
+    // If it is in user and has changed from old, set in new.
     for (let key in user) {
       if (!JSONExt.deepEqual(user[key], old[key] || null)) {
-        current[key] = user[key];
+        source.set(key, user[key]);
       }
     }
-    // If it was in old and is not in user, remove from current.
+
+    // If it was in old and is not in user, remove from source.
     for (let key in old) {
       if (!(key in user)) {
-        delete current[key];
         source.delete(key);
       }
-    }
-    // Set the values.
-    for (let key in current) {
-      source.set(key, current[key]);
     }
   }
 
@@ -432,15 +350,5 @@ export namespace JSONEditor {
      * The editor factory used by the editor.
      */
     editorFactory: CodeEditor.Factory;
-
-    /**
-     * The title of the editor. Defaults to an empty string.
-     */
-    title?: string;
-
-    /**
-     * Whether the title should be collapsible. Defaults to `false`.
-     */
-    collapsible?: boolean;
   }
 }

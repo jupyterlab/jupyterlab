@@ -3,9 +3,9 @@
 
 import { expect } from 'chai';
 
-import { Session } from '@jupyterlab/services/src/session';
+import { Session } from '@jupyterlab/services';
 
-import { validateModel } from '@jupyterlab/services/src/session/validate';
+import { validateModel } from '@jupyterlab/services/lib/session/validate';
 
 describe('session/validate', () => {
   describe('#validateModel()', () => {

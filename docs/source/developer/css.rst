@@ -97,6 +97,9 @@ We are organizing our CSS files in the following manner:
 CSS class names
 ~~~~~~~~~~~~~~~
 
+CSS class naming conventions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 We have a fairly formal method for naming our CSS classes.
 
 First, CSS class names are associated with TypeScript classes that
@@ -165,7 +168,7 @@ widget:
    are directories
 
 Edge cases
-~~~~~~~~~~
+^^^^^^^^^^
 
 Over time, we have found that there are some edge cases that these rules
 don't fully address. Here, we try to clarify those edge cases.
@@ -191,3 +194,47 @@ only the desired children.
 
 When in doubt, there is little harm done in parents adding selectors to
 children.
+
+Commonly used CSS selectors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We use CSS selectors to decide which context menu items to display and what command
+to invoke when a keyboard shortcut is used. The following common CSS selectors are 
+intended to be used for adding context menu items and keyboard shortcuts.
+
+**CSS classes that target widgets and their children**
+
+-  ``jp-Activity``: applied to elements in the main work area
+-  ``jp-Cell``: applied to cells
+-  ``jp-CodeCell``: applied to code cells
+-  ``jp-CodeConsole``: applied to consoles
+-  ``jp-CodeConsole-content``: applied to content panels in consoles
+-  ``jp-CodeConsole-promptCell``: applied to active prompt cells in consoles
+-  ``jp-DirListing-content``: applied to contents of file browser directory listings
+-  ``jp-DirListing-item``: applied to items in file browser directory listings
+-  ``jp-FileEditor``: applied to file editors
+-  ``jp-ImageViewer``: applied to image viewers
+-  ``jp-InputArea-editor``: applied to cell input area editors
+-  ``jp-Notebook``: applied to notebooks
+-  ``jp-SettingEditor``: applied to setting editors
+-  ``jp-SideBar``: applied to sidebars
+-  ``jp-Terminal``: applied to terminals
+
+**CSS classes that describe the state of a widget**
+
+-  ``jp-mod-current``: applied to elements on the current document only
+-  ``jp-mod-completer-enabled``: applied to ediors that can host a completer
+-  ``jp-mod-commandMode``: applied to a notebook in command mode
+-  ``jp-mod-editMode``: applied to a notebook in edit mode
+-  ``jp-mod-has-primary-selection``: applied to editors that have a primary selection
+-  ``jp-mod-in-leading-whitespace``: applied to editors that have a selection within the beginning whitespace of a line
+-  ``jp-mod-tooltip``: applied to the body when a tooltip exists on the page
+
+**CSS selectors that target data attributes**
+
+-  ``[data-jp-code-runner]``: applied to widgets that can run code
+-  ``[data-jp-interaction-mode="terminal"]``: applied when a code console is in terminal mode
+-  ``[data-jp-interaction-mode="notebook"]``: applied when a code console is in notebook mode
+-  ``[data-jp-isdir]``: applied to describe whether file browser items are directories
+-  ``[data-jp-undoer]``: applied to widgets that can undo
+-  ``[data-type]``: applied to describe the type of element, such as "document-title", "submenu", "inline"

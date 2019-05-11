@@ -274,16 +274,21 @@ export class ObservableMap<T> implements IObservableMap<T> {
    *
    * @returns the value of the given key,
    *   or undefined if that does not exist.
+   *
+   * #### Notes
+   * This is a no-op if the value does not change.
    */
   delete(key: string): T | undefined {
     let oldVal = this._map.get(key);
-    this._map.delete(key);
-    this._changed.emit({
-      type: 'remove',
-      key: key,
-      oldValue: oldVal,
-      newValue: undefined
-    });
+    let removed = this._map.delete(key);
+    if (removed) {
+      this._changed.emit({
+        type: 'remove',
+        key: key,
+        oldValue: oldVal,
+        newValue: undefined
+      });
+    }
     return oldVal;
   }
 

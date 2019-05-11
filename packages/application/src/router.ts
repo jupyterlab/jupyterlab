@@ -219,8 +219,13 @@ export class Router implements IRouter {
     const { base } = this;
     const { history } = window;
     const { hard, silent } = options;
+    const old = document.location.href;
     const url =
       path && path.indexOf(base) === 0 ? path : URLExt.join(base, path);
+
+    if (url === old) {
+      return hard ? this.reload() : undefined;
+    }
 
     if (silent) {
       history.replaceState({}, '', url);
@@ -235,7 +240,7 @@ export class Router implements IRouter {
     // Because a `route()` call may still be in the stack after having received
     // a `stop` token, wait for the next stack frame before calling `route()`.
     requestAnimationFrame(() => {
-      this.route();
+      void this.route();
     });
   }
 
@@ -292,29 +297,28 @@ export class Router implements IRouter {
 
     // Process each enqueued command sequentially and short-circuit if a promise
     // resolves with the `stop` token.
-    (function next() {
+    const next = async () => {
       if (!queue.length) {
         routed.emit(current);
-        done.resolve(void 0);
+        done.resolve(undefined);
         return;
       }
 
       const { command } = queue.pop();
 
-      commands
-        .execute(command, current)
-        .then(result => {
-          if (result === stop) {
-            queue.length = 0;
-            console.log(`Routing ${request} was short-circuited by ${command}`);
-          }
-          next();
-        })
-        .catch(reason => {
-          console.warn(`Routing ${request} to ${command} failed`, reason);
-          next();
-        });
-    })();
+      try {
+        const request = this.current.request;
+        const result = await commands.execute(command, current);
+        if (result === stop) {
+          queue.length = 0;
+          console.log(`Routing ${request} was short-circuited by ${command}`);
+        }
+      } catch (reason) {
+        console.warn(`Routing ${request} to ${command} failed`, reason);
+      }
+      void next();
+    };
+    void next();
 
     return done.promise;
   }

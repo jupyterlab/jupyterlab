@@ -17,7 +17,7 @@ import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { INotebookModel } from './model';
 
-import { Notebook } from './widget';
+import { Notebook, StaticNotebook } from './widget';
 
 /**
  * The class name added to notebook panels.
@@ -49,12 +49,9 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
 
     // Set up things related to the context
     this.content.model = this.context.model;
-    this.context.session.kernelChanged.connect(
-      this._onKernelChanged,
-      this
-    );
+    this.context.session.kernelChanged.connect(this._onKernelChanged, this);
 
-    this.revealed.then(() => {
+    void this.revealed.then(() => {
       // Set the document edit mode on initial open if it looks like a new document.
       if (this.content.widgets.length === 1) {
         let cellModel = this.content.widgets[0].model;
@@ -112,10 +109,26 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   /**
+   * Update the options for the current notebook panel.
+   *
+   * @param config new options to set
+   */
+  setConfig(config: NotebookPanel.IConfig): void {
+    this.content.editorConfig = config.editorConfig;
+    this.content.notebookConfig = config.notebookConfig;
+    // Update kernel shutdown behavior
+    const kernelPreference = this.context.session.kernelPreference;
+    this.context.session.kernelPreference = {
+      ...kernelPreference,
+      shutdownOnClose: config.kernelShutdown
+    };
+  }
+
+  /**
    * Set URI fragment identifier.
    */
   setFragment(fragment: string) {
-    this.context.ready.then(() => {
+    void this.context.ready.then(() => {
       this.content.setFragment(fragment);
     });
   }
@@ -149,12 +162,12 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       return;
     }
     let { newValue } = args;
-    newValue.ready.then(() => {
+    void newValue.ready.then(() => {
       if (this.model) {
         this._updateLanguage(newValue.info.language_info);
       }
     });
-    this._updateSpec(newValue);
+    void this._updateSpec(newValue);
   }
 
   /**
@@ -167,8 +180,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * Update the kernel spec.
    */
-  private _updateSpec(kernel: Kernel.IKernelConnection): void {
-    kernel.getSpec().then(spec => {
+  private _updateSpec(kernel: Kernel.IKernelConnection): Promise<void> {
+    return kernel.getSpec().then(spec => {
       if (this.isDisposed) {
         return;
       }
@@ -187,6 +200,24 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
  * A namespace for `NotebookPanel` statics.
  */
 export namespace NotebookPanel {
+  /**
+   * Notebook config interface for NotebookPanel
+   */
+  export interface IConfig {
+    /**
+     * A config object for cell editors
+     */
+    editorConfig: StaticNotebook.IEditorConfig;
+    /**
+     * A config object for notebook widget
+     */
+    notebookConfig: StaticNotebook.INotebookConfig;
+    /**
+     * Whether to shut down the kernel when closing the panel or not
+     */
+    kernelShutdown: boolean;
+  }
+
   /**
    * A content factory interface for NotebookPanel.
    */

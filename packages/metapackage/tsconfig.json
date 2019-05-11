@@ -142,6 +142,9 @@
       "path": "../mathjax2-extension"
     },
     {
+      "path": "../nbconvert-css"
+    },
+    {
       "path": "../notebook"
     },
     {
@@ -214,10 +217,13 @@
       "path": "../ui-components"
     },
     {
+      "path": "../vdom"
+    },
+    {
       "path": "../vdom-extension"
     },
     {
-      "path": "../vega4-extension"
+      "path": "../vega5-extension"
     }
   ]
 }

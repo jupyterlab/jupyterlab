@@ -20,6 +20,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     manager.register({
       name: 'JupyterLab Light',
       isLight: true,
+      themeScrollbars: false,
       load: () => manager.loadCSS(style),
       unload: () => Promise.resolve(undefined)
     });
