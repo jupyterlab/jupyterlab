@@ -321,6 +321,19 @@ describe('@jupyter/notebook', () => {
           expect(child.hasClass('jp-Notebook-cell')).to.equal(true);
         });
 
+        it('should initially render markdown cells with content', () => {
+          const cell1 = widget.model.contentFactory.createMarkdownCell({});
+          const cell2 = widget.model.contentFactory.createMarkdownCell({});
+          cell1.value.text = '# Hello';
+          widget.model.cells.push(cell1);
+          widget.model.cells.push(cell2);
+          expect(widget.widgets.length).to.equal(8);
+          const child1 = widget.widgets[6] as MarkdownCell;
+          const child2 = widget.widgets[7] as MarkdownCell;
+          expect(child1.rendered).to.equal(true);
+          expect(child2.rendered).to.equal(false);
+        });
+
         it('should handle a move', () => {
           const child = widget.widgets[1];
           widget.model.cells.move(1, 2);
@@ -686,6 +699,7 @@ describe('@jupyter/notebook', () => {
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         const cell = widget.model.contentFactory.createMarkdownCell({});
+        cell.value.text = '# Hello'; // Should be rendered with content.
         widget.model.cells.push(cell);
         const child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
         expect(child.rendered).to.equal(true);
@@ -1143,6 +1157,7 @@ describe('@jupyter/notebook', () => {
 
         it('should preserve "command" mode if in a markdown cell', () => {
           const cell = widget.model.contentFactory.createMarkdownCell({});
+          cell.value.text = '# Hello'; // Should be rendered with content.
           widget.model.cells.push(cell);
           const count = widget.widgets.length;
           const child = widget.widgets[count - 1] as MarkdownCell;
@@ -1194,6 +1209,7 @@ describe('@jupyter/notebook', () => {
         it('should leave a markdown cell rendered', () => {
           const code = widget.model.contentFactory.createCodeCell({});
           const md = widget.model.contentFactory.createMarkdownCell({});
+          md.value.text = '# Hello'; // Should be rendered with content.
           widget.model.cells.push(code);
           widget.model.cells.push(md);
           const count = widget.widgets.length;
@@ -1252,6 +1268,7 @@ describe('@jupyter/notebook', () => {
       context('dblclick', () => {
         it('should unrender a markdown cell', () => {
           const cell = widget.model.contentFactory.createMarkdownCell({});
+          cell.value.text = '# Hello'; // Should be rendered with content.
           widget.model.cells.push(cell);
           const child = widget.widgets[
             widget.widgets.length - 1
