@@ -85,8 +85,8 @@ describe('@jupyterlab/notebook', () => {
         model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         model.cells.undo();
         expect(model.cells.length).to.equal(1);
-        expect(model.cells.get(1).value.text).to.equal('foo');
-        expect(model.cells.get(1)).to.equal(cell); // should be ===.
+        expect(model.cells.get(0).value.text).to.equal('foo');
+        expect(model.cells.get(0)).to.equal(cell); // should be ===.
       });
 
       context('cells `changed` signal', () => {
