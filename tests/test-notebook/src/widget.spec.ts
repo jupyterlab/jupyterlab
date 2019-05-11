@@ -23,7 +23,11 @@ import { INotebookModel, NotebookModel } from '@jupyterlab/notebook';
 
 import { Notebook, StaticNotebook } from '@jupyterlab/notebook';
 
-import { NBTestUtils, framePromise } from '@jupyterlab/testutils';
+import {
+  NBTestUtils,
+  framePromise,
+  signalToPromise
+} from '@jupyterlab/testutils';
 
 const contentFactory = NBTestUtils.createNotebookFactory();
 const editorConfig = NBTestUtils.defaultEditorConfig;
@@ -253,6 +257,25 @@ describe('@jupyter/notebook', () => {
         expect(widget.widgets.length).to.equal(6);
       });
 
+      it('should add a default cell if the notebook model is empty', () => {
+        const widget = new LogStaticNotebook(options);
+        const model1 = new NotebookModel();
+        expect(model1.cells.length).to.equal(0);
+        widget.model = model1;
+        expect(model1.cells.length).to.equal(1);
+        expect(model1.cells.get(0).type).to.equal('code');
+
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          defaultCell: 'markdown'
+        };
+        const model2 = new NotebookModel();
+        expect(model2.cells.length).to.equal(0);
+        widget.model = model2;
+        expect(model2.cells.length).to.equal(1);
+        expect(model2.cells.get(0).type).to.equal('markdown');
+      });
+
       it('should set the mime types of the cell widgets', () => {
         const widget = new LogStaticNotebook(options);
         const model = new NotebookModel();
@@ -309,6 +332,21 @@ describe('@jupyter/notebook', () => {
           widget.model.cells.push(cell);
           widget.model.cells.clear();
           expect(widget.widgets.length).to.equal(0);
+        });
+
+        it('should add a new default cell when cells are cleared', async () => {
+          const model = widget.model;
+          widget.notebookConfig = {
+            ...widget.notebookConfig,
+            defaultCell: 'raw'
+          };
+          let promise = signalToPromise(model.cells.changed);
+          model.cells.clear();
+          await promise;
+          expect(model.cells.length).to.equal(0);
+          await signalToPromise(model.cells.changed);
+          expect(model.cells.length).to.equal(1);
+          expect(model.cells.get(0)).to.be.an.instanceof(RawCellModel);
         });
       });
     });
