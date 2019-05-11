@@ -363,7 +363,9 @@ a package by importing from it in the TypeScript file, and then running:
 `jlpm run integrity` from the repo root.
 
 We also have scripts for creating and removing packages in `packages/`,
-`jlpm run create:package` and `jlpm run remove:package`.
+`jlpm run create:package` and `jlpm run remove:package`. When creating a package,
+if it is meant to be included in the core bundle, add the `jupyterlab: { core: true }`
+metadata to the `package.json`.
 
 ## Testing Changes to External Packages
 

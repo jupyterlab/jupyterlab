@@ -60,6 +60,7 @@
     "access": "public"
   },
   "jupyterlab": {
+    "core": true,
     "extension": true,
     "schemaDir": "schema"
   }

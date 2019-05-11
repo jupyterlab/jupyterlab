@@ -120,7 +120,8 @@ function ensureJupyterlab(): string[] {
     } catch (e) {
       return;
     }
-    if (data.private === true || data.name === '@jupyterlab/metapackage') {
+    // Only include packages marked as core.
+    if (!data.jupyterlab || !data.jupyterlab.core) {
       return;
     }
 

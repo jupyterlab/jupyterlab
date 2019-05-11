@@ -19,6 +19,9 @@
   "directories": {
     "lib": "lib/"
   },
+  "jupyterlab": {
+    "include": true
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/jupyterlab/jupyterlab.git"
