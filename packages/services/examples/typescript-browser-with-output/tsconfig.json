@@ -7,11 +7,13 @@
     "noEmitOnError": true,
     "noUnusedLocals": true,
     "outDir": "build",
+    "rootDir": "src",
     "strict": true,
     "strictNullChecks": false,
     "target": "es2015",
     "types": []
   },
+  "include": ["src/*"],
   "references": [
     {
       "path": "../../../outputarea"
