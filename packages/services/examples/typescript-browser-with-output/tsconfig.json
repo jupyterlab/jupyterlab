@@ -11,5 +11,16 @@
     "strictNullChecks": false,
     "target": "es2015",
     "types": []
-  }
+  },
+  "references": [
+    {
+      "path": "../../../outputarea"
+    },
+    {
+      "path": "../../../rendermime"
+    },
+    {
+      "path": "../.."
+    }
+  ]
 }
