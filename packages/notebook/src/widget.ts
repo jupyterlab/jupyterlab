@@ -417,7 +417,7 @@ export class StaticNotebook extends Widget {
         each(args.oldValues, value => {
           this._removeCell(args.oldIndex);
         });
-        // Add code cell if there are no cells remaining.
+        // Add default cell if there are no cells remaining.
         if (!sender.length) {
           const model = this.model;
           // Add the cell in a new context to avoid triggering another
