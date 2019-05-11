@@ -223,7 +223,7 @@
       "@phosphor/widgets",
       "ajv",
       "codemirror",
-      "comment-json",
+      "json5",
       "es6-promise",
       "marked",
       "moment",
