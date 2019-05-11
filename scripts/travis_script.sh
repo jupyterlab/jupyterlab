@@ -9,6 +9,22 @@ set -o pipefail
 python -c "from jupyterlab.commands import build_check; build_check()"
 
 
+if [[ $GROUP == audit ]]; then
+    # check for pypi vulnerabilities in upstreams
+    safety check
+
+    # check for npm vulnerabilities of end user npm packages and dependencies
+    pushd jupyterlab/staging
+    jlpm audit --level high
+    popd
+
+    # check for npm vulnerabilities of dev packages and dependencies
+    jlpm audit --level high
+
+    echo "no findings"
+fi
+
+
 if [[ $GROUP == python ]]; then
     # Run the python tests
     py.test -v --junitxml=junit.xml
@@ -46,7 +62,6 @@ if [[ $GROUP == docs ]]; then
     make html
     popd
 fi
-
 
 if [[ $GROUP == integrity ]]; then
     # Run the integrity script first

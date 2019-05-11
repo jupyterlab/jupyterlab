@@ -7,6 +7,8 @@ jobs:
       gh.ref: github.com/jupyterlab/jupyterlab.git
     strategy:
       matrix:
+        Audit:
+          group: 'audit'
         JS:
           group: 'js'
           testResultsFiles: 'tests/**/junit.xml'

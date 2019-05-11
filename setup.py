@@ -141,6 +141,7 @@ setup_args['extras_require'] = {
     'test': [
         'pytest',
         'pytest-check-links',
+        'safety',
         'requests'
     ],
     'docs': [
