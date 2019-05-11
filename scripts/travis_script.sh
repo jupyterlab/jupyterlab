@@ -26,6 +26,17 @@ if [[ $GROUP == js ]]; then
     python main.py
     popd
 
+    # Run the output example.
+    pushd packages/services/examples/typescript-browser-with-output
+    jlpm build
+    python main.py &
+    TASK_PID=$!
+    # Make sure the task is running
+    ps -p $TASK_PID || exit 1
+    sleep 5
+    kill $TASK_PID
+    wait $TASK_PID
+
     jlpm run clean
 fi
 
