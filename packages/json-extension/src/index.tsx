@@ -86,7 +86,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     documentWidgetFactoryOptions: {
       name: 'JSON',
       primaryFileType: 'json',
-      fileTypes: ['json', 'notebook'],
+      fileTypes: ['json', 'notebook', 'geojson'],
       defaultFor: ['json']
     }
   }
