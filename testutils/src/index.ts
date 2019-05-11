@@ -90,7 +90,7 @@ export function signalToPromises<T, U>(
   numberValues: number
 ): Promise<[T, U]>[] {
   const values: Promise<[T, U]>[] = new Array(numberValues);
-  const resolvers: Array<((value: [T, U]) => void)> = new Array(numberValues);
+  const resolvers: Array<(value: [T, U]) => void> = new Array(numberValues);
 
   for (let i = 0; i < numberValues; i++) {
     values[i] = new Promise<[T, U]>(resolve => {
@@ -302,7 +302,7 @@ namespace Private {
    */
   export function getManager(): ServiceManager {
     if (!manager) {
-      manager = new ServiceManager();
+      manager = new ServiceManager({ standby: 'never' });
     }
     return manager;
   }

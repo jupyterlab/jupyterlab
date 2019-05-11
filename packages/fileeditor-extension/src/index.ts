@@ -42,7 +42,7 @@ import {
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject, ReadonlyJSONObject } from '@phosphor/coreutils';
 
 import { Menu } from '@phosphor/widgets';
 
@@ -154,7 +154,7 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
       };
       item.model!.config = config;
     };
-    Promise.all([
+    void Promise.all([
       settingRegistry.load('@jupyterlab/fileeditor-extension:plugin'),
       app.restored
     ]).then(([settings]) => {
@@ -283,9 +283,9 @@ function activate(
 
     // Notify the instance tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
-      tracker.save(widget);
+      void tracker.save(widget);
     });
-    tracker.add(widget);
+    void tracker.add(widget);
     updateWidget(widget.content);
   });
   app.docRegistry.addWidgetFactory(factory);
@@ -400,6 +400,26 @@ function activate(
     isToggled: () => config.autoClosingBrackets
   });
 
+  async function createConsole(
+    widget: IDocumentWidget<FileEditor>,
+    args?: ReadonlyJSONObject
+  ): Promise<void> {
+    const options = args || {};
+    const console = await commands.execute('console:create', {
+      activate: options['activate'],
+      name: widget.context.contentsModel.name,
+      path: widget.context.path,
+      preferredLanguage: widget.context.model.defaultKernelLanguage,
+      ref: widget.id,
+      insertMode: 'split-bottom'
+    });
+
+    widget.context.pathChanged.connect((sender, value) => {
+      console.session.setPath(value);
+      console.session.setName(widget.context.contentsModel.name);
+    });
+  }
+
   commands.addCommand(CommandIDs.createConsole, {
     execute: args => {
       const widget = tracker.currentWidget;
@@ -408,21 +428,7 @@ function activate(
         return;
       }
 
-      return commands
-        .execute('console:create', {
-          activate: args['activate'],
-          name: widget.context.contentsModel.name,
-          path: widget.context.path,
-          preferredLanguage: widget.context.model.defaultKernelLanguage,
-          ref: widget.id,
-          insertMode: 'split-bottom'
-        })
-        .then(console => {
-          widget.context.pathChanged.connect((sender, value) => {
-            console.session.setPath(value);
-            console.session.setName(widget.context.contentsModel.name);
-          });
-        });
+      return createConsole(widget, args);
     },
     isEnabled,
     label: 'Create Console for Editor'
@@ -722,37 +728,29 @@ function activate(
     menu.fileMenu.consoleCreators.add({
       tracker,
       name: 'Editor',
-      createConsole: current => {
-        const options = {
-          path: current.context.path,
-          preferredLanguage: current.context.model.defaultKernelLanguage
-        };
-        return commands.execute('console:create', options);
-      }
+      createConsole
     } as IFileMenu.IConsoleCreator<IDocumentWidget<FileEditor>>);
 
     // Add a code runner to the Run menu.
     menu.runMenu.codeRunners.add({
       tracker,
       noun: 'Code',
-      isEnabled: current => {
-        let found = false;
-        consoleTracker.forEach(console => {
-          if (console.console.session.path === current.context.path) {
-            found = true;
-          }
-        });
-        return found;
-      },
+      isEnabled: current =>
+        !!consoleTracker.find(c => c.session.path === current.context.path),
       run: () => commands.execute(CommandIDs.runCode),
       runAll: () => commands.execute(CommandIDs.runAllCode),
       restartAndRunAll: current => {
-        return current.context.session.restart().then(restarted => {
-          if (restarted) {
-            commands.execute(CommandIDs.runAllCode);
-          }
-          return restarted;
-        });
+        const console = consoleTracker.find(
+          console => console.session.path === current.context.path
+        );
+        if (console) {
+          return console.session.restart().then(restarted => {
+            if (restarted) {
+              void commands.execute(CommandIDs.runAllCode);
+            }
+            return restarted;
+          });
+        }
       }
     } as IRunMenu.ICodeRunner<IDocumentWidget<FileEditor>>);
   }

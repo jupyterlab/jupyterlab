@@ -67,7 +67,7 @@ describe('filebrowser/model', () => {
     registry = new DocumentRegistry({
       textModelFactory: new TextModelFactory()
     });
-    serviceManager = new ServiceManager();
+    serviceManager = new ServiceManager({ standby: 'never' });
     manager = new DocumentManager({
       registry,
       opener,

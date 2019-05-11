@@ -26,9 +26,9 @@ export interface IDisplayState {
   useRegex: boolean;
 
   /**
-   * The text in the entry
+   * The text in the search entry
    */
-  inputText: string;
+  searchText: string;
 
   /**
    * The query constructed from the text and the case/regex flags
@@ -44,6 +44,26 @@ export interface IDisplayState {
    * Should the focus forced into the input on the next render?
    */
   forceFocus: boolean;
+
+  /**
+   * Whether or not the search input is currently focused
+   */
+  searchInputFocused: boolean;
+
+  /**
+   * Whether or not the replace input is currently focused
+   */
+  replaceInputFocused: boolean;
+
+  /**
+   * The text in the replace entry
+   */
+  replaceText: string;
+
+  /**
+   * Whether or not the replace entry row is visible
+   */
+  replaceEntryShown: boolean;
 }
 
 export interface ISearchMatch {
@@ -87,6 +107,15 @@ export interface ISearchProviderConstructor {
 
 export interface ISearchProvider {
   /**
+   * Get an initial query value if applicable so that it can be entered
+   * into the search box as an initial query
+   *
+   * @param searchTarget The widget to be searched
+   *
+   * @returns Initial value used to populate the search box.
+   */
+  getInitialQuery(searchTarget: Widget): any;
+  /**
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
    *
@@ -129,6 +158,20 @@ export interface ISearchProvider {
   highlightPrevious(): Promise<ISearchMatch | undefined>;
 
   /**
+   * Replace the currently selected match with the provided text
+   *
+   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   */
+  replaceCurrentMatch(newText: string): Promise<boolean>;
+
+  /**
+   * Replace all matches in the notebook with the provided text
+   *
+   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   */
+  replaceAllMatches(newText: string): Promise<boolean>;
+
+  /**
    * The same list of matches provided by the startQuery promise resoluton
    */
   readonly matches: ISearchMatch[];
@@ -142,4 +185,11 @@ export interface ISearchProvider {
    * The current index of the selected match.
    */
   readonly currentMatchIndex: number | null;
+
+  /**
+   * Set to true if the widget under search is read-only, false
+   * if it is editable.  Will be used to determine whether to show
+   * the replace option.
+   */
+  readonly isReadOnly: boolean;
 }

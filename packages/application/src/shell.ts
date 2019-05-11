@@ -444,7 +444,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
   /*
    * Activate the next Tab in the active TabBar.
-  */
+   */
   activateNextTab(): void {
     let current = this._currentTabBar();
     if (!current) {
@@ -477,7 +477,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
   /*
    * Activate the previous Tab in the active TabBar.
-  */
+   */
   activatePreviousTab(): void {
     let current = this._currentTabBar();
     if (!current) {
@@ -743,6 +743,11 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     if (options.ref) {
       ref = find(dock.widgets(), value => value.id === options.ref!) || null;
     }
+
+    // Add widget ID to tab so that we can get a handle on the tab's widget
+    // (for context menu support)
+    widget.title.dataset = { ...widget.title.dataset, id: widget.id };
+
     dock.addWidget(widget, { mode, ref });
 
     // The dock panel doesn't account for placement information while

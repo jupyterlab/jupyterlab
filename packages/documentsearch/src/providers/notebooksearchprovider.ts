@@ -13,10 +13,23 @@ import CodeMirror from 'codemirror';
 
 interface ICellSearchPair {
   cell: Cell;
-  provider: ISearchProvider;
+  provider: CodeMirrorSearchProvider;
 }
 
 export class NotebookSearchProvider implements ISearchProvider {
+  /**
+   * Get an initial query value if applicable so that it can be entered
+   * into the search box as an initial query
+   *
+   * @returns Initial value used to populate the search box.
+   */
+  getInitialQuery(searchTarget: NotebookPanel): any {
+    const activeCell = searchTarget.content.activeCell;
+    const selection = (activeCell.editor as CodeMirrorEditor).doc.getSelection();
+    // if there are newlines, just return empty string
+    return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
+  }
+
   /**
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
@@ -114,8 +127,9 @@ export class NotebookSearchProvider implements ISearchProvider {
    * begin a new search.
    */
   async endQuery(): Promise<void> {
+    const queriesEnded: Promise<void>[] = [];
     this._cmSearchProviders.forEach(({ provider }) => {
-      provider.endQuery();
+      queriesEnded.push(provider.endQuery());
       provider.changed.disconnect(this._onCmSearchProviderChanged, this);
     });
     Signal.disconnectBetween(this._searchTarget.model.cells, this);
@@ -128,6 +142,7 @@ export class NotebookSearchProvider implements ISearchProvider {
       }
     });
     this._unRenderedMarkdownCells = [];
+    await Promise.all(queriesEnded);
   }
 
   /**
@@ -139,8 +154,9 @@ export class NotebookSearchProvider implements ISearchProvider {
     Signal.disconnectBetween(this._searchTarget.model.cells, this);
 
     const index = this._searchTarget.content.activeCellIndex;
+    const searchEnded: Promise<void>[] = [];
     this._cmSearchProviders.forEach(({ provider }) => {
-      provider.endSearch();
+      searchEnded.push(provider.endSearch());
       provider.changed.disconnect(this._onCmSearchProviderChanged, this);
     });
 
@@ -154,6 +170,7 @@ export class NotebookSearchProvider implements ISearchProvider {
     this._searchTarget.content.mode = 'edit';
     this._searchTarget = null;
     this._currentMatch = null;
+    await Promise.all(searchEnded);
   }
 
   /**
@@ -174,6 +191,48 @@ export class NotebookSearchProvider implements ISearchProvider {
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
     this._currentMatch = await this._stepNext(true);
     return this._currentMatch;
+  }
+
+  /**
+   * Replace the currently selected match with the provided text
+   *
+   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   */
+  async replaceCurrentMatch(newText: string): Promise<boolean> {
+    const notebook = this._searchTarget.content;
+    const editor = notebook.activeCell.editor as CodeMirrorEditor;
+    let replaceOccurred = false;
+    if (this._currentMatchIsSelected(editor)) {
+      const cellIndex = notebook.widgets.indexOf(notebook.activeCell);
+      const { provider } = this._cmSearchProviders[cellIndex];
+      replaceOccurred = await provider.replaceCurrentMatch(newText);
+      if (replaceOccurred) {
+        this._currentMatch = provider.currentMatch;
+        // If there was a replacement and there is another match, then the CodeMirrorSearchProvider
+        // already highlighted the next match, so we can return early to avoid skipping a match.
+        if (this._currentMatch) {
+          return replaceOccurred;
+        }
+      }
+    }
+    await this.highlightNext();
+    return replaceOccurred;
+  }
+
+  /**
+   * Replace all matches in the notebook with the provided text
+   *
+   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   */
+  async replaceAllMatches(newText: string): Promise<boolean> {
+    let replaceOccurred = false;
+    for (let index in this._cmSearchProviders) {
+      const { provider } = this._cmSearchProviders[index];
+      const singleReplaceOccurred = await provider.replaceAllMatches(newText);
+      replaceOccurred = singleReplaceOccurred ? true : replaceOccurred;
+    }
+    this._currentMatch = null;
+    return replaceOccurred;
   }
 
   /**
@@ -204,10 +263,17 @@ export class NotebookSearchProvider implements ISearchProvider {
    */
   get currentMatchIndex(): number {
     if (!this._currentMatch) {
-      return 0;
+      return null;
     }
     return this._currentMatch.index;
   }
+
+  /**
+   * Set to true if the widget under search is read-only, false
+   * if it is editable.  Will be used to determine whether to show
+   * the replace option.
+   */
+  readonly isReadOnly = false;
 
   private async _stepNext(
     reverse = false,
@@ -274,6 +340,23 @@ export class NotebookSearchProvider implements ISearchProvider {
 
   private _onCmSearchProviderChanged() {
     this._changed.emit(undefined);
+  }
+
+  private _currentMatchIsSelected(cm: CodeMirrorEditor): boolean {
+    if (!this._currentMatch) {
+      return false;
+    }
+    const currentSelection = cm.getSelection();
+    const currentSelectionLength =
+      currentSelection.end.column - currentSelection.start.column;
+    const selectionIsOneLine =
+      currentSelection.start.line === currentSelection.end.line;
+    return (
+      this._currentMatch.line === currentSelection.start.line &&
+      this._currentMatch.column === currentSelection.start.column &&
+      this._currentMatch.text.length === currentSelectionLength &&
+      selectionIsOneLine
+    );
   }
 
   private _searchTarget: NotebookPanel;

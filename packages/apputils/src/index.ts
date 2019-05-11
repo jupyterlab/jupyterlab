@@ -5,12 +5,14 @@ import '../style/index.css';
 
 export * from './clientsession';
 export * from './clipboard';
+export * from './collapse';
 export * from './commandlinker';
 export * from './commandpalette';
 export * from './dialog';
 export * from './domutils';
 export * from './hoverbox';
 export * from './iframe';
+export * from './inputdialog';
 export * from './instancetracker';
 export * from './mainareawidget';
 export * from './sanitizer';

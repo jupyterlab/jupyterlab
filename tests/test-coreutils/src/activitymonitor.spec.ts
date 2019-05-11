@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { Signal } from '@phosphor/signaling';
 
-import { ActivityMonitor } from '@jupyterlab/coreutils/src';
+import { ActivityMonitor } from '@jupyterlab/coreutils';
 
 import { sleep } from '@jupyterlab/testutils';
 

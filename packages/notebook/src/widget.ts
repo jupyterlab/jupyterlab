@@ -216,7 +216,7 @@ export class StaticNotebook extends Widget {
     this._model = newValue;
 
     if (oldValue && oldValue.modelDB.isCollaborative) {
-      oldValue.modelDB.connected.then(() => {
+      void oldValue.modelDB.connected.then(() => {
         oldValue.modelDB.collaborators.changed.disconnect(
           this._onCollaboratorsChanged,
           this
@@ -224,7 +224,7 @@ export class StaticNotebook extends Widget {
       });
     }
     if (newValue && newValue.modelDB.isCollaborative) {
-      newValue.modelDB.connected.then(() => {
+      void newValue.modelDB.connected.then(() => {
         newValue.modelDB.collaborators.changed.connect(
           this._onCollaboratorsChanged,
           this
@@ -475,7 +475,11 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false
     };
-    return this.contentFactory.createCodeCell(options, this);
+    const cell = this.contentFactory.createCodeCell(options, this);
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
+    cell.syncScrolled = true;
+    return cell;
   }
 
   /**
@@ -492,7 +496,10 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false
     };
-    return this.contentFactory.createMarkdownCell(options, this);
+    const cell = this.contentFactory.createMarkdownCell(options, this);
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
+    return cell;
   }
 
   /**
@@ -507,7 +514,10 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false
     };
-    return this.contentFactory.createRawCell(options, this);
+    const cell = this.contentFactory.createRawCell(options, this);
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
+    return cell;
   }
 
   /**
@@ -590,9 +600,10 @@ export class StaticNotebook extends Widget {
   }
 
   /**
-   * Update editor settings for notebook.
+   * Apply updated notebook settings.
    */
   private _updateNotebookConfig() {
+    // Apply scrollPastEnd setting.
     this.toggleClass(
       'jp-mod-scrollPastEnd',
       this._notebookConfig.scrollPastEnd
@@ -755,7 +766,7 @@ export namespace StaticNotebook {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new CodeCell(options);
+      return new CodeCell(options).initializeState();
     }
 
     /**
@@ -772,7 +783,7 @@ export namespace StaticNotebook {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new MarkdownCell(options);
+      return new MarkdownCell(options).initializeState();
     }
 
     /**
@@ -786,7 +797,7 @@ export namespace StaticNotebook {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new RawCell(options);
+      return new RawCell(options).initializeState();
     }
   }
 
@@ -1183,7 +1194,7 @@ export class Notebook extends StaticNotebook {
    */
   setFragment(fragment: string): void {
     // Wait all cells are rendered then set fragment and update.
-    Promise.all(this.widgets.map(widget => widget.ready)).then(() => {
+    void Promise.all(this.widgets.map(widget => widget.ready)).then(() => {
       this._fragment = fragment;
       this.update();
     });
@@ -1402,7 +1413,7 @@ export class Notebook extends StaticNotebook {
   protected onCellInserted(index: number, cell: Cell): void {
     if (this.model && this.model.modelDB.isCollaborative) {
       let modelDB = this.model.modelDB;
-      modelDB.connected.then(() => {
+      void modelDB.connected.then(() => {
         if (!cell.isDisposed) {
           // Setup the selection style for collaborators.
           let localCollaborator = modelDB.collaborators.localCollaborator;
@@ -1661,7 +1672,10 @@ export class Notebook extends StaticNotebook {
     if (targetArea === 'notebook') {
       this.deselectAll();
     } else if (targetArea === 'prompt' || targetArea === 'cell') {
-      if (button === 0 && shiftKey) {
+      // We don't want to prevent the default selection behavior
+      // if there is currently text selected in an output.
+      const hasSelection = window.getSelection().toString() !== '';
+      if (button === 0 && shiftKey && !hasSelection) {
         // Prevent browser selecting text in prompt or output
         event.preventDefault();
 
@@ -1993,7 +2007,7 @@ export class Notebook extends StaticNotebook {
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
     this._mouseMode = null;
-    this._drag.start(clientX, clientY).then(action => {
+    void this._drag.start(clientX, clientY).then(action => {
       if (this.isDisposed) {
         return;
       }

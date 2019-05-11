@@ -3,7 +3,8 @@
 
 import {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  ILabShell
 } from '@jupyterlab/application';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
@@ -11,10 +12,59 @@ import { ICommandPalette } from '@jupyterlab/apputils';
 import {
   ISearchProviderRegistry,
   SearchInstance,
-  SearchProviderRegistry
+  SearchProviderRegistry,
+  CodeMirrorSearchProvider,
+  NotebookSearchProvider
 } from '@jupyterlab/documentsearch';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
+import { Widget } from '@phosphor/widgets';
+
+const SEARCHABLE_CLASS = 'jp-mod-searchable';
+
+const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/documentsearch:labShellWidgetListener',
+  requires: [ILabShell, ISearchProviderRegistry],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    labShell: ILabShell,
+    registry: ISearchProviderRegistry
+  ) => {
+    // If a given widget is searchable, apply the searchable class.
+    // If it's not searchable, remove the class.
+    const transformWidgetSearchability = (widget: Widget) => {
+      if (!widget) {
+        return;
+      }
+      const providerForWidget = registry.getProviderForWidget(widget);
+      if (providerForWidget) {
+        widget.addClass(SEARCHABLE_CLASS);
+      }
+      if (!providerForWidget) {
+        widget.removeClass(SEARCHABLE_CLASS);
+      }
+    };
+
+    // Update searchability of the active widget when the registry
+    // changes, in case a provider for the current widget was added
+    // or removed
+    registry.changed.connect(() =>
+      transformWidgetSearchability(labShell.activeWidget)
+    );
+
+    // Apply the searchable class only to the active widget if it is actually
+    // searchable. Remove the searchable class from a widget when it's
+    // no longer active.
+    labShell.activeChanged.connect((_, args) => {
+      const oldWidget = args.oldValue;
+      if (oldWidget) {
+        oldWidget.removeClass(SEARCHABLE_CLASS);
+      }
+      transformWidgetSearchability(args.newValue);
+    });
+  }
+};
 
 /**
  * Initialization data for the document-search extension.
@@ -22,8 +72,7 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   id: '@jupyterlab/documentsearch:plugin',
   provides: ISearchProviderRegistry,
-  requires: [ICommandPalette],
-  optional: [IMainMenu],
+  optional: [ICommandPalette, IMainMenu],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
@@ -32,8 +81,10 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   ) => {
     // Create registry, retrieve all default providers
     const registry: SearchProviderRegistry = new SearchProviderRegistry();
-    // TODO: Should register the default providers, with an application-specific
-    // enabler.
+
+    // Register default implementations of the Notebook and CodeMirror search providers
+    registry.register('jp-notebookSearchProvider', NotebookSearchProvider);
+    registry.register('jp-codeMirrorSearchProvider', CodeMirrorSearchProvider);
 
     const activeSearches = new Map<string, SearchInstance>();
 
@@ -126,10 +177,11 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     });
 
     // Add the command to the palette.
-    palette.addItem({ command: startCommand, category: 'Main Area' });
-    palette.addItem({ command: nextCommand, category: 'Main Area' });
-    palette.addItem({ command: prevCommand, category: 'Main Area' });
-
+    if (palette) {
+      palette.addItem({ command: startCommand, category: 'Main Area' });
+      palette.addItem({ command: nextCommand, category: 'Main Area' });
+      palette.addItem({ command: prevCommand, category: 'Main Area' });
+    }
     // Add main menu notebook menu.
     if (mainMenu) {
       mainMenu.editMenu.addGroup(
@@ -147,4 +199,4 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   }
 };
 
-export default extension;
+export default [extension, labShellWidgetListener];

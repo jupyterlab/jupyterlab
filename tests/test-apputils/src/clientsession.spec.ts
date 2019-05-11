@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { SessionManager } from '@jupyterlab/services';
 
-import { ClientSession, IClientSession } from '@jupyterlab/apputils/src';
+import { ClientSession, Dialog, IClientSession } from '@jupyterlab/apputils';
 
 import { UUID } from '@phosphor/coreutils';
 
@@ -19,6 +19,7 @@ describe('@jupyterlab/apputils', () => {
     beforeAll(() => manager.ready);
 
     beforeEach(() => {
+      Dialog.flush();
       session = new ClientSession({
         manager,
         kernelPreference: { name: manager.specs.default }
@@ -26,7 +27,12 @@ describe('@jupyterlab/apputils', () => {
     });
 
     afterEach(async () => {
-      await session.shutdown();
+      Dialog.flush();
+      try {
+        await session.shutdown();
+      } catch (error) {
+        console.warn('Session shutdown failed.', error);
+      }
       session.dispose();
     });
 
@@ -186,11 +192,13 @@ describe('@jupyterlab/apputils', () => {
 
         await session.initialize();
         expect(other.kernel.id).to.equal(session.kernel.id);
+        await other.shutdown();
         other.dispose();
       });
 
       it('should connect to an existing kernel', async () => {
-        // Dispose the session so it can be re-instantiated.
+        // Shut down and dispose the session so it can be re-instantiated.
+        await session.shutdown();
         session.dispose();
 
         const other = await manager.startNew({ path: UUID.uuid4() });
@@ -199,6 +207,8 @@ describe('@jupyterlab/apputils', () => {
         session = new ClientSession({ manager, kernelPreference });
         await session.initialize();
         expect(session.kernel.id).to.equal(other.kernel.id);
+        // We don't call other.shutdown() here because that
+        // is handled by the afterEach() handler above.
         other.dispose();
       });
 

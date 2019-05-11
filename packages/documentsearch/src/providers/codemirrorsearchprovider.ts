@@ -45,6 +45,21 @@ type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
 export class CodeMirrorSearchProvider implements ISearchProvider {
   /**
+   * Get an initial query value if applicable so that it can be entered
+   * into the search box as an initial query
+   *
+   * @returns Initial value used to populate the search box.
+   */
+  getInitialQuery(searchTarget: Widget): any {
+    const target = searchTarget as MainAreaWidget;
+    const content = target.content as FileEditor;
+    const cm = content.editor as CodeMirrorEditor;
+    const selection = cm.doc.getSelection();
+    // if there are newlines, just return empty string
+    return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
+  }
+
+  /**
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
    *
@@ -63,8 +78,8 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
 
     // Extract the codemirror object from the editor widget. Each of these casts
     // is justified by the canSearchOn call above.
-    let target = searchTarget as MainAreaWidget;
-    let content = target.content as FileEditor;
+    const target = searchTarget as MainAreaWidget;
+    const content = target.content as FileEditor;
     this._cm = content.editor as CodeMirrorEditor;
     return this._startQuery(query);
   }
@@ -98,7 +113,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       const match = this._matchState[cursorMatch.from.line][
         cursorMatch.from.ch
       ];
-      this._matchIndex = match.index;
+      this._currentMatch = match;
     }
     return matches;
   }
@@ -112,8 +127,18 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
    */
   async endQuery(): Promise<void> {
     this._matchState = {};
-    this._matchIndex = null;
+    this._currentMatch = null;
     this._cm.removeOverlay(this._overlay);
+    const from = this._cm.getCursor('from');
+    const to = this._cm.getCursor('to');
+    // Setting a reverse selection to allow search-as-you-type to maintain the
+    // current selected match.  See comment in _findNext for more details.
+    if (from !== to) {
+      this._cm.setSelection({
+        start: this._toEditorPos(to),
+        end: this._toEditorPos(from)
+      });
+    }
     CodeMirror.off(this._cm.doc, 'change', this._onDocChanged.bind(this));
   }
 
@@ -126,7 +151,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     if (!this.isSubProvider) {
       this._cm.focus();
     }
-    this.endQuery();
+    return this.endQuery();
   }
 
   /**
@@ -140,7 +165,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       return;
     }
     const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
-    this._matchIndex = match.index;
+    this._currentMatch = match;
     return match;
   }
 
@@ -155,8 +180,58 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       return;
     }
     const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
-    this._matchIndex = match.index;
+    this._currentMatch = match;
     return match;
+  }
+
+  /**
+   * Replace the currently selected match with the provided text
+   *
+   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   */
+  async replaceCurrentMatch(newText: string): Promise<boolean> {
+    // If the current selection exactly matches the current match,
+    // replace it.  Otherwise, just select the next match after the cursor.
+    let replaceOccurred = false;
+    if (this._currentMatchIsSelected()) {
+      const cursor = this._cm.getSearchCursor(
+        this._query,
+        this._cm.getCursor('from'),
+        !this._query.ignoreCase
+      );
+      if (!cursor.findNext()) {
+        return replaceOccurred;
+      }
+      replaceOccurred = true;
+      cursor.replace(newText);
+    }
+    await this.highlightNext();
+    return replaceOccurred;
+  }
+
+  /**
+   * Replace all matches in the notebook with the provided text
+   *
+   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   */
+  async replaceAllMatches(newText: string): Promise<boolean> {
+    let replaceOccurred = false;
+    return new Promise((resolve, _) => {
+      this._cm.operation(() => {
+        const cursor = this._cm.getSearchCursor(
+          this._query,
+          null,
+          !this._query.ignoreCase
+        );
+        while (cursor.findNext()) {
+          replaceOccurred = true;
+          cursor.replace(newText);
+        }
+        this._matchState = {};
+        this._currentMatch = null;
+        resolve(replaceOccurred);
+      });
+    });
   }
 
   /**
@@ -177,6 +252,10 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     return this._parseMatchesFromState();
   }
 
+  get currentMatch(): ISearchMatch | null {
+    return this._currentMatch;
+  }
+
   /**
    * Signal indicating that something in the search has changed, so the UI should update
    */
@@ -188,8 +267,18 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
    * The current index of the selected match.
    */
   get currentMatchIndex(): number {
-    return this._matchIndex;
+    if (!this._currentMatch) {
+      return null;
+    }
+    return this._currentMatch.index;
   }
+
+  /**
+   * Set to true if the widget under search is read-only, false
+   * if it is editable.  Will be used to determine whether to show
+   * the replace option.
+   */
+  readonly isReadOnly = false;
 
   clearSelection(): void {
     return null;
@@ -328,7 +417,20 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   private _findNext(reverse: boolean): Private.ICodeMirrorMatch {
     return this._cm.operation(() => {
       const caseSensitive = this._query.ignoreCase;
-      const cursorToGet = reverse ? 'from' : 'to';
+
+      // In order to support search-as-you-type, we needed a way to allow the first
+      // match to be selected when a search is started, but prevent the selected
+      // search to move for each new keypress.  To do this, when a search is ended,
+      // the cursor is reversed, putting the head at the 'from' position.  When a new
+      // search is started, the cursor we want is at the 'from' position, so that the same
+      // match is selected when the next key is entered (if it is still a match).
+      //
+      // When toggling through a search normally, the cursor is always set in the forward
+      // direction, so head is always at the 'to' position.  That way, if reverse = false,
+      // the search proceeds from the 'to' position during normal toggling.  If reverse = true,
+      // the search always proceeds from the 'anchor' position, which is at the 'from'.
+
+      const cursorToGet = reverse ? 'anchor' : 'head';
       const lastPosition = this._cm.getCursor(cursorToGet);
       const position = this._toEditorPos(lastPosition);
       let cursor: CodeMirror.SearchCursor = this._cm.getSearchCursor(
@@ -340,7 +442,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
         // if we don't want to loop, no more matches found, reset the cursor and exit
         if (this.isSubProvider) {
           this._cm.setCursorPosition(position);
-          this._matchIndex = null;
+          this._currentMatch = null;
           return null;
         }
 
@@ -415,9 +517,26 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     };
   }
 
+  private _currentMatchIsSelected(): boolean {
+    if (!this._currentMatch) {
+      return false;
+    }
+    const currentSelection = this._cm.getSelection();
+    const currentSelectionLength =
+      currentSelection.end.column - currentSelection.start.column;
+    const selectionIsOneLine =
+      currentSelection.start.line === currentSelection.end.line;
+    return (
+      this._currentMatch.line === currentSelection.start.line &&
+      this._currentMatch.column === currentSelection.start.column &&
+      this._currentMatch.text.length === currentSelectionLength &&
+      selectionIsOneLine
+    );
+  }
+
   private _query: RegExp;
   private _cm: CodeMirrorEditor;
-  private _matchIndex: number;
+  private _currentMatch: ISearchMatch;
   private _matchState: MatchMap = {};
   private _changed = new Signal<this, void>(this);
   private _overlay: any;

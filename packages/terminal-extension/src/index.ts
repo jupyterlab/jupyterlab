@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ISettingRegistry } from '@jupyterlab/coreutils';
+
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
@@ -10,6 +12,7 @@ import {
 import {
   ICommandPalette,
   InstanceTracker,
+  IThemeManager,
   MainAreaWidget
 } from '@jupyterlab/apputils';
 
@@ -17,9 +20,15 @@ import { ILauncher } from '@jupyterlab/launcher';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { ITerminalTracker, Terminal } from '@jupyterlab/terminal';
+import {
+  ITerminalTracker,
+  ITerminal
+} from '@jupyterlab/terminal/lib/constants';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+// Name-only import so as to not trigger inclusion in main bundle
+import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
+
+import { Menu } from '@phosphor/widgets';
 
 /**
  * The command IDs used by the terminal plugin.
@@ -35,7 +44,7 @@ namespace CommandIDs {
 
   export const decreaseFont = 'terminal:decrease-font';
 
-  export const toggleTheme = 'terminal:toggle-theme';
+  export const setTheme = 'terminal:set-theme';
 }
 
 /**
@@ -51,7 +60,13 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
   id: '@jupyterlab/terminal-extension:plugin',
   provides: ITerminalTracker,
   requires: [ISettingRegistry],
-  optional: [ICommandPalette, ILauncher, ILayoutRestorer, IMainMenu],
+  optional: [
+    ICommandPalette,
+    ILauncher,
+    ILayoutRestorer,
+    IMainMenu,
+    IThemeManager
+  ],
   autoStart: true
 };
 
@@ -69,12 +84,15 @@ function activate(
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   restorer: ILayoutRestorer | null,
-  mainMenu: IMainMenu | null
+  mainMenu: IMainMenu | null,
+  themeManager: IThemeManager
 ): ITerminalTracker {
-  const { serviceManager } = app;
+  const { serviceManager, commands } = app;
   const category = 'Terminal';
   const namespace = 'terminal';
-  const tracker = new InstanceTracker<MainAreaWidget<Terminal>>({ namespace });
+  const tracker = new InstanceTracker<MainAreaWidget<ITerminal.ITerminal>>({
+    namespace
+  });
 
   // Bail if there are no terminals available.
   if (!serviceManager.terminals.isAvailable()) {
@@ -94,27 +112,27 @@ function activate(
   }
 
   // The terminal options from the setting editor.
-  let options: Partial<Terminal.IOptions>;
+  let options: Partial<ITerminal.IOptions>;
 
   /**
    * Update the option values.
    */
   function updateOptions(settings: ISettingRegistry.ISettings): void {
-    options = settings.composite as Partial<Terminal.IOptions>;
-    Object.keys(options).forEach((key: keyof Terminal.IOptions) => {
-      Terminal.defaultOptions[key] = options[key];
+    options = settings.composite as Partial<ITerminal.IOptions>;
+    Object.keys(options).forEach((key: keyof ITerminal.IOptions) => {
+      ITerminal.defaultOptions[key] = options[key];
     });
   }
 
   /**
    * Update terminal
    */
-  function updateTerminal(widget: MainAreaWidget<Terminal>): void {
+  function updateTerminal(widget: MainAreaWidget<ITerminal.ITerminal>): void {
     const terminal = widget.content;
     if (!terminal) {
       return;
     }
-    Object.keys(options).forEach((key: keyof Terminal.IOptions) => {
+    Object.keys(options).forEach((key: keyof ITerminal.IOptions) => {
       terminal.setOption(key, options[key]);
     });
   }
@@ -137,22 +155,50 @@ function activate(
         updateTracker();
       });
     })
-    .catch((reason: Error) => {
-      console.error(reason.message);
+    .catch(Private.showErrorMessage);
+
+  // Subscribe to changes in theme.
+  themeManager.themeChanged.connect((sender, args) => {
+    tracker.forEach(widget => {
+      const terminal = widget.content;
+      if (terminal.getOption('theme') === 'inherit') {
+        terminal.setOption('theme', 'inherit');
+      }
     });
+  });
 
   addCommands(app, tracker, settingRegistry);
 
   if (mainMenu) {
-    // Add some commands to the application view menu.
-    const viewGroup = [
-      CommandIDs.increaseFont,
-      CommandIDs.decreaseFont,
-      CommandIDs.toggleTheme
-    ].map(command => {
-      return { command };
+    // Add "Terminal Theme" menu below "JupyterLab Themes" menu.
+    const themeMenu = new Menu({ commands });
+    themeMenu.title.label = 'Terminal Theme';
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: { theme: 'inherit', isPalette: false }
     });
-    mainMenu.settingsMenu.addGroup(viewGroup, 40);
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: { theme: 'light', isPalette: false }
+    });
+    themeMenu.addItem({
+      command: CommandIDs.setTheme,
+      args: { theme: 'dark', isPalette: false }
+    });
+    mainMenu.settingsMenu.addGroup(
+      [{ type: 'submenu', submenu: themeMenu }],
+      2
+    );
+
+    // Add some commands to the "View" menu.
+    mainMenu.settingsMenu.addGroup(
+      [
+        { command: CommandIDs.increaseFont },
+        { command: CommandIDs.decreaseFont },
+        { type: 'submenu', submenu: themeMenu }
+      ],
+      40
+    );
 
     // Add terminal creation to the file menu.
     mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 20);
@@ -164,10 +210,24 @@ function activate(
       CommandIDs.createNew,
       CommandIDs.refresh,
       CommandIDs.increaseFont,
-      CommandIDs.decreaseFont,
-      CommandIDs.toggleTheme
+      CommandIDs.decreaseFont
     ].forEach(command => {
       palette.addItem({ command, category, args: { isPalette: true } });
+    });
+    palette.addItem({
+      command: CommandIDs.setTheme,
+      category,
+      args: { theme: 'inherit', isPalette: true }
+    });
+    palette.addItem({
+      command: CommandIDs.setTheme,
+      category,
+      args: { theme: 'light', isPalette: true }
+    });
+    palette.addItem({
+      command: CommandIDs.setTheme,
+      category,
+      args: { theme: 'dark', isPalette: true }
     });
   }
 
@@ -194,7 +254,7 @@ function activate(
  */
 export function addCommands(
   app: JupyterFrontEnd,
-  tracker: InstanceTracker<MainAreaWidget<Terminal>>,
+  tracker: InstanceTracker<MainAreaWidget<ITerminal.ITerminal>>,
   settingRegistry: ISettingRegistry
 ) {
   const { commands, serviceManager } = app;
@@ -204,31 +264,37 @@ export function addCommands(
     label: args => (args['isPalette'] ? 'New Terminal' : 'Terminal'),
     caption: 'Start a new terminal session',
     iconClass: args => (args['isPalette'] ? '' : TERMINAL_ICON_CLASS),
-    execute: args => {
+    execute: async args => {
+      // wait for the widget to lazy load
+      let Terminal: typeof WidgetModuleType.Terminal;
+      try {
+        Terminal = (await Private.ensureWidget()).Terminal;
+      } catch (err) {
+        Private.showErrorMessage(err);
+      }
+
       const name = args['name'] as string;
       const term = new Terminal();
-      const promise = name
-        ? serviceManager.terminals
-            .connectTo(name)
-            .catch(() => serviceManager.terminals.startNew())
-        : serviceManager.terminals.startNew();
 
       term.title.icon = TERMINAL_ICON_CLASS;
       term.title.label = '...';
       let main = new MainAreaWidget({ content: term });
       app.shell.add(main);
 
-      return promise
-        .then(session => {
-          term.session = session;
-          tracker.add(main);
-          app.shell.activateById(main.id);
+      try {
+        term.session = await (name
+          ? serviceManager.terminals
+              .connectTo(name)
+              .catch(() => serviceManager.terminals.startNew())
+          : serviceManager.terminals.startNew());
 
-          return main;
-        })
-        .catch(() => {
-          term.dispose();
-        });
+        void tracker.add(main);
+        app.shell.activateById(main.id);
+
+        return main;
+      } catch {
+        term.dispose();
+      }
     }
   });
 
@@ -252,61 +318,100 @@ export function addCommands(
   commands.addCommand(CommandIDs.refresh, {
     label: 'Refresh Terminal',
     caption: 'Refresh the current terminal session',
-    execute: () => {
+    execute: async () => {
       let current = tracker.currentWidget;
       if (!current) {
         return;
       }
       app.shell.activateById(current.id);
-
-      return current.content.refresh().then(() => {
+      try {
+        await current.content.refresh();
         if (current) {
           current.content.activate();
         }
-      });
+      } catch (err) {
+        Private.showErrorMessage(err);
+      }
     },
     isEnabled: () => tracker.currentWidget !== null
   });
 
-  function showErrorMessage(error: Error): void {
-    console.error(`Failed to set ${plugin.id}: ${error.message}`);
-  }
-
   commands.addCommand(CommandIDs.increaseFont, {
     label: 'Increase Terminal Font Size',
-    execute: () => {
-      let { fontSize } = Terminal.defaultOptions;
+    execute: async () => {
+      let { fontSize } = ITerminal.defaultOptions;
       if (fontSize < 72) {
-        return settingRegistry
-          .set(plugin.id, 'fontSize', fontSize + 1)
-          .catch(showErrorMessage);
+        try {
+          await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
+        } catch (err) {
+          Private.showErrorMessage(err);
+        }
       }
     }
   });
 
   commands.addCommand(CommandIDs.decreaseFont, {
     label: 'Decrease Terminal Font Size',
-    execute: () => {
-      let { fontSize } = Terminal.defaultOptions;
+    execute: async () => {
+      let { fontSize } = ITerminal.defaultOptions;
       if (fontSize > 9) {
-        return settingRegistry
-          .set(plugin.id, 'fontSize', fontSize - 1)
-          .catch(showErrorMessage);
+        try {
+          await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);
+        } catch (err) {
+          Private.showErrorMessage(err);
+        }
       }
     }
   });
 
-  commands.addCommand(CommandIDs.toggleTheme, {
-    label: 'Use Dark Terminal Theme',
-    caption: 'Whether to use the dark terminal theme',
-    isToggled: () => Terminal.defaultOptions.theme === 'dark',
-    execute: () => {
-      let { theme } = Terminal.defaultOptions;
-      theme = theme === 'dark' ? 'light' : 'dark';
-      return settingRegistry
-        .set(plugin.id, 'theme', theme)
-        .then(() => commands.notifyCommandChanged(CommandIDs.toggleTheme))
-        .catch(showErrorMessage);
+  commands.addCommand(CommandIDs.setTheme, {
+    label: args => {
+      const theme = args['theme'] as string;
+      const displayName = theme[0].toUpperCase() + theme.substring(1);
+      return args['isPalette']
+        ? `Use ${displayName} Terminal Theme`
+        : displayName;
+    },
+    caption: 'Set the terminal theme',
+    isToggled: args => args['theme'] === ITerminal.defaultOptions.theme,
+    execute: async args => {
+      const theme = args['theme'] as ITerminal.Theme;
+      try {
+        await settingRegistry.set(plugin.id, 'theme', theme);
+        commands.notifyCommandChanged(CommandIDs.setTheme);
+      } catch (err) {
+        Private.showErrorMessage(err);
+      }
     }
   });
+}
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * A Promise for the initial load of the terminal widget.
+   */
+  export let widgetReady: Promise<typeof WidgetModuleType>;
+
+  /**
+   * Lazy-load the widget (and xterm library and addons)
+   */
+  export function ensureWidget(): Promise<typeof WidgetModuleType> {
+    if (widgetReady) {
+      return widgetReady;
+    }
+
+    widgetReady = import('@jupyterlab/terminal/lib/widget');
+
+    return widgetReady;
+  }
+
+  /**
+   *  Utility function for consistent error reporting
+   */
+  export function showErrorMessage(error: Error): void {
+    console.error(`Failed to configure ${plugin.id}: ${error.message}`);
+  }
 }

@@ -48,7 +48,7 @@
 
 .jp-OutputArea-output {
   height: auto;
-  overflow-x: auto;
+  overflow: auto;
   user-select: text;
   -moz-user-select: text;
   -webkit-user-select: text;

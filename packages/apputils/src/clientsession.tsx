@@ -200,6 +200,11 @@ export namespace IClientSession {
     readonly canStart?: boolean;
 
     /**
+     * Whether a kernel needs to be close with the associated session
+     */
+    readonly shutdownOnClose?: boolean;
+
+    /**
      * Whether to auto-start the default kernel if no matching kernel is found.
      */
     readonly autoStartDefault?: boolean;
@@ -363,6 +368,11 @@ export class ClientSession implements IClientSession {
     }
     this._isDisposed = true;
     if (this._session) {
+      if (this.kernelPreference.shutdownOnClose) {
+        this._session.shutdown().catch(reason => {
+          console.error(`Kernel not shut down ${reason}`);
+        });
+      }
       this._session = null;
     }
     if (this._dialog) {
@@ -523,7 +533,8 @@ export class ClientSession implements IClientSession {
         let session = manager.connectTo(model);
         this._handleNewSession(session);
       } catch (err) {
-        this._handleSessionError(err);
+        void this._handleSessionError(err);
+        return Promise.reject(err);
       }
     }
     await this._startIfNecessary();
@@ -641,7 +652,7 @@ export class ClientSession implements IClientSession {
         return this._handleNewSession(session);
       })
       .catch(err => {
-        this._handleSessionError(err);
+        void this._handleSessionError(err);
         return Promise.reject(err);
       });
   }

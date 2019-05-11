@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/settingeditor-extension",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.6",
   "description": "JupyterLab - Setting Editor Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,22 +32,21 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.0.0-alpha.3",
-    "@jupyterlab/apputils": "^1.0.0-alpha.3",
-    "@jupyterlab/codeeditor": "^1.0.0-alpha.3",
-    "@jupyterlab/coreutils": "^3.0.0-alpha.3",
-    "@jupyterlab/rendermime": "^1.0.0-alpha.3",
-    "@jupyterlab/settingeditor": "^1.0.0-alpha.3"
+    "@jupyterlab/application": "^1.0.0-alpha.6",
+    "@jupyterlab/apputils": "^1.0.0-alpha.6",
+    "@jupyterlab/codeeditor": "^1.0.0-alpha.6",
+    "@jupyterlab/coreutils": "^3.0.0-alpha.6",
+    "@jupyterlab/rendermime": "^1.0.0-alpha.6",
+    "@jupyterlab/settingeditor": "^1.0.0-alpha.6"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
-    "typescript": "~3.3.1"
+    "typescript": "~3.4.3"
   },
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "31f68f6d1717b58c344a5fb4f4baf3b123b7c75c",
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema"

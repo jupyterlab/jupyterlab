@@ -54,7 +54,7 @@ export function renameDialog(
       return;
     }
     if (!isValidFileName(result.value)) {
-      showErrorMessage(
+      void showErrorMessage(
         'Rename Error',
         Error(
           `"${result.value}" is not a valid name for a file. ` +

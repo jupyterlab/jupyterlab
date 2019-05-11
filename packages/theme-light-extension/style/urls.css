@@ -48,7 +48,6 @@
   --jp-icon-console: url('icons/jupyter/console.svg');
   --jp-icon-copy: url('icons/md/copy.svg');
   --jp-icon-cut: url('icons/md/cut.svg');
-  --jp-icon-directions-run: url('icons/md/ic_directions_run_24px.svg');
   --jp-icon-directory-selected: url('icons/jupyter/directory_selected.svg');
   --jp-icon-directory: url('icons/jupyter/directory.svg');
   --jp-icon-download: url('icons/md/download.svg');
@@ -98,6 +97,7 @@
   --jp-icon-spreadsheet-selected: url('icons/jupyter/csv_selected.svg');
   --jp-icon-spreadsheet: url('icons/jupyter/csv.svg');
   --jp-icon-stop: url('icons/md/stop.svg');
+  --jp-icon-stop-circle: url('icons/md/stop-circle.svg');
   --jp-icon-tab: url('icons/md/ic_tab_24px.svg');
   --jp-icon-terminal: url('icons/jupyter/terminal.svg');
   --jp-icon-text-editor: url('icons/jupyter/texteditor.svg');

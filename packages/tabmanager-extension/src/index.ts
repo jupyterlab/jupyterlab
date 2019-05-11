@@ -39,7 +39,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     tabs.node.insertBefore(header, tabs.contentNode);
     shell.add(tabs, 'left', { rank: 600 });
 
-    app.restored.then(() => {
+    void app.restored.then(() => {
       const populate = () => {
         tabs.clearTabs();
         each(shell.widgets('main'), widget => {

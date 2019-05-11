@@ -28,7 +28,7 @@ import { KernelMessage } from '@jupyterlab/services';
 
 import { each } from '@phosphor/algorithm';
 
-import { MimeData } from '@phosphor/coreutils';
+import { MimeData, JSONObject } from '@phosphor/coreutils';
 
 import { Drag } from '@phosphor/dragdrop';
 
@@ -244,7 +244,7 @@ export class CodeConsole extends Widget {
     let banner = (this._banner = new RawCell({
       model,
       contentFactory: this.contentFactory
-    }));
+    })).initializeState();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     this._content.addWidget(banner);
@@ -349,9 +349,12 @@ export class CodeConsole extends Widget {
    *
    * @returns A promise that indicates when the injected cell's execution ends.
    */
-  inject(code: string): Promise<void> {
+  inject(code: string, metadata: JSONObject = {}): Promise<void> {
     let cell = this.createCodeCell();
     cell.model.value.text = code;
+    for (let key of Object.keys(metadata)) {
+      cell.model.metadata.set(key, metadata[key]);
+    }
     this.addCell(cell);
     return this._execute(cell);
   }
@@ -460,14 +463,18 @@ export class CodeConsole extends Widget {
         event.clientY
       )
     ) {
-      this._startDrag(data.index, event.clientX, event.clientY);
+      void this._startDrag(data.index, event.clientX, event.clientY);
     }
   }
 
   /**
    * Start a drag event
    */
-  private _startDrag(index: number, clientX: number, clientY: number) {
+  private _startDrag(
+    index: number,
+    clientX: number,
+    clientY: number
+  ): Promise<void> {
     const cellModel = this._focusedCell.model as ICodeCellModel;
     let selected: nbformat.ICell[] = [cellModel.toJSON()];
 
@@ -492,7 +499,7 @@ export class CodeConsole extends Widget {
 
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
-    this._drag.start(clientX, clientY).then(() => {
+    return this._drag.start(clientX, clientY).then(() => {
       if (this.isDisposed) {
         return;
       }
@@ -889,7 +896,7 @@ export namespace CodeConsole {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new CodeCell(options);
+      return new CodeCell(options).initializeState();
     }
 
     /**
@@ -903,7 +910,7 @@ export namespace CodeConsole {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new RawCell(options);
+      return new RawCell(options).initializeState();
     }
   }
 

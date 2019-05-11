@@ -121,7 +121,7 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
       return;
     }
 
-    this.ready.then(() => {
+    void this.ready.then(() => {
       const socket = this._ws;
 
       if (socket) {
@@ -450,15 +450,12 @@ export namespace DefaultTerminalSession {
    *
    * @returns A promise that resolves when all the sessions are shut down.
    */
-  export function shutdownAll(
+  export async function shutdownAll(
     settings?: ServerConnection.ISettings
   ): Promise<void> {
     settings = settings || ServerConnection.makeSettings();
-    return listRunning(settings).then(running => {
-      each(running, s => {
-        shutdown(s.name, settings);
-      });
-    });
+    const running = await listRunning(settings);
+    await Promise.all(running.map(s => shutdown(s.name, settings)));
   }
 }
 

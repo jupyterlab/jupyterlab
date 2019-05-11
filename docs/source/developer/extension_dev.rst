@@ -165,7 +165,8 @@ the CSS files) are watched by the WebPack process. This means that if
 your extension is in TypeScript you'll have to run a ``jlpm run build``
 before the changes will be reflected in JupyterLab. To avoid this step
 you can also watch the TypeScript sources in your extension which is
-usually assigned to the ``tsc -w`` shortcut.
+usually assigned to the ``tsc -w`` shortcut. If WebPack doesn't seem to
+detect the changes, this can be related to `the number of available watches <https://github.com/webpack/docs/wiki/troubleshooting#not-enough-watchers>`__.
 
 Note that the application is built against **released** versions of the
 core JupyterLab extensions. If your extension depends on JupyterLab
@@ -190,9 +191,8 @@ subsequently reversed by running
 
     jlpm run remove:package <extension-dir-name>
 
-This will remove the package metadata from the source tree, but will
-**not** remove any files added by the ``addsibling`` script, which
-should be removed manually.
+This will remove the package metadata from the source tree and delete
+all of the package files.
 
 The package should export EMCAScript 5 compatible JavaScript. It can
 import CSS using the syntax ``require('foo.css')``. The CSS files can

@@ -18,6 +18,17 @@ export class CSVSearchProvider implements ISearchProvider {
   }
 
   /**
+   * Get an initial query value if applicable so that it can be entered
+   * into the search box as an initial query
+   *
+   * @returns Initial value used to populate the search box.
+   */
+  getInitialQuery(searchTarget: IDocumentWidget<CSVViewer>): any {
+    // CSV Viewer does not support selection
+    return null;
+  }
+
+  /**
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
    *
@@ -72,9 +83,29 @@ export class CSVSearchProvider implements ISearchProvider {
    *
    * @returns A promise that resolves once the action has completed.
    */
-  highlightPrevious(): Promise<ISearchMatch | undefined> {
+  async highlightPrevious(): Promise<ISearchMatch | undefined> {
     this._target.content.searchService.find(this._query, true);
     return undefined;
+  }
+
+  /**
+   * Replace the currently selected match with the provided text
+   * Not implemented in the CSV viewer as it is read-only.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  async replaceCurrentMatch(newText: string): Promise<boolean> {
+    return false;
+  }
+
+  /**
+   * Replace all matches in the notebook with the provided text
+   * Not implemented in the CSV viewer as it is read-only.
+   *
+   * @returns A promise that resolves once the action has completed.
+   */
+  async replaceAllMatches(newText: string): Promise<boolean> {
+    return false;
   }
 
   /**
@@ -93,6 +124,13 @@ export class CSVSearchProvider implements ISearchProvider {
    * The current index of the selected match.
    */
   readonly currentMatchIndex: number | null = null;
+
+  /**
+   * Set to true if the widget under search is read-only, false
+   * if it is editable.  Will be used to determine whether to show
+   * the replace option.
+   */
+  readonly isReadOnly = true;
 
   private _target: IDocumentWidget<CSVViewer>;
   private _query: RegExp;

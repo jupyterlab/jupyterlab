@@ -223,7 +223,7 @@ export class Context<T extends DocumentRegistry.IModel>
       return this._modelDB.connected.then(() => {
         if (this._modelDB.isPrepopulated) {
           this._model.initialize();
-          this._save();
+          void this._save();
           return void 0;
         } else {
           return this._revert(true);
@@ -387,13 +387,13 @@ export class Context<T extends DocumentRegistry.IModel>
         };
       }
       this._path = newPath;
-      this.session.setPath(newPath);
+      void this.session.setPath(newPath);
       const updateModel = {
         ...this._contentsModel,
         ...changeModel
       };
       const localPath = this._manager.contents.localPath(newPath);
-      this.session.setName(PathExt.basename(localPath));
+      void this.session.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
       this._pathChanged.emit(this._path);
     }
@@ -456,7 +456,10 @@ export class Context<T extends DocumentRegistry.IModel>
         name,
         language: this._model.defaultKernelLanguage
       };
-      this.session.initialize();
+      // Note: we don't wait on the session to initialize
+      // so that the user can be shown the content before
+      // any kernel has started.
+      void this.session.initialize();
     });
   }
 
@@ -512,7 +515,7 @@ export class Context<T extends DocumentRegistry.IModel>
         // Otherwise show an error message and throw the error.
         const localPath = this._manager.contents.localPath(this._path);
         const name = PathExt.basename(localPath);
-        this._handleError(err, `File Save Error for ${name}`);
+        void this._handleError(err, `File Save Error for ${name}`);
         throw err;
       })
       .then(
@@ -585,7 +588,7 @@ export class Context<T extends DocumentRegistry.IModel>
         if (err.message === 'Invalid response: 400 bad format') {
           err = new Error('JupyterLab is unable to open this file type.');
         }
-        this._handleError(err, `File Load Error for ${name}`);
+        void this._handleError(err, `File Load Error for ${name}`);
         throw err;
       });
   }
@@ -629,27 +632,28 @@ export class Context<T extends DocumentRegistry.IModel>
   /**
    * Handle a save/load error with a dialog.
    */
-  private _handleError(
+  private async _handleError(
     err: Error | ServerConnection.ResponseError,
     title: string
-  ): void {
+  ): Promise<void> {
     let buttons = [Dialog.okButton()];
 
     // Check for a more specific error message.
     if (err instanceof ServerConnection.ResponseError) {
-      err.response.text().then(text => {
-        let body = '';
-        try {
-          body = JSON.parse(text).message;
-        } catch (e) {
-          body = text;
-        }
-        body = body || err.message;
-        showDialog({ title, body, buttons });
-      });
+      const text = await err.response.text();
+      let body = '';
+      try {
+        body = JSON.parse(text).message;
+      } catch (e) {
+        body = text;
+      }
+      body = body || err.message;
+      await showDialog({ title, body, buttons });
+      return;
     } else {
       let body = err.message;
-      showDialog({ title, body, buttons });
+      await showDialog({ title, body, buttons });
+      return;
     }
   }
 
@@ -697,7 +701,7 @@ export class Context<T extends DocumentRegistry.IModel>
         `${tDisk}`
     );
     let body =
-      `The file has changed on disk since the last time it ` +
+      `"${this.path}" has changed on disk since the last time it ` +
       `was opened or saved. ` +
       `Do you want to overwrite the file on disk with the version ` +
       ` open here, or load the version on disk (revert)?`;
@@ -739,7 +743,7 @@ export class Context<T extends DocumentRegistry.IModel>
       }
       if (result.button.label === 'OVERWRITE') {
         return this._manager.contents.delete(path).then(() => {
-          this._finishSaveAs(path);
+          return this._finishSaveAs(path);
         });
       }
     });
@@ -753,7 +757,7 @@ export class Context<T extends DocumentRegistry.IModel>
     return this.session
       .setPath(newPath)
       .then(() => {
-        this.session.setName(newPath.split('/').pop()!);
+        void this.session.setName(newPath.split('/').pop()!);
         return this.save();
       })
       .then(() => {

@@ -17,7 +17,7 @@ export namespace URLExt {
    * @returns A URL object.
    */
   export function parse(url: string): IUrl {
-    if (typeof document !== 'undefined') {
+    if (typeof document !== 'undefined' && document) {
       let a = document.createElement('a');
       a.href = url;
       return a;
@@ -98,7 +98,7 @@ export namespace URLExt {
    * Modified version of [stackoverflow](http://stackoverflow.com/a/30707423).
    */
   export function objectToQueryString(value: JSONObject): string {
-    const keys = Object.keys(value);
+    const keys = Object.keys(value).filter(key => key.length > 0);
 
     if (!keys.length) {
       return '';
@@ -129,7 +129,9 @@ export namespace URLExt {
         (acc, val) => {
           const [key, value] = val.split('=');
 
-          acc[key] = decodeURIComponent(value || '');
+          if (key.length > 0) {
+            acc[key] = decodeURIComponent(value || '');
+          }
 
           return acc;
         },

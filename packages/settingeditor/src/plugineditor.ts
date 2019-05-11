@@ -260,7 +260,7 @@ namespace Private {
   export function onSaveError(reason: any): void {
     console.error(`Saving setting editor value failed: ${reason.message}`);
 
-    showDialog({
+    void showDialog({
       title: 'Your changes were not saved.',
       body: reason.message,
       buttons: [Dialog.okButton()]

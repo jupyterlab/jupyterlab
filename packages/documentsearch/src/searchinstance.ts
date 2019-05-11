@@ -17,6 +17,9 @@ export class SearchInstance implements IDisposable {
     this._widget = widget;
     this._activeProvider = searchProvider;
 
+    const initialQuery = this._activeProvider.getInitialQuery(this._widget);
+    this._displayState.searchText = initialQuery || '';
+
     this._searchWidget = createSearchOverlay({
       widgetChanged: this._displayUpdateSignal,
       overlayState: this._displayState,
@@ -25,13 +28,17 @@ export class SearchInstance implements IDisposable {
       onHightlightNext: this._highlightNext.bind(this),
       onHighlightPrevious: this._highlightPrevious.bind(this),
       onStartQuery: this._startQuery.bind(this),
-      onEndSearch: this.dispose.bind(this)
+      onReplaceCurrent: this._replaceCurrent.bind(this),
+      onReplaceAll: this._replaceAll.bind(this),
+      onEndSearch: this.dispose.bind(this),
+      isReadOnly: this._activeProvider.isReadOnly
     });
 
     this._widget.disposed.connect(() => {
       this.dispose();
     });
     this._searchWidget.disposed.connect(() => {
+      this._widget.activate();
       this.dispose();
     });
 
@@ -64,9 +71,11 @@ export class SearchInstance implements IDisposable {
    */
   focusInput(): void {
     this._displayState.forceFocus = true;
+    this._displayState.searchInputFocused = true;
 
     // Trigger a rerender without resetting the forceFocus.
     this._displayUpdateSignal.emit(this._displayState);
+    this._displayState.forceFocus = false;
   }
 
   /**
@@ -103,6 +112,20 @@ export class SearchInstance implements IDisposable {
     );
   }
 
+  private async _replaceCurrent(newText: string) {
+    if (this._activeProvider && this._displayState.query && !!newText) {
+      await this._activeProvider.replaceCurrentMatch(newText);
+      this.updateIndices();
+    }
+  }
+
+  private async _replaceAll(newText: string) {
+    if (this._activeProvider && this._displayState.query && !!newText) {
+      await this._activeProvider.replaceAllMatches(newText);
+      this.updateIndices();
+    }
+  }
+
   /**
    * Dispose of the resources held by the search instance.
    */
@@ -114,7 +137,7 @@ export class SearchInstance implements IDisposable {
 
     // If a query hasn't been executed yet, no need to call endSearch
     if (this._displayState.query) {
-      this._activeProvider.endSearch();
+      void this._activeProvider.endSearch();
     }
 
     this._searchWidget.dispose();
@@ -177,10 +200,14 @@ export class SearchInstance implements IDisposable {
     totalMatches: 0,
     caseSensitive: false,
     useRegex: false,
-    inputText: '',
+    searchText: '',
     query: null,
     errorMessage: '',
-    forceFocus: true
+    searchInputFocused: true,
+    replaceInputFocused: false,
+    forceFocus: true,
+    replaceText: '',
+    replaceEntryShown: false
   };
   private _displayUpdateSignal = new Signal<this, IDisplayState>(this);
   private _activeProvider: ISearchProvider;

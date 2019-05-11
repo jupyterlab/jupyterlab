@@ -21,16 +21,16 @@ import {
   Contents,
   TerminalSession,
   ServerConnection
-} from '@jupyterlab/services/src';
+} from '@jupyterlab/services';
 
-import { Kernel, KernelMessage } from '@jupyterlab/services/src/kernel';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 
 import {
   deserialize,
   serialize
-} from '@jupyterlab/services/src/kernel/serialize';
+} from '@jupyterlab/services/lib/kernel/serialize';
 
-import { Session } from '@jupyterlab/services/src/session';
+import { Session } from '@jupyterlab/services';
 
 // stub for node global
 declare var global: any;
