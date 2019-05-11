@@ -10,7 +10,8 @@
   "dependencies": {
     "@jupyterlab/outputarea": "^1.0.0-alpha.6",
     "@jupyterlab/rendermime": "^1.0.0-alpha.6",
-    "@jupyterlab/services": "^4.0.0-alpha.6"
+    "@jupyterlab/services": "^4.0.0-alpha.6",
+    "es6-promise": "~4.1.1"
   },
   "devDependencies": {
     "css-loader": "~2.1.1",
