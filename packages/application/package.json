@@ -31,9 +31,6 @@
     "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
-  "jupyterlab": {
-    "core": true
-  },
   "dependencies": {
     "@jupyterlab/apputils": "^1.0.0-alpha.6",
     "@jupyterlab/coreutils": "^3.0.0-alpha.6",
@@ -59,5 +56,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "jupyterlab": {
+    "core": true
   }
 }
