@@ -232,6 +232,9 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
 
       socket.onclose = (event: CloseEvent) => {
         console.warn(`Terminal websocket closed: ${event.code}`);
+        if (this._disconnected) {
+          this.dispose();
+        }
         this._reconnectSocket();
       };
     });
@@ -440,13 +443,11 @@ export namespace DefaultTerminalSession {
       if (response.status === 404) {
         return response.json().then(data => {
           console.warn(data['message']);
-          Private.killTerminal(url);
         });
       }
       if (response.status !== 204) {
         throw new ServerConnection.ResponseError(response);
       }
-      Private.killTerminal(url);
     });
   }
 
@@ -494,16 +495,5 @@ namespace Private {
    */
   export function getServiceUrl(baseUrl: string): string {
     return URLExt.join(baseUrl, TERMINAL_SERVICE_URL);
-  }
-
-  /**
-   * Kill a terminal by url.
-   */
-  export function killTerminal(url: string): void {
-    // Update the local data store.
-    if (Private.running[url]) {
-      let session = Private.running[url];
-      session.dispose();
-    }
   }
 }
