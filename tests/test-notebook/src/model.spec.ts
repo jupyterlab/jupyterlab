@@ -13,11 +13,7 @@ import { NotebookModel } from '@jupyterlab/notebook';
 
 import { ModelDB } from '@jupyterlab/observables';
 
-import {
-  signalToPromise,
-  NBTestUtils,
-  acceptDialog
-} from '@jupyterlab/testutils';
+import { acceptDialog, NBTestUtils } from '@jupyterlab/testutils';
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookModel', () => {
@@ -33,12 +29,6 @@ describe('@jupyterlab/notebook', () => {
           'language_info'
         ) as nbformat.ILanguageInfoMetadata;
         expect(lang.name).to.equal('python');
-      });
-
-      it('should add a single code cell by default', () => {
-        const model = new NotebookModel();
-        expect(model.cells.length).to.equal(1);
-        expect(model.cells.get(0)).to.be.an.instanceof(CodeCellModel);
       });
 
       it('should accept an optional factory', () => {
@@ -78,12 +68,6 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#cells', () => {
-      it('should add an empty code cell by default', () => {
-        const model = new NotebookModel();
-        expect(model.cells.length).to.equal(1);
-        expect(model.cells.get(0)).to.be.an.instanceof(CodeCellModel);
-      });
-
       it('should be reset when loading from disk', () => {
         const model = new NotebookModel();
         const cell = model.contentFactory.createCodeCell({});
@@ -100,9 +84,9 @@ describe('@jupyterlab/notebook', () => {
         model.cells.push(cell);
         model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         model.cells.undo();
-        expect(model.cells.length).to.equal(2);
-        expect(model.cells.get(1).value.text).to.equal('foo');
-        expect(model.cells.get(1)).to.equal(cell); // should be ===.
+        expect(model.cells.length).to.equal(1);
+        expect(model.cells.get(0).value.text).to.equal('foo');
+        expect(model.cells.get(0)).to.equal(cell); // should be ===.
       });
 
       context('cells `changed` signal', () => {
@@ -148,17 +132,6 @@ describe('@jupyterlab/notebook', () => {
           const cell = model.contentFactory.createCodeCell({});
           model.cells.push(cell);
           expect(model.dirty).to.equal(true);
-        });
-
-        it('should add a new code cell when cells are cleared', async () => {
-          const model = new NotebookModel();
-          let promise = signalToPromise(model.cells.changed);
-          model.cells.clear();
-          await promise;
-          expect(model.cells.length).to.equal(0);
-          await signalToPromise(model.cells.changed);
-          expect(model.cells.length).to.equal(1);
-          expect(model.cells.get(0)).to.be.an.instanceof(CodeCellModel);
         });
       });
 
@@ -390,6 +363,23 @@ describe('@jupyterlab/notebook', () => {
           expect(factory.codeCellContentFactory).to.equal(
             codeCellContentFactory
           );
+        });
+      });
+
+      context('#createCell()', () => {
+        it('should create a new code cell', () => {
+          const cell = factory.createCell('code', {});
+          expect(cell.type).to.equal('code');
+        });
+
+        it('should create a new code cell', () => {
+          const cell = factory.createCell('markdown', {});
+          expect(cell.type).to.equal('markdown');
+        });
+
+        it('should create a new code cell', () => {
+          const cell = factory.createCell('raw', {});
+          expect(cell.type).to.equal('raw');
         });
       });
 
