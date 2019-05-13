@@ -81,7 +81,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.toggle, {
-      label: 'Enable Extension Manager',
+      label: 'Enable Extension Manager (experimental)',
       execute: () => {
         if (registry) {
           registry.set(plugin.id, 'enabled', !enabled);
