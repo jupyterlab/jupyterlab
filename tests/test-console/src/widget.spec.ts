@@ -201,7 +201,7 @@ describe('console/widget', () => {
         expect(widget.cells.length).to.be.greaterThan(0);
       });
 
-      it('should check if code is multiline and allow amending', async () => {
+      it.skip('should check if code is multiline and allow amending', async () => {
         const force = false;
         const timeout = 9000;
         Widget.attach(widget, document.body);

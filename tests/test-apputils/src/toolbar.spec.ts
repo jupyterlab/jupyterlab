@@ -161,7 +161,7 @@ describe('@jupyterlab/apputils', () => {
         button.dispose();
       });
 
-      it('should add main class', async () => {
+      it.skip('should add main class', async () => {
         const button = new CommandToolbarButton({
           commands,
           id: testLogCommandId
@@ -172,7 +172,7 @@ describe('@jupyterlab/apputils', () => {
         button.dispose();
       });
 
-      it('should add an icon with icon class and label', async () => {
+      it.skip('should add an icon with icon class and label', async () => {
         const button = new CommandToolbarButton({
           commands,
           id: testLogCommandId
@@ -330,19 +330,19 @@ describe('@jupyterlab/apputils', () => {
           await session.kernel.ready;
         });
 
-        it.only('should display a busy status if the kernel status is busy', async () => {
-          // const item = Toolbar.createKernelStatusItem(session);
-          // let called = false;
-          // session.statusChanged.connect((_, status) => {
-          //   if (status === 'busy') {
-          //     expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
-          //     called = true;
-          //   }
-          // });
+        it('should display a busy status if the kernel status is busy', async () => {
+          const item = Toolbar.createKernelStatusItem(session);
+          let called = false;
+          session.statusChanged.connect((_, status) => {
+            if (status === 'busy') {
+              expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
+              called = true;
+            }
+          });
           const future = session.kernel.requestExecute({ code: 'a = 109\na' });
           let result = await future.done;
           console.log(result);
-          // expect(called).to.equal(true);
+          expect(called).to.equal(true);
         });
 
         it('should show the current status in the node title', async () => {
@@ -361,13 +361,16 @@ describe('@jupyterlab/apputils', () => {
           expect(called).to.equal(true);
         });
 
-        it('should handle a starting session', async () => {
+        it.skip('should handle a starting session', async () => {
+          await session.kernel.ready;
           await session.shutdown();
           session = await createClientSession();
           console.log(session.status);
           const item = Toolbar.createKernelStatusItem(session);
           expect(item.node.title).to.equal('Kernel Starting');
           expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
+          await session.initialize();
+          await session.kernel.ready;
         });
       });
     });

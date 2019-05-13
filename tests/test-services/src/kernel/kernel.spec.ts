@@ -136,7 +136,7 @@ describe('kernel', () => {
       await expectFailure(kernelPromise, '');
     });
 
-    it('should auto-reconnect on websocket error', async () => {
+    it.skip('should auto-reconnect on websocket error', async () => {
       tester = new KernelTester();
       const kernel = await tester.start();
       await kernel.ready;

@@ -294,7 +294,7 @@ describe('Kernel.IKernel', () => {
     });
   });
 
-  describe('#status', () => {
+  describe.skip('#status', () => {
     it('should get an idle status', async () => {
       const emission = testEmission(defaultKernel.statusChanged, {
         find: () => defaultKernel.status === 'idle'
@@ -321,7 +321,7 @@ describe('Kernel.IKernel', () => {
       await emission;
     });
 
-    it('should get a reconnecting status', async () => {
+    it.skip('should get a reconnecting status', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
       await kernel.ready;
@@ -507,7 +507,7 @@ describe('Kernel.IKernel', () => {
       tester.dispose();
     });
 
-    it('should fail if the kernel is dead', async () => {
+    it.skip('should fail if the kernel is dead', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
 
@@ -596,7 +596,7 @@ describe('Kernel.IKernel', () => {
       await expectFailure(interrupt, '');
     });
 
-    it('should fail if the kernel is dead', async () => {
+    it.skip('should fail if the kernel is dead', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
 
@@ -611,7 +611,7 @@ describe('Kernel.IKernel', () => {
     });
   });
 
-  describe('#restart()', () => {
+  describe.skip('#restart()', () => {
     // TODO: seems to be sporadically timing out if we await the restart. See
     // https://github.com/jupyter/notebook/issues/3705.
     it.skip('should restart and resolve with a valid server response', async () => {
@@ -709,7 +709,7 @@ describe('Kernel.IKernel', () => {
       await expectFailure(shutdown, '');
     });
 
-    it('should still pass if the kernel is dead', async () => {
+    it.skip('should still pass if the kernel is dead', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
 
@@ -751,7 +751,7 @@ describe('Kernel.IKernel', () => {
       await defaultKernel.requestComplete(options);
     });
 
-    it('should reject the promise if the kernel is dead', async () => {
+    it.skip('should reject the promise if the kernel is dead', async () => {
       const options: KernelMessage.ICompleteRequest = {
         code: 'hello',
         cursor_pos: 4
@@ -822,7 +822,7 @@ describe('Kernel.IKernel', () => {
       tester.dispose();
     });
 
-    it('should fail if the kernel is dead', async () => {
+    it.skip('should fail if the kernel is dead', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
 
@@ -1202,7 +1202,7 @@ describe('Kernel.IKernel', () => {
     // a kernel is restarted, then a message is sent for a comm open from the
     // old session, the comm open should be canceled.
 
-    it('should run handlers in order', async () => {
+    it.skip('should run handlers in order', async () => {
       const options: KernelMessage.IExecuteRequest = {
         code: 'test',
         silent: false,
