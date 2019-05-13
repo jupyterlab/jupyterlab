@@ -52,10 +52,11 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
    * @param options - The instantiation options for a state database.
    */
   constructor(options: StateDB.IOptions) {
-    const { namespace, transform, windowName } = options;
+    const { connector, namespace, transform, windowName } = options;
 
     this.namespace = namespace;
 
+    this._connector = connector || Private.connector;
     this._window = windowName || '';
     this._ready = (transform || Promise.resolve(null)).then(transformation => {
       if (!transformation) {
@@ -101,7 +102,7 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
    */
   async clear(silent = false): Promise<void> {
     await this._ready;
-    this._clear();
+    await this._clear();
     if (silent) {
       return;
     }
@@ -127,9 +128,8 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
    * `undefined`.
    */
   async fetch(id: string): Promise<T> {
-    const value = await this._ready.then(() => this._fetch(id));
-
-    return value as T;
+    await this._ready;
+    return this._fetch(id);
   }
 
   /**
@@ -150,13 +150,7 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
    */
   async list(namespace: string): Promise<{ ids: string[]; values: T[] }> {
     await this._ready;
-
-    const prefix = `${this._window}:${this.namespace}:`;
-    const list = await this._connector.list(`${prefix}${namespace}:`);
-
-    list.ids = list.ids.map((key: string) => key.replace(prefix, ''));
-
-    return list as { ids: string[]; values: T[] };
+    return this._list(namespace);
   }
 
   /**
@@ -202,34 +196,22 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
   async toJSON(): Promise<{ [id: string]: T }> {
     await this._ready;
 
-    const prefix = `${this._window}:${this.namespace}:`;
-    const { ids, values } = await this._connector.list(prefix);
+    const { ids, values } = await this._list();
 
-    const transformed: { [id: string]: T } = values.reduce(
-      (acc: { [id: string]: T }, val, idx) => {
-        const key = ids[idx].replace(prefix, '');
-        const envelope = JSON.parse(val as string) as Private.Envelope;
-
-        acc[key] = envelope.v as T;
+    return values.reduce(
+      (acc, val, idx) => {
+        acc[ids[idx]] = val;
         return acc;
       },
-      {}
+      {} as { [id: string]: T }
     );
-
-    return transformed;
   }
 
   /**
    * Clear the entire database.
    */
   private async _clear(): Promise<void> {
-    const connector = this._connector;
-    const prefix = `${this._window}:${this.namespace}:`;
-    const removals = (await connector.list()).ids
-      .map(id => id && id.indexOf(prefix) === 0 && connector.remove(id))
-      .filter(removal => !!removal);
-
-    await Promise.all(removals);
+    await Promise.all((await this._list()).ids.map(id => this._remove(id)));
   }
 
   /**
@@ -247,13 +229,27 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
   }
 
   /**
+   * Fetch a list from the database.
+   */
+  private async _list(query?: string): Promise<{ ids: string[]; values: T[] }> {
+    const prefix = `${this._window}:${this.namespace}:`;
+    const { ids, values } = await this._connector.list(
+      query ? `${prefix}${query}:` : prefix
+    );
+
+    return {
+      ids: ids.map((key: string) => key.replace(prefix, '')),
+      values: values.map(val => (JSON.parse(val) as Private.Envelope).v as T)
+    };
+  }
+
+  /**
    * Merge data into the state database.
    */
   private async _merge(contents: { [id: string]: T }): Promise<void> {
-    const saves = Object.keys(contents).map(key => {
-      return this._save(key, contents[key]);
-    });
-    await Promise.all(saves);
+    await Promise.all(
+      Object.keys(contents).map(key => this._save(key, contents[key]))
+    );
   }
 
   /**
@@ -278,8 +274,7 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
    */
   private async _save(id: string, value: T): Promise<void> {
     const key = `${this._window}:${this.namespace}:${id}`;
-    const envelope: Private.Envelope = { v: value };
-    const serialized = JSON.stringify(envelope);
+    const serialized = JSON.stringify({ v: value } as Private.Envelope);
 
     return this._connector.save(key, serialized);
   }
