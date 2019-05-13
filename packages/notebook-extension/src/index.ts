@@ -18,7 +18,7 @@ import {
 
 import { CodeCell } from '@jupyterlab/cells';
 
-import { CodeEditor } from '@jupyterlab/codeeditor/lib/editor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IEditorServices } from '@jupyterlab/codeeditor/lib/tokens';
 

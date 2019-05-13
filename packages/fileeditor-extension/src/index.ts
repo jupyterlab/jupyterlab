@@ -9,7 +9,7 @@ import {
 
 import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
 
-import { CodeEditor } from '@jupyterlab/codeeditor/lib/editor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IEditorServices } from '@jupyterlab/codeeditor/lib/tokens';
 
