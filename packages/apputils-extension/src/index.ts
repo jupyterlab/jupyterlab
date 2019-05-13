@@ -17,7 +17,8 @@ import {
   IThemeManager,
   IWindowResolver,
   ThemeManager,
-  WindowResolver
+  WindowResolver,
+  Printing
 } from '@jupyterlab/apputils';
 
 import {
@@ -69,6 +70,8 @@ namespace CommandIDs {
   export const resetOnLoad = 'apputils:reset-on-load';
 
   export const saveState = 'apputils:save-statedb';
+
+  export const print = 'apputils:print';
 }
 
 /**
@@ -295,6 +298,27 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
         return Private.showSplash(restored, commands, CommandIDs.reset, light);
       }
     };
+  }
+};
+
+const print: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:print',
+  autoStart: true,
+  activate: (app: JupyterFrontEnd) => {
+    app.commands.addCommand(CommandIDs.print, {
+      label: 'Print...',
+      isEnabled: () => {
+        const widget = app.shell.currentWidget;
+        return Printing.getPrintFunction(widget) !== null;
+      },
+      execute: async () => {
+        const widget = app.shell.currentWidget;
+        const printFunction = Printing.getPrintFunction(widget);
+        if (printFunction) {
+          await printFunction();
+        }
+      }
+    });
   }
 };
 
@@ -567,7 +591,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   state,
   splash,
   themes,
-  themesPaletteMenu
+  themesPaletteMenu,
+  print
 ];
 export default plugins;
 

@@ -24,8 +24,7 @@ import {
   ISettingRegistry,
   IStateDB,
   nbformat,
-  PageConfig,
-  URLExt
+  PageConfig
 } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
@@ -1139,14 +1138,11 @@ function addCommands(
         return;
       }
 
-      const notebookPath = URLExt.encodeParts(current.context.path);
-      const url =
-        URLExt.join(
-          services.serverSettings.baseUrl,
-          'nbconvert',
-          args['format'] as string,
-          notebookPath
-        ) + '?download=true';
+      const url = PageConfig.getNBConvertURL({
+        format: args['format'] as string,
+        download: true,
+        path: current.context.path
+      });
       const child = window.open('', '_blank');
       const { context } = current;
 

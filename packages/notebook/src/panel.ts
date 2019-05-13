@@ -9,7 +9,7 @@ import { Message } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { IClientSession, Printing } from '@jupyterlab/apputils';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
@@ -18,6 +18,7 @@ import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import { INotebookModel } from './model';
 
 import { Notebook, StaticNotebook } from './widget';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 /**
  * The class name added to notebook panels.
@@ -149,6 +150,26 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
 
     // TODO: do we still need to emit this signal? Who is using it?
     this._activated.emit(void 0);
+  }
+
+  /**
+   * Prints the notebook by converting to HTML with nbconvert.
+   */
+  [Printing.symbol]() {
+    return async () => {
+      // Save before generating HTML
+      if (this.context.model.dirty && !this.context.model.readOnly) {
+        await this.context.save();
+      }
+
+      await Printing.printURL(
+        PageConfig.getNBConvertURL({
+          format: 'html',
+          download: false,
+          path: this.context.path
+        })
+      );
+    };
   }
 
   /**

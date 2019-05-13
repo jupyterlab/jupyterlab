@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Printing } from '@jupyterlab/apputils';
+
 import { Token } from '@phosphor/coreutils';
 
 import { ISignal } from '@phosphor/signaling';
@@ -88,13 +90,21 @@ export namespace IInspector {
 /**
  * A panel which contains a set of inspectors.
  */
-export class InspectorPanel extends Panel implements IInspector {
+export class InspectorPanel extends Panel
+  implements IInspector, Printing.IPrintable {
   /**
    * Construct an inspector.
    */
   constructor() {
     super();
     this.addClass(PANEL_CLASS);
+  }
+
+  /**
+   * Print in iframe
+   */
+  [Printing.symbol]() {
+    return () => Printing.printWidget(this);
   }
 
   /**

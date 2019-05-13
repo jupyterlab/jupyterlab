@@ -448,12 +448,14 @@ export function createFileMenu(
     { command: 'filemenu:logout' },
     { command: 'filemenu:shutdown' }
   ];
+  const printGroup = [{ command: 'apputils:print' }];
 
   menu.addGroup(newGroup, 0);
   menu.addGroup(newViewGroup, 1);
   menu.addGroup(closeGroup, 2);
   menu.addGroup(saveGroup, 3);
   menu.addGroup(reGroup, 4);
+  menu.addGroup(printGroup, 98);
   if (menu.quitEntry) {
     menu.addGroup(quitGroup, 99);
   }
