@@ -224,8 +224,6 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
     if (value) {
       return (JSON.parse(value) as Private.Envelope).v as T;
     }
-
-    return undefined;
   }
 
   /**

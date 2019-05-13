@@ -87,21 +87,6 @@ describe('StateDB', () => {
     });
   });
 
-  describe('#maxLength', () => {
-    it('should enforce the maximum length of a stored item', async () => {
-      const db = new StateDB({ namespace: 'test' });
-      const key = 'test-key';
-      const data = { a: new Array<string>(db.maxLength).join('A') };
-      let failed = false;
-      try {
-        await db.save(key, data);
-      } catch (e) {
-        failed = true;
-      }
-      expect(failed).to.equal(true);
-    });
-  });
-
   describe('#namespace', () => {
     it('should be the read-only internal namespace', () => {
       const namespace = 'test-namespace';
