@@ -382,6 +382,11 @@ export class StaticNotebook extends Widget {
     }
     this._updateMimetype();
     let cells = newValue.cells;
+    if (!cells.length) {
+      cells.push(
+        newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {})
+      );
+    }
     each(cells, (cell: ICellModel, i: number) => {
       this._insertCell(i, cell);
     });
@@ -412,6 +417,22 @@ export class StaticNotebook extends Widget {
         each(args.oldValues, value => {
           this._removeCell(args.oldIndex);
         });
+        // Add default cell if there are no cells remaining.
+        if (!sender.length) {
+          const model = this.model;
+          // Add the cell in a new context to avoid triggering another
+          // cell changed event during the handling of this signal.
+          requestAnimationFrame(() => {
+            if (!model.isDisposed && !model.cells.length) {
+              model.cells.push(
+                model.contentFactory.createCell(
+                  this.notebookConfig.defaultCell,
+                  {}
+                )
+              );
+            }
+          });
+        }
         break;
       case 'set':
         // TODO: reuse existing widgets if possible.
@@ -442,6 +463,9 @@ export class StaticNotebook extends Widget {
         break;
       case 'markdown':
         widget = this._createMarkdownCell(cell as IMarkdownCellModel);
+        if (cell.value.text === '') {
+          (widget as MarkdownCell).rendered = false;
+        }
         break;
       default:
         widget = this._createRawCell(cell as IRawCellModel);
@@ -730,12 +754,18 @@ export namespace StaticNotebook {
      * Enable scrolling past the last cell
      */
     scrollPastEnd: boolean;
+
+    /**
+     * The default type for new notebook cells.
+     */
+    defaultCell: nbformat.CellType;
   }
   /**
    * Default configuration options for notebooks.
    */
   export const defaultNotebookConfig: INotebookConfig = {
-    scrollPastEnd: true
+    scrollPastEnd: true,
+    defaultCell: 'code'
   };
 
   /**

@@ -1,0 +1,60 @@
+{
+  "name": "@jupyterlab/nbconvert-css",
+  "version": "0.1.0",
+  "description": "CSS bundle for the JupyterLab nbconvert template",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js",
+    "style/*.css"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "scripts": {
+    "build": "tsc -b && webpack && rimraf style/index.js",
+    "clean": "rimraf lib/ & rimraf style/",
+    "prepare": "npm run build",
+    "watch": "tsc -b --watch"
+  },
+  "dependencies": {
+    "@jupyterlab/apputils": "^1.0.0-alpha.6",
+    "@jupyterlab/cells": "^1.0.0-alpha.7",
+    "@jupyterlab/codemirror": "^1.0.0-alpha.6",
+    "@jupyterlab/notebook": "^1.0.0-alpha.7",
+    "@jupyterlab/outputarea": "^1.0.0-alpha.6",
+    "@jupyterlab/rendermime": "^1.0.0-alpha.6"
+  },
+  "devDependencies": {
+    "@jupyterlab/apputils": "^1.0.0-alpha.6",
+    "@jupyterlab/cells": "^1.0.0-alpha.7",
+    "@jupyterlab/codemirror": "^1.0.0-alpha.6",
+    "@jupyterlab/notebook": "^1.0.0-alpha.7",
+    "@jupyterlab/outputarea": "^1.0.0-alpha.6",
+    "@jupyterlab/rendermime": "^1.0.0-alpha.6",
+    "css-loader": "~2.1.1",
+    "file-loader": "~3.0.1",
+    "mini-css-extract-plugin": "~0.6.0",
+    "null-loader": "^1.0.0",
+    "rimraf": "~2.6.2",
+    "typescript": "~3.4.3",
+    "url-loader": "~1.1.2",
+    "webpack": "~4.29.6",
+    "webpack-cli": "^3.3.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

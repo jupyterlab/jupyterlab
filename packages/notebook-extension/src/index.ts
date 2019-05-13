@@ -20,7 +20,14 @@ import { CodeCell } from '@jupyterlab/cells';
 
 import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 
-import { ISettingRegistry, IStateDB, PageConfig } from '@jupyterlab/coreutils';
+import {
+  ISettingRegistry,
+  IStateDB,
+  nbformat,
+  PageConfig,
+  URLExt
+} from '@jupyterlab/coreutils';
+
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
@@ -621,7 +628,8 @@ function activateNotebookHandler(
     });
     factory.editorConfig = { code, markdown, raw };
     factory.notebookConfig = {
-      scrollPastEnd: settings.get('scrollPastEnd').composite as boolean
+      scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
+      defaultCell: settings.get('defaultCell').composite as nbformat.CellType
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
