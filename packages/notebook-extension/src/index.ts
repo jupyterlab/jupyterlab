@@ -24,8 +24,7 @@ import {
   ISettingRegistry,
   IStateDB,
   nbformat,
-  PageConfig,
-  URLExt
+  PageConfig
 } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
