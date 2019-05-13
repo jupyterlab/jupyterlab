@@ -38,12 +38,11 @@ import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
-import { Menu, Widget } from '@phosphor/widgets';
+import { Menu } from '@phosphor/widgets';
 
 import { Palette } from './palette';
 
 import '../style/index.css';
-import { toArray } from '@phosphor/algorithm';
 
 /**
  * The interval in milliseconds that calls to save a workspace are debounced
@@ -308,29 +307,6 @@ const print: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   requires: [ILabShell],
   activate: (app: JupyterFrontEnd, labShell: ILabShell) => {
-    // TODO: This was copied out of application-extension/src/index.tsx
-    // This should be refactored to not duplicate the code.
-    // Returns the widget associated with the most recent contextmenu event.
-    const contextMenuWidget = (): Widget => {
-      const test = (node: HTMLElement) => !!node.dataset.id;
-      const node = app.contextMenuHitTest(test);
-
-      if (!node) {
-        // Fall back to active widget if path cannot be obtained from event.
-        return app.shell.currentWidget;
-      }
-
-      const matches = toArray(app.shell.widgets('main')).filter(
-        widget => widget.id === node.dataset.id
-      );
-
-      if (matches.length < 1) {
-        return app.shell.currentWidget;
-      }
-
-      return matches[0];
-    };
-
     app.commands.addCommand(CommandIDs.print, {
       label: 'Print...',
       isEnabled: () => {
@@ -338,7 +314,7 @@ const print: JupyterFrontEndPlugin<void> = {
         return Printing.getPrintFunction(currentWidget) !== null;
       },
       execute: async () => {
-        const widget = contextMenuWidget();
+        const widget = app.shell.currentWidget;
         const printFunction = Printing.getPrintFunction(widget);
         if (printFunction) {
           await printFunction();
