@@ -87,7 +87,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
           registry.set(plugin.id, 'enabled', !enabled);
         }
       },
-      isToggled: () => enabled
+      isToggled: () => enabled,
+      isEnabled: () => serviceManager.builder.isAvailable
     });
 
     const category = 'Extension Manager';
