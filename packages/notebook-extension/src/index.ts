@@ -28,7 +28,6 @@ import {
   URLExt
 } from '@jupyterlab/coreutils';
 
-
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { ArrayExt } from '@phosphor/algorithm';
