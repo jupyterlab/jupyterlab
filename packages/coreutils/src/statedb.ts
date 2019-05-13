@@ -68,14 +68,11 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
         case 'cancel':
           return;
         case 'clear':
-          this._clear();
-          return;
+          return this._clear();
         case 'merge':
-          this._merge(contents || {});
-          return;
+          return this._merge(contents || {});
         case 'overwrite':
-          this._overwrite(contents || {});
-          return;
+          return this._overwrite(contents || {});
         default:
           return;
       }
