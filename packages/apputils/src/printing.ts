@@ -63,6 +63,7 @@ export namespace Printing {
     return printContent(widget.node);
   }
 
+  const settings = ServerConnection.makeSettings();
   /**
    * Prints a URL by loading it into an iframe.
    *
@@ -72,7 +73,7 @@ export namespace Printing {
     const text = await (await ServerConnection.makeRequest(
       url,
       {},
-      ServerConnection.makeSettings()
+      settings
     )).text();
     return printContent(text);
   }
