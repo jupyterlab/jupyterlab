@@ -364,10 +364,8 @@ namespace Private {
   export type Envelope = { readonly v: ReadonlyJSONValue };
 
   /**
-   * The in-memory storage
+   * An in-memory data connector for a state database.
    */
-  const storage: { [id: string]: string } = {};
-
   export const connector: IDataConnector<string> = {
     /**
      * Retrieve an item from the data connector.
@@ -408,4 +406,9 @@ namespace Private {
       storage[id] = value;
     }
   };
+
+  /**
+   * In-memory data storage for the data connector.
+   */
+  const storage: { [id: string]: string } = {};
 }
