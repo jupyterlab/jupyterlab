@@ -7,8 +7,7 @@ import {
   ILayoutRestorer,
   IRouter,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  ILabShell
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -305,13 +304,12 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
 const print: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:print',
   autoStart: true,
-  requires: [ILabShell],
-  activate: (app: JupyterFrontEnd, labShell: ILabShell) => {
+  activate: (app: JupyterFrontEnd) => {
     app.commands.addCommand(CommandIDs.print, {
       label: 'Print...',
       isEnabled: () => {
-        const { currentWidget } = labShell;
-        return Printing.getPrintFunction(currentWidget) !== null;
+        const widget = app.shell.currentWidget;
+        return Printing.getPrintFunction(widget) !== null;
       },
       execute: async () => {
         const widget = app.shell.currentWidget;
