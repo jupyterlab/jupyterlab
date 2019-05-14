@@ -771,18 +771,16 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
       }).timeout(30000); // Allow for slower CI
 
-      describe.skip('skipped group', () => {
-        it('should stop executing code cells on an error', async () => {
-          widget.activeCell.model.value.text = ERROR_INPUT;
-          const cell = widget.model.contentFactory.createCodeCell({});
-          widget.model.cells.push(cell);
-          const result = await NotebookActions.runAll(widget, ipySession);
-          expect(result).to.equal(false);
-          expect(cell.executionCount).to.be.null;
-          expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
-          await ipySession.kernel.restart();
-        }).timeout(30000); // Allow for slower CI
-      });
+      it('should stop executing code cells on an error', async () => {
+        widget.activeCell.model.value.text = ERROR_INPUT;
+        const cell = widget.model.contentFactory.createCodeCell({});
+        widget.model.cells.push(cell);
+        const result = await NotebookActions.runAll(widget, ipySession);
+        expect(result).to.equal(false);
+        expect(cell.executionCount).to.be.null;
+        expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
+        await ipySession.kernel.restart();
+      }).timeout(30000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
         widget.activeCell.model.value.text = ERROR_INPUT;

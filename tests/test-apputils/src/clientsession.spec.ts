@@ -316,7 +316,7 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#restart()', () => {
-      it.skip('should restart if the user accepts the dialog', async () => {
+      it('should restart if the user accepts the dialog', async () => {
         const emission = testEmission(session.statusChanged, {
           find: (_, args) => args === 'restarting'
         });
@@ -327,12 +327,11 @@ describe('@jupyterlab/apputils', () => {
         await acceptDialog();
         expect(await restart).to.equal(true);
         await emission;
-
         // Wait for the restarted kernel to be ready
         await session.kernel.ready;
       });
 
-      it.skip('should not restart if the user rejects the dialog', async () => {
+      it('should not restart if the user rejects the dialog', async () => {
         let called = false;
 
         await session.initialize();
@@ -382,7 +381,7 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#restartKernel()', () => {
-      it.skip('should restart if the user accepts the dialog', async () => {
+      it('should restart if the user accepts the dialog', async () => {
         let called = false;
 
         session.statusChanged.connect((sender, args) => {
@@ -395,7 +394,7 @@ describe('@jupyterlab/apputils', () => {
         const restart = ClientSession.restartKernel(session.kernel);
 
         await acceptDialog();
-        await restart;
+        expect(await restart).to.equal(true);
         expect(called).to.equal(true);
       }, 30000); // Allow for slower CI
 
@@ -412,7 +411,7 @@ describe('@jupyterlab/apputils', () => {
         const restart = ClientSession.restartKernel(session.kernel);
 
         await dismissDialog();
-        await restart;
+        expect(await restart).to.equal(false);
         expect(called).to.equal(false);
       }, 30000); // Allow for slower CI
     });
