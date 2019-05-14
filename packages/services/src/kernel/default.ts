@@ -57,11 +57,11 @@ export class DefaultKernel implements Kernel.IKernel {
       options.serverSettings || ServerConnection.makeSettings();
     this._clientId = options.clientId || UUID.uuid4();
     this._username = options.username || '';
-    this._futures = new Map<string, KernelFutureHandler>();
-    this._comms = new Map<string, Kernel.IComm>();
+
     this._readyPromise.promise.then(() => {
       this._sendPending();
     });
+
     this._createSocket();
     Private.runningKernels.push(this);
   }
@@ -823,9 +823,7 @@ export class DefaultKernel implements Kernel.IKernel {
         break;
       case 'restarting':
         // Send a kernel_info_request to get to a known kernel state.
-        void this.requestKernelInfo().catch(() => {
-          /*no-op*/
-        });
+        void this.requestKernelInfo().catch(this._noOp);
         break;
       case 'starting':
       case 'autorestarting':
@@ -889,10 +887,7 @@ export class DefaultKernel implements Kernel.IKernel {
     this._pendingMessages = [];
     const futuresResolved: Promise<void>[] = [];
     this._futures.forEach(future => {
-      const noop = () => {
-        /* no-op */
-      };
-      futuresResolved.push(future.done.then(noop, noop));
+      futuresResolved.push(future.done.then(this._noOp, this._noOp));
       future.dispose();
     });
     this._comms.forEach(comm => {
@@ -1236,10 +1231,10 @@ export class DefaultKernel implements Kernel.IKernel {
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
   private _isReady = false;
-  private _readyPromise: PromiseDelegate<void> = new PromiseDelegate();
+  private _readyPromise = new PromiseDelegate<void>();
   private _initialized = false;
-  private _futures: Map<string, KernelFutureHandler>;
-  private _comms: Map<string, Kernel.IComm>;
+  private _futures = new Map<string, KernelFutureHandler>();
+  private _comms = new Map<string, Kernel.IComm>();
   private _targetRegistry: {
     [key: string]: (
       comm: Kernel.IComm,
