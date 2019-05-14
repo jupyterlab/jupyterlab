@@ -1,5 +1,5 @@
 {
-  "name": "typescript-browser-with-output",
+  "name": "@jupyterlab/example-services-outputarea",
   "version": "1.0.0-alpha.6",
   "private": true,
   "scripts": {

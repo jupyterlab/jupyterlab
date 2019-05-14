@@ -21,22 +21,6 @@ if [[ $GROUP == js ]]; then
     jlpm build:test
     FORCE_COLOR=1 jlpm coverage --loglevel success
 
-    # Run the services node example.
-    pushd packages/services/examples/node
-    python main.py
-    popd
-
-    # Run the output example.
-    pushd packages/services/examples/typescript-browser-with-output
-    jlpm build
-    python main.py &
-    TASK_PID=$!
-    # Make sure the task is running
-    ps -p $TASK_PID || exit 1
-    sleep 5
-    kill $TASK_PID
-    wait $TASK_PID
-
     jlpm run clean
 fi
 
@@ -71,9 +55,6 @@ if [[ $GROUP == integrity ]]; then
 
     # Build the packages individually.
     jlpm run build:src
-
-    # Make sure the examples build
-    jlpm run build:examples
 
     # Make sure we have CSS that can be converted with postcss
     jlpm global add postcss-cli
@@ -181,5 +162,11 @@ if [[ $GROUP == cli ]]; then
     # verify that app directory is not resolved
     env JUPYTERLAB_DIR=./link_app_dir jupyter lab path | grep link_app_dir
     popd
+
+    # Build the examples.
+    jlpm run build:examples
+
+    # Test the examples
+    jlpm run test:examples
 
 fi

@@ -42,5 +42,7 @@ window.addEventListener('load', function() {
     version: require('./package.json').version
   });
   lab.registerPluginModules(mods);
-  lab.start();
+  lab.start().then(() => {
+    console.log('Example started!');
+  });
 });

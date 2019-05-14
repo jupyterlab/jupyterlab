@@ -26,18 +26,20 @@ class ExampleHander(IPythonHandler):
         return LOADER.load(self.settings['jinja2_env'], name)
 
 
+default_handlers = [
+    (r'/example/?', ExampleHander),
+    (r"/example/(.*)", FileFindHandler,
+        {'path': os.path.join(HERE, 'build')}),
+]
+
+
 class ExampleApp(NotebookApp):
     """A notebook app that runs the example."""
 
     default_url = Unicode('/example')
 
     def start(self):
-        handlers = [
-            (r'/example/?', ExampleHander),
-            (r"/example/(.*)", FileFindHandler,
-                {'path': os.path.join(HERE, 'build')}),
-        ]
-        self.web_app.add_handlers(".*$", handlers)
+        self.web_app.add_handlers(".*$", default_handlers)
         super(ExampleApp, self).start()
 
 

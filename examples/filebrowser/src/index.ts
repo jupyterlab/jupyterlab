@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import 'es6-promise/auto'; // polyfill Promise on IE
-import 'font-awesome/css/font-awesome.min.css';
 import '@jupyterlab/application/style/index.css';
+import '@jupyterlab/filebrowser/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';
 import '../index.css';
 
@@ -262,6 +262,8 @@ function createApp(manager: ServiceManager.IManager): void {
   window.addEventListener('resize', () => {
     panel.update();
   });
+
+  console.log('Example started!');
 }
 
 /**

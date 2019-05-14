@@ -1,5 +1,5 @@
 {
-  "name": "browser-example",
+  "name": "@jupyterlab/example-services-browser",
   "version": "1.0.0-alpha.6",
   "private": true,
   "scripts": {
@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@jupyterlab/services": "^4.0.0-alpha.6",
-    "es6-promise": "~4.1.1"
+    "es6-promise": "~4.1.1",
+    "typescript": "^3.4.5"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

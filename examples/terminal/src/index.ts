@@ -34,6 +34,10 @@ async function main(): Promise<void> {
   const term2 = new Terminal(s2, { theme: 'dark' });
   term2.title.closable = true;
   dock.addWidget(term2, { mode: 'tab-before' });
+
+  Promise.all([term1.session.ready, term2.session.ready]).then(() => {
+    console.log('Example started!');
+  });
 }
 
 window.addEventListener('load', main);
