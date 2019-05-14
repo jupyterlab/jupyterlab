@@ -77,13 +77,9 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
   /**
    * Clear the entire database.
    */
-  async clear(silent = false): Promise<void> {
+  async clear(): Promise<void> {
     await this._ready;
     await this._clear();
-    if (silent) {
-      return;
-    }
-    this._changed.emit({ id: null, type: 'clear' });
   }
 
   /**
@@ -170,7 +166,7 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
    *
    * @returns A promise that bears the database contents as JSON.
    */
-  async toJSON(): Promise<{ [id: string]: T }> {
+  async toJSON(): Promise<{ readonly [id: string]: T }> {
     await this._ready;
 
     const { ids, values } = await this._list();
@@ -292,14 +288,9 @@ export namespace StateDB {
    */
   export interface IOptions {
     /**
-     * Optional data connector for a database. Defaults to in-memory connector.
+     * Optional string key/value connector. Defaults to in-memory connector.
      */
     connector?: IDataConnector<string>;
-
-    /**
-     * The namespace prefix for all state database entries.
-     */
-    namespace: string;
 
     /**
      * An optional promise that resolves with a data transformation that is
@@ -323,7 +314,7 @@ export namespace StateDB {
     /**
      * Retrieve the list of items available from the data connector.
      */
-    async list(query: string): Promise<{ ids: string[]; values: string[] }> {
+    async list(query = ''): Promise<{ ids: string[]; values: string[] }> {
       return Object.keys(this._storage).reduce(
         (acc, val) => {
           if (val && val.indexOf(query) === 0) {
