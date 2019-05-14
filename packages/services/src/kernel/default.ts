@@ -59,6 +59,9 @@ export class DefaultKernel implements Kernel.IKernel {
     this._username = options.username || '';
     this._futures = new Map<string, KernelFutureHandler>();
     this._comms = new Map<string, Kernel.IComm>();
+    this._readyPromise.promise.then(() => {
+      this._sendPending();
+    });
     this._createSocket();
     Private.runningKernels.push(this);
   }
