@@ -46,8 +46,8 @@ class ExampleApp(NotebookApp):
         """
         super(ExampleApp, self).init_webapp()
         default_handlers = [
-            (ujoin(r'/example/?'), ExampleHandler),
-            (ujoin(r"/example/(.*)"), FileFindHandler,
+            (ujoin(self.base_url, r'/example/?'), ExampleHandler),
+            (ujoin(self.base_url, r"/example/(.*)"), FileFindHandler,
         {'path': os.path.join(HERE, 'build')})        ]
         self.web_app.add_handlers('.*$', default_handlers)
 

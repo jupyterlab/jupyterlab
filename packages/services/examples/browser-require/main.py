@@ -35,8 +35,8 @@ class ExampleApp(NotebookApp):
 
     def start(self):
         default_handlers = [
-            (ujoin(self.base_dir, r'/example/?'), ExampleHander),
-            (ujoin(self.base_dir, r'/example/(.*)'), FileFindHandler, {'path': HERE}),
+            (ujoin(self.base_url, r'/example/?'), ExampleHander),
+            (ujoin(self.base_url, r'/example/(.*)'), FileFindHandler, {'path': HERE}),
         ]
         self.web_app.add_handlers('.*$', default_handlers)
         super(ExampleApp, self).start()

@@ -1,5 +1,5 @@
 require(['jquery', '@jupyterlab/services'], function($, services) {
-  'use strict';
+  console.log('Starting example');
   var startNewKernel = services.Kernel.startNew;
 
   var kernelOptions = {
