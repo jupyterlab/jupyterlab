@@ -14,17 +14,14 @@ describe('StateDB', () => {
 
   describe('#constructor()', () => {
     it('should create a state database', () => {
-      const db = new StateDB({ namespace: 'test' });
+      const db = new StateDB();
       expect(db).to.be.an.instanceof(StateDB);
     });
 
     it('should allow an overwrite data transformation', async () => {
       const transform = new PromiseDelegate<StateDB.DataTransform>();
-      const db = new StateDB({
-        namespace: 'test',
-        transform: transform.promise
-      });
-      const prepopulate = new StateDB({ namespace: 'test' });
+      const db = new StateDB({ transform: transform.promise });
+      const prepopulate = new StateDB();
       const key = 'foo';
       const correct = 'bar';
       const incorrect = 'baz';
@@ -46,8 +43,8 @@ describe('StateDB', () => {
 
     it('should allow a merge data transformation', async () => {
       let transform = new PromiseDelegate<StateDB.DataTransform>();
-      let db = new StateDB({ namespace: 'test', transform: transform.promise });
-      let prepopulate = new StateDB({ namespace: 'test' });
+      let db = new StateDB({ transform: transform.promise });
+      let prepopulate = new StateDB();
       let key = 'baz';
       let value = 'qux';
 
@@ -64,8 +61,7 @@ describe('StateDB', () => {
 
   describe('#changed', () => {
     it('should emit changes when the database is updated', async () => {
-      const namespace = 'test-namespace';
-      const db = new StateDB({ namespace });
+      const db = new StateDB();
       const changes: StateDB.Change[] = [
         { id: 'foo', type: 'save' },
         { id: 'foo', type: 'remove' },
@@ -74,7 +70,7 @@ describe('StateDB', () => {
       ];
       const recorded: StateDB.Change[] = [];
 
-      db.changed.connect((sender, change) => {
+      db.changed.connect((_, change) => {
         recorded.push(change);
       });
 
@@ -89,8 +85,7 @@ describe('StateDB', () => {
 
   describe('#namespace', () => {
     it('should be the read-only internal namespace', () => {
-      const namespace = 'test-namespace';
-      const db = new StateDB({ namespace });
+      const db = new StateDB();
       expect(db.namespace).to.equal(namespace);
     });
   });
@@ -99,7 +94,7 @@ describe('StateDB', () => {
     it('should empty the items in a state database', async () => {
       const { localStorage } = window;
 
-      const db = new StateDB({ namespace: 'test-namespace' });
+      const db = new StateDB();
       const key = 'foo:bar';
       const value = { qux: 'quux' };
 
@@ -113,8 +108,8 @@ describe('StateDB', () => {
     it('should only clear its own namespace', async () => {
       const { localStorage } = window;
 
-      const db1 = new StateDB({ namespace: 'test-namespace-1' });
-      const db2 = new StateDB({ namespace: 'test-namespace-2' });
+      const db1 = new StateDB();
+      const db2 = new StateDB();
 
       expect(localStorage.length).to.equal(0);
       await db1.save('foo', { bar: null });
@@ -132,7 +127,7 @@ describe('StateDB', () => {
     it('should fetch a stored key', async () => {
       const { localStorage } = window;
 
-      const db = new StateDB({ namespace: 'test-namespace' });
+      const db = new StateDB();
       const key = 'foo:bar';
       const value = { baz: 'qux' };
 
@@ -147,7 +142,7 @@ describe('StateDB', () => {
     it('should resolve a nonexistent key fetch with undefined', async () => {
       let { localStorage } = window;
 
-      let db = new StateDB({ namespace: 'test-namespace' });
+      let db = new StateDB();
       let key = 'foo:bar';
 
       expect(localStorage.length).to.equal(0);
@@ -160,7 +155,7 @@ describe('StateDB', () => {
     it('should fetch a stored namespace', async () => {
       const { localStorage } = window;
 
-      const db = new StateDB({ namespace: 'test-namespace' });
+      const db = new StateDB();
       const keys = [
         'foo:bar',
         'foo:baz',
@@ -201,7 +196,7 @@ describe('StateDB', () => {
     it('should remove a stored key', async () => {
       const { localStorage } = window;
 
-      const db = new StateDB({ namespace: 'test-namespace' });
+      const db = new StateDB();
       const key = 'foo:bar';
       const value = { baz: 'qux' };
 
@@ -217,7 +212,7 @@ describe('StateDB', () => {
     it('should save a key and a value', async () => {
       const { localStorage } = window;
 
-      const db = new StateDB({ namespace: 'test-namespace' });
+      const db = new StateDB();
       const key = 'foo:bar';
       const value = { baz: 'qux' };
 
@@ -234,7 +229,7 @@ describe('StateDB', () => {
     it('return the full contents of a state database', async () => {
       const { localStorage } = window;
 
-      const db = new StateDB({ namespace: 'test-namespace' });
+      const db = new StateDB();
       const contents: ReadonlyJSONObject = {
         abc: 'def',
         ghi: 'jkl',

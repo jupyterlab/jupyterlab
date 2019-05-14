@@ -41,7 +41,7 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
    *
    * @param options - The instantiation options for a state database.
    */
-  constructor(options: StateDB.IOptions) {
+  constructor(options: StateDB.IOptions = {}) {
     const { connector, transform } = options;
 
     this._connector = connector || new StateDB.Connector();
