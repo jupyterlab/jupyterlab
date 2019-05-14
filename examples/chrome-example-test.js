@@ -14,7 +14,7 @@ async function main() {
 
   errored = false;
 
-  async function handleMessage(msg) {
+  const handleMessage = async msg => {
     const text = msg.text();
     console.log(`>> ${text}`);
     if (msg.type === 'error') {
@@ -29,7 +29,7 @@ async function main() {
       console.info('Example test complete!');
       return;
     }
-  }
+  };
 
   function handleError(err) {
     console.error(err);

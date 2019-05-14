@@ -135,7 +135,7 @@ function main(): void {
   });
 
   // Start up the kernel.
-  session.initialize().then(() => {
+  void session.initialize().then(() => {
     console.log('Example started!');
   });
 }

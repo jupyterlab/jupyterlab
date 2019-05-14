@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+// eslint-disable-next-line
 __webpack_public_path__ = URLExt.join(
   PageConfig.getBaseUrl(),
   'example/static/'
@@ -46,6 +47,7 @@ window.addEventListener('load', function() {
   });
   lab.registerPluginModules(mods);
   lab.start().then(() => {
+    // eslint-disable-next-line
     console.log('Example started!');
   });
 });
