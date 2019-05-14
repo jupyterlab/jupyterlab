@@ -8,6 +8,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@jupyterlab/coreutils": "^3.0.0-alpha.6",
     "@jupyterlab/services": "^4.0.0-alpha.6",
     "es6-promise": "~4.1.1",
     "typescript": "~3.4.3"
