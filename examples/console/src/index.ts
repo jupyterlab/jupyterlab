@@ -3,7 +3,7 @@
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 // @ts-ignore
-__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'static');
+__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
 
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/console/style/index.css';

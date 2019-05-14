@@ -6,6 +6,7 @@ from notebook.notebookapp import NotebookApp
 import os
 from jinja2 import FileSystemLoader
 from notebook.base.handlers import IPythonHandler, FileFindHandler
+from notebook.utils import url_path_join as ujoin
 from traitlets import Unicode
 
 
@@ -27,18 +28,16 @@ class ExampleHander(IPythonHandler):
         return LOADER.load(self.settings['jinja2_env'], name)
 
 
-default_handlers = [
-    (r'/example/?', ExampleHander),
-    (r'/example/(.*)', FileFindHandler, {'path': HERE}),
-]
-
-
 class ExampleApp(NotebookApp):
     """A notebook app that runs the example."""
 
     default_url = Unicode('/example')
 
     def start(self):
+        default_handlers = [
+            (ujoin(self.base_dir, r'/example/?'), ExampleHander),
+            (ujoin(self.base_dir, r'/example/(.*)'), FileFindHandler, {'path': HERE}),
+        ]
         self.web_app.add_handlers('.*$', default_handlers)
         super(ExampleApp, self).start()
 

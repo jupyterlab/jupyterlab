@@ -27,7 +27,7 @@ class ExampleCheckApp(mod.ExampleApp):
 
     open_browser = Bool(False)
     default_url = '/example'
-    base_url = '/foo'
+    base_url = '/foo/'
     ip = '127.0.0.1'
 
     def start(self):

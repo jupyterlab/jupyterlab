@@ -2,8 +2,9 @@
 # Distributed under the terms of the Modified BSD License.
 
 from jupyterlab_server import LabServerApp, LabConfig
+from notebook.utils import url_path_join as ujoin
 import os
-from traitlets import Unicode
+from traitlets import Unicode, default
 
 HERE = os.path.dirname(__file__)
 
@@ -16,20 +17,22 @@ class ExampleApp(LabServerApp):
     default_url = Unicode('/example',
                           help='The default URL to redirect to from `/`')
 
-    lab_config = LabConfig(
-        app_name = 'JupyterLab Example App',
-        app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
-        page_url = '/example',
-        schemas_dir = os.path.join(HERE, 'build', 'schemas'),
-        settings_dir = os.path.join(HERE, 'build', 'settings'),
-        static_dir = os.path.join(HERE, 'build'),
-        templates_dir = os.path.join(HERE, 'templates'),
-        themes_dir = os.path.join(HERE, 'build', 'themes'),
-        user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
-        workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),
-    )
+    def _get_lab_config(self):
+        return LabConfig(
+            app_name = 'JupyterLab Example App',
+            app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
+            page_url = ujoin(self.base_url, '/example'),
+            schemas_dir = os.path.join(HERE, 'build', 'schemas'),
+            settings_dir = os.path.join(HERE, 'build', 'settings'),
+            static_dir = os.path.join(HERE, 'build'),
+            templates_dir = os.path.join(HERE, 'templates'),
+            themes_dir = os.path.join(HERE, 'build', 'themes'),
+            user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
+            workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),
+        )
 
     def start(self):
+        self.lab_config = self._get_lab_config()
         settings = self.web_app.settings
 
         # By default, make terminals available.

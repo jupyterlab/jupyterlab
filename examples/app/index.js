@@ -1,8 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-// ES6 Promise polyfill
-require('es6-promise/auto');
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+__webpack_public_path__ = URLExt.join(
+  PageConfig.getBaseUrl(),
+  'example/static/'
+);
 
 window.addEventListener('load', function() {
   require('font-awesome/css/font-awesome.min.css');
