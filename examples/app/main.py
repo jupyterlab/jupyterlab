@@ -4,7 +4,7 @@
 from jupyterlab_server import LabServerApp, LabConfig
 from notebook.utils import url_path_join as ujoin
 import os
-from traitlets import Unicode, default
+from traitlets import Unicode
 
 HERE = os.path.dirname(__file__)
 
