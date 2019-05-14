@@ -879,10 +879,13 @@ export class DefaultKernel implements Kernel.IKernel {
    */
   private async _clearState(): Promise<void> {
     this._pendingMessages = [];
-    const futuresResolved: Promise<KernelMessage.IShellMessage>[] = [];
+    const futuresResolved: Promise<void>[] = [];
     this._futures.forEach(future => {
+      const noop = () => {
+        /* no-op */
+      };
+      futuresResolved.push(future.done.then(noop, noop));
       future.dispose();
-      futuresResolved.push(future.done);
     });
     this._comms.forEach(comm => {
       comm.dispose();
@@ -894,9 +897,7 @@ export class DefaultKernel implements Kernel.IKernel {
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
 
-    await Promise.all(futuresResolved).catch(() => {
-      /* no-op */
-    });
+    await Promise.all(futuresResolved);
   }
 
   /**
