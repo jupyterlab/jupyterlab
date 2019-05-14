@@ -18,7 +18,7 @@ describe('Kernel.IFuture', () => {
 
   afterAll(() => Kernel.shutdownAll());
 
-  it.skip('should have a msg attribute', async () => {
+  it('should have a msg attribute', async () => {
     const kernel = await Kernel.startNew();
     const future = kernel.requestExecute({ code: 'print("hello")' });
     expect(typeof future.msg.header.msg_id).to.equal('string');
