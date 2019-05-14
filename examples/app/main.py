@@ -13,13 +13,13 @@ os.environ["JUPYTER_NO_CONFIG"]="1"
 
 class ExampleApp(LabServerApp):
 
-    default_url = Unicode('/exampleapp',
+    default_url = Unicode('/example',
                           help='The default URL to redirect to from `/`')
 
     lab_config = LabConfig(
         app_name = 'JupyterLab Example App',
         app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
-        page_url = '/exampleapp',
+        page_url = '/example',
         schemas_dir = os.path.join(HERE, 'build', 'schemas'),
         settings_dir = os.path.join(HERE, 'build', 'settings'),
         static_dir = os.path.join(HERE, 'build'),

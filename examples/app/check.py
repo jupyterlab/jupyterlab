@@ -16,27 +16,15 @@ from jupyterlab.labapp import get_app_dir
 here = osp.abspath(osp.dirname(__file__))
 
 
-test_aliases = dict(aliases)
-test_aliases['example-dir'] = 'ExampleCheckApp.example_dir'
+# Import the base class from our sibling file
+mod_path = osp.abspath(osp.join(here, 'main.py'))
+spec = importlib.util.spec_from_file_location("example", mod_path)
+mod = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mod)
 
 
-class ExampleCheckApp(NotebookApp):
-
+class ExampleCheckApp(mod.ExampleApp):
     open_browser = Bool(False)
-    example_dir = Unicode('').tag(config=True)
-    default_url = '/example'
-    ip = '127.0.0.1'
-    aliases = test_aliases
-
-    def init_webapp(self):
-        """initialize tornado webapp and httpserver.
-        """
-        super().init_webapp()
-        mod_path = osp.abspath(osp.join(self.example_dir, 'main.py'))
-        spec = importlib.util.spec_from_file_location("example", mod_path)
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        self.web_app.add_handlers('.*$', mod.default_handlers)
 
     def start(self):
         pool = ThreadPoolExecutor()
@@ -60,7 +48,8 @@ def run_browser(url):
         os.makedirs(target)
         subprocess.call(["jlpm"], cwd=target)
         subprocess.call(["jlpm", "add", "puppeteer"], cwd=target)
-    shutil.copy(osp.join(here, 'chrome-example-test.js'), osp.join(target, 'chrome-example-test.js'))
+    src = osp.abspath(osp.join(here, '..', 'chrome-example-test.js'))
+    shutil.copy(src, osp.join(target, 'chrome-example-test.js'))
     return subprocess.check_call(["node", "chrome-example-test.js", url], cwd=target)
 
 
