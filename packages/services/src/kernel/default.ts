@@ -227,7 +227,7 @@ export class DefaultKernel implements Kernel.IKernel {
       return;
     }
     this._isDisposed = true;
-    this._terminated.emit(void 0);
+    this._terminated.emit();
     this._status = 'dead';
     // TODO: Kernel status rework should avoid doing
     // anything asynchronous in the disposal.
@@ -836,6 +836,10 @@ export class DefaultKernel implements Kernel.IKernel {
         if (this._isReady) {
           this._isReady = false;
           this._readyPromise = new PromiseDelegate();
+          this._readyPromise.promise.then(() => {
+            // when we are ready again, send any pending messages.
+            this._sendPending();
+          });
         }
         break;
       case 'dead':
@@ -856,9 +860,6 @@ export class DefaultKernel implements Kernel.IKernel {
       if (status === 'dead') {
         this.dispose();
       }
-    }
-    if (this._isReady) {
-      this._sendPending();
     }
   }
 
@@ -1064,7 +1065,7 @@ export class DefaultKernel implements Kernel.IKernel {
       .then(() => {
         this._initialized = true;
         this._isReady = true;
-        this._readyPromise.resolve(void 0);
+        this._readyPromise.resolve();
       })
       .catch(err => {
         this._initialized = true;
