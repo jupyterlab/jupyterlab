@@ -14,7 +14,12 @@ paths += [i for i in glob.glob(f'{services_dir}/*')]
 
 
 for path in sorted(paths):
-    if osp.basename(path) in ['node', 'app']:
+    if osp.basename(path) == 'node':
+        runner = osp.join(path, 'main.py')
+        subprocess.check_call([sys.executable, runner])
+        continue
+
+    if osp.basename(path) in ['app']:
         continue
 
     if not osp.exists(osp.join(path, 'main.py')):

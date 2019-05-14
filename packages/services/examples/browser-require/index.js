@@ -14,6 +14,7 @@ require(['jquery', '@jupyterlab/services'], function($, services) {
       var content = reply.content;
       $('#kernel-info').text(content.banner);
       console.log('Kernel info:', content);
+      console.log('Example started!');
     });
     $('#run').click(function() {
       var code = $('#cell').val();
@@ -38,7 +39,6 @@ require(['jquery', '@jupyterlab/services'], function($, services) {
       future.done.then(function() {
         console.log('Future is fulfilled');
         $('#output').append($('<pre>').text('Done!'));
-        console.log('Test Complete!');
       });
     });
   });

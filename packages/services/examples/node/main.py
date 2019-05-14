@@ -3,11 +3,11 @@
 
 from __future__ import print_function, absolute_import
 import json
-import os
+import os.path as osp
 from jupyterlab_server.process import which
 from jupyterlab_server.process_app import ProcessApp
 
-HERE = os.path.dirname(os.path.realpath(__file__))
+HERE = osp.dirname(osp.realpath(__file__))
 
 
 class NodeApp(ProcessApp):
@@ -18,7 +18,7 @@ class NodeApp(ProcessApp):
         # Run the node script with command arguments.
         config = dict(baseUrl=self.connection_url, token=self.token)
 
-        with open('config.json', 'w') as fid:
+        with open(osp.join(HERE, 'config.json'), 'w') as fid:
             json.dump(config, fid)
 
         cmd = [which('node'),
