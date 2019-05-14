@@ -85,7 +85,7 @@ describe('jupyter.services - Comm', () => {
     });
 
     describe('#registerCommTarget()', () => {
-      it.skip('should call the provided callback', async () => {
+      it('should call the provided callback', async () => {
         const promise = new PromiseDelegate<
           [Kernel.IComm, KernelMessage.ICommOpenMsg]
         >();
@@ -108,7 +108,7 @@ describe('jupyter.services - Comm', () => {
     });
 
     describe('#commInfo()', () => {
-      it.skip('should get the comm info', async () => {
+      it('should get the comm info', async () => {
         const commPromise = new PromiseDelegate<Kernel.IComm>();
         const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
           commPromise.resolve(comm);
@@ -133,7 +133,7 @@ describe('jupyter.services - Comm', () => {
         comm.dispose();
       });
 
-      it.skip('should allow an optional target', async () => {
+      it('should allow an optional target', async () => {
         await kernel.requestExecute({ code: SEND }, true).done;
         const msg = await kernel.requestCommInfo({ target: 'test' });
         const comms = msg.content.comms;
@@ -190,7 +190,7 @@ describe('jupyter.services - Comm', () => {
     });
 
     describe('#onClose', () => {
-      it.skip('should be readable and writable function', async () => {
+      it('should be readable and writable function', async () => {
         expect(comm.onClose).to.be.undefined;
         let called = false;
         comm.onClose = msg => {
@@ -200,7 +200,7 @@ describe('jupyter.services - Comm', () => {
         expect(called).to.equal(true);
       });
 
-      it.skip('should be called when the server side closes', async () => {
+      it('should be called when the server side closes', async () => {
         let promise = new PromiseDelegate<void>();
         kernel.registerCommTarget('test', (comm, msg) => {
           comm.onClose = data => {
@@ -231,7 +231,7 @@ describe('jupyter.services - Comm', () => {
         expect(called).to.equal(true);
       });
 
-      it.skip('should be called when the server side sends a message', async () => {
+      it('should be called when the server side sends a message', async () => {
         let called = false;
         kernel.registerCommTarget('test', (comm, msg) => {
           comm.onMsg = msg => {
@@ -244,7 +244,7 @@ describe('jupyter.services - Comm', () => {
       });
     });
 
-    describe.skip('#open()', () => {
+    describe('#open()', () => {
       it('should send a message to the server', async () => {
         let future = kernel.requestExecute({ code: TARGET });
         await future.done;
@@ -258,7 +258,7 @@ describe('jupyter.services - Comm', () => {
       });
     });
 
-    describe.skip('#send()', () => {
+    describe('#send()', () => {
       it('should send a message to the server', async () => {
         await comm.open().done;
         const future = comm.send({ foo: 'bar' }, { fizz: 'buzz' });
@@ -272,7 +272,7 @@ describe('jupyter.services - Comm', () => {
       });
     });
 
-    describe.skip('#close()', () => {
+    describe('#close()', () => {
       it('should send a message to the server', async () => {
         await comm.open().done;
         const encoder = new TextEncoder();
