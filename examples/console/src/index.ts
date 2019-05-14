@@ -1,7 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'es6-promise/auto'; // polyfill Promise on IE
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+// @ts-ignore
+__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'static');
+
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/console/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';

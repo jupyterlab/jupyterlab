@@ -52,12 +52,6 @@ class ExampleHandler(IPythonHandler):
         return loader.load(self.settings['jinja2_env'], name)
 
 
-default_handlers = [
-    (r'/example/?', ExampleHandler),
-    (r"/example/(.*)", FileFindHandler,
-        {'path': os.path.join(HERE, 'build')})
-]
-
 class ExampleApp(NotebookApp):
 
     default_url = Unicode('/example')
@@ -66,6 +60,12 @@ class ExampleApp(NotebookApp):
         """initialize tornado webapp and httpserver.
         """
         super(ExampleApp, self).init_webapp()
+
+        default_handlers = [
+            (ujoin(r'/example/?'), ExampleHandler),
+            (ujoin(r"/example/(.*)"), FileFindHandler,
+                {'path': os.path.join(HERE, 'build')})
+        ]
         self.web_app.add_handlers('.*$', default_handlers)
 
 

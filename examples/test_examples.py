@@ -30,19 +30,12 @@ for path in sorted(paths):
         count += 1
         continue
 
-    if osp.basename(path) in ['app']:
-        header(path)
-        runner = osp.join(path, 'check.py')
-        subprocess.check_call([sys.executable, runner])
-        count += 1
-        continue
-
     if not osp.exists(osp.join(path, 'main.py')):
         continue
 
     count += 1
     header(path)
     runner = osp.join(here, 'example_check.py')
-    subprocess.check_call([sys.executable, runner, '--example-dir', path])
+    subprocess.check_call([sys.executable, runner, path])
 
 print(f'\n\n{count} tests complete!')
