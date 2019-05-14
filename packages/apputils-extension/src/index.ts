@@ -62,8 +62,6 @@ namespace CommandIDs {
 
   export const loadState = 'apputils:load-statedb';
 
-  export const recoverState = 'apputils:recover-statedb';
-
   export const reset = 'apputils:reset';
 
   export const resetOnLoad = 'apputils:reset-on-load';
@@ -321,39 +319,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     const { workspaces } = serviceManager;
     const workspace = resolver.name;
     const transform = new PromiseDelegate<StateDB.DataTransform>();
-    const db = new StateDB({
-      namespace: app.namespace,
-      transform: transform.promise,
-      windowName: workspace
-    });
-
-    commands.addCommand(CommandIDs.recoverState, {
-      execute: async ({ global }) => {
-        const immediate = true;
-        const silent = true;
-
-        // Clear the state silently so that the state changed signal listener
-        // will not be triggered as it causes a save state.
-        await db.clear(silent);
-
-        // If the user explictly chooses to recover state, all of local storage
-        // should be cleared.
-        if (global) {
-          try {
-            window.localStorage.clear();
-            console.log('Cleared local storage');
-          } catch (error) {
-            console.warn('Clearing local storage failed.', error);
-
-            // To give the user time to see the console warning before redirect,
-            // do not set the `immediate` flag.
-            return commands.execute(CommandIDs.saveState);
-          }
-        }
-
-        return commands.execute(CommandIDs.saveState, { immediate });
-      }
-    });
+    const db = new StateDB({ transform: transform.promise });
 
     // Conflate all outstanding requests to the save state command that happen
     // within the `WORKSPACE_SAVE_DEBOUNCE_INTERVAL` into a single promise.
@@ -468,13 +434,8 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     commands.addCommand(CommandIDs.reset, {
       label: 'Reset Application State',
       execute: async () => {
-        const global = true;
-
-        try {
-          await commands.execute(CommandIDs.recoverState, { global });
-        } catch (error) {
-          /* Ignore failures and redirect. */
-        }
+        await db.clear();
+        await commands.execute(CommandIDs.saveState, { immediate: true });
         router.reload();
       }
     });
@@ -511,9 +472,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         const silent = true;
         const hard = true;
         const url = path + URLExt.objectToQueryString(query) + hash;
-        const cleared = commands
-          .execute(CommandIDs.recoverState)
-          .then(() => router.stop); // Stop routing before new route navigation.
+        const cleared = db.clear().then(() => router.stop);
 
         // After the state has been reset, navigate to the URL.
         if (clone) {
@@ -541,15 +500,6 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
       command: CommandIDs.resetOnLoad,
       pattern: /(\?reset|\&reset)($|&)/,
       rank: 20 // High priority: 20:100.
-    });
-
-    // Clean up state database when the window unloads.
-    window.addEventListener('beforeunload', () => {
-      const silent = true;
-
-      db.clear(silent).catch(() => {
-        /* no-op */
-      });
     });
 
     return db;
