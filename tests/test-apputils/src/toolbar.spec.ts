@@ -161,7 +161,7 @@ describe('@jupyterlab/apputils', () => {
         button.dispose();
       });
 
-      it.skip('should add main class', async () => {
+      it('should add main class', async () => {
         const button = new CommandToolbarButton({
           commands,
           id: testLogCommandId
@@ -172,7 +172,7 @@ describe('@jupyterlab/apputils', () => {
         button.dispose();
       });
 
-      it.skip('should add an icon with icon class and label', async () => {
+      it('should add an icon with icon class and label', async () => {
         const button = new CommandToolbarButton({
           commands,
           id: testLogCommandId
@@ -361,7 +361,7 @@ describe('@jupyterlab/apputils', () => {
           expect(called).to.equal(true);
         });
 
-        it.skip('should handle a starting session', async () => {
+        it('should handle a starting session', async () => {
           await session.kernel.ready;
           await session.shutdown();
           session = await createClientSession();
