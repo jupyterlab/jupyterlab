@@ -818,7 +818,6 @@ export class DefaultKernel implements Kernel.IKernel {
           this._readyPromise.resolve();
         }
         break;
-      case 'connected':
       case 'restarting':
         // Send a kernel_info_request to get to a known kernel state.
         void this.requestKernelInfo().catch(() => {
@@ -831,6 +830,9 @@ export class DefaultKernel implements Kernel.IKernel {
         // 'autorestarting' is always preceded by 'restarting'. In either case,
         // the 'restarting' handler above is fine, so we do nothing here.
         /* no-op */
+        break;
+      case 'connected':
+        // requestKernelInfo is sent by the onWSOpen
         break;
       case 'reconnecting':
         if (this._isReady) {
