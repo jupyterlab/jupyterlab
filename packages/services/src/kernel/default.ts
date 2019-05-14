@@ -821,7 +821,9 @@ export class DefaultKernel implements Kernel.IKernel {
       case 'connected':
       case 'restarting':
         // Send a kernel_info_request to get to a known kernel state.
-        void this.requestKernelInfo();
+        void this.requestKernelInfo().catch(() => {
+          /*no-op*/
+        });
         break;
       case 'starting':
       case 'autorestarting':
