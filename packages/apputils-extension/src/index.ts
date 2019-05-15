@@ -21,6 +21,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  debounce,
   ISettingRegistry,
   IStateDB,
   SettingRegistry,
@@ -43,13 +44,6 @@ import { Palette } from './palette';
 import '../style/index.css';
 
 /**
- * The interval in milliseconds that calls to save a workspace are debounced
- * to allow for multiple quickly executed state changes to result in a single
- * workspace save operation.
- */
-const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 750;
-
-/**
  * The interval in milliseconds before recover options appear during splash.
  */
 const SPLASH_RECOVER_TIMEOUT = 12000;
@@ -65,8 +59,6 @@ namespace CommandIDs {
   export const reset = 'apputils:reset';
 
   export const resetOnLoad = 'apputils:reset-on-load';
-
-  export const saveState = 'apputils:save-statedb';
 }
 
 /**
@@ -312,58 +304,19 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     resolver: IWindowResolver,
     splash: ISplashScreen | null
   ) => {
-    let debouncer: number;
     let resolved = false;
-
     const { commands, serviceManager } = app;
     const { workspaces } = serviceManager;
     const workspace = resolver.name;
     const transform = new PromiseDelegate<StateDB.DataTransform>();
     const db = new StateDB({ transform: transform.promise });
+    const save = debounce(async () => {
+      const id = workspace;
+      const metadata = { id };
+      const data = await db.toJSON();
 
-    // Conflate all outstanding requests to the save state command that happen
-    // within the `WORKSPACE_SAVE_DEBOUNCE_INTERVAL` into a single promise.
-    let conflated: PromiseDelegate<void> | null = null;
-
-    commands.addCommand(CommandIDs.saveState, {
-      label: () => `Save Workspace (${workspace})`,
-      execute: ({ immediate }) => {
-        const timeout = immediate ? 0 : WORKSPACE_SAVE_DEBOUNCE_INTERVAL;
-        const id = workspace;
-        const metadata = { id };
-
-        // Only instantiate a new conflated promise if one is not outstanding.
-        if (!conflated) {
-          conflated = new PromiseDelegate<void>();
-        }
-
-        if (debouncer) {
-          window.clearTimeout(debouncer);
-        }
-
-        debouncer = window.setTimeout(async () => {
-          const data = await db.toJSON();
-
-          try {
-            await workspaces.save(id, { data, metadata });
-            if (conflated) {
-              conflated.resolve(undefined);
-            }
-          } catch (error) {
-            if (conflated) {
-              conflated.reject(error);
-            }
-          }
-          conflated = null;
-        }, timeout);
-
-        return conflated.promise;
-      }
+      return await workspaces.save(id, { data, metadata });
     });
-
-    const listener = (sender: any, change: StateDB.Change) => {
-      return commands.execute(CommandIDs.saveState);
-    };
 
     commands.addCommand(CommandIDs.loadState, {
       execute: async (args: IRouter.ILocation) => {
@@ -405,18 +358,14 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         }
 
         // Any time the local state database changes, save the workspace.
-        db.changed.connect(listener, db);
-
-        const immediate = true;
+        db.changed.connect(() => void save(), db);
 
         if (source === clone) {
           // Maintain the query string parameters but remove `clone`.
           delete query['clone'];
 
           const url = path + URLExt.objectToQueryString(query) + hash;
-          const cloned = commands
-            .execute(CommandIDs.saveState, { immediate })
-            .then(() => router.stop);
+          const cloned = save().then(() => router.stop);
 
           // After the state has been cloned, navigate to the URL.
           void cloned.then(() => {
@@ -427,7 +376,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         }
 
         // After the state database has finished loading, save it.
-        return commands.execute(CommandIDs.saveState, { immediate });
+        await save();
       }
     });
 
@@ -435,7 +384,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
       label: 'Reset Application State',
       execute: async () => {
         await db.clear();
-        await commands.execute(CommandIDs.saveState, { immediate: true });
+        await save();
         router.reload();
       }
     });
