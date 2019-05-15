@@ -1293,6 +1293,7 @@ namespace Private {
       indentUnit: tabSize,
       indentWithTabs: !insertSpaces,
       lineWrapping: lineWrap === 'off' ? false : true,
+      inputStyle: 'contenteditable',
       readOnly,
       ...otherOptions
     };
