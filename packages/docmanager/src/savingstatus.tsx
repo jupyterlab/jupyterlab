@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
@@ -38,7 +38,11 @@ namespace SavingStatusComponent {
 function SavingStatusComponent(
   props: SavingStatusComponent.IProps
 ): React.ReactElement<SavingStatusComponent.IProps> {
-  return <TextItem source={`Saving ${props.fileStatus}`} />;
+  let msg = `Saving ${props.fileStatus}`;
+  useEffect(() => {
+      document.getElementById("arialive-status").innerText = msg;
+  });
+  return <TextItem source={msg} />;
 }
 
 /**
