@@ -834,6 +834,14 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).to.equal(0);
       });
 
+      it('should not change if in edit mode and no non-collapsed cells above', () => {
+        widget.activeCellIndex = 1;
+        widget.mode = 'edit';
+        widget.widgets[0].inputHidden = true;
+        NotebookActions.selectAbove(widget);
+        expect(widget.activeCellIndex).to.equal(1);
+      });
+
       it('should not skip collapsed cells and in command mode', () => {
         widget.activeCellIndex = 3;
         widget.mode = 'command';
@@ -882,12 +890,22 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).to.equal(4);
       });
 
-      it('should not skip collapsed cells and in command mode', () => {
+      it('should not change if in edit mode and no non-collapsed cells below', () => {
         widget.activeCellIndex = 0;
-        widget.mode = 'command';
+        widget.mode = 'edit';
         widget.widgets[1].inputHidden = true;
+        widget.widgets[2].inputHidden = true;
+        widget.widgets[3].inputHidden = false;
         NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).to.equal(1);
+        expect(widget.activeCellIndex).to.equal(4);
+      });
+
+      it('should not skip collapsed cells and in command mode', () => {
+        widget.activeCellIndex = widget.widgets.length - 2;
+        widget.mode = 'edit';
+        widget.widgets[widget.widgets.length - 1].inputHidden = true;
+        NotebookActions.selectBelow(widget);
+        expect(widget.activeCellIndex).to.equal(widget.widgets.length - 2);
       });
     });
 
