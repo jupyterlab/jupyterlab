@@ -1,5 +1,12 @@
 
 # -*- coding: utf-8 -*-
+"""
+This file is meant to be used to test all of the example here and and
+in ../packages/services/examples.  We import each of the applications
+and add instrument them with a puppeteer test that makes sure
+there are no console errors or uncaught errors prior to a sentinal
+string being printed.
+"""
 import glob
 import os.path as osp
 import subprocess

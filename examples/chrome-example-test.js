@@ -1,3 +1,8 @@
+/**
+ * A puppeteer test that launches an example app and makes sure
+ * there are no console errors or uncaught errors prior to a sentinal
+ * string being printed.
+ */
 const puppeteer = require('puppeteer');
 const inspect = require('util').inspect;
 const URL = process.argv[2];

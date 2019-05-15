@@ -1,5 +1,14 @@
 
 # -*- coding: utf-8 -*-
+"""
+This file is mean to be called with a path to an example directory as
+its argument.  We import the application entry point for the example
+and add instrument them with a puppeteer test that makes sure
+there are no console errors or uncaught errors prior to a sentinal
+string being printed.
+
+e.g. python example_check.py ./app
+"""
 from concurrent.futures import ThreadPoolExecutor
 import importlib.util
 from os import path as osp
