@@ -303,8 +303,6 @@ describe('Kernel.IKernel', () => {
       await emission;
     });
 
-    // TODO: seems to be sporadically timing out if we await the restart. See
-    // https://github.com/jupyter/notebook/issues/3705.
     it('should get a restarting status', async () => {
       const emission = testEmission(defaultKernel.statusChanged, {
         find: () => defaultKernel.status === 'restarting'
@@ -612,8 +610,6 @@ describe('Kernel.IKernel', () => {
   });
 
   describe('#restart()', () => {
-    // TODO: seems to be sporadically timing out if we await the restart. See
-    // https://github.com/jupyter/notebook/issues/3705.
     it('should restart and resolve with a valid server response', async () => {
       await defaultKernel.restart();
       await defaultKernel.ready;
@@ -646,8 +642,6 @@ describe('Kernel.IKernel', () => {
       await expectFailure(restart);
     });
 
-    // TODO: seems to be sporadically timing out if we await the restart. See
-    // https://github.com/jupyter/notebook/issues/3705.
     it('should dispose of existing comm and future objects', async () => {
       const kernel = defaultKernel;
       const comm = kernel.connectToComm('test');
