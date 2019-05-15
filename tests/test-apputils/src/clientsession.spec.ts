@@ -398,7 +398,7 @@ describe('@jupyterlab/apputils', () => {
         expect(called).to.equal(true);
       }, 30000); // Allow for slower CI
 
-      it.skip('should not restart if the user rejects the dialog', async () => {
+      it('should not restart if the user rejects the dialog', async () => {
         let called = false;
 
         await session.initialize();

@@ -341,7 +341,6 @@ describe('@jupyterlab/apputils', () => {
           });
           const future = session.kernel.requestExecute({ code: 'a = 109\na' });
           let result = await future.done;
-          console.log(result);
           expect(called).to.equal(true);
         });
 
@@ -365,7 +364,6 @@ describe('@jupyterlab/apputils', () => {
           await session.kernel.ready;
           await session.shutdown();
           session = await createClientSession();
-          console.log(session.status);
           const item = Toolbar.createKernelStatusItem(session);
           expect(item.node.title).to.equal('Kernel Starting');
           expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
