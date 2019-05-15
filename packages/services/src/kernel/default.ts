@@ -850,6 +850,7 @@ export class DefaultKernel implements Kernel.IKernel {
           this._isReady = false;
           this._readyPromise = new PromiseDelegate();
         }
+        this._readyPromise.promise.catch(this._noOp);
         this._readyPromise.reject('Kernel is dead');
         break;
       default:
