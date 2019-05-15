@@ -340,7 +340,7 @@ describe('@jupyterlab/apputils', () => {
             }
           });
           const future = session.kernel.requestExecute({ code: 'a = 109\na' });
-          let result = await future.done;
+          await future.done;
           expect(called).to.equal(true);
         });
 
