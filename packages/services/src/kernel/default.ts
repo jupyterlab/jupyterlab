@@ -58,7 +58,7 @@ export class DefaultKernel implements Kernel.IKernel {
     this._clientId = options.clientId || UUID.uuid4();
     this._username = options.username || '';
 
-    this._readyPromise.promise.then(() => {
+    void this._readyPromise.promise.then(() => {
       this._sendPending();
     });
 
@@ -832,7 +832,7 @@ export class DefaultKernel implements Kernel.IKernel {
         if (this._isReady) {
           this._isReady = false;
           this._readyPromise = new PromiseDelegate();
-          this._readyPromise.promise.then(() => {
+          void this._readyPromise.promise.then(() => {
             // when we are ready again, send any pending messages.
             this._sendPending();
           });
@@ -843,7 +843,7 @@ export class DefaultKernel implements Kernel.IKernel {
           this._isReady = false;
           this._readyPromise = new PromiseDelegate();
         }
-        this._readyPromise.promise.catch(this._noOp);
+        void this._readyPromise.promise.catch(this._noOp);
         this._readyPromise.reject('Kernel is dead');
         break;
       default:
