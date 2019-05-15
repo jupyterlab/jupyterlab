@@ -48,7 +48,6 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     const { initialCommand, theme, ...other } = this._options;
     const xtermOptions = {
       theme: Private.getXTermTheme(theme),
-      screenReaderMode: true,
       ...other
     };
 
