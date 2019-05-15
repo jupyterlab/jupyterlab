@@ -784,8 +784,7 @@ export class CodeConsole extends Widget {
       if (!kernel) {
         return;
       }
-      kernel
-        .requestKernelInfo()
+      kernel.ready
         .then(() => {
           if (this.isDisposed || !kernel || !kernel.info) {
             return;
@@ -797,6 +796,7 @@ export class CodeConsole extends Widget {
         });
     } else if (this.session.status === 'restarting') {
       this.addBanner();
+      this._handleInfo(this.session.kernel.info);
     }
   }
 

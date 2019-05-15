@@ -3,6 +3,8 @@
 
 import { UseSignal, ReactWidget } from './vdom';
 
+import { Kernel } from '@jupyterlab/services';
+
 import { Button } from '@jupyterlab/ui-components';
 
 import { IIterator, find, map, some } from '@phosphor/algorithm';
@@ -400,8 +402,7 @@ export namespace Toolbar {
    * Create a kernel status indicator item.
    *
    * #### Notes
-   * It show display a busy status if the kernel status is
-   * not idle.
+   * It will show a busy status if the kernel status is busy.
    * It will show the current status in the node title.
    * It can handle a change to the context or the kernel.
    */
@@ -679,10 +680,20 @@ namespace Private {
         return;
       }
       let status = session.status;
-      this.toggleClass(TOOLBAR_IDLE_CLASS, status === 'idle');
-      this.toggleClass(TOOLBAR_BUSY_CLASS, status !== 'idle');
+      const busy = this._isBusy(status);
+      this.toggleClass(TOOLBAR_BUSY_CLASS, busy);
+      this.toggleClass(TOOLBAR_IDLE_CLASS, !busy);
       let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
       this.node.title = title;
+    }
+
+    /**
+     * Check if status should be shown as busy.
+     */
+    private _isBusy(status: Kernel.Status): boolean {
+      return (
+        status === 'busy' || status === 'starting' || status === 'restarting'
+      );
     }
   }
 }

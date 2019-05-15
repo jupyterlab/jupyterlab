@@ -14,30 +14,23 @@ import { toArray } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-// import { ReadonlyJSONObject } from '@phosphor/coreutils';
-
-// import { Message } from '@phosphor/messaging';
+import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
 import { Widget } from '@phosphor/widgets';
 
 import { simulate } from 'simulate-event';
 
 import { createClientSession, framePromise } from '@jupyterlab/testutils';
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
 describe('@jupyterlab/apputils', () => {
   let widget: Toolbar<Widget>;
-  let session: ClientSession;
 
   beforeEach(async () => {
     widget = new Toolbar();
-    session = await createClientSession();
   });
 
   afterEach(async () => {
     widget.dispose();
-    await session.shutdown();
-    session.dispose();
   });
 
   describe('Toolbar', () => {
@@ -281,87 +274,102 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('.createInterruptButton()', () => {
-      it("should have the `'jp-StopIcon'` class", async () => {
-        const button = Toolbar.createInterruptButton(session);
-        Widget.attach(button, document.body);
-        await framePromise();
-        expect(button.node.querySelector('.jp-StopIcon')).to.exist;
-      });
-    });
-
-    describe('.createRestartButton()', () => {
-      it("should have the `'jp-RefreshIcon'` class", async () => {
-        const button = Toolbar.createRestartButton(session);
-        Widget.attach(button, document.body);
-        await framePromise();
-        expect(button.node.querySelector('.jp-RefreshIcon')).to.exist;
-      });
-    });
-
-    describe('.createKernelNameItem()', () => {
-      it("should display the `'display_name'` of the kernel", async () => {
-        const item = Toolbar.createKernelNameItem(session);
-        await session.initialize();
-        Widget.attach(item, document.body);
-        await framePromise();
-        expect(
-          (item.node.firstChild.lastChild as HTMLElement).textContent
-        ).to.equal(session.kernelDisplayName);
-      });
-
-      it("should display `'No Kernel!'` if there is no kernel", async () => {
-        const item = Toolbar.createKernelNameItem(session);
-        Widget.attach(item, document.body);
-        await framePromise();
-        expect(
-          (item.node.firstChild.lastChild as HTMLElement).textContent
-        ).to.equal('No Kernel!');
-      });
-    });
-
-    describe('.createKernelStatusItem()', () => {
+    describe('Kernel buttons', () => {
+      let session: ClientSession;
       beforeEach(async () => {
-        await session.initialize();
-        await session.kernel.ready;
-      });
-
-      it('should display a busy status if the kernel status is not idle', async () => {
-        const item = Toolbar.createKernelStatusItem(session);
-        let called = false;
-        const future = session.kernel.requestExecute({ code: 'a = 1' });
-        future.onIOPub = msg => {
-          if (session.status === 'busy') {
-            expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
-            called = true;
-          }
-        };
-        await future.done;
-        expect(called).to.equal(true);
-      });
-
-      it('should show the current status in the node title', async () => {
-        const item = Toolbar.createKernelStatusItem(session);
-        const status = session.status;
-        expect(item.node.title.toLowerCase()).to.contain(status);
-        let called = false;
-        const future = session.kernel.requestExecute({ code: 'a = 1' });
-        future.onIOPub = msg => {
-          if (session.status === 'busy') {
-            expect(item.node.title.toLowerCase()).to.contain('busy');
-            called = true;
-          }
-        };
-        await future.done;
-        expect(called).to.equal(true);
-      });
-
-      it('should handle a starting session', async () => {
-        await session.shutdown();
         session = await createClientSession();
-        const item = Toolbar.createKernelStatusItem(session);
-        expect(item.node.title).to.equal('Kernel Starting');
-        expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
+      });
+
+      afterEach(async () => {
+        await session.shutdown();
+        session.dispose();
+      });
+
+      describe('.createInterruptButton()', () => {
+        it("should have the `'jp-StopIcon'` class", async () => {
+          const button = Toolbar.createInterruptButton(session);
+          Widget.attach(button, document.body);
+          await framePromise();
+          expect(button.node.querySelector('.jp-StopIcon')).to.exist;
+        });
+      });
+
+      describe('.createRestartButton()', () => {
+        it("should have the `'jp-RefreshIcon'` class", async () => {
+          const button = Toolbar.createRestartButton(session);
+          Widget.attach(button, document.body);
+          await framePromise();
+          expect(button.node.querySelector('.jp-RefreshIcon')).to.exist;
+        });
+      });
+
+      describe('.createKernelNameItem()', () => {
+        it("should display the `'display_name'` of the kernel", async () => {
+          const item = Toolbar.createKernelNameItem(session);
+          await session.initialize();
+          Widget.attach(item, document.body);
+          await framePromise();
+          expect(
+            (item.node.firstChild.lastChild as HTMLElement).textContent
+          ).to.equal(session.kernelDisplayName);
+        });
+
+        it("should display `'No Kernel!'` if there is no kernel", async () => {
+          const item = Toolbar.createKernelNameItem(session);
+          Widget.attach(item, document.body);
+          await framePromise();
+          expect(
+            (item.node.firstChild.lastChild as HTMLElement).textContent
+          ).to.equal('No Kernel!');
+        });
+      });
+
+      describe('.createKernelStatusItem()', () => {
+        beforeEach(async () => {
+          await session.initialize();
+          await session.kernel.ready;
+        });
+
+        it('should display a busy status if the kernel status is busy', async () => {
+          const item = Toolbar.createKernelStatusItem(session);
+          let called = false;
+          session.statusChanged.connect((_, status) => {
+            if (status === 'busy') {
+              expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
+              called = true;
+            }
+          });
+          const future = session.kernel.requestExecute({ code: 'a = 109\na' });
+          await future.done;
+          expect(called).to.equal(true);
+        });
+
+        it('should show the current status in the node title', async () => {
+          const item = Toolbar.createKernelStatusItem(session);
+          const status = session.status;
+          expect(item.node.title.toLowerCase()).to.contain(status);
+          let called = false;
+          const future = session.kernel.requestExecute({ code: 'a = 1' });
+          future.onIOPub = msg => {
+            if (session.status === 'busy') {
+              expect(item.node.title.toLowerCase()).to.contain('busy');
+              called = true;
+            }
+          };
+          await future.done;
+          expect(called).to.equal(true);
+        });
+
+        it('should handle a starting session', async () => {
+          await session.kernel.ready;
+          await session.shutdown();
+          session = await createClientSession();
+          const item = Toolbar.createKernelStatusItem(session);
+          expect(item.node.title).to.equal('Kernel Starting');
+          expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
+          await session.initialize();
+          await session.kernel.ready;
+        });
       });
     });
   });

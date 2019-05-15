@@ -17,7 +17,11 @@ import {
 
 import { RenderedText, IRenderMime } from '@jupyterlab/rendermime';
 
-import { createFileContext, defaultRenderMime } from '@jupyterlab/testutils';
+import {
+  createFileContext,
+  defaultRenderMime,
+  testEmission
+} from '@jupyterlab/testutils';
 
 const RENDERMIME = defaultRenderMime();
 
@@ -111,10 +115,10 @@ describe('docregistry/mimedocument', () => {
       it('should change the document contents', async () => {
         RENDERMIME.addFactory(fooFactory);
         await dContext.initialize(true);
-        let called = false;
-        dContext.model.contentChanged.connect(() => {
-          expect(dContext.model.toString()).to.equal('bar');
-          called = true;
+        const emission = testEmission(dContext.model.contentChanged, {
+          test: () => {
+            expect(dContext.model.toString()).to.equal('bar');
+          }
         });
         const renderer = RENDERMIME.createRenderer('text/foo');
         const widget = new LogRenderer({
@@ -125,7 +129,7 @@ describe('docregistry/mimedocument', () => {
           dataType: 'string'
         });
         await widget.ready;
-        expect(called).to.equal(true);
+        await emission;
       });
     });
   });
