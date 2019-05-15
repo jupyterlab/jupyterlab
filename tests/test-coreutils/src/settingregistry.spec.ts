@@ -18,10 +18,6 @@ import { JSONObject } from '@phosphor/coreutils';
 class TestConnector extends StateDB {
   schemas: { [key: string]: ISettingRegistry.ISchema } = {};
 
-  constructor() {
-    super({ namespace: 'setting-registry-tests' });
-  }
-
   async fetch(id: string): Promise<ISettingRegistry.IPlugin | undefined> {
     const fetched = await super.fetch(id);
     if (!fetched && !this.schemas[id]) {
