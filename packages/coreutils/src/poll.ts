@@ -234,11 +234,11 @@ export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
       throw new Error('Poll backoff growth factor must be at least 1');
     }
 
-    if (interval < 0 || interval > max) {
+    if ((interval < 0 || interval > max) && interval !== Private.NEVER) {
       throw new Error('Poll interval must be between 0 and max');
     }
 
-    if (max > Poll.MAX_INTERVAL) {
+    if (max > Poll.MAX_INTERVAL && max !== Private.NEVER) {
       throw new Error(`Max interval must be less than ${Poll.MAX_INTERVAL}`);
     }
 
@@ -542,6 +542,43 @@ export namespace Poll {
    * https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout#Maximum_delay_value
    */
   export const MAX_INTERVAL = 2147483647;
+}
+
+class Debouncer extends Poll<void, void> {
+  constructor(factory: Poll.Factory<void, void>, public interval: number) {
+    super({ factory, name: 'DEBOUNCER' });
+    void super.stop();
+  }
+
+  readonly frequency: IPoll.Frequency = {
+    backoff: false,
+    interval: Infinity,
+    max: Infinity
+  };
+
+  readonly standby = 'when-hidden';
+
+  async debounce(): Promise<void> {
+    await this.schedule({
+      cancel: last => last.phase === 'refreshed',
+      interval: this.interval,
+      phase: 'refreshed'
+    });
+    await this.tick;
+  }
+}
+
+/**
+ * Returns a debounced function that can be called multiple times safely and
+ * only executes the underlying function once per `interval`.
+ *
+ * @param fn - The function to debounce.
+ *
+ * @param interval - The debounce interval; defaults to 500ms.
+ */
+export function debounce(fn: () => any, interval = 500): () => Promise<void> {
+  const debouncer = new Debouncer(async () => fn(), interval);
+  return () => debouncer.debounce();
 }
 
 /**
