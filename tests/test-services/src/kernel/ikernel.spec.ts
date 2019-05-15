@@ -294,7 +294,7 @@ describe('Kernel.IKernel', () => {
     });
   });
 
-  describe.skip('#status', () => {
+  describe('#status', () => {
     it('should get an idle status', async () => {
       const emission = testEmission(defaultKernel.statusChanged, {
         find: () => defaultKernel.status === 'idle'
@@ -305,7 +305,7 @@ describe('Kernel.IKernel', () => {
 
     // TODO: seems to be sporadically timing out if we await the restart. See
     // https://github.com/jupyter/notebook/issues/3705.
-    it.skip('should get a restarting status', async () => {
+    it('should get a restarting status', async () => {
       const emission = testEmission(defaultKernel.statusChanged, {
         find: () => defaultKernel.status === 'restarting'
       });
@@ -321,7 +321,7 @@ describe('Kernel.IKernel', () => {
       await emission;
     });
 
-    it.skip('should get a reconnecting status', async () => {
+    it('should get a reconnecting status', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
       await kernel.ready;
@@ -507,7 +507,7 @@ describe('Kernel.IKernel', () => {
       tester.dispose();
     });
 
-    it.skip('should fail if the kernel is dead', async () => {
+    it('should fail if the kernel is dead', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
 
@@ -596,7 +596,7 @@ describe('Kernel.IKernel', () => {
       await expectFailure(interrupt, '');
     });
 
-    it.skip('should fail if the kernel is dead', async () => {
+    it('should fail if the kernel is dead', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
 
@@ -611,10 +611,10 @@ describe('Kernel.IKernel', () => {
     });
   });
 
-  describe.skip('#restart()', () => {
+  describe('#restart()', () => {
     // TODO: seems to be sporadically timing out if we await the restart. See
     // https://github.com/jupyter/notebook/issues/3705.
-    it.skip('should restart and resolve with a valid server response', async () => {
+    it('should restart and resolve with a valid server response', async () => {
       await defaultKernel.restart();
       await defaultKernel.ready;
     });
@@ -648,7 +648,7 @@ describe('Kernel.IKernel', () => {
 
     // TODO: seems to be sporadically timing out if we await the restart. See
     // https://github.com/jupyter/notebook/issues/3705.
-    it.skip('should dispose of existing comm and future objects', async () => {
+    it('should dispose of existing comm and future objects', async () => {
       const kernel = defaultKernel;
       const comm = kernel.connectToComm('test');
       const future = kernel.requestExecute({ code: 'foo' });
@@ -709,7 +709,7 @@ describe('Kernel.IKernel', () => {
       await expectFailure(shutdown, '');
     });
 
-    it.skip('should still pass if the kernel is dead', async () => {
+    it('should still pass if the kernel is dead', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
 
@@ -751,7 +751,7 @@ describe('Kernel.IKernel', () => {
       await defaultKernel.requestComplete(options);
     });
 
-    it.skip('should reject the promise if the kernel is dead', async () => {
+    it('should reject the promise if the kernel is dead', async () => {
       const options: KernelMessage.ICompleteRequest = {
         code: 'hello',
         cursor_pos: 4
@@ -822,7 +822,7 @@ describe('Kernel.IKernel', () => {
       tester.dispose();
     });
 
-    it.skip('should fail if the kernel is dead', async () => {
+    it('should fail if the kernel is dead', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
 
@@ -1202,7 +1202,7 @@ describe('Kernel.IKernel', () => {
     // a kernel is restarted, then a message is sent for a comm open from the
     // old session, the comm open should be canceled.
 
-    it.skip('should run handlers in order', async () => {
+    it('should run handlers in order', async () => {
       const options: KernelMessage.IExecuteRequest = {
         code: 'test',
         silent: false,
