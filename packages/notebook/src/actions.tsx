@@ -644,6 +644,7 @@ export namespace NotebookActions {
    * #### Notes
    * The widget mode will be preserved.
    * This is a no-op if the first cell is the active cell.
+   * This will skip any collapsed cells.
    * The existing selection will be cleared.
    */
   export function selectAbove(notebook: Notebook): void {
@@ -654,9 +655,22 @@ export namespace NotebookActions {
       return;
     }
 
+    let possibleNextCell = notebook.activeCellIndex - 1;
+
+    // find first non hidden cell above current cell
+    if (notebook.mode === 'edit') {
+      while (notebook.widgets[possibleNextCell].inputHidden) {
+        // If we are at the top cell, we cannot change selection.
+        if (possibleNextCell === 0) {
+          return;
+        }
+        possibleNextCell -= 1;
+      }
+    }
+
     const state = Private.getState(notebook);
 
-    notebook.activeCellIndex -= 1;
+    notebook.activeCellIndex = possibleNextCell;
     notebook.deselectAll();
     Private.handleState(notebook, state, true);
   }
@@ -669,19 +683,34 @@ export namespace NotebookActions {
    * #### Notes
    * The widget mode will be preserved.
    * This is a no-op if the last cell is the active cell.
+   * This will skip any collapsed cells.
    * The existing selection will be cleared.
    */
   export function selectBelow(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
-    if (notebook.activeCellIndex === notebook.widgets.length - 1) {
+    const maxCellIndex = notebook.widgets.length - 1;
+    if (notebook.activeCellIndex === maxCellIndex) {
       return;
+    }
+
+    let possibleNextCell = notebook.activeCellIndex + 1;
+
+    // find first non hidden cell below current cell
+    if (notebook.mode === 'edit') {
+      while (notebook.widgets[possibleNextCell].inputHidden) {
+        // If we are at the bottom cell, we cannot change selection.
+        if (possibleNextCell === maxCellIndex) {
+          return;
+        }
+        possibleNextCell += 1;
+      }
     }
 
     const state = Private.getState(notebook);
 
-    notebook.activeCellIndex += 1;
+    notebook.activeCellIndex = possibleNextCell;
     notebook.deselectAll();
     Private.handleState(notebook, state, true);
   }

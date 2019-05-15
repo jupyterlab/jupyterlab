@@ -797,7 +797,7 @@ describe('@jupyterlab/notebook', () => {
       }).timeout(60000); // Allow for slower CI
     });
 
-    describe('#selectAbove(`)', () => {
+    describe('#selectAbove()', () => {
       it('should select the cell above the active cell', () => {
         widget.activeCellIndex = 1;
         NotebookActions.selectAbove(widget);
@@ -887,25 +887,25 @@ describe('@jupyterlab/notebook', () => {
         widget.widgets[2].inputHidden = true;
         widget.widgets[3].inputHidden = false;
         NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).to.equal(4);
+        expect(widget.activeCellIndex).to.equal(3);
       });
 
       it('should not change if in edit mode and no non-collapsed cells below', () => {
-        widget.activeCellIndex = 0;
-        widget.mode = 'edit';
-        widget.widgets[1].inputHidden = true;
-        widget.widgets[2].inputHidden = true;
-        widget.widgets[3].inputHidden = false;
-        NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).to.equal(4);
-      });
-
-      it('should not skip collapsed cells and in command mode', () => {
         widget.activeCellIndex = widget.widgets.length - 2;
         widget.mode = 'edit';
         widget.widgets[widget.widgets.length - 1].inputHidden = true;
         NotebookActions.selectBelow(widget);
         expect(widget.activeCellIndex).to.equal(widget.widgets.length - 2);
+      });
+
+      it('should not skip collapsed cells and in command mode', () => {
+        widget.activeCellIndex = 0;
+        widget.mode = 'command';
+        widget.widgets[1].inputHidden = true;
+        widget.widgets[2].inputHidden = true;
+        widget.widgets[3].inputHidden = false;
+        NotebookActions.selectBelow(widget);
+        expect(widget.activeCellIndex).to.equal(1);
       });
     });
 
