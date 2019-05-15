@@ -377,14 +377,14 @@ export class DefaultKernel implements Kernel.IKernel {
    * On a valid response, closes the websocket and disposes of the kernel
    * object, and fulfills the promise.
    *
-   * The promise will be rejected if the kernel status is `dead` or if the
-   * request fails or the response is invalid.
+   * If the kernel is already `dead`, it closes the websocket and returns
+   * without a server request.
    */
   async shutdown(): Promise<void> {
     if (this.status === 'dead') {
       this._clearSocket();
       await this._clearState();
-      throw new Error('Kernel is dead');
+      return;
     }
     await Private.shutdownKernel(this.id, this.serverSettings);
     await this._clearState();
