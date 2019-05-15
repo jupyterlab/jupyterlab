@@ -339,7 +339,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
       const metadata = { id };
       const data = await db.toJSON();
 
-      return await workspaces.save(id, { data, metadata });
+      await workspaces.save(id, { data, metadata });
     });
 
     commands.addCommand(CommandIDs.loadState, {
