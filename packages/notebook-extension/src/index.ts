@@ -23,8 +23,8 @@ import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import {
   ISettingRegistry,
   IStateDB,
-  PageConfig,
-  URLExt
+  nbformat,
+  PageConfig
 } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
@@ -626,7 +626,8 @@ function activateNotebookHandler(
     });
     factory.editorConfig = { code, markdown, raw };
     factory.notebookConfig = {
-      scrollPastEnd: settings.get('scrollPastEnd').composite as boolean
+      scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
+      defaultCell: settings.get('defaultCell').composite as nbformat.CellType
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
@@ -1137,14 +1138,11 @@ function addCommands(
         return;
       }
 
-      const notebookPath = URLExt.encodeParts(current.context.path);
-      const url =
-        URLExt.join(
-          services.serverSettings.baseUrl,
-          'nbconvert',
-          args['format'] as string,
-          notebookPath
-        ) + '?download=true';
+      const url = PageConfig.getNBConvertURL({
+        format: args['format'] as string,
+        download: true,
+        path: current.context.path
+      });
       const child = window.open('', '_blank');
       const { context } = current;
 

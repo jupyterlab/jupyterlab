@@ -93,13 +93,6 @@ describe('@jupyterlab/notebook', () => {
         expect(model).to.be.an.instanceof(NotebookModel);
       });
 
-      it('should add an empty code cell by default', () => {
-        const factory = new NotebookModelFactory({});
-        const model = factory.createNew();
-        expect(model.cells.length).to.equal(1);
-        expect(model.cells.get(0).type).to.equal('code');
-      });
-
       it('should accept a language preference', () => {
         const factory = new NotebookModelFactory({});
         const model = factory.createNew('foo');

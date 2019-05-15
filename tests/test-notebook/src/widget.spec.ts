@@ -23,7 +23,11 @@ import { INotebookModel, NotebookModel } from '@jupyterlab/notebook';
 
 import { Notebook, StaticNotebook } from '@jupyterlab/notebook';
 
-import { NBTestUtils, framePromise } from '@jupyterlab/testutils';
+import {
+  NBTestUtils,
+  framePromise,
+  signalToPromise
+} from '@jupyterlab/testutils';
 
 const contentFactory = NBTestUtils.createNotebookFactory();
 const editorConfig = NBTestUtils.defaultEditorConfig;
@@ -253,6 +257,25 @@ describe('@jupyter/notebook', () => {
         expect(widget.widgets.length).to.equal(6);
       });
 
+      it('should add a default cell if the notebook model is empty', () => {
+        const widget = new LogStaticNotebook(options);
+        const model1 = new NotebookModel();
+        expect(model1.cells.length).to.equal(0);
+        widget.model = model1;
+        expect(model1.cells.length).to.equal(1);
+        expect(model1.cells.get(0).type).to.equal('code');
+
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          defaultCell: 'markdown'
+        };
+        const model2 = new NotebookModel();
+        expect(model2.cells.length).to.equal(0);
+        widget.model = model2;
+        expect(model2.cells.length).to.equal(1);
+        expect(model2.cells.get(0).type).to.equal('markdown');
+      });
+
       it('should set the mime types of the cell widgets', () => {
         const widget = new LogStaticNotebook(options);
         const model = new NotebookModel();
@@ -298,6 +321,19 @@ describe('@jupyter/notebook', () => {
           expect(child.hasClass('jp-Notebook-cell')).to.equal(true);
         });
 
+        it('should initially render markdown cells with content', () => {
+          const cell1 = widget.model.contentFactory.createMarkdownCell({});
+          const cell2 = widget.model.contentFactory.createMarkdownCell({});
+          cell1.value.text = '# Hello';
+          widget.model.cells.push(cell1);
+          widget.model.cells.push(cell2);
+          expect(widget.widgets.length).to.equal(8);
+          const child1 = widget.widgets[6] as MarkdownCell;
+          const child2 = widget.widgets[7] as MarkdownCell;
+          expect(child1.rendered).to.equal(true);
+          expect(child2.rendered).to.equal(false);
+        });
+
         it('should handle a move', () => {
           const child = widget.widgets[1];
           widget.model.cells.move(1, 2);
@@ -309,6 +345,21 @@ describe('@jupyter/notebook', () => {
           widget.model.cells.push(cell);
           widget.model.cells.clear();
           expect(widget.widgets.length).to.equal(0);
+        });
+
+        it('should add a new default cell when cells are cleared', async () => {
+          const model = widget.model;
+          widget.notebookConfig = {
+            ...widget.notebookConfig,
+            defaultCell: 'raw'
+          };
+          let promise = signalToPromise(model.cells.changed);
+          model.cells.clear();
+          await promise;
+          expect(model.cells.length).to.equal(0);
+          await signalToPromise(model.cells.changed);
+          expect(model.cells.length).to.equal(1);
+          expect(model.cells.get(0)).to.be.an.instanceof(RawCellModel);
         });
       });
     });
@@ -648,6 +699,7 @@ describe('@jupyter/notebook', () => {
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         const cell = widget.model.contentFactory.createMarkdownCell({});
+        cell.value.text = '# Hello'; // Should be rendered with content.
         widget.model.cells.push(cell);
         const child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
         expect(child.rendered).to.equal(true);
@@ -1105,6 +1157,7 @@ describe('@jupyter/notebook', () => {
 
         it('should preserve "command" mode if in a markdown cell', () => {
           const cell = widget.model.contentFactory.createMarkdownCell({});
+          cell.value.text = '# Hello'; // Should be rendered with content.
           widget.model.cells.push(cell);
           const count = widget.widgets.length;
           const child = widget.widgets[count - 1] as MarkdownCell;
@@ -1156,6 +1209,7 @@ describe('@jupyter/notebook', () => {
         it('should leave a markdown cell rendered', () => {
           const code = widget.model.contentFactory.createCodeCell({});
           const md = widget.model.contentFactory.createMarkdownCell({});
+          md.value.text = '# Hello'; // Should be rendered with content.
           widget.model.cells.push(code);
           widget.model.cells.push(md);
           const count = widget.widgets.length;
@@ -1214,6 +1268,7 @@ describe('@jupyter/notebook', () => {
       context('dblclick', () => {
         it('should unrender a markdown cell', () => {
           const cell = widget.model.contentFactory.createMarkdownCell({});
+          cell.value.text = '# Hello'; // Should be rendered with content.
           widget.model.cells.push(cell);
           const child = widget.widgets[
             widget.widgets.length - 1

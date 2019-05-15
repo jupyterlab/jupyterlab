@@ -56,6 +56,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * The metadata associated with the notebook.
    */
   readonly metadata: IObservableJSON;
+
   /**
    * The array of deleted cells since the notebook was last run.
    */
@@ -74,10 +75,6 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     let factory = options.contentFactory || NotebookModel.defaultContentFactory;
     this.contentFactory = factory.clone(this.modelDB.view('cells'));
     this._cells = new CellList(this.modelDB, this.contentFactory);
-    // Add an initial code cell by default.
-    if (!this._cells.length) {
-      this._cells.push(factory.createCodeCell({}));
-    }
     this._cells.changed.connect(this._onCellsChanged, this);
 
     // Handle initial metadata.
@@ -131,12 +128,14 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     let spec = this.metadata.get('kernelspec') as nbformat.IKernelspecMetadata;
     return spec ? spec.name : '';
   }
+
   /**
-   * The default kernel name of the document.
+   * A list of deleted cells for the notebook..
    */
   get deletedCells(): string[] {
     return this._deletedCells;
   }
+
   /**
    * The default kernel language of the document.
    */
@@ -312,17 +311,6 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       default:
         break;
     }
-    let factory = this.contentFactory;
-    // Add code cell if there are no cells remaining.
-    if (!this.cells.length) {
-      // Add the cell in a new context to avoid triggering another
-      // cell changed event during the handling of this signal.
-      requestAnimationFrame(() => {
-        if (!this.isDisposed && !this.cells.length) {
-          this.cells.push(factory.createCodeCell({}));
-        }
-      });
-    }
     this.triggerContentChange();
   }
 
@@ -386,6 +374,19 @@ export namespace NotebookModel {
     modelDB: IModelDB;
 
     /**
+     * Create a new cell by cell type.
+     *
+     * @param type:  the type of the cell to create.
+     *
+     * @param options: the cell creation options.
+     *
+     * #### Notes
+     * This method is intended to be a convenience method to programmaticaly
+     * call the other cell creation methods in the factory.
+     */
+    createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel;
+
+    /**
      * Create a new code cell.
      *
      * @param options - The options used to create the cell.
@@ -443,6 +444,31 @@ export namespace NotebookModel {
      * The IModelDB in which to put the notebook data.
      */
     readonly modelDB: IModelDB | undefined;
+
+    /**
+     * Create a new cell by cell type.
+     *
+     * @param type:  the type of the cell to create.
+     *
+     * @param options: the cell creation options.
+     *
+     * #### Notes
+     * This method is intended to be a convenience method to programmaticaly
+     * call the other cell creation methods in the factory.
+     */
+    createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel {
+      switch (type) {
+        case 'code':
+          return this.createCodeCell(opts);
+          break;
+        case 'markdown':
+          return this.createMarkdownCell(opts);
+          break;
+        case 'raw':
+        default:
+          return this.createRawCell(opts);
+      }
+    }
 
     /**
      * Create a new code cell.

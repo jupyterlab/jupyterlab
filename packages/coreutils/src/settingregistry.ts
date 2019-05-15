@@ -3,7 +3,7 @@
 
 import Ajv from 'ajv';
 
-import * as json from 'comment-json';
+import * as json from 'json5';
 
 import {
   JSONExt,
@@ -458,9 +458,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
     // Parse the raw commented JSON into a user map.
     let user: JSONObject;
     try {
-      const strip = true;
-
-      user = json.parse(plugin.raw, null, strip) as JSONObject;
+      user = json.parse(plugin.raw, null) as JSONObject;
     } catch (error) {
       if (error instanceof SyntaxError) {
         return [
@@ -692,7 +690,7 @@ export class SettingRegistry {
       return;
     }
 
-    const raw = json.parse(plugins[plugin].raw, null, true);
+    const raw = json.parse(plugins[plugin].raw, null);
 
     // Delete both the value and any associated comment.
     delete raw[key];
@@ -725,7 +723,7 @@ export class SettingRegistry {
     }
 
     // Parse the raw JSON string removing all comments and return an object.
-    const raw = json.parse(plugins[plugin].raw, null, true);
+    const raw = json.parse(plugins[plugin].raw, null);
 
     plugins[plugin].raw = Private.annotatedPlugin(plugins[plugin], {
       ...raw,

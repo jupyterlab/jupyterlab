@@ -17,7 +17,8 @@ import {
   IThemeManager,
   IWindowResolver,
   ThemeManager,
-  WindowResolver
+  WindowResolver,
+  Printing
 } from '@jupyterlab/apputils';
 
 import {
@@ -55,6 +56,8 @@ namespace CommandIDs {
   export const changeTheme = 'apputils:change-theme';
 
   export const loadState = 'apputils:load-statedb';
+
+  export const print = 'apputils:print';
 
   export const reset = 'apputils:reset';
 
@@ -288,6 +291,27 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
   }
 };
 
+const print: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:print',
+  autoStart: true,
+  activate: (app: JupyterFrontEnd) => {
+    app.commands.addCommand(CommandIDs.print, {
+      label: 'Print...',
+      isEnabled: () => {
+        const widget = app.shell.currentWidget;
+        return Printing.getPrintFunction(widget) !== null;
+      },
+      execute: async () => {
+        const widget = app.shell.currentWidget;
+        const printFunction = Printing.getPrintFunction(widget);
+        if (printFunction) {
+          await printFunction();
+        }
+      }
+    });
+  }
+};
+
 /**
  * The default state database for storing application state.
  */
@@ -466,7 +490,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   state,
   splash,
   themes,
-  themesPaletteMenu
+  themesPaletteMenu,
+  print
 ];
 export default plugins;
 

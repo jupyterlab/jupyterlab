@@ -212,8 +212,8 @@ jlpm create:test <package-directory-name>
 #### Running Jest Tests
 
 For those test folders that use `jest`, they can be run as `jlpm test` to run the files
-directly. You can also use `jlpm test --namePattern=<regex>` to specify specific test
-suite names, and `jlpm test --pathPattern=<regex>` to specify specific test module names. In order to watch the code, add a `debugger` line in your code and run `jlpm watch`. This will start a node V8 debugger, which can be debugged
+directly. You can also use `jlpm test --testNamePattern=<regex>` to specify specific test
+suite names, and `jlpm test --testPathPattern=<regex>` to specify specific test module names. In order to watch the code, add a `debugger` line in your code and run `jlpm watch`. This will start a node V8 debugger, which can be debugged
 in Chrome by browsing to `chrome://inspect/` and launching the remote session.
 
 ### Build and run the stand-alone examples

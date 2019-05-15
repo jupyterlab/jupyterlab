@@ -20,11 +20,6 @@ export interface IEditMenu extends IJupyterLabMenu {
   readonly clearers: Set<IEditMenu.IClearer<Widget>>;
 
   /**
-   * A set storing IFindReplacers for the Edit menu.
-   */
-  readonly findReplacers: Set<IEditMenu.IFindReplacer<Widget>>;
-
-  /**
    * A set storing IGoToLiners for the Edit menu.
    */
   readonly goToLiners: Set<IEditMenu.IGoToLiner<Widget>>;
@@ -45,8 +40,6 @@ export class EditMenu extends JupyterLabMenu implements IEditMenu {
 
     this.clearers = new Set<IEditMenu.IClearer<Widget>>();
 
-    this.findReplacers = new Set<IEditMenu.IFindReplacer<Widget>>();
-
     this.goToLiners = new Set<IEditMenu.IGoToLiner<Widget>>();
   }
 
@@ -61,11 +54,6 @@ export class EditMenu extends JupyterLabMenu implements IEditMenu {
   readonly clearers: Set<IEditMenu.IClearer<Widget>>;
 
   /**
-   * A set storing IFindReplacers for the Edit menu.
-   */
-  readonly findReplacers: Set<IEditMenu.IFindReplacer<Widget>>;
-
-  /**
    * A set storing IGoToLiners for the Edit menu.
    */
   readonly goToLiners: Set<IEditMenu.IGoToLiner<Widget>>;
@@ -76,7 +64,6 @@ export class EditMenu extends JupyterLabMenu implements IEditMenu {
   dispose(): void {
     this.undoers.clear();
     this.clearers.clear();
-    this.findReplacers.clear();
     super.dispose();
   }
 }
@@ -123,16 +110,6 @@ export namespace IEditMenu {
      * A function to clear all of an activity.
      */
     clearAll?: (widget: T) => void;
-  }
-
-  /**
-   * Interface for an activity that uses Find/Find+Replace.
-   */
-  export interface IFindReplacer<T extends Widget> extends IMenuExtender<T> {
-    /**
-     * Execute a find/replace command for the activity.
-     */
-    findAndReplace?: (widget: T) => void;
   }
 
   /**

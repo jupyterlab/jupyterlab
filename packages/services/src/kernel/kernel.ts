@@ -929,6 +929,7 @@ export namespace Kernel {
     | 'idle'
     | 'busy'
     | 'restarting'
+    | 'autorestarting'
     | 'dead'
     | 'connected';
 

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { showErrorMessage } from '@jupyterlab/apputils';
+import { showErrorMessage, Printing } from '@jupyterlab/apputils';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 
@@ -77,6 +77,13 @@ export class MimeContent extends Widget {
    * The mimetype for this rendered content.
    */
   readonly mimeType: string;
+
+  /**
+   * Print method. Defered to the renderer.
+   */
+  [Printing.symbol]() {
+    return Printing.getPrintFunction(this.renderer);
+  }
 
   /**
    * A promise that resolves when the widget is ready.

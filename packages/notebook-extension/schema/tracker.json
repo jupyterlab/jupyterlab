@@ -284,6 +284,13 @@
         "codeFolding": false
       }
     },
+    "defaultCell": {
+      "title": "Default cell type",
+      "description": "The default type (markdown, code, or raw) for new cells",
+      "type": "string",
+      "enum": ["code", "markdown", "raw"],
+      "default": "code"
+    },
     "kernelShutdown": {
       "title": "Shut down kernel",
       "description": "Whether to shut down or not the kernel when closing a notebook.",
