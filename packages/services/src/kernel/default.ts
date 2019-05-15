@@ -232,8 +232,7 @@ export class DefaultKernel implements Kernel.IKernel {
     this._isDisposed = true;
     this._terminated.emit();
     this._status = 'dead';
-    // TODO: Kernel status rework should avoid doing
-    // anything asynchronous in the disposal.
+    // Trigger the async _clearState, but do not wait for it.
     void this._clearState();
     this._clearSocket();
     this._kernelSession = '';
@@ -382,12 +381,10 @@ export class DefaultKernel implements Kernel.IKernel {
    * request fails or the response is invalid.
    */
   async shutdown(): Promise<void> {
-    // TODO: we are not keeping the promise in the docs above to throw an error
-    // if status is dead.
     if (this.status === 'dead') {
       this._clearSocket();
       await this._clearState();
-      return;
+      throw new Error('Kernel is dead');
     }
     await Private.shutdownKernel(this.id, this.serverSettings);
     await this._clearState();
@@ -402,10 +399,6 @@ export class DefaultKernel implements Kernel.IKernel {
    *
    * Fulfills with the `kernel_info_response` content when the shell reply is
    * received and validated.
-   *
-   * TODO: this should be automatically run every time our kernel restarts,
-   * before we say the kernel is ready, and cache the info and the kernel
-   * session id. Further calls to this should returned the cached results.
    */
   async requestKernelInfo(): Promise<KernelMessage.IInfoReplyMsg> {
     let options: KernelMessage.IOptions = {
@@ -793,8 +786,8 @@ export class DefaultKernel implements Kernel.IKernel {
    * Clear the socket state.
    *
    * #### Notes
-   * When calling this, you should also set the status to something that will
-   * reset the kernel ready state.
+   * When calling this, you should also set the status to something like
+   * 'reconnecting' to reset the kernel ready state.
    */
   private _clearSocket(): void {
     this._wsStopped = true;
@@ -1059,9 +1052,6 @@ export class DefaultKernel implements Kernel.IKernel {
     this._isReady = true;
 
     // Get the kernel info, signaling that the kernel is ready.
-
-    // TODO: requestKernelInfo maybe shouldn't make a request, but should return
-    // cached info since there may be other connections to this kernel?
     this.requestKernelInfo()
       .then(() => {
         this._initialized = true;
@@ -1578,11 +1568,6 @@ namespace Private {
       'restart'
     );
     let init = { method: 'POST' };
-
-    // TODO: If we handleRestart before making the server request, we sever the
-    // communication link before the shutdown_reply message comes, so we end up
-    // getting the shutdown_reply messages after we reconnect, which is weird.
-    // We might want to move the handleRestart to after we get the response back
 
     // Handle the restart on all of the kernels with the same id.
     await Promise.all(
