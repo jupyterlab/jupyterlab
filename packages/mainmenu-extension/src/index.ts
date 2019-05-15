@@ -51,8 +51,6 @@ export namespace CommandIDs {
 
   export const find = 'editmenu:find';
 
-  export const findAndReplace = 'editmenu:find-and-replace';
-
   export const goToLine = 'editmenu:go-to-line';
 
   export const openFile = 'filemenu:open';
@@ -280,20 +278,6 @@ export function createEditMenu(app: JupyterFrontEnd, menu: EditMenu): void {
     10
   );
 
-  // Add the find-replace command to the Edit menu.
-  commands.addCommand(CommandIDs.findAndReplace, {
-    label: 'Find and Replace…',
-    isEnabled: Private.delegateEnabled(
-      app,
-      menu.findReplacers,
-      'findAndReplace'
-    ),
-    execute: Private.delegateExecute(app, menu.findReplacers, 'findAndReplace')
-  });
-  menu.addGroup(
-    [{ command: CommandIDs.find }, { command: CommandIDs.findAndReplace }],
-    200
-  );
   commands.addCommand(CommandIDs.goToLine, {
     label: 'Go to Line…',
     isEnabled: Private.delegateEnabled(app, menu.goToLiners, 'goToLine'),

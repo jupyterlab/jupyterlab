@@ -42,8 +42,6 @@ namespace CommandIDs {
 
   export const find = 'codemirror:find';
 
-  export const findAndReplace = 'codemirror:find-and-replace';
-
   export const goToLine = 'codemirror:go-to-line';
 }
 
@@ -284,19 +282,6 @@ function activateEditorCommands(
     isEnabled
   });
 
-  commands.addCommand(CommandIDs.findAndReplace, {
-    label: 'Find and Replace...',
-    execute: () => {
-      let widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
-      let editor = widget.content.editor as CodeMirrorEditor;
-      editor.execCommand('replace');
-    },
-    isEnabled
-  });
-
   commands.addCommand(CommandIDs.goToLine, {
     label: 'Go to Line...',
     execute: () => {
@@ -394,15 +379,6 @@ function activateEditorCommands(
 
     // Add the syntax highlighting submenu to the `View` menu.
     mainMenu.viewMenu.addGroup([{ type: 'submenu', submenu: modeMenu }], 40);
-
-    // Add find-replace capabilities to the edit menu.
-    mainMenu.editMenu.findReplacers.add({
-      tracker,
-      findAndReplace: (widget: IDocumentWidget<FileEditor>) => {
-        let editor = widget.content.editor as CodeMirrorEditor;
-        editor.execCommand('replace');
-      }
-    } as IEditMenu.IFindReplacer<IDocumentWidget<FileEditor>>);
 
     // Add go to line capabilities to the edit menu.
     mainMenu.editMenu.goToLiners.add({
