@@ -69,6 +69,8 @@ export class Dialog<T> extends Widget {
   constructor(options: Partial<Dialog.IOptions<T>> = {}) {
     super();
     this.addClass('jp-Dialog');
+    this.node.setAttribute('aria-modal', 'true');
+    this.node.setAttribute('role', 'dialog');
     let normalized = Private.handleOptions(options);
     let renderer = normalized.renderer;
 
