@@ -95,7 +95,7 @@ if [[ $GROUP == integrity ]]; then
 fi
 
 
-if [[ $GROUP == cli ]]; then
+if [[ $GROUP == usage ]]; then
     # Test the cli apps.
     jupyter lab clean
     jupyter lab build
