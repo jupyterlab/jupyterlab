@@ -30,8 +30,8 @@ const OPEN_DIALOG_CLASS = 'jp-Open-Dialog';
  */
 export function getOpenFiles(
   options: OpenFileDialog.IOptions
-): Promise<Dialog.IResult<Promise<Contents.IModel[]>>> {
-  let dialogOptions: Partial<Dialog.IOptions<Promise<Contents.IModel[]>>> = {
+): Promise<Dialog.IResult<Contents.IModel[]>> {
+  let dialogOptions: Partial<Dialog.IOptions<Contents.IModel[]>> = {
     title: options.title,
     buttons: [
       Dialog.cancelButton(),
@@ -60,7 +60,7 @@ export function getOpenFiles(
  */
 export function getExistingDirectory(
   options: OpenDirectoryDialog.IOptions
-): Promise<Dialog.IResult<Promise<Contents.IModel[]>>> {
+): Promise<Dialog.IResult<Contents.IModel[]>> {
   return getOpenFiles({
     ...options,
     filter: model => false
@@ -99,7 +99,7 @@ export class FilterFileBrowserModel extends FileBrowserModel {
  * Open dialog widget
  */
 class OpenDialog extends Widget
-  implements Dialog.IBodyWidget<Promise<Contents.IModel[]>> {
+  implements Dialog.IBodyWidget<Contents.IModel[]> {
   constructor(
     manager: IDocumentManager,
     filter?: (value: Contents.IModel) => boolean
@@ -124,7 +124,7 @@ class OpenDialog extends Widget
   /**
    * Get the selected items.
    */
-  async getValue(): Promise<Contents.IModel[]> {
+  getValue(): Contents.IModel[] {
     const selection = toArray(this._browser.selectedItems());
     if (selection.length === 0) {
       // Return current path
