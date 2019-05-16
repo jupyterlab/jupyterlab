@@ -40,7 +40,7 @@ function RunningSessionsComponent(
         <TextItem source={props.kernels} />
         <IconItem source={'jp-StatusItem-kernel'} offset={{ x: 0, y: 2 }} />
       </GroupItem>
-      <span aria-live="assertive" aria-atomic="true" id="arialive-status"> something here
+      <span className="screenReaderOnly" aria-live="assertive" aria-atomic="true" id="arialive-status">
       </span>
     </GroupItem>
   );
