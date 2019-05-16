@@ -986,10 +986,12 @@ namespace Private {
     let body = document.createElement('div');
     let text = document.createElement('label');
     text.innerHTML = `Select kernel for: "${session.name}"`;
+    text.id = "DialogSelectLabel";
     body.appendChild(text);
 
     let options = getKernelSearch(session);
     let selector = document.createElement('select');
+    selector.setAttribute("aria-labelledby", "DialogSelectLabel");
     ClientSession.populateKernelSelect(selector, options);
     body.appendChild(selector);
     return body;

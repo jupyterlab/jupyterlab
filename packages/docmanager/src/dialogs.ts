@@ -204,8 +204,10 @@ namespace Private {
 
     let nameTitle = document.createElement('label');
     nameTitle.textContent = 'New Name';
+    nameTitle.id = 'DialogInputLabel';
     nameTitle.className = RENAME_NEWNAME_TITLE_CLASS;
     let name = document.createElement('input');
+    name.setAttribute("aria-labelledby", "DialogInputLabel");
 
     body.appendChild(existingLabel);
     body.appendChild(existingPath);
@@ -221,10 +223,12 @@ namespace Private {
     let body = document.createElement('div');
     let existingLabel = document.createElement('label');
     existingLabel.textContent = 'File Path:';
+    existingLabel.id = 'DialogInputLabel';
 
     let input = document.createElement('input');
     input.value = '';
     input.placeholder = '/path/to/file';
+    input.setAttribute("aria-labelledby", "DialogInputLabel")
 
     body.appendChild(existingLabel);
     body.appendChild(input);
