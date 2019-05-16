@@ -44,6 +44,7 @@ export abstract class Collapser extends ReactWidget {
   constructor() {
     super();
     this.addClass(COLLAPSER_CLASS);
+    this.node.setAttribute('role', 'gridcell');
   }
 
   /**
@@ -58,7 +59,13 @@ export abstract class Collapser extends ReactWidget {
    */
   protected render(): React.ReactElement<any> {
     let childClass = COLLAPSER_CHILD_CLASS;
-    return <div className={childClass} onClick={e => this.handleClick(e)} />;
+    return (
+      <div
+        role={'gridcell'}
+        className={childClass}
+        onClick={e => this.handleClick(e)}
+      />
+    );
   }
 
   /**

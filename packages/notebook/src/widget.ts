@@ -160,6 +160,8 @@ export class StaticNotebook extends Widget {
    */
   constructor(options: StaticNotebook.IOptions) {
     super();
+
+    this.node.setAttribute('role', 'grid');
     this.addClass(NB_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[UNDOER] = 'true';
