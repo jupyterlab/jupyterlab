@@ -291,6 +291,12 @@ export class TerminalManager implements TerminalSession.IManager {
       this._models.splice(index, 1);
       this._runningChanged.emit(this._models.slice());
     }
+    const sessions = this._sessions;
+    sessions.forEach(session => {
+      if (session.name === name) {
+        sessions.delete(session);
+      }
+    });
   }
 
   private _isDisposed = false;
