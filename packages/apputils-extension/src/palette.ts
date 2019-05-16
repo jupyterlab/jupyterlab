@@ -107,6 +107,7 @@ export namespace Palette {
     });
 
     palette.inputNode.placeholder = 'SEARCH';
+    palette.inputNode.setAttribute("aria-label", palette.title.caption + " " + palette.inputNode.placeholder.toLowerCase());
 
     shell.add(palette, 'left', { rank: 300 });
 
