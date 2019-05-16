@@ -16,3 +16,14 @@ pre {
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);
 }
+
+/* A special class to be used to make elements needed for screenreaders
+ * invisible to users who do not use screen readers */
+.screenReaderOnly {
+  clip: rect(1px, 1px, 1px, 1px);
+  position: absolute !important;
+  white-space: nowrap;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+}

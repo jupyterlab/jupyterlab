@@ -837,7 +837,7 @@ namespace Private {
   export function getSavePath(path: string): Promise<string | undefined> {
     let saveBtn = Dialog.okButton({ label: 'SAVE' });
     return showDialog({
-      title: 'Save File As..',
+      title: 'Save File As...',
       body: new SaveWidget(path),
       buttons: [Dialog.cancelButton(), saveBtn]
     }).then(result => {
@@ -880,6 +880,7 @@ namespace Private {
   function createSaveNode(path: string): HTMLElement {
     let input = document.createElement('input');
     input.value = path;
+    input.setAttribute('aria-labelledby', 'DialogHeader');
     return input;
   }
 }

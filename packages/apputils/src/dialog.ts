@@ -69,6 +69,12 @@ export class Dialog<T> extends Widget {
   constructor(options: Partial<Dialog.IOptions<T>> = {}) {
     super();
     this.addClass('jp-Dialog');
+
+    // Add attributes for accessibility with screen readers
+    this.node.setAttribute('aria-modal', 'true');
+    this.node.setAttribute('aria-labelledby', 'DialogHeader');
+    this.node.setAttribute('role', 'dialog');
+
     let normalized = Private.handleOptions(options);
     let renderer = normalized.renderer;
 
@@ -662,7 +668,8 @@ export namespace Dialog {
     createHeader(title: Header): Widget {
       let header: Widget;
       if (typeof title === 'string') {
-        header = new Widget({ node: document.createElement('span') });
+        header = new Widget({ node: document.createElement('h1') });
+        header.node.id = 'DialogHeader';
         header.node.textContent = title;
       } else {
         header = ReactWidget.create(title);

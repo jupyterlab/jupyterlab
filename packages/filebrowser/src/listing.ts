@@ -931,7 +931,21 @@ export class DirListing extends Widget {
 
         break;
       case 38: // Up arrow
-        this.selectPrevious(event.shiftKey);
+        if ((IS_MAC && event.metaKey) || event.altKey) {
+          // Up arrow + command (on macOS) or up arrow + alt (on Windows)
+          // -> go up a directory
+          // Note that those are the shortcuts used by the Finder and Windows
+          // Explorer, respectively.
+          let path =
+            '/' + this._manager.services.contents.localPath(this._model.path);
+          // Remove the last component of the path => parent directory
+          path = path.replace(/\/[^\/]+$/, '') || '/';
+          this._model
+            .cd(path)
+            .catch(error => showErrorMessage('Open directory', error));
+        } else {
+          this.selectPrevious(event.shiftKey);
+        }
         event.stopPropagation();
         event.preventDefault();
         break;
