@@ -49,6 +49,7 @@
     "test": "lerna run test --scope \"@jupyterlab/test-*\" --concurrency 1 --stream",
     "test:chrome": "lerna run test:chrome --scope \"@jupyterlab/test-*\" --concurrency 1 --stream",
     "test:chrome-headless": "lerna run test:chrome-headless --scope \"@jupyterlab/test-*\" --concurrency 1 --stream",
+    "test:examples": "python examples/test_examples.py",
     "test:firefox": "lerna run test:firefox --scope \"@jupyterlab/test-*\" --concurrency 1 --stream",
     "test:ie": "lerna run test:ie --scope \"@jupyterlab/test-*\" --concurrency 1 --stream",
     "tslint": "tslint --fix -c tslint.json --project tsconfigbase.json '**/*{.ts,.tsx}'",

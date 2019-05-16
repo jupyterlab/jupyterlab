@@ -1,7 +1,9 @@
 module.exports = {
   entry: './build/index.js',
+  mode: 'development',
   output: {
-    filename: './build/bundle.js'
+    path: require('path').join(__dirname, 'build'),
+    filename: 'bundle.js'
   },
   bail: true
 };

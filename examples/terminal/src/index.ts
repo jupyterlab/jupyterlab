@@ -1,7 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'es6-promise/auto'; // polyfill Promise on IE
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+// @ts-ignore
+__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
+
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/terminal/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';
@@ -34,6 +37,8 @@ async function main(): Promise<void> {
   const term2 = new Terminal(s2, { theme: 'dark' });
   term2.title.closable = true;
   dock.addWidget(term2, { mode: 'tab-before' });
+
+  console.log('Example started!');
 }
 
 window.addEventListener('load', main);
