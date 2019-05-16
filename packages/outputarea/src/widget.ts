@@ -98,6 +98,7 @@ export class OutputArea extends Widget {
     super();
     let model = (this.model = options.model);
     this.addClass(OUTPUT_AREA_CLASS);
+    this.node.setAttribute('role', 'gridcell');
     this.rendermime = options.rendermime;
     this.contentFactory =
       options.contentFactory || OutputArea.defaultContentFactory;
