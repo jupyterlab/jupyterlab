@@ -549,20 +549,39 @@ export namespace Poll {
   export const MAX_INTERVAL = 2147483647;
 }
 
-class Debouncer extends Poll<void, void> {
+/**
+ * A poll that only schedules ticks manually.
+ */
+export class Debouncer extends Poll<void, void> {
+  /**
+   * Instantiate a debouncer poll.
+   *
+   * @param factory - The poll factory.
+   *
+   * @param interval - The debounce interval.
+   */
   constructor(factory: Poll.Factory<void, void>, public interval: number) {
     super({ factory, name: 'DEBOUNCER' });
     void super.stop();
   }
 
+  /**
+   * The debouncer frequency.
+   */
   readonly frequency: IPoll.Frequency = {
     backoff: false,
     interval: Infinity,
     max: Infinity
   };
 
+  /**
+   * The debouncer poll standby value.
+   */
   readonly standby = 'when-hidden';
 
+  /**
+   * Debounce a request to refresh the poll within the debounce interval.
+   */
   async debounce(): Promise<void> {
     await this.schedule({
       cancel: last => last.phase === 'refreshed',
