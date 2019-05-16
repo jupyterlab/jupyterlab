@@ -931,8 +931,11 @@ export class DirListing extends Widget {
 
         break;
       case 38: // Up arrow
-        if (event.altKey || event.ctrlKey || event.metaKey) {
-          // Up arrow + modifier (except shit) -> go up a directory
+        if ((IS_MAC && event.metaKey) || event.altKey) {
+          // Up arrow + command (on macOS) or up arrow + alt (on Windows) 
+          // -> go up a directory
+          // Note that those are the shortcuts used by the Finder and Windows
+          // Explorer, respectively.
           let path = '/' + this._manager.services.contents.localPath(this._model.path);
           // Remove the last component of the path => parent directory
           path = path.replace(/\/[^\/]+$/, '') || '/';
