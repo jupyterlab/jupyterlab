@@ -7,10 +7,16 @@ import { IPoll, Poll } from '@jupyterlab/coreutils';
 
 import { sleep } from '@jupyterlab/testutils';
 
-class TestPoll extends Poll {
-  schedule(
-    next: Partial<IPoll.State & { cancel: (last: IPoll.State) => boolean }> = {}
-  ): Promise<void> {
+class TestPoll<T = void, U = void, V extends string = 'standby'> extends Poll<
+  T,
+  U,
+  V
+> {
+  async schedule(
+    next: Partial<
+      IPoll.State<T, U, V> & { cancel: (last: IPoll.State<T, U, V>) => boolean }
+    > = {}
+  ) {
     return super.schedule(next);
   }
 }
@@ -208,8 +214,8 @@ describe('Poll', () => {
         name: '@jupyterlab/test-coreutils:Poll#tick-1'
       });
       const expected = 'when-resolved resolved';
-      const ticker: IPoll.Phase[] = [];
-      const tock = (poll: IPoll) => {
+      const ticker: IPoll.Phase<any>[] = [];
+      const tock = (poll: Poll) => {
         ticker.push(poll.state.phase);
         poll.tick.then(tock).catch(() => undefined);
       };
@@ -225,13 +231,13 @@ describe('Poll', () => {
         frequency: { interval: 0, backoff: false },
         name: '@jupyterlab/test-coreutils:Poll#tick-2'
       });
-      const ticker: IPoll.Phase[] = [];
-      const tocker: IPoll.Phase[] = [];
+      const ticker: IPoll.Phase<any>[] = [];
+      const tocker: IPoll.Phase<any>[] = [];
       poll.ticked.connect(async (_, state) => {
         ticker.push(state.phase);
         expect(ticker.length).to.equal(tocker.length + 1);
       });
-      const tock = async (poll: IPoll) => {
+      const tock = async (poll: Poll) => {
         tocker.push(poll.state.phase);
         expect(ticker.join(' ')).to.equal(tocker.join(' '));
         poll.tick.then(tock).catch(() => undefined);
@@ -266,7 +272,7 @@ describe('Poll', () => {
 
     it('should emit when the poll ticks after `when` resolves', async () => {
       const expected = 'when-resolved resolved';
-      const ticker: IPoll.Phase[] = [];
+      const ticker: IPoll.Phase<any>[] = [];
       poll = new Poll<void, void>({
         factory: () => Promise.resolve(),
         frequency: { interval: 2000, backoff: false },
@@ -281,7 +287,7 @@ describe('Poll', () => {
 
     it('should emit when the poll ticks after `when` rejects', async () => {
       const expected = 'when-rejected resolved';
-      const ticker: IPoll.Phase[] = [];
+      const ticker: IPoll.Phase<any>[] = [];
       const promise = Promise.reject();
       poll = new Poll({
         factory: () => Promise.resolve(),
@@ -319,7 +325,7 @@ describe('Poll', () => {
 
     it('should dispose the poll and be safe to call repeatedly', async () => {
       let rejected = false;
-      let tick: Promise<IPoll>;
+      let tick: Promise<Poll>;
       poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#dispose()-1',
         factory: () => Promise.resolve()
@@ -347,7 +353,7 @@ describe('Poll', () => {
 
     it('should refresh the poll when the poll is ready', async () => {
       const expected = 'when-resolved refreshed resolved';
-      const ticker: IPoll.Phase[] = [];
+      const ticker: IPoll.Phase<any>[] = [];
       poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#refresh()-1',
         frequency: { interval: 100 },
@@ -366,7 +372,7 @@ describe('Poll', () => {
 
     it('should be safe to call multiple times', async () => {
       const expected = 'when-resolved refreshed resolved';
-      const ticker: IPoll.Phase[] = [];
+      const ticker: IPoll.Phase<any>[] = [];
       poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#refresh()-2',
         frequency: { interval: 100 },
@@ -399,7 +405,7 @@ describe('Poll', () => {
 
     it('should start the poll if it is stopped', async () => {
       const expected = 'when-resolved stopped started resolved';
-      const ticker: IPoll.Phase[] = [];
+      const ticker: IPoll.Phase<any>[] = [];
       poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#start()-1',
         frequency: { interval: 100 },
@@ -421,7 +427,7 @@ describe('Poll', () => {
 
     it('be safe to call multiple times and no-op if unnecessary', async () => {
       const expected = 'when-resolved resolved stopped started resolved';
-      const ticker: IPoll.Phase[] = [];
+      const ticker: IPoll.Phase<any>[] = [];
       poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#start()-2',
         frequency: { interval: 100 },
@@ -458,7 +464,7 @@ describe('Poll', () => {
 
     it('should stop the poll if it is active', async () => {
       const expected = 'when-resolved stopped started resolved';
-      const ticker: IPoll.Phase[] = [];
+      const ticker: IPoll.Phase<any>[] = [];
       poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#stop()-1',
         frequency: { interval: 100 },
@@ -479,7 +485,7 @@ describe('Poll', () => {
 
     it('be safe to call multiple times', async () => {
       const expected = 'when-resolved stopped started resolved';
-      const ticker: IPoll.Phase[] = [];
+      const ticker: IPoll.Phase<any>[] = [];
       poll = new Poll({
         name: '@jupyterlab/test-coreutils:Poll#stop()-2',
         frequency: { interval: 100 },
