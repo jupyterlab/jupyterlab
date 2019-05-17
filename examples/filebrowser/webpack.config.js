@@ -6,7 +6,7 @@ module.exports = {
     publicPath: './example/'
   },
   bail: true,
-  devtool: 'cheap-source-map',
+  devtool: 'source-map',
   mode: 'production',
   module: {
     rules: [
