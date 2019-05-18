@@ -149,7 +149,8 @@ def ensure_core(logger=None):
 
     # Determine whether to build.
     target = pjoin(HERE, 'static', 'index.html')
-    if ensure_node_modules(staging, logger) or not osp.exists(target):
+    if not osp.exists(target):
+        ensure_node_modules(staging, logger)
         yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=staging,
                             logger=logger)
         yarn_proc.wait()
