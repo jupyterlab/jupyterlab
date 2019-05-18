@@ -3,6 +3,7 @@
 
 export * from './activitymonitor';
 export * from './dataconnector';
+export * from './debounce';
 export * from './interfaces';
 export * from './markdowncodeblocks';
 export * from './nbformat';

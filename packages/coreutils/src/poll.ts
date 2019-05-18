@@ -563,62 +563,6 @@ export namespace Poll {
 }
 
 /**
- * A poll that only schedules ticks manually.
- */
-export class Debouncer extends Poll<void, void, 'debounced'> {
-  /**
-   * Instantiate a debouncer poll.
-   *
-   * @param factory - The factory function being debounced.
-   *
-   * @param interval - The debounce interval.
-   */
-  constructor(
-    factory: Poll.Factory<void, void, 'debounced'>,
-    public interval: number
-  ) {
-    super({ factory });
-    this.frequency = { backoff: false, interval: Infinity, max: Infinity };
-    void super.stop();
-  }
-
-  /**
-   * The debouncer frequency.
-   */
-  readonly frequency: IPoll.Frequency;
-
-  /**
-   * The debouncer poll standby value.
-   */
-  readonly standby = Private.DEFAULT_STANDBY;
-
-  /**
-   * Invokes the debounced function after the interval has elapsed.
-   */
-  async debounce(): Promise<void> {
-    await this.schedule({
-      cancel: last => last.phase === 'debounced',
-      interval: this.interval,
-      phase: 'debounced'
-    });
-    await this.tick;
-  }
-}
-
-/**
- * Returns a debounced function that can be called multiple times safely and
- * only executes the underlying function once per `interval`.
- *
- * @param fn - The function to debounce.
- *
- * @param interval - The debounce interval; defaults to 500ms.
- */
-export function debounce(fn: () => any, interval = 500): () => Promise<void> {
-  const debouncer = new Debouncer(async () => fn(), interval);
-  return () => debouncer.debounce();
-}
-
-/**
  * A namespace for private module data.
  */
 namespace Private {
