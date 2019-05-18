@@ -108,18 +108,34 @@ def dedupe_yarn(path, logger=None):
         yarn_proc.wait()
 
 
-def ensure_dev(logger=None):
-    """Ensure that the dev assets are available.
-    """
-    parent = pjoin(HERE, '..')
+def ensure_node_modules(cwd, logger=None):
+    """Ensure that node_modules is up to date.
 
-    if not osp.exists(pjoin(parent, 'node_modules')):
-        yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
+    Returns true if the node_modules was updated.
+    """
+    logger = _ensure_logger(logger)
+    yarn_proc = Process(['node', YARN_PATH, 'check', '--verify-tree'], cwd=cwd, logger=logger)
+    ret = yarn_proc.wait()
+
+    # Update node_modules if needed.
+    if ret != 0:
+        yarn_proc = Process(['node', YARN_PATH], cwd=cwd, logger=logger)
         yarn_proc.wait()
 
         dedupe_yarn(parent, logger)
 
-    if not osp.exists(pjoin(parent, 'dev_mode', 'static')):
+    return ret != 0
+
+
+def ensure_dev(logger=None):
+    """Ensure that the dev assets are available.
+    """
+    parent = pjoin(HERE, '..')
+    logger = _ensure_logger(logger)
+    target = pjoin(parent, 'dev_mode', 'static')
+
+    # Determine whether to build.
+    if ensure_node_modules(parent, logger) or not osp.exists(target):
         yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=parent,
                             logger=logger)
         yarn_proc.wait()
@@ -129,21 +145,29 @@ def ensure_core(logger=None):
     """Ensure that the core assets are available.
     """
     staging = pjoin(HERE, 'staging')
+    logger = _ensure_logger(logger)
 
-    # Bail if the static directory already exists.
-    if osp.exists(pjoin(HERE, 'static')):
-        return
-
-    if not osp.exists(pjoin(staging, 'node_modules')):
-        yarn_proc = Process(['node', YARN_PATH], cwd=staging, logger=logger)
-        yarn_proc.wait()
-
-        dedupe_yarn(staging, logger)
-
-    if not osp.exists(pjoin(HERE, 'static')):
+    # Determine whether to build.
+    target = pjoin(HERE, 'static', 'index.html')
+    if ensure_node_modules(staging, logger) or not osp.exists(target):
         yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=staging,
                             logger=logger)
         yarn_proc.wait()
+
+
+def ensure_app(app_dir, logger=None):
+    """Ensure that an application directory is available.
+    """
+    logger = _ensure_logger(logger)
+    if osp.exists(pjoin(app_dir, 'static', 'index.html')):
+        return
+
+    if which('node'):
+        logger.info('Assets not found, building application')
+        build(self.app_dir)
+    else:
+        msg = 'JupyterLab application assets not found in %s'
+        raise RuntimeError(msg % self.app_dir)
 
 
 def watch_packages(logger=None):
@@ -159,14 +183,9 @@ def watch_packages(logger=None):
     A list of `WatchHelper` objects.
     """
     parent = pjoin(HERE, '..')
-
-    if not osp.exists(pjoin(parent, 'node_modules')):
-        yarn_proc = Process(['node', YARN_PATH], cwd=parent, logger=logger)
-        yarn_proc.wait()
-
-        dedupe_yarn(parent, logger)
-
     logger = _ensure_logger(logger)
+    ensure_node_modules(parent, logger)
+
     ts_dir = osp.abspath(osp.join(HERE, '..', 'packages', 'metapackage'))
 
     # Run typescript watch and wait for the string indicating it is done.

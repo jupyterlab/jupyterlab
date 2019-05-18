@@ -87,7 +87,8 @@ def load_jupyter_server_extension(nbapp):
         extensions_handler_path, ExtensionManager, ExtensionHandler
     )
     from .commands import (
-        DEV_DIR, HERE, ensure_core, ensure_dev, watch, watch_dev, get_app_dir
+        DEV_DIR, HERE, ensure_app, ensure_core, ensure_dev, watch,
+        watch_dev, get_app_dir
     )
 
     web_app = nbapp.web_app
@@ -157,18 +158,22 @@ def load_jupyter_server_extension(nbapp):
         nbapp.default_url = uri
         nbapp.file_to_run = ''
 
+    # Print messages.
+    logger.info('JupyterLab extension loaded from %s' % HERE)
+    logger.info('JupyterLab application directory is %s' % app_dir)
+
     if core_mode:
         logger.info(CORE_NOTE.strip())
         ensure_core(logger)
 
     elif dev_mode:
-        ensure_dev(logger)
         if not watch_mode:
+            ensure_dev(logger)
             logger.info(DEV_NOTE)
 
-    # Print messages.
-    logger.info('JupyterLab extension loaded from %s' % HERE)
-    logger.info('JupyterLab application directory is %s' % app_dir)
+    # Make sure the app dir exists.
+    else:
+        ensure_app(app_dir, logger=logger)
 
     if watch_mode:
         logger.info('Starting JupyterLab watch mode...')

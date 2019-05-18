@@ -6,6 +6,8 @@
 
 import json
 import os
+import os.path as osp
+from os.path import join as pjoin
 import sys
 
 from jupyter_core.application import JupyterApp, base_aliases
@@ -140,9 +142,9 @@ class LabWorkspaceExportApp(JupyterApp):
         raw = (page_url if not self.extra_args
                else ujoin(config.workspaces_url, self.extra_args[0]))
         slug = slugify(raw, base_url)
-        workspace_path = os.path.join(directory, slug + WORKSPACE_EXTENSION)
+        workspace_path = pjoin(directory, slug + WORKSPACE_EXTENSION)
 
-        if os.path.exists(workspace_path):
+        if osp.exists(workspace_path):
             with open(workspace_path) as fid:
                 try:  # to load the workspace file.
                     print(fid.read())
@@ -195,7 +197,7 @@ class LabWorkspaceImportApp(JupyterApp):
                 print('%s is not a valid workspace:\n%s' % (fid.name, e))
                 sys.exit(1)
 
-        if not os.path.exists(directory):
+        if not osp.exists(directory):
             try:
                 os.makedirs(directory)
             except Exception as e:
@@ -203,7 +205,7 @@ class LabWorkspaceImportApp(JupyterApp):
                 sys.exit(1)
 
         slug = slugify(workspace['metadata']['id'], base_url)
-        workspace_path = os.path.join(directory, slug + WORKSPACE_EXTENSION)
+        workspace_path = pjoin(directory, slug + WORKSPACE_EXTENSION)
 
         # Write the workspace data to a file.
         with open(workspace_path, 'w') as fid:
@@ -217,12 +219,12 @@ class LabWorkspaceImportApp(JupyterApp):
         if file_name == '-':
             return sys.stdin
         else:
-            file_path = os.path.abspath(file_name)
+            file_path = osp.abspath(file_name)
 
-            if not os.path.exists(file_path):
+            if not osp.exists(file_path):
                 print('%s does not exist.' % file_name)
                 sys.exit(1)
-            
+
             return open(file_path)
 
     def _validate(self, data, base_url, page_url, workspaces_url):
