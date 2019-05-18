@@ -19,14 +19,15 @@ export const IStateDB = new Token<IStateDB>('@jupyterlab/coreutils:IStateDB');
 /* tslint:enable */
 
 /**
- * The description of a state database.
+ * A state database for saving small application state data that persists
+ * between user sessions.
  */
 export interface IStateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
   extends IDataConnector<T> {
   /**
    * Return a serialized copy of the state database's entire contents.
    *
-   * @returns A promise that bears the database contents as JSON.
+   * @returns A promise that resolves with the database contents as JSON.
    */
   toJSON(): Promise<{ [id: string]: T }>;
 }
@@ -164,7 +165,7 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
   /**
    * Return a serialized copy of the state database's entire contents.
    *
-   * @returns A promise that bears the database contents as JSON.
+   * @returns A promise that resolves with the database contents as JSON.
    */
   async toJSON(): Promise<{ readonly [id: string]: T }> {
     await this._ready;
