@@ -271,6 +271,10 @@ environment variable. If not specified, it will default to
 ``<sys-prefix>/share/jupyter/lab``, where ``<sys-prefix>`` is the
 site-specific directory prefix of the current Python environment. You
 can query the current application path by running ``jupyter lab path``.
+Note that the application directory is expected to contain the JupyterLab
+static assets (e.g. `static/index.html`).  If JupyterLab is launched
+and the static assets are not present, it will attempt to build if
+`node` is available, or raise an error during startup.
 
 JupyterLab Build Process
 ^^^^^^^^^^^^^^^^^^^^^^^^
