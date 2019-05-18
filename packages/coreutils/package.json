@@ -52,6 +52,6 @@
     "access": "public"
   },
   "jupyterlab": {
-    "include": true
+    "coreDependency": true
   }
 }

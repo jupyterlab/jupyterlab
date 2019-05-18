@@ -47,7 +47,6 @@
     "access": "public"
   },
   "jupyterlab": {
-    "core": true,
     "mimeExtension": true
   }
 }

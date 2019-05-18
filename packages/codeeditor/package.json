@@ -45,6 +45,9 @@
     "typedoc": "^0.14.2",
     "typescript": "~3.4.3"
   },
+  "jupyterlab": {
+    "coreDependency": false
+  },
   "publishConfig": {
     "access": "public"
   }
