@@ -11,13 +11,16 @@ import { PromiseDelegate } from '@phosphor/coreutils';
  *
  * @param interval - The debounce interval; defaults to 500ms.
  */
-export function debounce(fn: () => any, interval = 500): () => Promise<void> {
+export function debounce<T>(
+  fn: () => T | Promise<T>,
+  interval = 500
+): () => Promise<T> {
   let debouncer = 0;
   return () => {
-    const delegate = new PromiseDelegate<void>();
+    const delegate = new PromiseDelegate<T>();
     clearTimeout(debouncer);
     debouncer = setTimeout(async () => {
-      delegate.resolve(void (await fn()));
+      delegate.resolve(await fn());
     }, interval);
     return delegate.promise;
   };
