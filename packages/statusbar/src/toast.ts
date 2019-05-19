@@ -1,13 +1,14 @@
 import {
-  IToaster as IBlueToaster,
-  Toaster as BlueToaster,
+  IToaster as IBPToaster,
+  Toaster as BPToaster,
   Position,
   IToastProps,
   IActionProps,
-  Intent,
   IconName,
   IToastOptions
 } from '@blueprintjs/core';
+
+import { Intent } from '@jupyterlab/ui-components';
 
 import { Token } from '@phosphor/coreutils';
 
@@ -92,11 +93,6 @@ export interface IToaster {
  */
 export namespace IToaster {
   /**
-   * Toast type
-   */
-  export type Type = 'danger' | 'primary' | 'none' | 'success' | 'warning';
-
-  /**
    * Optional action associated to a toast.
    */
   export interface IAction {
@@ -146,7 +142,7 @@ export namespace IToaster {
     /**
      * Visual type color to apply to the toast.
      */
-    type?: Type;
+    type?: Intent;
     /**
      * Icon to illustrating the toast
      */
@@ -156,7 +152,7 @@ export namespace IToaster {
 
 export class Toaster implements IToaster {
   constructor() {
-    this._toaster = BlueToaster.create({
+    this._toaster = BPToaster.create({
       className: TOASTERCLASSNAME,
       position: Position.BOTTOM_RIGHT
     });
@@ -279,7 +275,7 @@ export class Toaster implements IToaster {
       action,
       className: TOASTCLASSNAME,
       icon: model.icon as IconName,
-      intent: model.type as Intent,
+      intent: model.type,
       message: model.message,
       onDismiss: model.onDismiss,
       timeout: model.timeout
@@ -301,9 +297,9 @@ export class Toaster implements IToaster {
       message: props.message,
       onDismiss: props.onDismiss,
       timeout: props.timeout,
-      type: props.intent as IToaster.Type
+      type: props.intent
     };
   }
 
-  private _toaster: IBlueToaster;
+  private _toaster: IBPToaster;
 }
