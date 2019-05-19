@@ -156,19 +156,17 @@ def ensure_core(logger=None):
         yarn_proc.wait()
 
 
-def ensure_app(app_dir, logger=None):
+def ensure_app(app_dir):
     """Ensure that an application directory is available.
+
+    If it does not exist, return a list of messages to prompt the user.
     """
-    logger = _ensure_logger(logger)
     if osp.exists(pjoin(app_dir, 'static', 'index.html')):
         return
 
-    if which('node'):
-        logger.info('Assets not found, building application')
-        build(self.app_dir)
-    else:
-        msg = 'JupyterLab application assets not found in %s'
-        raise RuntimeError(msg % self.app_dir)
+    msgs = ['JupyterLab application assets not found in "%s"' % app_dir,
+            'Please run `jupyter lab build` or use a different app directory']
+    return msgs
 
 
 def watch_packages(logger=None):
