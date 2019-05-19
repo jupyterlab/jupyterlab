@@ -1,7 +1,7 @@
-import { PromiseDelegate } from '@phosphor/coreutils';
-
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+
+import { PromiseDelegate } from '@phosphor/coreutils';
 
 /**
  * Returns a debounced function that can be called multiple times safely and
