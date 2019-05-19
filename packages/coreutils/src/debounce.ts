@@ -15,12 +15,16 @@ export function debounce<T>(
   fn: () => T | Promise<T>,
   interval = 500
 ): () => Promise<T> {
-  let debouncer = 0;
+  let delegate: PromiseDelegate<T> | null = null;
+
   return () => {
-    const delegate = new PromiseDelegate<T>();
-    clearTimeout(debouncer);
-    debouncer = setTimeout(async () => {
+    if (delegate) {
+      return delegate.promise;
+    }
+    delegate = new PromiseDelegate<T>();
+    setTimeout(async () => {
       delegate.resolve(await fn());
+      delegate = null;
     }, interval);
     return delegate.promise;
   };
