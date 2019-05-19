@@ -33,7 +33,9 @@ import {
   LineCol,
   MemoryUsage,
   RunningSessions,
-  StatusBar
+  StatusBar,
+  IToaster,
+  Toaster
 } from '@jupyterlab/statusbar';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
@@ -43,6 +45,8 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import { Title, Widget } from '@phosphor/widgets';
 
 export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
+
+export const TOAST_PLUGIN_ID = '@jupyterlab/statusbar-extension:toast';
 
 /**
  * Initialization data for the statusbar extension.
@@ -335,12 +339,26 @@ export const runningSessionsItem: JupyterFrontEndPlugin<void> = {
   }
 };
 
+/**
+ * Initialization for the toast extension.
+ */
+const toaster: JupyterFrontEndPlugin<IToaster> = {
+  id: TOAST_PLUGIN_ID,
+  provides: IToaster,
+  autoStart: true,
+  activate: (app: JupyterFrontEnd) => {
+    const toaster = new Toaster();
+    return toaster;
+  }
+};
+
 const plugins: JupyterFrontEndPlugin<any>[] = [
   statusBar,
   lineColItem,
   kernelStatus,
   runningSessionsItem,
-  memoryUsageItem
+  memoryUsageItem,
+  toaster
 ];
 
 export default plugins;
