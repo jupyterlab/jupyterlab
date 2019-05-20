@@ -191,7 +191,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
         }
 
         return this.schedule({
-          interval: Private.IMMEDIATE,
+          interval: Poll.IMMEDIATE,
           phase: 'when-resolved'
         });
       })
@@ -203,7 +203,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
         console.warn(`Poll (${this.name}) started despite rejection.`, reason);
 
         return this.schedule({
-          interval: Private.IMMEDIATE,
+          interval: Poll.IMMEDIATE,
           phase: 'when-rejected'
         });
       });
@@ -241,11 +241,11 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
       throw new Error('Poll backoff growth factor must be at least 1');
     }
 
-    if ((interval < 0 || interval > max) && interval !== Private.NEVER) {
+    if ((interval < 0 || interval > max) && interval !== Poll.NEVER) {
       throw new Error('Poll interval must be between 0 and max');
     }
 
-    if (max > Poll.MAX_INTERVAL && max !== Private.NEVER) {
+    if (max > Poll.MAX_INTERVAL && max !== Poll.NEVER) {
       throw new Error(`Max interval must be less than ${Poll.MAX_INTERVAL}`);
     }
 
@@ -325,7 +325,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
   refresh(): Promise<void> {
     return this.schedule({
       cancel: last => last.phase === 'refreshed',
-      interval: Private.IMMEDIATE,
+      interval: Poll.IMMEDIATE,
       phase: 'refreshed'
     });
   }
@@ -338,7 +338,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
   start(): Promise<void> {
     return this.schedule({
       cancel: last => last.phase !== 'standby' && last.phase !== 'stopped',
-      interval: Private.IMMEDIATE,
+      interval: Poll.IMMEDIATE,
       phase: 'started'
     });
   }
@@ -351,7 +351,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
   stop(): Promise<void> {
     return this.schedule({
       cancel: last => last.phase === 'stopped',
-      interval: Private.NEVER,
+      interval: Poll.NEVER,
       phase: 'stopped'
     });
   }
@@ -405,7 +405,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
     this._tick = scheduled;
 
     // Clear the schedule if possible.
-    if (last.interval === Private.IMMEDIATE) {
+    if (last.interval === Poll.IMMEDIATE) {
       cancelAnimationFrame(this._timeout);
     } else {
       clearTimeout(this._timeout);
@@ -425,9 +425,9 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
       this._execute();
     };
     this._timeout =
-      state.interval === Private.IMMEDIATE
+      state.interval === Poll.IMMEDIATE
         ? requestAnimationFrame(execute)
-        : state.interval === Private.NEVER
+        : state.interval === Poll.NEVER
         ? -1
         : setTimeout(execute, state.interval);
   }
@@ -552,6 +552,10 @@ export namespace Poll {
      */
     when?: Promise<any>;
   }
+  /**
+   * An interval value that indicates the poll should tick immediately.
+   */
+  export const IMMEDIATE = 0;
 
   /**
    * Delays are 32-bit integers in many browsers so intervals need to be capped.
@@ -560,22 +564,17 @@ export namespace Poll {
    * https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout#Maximum_delay_value
    */
   export const MAX_INTERVAL = 2147483647;
+
+  /**
+   * An interval value that indicates the poll should never tick.
+   */
+  export const NEVER = Infinity;
 }
 
 /**
  * A namespace for private module data.
  */
 namespace Private {
-  /**
-   * An interval value that indicates the poll should tick immediately.
-   */
-  export const IMMEDIATE = 0;
-
-  /**
-   * An interval value that indicates the poll should never tick.
-   */
-  export const NEVER = Infinity;
-
   /**
    * The default backoff growth rate if `backoff` is `true`.
    */
@@ -604,7 +603,7 @@ namespace Private {
    * The first poll tick state's default values superseded in constructor.
    */
   export const DEFAULT_STATE: IPoll.State<any, any, any> = {
-    interval: NEVER,
+    interval: Poll.NEVER,
     payload: null,
     phase: 'constructed',
     timestamp: new Date(0).getTime()
@@ -614,7 +613,7 @@ namespace Private {
    * The disposed tick state values.
    */
   export const DISPOSED_STATE: IPoll.State<any, any, any> = {
-    interval: NEVER,
+    interval: Poll.NEVER,
     payload: null,
     phase: 'disposed',
     timestamp: new Date(0).getTime()
