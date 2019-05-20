@@ -12,11 +12,11 @@ describe('debounce()', () => {
     const debounced = debounce(async () => {
       called += 1;
     }, interval);
-    const one = debounced();
-    const two = debounced();
-    const three = debounced();
-    const four = debounced();
-    const five = debounced();
+    const one = debounced.invoke();
+    const two = debounced.invoke();
+    const three = debounced.invoke();
+    const four = debounced.invoke();
+    const five = debounced.invoke();
     await five;
     expect(called).to.equal(1);
     await four;
@@ -27,9 +27,9 @@ describe('debounce()', () => {
     expect(called).to.equal(1);
     await one;
     expect(called).to.equal(1);
-    await debounced();
+    await debounced.invoke();
     expect(called).to.equal(2);
-    await debounced();
+    await debounced.invoke();
     expect(called).to.equal(3);
   });
 });
