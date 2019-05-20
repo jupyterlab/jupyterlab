@@ -3,13 +3,13 @@
 
 export * from './activitymonitor';
 export * from './dataconnector';
-export * from './debounce';
 export * from './interfaces';
 export * from './markdowncodeblocks';
 export * from './nbformat';
 export * from './pageconfig';
 export * from './path';
 export * from './poll';
+export * from './regulator';
 export * from './settingregistry';
 export * from './statedb';
 export * from './text';
