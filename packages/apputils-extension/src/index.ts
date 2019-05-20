@@ -27,16 +27,16 @@ import {
   IStateDB,
   SettingRegistry,
   StateDB,
+  throttle,
+  Throttled,
   URLExt
 } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { CommandRegistry } from '@phosphor/commands';
-
 import { PromiseDelegate } from '@phosphor/coreutils';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import { DisposableDelegate } from '@phosphor/disposable';
 
 import { Menu } from '@phosphor/widgets';
 
@@ -281,11 +281,95 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
   autoStart: true,
   provides: ISplashScreen,
   activate: app => {
+    const { commands, restored } = app;
+
+    // Create splash element and populate it.
+    const splash = document.createElement('div');
+    const galaxy = document.createElement('div');
+    const logo = document.createElement('div');
+
+    splash.id = 'jupyterlab-splash';
+    galaxy.id = 'galaxy';
+    logo.id = 'main-logo';
+
+    galaxy.appendChild(logo);
+    ['1', '2', '3'].forEach(id => {
+      const moon = document.createElement('div');
+      const planet = document.createElement('div');
+
+      moon.id = `moon${id}`;
+      moon.className = 'moon orbit';
+      planet.id = `planet${id}`;
+      planet.className = 'planet';
+
+      moon.appendChild(planet);
+      galaxy.appendChild(moon);
+    });
+
+    splash.appendChild(galaxy);
+
+    // Create debounced recovery dialog function.
+    let dialog: Dialog<any>;
+    const recovery: Throttled = throttle(async () => {
+      if (dialog) {
+        return;
+      }
+
+      dialog = new Dialog({
+        title: 'Loading...',
+        body: `The loading screen is taking a long time.
+          Would you like to clear the workspace or keep waiting?`,
+        buttons: [
+          Dialog.cancelButton({ label: 'Keep Waiting' }),
+          Dialog.warnButton({ label: 'Clear Workspace' })
+        ]
+      });
+
+      try {
+        const result = await dialog.launch();
+        dialog.dispose();
+        dialog = null;
+        if (result.button.accept && commands.hasCommand(CommandIDs.reset)) {
+          return commands.execute(CommandIDs.reset);
+        }
+
+        // Re-invoke the recovery timer in the next frame.
+        requestAnimationFrame(() => {
+          void recovery.invoke();
+        });
+      } catch (error) {
+        /* no-op */
+      }
+    }, SPLASH_RECOVER_TIMEOUT);
+
+    // Return ISplashScreen.
+    let splashCount = 0;
     return {
       show: (light = true) => {
-        const { commands, restored } = app;
+        splash.classList.remove('splash-fade');
+        splash.classList.toggle('light', light);
+        splash.classList.toggle('dark', !light);
+        splashCount++;
+        document.body.appendChild(splash);
 
-        return Private.showSplash(restored, commands, CommandIDs.reset, light);
+        void recovery.invoke();
+
+        return new DisposableDelegate(async () => {
+          await restored;
+          if (--splashCount === 0) {
+            void recovery.stop();
+
+            if (dialog) {
+              dialog.dispose();
+              dialog = null;
+            }
+
+            splash.classList.add('splash-fade');
+            window.setTimeout(() => {
+              document.body.removeChild(splash);
+            }, 200);
+          }
+        });
       }
     };
   }
@@ -382,14 +466,14 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         }
 
         // Any time the local state database changes, save the workspace.
-        db.changed.connect(() => void save(), db);
+        db.changed.connect(() => void save.invoke(), db);
 
         if (source === clone) {
           // Maintain the query string parameters but remove `clone`.
           delete query['clone'];
 
           const url = path + URLExt.objectToQueryString(query) + hash;
-          const cloned = save().then(() => router.stop);
+          const cloned = save.invoke().then(() => router.stop);
 
           // After the state has been cloned, navigate to the URL.
           void cloned.then(() => {
@@ -400,7 +484,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         }
 
         // After the state database has finished loading, save it.
-        await save();
+        await save.invoke();
       }
     });
 
@@ -408,7 +492,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
       label: 'Reset Application State',
       execute: async () => {
         await db.clear();
-        await save();
+        await save.invoke();
         router.reload();
       }
     });
@@ -513,150 +597,5 @@ namespace Private {
     return workspace
       ? URLExt.join(paths.urls.base, paths.urls.workspaces, workspace)
       : paths.urls.defaultWorkspace;
-  }
-
-  /**
-   * Create a splash element.
-   */
-  function createSplash(): HTMLElement {
-    const splash = document.createElement('div');
-    const galaxy = document.createElement('div');
-    const logo = document.createElement('div');
-
-    splash.id = 'jupyterlab-splash';
-    galaxy.id = 'galaxy';
-    logo.id = 'main-logo';
-
-    galaxy.appendChild(logo);
-    ['1', '2', '3'].forEach(id => {
-      const moon = document.createElement('div');
-      const planet = document.createElement('div');
-
-      moon.id = `moon${id}`;
-      moon.className = 'moon orbit';
-      planet.id = `planet${id}`;
-      planet.className = 'planet';
-
-      moon.appendChild(planet);
-      galaxy.appendChild(moon);
-    });
-
-    splash.appendChild(galaxy);
-
-    return splash;
-  }
-
-  /**
-   * A debouncer for recovery attempts.
-   */
-  let debouncer = 0;
-
-  /**
-   * The recovery dialog.
-   */
-  let dialog: Dialog<any>;
-
-  /**
-   * Allows the user to clear state if splash screen takes too long.
-   */
-  function recover(fn: () => void): void {
-    if (dialog) {
-      return;
-    }
-
-    dialog = new Dialog({
-      title: 'Loading...',
-      body: `The loading screen is taking a long time.
-        Would you like to clear the workspace or keep waiting?`,
-      buttons: [
-        Dialog.cancelButton({ label: 'Keep Waiting' }),
-        Dialog.warnButton({ label: 'Clear Workspace' })
-      ]
-    });
-
-    dialog
-      .launch()
-      .then(result => {
-        if (result.button.accept) {
-          return fn();
-        }
-
-        dialog.dispose();
-        dialog = null;
-
-        debouncer = window.setTimeout(() => {
-          recover(fn);
-        }, SPLASH_RECOVER_TIMEOUT);
-      })
-      .catch(() => {
-        /* no-op */
-      });
-  }
-
-  /**
-   * The splash element.
-   */
-  const splash = createSplash();
-
-  /**
-   * The splash screen counter.
-   */
-  let splashCount = 0;
-
-  /**
-   * Show the splash element.
-   *
-   * @param ready - A promise that must be resolved before splash disappears.
-   *
-   * @param commands - The application's command registry.
-   *
-   * @param recovery - A command that recovers from a hanging splash.
-   *
-   * @param light - A flag indicating whether the theme is light or dark.
-   */
-  export function showSplash(
-    ready: Promise<any>,
-    commands: CommandRegistry,
-    recovery: string,
-    light: boolean
-  ): IDisposable {
-    splash.classList.remove('splash-fade');
-    splash.classList.toggle('light', light);
-    splash.classList.toggle('dark', !light);
-    splashCount++;
-
-    if (debouncer) {
-      window.clearTimeout(debouncer);
-    }
-    debouncer = window.setTimeout(() => {
-      if (commands.hasCommand(recovery)) {
-        recover(() => {
-          return commands.execute(recovery);
-        });
-      }
-    }, SPLASH_RECOVER_TIMEOUT);
-
-    document.body.appendChild(splash);
-
-    return new DisposableDelegate(() => {
-      void ready.then(() => {
-        if (--splashCount === 0) {
-          if (debouncer) {
-            window.clearTimeout(debouncer);
-            debouncer = 0;
-          }
-
-          if (dialog) {
-            dialog.dispose();
-            dialog = null;
-          }
-
-          splash.classList.add('splash-fade');
-          window.setTimeout(() => {
-            document.body.removeChild(splash);
-          }, 500);
-        }
-      });
-    });
   }
 }
