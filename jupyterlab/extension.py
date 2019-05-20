@@ -164,6 +164,13 @@ def load_jupyter_server_extension(nbapp):
     logger.info('JupyterLab extension loaded from %s' % HERE)
     logger.info('JupyterLab application directory is %s' % app_dir)
 
+    build_url = ujoin(base_url, build_path)
+    builder = Builder(logger, core_mode, app_dir)
+    build_handler = (build_url, BuildHandler, {'builder': builder})
+    handlers = [build_handler]
+
+    errored = False
+
     if core_mode:
         logger.info(CORE_NOTE.strip())
         ensure_core(logger)
@@ -179,8 +186,8 @@ def load_jupyter_server_extension(nbapp):
         if msgs:
             [logger.error(msg) for msg in msgs]
             handler = (ujoin(base_url, '/lab'), ErrorHandler, { 'messages': msgs })
-            web_app.add_handlers('.*$', [handler])
-            return
+            handlers.append(handler)
+            errored = True
 
     if watch_mode:
         logger.info('Starting JupyterLab watch mode...')
@@ -195,12 +202,7 @@ def load_jupyter_server_extension(nbapp):
 
         config.cache_files = False
 
-    build_url = ujoin(base_url, build_path)
-    builder = Builder(logger, core_mode, app_dir)
-    build_handler = (build_url, BuildHandler, {'builder': builder})
-    handlers = [build_handler]
-
-    if not core_mode:
+    if not core_mode and not errored:
         ext_url = ujoin(base_url, extensions_handler_path)
         ext_manager = ExtensionManager(logger, app_dir)
         ext_handler = (ext_url, ExtensionHandler, {'manager': ext_manager})
@@ -209,4 +211,6 @@ def load_jupyter_server_extension(nbapp):
     # Must add before the root server handlers to avoid shadowing.
     web_app.add_handlers('.*$', handlers)
 
-    add_handlers(web_app, config)
+    # Add the root handlers if we have not errored.
+    if not errored:
+        add_handlers(web_app, config)
