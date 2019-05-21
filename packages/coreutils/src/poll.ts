@@ -331,32 +331,6 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
   }
 
   /**
-   * Starts the poll. Schedules `started` tick if necessary.
-   *
-   * @returns A promise that resolves after tick is scheduled and never rejects.
-   */
-  start(): Promise<void> {
-    return this.schedule({
-      cancel: last => last.phase !== 'standby' && last.phase !== 'stopped',
-      interval: Poll.IMMEDIATE,
-      phase: 'started'
-    });
-  }
-
-  /**
-   * Stops the poll. Schedules `stopped` tick if necessary.
-   *
-   * @returns A promise that resolves after tick is scheduled and never rejects.
-   */
-  stop(): Promise<void> {
-    return this.schedule({
-      cancel: last => last.phase === 'stopped',
-      interval: Poll.NEVER,
-      phase: 'stopped'
-    });
-  }
-
-  /**
    * Schedule the next poll tick.
    *
    * @param next - The next poll state data to schedule. Defaults to standby.
@@ -366,10 +340,10 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
    * @returns A promise that resolves when the next poll state is active.
    *
    * #### Notes
-   * This method is protected to allow sub-classes to implement methods that can
-   * schedule poll ticks.
+   * This method is not meant to be invoked by user code typically. It is public
+   * to allow poll instances to be composed into classes that schedule ticks.
    */
-  protected async schedule(
+  async schedule(
     next: Partial<
       IPoll.State<T, U, V> & { cancel: (last: IPoll.State<T, U, V>) => boolean }
     > = {}
@@ -430,6 +404,32 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
         : state.interval === Poll.NEVER
         ? -1
         : setTimeout(execute, state.interval);
+  }
+
+  /**
+   * Starts the poll. Schedules `started` tick if necessary.
+   *
+   * @returns A promise that resolves after tick is scheduled and never rejects.
+   */
+  start(): Promise<void> {
+    return this.schedule({
+      cancel: last => last.phase !== 'standby' && last.phase !== 'stopped',
+      interval: Poll.IMMEDIATE,
+      phase: 'started'
+    });
+  }
+
+  /**
+   * Stops the poll. Schedules `stopped` tick if necessary.
+   *
+   * @returns A promise that resolves after tick is scheduled and never rejects.
+   */
+  stop(): Promise<void> {
+    return this.schedule({
+      cancel: last => last.phase === 'stopped',
+      interval: Poll.NEVER,
+      phase: 'stopped'
+    });
   }
 
   /**
