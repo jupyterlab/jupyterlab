@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 from notebook.base.handlers import APIHandler
 from tornado import gen, web
 
-from .commands import (
+from ..commands import (
     get_app_info, install_extension, uninstall_extension,
     enable_extension, disable_extension, read_package,
     _AppHandler, get_latest_compatible_package_versions
