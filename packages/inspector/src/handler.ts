@@ -72,8 +72,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
       // the active cell
       this.onEditorChange();
       let signals: ISignal<any, any>[] = [
-        editor.model.selections.changed,
-        editor.model.value.changed
+        editor.model.selections.changed
       ];
       this._monitors = signals.map(s => {
         let m = new ActivityMonitor({ signal: s, timeout: 250 });
