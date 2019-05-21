@@ -22,13 +22,13 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  debounce,
+  Debouncer,
+  IRateLimiter,
   ISettingRegistry,
   IStateDB,
   SettingRegistry,
   StateDB,
-  throttle,
-  Throttled,
+  Throttler,
   URLExt
 } from '@jupyterlab/coreutils';
 
@@ -310,7 +310,7 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
 
     // Create debounced recovery dialog function.
     let dialog: Dialog<any>;
-    const recovery: Throttled = throttle(async () => {
+    const recovery: IRateLimiter = new Throttler(async () => {
       if (dialog) {
         return;
       }
@@ -418,7 +418,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     const workspace = resolver.name;
     const transform = new PromiseDelegate<StateDB.DataTransform>();
     const db = new StateDB({ transform: transform.promise });
-    const save = debounce(async () => {
+    const save = new Debouncer(async () => {
       const id = workspace;
       const metadata = { id };
       const data = await db.toJSON();
