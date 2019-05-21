@@ -8,9 +8,11 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog, showDialog, ICommandPalette } from '@jupyterlab/apputils';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
+
+import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { ExtensionView } from '@jupyterlab/extensionmanager';
 
@@ -18,13 +20,7 @@ import { ExtensionView } from '@jupyterlab/extensionmanager';
  * IDs of the commands added by this extension.
  */
 namespace CommandIDs {
-  export const enable = 'extensionmanager:enable';
-
-  export const hide = 'extensionmanager:hide-main';
-
-  export const show = 'extensionmanager:activate-main';
-
-  export const toggle = 'extensionmanager:toggle-main';
+  export const toggle = 'extensionmanager:toggle';
 }
 
 /**
@@ -34,17 +30,19 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/extensionmanager-extension:plugin',
   autoStart: true,
   requires: [ISettingRegistry],
-  optional: [ILabShell, ILayoutRestorer],
+  optional: [ILabShell, ILayoutRestorer, IMainMenu, ICommandPalette],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
     labShell: ILabShell | null,
-    restorer: ILayoutRestorer | null
+    restorer: ILayoutRestorer | null,
+    mainMenu: IMainMenu | null,
+    palette: ICommandPalette | null
   ) => {
     const settings = await registry.load(plugin.id);
     let enabled = settings.composite['enabled'] === true;
 
-    const { serviceManager, shell } = app;
+    const { commands, serviceManager, shell } = app;
     let view: ExtensionView | undefined;
 
     const createView = () => {
@@ -82,47 +80,28 @@ const plugin: JupyterFrontEndPlugin<void> = {
       });
     });
 
-    addCommands(app, view, labShell);
+    commands.addCommand(CommandIDs.toggle, {
+      label: 'Enable Extension Manager (experimental)',
+      execute: () => {
+        if (registry) {
+          registry.set(plugin.id, 'enabled', !enabled);
+        }
+      },
+      isToggled: () => enabled,
+      isEnabled: () => serviceManager.builder.isAvailable
+    });
+
+    const category = 'Extension Manager';
+    const command = CommandIDs.toggle;
+    if (palette) {
+      palette.addItem({ command, category });
+    }
+
+    if (mainMenu) {
+      mainMenu.settingsMenu.addGroup([{ command }], 100);
+    }
   }
 };
-
-/**
- * Add the main file view commands to the application's command registry.
- */
-function addCommands(
-  app: JupyterFrontEnd,
-  view: ExtensionView,
-  labShell: ILabShell | null
-): void {
-  const { commands, shell } = app;
-
-  commands.addCommand(CommandIDs.show, {
-    label: 'Show Extension Manager',
-    execute: () => {
-      shell.activateById(view.id);
-    }
-  });
-
-  commands.addCommand(CommandIDs.hide, {
-    execute: () => {
-      if (labShell && !view.isHidden) {
-        labShell.collapseLeft();
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.toggle, {
-    execute: () => {
-      if (view.isHidden) {
-        return commands.execute(CommandIDs.show, undefined);
-      } else {
-        return commands.execute(CommandIDs.hide, undefined);
-      }
-    }
-  });
-
-  // TODO: Also add to command palette.
-}
 
 /**
  * Export the plugin as the default.
