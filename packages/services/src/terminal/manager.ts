@@ -67,6 +67,13 @@ export class TerminalManager implements TerminalSession.IManager {
   }
 
   /**
+   * A signal emitted when there is a connection failure.
+   */
+  get connectionFailure(): ISignal<this, Error> {
+    return this._connectionFailure;
+  }
+
+  /**
    * Test whether the terminal manager is disposed.
    */
   get isDisposed(): boolean {
@@ -237,7 +244,16 @@ export class TerminalManager implements TerminalSession.IManager {
    * Execute a request to the server to poll running terminals and update state.
    */
   protected async requestRunning(): Promise<void> {
-    const models = await TerminalSession.listRunning(this.serverSettings);
+    const models = await TerminalSession.listRunning(this.serverSettings).catch(
+      err => {
+        if (err instanceof ServerConnection.NetworkError) {
+          this._connectionFailure.emit(err);
+          console.log('Connection Failure');
+          return [] as TerminalSession.IModel[];
+        }
+        throw err;
+      }
+    );
     if (this.isDisposed) {
       return;
     }
@@ -310,6 +326,7 @@ export class TerminalManager implements TerminalSession.IManager {
   private _sessions = new Set<TerminalSession.ISession>();
   private _ready: Promise<void>;
   private _runningChanged = new Signal<this, TerminalSession.IModel[]>(this);
+  private _connectionFailure = new Signal<this, Error>(this);
 }
 
 /**

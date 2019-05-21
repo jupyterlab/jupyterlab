@@ -69,6 +69,13 @@ export class ServiceManager implements ServiceManager.IManager {
   }
 
   /**
+   * A signal emitted when there is a connection failure with the kernel.
+   */
+  get connectionFailure(): ISignal<this, Error> {
+    return this._connectionFailure;
+  }
+
+  /**
    * Test whether the service manager is disposed.
    */
   get isDisposed(): boolean {
@@ -155,6 +162,7 @@ export class ServiceManager implements ServiceManager.IManager {
   private _isDisposed = false;
   private _readyPromise: Promise<void>;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
+  private _connectionFailure = new Signal<this, Error>(this);
   private _isReady = false;
 }
 
@@ -225,6 +233,11 @@ export namespace ServiceManager {
      * The nbconvert manager for the manager.
      */
     readonly nbconvert: NbConvert.IManager;
+
+    /**
+     * A signal emitted when there is a connection failure with the server.
+     */
+    readonly connectionFailure: ISignal<IManager, Error>;
   }
 
   /**
