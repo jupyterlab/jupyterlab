@@ -95,3 +95,24 @@ export interface IDataConnector<T, U = T, V = string> {
    */
   save(id: V, value: U): Promise<any>;
 }
+
+/**
+ * A function whose invocations are rate limited and can be stopped after
+ * invocation before it has fired.
+ */
+export interface IRateLimiter {
+  /**
+   * The rate limit in milliseconds.
+   */
+  readonly limit: number;
+
+  /**
+   * Invoke the rate limited function.
+   */
+  invoke(): Promise<void>;
+
+  /**
+   * Stop the function if it is mid-flight.
+   */
+  stop(): Promise<void>;
+}
