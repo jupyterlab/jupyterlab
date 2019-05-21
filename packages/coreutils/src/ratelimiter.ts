@@ -23,7 +23,7 @@ export abstract class RateLimiter implements IRateLimiter {
       frequency: { backoff: false, interval: Poll.NEVER, max: Poll.NEVER },
       standby: 'never'
     });
-    void this.poll.stop();
+    void this.stop();
   }
 
   /**
@@ -55,9 +55,13 @@ export abstract class RateLimiter implements IRateLimiter {
  *
  * @param fn - The function to debounce.
  *
- * @param interval - The debounce interval; defaults to 500ms.
+ * @param limit - The debounce rate limit; defaults to 500ms.
  */
 export class Debouncer extends RateLimiter {
+  /**
+   * Invokes the function and only executes after rate limit has elapsed.
+   * Each invocation resets the timer.
+   */
   async invoke(): Promise<void> {
     return this.poll.schedule({ interval: this.limit, phase: 'invoked' });
   }
@@ -69,9 +73,12 @@ export class Debouncer extends RateLimiter {
  *
  * @param fn - The function to throttle.
  *
- * @param interval - The throttle interval; defaults to 500ms.
+ * @param limit - The throttle rate limit; defaults to 500ms.
  */
 export class Throttler extends RateLimiter {
+  /**
+   * Throttles function invocations if one is currently in flight.
+   */
   async invoke(): Promise<void> {
     if (this.poll.state.phase !== 'invoked') {
       return this.poll.schedule({ interval: this.limit, phase: 'invoked' });
