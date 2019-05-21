@@ -50,5 +50,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "jupyterlab": {
+    "coreDependency": true
   }
 }
