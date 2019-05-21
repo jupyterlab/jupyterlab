@@ -131,7 +131,7 @@ function ensureJupyterlab(): string[] {
     ) {
       return;
     }
-    // Skip if it is not makred as an extension or a core dep.
+    // Skip if it is not marked as an extension or a core dep.
     if (
       !data.jupyterlab.coreDependency &&
       !data.jupyterlab.extension &&
