@@ -18,7 +18,7 @@ import { ICommandPalette, showDialog, Dialog } from '@jupyterlab/apputils';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
-import { IInspector } from '@jupyterlab/inspector/lib/tokens';
+import { IInspector } from '@jupyterlab/inspector';
 
 import {
   IMainMenu,

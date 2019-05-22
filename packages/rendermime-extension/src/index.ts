@@ -8,7 +8,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { IDocumentManager } from '@jupyterlab/docmanager/lib/tokens';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import {
   ILatexTypesetter,

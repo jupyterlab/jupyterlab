@@ -14,7 +14,7 @@ import {
   MainAreaWidget
 } from '@jupyterlab/apputils';
 
-import { IConsoleTracker } from '@jupyterlab/console/lib/tokens';
+import { IConsoleTracker } from '@jupyterlab/console';
 
 import {
   IInspector,

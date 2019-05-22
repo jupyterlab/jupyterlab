@@ -11,14 +11,15 @@ import { IClientSession, ICommandPalette } from '@jupyterlab/apputils';
 
 import { Cell, CodeCell } from '@jupyterlab/cells';
 
-import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
-
-import { IConsoleTracker } from '@jupyterlab/console/lib/tokens';
+import {
+  CodeConsole,
+  ConsolePanel,
+  IConsoleTracker
+} from '@jupyterlab/console';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
-import { IEditorTracker } from '@jupyterlab/fileeditor/lib/tokens';
-import { FileEditor } from '@jupyterlab/fileeditor';
+import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
 import {
   INotebookTracker,
@@ -37,7 +38,7 @@ import {
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-import { IMainMenu } from '@jupyterlab/mainmenu/lib/tokens';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { Title, Widget } from '@phosphor/widgets';
 

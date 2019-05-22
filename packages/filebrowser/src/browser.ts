@@ -3,7 +3,7 @@
 
 import { showErrorMessage, Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
-import { IDocumentManager } from '@jupyterlab/docmanager/lib/tokens';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { Contents, ServerConnection } from '@jupyterlab/services';
 

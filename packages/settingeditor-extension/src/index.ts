@@ -15,7 +15,7 @@ import {
   MainAreaWidget
 } from '@jupyterlab/apputils';
 
-import { IEditorServices } from '@jupyterlab/codeeditor/lib/tokens';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
 

@@ -11,10 +11,9 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { IEditMenu } from '@jupyterlab/mainmenu';
-import { IMainMenu } from '@jupyterlab/mainmenu/lib/tokens';
+import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
 
-import { IEditorServices } from '@jupyterlab/codeeditor/lib/tokens';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import {
   editorServices,
@@ -23,12 +22,11 @@ import {
   Mode
 } from '@jupyterlab/codemirror';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils/lib/tokens';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
-import { IEditorTracker } from '@jupyterlab/fileeditor/lib/tokens';
-import { FileEditor } from '@jupyterlab/fileeditor';
+import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 

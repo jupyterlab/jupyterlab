@@ -18,9 +18,9 @@ import {
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IConsoleTracker } from '@jupyterlab/console/lib/tokens';
+import { IConsoleTracker } from '@jupyterlab/console';
 
-import { IEditorTracker } from '@jupyterlab/fileeditor/lib/tokens';
+import { IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 

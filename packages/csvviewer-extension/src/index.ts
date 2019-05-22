@@ -9,7 +9,7 @@ import {
 
 import { InstanceTracker, IThemeManager, Dialog } from '@jupyterlab/apputils';
 
-import { ISearchProviderRegistry } from '@jupyterlab/documentsearch/lib/tokens';
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 
 import {
   CSVViewer,
@@ -22,8 +22,7 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { DataGrid } from '@phosphor/datagrid';
 
-import { IEditMenu } from '@jupyterlab/mainmenu';
-import { IMainMenu } from '@jupyterlab/mainmenu/lib/tokens';
+import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
 import { CSVSearchProvider } from './searchprovider';
 
 /**

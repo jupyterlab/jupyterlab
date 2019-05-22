@@ -16,13 +16,13 @@ import {
   showDialog
 } from '@jupyterlab/apputils';
 
-import { IEditorServices } from '@jupyterlab/codeeditor/lib/tokens';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
 import { ISettingRegistry, PageConfig } from '@jupyterlab/coreutils';
 
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser/lib/tokens';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { ILauncher } from '@jupyterlab/launcher';
 
@@ -31,10 +31,9 @@ import {
   IFileMenu,
   IHelpMenu,
   IKernelMenu,
+  IMainMenu,
   IRunMenu
 } from '@jupyterlab/mainmenu';
-
-import { IMainMenu } from '@jupyterlab/mainmenu/lib/tokens';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 

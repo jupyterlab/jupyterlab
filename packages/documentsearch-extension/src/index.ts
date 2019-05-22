@@ -17,7 +17,7 @@ import {
   NotebookSearchProvider
 } from '@jupyterlab/documentsearch';
 
-import { IMainMenu } from '@jupyterlab/mainmenu/lib/tokens';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 import { Widget } from '@phosphor/widgets';
 
 const SEARCHABLE_CLASS = 'jp-mod-searchable';

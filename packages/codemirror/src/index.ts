@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IEditorServices } from '@jupyterlab/codeeditor/lib/tokens';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { CodeMirrorEditorFactory } from './factory';
 
