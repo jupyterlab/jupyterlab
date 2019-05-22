@@ -94,6 +94,13 @@ export namespace ITerminal {
      * An optional command to run when the session starts.
      */
     initialCommand: string;
+
+    /**
+     * Wether to enable screen reader support.
+     *
+     * Set to false if you run into performance problems from DOM overhead
+     */
+    screenReaderMode: boolean;
   }
 
   /**
@@ -107,7 +114,8 @@ export namespace ITerminal {
     scrollback: 1000,
     shutdownOnClose: false,
     cursorBlink: true,
-    initialCommand: ''
+    initialCommand: '',
+    screenReaderMode: true
   };
 
   /**

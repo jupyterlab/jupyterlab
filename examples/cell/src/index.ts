@@ -1,8 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'es6-promise/auto'; // polyfill Promise on IE
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+// @ts-ignore
+__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
+
 import '@jupyterlab/application/style/index.css';
+import '@jupyterlab/cells/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';
 import '../index.css';
 
@@ -65,9 +69,8 @@ function main(): void {
     });
   });
 
-  // Start the default kernel.
+  // Use the default kernel.
   session.kernelPreference = { autoStartDefault: true };
-  void session.initialize();
 
   // Set up a completer.
   const editor = cellWidget.editor;
@@ -129,6 +132,11 @@ function main(): void {
     selector: '.jp-InputArea-editor',
     keys: ['Shift Enter'],
     command: 'run:cell'
+  });
+
+  // Start up the kernel.
+  void session.initialize().then(() => {
+    console.log('Example started!');
   });
 }
 

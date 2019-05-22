@@ -10,7 +10,7 @@ from notebook.base.handlers import APIHandler
 from tornado import gen, web
 from tornado.concurrent import run_on_executor
 
-from .commands import build, clean, build_check
+from ..commands import build, clean, build_check
 
 
 class Builder(object):

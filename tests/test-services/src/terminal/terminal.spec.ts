@@ -85,7 +85,7 @@ describe('terminal', () => {
           expect(args).to.be.undefined;
           called = true;
         });
-        await session.dispose();
+        session.dispose();
         expect(called).to.equal(true);
       });
     });

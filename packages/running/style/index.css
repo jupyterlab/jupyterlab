@@ -59,6 +59,7 @@
   display: flex;
   flex: 0 1 auto;
   flex-direction: column;
+  overflow: auto;
 }
 
 .jp-RunningSessions-sectionHeader {

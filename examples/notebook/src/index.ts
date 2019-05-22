@@ -1,8 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'es6-promise/auto'; // polyfill Promise on IE
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+// @ts-ignore
+__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
+
 import '@jupyterlab/application/style/index.css';
+import '@jupyterlab/notebook/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';
 import '../index.css';
 
@@ -36,7 +40,6 @@ import {
   RenderMimeRegistry,
   standardRendererFactories as initialFactories
 } from '@jupyterlab/rendermime';
-import { PageConfig } from '@jupyterlab/coreutils';
 import { SetupCommands } from './commands';
 
 function main(): void {
@@ -140,6 +143,8 @@ function createApp(manager: ServiceManager.IManager): void {
   });
 
   SetupCommands(commands, palette, nbWidget, handler);
+
+  console.log('Example started!');
 }
 
 window.addEventListener('load', main);
