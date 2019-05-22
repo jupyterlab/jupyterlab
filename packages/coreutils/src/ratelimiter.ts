@@ -29,16 +29,19 @@ export abstract class RateLimiter<T, U> implements IRateLimiter<T, U> {
       frequency: { backoff: false, interval: Poll.NEVER, max: Poll.NEVER },
       standby: 'never'
     });
-    void this.stop();
-    this.poll.ticked.connect((_, state) => {
+    this.payload = new PromiseDelegate();
+    this.poll.ticked.connect(async (_, state) => {
       const { payload } = this;
-      if (state.phase === 'resolved' || state.phase === 'reconnected') {
+
+      if (state.phase === 'resolved') {
         this.payload = new PromiseDelegate();
-        payload.resolve(state.payload as T);
+        payload.resolve((state.payload as T) || undefined);
         return;
       }
-      if (state.phase === 'rejected') {
+
+      if (state.phase === 'rejected' || state.phase === 'stopped') {
         this.payload = new PromiseDelegate();
+        payload.promise.catch(_ => undefined);
         payload.reject(state.payload as U);
         return;
       }
@@ -74,7 +77,7 @@ export abstract class RateLimiter<T, U> implements IRateLimiter<T, U> {
     return this.poll.stop();
   }
 
-  protected payload: PromiseDelegate<T> | null = new PromiseDelegate();
+  protected payload: PromiseDelegate<T> | null = null;
 
   /**
    * The underlying poll instance used by the rate limiter.
