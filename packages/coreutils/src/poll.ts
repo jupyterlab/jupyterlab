@@ -190,10 +190,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
           return;
         }
 
-        return this.schedule({
-          interval: Poll.IMMEDIATE,
-          phase: 'when-resolved'
-        });
+        void this.schedule({ phase: 'when-resolved' });
       })
       .catch(reason => {
         if (this.isDisposed) {
@@ -201,11 +198,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
         }
 
         console.warn(`Poll (${this.name}) started despite rejection.`, reason);
-
-        return this.schedule({
-          interval: Poll.IMMEDIATE,
-          phase: 'when-rejected'
-        });
+        void this.schedule({ phase: 'when-rejected' });
       });
   }
 
