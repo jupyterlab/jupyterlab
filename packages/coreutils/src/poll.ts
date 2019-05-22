@@ -647,6 +647,11 @@ namespace Private {
     last: IPoll.State<any, any, any>
   ): number {
     const { backoff, interval, max } = frequency;
+
+    if (interval === Poll.NEVER) {
+      return interval;
+    }
+
     const growth =
       backoff === true ? DEFAULT_BACKOFF : backoff === false ? 1 : backoff;
     const random = getRandomIntInclusive(interval, last.interval * growth);
