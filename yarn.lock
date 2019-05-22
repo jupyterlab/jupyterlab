@@ -1735,7 +1735,7 @@
   resolved "https://registry.yarnpkg.com/@types/clone/-/clone-0.1.30.tgz#e7365648c1b42136a59c7d5040637b3b5c83b614"
   integrity sha1-5zZWSMG0ITalnH1QQGN7O1yDthQ=
 
-"@types/codemirror@~0.0.70":
+"@types/codemirror@~0.0.74":
   version "0.0.74"
   resolved "https://registry.yarnpkg.com/@types/codemirror/-/codemirror-0.0.74.tgz#7ca146f7f3414166e7501000d691b2f18d978d10"
   integrity sha512-pjc14HE6KCCk3SYoC49k/gJJHkredJy4GdSK+lGRMIBfG+Uq6vT8oZiKToFH2J7pZ5pUd69UGD6CgmFG1V17wA==

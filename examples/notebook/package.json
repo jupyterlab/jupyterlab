@@ -23,7 +23,7 @@
     "es6-promise": "~4.1.1"
   },
   "devDependencies": {
-    "@types/codemirror": "~0.0.70",
+    "@types/codemirror": "~0.0.74",
     "css-loader": "~2.1.1",
     "file-loader": "~3.0.1",
     "mini-css-extract-plugin": "~0.6.0",

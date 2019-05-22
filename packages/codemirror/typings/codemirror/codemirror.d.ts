@@ -76,10 +76,6 @@ declare module 'codemirror' {
     head: Position;
   }
 
-  var commands: {
-    [key: string]: any;
-  };
-
   // findMode* functions are from loading the codemirror/mode/meta module
   interface modespec {
     ext?: string[];
@@ -98,14 +94,6 @@ declare module 'codemirror' {
   function findModeByExtension(name: string): modespec;
   function findModeByFileName(name: string): modespec;
   function findModeByMIME(mime: string): modespec;
-
-  var modes: {
-    [key: string]: any;
-  };
-
-  var mimeModes: {
-    [key: string]: any;
-  };
 
   // come back to this later
   interface Context {
