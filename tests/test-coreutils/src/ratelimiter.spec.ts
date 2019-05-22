@@ -20,7 +20,7 @@ describe('Debouncer', () => {
       const wanted = [1, 1, 1, 1, 1, 1];
       let called = 0;
 
-      debouncer = new Debouncer(async () => ++called, limit);
+      debouncer = new Debouncer(() => ++called, limit);
 
       const one = debouncer.invoke();
       const two = debouncer.invoke();
@@ -43,7 +43,7 @@ describe('Debouncer', () => {
       const wanted = [1, 1, 1, 1, 1, 2];
       let called = 0;
 
-      debouncer = new Debouncer(async () => ++called, limit);
+      debouncer = new Debouncer(() => ++called, limit);
 
       const one = debouncer.invoke();
       await sleep(sleeps[0]);
@@ -65,6 +65,33 @@ describe('Debouncer', () => {
       expect(await six).to.equal(wanted[5]);
     });
   });
+
+  describe('#stop()', () => {
+    it('should stop an invocation that has not fired yet', async () => {
+      let called = 0;
+      let caught = 0;
+      const wanted = [1, 2, 3, 4, 5, 6];
+
+      debouncer = new Debouncer(() => ++called);
+
+      const one = debouncer.invoke().catch(_ => ++caught);
+      const two = debouncer.invoke().catch(_ => ++caught);
+      const three = debouncer.invoke().catch(_ => ++caught);
+      const four = debouncer.invoke().catch(_ => ++caught);
+      const five = debouncer.invoke().catch(_ => ++caught);
+      const six = debouncer.invoke().catch(_ => ++caught);
+
+      void debouncer.stop();
+
+      expect(await one).to.equal(wanted[0]);
+      expect(await two).to.equal(wanted[1]);
+      expect(await three).to.equal(wanted[2]);
+      expect(await four).to.equal(wanted[3]);
+      expect(await five).to.equal(wanted[4]);
+      expect(await six).to.equal(wanted[5]);
+      expect(called).to.equal(0);
+    });
+  });
 });
 
 describe('Throttler', () => {
@@ -80,7 +107,7 @@ describe('Throttler', () => {
       const wanted = [1, 1, 1, 1, 1, 1];
       let called = 0;
 
-      throttler = new Debouncer(async () => ++called, limit);
+      throttler = new Throttler(() => ++called, limit);
 
       const one = throttler.invoke();
       const two = throttler.invoke();
@@ -103,7 +130,7 @@ describe('Throttler', () => {
       const wanted = [1, 1, 1, 2, 2, 3];
       let called = 0;
 
-      throttler = new Throttler(async () => ++called, limit);
+      throttler = new Throttler(() => ++called, limit);
 
       const one = throttler.invoke();
       await sleep(sleeps[0]);
@@ -123,6 +150,33 @@ describe('Throttler', () => {
       expect(await four).to.equal(wanted[3]);
       expect(await five).to.equal(wanted[4]);
       expect(await six).to.equal(wanted[5]);
+    });
+  });
+
+  describe('#stop()', () => {
+    it('should stop an invocation that has not fired yet', async () => {
+      let called = 0;
+      let caught = 0;
+      const wanted = [1, 2, 3, 4, 5, 6];
+
+      throttler = new Throttler(() => ++called);
+
+      const one = throttler.invoke().catch(_ => ++caught);
+      const two = throttler.invoke().catch(_ => ++caught);
+      const three = throttler.invoke().catch(_ => ++caught);
+      const four = throttler.invoke().catch(_ => ++caught);
+      const five = throttler.invoke().catch(_ => ++caught);
+      const six = throttler.invoke().catch(_ => ++caught);
+
+      void throttler.stop();
+
+      expect(await one).to.equal(wanted[0]);
+      expect(await two).to.equal(wanted[1]);
+      expect(await three).to.equal(wanted[2]);
+      expect(await four).to.equal(wanted[3]);
+      expect(await five).to.equal(wanted[4]);
+      expect(await six).to.equal(wanted[5]);
+      expect(called).to.equal(0);
     });
   });
 });
