@@ -172,7 +172,7 @@ describe('Poll', () => {
     it('should resolve after a tick', async () => {
       poll = new Poll({
         factory: () => Promise.resolve(),
-        frequency: { interval: 2000, backoff: false },
+        frequency: { interval: 200, backoff: false },
         name: '@jupyterlab/test-coreutils:Poll#tick-1'
       });
       const expected = 'when-resolved resolved';
@@ -182,7 +182,7 @@ describe('Poll', () => {
         poll.tick.then(tock).catch(() => undefined);
       };
       void poll.tick.then(tock);
-      await sleep(200); // Sleep for less than the interval.
+      await sleep(250); // Sleep for longer than the interval.
       expect(ticker.join(' ')).to.equal(expected);
     });
 
@@ -231,13 +231,13 @@ describe('Poll', () => {
       const ticker: IPoll.Phase<any>[] = [];
       poll = new Poll<void, void>({
         factory: () => Promise.resolve(),
-        frequency: { interval: 2000, backoff: false },
+        frequency: { interval: 200, backoff: false },
         name: '@jupyterlab/test-coreutils:Poll#ticked-1'
       });
       poll.ticked.connect(() => {
         ticker.push(poll.state.phase);
       });
-      await sleep(200); // Sleep for less than the interval.
+      await sleep(250); // Sleep for longer than the interval.
       expect(ticker.join(' ')).to.equal(expected);
     });
 
@@ -247,7 +247,7 @@ describe('Poll', () => {
       const promise = Promise.reject();
       poll = new Poll({
         factory: () => Promise.resolve(),
-        frequency: { interval: 2000, backoff: false },
+        frequency: { interval: 200, backoff: false },
         name: '@jupyterlab/test-coreutils:Poll#ticked-2',
         when: promise
       });
@@ -255,7 +255,7 @@ describe('Poll', () => {
         ticker.push(poll.state.phase);
       });
       await promise.catch(() => undefined);
-      await sleep(200); // Sleep for less than the interval.
+      await sleep(250); // Sleep for longer than the interval.
       expect(ticker.join(' ')).to.equal(expected);
     });
 
