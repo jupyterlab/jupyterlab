@@ -48,10 +48,16 @@ export abstract class RateLimiter<T, U> implements IRateLimiter<T, U> {
     }, this);
   }
 
+  /**
+   * Whether the rate limiter is disposed.
+   */
   get isDisposed(): boolean {
     return this.payload === null;
   }
 
+  /**
+   * Disposes the rate limiter.
+   */
   dispose(): void {
     if (this.isDisposed) {
       return;
@@ -77,6 +83,9 @@ export abstract class RateLimiter<T, U> implements IRateLimiter<T, U> {
     return this.poll.stop();
   }
 
+  /**
+   * A promise that resolves on each successful invocation.
+   */
   protected payload: PromiseDelegate<T> | null = null;
 
   /**
