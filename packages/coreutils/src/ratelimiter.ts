@@ -30,7 +30,7 @@ export abstract class RateLimiter<T, U> implements IRateLimiter<T, U> {
       standby: 'never'
     });
     this.payload = new PromiseDelegate();
-    this.poll.ticked.connect(async (_, state) => {
+    this.poll.ticked.connect((_, state) => {
       const { payload } = this;
 
       if (state.phase === 'resolved') {
