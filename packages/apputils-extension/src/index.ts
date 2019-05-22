@@ -335,7 +335,8 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
 
         // Re-invoke the recovery timer in the next frame.
         requestAnimationFrame(() => {
-          void recovery.invoke();
+          // Because recovery can be stopped, handle invocation rejection.
+          void recovery.invoke().catch(_ => undefined);
         });
       } catch (error) {
         /* no-op */
@@ -352,7 +353,8 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
         splashCount++;
         document.body.appendChild(splash);
 
-        void recovery.invoke();
+        // Because recovery can be stopped, handle invocation rejection.
+        void recovery.invoke().catch(_ => undefined);
 
         return new DisposableDelegate(async () => {
           await restored;
