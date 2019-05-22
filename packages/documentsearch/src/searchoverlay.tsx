@@ -4,6 +4,7 @@ import { IDisplayState } from './interfaces';
 import { SearchInstance } from './searchinstance';
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import { Debouncer } from '@jupyterlab/coreutils';
 import { Signal } from '@phosphor/signaling';
 import { Widget } from '@phosphor/widgets';
 import * as React from 'react';
@@ -252,7 +253,7 @@ class SearchOverlay extends React.Component<
   private _onSearchChange(event: React.ChangeEvent) {
     const searchText = (event.target as HTMLInputElement).value;
     this.setState({ searchText: searchText });
-    this._debouncedStartSearch(true, searchText);
+    void this._debouncedStartSearch.invoke();
   }
 
   private _onReplaceChange(event: React.ChangeEvent) {
@@ -311,24 +312,6 @@ class SearchOverlay extends React.Component<
     // clean up and close widget
     this.props.onEndSearch();
   }
-
-  private _debounce(func: Function, wait: number) {
-    const context = this;
-    let timeout: number;
-    return function(...args: any[]) {
-      const later = function() {
-        timeout = null;
-        return func.apply(context, args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
-
-  private _debouncedStartSearch = this._debounce(
-    this._executeSearch.bind(this),
-    100
-  );
 
   private _onReplaceToggled() {
     this.setState({
@@ -430,6 +413,10 @@ class SearchOverlay extends React.Component<
       </div>
     ];
   }
+
+  private _debouncedStartSearch = new Debouncer(() => {
+    this._executeSearch(true, this.state.searchText);
+  }, 100);
 }
 
 export function createSearchOverlay(
