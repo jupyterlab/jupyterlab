@@ -19,13 +19,13 @@
       "path": "../codemirror"
     },
     {
+      "path": "../coreutils"
+    },
+    {
       "path": "../fileeditor"
     },
     {
       "path": "../notebook"
-    },
-    {
-      "path": "../coreutils"
     }
   ]
 }

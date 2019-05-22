@@ -268,7 +268,7 @@ class SearchOverlay extends React.Component<
     } else if (event.keyCode === 27) {
       event.preventDefault();
       event.stopPropagation();
-      this.props.onEndSearch();
+      this._onClose();
     }
   }
 
@@ -309,8 +309,9 @@ class SearchOverlay extends React.Component<
   }
 
   private _onClose() {
-    // clean up and close widget
+    // Clean up and close widget.
     this.props.onEndSearch();
+    this._debouncedStartSearch.dispose();
   }
 
   private _onReplaceToggled() {
