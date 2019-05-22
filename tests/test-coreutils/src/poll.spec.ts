@@ -7,28 +7,14 @@ import { IPoll, Poll } from '@jupyterlab/coreutils';
 
 import { sleep } from '@jupyterlab/testutils';
 
-class TestPoll<T = void, U = void, V extends string = 'standby'> extends Poll<
-  T,
-  U,
-  V
-> {
-  async schedule(
-    next: Partial<
-      IPoll.State<T, U, V> & { cancel: (last: IPoll.State<T, U, V>) => boolean }
-    > = {}
-  ) {
-    return super.schedule(next);
-  }
-}
-
 describe('Poll', () => {
+  let poll: Poll;
+
+  afterEach(() => {
+    poll.dispose();
+  });
+
   describe('#constructor()', () => {
-    let poll: Poll;
-
-    afterEach(() => {
-      poll.dispose();
-    });
-
     it('should create a poll', () => {
       poll = new Poll({
         factory: () => Promise.resolve(),
@@ -140,12 +126,6 @@ describe('Poll', () => {
   });
 
   describe('#name', () => {
-    let poll: Poll;
-
-    afterEach(() => {
-      poll.dispose();
-    });
-
     it('should be set to value passed in during instantation', () => {
       const factory = () => Promise.resolve();
       const name = '@jupyterlab/test-coreutils:Poll#name-1';
@@ -162,12 +142,6 @@ describe('Poll', () => {
   });
 
   describe('#disposed', () => {
-    let poll: Poll;
-
-    afterEach(() => {
-      poll.dispose();
-    });
-
     it('should emit when the poll is disposed', () => {
       poll = new Poll({
         factory: () => Promise.resolve(),
@@ -183,12 +157,6 @@ describe('Poll', () => {
   });
 
   describe('#isDisposed', () => {
-    let poll: Poll;
-
-    afterEach(() => {
-      poll.dispose();
-    });
-
     it('should indicate whether the poll is disposed', () => {
       poll = new Poll({
         factory: () => Promise.resolve(),
@@ -201,12 +169,6 @@ describe('Poll', () => {
   });
 
   describe('#tick', () => {
-    let poll: Poll;
-
-    afterEach(() => {
-      poll.dispose();
-    });
-
     it('should resolve after a tick', async () => {
       poll = new Poll({
         factory: () => Promise.resolve(),
@@ -264,12 +226,6 @@ describe('Poll', () => {
   });
 
   describe('#ticked', () => {
-    let poll: Poll;
-
-    afterEach(() => {
-      poll.dispose();
-    });
-
     it('should emit when the poll ticks after `when` resolves', async () => {
       const expected = 'when-resolved resolved';
       const ticker: IPoll.Phase<any>[] = [];
@@ -317,12 +273,6 @@ describe('Poll', () => {
   });
 
   describe('#dispose()', () => {
-    let poll: Poll;
-
-    afterEach(() => {
-      poll.dispose();
-    });
-
     it('should dispose the poll and be safe to call repeatedly', async () => {
       let rejected = false;
       let tick: Promise<Poll>;
@@ -345,12 +295,6 @@ describe('Poll', () => {
   });
 
   describe('#refresh()', () => {
-    let poll: Poll;
-
-    afterEach(() => {
-      poll.dispose();
-    });
-
     it('should refresh the poll when the poll is ready', async () => {
       const expected = 'when-resolved refreshed resolved';
       const ticker: IPoll.Phase<any>[] = [];
@@ -397,12 +341,6 @@ describe('Poll', () => {
   });
 
   describe('#start()', () => {
-    let poll: Poll;
-
-    afterEach(() => {
-      poll.dispose();
-    });
-
     it('should start the poll if it is stopped', async () => {
       const expected = 'when-resolved stopped started resolved';
       const ticker: IPoll.Phase<any>[] = [];
@@ -456,12 +394,6 @@ describe('Poll', () => {
   });
 
   describe('#stop()', () => {
-    let poll: Poll;
-
-    afterEach(() => {
-      poll.dispose();
-    });
-
     it('should stop the poll if it is active', async () => {
       const expected = 'when-resolved stopped started resolved';
       const ticker: IPoll.Phase<any>[] = [];
@@ -510,14 +442,8 @@ describe('Poll', () => {
   });
 
   describe('#schedule()', () => {
-    let poll: TestPoll;
-
-    afterEach(() => {
-      poll.dispose();
-    });
-
     it('should schedule the next poll state', async () => {
-      poll = new TestPoll({
+      poll = new Poll({
         factory: () => Promise.resolve(),
         frequency: { interval: 100 },
         name: '@jupyterlab/test-coreutils:Poll#schedule()-1'
@@ -533,7 +459,7 @@ describe('Poll', () => {
     });
 
     it('should default to standby state', async () => {
-      poll = new TestPoll({
+      poll = new Poll({
         factory: () => Promise.resolve(),
         frequency: { interval: 100 },
         name: '@jupyterlab/test-coreutils:Poll#schedule()-2'
@@ -549,7 +475,7 @@ describe('Poll', () => {
     });
 
     it('should support phase transition cancellation', async () => {
-      poll = new TestPoll({
+      poll = new Poll({
         factory: () => Promise.resolve(),
         frequency: { interval: 100 },
         name: '@jupyterlab/test-coreutils:Poll#schedule()-3'
