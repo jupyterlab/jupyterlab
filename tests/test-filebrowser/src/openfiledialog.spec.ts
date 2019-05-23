@@ -5,11 +5,7 @@ import { toArray } from '@phosphor/algorithm';
 
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
-import {
-  getExistingDirectory,
-  getOpenFiles,
-  FilterFileBrowserModel
-} from '@jupyterlab/filebrowser';
+import { FileDialog, FilterFileBrowserModel } from '@jupyterlab/filebrowser';
 import { ServiceManager } from '@jupyterlab/services';
 import { expect } from 'chai';
 import {
@@ -102,9 +98,9 @@ describe('@jupyterlab/filebrowser', () => {
     });
   });
 
-  describe('getOpenFiles()', () => {
+  describe('FileDialog.getOpenFiles()', () => {
     it('should create a dialog', async () => {
-      let dialog = getOpenFiles({
+      let dialog = FileDialog.getOpenFiles({
         manager
       });
 
@@ -121,7 +117,7 @@ describe('@jupyterlab/filebrowser', () => {
 
       document.body.appendChild(node);
 
-      let dialog = getOpenFiles({
+      let dialog = FileDialog.getOpenFiles({
         manager,
         title: 'Select a notebook',
         host: node,
@@ -144,7 +140,7 @@ describe('@jupyterlab/filebrowser', () => {
 
       document.body.appendChild(node);
 
-      let dialog = getOpenFiles({
+      let dialog = FileDialog.getOpenFiles({
         manager,
         title: 'Select a notebook',
         host: node,
@@ -185,7 +181,7 @@ describe('@jupyterlab/filebrowser', () => {
     });
 
     it('should return current path if nothing is selected', async () => {
-      let dialog = getOpenFiles({
+      let dialog = FileDialog.getOpenFiles({
         manager
       });
 
@@ -200,9 +196,9 @@ describe('@jupyterlab/filebrowser', () => {
     });
   });
 
-  describe('getExistingDirectory()', () => {
+  describe('FileDialog.getExistingDirectory()', () => {
     it('should create a dialog', async () => {
-      let dialog = getExistingDirectory({
+      let dialog = FileDialog.getExistingDirectory({
         manager
       });
 
@@ -219,7 +215,7 @@ describe('@jupyterlab/filebrowser', () => {
 
       document.body.appendChild(node);
 
-      let dialog = getExistingDirectory({
+      let dialog = FileDialog.getExistingDirectory({
         manager,
         title: 'Select a folder',
         host: node
@@ -240,7 +236,7 @@ describe('@jupyterlab/filebrowser', () => {
 
       document.body.appendChild(node);
 
-      let dialog = getExistingDirectory({
+      let dialog = FileDialog.getExistingDirectory({
         manager,
         title: 'Select a folder',
         host: node
@@ -280,7 +276,7 @@ describe('@jupyterlab/filebrowser', () => {
     });
 
     it('should return current path if nothing is selected', async () => {
-      let dialog = getExistingDirectory({
+      let dialog = FileDialog.getExistingDirectory({
         manager
       });
 

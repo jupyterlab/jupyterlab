@@ -19,52 +19,101 @@ import { IFileBrowserFactory } from './factory';
 const OPEN_DIALOG_CLASS = 'jp-Open-Dialog';
 
 /**
- * Create and show a open files dialog.
- *
- * Note: if nothing is selected when `getValue` will return the browser
- * model current path.
- *
- * @param options - The dialog setup options.
- *
- * @returns A promise that resolves with whether the dialog was accepted.
+ * Namespace for file dialog
  */
-export function getOpenFiles(
-  options: OpenFileDialog.IOptions
-): Promise<Dialog.IResult<Contents.IModel[]>> {
-  let dialogOptions: Partial<Dialog.IOptions<Contents.IModel[]>> = {
-    title: options.title,
-    buttons: [
-      Dialog.cancelButton(),
-      Dialog.okButton({
-        label: 'Select'
-      })
-    ],
-    focusNodeSelector: options.focusNodeSelector,
-    host: options.host,
-    renderer: options.renderer,
-    body: new OpenDialog(options.manager, options.filter)
-  };
-  let dialog = new Dialog(dialogOptions);
-  return dialog.launch();
+export namespace FileDialog {
+  /**
+   * Options for the open directory dialog
+   */
+  export interface IDirectoryOptions
+    extends Partial<
+      Pick<
+        Dialog.IOptions<Promise<Contents.IModel[]>>,
+        Exclude<
+          keyof Dialog.IOptions<Promise<Contents.IModel[]>>,
+          'body' | 'buttons' | 'defaultButton'
+        >
+      >
+    > {
+    /**
+     * Document manager
+     */
+    manager: IDocumentManager;
+  }
+
+  /**
+   * Options for the open file dialog
+   */
+  export interface IFileOptions extends IDirectoryOptions {
+    /**
+     * Filter function on file browser item model
+     */
+    filter?: (value: Contents.IModel) => boolean;
+  }
+
+  /**
+   * Create and show a open files dialog.
+   *
+   * Note: if nothing is selected when `getValue` will return the browser
+   * model current path.
+   *
+   * @param options - The dialog setup options.
+   *
+   * @returns A promise that resolves with whether the dialog was accepted.
+   */
+  export function getOpenFiles(
+    options: IFileOptions
+  ): Promise<Dialog.IResult<Contents.IModel[]>> {
+    let dialogOptions: Partial<Dialog.IOptions<Contents.IModel[]>> = {
+      title: options.title,
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.okButton({
+          label: 'Select'
+        })
+      ],
+      focusNodeSelector: options.focusNodeSelector,
+      host: options.host,
+      renderer: options.renderer,
+      body: new OpenDialog(options.manager, options.filter)
+    };
+    let dialog = new Dialog(dialogOptions);
+    return dialog.launch();
+  }
+
+  /**
+   * Create and show a open directory dialog.
+   *
+   * Note: if nothing is selected when `getValue` will return the browser
+   * model current path.
+   *
+   * @param options - The dialog setup options.
+   *
+   * @returns A promise that resolves with whether the dialog was accepted.
+   */
+  export function getExistingDirectory(
+    options: IDirectoryOptions
+  ): Promise<Dialog.IResult<Contents.IModel[]>> {
+    return getOpenFiles({
+      ...options,
+      filter: model => false
+    });
+  }
 }
 
 /**
- * Create and show a open directory dialog.
- *
- * Note: if nothing is selected when `getValue` will return the browser
- * model current path.
- *
- * @param options - The dialog setup options.
- *
- * @returns A promise that resolves with whether the dialog was accepted.
+ * Namespace for the filtered file browser model
  */
-export function getExistingDirectory(
-  options: OpenDirectoryDialog.IOptions
-): Promise<Dialog.IResult<Contents.IModel[]>> {
-  return getOpenFiles({
-    ...options,
-    filter: model => false
-  });
+export namespace FilterFileBrowserModel {
+  /**
+   * Constructor options
+   */
+  export interface IOptions extends FileBrowserModel.IOptions {
+    /**
+     * Filter function on file browser item model
+     */
+    filter?: (value: Contents.IModel) => boolean;
+  }
 }
 
 /**
@@ -147,42 +196,6 @@ class OpenDialog extends Widget
   }
 
   private _browser: FileBrowser;
-}
-
-export namespace OpenDirectoryDialog {
-  export interface IOptions
-    extends Partial<
-      Pick<
-        Dialog.IOptions<Promise<Contents.IModel[]>>,
-        Exclude<
-          keyof Dialog.IOptions<Promise<Contents.IModel[]>>,
-          'body' | 'buttons' | 'defaultButton'
-        >
-      >
-    > {
-    /**
-     * Document manager
-     */
-    manager: IDocumentManager;
-  }
-}
-
-export namespace OpenFileDialog {
-  export interface IOptions extends OpenDirectoryDialog.IOptions {
-    /**
-     * Filter function on file browser item model
-     */
-    filter?: (value: Contents.IModel) => boolean;
-  }
-}
-
-namespace FilterFileBrowserModel {
-  export interface IOptions extends FileBrowserModel.IOptions {
-    /**
-     * Filter function on file browser item model
-     */
-    filter?: (value: Contents.IModel) => boolean;
-  }
 }
 
 namespace Private {
