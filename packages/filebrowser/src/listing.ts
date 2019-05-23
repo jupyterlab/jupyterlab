@@ -42,6 +42,7 @@ import { Message, MessageLoop } from '@phosphor/messaging';
 import { Widget } from '@phosphor/widgets';
 
 import { FileBrowserModel } from './model';
+import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
  * The class name added to DirListing widget.
@@ -254,6 +255,13 @@ export class DirListing extends Widget {
    */
   get sortState(): DirListing.ISortState {
     return this._sortState;
+  }
+
+  /**
+   * A signal fired when an item is opened.
+   */
+  get onItemOpened(): ISignal<DirListing, Contents.IModel> {
+    return this._onItemOpened;
   }
 
   /**
@@ -898,6 +906,20 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Handle the opening of an item.
+   */
+  private _handleOpen(item: Contents.IModel): void {
+    this._onItemOpened.emit(item);
+    if (item.type === 'directory') {
+      this._model
+        .cd(item.name)
+        .catch(error => showErrorMessage('Open directory', error));
+    } else {
+      let path = item.path;
+      this._manager.openOrReveal(path);
+    }
+  }
+  /**
    * Handle the `'keydown'` event for the widget.
    */
   private _evtKeydown(event: KeyboardEvent): void {
@@ -918,17 +940,8 @@ export class DirListing extends Widget {
           return;
         }
 
-        let model = this._model;
         let item = this._sortedItems[i];
-        if (item.type === 'directory') {
-          model
-            .cd(item.name)
-            .catch(error => showErrorMessage('Open directory', error));
-        } else {
-          let path = item.path;
-          this._manager.openOrReveal(path);
-        }
-
+        this._handleOpen(item);
         break;
       case 38: // Up arrow
         this.selectPrevious(event.shiftKey);
@@ -989,16 +1002,8 @@ export class DirListing extends Widget {
       return;
     }
 
-    let model = this._model;
     let item = this._sortedItems[i];
-    if (item.type === 'directory') {
-      model
-        .cd(item.name)
-        .catch(error => showErrorMessage('Open directory', error));
-    } else {
-      let path = item.path;
-      this._manager.openOrReveal(path);
-    }
+    this._handleOpen(item);
   }
 
   /**
@@ -1487,6 +1492,7 @@ export class DirListing extends Widget {
     direction: 'ascending',
     key: 'name'
   };
+  private _onItemOpened = new Signal<DirListing, Contents.IModel>(this);
   private _drag: Drag | null = null;
   private _dragData: {
     pressX: number;
