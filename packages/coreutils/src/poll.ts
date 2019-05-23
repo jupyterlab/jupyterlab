@@ -11,12 +11,12 @@ import { ISignal, Signal } from '@phosphor/signaling';
  * A readonly poll that calls an asynchronous function with each tick.
  *
  * @typeparam T - The resolved type of the factory's promises.
+ * Defaults to `any`.
  *
  * @typeparam U - The rejected type of the factory's promises.
- *
- * @typeparam V - The type to extend the phases supported by a poll.
+ * Defaults to `any`.
  */
-export interface IPoll<T, U, V extends string> {
+export interface IPoll<T = any, U = any> {
   /**
    * A signal emitted when the poll is disposed.
    */
@@ -40,7 +40,7 @@ export interface IPoll<T, U, V extends string> {
   /**
    * The poll state, which is the content of the currently-scheduled poll tick.
    */
-  readonly state: IPoll.State<T, U, V>;
+  readonly state: IPoll.State<T, U>;
 
   /**
    * A promise that resolves when the currently-scheduled tick completes.
@@ -50,12 +50,12 @@ export interface IPoll<T, U, V extends string> {
    * `state.timestamp`. It can resolve earlier if the user starts or refreshes the
    * poll, etc.
    */
-  readonly tick: Promise<IPoll<T, U, V>>;
+  readonly tick: Promise<IPoll<T, U>>;
 
   /**
    * A signal emitted when the poll state changes, i.e., a new tick is scheduled.
    */
-  readonly ticked: ISignal<IPoll<T, U, V>, IPoll.State<T, U, V>>;
+  readonly ticked: ISignal<IPoll<T, U>, IPoll.State<T, U>>;
 }
 
 /**
@@ -99,11 +99,8 @@ export namespace IPoll {
 
   /**
    * The phase of the poll when the current tick was scheduled.
-   *
-   * @typeparam T - A type for any additional tick phases a poll supports.
    */
-  export type Phase<T extends string> =
-    | T
+  export type Phase =
     | 'constructed'
     | 'disposed'
     | 'reconnected'
@@ -120,12 +117,12 @@ export namespace IPoll {
    * Definition of poll state at any given time.
    *
    * @typeparam T - The resolved type of the factory's promises.
+   * Defaults to `any`.
    *
    * @typeparam U - The rejected type of the factory's promises.
-   *
-   * @typeparam V - The type to extend the phases supported by a poll.
+   * Defaults to `any`.
    */
-  export type State<T, U, V extends string> = {
+  export type State<T = any, U = any> = {
     /**
      * The number of milliseconds until the current tick resolves.
      */
@@ -143,7 +140,7 @@ export namespace IPoll {
     /**
      * The current poll phase.
      */
-    readonly phase: Phase<V>;
+    readonly phase: Phase;
 
     /**
      * The timestamp for when this tick was scheduled.
@@ -161,18 +158,14 @@ export namespace IPoll {
  *
  * @typeparam U - The rejected type of the factory's promises.
  * Defaults to `any`.
- *
- * @typeparam V - An optional type to extend the phases supported by a poll.
- * Defaults to `standby`, which already exists in the `Phase` type.
  */
-export class Poll<T = any, U = any, V extends string = 'standby'>
-  implements IDisposable, IPoll<T, U, V> {
+export class Poll<T = any, U = any> implements IDisposable, IPoll<T, U> {
   /**
    * Instantiate a new poll with exponential backoff in case of failure.
    *
    * @param options - The poll instantiation options.
    */
-  constructor(options: Poll.IOptions<T, U, V>) {
+  constructor(options: Poll.IOptions<T, U>) {
     this._factory = options.factory;
     this._standby = options.standby || Private.DEFAULT_STANDBY;
     this._state = { ...Private.DEFAULT_STATE, timestamp: new Date().getTime() };
@@ -190,7 +183,10 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
           return;
         }
 
-        void this.schedule({ phase: 'when-resolved' });
+        return this.schedule({
+          interval: Private.IMMEDIATE,
+          phase: 'when-resolved'
+        });
       })
       .catch(reason => {
         if (this.isDisposed) {
@@ -198,7 +194,11 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
         }
 
         console.warn(`Poll (${this.name}) started despite rejection.`, reason);
-        void this.schedule({ phase: 'when-rejected' });
+
+        return this.schedule({
+          interval: Private.IMMEDIATE,
+          phase: 'when-rejected'
+        });
       });
   }
 
@@ -234,11 +234,11 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
       throw new Error('Poll backoff growth factor must be at least 1');
     }
 
-    if ((interval < 0 || interval > max) && interval !== Poll.NEVER) {
+    if (interval < 0 || interval > max) {
       throw new Error('Poll interval must be between 0 and max');
     }
 
-    if (max > Poll.MAX_INTERVAL && max !== Poll.NEVER) {
+    if (max > Poll.MAX_INTERVAL) {
       throw new Error(`Max interval must be less than ${Poll.MAX_INTERVAL}`);
     }
 
@@ -269,7 +269,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
   /**
    * The poll state, which is the content of the current poll tick.
    */
-  get state(): IPoll.State<T, U, V> {
+  get state(): IPoll.State<T, U> {
     return this._state;
   }
 
@@ -283,7 +283,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
   /**
    * A signal emitted when the poll ticks and fires off a new request.
    */
-  get ticked(): ISignal<this, IPoll.State<T, U, V>> {
+  get ticked(): ISignal<this, IPoll.State<T, U>> {
     return this._ticked;
   }
 
@@ -318,8 +318,34 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
   refresh(): Promise<void> {
     return this.schedule({
       cancel: last => last.phase === 'refreshed',
-      interval: Poll.IMMEDIATE,
+      interval: Private.IMMEDIATE,
       phase: 'refreshed'
+    });
+  }
+
+  /**
+   * Starts the poll. Schedules `started` tick if necessary.
+   *
+   * @returns A promise that resolves after tick is scheduled and never rejects.
+   */
+  start(): Promise<void> {
+    return this.schedule({
+      cancel: last => last.phase !== 'standby' && last.phase !== 'stopped',
+      interval: Private.IMMEDIATE,
+      phase: 'started'
+    });
+  }
+
+  /**
+   * Stops the poll. Schedules `stopped` tick if necessary.
+   *
+   * @returns A promise that resolves after tick is scheduled and never rejects.
+   */
+  stop(): Promise<void> {
+    return this.schedule({
+      cancel: last => last.phase === 'stopped',
+      interval: Private.NEVER,
+      phase: 'stopped'
     });
   }
 
@@ -333,13 +359,11 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
    * @returns A promise that resolves when the next poll state is active.
    *
    * #### Notes
-   * This method is not meant to be invoked by user code typically. It is public
-   * to allow poll instances to be composed into classes that schedule ticks.
+   * This method is protected to allow sub-classes to implement methods that can
+   * schedule poll ticks.
    */
-  async schedule(
-    next: Partial<
-      IPoll.State<T, U, V> & { cancel: (last: IPoll.State<T, U, V>) => boolean }
-    > = {}
+  protected async schedule(
+    next: Partial<IPoll.State & { cancel: (last: IPoll.State) => boolean }> = {}
   ): Promise<void> {
     if (this.isDisposed) {
       return;
@@ -361,7 +385,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
     const last = this.state;
     const pending = this._tick;
     const scheduled = new PromiseDelegate<this>();
-    const state: IPoll.State<T, U, V> = {
+    const state: IPoll.State<T, U> = {
       interval: this.frequency.interval,
       payload: null,
       phase: 'standby',
@@ -372,7 +396,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
     this._tick = scheduled;
 
     // Clear the schedule if possible.
-    if (last.interval === Poll.IMMEDIATE) {
+    if (last.interval === Private.IMMEDIATE) {
       cancelAnimationFrame(this._timeout);
     } else {
       clearTimeout(this._timeout);
@@ -392,37 +416,11 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
       this._execute();
     };
     this._timeout =
-      state.interval === Poll.IMMEDIATE
+      state.interval === Private.IMMEDIATE
         ? requestAnimationFrame(execute)
-        : state.interval === Poll.NEVER
+        : state.interval === Private.NEVER
         ? -1
         : setTimeout(execute, state.interval);
-  }
-
-  /**
-   * Starts the poll. Schedules `started` tick if necessary.
-   *
-   * @returns A promise that resolves after tick is scheduled and never rejects.
-   */
-  start(): Promise<void> {
-    return this.schedule({
-      cancel: last => last.phase !== 'standby' && last.phase !== 'stopped',
-      interval: Poll.IMMEDIATE,
-      phase: 'started'
-    });
-  }
-
-  /**
-   * Stops the poll. Schedules `stopped` tick if necessary.
-   *
-   * @returns A promise that resolves after tick is scheduled and never rejects.
-   */
-  stop(): Promise<void> {
-    return this.schedule({
-      cancel: last => last.phase === 'stopped',
-      interval: Poll.NEVER,
-      phase: 'stopped'
-    });
   }
 
   /**
@@ -471,12 +469,12 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
   }
 
   private _disposed = new Signal<this, void>(this);
-  private _factory: Poll.Factory<T, U, V>;
+  private _factory: Poll.Factory<T, U>;
   private _frequency: IPoll.Frequency;
   private _standby: Poll.Standby | (() => boolean | Poll.Standby);
-  private _state: IPoll.State<T, U, V>;
+  private _state: IPoll.State<T, U>;
   private _tick = new PromiseDelegate<this>();
-  private _ticked = new Signal<this, IPoll.State<T, U, V>>(this);
+  private _ticked = new Signal<this, IPoll.State<T, U>>(this);
   private _timeout = -1;
 }
 
@@ -490,12 +488,8 @@ export namespace Poll {
    * @typeparam T - The resolved type of the factory's promises.
    *
    * @typeparam U - The rejected type of the factory's promises.
-   *
-   * @typeparam V - The type to extend the phases supported by a poll.
    */
-  export type Factory<T, U, V extends string> = (
-    state: IPoll.State<T, U, V>
-  ) => Promise<T>;
+  export type Factory<T, U> = (state: IPoll.State<T, U>) => Promise<T>;
 
   /**
    * Indicates when the poll switches to standby.
@@ -506,16 +500,16 @@ export namespace Poll {
    * Instantiation options for polls.
    *
    * @typeparam T - The resolved type of the factory's promises.
+   * Defaults to `any`.
    *
    * @typeparam U - The rejected type of the factory's promises.
-   *
-   * @typeparam V - The type to extend the phases supported by a poll.
+   * Defaults to `any`.
    */
-  export interface IOptions<T, U, V extends string> {
+  export interface IOptions<T = any, U = any> {
     /**
      * A factory function that is passed a poll tick and returns a poll promise.
      */
-    factory: Factory<T, U, V>;
+    factory: Factory<T, U>;
 
     /**
      * The polling frequency parameters.
@@ -545,10 +539,6 @@ export namespace Poll {
      */
     when?: Promise<any>;
   }
-  /**
-   * An interval value that indicates the poll should tick immediately.
-   */
-  export const IMMEDIATE = 0;
 
   /**
    * Delays are 32-bit integers in many browsers so intervals need to be capped.
@@ -557,17 +547,22 @@ export namespace Poll {
    * https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout#Maximum_delay_value
    */
   export const MAX_INTERVAL = 2147483647;
-
-  /**
-   * An interval value that indicates the poll should never tick.
-   */
-  export const NEVER = Infinity;
 }
 
 /**
  * A namespace for private module data.
  */
 namespace Private {
+  /**
+   * An interval value that indicates the poll should tick immediately.
+   */
+  export const IMMEDIATE = 0;
+
+  /**
+   * An interval value that indicates the poll should never tick.
+   */
+  export const NEVER = Infinity;
+
   /**
    * The default backoff growth rate if `backoff` is `true`.
    */
@@ -595,8 +590,8 @@ namespace Private {
   /**
    * The first poll tick state's default values superseded in constructor.
    */
-  export const DEFAULT_STATE: IPoll.State<any, any, any> = {
-    interval: Poll.NEVER,
+  export const DEFAULT_STATE: IPoll.State = {
+    interval: NEVER,
     payload: null,
     phase: 'constructed',
     timestamp: new Date(0).getTime()
@@ -605,8 +600,8 @@ namespace Private {
   /**
    * The disposed tick state values.
    */
-  export const DISPOSED_STATE: IPoll.State<any, any, any> = {
-    interval: Poll.NEVER,
+  export const DISPOSED_STATE: IPoll.State = {
+    interval: NEVER,
     payload: null,
     phase: 'disposed',
     timestamp: new Date(0).getTime()
@@ -635,16 +630,8 @@ namespace Private {
    * @param frequency - The poll's base frequency.
    * @param last - The poll's last tick.
    */
-  export function sleep(
-    frequency: IPoll.Frequency,
-    last: IPoll.State<any, any, any>
-  ): number {
+  export function sleep(frequency: IPoll.Frequency, last: IPoll.State): number {
     const { backoff, interval, max } = frequency;
-
-    if (interval === Poll.NEVER) {
-      return interval;
-    }
-
     const growth =
       backoff === true ? DEFAULT_BACKOFF : backoff === false ? 1 : backoff;
     const random = getRandomIntInclusive(interval, last.interval * growth);

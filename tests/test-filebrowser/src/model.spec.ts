@@ -78,7 +78,7 @@ describe('filebrowser/model', () => {
       opener,
       manager: serviceManager
     });
-    state = new StateDB();
+    state = new StateDB({ namespace: 'filebrowser/model' });
   });
 
   beforeEach(async () => {

@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable } from '@phosphor/disposable';
-
 /**
  * A generic interface for change emitter payloads.
  */
@@ -96,29 +94,4 @@ export interface IDataConnector<T, U = T, V = string> {
    * type `T` being saved while others may return no content.
    */
   save(id: V, value: U): Promise<any>;
-}
-
-/**
- * A function whose invocations are rate limited and can be stopped after
- * invocation before it has fired.
- *
- * @typeparam T - The resolved type of the underlying function. Defaults to any.
- *
- * @typeparam U - The rejected type of the underlying function. Defaults to any.
- */
-export interface IRateLimiter<T = any, U = any> extends IDisposable {
-  /**
-   * The rate limit in milliseconds.
-   */
-  readonly limit: number;
-
-  /**
-   * Invoke the rate limited function.
-   */
-  invoke(): Promise<T>;
-
-  /**
-   * Stop the function if it is mid-flight.
-   */
-  stop(): Promise<void>;
 }

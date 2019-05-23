@@ -5,7 +5,7 @@ module.exports = {
     filename: 'bundle.js'
   },
   bail: true,
-  devtool: 'source-map',
+  devtool: 'cheap-source-map',
   mode: 'production',
   module: {
     rules: [

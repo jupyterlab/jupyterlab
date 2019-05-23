@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Debouncer } from '@jupyterlab/coreutils';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { ArrayExt, find, IIterator, iter, toArray } from '@phosphor/algorithm';
@@ -542,17 +540,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
-   * Dispose the shell.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._layoutDebouncer.dispose();
-    super.dispose();
-  }
-
-  /**
    * Expand the left area.
    *
    * #### Notes
@@ -936,7 +923,16 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Handle a change to the layout.
    */
   private _onLayoutModified(): void {
-    void this._layoutDebouncer.invoke();
+    // The dock can emit layout modified signals while in transient
+    // states (for instance, when switching from single-document to
+    // multiple-document mode). In those states, it can be unreliable
+    // for the signal consumers to query layout properties.
+    // We fix this by debouncing the layout modified signal so that it
+    // is only emitted after rearranging is done.
+    window.clearTimeout(this._debouncer);
+    this._debouncer = window.setTimeout(() => {
+      this._layoutModified.emit(undefined);
+    }, 0);
   }
 
   /**
@@ -967,9 +963,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _dockPanel: DockPanel;
   private _isRestored = false;
   private _layoutModified = new Signal<this, void>(this);
-  private _layoutDebouncer = new Debouncer(() => {
-    this._layoutModified.emit(undefined);
-  }, 0);
   private _leftHandler: Private.SideBarHandler;
   private _restored = new PromiseDelegate<ILabShell.ILayout>();
   private _rightHandler: Private.SideBarHandler;
@@ -977,6 +970,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _headerPanel: Panel;
   private _topPanel: Panel;
   private _bottomPanel: Panel;
+  private _debouncer = 0;
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
   private _sideOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
 }
