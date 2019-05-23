@@ -59,7 +59,7 @@ In addition, ``Ctrl+V`` will be interpreted as a paste command unless the ``past
 setting is disabled.  One may want to disable ``pasteWithCtrlV`` if the shortcut is needed
 for something else such as the vi editor.
 
-For anyone using a *nix shell, the default ``Ctrl+Shift+C`` conflicts with the default
+For anyone using a \*nix shell, the default ``Ctrl+Shift+C`` conflicts with the default
 shortcut for toggling the command palette (``apputils:activate-command-palette``).
 If desired, that shortcut can be changed by editing the keyboard shortcuts in setttings.
 Using ``Ctrl+Shift+V`` for paste works as usual.
