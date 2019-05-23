@@ -1209,7 +1209,7 @@ export namespace CodeMirrorEditor {
      * CodeMirror-activeline-background, and adds the class
      * CodeMirror-activeline-gutter to the line's gutter space is enabled.
      */
-    styleActiveLine: boolean | object;
+    styleActiveLine: boolean | CodeMirror.StyleActiveLine;
 
     /**
      * Whether to causes the selected text to be marked with the CSS class
@@ -1264,7 +1264,7 @@ export namespace CodeMirrorEditor {
     name: string,
     command: (cm: CodeMirror.Editor) => void
   ) {
-    CodeMirror.commands[name] = command;
+    (CodeMirror.commands as any)[name] = command;
   }
 }
 
@@ -1289,7 +1289,7 @@ namespace Private {
       ...otherOptions
     } = config;
     let bareConfig = {
-      autoCloseBrackets: autoClosingBrackets,
+      autoCloseBrackets: autoClosingBrackets ? {} : false,
       indentUnit: tabSize,
       indentWithTabs: !insertSpaces,
       lineWrapping: lineWrap === 'off' ? false : true,

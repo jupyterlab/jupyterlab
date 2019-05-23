@@ -78,7 +78,6 @@
     "codemirror": "~5.46.0",
     "es6-promise": "~4.1.1",
     "json5": "^2.1.0",
-    "marked": "0.5.1",
     "moment": "~2.21.0",
     "path-posix": "~1.0.0",
     "react": "~16.8.4",

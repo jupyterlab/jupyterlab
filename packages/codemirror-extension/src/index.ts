@@ -154,8 +154,9 @@ function activateEditorCommands(
     theme = (settings.get('theme').composite as string | null) || theme;
     scrollPastEnd = settings.get('scrollPastEnd').composite as boolean | null;
     styleActiveLine =
-      (settings.get('styleActiveLine').composite as boolean | object) ||
-      styleActiveLine;
+      (settings.get('styleActiveLine').composite as
+        | boolean
+        | CodeMirror.StyleActiveLine) || styleActiveLine;
     styleSelectedText =
       (settings.get('styleSelectedText').composite as boolean) ||
       styleSelectedText;
