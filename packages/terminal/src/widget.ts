@@ -3,7 +3,7 @@
 
 import { TerminalSession } from '@jupyterlab/services';
 
-import { IS_MAC } from '@phosphor/domutils';
+import { Platform } from '@phosphor/domutils';
 
 import { Message, MessageLoop } from '@phosphor/messaging';
 
@@ -256,7 +256,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
 
     // Do not add any Ctrl+C/Ctrl+V handling on macOS,
     // where Cmd+C/Cmd+V works as intended.
-    if (IS_MAC) {
+    if (Platform.IS_MAC) {
       return;
     }
 
