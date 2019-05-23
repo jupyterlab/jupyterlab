@@ -44,8 +44,9 @@ process.on('unhandledRejection', (error, promise) => {
   console.error('Unhandled promise rejection somewhere in tests');
   if (error) {
     console.error(error);
-    if (error.stack) {
-      console.error(error.stack);
+    const stack = (error as any).stack;
+    if (stack) {
+      console.error(stack);
     }
   }
   promise.catch(err => console.error('promise rejected', err));
