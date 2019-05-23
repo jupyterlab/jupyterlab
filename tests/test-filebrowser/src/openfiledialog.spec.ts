@@ -14,11 +14,11 @@ import { ServiceManager } from '@jupyterlab/services';
 import { expect } from 'chai';
 import {
   acceptDialog,
-  dismissDialog
-  // waitForDialog,
-  // sleep
+  dismissDialog,
+  waitForDialog,
+  sleep
 } from '@jupyterlab/testutils';
-// import { simulate } from 'simulate-event';
+import { simulate } from 'simulate-event';
 
 describe('@jupyterlab/filebrowser', () => {
   let manager: IDocumentManager;
@@ -139,43 +139,50 @@ describe('@jupyterlab/filebrowser', () => {
       document.body.removeChild(node);
     });
 
-    // it('should return one selected file', async () => {
-    //   const node = document.createElement('div');
+    it('should return one selected file', async () => {
+      const node = document.createElement('div');
 
-    //   document.body.appendChild(node);
+      document.body.appendChild(node);
 
-    //   let dialog = getOpenFiles({
-    //     manager,
-    //     title: 'Select a notebook',
-    //     host: node,
-    //     filter: value => value.type === 'notebook'
-    //   });
+      let dialog = getOpenFiles({
+        manager,
+        title: 'Select a notebook',
+        host: node,
+        filter: value => value.type === 'notebook'
+      });
 
-    //   await waitForDialog();
+      await waitForDialog();
 
-    //   let counter = 0;
-    //   let listing = node.getElementsByClassName('jp-DirListing-content')[0];
-    //   let items = listing.getElementsByTagName('li');
-    //   // Wait for the directory listing to be populated
-    //   while (items.length === 0 && counter < 100) {
-    //     await sleep(10);
-    //     items = listing.getElementsByTagName('li');
-    //     counter++;
-    //   }
+      let counter = 0;
+      let listing = node.getElementsByClassName('jp-DirListing-content')[0];
+      let items = listing.getElementsByTagName('li');
+      // Wait for the directory listing to be populated
+      while (items.length === 0 && counter < 100) {
+        await sleep(10);
+        items = listing.getElementsByTagName('li');
+        counter++;
+      }
 
-    //   if (items.length > 0) {
-    //     // Emulate notebook selection
-    //     simulate(items.item(2), 'mousedown');
-    //   }
+      if (items.length > 0) {
+        // Emulate notebook file selection
+        // Get node coordinates we need to be precised as code test for hit position
+        const rect = items.item(2).getBoundingClientRect();
 
-    //   await acceptDialog();
-    //   let result = await dialog;
-    //   let files = result.value;
-    //   expect(files.length).equal(1);
-    //   expect(files[0].type).equal('notebook');
+        simulate(items.item(2), 'mousedown', {
+          clientX: 0.5 * (rect.left + rect.right),
+          clientY: 0.5 * (rect.bottom + rect.top)
+        });
+      }
 
-    //   document.body.removeChild(node);
-    // });
+      await acceptDialog();
+      let result = await dialog;
+      let files = result.value;
+      expect(files.length).equal(1);
+      expect(files[0].type).equal('notebook');
+      expect(files[0].name).equal('Untitled.ipynb');
+
+      document.body.removeChild(node);
+    });
 
     it('should return current path if nothing is selected', async () => {
       let dialog = getOpenFiles({
@@ -228,12 +235,52 @@ describe('@jupyterlab/filebrowser', () => {
       document.body.removeChild(node);
     });
 
-    // it('should return one selected directory', async () => {
-    //   expect('').true;
-    // });
+    it('should return one selected directory', async () => {
+      const node = document.createElement('div');
+
+      document.body.appendChild(node);
+
+      let dialog = getExistingDirectory({
+        manager,
+        title: 'Select a folder',
+        host: node
+      });
+
+      await waitForDialog();
+
+      let counter = 0;
+      let listing = node.getElementsByClassName('jp-DirListing-content')[0];
+      let items = listing.getElementsByTagName('li');
+      // Wait for the directory listing to be populated
+      while (items.length === 0 && counter < 100) {
+        await sleep(10);
+        items = listing.getElementsByTagName('li');
+        counter++;
+      }
+
+      if (items.length > 0) {
+        // Emulate notebook file selection
+        // Get node coordinates we need to be precised as code test for hit position
+        const rect = items.item(1).getBoundingClientRect();
+
+        simulate(items.item(1), 'mousedown', {
+          clientX: 0.5 * (rect.left + rect.right),
+          clientY: 0.5 * (rect.bottom + rect.top)
+        });
+      }
+
+      await acceptDialog();
+      let result = await dialog;
+      let files = result.value;
+      expect(files.length).equal(1);
+      expect(files[0].type).equal('directory');
+      expect(files[0].name).equal('Untitled Folder');
+
+      document.body.removeChild(node);
+    });
 
     it('should return current path if nothing is selected', async () => {
-      let dialog = getOpenFiles({
+      let dialog = getExistingDirectory({
         manager
       });
 
