@@ -3,6 +3,8 @@
 
 import { TerminalSession } from '@jupyterlab/services';
 
+import { Platform } from '@phosphor/domutils';
+
 import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
@@ -237,7 +239,8 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Initialize the terminal object.
    */
   private _initializeTerm(): void {
-    this._term.on('data', (data: string) => {
+    const term = this._term;
+    term.on('data', (data: string) => {
       if (this.isDisposed) {
         return;
       }
@@ -247,8 +250,29 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       });
     });
 
-    this._term.on('title', (title: string) => {
+    term.on('title', (title: string) => {
       this.title.label = title;
+    });
+
+    // Do not add any Ctrl+C/Ctrl+V handling on macOS,
+    // where Cmd+C/Cmd+V works as intended.
+    if (Platform.IS_MAC) {
+      return;
+    }
+
+    term.attachCustomKeyEventHandler(event => {
+      if (event.ctrlKey && event.key === 'c' && term.hasSelection()) {
+        // Return so that the usual OS copy happens
+        // instead of interrupt signal.
+        return false;
+      }
+
+      if (event.ctrlKey && event.key === 'v' && this._options.pasteWithCtrlV) {
+        // Return so that the usual paste happens.
+        return false;
+      }
+
+      return true;
     });
   }
 
@@ -303,7 +327,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     }
   }
 
-  private _term: Xterm;
+  private readonly _term: Xterm;
   private _needsResize = true;
   private _termOpened = false;
   private _offsetWidth = -1;

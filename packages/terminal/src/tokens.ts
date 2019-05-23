@@ -96,11 +96,18 @@ export namespace ITerminal {
     initialCommand: string;
 
     /**
-     * Wether to enable screen reader support.
+     * Whether to enable screen reader support.
      *
      * Set to false if you run into performance problems from DOM overhead
      */
     screenReaderMode: boolean;
+
+    /**
+     * Whether to enable using Ctrl+V to paste.
+     *
+     * This setting has no effect on macOS, where Cmd+V is available.
+     */
+    pasteWithCtrlV: boolean;
   }
 
   /**
@@ -115,7 +122,8 @@ export namespace ITerminal {
     shutdownOnClose: false,
     cursorBlink: true,
     initialCommand: '',
-    screenReaderMode: true
+    screenReaderMode: true,
+    pasteWithCtrlV: true
   };
 
   /**
