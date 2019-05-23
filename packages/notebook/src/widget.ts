@@ -36,7 +36,7 @@ import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
 
 import { IObservableMap, IObservableList } from '@jupyterlab/observables';
 
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { INotebookModel } from './model';
 
@@ -199,7 +199,7 @@ export class StaticNotebook extends Widget {
   /**
    * The Rendermime instance used by the widget.
    */
-  readonly rendermime: RenderMimeRegistry;
+  readonly rendermime: IRenderMimeRegistry;
 
   /**
    * The model for the widget.
@@ -645,7 +645,7 @@ export namespace StaticNotebook {
     /**
      * The rendermime instance used by the widget.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
 
     /**
      * The language preference for the model.

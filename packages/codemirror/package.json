@@ -46,7 +46,7 @@
     "react": "~16.8.4"
   },
   "devDependencies": {
-    "@types/codemirror": "~0.0.70",
+    "@types/codemirror": "~0.0.74",
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
     "typescript": "~3.4.3"

@@ -20,10 +20,7 @@ import { ILauncher } from '@jupyterlab/launcher';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import {
-  ITerminalTracker,
-  ITerminal
-} from '@jupyterlab/terminal/lib/constants';
+import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal';
 
 // Name-only import so as to not trigger inclusion in main bundle
 import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';

@@ -1,36 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ReadonlyJSONObject,
-  ReadonlyJSONValue,
-  Token
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { IDataConnector } from './interfaces';
 
-/* tslint:disable */
-/**
- * The default state database token.
- */
-export const IStateDB = new Token<IStateDB>('@jupyterlab/coreutils:IStateDB');
-/* tslint:enable */
-
-/**
- * A state database for saving small application state data that persists
- * between user sessions.
- */
-export interface IStateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
-  extends IDataConnector<T> {
-  /**
-   * Return a serialized copy of the state database's entire contents.
-   *
-   * @returns A promise that resolves with the database contents as JSON.
-   */
-  toJSON(): Promise<{ [id: string]: T }>;
-}
+import { IStateDB } from './tokens';
 
 /**
  * The default concrete implementation of a state database.

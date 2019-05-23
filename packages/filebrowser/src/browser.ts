@@ -3,7 +3,7 @@
 
 import { showErrorMessage, Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
-import { DocumentManager } from '@jupyterlab/docmanager';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { Contents, ServerConnection } from '@jupyterlab/services';
 
@@ -272,7 +272,7 @@ export class FileBrowser extends Widget {
 
   private _crumbs: BreadCrumbs;
   private _listing: DirListing;
-  private _manager: DocumentManager;
+  private _manager: IDocumentManager;
   private _showingError = false;
   private _directoryPending: boolean;
 }

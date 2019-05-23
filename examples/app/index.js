@@ -1,8 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-// ES6 Promise polyfill
-require('es6-promise/auto');
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+// eslint-disable-next-line
+__webpack_public_path__ = URLExt.join(
+  PageConfig.getBaseUrl(),
+  'example/static/'
+);
 
 window.addEventListener('load', function() {
   require('font-awesome/css/font-awesome.min.css');
@@ -42,5 +46,8 @@ window.addEventListener('load', function() {
     version: require('./package.json').version
   });
   lab.registerPluginModules(mods);
-  lab.start();
+  lab.start().then(() => {
+    // eslint-disable-next-line
+    console.log('Example started!');
+  });
 });

@@ -15,6 +15,7 @@ import os
 from jinja2 import FileSystemLoader
 from notebook.base.handlers import IPythonHandler, FileFindHandler
 from notebook.notebookapp import NotebookApp
+from notebook.utils import url_path_join as ujoin
 from traitlets import Unicode
 
 HERE = os.path.dirname(__file__)
@@ -43,9 +44,9 @@ class ExampleApp(NotebookApp):
         """
         super(ExampleApp, self).init_webapp()
         default_handlers = [
-            (r'/example/?', ExampleHandler),
-            (r"/example/(.*)", FileFindHandler,
-                {'path': os.path.join(HERE, 'build')})        ]
+            (ujoin(self.base_url, r'/example/?'), ExampleHandler),
+            (ujoin(self.base_url, r"/example/(.*)"), FileFindHandler,
+        {'path': os.path.join(HERE, 'build')})        ]
         self.web_app.add_handlers('.*$', default_handlers)
 
 

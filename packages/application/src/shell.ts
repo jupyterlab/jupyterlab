@@ -63,7 +63,7 @@ const ACTIVITY_CLASS = 'jp-Activity';
 
 /* tslint:disable */
 /**
- * The layout restorer token.
+ * The JupyterLab application shell token.
  */
 export const ILabShell = new Token<ILabShell>(
   '@jupyterlab/application:ILabShell'
@@ -71,7 +71,7 @@ export const ILabShell = new Token<ILabShell>(
 /* tslint:enable */
 
 /**
- * The JupyterLab application shell.
+ * The JupyterLab application shell interface.
  */
 export interface ILabShell extends LabShell {}
 

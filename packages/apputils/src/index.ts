@@ -21,6 +21,7 @@ export * from './spinner';
 export * from './splash';
 export * from './styling';
 export * from './thememanager';
+export * from './tokens';
 export * from './toolbar';
 export * from './vdom';
 export * from './windowresolver';

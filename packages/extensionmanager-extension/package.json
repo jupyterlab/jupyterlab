@@ -35,7 +35,8 @@
     "@jupyterlab/application": "^1.0.0-alpha.6",
     "@jupyterlab/apputils": "^1.0.0-alpha.6",
     "@jupyterlab/coreutils": "^3.0.0-alpha.6",
-    "@jupyterlab/extensionmanager": "^1.0.0-alpha.6"
+    "@jupyterlab/extensionmanager": "^1.0.0-alpha.6",
+    "@jupyterlab/mainmenu": "^1.0.0-alpha.6"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

@@ -46,7 +46,10 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     this._options = { ...ITerminal.defaultOptions, ...options };
 
     const { initialCommand, theme, ...other } = this._options;
-    const xtermOptions = { theme: Private.getXTermTheme(theme), ...other };
+    const xtermOptions = {
+      theme: Private.getXTermTheme(theme),
+      ...other
+    };
 
     this.addClass(TERMINAL_CLASS);
 

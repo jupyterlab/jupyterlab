@@ -40,11 +40,11 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 
 import {
-  IMainMenu,
   IEditMenu,
   IFileMenu,
   IHelpMenu,
   IKernelMenu,
+  IMainMenu,
   IRunMenu,
   IViewMenu
 } from '@jupyterlab/mainmenu';
@@ -782,26 +782,31 @@ function activateNotebookHandler(
     rank: 7
   });
   app.contextMenu.addItem({
-    type: 'separator',
+    command: CommandIDs.merge,
     selector: '.jp-Notebook .jp-Cell',
     rank: 8
+  });
+  app.contextMenu.addItem({
+    type: 'separator',
+    selector: '.jp-Notebook .jp-Cell',
+    rank: 9
   });
 
   // CodeCell context menu groups
   app.contextMenu.addItem({
     command: CommandIDs.createOutputView,
     selector: '.jp-Notebook .jp-CodeCell',
-    rank: 9
+    rank: 10
   });
   app.contextMenu.addItem({
     type: 'separator',
     selector: '.jp-Notebook .jp-CodeCell',
-    rank: 10
+    rank: 11
   });
   app.contextMenu.addItem({
     command: CommandIDs.clearOutputs,
     selector: '.jp-Notebook .jp-CodeCell',
-    rank: 11
+    rank: 12
   });
 
   // Notebook context menu groups

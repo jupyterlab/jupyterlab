@@ -1,5 +1,5 @@
 {
-  "name": "browser-example",
+  "name": "@jupyterlab/example-services-browser",
   "version": "1.0.0-alpha.6",
   "private": true,
   "scripts": {
@@ -8,11 +8,12 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/services": "^4.0.0-alpha.6",
-    "es6-promise": "~4.1.1"
+    "@jupyterlab/coreutils": "^3.0.0-alpha.6",
+    "@jupyterlab/services": "^4.0.0-alpha.6"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
+    "typescript": "~3.4.3",
     "webpack": "~4.29.6",
     "webpack-cli": "^3.3.0"
   }

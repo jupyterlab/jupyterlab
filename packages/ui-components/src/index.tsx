@@ -35,6 +35,7 @@ export { Intent } from '@blueprintjs/core/lib/cjs/common/intent';
 
 interface IButtonProps extends IBPButtonProps {
   title?: string;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 interface IInputGroupProps extends IBPInputGroupProps {

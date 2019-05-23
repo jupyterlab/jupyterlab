@@ -9,8 +9,6 @@ import { IInstanceTracker, MainAreaWidget } from '@jupyterlab/apputils';
 
 import { TerminalSession } from '@jupyterlab/services';
 
-import '../style/index.css';
-
 /**
  * A class that tracks editor widgets.
  */
@@ -96,6 +94,13 @@ export namespace ITerminal {
      * An optional command to run when the session starts.
      */
     initialCommand: string;
+
+    /**
+     * Wether to enable screen reader support.
+     *
+     * Set to false if you run into performance problems from DOM overhead
+     */
+    screenReaderMode: boolean;
   }
 
   /**
@@ -109,7 +114,8 @@ export namespace ITerminal {
     scrollback: 1000,
     shutdownOnClose: false,
     cursorBlink: true,
-    initialCommand: ''
+    initialCommand: '',
+    screenReaderMode: true
   };
 
   /**
