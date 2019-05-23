@@ -7,7 +7,7 @@ import { ActivityMonitor } from '@jupyterlab/coreutils';
 
 import {
   IRenderMime,
-  RenderMimeRegistry,
+  IRenderMimeRegistry,
   MimeModel
 } from '@jupyterlab/rendermime';
 
@@ -293,7 +293,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
     return widget;
   }
 
-  private _rendermime: RenderMimeRegistry;
+  private _rendermime: IRenderMimeRegistry;
   private _renderTimeout: number;
   private _dataType: 'string' | 'json';
   private _fileType: DocumentRegistry.IFileType;
@@ -316,7 +316,7 @@ export namespace MimeDocumentFactory {
     /**
      * The rendermime instance.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
 
     /**
      * The render timeout.

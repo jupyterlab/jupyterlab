@@ -1,51 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ReadonlyJSONObject,
-  ReadonlyJSONValue,
-  Token
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { IDataConnector } from './interfaces';
-
-/* tslint:disable */
-/**
- * The default state database token.
- */
-export const IStateDB = new Token<IStateDB>('@jupyterlab/coreutils:IStateDB');
-/* tslint:enable */
-
-/**
- * The description of a state database.
- */
-export interface IStateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
-  extends IDataConnector<T> {
-  /**
-   * The maximum allowed length of the data after it has been serialized.
-   */
-  readonly maxLength: number;
-
-  /**
-   * The namespace prefix for all state database entries.
-   *
-   * #### Notes
-   * This value should be set at instantiation and will only be used
-   * internally by a state database. That means, for example, that an
-   * app could have multiple, mutually exclusive state databases.
-   */
-  readonly namespace: string;
-
-  /**
-   * Return a serialized copy of the state database's entire contents.
-   *
-   * @returns A promise that bears the database contents as JSON.
-   */
-  toJSON(): Promise<{ [id: string]: T }>;
-}
-
+import { IStateDB } from './tokens';
 /**
  * The default concrete implementation of a state database.
  */

@@ -24,7 +24,7 @@ namespace CommandIDs {
 /**
  * A plugin providing a rendermime registry.
  */
-const plugin: JupyterFrontEndPlugin<RenderMimeRegistry> = {
+const plugin: JupyterFrontEndPlugin<IRenderMimeRegistry> = {
   id: '@jupyterlab/rendermime-extension:plugin',
   requires: [IDocumentManager],
   optional: [ILatexTypesetter],

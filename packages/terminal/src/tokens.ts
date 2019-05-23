@@ -9,8 +9,6 @@ import { IInstanceTracker, MainAreaWidget } from '@jupyterlab/apputils';
 
 import { TerminalSession } from '@jupyterlab/services';
 
-import '../style/index.css';
-
 /**
  * A class that tracks editor widgets.
  */

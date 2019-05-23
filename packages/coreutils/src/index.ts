@@ -13,4 +13,5 @@ export * from './settingregistry';
 export * from './statedb';
 export * from './text';
 export * from './time';
+export * from './tokens';
 export * from './url';

@@ -19,7 +19,7 @@ import { IClientSession } from '@jupyterlab/apputils';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { IOutputModel, RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
@@ -123,7 +123,7 @@ export class OutputArea extends Widget {
   /**
    * The rendermime instance used by the widget.
    */
-  readonly rendermime: RenderMimeRegistry;
+  readonly rendermime: IRenderMimeRegistry;
 
   /**
    * A read-only sequence of the chidren widgets in the output area.
@@ -522,7 +522,7 @@ export namespace OutputArea {
     /**
      * The rendermime instance used by the widget.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
   }
 
   /**

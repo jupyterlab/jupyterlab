@@ -22,7 +22,7 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { DataGrid } from '@phosphor/datagrid';
 
-import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
+import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
 import { CSVSearchProvider } from './searchprovider';
 
 /**

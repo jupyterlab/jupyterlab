@@ -8,6 +8,7 @@ import { DataConnector, ISchemaValidator } from '@jupyterlab/coreutils';
 import { InspectionHandler, InspectorPanel } from '@jupyterlab/inspector';
 
 import {
+  IRenderMimeRegistry,
   RenderMimeRegistry,
   standardRendererFactories
 } from '@jupyterlab/rendermime';
@@ -21,7 +22,7 @@ import { RawEditor } from './raweditor';
  */
 export function createInspector(
   editor: RawEditor,
-  rendermime?: RenderMimeRegistry
+  rendermime?: IRenderMimeRegistry
 ): InspectorPanel {
   const connector = new InspectorConnector(editor);
   const inspector = new InspectorPanel();

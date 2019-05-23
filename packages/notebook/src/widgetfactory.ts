@@ -5,7 +5,7 @@ import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
 import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { ToolbarItems } from './default-toolbar';
 
@@ -42,7 +42,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
   /*
    * The rendermime instance.
    */
-  readonly rendermime: RenderMimeRegistry;
+  readonly rendermime: IRenderMimeRegistry;
 
   /**
    * The content factory used by the widget factory.
@@ -122,7 +122,7 @@ export namespace NotebookWidgetFactory {
     /*
      * A rendermime instance.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
 
     /**
      * A notebook panel content factory.
