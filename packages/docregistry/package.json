@@ -18,6 +18,9 @@
     "lib/*.js",
     "style/index.css"
   ],
+  "sideEffects": [
+    "style/index.css"
+  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "directories": {
