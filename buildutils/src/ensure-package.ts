@@ -8,6 +8,7 @@ import * as glob from 'glob';
 import * as path from 'path';
 import * as ts from 'typescript';
 import { getDependency } from './get-dependency';
+import { getCssDependencies } from './css-dependency';
 import * as utils from './utils';
 
 /**
@@ -28,6 +29,8 @@ export async function ensurePackage(
   let unused = options.unused || [];
   let messages: string[] = [];
   let locals = options.locals || {};
+  const styledPkgs = options.styledPackages || [];
+  const missingCss = options.missingCss || [];
 
   // Verify dependencies are consistent.
   let promises = Object.keys(deps).map(async name => {
@@ -107,6 +110,19 @@ export async function ensurePackage(
 
   await Promise.all(promises);
 
+  // Get CSS imports
+  const cssDeps = data['style']
+    ? getCssDependencies(path.join(pkgPath, data['style']))
+    : [];
+  cssDeps.map(name => {
+    if (missing.indexOf(name) !== -1) {
+      return;
+    }
+    if (!deps[name]) {
+      messages.push(`Missing dependency for CSS import: ${name}`);
+    }
+  });
+
   // Look for unused packages
   Object.keys(deps).forEach(name => {
     if (options.noUnused === false) {
@@ -122,13 +138,47 @@ export async function ensurePackage(
         return;
       }
     }
-    if (names.indexOf(name) === -1) {
+    if (names.indexOf(name) === -1 && cssDeps.indexOf(name) === -1) {
       let version = data.dependencies[name];
       messages.push(
         `Unused dependency: ${name}@${version}: remove or add to list of known unused dependencies for this package`
       );
     }
   });
+
+  // Look for missing cross-package CSS imports
+  let extensionWithBase = false;
+  if (data.name.endsWith('-extension')) {
+    const baseName = data.name.slice(0, data.name.length - '-extension'.length);
+    if (Object.keys(deps).indexOf(baseName) !== -1) {
+      extensionWithBase = true;
+      if (
+        cssDeps.indexOf(baseName) === -1 &&
+        styledPkgs.indexOf(baseName) !== -1
+      ) {
+        messages.push(`Missing style import: ${baseName}`);
+      }
+    }
+  }
+
+  if (!extensionWithBase && !data.name.startsWith('@jupyterlab/test')) {
+    Object.keys(deps).forEach(name => {
+      if (!name.startsWith('@jupyterlab')) {
+        return;
+      }
+      if (missingCss.indexOf(name) !== -1) {
+        return;
+      }
+      if (cssDeps.indexOf(name) === -1) {
+        // Potential missing import
+        // Check if dep declare styles
+        if (styledPkgs.indexOf(name) === -1) {
+          return;
+        }
+        messages.push(`Missing style import: ${name}`);
+      }
+    });
+  }
 
   // Handle typedoc config output.
   const tdOptionsPath = path.join(pkgPath, 'tdoptions.json');
@@ -198,6 +248,24 @@ export async function ensurePackage(
   for (let style of styles) {
     if (!published.has(style)) {
       messages.push(`Style file ${style} not published in ${pkgPath}`);
+    }
+  }
+
+  // If we have styles, ensure that 'style' field is declared
+  if (styles.length > 0) {
+    if (data.style === undefined) {
+      data.style = 'style/index.css';
+    }
+  }
+
+  // Ensure that sideEffects are declared, and that any styles are covered
+  if (styles.length > 0) {
+    if (data.sideEffects === undefined) {
+      messages.push(
+        `Side effects not declared in ${pkgPath}, and styles are present.`
+      );
+    } else if (data.sideEffects === false) {
+      messages.push(`Style files not included in sideEffects in ${pkgPath}`);
     }
   }
 
@@ -277,6 +345,10 @@ export interface IEnsurePackageOptions {
    * Whether to enforce that dependencies get used.  Default is true.
    */
   noUnused?: boolean;
+
+  missingCss?: string[];
+
+  styledPackages?: string[];
 }
 
 /**

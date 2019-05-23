@@ -17,6 +17,9 @@ import {
 
 import { Kernel } from '@jupyterlab/services';
 
+import '@jupyterlab/rendermime/style/outputarea.css';
+import '@jupyterlab/rendermime/style/index.css';
+
 async function main() {
   const code = [
     'from IPython.display import HTML',

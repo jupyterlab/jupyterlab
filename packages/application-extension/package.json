@@ -16,11 +16,15 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "schema/*.json"
+    "schema/*.json",
+    "style/**/*.css"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "style/**/*.css"
+  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },

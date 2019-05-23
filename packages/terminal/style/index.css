@@ -3,13 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+@import './base.css';
+
 @import url('~xterm/src/xterm.css');
 
-.jp-Terminal {
-  min-width: 240px;
-  min-height: 120px;
-}
-
-.jp-Terminal-body {
-  padding: 8px;
-}
+@import url('~@jupyterlab/apputils/style/index.css');

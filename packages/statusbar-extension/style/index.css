@@ -3,7 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-/* A status bar icon */
-.jp-StatusBarIcon {
-  background-image: url('./status-bar-icon.svg');
-}
+@import './base.css';
+
+@import url('~@jupyterlab/statusbar/style/index.css');

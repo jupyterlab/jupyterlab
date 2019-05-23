@@ -42,8 +42,6 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { Title, Widget } from '@phosphor/widgets';
 
-import '../style/index.css';
-
 export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
 
 /**

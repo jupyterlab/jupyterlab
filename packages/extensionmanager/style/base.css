@@ -1,0 +1,321 @@
+/*
+  Main widget layout and styling
+*/
+
+.jp-extensionmanager-view {
+  padding-bottom: 0px;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  display: flex;
+  flex-direction: column;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-extensionmanager-content {
+  overflow: auto;
+  overflow-x: hidden;
+}
+
+/*
+  List view layout and styling
+*/
+
+.jp-extensionmanager-listview-wrapper {
+  margin: 0;
+  padding: 0;
+  padding-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+}
+
+.jp-extensionmanager-listview {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+}
+
+/*
+  Section headers
+*/
+
+.jp-extensionmanager-view header {
+  display: flex;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  margin: 0px;
+  padding-bottom: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  letter-spacing: 1px;
+  font-size: var(--jp-ui-font-size0);
+  line-height: 24px;
+  height: 24px;
+  padding: 4px;
+}
+
+.jp-extensionmanager-view header > .jp-ToolbarButtonComponent {
+  padding: 0px 4px;
+}
+
+.jp-extensionmanager-view header .jp-extensionmanager-headerText {
+  flex: 1 0 auto;
+  margin: 0px 4px;
+}
+
+.jp-extensionmanager-view header > .jp-ToolbarButtonComponent {
+  border: 1px solid transparent;
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-extensionmanager-view header > .jp-ToolbarButtonComponent:hover {
+  /* border: 1px solid var(--jp-brand-color1); */
+}
+
+/*
+  Error messages
+*/
+.jp-extensionmanager-view .jp-extensionmanager-error pre {
+  white-space: pre-wrap;
+}
+
+/*
+  Search bar layout and styling
+*/
+
+.jp-extensionmanager-search-bar {
+  padding: 4px;
+}
+
+.jp-extensionmanager-search-wrapper input {
+  background: transparent;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color0);
+  line-height: var(--jp-private-commandpalette-search-height);
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
+.jp-extensionmanager-search-wrapper input:focus {
+  box-shadow: inset 0 0 0 1px var(--jp-input-active-box-shadow-color),
+    inset 0 0 0 3px var(--jp-input-active-box-shadow-color);
+}
+
+/*
+  List view pagination styling
+*/
+
+.jp-extensionmanager-view ul.pagination {
+  display: inline-block;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.jp-extensionmanager-view .pagination li {
+  display: inline-block;
+}
+
+.jp-extensionmanager-view .pagination .break a {
+  cursor: default;
+}
+
+.jp-extensionmanager-pagination {
+  display: flex;
+  justify-content: center;
+}
+/*
+  Entry layout and styling
+*/
+
+.jp-extensionmanager-entry {
+  padding: 8px;
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
+}
+
+.jp-extensionmanager-entry-title {
+  display: flex;
+  flex-direction: row;
+}
+
+.jp-extensionmanager-entry-jupyter-org {
+  background-image: var(--jp-image-jupyter);
+  background-size: 1em;
+  background-repeat: no-repeat;
+  width: 1em;
+  display: none;
+  position: relative;
+  top: 1px;
+}
+
+.jp-extensionmanager-entry.jp-extensionmanager-entry-mod-whitelisted
+  .jp-extensionmanager-entry-jupyter-org {
+  display: inline;
+}
+
+/* Precedence order update/error/warning matters! */
+.jp-extensionmanager-entry.jp-extensionmanager-entry-update {
+  border-left: solid 8px var(--jp-brand-color2);
+  padding-left: 4px;
+}
+
+.jp-extensionmanager-entry.jp-extensionmanager-entry-error {
+  border-left: solid 8px var(--jp-error-color2);
+  padding-left: 4px;
+}
+
+.jp-extensionmanager-entry.jp-extensionmanager-entry-warning {
+}
+
+.jp-extensionmanager-entry-name {
+  font-size: var(--jp-ui-font-size1);
+  font-weight: 600;
+  padding: 0 8px 0 0;
+  margin-bottom: 4px;
+}
+
+.jp-extensionmanager-entry-name a:link {
+  color: var(--jp-content-link-color);
+  text-decoration: none;
+}
+
+.jp-extensionmanager-entry-name a:visited {
+  color: var(--jp-content-link-color);
+  text-decoration: none;
+}
+
+.jp-extensionmanager-entry-name a:hover {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+}
+
+.jp-extensionmanager-entry-description {
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color2);
+  font-weight: 400;
+}
+
+.jp-extensionmanager-loader,
+.jp-extensionmanager-error,
+.jp-extensionmanager-listview-message {
+  padding: 4px 12px;
+}
+
+.jp-extensionmanager-listview-message {
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-extensionmanager-entry-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/*
+  Pending entry progress indicator
+*/
+
+.jp-extensionmanager-pending {
+  height: 4px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  flex: 0 0 auto;
+  background-color: var(--jp-layout-color1);
+}
+
+.jp-extensionmanager-pending.jp-mod-hasPending:before {
+  display: block;
+  position: absolute;
+  content: '';
+  left: -200px;
+  width: 200px;
+  height: 4px;
+  border-radius: 4px;
+  background-color: var(--jp-brand-color1);
+  animation: loading 2s linear infinite;
+}
+
+@keyframes loading {
+  from {
+    left: -200px;
+    width: 30%;
+  }
+  50% {
+    width: 30%;
+  }
+  70% {
+    width: 70%;
+  }
+  80% {
+    left: 50%;
+  }
+  95% {
+    left: 120%;
+  }
+  to {
+    left: 100%;
+  }
+}
+
+/*
+  Entry buttons layout and styling
+*/
+
+.jp-extensionmanager-entry-buttons {
+  display: flex;
+  flex-direction: row;
+  padding-top: 4px;
+}
+
+/*
+  Rebuild prompt dialog
+*/
+
+.jp-extensionmanager-buildprompt {
+  background-color: var(--jp-brand-color1);
+  color: var(--jp-ui-inverse-font-color1);
+  padding: 4px 8px;
+  font-size: var(--jp-ui-font-size1);
+  font-weight: 400;
+}
+
+.jp-extensionmanager-buildprompt button {
+  border: none;
+  background-color: transparent;
+  color: var(--jp-ui-inverse-font-color1);
+  font-size: var(--jp-ui-font-size1);
+  font-weight: 600;
+  float: right;
+  margin: 4px;
+}
+
+/*
+  Companion packages dialog
+*/
+
+input[type='checkbox'] {
+  appearance: checkbox;
+  -webkit-appearance: checkbox;
+  -moz-appearance: checkbox;
+  height: auto;
+}
+
+/*
+  Generic dialog
+*/
+.jp-extensionmanager-dialog .jp-extensionmanager-dialog-subheader {
+  font-size: var(--jp-ui-font-size1);
+  font-weight: 600;
+  color: var(--jp-ui-font-color0);
+}
+
+.jp-extensionmanager-collapseIcon {
+  background-image: var(--jp-image-caretright);
+}
+
+.jp-extensionmanager-expandIcon {
+  background-image: var(--jp-image-caretdown);
+}

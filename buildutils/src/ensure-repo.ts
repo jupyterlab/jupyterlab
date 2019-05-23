@@ -15,12 +15,14 @@ import * as path from 'path';
 import * as utils from './utils';
 import { ensurePackage, IEnsurePackageOptions } from './ensure-package';
 
+type Dict<T> = { [key: string]: T };
+
 // Data to ignore.
-let MISSING: { [key: string]: string[] } = {
+let MISSING: Dict<string[]> = {
   '@jupyterlab/buildutils': ['path']
 };
 
-let UNUSED: { [key: string]: string[] } = {
+let UNUSED: Dict<string[]> = {
   '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/application': ['font-awesome'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
@@ -30,11 +32,44 @@ let UNUSED: { [key: string]: string[] } = {
   '@jupyterlab/vega5-extension': ['vega', 'vega-lite']
 };
 
-let pkgData: { [key: string]: any } = {};
-let pkgPaths: { [key: string]: string } = {};
-let pkgNames: { [key: string]: string } = {};
-let depCache: { [key: string]: string } = {};
-let locals: { [key: string]: string } = {};
+let MISSING_CSS: Dict<string[]> = {
+  '@jupyterlab/application': ['@jupyterlab/rendermime'],
+  '@jupyterlab/application-extension': ['@jupyterlab/apputils'],
+  '@jupyterlab/completer': ['@jupyterlab/codeeditor'],
+  '@jupyterlab/docmanager': ['@jupyterlab/statusbar'], // Statusbar styles should not be by status reporters
+  '@jupyterlab/docregistry': [
+    '@jupyterlab/codeeditor', // Only used for model
+    '@jupyterlab/codemirror', // Only used for Mode.findByFileName
+    '@jupyterlab/rendermime' // Only used for model
+  ],
+  '@jupyterlab/documentsearch': [
+    '@jupyterlab/cells',
+    '@jupyterlab/codeeditor',
+    '@jupyterlab/codemirror',
+    '@jupyterlab/fileeditor',
+    '@jupyterlab/notebook'
+  ],
+  '@jupyterlab/filebrowser': ['@jupyterlab/statusbar'],
+  '@jupyterlab/fileeditor': ['@jupyterlab/statusbar'],
+  '@jupyterlab/faq-extension': ['@jupyterlab/application'],
+  '@jupyterlab/help-extension': ['@jupyterlab/application'],
+  '@jupyterlab/shortcuts-extension': ['@jupyterlab/application'],
+  '@jupyterlab/tabmanager-extension': ['@jupyterlab/application'],
+  '@jupyterlab/theme-dark-extension': [
+    '@jupyterlab/application',
+    '@jupyterlab/apputils'
+  ],
+  '@jupyterlab/theme-light-extension': [
+    '@jupyterlab/application',
+    '@jupyterlab/apputils'
+  ]
+};
+
+let pkgData: Dict<any> = {};
+let pkgPaths: Dict<string> = {};
+let pkgNames: Dict<string> = {};
+let depCache: Dict<string> = {};
+let locals: Dict<string> = {};
 
 /**
  * Ensure the metapackage package.
@@ -47,7 +82,7 @@ function ensureMetaPackage(): string[] {
   let mpJson = path.join(mpPath, 'package.json');
   let mpData = utils.readJSONFile(mpJson);
   let messages: string[] = [];
-  let seen: { [key: string]: boolean } = {};
+  let seen: Dict<boolean> = {};
 
   utils.getCorePaths().forEach(pkgPath => {
     if (path.resolve(pkgPath) === path.resolve(mpPath)) {
@@ -180,7 +215,7 @@ function ensureJupyterlab(): string[] {
  * Ensure the repo integrity.
  */
 export async function ensureIntegrity(): Promise<boolean> {
-  let messages: { [key: string]: string[] } = {};
+  let messages: Dict<string[]> = {};
 
   // Pick up all the package versions.
   let paths = utils.getLernaPaths();
@@ -189,6 +224,14 @@ export async function ensureIntegrity(): Promise<boolean> {
   // in sync.
   paths.push('./jupyterlab/tests/mock_packages/extension');
   paths.push('./jupyterlab/tests/mock_packages/mimeextension');
+
+  const styledPackages = utils.getLernaPaths().reduce((hasStyles, pkgPath) => {
+    const d = utils.readJSONFile(path.resolve(pkgPath, 'package.json'));
+    if (d.style) {
+      hasStyles.push(d.name);
+    }
+    return hasStyles;
+  }, []);
 
   paths.forEach(pkgPath => {
     // Read in the package.json.
@@ -229,7 +272,9 @@ export async function ensureIntegrity(): Promise<boolean> {
       depCache,
       missing: MISSING[name],
       unused,
-      locals
+      locals,
+      missingCss: MISSING_CSS[name],
+      styledPackages
     };
 
     if (name === '@jupyterlab/metapackage') {

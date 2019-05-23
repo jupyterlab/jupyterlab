@@ -17,8 +17,6 @@ import { JSONObject } from '@phosphor/coreutils';
 
 import { Widget } from '@phosphor/widgets';
 
-import '../style/index.css';
-
 /**
  * The command IDs used by the launcher plugin.
  */

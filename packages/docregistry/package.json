@@ -16,13 +16,14 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "style/index.css"
+    "style/**/*.css"
   ],
   "sideEffects": [
-    "style/index.css"
+    "style/**/*.css"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },

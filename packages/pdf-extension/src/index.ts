@@ -9,8 +9,6 @@ import { DisposableDelegate } from '@phosphor/disposable';
 
 import { Widget } from '@phosphor/widgets';
 
-import '../style/index.css';
-
 /**
  * The MIME type for PDF.
  */

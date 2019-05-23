@@ -3,12 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-/*-----------------------------------------------------------------------------
-| Imports
-|----------------------------------------------------------------------------*/
+@import './base.css';
 
-@import './collapser.css';
-@import './headerfooter.css';
-@import './inputarea.css';
-@import './placeholder.css';
-@import './widget.css';
+@import url('~@jupyterlab/apputils/style/index.css');
+@import url('~@jupyterlab/attachments/style/index.css');
+@import url('~@jupyterlab/codeeditor/style/index.css');
+@import url('~@jupyterlab/codemirror/style/index.css');
+@import url('~@jupyterlab/outputarea/style/index.css');
+@import url('~@jupyterlab/rendermime/style/index.css');

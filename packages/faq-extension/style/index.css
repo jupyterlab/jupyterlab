@@ -3,19 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-FAQ {
-  font-family: var(--jp-content-font-family);
-  line-height: var(--jp-content-line-height);
-  font-size: var(--jp-content-font-size1);
-  color: var(--jp-content-font-color1);
-  outline: none;
-  display: flex;
-  flex-direction: column;
-  min-width: 240px;
-  min-height: 120px;
-}
+@import url('~@jupyterlab/apputils/style/index.css');
+@import url('~@jupyterlab/rendermime/style/index.css');
 
-.jp-FAQ-content {
-  overflow-y: auto;
-  padding: 32px;
-}
+@import './base.css';

@@ -1,0 +1,210 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Private CSS variables
+|----------------------------------------------------------------------------*/
+
+:root {
+}
+
+/*-----------------------------------------------------------------------------
+| Main OutputArea
+| OutputArea has a list of Outputs
+|----------------------------------------------------------------------------*/
+
+.jp-OutputArea {
+  overflow-y: auto;
+}
+
+.jp-OutputArea-child {
+  display: flex;
+  flex-direction: row;
+}
+
+.jp-OutputPrompt {
+  flex: 0 0 var(--jp-cell-prompt-width);
+  color: var(--jp-cell-outprompt-font-color);
+  font-family: var(--jp-cell-prompt-font-family);
+  padding: var(--jp-code-padding);
+  letter-spacing: var(--jp-cell-prompt-letter-spacing);
+  line-height: var(--jp-code-line-height);
+  font-size: var(--jp-code-font-size);
+  border: var(--jp-border-width) solid transparent;
+  opacity: var(--jp-cell-prompt-opacity);
+  /* Right align prompt text, don't wrap to handle large prompt numbers */
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Disable text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.jp-OutputArea-output {
+  height: auto;
+  overflow: auto;
+  user-select: text;
+  -moz-user-select: text;
+  -webkit-user-select: text;
+  -ms-user-select: text;
+}
+
+.jp-OutputArea-child .jp-OutputArea-output {
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+/**
+ * Isolated output.
+ */
+.jp-OutputArea-output.jp-mod-isolated {
+  width: 100%;
+  display: block;
+}
+
+/*
+When drag events occur, `p-mod-override-cursor` is added to the body.
+Because iframes steal all cursor events, the following two rules are necessary
+to suppress pointer events while resize drags are occurring. There may be a
+better solution to this problem.
+*/
+body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated {
+  position: relative;
+}
+
+body.p-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+}
+
+/* pre */
+
+.jp-OutputArea-output pre {
+  border: none;
+  margin: 0px;
+  padding: 0px;
+  overflow-x: auto;
+  overflow-y: auto;
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+/* tables */
+
+.jp-OutputArea-output.jp-RenderedHTMLCommon table {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* description lists */
+
+.jp-OutputArea-output dl,
+.jp-OutputArea-output dt,
+.jp-OutputArea-output dd {
+  display: block;
+}
+
+.jp-OutputArea-output dl {
+  width: 100%;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+.jp-OutputArea-output dt {
+  font-weight: bold;
+  float: left;
+  width: 20%;
+  padding: 0;
+  margin: 0;
+}
+
+.jp-OutputArea-output dd {
+  float: left;
+  width: 80%;
+  padding: 0;
+  margin: 0;
+}
+
+/* Hide the gutter in case of
+ *  - nested output areas (e.g. in the case of output widgets)
+ *  - mirrored output areas
+ */
+.jp-OutputArea .jp-OutputArea .jp-OutputArea-prompt {
+  display: none;
+}
+
+/*-----------------------------------------------------------------------------
+| executeResult is added to any Output-result for the display of the object
+| returned by a cell
+|----------------------------------------------------------------------------*/
+
+.jp-OutputArea-output.jp-OutputArea-executeResult {
+  margin-left: 0px;
+  flex: 1 1 auto;
+}
+
+.jp-OutputArea-executeResult.jp-RenderedText {
+  padding-top: var(--jp-code-padding);
+}
+
+/*-----------------------------------------------------------------------------
+| The Stdin output
+|----------------------------------------------------------------------------*/
+
+.jp-OutputArea-stdin {
+  line-height: var(--jp-code-line-height);
+  padding-top: var(--jp-code-padding);
+  display: flex;
+}
+
+.jp-Stdin-prompt {
+  color: var(--jp-content-font-color0);
+  padding-right: var(--jp-code-padding);
+  vertical-align: baseline;
+  flex: 0 0 auto;
+}
+
+.jp-Stdin-input {
+  font-family: var(--jp-code-font-family);
+  font-size: inherit;
+  color: inherit;
+  background-color: inherit;
+  width: 42%;
+  min-width: 200px;
+  /* make sure input baseline aligns with prompt */
+  vertical-align: baseline;
+  /* padding + margin = 0.5em between prompt and cursor */
+  padding: 0em 0.25em;
+  margin: 0em 0.25em;
+  flex: 0 0 70%;
+}
+
+.jp-Stdin-input:focus {
+  box-shadow: none;
+}
+
+/*-----------------------------------------------------------------------------
+| Output Area View
+|----------------------------------------------------------------------------*/
+
+.jp-LinkedOutputView .jp-OutputArea {
+  height: 100%;
+  display: block;
+}
+
+.jp-LinkedOutputView .jp-OutputArea-output:only-child {
+  height: 100%;
+}
