@@ -1,14 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ArrayExt,
-  each,
-  map,
-  find,
-  filter,
-  toArray
-} from '@phosphor/algorithm';
+import { ArrayExt, each, map, filter, toArray } from '@phosphor/algorithm';
 
 import { DisposableSet, IDisposable } from '@phosphor/disposable';
 
@@ -139,25 +132,25 @@ export class DocumentWidgetManager implements IDisposable {
   }
 
   /**
-   * See if a widget already exists for the given context and widget name.
+   * Find all widgets for a given context and widget name.
    *
    * @param context - The document context object.
    *
-   * @returns The found widget, or `undefined`.
+   * @returns The list of found widgets.
    *
    * #### Notes
    * This can be used to use an existing widget instead of opening
    * a new widget.
    */
-  findWidget(
+  findWidgets(
     context: DocumentRegistry.Context,
     widgetName: string
-  ): IDocumentWidget | undefined {
+  ): IDocumentWidget[] {
     let widgets = Private.widgetsProperty.get(context);
     if (!widgets) {
-      return undefined;
+      return [];
     }
-    return find(widgets, widget => {
+    return widgets.filter(widget => {
       let factory = Private.factoryProperty.get(widget);
       if (!factory) {
         return false;
