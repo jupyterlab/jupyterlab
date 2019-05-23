@@ -27,6 +27,7 @@ export class TerminalManager implements TerminalSession.IManager {
     // Check if terminals are available
     if (!TerminalSession.isAvailable()) {
       this._ready = Promise.reject('Terminals unavailable');
+      this._ready.catch(_ => undefined);
       return;
     }
 

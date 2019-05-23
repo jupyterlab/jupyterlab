@@ -10,7 +10,11 @@ const URL = process.argv[2];
 async function main() {
   console.info('Starting Chrome Headless');
 
-  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+  // Disable shm usage to save resources and prevent random memory
+  // errors seen on CI
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox', '--disable-dev-shm-usage']
+  });
   const page = await browser.newPage();
 
   console.info('Navigating to page:', URL);

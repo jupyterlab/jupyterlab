@@ -464,21 +464,6 @@ export const IStateDB = new Token<IStateDB>('@jupyterlab/coreutils:IStateDB');
 export interface IStateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
   extends IDataConnector<T> {
   /**
-   * The maximum allowed length of the data after it has been serialized.
-   */
-  readonly maxLength: number;
-
-  /**
-   * The namespace prefix for all state database entries.
-   *
-   * #### Notes
-   * This value should be set at instantiation and will only be used
-   * internally by a state database. That means, for example, that an
-   * app could have multiple, mutually exclusive state databases.
-   */
-  readonly namespace: string;
-
-  /**
    * Return a serialized copy of the state database's entire contents.
    *
    * @returns A promise that bears the database contents as JSON.
