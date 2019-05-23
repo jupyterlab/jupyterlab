@@ -1,0 +1,17 @@
+.jp-toast {
+  background: var(--jp-layout-color1);
+}
+
+/* .jp-toast > .button {
+  color: transparent;
+  background-size: 16px;
+  height: 16px;
+  width: 16px;
+  background-image: var(--jp-icon-close);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.jp-toast > button:hover {
+  background-image: var(--jp-icon-close-circle);
+} */

@@ -12,6 +12,8 @@ import { Intent } from '@jupyterlab/ui-components';
 
 import { Token } from '@phosphor/coreutils';
 
+import '../style/toast.css';
+
 export const TOASTERCLASSNAME = 'jp-toaster';
 
 export const TOASTCLASSNAME = 'jp-toast';
