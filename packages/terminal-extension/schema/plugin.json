@@ -65,7 +65,7 @@
     },
     "pasteWithCtrlV": {
       "title": "Paste with Ctrl+V",
-      "description": "Whether to enable pasting with Ctrl+V.  This can be disabled to use Ctrl+V in the vi editor, for instance",
+      "description": "Whether to enable pasting with Ctrl+V.  This can be disabled to use Ctrl+V in the vi editor, for instance.  This setting has no effect on macOS, where Cmd+V is available",
       "type": "boolean",
       "default": true
     }

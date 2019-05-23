@@ -104,6 +104,8 @@ export namespace ITerminal {
 
     /**
      * Whether to enable using Ctrl+V to paste.
+     *
+     * This setting has no effect on macOS, where Cmd+V is available.
      */
     pasteWithCtrlV: boolean;
   }
