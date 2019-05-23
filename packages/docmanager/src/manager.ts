@@ -145,7 +145,7 @@ export class DocumentManager implements IDocumentManager {
   /**
    * Clone a widget.
    *
-   * @param widget - The source widget.
+   * @param widget - The source IDocumentWidget.
    *
    * @returns A new widget or `undefined`.
    *
@@ -153,7 +153,7 @@ export class DocumentManager implements IDocumentManager {
    *  Uses the same widget factory and context as the source, or returns
    *  `undefined` if the source widget is not managed by this manager.
    */
-  cloneWidget(widget: Widget): IDocumentWidget | undefined {
+  cloneWidget(widget: IDocumentWidget): IDocumentWidget | undefined {
     return this._widgetManager.cloneWidget(widget);
   }
 

@@ -181,7 +181,7 @@ export class DocumentWidgetManager implements IDisposable {
    *  Uses the same widget factory and context as the source, or throws
    *  if the source widget is not managed by this manager.
    */
-  cloneWidget(widget: Widget): IDocumentWidget | undefined {
+  cloneWidget(widget: IDocumentWidget): IDocumentWidget | undefined {
     let context = Private.contextProperty.get(widget);
     if (!context) {
       return undefined;
@@ -190,7 +190,7 @@ export class DocumentWidgetManager implements IDisposable {
     if (!factory) {
       return undefined;
     }
-    let newWidget = factory.clone(widget as IDocumentWidget, context);
+    let newWidget = factory.clone(widget, context);
     this._initializeWidget(newWidget, factory, context);
     return newWidget;
   }
