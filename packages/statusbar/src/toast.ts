@@ -42,11 +42,10 @@ export interface IToaster {
   /**
    * Display an toast message with error format.
    *
-   * @param message Toast message
    * @param options Toast options
    * @returns Unique key of the created toast
    */
-  error(message: React.ReactNode, options?: IToaster.IOptions): string;
+  error(options: IToaster.IOptions): string;
 
   /**
    * Return the model of all active toasts.
@@ -58,11 +57,10 @@ export interface IToaster {
   /**
    * Display an toast message with information format.
    *
-   * @param message Toast message
    * @param options Toast options
    * @returns Unique key of the created toast
    */
-  info(message: React.ReactNode, options?: IToaster.IOptions): string;
+  info(options: IToaster.IOptions): string;
 
   /**
    * Show a new toast to the user or update an existing one corresponding
@@ -72,22 +70,22 @@ export interface IToaster {
    * @returns Toast unique key
    */
   show(model: IToaster.IModel): string;
+
   /**
    * Display an toast message with success format.
    *
-   * @param message Toast message
    * @param options Toast options
    * @returns Unique key of the created toast
    */
-  success(message: React.ReactNode, options?: IToaster.IOptions): string;
+  success(options: IToaster.IOptions): string;
+
   /**
    * Display an toast message with warning format.
    *
-   * @param message Toast message
    * @param options Toast options
    * @returns Unique key of the created toast
    */
-  warning(message: React.ReactNode, options?: IToaster.IOptions): string;
+  warning(options: IToaster.IOptions): string;
 }
 
 /**
