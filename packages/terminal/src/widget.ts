@@ -261,21 +261,13 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     }
 
     term.attachCustomKeyEventHandler(event => {
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.key === 'c' &&
-        term.hasSelection()
-      ) {
+      if (event.ctrlKey && event.key === 'c' && term.hasSelection()) {
         // Return so that the usual OS copy happens
         // instead of interrupt signal.
         return false;
       }
 
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.key === 'v' &&
-        this._options.pasteWithCtrlV
-      ) {
+      if (event.ctrlKey && event.key === 'v' && this._options.pasteWithCtrlV) {
         // Return so that the usual paste happens.
         return false;
       }
