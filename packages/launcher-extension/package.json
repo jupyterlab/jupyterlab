@@ -19,6 +19,9 @@
     "schema/*.json",
     "style/*.css"
   ],
+  "sideEffects": [
+    "style/*.css"
+  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "directories": {

@@ -17,6 +17,7 @@
     "lib/*.js.map",
     "lib/*.js"
   ],
+  "sideEffects": false,
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "directories": {

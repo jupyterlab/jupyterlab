@@ -201,6 +201,17 @@ export async function ensurePackage(
     }
   }
 
+  // Ensure that sideEffects are declared, and that any styles are covered
+  if (styles.length > 0) {
+    if (data.sideEffects === undefined) {
+      messages.push(
+        `Side effects not declared in ${pkgPath}, and styles are present.`
+      );
+    } else if (data.sideEffects === false) {
+      messages.push(`Style files not included in sideEffects in ${pkgPath}`);
+    }
+  }
+
   // Ensure dependencies and dev dependencies.
   data.dependencies = deps;
   data.devDependencies = devDeps;

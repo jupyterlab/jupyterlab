@@ -18,6 +18,7 @@
     "lib/*.js",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
   ],
+  "sideEffects": true,
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "directories": {

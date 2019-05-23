@@ -27,6 +27,7 @@
     "dist/*.js",
     "dist/**/*.js"
   ],
+  "sideEffects": false,
   "main": "lib/index.js",
   "browser": {
     "node-fetch": false,

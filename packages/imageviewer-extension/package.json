@@ -18,6 +18,7 @@
     "lib/*.js",
     "schema/*.json"
   ],
+  "sideEffects": false,
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "directories": {
