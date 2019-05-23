@@ -178,7 +178,6 @@ const FACTORY_MIME = 'application/vnd.phosphor.widget-factory';
  * A widget which hosts a file list area.
  */
 export class DirListing extends Widget {
-  onItemOpened: Signal<DirListing, Contents.IModel>;
   /**
    * Construct a new file browser directory listing widget.
    *
@@ -190,18 +189,9 @@ export class DirListing extends Widget {
     });
     this.addClass(DIR_LISTING_CLASS);
     this._model = options.model;
-    this._model.fileChanged.connect(
-      this._onFileChanged,
-      this
-    );
-    this._model.refreshed.connect(
-      this._onModelRefreshed,
-      this
-    );
-    this._model.pathChanged.connect(
-      this._onPathChanged,
-      this
-    );
+    this._model.fileChanged.connect(this._onFileChanged, this);
+    this._model.refreshed.connect(this._onModelRefreshed, this);
+    this._model.pathChanged.connect(this._onPathChanged, this);
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
     this._manager = this._model.manager;
@@ -209,12 +199,7 @@ export class DirListing extends Widget {
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
-    this._manager.activateRequested.connect(
-      this._onActivateRequested,
-      this
-    );
-
-    this.onItemOpened = new Signal<DirListing, Contents.IModel>(this);
+    this._manager.activateRequested.connect(this._onActivateRequested, this);
   }
 
   /**
@@ -270,6 +255,13 @@ export class DirListing extends Widget {
    */
   get sortState(): DirListing.ISortState {
     return this._sortState;
+  }
+
+  /**
+   * A signal fired when an item is opened.
+   */
+  get onItemOpened(): ISignal<DirListing, Contents.IModel> {
+    return this._onItemOpened;
   }
 
   /**
@@ -913,8 +905,11 @@ export class DirListing extends Widget {
     this._startDrag(data.index, event.clientX, event.clientY);
   }
 
-  private emitOpenEvent(item: Contents.IModel): void {
-    this.onItemOpened.emit(item);
+  /**
+   * Handle the opening of an item.
+   */
+  private _handleOpen(item: Contents.IModel): void {
+    this._onItemOpened.emit(item);
     if (item.type === 'directory') {
       this._model
         .cd(item.name)
@@ -946,7 +941,7 @@ export class DirListing extends Widget {
         }
 
         let item = this._sortedItems[i];
-        this.emitOpenEvent(item);
+        this._handleOpen(item);
         break;
       case 38: // Up arrow
         this.selectPrevious(event.shiftKey);
@@ -1008,7 +1003,7 @@ export class DirListing extends Widget {
     }
 
     let item = this._sortedItems[i];
-    this.emitOpenEvent(item);
+    this._handleOpen(item);
   }
 
   /**
@@ -1497,6 +1492,7 @@ export class DirListing extends Widget {
     direction: 'ascending',
     key: 'name'
   };
+  private _onItemOpened = new Signal<DirListing, Contents.IModel>(this);
   private _drag: Drag | null = null;
   private _dragData: {
     pressX: number;
