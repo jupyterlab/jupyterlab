@@ -112,9 +112,7 @@ export namespace IPoll {
     | 'resolved'
     | 'standby'
     | 'started'
-    | 'stopped'
-    | 'when-rejected'
-    | 'when-resolved';
+    | 'stopped';
 
   /**
    * Definition of poll state at any given time.
@@ -183,23 +181,9 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
     };
     this.name = options.name || Private.DEFAULT_NAME;
 
-    // Schedule poll ticks after `when` promise is settled.
-    (options.when || Promise.resolve())
-      .then(_ => {
-        if (this.isDisposed) {
-          return;
-        }
-
-        void this.schedule({ phase: 'when-resolved' });
-      })
-      .catch(reason => {
-        if (this.isDisposed) {
-          return;
-        }
-
-        console.warn(`Poll (${this.name}) started despite rejection.`, reason);
-        void this.schedule({ phase: 'when-rejected' });
-      });
+    if ('auto' in options ? options.auto : true) {
+      void this.start();
+    }
   }
 
   /**
@@ -345,13 +329,6 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
       return;
     }
 
-    // The `when` promise in the constructor options acts as a gate.
-    if (this.state.phase === 'constructed') {
-      if (next.phase !== 'when-rejected' && next.phase !== 'when-resolved') {
-        await this.tick;
-      }
-    }
-
     // Check if the phase transition should be canceled.
     if (next.cancel && next.cancel(this.state)) {
       return;
@@ -406,7 +383,8 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
    */
   start(): Promise<void> {
     return this.schedule({
-      cancel: last => last.phase !== 'standby' && last.phase !== 'stopped',
+      cancel: ({ phase }) =>
+        phase !== 'constructed' && phase !== 'standby' && phase !== 'stopped',
       interval: Poll.IMMEDIATE,
       phase: 'started'
     });
@@ -513,6 +491,11 @@ export namespace Poll {
    */
   export interface IOptions<T, U, V extends string> {
     /**
+     * Whether to begin polling automatically; defaults to `true`.
+     */
+    auto?: boolean;
+
+    /**
      * A factory function that is passed a poll tick and returns a poll promise.
      */
     factory: Factory<T, U, V>;
@@ -539,11 +522,6 @@ export namespace Poll {
      * tick execution, but may be called by clients as well.
      */
     standby?: Standby | (() => boolean | Standby);
-
-    /**
-     * If set, a promise which must resolve (or reject) before polling begins.
-     */
-    when?: Promise<any>;
   }
   /**
    * An interval value that indicates the poll should tick immediately.
