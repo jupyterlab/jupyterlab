@@ -321,6 +321,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   undo(): void {
     this.doc.undo();
+    // On some platforms undoing can cause rendering issues,
+    // so we manually trigger a refresh here.
+    this.refresh();
   }
 
   /**
@@ -328,6 +331,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   redo(): void {
     this.doc.redo();
+    // On some platforms redoing can cause rendering issues,
+    // so we manually trigger a refresh here.
+    this.refresh();
   }
 
   /**
