@@ -25,7 +25,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
   constructor(options: InspectionHandler.IOptions) {
     this._connector = options.connector;
     this._rendermime = options.rendermime;
-    this._debouncer = new Debouncer(() => this.onEditorChange, 250);
+    this._debouncer = new Debouncer(this.onEditorChange.bind(this), 250);
   }
 
   /**
