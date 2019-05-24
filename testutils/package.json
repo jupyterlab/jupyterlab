@@ -6,6 +6,10 @@
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "files": [
@@ -19,10 +23,6 @@
   "types": "lib/index.d.ts",
   "directories": {
     "lib": "lib/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc",
@@ -44,7 +44,7 @@
     "@phosphor/signaling": "^1.2.2",
     "identity-obj-proxy": "^3.0.0",
     "json-to-html": "~0.1.2",
-    "node-fetch": "~2.2.0",
+    "node-fetch": "^2.6.0",
     "path": "~0.12.7",
     "simulate-event": "~1.4.0"
   },

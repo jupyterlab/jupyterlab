@@ -21,7 +21,7 @@
     "chai": "~4.1.2",
     "jest": "^24.7.1",
     "jest-junit": "^6.3.0",
-    "node-fetch": "~2.2.0",
+    "node-fetch": "^2.6.0",
     "text-encoding": "^0.7.0",
     "ts-jest": "^24.0.2",
     "ws": "^7.0.0"

@@ -47,7 +47,7 @@
     "@types/react": "^16.8.18",
     "react": "~16.8.4",
     "react-dom": "~16.8.4",
-    "sanitize-html": "~1.18.2"
+    "sanitize-html": "~1.20.1"
   },
   "devDependencies": {
     "@types/react-dom": "^16.8.4",

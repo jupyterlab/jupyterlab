@@ -12,7 +12,7 @@
     "@jupyterlab/terminal": "^1.0.0-alpha.6",
     "@jupyterlab/theme-light-extension": "^1.0.0-alpha.7",
     "@phosphor/widgets": "^1.6.0",
-    "es6-promise": "~4.1.1"
+    "es6-promise": "~4.2.6"
   },
   "devDependencies": {
     "css-loader": "~2.1.1",
