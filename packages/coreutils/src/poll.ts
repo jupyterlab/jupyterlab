@@ -10,18 +10,18 @@ import { ISignal, Signal } from '@phosphor/signaling';
 /**
  * A function to defer an action immediately.
  */
-const schedule = (() => {
-  let ok = typeof requestAnimationFrame === 'function';
-  return ok ? requestAnimationFrame : setImmediate;
-})();
+const defer =
+  typeof requestAnimationFrame === 'function'
+    ? requestAnimationFrame
+    : setImmediate;
 
 /**
- * A function to unschedule a deferred action.
+ * A function to cancel a deferred action.
  */
-const unschedule = (() => {
-  let ok = typeof cancelAnimationFrame === 'function';
-  return ok ? cancelAnimationFrame : clearImmediate;
-})();
+const cancel =
+  typeof cancelAnimationFrame === 'function'
+    ? cancelAnimationFrame
+    : clearImmediate;
 
 /**
  * A readonly poll that calls an asynchronous function with each tick.
@@ -198,9 +198,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
     this.name = options.name || Private.DEFAULT_NAME;
 
     if ('auto' in options ? options.auto : true) {
-      schedule(() => {
-        void this.start();
-      });
+      defer(() => void this.start());
     }
   }
 
@@ -368,7 +366,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
 
     // Clear the schedule if possible.
     if (last.interval === Poll.IMMEDIATE) {
-      unschedule(this._timeout);
+      cancel(this._timeout);
     } else {
       clearTimeout(this._timeout);
     }
@@ -388,7 +386,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
     };
     this._timeout =
       state.interval === Poll.IMMEDIATE
-        ? schedule(execute)
+        ? defer(execute)
         : state.interval === Poll.NEVER
         ? -1
         : setTimeout(execute, state.interval);
