@@ -84,7 +84,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       label: 'Enable Extension Manager (experimental)',
       execute: () => {
         if (registry) {
-          registry.set(plugin.id, 'enabled', !enabled);
+          void registry.set(plugin.id, 'enabled', !enabled);
         }
       },
       isToggled: () => enabled,
