@@ -114,6 +114,13 @@ export class KernelManager implements Kernel.IManager {
   }
 
   /**
+   * A signal emitted when there is a connection failure.
+   */
+  get connectionFailure(): ISignal<this, ServerConnection.NetworkError> {
+    return this._connectionFailure;
+  }
+
+  /**
    * Connect to an existing kernel.
    *
    * @param model - The model of the target kernel.
@@ -272,7 +279,13 @@ export class KernelManager implements Kernel.IManager {
    * Execute a request to the server to poll running kernels and update state.
    */
   protected async requestRunning(): Promise<void> {
-    const models = await Kernel.listRunning(this.serverSettings);
+    const models = await Kernel.listRunning(this.serverSettings).catch(err => {
+      if (err instanceof ServerConnection.NetworkError) {
+        this._connectionFailure.emit(err);
+        return [] as Kernel.IModel[];
+      }
+      throw err;
+    });
     if (this._isDisposed) {
       return;
     }
@@ -341,6 +354,9 @@ export class KernelManager implements Kernel.IManager {
   private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
   private _specs: Kernel.ISpecModels | null = null;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
+  private _connectionFailure = new Signal<this, ServerConnection.NetworkError>(
+    this
+  );
 }
 
 /**

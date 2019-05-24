@@ -51,6 +51,13 @@ export class ServiceManager implements ServiceManager.IManager {
     this.sessions.specsChanged.connect((_, specs) => {
       this._specsChanged.emit(specs);
     });
+
+    // Relay connection failures from the service managers that poll
+    // the server for running sessions.
+    // TODO: should we also relay connection failures from other managers?
+    this.sessions.connectionFailure.connect(this._onConnectionFailure, this);
+    this.terminals.connectionFailure.connect(this._onConnectionFailure, this);
+
     this._readyPromise = this.sessions.ready.then(() => {
       if (this.terminals.isAvailable()) {
         return this.terminals.ready;
@@ -66,6 +73,13 @@ export class ServiceManager implements ServiceManager.IManager {
    */
   get specsChanged(): ISignal<this, Kernel.ISpecModels> {
     return this._specsChanged;
+  }
+
+  /**
+   * A signal emitted when there is a connection failure with the kernel.
+   */
+  get connectionFailure(): ISignal<this, ServerConnection.NetworkError> {
+    return this._connectionFailure;
   }
 
   /**
@@ -152,9 +166,19 @@ export class ServiceManager implements ServiceManager.IManager {
     return this._readyPromise;
   }
 
+  private _onConnectionFailure(
+    sender: any,
+    err: ServerConnection.NetworkError
+  ): void {
+    this._connectionFailure.emit(err);
+  }
+
   private _isDisposed = false;
   private _readyPromise: Promise<void>;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
+  private _connectionFailure = new Signal<this, ServerConnection.NetworkError>(
+    this
+  );
   private _isReady = false;
 }
 
@@ -225,6 +249,14 @@ export namespace ServiceManager {
      * The nbconvert manager for the manager.
      */
     readonly nbconvert: NbConvert.IManager;
+
+    /**
+     * A signal emitted when there is a connection failure with the server.
+     */
+    readonly connectionFailure: ISignal<
+      IManager,
+      ServerConnection.NetworkError
+    >;
   }
 
   /**

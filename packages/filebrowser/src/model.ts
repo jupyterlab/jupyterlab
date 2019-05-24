@@ -291,7 +291,8 @@ export class FileBrowserModel implements IDisposable {
       })
       .catch(error => {
         this._pendingPath = null;
-        if (error.message === 'Not Found') {
+        this._pending = null;
+        if (error.response && error.response.status === 404) {
           error.message = `Directory not found: "${this._model.path}"`;
           console.error(error);
           this._connectionFailure.emit(error);

@@ -381,6 +381,11 @@ export namespace Session {
     runningChanged: ISignal<this, IModel[]>;
 
     /**
+     * A signal emitted when there is a connection failure.
+     */
+    connectionFailure: ISignal<IManager, ServerConnection.NetworkError>;
+
+    /**
      * The server settings for the manager.
      */
     serverSettings?: ServerConnection.ISettings;

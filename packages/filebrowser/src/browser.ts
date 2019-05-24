@@ -244,30 +244,18 @@ export class FileBrowser extends Widget {
    * Handle a connection lost signal from the model.
    */
   private _onConnectionFailure(sender: FileBrowserModel, args: Error): void {
-    if (this._showingError) {
-      return;
+    if (
+      !this._showingError &&
+      args instanceof ServerConnection.ResponseError &&
+      args.response.status === 404
+    ) {
+      const title = 'Directory not found';
+      args.message = `Directory not found: "${this.model.path}"`;
+      this._showingError = true;
+      void showErrorMessage(title, args).then(() => {
+        this._showingError = false;
+      });
     }
-    this._showingError = true;
-
-    let title = 'Server Connection Error';
-    let networkMsg =
-      'A connection to the Jupyter server could not be established.\n' +
-      'JupyterLab will continue trying to reconnect.\n' +
-      'Check your network connection or Jupyter server configuration.\n';
-
-    // Check for a fetch error.
-    if (args instanceof ServerConnection.NetworkError) {
-      args.message = networkMsg;
-    } else if (args instanceof ServerConnection.ResponseError) {
-      if (args.response.status === 404) {
-        title = 'Directory not found';
-        args.message = `Directory not found: "${this.model.path}"`;
-      }
-    }
-
-    void showErrorMessage(title, args).then(() => {
-      this._showingError = false;
-    });
   }
 
   private _crumbs: BreadCrumbs;

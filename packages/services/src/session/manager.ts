@@ -83,6 +83,13 @@ export class SessionManager implements Session.IManager {
   }
 
   /**
+   * A signal emitted when there is a connection failure.
+   */
+  get connectionFailure(): ISignal<this, ServerConnection.NetworkError> {
+    return this._connectionFailure;
+  }
+
+  /**
    * Test whether the manager is disposed.
    */
   get isDisposed(): boolean {
@@ -281,7 +288,13 @@ export class SessionManager implements Session.IManager {
    * Execute a request to the server to poll running kernels and update state.
    */
   protected async requestRunning(): Promise<void> {
-    const models = await Session.listRunning(this.serverSettings);
+    const models = await Session.listRunning(this.serverSettings).catch(err => {
+      if (err instanceof ServerConnection.NetworkError) {
+        this._connectionFailure.emit(err);
+        return [] as Session.IModel[];
+      }
+      throw err;
+    });
     if (this.isDisposed) {
       return;
     }
@@ -367,6 +380,9 @@ export class SessionManager implements Session.IManager {
   private _pollSpecs: Poll;
   private _ready: Promise<void>;
   private _runningChanged = new Signal<this, Session.IModel[]>(this);
+  private _connectionFailure = new Signal<this, ServerConnection.NetworkError>(
+    this
+  );
   private _sessions = new Set<Session.ISession>();
   private _specs: Kernel.ISpecModels | null = null;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
