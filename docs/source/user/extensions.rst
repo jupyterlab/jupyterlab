@@ -352,7 +352,7 @@ The following configurations may be present in this file:
 2. ``disabledExtensions`` controls which extensions should not load at all.
 3. ``deferredExtensions`` controls which extensions should not load until
    they are required by something, irrespective of whether they set
-   ``autostart`` to ``true``.
+   ``autoStart`` to ``true``.
 
 The value for the ``disabledExtensions`` and ``deferredExtensions`` fields
 are an array of strings. The following sequence of checks are performed
