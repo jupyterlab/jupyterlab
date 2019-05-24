@@ -19,6 +19,14 @@ export const IConnectionLost = new Token<IConnectionLost>(
   '@jupyterlab/apputils:IConnectionLost'
 );
 
+/**
+ * A function that handles a connection to the server being lost.
+ *
+ * #### Notes
+ * The default implementation shows a simple dialog upon connection
+ * failures, but it may be overridden by extensions to perform other
+ * actions.
+ */
 export type IConnectionLost = (
   manager: ServiceManager.IManager,
   err: ServerConnection.NetworkError
