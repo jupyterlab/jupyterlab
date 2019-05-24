@@ -18,7 +18,7 @@ const defer =
 /**
  * A function to cancel a deferred action.
  */
-const cancel =
+const cancel: (timeout: any) => void =
   typeof cancelAnimationFrame === 'function'
     ? cancelAnimationFrame
     : clearImmediate;
