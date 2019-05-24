@@ -8,6 +8,22 @@ import { IDisposable } from '@phosphor/disposable';
 import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
+ * A function to defer an action immediately.
+ */
+const schedule = (() => {
+  let ok = typeof requestAnimationFrame === 'function';
+  return ok ? requestAnimationFrame : setImmediate;
+})();
+
+/**
+ * A function to unschedule a deferred action.
+ */
+const unschedule = (() => {
+  let ok = typeof cancelAnimationFrame === 'function';
+  return ok ? cancelAnimationFrame : clearImmediate;
+})();
+
+/**
  * A readonly poll that calls an asynchronous function with each tick.
  *
  * @typeparam T - The resolved type of the factory's promises.
@@ -182,7 +198,9 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
     this.name = options.name || Private.DEFAULT_NAME;
 
     if ('auto' in options ? options.auto : true) {
-      void this.start();
+      schedule(() => {
+        void this.start();
+      });
     }
   }
 
@@ -350,7 +368,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
 
     // Clear the schedule if possible.
     if (last.interval === Poll.IMMEDIATE) {
-      cancelAnimationFrame(this._timeout);
+      unschedule(this._timeout);
     } else {
       clearTimeout(this._timeout);
     }
@@ -370,7 +388,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
     };
     this._timeout =
       state.interval === Poll.IMMEDIATE
-        ? requestAnimationFrame(execute)
+        ? schedule(execute)
         : state.interval === Poll.NEVER
         ? -1
         : setTimeout(execute, state.interval);
@@ -455,7 +473,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
   private _state: IPoll.State<T, U, V>;
   private _tick = new PromiseDelegate<this>();
   private _ticked = new Signal<this, IPoll.State<T, U, V>>(this);
-  private _timeout = -1;
+  private _timeout: any = -1;
 }
 
 /**
