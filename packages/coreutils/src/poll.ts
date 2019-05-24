@@ -301,7 +301,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
    */
   refresh(): Promise<void> {
     return this.schedule({
-      cancel: last => last.phase === 'refreshed',
+      cancel: ({ phase }) => phase === 'refreshed',
       interval: Poll.IMMEDIATE,
       phase: 'refreshed'
     });
@@ -397,7 +397,7 @@ export class Poll<T = any, U = any, V extends string = 'standby'>
    */
   stop(): Promise<void> {
     return this.schedule({
-      cancel: last => last.phase === 'stopped',
+      cancel: ({ phase }) => phase === 'stopped',
       interval: Poll.NEVER,
       phase: 'stopped'
     });
