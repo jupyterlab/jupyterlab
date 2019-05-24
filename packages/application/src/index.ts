@@ -14,10 +14,10 @@ export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
 
 export { IMimeDocumentTracker } from './mimerenderers';
 
-export { IRouter, Router } from './router';
+export { Router } from './router';
 
 export { ILabShell, LabShell } from './shell';
 
 export { ILabStatus } from './status';
 
-export { IConnectionLost } from './tokens';
+export * from './tokens';

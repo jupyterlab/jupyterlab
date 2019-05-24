@@ -8,7 +8,7 @@ import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 import { IConnectionLost } from './tokens';
 
 export const ConnectionLost: IConnectionLost = async function(
-  manager: ServiceManager,
+  manager: ServiceManager.IManager,
   err: ServerConnection.NetworkError
 ): Promise<void> {
   if (Private.showingError) {
