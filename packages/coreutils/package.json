@@ -6,6 +6,10 @@
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "files": [
@@ -18,10 +22,6 @@
   "types": "lib/index.d.ts",
   "directories": {
     "lib": "lib/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc -b",
@@ -37,13 +37,13 @@
     "ajv": "^6.5.5",
     "json5": "^2.1.0",
     "minimist": "~1.2.0",
-    "moment": "~2.21.0",
+    "moment": "^2.24.0",
     "path-posix": "~1.0.0",
     "url-parse": "~1.4.3"
   },
   "devDependencies": {
-    "@types/json5": "0.0.30",
-    "@types/minimist": "~1.2.0",
+    "@types/json5": "^0.0.30",
+    "@types/minimist": "^1.2.0",
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
     "typescript": "~3.4.3"

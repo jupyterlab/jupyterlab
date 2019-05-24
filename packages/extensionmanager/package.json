@@ -6,6 +6,10 @@
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "files": [
@@ -18,10 +22,6 @@
   "types": "lib/index.d.ts",
   "directories": {
     "lib": "lib/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc -b",
@@ -36,12 +36,12 @@
     "@jupyterlab/ui-components": "^1.0.0-alpha.6",
     "@phosphor/messaging": "^1.2.2",
     "react": "~16.8.4",
-    "react-paginate": "^5.2.3",
-    "semver": "^5.5.0"
+    "react-paginate": "^6.3.0",
+    "semver": "^6.1.0"
   },
   "devDependencies": {
-    "@types/react-paginate": "^4.3.2",
-    "@types/semver": "^5.5.0",
+    "@types/react-paginate": "^6.2.1",
+    "@types/semver": "^6.0.0",
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
     "typescript": "~3.4.3"

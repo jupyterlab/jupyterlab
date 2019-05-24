@@ -16,14 +16,14 @@
     "@jupyterlab/testutils": "^1.0.0-alpha.6",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/coreutils": "^1.3.0",
-    "chai": "~4.1.2",
+    "chai": "^4.2.0",
     "jest": "^24.7.1",
     "jest-junit": "^6.3.0",
     "ts-jest": "^24.0.2"
   },
   "devDependencies": {
-    "@types/chai": "~4.0.10",
-    "@types/jest": "^24.0.11",
+    "@types/chai": "^4.1.7",
+    "@types/jest": "^24.0.13",
     "rimraf": "~2.6.2",
     "typescript": "~3.4.3"
   }

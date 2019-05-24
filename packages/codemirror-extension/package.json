@@ -6,6 +6,10 @@
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "files": [
@@ -18,10 +22,6 @@
   "types": "lib/index.d.ts",
   "directories": {
     "lib": "lib/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc -b",
@@ -40,7 +40,7 @@
     "@jupyterlab/mainmenu": "^1.0.0-alpha.6",
     "@jupyterlab/statusbar": "^1.0.0-alpha.6",
     "@phosphor/widgets": "^1.6.0",
-    "codemirror": "~5.46.0"
+    "codemirror": "~5.47.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

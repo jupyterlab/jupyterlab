@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "@jupyterlab/services": "^4.0.0-alpha.6",
-    "node-fetch": "~2.2.0",
-    "ws": "~6.0.0"
+    "node-fetch": "^2.6.0",
+    "ws": "^7.0.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2"

@@ -27,13 +27,13 @@
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/signaling": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
-    "chai": "~4.1.2"
+    "chai": "^4.2.0"
   },
   "devDependencies": {
-    "@types/chai": "~4.0.10",
-    "karma": "~2.0.4",
+    "@types/chai": "^4.1.7",
+    "karma": "^4.1.0",
     "karma-chrome-launcher": "~2.2.0",
-    "puppeteer": "^1.5.0",
+    "puppeteer": "~1.17.0",
     "rimraf": "~2.6.2",
     "typescript": "~3.4.3"
   }
