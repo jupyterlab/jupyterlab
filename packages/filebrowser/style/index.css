@@ -120,6 +120,10 @@
   text-align: right;
 }
 
+.jp-DirListing-narrow .jp-id-modified, .jp-DirListing-narrow .jp-DirListing-itemModified {
+  display: none;
+}
+
 .jp-DirListing-headerItem.jp-mod-selected {
   font-weight: 600;
 }

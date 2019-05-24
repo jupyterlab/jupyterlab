@@ -786,6 +786,12 @@ export class DirListing extends Widget {
     this._prevPath = this._model.path;
   }
 
+  onResize(msg: Widget.ResizeMessage) {
+    const { width } =
+      msg.width === -1 ? this.node.getBoundingClientRect() : msg;
+    this.toggleClass('jp-DirListing-narrow', width < 250);
+  }
+
   /**
    * Handle the `'click'` event for the widget.
    */
