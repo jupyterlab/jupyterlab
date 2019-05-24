@@ -749,7 +749,8 @@ const paths: JupyterFrontEndPlugin<JupyterFrontEnd.IPaths> = {
 };
 
 /**
- * The default JupyterLab paths dictionary provider.
+ * The default JupyterLab connection lost provider. This may be overridden
+ * to provide custom behavior when a connection to the server is lost.
  */
 const connectionlost: JupyterFrontEndPlugin<IConnectionLost> = {
   id: '@jupyterlab/apputils-extension:connectionlost',
