@@ -42,7 +42,7 @@
   "devDependencies": {
     "css-loader": "~2.1.1",
     "file-loader": "~3.0.1",
-    "fs-extra": "~4.0.2",
+    "fs-extra": "^8.0.1",
     "glob": "~7.1.2",
     "mini-css-extract-plugin": "~0.6.0",
     "raw-loader": "~2.0.0",

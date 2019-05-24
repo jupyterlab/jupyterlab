@@ -42,7 +42,7 @@
     "@yarnpkg/lockfile": "^1.1.0",
     "child_process": "~1.0.2",
     "commander": "~2.18.0",
-    "fs-extra": "~4.0.2",
+    "fs-extra": "^8.0.1",
     "glob": "~7.1.2",
     "inquirer": "~3.3.0",
     "mini-css-extract-plugin": "~0.6.0",

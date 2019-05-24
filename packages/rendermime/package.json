@@ -43,7 +43,7 @@
     "@phosphor/signaling": "^1.2.2",
     "@phosphor/widgets": "^1.6.0",
     "lodash.escape": "^4.0.1",
-    "marked": "0.5.1"
+    "marked": "0.6.2"
   },
   "devDependencies": {
     "@types/lodash.escape": "^4.0.4",
