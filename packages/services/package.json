@@ -51,8 +51,8 @@
     "ws": "^7.0.0"
   },
   "devDependencies": {
-    "@types/node": "~8.0.47",
-    "@types/text-encoding": "0.0.33",
+    "@types/node": "^12.0.2",
+    "@types/text-encoding": "^0.0.35",
     "rimraf": "~2.6.2",
     "text-encoding": "^0.7.0",
     "typedoc": "^0.14.2",

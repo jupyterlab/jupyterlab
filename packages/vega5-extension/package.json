@@ -38,7 +38,7 @@
     "vega-lite": "^3.2.1"
   },
   "devDependencies": {
-    "@types/webpack-env": "~1.13.6",
+    "@types/webpack-env": "^1.13.9",
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
     "typescript": "~3.4.3"
