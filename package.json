@@ -1,7 +1,21 @@
 {
   "private": true,
+  "workspaces": [
+    "dev_mode",
+    "examples/*",
+    "packages/*",
+    "packages/services/examples/node",
+    "packages/services/examples/browser",
+    "packages/services/examples/typescript-browser-with-output",
+    "buildutils",
+    "buildutils/template",
+    "buildutils/test-template",
+    "tests",
+    "tests/test-*",
+    "testutils",
+    "jupyterlab/tests/mock_packages/extension"
+  ],
   "scripts": {
-    "pre-publish": "jlpm && cd buildutils && npm run build && cd .. && node buildutils/lib/prepublish.js",
     "add:sibling": "node buildutils/lib/add-sibling.js",
     "analyze": "jlpm run analyze:dev",
     "analyze:dev": "cd dev_mode && jlpm run build --analyze && opn static/stats.html",
@@ -39,6 +53,9 @@
     "lint": "jlpm && jlpm run prettier && jlpm run eslint && jlpm run tslint",
     "lint:check": "jlpm run prettier:check && jlpm run eslint:check && jlpm run tslint:check",
     "patch:release": "node buildutils/lib/patch-release.js",
+    "pre-publish": "jlpm && cd buildutils && npm run build && cd .. && node buildutils/lib/prepublish.js",
+    "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
+    "prettier:check": "prettier --list-different '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "publish:all": "jlpm run pre-publish && lerna publish --force-publish=* -m \"Publish\"",
     "publish:next": "jlpm run pre-publish && lerna publish --npm-tag=next -m \"Publish with 'next' tag\"",
     "publish:next:all": "jlpm run pre-publish && lerna publish --npm-tag=next --force-publish=* -m \"Publish with 'next' tag\"",
@@ -54,8 +71,6 @@
     "test:ie": "lerna run test:ie --scope \"@jupyterlab/test-*\" --concurrency 1 --stream",
     "tslint": "tslint --fix -c tslint.json --project tsconfigbase.json '**/*{.ts,.tsx}'",
     "tslint:check": "tslint -c tslint.json --project tsconfigbase.json '**/*{.ts,.tsx}'",
-    "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
-    "prettier:check": "prettier --list-different '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "update:dependency": "node buildutils/lib/update-dependency.js --lerna",
     "update:dist-tag": "node buildutils/lib/update-dist-tag.js --lerna",
     "update:local": "node buildutils/lib/update-local.js",
@@ -66,6 +81,12 @@
     "watch": "python scripts/watch_dev.py",
     "watch:main": "jlpm run watch",
     "watch:packages": "python scripts/watch_packages.py"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "jlpm run integrity"
+    }
   },
   "dependencies": {},
   "devDependencies": {
@@ -82,26 +103,5 @@
     "tslint-plugin-prettier": "^2.0.1",
     "tslint-react": "^4.0.0",
     "yarn": "1.15.2"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "jlpm run integrity"
-    }
-  },
-  "workspaces": [
-    "dev_mode",
-    "examples/*",
-    "packages/*",
-    "packages/services/examples/node",
-    "packages/services/examples/browser",
-    "packages/services/examples/typescript-browser-with-output",
-    "buildutils",
-    "buildutils/template",
-    "buildutils/test-template",
-    "tests",
-    "tests/test-*",
-    "testutils",
-    "jupyterlab/tests/mock_packages/extension"
-  ]
+  }
 }

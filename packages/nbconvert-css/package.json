@@ -6,6 +6,10 @@
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "files": [
@@ -18,10 +22,6 @@
   "types": "lib/index.d.ts",
   "directories": {
     "lib": "lib/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc -b && webpack && rimraf style/index.js",
