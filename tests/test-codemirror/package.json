@@ -15,7 +15,7 @@
     "@jupyterlab/codeeditor": "^1.0.0-alpha.6",
     "@jupyterlab/codemirror": "^1.0.0-alpha.6",
     "@jupyterlab/testutils": "^1.0.0-alpha.6",
-    "chai": "~4.1.2",
+    "chai": "^4.2.0",
     "codemirror": "~5.47.0",
     "jest": "^24.7.1",
     "jest-junit": "^6.3.0",

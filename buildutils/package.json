@@ -51,7 +51,7 @@
     "semver": "^6.1.0",
     "sort-package-json": "~1.22.1",
     "typescript": "~3.4.3",
-    "webpack": "~4.29.6"
+    "webpack": "^4.32.2"
   },
   "devDependencies": {
     "@types/fs-extra": "^7.0.0",
