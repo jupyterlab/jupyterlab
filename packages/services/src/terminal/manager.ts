@@ -248,7 +248,6 @@ export class TerminalManager implements TerminalSession.IManager {
       err => {
         if (err instanceof ServerConnection.NetworkError) {
           this._connectionFailure.emit(err);
-          console.log('Connection Failure');
           return [] as TerminalSession.IModel[];
         }
         throw err;

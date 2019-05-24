@@ -4,6 +4,8 @@
 // Local CSS must be loaded prior to loading other libs.
 import '../style/index.css';
 
+export { ConnectionLost } from './connectionlost';
+
 export { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
 
 export { JupyterLab } from './lab';
@@ -17,3 +19,5 @@ export { IRouter, Router } from './router';
 export { ILabShell, LabShell } from './shell';
 
 export { ILabStatus } from './status';
+
+export { IConnectionLost } from './tokens';

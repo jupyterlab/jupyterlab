@@ -282,7 +282,6 @@ export class KernelManager implements Kernel.IManager {
     const models = await Kernel.listRunning(this.serverSettings).catch(err => {
       if (err instanceof ServerConnection.NetworkError) {
         this._connectionFailure.emit(err);
-        console.log('Connection Failure');
         return [] as Kernel.IModel[];
       }
       throw err;
