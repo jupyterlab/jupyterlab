@@ -133,6 +133,10 @@
   background: var(--jp-layout-color3);
 }
 
+.p-CommandPalette-item.p-mod-active:hover:not(.p-mod-disabled) {
+  background: var(--jp-layout-color4);
+}
+
 .p-CommandPalette-item:hover:not(.p-mod-active):not(.p-mod-disabled) {
   background: var(--jp-layout-color2);
 }
