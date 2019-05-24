@@ -48,13 +48,13 @@
     "@phosphor/disposable": "^1.1.2",
     "@phosphor/signaling": "^1.2.2",
     "node-fetch": "~2.2.0",
-    "ws": "~6.0.0"
+    "ws": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "~8.0.47",
     "@types/text-encoding": "0.0.33",
     "rimraf": "~2.6.2",
-    "text-encoding": "~0.5.5",
+    "text-encoding": "^0.7.0",
     "typedoc": "^0.14.2",
     "typescript": "~3.4.3",
     "webpack": "~4.29.6",

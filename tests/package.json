@@ -66,8 +66,8 @@
     "raw-loader": "~2.0.0",
     "rimraf": "~2.6.2",
     "style-loader": "~0.23.1",
-    "thread-loader": "^1.1.5",
-    "ts-loader": "~5.3.3",
+    "thread-loader": "^2.1.2",
+    "ts-loader": "^6.0.1",
     "typescript": "~3.4.3",
     "url-loader": "~1.1.2",
     "webpack": "~4.29.6"

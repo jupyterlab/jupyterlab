@@ -46,9 +46,9 @@
     "glob": "~7.1.2",
     "inquirer": "~3.3.0",
     "mini-css-extract-plugin": "~0.6.0",
-    "package-json": "~5.0.0",
+    "package-json": "^6.3.0",
     "path": "~0.12.7",
-    "semver": "^5.5.0",
+    "semver": "^6.1.0",
     "sort-package-json": "~1.7.1",
     "typescript": "~3.4.3",
     "webpack": "~4.29.6"

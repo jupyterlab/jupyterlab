@@ -36,8 +36,8 @@
     "@jupyterlab/ui-components": "^1.0.0-alpha.6",
     "@phosphor/messaging": "^1.2.2",
     "react": "~16.8.4",
-    "react-paginate": "^5.2.3",
-    "semver": "^5.5.0"
+    "react-paginate": "^6.3.0",
+    "semver": "^6.1.0"
   },
   "devDependencies": {
     "@types/react-paginate": "^4.3.2",
