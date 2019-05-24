@@ -69,7 +69,7 @@ export class TerminalManager implements TerminalSession.IManager {
   /**
    * A signal emitted when there is a connection failure.
    */
-  get connectionFailure(): ISignal<this, Error> {
+  get connectionFailure(): ISignal<this, ServerConnection.NetworkError> {
     return this._connectionFailure;
   }
 
@@ -325,7 +325,9 @@ export class TerminalManager implements TerminalSession.IManager {
   private _sessions = new Set<TerminalSession.ISession>();
   private _ready: Promise<void>;
   private _runningChanged = new Signal<this, TerminalSession.IModel[]>(this);
-  private _connectionFailure = new Signal<this, Error>(this);
+  private _connectionFailure = new Signal<this, ServerConnection.NetworkError>(
+    this
+  );
 }
 
 /**

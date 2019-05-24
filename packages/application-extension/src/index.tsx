@@ -113,9 +113,7 @@ const main: JupyterFrontEndPlugin<void> = {
 
     // If the connection to the server is lost, handle it with the
     // connection lost token.
-    app.serviceManager.terminals.connectionFailure.connect(
-      connectionLost as any
-    );
+    app.serviceManager.connectionFailure.connect(connectionLost);
 
     const builder = app.serviceManager.builder;
     const build = () => {

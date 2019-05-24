@@ -116,7 +116,7 @@ export class KernelManager implements Kernel.IManager {
   /**
    * A signal emitted when there is a connection failure.
    */
-  get connectionFailure(): ISignal<this, Error> {
+  get connectionFailure(): ISignal<this, ServerConnection.NetworkError> {
     return this._connectionFailure;
   }
 
@@ -354,7 +354,9 @@ export class KernelManager implements Kernel.IManager {
   private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
   private _specs: Kernel.ISpecModels | null = null;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
-  private _connectionFailure = new Signal<this, Error>(this);
+  private _connectionFailure = new Signal<this, ServerConnection.NetworkError>(
+    this
+  );
 }
 
 /**

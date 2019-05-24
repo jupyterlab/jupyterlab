@@ -3,12 +3,12 @@
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 
-import { ServerConnection, SessionManager } from '@jupyterlab/services';
+import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 
 import { IConnectionLost } from './tokens';
 
 export const ConnectionLost: IConnectionLost = async function(
-  manager: SessionManager,
+  manager: ServiceManager,
   err: ServerConnection.NetworkError
 ): Promise<void> {
   if (Private.showingError) {

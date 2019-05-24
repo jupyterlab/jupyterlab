@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ServerConnection, SessionManager } from '@jupyterlab/services';
+import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 
 import { Token } from '@phosphor/coreutils';
 
@@ -14,6 +14,6 @@ export const IConnectionLost = new Token<IConnectionLost>(
 );
 
 export type IConnectionLost = (
-  manager: SessionManager,
+  manager: ServiceManager,
   err: ServerConnection.NetworkError
 ) => Promise<void>;
