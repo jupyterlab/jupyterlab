@@ -73,7 +73,7 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
     }, this._timeout);
   }
 
-  private _timer = -1;
+  private _timer: any = -1;
   private _timeout = -1;
   private _sender: Sender;
   private _args: Args;

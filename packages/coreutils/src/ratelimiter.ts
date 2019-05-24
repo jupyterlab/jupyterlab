@@ -25,6 +25,7 @@ export abstract class RateLimiter<T, U> implements IRateLimiter<T, U> {
   constructor(fn: () => T | Promise<T>, limit = 500) {
     this.limit = limit;
     this.poll = new Poll({
+      auto: false,
       factory: async () => await fn(),
       frequency: { backoff: false, interval: Poll.NEVER, max: Poll.NEVER },
       standby: 'never'

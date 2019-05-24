@@ -39,6 +39,7 @@ export class KernelManager implements Kernel.IManager {
 
     // Start model and specs polling with exponential backoff.
     this._pollModels = new Poll({
+      auto: false,
       factory: () => this.requestRunning(),
       frequency: {
         interval: 10 * 1000,
@@ -46,10 +47,10 @@ export class KernelManager implements Kernel.IManager {
         max: 300 * 1000
       },
       name: `@jupyterlab/services:KernelManager#models`,
-      standby: options.standby || 'when-hidden',
-      when: this.ready
+      standby: options.standby || 'when-hidden'
     });
     this._pollSpecs = new Poll({
+      auto: false,
       factory: () => this.requestSpecs(),
       frequency: {
         interval: 61 * 1000,
@@ -57,8 +58,11 @@ export class KernelManager implements Kernel.IManager {
         max: 300 * 1000
       },
       name: `@jupyterlab/services:KernelManager#specs`,
-      standby: options.standby || 'when-hidden',
-      when: this.ready
+      standby: options.standby || 'when-hidden'
+    });
+    void this.ready.then(() => {
+      void this._pollModels.start();
+      void this._pollSpecs.start();
     });
   }
 
