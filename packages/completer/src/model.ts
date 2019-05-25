@@ -312,7 +312,7 @@ export class CompleterModel implements Completer.IModel {
     }
 
     // If final character is whitespace, reset completion.
-    this.reset(true);
+    this.reset(false);
   }
 
   /**
