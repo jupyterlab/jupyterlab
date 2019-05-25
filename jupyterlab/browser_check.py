@@ -30,6 +30,16 @@ test_aliases = dict(aliases)
 test_aliases['app-dir'] = 'BrowserApp.app_dir'
 
 
+class LogErrorHandler(logging.Handler):
+    """A handler that exits with 1 on a logged error."""
+    def emit(self, record):
+        if record.level < logging.ERROR:
+            return
+        print(record.msg, file=sys.stderr)
+        logging.shutdown()
+        sys.exit(1)
+
+
 class BrowserApp(LabApp):
 
     open_browser = Bool(False)
@@ -47,6 +57,7 @@ class BrowserApp(LabApp):
         pool = ThreadPoolExecutor()
         future = pool.submit(run_browser, self.display_url)
         IOLoop.current().add_future(future, self._browser_finished)
+        self.log.addHandler(LogErrorHandler())
         super(BrowserApp, self).start()
 
     def _browser_finished(self, future):
@@ -54,7 +65,6 @@ class BrowserApp(LabApp):
             sys.exit(future.result())
         except Exception as e:
             self.log.error(str(e))
-            sys.exit(1)
 
 
 def run_browser(url):

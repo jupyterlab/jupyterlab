@@ -11,6 +11,7 @@ e.g. python example_check.py ./app
 """
 from concurrent.futures import ThreadPoolExecutor
 import importlib.util
+import logging
 from os import path as osp
 import os
 import shutil
@@ -32,8 +33,18 @@ mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 
 
-class ExampleCheckApp(mod.ExampleApp):
+class LogErrorHandler(logging.Handler):
+    """A handler that exits with 1 on a logged error."""
+    def emit(self, record):
+        if record.level < logging.ERROR:
+            return
+        print(record.msg, file=sys.stderr)
+        logging.shutdown()
+        sys.exit(1)
 
+
+class ExampleCheckApp(mod.ExampleApp):
+    """An example app that adds instrumentation."""
     open_browser = Bool(False)
     default_url = '/example'
     base_url = '/foo/'
@@ -43,6 +54,7 @@ class ExampleCheckApp(mod.ExampleApp):
         pool = ThreadPoolExecutor()
         future = pool.submit(run_browser, self.display_url)
         IOLoop.current().add_future(future, self._browser_finished)
+        self.log.addHandler(LogErrorHandler())
         super().start()
 
     def _browser_finished(self, future):
@@ -50,7 +62,6 @@ class ExampleCheckApp(mod.ExampleApp):
             sys.exit(future.result())
         except Exception as e:
             self.log.error(str(e))
-            sys.exit(1)
 
 
 def run_browser(url):

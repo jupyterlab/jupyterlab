@@ -8,8 +8,7 @@ __webpack_public_path__ = URLExt.join(
   'example/static/'
 );
 
-window.addEventListener('load', function() {
-  require('font-awesome/css/font-awesome.min.css');
+window.addEventListener('load', async function() {
   var JupyterLab = require('@jupyterlab/application').JupyterLab;
 
   var mods = [
@@ -47,8 +46,10 @@ window.addEventListener('load', function() {
     version: require('./package.json').version
   });
   lab.registerPluginModules(mods);
-  lab.start().then(() => {
-    // eslint-disable-next-line
-    console.log('Example started!');
-  });
+  // eslint - disable no - console.
+  console.log('Starting app');
+  await lab.start();
+  console.log('App started, waiting for restore');
+  await lab.restored;
+  console.log('Example started!');
 });
