@@ -528,7 +528,7 @@ export namespace OutputArea {
   /**
    * Execute code on an output area.
    */
-  export function execute(
+  export async function execute(
     code: string,
     output: OutputArea,
     session: IClientSession,
@@ -541,7 +541,7 @@ export namespace OutputArea {
     };
 
     if (!session.kernel) {
-      return Promise.reject('Session has no kernel.');
+      throw new Error('Session has no kernel.');
     }
     let future = session.kernel.requestExecute(content, false, metadata);
     output.future = future;

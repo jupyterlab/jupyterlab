@@ -1006,7 +1006,7 @@ export namespace CodeCell {
   /**
    * Execute a cell given a client session.
    */
-  export function execute(
+  export async function execute(
     cell: CodeCell,
     session: IClientSession,
     metadata?: JSONObject
@@ -1016,7 +1016,7 @@ export namespace CodeCell {
     if (!code.trim() || !session.kernel) {
       model.executionCount = null;
       model.outputs.clear();
-      return Promise.resolve(void 0);
+      return;
     }
 
     let cellId = { cellId: model.id };
@@ -1026,17 +1026,21 @@ export namespace CodeCell {
     cell.setPrompt('*');
     model.trusted = true;
 
-    return OutputArea.execute(code, cell.outputArea, session, metadata)
-      .then(msg => {
-        model.executionCount = msg.content.execution_count;
-        return msg;
-      })
-      .catch(e => {
-        if (e.message === 'Canceled') {
-          cell.setPrompt('');
-        }
-        throw e;
-      });
+    try {
+      const msg = await OutputArea.execute(
+        code,
+        cell.outputArea,
+        session,
+        metadata
+      );
+      model.executionCount = msg.content.execution_count;
+      return msg;
+    } catch (e) {
+      if (e.message === 'Canceled') {
+        cell.setPrompt('');
+      }
+      throw e;
+    }
   }
 }
 
