@@ -556,7 +556,7 @@ export namespace OutputArea {
     }
     let future = session.kernel.requestExecute(content, false, metadata);
     output.future = future;
-    return future.done as Promise<KernelMessage.IExecuteReplyMsg>;
+    return future.done;
   }
 
   /**

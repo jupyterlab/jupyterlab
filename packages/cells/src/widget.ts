@@ -1010,7 +1010,7 @@ export namespace CodeCell {
     cell: CodeCell,
     session: IClientSession,
     metadata?: JSONObject
-  ): Promise<KernelMessage.IExecuteReplyMsg> {
+  ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     let model = cell.model;
     let code = model.value.text;
     if (!code.trim() || !session.kernel) {
@@ -1031,10 +1031,15 @@ export namespace CodeCell {
       KernelMessage.IExecuteReplyMsg
     >;
     try {
-      // We assume cell.outputArea.future is the future for this execution.
-      OutputArea.execute(code, cell.outputArea, session, metadata);
-      let future = cell.outputArea.future;
-      const msg = await future.done;
+      const msgPromise = OutputArea.execute(
+        code,
+        cell.outputArea,
+        session,
+        metadata
+      );
+      // Save this execution's future so we can compare in the catch below.
+      future = cell.outputArea.future;
+      const msg = await msgPromise;
       model.executionCount = msg.content.execution_count;
       return msg;
     } catch (e) {
