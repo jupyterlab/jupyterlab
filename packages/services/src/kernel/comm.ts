@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONObject, JSONValue } from '@phosphor/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
 
 import { DisposableDelegate } from '@phosphor/disposable';
 
@@ -100,7 +100,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
    * **See also:** [[ICommOpen]]
    */
   open(
-    data?: JSONValue,
+    data?: JSONObject,
     metadata?: JSONObject,
     buffers: (ArrayBuffer | ArrayBufferView)[] = []
   ): Kernel.IFuture {
@@ -136,7 +136,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
    * **See also:** [[ICommMsg]]
    */
   send(
-    data: JSONValue,
+    data: JSONObject,
     metadata?: JSONObject,
     buffers: (ArrayBuffer | ArrayBufferView)[] = [],
     disposeOnDone: boolean = true
@@ -175,7 +175,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
    * **See also:** [[ICommClose]], [[onClose]]
    */
   close(
-    data?: JSONValue,
+    data?: JSONObject,
     metadata?: JSONObject,
     buffers: (ArrayBuffer | ArrayBufferView)[] = []
   ): Kernel.IFuture {
@@ -183,7 +183,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       throw new Error('Cannot close');
     }
     let options: KernelMessage.IOptions = {
-      msgType: 'comm_msg',
+      msgType: 'comm_close',
       channel: 'shell',
       username: this._kernel.username,
       session: this._kernel.clientId
@@ -199,11 +199,10 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       buffers
     );
     let future = this._kernel.sendShellMessage(msg, false, true);
-    options.channel = 'iopub';
     let onClose = this._onClose;
     if (onClose) {
       let ioMsg = KernelMessage.createMessage(
-        options,
+        { ...options, msgType: 'comm_close', channel: 'iopub' },
         content,
         metadata,
         buffers

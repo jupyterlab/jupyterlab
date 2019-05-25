@@ -126,11 +126,11 @@ export namespace Kernel {
      *
      * If the kernel status is `'dead'`, this will throw an error.
      */
-    sendShellMessage(
-      msg: KernelMessage.IShellMessage,
+    sendShellMessage<T extends KernelMessage.ShellMessageType>(
+      msg: KernelMessage.IShellMessage<T>,
       expectReply?: boolean,
       disposeOnDone?: boolean
-    ): Kernel.IFuture;
+    ): Kernel.IFuture<KernelMessage.IShellMessage<T>>;
 
     /**
      * Reconnect to a disconnected kernel.
@@ -268,7 +268,10 @@ export namespace Kernel {
       content: KernelMessage.IExecuteRequest,
       disposeOnDone?: boolean,
       metadata?: JSONObject
-    ): Kernel.IFuture;
+    ): Kernel.IFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >;
 
     /**
      * Send an `is_complete_request` message.
@@ -739,11 +742,14 @@ export namespace Kernel {
    * When a message is sent to a kernel, a Future is created to handle any
    * responses that may come from the kernel.
    */
-  export interface IFuture extends IDisposable {
+  export interface IFuture<
+    REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
+    REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
+  > extends IDisposable {
     /**
      * The original outgoing message.
      */
-    readonly msg: KernelMessage.IShellMessage;
+    readonly msg: REQUEST;
 
     /**
      * A promise that resolves when the future is done.
@@ -755,7 +761,7 @@ export namespace Kernel {
      * The `done` promise resolves to the reply message if there is one,
      * otherwise it resolves to `undefined`.
      */
-    readonly done: Promise<KernelMessage.IShellMessage | undefined>;
+    readonly done: Promise<REPLY | undefined>;
 
     /**
      * The reply handler for the kernel future.
@@ -766,7 +772,7 @@ export namespace Kernel {
      * `done` promise also resolves to the reply message after this handler has
      * been called.
      */
-    onReply: (msg: KernelMessage.IShellMessage) => void | PromiseLike<void>;
+    onReply: (msg: REPLY) => void | PromiseLike<void>;
 
     /**
      * The stdin handler for the kernel future.

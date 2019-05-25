@@ -259,11 +259,11 @@ export class DefaultKernel implements Kernel.IKernel {
    *
    * If the kernel status is `dead`, this will throw an error.
    */
-  sendShellMessage(
-    msg: KernelMessage.IShellMessage,
+  sendShellMessage<T extends KernelMessage.ShellMessageType>(
+    msg: KernelMessage.IShellMessage<T>,
     expectReply = false,
     disposeOnDone = true
-  ): Kernel.IFuture {
+  ): Kernel.IFuture<KernelMessage.IShellMessage<T>> {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
@@ -510,7 +510,10 @@ export class DefaultKernel implements Kernel.IKernel {
     content: KernelMessage.IExecuteRequest,
     disposeOnDone: boolean = true,
     metadata?: JSONObject
-  ): Kernel.IFuture {
+  ): Kernel.IFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  > {
     let options: KernelMessage.IOptions = {
       msgType: 'execute_request',
       channel: 'shell',
@@ -525,8 +528,15 @@ export class DefaultKernel implements Kernel.IKernel {
       stop_on_error: false
     };
     content = { ...defaults, ...content };
-    let msg = KernelMessage.createShellMessage(options, content, metadata);
-    return this.sendShellMessage(msg, true, disposeOnDone);
+    let msg = KernelMessage.createShellMessage(
+      options,
+      content,
+      metadata
+    ) as KernelMessage.IExecuteRequestMsg;
+    return this.sendShellMessage(msg, true, disposeOnDone) as Kernel.IFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >;
   }
 
   /**
@@ -736,10 +746,12 @@ export class DefaultKernel implements Kernel.IKernel {
       // We've seen it before, update existing outputs with same display_id
       // by handling display_data as update_display_data.
       let updateMsg: KernelMessage.IMessage = {
-        header: JSONExt.deepCopy(msg.header) as KernelMessage.IHeader,
-        parent_header: JSONExt.deepCopy(
-          msg.parent_header
-        ) as KernelMessage.IHeader,
+        header: (JSONExt.deepCopy(
+          (msg.header as unknown) as JSONObject
+        ) as unknown) as KernelMessage.IHeader,
+        parent_header: (JSONExt.deepCopy(
+          (msg.parent_header as unknown) as JSONObject
+        ) as unknown) as KernelMessage.IHeader,
         metadata: JSONExt.deepCopy(msg.metadata),
         content: JSONExt.deepCopy(msg.content),
         channel: msg.channel,

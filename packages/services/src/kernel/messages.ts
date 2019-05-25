@@ -5,7 +5,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
 
-import { JSONObject, JSONValue } from '@phosphor/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
 
 import { Kernel } from './kernel';
 
@@ -18,12 +18,13 @@ export namespace KernelMessage {
    */
   export function createMessage(
     options: IOptions,
-    content: JSONObject = {},
-    metadata: JSONObject = {},
+    content: any = {},
+    metadata: any = {},
     buffers: (ArrayBuffer | ArrayBufferView)[] = []
   ): IMessage {
     return {
       header: {
+        date: new Date().toISOString(),
         username: options.username || '',
         version: '5.2',
         session: options.session,
@@ -42,14 +43,62 @@ export namespace KernelMessage {
    * Create a well-formed kernel shell message.
    */
   export function createShellMessage(
-    options: IOptions,
-    content: JSONObject = {},
-    metadata: JSONObject = {},
+    options: IOptionsShell,
+    content: any = {},
+    metadata: any = {},
     buffers: (ArrayBuffer | ArrayBufferView)[] = []
   ): IShellMessage {
     let msg = createMessage(options, content, metadata, buffers);
     return msg as IShellMessage;
   }
+
+  export type ShellMessageType =
+    | 'comm_close'
+    | 'comm_info_reply'
+    | 'comm_info_request'
+    | 'comm_msg'
+    | 'comm_open'
+    | 'complete_reply'
+    | 'complete_request'
+    | 'execute_reply'
+    | 'execute_request'
+    | 'history_reply'
+    | 'history_request'
+    | 'inspect_reply'
+    | 'inspect_request'
+    | 'interrupt_reply'
+    | 'interrupt_request'
+    | 'is_complete_reply'
+    | 'is_complete_request'
+    | 'kernel_info_reply'
+    | 'kernel_info_request'
+    | 'shutdown_reply'
+    | 'shutdown_request';
+
+  export type IOPubMessageType =
+    | 'clear_output'
+    | 'comm_close'
+    | 'comm_msg'
+    | 'comm_open'
+    | 'display_data'
+    | 'error'
+    | 'execute_input'
+    | 'execute_result'
+    | 'status'
+    | 'stream'
+    | 'update_display_data';
+
+  export type StdinMessageType = 'input_request' | 'input_reply';
+
+  export type MessageType =
+    | IOPubMessageType
+    | ShellMessageType
+    | StdinMessageType;
+
+  /**
+   * The valid channel names.
+   */
+  export type Channel = 'shell' | 'iopub' | 'stdin';
 
   /**
    * Kernel message header content.
@@ -58,12 +107,36 @@ export namespace KernelMessage {
    *
    * **See also:** [[IMessage]]
    */
-  export interface IHeader extends JSONObject {
-    username: string;
-    version: string;
-    session: string;
+  export interface IHeader<T extends MessageType = MessageType> {
+    /**
+     * ISO 8601 timestamp for when the message is created
+     */
+    date: string;
+
+    /**
+     * Message id, typically UUID, must be unique per message
+     */
     msg_id: string;
-    msg_type: string;
+
+    /**
+     * Message type
+     */
+    msg_type: T;
+
+    /**
+     * Session id, typically UUID, should be unique per session.
+     */
+    session: string;
+
+    /**
+     * The user sending the message
+     */
+    username: string;
+
+    /**
+     * The message protocol version, should be 5.1, 5.2, 5.3, etc.
+     */
+    version: string;
   }
 
   /**
@@ -71,38 +144,59 @@ export namespace KernelMessage {
    *
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#general-message-format).
    */
-  export interface IMessage {
-    header: IHeader;
+  export interface IMessage<MSGTYPE extends MessageType = MessageType> {
+    /**
+     * The message header.
+     */
+    header: IHeader<MSGTYPE>;
+
+    /**
+     * The parent message
+     */
     parent_header: IHeader | {};
+
+    /**
+     * Metadata associated with the message.
+     */
     metadata: JSONObject;
-    content: JSONObject;
+
+    /**
+     * The content of the message.
+     */
+    content: any;
+
+    /**
+     * Which channel on which the message is transmitted.
+     */
     channel: Channel;
+
+    /**
+     * An optional list of binary buffers.
+     */
     buffers?: (ArrayBuffer | ArrayBufferView)[];
   }
 
   /**
-   * The valid channel names.
-   */
-  export type Channel = 'shell' | 'iopub' | 'stdin';
-
-  /**
    * A kernel message on the `'shell'` channel.
    */
-  export interface IShellMessage extends IMessage {
+  export interface IShellMessage<T extends ShellMessageType = ShellMessageType>
+    extends IMessage<T> {
     channel: 'shell';
   }
 
   /**
    * A kernel message on the `'iopub'` channel.
    */
-  export interface IIOPubMessage extends IMessage {
+  export interface IIOPubMessage<T extends IOPubMessageType = IOPubMessageType>
+    extends IMessage<T> {
     channel: 'iopub';
   }
 
   /**
    * A kernel message on the `'stdin'` channel.
    */
-  export interface IStdinMessage extends IMessage {
+  export interface IStdinMessage<T extends StdinMessageType = StdinMessageType>
+    extends IMessage<T> {
     channel: 'stdin';
   }
 
@@ -111,7 +205,7 @@ export namespace KernelMessage {
    *
    * See [Streams](https://jupyter-client.readthedocs.io/en/latest/messaging.html#streams-stdout-stderr-etc).
    */
-  export interface IStreamMsg extends IIOPubMessage {
+  export interface IStreamMsg extends IIOPubMessage<'stream'> {
     content: {
       name: 'stdout' | 'stderr';
       text: string;
@@ -130,7 +224,7 @@ export namespace KernelMessage {
    *
    * See [Display data](https://jupyter-client.readthedocs.io/en/latest/messaging.html#display-data).
    */
-  export interface IDisplayDataMsg extends IIOPubMessage {
+  export interface IDisplayDataMsg extends IIOPubMessage<'display_data'> {
     content: {
       data: nbformat.IMimeBundle;
       metadata: nbformat.OutputMetadata;
@@ -150,8 +244,10 @@ export namespace KernelMessage {
    *
    * See [Update Display data](https://jupyter-client.readthedocs.io/en/latest/messaging.html#update-display-data).
    */
-  export interface IUpdateDisplayDataMsg extends IDisplayDataMsg {
+  export interface IUpdateDisplayDataMsg
+    extends IIOPubMessage<'update_display_data'> {
     content: IDisplayDataMsg['content'] & {
+      // display_id is a required field in update_display_data
       transient: { display_id: string };
     };
   }
@@ -170,7 +266,7 @@ export namespace KernelMessage {
    *
    * See [Code inputs](https://jupyter-client.readthedocs.io/en/latest/messaging.html#code-inputs).
    */
-  export interface IExecuteInputMsg extends IIOPubMessage {
+  export interface IExecuteInputMsg extends IIOPubMessage<'execute_input'> {
     content: {
       code: string;
       execution_count: nbformat.ExecutionCount;
@@ -189,7 +285,7 @@ export namespace KernelMessage {
    *
    * See [Execution results](https://jupyter-client.readthedocs.io/en/latest/messaging.html#id4).
    */
-  export interface IExecuteResultMsg extends IIOPubMessage {
+  export interface IExecuteResultMsg extends IIOPubMessage<'execute_result'> {
     content: {
       execution_count: nbformat.ExecutionCount;
       data: nbformat.IMimeBundle;
@@ -209,7 +305,7 @@ export namespace KernelMessage {
    *
    * See [Execution errors](https://jupyter-client.readthedocs.io/en/latest/messaging.html#execution-errors).
    */
-  export interface IErrorMsg extends IIOPubMessage {
+  export interface IErrorMsg extends IIOPubMessage<'error'> {
     content: {
       ename: string;
       evalue: string;
@@ -229,7 +325,7 @@ export namespace KernelMessage {
    *
    * See [Kernel status](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-status).
    */
-  export interface IStatusMsg extends IIOPubMessage {
+  export interface IStatusMsg extends IIOPubMessage<'status'> {
     content: {
       execution_state: Kernel.Status;
     };
@@ -247,7 +343,7 @@ export namespace KernelMessage {
    *
    * See [Clear output](https://jupyter-client.readthedocs.io/en/latest/messaging.html#clear-output).
    */
-  export interface IClearOutputMsg extends IIOPubMessage {
+  export interface IClearOutputMsg extends IIOPubMessage<'clear_output'> {
     content: {
       wait: boolean;
     };
@@ -265,7 +361,8 @@ export namespace KernelMessage {
    *
    * See [Comm open](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
    */
-  export interface ICommOpenMsg extends IIOPubMessage {
+  export interface ICommOpenMsg extends IMessage<'comm_open'> {
+    channel: 'shell' | 'iopub';
     content: ICommOpen;
   }
 
@@ -275,10 +372,10 @@ export namespace KernelMessage {
    *
    * See [Comm open](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
    */
-  export interface ICommOpen extends JSONObject {
+  export interface ICommOpen {
     comm_id: string;
     target_name: string;
-    data: JSONValue;
+    data: JSONObject;
     target_module?: string;
   }
 
@@ -294,7 +391,8 @@ export namespace KernelMessage {
    *
    * See [Comm close](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
    */
-  export interface ICommCloseMsg extends IIOPubMessage {
+  export interface ICommCloseMsg extends IMessage<'comm_close'> {
+    channel: 'iopub' | 'shell';
     content: ICommClose;
   }
 
@@ -304,9 +402,9 @@ export namespace KernelMessage {
    *
    * See [Comm close](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
    */
-  export interface ICommClose extends JSONObject {
+  export interface ICommClose {
     comm_id: string;
-    data: JSONValue;
+    data: JSONObject;
   }
 
   /**
@@ -321,7 +419,8 @@ export namespace KernelMessage {
    *
    * See [Comm msg](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
    */
-  export interface ICommMsgMsg extends IIOPubMessage {
+  export interface ICommMsgMsg extends IMessage<'comm_msg'> {
+    channel: 'iopub' | 'shell';
     content: ICommMsg;
   }
 
@@ -331,9 +430,9 @@ export namespace KernelMessage {
    *
    * See [Comm msg](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
    */
-  export interface ICommMsg extends JSONObject {
+  export interface ICommMsg {
     comm_id: string;
-    data: JSONValue;
+    data: JSONObject;
   }
 
   /**
@@ -344,11 +443,22 @@ export namespace KernelMessage {
   }
 
   /**
-   * A `'kernel_info_reply'` message on the `'stream'` channel.
+   * A `'kernel_info_request'` message on the `'shell'` channel.
    *
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-info).
    */
-  export interface IInfoReplyMsg extends IShellMessage {
+  export interface IInfoRequestMsg
+    extends IShellMessage<'kernel_info_request'> {
+    content: {};
+  }
+
+  /**
+   * A `'kernel_info_reply'` message on the `'shell'` channel.
+   *
+   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-info).
+   */
+  export interface IInfoReplyMsg extends IShellMessage<'kernel_info_reply'> {
+    parent_header: IHeader<'kernel_info_request'>;
     content: IInfoReply;
   }
 
@@ -357,7 +467,7 @@ export namespace KernelMessage {
    *
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-info).
    */
-  export interface IInfoReply extends JSONObject {
+  export interface IInfoReply {
     protocol_version: string;
     implementation: string;
     implementation_version: string;
@@ -376,6 +486,11 @@ export namespace KernelMessage {
     nbconverter_exporter?: string;
   }
 
+  export interface ICompleteRequestMsg
+    extends IShellMessage<'complete_request'> {
+    content: ICompleteRequest;
+  }
+
   /**
    * The content of a  `'complete_request'` message.
    *
@@ -383,7 +498,7 @@ export namespace KernelMessage {
    *
    * **See also:** [[ICompleteReply]], [[IKernel.complete]]
    */
-  export interface ICompleteRequest extends JSONObject {
+  export interface ICompleteRequest {
     code: string;
     cursor_pos: number;
   }
@@ -395,7 +510,8 @@ export namespace KernelMessage {
    *
    * **See also:** [[ICompleteRequest]], [[IKernel.complete]]
    */
-  export interface ICompleteReplyMsg extends IShellMessage {
+  export interface ICompleteReplyMsg extends IShellMessage<'complete_reply'> {
+    parent_header: IHeader<'complete_request'>;
     content: {
       matches: string[];
       cursor_start: number;
@@ -405,6 +521,10 @@ export namespace KernelMessage {
     };
   }
 
+  export interface IInspectRequestMsg extends IShellMessage<'inspect_request'> {
+    content: IInspectRequest;
+  }
+
   /**
    * The content of an `'inspect_request'` message.
    *
@@ -412,7 +532,7 @@ export namespace KernelMessage {
    *
    * **See also:** [[IInspectReply]], [[[IKernel.inspect]]]
    */
-  export interface IInspectRequest extends JSONObject {
+  export interface IInspectRequest {
     code: string;
     cursor_pos: number;
     detail_level: 0 | 1;
@@ -425,7 +545,8 @@ export namespace KernelMessage {
    *
    * **See also:** [[IInspectRequest]], [[IKernel.inspect]]
    */
-  export interface IInspectReplyMsg extends IShellMessage {
+  export interface IInspectReplyMsg extends IShellMessage<'inspect_reply'> {
+    parent_header: IHeader<'inspect_request'>;
     content: {
       status: 'ok' | 'error';
       found: boolean;
@@ -434,36 +555,8 @@ export namespace KernelMessage {
     };
   }
 
-  /**
-   * The content of a `'history_request'` message.
-   *
-   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
-   *
-   * **See also:** [[IHistoryReply]], [[[IKernel.history]]]
-   */
-  export interface IHistoryRequest extends JSONObject {
-    output: boolean;
-    raw: boolean;
-    hist_access_type: HistAccess;
-    session?: number;
-    start?: number;
-    stop?: number;
-    n?: number;
-    pattern?: string;
-    unique?: boolean;
-  }
-
-  /**
-   * A `'history_reply'` message on the `'stream'` channel.
-   *
-   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
-   *
-   * **See also:** [[IHistoryRequest]], [[IKernel.history]]
-   */
-  export interface IHistoryReplyMsg extends IShellMessage {
-    content: {
-      history: JSONValue[];
-    };
+  export interface IHistoryRequestMsg extends IShellMessage<'history_request'> {
+    content: IHistoryRequest;
   }
 
   /**
@@ -472,13 +565,71 @@ export namespace KernelMessage {
   export type HistAccess = 'range' | 'tail' | 'search';
 
   /**
+   * The content of a `'history_request'` message.
+   *
+   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
+   *
+   * **See also:** [[IHistoryReply]], [[[IKernel.history]]]
+   */
+  export interface IHistoryRequestRange {
+    output: boolean;
+    raw: boolean;
+    hist_access_type: 'range';
+    session: number;
+    start: number;
+    stop: number;
+  }
+
+  export interface IHistoryRequestTail {
+    output: boolean;
+    raw: boolean;
+    hist_access_type: 'tail';
+    n: number;
+  }
+
+  export interface IHistoryRequestSearch {
+    output: boolean;
+    raw: boolean;
+    hist_access_type: 'search';
+    n: number;
+    pattern: string;
+    unique: boolean;
+  }
+
+  export type IHistoryRequest =
+    | IHistoryRequestRange
+    | IHistoryRequestTail
+    | IHistoryRequestSearch;
+
+  /**
+   * A `'history_reply'` message on the `'stream'` channel.
+   *
+   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
+   *
+   * **See also:** [[IHistoryRequest]], [[IKernel.history]]
+   */
+  export interface IHistoryReplyMsg extends IShellMessage<'history_reply'> {
+    parent_header: IHeader<'history_request'>;
+    content: {
+      history:
+        | [string, number, string][]
+        | [string, number, [string, string]][];
+    };
+  }
+
+  export interface IIsCompleteRequestMsg
+    extends IShellMessage<'is_complete_request'> {
+    content: IIsCompleteRequest;
+  }
+
+  /**
    * The content of an `'is_complete_request'` message.
    *
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#code-completeness).
    *
    * **See also:** [[IIsCompleteReply]], [[IKernel.isComplete]]
    */
-  export interface IIsCompleteRequest extends JSONObject {
+  export interface IIsCompleteRequest {
     code: string;
   }
 
@@ -489,11 +640,20 @@ export namespace KernelMessage {
    *
    * **See also:** [[IIsCompleteRequest]], [[IKernel.isComplete]]
    */
-  export interface IIsCompleteReplyMsg extends IShellMessage {
+  export interface IIsCompleteReplyMsg
+    extends IShellMessage<'is_complete_reply'> {
+    parent_header: IHeader<'is_complete_request'>;
     content: {
       status: string;
       indent: string;
     };
+  }
+
+  /**
+   * An `execute_request` message on the `
+   */
+  export interface IExecuteRequestMsg extends IShellMessage<'execute_request'> {
+    content: IExecuteRequest;
   }
 
   /**
@@ -512,7 +672,7 @@ export namespace KernelMessage {
    *
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#execute).
    */
-  export interface IExecuteOptions extends JSONObject {
+  export interface IExecuteOptions {
     /**
      * Whether to execute the code as quietly as possible.
      * The default is `false`.
@@ -552,7 +712,8 @@ export namespace KernelMessage {
    *
    * **See also:** [[IExecuteRequest]], [[IKernel.execute]]
    */
-  export interface IExecuteReplyMsg extends IShellMessage {
+  export interface IExecuteReplyMsg extends IShellMessage<'execute_reply'> {
+    parent_header: IHeader<'execute_request'>;
     content: IExecuteReply;
   }
 
@@ -561,7 +722,7 @@ export namespace KernelMessage {
    *
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#execution-results).
    */
-  export interface IExecuteReply extends JSONObject {
+  export interface IExecuteReply {
     status: 'ok' | 'error' | 'abort';
     execution_count: nbformat.ExecutionCount;
   }
@@ -620,14 +781,14 @@ export namespace KernelMessage {
    *
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
    */
-  export interface IInputRequestMsg extends IStdinMessage {
+  export interface IInputRequestMsg extends IStdinMessage<'input_request'> {
     content: IInputRequest;
   }
 
   /**
    * The content of an `'input_request'` message.
    */
-  export interface IInputRequest extends JSONObject {
+  export interface IInputRequest {
     /**
      * The text to show at the prompt.
      */
@@ -647,6 +808,11 @@ export namespace KernelMessage {
     return msg.header.msg_type === 'input_request';
   }
 
+  export interface IInputReplyMsg extends IStdinMessage<'input_reply'> {
+    parent_header: IHeader<'input_request'>;
+    content: IInputReply;
+  }
+
   /**
    * The content of an `'input_reply'` message.
    *
@@ -654,8 +820,13 @@ export namespace KernelMessage {
    *
    * **See also:** [[IKernel.input_reply]]
    */
-  export interface IInputReply extends JSONObject {
+  export interface IInputReply {
     value: string;
+  }
+
+  export interface ICommInfoRequestMsg
+    extends IShellMessage<'comm_info_request'> {
+    content: ICommInfoRequest;
   }
 
   /**
@@ -665,7 +836,7 @@ export namespace KernelMessage {
    *
    * **See also:** [[ICommInfoReply]], [[IKernel.commInfo]]
    */
-  export interface ICommInfoRequest extends JSONObject {
+  export interface ICommInfoRequest {
     target?: string;
   }
 
@@ -676,7 +847,8 @@ export namespace KernelMessage {
    *
    * **See also:** [[ICommInfoRequest]], [[IKernel.commInfo]]
    */
-  export interface ICommInfoReplyMsg extends IShellMessage {
+  export interface ICommInfoReplyMsg extends IShellMessage<'comm_info_reply'> {
+    parent_header: IHeader<'comm_info_request'>;
     content: {
       /**
        * Mapping of comm ids to target names.
@@ -685,16 +857,33 @@ export namespace KernelMessage {
     };
   }
 
-  /**
-   * Options for an `IMessage`.
-   *
-   * **See also:** [[IMessage]]
-   */
-  export interface IOptions {
-    msgType: string;
+  export interface IOptionsBase {
+    msgType: MessageType;
     channel: Channel;
     session: string;
     username?: string;
     msgId?: string;
   }
+
+  export interface IOptionsIOPub extends IOptionsBase {
+    msgType: IOPubMessageType;
+    channel: 'iopub';
+  }
+
+  export interface IOptionsShell extends IOptionsBase {
+    msgType: ShellMessageType;
+    channel: 'shell';
+  }
+
+  export interface IOptionsStdin extends IOptionsBase {
+    msgType: StdinMessageType;
+    channel: 'stdin';
+  }
+
+  /**
+   * Options for an `IMessage`.
+   *
+   * **See also:** [[IMessage]]
+   */
+  export type IOptions = IOptionsIOPub | IOptionsShell | IOptionsStdin;
 }
