@@ -22,7 +22,6 @@ class ExampleApp(LabServerApp):
         app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
         page_url = 'example',
         schemas_dir = os.path.join(HERE, 'build', 'schemas'),
-        settings_dir = os.path.join(HERE, 'build', 'settings'),
         static_dir = os.path.join(HERE, 'build'),
         templates_dir = os.path.join(HERE, 'templates'),
         themes_dir = os.path.join(HERE, 'build', 'themes'),
