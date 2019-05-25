@@ -35,7 +35,9 @@ spec.loader.exec_module(mod)
 
 
 class ExampleCheckApp(mod.ExampleApp):
-    """An example app that adds instrumentation."""
+    """An app that launches an example and waits for it to start up, checking for
+    JS console errors, JS errors, and Python logged errors.
+    """
     open_browser = Bool(False)
     default_url = '/example'
     base_url = '/foo/'
