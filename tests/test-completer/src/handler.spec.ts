@@ -237,9 +237,11 @@ describe('@jupyterlab/completer', () => {
         const editor = createEditorWidget().editor;
         const text = 'eggs\nfoo # comment\nbaz';
         const want = 'eggs\nfoobar # comment\nbaz';
+        const line = 1;
+        const column = 5;
         const request: Completer.ITextState = {
-          column: 5,
-          line: 1,
+          column,
+          line,
           lineHeight: 0,
           charWidth: 0,
           coords: null,
@@ -248,10 +250,15 @@ describe('@jupyterlab/completer', () => {
 
         handler.editor = editor;
         handler.editor.model.value.text = text;
+        handler.editor.setCursorPosition({ line, column: column + 3 });
         model.original = request;
-        model.cursor = { start: 5, end: 8 };
+        model.cursor = { start: column, end: column + 3 };
         (completer.selected as any).emit(patch);
         expect(handler.editor.model.value.text).to.equal(want);
+        expect(handler.editor.getCursorPosition()).to.eql({
+          line,
+          column: column + 6
+        });
       });
     });
   });
