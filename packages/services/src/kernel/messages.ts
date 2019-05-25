@@ -52,6 +52,9 @@ export namespace KernelMessage {
     return msg as IShellMessage;
   }
 
+  /**
+   * Shell message types.
+   */
   export type ShellMessageType =
     | 'comm_close'
     | 'comm_info_reply'
@@ -75,6 +78,9 @@ export namespace KernelMessage {
     | 'shutdown_reply'
     | 'shutdown_request';
 
+  /**
+   * IOPub message types.
+   */
   export type IOPubMessageType =
     | 'clear_output'
     | 'comm_close'
@@ -88,15 +94,21 @@ export namespace KernelMessage {
     | 'stream'
     | 'update_display_data';
 
+  /**
+   * Stdin message types.
+   */
   export type StdinMessageType = 'input_request' | 'input_reply';
 
+  /**
+   * Jupyter message types.
+   */
   export type MessageType =
     | IOPubMessageType
     | ShellMessageType
     | StdinMessageType;
 
   /**
-   * The valid channel names.
+   * The valid Jupyter channel names in a message to a frontend.
    */
   export type Channel = 'shell' | 'iopub' | 'stdin';
 
@@ -166,7 +178,7 @@ export namespace KernelMessage {
     content: any;
 
     /**
-     * Which channel on which the message is transmitted.
+     * The channel on which the message is transmitted.
      */
     channel: Channel;
 
@@ -486,6 +498,13 @@ export namespace KernelMessage {
     nbconverter_exporter?: string;
   }
 
+  /**
+   * A  `'complete_request'` message.
+   *
+   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#completion).
+   *
+   * **See also:** [[ICompleteReplyMsg]], [[IKernel.complete]]
+   */
   export interface ICompleteRequestMsg
     extends IShellMessage<'complete_request'> {
     content: ICompleteRequest;
@@ -521,6 +540,13 @@ export namespace KernelMessage {
     };
   }
 
+  /**
+   * An `'inspect_request'` message.
+   *
+   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#introspection).
+   *
+   * **See also:** [[IInspectReplyMsg]], [[[IKernel.inspect]]]
+   */
   export interface IInspectRequestMsg extends IShellMessage<'inspect_request'> {
     content: IInspectRequest;
   }
@@ -555,6 +581,13 @@ export namespace KernelMessage {
     };
   }
 
+  /**
+   * A `'history_request'` message.
+   *
+   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
+   *
+   * **See also:** [[IHistoryReplyMsg]], [[[IKernel.history]]]
+   */
   export interface IHistoryRequestMsg extends IShellMessage<'history_request'> {
     content: IHistoryRequest;
   }
@@ -565,7 +598,7 @@ export namespace KernelMessage {
   export type HistAccess = 'range' | 'tail' | 'search';
 
   /**
-   * The content of a `'history_request'` message.
+   * The content of a `'history_request'` range message.
    *
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
    *
@@ -580,6 +613,13 @@ export namespace KernelMessage {
     stop: number;
   }
 
+  /**
+   * The content of a `'history_request'` tail message.
+   *
+   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
+   *
+   * **See also:** [[IHistoryReply]], [[[IKernel.history]]]
+   */
   export interface IHistoryRequestTail {
     output: boolean;
     raw: boolean;
@@ -587,6 +627,13 @@ export namespace KernelMessage {
     n: number;
   }
 
+  /**
+   * The content of a `'history_request'` search message.
+   *
+   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
+   *
+   * **See also:** [[IHistoryReply]], [[[IKernel.history]]]
+   */
   export interface IHistoryRequestSearch {
     output: boolean;
     raw: boolean;
@@ -596,6 +643,13 @@ export namespace KernelMessage {
     unique: boolean;
   }
 
+  /**
+   * The content of a `'history_request'` message.
+   *
+   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#history).
+   *
+   * **See also:** [[IHistoryReply]], [[[IKernel.history]]]
+   */
   export type IHistoryRequest =
     | IHistoryRequestRange
     | IHistoryRequestTail
@@ -617,6 +671,13 @@ export namespace KernelMessage {
     };
   }
 
+  /**
+   * An `'is_complete_request'` message.
+   *
+   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#code-completeness).
+   *
+   * **See also:** [[IIsCompleteReplyMsg]], [[IKernel.isComplete]]
+   */
   export interface IIsCompleteRequestMsg
     extends IShellMessage<'is_complete_request'> {
     content: IIsCompleteRequest;
@@ -857,6 +918,11 @@ export namespace KernelMessage {
     };
   }
 
+  /**
+   * Base options for an `IMessage`.
+   *
+   * **See also:** [[IMessage]]
+   */
   export interface IOptionsBase {
     msgType: MessageType;
     channel: Channel;
@@ -865,16 +931,31 @@ export namespace KernelMessage {
     msgId?: string;
   }
 
+  /**
+   * Options for an iopub `IMessage`.
+   *
+   * **See also:** [[IMessage]]
+   */
   export interface IOptionsIOPub extends IOptionsBase {
     msgType: IOPubMessageType;
     channel: 'iopub';
   }
 
+  /**
+   * Options for a shell `IMessage`.
+   *
+   * **See also:** [[IMessage]]
+   */
   export interface IOptionsShell extends IOptionsBase {
     msgType: ShellMessageType;
     channel: 'shell';
   }
 
+  /**
+   * Options for a stdin `IMessage`.
+   *
+   * **See also:** [[IMessage]]
+   */
   export interface IOptionsStdin extends IOptionsBase {
     msgType: StdinMessageType;
     channel: 'stdin';
