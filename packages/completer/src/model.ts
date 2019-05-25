@@ -331,6 +331,8 @@ export class CompleterModel implements Completer.IModel {
     }
 
     let { start, end } = cursor;
+    // Also include any filtering/additional-typing that has occurred
+    // since the completion request in the patched length.
     end = end + (this.current.text.length - this.original.text.length);
 
     return { start, end, value: patch };
