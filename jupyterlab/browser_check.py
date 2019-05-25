@@ -1,5 +1,9 @@
 
 # -*- coding: utf-8 -*-
+"""
+This module is meant to run JupyterLab in a headless browser, making sure
+the application launches and starts up without errors.
+"""
 from concurrent.futures import ThreadPoolExecutor
 from os import path as osp
 import os
@@ -41,7 +45,9 @@ class LogErrorHandler(logging.Handler):
 
 
 class BrowserApp(LabApp):
-
+    """An app the launches JupyterLab and waits for it to start up, checking for
+    JS console errors, JS errors, and Python logged errors.
+    """
     open_browser = Bool(False)
     base_url = '/foo/'
     ip = '127.0.0.1'
