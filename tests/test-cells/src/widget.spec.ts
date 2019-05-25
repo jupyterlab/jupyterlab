@@ -766,15 +766,16 @@ describe('cells/widget', () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
         widget.initializeState();
         widget.model.value.text = 'foo';
-        const future1 = CodeCell.execute(widget, session);
+        const future1 = CodeCell.execute(widget, session).catch(() => {
+          /* no-op */
+        });
         expect(widget.promptNode.textContent).to.equal('[*]:');
         const future2 = CodeCell.execute(widget, session);
         expect(widget.promptNode.textContent).to.equal('[*]:');
-        try {
-          await future1;
-        } catch (e) {
-          /* no-op */
-        }
+        await framePromise();
+        expect(widget.promptNode.textContent).to.equal('[*]:');
+
+        await future1;
         let msg = await future2;
         expect(widget.promptNode.textContent).to.equal(
           `[${msg.content.execution_count}]:`
