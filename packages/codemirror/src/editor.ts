@@ -867,12 +867,18 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     switch (args.type) {
       case 'insert':
         let pos = doc.posFromIndex(args.start);
-        doc.replaceRange(args.value, pos, pos);
+        // Replace the range, including a '+input' orign,
+        // which indicates that CodeMirror may merge changes
+        // for undo/redo purposes.
+        doc.replaceRange(args.value, pos, pos, '+input');
         break;
       case 'remove':
         let from = doc.posFromIndex(args.start);
         let to = doc.posFromIndex(args.end);
-        doc.replaceRange('', from, to);
+        // Replace the range, including a '+input' orign,
+        // which indicates that CodeMirror may merge changes
+        // for undo/redo purposes.
+        doc.replaceRange('', from, to, '+input');
         break;
       case 'set':
         doc.setValue(args.value);

@@ -166,26 +166,22 @@ export class CompletionHandler implements IDisposable {
   /**
    * Handle a completion selected signal from the completion widget.
    */
-  protected onCompletionSelected(completer: Completer, value: string): void {
+  protected onCompletionSelected(completer: Completer, val: string): void {
     const model = completer.model;
     const editor = this._editor;
     if (!editor || !model) {
       return;
     }
 
-    const patch = model.createPatch(value);
+    const patch = model.createPatch(val);
 
     if (!patch) {
       return;
     }
 
-    const { offset, text } = patch;
-    editor.model.value.text = text;
-
-    const position = editor.getPositionAt(offset);
-    if (position) {
-      editor.setCursorPosition(position);
-    }
+    const { start, end, value } = patch;
+    editor.model.value.remove(start, end);
+    editor.model.value.insert(start, value);
   }
 
   /**
