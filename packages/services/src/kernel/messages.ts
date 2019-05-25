@@ -612,8 +612,8 @@ export namespace KernelMessage {
     parent_header: IHeader<'history_request'>;
     content: {
       history:
-        | [string, number, string][]
-        | [string, number, [string, string]][];
+        | [number, number, string][]
+        | [number, number, [string, string]][];
     };
   }
 
