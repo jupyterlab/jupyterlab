@@ -47,7 +47,6 @@ window.addEventListener('load', function() {
     version: require('./package.json').version
   });
   lab.registerPluginModules(mods);
-  console.log('what');
   lab.start().then(() => {
     // eslint-disable-next-line
     console.log('Example started!');
