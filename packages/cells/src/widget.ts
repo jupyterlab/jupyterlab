@@ -28,13 +28,11 @@ import {
   IRenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
-import { KernelMessage } from '@jupyterlab/services';
+import { KernelMessage, Kernel } from '@jupyterlab/services';
 
 import { JSONValue, PromiseDelegate, JSONObject } from '@phosphor/coreutils';
 
 import { Message } from '@phosphor/messaging';
-
-import { AttachedProperty } from '@phosphor/properties';
 
 import { PanelLayout, Panel, Widget } from '@phosphor/widgets';
 
@@ -1018,7 +1016,6 @@ export namespace CodeCell {
     if (!code.trim() || !session.kernel) {
       model.executionCount = null;
       model.outputs.clear();
-      ExecutionFutureProperty.set(cell, null);
       return;
     }
 
@@ -1029,35 +1026,25 @@ export namespace CodeCell {
     cell.setPrompt('*');
     model.trusted = true;
 
-    let future: Promise<KernelMessage.IExecuteReplyMsg>;
+    let future: Kernel.IFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >;
     try {
-      future = OutputArea.execute(code, cell.outputArea, session, metadata);
-      ExecutionFutureProperty.set(cell, future);
-      const msg = await future;
+      // We assume cell.outputArea.future is the future for this execution.
+      OutputArea.execute(code, cell.outputArea, session, metadata);
+      let future = cell.outputArea.future;
+      const msg = await future.done;
       model.executionCount = msg.content.execution_count;
       return msg;
     } catch (e) {
-      // If the current execution was canceled, reset the prompt.
-      if (
-        e.message === 'Canceled' &&
-        ExecutionFutureProperty.get(cell) === future
-      ) {
+      // If this is still the current execution, clear the prompt.
+      if (e.message === 'Canceled' && cell.outputArea.future === future) {
         cell.setPrompt('');
       }
       throw e;
     }
   }
-
-  /**
-   * An attached property for an execution future handler.
-   */
-  const ExecutionFutureProperty = new AttachedProperty<
-    CodeCell,
-    Promise<KernelMessage.IExecuteReplyMsg> | null
-  >({
-    name: 'executionFuture',
-    create: () => null
-  });
 }
 
 /******************************************************************************
