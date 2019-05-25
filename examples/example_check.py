@@ -51,10 +51,12 @@ class ExampleCheckApp(mod.ExampleApp):
     ip = '127.0.0.1'
 
     def start(self):
+        self.log.addHandler(LogErrorHandler())
+
         pool = ThreadPoolExecutor()
         future = pool.submit(run_browser, self.display_url)
         IOLoop.current().add_future(future, self._browser_finished)
-        self.log.addHandler(LogErrorHandler())
+
         super().start()
 
     def _browser_finished(self, future):

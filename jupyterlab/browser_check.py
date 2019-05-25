@@ -53,11 +53,10 @@ class BrowserApp(LabApp):
         web_app.settings.setdefault('page_config_data', dict())
         web_app.settings['page_config_data']['browserTest'] = True
         web_app.settings['page_config_data']['buildAvailable'] = False
-
+        self.log.addHandler(LogErrorHandler())
         pool = ThreadPoolExecutor()
         future = pool.submit(run_browser, self.display_url)
         IOLoop.current().add_future(future, self._browser_finished)
-        self.log.addHandler(LogErrorHandler())
         super(BrowserApp, self).start()
 
     def _browser_finished(self, future):
