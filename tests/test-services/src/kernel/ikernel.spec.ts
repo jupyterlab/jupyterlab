@@ -116,7 +116,7 @@ describe('Kernel.IKernel', () => {
         find: (k, msg) => msg.header.msg_id === msgId
       });
       const msg = KernelMessage.createShellMessage({
-        msgType: 'foo',
+        msgType: 'kernel_info_request',
         channel: 'shell',
         session: tester.serverSessionId,
         msgId
@@ -143,7 +143,7 @@ describe('Kernel.IKernel', () => {
 
       // Send a shell message.
       const msg = KernelMessage.createShellMessage({
-        msgType: 'foo',
+        msgType: 'kernel_info_request',
         channel: 'shell',
         session: tester.serverSessionId,
         msgId
@@ -172,7 +172,7 @@ describe('Kernel.IKernel', () => {
 
       // Send a shell message with the wrong client (parent) session.
       const msg1 = KernelMessage.createShellMessage({
-        msgType: 'foo',
+        msgType: 'kernel_info_request',
         channel: 'shell',
         session: tester.serverSessionId,
         msgId: 'message from wrong session'
@@ -182,7 +182,7 @@ describe('Kernel.IKernel', () => {
 
       // Send a shell message with the right client (parent) session.
       const msg2 = KernelMessage.createShellMessage({
-        msgType: 'foo',
+        msgType: 'kernel_info_request',
         channel: 'shell',
         session: tester.serverSessionId,
         msgId: msgId
@@ -217,7 +217,7 @@ describe('Kernel.IKernel', () => {
       });
 
       const msg = KernelMessage.createShellMessage({
-        msgType: 'foo',
+        msgType: 'kernel_info_request',
         channel: 'shell',
         session: tester.serverSessionId,
         msgId
@@ -455,7 +455,7 @@ describe('Kernel.IKernel', () => {
       });
 
       const options: KernelMessage.IOptions = {
-        msgType: 'custom',
+        msgType: 'kernel_info_request',
         channel: 'shell',
         username: kernel.username,
         session: kernel.clientId,
@@ -487,7 +487,7 @@ describe('Kernel.IKernel', () => {
       });
 
       const options: KernelMessage.IOptions = {
-        msgType: 'custom',
+        msgType: 'kernel_info_request',
         channel: 'shell',
         username: kernel.username,
         session: kernel.clientId,
@@ -517,7 +517,7 @@ describe('Kernel.IKernel', () => {
       await dead;
 
       const options: KernelMessage.IOptions = {
-        msgType: 'custom',
+        msgType: 'kernel_info_request',
         channel: 'shell',
         username: kernel.username,
         session: kernel.clientId
@@ -538,7 +538,7 @@ describe('Kernel.IKernel', () => {
       const kernel = await tester.start();
 
       const options: KernelMessage.IOptions = {
-        msgType: 'custom',
+        msgType: 'kernel_info_request',
         channel: 'shell',
         username: kernel.username,
         session: kernel.clientId
@@ -846,7 +846,7 @@ describe('Kernel.IKernel', () => {
       };
 
       const options: KernelMessage.IOptions = {
-        msgType: 'custom',
+        msgType: 'kernel_info_request',
         channel: 'shell',
         username: defaultKernel.username,
         session: defaultKernel.clientId

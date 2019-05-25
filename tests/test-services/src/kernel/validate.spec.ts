@@ -89,7 +89,7 @@ describe('kernel/validate', () => {
           msgType: 'foo',
           channel: 'iopub',
           session: 'baz'
-        },
+        } as any,
         {}
       );
       validateMessage(msg);

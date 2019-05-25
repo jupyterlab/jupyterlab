@@ -15,7 +15,7 @@ describe('kernel/messages', () => {
       });
       expect(KernelMessage.isStreamMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
-        msgType: 'foo',
+        msgType: 'status',
         channel: 'iopub',
         session: 'baz'
       });
@@ -32,7 +32,7 @@ describe('kernel/messages', () => {
       });
       expect(KernelMessage.isDisplayDataMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
-        msgType: 'foo',
+        msgType: 'status',
         channel: 'iopub',
         session: 'baz'
       });
@@ -49,7 +49,7 @@ describe('kernel/messages', () => {
       });
       expect(KernelMessage.isExecuteInputMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
-        msgType: 'foo',
+        msgType: 'status',
         channel: 'iopub',
         session: 'baz'
       });
@@ -66,7 +66,7 @@ describe('kernel/messages', () => {
       });
       expect(KernelMessage.isExecuteResultMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
-        msgType: 'foo',
+        msgType: 'status',
         channel: 'iopub',
         session: 'baz'
       });
@@ -83,7 +83,7 @@ describe('kernel/messages', () => {
       });
       expect(KernelMessage.isStatusMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
-        msgType: 'foo',
+        msgType: 'execute_input',
         channel: 'iopub',
         session: 'baz'
       });
@@ -100,7 +100,7 @@ describe('kernel/messages', () => {
       });
       expect(KernelMessage.isClearOutputMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
-        msgType: 'foo',
+        msgType: 'status',
         channel: 'iopub',
         session: 'baz'
       });
@@ -117,7 +117,7 @@ describe('kernel/messages', () => {
       });
       expect(KernelMessage.isCommOpenMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
-        msgType: 'foo',
+        msgType: 'status',
         channel: 'iopub',
         session: 'baz'
       });
@@ -134,7 +134,7 @@ describe('kernel/messages', () => {
       });
       expect(KernelMessage.isErrorMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
-        msgType: 'foo',
+        msgType: 'status',
         channel: 'iopub',
         session: 'baz'
       });
@@ -151,11 +151,11 @@ describe('kernel/messages', () => {
       });
       expect(KernelMessage.isInputRequestMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
-        msgType: 'foo',
+        msgType: 'status',
         channel: 'stdin',
         session: 'baz'
       });
-      expect(KernelMessage.isStatusMsg(msg)).to.equal(false);
+      expect(KernelMessage.isInputRequestMsg(msg)).to.equal(false);
     });
   });
 });

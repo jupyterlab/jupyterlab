@@ -122,7 +122,7 @@ describe('session', () => {
           find: (k, msg) => msg.header.msg_id === msgId
         });
         const msg = KernelMessage.createShellMessage({
-          msgType: 'foo',
+          msgType: 'kernel_info_request',
           channel: 'shell',
           session: tester.serverSessionId,
           msgId
