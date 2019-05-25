@@ -418,7 +418,7 @@ export class KernelTester extends SocketTester {
 
   sendExecuteReply(
     msgId: string,
-    content: KernelMessage.IExecuteReply['content']
+    content: KernelMessage.IExecuteReplyMsg['content']
   ) {
     return this.sendMessage(
       { msgId, msgType: 'execute_reply', channel: 'shell' },
