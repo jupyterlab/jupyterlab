@@ -34,6 +34,7 @@ window.addEventListener('load', function() {
     require('@jupyterlab/running-extension'),
     require('@jupyterlab/settingeditor-extension'),
     require('@jupyterlab/shortcuts-extension'),
+    require('@jupyterlab/statusbar-extension'),
     require('@jupyterlab/tabmanager-extension'),
     require('@jupyterlab/terminal-extension'),
     require('@jupyterlab/theme-dark-extension'),
@@ -46,6 +47,7 @@ window.addEventListener('load', function() {
     version: require('./package.json').version
   });
   lab.registerPluginModules(mods);
+  console.log('what');
   lab.start().then(() => {
     // eslint-disable-next-line
     console.log('Example started!');

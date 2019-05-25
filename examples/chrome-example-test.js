@@ -17,23 +17,20 @@ async function main() {
   });
   const page = await browser.newPage();
 
-  console.info('Navigating to page:', URL);
-  await page.goto(URL);
-  console.info('Waiting for page to load...');
-
   errored = false;
 
   const handleMessage = async msg => {
     const text = msg.text();
     console.log(`>> ${text}`);
-    if (msg.type === 'error') {
+    if (msg.type() === 'error') {
       errored = true;
     }
     const lower = text.toLowerCase();
     if (lower === 'example started!' || lower === 'test complete!') {
       await browser.close();
       if (errored) {
-        throw Error('Example test failed!');
+        console.error('\n\n***\nExample test failed!\n***\n\n');
+        process.exit(1);
       }
       console.info('Example test complete!');
       return;
@@ -47,6 +44,10 @@ async function main() {
 
   page.on('console', handleMessage);
   page.on('error', handleError);
+
+  console.info('Navigating to page:', URL);
+  await page.goto(URL);
+  console.info('Waiting for page to load...');
 
   const html = await page.content();
   if (inspect(html).indexOf('jupyter-config-data') === -1) {
