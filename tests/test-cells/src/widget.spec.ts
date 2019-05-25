@@ -761,6 +761,25 @@ describe('cells/widget', () => {
         const executionCount = widget.model.executionCount;
         expect(executionCount).to.not.equal(originalCount);
       });
+
+      it('should set the cell prompt properly while executing', async () => {
+        const widget = new CodeCell({ model, rendermime, contentFactory });
+        widget.initializeState();
+        widget.model.value.text = 'foo';
+        const future1 = CodeCell.execute(widget, session);
+        expect(widget.promptNode.textContent).to.equal('[*]:');
+        const future2 = CodeCell.execute(widget, session);
+        expect(widget.promptNode.textContent).to.equal('[*]:');
+        try {
+          await future1;
+        } catch (e) {
+          /* no-op */
+        }
+        let msg = await future2;
+        expect(widget.promptNode.textContent).to.equal(
+          `[${msg.content.execution_count}]:`
+        );
+      });
     });
   });
 
