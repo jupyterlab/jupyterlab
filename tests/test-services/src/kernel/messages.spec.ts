@@ -151,7 +151,7 @@ describe('kernel/messages', () => {
       });
       expect(KernelMessage.isInputRequestMsg(msg)).to.equal(true);
       msg = KernelMessage.createMessage({
-        msgType: 'status',
+        msgType: 'input_reply',
         channel: 'stdin',
         session: 'baz'
       });

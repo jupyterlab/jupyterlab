@@ -130,7 +130,7 @@ export const KERNELSPECS: JSONObject = {
  */
 export function createMsg(
   channel: KernelMessage.Channel,
-  parentHeader: JSONObject
+  parentHeader: KernelMessage.IHeader | {}
 ): KernelMessage.IMessage {
   return {
     channel: channel,

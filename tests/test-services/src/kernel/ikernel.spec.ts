@@ -211,7 +211,7 @@ describe('Kernel.IKernel', () => {
       const emission = testEmission(kernel.anyMessage, {
         test: (k, args) => {
           expect(args.msg.header.msg_id).to.equal(msgId);
-          expect(args.msg.header.msg_type).to.equal('foo');
+          expect(args.msg.header.msg_type).to.equal('kernel_info_request');
           expect(args.direction).to.equal('recv');
         }
       });
@@ -438,14 +438,26 @@ describe('Kernel.IKernel', () => {
   });
 
   describe('#sendShellMessage()', () => {
+    let tester: KernelTester;
+    let kernel: Kernel.IKernel;
+
+    beforeEach(async () => {
+      tester = new KernelTester();
+      kernel = await tester.start();
+    });
+
+    afterEach(async () => {
+      await tester.shutdown();
+      tester.dispose();
+    });
+
     it('should send a message to the kernel', async () => {
-      const tester = new KernelTester();
-      const kernel = await tester.start();
       const done = new PromiseDelegate<void>();
       const msgId = UUID.uuid4();
 
       tester.onMessage(msg => {
         try {
+          console.log('*************IN MESSAGE***************');
           expect(msg.header.msg_id).to.equal(msgId);
         } catch (e) {
           done.reject(e);
@@ -464,13 +476,9 @@ describe('Kernel.IKernel', () => {
       const msg = KernelMessage.createShellMessage(options);
       kernel.sendShellMessage(msg, true);
       await done.promise;
-      await tester.shutdown();
-      tester.dispose();
     });
 
     it('should send a binary message', async () => {
-      const tester = new KernelTester();
-      const kernel = await tester.start();
       const done = new PromiseDelegate<void>();
       const msgId = UUID.uuid4();
 
@@ -501,13 +509,9 @@ describe('Kernel.IKernel', () => {
       ]);
       kernel.sendShellMessage(msg, true);
       await done.promise;
-      await tester.shutdown();
-      tester.dispose();
     });
 
     it('should fail if the kernel is dead', async () => {
-      const tester = new KernelTester();
-      const kernel = await tester.start();
 
       // Create a promise that resolves when the kernel's status changes to dead
       const dead = testEmission(kernel.statusChanged, {
@@ -527,15 +531,11 @@ describe('Kernel.IKernel', () => {
         kernel.sendShellMessage(msg, true);
         expect(false).to.equal(true);
       }).to.throw(/Kernel is dead/);
-      await tester.shutdown();
-      tester.dispose();
     });
 
     it('should handle out of order messages', async () => {
       // This test that a future.done promise resolves when a status idle and
       // reply come through, even if the status comes first.
-      const tester = new KernelTester();
-      const kernel = await tester.start();
 
       const options: KernelMessage.IOptions = {
         msgType: 'kernel_info_request',
@@ -549,25 +549,26 @@ describe('Kernel.IKernel', () => {
       let newMsg: KernelMessage.IMessage;
       tester.onMessage(msg => {
         // trigger onDone
-        options.msgType = 'status';
-        options.channel = 'iopub';
-        newMsg = KernelMessage.createMessage(options, {
-          execution_state: 'idle'
-        });
+        newMsg = KernelMessage.createMessage(
+          { ...options, msgType: 'status', channel: 'iopub' },
+          {
+            execution_state: 'idle'
+          }
+        );
         newMsg.parent_header = msg.header;
         tester.send(newMsg);
 
         future.onIOPub = () => {
-          options.msgType = 'custom';
-          options.channel = 'shell';
-          newMsg = KernelMessage.createShellMessage(options);
+          newMsg = KernelMessage.createShellMessage({
+            ...options,
+            msgType: 'comm_open',
+            channel: 'shell'
+          });
           newMsg.parent_header = msg.header;
           tester.send(newMsg);
         };
       });
       await future.done;
-      await tester.shutdown();
-      tester.dispose();
     });
   });
 
@@ -785,14 +786,33 @@ describe('Kernel.IKernel', () => {
   });
 
   describe('#requestHistory()', () => {
-    it('should resolve the promise', async () => {
+    it('range messages should resolve the promise', async () => {
+      const options: KernelMessage.IHistoryRequest = {
+        output: true,
+        raw: true,
+        hist_access_type: 'range',
+        session: 0,
+        start: 1,
+        stop: 2
+      };
+      await defaultKernel.requestHistory(options);
+    });
+
+    it('tail messages should resolve the promise', async () => {
+      const options: KernelMessage.IHistoryRequest = {
+        output: true,
+        raw: true,
+        hist_access_type: 'tail',
+        n: 1
+      };
+      await defaultKernel.requestHistory(options);
+    });
+
+    it('search messages should resolve the promise', async () => {
       const options: KernelMessage.IHistoryRequest = {
         output: true,
         raw: true,
         hist_access_type: 'search',
-        session: 0,
-        start: 1,
-        stop: 2,
         n: 1,
         pattern: '*',
         unique: true
@@ -859,25 +879,31 @@ describe('Kernel.IKernel', () => {
         expect(msg.channel).to.equal('shell');
 
         // send a reply
-        options.channel = 'shell';
-        newMsg = KernelMessage.createMessage(options);
+        newMsg = KernelMessage.createMessage({
+          ...options,
+          msgType: 'kernel_info_reply'
+        });
         newMsg.parent_header = msg.header;
         tester.send(newMsg);
 
         future.onReply = () => {
           // trigger onStdin
-          options.channel = 'stdin';
-          newMsg = KernelMessage.createMessage(options);
+          newMsg = KernelMessage.createMessage({
+            ...options,
+            channel: 'stdin',
+            msgType: 'input_request'
+          });
           newMsg.parent_header = msg.header;
           tester.send(newMsg);
         };
 
         future.onStdin = () => {
           // trigger onIOPub with a 'stream' message
-          options.channel = 'iopub';
-          options.msgType = 'stream';
           const streamContent: JSONObject = { name: 'stdout', text: '' };
-          newMsg = KernelMessage.createMessage(options, streamContent);
+          newMsg = KernelMessage.createMessage(
+            { ...options, channel: 'iopub', msgType: 'stream' },
+            streamContent
+          );
           newMsg.parent_header = msg.header;
           tester.send(newMsg);
         };
@@ -885,10 +911,12 @@ describe('Kernel.IKernel', () => {
         future.onIOPub = ioMsg => {
           if (ioMsg.header.msg_type === 'stream') {
             // trigger onDone
-            options.msgType = 'status';
-            newMsg = KernelMessage.createMessage(options, {
-              execution_state: 'idle'
-            });
+            newMsg = KernelMessage.createMessage(
+              { ...options, channel: 'iopub', msgType: 'status' },
+              {
+                execution_state: 'idle'
+              }
+            );
             newMsg.parent_header = msg.header;
             tester.send(newMsg);
           }
@@ -1307,7 +1335,12 @@ describe('Kernel.IKernel', () => {
           })
         );
         pushIopub(tester.sendStatus('idle', 'idle'));
-        pushReply(tester.sendExecuteReply('execute reply', {}));
+        pushReply(
+          tester.sendExecuteReply('execute reply', {
+            status: 'ok',
+            execution_count: 1
+          })
+        );
 
         tester.parentHeader = undefined;
       });
