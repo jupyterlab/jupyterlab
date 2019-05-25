@@ -21,6 +21,7 @@ import subprocess
 from tornado.ioloop import IOLoop
 from traitlets import Bool, Unicode
 from jupyterlab.labapp import get_app_dir
+from jupyterlab.browser_check import LogErrorHandler
 
 here = osp.abspath(osp.dirname(__file__))
 
@@ -31,16 +32,6 @@ mod_path = osp.abspath(osp.join(example_dir, 'main.py'))
 spec = importlib.util.spec_from_file_location("example", mod_path)
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
-
-
-class LogErrorHandler(logging.Handler):
-    """A handler that exits with 1 on a logged error."""
-    def emit(self, record):
-        if record.level < logging.ERROR:
-            return
-        print(record.msg, file=sys.stderr)
-        logging.shutdown()
-        sys.exit(1)
 
 
 class ExampleCheckApp(mod.ExampleApp):
