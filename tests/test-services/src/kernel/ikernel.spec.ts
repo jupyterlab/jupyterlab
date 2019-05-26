@@ -472,8 +472,9 @@ describe('Kernel.IKernel', () => {
         session: kernel.clientId,
         msgId
       };
+
       const msg = KernelMessage.createShellMessage(options);
-      await kernel.sendShellMessage(msg, true).done;
+      kernel.sendShellMessage(msg, true);
       await done.promise;
     });
 
@@ -506,7 +507,7 @@ describe('Kernel.IKernel', () => {
         data,
         data.buffer
       ]);
-      await kernel.sendShellMessage(msg, true).done;
+      kernel.sendShellMessage(msg, true);
       await done.promise;
     });
 
