@@ -463,7 +463,7 @@ describe('Kernel.IKernel', () => {
           done.reject(e);
           throw e;
         }
-        done.resolve(null);
+        done.resolve();
       });
 
       const options: KernelMessage.IOptions = {
@@ -491,7 +491,7 @@ describe('Kernel.IKernel', () => {
           done.reject(e);
           throw e;
         }
-        done.resolve(null);
+        done.resolve();
       });
 
       const options: KernelMessage.IOptions = {
@@ -512,7 +512,6 @@ describe('Kernel.IKernel', () => {
     });
 
     it('should fail if the kernel is dead', async () => {
-
       // Create a promise that resolves when the kernel's status changes to dead
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
