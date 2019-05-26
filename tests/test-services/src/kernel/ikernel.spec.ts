@@ -457,7 +457,6 @@ describe('Kernel.IKernel', () => {
 
       tester.onMessage(msg => {
         try {
-          console.log('*************IN MESSAGE***************');
           expect(msg.header.msg_id).to.equal(msgId);
         } catch (e) {
           done.reject(e);
@@ -467,14 +466,14 @@ describe('Kernel.IKernel', () => {
       });
 
       const options: KernelMessage.IOptions = {
-        msgType: 'kernel_info_request',
+        msgType: 'comm_info_request',
         channel: 'shell',
         username: kernel.username,
         session: kernel.clientId,
         msgId
       };
       const msg = KernelMessage.createShellMessage(options);
-      kernel.sendShellMessage(msg, true);
+      await kernel.sendShellMessage(msg, true).done;
       await done.promise;
     });
 
@@ -495,7 +494,7 @@ describe('Kernel.IKernel', () => {
       });
 
       const options: KernelMessage.IOptions = {
-        msgType: 'kernel_info_request',
+        msgType: 'comm_info_request',
         channel: 'shell',
         username: kernel.username,
         session: kernel.clientId,
@@ -507,7 +506,7 @@ describe('Kernel.IKernel', () => {
         data,
         data.buffer
       ]);
-      kernel.sendShellMessage(msg, true);
+      await kernel.sendShellMessage(msg, true).done;
       await done.promise;
     });
 
