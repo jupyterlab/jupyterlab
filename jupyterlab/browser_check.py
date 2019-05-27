@@ -41,11 +41,12 @@ class LogErrorHandler(logging.Handler):
     def filter(self, record):
         if record.levelno < logging.ERROR:
             return False
+        # known startup error message
+        elif 'copy and paste' in record.msg:
+            return
         return super().filter(record)
 
     def emit(self, record):
-        if 'copy and paste' in record.msg:
-            return
         print(record.msg, file=sys.stderr)
         sys.exit(1)
 
