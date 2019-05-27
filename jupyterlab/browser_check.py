@@ -38,7 +38,7 @@ test_aliases['app-dir'] = 'BrowserApp.app_dir'
 class LogErrorHandler(logging.Handler):
     """A handler that exits with 1 on a logged error."""
     def emit(self, record):
-        if record.level < logging.ERROR:
+        if record.levelno < logging.ERROR:
             return
         print(record.msg, file=sys.stderr)
         logging.shutdown()
