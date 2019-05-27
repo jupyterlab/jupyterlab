@@ -51,7 +51,12 @@ class LogErrorHandler(logging.Handler):
 
     def emit(self, record):
         print(record.msg, file=sys.stderr)
+<<<<<<< HEAD
         self.app.errored = True
+=======
+        print('\n\n***Exiting***\n')
+        sys.exit(1)
+>>>>>>> a64780ad1... Add exiting note and test examples first
 
 
 class BrowserApp(LabApp):
