@@ -47,7 +47,6 @@ class LogErrorHandler(logging.Handler):
         if 'copy and paste' in record.msg:
             return
         print(record.msg, file=sys.stderr)
-        logging.shutdown()
         sys.exit(1)
 
 
