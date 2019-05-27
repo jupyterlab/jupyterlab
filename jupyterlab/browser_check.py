@@ -37,8 +37,14 @@ test_aliases['app-dir'] = 'BrowserApp.app_dir'
 
 class LogErrorHandler(logging.Handler):
     """A handler that exits with 1 on a logged error."""
-    def emit(self, record):
+
+    def filter(self, record):
         if record.levelno < logging.ERROR:
+            return False
+        return super().filter(record)
+
+    def emit(self, record):
+        if 'copy and paste' in record.msg:
             return
         print(record.msg, file=sys.stderr)
         logging.shutdown()
