@@ -8,6 +8,7 @@ const inspect = require('util').inspect;
 const URL = process.argv[2];
 
 async function main() {
+  /* eslint-disable no-console */
   console.info('Starting Chrome Headless');
 
   // Disable shm usage to save resources and prevent random memory
@@ -17,7 +18,7 @@ async function main() {
   });
   const page = await browser.newPage();
 
-  errored = false;
+  let errored = false;
 
   const handleMessage = async msg => {
     const text = msg.text();

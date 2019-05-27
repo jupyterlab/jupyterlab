@@ -5,6 +5,7 @@ This module is meant to run JupyterLab in a headless browser, making sure
 the application launches and starts up without errors.
 """
 from concurrent.futures import ThreadPoolExecutor
+import logging
 from os import path as osp
 import os
 import shutil
