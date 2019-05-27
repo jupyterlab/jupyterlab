@@ -46,7 +46,7 @@ window.addEventListener('load', async function() {
     version: require('./package.json').version
   });
   lab.registerPluginModules(mods);
-  // eslint - disable no - console.
+  /* eslint-disable no-console */
   console.log('Starting app');
   await lab.start();
   console.log('App started, waiting for restore');
