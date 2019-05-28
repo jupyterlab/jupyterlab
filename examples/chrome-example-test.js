@@ -11,10 +11,8 @@ async function main() {
   /* eslint-disable no-console */
   console.info('Starting Chrome Headless');
 
-  // Disable shm usage to save resources and prevent random memory
-  // errors seen on CI
   const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-dev-shm-usage']
+    args: ['--no-sandbox']
   });
   const page = await browser.newPage();
 
