@@ -96,22 +96,13 @@ fi
 
 
 if [[ $GROUP == usage ]]; then
-<<<<<<< HEAD
-
     # Build the examples.
-    jlpm build:packages
-=======
-    # Build the examples.
->>>>>>> a64780ad1... Add exiting note and test examples first
+    jlpm run build:packages
     jlpm run build:examples
 
     # Test the examples
     jlpm run test:examples
 
-<<<<<<< HEAD
-
-=======
->>>>>>> a64780ad1... Add exiting note and test examples first
     # Test the cli apps.
     jupyter lab clean
     jupyter lab build
