@@ -258,29 +258,47 @@ describe('outputarea/widget', () => {
         await ipySession.shutdown();
       });
 
-      it('should raise an error', async () => {
+      it('should stop on an error', async () => {
+        let ipySession: ClientSession;
+        ipySession = await createClientSession({
+          kernelPreference: { name: 'ipython' }
+        });
+        await ipySession.initialize();
+        await ipySession.kernel.ready;
         const widget1 = new LogOutputArea({ rendermime, model });
-        const reply = await OutputArea.execute('a++1', widget, session);
-        const reply2 = await OutputArea.execute('a=1', widget1, session);
-        expect(reply.content.status).to.equal('hi');
-        expect(reply2.content.status).to.equal('hi');
+        const future1 = OutputArea.execute('a++1', widget, ipySession);
+        const future2 = OutputArea.execute('a=1', widget1, ipySession);
+        const reply = await future1;
+        const reply2 = await future2;
+        expect(reply.content.status).to.equal('error');
+        expect(reply2.content.status).to.equal('aborted');
         expect(model.length).to.equal(1);
         widget1.dispose();
+        await ipySession.shutdown();
       });
 
       it('should allow an error given "raises-exception" metadata tag', async () => {
+        let ipySession: ClientSession;
+        ipySession = await createClientSession({
+          kernelPreference: { name: 'ipython' }
+        });
+        await ipySession.initialize();
+        await ipySession.kernel.ready;
         const widget1 = new LogOutputArea({ rendermime, model });
         const metadata = { tags: ['raises-exception'] };
-        const reply = await OutputArea.execute(
+        const future1 = OutputArea.execute(
           'a++1',
           widget,
-          session,
+          ipySession,
           metadata
         );
-        const reply2 = await OutputArea.execute('a=1', widget1, session);
-        expect(reply.content.execution_count).to.equal('hi');
-        expect(reply2.content.execution_count).to.equal('hi');
+        const future2 = OutputArea.execute('a=1', widget1, ipySession);
+        const reply = await future1;
+        const reply2 = await future2;
+        expect(reply.content.status).to.equal('error');
+        expect(reply2.content.status).to.equal('ok');
         widget1.dispose();
+        await ipySession.shutdown();
       });
     });
 
