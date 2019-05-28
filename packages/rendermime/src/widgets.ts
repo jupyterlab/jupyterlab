@@ -354,6 +354,7 @@ export class RenderedText extends RenderedCommon {
   render(model: IRenderMime.IMimeModel): Promise<void> {
     return renderers.renderText({
       host: this.node,
+      sanitizer: this.sanitizer,
       source: String(model.data[this.mimeType])
     });
   }
@@ -383,6 +384,7 @@ export class RenderedJavaScript extends RenderedCommon {
   render(model: IRenderMime.IMimeModel): Promise<void> {
     return renderers.renderText({
       host: this.node,
+      sanitizer: this.sanitizer,
       source: 'JavaScript output is disabled in JupyterLab'
     });
   }

@@ -468,13 +468,17 @@ export namespace renderSVG {
  */
 export function renderText(options: renderText.IRenderOptions): Promise<void> {
   // Unpack the options.
-  let { host, source } = options;
+  const { host, sanitizer, source } = options;
 
   // Create the HTML content.
-  let content = Private.ansiSpan(source);
+  const content = sanitizer.sanitize(Private.ansiSpan(source), {
+    allowedTags: ['span']
+  });
 
-  // Set the inner HTML for the host node.
-  host.innerHTML = `<pre>${content}</pre>`;
+  // Set the sanitized content for the host node.
+  const pre = document.createElement('pre');
+  pre.innerHTML = content;
+  host.appendChild(pre);
 
   // Return the rendered promise.
   return Promise.resolve(undefined);
@@ -492,6 +496,11 @@ export namespace renderText {
      * The host node for the text content.
      */
     host: HTMLElement;
+
+    /**
+     * The html sanitizer for untrusted source.
+     */
+    sanitizer: ISanitizer;
 
     /**
      * The source text to render.

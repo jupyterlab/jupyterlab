@@ -386,7 +386,10 @@ export class OutputArea extends Widget {
       }
       output.renderModel(model).catch(error => {
         // Manually append error message to output
-        output.node.innerHTML = `<pre>Javascript Error: ${error.message}</pre>`;
+        const pre = document.createElement('p');
+        pre.textContent = `Javascript Error: ${error.message}`;
+        output.node.appendChild(pre);
+
         // Remove mime-type-specific CSS classes
         output.node.className = 'p-Widget jp-RenderedText';
         output.node.setAttribute(
