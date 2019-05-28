@@ -38,10 +38,9 @@ test_aliases['app-dir'] = 'BrowserApp.app_dir'
 class LogErrorHandler(logging.Handler):
     """A handler that exits with 1 on a logged error."""
 
-    def __init__(self, app):
+    def __init__(self):
         super().__init__(level=logging.ERROR)
-        self.app = app
-        self.app.errored = False
+        self.errored = False
 
     def filter(self, record):
         # known startup error message
@@ -51,7 +50,30 @@ class LogErrorHandler(logging.Handler):
 
     def emit(self, record):
         print(record.msg, file=sys.stderr)
-        self.app.errored = True
+        self.errored = True
+
+
+def run_test(app, func):
+    """Run a test against the application.
+
+    func is a function that accepts an app url as a parameter and returns a result.
+    """
+    handler = LogErrorHandler()
+
+    def finished(future):
+        try:
+            result = future.result()
+        except Exception as e:
+            self.log.error(str(e))
+        if handler.errored:
+            sys.exit(1)
+        else:
+            sys.exit(result)
+
+    app.log.addHandler(handler)
+    pool = ThreadPoolExecutor()
+    future = pool.submit(run_browser, app.display_url)
+    IOLoop.current().add_future(future, finished)
 
 
 class BrowserApp(LabApp):
@@ -69,21 +91,8 @@ class BrowserApp(LabApp):
         web_app.settings.setdefault('page_config_data', dict())
         web_app.settings['page_config_data']['browserTest'] = True
         web_app.settings['page_config_data']['buildAvailable'] = False
-        self.log.addHandler(LogErrorHandler(self))
-        pool = ThreadPoolExecutor()
-        future = pool.submit(run_browser, self.display_url)
-        IOLoop.current().add_future(future, self._browser_finished)
-        super(BrowserApp, self).start()
-
-    def _browser_finished(self, future):
-        try:
-            result = future.result()
-        except Exception as e:
-            self.log.error(str(e))
-        if self.errored:
-            sys.exit(1)
-        else:
-            sys.exit(result)
+        run_test(self, run_browser)
+        super().start()
 
 
 def run_browser(url):

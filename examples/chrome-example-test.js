@@ -58,7 +58,9 @@ async function main() {
 
 // Stop the process if an error is raised in the async function.
 process.on('unhandledRejection', up => {
-  throw up;
+  if (String(up).indexOf('Target closed') === -1) {
+    throw up;
+  }
 });
 
 main();

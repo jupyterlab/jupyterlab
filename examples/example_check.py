@@ -9,7 +9,6 @@ string being printed.
 
 e.g. python example_check.py ./app
 """
-from concurrent.futures import ThreadPoolExecutor
 import importlib.util
 import logging
 from os import path as osp
@@ -21,7 +20,7 @@ import subprocess
 from tornado.ioloop import IOLoop
 from traitlets import Bool, Unicode
 from jupyterlab.labapp import get_app_dir
-from jupyterlab.browser_check import LogErrorHandler
+from jupyterlab.browser_check import run_test
 
 here = osp.abspath(osp.dirname(__file__))
 
@@ -44,23 +43,8 @@ class ExampleCheckApp(mod.ExampleApp):
     ip = '127.0.0.1'
 
     def start(self):
-        self.log.addHandler(LogErrorHandler(self))
-
-        pool = ThreadPoolExecutor()
-        future = pool.submit(run_browser, self.display_url)
-        IOLoop.current().add_future(future, self._browser_finished)
-
+        run_test(run_browser)
         super().start()
-
-    def _browser_finished(self, future):
-        try:
-            result = future.result()
-        except Exception as e:
-            self.log.error(str(e))
-        if self.errored:
-            sys.exit(1)
-        else:
-            sys.exit(result)
 
 
 def run_browser(url):
