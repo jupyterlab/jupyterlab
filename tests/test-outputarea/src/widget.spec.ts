@@ -257,6 +257,31 @@ describe('outputarea/widget', () => {
         expect(outputs[2].data).to.deep.equal({ 'text/plain': '4' });
         await ipySession.shutdown();
       });
+
+      it('should raise an error', async () => {
+        const widget1 = new LogOutputArea({ rendermime, model });
+        const reply = await OutputArea.execute('a++1', widget, session);
+        const reply2 = await OutputArea.execute('a=1', widget1, session);
+        expect(reply.content.status).to.equal('hi');
+        expect(reply2.content.status).to.equal('hi');
+        expect(model.length).to.equal(1);
+        widget1.dispose();
+      });
+
+      it('should allow an error given "raises-exception" metadata tag', async () => {
+        const widget1 = new LogOutputArea({ rendermime, model });
+        const metadata = { tags: ['raises-exception'] };
+        const reply = await OutputArea.execute(
+          'a++1',
+          widget,
+          session,
+          metadata
+        );
+        const reply2 = await OutputArea.execute('a=1', widget1, session);
+        expect(reply.content.execution_count).to.equal('hi');
+        expect(reply2.content.execution_count).to.equal('hi');
+        widget1.dispose();
+      });
     });
 
     describe('.ContentFactory', () => {

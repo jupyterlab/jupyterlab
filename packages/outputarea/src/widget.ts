@@ -535,9 +535,17 @@ export namespace OutputArea {
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg> {
     // Override the default for `stop_on_error`.
+    let stopOnError = true;
+    if (
+      metadata &&
+      metadata.tags &&
+      (metadata.tags as string[]).indexOf('raises-exception') !== -1
+    ) {
+      stopOnError = false;
+    }
     let content: KernelMessage.IExecuteRequest = {
       code,
-      stop_on_error: true
+      stop_on_error: stopOnError
     };
 
     if (!session.kernel) {
