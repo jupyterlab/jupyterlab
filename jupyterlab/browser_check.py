@@ -38,17 +38,20 @@ test_aliases['app-dir'] = 'BrowserApp.app_dir'
 class LogErrorHandler(logging.Handler):
     """A handler that exits with 1 on a logged error."""
 
+    def __init__(self, app):
+        super().__init__(self, level=logging.ERROR)
+        self.app = app
+        self.app.errored = False
+
     def filter(self, record):
-        if record.levelno < logging.ERROR:
-            return False
         # known startup error message
-        elif 'copy and paste' in record.msg:
+        elif 'paste' in record.msg:
             return
         return super().filter(record)
 
     def emit(self, record):
         print(record.msg, file=sys.stderr)
-        sys.exit(1)
+        self.app.errored = True
 
 
 class BrowserApp(LabApp):
@@ -66,7 +69,7 @@ class BrowserApp(LabApp):
         web_app.settings.setdefault('page_config_data', dict())
         web_app.settings['page_config_data']['browserTest'] = True
         web_app.settings['page_config_data']['buildAvailable'] = False
-        self.log.addHandler(LogErrorHandler())
+        self.log.addHandler(LogErrorHandler(self))
         pool = ThreadPoolExecutor()
         future = pool.submit(run_browser, self.display_url)
         IOLoop.current().add_future(future, self._browser_finished)
@@ -74,9 +77,13 @@ class BrowserApp(LabApp):
 
     def _browser_finished(self, future):
         try:
-            sys.exit(future.result())
+            result = future.result()
         except Exception as e:
             self.log.error(str(e))
+        if self.errored:
+            sys.exit(1)
+        else:
+            sys.exit(result)
 
 
 def run_browser(url):

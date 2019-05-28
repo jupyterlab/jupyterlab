@@ -44,7 +44,7 @@ class ExampleCheckApp(mod.ExampleApp):
     ip = '127.0.0.1'
 
     def start(self):
-        self.log.addHandler(LogErrorHandler())
+        self.log.addHandler(LogErrorHandler(self))
 
         pool = ThreadPoolExecutor()
         future = pool.submit(run_browser, self.display_url)
@@ -54,9 +54,13 @@ class ExampleCheckApp(mod.ExampleApp):
 
     def _browser_finished(self, future):
         try:
-            sys.exit(future.result())
+            result = future.result()
         except Exception as e:
             self.log.error(str(e))
+        if self.errored:
+            sys.exit(1)
+        else:
+            sys.exit(result)
 
 
 def run_browser(url):
