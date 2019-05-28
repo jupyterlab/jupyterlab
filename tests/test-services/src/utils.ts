@@ -332,20 +332,24 @@ export class KernelTester extends SocketTester {
    * Send the status from the server to the client.
    */
   sendStatus(msgId: string, status: Kernel.Status) {
-    return this.sendMessage(
-      { msgId, msgType: 'status', channel: 'iopub' },
-      { execution_state: status }
-    );
+    return this.sendMessage({
+      msgId,
+      msgType: 'status',
+      channel: 'iopub',
+      content: { execution_state: status }
+    });
   }
 
   /**
    * Send an iopub stream message.
    */
   sendStream(msgId: string, content: KernelMessage.IStreamMsg['content']) {
-    return this.sendMessage(
-      { msgId, msgType: 'stream', channel: 'iopub' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'stream',
+      channel: 'iopub',
       content
-    );
+    });
   }
 
   /**
@@ -355,10 +359,12 @@ export class KernelTester extends SocketTester {
     msgId: string,
     content: KernelMessage.IDisplayDataMsg['content']
   ) {
-    return this.sendMessage(
-      { msgId, msgType: 'display_data', channel: 'iopub' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'display_data',
+      channel: 'iopub',
       content
-    );
+    });
   }
 
   /**
@@ -368,19 +374,23 @@ export class KernelTester extends SocketTester {
     msgId: string,
     content: KernelMessage.IUpdateDisplayDataMsg['content']
   ) {
-    return this.sendMessage(
-      { msgId, msgType: 'update_display_data', channel: 'iopub' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'update_display_data',
+      channel: 'iopub',
       content
-    );
+    });
   }
   /**
    * Send an iopub comm open message.
    */
   sendCommOpen(msgId: string, content: KernelMessage.ICommOpenMsg['content']) {
-    return this.sendMessage(
-      { msgId, msgType: 'comm_open', channel: 'iopub' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'comm_open',
+      channel: 'iopub',
       content
-    );
+    });
   }
 
   /**
@@ -390,74 +400,84 @@ export class KernelTester extends SocketTester {
     msgId: string,
     content: KernelMessage.ICommCloseMsg['content']
   ) {
-    return this.sendMessage(
-      { msgId, msgType: 'comm_close', channel: 'iopub' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'comm_close',
+      channel: 'iopub',
       content
-    );
+    });
   }
 
   /**
    * Send an iopub comm message.
    */
   sendCommMsg(msgId: string, content: KernelMessage.ICommMsgMsg['content']) {
-    return this.sendMessage(
-      { msgId, msgType: 'comm_msg', channel: 'iopub' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'comm_msg',
+      channel: 'iopub',
       content
-    );
+    });
   }
 
   sendExecuteResult(
     msgId: string,
     content: KernelMessage.IExecuteResultMsg['content']
   ) {
-    return this.sendMessage(
-      { msgId, msgType: 'execute_result', channel: 'iopub' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'execute_result',
+      channel: 'iopub',
       content
-    );
+    });
   }
 
   sendExecuteReply(
     msgId: string,
     content: KernelMessage.IExecuteReplyMsg['content']
   ) {
-    return this.sendMessage(
-      { msgId, msgType: 'execute_reply', channel: 'shell' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'execute_reply',
+      channel: 'shell',
       content
-    );
+    });
   }
 
   sendKernelInfoReply(
     msgId: string,
     content: KernelMessage.IInfoReplyMsg['content']
   ) {
-    return this.sendMessage(
-      { msgId, msgType: 'kernel_info_reply', channel: 'shell' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'kernel_info_reply',
+      channel: 'shell',
       content
-    );
+    });
   }
 
   sendInputRequest(
     msgId: string,
     content: KernelMessage.IInputRequestMsg['content']
   ) {
-    return this.sendMessage(
-      { msgId, msgType: 'input_request', channel: 'stdin' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'input_request',
+      channel: 'stdin',
       content
-    );
+    });
   }
 
   /**
    * Send a kernel message with sensible defaults.
    */
-  sendMessage(
-    options: MakeOptional<KernelMessage.IOptions, 'session'>,
-    content: any
+  sendMessage<T extends KernelMessage.Message>(
+    options: MakeOptional<KernelMessage.IOptions<T>, 'session'>
   ) {
-    options.session = this.serverSessionId;
-    const msg = KernelMessage.createMessage(
-      options as KernelMessage.IOptions,
-      content
-    );
+    const msg = KernelMessage.createMessage<any>({
+      session: this.serverSessionId,
+      ...options
+    });
     msg.parent_header = this.parentHeader;
     this.send(msg);
     return msg.header.msg_id;
@@ -466,7 +486,7 @@ export class KernelTester extends SocketTester {
   /**
    * Send a kernel message from the server to the client.
    */
-  send(msg: KernelMessage.IMessage): void {
+  send(msg: KernelMessage.Message): void {
     this.sendRaw(serialize(msg));
   }
 
@@ -614,14 +634,14 @@ export class SessionTester extends SocketTester {
   /**
    * Send the status from the server to the client.
    */
-  sendStatus(status: string, parentHeader?: KernelMessage.IHeader) {
-    const options: KernelMessage.IOptions = {
+  sendStatus(status: Kernel.Status, parentHeader?: KernelMessage.IHeader) {
+    const msg = KernelMessage.createMessage({
       msgType: 'status',
       channel: 'iopub',
-      session: this.serverSessionId
-    };
-    const msg = KernelMessage.createMessage(options, {
-      execution_state: status
+      session: this.serverSessionId,
+      content: {
+        execution_state: status
+      }
     });
     if (parentHeader) {
       msg.parent_header = parentHeader;
@@ -653,19 +673,19 @@ export class SessionTester extends SocketTester {
         msg = new Uint8Array(msg).buffer;
       }
       const data = deserialize(msg);
-      if (data.header.msg_type === 'kernel_info_request') {
+      if (KernelMessage.isInfoRequestMsg(data)) {
         // First send status busy message.
         this.sendStatus('busy', data.header);
 
         // Then send the kernel_info_reply message.
-        const options: KernelMessage.IOptions = {
+        const reply = KernelMessage.createMessage({
           msgType: 'kernel_info_reply',
           channel: 'shell',
-          session: this.serverSessionId
-        };
-        const msg = KernelMessage.createMessage(options, EXAMPLE_KERNEL_INFO);
-        msg.parent_header = data.header;
-        this.send(msg);
+          session: this.serverSessionId,
+          content: EXAMPLE_KERNEL_INFO
+        });
+        reply.parent_header = data.header;
+        this.send(reply);
 
         // Then send status idle message.
         this.sendStatus('idle', data.header);

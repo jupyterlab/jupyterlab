@@ -401,13 +401,13 @@ export class DefaultKernel implements Kernel.IKernel {
    * received and validated.
    */
   async requestKernelInfo(): Promise<KernelMessage.IInfoReplyMsg> {
-    let options: KernelMessage.IOptions = {
+    let msg = KernelMessage.createMessage({
       msgType: 'kernel_info_request',
       channel: 'shell',
       username: this._username,
-      session: this._clientId
-    };
-    let msg = KernelMessage.createShellMessage(options);
+      session: this._clientId,
+      content: {}
+    });
     let reply = (await Private.handleShellMessage(
       this,
       msg
@@ -431,13 +431,13 @@ export class DefaultKernel implements Kernel.IKernel {
   requestComplete(
     content: KernelMessage.ICompleteRequest
   ): Promise<KernelMessage.ICompleteReplyMsg> {
-    let options: KernelMessage.IOptions = {
+    let msg = KernelMessage.createMessage({
       msgType: 'complete_request',
       channel: 'shell',
       username: this._username,
-      session: this._clientId
-    };
-    let msg = KernelMessage.createShellMessage(options, content);
+      session: this._clientId,
+      content
+    });
     return Private.handleShellMessage(this, msg) as Promise<
       KernelMessage.ICompleteReplyMsg
     >;
@@ -455,13 +455,13 @@ export class DefaultKernel implements Kernel.IKernel {
   requestInspect(
     content: KernelMessage.IInspectRequest
   ): Promise<KernelMessage.IInspectReplyMsg> {
-    let options: KernelMessage.IOptions = {
+    let msg = KernelMessage.createMessage({
       msgType: 'inspect_request',
       channel: 'shell',
       username: this._username,
-      session: this._clientId
-    };
-    let msg = KernelMessage.createShellMessage(options, content);
+      session: this._clientId,
+      content: content
+    });
     return Private.handleShellMessage(this, msg) as Promise<
       KernelMessage.IInspectReplyMsg
     >;
@@ -479,13 +479,13 @@ export class DefaultKernel implements Kernel.IKernel {
   requestHistory(
     content: KernelMessage.IHistoryRequest
   ): Promise<KernelMessage.IHistoryReplyMsg> {
-    let options: KernelMessage.IOptions = {
+    let msg = KernelMessage.createMessage({
       msgType: 'history_request',
       channel: 'shell',
       username: this._username,
-      session: this._clientId
-    };
-    let msg = KernelMessage.createShellMessage(options, content);
+      session: this._clientId,
+      content
+    });
     return Private.handleShellMessage(this, msg) as Promise<
       KernelMessage.IHistoryReplyMsg
     >;
@@ -514,12 +514,6 @@ export class DefaultKernel implements Kernel.IKernel {
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
   > {
-    let options: KernelMessage.IOptions = {
-      msgType: 'execute_request',
-      channel: 'shell',
-      username: this._username,
-      session: this._clientId
-    };
     let defaults: JSONObject = {
       silent: false,
       store_history: true,
@@ -527,12 +521,13 @@ export class DefaultKernel implements Kernel.IKernel {
       allow_stdin: true,
       stop_on_error: false
     };
-    content = { ...defaults, ...content };
-    let msg = KernelMessage.createShellMessage(
-      options,
-      content,
-      metadata
-    ) as KernelMessage.IExecuteRequestMsg;
+    let msg = KernelMessage.createMessage({
+      msgType: 'execute_request',
+      channel: 'shell',
+      username: this._username,
+      session: this._clientId,
+      content: { ...defaults, ...content }
+    });
     return this.sendShellMessage(msg, true, disposeOnDone) as Kernel.IFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
@@ -551,13 +546,13 @@ export class DefaultKernel implements Kernel.IKernel {
   requestIsComplete(
     content: KernelMessage.IIsCompleteRequest
   ): Promise<KernelMessage.IIsCompleteReplyMsg> {
-    let options: KernelMessage.IOptions = {
+    let msg = KernelMessage.createMessage({
       msgType: 'is_complete_request',
       channel: 'shell',
       username: this._username,
-      session: this._clientId
-    };
-    let msg = KernelMessage.createShellMessage(options, content);
+      session: this._clientId,
+      content
+    });
     return Private.handleShellMessage(this, msg) as Promise<
       KernelMessage.IIsCompleteReplyMsg
     >;
@@ -573,13 +568,13 @@ export class DefaultKernel implements Kernel.IKernel {
   requestCommInfo(
     content: KernelMessage.ICommInfoRequest
   ): Promise<KernelMessage.ICommInfoReplyMsg> {
-    let options: KernelMessage.IOptions = {
+    let msg = KernelMessage.createMessage({
       msgType: 'comm_info_request',
       channel: 'shell',
       username: this._username,
-      session: this._clientId
-    };
-    let msg = KernelMessage.createShellMessage(options, content);
+      session: this._clientId,
+      content
+    });
     return Private.handleShellMessage(this, msg) as Promise<
       KernelMessage.ICommInfoReplyMsg
     >;
@@ -595,13 +590,13 @@ export class DefaultKernel implements Kernel.IKernel {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
-    let options: KernelMessage.IOptions = {
+    let msg = KernelMessage.createMessage({
       msgType: 'input_reply',
       channel: 'stdin',
       username: this._username,
-      session: this._clientId
-    };
-    let msg = KernelMessage.createMessage(options, content);
+      session: this._clientId,
+      content
+    });
     if (!this._isReady || !this._ws) {
       this._pendingMessages.push(msg);
     } else {
@@ -753,7 +748,7 @@ export class DefaultKernel implements Kernel.IKernel {
           (msg.parent_header as unknown) as JSONObject
         ) as unknown) as KernelMessage.IHeader,
         metadata: JSONExt.deepCopy(msg.metadata),
-        content: JSONExt.deepCopy(msg.content),
+        content: JSONExt.deepCopy(msg.content as JSONObject),
         channel: msg.channel,
         buffers: msg.buffers ? msg.buffers.slice() : []
       };
@@ -1124,22 +1119,20 @@ export class DefaultKernel implements Kernel.IKernel {
     let handled = false;
 
     // Check to see if we have a display_id we need to reroute.
-    if (msg.parent_header && msg.channel === 'iopub') {
-      switch (msg.header.msg_type) {
-        case 'display_data':
-        case 'update_display_data':
-        case 'execute_result':
-          // display_data messages may re-route based on their display_id.
-          let transient = (msg.content.transient || {}) as JSONObject;
-          let displayId = transient['display_id'] as string;
-          if (displayId) {
-            handled = await this._handleDisplayId(displayId, msg);
-            // The await above may make this message out of date, so check again.
-            this._assertCurrentMessage(msg);
-          }
-          break;
-        default:
-          break;
+    if (
+      msg.parent_header &&
+      msg.channel === 'iopub' &&
+      (KernelMessage.isDisplayDataMsg(msg) ||
+        KernelMessage.isUpdateDisplayDataMsg(msg) ||
+        KernelMessage.isExecuteResultMsg(msg))
+    ) {
+      // display_data messages may re-route based on their display_id.
+      let transient = (msg.content.transient || {}) as JSONObject;
+      let displayId = transient['display_id'] as string;
+      if (displayId) {
+        handled = await this._handleDisplayId(displayId, msg);
+        // The await above may make this message out of date, so check again.
+        this._assertCurrentMessage(msg);
       }
     }
 

@@ -13,43 +13,118 @@ import { Kernel } from './kernel';
  * A namespace for kernel messages.
  */
 export namespace KernelMessage {
-  /**
-   * Create a well-formed kernel message.
-   */
-  export function createMessage(
-    options: IOptions,
-    content: any = {},
-    metadata: any = {},
-    buffers: (ArrayBuffer | ArrayBufferView)[] = []
-  ): IMessage {
+  export interface IOptions<T extends Message> {
+    session: string;
+    channel: T['channel'];
+    msgType: T['header']['msg_type'];
+    content: T['content'];
+    buffers?: (ArrayBuffer | ArrayBufferView)[];
+    metadata?: JSONObject;
+    msgId?: string;
+    username?: string;
+    parentHeader?: T['parent_header'];
+  }
+  export function createMessage<T extends IClearOutputMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends ICommCloseMsg<'iopub'>>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends ICommCloseMsg<'shell'>>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends ICommInfoReplyMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends ICommInfoRequestMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends ICommMsgMsg<'iopub'>>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends ICommMsgMsg<'shell'>>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends ICommOpenMsg<'iopub'>>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends ICommOpenMsg<'shell'>>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends ICompleteReplyMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends ICompleteRequestMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IDisplayDataMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IErrorMsg>(options: IOptions<T>): T;
+  export function createMessage<T extends IExecuteInputMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IExecuteReplyMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IExecuteRequestMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IExecuteResultMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IHistoryReplyMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IHistoryRequestMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IInfoReplyMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IInfoRequestMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IInputReplyMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IInputRequestMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IInspectReplyMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IInspectRequestMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IIsCompleteReplyMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IIsCompleteRequestMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IStatusMsg>(options: IOptions<T>): T;
+  export function createMessage<T extends IStreamMsg>(options: IOptions<T>): T;
+  export function createMessage<T extends IUpdateDisplayDataMsg>(
+    options: IOptions<T>
+  ): T;
+
+  export function createMessage<T extends Message>(options: IOptions<T>): T {
     return {
+      buffers: options.buffers || [],
+      channel: options.channel,
+      content: options.content,
       header: {
         date: new Date().toISOString(),
-        username: options.username || '',
-        version: '5.2',
-        session: options.session,
         msg_id: options.msgId || UUID.uuid4(),
-        msg_type: options.msgType
+        msg_type: options.msgType,
+        session: options.session,
+        username: options.username || '',
+        version: '5.2'
       },
-      parent_header: {},
-      channel: options.channel,
-      content,
-      metadata,
-      buffers
-    };
-  }
-
-  /**
-   * Create a well-formed kernel shell message.
-   */
-  export function createShellMessage(
-    options: IOptionsShell,
-    content: any = {},
-    metadata: any = {},
-    buffers: (ArrayBuffer | ArrayBufferView)[] = []
-  ): IShellMessage {
-    let msg = createMessage(options, content, metadata, buffers);
-    return msg as IShellMessage;
+      metadata: options.metadata || {},
+      parent_header: options.parentHeader || {}
+    } as T;
   }
 
   /**
@@ -175,7 +250,7 @@ export namespace KernelMessage {
     /**
      * The content of the message.
      */
-    content: any;
+    content: MessageContent;
 
     /**
      * The channel on which the message is transmitted.
@@ -211,6 +286,40 @@ export namespace KernelMessage {
     extends IMessage<T> {
     channel: 'stdin';
   }
+
+  export type Message =
+    | IClearOutputMsg
+    | ICommCloseMsg<'iopub'>
+    | ICommCloseMsg<'shell'>
+    | ICommInfoReplyMsg
+    | ICommInfoRequestMsg
+    | ICommMsgMsg<'iopub'>
+    | ICommMsgMsg<'shell'>
+    | ICommOpenMsg<'iopub'>
+    | ICommOpenMsg<'shell'>
+    | ICompleteReplyMsg
+    | ICompleteRequestMsg
+    | IDisplayDataMsg
+    | IErrorMsg
+    | IExecuteInputMsg
+    | IExecuteReplyMsg
+    | IExecuteRequestMsg
+    | IExecuteResultMsg
+    | IHistoryReplyMsg
+    | IHistoryRequestMsg
+    | IInfoReplyMsg
+    | IInfoRequestMsg
+    | IInputReplyMsg
+    | IInputRequestMsg
+    | IInspectReplyMsg
+    | IInspectRequestMsg
+    | IIsCompleteReplyMsg
+    | IIsCompleteRequestMsg
+    | IStatusMsg
+    | IStreamMsg
+    | IUpdateDisplayDataMsg;
+
+  export type MessageContent<T extends Message = Message> = T['content'];
 
   /**
    * A `'stream'` message on the `'iopub'` channel.
@@ -302,6 +411,7 @@ export namespace KernelMessage {
       execution_count: nbformat.ExecutionCount;
       data: nbformat.IMimeBundle;
       metadata: nbformat.OutputMetadata;
+      transient?: { display_id?: string };
     };
   }
 
@@ -373,8 +483,30 @@ export namespace KernelMessage {
    *
    * See [Comm open](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
    */
-  export interface ICommOpenMsg extends IMessage<'comm_open'> {
-    channel: 'shell' | 'iopub';
+  export interface ICommOpenMsg<
+    T extends 'shell' | 'iopub' = 'iopub' | 'shell'
+  > extends IMessage<'comm_open'> {
+    channel: T;
+    content: ICommOpen;
+  }
+
+  /**
+   * A `'comm_open'` message on the `'iopub'` channel.
+   *
+   * See [Comm open](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
+   */
+  export interface ICommOpenIOPubMsg extends IIOPubMessage<'comm_open'> {
+    channel: 'iopub';
+    content: ICommOpen;
+  }
+
+  /**
+   * A `'comm_open'` message on the `'shell'` channel.
+   *
+   * See [Comm open](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
+   */
+  export interface ICommOpenShellMsg extends IShellMessage<'comm_open'> {
+    channel: 'shell';
     content: ICommOpen;
   }
 
@@ -394,17 +526,23 @@ export namespace KernelMessage {
   /**
    * Test whether a kernel message is a `'comm_open'` message.
    */
-  export function isCommOpenMsg(msg: IMessage): msg is ICommOpenMsg {
+  export function isCommOpenMsg(
+    msg: IMessage
+  ): msg is ICommOpenIOPubMsg | ICommOpenShellMsg {
     return msg.header.msg_type === 'comm_open';
   }
+
+  export type iopubshell = 'iopub' | 'shell';
 
   /**
    * A `'comm_close'` message on the `'iopub'` channel.
    *
    * See [Comm close](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
    */
-  export interface ICommCloseMsg extends IMessage<'comm_close'> {
-    channel: 'iopub' | 'shell';
+  export interface ICommCloseMsg<
+    T extends 'iopub' | 'shell' = 'iopub' | 'shell'
+  > extends IMessage<'comm_close'> {
+    channel: T;
     content: ICommClose;
   }
 
@@ -422,7 +560,9 @@ export namespace KernelMessage {
   /**
    * Test whether a kernel message is a `'comm_close'` message.
    */
-  export function isCommCloseMsg(msg: IMessage): msg is ICommCloseMsg {
+  export function isCommCloseMsg(
+    msg: IMessage
+  ): msg is ICommCloseMsg<'iopub' | 'shell'> {
     return msg.header.msg_type === 'comm_close';
   }
 
@@ -431,8 +571,9 @@ export namespace KernelMessage {
    *
    * See [Comm msg](https://jupyter-client.readthedocs.io/en/latest/messaging.html#opening-a-comm).
    */
-  export interface ICommMsgMsg extends IMessage<'comm_msg'> {
-    channel: 'iopub' | 'shell';
+  export interface ICommMsgMsg<T extends 'iopub' | 'shell' = 'iopub' | 'shell'>
+    extends IMessage<'comm_msg'> {
+    channel: T;
     content: ICommMsg;
   }
 
@@ -450,7 +591,9 @@ export namespace KernelMessage {
   /**
    * Test whether a kernel message is a `'comm_msg'` message.
    */
-  export function isCommMsgMsg(msg: IMessage): msg is ICommMsgMsg {
+  export function isCommMsgMsg(
+    msg: IMessage
+  ): msg is ICommMsgMsg<'iopub' | 'shell'> {
     return msg.header.msg_type === 'comm_msg';
   }
 
@@ -462,6 +605,13 @@ export namespace KernelMessage {
   export interface IInfoRequestMsg
     extends IShellMessage<'kernel_info_request'> {
     content: {};
+  }
+
+  /**
+   * Test whether a kernel message is a `'kernel_info_request'` message.
+   */
+  export function isInfoRequestMsg(msg: IMessage): msg is IInfoRequestMsg {
+    return msg.header.msg_type === 'kernel_info_request';
   }
 
   /**
@@ -869,6 +1019,11 @@ export namespace KernelMessage {
     return msg.header.msg_type === 'input_request';
   }
 
+  /**
+   * An `'input_reply'` message on the `'stdin'` channel.
+   *
+   * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
+   */
   export interface IInputReplyMsg extends IStdinMessage<'input_reply'> {
     parent_header: IHeader<'input_request'>;
     content: IInputReply;
@@ -883,6 +1038,13 @@ export namespace KernelMessage {
    */
   export interface IInputReply {
     value: string;
+  }
+
+  /**
+   * Test whether a kernel message is an `'input_reply'` message.
+   */
+  export function isInputReplyMsg(msg: IMessage): msg is IInputReplyMsg {
+    return msg.header.msg_type === 'input_reply';
   }
 
   export interface ICommInfoRequestMsg
@@ -917,54 +1079,4 @@ export namespace KernelMessage {
       comms: { [commId: string]: { target_name: string } };
     };
   }
-
-  /**
-   * Base options for an `IMessage`.
-   *
-   * **See also:** [[IMessage]]
-   */
-  export interface IOptionsBase {
-    msgType: MessageType;
-    channel: Channel;
-    session: string;
-    username?: string;
-    msgId?: string;
-  }
-
-  /**
-   * Options for an iopub `IMessage`.
-   *
-   * **See also:** [[IMessage]]
-   */
-  export interface IOptionsIOPub extends IOptionsBase {
-    msgType: IOPubMessageType;
-    channel: 'iopub';
-  }
-
-  /**
-   * Options for a shell `IMessage`.
-   *
-   * **See also:** [[IMessage]]
-   */
-  export interface IOptionsShell extends IOptionsBase {
-    msgType: ShellMessageType;
-    channel: 'shell';
-  }
-
-  /**
-   * Options for a stdin `IMessage`.
-   *
-   * **See also:** [[IMessage]]
-   */
-  export interface IOptionsStdin extends IOptionsBase {
-    msgType: StdinMessageType;
-    channel: 'stdin';
-  }
-
-  /**
-   * Options for an `IMessage`.
-   *
-   * **See also:** [[IMessage]]
-   */
-  export type IOptions = IOptionsIOPub | IOptionsShell | IOptionsStdin;
 }

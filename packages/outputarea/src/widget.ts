@@ -420,7 +420,7 @@ export class OutputArea extends Widget {
     let model = this.model;
     let msgType = msg.header.msg_type;
     let output: nbformat.IOutput;
-    let transient = (msg.content.transient || {}) as JSONObject;
+    let transient = ((msg.content as any).transient || {}) as JSONObject;
     let displayId = transient['display_id'] as string;
     let targets: number[];
 

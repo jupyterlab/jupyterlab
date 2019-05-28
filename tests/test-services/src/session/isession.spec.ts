@@ -121,11 +121,12 @@ describe('session', () => {
         const emission = testEmission(session.unhandledMessage, {
           find: (k, msg) => msg.header.msg_id === msgId
         });
-        const msg = KernelMessage.createShellMessage({
+        const msg = KernelMessage.createMessage({
           msgType: 'kernel_info_request',
           channel: 'shell',
           session: tester.serverSessionId,
-          msgId
+          msgId,
+          content: {}
         });
         msg.parent_header = { session: session.kernel.clientId };
         tester.send(msg);
