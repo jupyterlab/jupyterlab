@@ -115,7 +115,23 @@ function ensureJupyterlab(): string[] {
     } catch (e) {
       return;
     }
-    if (data.private === true || data.name === '@jupyterlab/metapackage') {
+    // Determine whether to include the package.
+    if (!data.jupyterlab) {
+      return;
+    }
+    // Skip if explicitly marked as not a core dep.
+    if (
+      'coreDependency' in data.jupyterlab &&
+      !data.jupyterlab.coreDependency
+    ) {
+      return;
+    }
+    // Skip if it is not marked as an extension or a core dep.
+    if (
+      !data.jupyterlab.coreDependency &&
+      !data.jupyterlab.extension &&
+      !data.jupyterlab.mimeExtension
+    ) {
       return;
     }
 

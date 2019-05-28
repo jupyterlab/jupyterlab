@@ -1,6 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { HoverBox, defaultSanitizer } from '@jupyterlab/apputils';
+
+import { CodeEditor } from '@jupyterlab/codeeditor';
+
 import { IIterator, IterableOrArrayLike, toArray } from '@phosphor/algorithm';
 
 import { JSONObject, JSONExt } from '@phosphor/coreutils';
@@ -14,10 +18,6 @@ import { Message } from '@phosphor/messaging';
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
-
-import { HoverBox, defaultSanitizer } from '@jupyterlab/apputils';
-
-import { CodeEditor } from '@jupyterlab/codeeditor';
 
 /**
  * The class name added to completer menu items.
@@ -662,14 +662,19 @@ export namespace Completer {
    */
   export interface IPatch {
     /**
-     * The patched text.
+     * The start of the range to be patched.
      */
-    text: string;
+    start: number;
 
     /**
-     * The offset of the cursor.
+     * The end of the range to be patched.
      */
-    offset: number;
+    end: number;
+
+    /**
+     * The value to be patched in.
+     */
+    value: string;
   }
 
   /**

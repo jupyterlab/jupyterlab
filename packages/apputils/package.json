@@ -6,6 +6,10 @@
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "files": [
@@ -18,10 +22,6 @@
   "types": "lib/index.d.ts",
   "directories": {
     "lib": "lib/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc -b",
@@ -44,14 +44,14 @@
     "@phosphor/signaling": "^1.2.2",
     "@phosphor/virtualdom": "^1.1.2",
     "@phosphor/widgets": "^1.6.0",
-    "@types/react": "~16.8.8",
+    "@types/react": "~16.8.18",
     "react": "~16.8.4",
     "react-dom": "~16.8.4",
-    "sanitize-html": "~1.18.2"
+    "sanitize-html": "~1.20.1"
   },
   "devDependencies": {
-    "@types/react-dom": "~16.8.2",
-    "@types/sanitize-html": "~1.18.0",
+    "@types/react-dom": "^16.8.4",
+    "@types/sanitize-html": "^1.18.3",
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
     "typescript": "~3.4.3"

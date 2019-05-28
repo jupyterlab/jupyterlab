@@ -234,6 +234,18 @@ describe('docregistry/default', () => {
         expect(widget).to.be.an.instanceof(Widget);
       });
     });
+
+    describe('#clone()', () => {
+      it('should call createNew in default implementation', () => {
+        const factory = createFactory();
+        const context = createFileContext();
+        const widget = factory.createNew(context);
+        const clonedWidget: IDocumentWidget = factory.clone(widget, context);
+        expect(clonedWidget).to.not.equal(widget);
+        expect(clonedWidget.hasClass('WidgetFactory')).to.be.true;
+        expect(clonedWidget.context).to.equal(widget.context);
+      });
+    });
   });
 
   describe('Base64ModelFactory', () => {

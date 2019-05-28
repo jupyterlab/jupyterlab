@@ -68,7 +68,7 @@ describe('Kernel.IKernel', () => {
     });
   });
 
-  describe('#iopubMessage', async () => {
+  describe('#iopubMessage', () => {
     it('should be emitted for an iopub message', async () => {
       let called = false;
       defaultKernel.iopubMessage.connect((k, msg) => {
@@ -303,9 +303,7 @@ describe('Kernel.IKernel', () => {
       await emission;
     });
 
-    // TODO: seems to be sporadically timing out if we await the restart. See
-    // https://github.com/jupyter/notebook/issues/3705.
-    it.skip('should get a restarting status', async () => {
+    it('should get a restarting status', async () => {
       const emission = testEmission(defaultKernel.statusChanged, {
         find: () => defaultKernel.status === 'restarting'
       });
@@ -612,9 +610,7 @@ describe('Kernel.IKernel', () => {
   });
 
   describe('#restart()', () => {
-    // TODO: seems to be sporadically timing out if we await the restart. See
-    // https://github.com/jupyter/notebook/issues/3705.
-    it.skip('should restart and resolve with a valid server response', async () => {
+    it('should restart and resolve with a valid server response', async () => {
       await defaultKernel.restart();
       await defaultKernel.ready;
     });
@@ -646,9 +642,7 @@ describe('Kernel.IKernel', () => {
       await expectFailure(restart);
     });
 
-    // TODO: seems to be sporadically timing out if we await the restart. See
-    // https://github.com/jupyter/notebook/issues/3705.
-    it.skip('should dispose of existing comm and future objects', async () => {
+    it('should dispose of existing comm and future objects', async () => {
       const kernel = defaultKernel;
       const comm = kernel.connectToComm('test');
       const future = kernel.requestExecute({ code: 'foo' });

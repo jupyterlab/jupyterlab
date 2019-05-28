@@ -54,7 +54,11 @@ export function writePackageData(pkgJsonPath: string, data: any): boolean {
  * Read a json file.
  */
 export function readJSONFile(filePath: string): any {
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (e) {
+    throw `Cannot read JSON for path ${filePath}: ${e}`;
+  }
 }
 
 /**

@@ -286,6 +286,7 @@ export class CellTypeSwitcher extends ReactWidget {
         onChange={this.handleChange}
         onKeyDown={this.handleKeyDown}
         value={value}
+        aria-label="Cell type"
         minimal
       >
         <option value="-">-</option>

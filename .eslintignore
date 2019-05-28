@@ -17,6 +17,7 @@ dev_mode/workspaces
 examples/app/build
 examples/app/themes
 examples/app/schemas
+examples/chrome-example-test.js
 tests/**/coverage
 docs/_build
 docs/api

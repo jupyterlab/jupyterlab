@@ -5,6 +5,7 @@
 
 @import url('~font-awesome/css/font-awesome.min.css');
 @import url('~@phosphor/widgets/style/index.css');
+@import url('~@jupyterlab/apputils/style/index.css');
 
 .p-Widget.p-mod-hidden {
   display: none !important;

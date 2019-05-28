@@ -85,8 +85,22 @@ export class DocumentWidgetManager implements IDisposable {
     context: DocumentRegistry.Context
   ): IDocumentWidget {
     let widget = factory.createNew(context);
-    Private.factoryProperty.set(widget, factory);
+    this._initializeWidget(widget, factory, context);
+    return widget;
+  }
 
+  /**
+   * When a new widget is created, we need to hook it up
+   * with some signals, update the widget extensions (for
+   * this kind of widget) in the docregistry, among
+   * other things.
+   */
+  private _initializeWidget(
+    widget: IDocumentWidget,
+    factory: DocumentRegistry.WidgetFactory,
+    context: DocumentRegistry.Context
+  ) {
+    Private.factoryProperty.set(widget, factory);
     // Handle widget extensions.
     let disposables = new DisposableSet();
     each(this._registry.widgetExtensions(factory.name), extender => {
@@ -101,7 +115,6 @@ export class DocumentWidgetManager implements IDisposable {
     void context.ready.then(() => {
       void this.setCaption(widget);
     });
-    return widget;
   }
 
   /**
@@ -184,7 +197,8 @@ export class DocumentWidgetManager implements IDisposable {
     if (!factory) {
       return undefined;
     }
-    let newWidget = this.createWidget(factory, context);
+    let newWidget = factory.clone(widget as IDocumentWidget, context);
+    this._initializeWidget(newWidget, factory, context);
     return newWidget;
   }
 

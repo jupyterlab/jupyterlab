@@ -26,7 +26,8 @@ import {
 import {
   acceptDialog,
   dismissDialog,
-  signalToPromises
+  signalToPromises,
+  sleep
 } from '@jupyterlab/testutils';
 import { toArray } from '@phosphor/algorithm';
 
@@ -77,7 +78,7 @@ describe('filebrowser/model', () => {
       opener,
       manager: serviceManager
     });
-    state = new StateDB({ namespace: 'filebrowser/model' });
+    state = new StateDB();
   });
 
   beforeEach(async () => {
@@ -259,18 +260,15 @@ describe('filebrowser/model', () => {
           opener,
           manager: delayedServiceManager
         });
-        model = new FileBrowserModel({ manager, state });
+        model = new FileBrowserModel({ manager, state }); // Should delay 1000ms
 
-        const paths: string[] = [];
         // An initial refresh is called in the constructor.
         // If it is too slow, it can come in after the directory change,
         // causing a directory set by, e.g., the tree handler to be wrong.
         // This checks to make sure we are handling that case correctly.
-        const refresh = model.refresh().then(() => paths.push(model.path));
-        const cd = model.cd('src').then(() => paths.push(model.path));
-        await Promise.all([refresh, cd]);
+        await model.cd('src'); // should delay 500ms
+        await sleep(2000);
         expect(model.path).to.equal('src');
-        expect(paths).to.eql(['', 'src']);
 
         manager.dispose();
         delayedServiceManager.contents.dispose();

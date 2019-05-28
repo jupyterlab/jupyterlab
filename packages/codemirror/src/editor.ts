@@ -867,12 +867,18 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     switch (args.type) {
       case 'insert':
         let pos = doc.posFromIndex(args.start);
-        doc.replaceRange(args.value, pos, pos);
+        // Replace the range, including a '+input' orign,
+        // which indicates that CodeMirror may merge changes
+        // for undo/redo purposes.
+        doc.replaceRange(args.value, pos, pos, '+input');
         break;
       case 'remove':
         let from = doc.posFromIndex(args.start);
         let to = doc.posFromIndex(args.end);
-        doc.replaceRange('', from, to);
+        // Replace the range, including a '+input' orign,
+        // which indicates that CodeMirror may merge changes
+        // for undo/redo purposes.
+        doc.replaceRange('', from, to, '+input');
         break;
       case 'set':
         doc.setValue(args.value);
@@ -1209,7 +1215,7 @@ export namespace CodeMirrorEditor {
      * CodeMirror-activeline-background, and adds the class
      * CodeMirror-activeline-gutter to the line's gutter space is enabled.
      */
-    styleActiveLine: boolean | object;
+    styleActiveLine: boolean | CodeMirror.StyleActiveLine;
 
     /**
      * Whether to causes the selected text to be marked with the CSS class
@@ -1264,7 +1270,7 @@ export namespace CodeMirrorEditor {
     name: string,
     command: (cm: CodeMirror.Editor) => void
   ) {
-    CodeMirror.commands[name] = command;
+    (CodeMirror.commands as any)[name] = command;
   }
 }
 
@@ -1289,7 +1295,7 @@ namespace Private {
       ...otherOptions
     } = config;
     let bareConfig = {
-      autoCloseBrackets: autoClosingBrackets,
+      autoCloseBrackets: autoClosingBrackets ? {} : false,
       indentUnit: tabSize,
       indentWithTabs: !insertSpaces,
       lineWrapping: lineWrap === 'off' ? false : true,

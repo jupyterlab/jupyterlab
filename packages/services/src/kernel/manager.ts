@@ -39,6 +39,7 @@ export class KernelManager implements Kernel.IManager {
 
     // Start model and specs polling with exponential backoff.
     this._pollModels = new Poll({
+      auto: false,
       factory: () => this.requestRunning(),
       frequency: {
         interval: 10 * 1000,
@@ -46,10 +47,10 @@ export class KernelManager implements Kernel.IManager {
         max: 300 * 1000
       },
       name: `@jupyterlab/services:KernelManager#models`,
-      standby: options.standby || 'when-hidden',
-      when: this.ready
+      standby: options.standby || 'when-hidden'
     });
     this._pollSpecs = new Poll({
+      auto: false,
       factory: () => this.requestSpecs(),
       frequency: {
         interval: 61 * 1000,
@@ -57,8 +58,11 @@ export class KernelManager implements Kernel.IManager {
         max: 300 * 1000
       },
       name: `@jupyterlab/services:KernelManager#specs`,
-      standby: options.standby || 'when-hidden',
-      when: this.ready
+      standby: options.standby || 'when-hidden'
+    });
+    void this.ready.then(() => {
+      void this._pollModels.start();
+      void this._pollSpecs.start();
     });
   }
 
@@ -107,6 +111,13 @@ export class KernelManager implements Kernel.IManager {
    */
   get specsChanged(): ISignal<this, Kernel.ISpecModels> {
     return this._specsChanged;
+  }
+
+  /**
+   * A signal emitted when there is a connection failure.
+   */
+  get connectionFailure(): ISignal<this, ServerConnection.NetworkError> {
+    return this._connectionFailure;
   }
 
   /**
@@ -268,7 +279,13 @@ export class KernelManager implements Kernel.IManager {
    * Execute a request to the server to poll running kernels and update state.
    */
   protected async requestRunning(): Promise<void> {
-    const models = await Kernel.listRunning(this.serverSettings);
+    const models = await Kernel.listRunning(this.serverSettings).catch(err => {
+      if (err instanceof ServerConnection.NetworkError) {
+        this._connectionFailure.emit(err);
+        return [] as Kernel.IModel[];
+      }
+      throw err;
+    });
     if (this._isDisposed) {
       return;
     }
@@ -337,6 +354,9 @@ export class KernelManager implements Kernel.IManager {
   private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
   private _specs: Kernel.ISpecModels | null = null;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
+  private _connectionFailure = new Signal<this, ServerConnection.NetworkError>(
+    this
+  );
 }
 
 /**

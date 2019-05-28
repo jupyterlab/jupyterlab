@@ -57,7 +57,7 @@ describe('terminal/index', () => {
     });
 
     beforeEach(() => {
-      widget = new LogTerminal();
+      widget = new LogTerminal(session);
       Widget.attach(widget, document.body);
       return framePromise();
     });
@@ -73,13 +73,11 @@ describe('terminal/index', () => {
     });
 
     describe('#session', () => {
-      it('should be `null` by default', () => {
-        expect(widget.session).to.be.null;
+      it('should be the constructor value', () => {
+        expect(widget.session).to.equal(session);
       });
 
       it('should set the title when ready', async () => {
-        widget.session = session;
-        expect(widget.session).to.equal(session);
         await session.ready;
         expect(widget.title.label).to.contain(session.name);
       });
@@ -127,7 +125,6 @@ describe('terminal/index', () => {
 
     describe('#refresh()', () => {
       it('should refresh the widget', () => {
-        widget.session = session;
         return widget.refresh();
       });
     });
@@ -141,7 +138,6 @@ describe('terminal/index', () => {
 
     describe('#onAfterAttach()', () => {
       it('should post an update request', async () => {
-        widget.session = session;
         Widget.detach(widget);
         Widget.attach(widget, document.body);
         await framePromise();
@@ -151,7 +147,6 @@ describe('terminal/index', () => {
 
     describe('#onAfterShow()', () => {
       it('should post an update request', async () => {
-        widget.session = session;
         widget.hide();
         Widget.detach(widget);
         Widget.attach(widget, document.body);

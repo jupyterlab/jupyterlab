@@ -9,8 +9,6 @@ import { IInstanceTracker, MainAreaWidget } from '@jupyterlab/apputils';
 
 import { TerminalSession } from '@jupyterlab/services';
 
-import '../style/index.css';
-
 /**
  * A class that tracks editor widgets.
  */
@@ -35,7 +33,7 @@ export namespace ITerminal {
     /**
      * The terminal session associated with the widget.
      */
-    session: TerminalSession.ISession | null;
+    session: TerminalSession.ISession;
 
     /**
      * Get a config option for the terminal.
@@ -96,6 +94,20 @@ export namespace ITerminal {
      * An optional command to run when the session starts.
      */
     initialCommand: string;
+
+    /**
+     * Whether to enable screen reader support.
+     *
+     * Set to false if you run into performance problems from DOM overhead
+     */
+    screenReaderMode: boolean;
+
+    /**
+     * Whether to enable using Ctrl+V to paste.
+     *
+     * This setting has no effect on macOS, where Cmd+V is available.
+     */
+    pasteWithCtrlV: boolean;
   }
 
   /**
@@ -109,7 +121,9 @@ export namespace ITerminal {
     scrollback: 1000,
     shutdownOnClose: false,
     cursorBlink: true,
-    initialCommand: ''
+    initialCommand: '',
+    screenReaderMode: true,
+    pasteWithCtrlV: true
   };
 
   /**

@@ -20,12 +20,14 @@ comm.close("goodbye")
 `;
 
 const RECEIVE = `
-def _recv(msg):
-    data = msg["content"]["data"]
-    if data == "quit":
-         comm.close("goodbye")
-    else:
-         comm.send(data)
+def create_recv(comm):
+  def _recv(msg):
+      data = msg["content"]["data"]
+      if data == "quit":
+          comm.close("goodbye")
+      else:
+          comm.send(data)
+  return _recv
 `;
 
 const SEND = `
@@ -33,13 +35,13 @@ ${RECEIVE}
 from ipykernel.comm import Comm
 comm = Comm(target_name="test", data="hello")
 comm.send(data="hello")
-comm.on_msg(_recv)
+comm.on_msg(create_recv(comm))
 `;
 
 const TARGET = `
 ${RECEIVE}
 def target_func(comm, msg):
-    comm.on_msg(_recv)
+    comm.on_msg(create_recv(comm))
 get_ipython().kernel.comm_manager.register_target("test", target_func)
 `;
 

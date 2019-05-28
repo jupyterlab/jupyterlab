@@ -5,7 +5,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IDataConnector, Text, ActivityMonitor } from '@jupyterlab/coreutils';
 
-import { MimeModel, RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { MimeModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
@@ -13,7 +13,7 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { IInspector } from './inspector';
+import { IInspector } from './tokens';
 
 /**
  * An object that handles code inspection.
@@ -183,7 +183,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
   private _inspected = new Signal<this, IInspector.IInspectorUpdate>(this);
   private _isDisposed = false;
   private _pending = 0;
-  private _rendermime: RenderMimeRegistry;
+  private _rendermime: IRenderMimeRegistry;
   private _standby = true;
   private _monitors: ActivityMonitor<any, any>[];
 }
@@ -209,7 +209,7 @@ export namespace InspectionHandler {
     /**
      * The mime renderer for the inspection handler.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
   }
 
   /**

@@ -4,8 +4,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-// Polyfill for ES6 Promises
-import 'es6-promise';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+// @ts-ignore
+__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
 
 import { OutputArea, OutputAreaModel } from '@jupyterlab/outputarea';
 
@@ -16,25 +17,20 @@ import {
 
 import { Kernel } from '@jupyterlab/services';
 
-function main() {
+async function main() {
   const code = [
-    'import numpy as np',
-    'import matplotlib.pyplot as plt',
-    '%matplotlib inline',
-    'x = np.linspace(-10,10)',
-    'y = x**2',
-    'print(x)',
-    'print(y)',
-    'plt.plot(x, y)'
+    'from IPython.display import HTML',
+    'HTML("<h1>Hello, world!</h1>")'
   ].join('\n');
   const model = new OutputAreaModel();
   const rendermime = new RenderMimeRegistry({ initialFactories });
   const outputArea = new OutputArea({ model, rendermime });
 
-  void Kernel.startNew().then(kernel => {
-    outputArea.future = kernel.requestExecute({ code });
-    document.getElementById('outputarea').appendChild(outputArea.node);
-  });
+  const kernel = await Kernel.startNew();
+  outputArea.future = kernel.requestExecute({ code });
+  document.getElementById('outputarea').appendChild(outputArea.node);
+  await outputArea.future.done;
+  console.log('Test complete!');
 }
 
 window.onload = main;

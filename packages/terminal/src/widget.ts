@@ -3,6 +3,8 @@
 
 import { TerminalSession } from '@jupyterlab/services';
 
+import { Platform } from '@phosphor/domutils';
+
 import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
@@ -30,16 +32,26 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   /**
    * Construct a new terminal widget.
    *
+   * @param session - The terminal session object.
+   *
    * @param options - The terminal configuration options.
    */
-  constructor(options: Partial<ITerminal.IOptions> = {}) {
+  constructor(
+    session: TerminalSession.ISession,
+    options: Partial<ITerminal.IOptions> = {}
+  ) {
     super();
+
+    this.session = session;
 
     // Initialize settings.
     this._options = { ...ITerminal.defaultOptions, ...options };
 
     const { initialCommand, theme, ...other } = this._options;
-    const xtermOptions = { theme: Private.getXTermTheme(theme), ...other };
+    const xtermOptions = {
+      theme: Private.getXTermTheme(theme),
+      ...other
+    };
 
     this.addClass(TERMINAL_CLASS);
 
@@ -49,37 +61,30 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
 
     this.id = `jp-Terminal-${Private.id++}`;
     this.title.label = 'Terminal';
-  }
 
-  /**
-   * The terminal session associated with the widget.
-   */
-  get session(): TerminalSession.ISession | null {
-    return this._session;
-  }
-  set session(value: TerminalSession.ISession | null) {
-    if (this._session && !this._session.isDisposed) {
-      this._session.messageReceived.disconnect(this._onMessage, this);
-    }
-    this._session = value || null;
-    if (!value) {
-      return;
-    }
-    void value.ready.then(() => {
-      if (this.isDisposed || value !== this._session) {
+    session.messageReceived.connect(this._onMessage, this);
+    session.terminated.connect(this.dispose, this);
+
+    void session.ready.then(() => {
+      if (this.isDisposed) {
         return;
       }
-      value.messageReceived.connect(this._onMessage, this);
-      this.title.label = `Terminal ${value.name}`;
+
+      this.title.label = `Terminal ${session.name}`;
       this._setSessionSize();
       if (this._options.initialCommand) {
-        this._session.send({
+        this.session.send({
           type: 'stdin',
           content: [this._options.initialCommand + '\r']
         });
       }
     });
   }
+
+  /**
+   * The terminal session associated with the widget.
+   */
+  readonly session: TerminalSession.ISession;
 
   /**
    * Get a config option for the terminal.
@@ -128,14 +133,13 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Dispose of the resources held by the terminal widget.
    */
   dispose(): void {
-    if (this._session) {
+    if (!this.session.isDisposed) {
       if (this.getOption('shutdownOnClose')) {
-        this._session.shutdown().catch(reason => {
+        this.session.shutdown().catch(reason => {
           console.error(`Terminal not shut down: ${reason}`);
         });
       }
     }
-    this._session = null;
     this._term.dispose();
     super.dispose();
   }
@@ -147,8 +151,8 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Failure to reconnect to the session should be caught appropriately
    */
   async refresh(): Promise<void> {
-    if (this._session) {
-      await this._session.reconnect();
+    if (!this.isDisposed) {
+      await this.session.reconnect();
       this._term.clear();
     }
   }
@@ -235,17 +239,40 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Initialize the terminal object.
    */
   private _initializeTerm(): void {
-    this._term.on('data', (data: string) => {
-      if (this._session) {
-        this._session.send({
-          type: 'stdin',
-          content: [data]
-        });
+    const term = this._term;
+    term.on('data', (data: string) => {
+      if (this.isDisposed) {
+        return;
       }
+      this.session.send({
+        type: 'stdin',
+        content: [data]
+      });
     });
 
-    this._term.on('title', (title: string) => {
+    term.on('title', (title: string) => {
       this.title.label = title;
+    });
+
+    // Do not add any Ctrl+C/Ctrl+V handling on macOS,
+    // where Cmd+C/Cmd+V works as intended.
+    if (Platform.IS_MAC) {
+      return;
+    }
+
+    term.attachCustomKeyEventHandler(event => {
+      if (event.ctrlKey && event.key === 'c' && term.hasSelection()) {
+        // Return so that the usual OS copy happens
+        // instead of interrupt signal.
+        return false;
+      }
+
+      if (event.ctrlKey && event.key === 'v' && this._options.pasteWithCtrlV) {
+        // Return so that the usual paste happens.
+        return false;
+      }
+
+      return true;
     });
   }
 
@@ -295,14 +322,13 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       this._offsetHeight,
       this._offsetWidth
     ];
-    if (this._session) {
-      this._session.send({ type: 'set_size', content });
+    if (!this.isDisposed) {
+      this.session.send({ type: 'set_size', content });
     }
   }
 
-  private _term: Xterm;
+  private readonly _term: Xterm;
   private _needsResize = true;
-  private _session: TerminalSession.ISession | null = null;
   private _termOpened = false;
   private _offsetWidth = -1;
   private _offsetHeight = -1;

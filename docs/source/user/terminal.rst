@@ -47,20 +47,19 @@ re-open it using the Running tab in the left sidebar:
 Copy/Paste
 ~~~~~~~~~~~~
 
-For both Windows and Mac users, press ``shift`` + ``right-click`` to get to the right-click menu from inside Jupyterlab terminal. Or by using shortcut keys as follows:
+For macOS users,  ``Cmd+C`` and ``Cmd+V`` work as usual.
 
-* **For Mac users:**
+For Windows users using ``PowerShell``, ``Ctrl+Insert`` and ``Shift+Insert`` work as usual.
 
-	**Copy** : ``Cmd`` + ``c`` 
+To use the native browser Copy/Paste menu, hold ``Shift`` and right click to bring up the
+context menu (note: this may not work in all browsers).
 
-	**Paste**: ``Cmd`` + ``v``
+For non-macOS users, JupyterLab will interpret ``Ctrl+C`` as a copy if there is text selected.
+In addition, ``Ctrl+V`` will be interpreted as a paste command unless the ``pasteWithCtrlV``
+setting is disabled.  One may want to disable ``pasteWithCtrlV`` if the shortcut is needed
+for something else such as the vi editor.
 
-
-* **For Windows users (Power shell):**
-
-	**Copy** : ``Ctrl`` + ``Insert``
-
-	**Paste** : ``Shift`` + ``Insert``
-
-
-
+For anyone using a \*nix shell, the default ``Ctrl+Shift+C`` conflicts with the default
+shortcut for toggling the command palette (``apputils:activate-command-palette``).
+If desired, that shortcut can be changed by editing the keyboard shortcuts in setttings.
+Using ``Ctrl+Shift+V`` for paste works as usual.

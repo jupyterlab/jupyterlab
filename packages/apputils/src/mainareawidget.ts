@@ -11,6 +11,8 @@ import { Toolbar } from './toolbar';
 
 import { DOMUtils } from './domutils';
 
+import { Printing } from './printing';
+
 /**
  * A widget meant to be contained in the JupyterLab main area.
  *
@@ -20,7 +22,8 @@ import { DOMUtils } from './domutils';
  * This widget is automatically disposed when closed.
  * This widget ensures its own focus when activated.
  */
-export class MainAreaWidget<T extends Widget = Widget> extends Widget {
+export class MainAreaWidget<T extends Widget = Widget> extends Widget
+  implements Printing.IPrintable {
   /**
    * Construct a new main area widget.
    *
@@ -94,6 +97,13 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget {
       this._isRevealed = true;
       this._revealed = Promise.resolve(undefined);
     }
+  }
+
+  /**
+   * Print method. Defered to content.
+   */
+  [Printing.symbol](): Printing.OptionalAsyncThunk {
+    return Printing.getPrintFunction(this._content);
   }
 
   /**

@@ -49,7 +49,7 @@ describe('workspace', () => {
       });
     });
 
-    describe('#list()', async () => {
+    describe('#list()', () => {
       it('should fetch a workspace list supporting arbitrary IDs', async () => {
         const ids = ['foo', 'bar', 'baz', 'f/o/o', 'b/a/r', 'b/a/z'];
         const promises = ids.map(id =>

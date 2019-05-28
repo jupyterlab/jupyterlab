@@ -8,7 +8,7 @@ import * as inquirer from 'inquirer';
 import * as path from 'path';
 import * as utils from './utils';
 
-let questions = [
+let questions: inquirer.Question[] = [
   {
     type: 'input',
     name: 'name',

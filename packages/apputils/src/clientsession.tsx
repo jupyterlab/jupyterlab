@@ -878,26 +878,25 @@ export namespace ClientSession {
    *
    * Returns a promise resolving with whether the kernel was restarted.
    */
-  export function restartKernel(
+  export async function restartKernel(
     kernel: Kernel.IKernelConnection
   ): Promise<boolean> {
     let restartBtn = Dialog.warnButton({ label: 'RESTART ' });
-    return showDialog({
+    const result = await showDialog({
       title: 'Restart Kernel?',
       body:
         'Do you want to restart the current kernel? All variables will be lost.',
       buttons: [Dialog.cancelButton(), restartBtn]
-    }).then(result => {
-      if (kernel.isDisposed) {
-        return Promise.resolve(false);
-      }
-      if (result.button.accept) {
-        return kernel.restart().then(() => {
-          return true;
-        });
-      }
-      return false;
     });
+
+    if (kernel.isDisposed) {
+      return false;
+    }
+    if (result.button.accept) {
+      await kernel.restart();
+      return true;
+    }
+    return false;
   }
 
   /**

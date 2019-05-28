@@ -77,7 +77,7 @@ describe('terminal', () => {
 
   describe('.ISession', () => {
     describe('#terminated', () => {
-      it('should be emitted when the session is shut down', async () => {
+      it('should be emitted when the session is disposed', async () => {
         session = await TerminalSession.startNew();
         let called = false;
         session.terminated.connect((sender, args) => {
@@ -85,7 +85,7 @@ describe('terminal', () => {
           expect(args).to.be.undefined;
           called = true;
         });
-        await session.shutdown();
+        session.dispose();
         expect(called).to.equal(true);
       });
     });

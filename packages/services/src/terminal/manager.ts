@@ -27,6 +27,7 @@ export class TerminalManager implements TerminalSession.IManager {
     // Check if terminals are available
     if (!TerminalSession.isAvailable()) {
       this._ready = Promise.reject('Terminals unavailable');
+      this._ready.catch(_ => undefined);
       return;
     }
 
@@ -43,6 +44,7 @@ export class TerminalManager implements TerminalSession.IManager {
 
     // Start polling with exponential backoff.
     this._pollModels = new Poll({
+      auto: false,
       factory: () => this.requestRunning(),
       frequency: {
         interval: 10 * 1000,
@@ -50,8 +52,10 @@ export class TerminalManager implements TerminalSession.IManager {
         max: 300 * 1000
       },
       name: `@jupyterlab/services:TerminalManager#models`,
-      standby: options.standby || 'when-hidden',
-      when: this.ready
+      standby: options.standby || 'when-hidden'
+    });
+    void this.ready.then(() => {
+      void this._pollModels.start();
     });
   }
 
@@ -60,6 +64,13 @@ export class TerminalManager implements TerminalSession.IManager {
    */
   get runningChanged(): ISignal<this, TerminalSession.IModel[]> {
     return this._runningChanged;
+  }
+
+  /**
+   * A signal emitted when there is a connection failure.
+   */
+  get connectionFailure(): ISignal<this, ServerConnection.NetworkError> {
+    return this._connectionFailure;
   }
 
   /**
@@ -233,7 +244,15 @@ export class TerminalManager implements TerminalSession.IManager {
    * Execute a request to the server to poll running terminals and update state.
    */
   protected async requestRunning(): Promise<void> {
-    const models = await TerminalSession.listRunning(this.serverSettings);
+    const models = await TerminalSession.listRunning(this.serverSettings).catch(
+      err => {
+        if (err instanceof ServerConnection.NetworkError) {
+          this._connectionFailure.emit(err);
+          return [] as TerminalSession.IModel[];
+        }
+        throw err;
+      }
+    );
     if (this.isDisposed) {
       return;
     }
@@ -291,6 +310,12 @@ export class TerminalManager implements TerminalSession.IManager {
       this._models.splice(index, 1);
       this._runningChanged.emit(this._models.slice());
     }
+    const sessions = this._sessions;
+    sessions.forEach(session => {
+      if (session.name === name) {
+        sessions.delete(session);
+      }
+    });
   }
 
   private _isDisposed = false;
@@ -300,6 +325,9 @@ export class TerminalManager implements TerminalSession.IManager {
   private _sessions = new Set<TerminalSession.ISession>();
   private _ready: Promise<void>;
   private _runningChanged = new Signal<this, TerminalSession.IModel[]>(this);
+  private _connectionFailure = new Signal<this, ServerConnection.NetworkError>(
+    this
+  );
 }
 
 /**

@@ -5,7 +5,8 @@ import {
   IChangedArgs,
   IStateDB,
   PathExt,
-  PageConfig
+  PageConfig,
+  Poll
 } from '@jupyterlab/coreutils';
 
 import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
@@ -33,11 +34,6 @@ import { showDialog, Dialog } from '@jupyterlab/apputils';
  * The default duration of the auto-refresh in ms
  */
 const DEFAULT_REFRESH_INTERVAL = 10000;
-
-/**
- * The enforced time between refreshes in ms.
- */
-const MIN_REFRESH = 1000;
 
 /**
  * The maximum upload size (in bytes) for notebook version < 5.1.0
@@ -87,8 +83,7 @@ export class FileBrowserModel implements IDisposable {
       format: 'text'
     };
     this._state = options.state || null;
-    this._baseRefreshDuration =
-      options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
+    const refreshInterval = options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
 
     const { services } = options.manager;
     services.contents.fileChanged.connect(this._onFileChanged, this);
@@ -103,8 +98,15 @@ export class FileBrowserModel implements IDisposable {
       }
     };
     window.addEventListener('beforeunload', this._unloadEventListener);
-    this._scheduleUpdate();
-    this._startTimer();
+    this._poll = new Poll({
+      factory: () => this.cd('.'),
+      frequency: {
+        interval: refreshInterval,
+        backoff: true,
+        max: 300 * 1000
+      },
+      standby: 'when-hidden'
+    });
   }
 
   /**
@@ -198,7 +200,7 @@ export class FileBrowserModel implements IDisposable {
     }
     window.removeEventListener('beforeunload', this._unloadEventListener);
     this._isDisposed = true;
-    clearTimeout(this._timeoutId);
+    this._poll.dispose();
     this._sessions.length = 0;
     this._items.length = 0;
     Signal.clearData(this);
@@ -225,10 +227,9 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Force a refresh of the directory contents.
    */
-  refresh(): Promise<void> {
-    this._lastRefresh = new Date().getTime();
-    this._requested = false;
-    return this.cd('.');
+  async refresh(): Promise<void> {
+    await this._poll.refresh();
+    await this._poll.tick;
   }
 
   /**
@@ -269,9 +270,9 @@ export class FileBrowserModel implements IDisposable {
         if (this.isDisposed) {
           return;
         }
-        this._refreshDuration = this._baseRefreshDuration;
         this._handleContents(contents);
         this._pendingPath = null;
+        this._pending = null;
         if (oldValue !== newValue) {
           // If there is a state database and a unique key, save the new path.
           // We don't need to wait on the save to continue.
@@ -290,13 +291,13 @@ export class FileBrowserModel implements IDisposable {
       })
       .catch(error => {
         this._pendingPath = null;
-        if (error.message === 'Not Found') {
+        this._pending = null;
+        if (error.response && error.response.status === 404) {
           error.message = `Directory not found: "${this._model.path}"`;
           console.error(error);
           this._connectionFailure.emit(error);
           return this.cd('/');
         } else {
-          this._refreshDuration = this._baseRefreshDuration * 10;
           this._connectionFailure.emit(error);
         }
       });
@@ -586,7 +587,7 @@ export class FileBrowserModel implements IDisposable {
 
     // If either the old value or the new value is in the current path, update.
     if (value) {
-      this._scheduleUpdate();
+      void this._poll.refresh();
       this._populateSessions(sessions.running());
       this._fileChanged.emit(change);
       return;
@@ -605,38 +606,6 @@ export class FileBrowserModel implements IDisposable {
     });
   }
 
-  /**
-   * Start the internal refresh timer.
-   */
-  private _startTimer(): void {
-    this._timeoutId = window.setInterval(() => {
-      if (this._requested) {
-        void this.refresh();
-        return;
-      }
-      if (document.hidden) {
-        // Don't poll when nobody's looking.
-        return;
-      }
-      let date = new Date().getTime();
-      if (date - this._lastRefresh > this._refreshDuration) {
-        void this.refresh();
-      }
-    }, MIN_REFRESH);
-  }
-
-  /**
-   * Handle internal model refresh logic.
-   */
-  private _scheduleUpdate(): void {
-    let date = new Date().getTime();
-    if (date - this._lastRefresh > MIN_REFRESH) {
-      void this.refresh();
-    } else {
-      this._requested = true;
-    }
-  }
-
   private _connectionFailure = new Signal<this, Error>(this);
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _items: Contents.IModel[] = [];
@@ -647,19 +616,15 @@ export class FileBrowserModel implements IDisposable {
   private _pending: Promise<void> | null = null;
   private _pendingPath: string | null = null;
   private _refreshed = new Signal<this, void>(this);
-  private _lastRefresh = -1;
-  private _requested = false;
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;
-  private _timeoutId = -1;
-  private _refreshDuration: number;
-  private _baseRefreshDuration: number;
   private _driveName: string;
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();
   private _uploads: IUploadModel[] = [];
   private _uploadChanged = new Signal<this, IChangedArgs<IUploadModel>>(this);
   private _unloadEventListener: (e: Event) => string;
+  private _poll: Poll;
 }
 
 /**

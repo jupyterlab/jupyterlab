@@ -10,6 +10,7 @@ import {
   TerminalSession,
   TerminalManager
 } from '@jupyterlab/services';
+import { testEmission } from '../utils';
 
 describe('terminal', () => {
   let manager: TerminalSession.IManager;
@@ -123,27 +124,27 @@ describe('terminal', () => {
       });
 
       it('should emit a runningChanged signal', async () => {
-        let called = false;
         session = await manager.startNew();
-        manager.runningChanged.connect((sender, args) => {
-          expect(session.isDisposed).to.equal(false);
-          called = true;
+        const emission = testEmission(manager.runningChanged, {
+          test: () => {
+            expect(session.isDisposed).to.equal(false);
+          }
         });
         await manager.shutdown(session.name);
-        expect(called).to.equal(true);
+        await emission;
       });
     });
 
     describe('#runningChanged', () => {
       it('should be emitted when the running terminals changed', async () => {
-        let called = false;
-        manager.runningChanged.connect((sender, args) => {
-          expect(sender).to.equal(manager);
-          expect(toArray(args).length).to.be.greaterThan(0);
-          called = true;
+        const emission = testEmission(manager.runningChanged, {
+          test: (sender, args) => {
+            expect(sender).to.equal(manager);
+            expect(toArray(args).length).to.be.greaterThan(0);
+          }
         });
         await manager.startNew();
-        expect(called).to.equal(true);
+        await emission;
       });
     });
 

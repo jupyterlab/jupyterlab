@@ -5,97 +5,25 @@ import { ArrayExt } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { Token } from '@phosphor/coreutils';
-
 import { Menu, MenuBar } from '@phosphor/widgets';
 
-import { IFileMenu, FileMenu } from './file';
+import { FileMenu } from './file';
 
-import { IEditMenu, EditMenu } from './edit';
+import { EditMenu } from './edit';
 
-import { IHelpMenu, HelpMenu } from './help';
+import { HelpMenu } from './help';
 
-import { IKernelMenu, KernelMenu } from './kernel';
+import { KernelMenu } from './kernel';
 
-import { IRunMenu, RunMenu } from './run';
+import { RunMenu } from './run';
 
-import { ISettingsMenu, SettingsMenu } from './settings';
+import { SettingsMenu } from './settings';
 
-import { IViewMenu, ViewMenu } from './view';
+import { ViewMenu } from './view';
 
-import { ITabsMenu, TabsMenu } from './tabs';
+import { TabsMenu } from './tabs';
 
-/* tslint:disable */
-/**
- * The main menu token.
- */
-export const IMainMenu = new Token<IMainMenu>('@jupyterlab/mainmenu:IMainMenu');
-/* tslint:enable */
-
-/**
- * The main menu interface.
- */
-export interface IMainMenu {
-  /**
-   * Add a new menu to the main menu bar.
-   */
-  addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void;
-
-  /**
-   * The application "File" menu.
-   */
-  readonly fileMenu: IFileMenu;
-
-  /**
-   * The application "Edit" menu.
-   */
-  readonly editMenu: IEditMenu;
-
-  /**
-   * The application "View" menu.
-   */
-  readonly viewMenu: IViewMenu;
-
-  /**
-   * The application "Help" menu.
-   */
-  readonly helpMenu: IHelpMenu;
-
-  /**
-   * The application "Kernel" menu.
-   */
-  readonly kernelMenu: IKernelMenu;
-
-  /**
-   * The application "Run" menu.
-   */
-  readonly runMenu: IRunMenu;
-
-  /**
-   * The application "Settings" menu.
-   */
-  readonly settingsMenu: ISettingsMenu;
-
-  /**
-   * The application "Tabs" menu.
-   */
-  readonly tabsMenu: ITabsMenu;
-}
-
-/**
- * The namespace for IMainMenu attached interfaces.
- */
-export namespace IMainMenu {
-  /**
-   * The options used to add a menu to the main menu.
-   */
-  export interface IAddOptions {
-    /**
-     * The rank order of the menu among its siblings.
-     */
-    rank?: number;
-  }
-}
+import { IMainMenu } from './tokens';
 
 /**
  * The main menu class.  It is intended to be used as a singleton.

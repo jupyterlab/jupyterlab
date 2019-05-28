@@ -74,12 +74,12 @@ utils.writeJSONFile(path.join(testSrc, 'tsconfig.json'), tsData);
 
 // Git remove old tests infra
 ['karma-cov.conf.js', 'karma.conf.js', 'run-test.py'].forEach(fname => {
-  utils.run(`git rm -f ./test-${name}/${fname}`);
+  utils.run(`git rm -f ./test-${name}/${fname} || true`);
 });
 
 // Copy common files from coreutils
 ['run.py', 'babel.config.js'].forEach(fname => {
-  fs.copySync(path.join(coreUtils, fname, path.join(testSrc, fname)));
+  fs.copySync(path.join(coreUtils, fname), path.join(testSrc, fname));
 });
 
 // Add new files to git

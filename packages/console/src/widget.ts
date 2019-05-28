@@ -22,7 +22,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { KernelMessage } from '@jupyterlab/services';
 
@@ -165,7 +165,7 @@ export class CodeConsole extends Widget {
   /**
    * The rendermime instance used by the console.
    */
-  readonly rendermime: RenderMimeRegistry;
+  readonly rendermime: IRenderMimeRegistry;
 
   /**
    * The client session used by the console.
@@ -784,8 +784,7 @@ export class CodeConsole extends Widget {
       if (!kernel) {
         return;
       }
-      kernel
-        .requestKernelInfo()
+      kernel.ready
         .then(() => {
           if (this.isDisposed || !kernel || !kernel.info) {
             return;
@@ -797,6 +796,7 @@ export class CodeConsole extends Widget {
         });
     } else if (this.session.status === 'restarting') {
       this.addBanner();
+      this._handleInfo(this.session.kernel.info);
     }
   }
 
@@ -837,7 +837,7 @@ export namespace CodeConsole {
     /**
      * The mime renderer for the console widget.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
 
     /**
      * The client session for the console widget.

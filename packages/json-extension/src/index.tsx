@@ -3,6 +3,8 @@
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
+import { Printing } from '@jupyterlab/apputils';
+
 import { Message } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
@@ -28,7 +30,8 @@ export const MIME_TYPE = 'application/json';
 /**
  * A renderer for JSON data.
  */
-export class RenderedJSON extends Widget implements IRenderMime.IRenderer {
+export class RenderedJSON extends Widget
+  implements IRenderMime.IRenderer, Printing.IPrintable {
   /**
    * Create a new widget for rendering JSON.
    */
@@ -38,6 +41,10 @@ export class RenderedJSON extends Widget implements IRenderMime.IRenderer {
     this.addClass('CodeMirror');
     this.addClass('cm-s-jupyter');
     this._mimeType = options.mimeType;
+  }
+
+  [Printing.symbol]() {
+    return () => Printing.printWidget(this);
   }
 
   /**
@@ -86,7 +93,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     documentWidgetFactoryOptions: {
       name: 'JSON',
       primaryFileType: 'json',
-      fileTypes: ['json', 'notebook'],
+      fileTypes: ['json', 'notebook', 'geojson'],
       defaultFor: ['json']
     }
   }

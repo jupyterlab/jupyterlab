@@ -13,7 +13,7 @@ import {
 
 import {
   IRenderMime,
-  RenderMimeRegistry,
+  IRenderMimeRegistry,
   MimeModel
 } from '@jupyterlab/rendermime';
 
@@ -315,7 +315,7 @@ export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
   }
 
   private _fileType: DocumentRegistry.IFileType;
-  private _rendermime: RenderMimeRegistry;
+  private _rendermime: IRenderMimeRegistry;
 }
 
 /**
@@ -334,7 +334,7 @@ export namespace MarkdownViewerFactory {
     /**
      * The rendermime instance.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
   }
 }
 

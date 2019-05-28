@@ -155,6 +155,27 @@ export namespace PageConfig {
   }
 
   /**
+   * Returns the URL converting this notebook to a certain
+   * format with nbconvert.
+   */
+  export function getNBConvertURL({
+    path,
+    format,
+    download
+  }: {
+    path: string;
+    format: string;
+    download: boolean;
+  }): string {
+    const notebookPath = URLExt.encodeParts(path);
+    const url = URLExt.join(getBaseUrl(), 'nbconvert', format, notebookPath);
+    if (download) {
+      return url + '?download=true';
+    }
+    return url;
+  }
+
+  /**
    * Get the authorization token for a Jupyter application.
    */
   export function getToken(): string {

@@ -15,8 +15,6 @@ import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { DockPanel, Widget } from '@phosphor/widgets';
 
-const NAMESPACE = 'jupyterlab-layout-restorer-tests';
-
 describe('apputils', () => {
   describe('LayoutRestorer', () => {
     describe('#constructor()', () => {
@@ -24,7 +22,7 @@ describe('apputils', () => {
         const restorer = new LayoutRestorer({
           first: Promise.resolve<void>(void 0),
           registry: new CommandRegistry(),
-          state: new StateDB({ namespace: NAMESPACE })
+          state: new StateDB()
         });
         expect(restorer).to.be.an.instanceof(LayoutRestorer);
       });
@@ -35,7 +33,7 @@ describe('apputils', () => {
         const restorer = new LayoutRestorer({
           first: Promise.resolve<void>(void 0),
           registry: new CommandRegistry(),
-          state: new StateDB({ namespace: NAMESPACE })
+          state: new StateDB()
         });
         expect(restorer.restored).to.be.an.instanceof(Promise);
       });
@@ -45,7 +43,7 @@ describe('apputils', () => {
         const restorer = new LayoutRestorer({
           first: ready.promise,
           registry: new CommandRegistry(),
-          state: new StateDB({ namespace: NAMESPACE })
+          state: new StateDB()
         });
         let promise = restorer.restored;
         ready.resolve(void 0);
@@ -59,7 +57,7 @@ describe('apputils', () => {
         const restorer = new LayoutRestorer({
           first: ready.promise,
           registry: new CommandRegistry(),
-          state: new StateDB({ namespace: NAMESPACE })
+          state: new StateDB()
         });
         const currentWidget = new Widget();
         const mode: DockPanel.Mode = 'single-document';
@@ -83,7 +81,7 @@ describe('apputils', () => {
         const restorer = new LayoutRestorer({
           first: Promise.resolve(void 0),
           registry: new CommandRegistry(),
-          state: new StateDB({ namespace: NAMESPACE })
+          state: new StateDB()
         });
         const layout = await restorer.fetch();
         expect(layout).to.not.equal(null);
@@ -94,7 +92,7 @@ describe('apputils', () => {
         const restorer = new LayoutRestorer({
           first: ready.promise,
           registry: new CommandRegistry(),
-          state: new StateDB({ namespace: NAMESPACE })
+          state: new StateDB()
         });
         const currentWidget = new Widget();
         // The `fresh` attribute is only here to check against the return value.
@@ -123,7 +121,7 @@ describe('apputils', () => {
           namespace: 'foo-widget'
         });
         const registry = new CommandRegistry();
-        const state = new StateDB({ namespace: NAMESPACE });
+        const state = new StateDB();
         const ready = new PromiseDelegate<void>();
         const restorer = new LayoutRestorer({
           first: ready.promise,
@@ -157,7 +155,7 @@ describe('apputils', () => {
             // no op
           }),
           registry: new CommandRegistry(),
-          state: new StateDB({ namespace: NAMESPACE })
+          state: new StateDB()
         });
         const dehydrated: ILabShell.ILayout = {
           mainArea: { currentWidget: null, dock: null, mode: null },
@@ -176,7 +174,7 @@ describe('apputils', () => {
         const restorer = new LayoutRestorer({
           first: ready.promise,
           registry: new CommandRegistry(),
-          state: new StateDB({ namespace: NAMESPACE })
+          state: new StateDB()
         });
         const currentWidget = new Widget();
         // The `fresh` attribute is only here to check against the return value.

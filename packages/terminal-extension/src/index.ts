@@ -20,10 +20,7 @@ import { ILauncher } from '@jupyterlab/launcher';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import {
-  ITerminalTracker,
-  ITerminal
-} from '@jupyterlab/terminal/lib/constants';
+import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal';
 
 // Name-only import so as to not trigger inclusion in main bundle
 import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
@@ -107,7 +104,7 @@ function activate(
     restorer.restore(tracker, {
       command: CommandIDs.createNew,
       args: widget => ({ name: widget.content.session.name }),
-      name: widget => widget.content.session && widget.content.session.name
+      name: widget => widget.content.session.name
     });
   }
 
@@ -185,10 +182,6 @@ function activate(
       command: CommandIDs.setTheme,
       args: { theme: 'dark', isPalette: false }
     });
-    mainMenu.settingsMenu.addGroup(
-      [{ type: 'submenu', submenu: themeMenu }],
-      2
-    );
 
     // Add some commands to the "View" menu.
     mainMenu.settingsMenu.addGroup(
@@ -274,27 +267,22 @@ export function addCommands(
       }
 
       const name = args['name'] as string;
-      const term = new Terminal();
+
+      const session = await (name
+        ? serviceManager.terminals
+            .connectTo(name)
+            .catch(() => serviceManager.terminals.startNew())
+        : serviceManager.terminals.startNew());
+
+      const term = new Terminal(session);
 
       term.title.icon = TERMINAL_ICON_CLASS;
       term.title.label = '...';
+
       let main = new MainAreaWidget({ content: term });
       app.shell.add(main);
-
-      try {
-        term.session = await (name
-          ? serviceManager.terminals
-              .connectTo(name)
-              .catch(() => serviceManager.terminals.startNew())
-          : serviceManager.terminals.startNew());
-
-        void tracker.add(main);
-        app.shell.activateById(main.id);
-
-        return main;
-      } catch {
-        term.dispose();
-      }
+      void tracker.add(main);
+      app.shell.activateById(main.id);
     }
   });
 
@@ -304,7 +292,7 @@ export function addCommands(
       // Check for a running terminal with the given name.
       const widget = tracker.find(value => {
         let content = value.content;
-        return (content.session && content.session.name === name) || false;
+        return content.session.name === name || false;
       });
       if (widget) {
         app.shell.activateById(widget.id);
