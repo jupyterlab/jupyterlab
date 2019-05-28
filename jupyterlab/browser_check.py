@@ -45,18 +45,13 @@ class LogErrorHandler(logging.Handler):
 
     def filter(self, record):
         # known startup error message
-        elif 'paste' in record.msg:
+        if 'paste' in record.msg:
             return
         return super().filter(record)
 
     def emit(self, record):
         print(record.msg, file=sys.stderr)
-<<<<<<< HEAD
         self.app.errored = True
-=======
-        print('\n\n***Exiting***\n')
-        sys.exit(1)
->>>>>>> a64780ad1... Add exiting note and test examples first
 
 
 class BrowserApp(LabApp):
