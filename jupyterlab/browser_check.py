@@ -39,7 +39,7 @@ class LogErrorHandler(logging.Handler):
     """A handler that exits with 1 on a logged error."""
 
     def __init__(self, app):
-        super().__init__(self, level=logging.ERROR)
+        super().__init__(level=logging.ERROR)
         self.app = app
         self.app.errored = False
 
