@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-notebook",
-  "version": "1.0.0-alpha.7",
+  "version": "1.0.0-alpha.8",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -8,16 +8,16 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/codemirror": "^1.0.0-alpha.7",
-    "@jupyterlab/completer": "^1.0.0-alpha.7",
-    "@jupyterlab/docmanager": "^1.0.0-alpha.7",
-    "@jupyterlab/docregistry": "^1.0.0-alpha.7",
-    "@jupyterlab/documentsearch": "^1.0.0-alpha.8",
-    "@jupyterlab/mathjax2": "^1.0.0-alpha.7",
-    "@jupyterlab/notebook": "^1.0.0-alpha.8",
-    "@jupyterlab/rendermime": "^1.0.0-alpha.7",
-    "@jupyterlab/services": "^4.0.0-alpha.7",
-    "@jupyterlab/theme-light-extension": "^1.0.0-alpha.8",
+    "@jupyterlab/codemirror": "^1.0.0-alpha.8",
+    "@jupyterlab/completer": "^1.0.0-alpha.8",
+    "@jupyterlab/docmanager": "^1.0.0-alpha.8",
+    "@jupyterlab/docregistry": "^1.0.0-alpha.8",
+    "@jupyterlab/documentsearch": "^1.0.0-alpha.9",
+    "@jupyterlab/mathjax2": "^1.0.0-alpha.8",
+    "@jupyterlab/notebook": "^1.0.0-alpha.9",
+    "@jupyterlab/rendermime": "^1.0.0-alpha.8",
+    "@jupyterlab/services": "^4.0.0-alpha.8",
+    "@jupyterlab/theme-light-extension": "^1.0.0-alpha.9",
     "@phosphor/commands": "^1.6.1",
     "@phosphor/widgets": "^1.6.0",
     "es6-promise": "~4.2.6"
