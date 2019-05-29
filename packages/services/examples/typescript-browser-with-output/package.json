@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-services-outputarea",
-  "version": "1.0.0-alpha.6",
+  "version": "1.0.0-alpha.7",
   "private": true,
   "scripts": {
     "build": "tsc && webpack",
@@ -8,10 +8,10 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^3.0.0-alpha.6",
-    "@jupyterlab/outputarea": "^1.0.0-alpha.6",
-    "@jupyterlab/rendermime": "^1.0.0-alpha.6",
-    "@jupyterlab/services": "^4.0.0-alpha.6"
+    "@jupyterlab/coreutils": "^3.0.0-alpha.7",
+    "@jupyterlab/outputarea": "^1.0.0-alpha.7",
+    "@jupyterlab/rendermime": "^1.0.0-alpha.7",
+    "@jupyterlab/services": "^4.0.0-alpha.7"
   },
   "devDependencies": {
     "css-loader": "~2.1.1",
