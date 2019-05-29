@@ -35,7 +35,7 @@
     "@jupyterlab/application": "^1.0.0-alpha.6",
     "@jupyterlab/apputils": "^1.0.0-alpha.6",
     "@jupyterlab/cells": "^1.0.0-alpha.6",
-    "@jupyterlab/coreutils": "3.0.0-alpha.6",
+    "@jupyterlab/coreutils": "^3.0.0-alpha.6",
     "@jupyterlab/docmanager": "^1.0.0-alpha.6",
     "@jupyterlab/docregistry": "^1.0.0-alpha.6",
     "@jupyterlab/fileeditor": "^1.0.0-alpha.6",
