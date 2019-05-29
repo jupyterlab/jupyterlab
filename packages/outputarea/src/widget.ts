@@ -468,7 +468,10 @@ export class OutputArea extends Widget {
     // is overridden from 'execute_reply' to 'display_data' in order to
     // render output.
     let model = this.model;
-    let content = msg.content as KernelMessage.IExecuteOkReply;
+    let content = msg.content;
+    if (content.status !== 'ok') {
+      return;
+    }
     let payload = content && content.payload;
     if (!payload || !payload.length) {
       return;
@@ -557,7 +560,7 @@ export namespace OutputArea {
     ) {
       stopOnError = false;
     }
-    let content: KernelMessage.IExecuteRequest = {
+    let content: KernelMessage.IExecuteRequestMsg['content'] = {
       code,
       stop_on_error: stopOnError
     };
@@ -712,6 +715,7 @@ export class Stdin extends Widget implements IStdin {
       if ((event as KeyboardEvent).keyCode === 13) {
         // Enter
         this._future.sendInputReply({
+          status: 'ok',
           value: input.value
         });
         if (input.type === 'password') {

@@ -791,7 +791,7 @@ describe('Kernel.IKernel', () => {
 
   describe('#requestIsComplete()', () => {
     it('should resolve the promise', async () => {
-      const options: KernelMessage.IIsCompleteRequest = {
+      const options: KernelMessage.IIsCompleteRequestMsg['content'] = {
         code: 'hello'
       };
       await defaultKernel.requestIsComplete(options);

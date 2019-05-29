@@ -224,10 +224,12 @@ export class ConsoleHistory implements IConsoleHistory {
     this._history.length = 0;
     let last = '';
     let current = '';
-    for (let i = 0; i < value.content.history.length; i++) {
-      current = (value.content.history[i] as string[])[2];
-      if (current !== last) {
-        this._history.push((last = current));
+    if (value.content.status === 'ok') {
+      for (let i = 0; i < value.content.history.length; i++) {
+        current = (value.content.history[i] as string[])[2];
+        if (current !== last) {
+          this._history.push((last = current));
+        }
       }
     }
     // Reset the history navigation cursor back to the bottom.
@@ -360,7 +362,7 @@ export namespace ConsoleHistory {
  * A namespace for private data.
  */
 namespace Private {
-  export const initialRequest: KernelMessage.IHistoryRequest = {
+  export const initialRequest: KernelMessage.IHistoryRequestMsg['content'] = {
     output: false,
     raw: true,
     hist_access_type: 'tail',

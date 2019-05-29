@@ -164,7 +164,10 @@ function activate(
   helpMenu.addGroup(resourcesGroup, 10);
 
   // Generate a cache of the kernel help links.
-  const kernelInfoCache = new Map<string, KernelMessage.IInfoReply>();
+  const kernelInfoCache = new Map<
+    string,
+    KernelMessage.IInfoReplyMsg['content']
+  >();
   serviceManager.sessions.runningChanged.connect((m, sessions) => {
     // If a new session has been added, it is at the back
     // of the session list. If one has changed or stopped,

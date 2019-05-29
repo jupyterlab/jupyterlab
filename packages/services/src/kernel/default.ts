@@ -415,6 +415,9 @@ export class DefaultKernel implements Kernel.IKernel {
     if (this.isDisposed) {
       throw new Error('Disposed kernel');
     }
+    if (reply.content.status !== 'ok') {
+      throw new Error('Kernel info reply errored');
+    }
     this._info = reply.content;
     return reply;
   }
@@ -429,7 +432,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * received and validated.
    */
   requestComplete(
-    content: KernelMessage.ICompleteRequest
+    content: KernelMessage.ICompleteRequestMsg['content']
   ): Promise<KernelMessage.ICompleteReplyMsg> {
     let msg = KernelMessage.createMessage({
       msgType: 'complete_request',
@@ -453,7 +456,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * received and validated.
    */
   requestInspect(
-    content: KernelMessage.IInspectRequest
+    content: KernelMessage.IInspectRequestMsg['content']
   ): Promise<KernelMessage.IInspectReplyMsg> {
     let msg = KernelMessage.createMessage({
       msgType: 'inspect_request',
@@ -477,7 +480,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * received and validated.
    */
   requestHistory(
-    content: KernelMessage.IHistoryRequest
+    content: KernelMessage.IHistoryRequestMsg['content']
   ): Promise<KernelMessage.IHistoryReplyMsg> {
     let msg = KernelMessage.createMessage({
       msgType: 'history_request',
@@ -507,7 +510,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * **See also:** [[IExecuteReply]]
    */
   requestExecute(
-    content: KernelMessage.IExecuteRequest,
+    content: KernelMessage.IExecuteRequestMsg['content'],
     disposeOnDone: boolean = true,
     metadata?: JSONObject
   ): Kernel.IFuture<
@@ -544,7 +547,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * received and validated.
    */
   requestIsComplete(
-    content: KernelMessage.IIsCompleteRequest
+    content: KernelMessage.IIsCompleteRequestMsg['content']
   ): Promise<KernelMessage.IIsCompleteReplyMsg> {
     let msg = KernelMessage.createMessage({
       msgType: 'is_complete_request',
@@ -566,7 +569,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * received and validated.
    */
   requestCommInfo(
-    content: KernelMessage.ICommInfoRequest
+    content: KernelMessage.ICommInfoRequestMsg['content']
   ): Promise<KernelMessage.ICommInfoReplyMsg> {
     let msg = KernelMessage.createMessage({
       msgType: 'comm_info_request',
@@ -586,7 +589,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * #### Notes
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
    */
-  sendInputReply(content: KernelMessage.IInputReply): void {
+  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
