@@ -121,7 +121,7 @@ def ensure_node_modules(cwd, logger=None):
     if ret != 0:
         yarn_proc = Process(['node', YARN_PATH], cwd=cwd, logger=logger)
         yarn_proc.wait()
-
+        parent = pjoin(HERE, '..')
         dedupe_yarn(parent, logger)
 
     return ret != 0

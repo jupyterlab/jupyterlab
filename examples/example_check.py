@@ -43,7 +43,7 @@ class ExampleCheckApp(mod.ExampleApp):
     ip = '127.0.0.1'
 
     def start(self):
-        run_test(run_browser)
+        run_test(self, run_browser)
         super().start()
 
 
