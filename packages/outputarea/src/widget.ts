@@ -538,8 +538,8 @@ export namespace OutputArea {
     let stopOnError = true;
     if (
       metadata &&
-      metadata.tags &&
-      (metadata.tags as string[]).indexOf('raises-exception') !== -1
+      Array.isArray(metadata.tags) &&
+      metadata.tags.indexOf('raises-exception') !== -1
     ) {
       stopOnError = false;
     }
