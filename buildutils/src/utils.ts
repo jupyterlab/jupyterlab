@@ -130,7 +130,9 @@ export function prebump() {
 
   // Make sure we start in a clean git state.
   if (checkStatus('test -z "$(git status --porcelain)"') !== 0) {
-    throw new Error('Must be in a clean git state with no untracked files.');
+    throw new Error(
+      'Must be in a clean git state with no untracked files. Run "git status" to see the issues.'
+    );
   }
 }
 
