@@ -41,13 +41,13 @@ pip install -ve .
 
 Here is an example of how version numbers progress through a release process.
 
-| Command                              |  Python Version Change  | NPM Version change   |
-|---                                   |---                      |---      |
-| `jlpm bumpversion minor`             | x.y.z-> x.(y+1).0.a0    | All a.b.c -> a.(b+1).0-alpha.0 |
-| `jlpm bumpversion build`             | x.y.z.a0-> x.y.z.a1     | All a.b.c-alpha.0 -> a.b.c-alpha.1 |
-| `jlpm bumpversion release`           | x.y.z.a1-> x.y.z.rc0    | All a.b.c-alpha.1 -> a.b.c-rc.0 |
-| `jlpm bumpversion release`           | x.y.z.rc0-> x.y.z       | All a.b.c-rc0 -> a.b.c
-| `jlpm patch:release [...packages]`   | x.y.z -> x.y.(z+1)      | Selected a.b.c -> a.b.(c+1) |
+| Command                            | Python Version Change | NPM Version change                 |
+| ---------------------------------- | --------------------- | ---------------------------------- |
+| `jlpm bumpversion minor`           | x.y.z-> x.(y+1).0.a0  | All a.b.c -> a.(b+1).0-alpha.0     |
+| `jlpm bumpversion build`           | x.y.z.a0-> x.y.z.a1   | All a.b.c-alpha.0 -> a.b.c-alpha.1 |
+| `jlpm bumpversion release`         | x.y.z.a1-> x.y.z.rc0  | All a.b.c-alpha.1 -> a.b.c-rc.0    |
+| `jlpm bumpversion release`         | x.y.z.rc0-> x.y.z     | All a.b.c-rc0 -> a.b.c             |
+| `jlpm patch:release [...packages]` | x.y.z -> x.y.(z+1)    | Selected a.b.c -> a.b.(c+1)        |
 
 ### JS major release(s)
 
@@ -56,10 +56,10 @@ Command:
 
 Results:
 
-* Python package is not affected.
-* JS dependencies are also bumped a major version.
-* Packages that have already had a major bump in this prerelease cycle are not affected.
-* All affected packages changed to match the current release type of the Python package (`alpha` or `rc`).  
+- Python package is not affected.
+- JS dependencies are also bumped a major version.
+- Packages that have already had a major bump in this prerelease cycle are not affected.
+- All affected packages changed to match the current release type of the Python package (`alpha` or `rc`).
 
 ### Publishing Packages
 
