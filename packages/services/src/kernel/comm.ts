@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONObject, JSONValue } from '@phosphor/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
 
 import { DisposableDelegate } from '@phosphor/disposable';
 
@@ -100,30 +100,26 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
    * **See also:** [[ICommOpen]]
    */
   open(
-    data?: JSONValue,
+    data?: JSONObject,
     metadata?: JSONObject,
     buffers: (ArrayBuffer | ArrayBufferView)[] = []
   ): Kernel.IFuture {
     if (this.isDisposed || this._kernel.isDisposed) {
       throw new Error('Cannot open');
     }
-    let options: KernelMessage.IOptions = {
+    let msg = KernelMessage.createMessage({
       msgType: 'comm_open',
       channel: 'shell',
       username: this._kernel.username,
-      session: this._kernel.clientId
-    };
-    let content: KernelMessage.ICommOpen = {
-      comm_id: this._id,
-      target_name: this._target,
-      data: data || {}
-    };
-    let msg = KernelMessage.createShellMessage(
-      options,
-      content,
+      session: this._kernel.clientId,
+      content: {
+        comm_id: this._id,
+        target_name: this._target,
+        data: data || {}
+      },
       metadata,
       buffers
-    );
+    });
     return this._kernel.sendShellMessage(msg, false, true);
   }
 
@@ -136,7 +132,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
    * **See also:** [[ICommMsg]]
    */
   send(
-    data: JSONValue,
+    data: JSONObject,
     metadata?: JSONObject,
     buffers: (ArrayBuffer | ArrayBufferView)[] = [],
     disposeOnDone: boolean = true
@@ -144,22 +140,18 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     if (this.isDisposed || this._kernel.isDisposed) {
       throw new Error('Cannot send');
     }
-    let options: KernelMessage.IOptions = {
+    let msg = KernelMessage.createMessage({
       msgType: 'comm_msg',
       channel: 'shell',
       username: this._kernel.username,
-      session: this._kernel.clientId
-    };
-    let content: KernelMessage.ICommMsg = {
-      comm_id: this._id,
-      data: data
-    };
-    let msg = KernelMessage.createShellMessage(
-      options,
-      content,
+      session: this._kernel.clientId,
+      content: {
+        comm_id: this._id,
+        data: data
+      },
       metadata,
       buffers
-    );
+    });
     return this._kernel.sendShellMessage(msg, false, true);
   }
 
@@ -175,42 +167,43 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
    * **See also:** [[ICommClose]], [[onClose]]
    */
   close(
-    data?: JSONValue,
+    data?: JSONObject,
     metadata?: JSONObject,
     buffers: (ArrayBuffer | ArrayBufferView)[] = []
   ): Kernel.IFuture {
     if (this.isDisposed || this._kernel.isDisposed) {
       throw new Error('Cannot close');
     }
-    let options: KernelMessage.IOptions = {
-      msgType: 'comm_msg',
+    let msg = KernelMessage.createMessage({
+      msgType: 'comm_close',
       channel: 'shell',
       username: this._kernel.username,
-      session: this._kernel.clientId
-    };
-    let content: KernelMessage.ICommClose = {
-      comm_id: this._id,
-      data: data || {}
-    };
-    let msg = KernelMessage.createShellMessage(
-      options,
-      content,
+      session: this._kernel.clientId,
+      content: {
+        comm_id: this._id,
+        data: data || {}
+      },
       metadata,
       buffers
-    );
+    });
     let future = this._kernel.sendShellMessage(msg, false, true);
-    options.channel = 'iopub';
     let onClose = this._onClose;
     if (onClose) {
-      let ioMsg = KernelMessage.createMessage(
-        options,
-        content,
+      let ioMsg = KernelMessage.createMessage({
+        msgType: 'comm_close',
+        channel: 'iopub',
+        username: this._kernel.username,
+        session: this._kernel.clientId,
+        content: {
+          comm_id: this._id,
+          data: data || {}
+        },
         metadata,
         buffers
-      );
+      });
       // In the future, we may want to communicate back to the user the possible
       // promise returned from onClose.
-      onClose(ioMsg as KernelMessage.ICommCloseMsg);
+      onClose(ioMsg);
     }
     this.dispose();
     return future;
@@ -220,7 +213,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
   private _id = '';
   private _kernel: Kernel.IKernel;
   private _onClose: (
-    msg: KernelMessage.ICommCloseMsg
+    msg: KernelMessage.ICommCloseMsg<'iopub'>
   ) => void | PromiseLike<void>;
   private _onMsg: (msg: KernelMessage.ICommMsgMsg) => void | PromiseLike<void>;
 }
