@@ -94,6 +94,74 @@ export function writeJSONFile(filePath: string, data: any): boolean {
 }
 
 /**
+ *
+ * Call a command, checking its status.
+ */
+export function checkStatus(cmd: string) {
+  const data = childProcess.spawnSync(cmd, { shell: true });
+  return data.status;
+}
+
+/**
+ * Get the current version of JupyterLab
+ */
+export function getPythonVersion() {
+  const cmd = 'python setup.py --version';
+  return run(cmd, { stdio: 'pipe' });
+}
+
+/**
+ * Get the current version of a package
+ */
+export function getJSVersion(pkg: string) {
+  const filePath = path.resolve(
+    path.join('.', 'packages', pkg, 'package.json')
+  );
+  const data = readJSONFile(filePath);
+  return data.version;
+}
+
+/**
+ * Pre-bump.
+ */
+export function prebump() {
+  // Ensure bump2version is installed (active fork of bumpversion)
+  run('python -m pip install bump2version');
+
+  // Make sure we start in a clean git state.
+  let status = run('git status --porcelain', {
+    stdio: 'pipe',
+    encoding: 'utf8'
+  });
+  if (status.length > 0) {
+    throw new Error(
+      `Must be in a clean git state with no untracked files.
+Run "git status" to see the issues.
+
+${status}`
+    );
+  }
+}
+
+/**
+ * Post-bump.
+ */
+export function postbump() {
+  // Get the current version.
+  const curr = getPythonVersion();
+
+  // Update the dev mode version.
+  let filePath = path.resolve(path.join('.', 'dev_mode', 'package.json'));
+  let data = readJSONFile(filePath);
+  data.jupyterlab.version = curr;
+  writeJSONFile(filePath, data);
+
+  // Create a git tag and commit.
+  run(`git tag v${curr}`);
+  run(`git commit -am "Publish ${curr}"`);
+}
+
+/**
  * Run a command with terminal output.
  *
  * @param cmd - The command to run.
