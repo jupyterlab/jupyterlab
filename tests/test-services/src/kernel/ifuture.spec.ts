@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import { KernelTester, createMsg } from '../utils';
+import { KernelTester } from '../utils';
 
 describe('Kernel.IFuture', () => {
   let tester: KernelTester;
@@ -43,21 +43,38 @@ describe('Kernel.IFuture', () => {
       tester.onMessage(message => {
         // send a reply
         const parentHeader = message.header;
-        const msg = createMsg('shell', parentHeader) as any;
-        tester.send(msg);
+        const session = 'session';
+        tester.send(
+          KernelMessage.createMessage({
+            parentHeader,
+            session,
+            channel: 'shell',
+            msgType: 'comm_open',
+            content: { comm_id: 'B', data: {}, target_name: 'C' }
+          })
+        );
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          const msgStream = createMsg('iopub', parentHeader) as any;
-          msgStream.header.msg_type = 'stream';
-          msgStream.content = { name: 'stdout', text: 'foo' };
-          tester.send(msgStream);
+          tester.send(
+            KernelMessage.createMessage({
+              parentHeader,
+              session,
+              channel: 'iopub',
+              msgType: 'stream',
+              content: { name: 'stdout', text: 'foo' }
+            })
+          );
           // trigger onDone
-          const msgDone = createMsg('iopub', parentHeader) as any;
-          msgDone.header.msg_type = 'status';
-          (msgDone as KernelMessage.IStatusMsg).content.execution_state =
-            'idle';
-          tester.send(msgDone);
+          tester.send(
+            KernelMessage.createMessage({
+              parentHeader,
+              session,
+              channel: 'iopub',
+              msgType: 'status',
+              content: { execution_state: 'idle' }
+            })
+          );
         };
 
         future.registerMessageHook(async msg => {
@@ -119,21 +136,38 @@ describe('Kernel.IFuture', () => {
       tester.onMessage(message => {
         // send a reply
         const parentHeader = message.header;
-        const msg = createMsg('shell', parentHeader) as any;
-        tester.send(msg);
+        const session = 'session';
+        tester.send(
+          KernelMessage.createMessage({
+            parentHeader,
+            session,
+            channel: 'shell',
+            msgType: 'comm_open',
+            content: { comm_id: 'B', data: {}, target_name: 'C' }
+          })
+        );
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          const msgStream = createMsg('iopub', parentHeader) as any;
-          msgStream.header.msg_type = 'stream';
-          msgStream.content = { name: 'stdout', text: 'foo' };
-          tester.send(msgStream);
+          tester.send(
+            KernelMessage.createMessage({
+              parentHeader,
+              session,
+              channel: 'iopub',
+              msgType: 'stream',
+              content: { name: 'stdout', text: 'foo' }
+            })
+          );
           // trigger onDone
-          const msgDone = createMsg('iopub', parentHeader) as any;
-          msgDone.header.msg_type = 'status';
-          (msgDone as KernelMessage.IStatusMsg).content.execution_state =
-            'idle';
-          tester.send(msgDone);
+          tester.send(
+            KernelMessage.createMessage({
+              parentHeader,
+              session,
+              channel: 'iopub',
+              msgType: 'status',
+              content: { execution_state: 'idle' }
+            })
+          );
         };
 
         future.registerMessageHook(msg => {
@@ -174,21 +208,38 @@ describe('Kernel.IFuture', () => {
       tester.onMessage(message => {
         // send a reply
         const parentHeader = message.header;
-        const msg = createMsg('shell', parentHeader) as any;
-        tester.send(msg);
+        const session = 'session';
+        tester.send(
+          KernelMessage.createMessage({
+            parentHeader,
+            session,
+            channel: 'shell',
+            msgType: 'comm_open',
+            content: { comm_id: 'B', data: {}, target_name: 'C' }
+          })
+        );
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          const msgStream = createMsg('iopub', parentHeader) as any;
-          msgStream.header.msg_type = 'stream';
-          msgStream.content = { name: 'stdout', text: 'foo' };
-          tester.send(msgStream);
+          tester.send(
+            KernelMessage.createMessage({
+              parentHeader,
+              session,
+              channel: 'iopub',
+              msgType: 'stream',
+              content: { name: 'stdout', text: 'foo' }
+            })
+          );
           // trigger onDone
-          const msgDone = createMsg('iopub', parentHeader) as any;
-          msgDone.header.msg_type = 'status';
-          (msgDone as KernelMessage.IStatusMsg).content.execution_state =
-            'idle';
-          tester.send(msgDone);
+          tester.send(
+            KernelMessage.createMessage({
+              parentHeader,
+              session,
+              channel: 'iopub',
+              msgType: 'status',
+              content: { execution_state: 'idle' }
+            })
+          );
         };
 
         future.registerMessageHook(msg => {
@@ -240,21 +291,38 @@ describe('Kernel.IFuture', () => {
       tester.onMessage(message => {
         // send a reply
         const parentHeader = message.header;
-        const msg = createMsg('shell', parentHeader) as any;
-        tester.send(msg);
+        const session = 'session';
+        tester.send(
+          KernelMessage.createMessage({
+            parentHeader,
+            session,
+            channel: 'shell',
+            msgType: 'comm_open',
+            content: { comm_id: 'B', data: {}, target_name: 'C' }
+          })
+        );
 
         future.onReply = () => {
           // trigger onIOPub with a 'stream' message
-          const msgStream = createMsg('iopub', parentHeader) as any;
-          msgStream.header.msg_type = 'stream';
-          msgStream.content = { name: 'stdout', text: 'foo' };
-          tester.send(msgStream);
+          tester.send(
+            KernelMessage.createMessage({
+              parentHeader,
+              session,
+              channel: 'iopub',
+              msgType: 'stream',
+              content: { name: 'stdout', text: 'foo' }
+            })
+          );
           // trigger onDone
-          const msgDone = createMsg('iopub', parentHeader) as any;
-          msgDone.header.msg_type = 'status';
-          (msgDone as KernelMessage.IStatusMsg).content.execution_state =
-            'idle';
-          tester.send(msgDone);
+          tester.send(
+            KernelMessage.createMessage({
+              parentHeader,
+              session,
+              channel: 'iopub',
+              msgType: 'status',
+              content: { execution_state: 'idle' }
+            })
+          );
         };
 
         future.registerMessageHook(toDelete);

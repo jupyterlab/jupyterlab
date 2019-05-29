@@ -126,23 +126,6 @@ export const KERNELSPECS: JSONObject = {
 };
 
 /**
- * Create a message from an existing message.
- */
-export function createMsg(
-  channel: KernelMessage.Channel,
-  parentHeader: KernelMessage.IHeader | {}
-): KernelMessage.IMessage {
-  return {
-    channel: channel,
-    parent_header: JSON.parse(JSON.stringify(parentHeader)),
-    content: {},
-    header: JSON.parse(JSON.stringify(parentHeader)),
-    metadata: {},
-    buffers: []
-  };
-}
-
-/**
  * Get a single handler for a request.
  */
 export function getRequestHandler(
