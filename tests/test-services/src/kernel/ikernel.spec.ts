@@ -7,7 +7,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
 
-import { JSONObject, PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
@@ -551,7 +551,6 @@ describe('Kernel.IKernel', () => {
       });
       const future = kernel.sendShellMessage(msg, true);
 
-      let newMsg: KernelMessage.IMessage;
       tester.onMessage(msg => {
         // trigger onDone
         tester.send(
@@ -566,7 +565,6 @@ describe('Kernel.IKernel', () => {
         );
 
         future.onIOPub = () => {
-          newMsg.parent_header = msg.header;
           tester.send(
             KernelMessage.createMessage({
               msgType: 'comm_open',
@@ -870,7 +868,6 @@ describe('Kernel.IKernel', () => {
 
   describe('#requestExecute()', () => {
     it('should send and handle incoming messages', async () => {
-      let newMsg: KernelMessage.IMessage;
       const content: KernelMessage.IExecuteRequest = {
         code: 'test',
         silent: false,
