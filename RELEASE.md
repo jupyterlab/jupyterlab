@@ -32,7 +32,7 @@ conda deactivate
 conda remove --all -y -n jlabrelease
 rm -rf jupyterlab
 
-conda create -c conda-forge -y -n jlabrelease notebook nodejs
+conda create -c conda-forge -y -n jlabrelease notebook nodejs twine 'tornado<6'
 conda activate jlabrelease
 git clone git@github.com:jupyterlab/jupyterlab.git
 cd jupyterlab
