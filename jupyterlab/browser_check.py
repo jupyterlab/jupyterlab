@@ -73,7 +73,7 @@ def run_test(app, func):
 
     app.log.addHandler(handler)
     pool = ThreadPoolExecutor()
-    future = pool.submit(run_browser, app.display_url)
+    future = pool.submit(func, app.display_url)
     IOLoop.current().add_future(future, finished)
 
 

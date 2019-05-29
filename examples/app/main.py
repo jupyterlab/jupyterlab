@@ -13,7 +13,7 @@ HERE = os.path.dirname(__file__)
 os.environ["JUPYTER_NO_CONFIG"]="1"
 
 class ExampleApp(LabServerApp):
-
+    base_url = '/foo/'
     default_url = Unicode('/example',
                           help='The default URL to redirect to from `/`')
 
