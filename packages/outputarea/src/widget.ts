@@ -386,7 +386,7 @@ export class OutputArea extends Widget {
       }
       output.renderModel(model).catch(error => {
         // Manually append error message to output
-        const pre = document.createElement('p');
+        const pre = document.createElement('pre');
         pre.textContent = `Javascript Error: ${error.message}`;
         output.node.appendChild(pre);
 
