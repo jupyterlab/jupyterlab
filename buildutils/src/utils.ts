@@ -129,8 +129,8 @@ export function prebump() {
   run('python -m pip install bump2version');
 
   // Make sure we start in a clean git state.
-  if (checkStatus('git diff --quiet') !== 0) {
-    throw new Error('Must be in a clean git state');
+  if (checkStatus('test -z "$(git status --porcelain)"') !== 0) {
+    throw new Error('Must be in a clean git state with no untracked files.');
   }
 }
 
