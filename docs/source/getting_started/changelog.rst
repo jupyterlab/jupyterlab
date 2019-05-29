@@ -15,8 +15,12 @@ milestone on GitHub for the full list of pull requests and issues closed.
 
 Changes in 1.0.0a4
 ^^^^^^^^^^^^^^^^^^
+
+* Prepublishonly Integrity Check (`#6437 <https://github.com/jupyterlab/jupyterlab/pull/6437>`__)
 * Add Version To Vega Extension Id (`#6429 <https://github.com/jupyterlab/jupyterlab/pull/6429>`__)
 * Audit Innerhtml Usage And Sanitize Inputs. (`#6426 <https://github.com/jupyterlab/jupyterlab/pull/6426>`__)
+* Allow Raises-Exception (`#6424 <https://github.com/jupyterlab/jupyterlab/pull/6424>`__, `#2412 <https://github.com/jupyterlab/jupyterlab/issues/2412>`__)
+* Rewrite Kernel Message Typings And Only Clear Cell Execution Prompt If Needed (`#6412 <https://github.com/jupyterlab/jupyterlab/pull/6412>`__, `#5779 <https://github.com/jupyterlab/jupyterlab/issues/5779>`__)
 * More Granular Completion (`#6409 <https://github.com/jupyterlab/jupyterlab/pull/6409>`__, `#5872 <https://github.com/jupyterlab/jupyterlab/issues/5872>`__)
 * Make Selected Command Palette Darker On Hover (`#6407 <https://github.com/jupyterlab/jupyterlab/pull/6407>`__, `#279 <https://github.com/jupyterlab/jupyterlab/issues/279>`__)
 * Hide The Last Modified Column On A Narrow Filebrowser. (`#6406 <https://github.com/jupyterlab/jupyterlab/pull/6406>`__, `#6093 <https://github.com/jupyterlab/jupyterlab/issues/6093>`__)
