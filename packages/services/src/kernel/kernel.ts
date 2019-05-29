@@ -69,7 +69,7 @@ export namespace Kernel {
      * #### Notes
      * This value will be null until the kernel is ready.
      */
-    readonly info: KernelMessage.IInfoReply | null;
+    readonly info: KernelMessage.IInfoReplyMsg['content'] | null;
 
     /**
      * Test whether the kernel is ready.
@@ -287,7 +287,7 @@ export namespace Kernel {
      * received and validated.
      */
     requestIsComplete(
-      content: KernelMessage.IIsCompleteRequest
+      content: KernelMessage.IIsCompleteRequestMsg['content']
     ): Promise<KernelMessage.IIsCompleteReplyMsg>;
 
     /**
@@ -315,7 +315,7 @@ export namespace Kernel {
      * #### Notes
      * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
      */
-    sendInputReply(content: KernelMessage.IInputReply): void;
+    sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
 
     /**
      * Connect to a comm, or create a new one.
@@ -830,7 +830,7 @@ export namespace Kernel {
     /**
      * Send an `input_reply` message.
      */
-    sendInputReply(content: KernelMessage.IInputReply): void;
+    sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
   }
 
   /**

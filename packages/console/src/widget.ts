@@ -682,7 +682,7 @@ export class CodeConsole extends Widget {
   /**
    * Update the console based on the kernel info.
    */
-  private _handleInfo(info: KernelMessage.IInfoReply): void {
+  private _handleInfo(info: KernelMessage.IInfoReplyMsg['content']): void {
     this._banner.model.value.text = info.banner;
     let lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);

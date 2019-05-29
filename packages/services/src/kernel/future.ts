@@ -154,7 +154,7 @@ export class KernelFutureHandler<
   /**
    * Send an `input_reply` message.
    */
-  sendInputReply(content: KernelMessage.IInputReply): void {
+  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void {
     this._kernel.sendInputReply(content);
   }
 

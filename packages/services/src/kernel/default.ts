@@ -175,7 +175,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * #### Notes
    * This value will be null until the kernel is ready.
    */
-  get info(): KernelMessage.IInfoReply | null {
+  get info(): KernelMessage.IInfoReplyMsg['content'] | null {
     return this._info;
   }
 
@@ -544,7 +544,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * received and validated.
    */
   requestIsComplete(
-    content: KernelMessage.IIsCompleteRequest
+    content: KernelMessage.IIsCompleteRequestMsg['content']
   ): Promise<KernelMessage.IIsCompleteReplyMsg> {
     let msg = KernelMessage.createMessage({
       msgType: 'is_complete_request',
@@ -586,7 +586,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * #### Notes
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
    */
-  sendInputReply(content: KernelMessage.IInputReply): void {
+  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
@@ -1237,7 +1237,7 @@ export class DefaultKernel implements Kernel.IKernel {
       msg: KernelMessage.ICommOpenMsg
     ) => void;
   } = Object.create(null);
-  private _info: KernelMessage.IInfoReply | null = null;
+  private _info: KernelMessage.IInfoReplyMsg['content'] | null = null;
   private _pendingMessages: KernelMessage.IMessage[] = [];
   private _specPromise: Promise<Kernel.ISpecModel>;
   private _statusChanged = new Signal<this, Kernel.Status>(this);
