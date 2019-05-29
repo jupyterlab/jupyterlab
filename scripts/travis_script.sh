@@ -100,6 +100,7 @@ if [[ $GROUP == integrity ]]; then
     git config --global user.name "CI"
     git stash
     git checkout -b commit_${BUILD_SOURCEVERSION}
+    git clean -df
     jlpm bumpversion minor --force
     jlpm bumpversion major --force
     jlpm bumpversion release --force # switch to rc
