@@ -51,7 +51,7 @@ commander
       lernaVersion = 'prerelease';
       // a -> rc
     } else if (spec === 'release' && prev.indexOf('a') !== -1) {
-      lernaVersion = 'prerelease --pre-id=rc';
+      lernaVersion = 'prerelease --preid=rc';
       // rc -> final
     } else if (spec === 'release' && prev.indexOf('rc') !== -1) {
       lernaVersion = 'patch';
