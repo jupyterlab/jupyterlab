@@ -257,6 +257,49 @@ describe('outputarea/widget', () => {
         expect(outputs[2].data).to.deep.equal({ 'text/plain': '4' });
         await ipySession.shutdown();
       });
+
+      it('should stop on an error', async () => {
+        let ipySession: ClientSession;
+        ipySession = await createClientSession({
+          kernelPreference: { name: 'ipython' }
+        });
+        await ipySession.initialize();
+        await ipySession.kernel.ready;
+        const widget1 = new LogOutputArea({ rendermime, model });
+        const future1 = OutputArea.execute('a++1', widget, ipySession);
+        const future2 = OutputArea.execute('a=1', widget1, ipySession);
+        const reply = await future1;
+        const reply2 = await future2;
+        expect(reply.content.status).to.equal('error');
+        expect(reply2.content.status).to.equal('aborted');
+        expect(model.length).to.equal(1);
+        widget1.dispose();
+        await ipySession.shutdown();
+      });
+
+      it('should allow an error given "raises-exception" metadata tag', async () => {
+        let ipySession: ClientSession;
+        ipySession = await createClientSession({
+          kernelPreference: { name: 'ipython' }
+        });
+        await ipySession.initialize();
+        await ipySession.kernel.ready;
+        const widget1 = new LogOutputArea({ rendermime, model });
+        const metadata = { tags: ['raises-exception'] };
+        const future1 = OutputArea.execute(
+          'a++1',
+          widget,
+          ipySession,
+          metadata
+        );
+        const future2 = OutputArea.execute('a=1', widget1, ipySession);
+        const reply = await future1;
+        const reply2 = await future2;
+        expect(reply.content.status).to.equal('error');
+        expect(reply2.content.status).to.equal('ok');
+        widget1.dispose();
+        await ipySession.shutdown();
+      });
     });
 
     describe('.ContentFactory', () => {
