@@ -64,7 +64,7 @@ def run_test(app, func):
         try:
             result = future.result()
         except Exception as e:
-            self.log.error(str(e))
+            app.log.error(str(e))
         app.stop()
         if handler.errored:
             sys.exit(1)
