@@ -13,7 +13,7 @@ See the `JupyterLab
 1.0.0 <https://github.com/jupyterlab/jupyterlab/milestone/2?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
-Changes in 1.0.0a4
+Changes in 1.0.0a5
 ^^^^^^^^^^^^^^^^^^
 
 * Prepublishonly Integrity Check (`#6437 <https://github.com/jupyterlab/jupyterlab/pull/6437>`__)
