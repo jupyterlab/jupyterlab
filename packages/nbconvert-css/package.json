@@ -27,6 +27,7 @@
     "build": "tsc -b && webpack && rimraf style/index.js",
     "clean": "rimraf lib/ & rimraf style/",
     "prepare": "npm run build",
+    "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
