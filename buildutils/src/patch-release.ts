@@ -28,7 +28,28 @@ commander
       if (options.force) {
         cmd += ' --yes';
       }
+      let oldVersion = utils.run(
+        'git rev-parse HEAD',
+        {
+          stdio: 'pipe',
+          encoding: 'utf8'
+        },
+        true
+      );
       utils.run(cmd);
+      let newVersion = utils.run(
+        'git rev-parse HEAD',
+        {
+          stdio: 'pipe',
+          encoding: 'utf8'
+        },
+        true
+      );
+      if (oldVersion === newVersion) {
+        console.log('aborting');
+        // lerna didn't version anything, so we assume the user aborted
+        throw new Error('Lerna aborted');
+      }
     }
 
     // Patch the python version

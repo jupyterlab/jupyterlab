@@ -60,7 +60,28 @@ commander
     if (opts.force) {
       cmd += ' --yes';
     }
+
+    let oldVersion = utils.run(
+      'git rev-parse HEAD',
+      {
+        stdio: 'pipe',
+        encoding: 'utf8'
+      },
+      true
+    );
     utils.run(cmd);
+    let newVersion = utils.run(
+      'git rev-parse HEAD',
+      {
+        stdio: 'pipe',
+        encoding: 'utf8'
+      },
+      true
+    );
+    if (oldVersion === newVersion) {
+      // lerna didn't version anything, so we assume the user aborted
+      throw new Error('Lerna aborted');
+    }
 
     // Our work is done if this is a major or minor bump.
     if (spec in ['major', 'minor']) {
