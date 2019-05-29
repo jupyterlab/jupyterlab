@@ -98,8 +98,8 @@ describe('kernel/validate', () => {
         msgType: 'error',
         channel: 'iopub',
         session: 'baz',
-        content: { ename: '', evalue: '', traceback: [] }
-      });
+        content: {} as any
+      } as any);
       expect(() => validateMessage(msg)).to.throw();
     });
 
