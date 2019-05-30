@@ -144,11 +144,19 @@ export class OutputArea extends Widget {
   /**
    * The kernel future associated with the output area.
    */
-  get future(): Kernel.IFuture {
+  get future(): Kernel.IFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  > | null {
     return this._future;
   }
 
-  set future(value: Kernel.IFuture) {
+  set future(
+    value: Kernel.IFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    > | null
+  ) {
     // Bail if the model is disposed.
     if (this.model.isDisposed) {
       throw Error('Model is disposed');
@@ -386,7 +394,10 @@ export class OutputArea extends Widget {
       }
       output.renderModel(model).catch(error => {
         // Manually append error message to output
-        output.node.innerHTML = `<pre>Javascript Error: ${error.message}</pre>`;
+        const pre = document.createElement('pre');
+        pre.textContent = `Javascript Error: ${error.message}`;
+        output.node.appendChild(pre);
+
         // Remove mime-type-specific CSS classes
         output.node.className = 'p-Widget jp-RenderedText';
         output.node.setAttribute(
@@ -412,7 +423,7 @@ export class OutputArea extends Widget {
     let model = this.model;
     let msgType = msg.header.msg_type;
     let output: nbformat.IOutput;
-    let transient = (msg.content.transient || {}) as JSONObject;
+    let transient = ((msg.content as any).transient || {}) as JSONObject;
     let displayId = transient['display_id'] as string;
     let targets: number[];
 
@@ -476,7 +487,10 @@ export class OutputArea extends Widget {
   };
 
   private _minHeightTimeout: number = null;
-  private _future: Kernel.IFuture = null;
+  private _future: Kernel.IFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  > | null = null;
   private _displayIdMap = new Map<string, number[]>();
 }
 
@@ -528,24 +542,32 @@ export namespace OutputArea {
   /**
    * Execute code on an output area.
    */
-  export function execute(
+  export async function execute(
     code: string,
     output: OutputArea,
     session: IClientSession,
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg> {
     // Override the default for `stop_on_error`.
+    let stopOnError = true;
+    if (
+      metadata &&
+      Array.isArray(metadata.tags) &&
+      metadata.tags.indexOf('raises-exception') !== -1
+    ) {
+      stopOnError = false;
+    }
     let content: KernelMessage.IExecuteRequest = {
       code,
-      stop_on_error: true
+      stop_on_error: stopOnError
     };
 
     if (!session.kernel) {
-      return Promise.reject('Session has no kernel.');
+      throw new Error('Session has no kernel.');
     }
     let future = session.kernel.requestExecute(content, false, metadata);
     output.future = future;
-    return future.done as Promise<KernelMessage.IExecuteReplyMsg>;
+    return future.done;
   }
 
   /**

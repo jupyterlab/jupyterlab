@@ -84,7 +84,7 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     const el = document.createElement('div');
 
     // clear the output before attaching a chart
-    this.node.innerHTML = '';
+    this.node.textContent = '';
     this.node.appendChild(el);
 
     this._result = await vega.default(el, spec, {
@@ -130,7 +130,7 @@ export const rendererFactory: IRenderMime.IRendererFactory = {
 };
 
 const extension: IRenderMime.IExtension = {
-  id: '@jupyterlab/vega-extension:factory',
+  id: '@jupyterlab/vega5-extension:factory',
   rendererFactory,
   rank: 50,
   dataType: 'json',

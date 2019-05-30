@@ -92,6 +92,33 @@ if [[ $GROUP == integrity ]]; then
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
+
+    # Make sure we can bump the version
+    # This must be done at the end so as not to interfere
+    # with the other checks
+    git config --global user.email "you@example.com"
+    git config --global user.name "CI"
+    git stash
+    git checkout -b commit_${BUILD_SOURCEVERSION}
+    git clean -df
+    jlpm bumpversion minor --force
+    jlpm bumpversion major --force
+    jlpm bumpversion release --force # switch to rc
+    jlpm bumpversion build --force
+    VERSION=$(python setup.py --version)
+    if [[ $VERSION != *rc1 ]]; then exit 1; fi
+
+    # make sure we can patch release
+    jlpm bumpversion release --force  # switch to final
+    jlpm patch:release --force
+    jlpm patch:release console --force
+    jlpm patch:release filebrowser notebook --force
+
+    # make sure we can bump major JS releases
+    jlpm bumpversion minor --force
+    jlpm bump:js:major console --force
+    jlpm bump:js:major console notebook --force
+
 fi
 
 

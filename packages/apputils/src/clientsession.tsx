@@ -985,7 +985,7 @@ namespace Private {
     // Create the dialog body.
     let body = document.createElement('div');
     let text = document.createElement('label');
-    text.innerHTML = `Select kernel for: "${session.name}"`;
+    text.textContent = `Select kernel for: "${session.name}"`;
     body.appendChild(text);
 
     let options = getKernelSearch(session);

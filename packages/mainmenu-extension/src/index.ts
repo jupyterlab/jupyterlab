@@ -358,9 +358,16 @@ export function createFileMenu(
             .then(result => {
               if (result.ok) {
                 // Close this window if the shutdown request has been successful
-                let body = document.createElement('div');
-                body.innerHTML = `<p>You have shut down the Jupyter server. You can now close this tab.</p>
-                  <p>To use JupyterLab again, you will need to relaunch it.</p>`;
+                const body = document.createElement('div');
+                const p1 = document.createElement('p');
+                p1.textContent =
+                  'You have shut down the Jupyter server. You can now close this tab.';
+                const p2 = document.createElement('p');
+                p2.textContent =
+                  'To use JupyterLab again, you will need to relaunch it.';
+
+                body.appendChild(p1);
+                body.appendChild(p2);
                 void showDialog({
                   title: 'Server stopped',
                   body: new Widget({ node: body }),

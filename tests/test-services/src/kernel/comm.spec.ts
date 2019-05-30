@@ -220,14 +220,17 @@ describe('jupyter.services - Comm', () => {
           called = true;
         };
         expect(typeof comm.onMsg).to.equal('function');
-        const options: KernelMessage.IOptions = {
+        const msg = KernelMessage.createMessage({
           msgType: 'comm_msg',
           channel: 'iopub',
           username: kernel.username,
-          session: kernel.clientId
-        };
-        const msg = KernelMessage.createMessage(options);
-        comm.onMsg(msg as KernelMessage.ICommMsgMsg);
+          session: kernel.clientId,
+          content: {
+            comm_id: 'abcd',
+            data: {}
+          }
+        });
+        comm.onMsg(msg);
         expect(called).to.equal(true);
       });
 
@@ -250,11 +253,11 @@ describe('jupyter.services - Comm', () => {
         await future.done;
         const encoder = new TextEncoder();
         const data = encoder.encode('hello');
-        future = comm.open({ foo: 'bar' }, { fizz: 'buzz' }, [
+        let future2 = comm.open({ foo: 'bar' }, { fizz: 'buzz' }, [
           data,
           data.buffer
         ]);
-        await future.done;
+        await future2.done;
       });
     });
 

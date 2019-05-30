@@ -28,7 +28,7 @@ import {
   IRenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
-import { KernelMessage } from '@jupyterlab/services';
+import { KernelMessage, Kernel } from '@jupyterlab/services';
 
 import { JSONValue, PromiseDelegate, JSONObject } from '@phosphor/coreutils';
 
@@ -1006,17 +1006,17 @@ export namespace CodeCell {
   /**
    * Execute a cell given a client session.
    */
-  export function execute(
+  export async function execute(
     cell: CodeCell,
     session: IClientSession,
     metadata?: JSONObject
-  ): Promise<KernelMessage.IExecuteReplyMsg> {
+  ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     let model = cell.model;
     let code = model.value.text;
     if (!code.trim() || !session.kernel) {
       model.executionCount = null;
       model.outputs.clear();
-      return Promise.resolve(void 0);
+      return;
     }
 
     let cellId = { cellId: model.id };
@@ -1026,17 +1026,29 @@ export namespace CodeCell {
     cell.setPrompt('*');
     model.trusted = true;
 
-    return OutputArea.execute(code, cell.outputArea, session, metadata)
-      .then(msg => {
-        model.executionCount = msg.content.execution_count;
-        return msg;
-      })
-      .catch(e => {
-        if (e.message === 'Canceled') {
-          cell.setPrompt('');
-        }
-        throw e;
-      });
+    let future: Kernel.IFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >;
+    try {
+      const msgPromise = OutputArea.execute(
+        code,
+        cell.outputArea,
+        session,
+        metadata
+      );
+      // Save this execution's future so we can compare in the catch below.
+      future = cell.outputArea.future;
+      const msg = await msgPromise;
+      model.executionCount = msg.content.execution_count;
+      return msg;
+    } catch (e) {
+      // If this is still the current execution, clear the prompt.
+      if (e.message === 'Canceled' && cell.outputArea.future === future) {
+        cell.setPrompt('');
+      }
+      throw e;
+    }
   }
 }
 
