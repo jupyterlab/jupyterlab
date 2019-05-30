@@ -319,8 +319,7 @@ function activateBrowser(
 
 function activateShareFile(
   app: JupyterFrontEnd,
-  factory: IFileBrowserFactory,
-  resolver: IWindowResolver
+  factory: IFileBrowserFactory
 ): void {
   const { commands } = app;
   const { tracker } = factory;
