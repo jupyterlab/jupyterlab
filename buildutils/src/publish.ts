@@ -29,14 +29,23 @@ async function main() {
     });
   });
 
-  // Update core mode.
+  // Update core mode.  This cannot be done until the JS packages are
+  // released.
   utils.run('node buildutils/lib/update-core-mode.js');
 
   // Make the Python release.
   utils.run('python setup.py sdist');
-  utils.run('python setup.py bdist_wheel --universal');
-  utils.run('python -m pip install twine');
-  utils.run('twine upload dist/*');
+  utils.run('python setup.py bdist_wheel');
+  utils.run('python -m pip install -U twine');
+  utils.run('twine check dist/*');
+
+  // Prompt the user to finalize.
+  console.log('*'.repeat(40));
+  console.log('Ready to publish!');
+  console.log('Run these command when ready:');
+  console.log(`git tag v${curr}`);
+  console.log(`git commit -am "Publish ${curr}"`);
+  console.log('twine upload dist/*');
 }
 
 void main();

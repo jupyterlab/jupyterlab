@@ -107,7 +107,7 @@ export function checkStatus(cmd: string) {
  */
 export function getPythonVersion() {
   const cmd = 'python setup.py --version';
-  return run(cmd, { stdio: 'pipe' });
+  return run(cmd, { stdio: 'pipe' }, true);
 }
 
 /**
@@ -155,10 +155,6 @@ export function postbump() {
   let data = readJSONFile(filePath);
   data.jupyterlab.version = curr;
   writeJSONFile(filePath, data);
-
-  // Create a git tag and commit.
-  run(`git tag v${curr}`);
-  run(`git commit -am "Publish ${curr}"`);
 }
 
 /**
