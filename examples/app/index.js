@@ -40,11 +40,7 @@ window.addEventListener('load', async function() {
     require('@jupyterlab/theme-light-extension'),
     require('@jupyterlab/tooltip-extension')
   ];
-  var lab = new JupyterLab({
-    name: 'JupyterLab Example',
-    namespace: 'lab-example',
-    version: require('./package.json').version
-  });
+  var lab = new JupyterLab({});
   lab.registerPluginModules(mods);
   /* eslint-disable no-console */
   console.log('Starting app');
