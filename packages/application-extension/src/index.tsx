@@ -92,7 +92,7 @@ const main: JupyterFrontEndPlugin<void> = {
     // will short-circuit and ask the user to navigate away.
     const workspace = resolver.name;
 
-    console.log(`Starting application in workspace: ${workspace}`);
+    console.log(`Starting application in workspace: "${workspace}"`);
 
     // If there were errors registering plugins, tell the user.
     if (app.registerPluginErrors.length !== 0) {
