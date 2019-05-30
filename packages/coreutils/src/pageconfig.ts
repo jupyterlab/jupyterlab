@@ -5,8 +5,6 @@ import { JSONExt } from '@phosphor/coreutils';
 
 import minimist from 'minimist';
 
-import { PathExt } from './path';
-
 import { URLExt } from './url';
 
 /**
@@ -19,16 +17,6 @@ declare var require: any;
  * The namespace for Page Config functions.
  */
 export namespace PageConfig {
-  /**
-   * The tree URL construction options.
-   */
-  export interface ITreeOptions {
-    /**
-     * If provided, the tree URL will include the current workspace, if any.
-     */
-    workspace?: string;
-  }
-
   /**
    * Get global configuration data for the Jupyter application.
    *
@@ -124,19 +112,9 @@ export namespace PageConfig {
 
   /**
    * Get the tree url for a JupyterLab application.
-   *
-   * @param options - The tree URL construction options.
    */
-  export function getTreeUrl(options: ITreeOptions = {}): string {
-    const base = getBaseUrl();
-    const tree = getOption('treeUrl');
-    const defaultWorkspace = getOption('defaultWorkspace');
-    const workspaces = getOption('workspacesUrl');
-    const workspace = options.workspace || '';
-
-    return workspace && workspace !== defaultWorkspace
-      ? URLExt.join(base, workspaces, PathExt.basename(workspace), 'tree')
-      : URLExt.join(base, tree);
+  export function getTreeUrl(): string {
+    return URLExt.join(getBaseUrl(), getOption('treeUrl'));
   }
 
   /**

@@ -431,11 +431,9 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     const db = new StateDB({ transform: transform.promise });
     const save = new Debouncer(async () => {
       const id = workspace;
-      if (id) {
-        const metadata = { id };
-        const data = await db.toJSON();
-        await workspaces.save(id, { data, metadata });
-      }
+      const metadata = { id };
+      const data = await db.toJSON();
+      await workspaces.save(id, { data, metadata });
     });
 
     commands.addCommand(CommandIDs.loadState, {
@@ -452,7 +450,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         const clone =
           typeof query['clone'] === 'string'
             ? query['clone'] === ''
-              ? urls.defaultWorkspace
+              ? URLExt.join(paths.urls.base, paths.urls.page)
               : URLExt.join(urls.base, urls.workspaces, query['clone'])
             : null;
         const source = clone || workspace || null;
@@ -613,6 +611,6 @@ namespace Private {
   ): string {
     return workspace
       ? URLExt.join(paths.urls.base, paths.urls.workspaces, workspace)
-      : paths.urls.defaultWorkspace;
+      : URLExt.join(paths.urls.base, paths.urls.page);
   }
 }
