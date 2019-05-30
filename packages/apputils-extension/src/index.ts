@@ -472,8 +472,8 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
             resolved = true;
             transform.resolve({ type: 'overwrite', contents: saved.data });
           }
-        } catch (error) {
-          console.warn(`Fetching workspace (${workspace}) failed:`, error);
+        } catch ({ message }) {
+          console.log(`Fetching workspace "${workspace}" failed.`, message);
 
           // If the workspace does not exist, cancel the data transformation
           // and save a workspace with the current user state data.
