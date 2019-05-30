@@ -450,7 +450,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         const clone =
           typeof query['clone'] === 'string'
             ? query['clone'] === ''
-              ? URLExt.join(paths.urls.base, paths.urls.page)
+              ? URLExt.join(urls.base, urls.page)
               : URLExt.join(urls.base, urls.workspaces, query['clone'])
             : null;
         const source = clone || workspace || null;
@@ -606,11 +606,11 @@ namespace Private {
    * @returns A workspace name candidate.
    */
   export function candidate(
-    paths: JupyterFrontEnd.IPaths,
+    { urls }: JupyterFrontEnd.IPaths,
     workspace = ''
   ): string {
     return workspace
-      ? URLExt.join(paths.urls.base, paths.urls.workspaces, workspace)
-      : URLExt.join(paths.urls.base, paths.urls.page);
+      ? URLExt.join(urls.base, urls.workspaces, workspace)
+      : URLExt.join(urls.base, urls.page);
   }
 }
