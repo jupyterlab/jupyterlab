@@ -43,7 +43,7 @@
     "@types/webpack-env": "^1.13.9",
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
-    "typescript": "~3.4.3"
+    "typescript": "~3.5.1"
   },
   "publishConfig": {
     "access": "public"

@@ -108,17 +108,14 @@ function activate(
     });
   }
 
-  // The terminal options from the setting editor.
+  // The cached terminal options from the setting editor.
   let options: Partial<ITerminal.IOptions>;
 
   /**
-   * Update the option values.
+   * Update the cached option values.
    */
   function updateOptions(settings: ISettingRegistry.ISettings): void {
-    options = settings.composite as Partial<ITerminal.IOptions>;
-    Object.keys(options).forEach((key: keyof ITerminal.IOptions) => {
-      ITerminal.defaultOptions[key] = options[key];
-    });
+    options = settings.composite;
   }
 
   /**
@@ -164,7 +161,7 @@ function activate(
     });
   });
 
-  addCommands(app, tracker, settingRegistry);
+  addCommands(app, tracker, settingRegistry, options);
 
   if (mainMenu) {
     // Add "Terminal Theme" menu below "JupyterLab Themes" menu.
@@ -248,7 +245,8 @@ function activate(
 export function addCommands(
   app: JupyterFrontEnd,
   tracker: InstanceTracker<MainAreaWidget<ITerminal.ITerminal>>,
-  settingRegistry: ISettingRegistry
+  settingRegistry: ISettingRegistry,
+  options: Partial<ITerminal.IOptions>
 ) {
   const { commands, serviceManager } = app;
 
@@ -274,7 +272,7 @@ export function addCommands(
             .catch(() => serviceManager.terminals.startNew())
         : serviceManager.terminals.startNew());
 
-      const term = new Terminal(session);
+      const term = new Terminal(session, options);
 
       term.title.icon = TERMINAL_ICON_CLASS;
       term.title.label = '...';

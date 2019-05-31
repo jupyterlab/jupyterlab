@@ -145,14 +145,10 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
 
     // Keep a reference to the code editor config from the settings system.
     const updateSettings = (settings: ISettingRegistry.ISettings): void => {
-      const cached = settings.get('editorConfig').composite as Partial<
-        CodeEditor.IConfig
-      >;
-      const config: CodeEditor.IConfig = {
+      item.model!.config = {
         ...CodeEditor.defaultConfig,
-        ...cached
+        ...(settings.get('editorConfig').composite as JSONObject)
       };
-      item.model!.config = config;
     };
     void Promise.all([
       settingRegistry.load('@jupyterlab/fileeditor-extension:plugin'),
@@ -215,7 +211,7 @@ function activate(
     tracker.currentWidget !== null &&
     tracker.currentWidget === shell.currentWidget;
 
-  let config = { ...CodeEditor.defaultConfig };
+  let config: CodeEditor.IConfig = { ...CodeEditor.defaultConfig };
 
   // Handle state restoration.
   if (restorer) {
@@ -230,15 +226,11 @@ function activate(
    * Update the setting values.
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
-    let cached = settings.get('editorConfig').composite as Partial<
-      CodeEditor.IConfig
-    >;
-    Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-      config[key] =
-        cached[key] === null || cached[key] === undefined
-          ? CodeEditor.defaultConfig[key]
-          : cached[key];
-    });
+    config = {
+      ...CodeEditor.defaultConfig,
+      ...(settings.get('editorConfig').composite as JSONObject)
+    };
+
     // Trigger a refresh of the rendered commands
     app.commands.notifyCommandChanged();
   }
@@ -313,7 +305,7 @@ function activate(
       const currentSize = config.fontSize || cssSize;
       config.fontSize = currentSize + delta;
       return settingRegistry
-        .set(id, 'editorConfig', config)
+        .set(id, 'editorConfig', (config as unknown) as JSONObject)
         .catch((reason: Error) => {
           console.error(`Failed to set ${id}: ${reason.message}`);
         });
@@ -325,7 +317,7 @@ function activate(
     execute: () => {
       config.lineNumbers = !config.lineNumbers;
       return settingRegistry
-        .set(id, 'editorConfig', config)
+        .set(id, 'editorConfig', (config as unknown) as JSONObject)
         .catch((reason: Error) => {
           console.error(`Failed to set ${id}: ${reason.message}`);
         });
@@ -342,7 +334,7 @@ function activate(
       const lineWrap = (args['mode'] as wrappingMode) || 'off';
       config.lineWrap = lineWrap;
       return settingRegistry
-        .set(id, 'editorConfig', config)
+        .set(id, 'editorConfig', (config as unknown) as JSONObject)
         .catch((reason: Error) => {
           console.error(`Failed to set ${id}: ${reason.message}`);
         });
@@ -361,7 +353,7 @@ function activate(
       config.tabSize = (args['size'] as number) || 4;
       config.insertSpaces = !!args['insertSpaces'];
       return settingRegistry
-        .set(id, 'editorConfig', config)
+        .set(id, 'editorConfig', (config as unknown) as JSONObject)
         .catch((reason: Error) => {
           console.error(`Failed to set ${id}: ${reason.message}`);
         });
@@ -377,7 +369,7 @@ function activate(
     execute: () => {
       config.matchBrackets = !config.matchBrackets;
       return settingRegistry
-        .set(id, 'editorConfig', config)
+        .set(id, 'editorConfig', (config as unknown) as JSONObject)
         .catch((reason: Error) => {
           console.error(`Failed to set ${id}: ${reason.message}`);
         });
@@ -391,7 +383,7 @@ function activate(
     execute: () => {
       config.autoClosingBrackets = !config.autoClosingBrackets;
       return settingRegistry
-        .set(id, 'editorConfig', config)
+        .set(id, 'editorConfig', (config as unknown) as JSONObject)
         .catch((reason: Error) => {
           console.error(`Failed to set ${id}: ${reason.message}`);
         });

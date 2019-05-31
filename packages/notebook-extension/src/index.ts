@@ -18,7 +18,7 @@ import {
 
 import { CodeCell } from '@jupyterlab/cells';
 
-import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import {
   ISettingRegistry,
@@ -31,7 +31,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { ArrayExt } from '@phosphor/algorithm';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID, JSONObject } from '@phosphor/coreutils';
 
 import { DisposableSet } from '@phosphor/disposable';
 
@@ -594,36 +594,21 @@ function activateNotebookHandler(
    * Update the setting values.
    */
   function updateConfig(settings: ISettingRegistry.ISettings): void {
-    let cached = settings.get('codeCellConfig').composite as Partial<
-      CodeEditor.IConfig
-    >;
-    let code = { ...StaticNotebook.defaultEditorConfig.code };
-    Object.keys(code).forEach((key: keyof CodeEditor.IConfig) => {
-      code[key] =
-        cached[key] === null || cached[key] === undefined
-          ? code[key]
-          : cached[key];
-    });
-    cached = settings.get('markdownCellConfig').composite as Partial<
-      CodeEditor.IConfig
-    >;
-    let markdown = { ...StaticNotebook.defaultEditorConfig.markdown };
-    Object.keys(markdown).forEach((key: keyof CodeEditor.IConfig) => {
-      markdown[key] =
-        cached[key] === null || cached[key] === undefined
-          ? markdown[key]
-          : cached[key];
-    });
-    cached = settings.get('rawCellConfig').composite as Partial<
-      CodeEditor.IConfig
-    >;
-    let raw = { ...StaticNotebook.defaultEditorConfig.raw };
-    Object.keys(raw).forEach((key: keyof CodeEditor.IConfig) => {
-      raw[key] =
-        cached[key] === null || cached[key] === undefined
-          ? raw[key]
-          : cached[key];
-    });
+    let code = {
+      ...StaticNotebook.defaultEditorConfig.code,
+      ...(settings.get('codeCellConfig').composite as JSONObject)
+    };
+
+    let markdown = {
+      ...StaticNotebook.defaultEditorConfig.markdown,
+      ...(settings.get('markdownCellConfig').composite as JSONObject)
+    };
+
+    let raw = {
+      ...StaticNotebook.defaultEditorConfig.raw,
+      ...(settings.get('rawCellConfig').composite as JSONObject)
+    };
+
     factory.editorConfig = { code, markdown, raw };
     factory.notebookConfig = {
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
