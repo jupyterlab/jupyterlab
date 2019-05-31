@@ -33,19 +33,23 @@ mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 
 
-class ExampleCheckApp(mod.ExampleApp):
-    """An app that launches an example and waits for it to start up, checking for
-    JS console errors, JS errors, and Python logged errors.
-    """
-    open_browser = Bool(False)
-    default_url = '/example'
-    base_url = '/foo/'
-    ip = '127.0.0.1'
+def factory(BaseClass):
 
-    def start(self):
-        run_test(self, run_browser)
-        super().start()
+    class App(BaseClass):
+        """An app that launches an example and waits for it to start up, checking for
+        JS console errors, JS errors, and Python logged errors.
+        """
+        open_browser = Bool(False)
+        default_url = '/example'
+        base_url = '/foo/'
+        ip = '127.0.0.1'
 
+        def start(self):
+            run_test(self, run_browser)
+            super().start()
+
+    App.__name__ = osp.basename(example_dir).capitalize() + 'Test'
+    return App
 
 def run_browser(url):
     """Run the browser test and return an exit code.
@@ -60,4 +64,5 @@ def run_browser(url):
 
 
 if __name__ == '__main__':
-    ExampleCheckApp.launch_instance()
+    cls = factory(mod.ExampleApp)
+    cls.launch_instance()

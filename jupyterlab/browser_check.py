@@ -65,11 +65,16 @@ def run_test(app, func):
             result = future.result()
         except Exception as e:
             app.log.error(str(e))
+        app.log.info('Stopping server...')
         app.stop()
         if handler.errored:
+            app.log.critical('Exiting with 1 due to errors')
             sys.exit(1)
-        else:
+        elif result != 0:
+            app.log.critical(`Exiting with {result} due to errors`)
             sys.exit(result)
+        else:
+            sys.exit()
 
     app.log.addHandler(handler)
     pool = ThreadPoolExecutor()
