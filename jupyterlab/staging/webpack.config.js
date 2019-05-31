@@ -90,8 +90,8 @@ JupyterFrontEndPlugin.prototype.apply = function(compiler) {
       var indexPath = path.join(buildDir, 'index.html');
       var indexData = fs.readFileSync(indexPath, 'utf8');
       indexData = indexData
-        .split('{{page_config.bundleUrl}}/')
-        .join('{{page_config.bundleUrl}}');
+        .split('{{page_config.frontendUrl}}/')
+        .join('{{page_config.frontendUrl}}');
       fs.writeFileSync(indexPath, indexData, 'utf8');
 
       // Copy the static assets.
@@ -141,7 +141,7 @@ module.exports = [
     },
     output: {
       path: path.resolve(buildDir),
-      publicPath: '{{page_config.bundleUrl}}',
+      publicPath: '{{page_config.frontendUrl}}',
       filename: '[name].[chunkhash].js'
     },
     optimization: {

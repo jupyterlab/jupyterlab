@@ -238,7 +238,6 @@ export namespace JupyterLab {
   export const defaultPaths: JupyterFrontEnd.IPaths = {
     urls: {
       base: PageConfig.getOption('baseUrl'),
-      defaultWorkspace: PageConfig.getOption('defaultWorkspace'),
       notFound: PageConfig.getOption('notFoundUrl'),
       page: PageConfig.getOption('pageUrl'),
       public: PageConfig.getOption('publicUrl'),

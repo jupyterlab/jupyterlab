@@ -265,7 +265,6 @@ export namespace JupyterFrontEnd {
      */
     readonly urls: {
       readonly base: string;
-      readonly defaultWorkspace: string;
       readonly notFound?: string;
       readonly page: string;
       readonly public: string;

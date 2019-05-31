@@ -9,8 +9,8 @@ string being printed.
 
 e.g. python example_check.py ./app
 """
-from concurrent.futures import ThreadPoolExecutor
 import importlib.util
+import logging
 from os import path as osp
 import os
 import shutil
@@ -20,6 +20,7 @@ import subprocess
 from tornado.ioloop import IOLoop
 from traitlets import Bool, Unicode
 from jupyterlab.labapp import get_app_dir
+from jupyterlab.browser_check import run_test
 
 here = osp.abspath(osp.dirname(__file__))
 
@@ -32,26 +33,23 @@ mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 
 
-class ExampleCheckApp(mod.ExampleApp):
+def factory(BaseClass):
 
-    open_browser = Bool(False)
-    default_url = '/example'
-    base_url = '/foo/'
-    ip = '127.0.0.1'
+    class App(BaseClass):
+        """An app that launches an example and waits for it to start up, checking for
+        JS console errors, JS errors, and Python logged errors.
+        """
+        open_browser = Bool(False)
+        default_url = '/example'
+        base_url = '/foo/'
+        ip = '127.0.0.1'
 
-    def start(self):
-        pool = ThreadPoolExecutor()
-        future = pool.submit(run_browser, self.display_url)
-        IOLoop.current().add_future(future, self._browser_finished)
-        super().start()
+        def start(self):
+            run_test(self, run_browser)
+            super().start()
 
-    def _browser_finished(self, future):
-        try:
-            sys.exit(future.result())
-        except Exception as e:
-            self.log.error(str(e))
-            sys.exit(1)
-
+    App.__name__ = osp.basename(example_dir).capitalize() + 'Test'
+    return App
 
 def run_browser(url):
     """Run the browser test and return an exit code.
@@ -66,4 +64,5 @@ def run_browser(url):
 
 
 if __name__ == '__main__':
-    ExampleCheckApp.launch_instance()
+    cls = factory(mod.ExampleApp)
+    cls.launch_instance()

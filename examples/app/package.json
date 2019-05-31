@@ -32,6 +32,7 @@
     "@jupyterlab/running-extension": "^1.0.0-alpha.8",
     "@jupyterlab/settingeditor-extension": "^1.0.0-alpha.8",
     "@jupyterlab/shortcuts-extension": "^1.0.0-alpha.8",
+    "@jupyterlab/statusbar-extension": "^1.0.0-alpha.8",
     "@jupyterlab/tabmanager-extension": "^1.0.0-alpha.8",
     "@jupyterlab/terminal-extension": "^1.0.0-alpha.8",
     "@jupyterlab/theme-dark-extension": "^1.0.0-alpha.9",

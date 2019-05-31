@@ -33,7 +33,7 @@ class ExampleHandler(IPythonHandler):
             'baseUrl': self.base_url,
             'token': self.settings['token'],
             'notebookPath': 'test.ipynb',
-            'bundleUrl': ujoin(self.base_url, 'build/'),
+            'frontendUrl': ujoin(self.base_url, 'example/'),
             # FIXME: Don't use a CDN here
             'mathjaxUrl': "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
             'mathjaxConfig': "TeX-AMS_CHTML-full,Safe"

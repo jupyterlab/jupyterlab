@@ -123,6 +123,13 @@ fi
 
 
 if [[ $GROUP == usage ]]; then
+    # Build the examples.
+    jlpm run build:packages
+    jlpm run build:examples
+
+    # Test the examples
+    jlpm run test:examples
+
     # Test the cli apps.
     jupyter lab clean
     jupyter lab build
@@ -189,11 +196,5 @@ if [[ $GROUP == usage ]]; then
     # verify that app directory is not resolved
     env JUPYTERLAB_DIR=./link_app_dir jupyter lab path | grep link_app_dir
     popd
-
-    # Build the examples.
-    jlpm run build:examples
-
-    # Test the examples
-    jlpm run test:examples
 
 fi

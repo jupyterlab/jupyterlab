@@ -8,8 +8,7 @@ __webpack_public_path__ = URLExt.join(
   'example/static/'
 );
 
-window.addEventListener('load', function() {
-  require('font-awesome/css/font-awesome.min.css');
+window.addEventListener('load', async function() {
   var JupyterLab = require('@jupyterlab/application').JupyterLab;
 
   var mods = [
@@ -34,20 +33,19 @@ window.addEventListener('load', function() {
     require('@jupyterlab/running-extension'),
     require('@jupyterlab/settingeditor-extension'),
     require('@jupyterlab/shortcuts-extension'),
+    require('@jupyterlab/statusbar-extension'),
     require('@jupyterlab/tabmanager-extension'),
     require('@jupyterlab/terminal-extension'),
     require('@jupyterlab/theme-dark-extension'),
     require('@jupyterlab/theme-light-extension'),
     require('@jupyterlab/tooltip-extension')
   ];
-  var lab = new JupyterLab({
-    name: 'JupyterLab Example',
-    namespace: 'lab-example',
-    version: require('./package.json').version
-  });
+  var lab = new JupyterLab();
   lab.registerPluginModules(mods);
-  lab.start().then(() => {
-    // eslint-disable-next-line
-    console.log('Example started!');
-  });
+  /* eslint-disable no-console */
+  console.log('Starting app');
+  await lab.start();
+  console.log('App started, waiting for restore');
+  await lab.restored;
+  console.log('Example started!');
 });

@@ -3,6 +3,7 @@ const inspect = require('util').inspect;
 const URL = process.argv[2];
 
 async function main() {
+  /* eslint-disable no-console */
   console.info('Starting Chrome Headless');
 
   const browser = await puppeteer.launch({ args: ['--no-sandbox'] });

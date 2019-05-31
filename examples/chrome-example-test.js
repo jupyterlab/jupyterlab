@@ -8,32 +8,28 @@ const inspect = require('util').inspect;
 const URL = process.argv[2];
 
 async function main() {
+  /* eslint-disable no-console */
   console.info('Starting Chrome Headless');
 
-  // Disable shm usage to save resources and prevent random memory
-  // errors seen on CI
   const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-dev-shm-usage']
+    args: ['--no-sandbox']
   });
   const page = await browser.newPage();
 
-  console.info('Navigating to page:', URL);
-  await page.goto(URL);
-  console.info('Waiting for page to load...');
-
-  errored = false;
+  let errored = false;
 
   const handleMessage = async msg => {
     const text = msg.text();
     console.log(`>> ${text}`);
-    if (msg.type === 'error') {
+    if (msg.type() === 'error') {
       errored = true;
     }
     const lower = text.toLowerCase();
     if (lower === 'example started!' || lower === 'test complete!') {
       await browser.close();
       if (errored) {
-        throw Error('Example test failed!');
+        console.error('\n\n***\nExample test failed!\n***\n\n');
+        process.exit(1);
       }
       console.info('Example test complete!');
       return;
@@ -48,6 +44,10 @@ async function main() {
   page.on('console', handleMessage);
   page.on('error', handleError);
 
+  console.info('Navigating to page:', URL);
+  await page.goto(URL);
+  console.info('Waiting for page to load...');
+
   const html = await page.content();
   if (inspect(html).indexOf('jupyter-config-data') === -1) {
     console.error('Error loading JupyterLab page:');
@@ -58,7 +58,9 @@ async function main() {
 
 // Stop the process if an error is raised in the async function.
 process.on('unhandledRejection', up => {
-  throw up;
+  if (String(up).indexOf('Target closed') === -1) {
+    throw up;
+  }
 });
 
 main();

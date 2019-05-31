@@ -400,20 +400,29 @@ const print: JupyterFrontEndPlugin<void> = {
 
 /**
  * The default state database for storing application state.
+ *
+ * #### Notes
+ * If this extension is loaded with a window resolver, it will automatically add
+ * state management commands, URL support for `clone` and `reset`, and workspace
+ * auto-saving. Otherwise, it will return a simple in-memory state database.
  */
 const state: JupyterFrontEndPlugin<IStateDB> = {
   id: '@jupyterlab/apputils-extension:state',
   autoStart: true,
   provides: IStateDB,
-  requires: [JupyterFrontEnd.IPaths, IRouter, IWindowResolver],
-  optional: [ISplashScreen],
+  requires: [JupyterFrontEnd.IPaths, IRouter],
+  optional: [ISplashScreen, IWindowResolver],
   activate: (
     app: JupyterFrontEnd,
     paths: JupyterFrontEnd.IPaths,
     router: IRouter,
-    resolver: IWindowResolver,
-    splash: ISplashScreen | null
+    splash: ISplashScreen | null,
+    resolver: IWindowResolver | null
   ) => {
+    if (resolver === null) {
+      return new StateDB();
+    }
+
     let resolved = false;
     const { commands, serviceManager } = app;
     const { workspaces } = serviceManager;
@@ -424,7 +433,6 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
       const id = workspace;
       const metadata = { id };
       const data = await db.toJSON();
-
       await workspaces.save(id, { data, metadata });
     });
 
@@ -442,10 +450,18 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         const clone =
           typeof query['clone'] === 'string'
             ? query['clone'] === ''
-              ? urls.defaultWorkspace
+              ? URLExt.join(urls.base, urls.page)
               : URLExt.join(urls.base, urls.workspaces, query['clone'])
             : null;
-        const source = clone || workspace;
+        const source = clone || workspace || null;
+
+        if (source === null) {
+          console.error(`${CommandIDs.loadState} cannot load null workspace.`);
+          return;
+        }
+
+        // Any time the local state database changes, save the workspace.
+        db.changed.connect(() => void save.invoke(), db);
 
         try {
           const saved = await workspaces.fetch(source);
@@ -456,8 +472,8 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
             resolved = true;
             transform.resolve({ type: 'overwrite', contents: saved.data });
           }
-        } catch (error) {
-          console.warn(`Fetching workspace (${workspace}) failed:`, error);
+        } catch ({ message }) {
+          console.log(`Fetching workspace "${workspace}" failed.`, message);
 
           // If the workspace does not exist, cancel the data transformation
           // and save a workspace with the current user state data.
@@ -466,9 +482,6 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
             transform.resolve({ type: 'cancel', contents: null });
           }
         }
-
-        // Any time the local state database changes, save the workspace.
-        db.changed.connect(() => void save.invoke(), db);
 
         if (source === clone) {
           // Maintain the query string parameters but remove `clone`.
@@ -593,11 +606,11 @@ namespace Private {
    * @returns A workspace name candidate.
    */
   export function candidate(
-    paths: JupyterFrontEnd.IPaths,
+    { urls }: JupyterFrontEnd.IPaths,
     workspace = ''
   ): string {
     return workspace
-      ? URLExt.join(paths.urls.base, paths.urls.workspaces, workspace)
-      : paths.urls.defaultWorkspace;
+      ? URLExt.join(urls.base, urls.workspaces, workspace)
+      : URLExt.join(urls.base, urls.page);
   }
 }
