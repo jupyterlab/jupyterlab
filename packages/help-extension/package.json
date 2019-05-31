@@ -49,7 +49,6 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extension": true,
-    "schemaDir": "schema"
+    "extension": true
   }
 }
