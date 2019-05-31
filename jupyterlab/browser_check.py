@@ -74,6 +74,7 @@ def run_test(app, func):
             app.log.critical('Exiting with %s due to errors' % result)
             sys.exit(result)
         else:
+            app.log.info('Exiting normally')
             sys.exit()
 
     app.log.addHandler(handler)
