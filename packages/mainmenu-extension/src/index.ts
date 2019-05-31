@@ -298,6 +298,9 @@ export function createFileMenu(
   const commands = menu.menu.commands;
 
   // Add a delegator command for closing and cleaning up an activity.
+  // This one is a bit difference, in that we consider it enabled
+  // even if it cannot find a delegate for the activity.
+  // In that case, we instead call the application `close` command.
   commands.addCommand(CommandIDs.closeAndCleanup, {
     label: () => {
       const action = Private.delegateLabel(
@@ -308,16 +311,22 @@ export function createFileMenu(
       const name = Private.delegateLabel(app, menu.closeAndCleaners, 'name');
       return `Close and ${action ? ` ${action} ${name}` : 'Shutdown'}`;
     },
-    isEnabled: Private.delegateEnabled(
-      app,
-      menu.closeAndCleaners,
-      'closeAndCleanup'
-    ),
-    execute: Private.delegateExecute(
-      app,
-      menu.closeAndCleaners,
-      'closeAndCleanup'
-    )
+    isEnabled: () =>
+      !!app.shell.currentWidget && !!app.shell.currentWidget.title.closable,
+    execute: () => {
+      // Check if we have a registered delegate. If so, call that.
+      if (
+        Private.delegateEnabled(app, menu.closeAndCleaners, 'closeAndCleanup')()
+      ) {
+        return Private.delegateExecute(
+          app,
+          menu.closeAndCleaners,
+          'closeAndCleanup'
+        )();
+      }
+      // If we have no delegate, call the top-level application close.
+      return app.commands.execute('application:close');
+    }
   });
 
   // Add a delegator command for creating a console for an activity.
