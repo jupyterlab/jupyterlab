@@ -71,7 +71,7 @@ def run_test(app, func):
             app.log.critical('Exiting with 1 due to errors')
             sys.exit(1)
         elif result != 0:
-            app.log.critical(`Exiting with {result} due to errors`)
+            app.log.critical('Exiting with %s due to errors' % result)
             sys.exit(result)
         else:
             sys.exit()
