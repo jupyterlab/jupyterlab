@@ -18,7 +18,7 @@ import {
 
 import { ILauncher } from '@jupyterlab/launcher';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IFileMenu, IMainMenu } from '@jupyterlab/mainmenu';
 
 import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal';
 
@@ -192,6 +192,17 @@ function activate(
 
     // Add terminal creation to the file menu.
     mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 20);
+
+    // Add terminal close-and-shutdown to the file menu.
+    mainMenu.fileMenu.closeAndCleaners.add({
+      tracker,
+      action: 'Shutdown',
+      name: 'Terminal',
+      closeAndCleanup: (current: MainAreaWidget<ITerminal.ITerminal>) => {
+        // The widget is automatically disposed upon session shutdown.
+        return current.content.session.shutdown();
+      }
+    } as IFileMenu.ICloseAndCleaner<MainAreaWidget<ITerminal.ITerminal>>);
   }
 
   if (palette) {
