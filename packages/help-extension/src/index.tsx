@@ -44,8 +44,6 @@ namespace CommandIDs {
 
   export const hide = 'help:hide';
 
-  export const toggle = 'help:toggle';
-
   export const launchClassic = 'help:launch-classic-notebook';
 }
 

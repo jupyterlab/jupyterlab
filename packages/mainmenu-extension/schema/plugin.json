@@ -24,12 +24,12 @@
     },
     {
       "command": "editmenu:redo",
-      "keys": ["Ctrl Shift Z"],
+      "keys": ["Accel Shift Z"],
       "selector": "[data-jp-undoer]"
     },
     {
       "command": "editmenu:undo",
-      "keys": ["Ctrl Z"],
+      "keys": ["Accel Z"],
       "selector": "[data-jp-undoer]"
     },
     {

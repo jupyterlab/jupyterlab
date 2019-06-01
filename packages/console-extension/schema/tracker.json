@@ -14,7 +14,7 @@
     },
     {
       "command": "console:linebreak",
-      "keys": ["Ctrl Enter"],
+      "keys": ["Accel Enter"],
       "selector": ".jp-CodeConsole[data-jp-interaction-mode='terminal'] .jp-CodeConsole-promptCell"
     },
     {
