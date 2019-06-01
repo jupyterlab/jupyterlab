@@ -73,7 +73,7 @@
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/properties": "^1.1.2",
     "@phosphor/signaling": "^1.2.2",
-    "@phosphor/widgets": "^1.6.0",
+    "@phosphor/widgets": "^1.7.0",
     "ajv": "^6.5.5",
     "codemirror": "~5.47.0",
     "es6-promise": "~4.2.6",

@@ -44,7 +44,7 @@
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/disposable": "^1.1.2",
     "@phosphor/properties": "^1.1.2",
-    "@phosphor/widgets": "^1.6.0"
+    "@phosphor/widgets": "^1.7.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

@@ -35,7 +35,7 @@
     "@jupyterlab/apputils": "^1.0.0-alpha.8",
     "@jupyterlab/coreutils": "^3.0.0-alpha.8",
     "@phosphor/algorithm": "^1.1.2",
-    "@phosphor/widgets": "^1.6.0",
+    "@phosphor/widgets": "^1.7.0",
     "react": "~16.8.4"
   },
   "devDependencies": {
