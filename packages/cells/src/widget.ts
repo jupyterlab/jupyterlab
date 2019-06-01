@@ -1215,10 +1215,14 @@ export class AttachmentsCell extends Cell {
       if (protocol !== 'data:') {
         return;
       }
-      const content = href.split(':')[1];
-      const [mimeType, encodedData] = content.split(';');
-      const data = encodedData.split(',')[1];
-      const bundle: nbformat.IMimeBundle = { [mimeType]: data };
+      const dataURIRegex = /([\w+\/\+]+)?(?:;(charset=[\w\d-]*|base64))?,(.*)/;
+      const matches = dataURIRegex.exec(href);
+      if (matches.length !== 4) {
+        return;
+      }
+      const mimeType = matches[1];
+      const encodedData = matches[3];
+      const bundle: nbformat.IMimeBundle = { [mimeType]: encodedData };
       this.model.attachments.set(blob.name, bundle);
       this._updateCellSourceWithAttachment(blob.name);
     };
