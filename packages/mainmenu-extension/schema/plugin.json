@@ -34,7 +34,7 @@
     },
     {
       "command": "filemenu:close-and-cleanup",
-      "keys": ["Accel Shift Q"],
+      "keys": ["Ctrl Shift Q"],
       "selector": ".jp-Activity"
     },
     {

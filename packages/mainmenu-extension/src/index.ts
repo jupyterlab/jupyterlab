@@ -298,7 +298,7 @@ export function createFileMenu(
   const commands = menu.menu.commands;
 
   // Add a delegator command for closing and cleaning up an activity.
-  // This one is a bit difference, in that we consider it enabled
+  // This one is a bit different, in that we consider it enabled
   // even if it cannot find a delegate for the activity.
   // In that case, we instead call the application `close` command.
   commands.addCommand(CommandIDs.closeAndCleanup, {
