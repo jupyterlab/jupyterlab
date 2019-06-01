@@ -18,7 +18,7 @@
     "@jupyterlab/services": "^4.0.0-alpha.8",
     "@jupyterlab/testutils": "^1.0.0-alpha.8",
     "@phosphor/messaging": "^1.2.2",
-    "@phosphor/widgets": "^1.6.0",
+    "@phosphor/widgets": "^1.7.0",
     "chai": "^4.2.0",
     "jest": "^24.7.1",
     "jest-junit": "^6.3.0",

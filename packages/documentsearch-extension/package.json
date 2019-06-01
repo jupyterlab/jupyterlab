@@ -33,7 +33,7 @@
     "@jupyterlab/apputils": "^1.0.0-alpha.8",
     "@jupyterlab/documentsearch": "^1.0.0-alpha.9",
     "@jupyterlab/mainmenu": "^1.0.0-alpha.8",
-    "@phosphor/widgets": "^1.6.0"
+    "@phosphor/widgets": "^1.7.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
