@@ -204,6 +204,14 @@ def load_jupyter_server_extension(nbapp):
     # Must add before the root server handlers to avoid shadowing.
     web_app.add_handlers('.*$', handlers)
 
+    # If running under JupyterHub, add more metadata.
+    if hasattr(nbapp, 'hub_prefix'):
+        settings['page_config_data']['hub_prefix'] = nbapp.hub_prefix
+        settings['page_config_data']['hub_host'] = nbapp.hub_host
+        settings['page_config_data']['hub_user'] = nbapp.user
+        api_token = os.getenv('JUPYTERHUB_API_TOKEN', '')
+        settings['page_config_data']['token'] = api_token
+
     # Add the root handlers if we have not errored.
     if not errored:
         add_handlers(web_app, config)
