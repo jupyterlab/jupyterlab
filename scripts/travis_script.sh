@@ -93,11 +93,8 @@ if [[ $GROUP == integrity ]]; then
 
     # make sure we can bump major JS releases
     jlpm bumpversion minor --force
-    git commit -a -m "minor"
     jlpm bump:js:major console --force
-    git commit -a -m "major single"
     jlpm bump:js:major console notebook --force
-    git commit -a -m "major multiple"
 
     # Make sure that a prepublish would include the proper files.
     jlpm run prepublish:check
