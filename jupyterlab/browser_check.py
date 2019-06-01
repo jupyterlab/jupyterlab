@@ -62,7 +62,7 @@ def run_test(app, func):
     handler = LogErrorHandler()
 
     env_patch = TestEnv()
-    app.env_patch.start()
+    env_patch.start()
 
     def finished(future):
         try:
