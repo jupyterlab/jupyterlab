@@ -17,6 +17,7 @@ from notebook.notebookapp import flags, aliases
 from traitlets import Bool
 
 from .labapp import LabApp, get_app_dir
+from .tests.test_app import TestEnv
 
 
 here = osp.abspath(osp.dirname(__file__))
@@ -60,6 +61,9 @@ def run_test(app, func):
     """
     handler = LogErrorHandler()
 
+    env_patch = TestEnv()
+    app.env_patch.start()
+
     def finished(future):
         try:
             result = future.result()
@@ -69,13 +73,21 @@ def run_test(app, func):
         app.stop()
         if handler.errored:
             app.log.critical('Exiting with 1 due to errors')
-            sys.exit(1)
+            result = 1
         elif result != 0:
             app.log.critical('Exiting with %s due to errors' % result)
-            sys.exit(result)
         else:
             app.log.info('Exiting normally')
-            sys.exit()
+            result = 0
+
+        app.http_server.stop()
+        app.io_loop.stop()
+        env_patch.stop()
+        try:
+            os._exit(result)
+        except Exception as e:
+            self.log.error(str(e))
+            os._exit(1)
 
     app.log.addHandler(handler)
     pool = ThreadPoolExecutor()

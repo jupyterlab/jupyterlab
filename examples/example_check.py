@@ -25,17 +25,15 @@ from jupyterlab.browser_check import run_test
 here = osp.abspath(osp.dirname(__file__))
 
 
-# Load the main file and grab the example class so we can subclass
-example_dir = sys.argv.pop()
-mod_path = osp.abspath(osp.join(example_dir, 'main.py'))
-spec = importlib.util.spec_from_file_location("example", mod_path)
-mod = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(mod)
+def main():
+    # Load the main file and grab the example class so we can subclass
+    example_dir = sys.argv.pop()
+    mod_path = osp.abspath(osp.join(example_dir, 'main.py'))
+    spec = importlib.util.spec_from_file_location("example", mod_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
 
-
-def factory(BaseClass):
-
-    class App(BaseClass):
+    class App(mod.ExampleApp):
         """An app that launches an example and waits for it to start up, checking for
         JS console errors, JS errors, and Python logged errors.
         """
@@ -49,7 +47,8 @@ def factory(BaseClass):
             super().start()
 
     App.__name__ = osp.basename(example_dir).capitalize() + 'Test'
-    return App
+    App.launch_instance()
+
 
 def run_browser(url):
     """Run the browser test and return an exit code.
@@ -64,5 +63,4 @@ def run_browser(url):
 
 
 if __name__ == '__main__':
-    cls = factory(mod.ExampleApp)
-    cls.launch_instance()
+    main()
