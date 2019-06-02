@@ -15,7 +15,7 @@ mkdir ~/.jupyter
 
 # do not download chrome when installing puppeteer
 # (to avoid 502 errors)
-npm config set puppeteer_skip_chromium_download true
+export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 # Install and enable the server extension
 pip install -q --upgrade pip
