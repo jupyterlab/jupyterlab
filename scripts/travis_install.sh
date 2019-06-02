@@ -13,6 +13,10 @@ sudo rm -rf $(which yarn)
 # create jupyter base dir (needed for config retrieval)
 mkdir ~/.jupyter
 
+# do not download chrome when installing puppeteer
+# (to avoid 502 errors)
+npm config set puppeteer_skip_chromium_download true
+
 # Install and enable the server extension
 pip install -q --upgrade pip
 pip --version
