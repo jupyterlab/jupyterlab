@@ -95,15 +95,6 @@ if [[ $GROUP == integrity ]]; then
     jlpm bumpversion minor --force
     jlpm bump:js:major console --force
     jlpm bump:js:major console notebook --force
-
-    # Make sure that a prepublish would include the proper files.
-    jlpm run prepublish:check
-
-    # run twine check on the python build assets.
-    python setup.py sdist
-    python setup.py bdist_wheel
-    python -m pip install -U twine
-    twine check dist/*
 fi
 
 
