@@ -98,7 +98,7 @@ def _install_kernels():
     write_kernel_spec(ipykernel_dir)
 
 
-class _test_env(object):
+class TestEnv(object):
     """Set Jupyter path variables to a temporary directory
 
     Useful as a context manager or with explicit start/stop
@@ -148,7 +148,7 @@ class ProcessTestApp(ProcessApp):
     workspaces_dir = Unicode(_create_workspaces_dir())
 
     def __init__(self):
-        self.env_patch = _test_env()
+        self.env_patch = TestEnv()
         self.env_patch.start()
         ProcessApp.__init__(self)
 
