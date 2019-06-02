@@ -8,10 +8,6 @@ set -o pipefail
 
 python -c "from jupyterlab.commands import build_check; build_check()"
 
-# do not download chrome when installing puppeteer
-# (to avoid 502 errors)
-export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-
 
 if [[ $GROUP == python ]]; then
     # Run the python tests
