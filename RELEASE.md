@@ -73,7 +73,8 @@ JupyterLab itself, run `jlpm run bumpversion major`.
 - Push the commits and tags as prompted.
 - Run `jlpm run publish:all` to publish the JS and Python packages.
   Execute the suggested commands after doing a quick sanity check.
-
+  If there is a network error during JS publish, run `jlpm run publish:all --skip-build` to resume publish without requiring another
+  clean and build phase of the JS packages.
 - Run `jlpm run bumpversion release` to switch to an `rc` version.
   (running `jlpm run bumpversion build` will then increment `rc` versions).
 
