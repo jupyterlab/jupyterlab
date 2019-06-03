@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/theme-dark-extension",
-  "version": "1.0.0-alpha.9",
+  "version": "1.0.0-alpha.10",
   "description": "JupyterLab - Default Dark Theme",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -30,8 +30,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.0.0-alpha.8",
-    "@jupyterlab/apputils": "^1.0.0-alpha.8"
+    "@jupyterlab/application": "^1.0.0-alpha.9",
+    "@jupyterlab/apputils": "^1.0.0-alpha.9"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

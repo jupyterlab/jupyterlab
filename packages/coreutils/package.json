@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/coreutils",
-  "version": "3.0.0-alpha.8",
+  "version": "3.0.0-alpha.9",
   "description": "JupyterLab - Core Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
