@@ -21,11 +21,9 @@ from setuptools.command.develop import develop
 
 NAME = 'jupyterlab'
 DESCRIPTION = 'The JupyterLab notebook server extension.'
-LONG_DESCRIPTION = """
-An extensible, comprehensive Jupyter web application.
-Development happens on https://github.com/jupyter/jupyterlab, with chat on
-https://gitter.im/jupyterlab/jupyterlab.
-"""
+
+with open(pjoin(HERE, 'README.md')) as fid:
+    LONG_DESCRIPTION = fid.read()
 
 ensure_python(['>=3.5'])
 
@@ -108,6 +106,7 @@ setup_args = dict(
     name=NAME,
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
+    long_description_content_type='text/markdown',
     version=VERSION,
     packages=find_packages(),
     cmdclass=cmdclass,

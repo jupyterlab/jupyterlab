@@ -54,6 +54,7 @@
     "lint": "jlpm && jlpm run prettier && jlpm run eslint && jlpm run tslint",
     "lint:check": "jlpm run prettier:check && jlpm run eslint:check && jlpm run tslint:check",
     "patch:release": "node buildutils/lib/patch-release.js",
+    "prepublish:check": "node buildutils/lib/prepublish-check.js",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "prettier:check": "prettier --list-different '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "publish:all": "node buildutils/lib/publish.js",

@@ -72,6 +72,7 @@ JupyterLab itself, run `jlpm run bumpversion major`.
 - Run `jlpm run bumpversion build` to create a new `alpha` version.
 - Push the commits and tags as prompted.
 - Run `jlpm run publish:all` to publish the JS and Python packages.
+  Execute the suggested commands after doing a quick sanity check.
 
 - Run `jlpm run bumpversion release` to switch to an `rc` version.
   (running `jlpm run bumpversion build` will then increment `rc` versions).

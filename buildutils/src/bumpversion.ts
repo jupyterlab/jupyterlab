@@ -45,6 +45,18 @@ commander
       return;
     }
 
+    // If this is a major release during the alpha cycle, bump
+    // just the Python version.
+    if (prev.indexOf('a') !== -1 && spec === 'major') {
+      // Bump the version.
+      utils.run(`bumpversion ${spec}`);
+
+      // Run the post-bump script.
+      utils.postbump();
+
+      return;
+    }
+
     // Determine the version spec to use for lerna.
     let lernaVersion = 'preminor';
     if (spec === 'build') {
@@ -81,11 +93,6 @@ commander
     if (oldVersion === newVersion) {
       // lerna didn't version anything, so we assume the user aborted
       throw new Error('Lerna aborted');
-    }
-
-    // Our work is done if this is a major or minor bump.
-    if (spec in ['major', 'minor']) {
-      return;
     }
 
     // Bump the version.
