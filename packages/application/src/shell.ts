@@ -1024,59 +1024,11 @@ namespace Private {
     });
   }
 
-  /**
-   * The default implementation of `IRenderer`.
-   *
-   * #### Notes
-   * Subclasses are free to reimplement rendering methods as needed.
-   */
   class SideBarRenderer extends TabBar.Renderer {
-    // /**
-    //  * Render the virtual element for a tab.
-    //  *
-    //  * @param data - The data to use for rendering the tab.
-    //  *
-    //  * @returns A virtual element representing the tab.
-    //  */
-    // renderTab(data: TabBar.IRenderData<any>): VirtualElement {
-    //   let title = data.title.caption;
-    //   let key = this.createTabKey(data);
-    //   let style = this.createTabStyle(data);
-    //   let className = this.createTabClass(data);
-    //   let dataset = this.createTabDataset(data);
-    //   return (
-    //     h.li({ key, className, title, style, dataset },
-    //       this.renderIcon(data),
-    //       this.renderLabel(data),
-    //       this.renderCloseIcon(data)
-    //     )
-    //   );
-    // }
-
-    /**
-     * Render the icon element for a tab.
-     *
-     * @param data - The data to use for rendering the tab.
-     *
-     * @returns A virtual element representing the tab icon.
-     */
     renderIcon(data: TabBar.IRenderData<any>): VirtualElement {
       let className = this.createIconClass(data);
       return h.div({ className });
     }
-
-    // /**
-    //  * Create the class name for the tab icon.
-    //  *
-    //  * @param data - The data to use for the tab.
-    //  *
-    //  * @returns The full class name for the tab icon.
-    //  */
-    // createIconClass(data: TabBar.IRenderData<any>): string {
-    //   let name = 'p-TabBar-tabIcon';
-    //   let extra = data.title.iconClass;
-    //   return extra ? `${name} ${extra}` : name;
-    // }
   }
 
   /**
