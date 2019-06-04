@@ -270,10 +270,9 @@ const tree: JupyterFrontEndPlugin<void> = {
           args.search +
           args.hash;
         const immediate = true;
-        const silent = true;
 
-        // Silently remove the tree portion of the URL leaving the rest intact.
-        router.navigate(url, { silent });
+        // Remove the tree portion of the URL leaving the rest intact.
+        router.navigate(url);
 
         try {
           await commands.execute('filebrowser:navigate', { path });
@@ -311,9 +310,8 @@ const notfound: JupyterFrontEndPlugin<void> = {
       The path: ${bad} was not found. JupyterLab redirected to: ${base}
     `;
 
-    // Change the URL back to the base application URL without adding the
-    // URL change to the browser history.
-    router.navigate('', { silent: true });
+    // Change the URL back to the base application URL.
+    router.navigate('');
 
     void showErrorMessage('Path Not Found', { message });
   },

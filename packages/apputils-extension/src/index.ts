@@ -265,9 +265,8 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
         // Clone the originally requested workspace after redirecting.
         query['clone'] = workspace;
 
-        // Change the URL and trigger a hard reload to re-route.
         const url = path + URLExt.objectToQueryString(query) + (hash || '');
-        router.navigate(url, { hard: true, silent: true });
+        router.navigate(url, { hard: true });
       });
     }
   }
@@ -492,7 +491,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
           // After the state has been cloned, navigate to the URL.
           void cloned.then(() => {
-            router.navigate(url, { silent: true });
+            router.navigate(url);
           });
 
           return cloned;
@@ -541,19 +540,17 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         // Maintain the query string parameters but remove `reset`.
         delete query['reset'];
 
-        const silent = true;
-        const hard = true;
         const url = path + URLExt.objectToQueryString(query) + hash;
         const cleared = db.clear().then(() => router.stop);
 
         // After the state has been reset, navigate to the URL.
         if (clone) {
           void cleared.then(() => {
-            router.navigate(url, { silent, hard });
+            router.navigate(url, { hard: true });
           });
         } else {
           void cleared.then(() => {
-            router.navigate(url, { silent });
+            router.navigate(url);
             loading.dispose();
           });
         }
