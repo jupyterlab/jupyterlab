@@ -292,7 +292,6 @@ export function addCommands(
       app.shell.add(main);
       void tracker.add(main);
       app.shell.activateById(main.id);
-      return main;
     }
   });
 
