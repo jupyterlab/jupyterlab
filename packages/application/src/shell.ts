@@ -1191,36 +1191,13 @@ namespace Private {
       this._stackedPanel.setHidden(this._sideBar.currentTitle === null);
 
       // filthy hack to get the tab icons
-      defaultIconRegistry.override({
-        name: 'extension',
-        className: 'jp-ExtensionIcon',
-        center: true,
-        kind: 'sideBar'
-      });
-      defaultIconRegistry.override({
-        name: 'folder',
-        className: 'jp-FolderIcon',
-        center: true,
-        kind: 'sideBar'
-      });
-      defaultIconRegistry.override({
-        name: 'palette',
-        className: 'jp-PaletteIcon',
-        center: true,
-        kind: 'sideBar'
-      });
-      defaultIconRegistry.override({
-        name: 'running',
-        className: 'jp-RunningIcon',
-        center: true,
-        kind: 'sideBar'
-      });
-      defaultIconRegistry.override({
-        name: 'tab',
-        className: 'jp-TabIcon',
-        center: true,
-        kind: 'sideBar'
-      });
+      for (let title of this._sideBar.titles) {
+        defaultIconRegistry.override({
+          className: title.iconClass,
+          center: true,
+          kind: 'sideBar'
+        });
+      }
     }
 
     /**

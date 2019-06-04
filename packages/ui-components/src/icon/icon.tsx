@@ -4,6 +4,7 @@
 import React from 'react';
 import { classes } from 'typestyle/lib';
 
+import { camelize } from '../utils';
 import { IIconStyle, iconStyle, iconStyleFlat } from '../style/icon';
 
 /**
@@ -13,31 +14,40 @@ import { IIconStyle, iconStyle, iconStyleFlat } from '../style/icon';
  */
 
 /* tslint:disable */
-import html5Svg from '../../style/icons/html5.svg';
-import kernelSvg from '../../style/icons/kernel.svg';
 import jupyterFaviconSvg from '../../style/icons/jupyter-favicon.svg';
+
+// filetype icons
+import html5Svg from '../../style/icons/html5.svg';
+
+// status bar icons
+import kernelSvg from '../../style/icons/kernel.svg';
 import lineFormSvg from '../../style/icons/line-form.svg';
 import notTrustedSvg from '../../style/icons/not-trusted.svg';
 import statusBarSvg from '../../style/icons/status-bar.svg';
 import terminalSvg from '../../style/icons/terminal.svg';
 import trustedSvg from '../../style/icons/trusted.svg';
 
+// sidebar tab icons
+import buildSvg from '../../style/tabicons/build.svg'; // originally ic-build-24px.svg
 import extensionSvg from '../../style/tabicons/extension.svg'; // originally ic-extension-24px.svg
 import folderSvg from '../../style/tabicons/folder.svg'; // originally ic-folder-24px.svg
 import paletteSvg from '../../style/tabicons/palette.svg'; // originally ic-palette-24px.svg
 import runningSvg from '../../style/tabicons/running.svg'; // originally stop-circle.svg
 import tabSvg from '../../style/tabicons/tab.svg'; // originally ic-tab-24px.svg
 
-const _defaultIcons: ReadonlyArray<IconRegistry.IconModel> = [
-  { name: 'html5', svg: html5Svg },
-  { name: 'kernel', svg: kernelSvg },
+const _defaultIcons: ReadonlyArray<IconRegistry.IModel> = [
   { name: 'jupyter-favicon', svg: jupyterFaviconSvg },
+
+  { name: 'html5', svg: html5Svg },
+
+  { name: 'kernel', svg: kernelSvg },
   { name: 'line-form', svg: lineFormSvg },
   { name: 'not-trusted', svg: notTrustedSvg },
   { name: 'status-bar', svg: statusBarSvg },
   { name: 'terminal', svg: terminalSvg },
   { name: 'trusted', svg: trustedSvg },
 
+  { name: 'build', svg: buildSvg },
   { name: 'extension', svg: extensionSvg },
   { name: 'folder', svg: folderSvg },
   { name: 'palette', svg: paletteSvg },
@@ -50,7 +60,7 @@ const _defaultIcons: ReadonlyArray<IconRegistry.IconModel> = [
  * The icon registry class.
  */
 export class IconRegistry {
-  constructor(...icons: IconRegistry.IconModel[]) {
+  constructor(...icons: IconRegistry.IModel[]) {
     if (icons.length) {
       this.addIcon(...icons);
     } else {
@@ -58,10 +68,13 @@ export class IconRegistry {
     }
   }
 
-  addIcon(...icons: IconRegistry.IconModel[]): void {
+  addIcon(...icons: IconRegistry.IModel[]): void {
     icons.forEach((icon: IconRegistry.IModel) => {
-      this._classNameToName[icon.className] = icon.name;
-      this._nameToClassName[icon.name] = icon.className;
+      let className = icon.className
+        ? icon.className
+        : IconRegistry.iconClassName(icon.name);
+      this._classNameToName[className] = icon.name;
+      this._nameToClassName[icon.name] = className;
       this._svgs[icon.name] = icon.svg;
     });
   }
@@ -96,7 +109,7 @@ export class IconRegistry {
       if (className) {
         // override the className, if explicitly passed
         container.className = classes(className, styleClass);
-      } else if (!container.className.includes(styleClass)) {
+      } else if (!(styleClass in container.classList)) {
         // add icon styling class to the container's class, if not already present
         container.className = classes(container.className, styleClass);
       }
@@ -130,15 +143,28 @@ export class IconRegistry {
   }
 
   override(
-    props: { name: string; className: string; title?: string } & IIconStyle
+    props: { className: string; name?: string; title?: string } & IIconStyle
   ) {
     const { name, className, title, ...propsStyle } = props;
+
+    let usedname = name;
+    if (!usedname) {
+      // for now, just assume that the first className is the relevant one
+      usedname = className.split(/\s+/)[0];
+
+      // bail if no corresponding icon is found
+      if (!(usedname in this._classNameToName)) {
+        return;
+      }
+
+      usedname = this._classNameToName[usedname];
+    }
 
     for (let container of document.getElementsByClassName(
       className
     ) as HTMLCollectionOf<HTMLElement>) {
       this.icon({
-        name: name,
+        name: usedname,
         title: title,
         container: container,
         ...propsStyle
@@ -152,6 +178,10 @@ export class IconRegistry {
     }
 
     return this._svgs[name];
+  }
+
+  static iconClassName(name: string): string {
+    return 'jp-' + camelize(name, true) + 'Icon';
   }
 
   private _classNameToName: { [key: string]: string } = Object.create(null);
@@ -180,18 +210,6 @@ export namespace IconRegistry {
     svg: string;
   }
 
-  export class IconModel implements IModel {
-    constructor(imod: IModel) {
-      if (!imod.className) {
-        this.className = Private.classNameFromName(imod.name);
-      }
-    }
-
-    name: string;
-    className?: string;
-    svg: string;
-  }
-
   export interface IIconOptions {
     name: string;
     className?: string;
@@ -202,18 +220,6 @@ export namespace IconRegistry {
 }
 
 namespace Private {
-  function camelize(str: string): string {
-    return str.replace(/(?:^\w|[A-Z]|\b\w|\s+|-+)/g, function(match, index) {
-      console.log(match);
-      if (+match === 0 || match[0] === '-') return '';
-      return match.toUpperCase();
-    });
-  }
-
-  export function classNameFromName(name: string): string {
-    return 'jp-' + camelize(name);
-  }
-
   export function parseSvg(svg: string): HTMLElement {
     let parser = new DOMParser();
     return parser.parseFromString(svg, 'image/svg+xml').documentElement;

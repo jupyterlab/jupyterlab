@@ -95,10 +95,6 @@
   background-image: var(--jp-icon-ellipses);
 }
 
-.jp-ExtensionIcon {
-  /*background-image: var(--jp-icon-extension);*/
-}
-
 .jp-FileIcon {
   background-image: var(--jp-icon-file);
 }
@@ -109,10 +105,6 @@
 
 .jp-FilterListIcon {
   background-image: var(--jp-icon-filter-list);
-}
-
-.jp-FolderIcon {
-  /*background-image: var(--jp-icon-folder);*/
 }
 
 .jp-HomeIcon {
@@ -189,10 +181,6 @@
   background-image: var(--jp-icon-folder);
 }
 
-.jp-PaletteIcon {
-  /*background-image: var(--jp-icon-palette);*/
-}
-
 .jp-PasteIcon {
   background-image: var(--jp-icon-paste);
 }
@@ -213,10 +201,6 @@
   background-image: var(--jp-icon-run);
 }
 
-.jp-RunningIcon {
-  /*background-image: var(--jp-icon-stop-circle);*/
-}
-
 .jp-SaveIcon {
   background-image: var(--jp-icon-save);
 }
@@ -231,10 +215,6 @@
 
 .jp-StopIcon {
   background-image: var(--jp-icon-stop);
-}
-
-.jp-TabIcon {
-  /*background-image: var(--jp-icon-tab);*/
 }
 
 .jp-TerminalIcon {
@@ -253,10 +233,40 @@
   background-image: var(--jp-icon-file-upload);
 }
 
-.jp-YAMLIcon {
+.jp-YamlIcon {
   background-image: var(--jp-icon-yaml);
 }
 
 .jp-VegaIcon {
   background-image: var(--jp-icon-vega);
 }
+
+.jp-QuestionMarkIcon {
+  background-image: var(--jp-icon-question-mark);
+}
+
+/* disabled/replaced by svg */
+
+/*.jp-BuildIcon {*/
+/*  background-image: var(--jp-icon-build);*/
+/*}*/
+
+/*.jp-ExtensionIcon {*/
+/*  background-image: var(--jp-icon-extension);*/
+/*}*/
+
+/*.jp-FolderIcon {*/
+/*  background-image: var(--jp-icon-folder);*/
+/*}*/
+
+/*.jp-PaletteIcon {*/
+/*  background-image: var(--jp-icon-palette);*/
+/*}*/
+
+/*.jp-RunningIcon {*/
+/*  background-image: var(--jp-icon-stop-circle);*/
+/*}*/
+
+/*.jp-TabIcon {*/
+/*  background-image: var(--jp-icon-tab);*/
+/*}*/
