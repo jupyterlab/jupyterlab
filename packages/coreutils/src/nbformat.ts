@@ -512,7 +512,7 @@ export namespace nbformat {
   }
 
   /**
-   * Test whether an output is from a stream.
+   * Test whether an output is an error.
    */
   export function isError(output: IOutput): output is IError {
     return output.output_type === 'error';
