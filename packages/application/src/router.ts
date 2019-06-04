@@ -73,7 +73,7 @@ export class Router implements IRouter {
   navigate(path: string, options: IRouter.INavOptions = {}): void {
     const { base } = this;
     const { history } = window;
-    const { hard, silent } = options;
+    const { hard } = options;
     const old = document.location.href;
     const url =
       path && path.indexOf(base) === 0 ? path : URLExt.join(base, path);
@@ -82,11 +82,7 @@ export class Router implements IRouter {
       return hard ? this.reload() : undefined;
     }
 
-    if (silent) {
-      history.replaceState({}, '', url);
-    } else {
-      history.pushState({}, '', url);
-    }
+    history.pushState({}, '', url);
 
     if (hard) {
       return this.reload();

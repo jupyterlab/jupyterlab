@@ -144,11 +144,6 @@ export namespace IRouter {
      * history API change.
      */
     hard?: boolean;
-
-    /**
-     * Whether the navigation should be added to the browser's history.
-     */
-    silent?: boolean;
   }
 
   /**
