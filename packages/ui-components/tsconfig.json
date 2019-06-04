@@ -5,6 +5,5 @@
     "types": ["webpack-env"],
     "rootDir": "src"
   },
-  "include": ["src/**/*"],
-  "references": []
+  "include": ["src/**/*"]
 }
