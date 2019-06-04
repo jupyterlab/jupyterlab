@@ -86,7 +86,6 @@ A Jupyter front-end application object is given to each plugin in its
 ``activate()`` function. The application object has:
 
 -  commands - used to add and execute commands in the application.
--  keymap - used to add keyboard shortcuts to the application.
 -  shell - a generic Jupyter front-end shell instance.
 
 Jupyter Front-End Shell
