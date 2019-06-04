@@ -129,14 +129,17 @@ export class IconRegistry {
     );
   }
 
-  override(props: { name: string; className: string } & IIconStyle) {
-    const { name, className, ...propsStyle } = props;
+  override(
+    props: { name: string; className: string; title?: string } & IIconStyle
+  ) {
+    const { name, className, title, ...propsStyle } = props;
 
     for (let container of document.getElementsByClassName(
       className
     ) as HTMLCollectionOf<HTMLElement>) {
-      defaultIconRegistry.icon({
+      this.icon({
         name: name,
+        title: title,
         container: container,
         ...propsStyle
       });

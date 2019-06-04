@@ -1771,18 +1771,13 @@ export namespace DirListing {
             kind: 'listing'
           });
 
-          // filthy hack to get the tab icons
-          for (let iconNode of document.getElementsByClassName(
-            ['p-TabBar-tabIcon', fileType.iconClass].join(' ')
-          ) as HTMLCollectionOf<HTMLElement>) {
-            defaultIconRegistry.icon({
-              name: fileType.iconName,
-              title: fileType.iconLabel,
-              container: iconNode,
-              center: true,
-              kind: 'tab'
-            });
-          }
+          // filthy hack to get the topbar tab icons
+          defaultIconRegistry.override({
+            name: fileType.iconName,
+            className: ['p-TabBar-tabIcon', fileType.iconClass].join(' '),
+            center: true,
+            kind: 'tab'
+          });
         } else {
           // add icon as CSS background image. Can't be styled using CSS
           icon.textContent = fileType.iconLabel || '';
