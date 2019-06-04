@@ -418,6 +418,12 @@ export function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
     return Promise.resolve(undefined);
   }
 
+  // Add missing SVG namespace (if actually missing)
+  var patt = '<svg[^>]+xmlns=[^>]+svg';
+  if (source.search(patt) < 0) {
+    source = source.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+  }
+
   // Render in img so that user can save it easily
   const img = new Image();
   img.src = `data:image/svg+xml,${encodeURIComponent(source)}`;
