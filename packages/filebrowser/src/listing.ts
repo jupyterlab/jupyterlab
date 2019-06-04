@@ -1759,27 +1759,36 @@ export namespace DirListing {
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       if (fileType) {
+        icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
+
         if (fileType.iconName) {
+          // add icon as svg node. Can be styled using CSS
           defaultIconRegistry.icon({
             name: fileType.iconName,
             title: fileType.iconLabel,
-            parent: icon
+            container: icon,
+            center: true,
+            kind: 'listing'
           });
+
           // filthy hack to get the tab icons
           for (let iconNode of document.getElementsByClassName(
-            fileType.iconClass
+            ['p-TabBar-tabIcon', fileType.iconClass].join(' ')
           ) as HTMLCollectionOf<HTMLElement>) {
             defaultIconRegistry.icon({
               name: fileType.iconName,
               title: fileType.iconLabel,
-              parent: iconNode
+              container: iconNode,
+              center: true,
+              kind: 'tab'
             });
           }
         } else {
+          // add icon as CSS background image. Can't be styled using CSS
           icon.textContent = fileType.iconLabel || '';
         }
-        icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
       } else {
+        // use default icon as CSS background image
         icon.textContent = '';
         icon.className = ITEM_ICON_CLASS;
       }

@@ -4,7 +4,7 @@
 import React from 'react';
 import { classes } from 'typestyle/lib';
 
-import { IIconStyle, iconStyle, iconNestedStyle } from '../style/icon';
+import { IIconStyle, iconStyle, iconStyleFlat } from '../style/icon';
 
 /**
  * To add an icon to the defaultIconRegistry requires two lines of code:
@@ -63,30 +63,35 @@ export class IconRegistry {
   /**
    * Get the icon as an HTMLElement of tag <svg><svg/>
    */
-  icon(props: IconRegistry.IIcon): HTMLElement {
-    const { name, title, parent, ...propStyle } = props;
-
+  icon(
+    props: IconRegistry.IIconOptions & { container: HTMLElement } & IIconStyle
+  ): HTMLElement {
+    const { name, className, title, container, ...propsStyle } = props;
     let svgNode = Private.parseSvg(this.svg(name));
 
-    // style the svg node
-    svgNode.className = iconStyle(propStyle);
-
     if (title) {
-      // add a title node to the top level svg node
-      let titleNodes = svgNode.getElementsByTagName('title');
-      if (titleNodes) {
-        titleNodes[0].textContent = title;
-      } else {
-        let titleNode = document.createElement('title');
-        titleNode.textContent = title;
-        svgNode.appendChild(titleNode);
-      }
+      Private.setTitleSvg(svgNode, title);
     }
 
-    if (parent) {
-      // clear any existing icon in parent (and all other child elements)
-      parent.textContent = '';
-      parent.appendChild(svgNode);
+    if (container) {
+      // clear any existing icon in container (and all other child elements)
+      container.textContent = '';
+      container.appendChild(svgNode);
+
+      // add icon styling class to the container, if not already present
+      let classNames = classes(
+        className,
+        propsStyle ? iconStyle(propsStyle) : ''
+      );
+      if (!container.className.includes(classNames)) {
+        container.className = classes(container.className, classNames);
+      }
+    } else {
+      // add icon styling class directly to the svg node
+      svgNode.setAttribute(
+        'class',
+        classes(className, propsStyle ? iconStyleFlat(propsStyle) : '')
+      );
     }
 
     return svgNode;
@@ -97,13 +102,14 @@ export class IconRegistry {
    * TODO: figure out how to remove the unnecessary outer <tag>
    */
   iconReact(
-    props: IconRegistry.IIcon & { tag?: 'div' | 'span'; className?: string }
+    props: IconRegistry.IIconOptions & { tag?: 'div' | 'span' } & IIconStyle
   ): React.ReactElement {
-    const { name, className, tag, ...propStyle } = props;
+    const { name, className, title, tag, ...propsStyle } = props;
     const Tag = tag || 'div';
+
     return (
       <Tag
-        className={classes(className, iconNestedStyle(propStyle))}
+        className={classes(className, propsStyle ? iconStyle(propsStyle) : '')}
         dangerouslySetInnerHTML={{ __html: this.svg(name) }}
       />
     );
@@ -121,7 +127,7 @@ export const defaultIconRegistry: IconRegistry = new IconRegistry();
  * Alias for defaultIconRegistry.iconReact that can be used as a React component
  */
 export const IconReact = (
-  props: IconRegistry.IIcon & { tag?: 'div' | 'span'; className?: string }
+  props: IconRegistry.IIconOptions & { tag?: 'div' | 'span' } & IIconStyle
 ): React.ReactElement => {
   return defaultIconRegistry.iconReact(props);
 };
@@ -132,10 +138,10 @@ export namespace IconRegistry {
     svg: string;
   }
 
-  export interface IIcon extends IIconStyle {
+  export interface IIconOptions {
     name: string;
+    className?: string;
     title?: string;
-    parent?: HTMLElement;
   }
 
   export const defaultIcons = _defaultIcons;
@@ -145,5 +151,17 @@ namespace Private {
   export function parseSvg(svg: string): HTMLElement {
     let parser = new DOMParser();
     return parser.parseFromString(svg, 'image/svg+xml').documentElement;
+  }
+
+  export function setTitleSvg(svgNode: HTMLElement, title: string): void {
+    // add a title node to the top level svg node
+    let titleNodes = svgNode.getElementsByTagName('title');
+    if (titleNodes) {
+      titleNodes[0].textContent = title;
+    } else {
+      let titleNode = document.createElement('title');
+      titleNode.textContent = title;
+      svgNode.appendChild(titleNode);
+    }
   }
 }

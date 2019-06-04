@@ -275,10 +275,11 @@ namespace Private {
         >
           {iconName ? (
             <IconReact
-              tag={'span'}
               name={iconName}
-              className={iconClass}
               title={iconTitle}
+              className={iconClass}
+              tag={'span'}
+              kind={'listing'}
             />
           ) : (
             <span className={iconClass} title={iconTitle} />

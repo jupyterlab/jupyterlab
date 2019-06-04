@@ -116,7 +116,11 @@ class LineFormComponent extends React.Component<
               }}
             />
             <div className={lineFormButtonDiv}>
-              <IconReact name="line-form" className={lineFormButtonIcon} />
+              <IconReact
+                name="line-form"
+                className={lineFormButtonIcon}
+                center={true}
+              />
               <input type="submit" className={lineFormButton} value="" />
             </div>
           </div>
