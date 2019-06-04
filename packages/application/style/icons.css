@@ -96,7 +96,7 @@
 }
 
 .jp-ExtensionIcon {
-  background-image: var(--jp-icon-extension);
+  /*background-image: var(--jp-icon-extension);*/
 }
 
 .jp-FileIcon {
@@ -112,7 +112,7 @@
 }
 
 .jp-FolderIcon {
-  background-image: var(--jp-icon-folder);
+  /*background-image: var(--jp-icon-folder);*/
 }
 
 .jp-HomeIcon {
@@ -190,7 +190,7 @@
 }
 
 .jp-PaletteIcon {
-  background-image: var(--jp-icon-palette);
+  /*background-image: var(--jp-icon-palette);*/
 }
 
 .jp-PasteIcon {
@@ -214,7 +214,7 @@
 }
 
 .jp-RunningIcon {
-  background-image: var(--jp-icon-stop-circle);
+  /*background-image: var(--jp-icon-stop-circle);*/
 }
 
 .jp-SaveIcon {
@@ -234,7 +234,7 @@
 }
 
 .jp-TabIcon {
-  background-image: var(--jp-icon-tab);
+  /*background-image: var(--jp-icon-tab);*/
 }
 
 .jp-TerminalIcon {

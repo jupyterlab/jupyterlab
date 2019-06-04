@@ -5,6 +5,8 @@ import { Debouncer } from '@jupyterlab/coreutils';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
+import { defaultIconRegistry } from '@jupyterlab/ui-components';
+
 import { ArrayExt, find, IIterator, iter, toArray } from '@phosphor/algorithm';
 
 import { PromiseDelegate, Token } from '@phosphor/coreutils';
@@ -12,6 +14,8 @@ import { PromiseDelegate, Token } from '@phosphor/coreutils';
 import { Message, MessageLoop, IMessageHandler } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
+
+import { h, VirtualElement } from '@phosphor/virtualdom';
 
 import {
   BoxLayout,
@@ -1021,6 +1025,61 @@ namespace Private {
   }
 
   /**
+   * The default implementation of `IRenderer`.
+   *
+   * #### Notes
+   * Subclasses are free to reimplement rendering methods as needed.
+   */
+  class SideBarRenderer extends TabBar.Renderer {
+    // /**
+    //  * Render the virtual element for a tab.
+    //  *
+    //  * @param data - The data to use for rendering the tab.
+    //  *
+    //  * @returns A virtual element representing the tab.
+    //  */
+    // renderTab(data: TabBar.IRenderData<any>): VirtualElement {
+    //   let title = data.title.caption;
+    //   let key = this.createTabKey(data);
+    //   let style = this.createTabStyle(data);
+    //   let className = this.createTabClass(data);
+    //   let dataset = this.createTabDataset(data);
+    //   return (
+    //     h.li({ key, className, title, style, dataset },
+    //       this.renderIcon(data),
+    //       this.renderLabel(data),
+    //       this.renderCloseIcon(data)
+    //     )
+    //   );
+    // }
+
+    /**
+     * Render the icon element for a tab.
+     *
+     * @param data - The data to use for rendering the tab.
+     *
+     * @returns A virtual element representing the tab icon.
+     */
+    renderIcon(data: TabBar.IRenderData<any>): VirtualElement {
+      let className = this.createIconClass(data);
+      return h.div({ className });
+    }
+
+    // /**
+    //  * Create the class name for the tab icon.
+    //  *
+    //  * @param data - The data to use for the tab.
+    //  *
+    //  * @returns The full class name for the tab icon.
+    //  */
+    // createIconClass(data: TabBar.IRenderData<any>): string {
+    //   let name = 'p-TabBar-tabIcon';
+    //   let extra = data.title.iconClass;
+    //   return extra ? `${name} ${extra}` : name;
+    // }
+  }
+
+  /**
    * A class which manages a side bar and related stacked panel.
    */
   export class SideBarHandler {
@@ -1031,7 +1090,8 @@ namespace Private {
       this._sideBar = new TabBar<Widget>({
         insertBehavior: 'none',
         removeBehavior: 'none',
-        allowDeselect: true
+        allowDeselect: true,
+        renderer: new SideBarRenderer()
       });
       this._stackedPanel = new StackedPanel();
       this._sideBar.hide();
@@ -1177,6 +1237,38 @@ namespace Private {
     private _refreshVisibility(): void {
       this._sideBar.setHidden(this._sideBar.titles.length === 0);
       this._stackedPanel.setHidden(this._sideBar.currentTitle === null);
+
+      // filthy hack to get the tab icons
+      defaultIconRegistry.override({
+        name: 'extension',
+        className: 'jp-ExtensionIcon',
+        center: true,
+        kind: 'sideBar'
+      });
+      defaultIconRegistry.override({
+        name: 'folder',
+        className: 'jp-FolderIcon',
+        center: true,
+        kind: 'sideBar'
+      });
+      defaultIconRegistry.override({
+        name: 'palette',
+        className: 'jp-PaletteIcon',
+        center: true,
+        kind: 'sideBar'
+      });
+      defaultIconRegistry.override({
+        name: 'running',
+        className: 'jp-RunningIcon',
+        center: true,
+        kind: 'sideBar'
+      });
+      defaultIconRegistry.override({
+        name: 'tab',
+        className: 'jp-TabIcon',
+        center: true,
+        kind: 'sideBar'
+      });
     }
 
     /**

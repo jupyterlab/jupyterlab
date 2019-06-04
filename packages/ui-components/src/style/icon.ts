@@ -33,6 +33,10 @@ const iconCSSListing: NestedCSSProperties = {
   height: '16px'
 };
 
+const iconCSSSideBar: NestedCSSProperties = {
+  width: '20px'
+};
+
 const iconCSSStatusBar: NestedCSSProperties = {
   left: '0px',
   top: '0px',
@@ -47,7 +51,7 @@ const iconCSSTab: NestedCSSProperties = {
 
 const iconCSSKind: { [k in iconKindType]: NestedCSSProperties } = {
   listing: iconCSSListing,
-  sideBar: {},
+  sideBar: iconCSSSideBar,
   statusBar: iconCSSStatusBar,
   tab: iconCSSTab,
   unset: {}

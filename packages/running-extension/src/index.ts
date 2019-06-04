@@ -33,6 +33,7 @@ function activate(
 ): void {
   let running = new RunningSessions({ manager: app.serviceManager });
   running.id = 'jp-running-sessions';
+  running.title.icon = 'running';
   running.title.iconClass = 'jp-RunningIcon jp-SideBar-tabIcon';
   running.title.caption = 'Running Terminals and Kernels';
 
