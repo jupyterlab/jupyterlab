@@ -41,6 +41,7 @@ JupyterLab is the next-generation web-based user interface for Project Jupyter. 
    user/file_formats
    user/extensions
    user/jupyterhub
+   user/export
 
 
 .. toctree::
