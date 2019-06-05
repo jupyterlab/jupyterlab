@@ -419,7 +419,7 @@ export function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
   }
 
   // Add missing SVG namespace (if actually missing)
-  var patt = '<svg[^>]+xmlns=[^>]+svg';
+  let patt = '<svg[^>]+xmlns=[^>]+svg';
   if (source.search(patt) < 0) {
     source = source.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
   }
