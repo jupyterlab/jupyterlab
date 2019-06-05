@@ -217,8 +217,6 @@ export namespace IconRegistry {
     className?: string;
     title?: string;
   }
-
-  export const defaultIcons = _defaultIcons;
 }
 
 namespace Private {
