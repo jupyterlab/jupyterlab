@@ -17,23 +17,23 @@ import { IIconStyle, iconStyle, iconStyleFlat } from '../style/icon';
 import jupyterFaviconSvg from '../../style/icons/jupyter-favicon.svg';
 
 // filetype icons
-import html5Svg from '../../style/icons/html5.svg';
+import html5Svg from '../../style/icons/filetype/html5.svg';
 
-// status bar icons
-import kernelSvg from '../../style/icons/kernel.svg';
-import lineFormSvg from '../../style/icons/line-form.svg';
-import notTrustedSvg from '../../style/icons/not-trusted.svg';
-import statusBarSvg from '../../style/icons/status-bar.svg';
-import terminalSvg from '../../style/icons/terminal.svg';
-import trustedSvg from '../../style/icons/trusted.svg';
+// statusbar icons
+import kernelSvg from '../../style/icons/statusbar/kernel.svg';
+import lineFormSvg from '../../style/icons/statusbar/line-form.svg';
+import notTrustedSvg from '../../style/icons/statusbar/not-trusted.svg';
+import statusBarSvg from '../../style/icons/statusbar/status-bar.svg';
+import terminalSvg from '../../style/icons/statusbar/terminal.svg';
+import trustedSvg from '../../style/icons/statusbar/trusted.svg';
 
-// sidebar tab icons
-import buildSvg from '../../style/tabicons/build.svg'; // originally ic-build-24px.svg
-import extensionSvg from '../../style/tabicons/extension.svg'; // originally ic-extension-24px.svg
-import folderSvg from '../../style/tabicons/folder.svg'; // originally ic-folder-24px.svg
-import paletteSvg from '../../style/tabicons/palette.svg'; // originally ic-palette-24px.svg
-import runningSvg from '../../style/tabicons/running.svg'; // originally stop-circle.svg
-import tabSvg from '../../style/tabicons/tab.svg'; // originally ic-tab-24px.svg
+// sidebar icons
+import buildSvg from '../../style/icons/sidebar/build.svg'; // originally ic-build-24px.svg
+import extensionSvg from '../../style/icons/sidebar/extension.svg'; // originally ic-extension-24px.svg
+import folderSvg from '../../style/icons/sidebar/folder.svg'; // originally ic-folder-24px.svg
+import paletteSvg from '../../style/icons/sidebar/palette.svg'; // originally ic-palette-24px.svg
+import runningSvg from '../../style/icons/sidebar/running.svg'; // originally stop-circle.svg
+import tabSvg from '../../style/icons/sidebar/tab.svg'; // originally ic-tab-24px.svg
 
 const _defaultIcons: ReadonlyArray<IconRegistry.IModel> = [
   { name: 'jupyter-favicon', svg: jupyterFaviconSvg },
