@@ -15,7 +15,7 @@ import { Message, MessageLoop, IMessageHandler } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { h, VirtualElement } from '@phosphor/virtualdom';
+import { h, VirtualElement, VirtualDOM } from '@phosphor/virtualdom';
 
 import {
   BoxLayout,
@@ -1024,6 +1024,22 @@ namespace Private {
     });
   }
 
+  class SideBar extends TabBar<Widget> {
+    protected onUpdateRequest(msg: Message): void {
+      let titles = this.titles;
+      let renderer = this.renderer;
+      let currentTitle = this.currentTitle;
+      let content = new Array<VirtualElement>(titles.length);
+      for (let i = 0, n = titles.length; i < n; ++i) {
+        let title = titles[i];
+        let current = title === currentTitle;
+        let zIndex = current ? n : n - i - 1;
+        content[i] = renderer.renderTab({ title, current, zIndex });
+      }
+      VirtualDOM.render(content, this.contentNode);
+    }
+  }
+
   class SideBarRenderer extends TabBar.Renderer {
     renderIcon(data: TabBar.IRenderData<any>): VirtualElement {
       let className = this.createIconClass(data);
@@ -1039,7 +1055,7 @@ namespace Private {
      * Construct a new side bar handler.
      */
     constructor(side: string) {
-      this._sideBar = new TabBar<Widget>({
+      this._sideBar = new SideBar({
         insertBehavior: 'none',
         removeBehavior: 'none',
         allowDeselect: true,

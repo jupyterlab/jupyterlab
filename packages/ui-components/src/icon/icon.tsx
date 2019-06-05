@@ -14,6 +14,7 @@ import { IIconStyle, iconStyle, iconStyleFlat } from '../style/icon';
  */
 
 /* tslint:disable */
+import badSvg from '../../style/icons/bad.svg';
 import jupyterFaviconSvg from '../../style/icons/jupyter-favicon.svg';
 
 // filetype icons
@@ -66,6 +67,9 @@ export class IconRegistry {
     } else {
       this.addIcon(..._defaultIcons);
     }
+
+    // add the bad state icon
+    this.addIcon({ name: 'bad', svg: badSvg });
   }
 
   addIcon(...icons: IconRegistry.IModel[]): void {
@@ -152,12 +156,10 @@ export class IconRegistry {
       // for now, just assume that the first className is the relevant one
       usedname = className.split(/\s+/)[0];
 
-      // bail if no corresponding icon is found
-      if (!(usedname in this._classNameToName)) {
-        return;
-      }
-
-      usedname = this._classNameToName[usedname];
+      usedname =
+        usedname in this._classNameToName
+          ? this._classNameToName[usedname]
+          : 'bad';
     }
 
     for (let container of document.getElementsByClassName(
