@@ -15,7 +15,7 @@ import { Message, MessageLoop, IMessageHandler } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { h, VirtualElement, VirtualDOM } from '@phosphor/virtualdom';
+import { h, VirtualElement } from '@phosphor/virtualdom';
 
 import {
   BoxLayout,
@@ -1025,22 +1025,38 @@ namespace Private {
   }
 
   class SideBar extends TabBar<Widget> {
+    /**
+     * A message handler invoked on an `'update-request'` message.
+     */
     protected onUpdateRequest(msg: Message): void {
-      let titles = this.titles;
-      let renderer = this.renderer;
-      let currentTitle = this.currentTitle;
-      let content = new Array<VirtualElement>(titles.length);
-      for (let i = 0, n = titles.length; i < n; ++i) {
-        let title = titles[i];
-        let current = title === currentTitle;
-        let zIndex = current ? n : n - i - 1;
-        content[i] = renderer.renderTab({ title, current, zIndex });
+      super.onUpdateRequest(msg);
+
+      for (let itab in this.contentNode.children) {
+        let tab = this.contentNode.children[itab];
+        let title = this.titles[itab];
+        let iconNode = tab.children ? (tab.children[0] as HTMLElement) : null;
+
+        if (iconNode && iconNode.children.length < 1) {
+          // add the svg node, if not already present
+          defaultIconRegistry.icon({
+            name: title.iconClass,
+            container: iconNode,
+            center: true,
+            kind: 'sideBar'
+          });
+        }
       }
-      VirtualDOM.render(content, this.contentNode);
     }
   }
 
   class SideBarRenderer extends TabBar.Renderer {
+    /**
+     * Render the icon element for a tab.
+     *
+     * @param data - The data to use for rendering the tab.
+     *
+     * @returns A virtual element representing the tab icon.
+     */
     renderIcon(data: TabBar.IRenderData<any>): VirtualElement {
       let className = this.createIconClass(data);
       return h.div({ className });
@@ -1205,15 +1221,6 @@ namespace Private {
     private _refreshVisibility(): void {
       this._sideBar.setHidden(this._sideBar.titles.length === 0);
       this._stackedPanel.setHidden(this._sideBar.currentTitle === null);
-
-      // filthy hack to get the tab icons
-      for (let title of this._sideBar.titles) {
-        defaultIconRegistry.override({
-          className: title.iconClass,
-          center: true,
-          kind: 'sideBar'
-        });
-      }
     }
 
     /**

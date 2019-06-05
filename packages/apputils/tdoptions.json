@@ -1,5 +1,4 @@
 {
-  "exclude": ["**/node_modules/@jupyterlab/*/lib/**"],
   "excludeNotExported": true,
   "mode": "file",
   "target": "es5",

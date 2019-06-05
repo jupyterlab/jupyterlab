@@ -79,16 +79,15 @@ export class IconRegistry {
         : IconRegistry.iconClassName(icon.name);
       this._classNameToName[className] = icon.name;
       this._nameToClassName[icon.name] = className;
-      this._svgs[icon.name] = icon.svg;
+      this._svg[icon.name] = icon.svg;
     });
   }
 
-  get classNameToName(): { [key: string]: string } {
-    return this._classNameToName;
-  }
+  classNameToName(className: string): string {
+    // for now, just assume that the first className is the relevant one
+    let name = className.split(/\s+/)[0];
 
-  get nameToClassName(): { [key: string]: string } {
-    return this._nameToClassName;
+    return name in this._classNameToName ? this._classNameToName[name] : 'bad';
   }
 
   /**
@@ -98,7 +97,13 @@ export class IconRegistry {
     props: IconRegistry.IIconOptions & { container: HTMLElement } & IIconStyle
   ): HTMLElement {
     const { name, className, title, container, ...propsStyle } = props;
-    let svgNode = Private.parseSvg(this.svg(name));
+
+    // if name not in _svg, assume we've been handed a className in place of name
+    let svg =
+      !(name in this._svg) && name.startsWith('jp-')
+        ? this.svg(this.classNameToName(name))
+        : this.svg(name);
+    let svgNode = Private.parseSvg(svg);
 
     if (title) {
       Private.setTitleSvg(svgNode, title);
@@ -151,22 +156,11 @@ export class IconRegistry {
   ) {
     const { name, className, title, ...propsStyle } = props;
 
-    let usedname = name;
-    if (!usedname) {
-      // for now, just assume that the first className is the relevant one
-      usedname = className.split(/\s+/)[0];
-
-      usedname =
-        usedname in this._classNameToName
-          ? this._classNameToName[usedname]
-          : 'bad';
-    }
-
     for (let container of document.getElementsByClassName(
       className
     ) as HTMLCollectionOf<HTMLElement>) {
       this.icon({
-        name: usedname,
+        name: name ? name : this.classNameToName(className),
         title: title,
         container: container,
         ...propsStyle
@@ -175,11 +169,12 @@ export class IconRegistry {
   }
 
   svg(name: string): string {
-    if (!(name in this._svgs)) {
+    if (!(name in this._svg)) {
       console.error(`Invalid icon name: ${name}`);
+      return this._svg['bad'];
     }
 
-    return this._svgs[name];
+    return this._svg[name];
   }
 
   static iconClassName(name: string): string {
@@ -188,7 +183,7 @@ export class IconRegistry {
 
   private _classNameToName: { [key: string]: string } = Object.create(null);
   private _nameToClassName: { [key: string]: string } = Object.create(null);
-  private _svgs: { [key: string]: string } = Object.create(null);
+  private _svg: { [key: string]: string } = Object.create(null);
 }
 
 /**
@@ -217,6 +212,9 @@ export namespace IconRegistry {
     className?: string;
     title?: string;
   }
+
+  // needs the explicit type to avoid a typedoc issue
+  export const defaultIcons: ReadonlyArray<IconRegistry.IModel> = _defaultIcons;
 }
 
 namespace Private {
