@@ -245,8 +245,9 @@ async function activateConsole(
     )).composite as string;
     panel.console.node.dataset.jpInteractionMode = interactionMode;
 
-    // Add the console panel to the tracker and wait for it to be ready.
-    await Promise.all([tracker.add(panel), panel.session.ready]);
+    // Add the console panel to the tracker. We want the panel to show up before
+    // any kernel selection dialog, so we do not await panel.session.ready;
+    await tracker.add(panel);
     panel.session.propertyChanged.connect(() => tracker.save(panel));
 
     shell.add(panel, 'main', {
