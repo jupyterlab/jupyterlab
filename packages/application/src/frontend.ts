@@ -43,7 +43,7 @@ export abstract class JupyterFrontEnd<
     // The default restored promise if one does not exist in the options.
     const restored = new Promise<void>(resolve => {
       requestAnimationFrame(() => {
-        resolve();
+        resolve(void 0);
       });
     });
 
