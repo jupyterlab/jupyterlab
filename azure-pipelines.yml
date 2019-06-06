@@ -17,7 +17,6 @@ jobs:
           testResultsFiles: 'junit.xml'
         Usage:
           group: 'usage'
-          python.version: '3.5'
         Docs:
           group: 'docs'
 
