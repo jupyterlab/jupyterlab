@@ -20,7 +20,6 @@
 
 .p-DockPanel-tabBar {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
-  overflow: visible;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
 }
