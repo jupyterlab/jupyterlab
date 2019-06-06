@@ -607,7 +607,7 @@ namespace Private {
     workspace = ''
   ): string {
     return workspace
-      ? URLExt.join(urls.base, urls.workspaces, workspace)
-      : URLExt.join(urls.base, urls.page);
+      ? URLExt.join(urls.workspaces, workspace)
+      : URLExt.join(urls.page);
   }
 }

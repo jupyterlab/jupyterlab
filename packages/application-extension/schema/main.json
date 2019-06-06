@@ -15,7 +15,7 @@
     },
     {
       "command": "application:close",
-      "keys": ["Accel W"],
+      "keys": ["Alt W"],
       "selector": ".jp-Activity"
     },
     {

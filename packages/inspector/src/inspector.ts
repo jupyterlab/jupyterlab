@@ -18,6 +18,11 @@ const PANEL_CLASS = 'jp-Inspector';
 const CONTENT_CLASS = 'jp-Inspector-content';
 
 /**
+ * The class name added to default inspector content.
+ */
+const DEFAULT_CONTENT_CLASS = 'jp-Inspector-default-content';
+
+/**
  * A panel which contains a set of inspectors.
  */
 export class InspectorPanel extends Panel
@@ -28,6 +33,7 @@ export class InspectorPanel extends Panel
   constructor() {
     super();
     this.addClass(PANEL_CLASS);
+    (this.layout as PanelLayout).addWidget(this._content);
   }
 
   /**
@@ -92,17 +98,14 @@ export class InspectorPanel extends Panel
     const { content } = args;
 
     // Update the content of the inspector widget.
-    if (content === this._content) {
+    if (!content || content === this._content) {
       return;
     }
-    if (this._content) {
-      this._content.dispose();
-    }
+    this._content.dispose();
+
     this._content = content;
-    if (content) {
-      content.addClass(CONTENT_CLASS);
-      (this.layout as PanelLayout).addWidget(content);
-    }
+    content.addClass(CONTENT_CLASS);
+    (this.layout as PanelLayout).addWidget(content);
   }
 
   /**
@@ -112,6 +115,18 @@ export class InspectorPanel extends Panel
     this.source = null;
   }
 
-  private _content: Widget | null = null;
+  private _content: Widget = Private.defaultContent();
   private _source: IInspector.IInspectable | null = null;
+}
+
+namespace Private {
+  export function defaultContent() {
+    const defaultContent = new Widget();
+    defaultContent.node.innerHTML =
+      '<p>Click on a function to see documentation.</p>';
+    defaultContent.addClass(CONTENT_CLASS);
+    defaultContent.addClass(DEFAULT_CONTENT_CLASS);
+
+    return defaultContent;
+  }
 }

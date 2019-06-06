@@ -46,3 +46,11 @@
   background-image: var(--jp-icon-inspector);
   transform: scaleX(-1);
 }
+
+.jp-Inspector-default-content {
+  align-items: center;
+  justify-content: center;
+  font-size: xx-large;
+  font-style: italic;
+  color: darkgray;
+}

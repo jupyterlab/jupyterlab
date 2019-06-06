@@ -564,7 +564,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   palette.addItem({ command: CommandIDs.closeAll, category });
 
   commands.addCommand(CommandIDs.closeOtherTabs, {
-    label: () => `Close Other Tabs`,
+    label: () => `Close All Other Tabs`,
     isEnabled: () => {
       // Ensure there are at least two widgets.
       const iterator = shell.widgets('main');
