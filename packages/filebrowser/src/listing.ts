@@ -1771,13 +1771,13 @@ export namespace DirListing {
             kind: 'listing'
           });
 
-          // filthy hack to get the topbar tab icons
-          defaultIconRegistry.override({
-            name: fileType.iconName,
-            className: ['p-TabBar-tabIcon', fileType.iconClass].join(' '),
-            center: true,
-            kind: 'tab'
-          });
+          // // filthy hack to get the topbar tab icons
+          // defaultIconRegistry.override({
+          //   name: fileType.iconName,
+          //   className: ['p-TabBar-tabIcon', fileType.iconClass].join(' '),
+          //   center: true,
+          //   kind: 'tab'
+          // });
         } else {
           // add icon as CSS background image. Can't be styled using CSS
           icon.textContent = fileType.iconLabel || '';

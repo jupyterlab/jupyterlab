@@ -2,22 +2,26 @@ import { Message } from '@phosphor/messaging';
 
 import { h, VirtualElement } from '@phosphor/virtualdom';
 
-import { TabBar, Widget } from '@phosphor/widgets';
+import { TabBar } from '@phosphor/widgets';
 
-import { defaultIconRegistry } from './icon';
+import { iconKindType } from './icon';
+import { defaultIconRegistry } from './iconregistry';
 
-export class TabBarSvg extends TabBar<Widget> {
+export class TabBarSvg<T> extends TabBar<T> {
   /**
    * Construct a new tab bar. Sets the (icon) kind and overrides
    * the default renderer.
    *
    * @param options - The options for initializing the tab bar.
    */
-  constructor(options: { kind: string } & TabBar.IOptions<Widget>) {
+  constructor(
+    options: { kind: iconKindType; skipbad?: boolean } & TabBar.IOptions<T>
+  ) {
     options.renderer = options.renderer || TabBarSvg.defaultRenderer;
     super(options);
 
     this._kind = options.kind;
+    this._skipbad = options.skipbad;
   }
 
   /**
@@ -37,13 +41,15 @@ export class TabBarSvg extends TabBar<Widget> {
           name: title.iconClass,
           container: iconNode,
           center: true,
-          kind: this._kind
+          kind: this._kind,
+          skipbad: this._skipbad
         });
       }
     }
   }
 
-  protected _kind: string;
+  protected _kind: iconKindType;
+  protected _skipbad: boolean;
 }
 
 export namespace TabBarSvg {

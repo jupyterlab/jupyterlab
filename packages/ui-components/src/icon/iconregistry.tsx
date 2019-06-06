@@ -83,11 +83,19 @@ export class IconRegistry {
     });
   }
 
-  classNameToName(className: string): string {
-    // for now, just assume that the first className is the relevant one
-    let name = className.split(/\s+/)[0];
+  resolveName(name: string): string {
+    if (!(name in this._svg)) {
+      // assume name is really a className, split the className into parts and check each part
+      for (let className of name.split(/\s+/)) {
+        if (className in this._classNameToName) {
+          return this._nameToClassName[className];
+        }
+      }
+      // couldn't resolve name, mark as bad
+      return 'bad';
+    }
 
-    return name in this._classNameToName ? this._classNameToName[name] : 'bad';
+    return name;
   }
 
   /**
@@ -96,13 +104,15 @@ export class IconRegistry {
   icon(
     props: IconRegistry.IIconOptions & { container: HTMLElement } & IIconStyle
   ): HTMLElement {
-    const { name, className, title, container, ...propsStyle } = props;
+    const { name, className, title, skipbad, container, ...propsStyle } = props;
 
     // if name not in _svg, assume we've been handed a className in place of name
-    let svg =
-      !(name in this._svg) && name.startsWith('jp-')
-        ? this.svg(this.classNameToName(name))
-        : this.svg(name);
+    let svg = this.svg(name, skipbad);
+    if (!svg) {
+      // bail
+      return;
+    }
+
     let svgNode = Private.parseSvg(svg);
 
     if (title) {
@@ -140,41 +150,61 @@ export class IconRegistry {
   iconReact(
     props: IconRegistry.IIconOptions & { tag?: 'div' | 'span' } & IIconStyle
   ): React.ReactElement {
-    const { name, className, title, tag, ...propsStyle } = props;
+    const { name, className, title, skipbad, tag, ...propsStyle } = props;
     const Tag = tag || 'div';
+
+    let svg = this.svg(name, skipbad);
+    if (!svg) {
+      // bail
+      return;
+    }
 
     return (
       <Tag
         className={classes(className, propsStyle ? iconStyle(propsStyle) : '')}
-        dangerouslySetInnerHTML={{ __html: this.svg(name) }}
+        dangerouslySetInnerHTML={{ __html: svg }}
       />
     );
   }
 
-  override(
-    props: { className: string; name?: string; title?: string } & IIconStyle
-  ) {
-    const { name, className, title, ...propsStyle } = props;
+  // override(
+  //   props: { className: string; name?: string; title?: string } & IIconStyle
+  // ) {
+  //   let { name, className, title, ...propsStyle } = props;
+  //
+  //   // try to resolve name
+  //   name = name ? name : this.classNameToName(className);
+  //   if (!name) {
+  //     // bail
+  //     return;
+  //   }
+  //
+  //   for (let container of document.getElementsByClassName(
+  //     className
+  //   ) as HTMLCollectionOf<HTMLElement>) {
+  //     this.icon({
+  //       name: name,
+  //       title: title,
+  //       container: container,
+  //       ...propsStyle
+  //     });
+  //   }
+  // }
 
-    for (let container of document.getElementsByClassName(
-      className
-    ) as HTMLCollectionOf<HTMLElement>) {
-      this.icon({
-        name: name ? name : this.classNameToName(className),
-        title: title,
-        container: container,
-        ...propsStyle
-      });
+  svg(name: string, skipbad: boolean = false): string {
+    let svgname = this.resolveName(name);
+
+    if (name === 'bad') {
+      if (!skipbad) {
+        // log a warning and mark missing icons with an X
+        console.error(`Invalid icon name: ${name}`);
+      } else {
+        // silently return empty string
+        return '';
+      }
     }
-  }
 
-  svg(name: string): string {
-    if (!(name in this._svg)) {
-      console.error(`Invalid icon name: ${name}`);
-      return this._svg['bad'];
-    }
-
-    return this._svg[name];
+    return this._svg[svgname];
   }
 
   static iconClassName(name: string): string {
@@ -211,6 +241,7 @@ export namespace IconRegistry {
     name: string;
     className?: string;
     title?: string;
+    skipbad?: boolean;
   }
 
   // needs the explicit type to avoid a typedoc issue

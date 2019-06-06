@@ -4,7 +4,7 @@
 import { style } from 'typestyle/lib';
 import { NestedCSSProperties } from 'typestyle/lib/types';
 
-type iconKindType = 'listing' | 'sideBar' | 'statusBar' | 'tab' | 'unset';
+import { iconKindType } from '../icon';
 
 export interface IIconStyle extends NestedCSSProperties {
   /**

@@ -5,7 +5,7 @@ import { Debouncer } from '@jupyterlab/coreutils';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { defaultIconRegistry } from '@jupyterlab/ui-components';
+import { TabBarSvg } from '@jupyterlab/ui-components';
 
 import { ArrayExt, find, IIterator, iter, toArray } from '@phosphor/algorithm';
 
@@ -14,8 +14,6 @@ import { PromiseDelegate, Token } from '@phosphor/coreutils';
 import { Message, MessageLoop, IMessageHandler } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
-
-import { h, VirtualElement } from '@phosphor/virtualdom';
 
 import {
   BoxLayout,
@@ -1024,44 +1022,44 @@ namespace Private {
     });
   }
 
-  class SideBar extends TabBar<Widget> {
-    /**
-     * A message handler invoked on an `'update-request'` message.
-     */
-    protected onUpdateRequest(msg: Message): void {
-      super.onUpdateRequest(msg);
-
-      for (let itab in this.contentNode.children) {
-        let tab = this.contentNode.children[itab];
-        let title = this.titles[itab];
-        let iconNode = tab.children ? (tab.children[0] as HTMLElement) : null;
-
-        if (iconNode && iconNode.children.length < 1) {
-          // add the svg node, if not already present
-          defaultIconRegistry.icon({
-            name: title.iconClass,
-            container: iconNode,
-            center: true,
-            kind: 'sideBar'
-          });
-        }
-      }
-    }
-  }
-
-  class SideBarRenderer extends TabBar.Renderer {
-    /**
-     * Render the icon element for a tab.
-     *
-     * @param data - The data to use for rendering the tab.
-     *
-     * @returns A virtual element representing the tab icon.
-     */
-    renderIcon(data: TabBar.IRenderData<any>): VirtualElement {
-      let className = this.createIconClass(data);
-      return h.div({ className });
-    }
-  }
+  // class SideBar extends TabBar<Widget> {
+  //   /**
+  //    * A message handler invoked on an `'update-request'` message.
+  //    */
+  //   protected onUpdateRequest(msg: Message): void {
+  //     super.onUpdateRequest(msg);
+  //
+  //     for (let itab in this.contentNode.children) {
+  //       let tab = this.contentNode.children[itab];
+  //       let title = this.titles[itab];
+  //       let iconNode = tab.children ? (tab.children[0] as HTMLElement) : null;
+  //
+  //       if (iconNode && iconNode.children.length < 1) {
+  //         // add the svg node, if not already present
+  //         defaultIconRegistry.icon({
+  //           name: title.iconClass,
+  //           container: iconNode,
+  //           center: true,
+  //           kind: 'sideBar'
+  //         });
+  //       }
+  //     }
+  //   }
+  // }
+  //
+  // class SideBarRenderer extends TabBar.Renderer {
+  //   /**
+  //    * Render the icon element for a tab.
+  //    *
+  //    * @param data - The data to use for rendering the tab.
+  //    *
+  //    * @returns A virtual element representing the tab icon.
+  //    */
+  //   renderIcon(data: TabBar.IRenderData<any>): VirtualElement {
+  //     let className = this.createIconClass(data);
+  //     return h.div({ className });
+  //   }
+  // }
 
   /**
    * A class which manages a side bar and related stacked panel.
@@ -1071,11 +1069,11 @@ namespace Private {
      * Construct a new side bar handler.
      */
     constructor(side: string) {
-      this._sideBar = new SideBar({
+      this._sideBar = new TabBarSvg<Widget>({
+        kind: 'sideBar',
         insertBehavior: 'none',
         removeBehavior: 'none',
-        allowDeselect: true,
-        renderer: new SideBarRenderer()
+        allowDeselect: true
       });
       this._stackedPanel = new StackedPanel();
       this._sideBar.hide();
