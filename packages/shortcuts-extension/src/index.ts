@@ -164,7 +164,21 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
         .sort((a, b) => a.command.localeCompare(b.command));
       schema.properties.shortcuts.title =
         'List of Commands (followed by shortcuts)';
+
+      const disableShortcutInstructions = `Note: To disable a system default shortcut,
+copy it to User Preferences and add the
+"disabled" key, for example:
+{
+    "command": "application:activate-next-tab",
+    "keys": [
+        "Ctrl Shift ]"
+    ],
+    "selector": "body",
+    "disabled": true
+}`;
       schema.properties.shortcuts.description = `${commands}
+
+${disableShortcutInstructions}
 
 List of Keyboard Shortcuts`;
     }
