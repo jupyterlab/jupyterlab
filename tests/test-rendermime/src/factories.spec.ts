@@ -135,6 +135,7 @@ describe('rendermime/factories', () => {
     describe('#createRenderer()', () => {
       it('should create an img element with the uri encoded svg inline', async () => {
         const source = '<svg></svg>';
+        const displaySource = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
         const f = svgRendererFactory;
         const mimeType = 'image/svg+xml';
         const model = createModel(mimeType, source, true);
@@ -142,7 +143,7 @@ describe('rendermime/factories', () => {
         await w.renderModel(model);
         const imgEl = w.node.getElementsByTagName('img')[0];
         expect(imgEl).to.be.ok;
-        expect(imgEl.src).to.contain(encodeURIComponent(source));
+        expect(imgEl.src).to.contain(encodeURIComponent(displaySource));
       });
     });
   });
