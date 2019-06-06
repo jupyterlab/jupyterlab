@@ -52,6 +52,7 @@ uninstall_flags['all'] = (
 aliases = dict(base_aliases)
 aliases['app-dir'] = 'BaseExtensionApp.app_dir'
 aliases['dev-build'] = 'BaseExtensionApp.dev_build'
+aliases['npm-registry'] = 'BaseExtensionApp.npm_registry'
 
 VERSION = get_app_version()
 
@@ -61,17 +62,20 @@ class BaseExtensionApp(JupyterApp):
     flags = flags
     aliases = aliases
 
+    npm_registry = Unicode(
+        '', config=True, help="The npm registry to install extensions")
+
     app_dir = Unicode('', config=True,
-        help="The app directory to target")
+                      help="The app directory to target")
 
     should_build = Bool(True, config=True,
-        help="Whether to build the app after the action")
+                        help="Whether to build the app after the action")
 
     dev_build = Bool(True, config=True,
-        help="Whether to build in dev mode (defaults to dev mode)")
+                     help="Whether to build in dev mode (defaults to dev mode)")
 
     should_clean = Bool(False, config=True,
-        help="Whether temporary files should be cleaned up after building jupyterlab")
+                        help="Whether temporary files should be cleaned up after building jupyterlab")
 
     def start(self):
         if self.app_dir and self.app_dir.startswith(HERE):
@@ -81,7 +85,7 @@ class BaseExtensionApp(JupyterApp):
             if ans and self.should_build:
                 command = 'build:prod' if not self.dev_build else 'build'
                 build(app_dir=self.app_dir, clean_staging=self.should_clean,
-                      logger=self.log, command=command)
+                      logger=self.log, command=command, npm_registry=self.npm_registry)
         except Exception as ex:
             _, _, exc_traceback = sys.exc_info()
             msg = traceback.format_exception(ex.__class__, ex, exc_traceback)
@@ -104,8 +108,10 @@ class InstallLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
+        print('-- install: ', self.npm_registry)
         return any([
-            install_extension(arg, self.app_dir, logger=self.log)
+            install_extension(arg, self.app_dir, logger=self.log,
+                              npm_registry=self.npm_registry)
             for arg in self.extra_args
         ])
 
@@ -115,16 +121,18 @@ class UpdateLabExtensionApp(BaseExtensionApp):
     flags = update_flags
 
     all = Bool(False, config=True,
-        help="Whether to update all extensions")
+               help="Whether to update all extensions")
 
     def run_task(self):
         if not self.all and not self.extra_args:
-            self.log.warn('Specify an extension to update, or use --all to update all extensions')
+            self.log.warn(
+                'Specify an extension to update, or use --all to update all extensions')
             return False
         if self.all:
-            return update_extension(all_=True, app_dir=self.app_dir, logger=self.log)
+            return update_extension(all_=True, app_dir=self.app_dir, logger=self.log, npm_registry=self.npm_registry)
         return any([
-            update_extension(name=arg, app_dir=self.app_dir, logger=self.log)
+            update_extension(name=arg, app_dir=self.app_dir,
+                             logger=self.log, npm_registry=self.npm_registry)
             for arg in self.extra_args
         ])
 
@@ -138,7 +146,7 @@ class LinkLabExtensionApp(BaseExtensionApp):
     `jupyter lab build` is run.
     """
     should_build = Bool(True, config=True,
-        help="Whether to build the app after the action")
+                        help="Whether to build the app after the action")
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
@@ -164,12 +172,13 @@ class UninstallLabExtensionApp(BaseExtensionApp):
     flags = uninstall_flags
 
     all = Bool(False, config=True,
-        help="Whether to uninstall all extensions")
+               help="Whether to uninstall all extensions")
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
         return any([
-            uninstall_extension(arg, all_=self.all, app_dir=self.app_dir, logger=self.log)
+            uninstall_extension(arg, all_=self.all,
+                                app_dir=self.app_dir, logger=self.log, npm_registry=self.npm_registry)
             for arg in self.extra_args
         ])
 
@@ -202,7 +211,7 @@ class CheckLabExtensionsApp(BaseExtensionApp):
     flags = check_flags
 
     should_check_installed_only = Bool(False, config=True,
-        help="Whether it should check only if the extensions is installed")
+                                       help="Whether it should check only if the extensions is installed")
 
     def run_task(self):
         all_enabled = all(

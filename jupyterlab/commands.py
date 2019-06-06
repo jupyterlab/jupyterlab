@@ -239,7 +239,7 @@ def watch(app_dir=None, logger=None):
     return handler.watch()
 
 
-def install_extension(extension, app_dir=None, logger=None):
+def install_extension(extension, app_dir=None, logger=None, npm_registry=None):
     """Install an extension package into JupyterLab.
 
     The extension is first validated.
@@ -248,7 +248,7 @@ def install_extension(extension, app_dir=None, logger=None):
     """
     logger = _ensure_logger(logger)
     _node_check(logger)
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, npm_registry=npm_registry)
     return handler.install_extension(extension)
 
 
@@ -265,7 +265,7 @@ def uninstall_extension(name=None, app_dir=None, logger=None, all_=False):
     return handler.uninstall_extension(name)
 
 
-def update_extension(name=None, all_=False, app_dir=None, logger=None):
+def update_extension(name=None, all_=False, app_dir=None, logger=None, npm_registry=None):
     """Update an extension by name, or all extensions.
 
     Either `name` must be given as a string, or `all_` must be `True`.
@@ -275,7 +275,7 @@ def update_extension(name=None, all_=False, app_dir=None, logger=None):
     """
     logger = _ensure_logger(logger)
     _node_check(logger)
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, npm_registry=npm_registry)
     if all_ is True:
         return handler.update_all_extensions()
     return handler.update_extension(name)
@@ -299,12 +299,12 @@ def clean(app_dir=None, logger=None):
 
 def build(app_dir=None, name=None, version=None, public_url=None,
           logger=None, command='build:prod', kill_event=None,
-          clean_staging=False):
+          clean_staging=False, npm_registry=None):
     """Build the JupyterLab application.
     """
     logger = _ensure_logger(logger)
     _node_check(logger)
-    handler = _AppHandler(app_dir, logger, kill_event=kill_event)
+    handler = _AppHandler(app_dir, logger, kill_event=kill_event, npm_registry=npm_registry)
     return handler.build(name=name, version=version, public_url=public_url,
                          command=command, clean_staging=clean_staging)
 
@@ -412,7 +412,7 @@ def read_package(target):
 
 class _AppHandler(object):
 
-    def __init__(self, app_dir, logger=None, kill_event=None):
+    def __init__(self, app_dir, logger=None, kill_event=None, npm_registry=None):
         """Create a new _AppHandler object
         """
         self.app_dir = app_dir or get_app_dir()
@@ -421,7 +421,8 @@ class _AppHandler(object):
         self.info = self._get_app_info()
         self.kill_event = kill_event or Event()
         # TODO: Make this configurable
-        self.registry = 'https://registry.npmjs.org'
+        self.registry = npm_registry or 'https://registry.npmjs.org'
+
 
     def install_extension(self, extension, existing=None):
         """Install an extension package into JupyterLab.
@@ -1371,7 +1372,7 @@ class _AppHandler(object):
 
         info = dict(source=source, is_dir=is_dir)
 
-        ret = self._run([which('npm'), 'pack', source], cwd=tempdir, quiet=quiet)
+        ret = self._run([which('npm'), 'pack', source, '--registry', self.registry], cwd=tempdir, quiet=quiet)
         if ret != 0:
             msg = '"%s" is not a valid npm package'
             raise ValueError(msg % source)
@@ -1458,7 +1459,7 @@ class _AppHandler(object):
         if not keys:
             return versions
         with TemporaryDirectory() as tempdir:
-            ret = self._run([which('npm'), 'pack'] + keys, cwd=tempdir, quiet=True)
+            ret = self._run([which('npm'), 'pack'] + keys + ['--registry', self.registry], cwd=tempdir, quiet=True)
             if ret != 0:
                 msg = '"%s" is not a valid npm package'
                 raise ValueError(msg % keys)
