@@ -173,7 +173,7 @@ function Item<M>(props: SessionProps<M> & { model: M }) {
         className={`${SHUTDOWN_BUTTON_CLASS} jp-mod-styled`}
         onClick={() => props.shutdown(model)}
       >
-        SHUT DOWN
+        SHUT&nbsp;DOWN
       </button>
     </li>
   );
