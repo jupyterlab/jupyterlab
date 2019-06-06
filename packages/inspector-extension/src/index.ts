@@ -50,8 +50,8 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
   ): IInspector => {
     const { commands, shell } = app;
     const command = CommandIDs.open;
-    const label = 'Open Inspector';
-    const title = 'Inspector';
+    const label = 'Open Interactive Help';
+    const title = 'Interactive Help';
     const namespace = 'inspector';
     const tracker = new InstanceTracker<MainAreaWidget<InspectorPanel>>({
       namespace
