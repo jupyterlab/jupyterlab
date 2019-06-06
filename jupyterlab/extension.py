@@ -206,10 +206,9 @@ def load_jupyter_server_extension(nbapp):
 
     # If running under JupyterHub, add more metadata.
     if hasattr(nbapp, 'hub_prefix'):
-        logger.error('******\nhey, got a prefix\n\n')
-        page_config['hub_prefix'] = nbapp.hub_prefix
-        page_config['hub_host'] = nbapp.hub_host
-        page_config['hub_user'] = nbapp.user
+        settings['page_config_data']['hubPrefix'] = nbapp.hub_prefix
+        settings['page_config_data']['hubHost'] = nbapp.hub_host
+        settings['page_config_data']['hubUser'] = nbapp.user
         api_token = os.getenv('JUPYTERHUB_API_TOKEN', '')
         page_config['token'] = api_token
     else:

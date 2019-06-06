@@ -12,7 +12,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
@@ -30,12 +30,13 @@ export namespace CommandIDs {
  */
 function activateHubExtension(
   app: JupyterFrontEnd,
+  paths: JupyterFrontEnd.IPaths,
   palette: ICommandPalette,
   mainMenu: IMainMenu
 ): void {
-  const hubHost = PageConfig.getOption('hub_host');
-  const hubPrefix = PageConfig.getOption('hub_prefix');
-  const baseUrl = PageConfig.getBaseUrl();
+  const hubHost = paths.urls.hubHost;
+  const hubPrefix = paths.urls.hubPrefix;
+  const baseUrl = paths.urls.base;
 
   // Bail if not running on JupyterHub.
   if (!hubPrefix) {
@@ -82,7 +83,7 @@ function activateHubExtension(
 const hubExtension: JupyterFrontEndPlugin<void> = {
   activate: activateHubExtension,
   id: 'jupyter.extensions.hub-extension',
-  requires: [ICommandPalette, IMainMenu],
+  requires: [JupyterFrontEnd.IPaths, ICommandPalette, IMainMenu],
   autoStart: true
 };
 

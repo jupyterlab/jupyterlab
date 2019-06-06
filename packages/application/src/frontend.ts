@@ -272,6 +272,8 @@ export namespace JupyterFrontEnd {
       readonly themes: string;
       readonly tree: string;
       readonly workspaces: string;
+      readonly hubPrefix?: string;
+      readonly hubHost?: string;
     };
 
     /**
