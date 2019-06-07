@@ -894,7 +894,7 @@ namespace Private {
   export const keyProperty = new AttachedProperty<
     ILauncher.IGroupedItemOptions,
     number
-  >({
+  >({ 
     name: 'key',
     create: () => id++
   });
