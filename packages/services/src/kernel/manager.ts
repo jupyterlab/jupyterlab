@@ -116,7 +116,7 @@ export class KernelManager implements Kernel.IManager {
   /**
    * A signal emitted when there is a connection failure.
    */
-  get connectionFailure(): ISignal<this, ServerConnection.NetworkError> {
+  get connectionFailure(): ISignal<this, Error> {
     return this._connectionFailure;
   }
 
@@ -280,7 +280,12 @@ export class KernelManager implements Kernel.IManager {
    */
   protected async requestRunning(): Promise<void> {
     const models = await Kernel.listRunning(this.serverSettings).catch(err => {
-      if (err instanceof ServerConnection.NetworkError) {
+      // Check for a network error, or a 503 error, which is returned
+      // by a JupyterHub when a server is shut down.
+      if (
+        err instanceof ServerConnection.NetworkError ||
+        (err.response && err.response.status === 503)
+      ) {
         this._connectionFailure.emit(err);
         return [] as Kernel.IModel[];
       }
@@ -354,9 +359,7 @@ export class KernelManager implements Kernel.IManager {
   private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
   private _specs: Kernel.ISpecModels | null = null;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
-  private _connectionFailure = new Signal<this, ServerConnection.NetworkError>(
-    this
-  );
+  private _connectionFailure = new Signal<this, Error>(this);
 }
 
 /**

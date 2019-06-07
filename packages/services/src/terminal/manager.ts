@@ -69,7 +69,7 @@ export class TerminalManager implements TerminalSession.IManager {
   /**
    * A signal emitted when there is a connection failure.
    */
-  get connectionFailure(): ISignal<this, ServerConnection.NetworkError> {
+  get connectionFailure(): ISignal<this, Error> {
     return this._connectionFailure;
   }
 
@@ -246,7 +246,12 @@ export class TerminalManager implements TerminalSession.IManager {
   protected async requestRunning(): Promise<void> {
     const models = await TerminalSession.listRunning(this.serverSettings).catch(
       err => {
-        if (err instanceof ServerConnection.NetworkError) {
+        // Check for a network error, or a 503 error, which is returned
+        // by a JupyterHub when a server is shut down.
+        if (
+          err instanceof ServerConnection.NetworkError ||
+          (err.response && err.response.status === 503)
+        ) {
           this._connectionFailure.emit(err);
           return [] as TerminalSession.IModel[];
         }
@@ -325,9 +330,7 @@ export class TerminalManager implements TerminalSession.IManager {
   private _sessions = new Set<TerminalSession.ISession>();
   private _ready: Promise<void>;
   private _runningChanged = new Signal<this, TerminalSession.IModel[]>(this);
-  private _connectionFailure = new Signal<this, ServerConnection.NetworkError>(
-    this
-  );
+  private _connectionFailure = new Signal<this, Error>(this);
 }
 
 /**
