@@ -252,14 +252,14 @@ def install_extension(extension, app_dir=None, logger=None, npm_registry=None):
     return handler.install_extension(extension)
 
 
-def uninstall_extension(name=None, app_dir=None, logger=None, all_=False):
+def uninstall_extension(name=None, app_dir=None, logger=None, all_=False, npm_registry=None):
     """Uninstall an extension by name or path.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     logger = _ensure_logger(logger)
     _node_check(logger)
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, npm_registry=npm_registry)
     if all_ is True:
         return handler.uninstall_all_extensions()
     return handler.uninstall_extension(name)
