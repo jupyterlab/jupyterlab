@@ -1,4 +1,5 @@
 import os
+import warnings
 
 from traitlets import default
 
@@ -18,8 +19,9 @@ else:
             return "/lab"
 
         def init_webapp(self, *args, **kwargs):
-             warnings.warn(
-                "SingleUserLabApp is deprecated, use SingleUserNotebookApp and set " + "c.Spawner.default_url = '/lab' in jupyterhub_config.py", DeprecationWarning
+            warnings.warn(
+                "SingleUserLabApp is deprecated, use SingleUserNotebookApp and set " + \
+                "c.Spawner.default_url = '/lab' in jupyterhub_config.py", DeprecationWarning
             )
             super().init_webapp(*args, **kwargs)
 
