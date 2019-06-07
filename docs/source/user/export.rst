@@ -21,6 +21,10 @@ To access these options, while a notebook is open, browse the File menu:
    :align: center
    :class: jp-screenshot
 
+Note: The exporting options depend on your nbconvert configuration. For more
+information visit the
+`official nbconvert documentation <https://nbconvert.readthedocs.io/en/latest/>`__.
+
 .. _user_export_revealjs:
 
 Reveal.js Slides
