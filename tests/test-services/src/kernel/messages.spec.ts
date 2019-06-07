@@ -161,6 +161,7 @@ describe('kernel/messages', () => {
         channel: 'stdin',
         session: 'baz',
         content: {
+          status: 'ok',
           value: ''
         }
       });
