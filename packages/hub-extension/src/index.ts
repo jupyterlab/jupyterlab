@@ -3,9 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ICommandPalette } from '@jupyterlab/apputils';
+import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 
 import {
+  ConnectionLost,
+  IConnectionLost,
   IRouter,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -15,6 +17,8 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
+import { ServerConnection, ServiceManager } from '@jupyterlab/services';
+
 /**
  * The command IDs used by the plugin.
  */
@@ -22,6 +26,8 @@ export namespace CommandIDs {
   export const controlPanel: string = 'hub:control-panel';
 
   export const logout: string = 'hub:logout';
+
+  export const restart: string = 'hub:restart';
 }
 
 /**
@@ -49,6 +55,20 @@ function activateHubExtension(
   });
 
   const { commands } = app;
+
+  // TODO: use /spawn/:user/:name
+  // but that requires jupyterhub 1.0
+  // and jupyterlab to pass username, servername to PageConfig
+  const restartUrl =
+    hubHost + URLExt.join(hubPrefix, `spawn?next=${hubPrefix}home`);
+
+  commands.addCommand(CommandIDs.restart, {
+    label: 'Restart Server',
+    caption: 'Request that the Hub restart this server',
+    execute: () => {
+      window.open(restartUrl, '_blank');
+    }
+  });
 
   commands.addCommand(CommandIDs.controlPanel, {
     label: 'Hub Control Panel',
@@ -86,4 +106,58 @@ const hubExtension: JupyterFrontEndPlugin<void> = {
   autoStart: true
 };
 
-export default hubExtension;
+/**
+ * The default JupyterLab connection lost provider. This may be overridden
+ * to provide custom behavior when a connection to the server is lost.
+ *
+ * If the application is being deployed within a JupyterHub context,
+ * this will provide a dialog that prompts the user to restart the server.
+ * Otherwise, it shows an error dialog.
+ */
+const connectionlost: JupyterFrontEndPlugin<IConnectionLost> = {
+  id: '@jupyterlab/apputils-extension:connectionlost',
+  requires: [JupyterFrontEnd.IPaths],
+  activate: (
+    app: JupyterFrontEnd,
+    paths: JupyterFrontEnd.IPaths
+  ): IConnectionLost => {
+    const hubPrefix = paths.urls.hubPrefix || '';
+    const baseUrl = paths.urls.base;
+
+    // Return the default error message if not running on JupyterHub.
+    if (!hubPrefix) {
+      return ConnectionLost;
+    }
+
+    // If we are running on JupyterHub, return a dialog
+    // that prompts the user to restart their server.
+    let showingError = false;
+    const onConnectionLost: IConnectionLost = async (
+      manager: ServiceManager.IManager,
+      err: ServerConnection.NetworkError
+    ): Promise<void> => {
+      if (showingError) {
+        return;
+      }
+      showingError = true;
+      const result = await showDialog({
+        title: 'Server Not Running',
+        body: `Your server at ${baseUrl} is not running.
+Would you like to restart it?`,
+        buttons: [
+          Dialog.okButton({ label: 'Restart' }),
+          Dialog.cancelButton({ label: 'Dismiss' })
+        ]
+      });
+      showingError = false;
+      if (result.button.accept) {
+        await app.commands.execute(CommandIDs.restart);
+      }
+    };
+    return onConnectionLost;
+  },
+  autoStart: true,
+  provides: IConnectionLost
+};
+
+export default [hubExtension, connectionlost] as JupyterFrontEndPlugin<any>[];

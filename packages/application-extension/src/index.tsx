@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ConnectionLost,
   IConnectionLost,
   ILabShell,
   ILabStatus,
@@ -747,19 +746,6 @@ const paths: JupyterFrontEndPlugin<JupyterFrontEnd.IPaths> = {
 };
 
 /**
- * The default JupyterLab connection lost provider. This may be overridden
- * to provide custom behavior when a connection to the server is lost.
- */
-const connectionlost: JupyterFrontEndPlugin<IConnectionLost> = {
-  id: '@jupyterlab/apputils-extension:connectionlost',
-  activate: (app: JupyterFrontEnd): IConnectionLost => {
-    return ConnectionLost;
-  },
-  autoStart: true,
-  provides: IConnectionLost
-};
-
-/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -773,8 +759,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   shell,
   status,
   info,
-  paths,
-  connectionlost
+  paths
 ];
 
 export default plugins;
