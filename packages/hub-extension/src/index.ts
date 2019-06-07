@@ -39,7 +39,7 @@ function activateHubExtension(
   const baseUrl = paths.urls.base;
 
   // Bail if not running on JupyterHub.
-  if (!hubPrefix) {
+  if (!hubPrefix || !hubHost) {
     return;
   }
 
