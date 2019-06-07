@@ -122,6 +122,7 @@ const plugins = [
     }
   }),
   new HtmlWebpackPlugin({
+    chunksSortMode: 'none',
     template: path.join('templates', 'template.html'),
     title: jlab.name || 'JupyterLab'
   }),
