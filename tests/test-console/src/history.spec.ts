@@ -29,6 +29,7 @@ const mockHistory: KernelMessage.IHistoryReplyMsg = {
   buffers: null,
   channel: 'shell',
   content: {
+    status: 'ok',
     history: [[0, 0, 'foo'], [0, 0, 'bar'], [0, 0, 'baz'], [0, 0, 'qux']]
   }
 };
@@ -116,6 +117,9 @@ describe('console/history', () => {
         const history = new TestHistory({ session });
         history.onHistory(mockHistory);
         const result = await history.back('');
+        if (mockHistory.content.status !== 'ok') {
+          throw new Error('Test history reply is not an "ok" reply');
+        }
         const index = mockHistory.content.history.length - 1;
         const last = (mockHistory.content.history[index] as any)[2];
         expect(result).to.equal(last);
@@ -134,6 +138,9 @@ describe('console/history', () => {
         history.onHistory(mockHistory);
         await Promise.all([history.back(''), history.back('')]);
         const result = await history.forward('');
+        if (mockHistory.content.status !== 'ok') {
+          throw new Error('Test history reply is not an "ok" reply');
+        }
         const index = mockHistory.content.history.length - 1;
         const last = (mockHistory.content.history[index] as any)[2];
         expect(result).to.equal(last);

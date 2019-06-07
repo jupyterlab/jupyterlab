@@ -59,6 +59,7 @@ export function makeSettings(
 }
 
 const EXAMPLE_KERNEL_INFO: KernelMessage.IInfoReplyMsg['content'] = {
+  status: 'ok',
   protocol_version: '1',
   implementation: 'a',
   implementation_version: '1',
