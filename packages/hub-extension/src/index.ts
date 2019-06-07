@@ -3,11 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Menu } from '@phosphor/widgets';
-
 import { ICommandPalette } from '@jupyterlab/apputils';
 
 import {
+  IRouter,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -30,16 +29,17 @@ export namespace CommandIDs {
  */
 function activateHubExtension(
   app: JupyterFrontEnd,
+  router: IRouter,
   paths: JupyterFrontEnd.IPaths,
   palette: ICommandPalette,
   mainMenu: IMainMenu
 ): void {
-  const hubHost = paths.urls.hubHost;
-  const hubPrefix = paths.urls.hubPrefix;
+  const hubHost = paths.urls.hubHost || '';
+  const hubPrefix = paths.urls.hubPrefix || '';
   const baseUrl = paths.urls.base;
 
   // Bail if not running on JupyterHub.
-  if (!hubPrefix || !hubHost) {
+  if (!hubPrefix) {
     return;
   }
 
@@ -48,11 +48,10 @@ function activateHubExtension(
     hubPrefix: hubPrefix
   });
 
-  const category = 'Hub';
   const { commands } = app;
 
   commands.addCommand(CommandIDs.controlPanel, {
-    label: 'Control Panel',
+    label: 'Hub Control Panel',
     caption: 'Open the Hub control panel in a new browser tab',
     execute: () => {
       window.open(hubHost + URLExt.join(hubPrefix, 'home'), '_blank');
@@ -60,7 +59,7 @@ function activateHubExtension(
   });
 
   commands.addCommand(CommandIDs.logout, {
-    label: 'Logout',
+    label: 'Log Out',
     caption: 'Log out of the Hub',
     execute: () => {
       window.location.href = hubHost + URLExt.join(baseUrl, 'logout');
@@ -68,13 +67,13 @@ function activateHubExtension(
   });
 
   // Add commands and menu itmes.
-  let menu = new Menu({ commands });
-  menu.title.label = category;
-  [CommandIDs.controlPanel, CommandIDs.logout].forEach(command => {
-    palette.addItem({ command, category });
-    menu.addItem({ command });
-  });
-  mainMenu.addMenu(menu, { rank: 100 });
+  mainMenu.fileMenu.addGroup(
+    [{ command: CommandIDs.controlPanel }, { command: CommandIDs.logout }],
+    100
+  );
+  const category = 'Hub';
+  palette.addItem({ category, command: CommandIDs.controlPanel });
+  palette.addItem({ category, command: CommandIDs.logout });
 }
 
 /**
@@ -83,7 +82,7 @@ function activateHubExtension(
 const hubExtension: JupyterFrontEndPlugin<void> = {
   activate: activateHubExtension,
   id: 'jupyter.extensions.hub-extension',
-  requires: [JupyterFrontEnd.IPaths, ICommandPalette, IMainMenu],
+  requires: [IRouter, JupyterFrontEnd.IPaths, ICommandPalette, IMainMenu],
   autoStart: true
 };
 
