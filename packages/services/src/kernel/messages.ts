@@ -108,6 +108,13 @@ export namespace KernelMessage {
   export function createMessage<T extends IUpdateDisplayDataMsg>(
     options: IOptions<T>
   ): T;
+  export function createMessage<T extends IDebugRequestMsg>(
+    options: IOptions<T>
+  ): T;
+
+  export function createMessage<T extends IDebugReplyMsg>(
+    options: IOptions<T>
+  ): T;
 
   export function createMessage<T extends Message>(options: IOptions<T>): T {
     return {
@@ -154,6 +161,13 @@ export namespace KernelMessage {
     | 'shutdown_request';
 
   /**
+   * Control message types.
+   */
+  export type ControlMessageType = 
+    | 'debug_request'
+    | 'debug_reply';
+
+  /**
    * IOPub message types.
    */
   export type IOPubMessageType =
@@ -180,12 +194,13 @@ export namespace KernelMessage {
   export type MessageType =
     | IOPubMessageType
     | ShellMessageType
+    | ControlMessageType
     | StdinMessageType;
 
   /**
    * The valid Jupyter channel names in a message to a frontend.
    */
-  export type Channel = 'shell' | 'iopub' | 'stdin';
+  export type Channel = 'shell' | 'control' | 'iopub' | 'stdin';
 
   /**
    * Kernel message header content.
@@ -272,6 +287,14 @@ export namespace KernelMessage {
   }
 
   /**
+   * A kernel message on the `'control'` channel.
+   */
+  export interface IControlMessage<T extends ControlMessageType = ControlMessageType>
+    extends IMessage<T> {
+    channel: 'control';
+  }
+
+  /**
    * A kernel message on the `'iopub'` channel.
    */
   export interface IIOPubMessage<T extends IOPubMessageType = IOPubMessageType>
@@ -317,7 +340,9 @@ export namespace KernelMessage {
     | IIsCompleteRequestMsg
     | IStatusMsg
     | IStreamMsg
-    | IUpdateDisplayDataMsg;
+    | IUpdateDisplayDataMsg
+    | IDebugRequestMsg
+    | IDebugReplyMsg;
 
   //////////////////////////////////////////////////
   // IOPub Messages
@@ -955,6 +980,57 @@ export namespace KernelMessage {
    */
   export function isExecuteReplyMsg(msg: IMessage): msg is IExecuteReplyMsg {
     return msg.header.msg_type === 'execute_reply';
+  }
+
+  /**
+   * Debug message types.
+   */
+  export type DebugMessageType =
+    | 'request'
+    | 'response'
+    | 'event';
+
+  /**
+   * Base interface for debug protocol message.
+   */
+  export interface IDebugProtocolMsg<T extends DebugMessageType = DebugMessageType>
+  {
+    seq: number;
+    type: T;
+  }
+
+  /**
+   * The content of a `'debug_request'` message.
+   */
+  export interface IDebugRequest extends IDebugProtocolMsg<'request'> {
+    command: string;
+    arguments?: any;
+  }
+
+  /**
+   * A `'debug_request'` message on the `'control'` channel.
+   */
+  export interface IDebugRequestMsg extends IControlMessage<'debug_request'> {
+    content: IDebugRequest;
+  }
+
+  /**
+   * The content of a `'debug_reply'` message.
+   */
+  export interface IDebugResponse extends IDebugProtocolMsg<'response'> {
+    request_seq: number;
+    success: boolean;
+    command: string;
+    message?: string;
+    body?: any;
+  }
+
+  /**
+   * A `'debug_reply'` message on the `'control'` channel.
+   */
+  export interface IDebugReplyMsg extends IControlMessage<'debug_reply'> {
+    parent_header: IHeader<'debug_request'>;
+    content: IDebugResponse;
   }
 
   /**
