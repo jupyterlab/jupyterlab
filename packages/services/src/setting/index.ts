@@ -40,9 +40,9 @@ export class SettingManager extends DataConnector<
    */
   async fetch(id: string): Promise<ISettingRegistry.IPlugin> {
     const { serverSettings } = this;
-    const { baseUrl, pageUrl } = serverSettings;
+    const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
-    const base = baseUrl + pageUrl;
+    const base = baseUrl + appUrl;
     const url = Private.url(base, id);
     const response = await makeRequest(url, {}, serverSettings);
 
@@ -65,9 +65,9 @@ export class SettingManager extends DataConnector<
    */
   async list(): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }> {
     const { serverSettings } = this;
-    const { baseUrl, pageUrl } = serverSettings;
+    const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
-    const base = baseUrl + pageUrl;
+    const base = baseUrl + appUrl;
     const url = Private.url(base, '');
     const response = await makeRequest(url, {}, serverSettings);
 
@@ -98,9 +98,9 @@ export class SettingManager extends DataConnector<
    */
   async save(id: string, raw: string): Promise<void> {
     const { serverSettings } = this;
-    const { baseUrl, pageUrl } = serverSettings;
+    const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
-    const base = baseUrl + pageUrl;
+    const base = baseUrl + appUrl;
     const url = Private.url(base, id);
     const init = { body: raw, method: 'PUT' };
     const response = await makeRequest(url, init, serverSettings);

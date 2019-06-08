@@ -9,7 +9,7 @@ import {
   PageConfig, URLExt
 } from '@jupyterlab/coreutils';
 
-__webpack_public_path__ = PageConfig.getOption('frontendUrl');
+__webpack_public_path__ = PageConfig.getOption('fullStaticUrl') + '/';
 
 // This needs to come after __webpack_public_path__ is set.
 require('font-awesome/css/font-awesome.min.css');

@@ -1,12 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 // eslint-disable-next-line
-__webpack_public_path__ = URLExt.join(
-  PageConfig.getBaseUrl(),
-  'example/static/'
-);
+__webpack_public_path__ = PageConfig.getOption('fullStaticUrl') + '/';
 
 window.addEventListener('load', async function() {
   var JupyterLab = require('@jupyterlab/application').JupyterLab;

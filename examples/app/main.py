@@ -17,7 +17,7 @@ with open(os.path.join(HERE, 'package.json')) as fid:
     version = json.load(fid)['version']
 
 class ExampleApp(LabServerApp):
-    base_url = '/foo/'
+    base_url = '/foo'
     default_url = Unicode('/example',
                           help='The default URL to redirect to from `/`')
 
@@ -25,7 +25,7 @@ class ExampleApp(LabServerApp):
         app_name = 'JupyterLab Example App',
         app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
         app_version = version,
-        page_url = '/example',
+        app_url = '/example',
         schemas_dir = os.path.join(HERE, 'build', 'schemas'),
         static_dir = os.path.join(HERE, 'build'),
         templates_dir = os.path.join(HERE, 'templates'),
