@@ -68,7 +68,7 @@ export abstract class RenderedCommon extends Widget
    * If the DOM node for this widget already has content, it is emptied
    * before rendering. Subclasses that do not want this behavior
    * (if, for instance, they are using DOM diffing), should override
-   * this method.
+   * this method and not call `super.renderModel()`.
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     // TODO compare model against old model for early bail?
