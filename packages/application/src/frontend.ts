@@ -41,7 +41,7 @@ export abstract class JupyterFrontEnd<
     super(options);
 
     // The default restored promise if one does not exist in the options.
-    const restored = new Promise(resolve => {
+    const restored = new Promise<void>(resolve => {
       requestAnimationFrame(() => {
         resolve();
       });

@@ -206,7 +206,7 @@ export namespace Kernel {
      * received and validated.
      */
     requestComplete(
-      content: KernelMessage.ICompleteRequest
+      content: KernelMessage.ICompleteRequestMsg['content']
     ): Promise<KernelMessage.ICompleteReplyMsg>;
 
     /**
@@ -223,7 +223,7 @@ export namespace Kernel {
      * received and validated.
      */
     requestInspect(
-      content: KernelMessage.IInspectRequest
+      content: KernelMessage.IInspectRequestMsg['content']
     ): Promise<KernelMessage.IInspectReplyMsg>;
 
     /**
@@ -240,7 +240,7 @@ export namespace Kernel {
      * received and validated.
      */
     requestHistory(
-      content: KernelMessage.IHistoryRequest
+      content: KernelMessage.IHistoryRequestMsg['content']
     ): Promise<KernelMessage.IHistoryReplyMsg>;
 
     /**
@@ -265,7 +265,7 @@ export namespace Kernel {
      * **See also:** [[IExecuteReply]]
      */
     requestExecute(
-      content: KernelMessage.IExecuteRequest,
+      content: KernelMessage.IExecuteRequestMsg['content'],
       disposeOnDone?: boolean,
       metadata?: JSONObject
     ): Kernel.IFuture<
@@ -287,7 +287,7 @@ export namespace Kernel {
      * received and validated.
      */
     requestIsComplete(
-      content: KernelMessage.IIsCompleteRequest
+      content: KernelMessage.IIsCompleteRequestMsg['content']
     ): Promise<KernelMessage.IIsCompleteReplyMsg>;
 
     /**
@@ -304,7 +304,7 @@ export namespace Kernel {
      * received and validated.
      */
     requestCommInfo(
-      content: KernelMessage.ICommInfoRequest
+      content: KernelMessage.ICommInfoRequestMsg['content']
     ): Promise<KernelMessage.ICommInfoReplyMsg>;
 
     /**
@@ -315,7 +315,7 @@ export namespace Kernel {
      * #### Notes
      * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
      */
-    sendInputReply(content: KernelMessage.IInputReply): void;
+    sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
 
     /**
      * Connect to a comm, or create a new one.
@@ -830,7 +830,7 @@ export namespace Kernel {
     /**
      * Send an `input_reply` message.
      */
-    sendInputReply(content: KernelMessage.IInputReply): void;
+    sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
   }
 
   /**

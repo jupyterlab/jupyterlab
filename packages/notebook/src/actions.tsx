@@ -1488,7 +1488,7 @@ namespace Private {
               }
 
               if (reply.content.status === 'ok') {
-                const content = reply.content as KernelMessage.IExecuteOkReply;
+                const content = reply.content;
 
                 if (content.payload && content.payload.length) {
                   handlePayload(content, notebook, cell);
@@ -1532,7 +1532,7 @@ namespace Private {
    * See [Payloads (DEPRECATED)](https://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
    */
   function handlePayload(
-    content: KernelMessage.IExecuteOkReply,
+    content: KernelMessage.IExecuteReply,
     notebook: Notebook,
     cell: Cell
   ) {

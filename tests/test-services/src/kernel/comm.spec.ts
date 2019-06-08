@@ -124,6 +124,10 @@ describe('jupyter.services - Comm', () => {
         // Ask the kernel for the list of current comms.
         const msg = await kernel.requestCommInfo({});
 
+        if (msg.content.status !== 'ok') {
+          throw new Error('Message error');
+        }
+
         // Test to make sure the comm we just created is listed.
         const comms = msg.content.comms;
         expect(comms[comm.commId].target_name).to.equal('test');
@@ -136,6 +140,9 @@ describe('jupyter.services - Comm', () => {
       it('should allow an optional target', async () => {
         await kernel.requestExecute({ code: SEND }, true).done;
         const msg = await kernel.requestCommInfo({ target: 'test' });
+        if (msg.content.status !== 'ok') {
+          throw new Error('Message error');
+        }
         const comms = msg.content.comms;
         for (const id in comms) {
           expect(comms[id].target_name).to.equal('test');

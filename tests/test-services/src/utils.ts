@@ -58,7 +58,8 @@ export function makeSettings(
   return ServerConnection.makeSettings(settings);
 }
 
-const EXAMPLE_KERNEL_INFO: KernelMessage.IInfoReply = {
+const EXAMPLE_KERNEL_INFO: KernelMessage.IInfoReplyMsg['content'] = {
+  status: 'ok',
   protocol_version: '1',
   implementation: 'a',
   implementation_version: '1',

@@ -27,7 +27,7 @@ describe('Kernel.IFuture', () => {
 
   describe('Message hooks', () => {
     it('should have the most recently registered hook run first', async () => {
-      const options: KernelMessage.IExecuteRequest = {
+      const options: KernelMessage.IExecuteRequestMsg['content'] = {
         code: 'test',
         silent: false,
         store_history: true,
@@ -120,7 +120,7 @@ describe('Kernel.IFuture', () => {
     });
 
     it('should abort processing if a hook returns false, but the done logic should still work', async () => {
-      const options: KernelMessage.IExecuteRequest = {
+      const options: KernelMessage.IExecuteRequestMsg['content'] = {
         code: 'test',
         silent: false,
         store_history: true,
@@ -193,7 +193,7 @@ describe('Kernel.IFuture', () => {
     });
 
     it('should process additions on the next run', async () => {
-      const options: KernelMessage.IExecuteRequest = {
+      const options: KernelMessage.IExecuteRequestMsg['content'] = {
         code: 'test',
         silent: false,
         store_history: true,
@@ -263,7 +263,7 @@ describe('Kernel.IFuture', () => {
     });
 
     it('should deactivate message hooks immediately on removal', async () => {
-      const options: KernelMessage.IExecuteRequest = {
+      const options: KernelMessage.IExecuteRequestMsg['content'] = {
         code: 'test',
         silent: false,
         store_history: true,

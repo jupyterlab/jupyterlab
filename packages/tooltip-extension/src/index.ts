@@ -301,7 +301,7 @@ namespace Private {
       return Promise.reject(void 0);
     }
 
-    let contents: KernelMessage.IInspectRequest = {
+    let contents: KernelMessage.IInspectRequestMsg['content'] = {
       code,
       cursor_pos: offset,
       detail_level: detail || 0

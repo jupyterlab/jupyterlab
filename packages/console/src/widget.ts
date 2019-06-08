@@ -646,7 +646,7 @@ export class CodeConsole extends Widget {
         return;
       }
       if (value && value.content.status === 'ok') {
-        let content = value.content as KernelMessage.IExecuteOkReply;
+        let content = value.content;
         // Use deprecated payloads for backwards compatibility.
         if (content.payload && content.payload.length) {
           let setNextInput = content.payload.filter(i => {
@@ -682,7 +682,11 @@ export class CodeConsole extends Widget {
   /**
    * Update the console based on the kernel info.
    */
-  private _handleInfo(info: KernelMessage.IInfoReply): void {
+  private _handleInfo(info: KernelMessage.IInfoReplyMsg['content']): void {
+    if (info.status !== 'ok') {
+      this._banner.model.value.text = 'Error in getting kernel banner';
+      return;
+    }
     this._banner.model.value.text = info.banner;
     let lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);
