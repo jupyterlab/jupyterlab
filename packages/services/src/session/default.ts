@@ -29,7 +29,7 @@ export class DefaultSession implements Session.ISession {
   /**
    * Construct a new session.
    */
-  constructor(options: Session.IOptions, id: string, kernel: Kernel.IKernel) {
+  constructor(options: Session.IOptions, id: string, model: Kernel.IModel) {
     this._id = id;
     this._path = options.path;
     this._type = options.type || 'file';
@@ -37,7 +37,7 @@ export class DefaultSession implements Session.ISession {
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
     Private.addRunning(this);
-    this.setupKernel(kernel);
+    this.setupKernel(model);
   }
 
   /**
@@ -169,7 +169,6 @@ export class DefaultSession implements Session.ISession {
    * Clone the current session with a new clientId.
    */
   clone(): Session.ISession {
-    const kernel = Kernel.connectTo(this.kernel.model, this.serverSettings);
     return new DefaultSession(
       {
         path: this._path,
@@ -178,7 +177,7 @@ export class DefaultSession implements Session.ISession {
         serverSettings: this.serverSettings
       },
       this._id,
-      kernel
+      this.kernel.model
     );
   }
 
@@ -196,12 +195,11 @@ export class DefaultSession implements Session.ISession {
     this._type = model.type;
 
     if (this._kernel.isDisposed || model.kernel.id !== this._kernel.id) {
-      let newValue = Kernel.connectTo(model.kernel, this.serverSettings);
       let oldValue = this._kernel;
-      this.setupKernel(newValue);
+      this.setupKernel(model.kernel);
+      let newValue = this._kernel;
+      oldValue.dispose();
       this._kernelChanged.emit({ oldValue, newValue });
-      this._handleModelChange(oldModel);
-      return;
     }
 
     this._handleModelChange(oldModel);
@@ -307,10 +305,13 @@ export class DefaultSession implements Session.ISession {
   }
 
   /**
-   * Handle connections to a kernel.  This method is not meant to be
-   * subclassed.
+   * Create a new kernel connection and hook up to its events.
+   *
+   * #### Notes
+   * This method is not meant to be subclassed.
    */
-  protected setupKernel(kernel: Kernel.IKernel): void {
+  protected setupKernel(model: Kernel.IModel): void {
+    const kernel = Kernel.connectTo(model, this.serverSettings);
     this._kernel = kernel;
     kernel.statusChanged.connect(this.onKernelStatus, this);
     kernel.unhandledMessage.connect(this.onUnhandledMessage, this);
@@ -545,7 +546,6 @@ namespace Private {
     settings?: ServerConnection.ISettings
   ): DefaultSession {
     settings = settings || ServerConnection.makeSettings();
-    let kernel = Kernel.connectTo(model.kernel, settings);
     return new DefaultSession(
       {
         path: model.path,
@@ -554,7 +554,7 @@ namespace Private {
         serverSettings: settings
       },
       model.id,
-      kernel
+      model.kernel
     );
   }
 
