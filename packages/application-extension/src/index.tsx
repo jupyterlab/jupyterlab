@@ -266,7 +266,7 @@ const tree: JupyterFrontEndPlugin<void> = {
         const url =
           (workspaceMatch
             ? URLExt.join(paths.urls.workspaces, workspace)
-            : paths.urls.page) +
+            : paths.urls.app) +
           args.search +
           args.hash;
         const immediate = true;

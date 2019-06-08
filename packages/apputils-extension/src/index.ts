@@ -246,7 +246,7 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
     const candidate = Private.candidate(paths, workspace);
     const rest = workspace
       ? path.replace(new RegExp(`^${paths.urls.workspaces}${workspace}`), '')
-      : path.replace(new RegExp(`^${paths.urls.page}`), '');
+      : path.replace(new RegExp(`^${paths.urls.app}`), '');
 
     try {
       await solver.resolve(candidate);
@@ -449,7 +449,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         const clone =
           typeof query['clone'] === 'string'
             ? query['clone'] === ''
-              ? URLExt.join(urls.base, urls.page)
+              ? URLExt.join(urls.base, urls.app)
               : URLExt.join(urls.base, urls.workspaces, query['clone'])
             : null;
         const source = clone || workspace || null;
@@ -608,6 +608,6 @@ namespace Private {
   ): string {
     return workspace
       ? URLExt.join(urls.workspaces, workspace)
-      : URLExt.join(urls.page);
+      : URLExt.join(urls.app);
   }
 }

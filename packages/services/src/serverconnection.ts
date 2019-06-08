@@ -57,9 +57,9 @@ export namespace ServerConnection {
     readonly baseUrl: string;
 
     /**
-     * The page url of the JupyterLab application.
+     * The app url of the JupyterLab application.
      */
-    readonly pageUrl: string;
+    readonly appUrl: string;
 
     /**
      * The base ws url of the server.
@@ -178,7 +178,7 @@ export namespace ServerConnection {
    */
   export const defaultSettings: ServerConnection.ISettings = {
     baseUrl: PageConfig.getBaseUrl(),
-    pageUrl: PageConfig.getOption('pageUrl'),
+    appUrl: PageConfig.getOption('appUrl'),
     wsUrl: PageConfig.getWsUrl(),
     token: PageConfig.getToken(),
     init: { cache: 'no-store', credentials: 'same-origin' },

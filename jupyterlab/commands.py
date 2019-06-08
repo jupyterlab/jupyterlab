@@ -297,7 +297,7 @@ def clean(app_dir=None, logger=None):
     logger.info('Success!')
 
 
-def build(app_dir=None, name=None, version=None, public_url=None,
+def build(app_dir=None, name=None, version=None, static_url=None,
           logger=None, command='build:prod', kill_event=None,
           clean_staging=False):
     """Build the JupyterLab application.
@@ -305,7 +305,7 @@ def build(app_dir=None, name=None, version=None, public_url=None,
     logger = _ensure_logger(logger)
     _node_check(logger)
     handler = _AppHandler(app_dir, logger, kill_event=kill_event)
-    return handler.build(name=name, version=version, public_url=public_url,
+    return handler.build(name=name, version=version, static_url=static_url,
                          command=command, clean_staging=clean_staging)
 
 
@@ -469,7 +469,7 @@ class _AppHandler(object):
 
         return True
 
-    def build(self, name=None, version=None, public_url=None,
+    def build(self, name=None, version=None, static_url=None,
               command='build:prod', clean_staging=False):
         """Build the application.
         """
@@ -477,7 +477,7 @@ class _AppHandler(object):
         app_dir = self.app_dir
 
         self._populate_staging(
-            name=name, version=version, public_url=public_url,
+            name=name, version=version, static_url=static_url,
             clean=clean_staging
         )
 
@@ -882,7 +882,7 @@ class _AppHandler(object):
         info['static_data'] = _get_static_data(self.app_dir)
         app_data = info['static_data'] or core_data
         info['version'] = app_data['jupyterlab']['version']
-        info['publicUrl'] = app_data['jupyterlab'].get('publicUrl', '')
+        info['staticUrl'] = app_data['jupyterlab'].get('staticUrl', '')
 
         info['sys_dir'] = self.sys_dir
         info['app_dir'] = self.app_dir
@@ -897,7 +897,7 @@ class _AppHandler(object):
         info['disabled_core'] = disabled_core
         return info
 
-    def _populate_staging(self, name=None, version=None, public_url=None,
+    def _populate_staging(self, name=None, version=None, static_url=None,
                           clean=False):
         """Set up the assets in the staging directory.
         """
@@ -986,8 +986,8 @@ class _AppHandler(object):
         if name:
             data['jupyterlab']['name'] = name
 
-        if public_url:
-            data['jupyterlab']['publicUrl'] = public_url
+        if static_url:
+            data['jupyterlab']['staticUrl'] = static_url
 
         pkg_path = pjoin(staging, 'package.json')
         with open(pkg_path, 'w') as fid:
