@@ -66,6 +66,16 @@ describe('rendermime/factories', () => {
         expect(w.node.innerHTML).to.equal('<pre>x = 2 ** a</pre>');
       });
 
+      it('should be re-renderable', async () => {
+        const f = textRendererFactory;
+        const mimeType = 'text/plain';
+        const model = createModel(mimeType, 'x = 2 ** a');
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        await w.renderModel(model);
+        expect(w.node.innerHTML).to.equal('<pre>x = 2 ** a</pre>');
+      });
+
       it('should output the correct HTML with ansi colors', async () => {
         const f = textRendererFactory;
         const source = 'There is no text but \x1b[01;41;32mtext\x1b[00m.\nWoo.';
@@ -113,6 +123,17 @@ describe('rendermime/factories', () => {
         const mimeType = 'text/latex';
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        expect(w.node.textContent).to.equal(source);
+      });
+
+      it('should be re-renderable', async () => {
+        const source = 'sumlimits_{i=0}^{infty} \frac{1}{n^2}';
+        const f = latexRendererFactory;
+        const mimeType = 'text/latex';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
         await w.renderModel(model);
         expect(w.node.textContent).to.equal(source);
       });
@@ -174,6 +195,17 @@ describe('rendermime/factories', () => {
         expect(w.node.innerHTML).to.equal(source);
       });
 
+      it('it should be re-renderable', async () => {
+        const f = markdownRendererFactory;
+        const source = '<p>hello</p>';
+        const mimeType = 'text/markdown';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        await w.renderModel(model);
+        expect(w.node.innerHTML).to.equal(source);
+      });
+
       it('should add header anchors', async () => {
         const source = require('../../../examples/filebrowser/sample.md')
           .default as string;
@@ -225,6 +257,17 @@ describe('rendermime/factories', () => {
         const mimeType = 'text/html';
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).to.equal('<h1>This is great</h1>');
+      });
+
+      it('should be re-renderable', async () => {
+        const f = htmlRendererFactory;
+        const source = '<h1>This is great</h1>';
+        const mimeType = 'text/html';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
         await w.renderModel(model);
         expect(w.node.innerHTML).to.equal('<h1>This is great</h1>');
       });
