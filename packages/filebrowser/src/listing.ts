@@ -1763,7 +1763,7 @@ export namespace DirListing {
 
       node.title = model.name;
       // If an item is being edited currently, its text node is unavailable.
-      if (text) {
+      if (text && text.textContent !== model.name) {
         text.textContent = model.name;
       }
 
