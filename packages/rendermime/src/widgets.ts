@@ -63,9 +63,20 @@ export abstract class RenderedCommon extends Widget
    * @param model - The mime model to render.
    *
    * @returns A promise which resolves when rendering is complete.
+   *
+   * #### Notes
+   * If the DOM node for this widget already has content, it is emptied
+   * before rendering. Subclasses that do not want this behavior
+   * (if, for instance, they are using DOM diffing), should override
+   * this method and not call `super.renderModel()`.
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     // TODO compare model against old model for early bail?
+
+    // Empty any existing content in the node from previous renders
+    while (this.node.firstChild) {
+      this.node.removeChild(this.node.firstChild);
+    }
 
     // Toggle the trusted class on the widget.
     this.toggleClass('jp-mod-trusted', model.trusted);
