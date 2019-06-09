@@ -64,8 +64,12 @@ def load_config(nbapp):
         config.themes_url = nbapp.override_theme_url
         config.themes_dir = ''
 
+    # shim for jupyterlab_server 0.3
     if static_url:
-        config.static_url = static_url
+        if hasattr(config, 'static_url'):
+            config.static_url = static_url
+        else:
+            config.public_url = static_url
     else:
         config.static_dir = pjoin(app_dir, 'static')
 
@@ -119,7 +123,13 @@ def load_jupyter_server_extension(nbapp):
     config = load_config(nbapp)
     config.app_name = 'JupyterLab'
     config.app_namespace = 'jupyterlab'
-    config.app_url = '/lab'
+
+    # shim for jupyterlab_server 0.3
+    if hasattr(config, 'app_url'):
+        config.app_url = '/lab'
+    else:
+        config.page_url = '/lab'
+
     config.cache_files = True
 
     # Check for watch.
