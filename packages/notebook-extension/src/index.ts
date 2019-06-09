@@ -962,7 +962,7 @@ function addCommands(
         return;
       }
 
-      let code: string = '';
+      let code: string;
       const editor = cell.editor;
       const selection = editor.getSelection();
       const { start, end } = selection;
