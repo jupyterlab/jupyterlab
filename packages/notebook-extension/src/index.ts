@@ -984,9 +984,7 @@ function addCommands(
         };
 
         let moveCursorTo = function(line: number) {
-          if (line === editor.lineCount) {
-            return;
-          }
+          if (line === editor.lineCount) return;
           const cursor = editor.getCursorPosition();
           editor.setCursorPosition({
             line: line,
