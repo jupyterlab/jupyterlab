@@ -974,15 +974,6 @@ function addCommands(
         const end = editor.getOffsetAt(selection.end);
         code = editor.model.value.text.substring(start, end);
       } else {
-        let getCode = function(begLine: number, endLine: number) {
-          let code = '';
-          for (let line: number = begLine; line < endLine; ++line) {
-            code += editor.getLine(line) + '\n';
-          }
-          // remove last newline
-          return code.slice(0, -1);
-        };
-
         let moveCursorTo = function(line: number) {
           if (line === editor.lineCount) {
             return;
@@ -995,17 +986,16 @@ function addCommands(
         };
 
         // no selection, find the complete statement around the current line
+        let srcLines = editor.model.value.text.split('\n');
         let curLine = selection.start.line;
         let firstLine = curLine;
         let lastLine = curLine + 1;
         while (true) {
-          code = getCode(firstLine, lastLine);
-
           // at least for ipykernel, a = [1, \n 2] returns "incomplete" so
           // we need to join lines by space, not by newline, but this might
           // not work for all languages/kernels.
           const msg: KernelMessage.IIsCompleteRequestMsg['content'] = {
-            code: code.replace(/\n/gm, ' ')
+            code: srcLines.slice(firstLine, lastLine).join(' ')
           };
 
           let completed = false;
@@ -1016,6 +1006,7 @@ function addCommands(
             });
 
           if (completed) {
+            code = srcLines.slice(firstLine, lastLine).join('\n');
             moveCursorTo(lastLine);
             break;
           }
@@ -1026,9 +1017,9 @@ function addCommands(
               firstLine -= 1;
               lastLine = curLine + 1;
             } else {
-              // if we have looked everything, we submit only the current line while knowing
-              // it is incomplete
-              code = getCode(curLine, curLine + 1);
+              // if we have looked everything but could not find a complete statement,
+              // submit only the current line while knowing it is incomplete
+              code = editor.getLine(curLine);
               moveCursorTo(curLine + 1);
               break;
             }
