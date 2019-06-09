@@ -7,6 +7,7 @@ import {
   ILabStatus,
   ILayoutRestorer,
   IRouter,
+  ConnectionLost,
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
   JupyterLab,
@@ -74,13 +75,14 @@ namespace CommandIDs {
  */
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
-  requires: [ICommandPalette, IConnectionLost, IRouter, IWindowResolver],
+  requires: [ICommandPalette, IRouter, IWindowResolver],
+  optional: [IConnectionLost],
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
-    connectionLost: IConnectionLost,
     router: IRouter,
-    resolver: IWindowResolver
+    resolver: IWindowResolver,
+    connectionLost: IConnectionLost | undefined
   ) => {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${main.id} must be activated in JupyterLab.`);
@@ -111,7 +113,8 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     // If the connection to the server is lost, handle it with the
-    // connection lost token.
+    // connection lost handler.
+    connectionLost = connectionLost || ConnectionLost;
     app.serviceManager.connectionFailure.connect(connectionLost);
 
     const builder = app.serviceManager.builder;
