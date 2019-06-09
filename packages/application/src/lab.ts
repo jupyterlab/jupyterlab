@@ -244,7 +244,9 @@ export namespace JupyterLab {
       settings: PageConfig.getOption('settingsUrl'),
       themes: PageConfig.getOption('themesUrl'),
       tree: PageConfig.getOption('treeUrl'),
-      workspaces: PageConfig.getOption('workspacesUrl')
+      workspaces: PageConfig.getOption('workspacesUrl'),
+      hubHost: PageConfig.getOption('hubHost') || undefined,
+      hubPrefix: PageConfig.getOption('hubPrefix') || undefined
     },
     directories: {
       appSettings: PageConfig.getOption('appSettingsDir'),

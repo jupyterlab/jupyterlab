@@ -61,6 +61,7 @@
     "@jupyterlab/help-extension": "^1.0.0-alpha.9",
     "@jupyterlab/htmlviewer": "^1.0.0-alpha.10",
     "@jupyterlab/htmlviewer-extension": "^1.0.0-alpha.10",
+    "@jupyterlab/hub-extension": "^1.0.0-alpha.8",
     "@jupyterlab/imageviewer": "^1.0.0-alpha.9",
     "@jupyterlab/imageviewer-extension": "^1.0.0-alpha.9",
     "@jupyterlab/inspector": "^1.0.0-alpha.9",

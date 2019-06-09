@@ -1,4 +1,5 @@
 import os
+import warnings
 
 from traitlets import default
 
@@ -11,29 +12,30 @@ except ImportError:
     raise ImportError('You must have jupyterhub installed for this to work.')
 else:
     class SingleUserLabApp(SingleUserNotebookApp, LabApp):
+        """
+        A sublcass of JupyterHub's SingleUserNotebookApp which includes LabApp
+        as a mixin. This makes the LabApp configurables available to the spawned
+        jupyter server.
 
+        If you don't need to change any of the configurables from their default
+        values, then this class is not necessary, and you can deploy JupyterLab
+        by ensuring that its server extension is enabled and setting the
+        `Spawner.default_url` to '/lab'.
+
+        If you do need to configure JupyterLab, then use this application by
+        setting `Spawner.cmd = ['jupyter-labhub']`.
+        """
         @default("default_url")
         def _default_url(self):
             """when using jupyter-labhub, jupyterlab is default ui"""
             return "/lab"
 
         def init_webapp(self, *args, **kwargs):
+            warnings.warn(
+                "SingleUserLabApp is deprecated, use SingleUserNotebookApp and set " + \
+                "c.Spawner.default_url = '/lab' in jupyterhub_config.py", DeprecationWarning
+            )
             super().init_webapp(*args, **kwargs)
-            settings = self.web_app.settings
-            if 'page_config_data' not in settings:
-                settings['page_config_data'] = {}
-            settings['page_config_data']['hub_prefix'] = self.hub_prefix
-            settings['page_config_data']['hub_host'] = self.hub_host
-            settings['page_config_data']['hub_user'] = self.user
-            api_token = os.getenv('JUPYTERHUB_API_TOKEN')
-            if not api_token:
-                api_token = ''
-            if not self.token:
-                try:
-                    self.token = api_token
-                except AttributeError:
-                    self.log.error("Can't set self.token")
-            settings['page_config_data']['token'] = api_token
 
 
 def main(argv=None):
