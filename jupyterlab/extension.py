@@ -39,7 +39,7 @@ def load_config(nbapp):
 
     app_dir = getattr(nbapp, 'app_dir', get_app_dir())
     info = get_app_info(app_dir)
-    public_url = info['publicUrl']
+    static_url = info['staticUrl']
     user_settings_dir = getattr(
         nbapp, 'user_settings_dir', get_user_settings_dir()
     )
@@ -59,13 +59,18 @@ def load_config(nbapp):
     config.workspaces_dir = workspaces_dir
 
     if getattr(nbapp, 'override_static_url', ''):
-        public_url = nbapp.override_static_url
+        static_url = nbapp.override_static_url
     if getattr(nbapp, 'override_theme_url', ''):
         config.themes_url = nbapp.override_theme_url
         config.themes_dir = ''
 
-    if public_url:
-        config.public_url = public_url
+    # shim for jupyterlab_server 0.3
+    # XXX remove after next JLab release (current is 1.0.0a6)
+    if static_url:
+        if hasattr(config, 'static_url'):
+            config.static_url = static_url
+        else:
+            config.public_url = static_url
     else:
         config.static_dir = pjoin(app_dir, 'static')
 
@@ -119,7 +124,14 @@ def load_jupyter_server_extension(nbapp):
     config = load_config(nbapp)
     config.app_name = 'JupyterLab'
     config.app_namespace = 'jupyterlab'
-    config.page_url = '/lab'
+
+    # shim for jupyterlab_server 0.3
+    # XXX remove after next JLab release (current is 1.0.0a6)
+    if hasattr(config, 'app_url'):
+        config.app_url = '/lab'
+    else:
+        config.page_url = '/lab'
+
     config.cache_files = True
 
     # Check for watch.

@@ -39,9 +39,9 @@ export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
    */
   async fetch(id: string): Promise<Workspace.IWorkspace> {
     const { serverSettings } = this;
-    const { baseUrl, pageUrl } = serverSettings;
+    const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
-    const base = baseUrl + pageUrl;
+    const base = baseUrl + appUrl;
     const url = Private.url(base, id);
     const response = await makeRequest(url, {}, serverSettings);
 
@@ -59,9 +59,9 @@ export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
    */
   async list(): Promise<{ ids: string[]; values: Workspace.IWorkspace[] }> {
     const { serverSettings } = this;
-    const { baseUrl, pageUrl } = serverSettings;
+    const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
-    const base = baseUrl + pageUrl;
+    const base = baseUrl + appUrl;
     const url = Private.url(base, '');
     const response = await makeRequest(url, {}, serverSettings);
 
@@ -83,9 +83,9 @@ export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
    */
   async remove(id: string): Promise<void> {
     const { serverSettings } = this;
-    const { baseUrl, pageUrl } = serverSettings;
+    const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
-    const base = baseUrl + pageUrl;
+    const base = baseUrl + appUrl;
     const url = Private.url(base, id);
     const init = { method: 'DELETE' };
     const response = await makeRequest(url, init, serverSettings);
@@ -106,9 +106,9 @@ export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
    */
   async save(id: string, workspace: Workspace.IWorkspace): Promise<void> {
     const { serverSettings } = this;
-    const { baseUrl, pageUrl } = serverSettings;
+    const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
-    const base = baseUrl + pageUrl;
+    const base = baseUrl + appUrl;
     const url = Private.url(base, id);
     const init = { body: JSON.stringify(workspace), method: 'PUT' };
     const response = await makeRequest(url, init, serverSettings);

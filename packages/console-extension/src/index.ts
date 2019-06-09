@@ -20,7 +20,7 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
-import { ISettingRegistry, PageConfig } from '@jupyterlab/coreutils';
+import { ISettingRegistry, PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -181,7 +181,7 @@ async function activateConsole(
           let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
           if (kernelIconUrl) {
             let index = kernelIconUrl.indexOf('kernelspecs');
-            kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+            kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
           }
           disposables.add(
             launcher.add({

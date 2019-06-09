@@ -86,14 +86,6 @@ JupyterFrontEndPlugin.prototype.apply = function(compiler) {
   compiler.hooks.afterEmit.tap(
     'JupyterFrontEndPlugin',
     function() {
-      // Fix the template output.
-      var indexPath = path.join(buildDir, 'index.html');
-      var indexData = fs.readFileSync(indexPath, 'utf8');
-      indexData = indexData
-        .split('{{page_config.frontendUrl}}/')
-        .join('{{page_config.frontendUrl}}');
-      fs.writeFileSync(indexPath, indexData, 'utf8');
-
       // Copy the static assets.
       var staticDir = jlab.staticDir;
       if (!staticDir) {
@@ -142,7 +134,7 @@ module.exports = [
     },
     output: {
       path: path.resolve(buildDir),
-      publicPath: '{{page_config.frontendUrl}}',
+      publicPath: '{{page_config.fullStaticUrl}}/',
       filename: '[name].[chunkhash].js'
     },
     optimization: {

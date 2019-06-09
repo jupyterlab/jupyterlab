@@ -239,8 +239,8 @@ export namespace JupyterLab {
     urls: {
       base: PageConfig.getOption('baseUrl'),
       notFound: PageConfig.getOption('notFoundUrl'),
-      page: PageConfig.getOption('pageUrl'),
-      public: PageConfig.getOption('publicUrl'),
+      app: PageConfig.getOption('appUrl'),
+      static: PageConfig.getOption('staticUrl'),
       settings: PageConfig.getOption('settingsUrl'),
       themes: PageConfig.getOption('themesUrl'),
       tree: PageConfig.getOption('treeUrl'),

@@ -13,7 +13,7 @@ init();
 describe('setting', () => {
   describe('SettingManager', () => {
     const manager = new SettingManager({
-      serverSettings: ServerConnection.makeSettings({ pageUrl: 'lab' })
+      serverSettings: ServerConnection.makeSettings({ appUrl: 'lab' })
     });
 
     describe('#constructor()', () => {

@@ -364,7 +364,7 @@ class TestExtension(TestCase):
 
     def test_build_custom(self):
         assert install_extension(self.mock_extension) is True
-        build(name='foo', version='1.0', public_url='bar')
+        build(name='foo', version='1.0', static_url='bar')
 
         # check static directory.
         entry = pjoin(self.app_dir, 'static', 'index.out.js')
@@ -377,7 +377,7 @@ class TestExtension(TestCase):
             data = json.load(fid)
         assert data['jupyterlab']['name'] == 'foo'
         assert data['jupyterlab']['version'] == '1.0'
-        assert data['jupyterlab']['publicUrl'] == 'bar'
+        assert data['jupyterlab']['staticUrl'] == 'bar'
 
     def test_load_extension(self):
         app = NotebookApp()

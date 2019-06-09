@@ -24,7 +24,8 @@ import {
   ISettingRegistry,
   IStateDB,
   nbformat,
-  PageConfig
+  PageConfig,
+  URLExt
 } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
@@ -707,7 +708,7 @@ function activateNotebookHandler(
           let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
           if (kernelIconUrl) {
             let index = kernelIconUrl.indexOf('kernelspecs');
-            kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+            kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
           }
           disposables.add(
             launcher.add({
