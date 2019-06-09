@@ -17,9 +17,17 @@ button {
 }
 
 button.jp-mod-styled.jp-mod-accept {
-  background: var(--jp-brand-color1);
+  background: var(--md-blue-500);
+  border: 1px solid var(--md-blue-500);
   color: white;
-  border: 1px solid var(--jp-brand-color1);
+}
+
+button.jp-mod-styled:hover {
+  opacity: 0.85;
+}
+
+button.jp-mod-styled:active {
+  opacity: 1;
 }
 
 button.jp-mod-styled.jp-mod-reject {
@@ -30,8 +38,8 @@ button.jp-mod-styled.jp-mod-reject {
 
 button.jp-mod-styled.jp-mod-warn {
   background: var(--jp-error-color1);
-  color: white;
   border: 1px solid var(--jp-error-color1);
+  color: white;
 }
 
 .jp-Button-flat {
