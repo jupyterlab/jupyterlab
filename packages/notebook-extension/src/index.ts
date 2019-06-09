@@ -974,15 +974,20 @@ function addCommands(
         const end = editor.getOffsetAt(selection.end);
         code = editor.model.value.text.substring(start, end);
       } else {
-        // no selection, find the next complete statement
-        let firstLine = selection.start.line;
-        let lastLine = firstLine;
-        while (true) {
-          code += editor.getLine(lastLine) + '\n';
-          // check if the code is complete
+        let getCode = function(begLine: number, endLine: number) {
+          let code = '';
+          for (let line: number = begLine; line < endLine; ++line) {
+            code += editor.getLine(line) + '\n';
+          }
+          // remove last newline
+          return code.slice(0, -1);
+        };
+
+        let isCompleteStatement = async function(code: string) {
+          // at least for ipykernel, a = [1, \n 2] returns "incomplete" so
+          // we need to join lines by space, not by newline, but this might
+          // not work for all languages/kernels.
           const msg: KernelMessage.IIsCompleteRequestMsg['content'] = {
-            // at least for ipykernel, a = [1, \n 2] returns "incomplete"
-            // so we need to remove \n from the code
             code: code.replace(/\n/gm, ' ')
           };
 
@@ -992,35 +997,52 @@ function addCommands(
             .then(reply => {
               completed = reply.content.status === 'complete';
             });
+          return completed;
+        };
 
-          if (completed) {
-            // if completed, move cursor to next line, unless it is already the last line
-            if (lastLine + 1 !== editor.lineCount) {
-              const cursor = editor.getCursorPosition();
-              editor.setCursorPosition({
-                line: lastLine + 1,
-                column: cursor.column
-              });
-            }
+        let moveCursorTo = function(line: number) {
+          if (line === editor.lineCount) return;
+          const cursor = editor.getCursorPosition();
+          editor.setCursorPosition({
+            line: line,
+            column: cursor.column
+          });
+        };
+
+        // no selection, find the complete statement around the current line
+        let curLine = selection.start.line;
+        let firstLine = curLine;
+        let lastLine = curLine + 1;
+        while (true) {
+          code = getCode(firstLine, lastLine);
+          if (await isCompleteStatement(code)) {
+            moveCursorTo(lastLine);
             break;
           }
-          // if reaching the end of cell but still incomplete, sending only the original first line
-          if (lastLine + 1 === editor.lineCount) {
-            code = editor.getLine(firstLine) + '\n';
-            if (firstLine + 1 !== editor.lineCount) {
-              const cursor = editor.getCursorPosition();
-              editor.setCursorPosition({
-                line: firstLine + 1,
-                column: cursor.column
-              });
+          // if reaching the end of cell but still incomplete
+          if (lastLine === editor.lineCount) {
+            // try to look before the current line
+            if (firstLine > 0) {
+              firstLine -= 1;
+              lastLine = curLine + 1;
+              // if the statement before curLine is complete, we do not look further
+              if (await isCompleteStatement(getCode(firstLine, curLine))) {
+                code = getCode(curLine, curLine + 1);
+                moveCursorTo(curLine + 1);
+                break;
+              }
+            } else {
+              // if we have looked everything, we submit only the current line while knowing
+              // it is incomplete
+              code = getCode(curLine, curLine + 1);
+              moveCursorTo(curLine + 1);
+              break;
             }
-            break;
+          } else {
+            // if incomplete and there are more lines, add the line and check again
+            lastLine += 1;
           }
-          // if incomplete and there are more lines, add the line and check again
-          lastLine += 1;
         }
-        // remove trailing new line that was added manually
-        code = code.slice(0, -1);
       }
 
       if (!code) {
