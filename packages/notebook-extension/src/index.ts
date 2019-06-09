@@ -1027,12 +1027,6 @@ function addCommands(
             if (firstLine > 0) {
               firstLine -= 1;
               lastLine = curLine + 1;
-              // if the statement before curLine is complete, we do not look further
-              if (await isCompleteStatement(getCode(firstLine, curLine))) {
-                code = getCode(curLine, curLine + 1);
-                moveCursorTo(curLine + 1);
-                break;
-              }
             } else {
               // if we have looked everything, we submit only the current line while knowing
               // it is incomplete
