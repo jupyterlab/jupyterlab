@@ -983,23 +983,6 @@ function addCommands(
           return code.slice(0, -1);
         };
 
-        let isCompleteStatement = async function(code: string) {
-          // at least for ipykernel, a = [1, \n 2] returns "incomplete" so
-          // we need to join lines by space, not by newline, but this might
-          // not work for all languages/kernels.
-          const msg: KernelMessage.IIsCompleteRequestMsg['content'] = {
-            code: code.replace(/\n/gm, ' ')
-          };
-
-          let completed = false;
-          await current.context.session.kernel
-            .requestIsComplete(msg)
-            .then(reply => {
-              completed = reply.content.status === 'complete';
-            });
-          return completed;
-        };
-
         let moveCursorTo = function(line: number) {
           if (line === editor.lineCount) {
             return;
@@ -1017,7 +1000,22 @@ function addCommands(
         let lastLine = curLine + 1;
         while (true) {
           code = getCode(firstLine, lastLine);
-          if (await isCompleteStatement(code)) {
+
+          // at least for ipykernel, a = [1, \n 2] returns "incomplete" so
+          // we need to join lines by space, not by newline, but this might
+          // not work for all languages/kernels.
+          const msg: KernelMessage.IIsCompleteRequestMsg['content'] = {
+            code: code.replace(/\n/gm, ' ')
+          };
+
+          let completed = false;
+          await current.context.session.kernel
+            .requestIsComplete(msg)
+            .then(reply => {
+              completed = reply.content.status === 'complete';
+            });
+
+          if (completed) {
             moveCursorTo(lastLine);
             break;
           }
