@@ -1004,28 +1004,24 @@ function addCommands(
               });
             }
             break;
-          }
-          // if reaching the end of cell but still incomplete
-          if (lastLine === editor.lineCount) {
-            // try to look before the current line
-            if (firstLine > 0) {
-              firstLine -= 1;
-              lastLine = curLine + 1;
-            } else {
-              // if we have looked everything but could not find a complete statement,
-              // submit only the current line while knowing it is incomplete
-              code = editor.getLine(curLine);
-              if (curLine + 1 < editor.lineCount) {
-                editor.setCursorPosition({
-                  line: curLine + 1,
-                  column: cursor.column
-                });
-              }
-              break;
-            }
-          } else {
+          } else if (lastLine < editor.lineCount) {
             // if incomplete and there are more lines, add the line and check again
             lastLine += 1;
+          } else if (firstLine > 0) {
+            // if reached last line, try to look before the current line
+            firstLine -= 1;
+            lastLine = curLine + 1;
+          } else {
+            // if we have looked everything but could not find a complete statement,
+            // submit only the current line while knowing it is incomplete
+            code = editor.getLine(curLine);
+            if (curLine + 1 < editor.lineCount) {
+              editor.setCursorPosition({
+                line: curLine + 1,
+                column: cursor.column
+              });
+            }
+            break;
           }
         }
       }
