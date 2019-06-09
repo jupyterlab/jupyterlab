@@ -974,18 +974,8 @@ function addCommands(
         const end = editor.getOffsetAt(selection.end);
         code = editor.model.value.text.substring(start, end);
       } else {
-        let moveCursorTo = function(line: number) {
-          if (line === editor.lineCount) {
-            return;
-          }
-          const cursor = editor.getCursorPosition();
-          editor.setCursorPosition({
-            line: line,
-            column: cursor.column
-          });
-        };
-
         // no selection, find the complete statement around the current line
+        const cursor = editor.getCursorPosition();
         let srcLines = editor.model.value.text.split('\n');
         let curLine = selection.start.line;
         let firstLine = curLine;
@@ -1007,7 +997,12 @@ function addCommands(
 
           if (completed) {
             code = srcLines.slice(firstLine, lastLine).join('\n');
-            moveCursorTo(lastLine);
+            if (lastLine < editor.lineCount) {
+              editor.setCursorPosition({
+                line: lastLine,
+                column: cursor.column
+              });
+            }
             break;
           }
           // if reaching the end of cell but still incomplete
@@ -1020,7 +1015,12 @@ function addCommands(
               // if we have looked everything but could not find a complete statement,
               // submit only the current line while knowing it is incomplete
               code = editor.getLine(curLine);
-              moveCursorTo(curLine + 1);
+              if (curLine + 1 < editor.lineCount) {
+                editor.setCursorPosition({
+                  line: curLine + 1,
+                  column: cursor.column
+                });
+              }
               break;
             }
           } else {
