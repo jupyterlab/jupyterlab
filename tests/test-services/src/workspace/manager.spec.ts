@@ -13,7 +13,7 @@ init();
 describe('workspace', () => {
   describe('WorkspaceManager', () => {
     const manager = new WorkspaceManager({
-      serverSettings: ServerConnection.makeSettings({ pageUrl: 'lab' })
+      serverSettings: ServerConnection.makeSettings({ appUrl: 'lab' })
     });
 
     describe('#constructor()', () => {
