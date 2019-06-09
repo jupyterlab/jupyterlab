@@ -10,6 +10,7 @@ import jupyterFaviconSvg from '../../style/icons/jupyter-favicon.svg';
 
 // filetype icons
 import html5Svg from '../../style/icons/filetype/html5.svg';
+import reactSvg from '../../style/icons/filetype/react.svg';
 
 // statusbar icons
 import kernelSvg from '../../style/icons/statusbar/kernel.svg';
@@ -31,6 +32,7 @@ export const defaultIcons: ReadonlyArray<Icon.IModel> = [
   { name: 'jupyter-favicon', svg: jupyterFaviconSvg },
 
   { name: 'html5', svg: html5Svg },
+  { name: 'react', svg: reactSvg },
 
   { name: 'kernel', svg: kernelSvg },
   { name: 'line-form', svg: lineFormSvg },

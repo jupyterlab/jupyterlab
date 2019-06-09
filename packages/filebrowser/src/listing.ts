@@ -1759,6 +1759,7 @@ export namespace DirListing {
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       if (fileType) {
+        // TODO: should inline svg icons still get the same className?
         icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
 
         if (fileType.iconName) {
@@ -1770,14 +1771,6 @@ export namespace DirListing {
             center: true,
             kind: 'listing'
           });
-
-          // // filthy hack to get the topbar tab icons
-          // defaultIconRegistry.override({
-          //   name: fileType.iconName,
-          //   className: ['p-TabBar-tabIcon', fileType.iconClass].join(' '),
-          //   center: true,
-          //   kind: 'tab'
-          // });
         } else {
           // add icon as CSS background image. Can't be styled using CSS
           icon.textContent = fileType.iconLabel || '';

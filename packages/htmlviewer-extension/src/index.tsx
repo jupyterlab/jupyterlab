@@ -25,6 +25,11 @@ import {
 const CSS_ICON_CLASS = 'jp-Html5Icon';
 
 /**
+ * The name for an HTML5 icon.
+ */
+const ICON_NAME = 'html5';
+
+/**
  * Command IDs used by the plugin.
  */
 namespace CommandIDs {
@@ -59,7 +64,7 @@ function activateHTMLViewer(
     extensions: ['.html'],
     mimeTypes: ['text/html'],
     iconClass: CSS_ICON_CLASS,
-    iconName: 'html5'
+    iconName: ICON_NAME
   };
   app.docRegistry.addFileType(ft);
 

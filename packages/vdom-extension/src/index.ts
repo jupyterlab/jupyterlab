@@ -20,7 +20,12 @@ import { RenderedVDOM, IVDOMTracker } from '@jupyterlab/vdom';
 /**
  * The CSS class for a VDOM icon.
  */
-const CSS_ICON_CLASS = 'jp-MaterialIcon jp-VDOMIcon';
+const CSS_ICON_CLASS = 'jp-ReactIcon';
+
+/**
+ * The name for a VDOM icon.
+ */
+const ICON_NAME = 'react';
 
 /**
  * The MIME type for VDOM.
@@ -83,7 +88,7 @@ const plugin: JupyterFrontEndPlugin<IVDOMTracker> = {
       mimeTypes: [MIME_TYPE],
       extensions: ['.vdom', '.vdom.json'],
       iconClass: CSS_ICON_CLASS,
-      iconName: 'react'
+      iconName: ICON_NAME
     });
 
     const factory = new MimeDocumentFactory({
