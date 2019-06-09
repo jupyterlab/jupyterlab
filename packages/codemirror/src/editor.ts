@@ -49,7 +49,7 @@ import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/addon/selection/selection-pointer';
 import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
-import 'codemirror/keymap/vim.js';
+// import 'codemirror/keymap/vim.js';  lazy loading of vim mode is available in ../codemirror-extension/index.ts
 
 /**
  * The class name added to CodeMirrorWidget instances.
