@@ -151,6 +151,12 @@ function activateEditorCommands(
    */
   function updateSettings(settings: ISettingRegistry.ISettings): void {
     keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
+
+    // Lazy loading of vim mode
+    if (keyMap === 'vim') {
+      import('codemirror/keymap/vim.js');
+    }
+
     theme = (settings.get('theme').composite as string | null) || theme;
     scrollPastEnd = settings.get('scrollPastEnd').composite as boolean | null;
     styleActiveLine =
