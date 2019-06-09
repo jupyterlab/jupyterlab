@@ -975,7 +975,6 @@ function addCommands(
         code = editor.model.value.text.substring(start, end);
       } else {
         // no selection, find the next complete statement
-        let completed = false;
         let orig_lineno = selection.start.line;
         let lineno = orig_lineno;
         while (true) {
@@ -986,6 +985,8 @@ function addCommands(
             // so we need to remove \n from the code
             code: code.replace(/\n/gm, ' ')
           };
+
+          let completed = false;
           await current.context.session.kernel
             .requestIsComplete(code_msg)
             .then(reply_msg => {
