@@ -155,7 +155,7 @@ function activateEditorCommands(
     // Lazy loading of vim mode
     if (keyMap === 'vim') {
       // @ts-ignore
-      import('codemirror/keymap/vim.js');
+      void import('codemirror/keymap/vim.js');
     }
 
     theme = (settings.get('theme').composite as string | null) || theme;
