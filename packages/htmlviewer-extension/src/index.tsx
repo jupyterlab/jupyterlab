@@ -22,7 +22,7 @@ import {
 /**
  * The CSS class for an HTML5 icon.
  */
-const CSS_ICON_CLASS = 'jp-HTMLIcon';
+const CSS_ICON_CLASS = 'jp-Html5Icon';
 
 /**
  * Command IDs used by the plugin.

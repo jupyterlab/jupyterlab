@@ -5,7 +5,7 @@ import { Debouncer } from '@jupyterlab/coreutils';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { TabBarSvg } from '@jupyterlab/ui-components';
+import { DockPanelSvg, TabBarSvg } from '@jupyterlab/ui-components';
 
 import { ArrayExt, find, IIterator, iter, toArray } from '@phosphor/algorithm';
 
@@ -178,7 +178,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     let bottomPanel = (this._bottomPanel = new BoxPanel());
     let topPanel = (this._topPanel = new Panel());
     let hboxPanel = new BoxPanel();
-    let dockPanel = (this._dockPanel = new DockPanel());
+    let dockPanel = (this._dockPanel = new DockPanelSvg({
+      kind: 'dockPanelBar',
+      skipbad: true
+    }));
     let headerPanel = (this._headerPanel = new Panel());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
@@ -1022,45 +1025,6 @@ namespace Private {
     });
   }
 
-  // class SideBar extends TabBar<Widget> {
-  //   /**
-  //    * A message handler invoked on an `'update-request'` message.
-  //    */
-  //   protected onUpdateRequest(msg: Message): void {
-  //     super.onUpdateRequest(msg);
-  //
-  //     for (let itab in this.contentNode.children) {
-  //       let tab = this.contentNode.children[itab];
-  //       let title = this.titles[itab];
-  //       let iconNode = tab.children ? (tab.children[0] as HTMLElement) : null;
-  //
-  //       if (iconNode && iconNode.children.length < 1) {
-  //         // add the svg node, if not already present
-  //         defaultIconRegistry.icon({
-  //           name: title.iconClass,
-  //           container: iconNode,
-  //           center: true,
-  //           kind: 'sideBar'
-  //         });
-  //       }
-  //     }
-  //   }
-  // }
-  //
-  // class SideBarRenderer extends TabBar.Renderer {
-  //   /**
-  //    * Render the icon element for a tab.
-  //    *
-  //    * @param data - The data to use for rendering the tab.
-  //    *
-  //    * @returns A virtual element representing the tab icon.
-  //    */
-  //   renderIcon(data: TabBar.IRenderData<any>): VirtualElement {
-  //     let className = this.createIconClass(data);
-  //     return h.div({ className });
-  //   }
-  // }
-
   /**
    * A class which manages a side bar and related stacked panel.
    */
@@ -1071,6 +1035,7 @@ namespace Private {
     constructor(side: string) {
       this._sideBar = new TabBarSvg<Widget>({
         kind: 'sideBar',
+        skipbad: true,
         insertBehavior: 'none',
         removeBehavior: 'none',
         allowDeselect: true

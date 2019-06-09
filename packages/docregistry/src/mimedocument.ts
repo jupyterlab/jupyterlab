@@ -285,6 +285,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
       dataType: this._dataType
     });
 
+    content.title.icon = ft.iconName;
     content.title.iconClass = ft.iconClass;
     content.title.iconLabel = ft.iconLabel;
 

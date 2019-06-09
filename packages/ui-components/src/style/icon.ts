@@ -4,7 +4,12 @@
 import { style } from 'typestyle/lib';
 import { NestedCSSProperties } from 'typestyle/lib/types';
 
-import { iconKindType } from '../icon';
+export type IconKindType =
+  | 'dockPanelBar'
+  | 'listing'
+  | 'sideBar'
+  | 'statusBar'
+  | 'unset';
 
 export interface IIconStyle extends NestedCSSProperties {
   /**
@@ -15,9 +20,12 @@ export interface IIconStyle extends NestedCSSProperties {
   /**
    * the kind of the icon, associated with a default stylesheet
    */
-  kind?: iconKindType;
+  kind?: IconKindType;
 }
 
+/**
+ * styles for centering node inside of containers
+ */
 const iconContainerCSSCenter: NestedCSSProperties = {
   alignItems: 'center',
   display: 'flex !important'
@@ -27,6 +35,13 @@ const iconCSSCenter: NestedCSSProperties = {
   display: 'block',
   margin: '0 auto',
   width: '100%'
+};
+
+/**
+ * icon kind specific styles
+ */
+const iconCSSDockPanelBar: NestedCSSProperties = {
+  height: '14px'
 };
 
 const iconCSSListing: NestedCSSProperties = {
@@ -45,18 +60,18 @@ const iconCSSStatusBar: NestedCSSProperties = {
   position: 'relative'
 };
 
-const iconCSSTab: NestedCSSProperties = {
-  height: '14px'
-};
-
-const iconCSSKind: { [k in iconKindType]: NestedCSSProperties } = {
+const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
+  dockPanelBar: iconCSSDockPanelBar,
   listing: iconCSSListing,
   sideBar: iconCSSSideBar,
   statusBar: iconCSSStatusBar,
-  tab: iconCSSTab,
   unset: {}
 };
 
+/**
+ * for putting together the icon kind style with any user input styling,
+ * as well as styling from optional flags like `center`
+ */
 function iconCSS(props: IIconStyle): NestedCSSProperties {
   const { kind, center, ...propsCSS } = props;
 
@@ -68,7 +83,7 @@ function iconCSS(props: IIconStyle): NestedCSSProperties {
 }
 
 /**
- * For setting the style on the container of an svg node representing an icon
+ * for setting the style on the container of an svg node representing an icon
  */
 export const iconStyle = (props: IIconStyle): string => {
   return style({
@@ -80,7 +95,7 @@ export const iconStyle = (props: IIconStyle): string => {
 };
 
 /**
- * For setting the style directly on the svg node representing an icon
+ * for setting the style directly on the svg node representing an icon
  */
 export const iconStyleFlat = (props: IIconStyle): string => {
   return style(iconCSS(props));
