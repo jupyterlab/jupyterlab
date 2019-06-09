@@ -975,12 +975,12 @@ function addCommands(
         code = editor.model.value.text.substring(start, end);
       } else {
         // no selection, find the next complete statement
-        let orig_lineno = selection.start.line;
-        let lineno = orig_lineno;
+        let firstLine = selection.start.line;
+        let lastLine = firstLine;
         while (true) {
-          code += editor.getLine(lineno) + '\n';
+          code += editor.getLine(lastLine) + '\n';
           // check if the code is complete
-          const code_msg: KernelMessage.IIsCompleteRequestMsg['content'] = {
+          const msg: KernelMessage.IIsCompleteRequestMsg['content'] = {
             // at least for ipykernel, a = [1, \n 2] returns "incomplete"
             // so we need to remove \n from the code
             code: code.replace(/\n/gm, ' ')
@@ -988,36 +988,36 @@ function addCommands(
 
           let completed = false;
           await current.context.session.kernel
-            .requestIsComplete(code_msg)
-            .then(reply_msg => {
-              completed = reply_msg.content.status === 'complete';
+            .requestIsComplete(msg)
+            .then(reply => {
+              completed = reply.content.status === 'complete';
             });
 
           if (completed) {
             // if completed, move cursor to next line, unless it is already the last line
-            if (lineno + 1 !== editor.lineCount) {
+            if (lastLine + 1 !== editor.lineCount) {
               const cursor = editor.getCursorPosition();
               editor.setCursorPosition({
-                line: lineno + 1,
+                line: lastLine + 1,
                 column: cursor.column
               });
             }
             break;
           }
           // if reaching the end of cell but still incomplete, sending only the original first line
-          if (lineno + 1 === editor.lineCount) {
-            code = editor.getLine(orig_lineno) + '\n';
-            if (orig_lineno + 1 !== editor.lineCount) {
+          if (lastLine + 1 === editor.lineCount) {
+            code = editor.getLine(firstLine) + '\n';
+            if (firstLine + 1 !== editor.lineCount) {
               const cursor = editor.getCursorPosition();
               editor.setCursorPosition({
-                line: orig_lineno + 1,
+                line: firstLine + 1,
                 column: cursor.column
               });
             }
             break;
           }
           // if incomplete and there are more lines, add the line and check again
-          lineno += 1;
+          lastLine += 1;
         }
         // remove trailing new line that was added manually
         code = code.slice(0, -1);
