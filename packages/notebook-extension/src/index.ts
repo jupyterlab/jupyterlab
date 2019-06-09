@@ -65,7 +65,7 @@ import {
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { ServiceManager } from '@jupyterlab/services';
+import { ServiceManager, KernelMessage } from '@jupyterlab/services';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
@@ -962,7 +962,7 @@ function addCommands(
         return;
       }
 
-      let code: string;
+      let code: string = '';
       const editor = cell.editor;
       const selection = editor.getSelection();
       const { start, end } = selection;
@@ -974,15 +974,52 @@ function addCommands(
         const end = editor.getOffsetAt(selection.end);
         code = editor.model.value.text.substring(start, end);
       } else {
-        // no selection, submit whole line and advance
-        code = editor.getLine(selection.start.line);
-        const cursor = editor.getCursorPosition();
-        if (cursor.line + 1 !== editor.lineCount) {
-          editor.setCursorPosition({
-            line: cursor.line + 1,
-            column: cursor.column
-          });
+        // no selection, find the next complete statement
+        let completed = false;
+        let orig_lineno = selection.start.line;
+        let lineno = orig_lineno;
+        while (true) {
+          code += editor.getLine(lineno) + '\n';
+          // check if the code is complete
+          const code_msg: KernelMessage.IIsCompleteRequestMsg['content'] = {
+            // at least for ipykernel, a = [1, \n 2] returns "incomplete"
+            // so we need to remove \n from the code
+            code: code.replace(/\n/gm, ' ')
+          };
+          await current.context.session.kernel
+            .requestIsComplete(code_msg)
+            .then(reply_msg => {
+              completed = reply_msg.content.status === 'complete';
+            });
+
+          if (completed) {
+            // if completed, move cursor to next line, unless it is already the last line
+            if (lineno + 1 !== editor.lineCount) {
+              const cursor = editor.getCursorPosition();
+              editor.setCursorPosition({
+                line: lineno + 1,
+                column: cursor.column
+              });
+            }
+            break;
+          }
+          // if reaching the end of cell but still incomplete, sending only the original first line
+          if (lineno + 1 === editor.lineCount) {
+            code = editor.getLine(orig_lineno) + '\n';
+            if (orig_lineno + 1 !== editor.lineCount) {
+              const cursor = editor.getCursorPosition();
+              editor.setCursorPosition({
+                line: orig_lineno + 1,
+                column: cursor.column
+              });
+            }
+            break;
+          }
+          // if incomplete and there are more lines, add the line and check again
+          lineno += 1;
         }
+        // remove trailing new line that was added manually
+        code = code.slice(0, -1);
       }
 
       if (!code) {
