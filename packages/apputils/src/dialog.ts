@@ -43,7 +43,7 @@ export function showErrorMessage(
   title: string,
   error: any,
   buttons: ReadonlyArray<Dialog.IButton> = [
-    Dialog.okButton({ label: 'DISMISS' })
+    Dialog.okButton({ label: 'Dismiss' })
   ]
 ): Promise<void> {
   console.warn('Showing error:', error);
@@ -522,7 +522,7 @@ export namespace Dialog {
    */
   export function createButton(value: Partial<IButton>): Readonly<IButton> {
     value.accept = value.accept !== false;
-    let defaultLabel = value.accept ? 'OK' : 'CANCEL';
+    let defaultLabel = value.accept ? 'OK' : 'Cancel';
     return {
       label: value.label || defaultLabel,
       iconClass: value.iconClass || '',

@@ -699,8 +699,8 @@ export class Context<T extends DocumentRegistry.IModel>
       `was opened or saved. ` +
       `Do you want to overwrite the file on disk with the version ` +
       ` open here, or load the version on disk (revert)?`;
-    let revertBtn = Dialog.okButton({ label: 'REVERT' });
-    let overwriteBtn = Dialog.warnButton({ label: 'OVERWRITE' });
+    let revertBtn = Dialog.okButton({ label: 'Revert' });
+    let overwriteBtn = Dialog.warnButton({ label: 'Overwrite' });
     return showDialog({
       title: 'File Changed',
       body,
@@ -709,10 +709,10 @@ export class Context<T extends DocumentRegistry.IModel>
       if (this.isDisposed) {
         return Promise.reject(new Error('Disposed'));
       }
-      if (result.button.label === 'OVERWRITE') {
+      if (result.button.label === 'Overwrite') {
         return this._manager.contents.save(this._path, options);
       }
-      if (result.button.label === 'REVERT') {
+      if (result.button.label === 'Revert') {
         return this.revert().then(() => {
           return model;
         });
@@ -726,7 +726,7 @@ export class Context<T extends DocumentRegistry.IModel>
    */
   private _maybeOverWrite(path: string): Promise<void> {
     let body = `"${path}" already exists. Do you want to replace it?`;
-    let overwriteBtn = Dialog.warnButton({ label: 'OVERWRITE' });
+    let overwriteBtn = Dialog.warnButton({ label: 'Overwrite' });
     return showDialog({
       title: 'File Overwrite?',
       body,
@@ -735,7 +735,7 @@ export class Context<T extends DocumentRegistry.IModel>
       if (this.isDisposed) {
         return Promise.reject(new Error('Disposed'));
       }
-      if (result.button.label === 'OVERWRITE') {
+      if (result.button.label === 'Overwrite') {
         return this._manager.contents.delete(path).then(() => {
           return this._finishSaveAs(path);
         });
@@ -835,13 +835,13 @@ namespace Private {
    * Get a new file path from the user.
    */
   export function getSavePath(path: string): Promise<string | undefined> {
-    let saveBtn = Dialog.okButton({ label: 'SAVE' });
+    let saveBtn = Dialog.okButton({ label: 'Save' });
     return showDialog({
       title: 'Save File As..',
       body: new SaveWidget(path),
       buttons: [Dialog.cancelButton(), saveBtn]
     }).then(result => {
-      if (result.button.label === 'SAVE') {
+      if (result.button.label === 'Save') {
         return result.value;
       }
       return;
