@@ -6,13 +6,12 @@
 require('es6-promise/auto');  // polyfill Promise on IE
 
 import {
-  PageConfig, URLExt
+  PageConfig
 } from '@jupyterlab/coreutils';
 
+// eslint-disable-next-line no-undef
 __webpack_public_path__ = PageConfig.getOption('fullStaticUrl') + '/';
 
-// This needs to come after __webpack_public_path__ is set.
-require('font-awesome/css/font-awesome.min.css');
 
 /**
  * The main entry point for the application.
@@ -65,8 +64,19 @@ function main() {
 
   var register = [];
 
+  // Handle the CSS imports.
+  // We must import the application CSS first.
+  // This must be done synchronously so it is available when the theme manager
+  // loads the theme CSS.
+  require('{{jupyterlab_app_css}}');
+  {{#each jupyterlab_css_imports}}
+  require('{{this}}');
+  {{/each}}
+
   // Handle the registered mime extensions.
   var mimeExtensions = [];
+  var extension;
+  var extMod;
   {{#each jupyterlab_mime_extensions}}
   try {
     if (isDeferred('{{key}}')) {
@@ -76,12 +86,12 @@ function main() {
     if (isDisabled('{{@key}}')) {
       disabled.matches.push('{{@key}}');
     } else {
-      var module = require('{{@key}}/{{this}}');
-      var extension = module.default;
+      extMod = require('{{@key}}/{{this}}');
+      extension = extMod.default;
 
       // Handle CommonJS exports.
-      if (!module.hasOwnProperty('__esModule')) {
-        extension = module;
+      if (!extMod.hasOwnProperty('__esModule')) {
+        extension = extMod;
       }
 
       if (Array.isArray(extension)) {
@@ -115,12 +125,12 @@ function main() {
     if (isDisabled('{{@key}}')) {
       disabled.matches.push('{{@key}}');
     } else {
-      module = require('{{@key}}/{{this}}');
-      extension = module.default;
+      extMod = require('{{@key}}/{{this}}');
+      extension = extMod.default;
 
       // Handle CommonJS exports.
-      if (!module.hasOwnProperty('__esModule')) {
-        extension = module;
+      if (!extMod.hasOwnProperty('__esModule')) {
+        extension = extMod;
       }
 
       if (Array.isArray(extension)) {
@@ -169,7 +179,7 @@ function main() {
     var reported = false;
     var timeout = 25000;
 
-    var report = function(errors) {
+    var report = function() {
       if (reported) {
         return;
       }

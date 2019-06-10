@@ -21,3 +21,4 @@ examples/chrome-example-test.js
 tests/**/coverage
 docs/_build
 docs/api
+!dev_mode/static/index.out.js
