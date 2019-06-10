@@ -163,7 +163,7 @@ describe('@jupyterlab/apputils', () => {
 
         const result = await prompt;
 
-        expect(result.button.label).toBe('CANCEL');
+        expect(result.button.label).toBe('Cancel');
         expect(result.button.accept).toBe(false);
       });
     });
