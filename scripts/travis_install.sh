@@ -18,6 +18,7 @@ pip install -q --upgrade pip
 pip --version
 pip install -e ".[test]"
 pip install -U --pre jupyterlab_server
+pip install --force-reinstall --no-deps git+https://github.com/tornadoweb/tornado.git#egg=tornado
 jlpm versions
 jlpm config current
 jupyter serverextension enable --py jupyterlab
