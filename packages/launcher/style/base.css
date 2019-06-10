@@ -117,8 +117,17 @@
   border-radius: var(--jp-border-radius);
 }
 
+.jp-LauncherCard:focus:not(:active) {
+  border: 1px solid var(--jp-brand-color1);
+  box-shadow: var(--jp-elevation-z6);
+}
+
 .jp-LauncherCard:hover {
   box-shadow: var(--jp-elevation-z6);
+}
+
+.jp-LauncherCard:active {
+  box-shadow: var(--jp-elevation-z4);
 }
 
 .jp-LauncherCard-icon {

@@ -185,6 +185,9 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       }
     }
 
+    // The tabindex of cards in each category are separated by 100.
+    let tabIndexStep = 100;
+
     // Now create the sections for each category
     orderedCategories.forEach(cat => {
       const item = categories[cat][0] as ILauncher.IItemOptions;
@@ -203,20 +206,25 @@ export class Launcher extends VDomRenderer<LauncherModel> {
             </div>
             <div className="jp-Launcher-cardContainer">
               {toArray(
-                map(categories[cat], (item: ILauncher.IItemOptions) => {
-                  return Card(
-                    kernel,
-                    item,
-                    this,
-                    this._commands,
-                    this._callback
-                  );
-                })
+                map(
+                  categories[cat],
+                  (item: ILauncher.IItemOptions, tabindex: number) => {
+                    return Card(
+                      kernel,
+                      item,
+                      tabIndexStep + tabindex + 1,
+                      this,
+                      this._commands,
+                      this._callback
+                    );
+                  }
+                )
               )}
             </div>
           </div>
         );
         sections.push(section);
+        tabIndexStep += 100;
       }
     });
 
@@ -338,6 +346,7 @@ export namespace ILauncher {
 function Card(
   kernel: boolean,
   item: ILauncher.IItemOptions,
+  tabindex: number,
   launcher: Launcher,
   commands: CommandRegistry,
   launcherCallback: (widget: Widget) => void
@@ -375,12 +384,22 @@ function Card(
       });
   };
 
+  // With tabindex working, you can now pick a kernel by tabbing around and
+  // pressing Enter.
+  let onkeypress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      onclick();
+    }
+  };
+
   // Return the VDOM element.
   return (
     <div
       className="jp-LauncherCard"
       title={title}
       onClick={onclick}
+      onKeyPress={onkeypress}
+      tabIndex={tabindex}
       data-category={item.category || 'Other'}
       key={Private.keyProperty.get(item)}
     >
