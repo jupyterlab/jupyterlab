@@ -21,8 +21,8 @@
     "style/**/*"
   ],
   "main": "lib/index.js",
-  "style": "style/index.css",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },
