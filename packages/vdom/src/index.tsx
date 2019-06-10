@@ -21,8 +21,6 @@ import { Message } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
 
-import '../style/index.css';
-
 /**
  * The CSS class to add to the VDOM Widget.
  */

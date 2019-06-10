@@ -1,0 +1,55 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.p-Widget.p-mod-hidden {
+  display: none !important;
+}
+
+body {
+  font-family: var(--jp-ui-font-family);
+  background: var(--jp-layout-color3);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.jp-LabShell {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.jp-LabShell.jp-mod-devMode {
+  border-top: 4px solid red;
+}
+
+#jp-main-dock-panel {
+  padding: 5px;
+}
+
+#jp-top-panel {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
+  background: var(--jp-layout-color1);
+  display: flex;
+  min-height: var(--jp-private-menubar-height);
+}
+
+#jp-bottom-panel {
+  background: var(--jp-layout-color1);
+  display: flex;
+}
+
+/* Sibling imports */
+@import './datagrid.css';
+@import './dockpanel.css';
+@import './images.css';
+@import './icons.css';
+@import './menus.css';
+@import './scrollbar.css';
+@import './tabs.css';
+@import './buttons.css';
+@import './sidepanel.css';

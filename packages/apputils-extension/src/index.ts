@@ -42,8 +42,6 @@ import { Menu } from '@phosphor/widgets';
 
 import { Palette } from './palette';
 
-import '../style/index.css';
-
 /**
  * The interval in milliseconds before recover options appear during splash.
  */

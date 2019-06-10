@@ -18,9 +18,18 @@ var package_data = require('./package.json');
 var jlab = package_data.jupyterlab;
 var extensions = jlab.extensions;
 var mimeExtensions = jlab.mimeExtensions;
+var packageNames = Object.keys(mimeExtensions).concat(Object.keys(extensions));
 
+// Ensure a clear build directory.
+var buildDir = path.resolve(jlab.buildDir);
+if (fs.existsSync(buildDir)) {
+  fs.removeSync(buildDir);
+}
+fs.ensureDirSync(buildDir);
+
+// Build the assets
 var extraConfig = Build.ensureAssets({
-  packageNames: Object.keys(mimeExtensions).concat(Object.keys(extensions)),
+  packageNames: packageNames,
   output: jlab.outputDir
 });
 
@@ -33,15 +42,12 @@ var data = {
 };
 var result = template(data);
 
-// Ensure a clear build directory.
-var buildDir = path.resolve(jlab.buildDir);
-if (fs.existsSync(buildDir)) {
-  fs.removeSync(buildDir);
-}
-fs.ensureDirSync(buildDir);
-
 fs.writeFileSync(path.join(buildDir, 'index.out.js'), result);
 fs.copySync('./package.json', path.join(buildDir, 'package.json'));
+fs.copySync(
+  path.join(jlab.outputDir, 'imports.css'),
+  path.join(buildDir, 'imports.css')
+);
 
 // Set up variables for watch mode.
 var localLinked = {};

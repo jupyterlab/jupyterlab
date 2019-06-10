@@ -1,0 +1,56 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-inspector-tab-height: 24px;
+  --jp-private-inspector-tab-width: 60px;
+}
+
+/*-----------------------------------------------------------------------------
+| Inspector
+|----------------------------------------------------------------------------*/
+
+.jp-Inspector {
+  outline: none;
+  min-width: 120px;
+  min-height: 120px;
+}
+
+.jp-Inspector-content {
+  background: var(--jp-layout-color1);
+  display: flex;
+  border: none;
+}
+
+.jp-Inspector-content {
+  padding: 8px;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.jp-Inspector-content pre {
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-code-line-height);
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.jp-InspectorIcon {
+  background-image: var(--jp-icon-inspector);
+  transform: scaleX(-1);
+}
+
+.jp-Inspector-default-content {
+  align-items: center;
+  justify-content: center;
+  font-size: xx-large;
+  font-style: italic;
+  color: darkgray;
+}

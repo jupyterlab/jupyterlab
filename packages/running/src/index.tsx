@@ -19,8 +19,6 @@ import { PathExt } from '@jupyterlab/coreutils';
 
 import { ServiceManager, Session, TerminalSession } from '@jupyterlab/services';
 
-import '../style/index.css';
-
 /**
  * The class name added to a running widget.
  */

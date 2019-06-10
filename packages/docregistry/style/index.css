@@ -3,6 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-MimeDocument {
-  outline: none;
-}
+@import url('~@jupyterlab/apputils/style/index.css');
+
+@import './base.css';

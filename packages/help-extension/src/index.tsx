@@ -26,8 +26,6 @@ import { Menu } from '@phosphor/widgets';
 
 import * as React from 'react';
 
-import '../style/index.css';
-
 /**
  * The command IDs used by the help plugin.
  */

@@ -10,8 +10,6 @@ import { PromiseDelegate } from '@phosphor/coreutils';
 // Stub for window MathJax.
 declare var MathJax: any;
 
-import '../style/index.css';
-
 /**
  * The MathJax Typesetter.
  */

@@ -3,7 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-/* Document icon */
-.jp-HTMLIcon {
-  background-image: url('./html5-icon.svg');
-}
+@import './base.css';
+
+@import url('~@jupyterlab/htmlviewer/style/index.css');

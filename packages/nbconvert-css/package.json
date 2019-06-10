@@ -18,16 +18,20 @@
     "lib/*.js",
     "style/*.css"
   ],
+  "sideEffects": [
+    "style/*.css"
+  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },
   "scripts": {
-    "build": "tsc -b && webpack && rimraf style/index.js",
-    "clean": "rimraf lib/ & rimraf style/",
+    "build": "webpack && rimraf style/index.js",
+    "clean": "rimraf style/",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -b --watch"
+    "watch": "webpack --watch"
   },
   "dependencies": {
     "@jupyterlab/apputils": "^1.0.0-alpha.9",

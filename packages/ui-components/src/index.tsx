@@ -26,9 +26,6 @@ import {
   Select as BPSelect,
   ISelectProps
 } from '@blueprintjs/select/lib/cjs/components/select/select';
-import '@blueprintjs/icons/lib/css/blueprint-icons.css';
-import '@blueprintjs/core/lib/css/blueprint.css';
-import '../style/index.css';
 import { combineClassNames } from './utils';
 
 export { Intent } from '@blueprintjs/core/lib/cjs/common/intent';

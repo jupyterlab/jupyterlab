@@ -27,8 +27,6 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import * as React from 'react';
 
-import '../style/index.css';
-
 /**
  * A class that tracks HTML viewer widgets.
  */

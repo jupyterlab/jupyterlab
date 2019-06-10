@@ -24,8 +24,6 @@ import {
  */
 const CSS_ICON_CLASS = 'jp-MaterialIcon jp-HTMLIcon';
 
-import '../style/index.css';
-
 /**
  * Command IDs used by the plugin.
  */

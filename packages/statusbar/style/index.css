@@ -3,30 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-StatusItem-line-form {
-  background-image: url('./line-form.svg');
-}
+@import url('~@jupyterlab/apputils/style/index.css');
+@import url('~@jupyterlab/codeeditor/style/index.css');
 
-/*
- * icons for light themes
- */
-
-[data-theme-light='true'] .jp-StatusItem-kernel {
-  background-image: url('./kernel-icon-light.svg');
-}
-
-[data-theme-light='true'] .jp-StatusItem-terminal {
-  background-image: url('./terminal-icon-light.svg');
-}
-
-/*
- * icons for dark themes
- */
-
-[data-theme-light='false'] .jp-StatusItem-kernel {
-  background-image: url('./kernel-icon-dark.svg');
-}
-
-[data-theme-light='false'] .jp-StatusItem-terminal {
-  background-image: url('./terminal-icon-dark.svg');
-}
+@import './base.css';

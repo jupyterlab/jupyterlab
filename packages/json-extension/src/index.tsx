@@ -15,8 +15,6 @@ import * as ReactDOM from 'react-dom';
 
 import { Component } from './component';
 
-import '../style/index.css';
-
 /**
  * The CSS class to add to the JSON Widget.
  */
