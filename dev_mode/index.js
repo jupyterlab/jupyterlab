@@ -64,15 +64,6 @@ function main() {
 
   var register = [];
 
-  // Handle the CSS imports.
-  // We must import the application CSS first.
-  // This must be done synchronously so it is available when the theme manager
-  // loads the theme CSS.
-  require('{{jupyterlab_app_css}}');
-  {{#each jupyterlab_css_imports}}
-  require('{{this}}');
-  {{/each}}
-
   // Handle the registered mime extensions.
   var mimeExtensions = [];
   var extension;

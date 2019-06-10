@@ -102,13 +102,29 @@ export namespace Build {
 
     const themeConfig: webpack.Configuration[] = [];
 
+    // Get the CSS imports.
+    // We must import the application CSS first.
+    // The order of the rest does not matter.
+    // We explicitly ignore themes so they can be loaded dynamically.
+    const cssImports: Array<string> = [];
+    let appCSS = '';
+
     packageNames.forEach(name => {
       const packageDataPath = require.resolve(path.join(name, 'package.json'));
       const packageDir = path.dirname(packageDataPath);
-      const packageData = utils.readJSONFile(packageDataPath);
-      const extension = normalizeExtension(packageData);
+      const data = utils.readJSONFile(packageDataPath);
+      const extension = normalizeExtension(data);
 
       const { schemaDir, themePath } = extension;
+
+      // Handle styles.
+      if (data.style) {
+        if (data.name === '@jupyterlab/application-extension') {
+          appCSS = name + '/' + data.style;
+        } else if (!data.jupyterlab.themePath) {
+          cssImports.push(name + '/' + data.style);
+        }
+      }
 
       // Handle schemas.
       if (schemaDir) {
@@ -122,7 +138,7 @@ export namespace Build {
           try {
             const oldPackagePath = path.join(destination, 'package.json.orig');
             const oldPackageData = utils.readJSONFile(oldPackagePath);
-            if (oldPackageData.version === packageData.version) {
+            if (oldPackageData.version === data.version) {
               fs.removeSync(destination);
             }
           } catch (e) {
@@ -145,6 +161,15 @@ export namespace Build {
           path.join(destination, 'package.json.orig')
         );
       }
+
+      // Template the CSS index file.
+      let cssContents = '/* This is a generated file of CSS imports */';
+      cssContents += `\n@import url('~${appCSS}')`;
+      cssImports.forEach(cssImport => {
+        cssContents += `\n@import url('~${cssImport}')`;
+      });
+      const indexCSSPath = path.join(output, 'imports.css');
+      fs.writeFileSync(indexCSSPath, cssContents, { encoding: 'utf8' });
 
       if (!themePath) {
         return;

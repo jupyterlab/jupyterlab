@@ -20,23 +20,14 @@ var extensions = jlab.extensions;
 var mimeExtensions = jlab.mimeExtensions;
 var packageNames = Object.keys(mimeExtensions).concat(Object.keys(extensions));
 
-// Get the CSS imports.
-// We must import the application CSS first.
-// The order of the rest does not matter.
-// We explicitly ignore themes so they can be loaded dynamically.
-var cssImports = [];
-var appCSS = '';
-packageNames.forEach(function(packageName) {
-  var data = require(packageName + '/package.json');
-  if (data.style) {
-    if (data.name === '@jupyterlab/application-extension') {
-      appCSS = packageName + '/' + data.style;
-    } else if (!data.jupyterlab.themePath) {
-      cssImports.push(packageName + '/' + data.style);
-    }
-  }
-});
+// Ensure a clear build directory.
+var buildDir = path.resolve(jlab.buildDir);
+if (fs.existsSync(buildDir)) {
+  fs.removeSync(buildDir);
+}
+fs.ensureDirSync(buildDir);
 
+// Build the assets
 var extraConfig = Build.ensureAssets({
   packageNames: packageNames,
   output: jlab.outputDir
@@ -47,23 +38,12 @@ var source = fs.readFileSync('index.js').toString();
 var template = Handlebars.compile(source);
 var data = {
   jupyterlab_extensions: extensions,
-  jupyterlab_mime_extensions: mimeExtensions,
-  jupyterlab_app_css: appCSS,
-  jupyterlab_css_imports: cssImports
+  jupyterlab_mime_extensions: mimeExtensions
 };
 var result = template(data);
 
-// Ensure a clear build directory.
-var buildDir = path.resolve(jlab.buildDir);
-if (fs.existsSync(buildDir)) {
-  fs.removeSync(buildDir);
-}
-fs.ensureDirSync(buildDir);
-
 fs.writeFileSync(path.join(buildDir, 'index.out.js'), result);
 fs.copySync('./package.json', path.join(buildDir, 'package.json'));
-
-process.exit(0);
 
 // Set up variables for watch mode.
 var localLinked = {};
@@ -152,7 +132,11 @@ module.exports = [
   {
     mode: 'development',
     entry: {
-      main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')]
+      main: [
+        'whatwg-fetch',
+        path.resolve(jlab.outputDir, 'imports.css'),
+        path.resolve(buildDir, 'index.out.js')
+      ]
     },
     output: {
       path: path.resolve(buildDir),
