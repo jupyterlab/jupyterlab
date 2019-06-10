@@ -16,8 +16,7 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "style/*.css",
-    "style/*.scss"
+    "style/*.css"
   ],
   "sideEffects": [
     "style/**/*"
@@ -29,8 +28,7 @@
     "lib": "lib/"
   },
   "scripts": {
-    "build": "jlpm run build:css && tsc -b",
-    "build:css": "node-sass-chokidar --importer ../../node_modules/node-sass-package-importer/dist/cli.js --include-path ../../node_modules --functions ./scripts/sass-convert-svg.js ./style/ -o ./style/",
+    "build": "tsc -b",
     "clean": "rimraf lib",
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "npm run build",
@@ -44,8 +42,6 @@
   },
   "devDependencies": {
     "@types/react": "~16.8.18",
-    "node-sass-chokidar": "^1.3.4",
-    "node-sass-package-importer": "^5.3.1",
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
     "typescript": "~3.5.1"
