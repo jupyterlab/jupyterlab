@@ -170,6 +170,11 @@ export namespace Build {
         cssContents += `\n@import url('~${cssImport}');`;
       });
       const indexCSSPath = path.join(output, 'imports.css');
+
+      // Make sure the output dir exists before writing to it.
+      if (!fs.existsSync(output)) {
+        fs.mkdirSync(output);
+      }
       fs.writeFileSync(indexCSSPath, cssContents, { encoding: 'utf8' });
 
       if (!themePath) {
