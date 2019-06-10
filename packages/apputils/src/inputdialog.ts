@@ -3,7 +3,7 @@
 
 import { Widget } from '@phosphor/widgets';
 
-import { Dialog } from './dialog';
+import { Dialog, showDialog } from './dialog';
 import { Styling } from './styling';
 
 const INPUT_DIALOG_CLASS = 'jp-Input-Dialog';
@@ -15,23 +15,61 @@ export namespace InputDialog {
   /**
    * Common constructor options for input dialogs
    */
-  export interface IOptions<T>
-    extends Partial<
-      Pick<
-        Dialog.IOptions<T>,
-        Exclude<keyof Dialog.IOptions<T>, 'body' | 'buttons' | 'defaultButton'>
-      >
-    > {
+  export interface IOptions {
+    /**
+     * The top level text for the dialog.  Defaults to an empty string.
+     */
+    title: Dialog.Header;
+
+    /**
+     * The host element for the dialog. Defaults to `document.body`.
+     */
+    host?: HTMLElement;
+
     /**
      * Label of the requested input
      */
     label?: string;
+
+    /**
+     * An optional renderer for dialog items.  Defaults to a shared
+     * default renderer.
+     */
+    renderer?: Dialog.IRenderer;
   }
 
   /**
    * Constructor options for number input dialogs
    */
-  export interface INumberOptions extends IOptions<Number> {
+  export interface IBooleanOptions extends IOptions {
+    /**
+     * Default value
+     */
+    value?: boolean;
+  }
+
+  /**
+   * Create and show a input dialog for a boolean.
+   *
+   * @param options - The dialog setup options.
+   *
+   * @returns A promise that resolves with whether the dialog was accepted
+   */
+  export function getBoolean(
+    options: InputDialog.IBooleanOptions
+  ): Promise<Dialog.IResult<boolean>> {
+    return showDialog({
+      ...options,
+      body: new InputBooleanDialog(options),
+      buttons: [Dialog.cancelButton(), Dialog.okButton()],
+      focusNodeSelector: 'input'
+    });
+  }
+
+  /**
+   * Constructor options for number input dialogs
+   */
+  export interface INumberOptions extends IOptions {
     /**
      * Default value
      */
@@ -48,17 +86,18 @@ export namespace InputDialog {
   export function getNumber(
     options: InputDialog.INumberOptions
   ): Promise<Dialog.IResult<number>> {
-    let dialog = new Dialog({
+    return showDialog({
       ...options,
-      body: new InputNumberDialog(options)
+      body: new InputNumberDialog(options),
+      buttons: [Dialog.cancelButton(), Dialog.okButton()],
+      focusNodeSelector: 'input'
     });
-    return dialog.launch();
   }
 
   /**
    * Constructor options for item selection input dialogs
    */
-  export interface IItemOptions extends IOptions<string> {
+  export interface IItemOptions extends IOptions {
     /**
      * List of choices
      */
@@ -90,17 +129,18 @@ export namespace InputDialog {
   export function getItem(
     options: InputDialog.IItemOptions
   ): Promise<Dialog.IResult<string>> {
-    let dialog = new Dialog({
+    return showDialog({
       ...options,
-      body: new InputItemsDialog(options)
+      body: new InputItemsDialog(options),
+      buttons: [Dialog.cancelButton(), Dialog.okButton()],
+      focusNodeSelector: options.editable ? 'input' : 'select'
     });
-    return dialog.launch();
   }
 
   /**
    * Constructor options for text input dialogs
    */
-  export interface ITextOptions extends IOptions<string> {
+  export interface ITextOptions extends IOptions {
     /**
      * Default input text
      */
@@ -121,11 +161,12 @@ export namespace InputDialog {
   export function getText(
     options: InputDialog.ITextOptions
   ): Promise<Dialog.IResult<string>> {
-    let dialog = new Dialog({
+    return showDialog({
       ...options,
-      body: new InputTextDialog(options)
+      body: new InputTextDialog(options),
+      buttons: [Dialog.cancelButton(), Dialog.okButton()],
+      focusNodeSelector: 'input'
     });
-    return dialog.launch();
   }
 }
 
@@ -153,6 +194,35 @@ class InputDialogBase<T> extends Widget implements Dialog.IBodyWidget<T> {
 
   /** Input HTML node */
   protected _input: HTMLInputElement;
+}
+
+/**
+ * Widget body for input boolean dialog
+ */
+class InputBooleanDialog extends InputDialogBase<boolean> {
+  /**
+   * InputBooleanDialog constructor
+   *
+   * @param options Constructor options
+   */
+  constructor(options: InputDialog.IBooleanOptions) {
+    super(options.label);
+
+    this._input = document.createElement('input');
+    this._input.classList.add('jp-mod-styled');
+    this._input.type = 'checkbox';
+    this._input.checked = options.value ? true : false;
+
+    // Initialize the node
+    this.node.appendChild(this._input);
+  }
+
+  /**
+   * Get the text specified by the user
+   */
+  getValue(): boolean {
+    return this._input.checked;
+  }
 }
 
 /**
