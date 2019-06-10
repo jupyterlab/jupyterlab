@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-/* Override Blueprint's _reset.scss styles */
+* Override Blueprint's _reset.scss styles */
 html {
   box-sizing: unset;
 }
@@ -37,7 +37,6 @@ a {
   text-decoration: unset;
   color: unset;
 }
-
 a:hover {
   text-decoration: unset;
   color: unset;
@@ -49,7 +48,6 @@ a:hover {
   outline-offset: unset;
   -moz-outline-radius: unset;
 }
-
 /* Styles for ui-components */
 .jp-Button {
   border-radius: var(--jp-border-radius);
@@ -57,7 +55,10 @@ a:hover {
   font-size: var(--jp-ui-font-size1);
   text-transform: uppercase;
 }
-
+/* Use our own theme for hover styles */
+button.jp-Button.bp3-button.bp3-minimal:hover {
+  background-color: var(--jp-layout-color2);
+}
 .jp-Button.minimal {
   color: unset !important;
 }
@@ -65,7 +66,6 @@ a:hover {
 .jp-Button.jp-ToolbarButtonComponent {
   text-transform: none;
 }
-
 .jp-InputGroup input {
   box-sizing: border-box;
   border-radius: 0;
@@ -79,21 +79,17 @@ a:hover {
       var(--jp-input-active-box-shadow-color),
     inset 0 0 0 3px var(--jp-input-active-box-shadow-color);
 }
-
 .jp-InputGroup input::placeholder,
 input::placeholder {
   color: var(--jp-ui-font-color3);
 }
-
 .jp-Icon {
   color: var(--jp-layout-color4);
 }
-
 .jp-InputGroupAction {
   padding: 6px;
 }
-
-.jp-HTMLSelect select {
+.jp-HTMLSelect.bp3-html-select.bp3-minimal select {
   height: 24;
   font-size: var(--jp-ui-font-size1);
   line-height: 14px;
@@ -101,11 +97,11 @@ input::placeholder {
   display: block;
   color: var(--jp-ui-font-color0);
 }
-
-.jp-HTMLSelect select:hover {
+/* Use our own theme for hover styles */
+.jp-HTMLSelect.bp3-html-select.bp3-minimal select:hover {
   color: var(--jp-ui-font-color0);
+  background-color: var(--jp-layout-color2);
 }
-
 select {
   box-sizing: border-box;
 }
