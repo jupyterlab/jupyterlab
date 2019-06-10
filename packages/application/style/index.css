@@ -3,9 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-@import url('./base.css');
-
 @import url('~font-awesome/css/font-awesome.min.css');
+/* Phosphor needs to be imported before local styles */
 @import url('~@phosphor/widgets/style/index.css');
 @import url('~@jupyterlab/apputils/style/index.css');
 @import url('~@jupyterlab/docregistry/style/index.css');
+
+@import url('./base.css');

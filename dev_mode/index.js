@@ -12,6 +12,9 @@ import {
 // eslint-disable-next-line no-undef
 __webpack_public_path__ = PageConfig.getOption('fullStaticUrl') + '/';
 
+// This must be after the public path is set.
+// This cannot be extracted because the public path is dynamic.
+require('./imports.css');
 
 /**
  * The main entry point for the application.

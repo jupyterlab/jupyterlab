@@ -106,7 +106,7 @@ export namespace Build {
     // We must import the application CSS first.
     // The order of the rest does not matter.
     // We explicitly ignore themes so they can be loaded dynamically.
-    const cssImports: Array<string> = [];
+    let cssImports: Array<string> = [];
     let appCSS = '';
 
     packageNames.forEach(name => {
@@ -125,6 +125,7 @@ export namespace Build {
           cssImports.push(name + '/' + data.style);
         }
       }
+      cssImports = cssImports.sort((a, b) => a.localeCompare(b));
 
       // Handle schemas.
       if (schemaDir) {
@@ -164,9 +165,9 @@ export namespace Build {
 
       // Template the CSS index file.
       let cssContents = '/* This is a generated file of CSS imports */';
-      cssContents += `\n@import url('~${appCSS}')`;
+      cssContents += `\n@import url('~${appCSS}');`;
       cssImports.forEach(cssImport => {
-        cssContents += `\n@import url('~${cssImport}')`;
+        cssContents += `\n@import url('~${cssImport}');`;
       });
       const indexCSSPath = path.join(output, 'imports.css');
       fs.writeFileSync(indexCSSPath, cssContents, { encoding: 'utf8' });

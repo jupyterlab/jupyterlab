@@ -44,6 +44,10 @@ var result = template(data);
 
 fs.writeFileSync(path.join(buildDir, 'index.out.js'), result);
 fs.copySync('./package.json', path.join(buildDir, 'package.json'));
+fs.copySync(
+  path.join(jlab.outputDir, 'imports.css'),
+  path.join(buildDir, 'imports.css')
+);
 
 // Set up variables for watch mode.
 var localLinked = {};
@@ -132,11 +136,7 @@ module.exports = [
   {
     mode: 'development',
     entry: {
-      main: [
-        'whatwg-fetch',
-        path.resolve(jlab.outputDir, 'imports.css'),
-        path.resolve(buildDir, 'index.out.js')
-      ]
+      main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')]
     },
     output: {
       path: path.resolve(buildDir),

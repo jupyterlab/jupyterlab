@@ -17,7 +17,11 @@
     "schema/*.json",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
   ],
+  "sideEffects": [
+    "style/**/*"
+  ],
   "main": "lib/index.js",
+  "style": "style/index.css",
   "types": "lib/index.d.ts",
   "directories": {
     "lib": "lib/"
