@@ -9,7 +9,7 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 __webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
 
 // This has to be done after webpack public path is set to load the
-// font file.
+// fonts.
 import '../style/index.css';
 
 import { OutputArea, OutputAreaModel } from '@jupyterlab/outputarea';

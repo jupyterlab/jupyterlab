@@ -83,12 +83,14 @@ export async function ensurePackage(
     imports = imports.concat(getImports(sourceFile));
   });
 
-  // Make sure we are not importing CSS.
-  imports.forEach(importStr => {
-    if (importStr.indexOf('.css') !== -1) {
-      messages.push('CSS imports are not allowed source files');
-    }
-  });
+  // Make sure we are not importing CSS in a core package.
+  if (data.name.indexOf('example') === -1) {
+    imports.forEach(importStr => {
+      if (importStr.indexOf('.css') !== -1) {
+        messages.push('CSS imports are not allowed source files');
+      }
+    });
+  }
 
   let names: string[] = Array.from(new Set(imports)).sort();
   names = names.map(function(name) {
