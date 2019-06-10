@@ -145,9 +145,6 @@
       "path": "../mathjax2-extension"
     },
     {
-      "path": "../nbconvert-css"
-    },
-    {
       "path": "../notebook"
     },
     {

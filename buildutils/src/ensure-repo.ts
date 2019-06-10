@@ -280,6 +280,7 @@ export async function ensureIntegrity(): Promise<boolean> {
     if (name === '@jupyterlab/metapackage') {
       options.noUnused = false;
     }
+
     let pkgMessages = await ensurePackage(options);
     if (pkgMessages.length > 0) {
       messages[name] = pkgMessages;

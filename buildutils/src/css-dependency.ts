@@ -6,7 +6,7 @@
 import fs = require('fs-extra');
 
 /**
- *
+ * Get the name of the packages imported by a file.
  */
 export function getCssPackageImports(filePath: string): string[] {
   try {
@@ -27,7 +27,7 @@ export function getCssPackageImports(filePath: string): string[] {
 }
 
 /**
- *
+ * Get the CSS dependencies of a file as a list of package names (without the scope).
  */
 export function getCssDependencies(filePath: string): string[] {
   return getCssPackageImports(filePath).reduce((pkgs, m) => {

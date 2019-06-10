@@ -1,7 +1,7 @@
 var path = require('path');
 
 module.exports = {
-  entry: './build/index.js',
+  entry: ['./style/index.css', './build/index.js'],
   mode: 'development',
   output: {
     path: path.join(__dirname, 'build'),

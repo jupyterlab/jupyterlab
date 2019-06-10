@@ -82,6 +82,14 @@ export async function ensurePackage(
     );
     imports = imports.concat(getImports(sourceFile));
   });
+
+  // Make sure we are not importing CSS.
+  imports.forEach(importStr => {
+    if (importStr.indexOf('.css') !== -1) {
+      messages.push('CSS imports are not allowed source files');
+    }
+  });
+
   let names: string[] = Array.from(new Set(imports)).sort();
   names = names.map(function(name) {
     let parts = name.split('/');
@@ -146,7 +154,7 @@ export async function ensurePackage(
     }
   });
 
-  // Look for missing cross-package CSS imports
+  // Look for missing cross-package CSS imports.
   let extensionWithBase = false;
   if (data.name.endsWith('-extension')) {
     const baseName = data.name.slice(0, data.name.length - '-extension'.length);
@@ -161,7 +169,12 @@ export async function ensurePackage(
     }
   }
 
-  if (!extensionWithBase && !data.name.startsWith('@jupyterlab/test')) {
+  // For other packages, look for missing style imports of CSS deps.
+  if (
+    !extensionWithBase &&
+    !data.name.startsWith('@jupyterlab/test') &&
+    data.name !== '@jupyterlab/metapackage'
+  ) {
     Object.keys(deps).forEach(name => {
       if (!name.startsWith('@jupyterlab')) {
         return;
@@ -255,17 +268,6 @@ export async function ensurePackage(
   if (styles.length > 0) {
     if (data.style === undefined) {
       data.style = 'style/index.css';
-    }
-  }
-
-  // Ensure that sideEffects are declared, and that any styles are covered
-  if (styles.length > 0) {
-    if (data.sideEffects === undefined) {
-      messages.push(
-        `Side effects not declared in ${pkgPath}, and styles are present.`
-      );
-    } else if (data.sideEffects === false) {
-      messages.push(`Style files not included in sideEffects in ${pkgPath}`);
     }
   }
 

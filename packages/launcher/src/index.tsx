@@ -28,8 +28,6 @@ import { Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
-import '../style/index.css';
-
 /**
  * The class name added to Launcher instances.
  */
