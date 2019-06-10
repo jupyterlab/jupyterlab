@@ -58,6 +58,11 @@ a:hover {
   text-transform: uppercase;
 }
 
+/* Use our own theme for hover styles */
+button.jp-Button.bp3-button.bp3-minimal:hover {
+  background-color: var(--jp-layout-color2);
+}
+
 .jp-Button.minimal {
   color: unset !important;
 }
@@ -93,7 +98,7 @@ input::placeholder {
   padding: 6px;
 }
 
-.jp-HTMLSelect select {
+.jp-HTMLSelect.bp3-html-select.bp3-minimal select {
   height: 24;
   font-size: var(--jp-ui-font-size1);
   line-height: 14px;
@@ -102,8 +107,10 @@ input::placeholder {
   color: var(--jp-ui-font-color0);
 }
 
-.jp-HTMLSelect select:hover {
+/* Use our own theme for hover styles */
+.jp-HTMLSelect.bp3-html-select.bp3-minimal select:hover {
   color: var(--jp-ui-font-color0);
+  background-color: var(--jp-layout-color2);
 }
 
 select {
