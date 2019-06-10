@@ -62,7 +62,8 @@ let MISSING_CSS: Dict<string[]> = {
   '@jupyterlab/theme-light-extension': [
     '@jupyterlab/application',
     '@jupyterlab/apputils'
-  ]
+  ],
+  '@jupyterlab/ui-extension': ['@blueprintjs/icons']
 };
 
 let pkgData: Dict<any> = {};

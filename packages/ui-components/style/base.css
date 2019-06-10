@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-* Override Blueprint's _reset.scss styles */
+/* Override Blueprint's _reset.scss styles */
 html {
   box-sizing: unset;
 }
