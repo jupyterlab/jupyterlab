@@ -349,7 +349,7 @@ function Card(
   const args = { ...item.args, cwd: launcher.cwd };
   const caption = commands.caption(command, args);
   const label = commands.label(command, args);
-  const title = caption || label;
+  const title = kernel ? label : caption || label;
 
   // Build the onclick handler.
   let onclick = () => {
@@ -402,7 +402,7 @@ function Card(
         )}
       </div>
       <div className="jp-LauncherCard-label" title={title}>
-        {label}
+        <p>{label}</p>
       </div>
     </div>
   );

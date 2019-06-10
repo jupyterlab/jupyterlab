@@ -9,8 +9,8 @@
   --jp-private-launcher-top-padding: 16px;
   --jp-private-launcher-side-padding: 32px;
   --jp-private-launcher-card-size: 100px;
-  --jp-private-launcher-card-label-height: 25px;
-  --jp-private-launcher-card-icon-height: 75px;
+  --jp-private-launcher-card-label-height: 32px;
+  --jp-private-launcher-card-icon-height: 68px;
   --jp-private-launcher-large-icon-size: 52px;
   --jp-private-launcher-small-icon-size: 32px;
 }
@@ -150,15 +150,19 @@
 .jp-LauncherCard-label {
   width: 100%;
   height: var(--jp-private-launcher-card-label-height);
-  line-height: var(--jp-private-launcher-card-label-height);
-  font-size: var(--jp-ui-font-size1);
-  padding: 0 8px;
-  color: var(--jp-ui-font-color1);
+  padding: 0 4px 4px 4px;
   box-sizing: border-box;
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+}
+
+.jp-LauncherCard-label p {
+  height: 28px;
+  word-break: break-word;
   text-align: center;
+  color: var(--jp-ui-font-color1);
+  line-height: 14px;
+  font-size: 12px;
+  overflow: hidden;
 }
 
 /* Icons, kernel icons */
