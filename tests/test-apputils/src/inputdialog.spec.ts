@@ -12,7 +12,7 @@ import {
 describe('@jupyterlab/apputils', () => {
   describe('InputDialog', () => {
     describe('getBoolean()', () => {
-      it('should accept at least argument', async () => {
+      it('should accept at least the title argument', async () => {
         const dialog = InputDialog.getBoolean({
           title: 'Check or not'
         });
@@ -21,7 +21,7 @@ describe('@jupyterlab/apputils', () => {
         expect((await dialog).button.accept).toBe(false);
       });
 
-      it('should be false be default', async () => {
+      it('should be false by default', async () => {
         const dialog = InputDialog.getBoolean({
           title: 'Check or not'
         });

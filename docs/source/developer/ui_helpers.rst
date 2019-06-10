@@ -1,8 +1,8 @@
 User Interface Helpers
 ----------------------
 
-JupyterLab comes with helpers to show or request simple information to user.
-Those speed up development and ensure a common look & feel.
+JupyterLab comes with helpers to show or request simple information from a user.
+Those speed up development and ensure a common look and feel.
 
 Dialogs
 ~~~~~~~
@@ -11,9 +11,9 @@ Message Dialogs
 '''''''''''''''
 
 Helper functions to show a message to the user are available in the ``apputils`` package.
-Those dialog return a ``Promise`` resolving when the user dismisses the dialog.
+These dialogs return a ``Promise`` resolving when the user dismisses the dialog.
 
-There are one helper:
+There is one helper:
 
 * ``showErrorMessage`` : show an error message dialog.
 
@@ -21,7 +21,7 @@ There are one helper:
 Input Dialogs
 '''''''''''''
 
-Helper functions to request an single input from the user are available in the ``apputils``
+Helper functions to request a single input from the user are available in the ``apputils``
 package within the ``InputDialog`` namespace. There are four helpers:
 
 * ``getBoolean`` : request a boolean through a checkbox.
@@ -29,7 +29,7 @@ package within the ``InputDialog`` namespace. There are four helpers:
 * ``getNumber`` : request a number; if the user input is not a valid number, NaN is returned.
 * ``getText`` : request a short text.
 
-All dialog are built on the standard ``Dialog``. There for the helper function are returning
+All dialogs are built on the standard ``Dialog``. Therefore the helper functions each return
 a ``Promise`` resolving in a ``Dialog.IResult`` object.
 
 .. code:: typescript

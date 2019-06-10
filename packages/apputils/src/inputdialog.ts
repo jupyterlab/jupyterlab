@@ -39,7 +39,7 @@ export namespace InputDialog {
   }
 
   /**
-   * Constructor options for number input dialogs
+   * Constructor options for boolean input dialogs
    */
   export interface IBooleanOptions extends IOptions {
     /**
@@ -56,7 +56,7 @@ export namespace InputDialog {
    * @returns A promise that resolves with whether the dialog was accepted
    */
   export function getBoolean(
-    options: InputDialog.IBooleanOptions
+    options: IBooleanOptions
   ): Promise<Dialog.IResult<boolean>> {
     return showDialog({
       ...options,
@@ -84,7 +84,7 @@ export namespace InputDialog {
    * @returns A promise that resolves with whether the dialog was accepted
    */
   export function getNumber(
-    options: InputDialog.INumberOptions
+    options: INumberOptions
   ): Promise<Dialog.IResult<number>> {
     return showDialog({
       ...options,
@@ -127,7 +127,7 @@ export namespace InputDialog {
    * @returns A promise that resolves with whether the dialog was accepted
    */
   export function getItem(
-    options: InputDialog.IItemOptions
+    options: IItemOptions
   ): Promise<Dialog.IResult<string>> {
     return showDialog({
       ...options,
@@ -159,7 +159,7 @@ export namespace InputDialog {
    * @returns A promise that resolves with whether the dialog was accepted
    */
   export function getText(
-    options: InputDialog.ITextOptions
+    options: ITextOptions
   ): Promise<Dialog.IResult<string>> {
     return showDialog({
       ...options,
