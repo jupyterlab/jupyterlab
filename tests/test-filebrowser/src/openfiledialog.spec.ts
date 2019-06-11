@@ -5,14 +5,19 @@ import { toArray } from '@phosphor/algorithm';
 
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
-import { FileDialog, FilterFileBrowserModel } from '@jupyterlab/filebrowser';
+import {
+  FileDialog,
+  FilterFileBrowserModel,
+  FileBrowserModel
+} from '@jupyterlab/filebrowser';
 import { ServiceManager } from '@jupyterlab/services';
 import { expect } from 'chai';
 import {
   acceptDialog,
   dismissDialog,
   waitForDialog,
-  sleep
+  sleep,
+  framePromise
 } from '@jupyterlab/testutils';
 import { simulate } from 'simulate-event';
 
@@ -62,38 +67,50 @@ describe('@jupyterlab/filebrowser', () => {
 
     describe('#items()', () => {
       it('should list all elements if no filter is defined', async () => {
-        let model = new FilterFileBrowserModel({ manager });
+        let filteredModel = new FilterFileBrowserModel({ manager });
+        await filteredModel.cd();
+        let model = new FileBrowserModel({ manager });
         await model.cd();
 
+        const filteredItems = toArray(filteredModel.items());
         const items = toArray(model.items());
-        expect(items.length).equal(4);
+        expect(filteredItems.length).equal(items.length);
       });
 
       it('should list all directories whatever the filter', async () => {
-        let model = new FilterFileBrowserModel({
+        let filteredModel = new FilterFileBrowserModel({
           manager,
           filter: model => false
         });
+        await filteredModel.cd();
+        let model = new FileBrowserModel({ manager });
         await model.cd();
 
+        const filteredItems = toArray(filteredModel.items());
         const items = toArray(model.items());
-        expect(items.length).equal(2);
-        expect(items[0].type).equal('directory');
-        expect(items[1].type).equal('directory');
+        const folders = items.filter(item => item.type === 'directory');
+        expect(filteredItems.length).equal(folders.length);
       });
 
       it('should respect the filter', async () => {
-        let model = new FilterFileBrowserModel({
+        let filteredModel = new FilterFileBrowserModel({
           manager,
           filter: model => model.type === 'notebook'
         });
+        await filteredModel.cd();
+        let model = new FileBrowserModel({ manager });
         await model.cd();
 
+        const filteredItems = toArray(filteredModel.items());
         const items = toArray(model.items());
-        expect(items.length).equal(3);
-        expect(items[0].type).equal('directory');
-        expect(items[1].type).equal('directory');
-        expect(items[2].type).equal('notebook');
+        const shownItems = items.filter(
+          item => item.type === 'directory' || item.type === 'notebook'
+        );
+        expect(filteredItems.length).equal(shownItems.length);
+        const notebooks = filteredItems.filter(
+          item => item.type === 'notebook'
+        );
+        expect(notebooks.length).to.be.greaterThan(0);
       });
     });
   });
@@ -148,10 +165,14 @@ describe('@jupyterlab/filebrowser', () => {
       });
 
       await waitForDialog();
+      await framePromise();
 
       let counter = 0;
       let listing = node.getElementsByClassName('jp-DirListing-content')[0];
+      expect(listing).to.be.ok;
+
       let items = listing.getElementsByTagName('li');
+      counter = 0;
       // Wait for the directory listing to be populated
       while (items.length === 0 && counter < 100) {
         await sleep(10);
@@ -159,23 +180,24 @@ describe('@jupyterlab/filebrowser', () => {
         counter++;
       }
 
-      if (items.length > 0) {
-        // Emulate notebook file selection
-        // Get node coordinates we need to be precised as code test for hit position
-        const rect = items.item(2).getBoundingClientRect();
+      // Fails if there is no items shown
+      expect(items.length).to.be.greaterThan(0);
 
-        simulate(items.item(2), 'mousedown', {
-          clientX: 0.5 * (rect.left + rect.right),
-          clientY: 0.5 * (rect.bottom + rect.top)
-        });
-      }
+      // Emulate notebook file selection
+      // Get node coordinates we need to be precised as code test for hit position
+      const rect = items.item(items.length - 1).getBoundingClientRect();
+
+      simulate(items.item(items.length - 1), 'mousedown', {
+        clientX: 0.5 * (rect.left + rect.right),
+        clientY: 0.5 * (rect.bottom + rect.top)
+      });
 
       await acceptDialog();
       let result = await dialog;
       let files = result.value;
       expect(files.length).equal(1);
       expect(files[0].type).equal('notebook');
-      expect(files[0].name).equal('Untitled.ipynb');
+      expect(files[0].name).matches(/Untitled\d*.ipynb/);
 
       document.body.removeChild(node);
     });
@@ -243,9 +265,12 @@ describe('@jupyterlab/filebrowser', () => {
       });
 
       await waitForDialog();
+      await framePromise();
 
       let counter = 0;
       let listing = node.getElementsByClassName('jp-DirListing-content')[0];
+      expect(listing).to.be.ok;
+
       let items = listing.getElementsByTagName('li');
       // Wait for the directory listing to be populated
       while (items.length === 0 && counter < 100) {
@@ -254,23 +279,24 @@ describe('@jupyterlab/filebrowser', () => {
         counter++;
       }
 
-      if (items.length > 0) {
-        // Emulate notebook file selection
-        // Get node coordinates we need to be precised as code test for hit position
-        const rect = items.item(1).getBoundingClientRect();
+      // Fails if there is no items shown
+      expect(items.length).to.be.greaterThan(0);
 
-        simulate(items.item(1), 'mousedown', {
-          clientX: 0.5 * (rect.left + rect.right),
-          clientY: 0.5 * (rect.bottom + rect.top)
-        });
-      }
+      // Emulate notebook file selection
+      // Get node coordinates we need to be precised as code test for hit position
+      const rect = items.item(items.length - 1).getBoundingClientRect();
+
+      simulate(items.item(items.length - 1), 'mousedown', {
+        clientX: 0.5 * (rect.left + rect.right),
+        clientY: 0.5 * (rect.bottom + rect.top)
+      });
 
       await acceptDialog();
       let result = await dialog;
       let files = result.value;
       expect(files.length).equal(1);
       expect(files[0].type).equal('directory');
-      expect(files[0].name).equal('Untitled Folder');
+      expect(files[0].name).matches(/Untitled Folder( \d+)?/);
 
       document.body.removeChild(node);
     });
