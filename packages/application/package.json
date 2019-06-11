@@ -62,6 +62,7 @@
     "access": "public"
   },
   "jupyterlab": {
-    "coreDependency": true
+    "coreDependency": true,
+    "extraStyles": ["font-awesome/css/font-awesome.min.css"]
   }
 }
