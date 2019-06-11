@@ -268,9 +268,8 @@ export async function ensureIntegrity(): Promise<boolean> {
         return;
       }
       const depData = graph.getNodeData(depName);
-      console.log('hi', depName);
       if (depData.style) {
-        cssData[depName] = [pkgData[depName].style];
+        cssData[depName] = [depData.style];
       }
     });
 

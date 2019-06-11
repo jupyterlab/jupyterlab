@@ -190,12 +190,9 @@ export function run(
  * first order dependencies.
  */
 export function getPackageGraph(): DepGraph<Dict<any>> {
-  // Create a shared dependency graph.
-  const graph = new DepGraph();
-
   // Pick up all the package versions.
   const paths = getLernaPaths();
-  const locals: Dict<string> = {};
+  const locals: Dict<any> = {};
 
   // These two are not part of the workspaces but should be
   // considered part of the dependency graph.
@@ -212,32 +209,30 @@ export function getPackageGraph(): DepGraph<Dict<any>> {
       console.error(e);
       return;
     }
-    graph.addNode(data.name, data);
     locals[data.name] = data;
   });
 
-  const recurseDeps = (data: any) => {
-    const deps: Dict<Array<string>> = data.dependencies || {};
-    graph.addNode(data.name, data);
-    Object.keys(deps).forEach(depName => {
-      const hadNode = graph.hasNode(depName);
-      // Get external deps if needed.
-      let depData = locals[depName];
-      if (!(depName in locals)) {
-        depData = require(`${depName}/package.json`);
-      }
-      graph.addNode(depName, depData);
-      graph.addDependency(data.name, depName);
-      // Only recurse if we haven't yet recursed and this is a local pkg.
-      if (!hadNode && !(depName in locals)) {
-        recurseDeps(depData);
-      }
-    });
-  };
-
-  // Build up a dependency graph from all our local packages.
+  // Build up a dependency graph from all our local packages and
+  // their first order dependencies.
+  const graph = new DepGraph();
   Object.keys(locals).forEach(name => {
-    recurseDeps(locals[name]);
+    const data = locals[name];
+    graph.addNode(name, data);
+    const deps: Dict<Array<string>> = data.dependencies || {};
+    Object.keys(deps).forEach(depName => {
+      if (!graph.hasNode(depName)) {
+        let depData: any;
+        // get data from locals if available, otherwise from
+        // third party library.
+        if (depName in locals) {
+          depData = locals[depName];
+        } else {
+          depData = require(`${depName}/package.json`);
+        }
+        graph.addNode(depName, depData);
+      }
+      graph.addDependency(data.name, depName);
+    });
   });
 
   return graph;

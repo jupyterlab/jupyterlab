@@ -137,7 +137,7 @@ export async function ensurePackage(
     const cssPath = path.join(pkgPath, 'style/index.css');
     const prev = fs.readFileSync(cssPath, { encoding: 'utf8' });
     if (prev !== cssIndex) {
-      messages.push(`Updated CSS index for ${data.name}`);
+      messages.push(`Updated ${data.name}/${data.style}`);
       fs.writeFileSync(cssPath, cssIndex);
     }
   }
