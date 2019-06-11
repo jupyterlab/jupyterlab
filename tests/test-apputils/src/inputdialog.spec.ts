@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { getItem, getText, getNumber } from '@jupyterlab/apputils';
+import { InputDialog } from '@jupyterlab/apputils';
 
 import {
   acceptDialog,
@@ -10,188 +10,292 @@ import {
 } from '@jupyterlab/testutils';
 
 describe('@jupyterlab/apputils', () => {
-  describe('getItem()', () => {
-    it('should accept at least two arguments', async () => {
-      const dialog = getItem({
-        label: 'list',
-        items: ['item1']
+  describe('InputDialog', () => {
+    describe('getBoolean()', () => {
+      it('should accept at least the title argument', async () => {
+        const dialog = InputDialog.getBoolean({
+          title: 'Check or not'
+        });
+
+        await dismissDialog();
+        expect((await dialog).button.accept).toBe(false);
       });
 
-      await dismissDialog();
-      expect((await dialog).button.accept).toBe(false);
+      it('should be false by default', async () => {
+        const dialog = InputDialog.getBoolean({
+          title: 'Check or not'
+        });
+
+        await acceptDialog();
+
+        const result = await dialog;
+
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toBe(false);
+      });
+
+      it('should accept options', async () => {
+        const dialog = InputDialog.getBoolean({
+          title: 'Check or not',
+          value: true
+        });
+
+        await acceptDialog();
+
+        const result = await dialog;
+
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toBe(true);
+      });
+
+      it('should be editable', async () => {
+        const node = document.createElement('div');
+
+        document.body.appendChild(node);
+
+        const prompt = InputDialog.getBoolean({
+          title: 'Check or not',
+          host: node
+        });
+
+        await waitForDialog(node);
+        const body = node.getElementsByClassName('jp-Input-Dialog').item(0);
+        const input = body.getElementsByTagName('input').item(0);
+        input.checked = true;
+
+        await acceptDialog();
+
+        const result = await prompt;
+
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toBe(true);
+        document.body.removeChild(node);
+      });
     });
 
-    it('should accept options', async () => {
-      const dialog = getItem({
-        label: 'list',
-        items: ['item1', 'item2'],
-        current: 1,
-        editable: false,
-        title: 'Pick a choice',
-        placeholder: 'item'
+    describe('getItem()', () => {
+      it('should accept at least two arguments', async () => {
+        const dialog = InputDialog.getItem({
+          title: 'list',
+          items: ['item1']
+        });
+
+        await dismissDialog();
+        expect((await dialog).button.accept).toBe(false);
       });
 
-      await acceptDialog();
+      it('should be the first item by default', async () => {
+        const dialog = InputDialog.getItem({
+          items: ['item1', 'item2'],
+          title: 'Pick a choice'
+        });
 
-      const result = await dialog;
+        await acceptDialog();
 
-      expect(result.button.accept).toBe(true);
-      expect(result.value).toBe('item2');
+        const result = await dialog;
+
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toBe('item1');
+      });
+
+      it('should accept options', async () => {
+        const dialog = InputDialog.getItem({
+          label: 'list',
+          items: ['item1', 'item2'],
+          current: 1,
+          editable: false,
+          title: 'Pick a choice',
+          placeholder: 'item'
+        });
+
+        await acceptDialog();
+
+        const result = await dialog;
+
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toBe('item2');
+      });
+
+      it('should be editable', async () => {
+        const node = document.createElement('div');
+
+        document.body.appendChild(node);
+
+        const prompt = InputDialog.getItem({
+          label: 'list',
+          items: ['item1', 'item2'],
+          title: 'Pick a choice',
+          placeholder: 'item',
+          editable: true,
+          host: node
+        });
+
+        await waitForDialog(node);
+        const body = node.getElementsByClassName('jp-Input-Dialog').item(0);
+        const input = body.getElementsByTagName('input').item(0);
+        input.value = 'item3';
+
+        await acceptDialog();
+
+        const result = await prompt;
+
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toBe('item3');
+        document.body.removeChild(node);
+      });
     });
 
-    it('should be editable', async () => {
-      const node = document.createElement('div');
+    describe('getText()', () => {
+      it('should accept at least one argument', async () => {
+        const dialog = InputDialog.getText({
+          title: 'text'
+        });
 
-      document.body.appendChild(node);
-
-      const prompt = getItem({
-        label: 'list',
-        items: ['item1', 'item2'],
-        title: 'Pick a choice',
-        placeholder: 'item',
-        editable: true,
-        host: node
+        await dismissDialog();
+        expect((await dialog).button.accept).toBe(false);
       });
 
-      await waitForDialog(node);
-      const body = node.getElementsByClassName('jp-Input-Dialog').item(0);
-      const input = body.getElementsByTagName('input').item(0);
-      input.value = 'item3';
+      it('should be an empty string by default', async () => {
+        const dialog = InputDialog.getText({
+          title: 'Give a text'
+        });
 
-      await acceptDialog();
+        await acceptDialog();
 
-      const result = await prompt;
+        const result = await dialog;
 
-      expect(result.button.accept).toBe(true);
-      expect(result.value).toBe('item3');
-      document.body.removeChild(node);
-    });
-  });
-
-  describe('getText()', () => {
-    it('should accept at least one argument', async () => {
-      const dialog = getText({
-        label: 'text'
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toBe('');
       });
 
-      await dismissDialog();
-      expect((await dialog).button.accept).toBe(false);
-    });
+      it('should accept options', async () => {
+        const dialog = InputDialog.getText({
+          label: 'text',
+          title: 'Give a text',
+          placeholder: 'your text',
+          text: 'answer'
+        });
 
-    it('should accept options', async () => {
-      const dialog = getText({
-        label: 'text',
-        title: 'Give a text',
-        placeholder: 'your text',
-        text: 'answer'
+        await acceptDialog();
+
+        const result = await dialog;
+
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toBe('answer');
       });
 
-      await acceptDialog();
+      it('should be editable', async () => {
+        const node = document.createElement('div');
 
-      const result = await dialog;
+        document.body.appendChild(node);
 
-      expect(result.button.accept).toBe(true);
-      expect(result.value).toBe('answer');
-    });
+        const prompt = InputDialog.getText({
+          title: 'text',
+          host: node
+        });
 
-    it('should be editable', async () => {
-      const node = document.createElement('div');
+        await waitForDialog(node);
+        const body = node.getElementsByClassName('jp-Input-Dialog').item(0);
+        const input = body.getElementsByTagName('input').item(0);
+        input.value = 'my answer';
 
-      document.body.appendChild(node);
+        await acceptDialog();
 
-      const prompt = getText({
-        label: 'text',
-        host: node
+        const result = await prompt;
+
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toBe('my answer');
+        document.body.removeChild(node);
       });
-
-      await waitForDialog(node);
-      const body = node.getElementsByClassName('jp-Input-Dialog').item(0);
-      const input = body.getElementsByTagName('input').item(0);
-      input.value = 'my answer';
-
-      await acceptDialog();
-
-      const result = await prompt;
-
-      expect(result.button.accept).toBe(true);
-      expect(result.value).toBe('my answer');
-      document.body.removeChild(node);
-    });
-  });
-
-  describe('getNumber()', () => {
-    it('should accept at least one argument', async () => {
-      const dialog = getNumber({
-        label: 'number'
-      });
-
-      await dismissDialog();
-      expect((await dialog).button.accept).toBe(false);
     });
 
-    it('should accept options', async () => {
-      const dialog = getNumber({
-        label: 'number',
-        title: 'Pick a number',
-        value: 10
+    describe('getNumber()', () => {
+      it('should accept at least one argument', async () => {
+        const dialog = InputDialog.getNumber({
+          title: 'number'
+        });
+
+        await dismissDialog();
+        expect((await dialog).button.accept).toBe(false);
       });
 
-      await acceptDialog();
+      it('should be 0 by default', async () => {
+        const dialog = InputDialog.getNumber({
+          title: 'Pick a number'
+        });
 
-      const result = await dialog;
+        await acceptDialog();
 
-      expect(result.button.accept).toBe(true);
-      expect(result.value).toBe(10);
-    });
+        const result = await dialog;
 
-    it('should be editable', async () => {
-      const node = document.createElement('div');
-
-      document.body.appendChild(node);
-
-      const prompt = getNumber({
-        label: 'text',
-        title: 'Pick a number',
-        host: node
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toBe(0);
       });
 
-      await waitForDialog(node);
-      const body = node.getElementsByClassName('jp-Input-Dialog').item(0);
-      const input = body.getElementsByTagName('input').item(0);
-      input.value = '25';
+      it('should accept options', async () => {
+        const dialog = InputDialog.getNumber({
+          label: 'number',
+          title: 'Pick a number',
+          value: 10
+        });
 
-      await acceptDialog();
+        await acceptDialog();
 
-      const result = await prompt;
+        const result = await dialog;
 
-      expect(result.button.accept).toBe(true);
-      expect(result.value).toBe(25);
-      document.body.removeChild(node);
-    });
-
-    it('should return NaN if empty', async () => {
-      const node = document.createElement('div');
-
-      document.body.appendChild(node);
-
-      const prompt = getNumber({
-        label: 'text',
-        title: 'Pick a number',
-        host: node
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toBe(10);
       });
 
-      await waitForDialog(node);
-      const body = node.getElementsByClassName('jp-Input-Dialog').item(0);
-      const input = body.getElementsByTagName('input').item(0);
-      input.value = '';
+      it('should be editable', async () => {
+        const node = document.createElement('div');
 
-      await acceptDialog();
+        document.body.appendChild(node);
 
-      const result = await prompt;
+        const prompt = InputDialog.getNumber({
+          label: 'text',
+          title: 'Pick a number',
+          host: node
+        });
 
-      expect(result.button.accept).toBe(true);
-      expect(result.value).toBe(Number.NaN);
-      document.body.removeChild(node);
+        await waitForDialog(node);
+        const body = node.getElementsByClassName('jp-Input-Dialog').item(0);
+        const input = body.getElementsByTagName('input').item(0);
+        input.value = '25';
+
+        await acceptDialog();
+
+        const result = await prompt;
+
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toBe(25);
+        document.body.removeChild(node);
+      });
+
+      it('should return NaN if empty', async () => {
+        const node = document.createElement('div');
+
+        document.body.appendChild(node);
+
+        const prompt = InputDialog.getNumber({
+          label: 'text',
+          title: 'Pick a number',
+          host: node
+        });
+
+        await waitForDialog(node);
+        const body = node.getElementsByClassName('jp-Input-Dialog').item(0);
+        const input = body.getElementsByTagName('input').item(0);
+        input.value = '';
+
+        await acceptDialog();
+
+        const result = await prompt;
+
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toBe(Number.NaN);
+        document.body.removeChild(node);
+      });
     });
   });
 });

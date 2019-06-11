@@ -3,84 +3,101 @@
 
 import { Widget } from '@phosphor/widgets';
 
-import { Dialog } from './dialog';
+import { Dialog, showDialog } from './dialog';
 import { Styling } from './styling';
 
 const INPUT_DIALOG_CLASS = 'jp-Input-Dialog';
 
 /**
- * Create and show a input dialog for a number.
- *
- * @param options - The dialog setup options.
- *
- * @returns A promise that resolves with whether the dialog was accepted
+ * Namespace for input dialogs
  */
-export function getNumber(
-  options: InputDialog.INumberOptions
-): Promise<Dialog.IResult<number>> {
-  let dialog = new Dialog({
-    ...options,
-    body: new InputNumberDialog(options)
-  });
-  return dialog.launch();
-}
-
-/**
- * Create and show a input dialog for a choice.
- *
- * @param options - The dialog setup options.
- *
- * @returns A promise that resolves with whether the dialog was accepted
- */
-export function getItem(
-  options: InputDialog.IItemOptions
-): Promise<Dialog.IResult<string>> {
-  let dialog = new Dialog({
-    ...options,
-    body: new InputItemsDialog(options)
-  });
-  return dialog.launch();
-}
-
-/**
- * Create and show a input dialog for a text.
- *
- * @param options - The dialog setup options.
- *
- * @returns A promise that resolves with whether the dialog was accepted
- */
-export function getText(
-  options: InputDialog.ITextOptions
-): Promise<Dialog.IResult<string>> {
-  let dialog = new Dialog({
-    ...options,
-    body: new InputTextDialog(options)
-  });
-  return dialog.launch();
-}
-
 export namespace InputDialog {
-  export interface IOptions<T>
-    extends Partial<
-      Pick<
-        Dialog.IOptions<T>,
-        Exclude<keyof Dialog.IOptions<T>, 'body' | 'buttons' | 'defaultButton'>
-      >
-    > {
+  /**
+   * Common constructor options for input dialogs
+   */
+  export interface IOptions {
+    /**
+     * The top level text for the dialog.  Defaults to an empty string.
+     */
+    title: Dialog.Header;
+
+    /**
+     * The host element for the dialog. Defaults to `document.body`.
+     */
+    host?: HTMLElement;
+
     /**
      * Label of the requested input
      */
-    label: string;
+    label?: string;
+
+    /**
+     * An optional renderer for dialog items.  Defaults to a shared
+     * default renderer.
+     */
+    renderer?: Dialog.IRenderer;
   }
 
-  export interface INumberOptions extends IOptions<Number> {
+  /**
+   * Constructor options for boolean input dialogs
+   */
+  export interface IBooleanOptions extends IOptions {
+    /**
+     * Default value
+     */
+    value?: boolean;
+  }
+
+  /**
+   * Create and show a input dialog for a boolean.
+   *
+   * @param options - The dialog setup options.
+   *
+   * @returns A promise that resolves with whether the dialog was accepted
+   */
+  export function getBoolean(
+    options: IBooleanOptions
+  ): Promise<Dialog.IResult<boolean>> {
+    return showDialog({
+      ...options,
+      body: new InputBooleanDialog(options),
+      buttons: [Dialog.cancelButton(), Dialog.okButton()],
+      focusNodeSelector: 'input'
+    });
+  }
+
+  /**
+   * Constructor options for number input dialogs
+   */
+  export interface INumberOptions extends IOptions {
     /**
      * Default value
      */
     value?: number;
   }
 
-  export interface IItemOptions extends IOptions<string> {
+  /**
+   * Create and show a input dialog for a number.
+   *
+   * @param options - The dialog setup options.
+   *
+   * @returns A promise that resolves with whether the dialog was accepted
+   */
+  export function getNumber(
+    options: INumberOptions
+  ): Promise<Dialog.IResult<number>> {
+    return showDialog({
+      ...options,
+      body: new InputNumberDialog(options),
+      buttons: [Dialog.cancelButton(), Dialog.okButton()],
+      focusNodeSelector: 'input'
+    });
+  }
+
+  /**
+   * Constructor options for item selection input dialogs
+   */
+  export interface IItemOptions extends IOptions {
     /**
      * List of choices
      */
@@ -102,7 +119,28 @@ export namespace InputDialog {
     placeholder?: string;
   }
 
-  export interface ITextOptions extends IOptions<string> {
+  /**
+   * Create and show a input dialog for a choice.
+   *
+   * @param options - The dialog setup options.
+   *
+   * @returns A promise that resolves with whether the dialog was accepted
+   */
+  export function getItem(
+    options: IItemOptions
+  ): Promise<Dialog.IResult<string>> {
+    return showDialog({
+      ...options,
+      body: new InputItemsDialog(options),
+      buttons: [Dialog.cancelButton(), Dialog.okButton()],
+      focusNodeSelector: options.editable ? 'input' : 'select'
+    });
+  }
+
+  /**
+   * Constructor options for text input dialogs
+   */
+  export interface ITextOptions extends IOptions {
     /**
      * Default input text
      */
@@ -112,26 +150,46 @@ export namespace InputDialog {
      */
     placeholder?: string;
   }
+
+  /**
+   * Create and show a input dialog for a text.
+   *
+   * @param options - The dialog setup options.
+   *
+   * @returns A promise that resolves with whether the dialog was accepted
+   */
+  export function getText(
+    options: ITextOptions
+  ): Promise<Dialog.IResult<string>> {
+    return showDialog({
+      ...options,
+      body: new InputTextDialog(options),
+      buttons: [Dialog.cancelButton(), Dialog.okButton()],
+      focusNodeSelector: 'input'
+    });
+  }
 }
 
 /**
  * Base widget for input dialog body
  */
-class InputDialog<T> extends Widget implements Dialog.IBodyWidget<T> {
+class InputDialogBase<T> extends Widget implements Dialog.IBodyWidget<T> {
   /**
    * InputDialog constructor
    *
    * @param label Input field label
    */
-  constructor(label: string) {
+  constructor(label?: string) {
     super();
     this.addClass(INPUT_DIALOG_CLASS);
 
-    let labelElement = document.createElement('label');
-    labelElement.textContent = label;
+    if (label !== undefined) {
+      let labelElement = document.createElement('label');
+      labelElement.textContent = label;
 
-    // Initialize the node
-    this.node.appendChild(labelElement);
+      // Initialize the node
+      this.node.appendChild(labelElement);
+    }
   }
 
   /** Input HTML node */
@@ -139,9 +197,38 @@ class InputDialog<T> extends Widget implements Dialog.IBodyWidget<T> {
 }
 
 /**
+ * Widget body for input boolean dialog
+ */
+class InputBooleanDialog extends InputDialogBase<boolean> {
+  /**
+   * InputBooleanDialog constructor
+   *
+   * @param options Constructor options
+   */
+  constructor(options: InputDialog.IBooleanOptions) {
+    super(options.label);
+
+    this._input = document.createElement('input');
+    this._input.classList.add('jp-mod-styled');
+    this._input.type = 'checkbox';
+    this._input.checked = options.value ? true : false;
+
+    // Initialize the node
+    this.node.appendChild(this._input);
+  }
+
+  /**
+   * Get the text specified by the user
+   */
+  getValue(): boolean {
+    return this._input.checked;
+  }
+}
+
+/**
  * Widget body for input number dialog
  */
-class InputNumberDialog extends InputDialog<number> {
+class InputNumberDialog extends InputDialogBase<number> {
   /**
    * InputNumberDialog constructor
    *
@@ -174,7 +261,7 @@ class InputNumberDialog extends InputDialog<number> {
 /**
  * Widget body for input text dialog
  */
-class InputTextDialog extends InputDialog<string> {
+class InputTextDialog extends InputDialogBase<string> {
   /**
    * InputTextDialog constructor
    *
@@ -206,7 +293,7 @@ class InputTextDialog extends InputDialog<string> {
 /**
  * Widget body for input list dialog
  */
-class InputItemsDialog extends InputDialog<string> {
+class InputItemsDialog extends InputDialogBase<string> {
   /**
    * InputItemsDialog constructor
    *

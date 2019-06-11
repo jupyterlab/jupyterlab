@@ -7,7 +7,11 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { InstanceTracker, IThemeManager, Dialog } from '@jupyterlab/apputils';
+import {
+  InstanceTracker,
+  IThemeManager,
+  InputDialog
+} from '@jupyterlab/apputils';
 
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 
@@ -64,7 +68,10 @@ function addMenuEntries(
   mainMenu.editMenu.goToLiners.add({
     tracker,
     goToLine: (widget: IDocumentWidget<CSVViewer>) => {
-      return Dialog.prompt<number>('Go to Line', 0).then(value => {
+      return InputDialog.getNumber({
+        title: 'Go to Line',
+        value: 0
+      }).then(value => {
         if (value.button.accept) {
           widget.content.goToLine(value.value);
         }
