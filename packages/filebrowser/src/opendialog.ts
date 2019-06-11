@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { filter, IIterator, toArray } from '@phosphor/algorithm';
+import { toArray } from '@phosphor/algorithm';
 import { PanelLayout, Widget } from '@phosphor/widgets';
 import { PathExt } from '@jupyterlab/coreutils';
 
@@ -10,8 +10,8 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents } from '@jupyterlab/services';
 
 import { FileBrowser } from './browser';
-import { FileBrowserModel } from './model';
-import { IFileBrowserFactory } from './factory';
+import { FilterFileBrowserModel } from './model';
+import { IFileBrowserFactory } from './tokens';
 
 /**
  * The class name added to open file dialog
@@ -99,49 +99,6 @@ export namespace FileDialog {
       filter: model => false
     });
   }
-}
-
-/**
- * Namespace for the filtered file browser model
- */
-export namespace FilterFileBrowserModel {
-  /**
-   * Constructor options
-   */
-  export interface IOptions extends FileBrowserModel.IOptions {
-    /**
-     * Filter function on file browser item model
-     */
-    filter?: (value: Contents.IModel) => boolean;
-  }
-}
-
-/**
- * File browser model with optional filter on element.
- */
-export class FilterFileBrowserModel extends FileBrowserModel {
-  constructor(options: FilterFileBrowserModel.IOptions) {
-    super(options);
-
-    this._filter = options.filter ? options.filter : model => true;
-  }
-
-  /**
-   * Create an iterator over the filtered model's items.
-   *
-   * @returns A new iterator over the model's items.
-   */
-  items(): IIterator<Contents.IModel> {
-    return filter(super.items(), (value, index) => {
-      if (value.type === 'directory') {
-        return true;
-      } else {
-        return this._filter(value);
-      }
-    });
-  }
-
-  private _filter: (value: Contents.IModel) => boolean;
 }
 
 /**
