@@ -42,6 +42,7 @@
     "@yarnpkg/lockfile": "^1.1.0",
     "child_process": "~1.0.2",
     "commander": "~2.20.0",
+    "dependency-graph": "^0.8.0",
     "fs-extra": "^8.0.1",
     "glob": "~7.1.2",
     "inquirer": "^6.3.1",

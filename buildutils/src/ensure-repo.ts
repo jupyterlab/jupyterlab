@@ -13,6 +13,7 @@
  */
 import * as path from 'path';
 import * as utils from './utils';
+import { DepGraph } from 'dependency-graph';
 import { ensurePackage, IEnsurePackageOptions } from './ensure-package';
 
 type Dict<T> = { [key: string]: T };
@@ -32,7 +33,7 @@ let UNUSED: Dict<string[]> = {
   '@jupyterlab/vega5-extension': ['vega', 'vega-lite']
 };
 
-let MISSING_CSS: Dict<string[]> = {
+let SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
   '@jupyterlab/application-extension': ['@jupyterlab/apputils'],
   '@jupyterlab/completer': ['@jupyterlab/codeeditor'],
@@ -226,14 +227,9 @@ export async function ensureIntegrity(): Promise<boolean> {
   paths.push('./jupyterlab/tests/mock_packages/extension');
   paths.push('./jupyterlab/tests/mock_packages/mimeextension');
 
-  const styledPackages = utils.getLernaPaths().reduce((hasStyles, pkgPath) => {
-    const d = utils.readJSONFile(path.resolve(pkgPath, 'package.json'));
-    if (d.style) {
-      hasStyles.push(d.name);
-    }
-    return hasStyles;
-  }, []);
+  const cssImports: Dict<Array<string>> = {};
 
+  // Gather all of our package data.
   paths.forEach(pkgPath => {
     // Read in the package.json.
     let data: any;
@@ -248,6 +244,65 @@ export async function ensureIntegrity(): Promise<boolean> {
     pkgPaths[data.name] = pkgPath;
     pkgNames[pkgPath] = data.name;
     locals[data.name] = pkgPath;
+  });
+
+  // Create a shared dependency graph.
+  const graph = new DepGraph();
+  const recurseDeps = (depName: string) => {
+    const deps: Dict<Array<string>> = pkgData[depName].dependencies || {};
+    graph.addNode(depName);
+    Object.keys(deps).forEach(subDepName => {
+      const hadNode = graph.hasNode(subDepName);
+      graph.addNode(subDepName);
+      graph.addDependency(depName, subDepName);
+      // Add external deps to the cache if needed.
+      if (!(subDepName in pkgData)) {
+        pkgData[subDepName] = require(`${subDepName}/package.json`);
+      }
+      if (!hadNode && !(depName in locals)) {
+        recurseDeps(subDepName);
+      }
+    });
+  };
+
+  // Build up a dependency graph from all our local packages.
+  Object.keys(locals).forEach(name => {
+    recurseDeps(name);
+  });
+
+  // Build up an ordered list of CSS imports for each local package.
+  Object.keys(locals).forEach(name => {
+    const data = pkgData[name];
+    const deps: Dict<string> = data.dependencies || {};
+    const skip = SKIP_CSS[name] || [];
+    const cssData: Dict<Array<string>> = {};
+
+    if (data.jupyter && data.jupyter.extraStyles) {
+      Object.keys(data.jupyter.extraStyles).forEach(depName => {
+        cssData[depName] = data.jupyter.extraStyles[depName];
+      });
+    }
+
+    Object.keys(deps).forEach(depName => {
+      // Bail for skipped imports and known extra styles.
+      if (skip.indexOf(depName) !== -1 || depName in cssData) {
+        return;
+      }
+      if (pkgData[depName].style) {
+        cssData[depName] = [pkgData[depName].style];
+      }
+    });
+
+    // Get our CSS imports in dependency order.
+    cssImports[name] = [];
+
+    graph.dependenciesOf(name).forEach(depName => {
+      if (depName in cssData) {
+        cssData[depName].forEach(cssPath => {
+          cssImports[name].push(depName + '/' + cssPath);
+        });
+      }
+    });
   });
 
   // Update the metapackage.
@@ -274,8 +329,7 @@ export async function ensureIntegrity(): Promise<boolean> {
       missing: MISSING[name],
       unused,
       locals,
-      missingCss: MISSING_CSS[name],
-      styledPackages
+      cssImports: cssImports[name]
     };
 
     if (name === '@jupyterlab/metapackage') {

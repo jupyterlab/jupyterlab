@@ -97,7 +97,8 @@ We are organizing our CSS files in the following manner:
    determined by their ``style`` field in ``package.json``.  If additional
    files are desired or the external library does not have a ``style`` field,
    we use the ``jupyterlab: { "extraStyles": { "fooLibrary": ["path/to/css"] } }``
-   pattern in our ``package.json`` to declare them.
+   pattern in our ``package.json`` to declare them.  For imports that should not be added to ``index.css`, update ``SKIP_CSS`` in ``buildutils/src/ensure-repo.ts``.
+
 
 
 CSS class names
