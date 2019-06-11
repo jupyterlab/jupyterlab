@@ -214,6 +214,7 @@ export namespace Build {
     cssImports.forEach(cssImport => {
       cssContents += `\n@import url('~${cssImport}');`;
     });
+    cssContents += '\n';
     const indexCSSPath = path.join(output, 'imports.css');
 
     // Make sure the output dir exists before writing to it.
