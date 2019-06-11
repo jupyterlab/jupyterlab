@@ -2,8 +2,11 @@ import path = require('path');
 import glob = require('glob');
 import fs = require('fs-extra');
 import childProcess = require('child_process');
+import { DepGraph } from 'dependency-graph';
 import sortPackageJson = require('sort-package-json');
 import coreutils = require('@phosphor/coreutils');
+
+type Dict<T> = { [key: string]: T };
 
 /**
  * Get all of the lerna package paths.
@@ -180,4 +183,57 @@ export function run(
     .toString()
     .replace(/(\r\n|\n)$/, '')
     .trim();
+}
+
+/**
+ * Get a graph that has all of the package data for the local packages and thier
+ * first order depencies.
+ */
+export function getPackageGraph(): DepGraph<Dict<any>> {
+  // Create a shared dependency graph.
+  const graph = new DepGraph();
+
+  // Pick up all the package versions.
+  const paths = getLernaPaths();
+  const locals: Dict<string> = {};
+
+  // Gather all of our package data.
+  paths.forEach(pkgPath => {
+    // Read in the package.json.
+    let data: any;
+    try {
+      data = readJSONFile(path.join(pkgPath, 'package.json'));
+    } catch (e) {
+      console.error(e);
+      return;
+    }
+    graph.addNode(data.name, data);
+    locals[data.name] = data;
+  });
+
+  const recurseDeps = (data: any) => {
+    const deps: Dict<Array<string>> = data.dependencies || {};
+    graph.addNode(data.name);
+    Object.keys(deps).forEach(depName => {
+      const hadNode = graph.hasNode(depName);
+      graph.addNode(depName);
+      graph.addDependency(data.name, depName);
+      // Get external deps if needed.
+      let depData = locals[depName];
+      if (!(depName in locals)) {
+        depData = require(`${depName}/package.json`);
+      }
+      // Only recursive if we haven't yet recursed and this is a local pkg.
+      if (!hadNode && !(depName in locals)) {
+        recurseDeps(depData);
+      }
+    });
+  };
+
+  // Build up a dependency graph from all our local packages.
+  Object.keys(locals).forEach(name => {
+    recurseDeps(name);
+  });
+
+  return graph;
 }

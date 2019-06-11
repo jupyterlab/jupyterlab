@@ -13,7 +13,6 @@
  */
 import * as path from 'path';
 import * as utils from './utils';
-import { DepGraph } from 'dependency-graph';
 import { ensurePackage, IEnsurePackageOptions } from './ensure-package';
 
 type Dict<T> = { [key: string]: T };
@@ -230,6 +229,9 @@ export async function ensureIntegrity(): Promise<boolean> {
 
   const cssImports: Dict<Array<string>> = {};
 
+  // Get the package graph.
+  const graph = utils.getPackageGraph();
+
   // Gather all of our package data.
   paths.forEach(pkgPath => {
     // Read in the package.json.
@@ -241,34 +243,10 @@ export async function ensureIntegrity(): Promise<boolean> {
       return;
     }
 
-    pkgData[data.name] = data;
+    pkgData[data.name] = graph.getNodeData(data.name);
     pkgPaths[data.name] = pkgPath;
     pkgNames[pkgPath] = data.name;
     locals[data.name] = pkgPath;
-  });
-
-  // Create a shared dependency graph.
-  const graph = new DepGraph();
-  const recurseDeps = (depName: string) => {
-    const deps: Dict<Array<string>> = pkgData[depName].dependencies || {};
-    graph.addNode(depName);
-    Object.keys(deps).forEach(subDepName => {
-      const hadNode = graph.hasNode(subDepName);
-      graph.addNode(subDepName);
-      graph.addDependency(depName, subDepName);
-      // Add external deps to the cache if needed.
-      if (!(subDepName in pkgData)) {
-        pkgData[subDepName] = require(`${subDepName}/package.json`);
-      }
-      if (!hadNode && !(depName in locals)) {
-        recurseDeps(subDepName);
-      }
-    });
-  };
-
-  // Build up a dependency graph from all our local packages.
-  Object.keys(locals).forEach(name => {
-    recurseDeps(name);
   });
 
   // Build up an ordered list of CSS imports for each local package.
@@ -289,7 +267,8 @@ export async function ensureIntegrity(): Promise<boolean> {
       if (skip.indexOf(depName) !== -1 || depName in cssData) {
         return;
       }
-      if (pkgData[depName].style) {
+      const depData = graph.getNodeData(depName);
+      if (depData.style) {
         cssData[depName] = [pkgData[depName].style];
       }
     });
