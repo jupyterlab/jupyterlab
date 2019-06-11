@@ -40,7 +40,7 @@
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/domutils": "^1.1.2",
     "@phosphor/messaging": "^1.2.2",
-    "@phosphor/widgets": "^1.7.0",
+    "@phosphor/widgets": "^1.7.1",
     "xterm": "~3.13.2"
   },
   "devDependencies": {
@@ -50,5 +50,12 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "jupyterlab": {
+    "extraStyles": {
+      "xterm": [
+        "src/xterm.css"
+      ]
+    }
   }
 }

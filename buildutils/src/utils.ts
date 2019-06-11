@@ -2,8 +2,11 @@ import path = require('path');
 import glob = require('glob');
 import fs = require('fs-extra');
 import childProcess = require('child_process');
+import { DepGraph } from 'dependency-graph';
 import sortPackageJson = require('sort-package-json');
 import coreutils = require('@phosphor/coreutils');
+
+type Dict<T> = { [key: string]: T };
 
 /**
  * Get all of the lerna package paths.
@@ -180,4 +183,57 @@ export function run(
     .toString()
     .replace(/(\r\n|\n)$/, '')
     .trim();
+}
+
+/**
+ * Get a graph that has all of the package data for the local packages and their
+ * first order dependencies.
+ */
+export function getPackageGraph(): DepGraph<Dict<any>> {
+  // Pick up all the package versions.
+  const paths = getLernaPaths();
+  const locals: Dict<any> = {};
+
+  // These two are not part of the workspaces but should be
+  // considered part of the dependency graph.
+  paths.push('./jupyterlab/tests/mock_packages/extension');
+  paths.push('./jupyterlab/tests/mock_packages/mimeextension');
+
+  // Gather all of our package data.
+  paths.forEach(pkgPath => {
+    // Read in the package.json.
+    let data: any;
+    try {
+      data = readJSONFile(path.join(pkgPath, 'package.json'));
+    } catch (e) {
+      console.error(e);
+      return;
+    }
+    locals[data.name] = data;
+  });
+
+  // Build up a dependency graph from all our local packages and
+  // their first order dependencies.
+  const graph = new DepGraph();
+  Object.keys(locals).forEach(name => {
+    const data = locals[name];
+    graph.addNode(name, data);
+    const deps: Dict<Array<string>> = data.dependencies || {};
+    Object.keys(deps).forEach(depName => {
+      if (!graph.hasNode(depName)) {
+        let depData: any;
+        // get data from locals if available, otherwise from
+        // third party library.
+        if (depName in locals) {
+          depData = locals[depName];
+        } else {
+          depData = require(`${depName}/package.json`);
+        }
+        graph.addNode(depName, depData);
+      }
+      graph.addDependency(data.name, depName);
+    });
+  });
+
+  return graph;
 }

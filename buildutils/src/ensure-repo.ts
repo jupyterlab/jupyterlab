@@ -29,14 +29,15 @@ let UNUSED: Dict<string[]> = {
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/testutils': ['node-fetch', 'identity-obj-proxy'],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
-  '@jupyterlab/vega5-extension': ['vega', 'vega-lite']
+  '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],
+  '@jupyterlab/ui-components': ['@blueprintjs/icons']
 };
 
-let MISSING_CSS: Dict<string[]> = {
+let SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
   '@jupyterlab/application-extension': ['@jupyterlab/apputils'],
   '@jupyterlab/completer': ['@jupyterlab/codeeditor'],
-  '@jupyterlab/docmanager': ['@jupyterlab/statusbar'], // Statusbar styles should not be by status reporters
+  '@jupyterlab/docmanager': ['@jupyterlab/statusbar'], // Statusbar styles should not be used by status reporters
   '@jupyterlab/docregistry': [
     '@jupyterlab/codeeditor', // Only used for model
     '@jupyterlab/codemirror', // Only used for Mode.findByFileName
@@ -226,14 +227,12 @@ export async function ensureIntegrity(): Promise<boolean> {
   paths.push('./jupyterlab/tests/mock_packages/extension');
   paths.push('./jupyterlab/tests/mock_packages/mimeextension');
 
-  const styledPackages = utils.getLernaPaths().reduce((hasStyles, pkgPath) => {
-    const d = utils.readJSONFile(path.resolve(pkgPath, 'package.json'));
-    if (d.style) {
-      hasStyles.push(d.name);
-    }
-    return hasStyles;
-  }, []);
+  const cssImports: Dict<Array<string>> = {};
 
+  // Get the package graph.
+  const graph = utils.getPackageGraph();
+
+  // Gather all of our package data and other metadata.
   paths.forEach(pkgPath => {
     // Read in the package.json.
     let data: any;
@@ -250,6 +249,42 @@ export async function ensureIntegrity(): Promise<boolean> {
     locals[data.name] = pkgPath;
   });
 
+  // Build up an ordered list of CSS imports for each local package.
+  Object.keys(locals).forEach(name => {
+    const data = pkgData[name];
+    const deps: Dict<string> = data.dependencies || {};
+    const skip = SKIP_CSS[name] || [];
+    const cssData: Dict<Array<string>> = {};
+
+    if (data.jupyter && data.jupyter.extraStyles) {
+      Object.keys(data.jupyter.extraStyles).forEach(depName => {
+        cssData[depName] = data.jupyter.extraStyles[depName];
+      });
+    }
+
+    Object.keys(deps).forEach(depName => {
+      // Bail for skipped imports and known extra styles.
+      if (skip.indexOf(depName) !== -1 || depName in cssData) {
+        return;
+      }
+      const depData = graph.getNodeData(depName);
+      if (depData.style) {
+        cssData[depName] = [depData.style];
+      }
+    });
+
+    // Get our CSS imports in dependency order.
+    cssImports[name] = [];
+
+    graph.dependenciesOf(name).forEach(depName => {
+      if (depName in cssData) {
+        cssData[depName].forEach(cssPath => {
+          cssImports[name].push(depName + '/' + cssPath);
+        });
+      }
+    });
+  });
+
   // Update the metapackage.
   let pkgMessages = ensureMetaPackage();
   if (pkgMessages.length > 0) {
@@ -261,7 +296,7 @@ export async function ensureIntegrity(): Promise<boolean> {
   }
 
   // Validate each package.
-  for (let name in pkgData) {
+  for (let name in locals) {
     let unused = UNUSED[name] || [];
     // Allow jest-junit to be unused in the test suite.
     if (name.indexOf('@jupyterlab/test-') === 0) {
@@ -274,8 +309,7 @@ export async function ensureIntegrity(): Promise<boolean> {
       missing: MISSING[name],
       unused,
       locals,
-      missingCss: MISSING_CSS[name],
-      styledPackages
+      cssImports: cssImports[name]
     };
 
     if (name === '@jupyterlab/metapackage') {

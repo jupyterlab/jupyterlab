@@ -3,6 +3,7 @@ build
 dist
 lib
 
+jupyterlab/imports.css
 jupyterlab/static
 jupyterlab/schemas
 jupyterlab/themes

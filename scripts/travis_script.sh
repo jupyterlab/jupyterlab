@@ -195,8 +195,6 @@ if [[ $GROUP == usage ]]; then
     # Make sure core mode works
     jlpm run build:core
     # Make sure we have a final released version of JupyterLab server
-    pip uninstall -y jupyterlab_server
-    pip install jupyterlab_server
     python -m jupyterlab.browser_check --core-mode
 
     # Make sure we can run the built app.
