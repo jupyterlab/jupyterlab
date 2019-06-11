@@ -232,7 +232,7 @@ export async function ensureIntegrity(): Promise<boolean> {
   // Get the package graph.
   const graph = utils.getPackageGraph();
 
-  // Gather all of our package data.
+  // Gather all of our package data and other metadata.
   paths.forEach(pkgPath => {
     // Read in the package.json.
     let data: any;
@@ -243,7 +243,7 @@ export async function ensureIntegrity(): Promise<boolean> {
       return;
     }
 
-    pkgData[data.name] = graph.getNodeData(data.name);
+    pkgData[data.name] = data;
     pkgPaths[data.name] = pkgPath;
     pkgNames[pkgPath] = data.name;
     locals[data.name] = pkgPath;
@@ -268,6 +268,7 @@ export async function ensureIntegrity(): Promise<boolean> {
         return;
       }
       const depData = graph.getNodeData(depName);
+      console.log('hi', depName);
       if (depData.style) {
         cssData[depName] = [pkgData[depName].style];
       }
