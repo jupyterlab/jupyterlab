@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/running",
-  "version": "1.0.0-alpha.9",
+  "version": "1.0.0-alpha.10",
   "description": "JupyterLab - Running Sessions Panel",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,9 +35,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^1.0.0-alpha.9",
-    "@jupyterlab/coreutils": "^3.0.0-alpha.9",
-    "@jupyterlab/services": "^4.0.0-alpha.9",
+    "@jupyterlab/apputils": "^1.0.0-alpha.10",
+    "@jupyterlab/coreutils": "^3.0.0-alpha.10",
+    "@jupyterlab/services": "^4.0.0-alpha.10",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/signaling": "^1.2.2",
     "react": "~16.8.4"

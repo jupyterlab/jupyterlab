@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-services-browser",
-  "version": "1.0.0-alpha.9",
+  "version": "1.0.0-alpha.10",
   "private": true,
   "scripts": {
     "build": "tsc && webpack",
@@ -8,8 +8,8 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^3.0.0-alpha.9",
-    "@jupyterlab/services": "^4.0.0-alpha.9"
+    "@jupyterlab/coreutils": "^3.0.0-alpha.10",
+    "@jupyterlab/services": "^4.0.0-alpha.10"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
