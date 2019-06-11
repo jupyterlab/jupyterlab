@@ -63,6 +63,8 @@
   },
   "jupyterlab": {
     "coreDependency": true,
-    "extraStyles": ["font-awesome/css/font-awesome.min.css"]
+    "extraStyles": [
+      "font-awesome/css/font-awesome.min.css"
+    ]
   }
 }
