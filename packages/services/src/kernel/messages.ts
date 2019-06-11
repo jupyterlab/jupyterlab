@@ -163,9 +163,7 @@ export namespace KernelMessage {
   /**
    * Control message types.
    */
-  export type ControlMessageType = 
-    | 'debug_request'
-    | 'debug_reply';
+  export type ControlMessageType = 'debug_request' | 'debug_reply';
 
   /**
    * IOPub message types.
@@ -289,11 +287,13 @@ export namespace KernelMessage {
   /**
    * A kernel message on the `'control'` channel.
    */
-  export interface IControlMessage<T extends ControlMessageType = ControlMessageType>
-    extends IMessage<T> {
+  export interface IControlMessage<
+    T extends ControlMessageType = ControlMessageType
+  > extends IMessage<T> {
     channel: 'control';
   }
 
+  export type IShellControlMessage = IShellMessage | IControlMessage;
   /**
    * A kernel message on the `'iopub'` channel.
    */
@@ -985,16 +985,14 @@ export namespace KernelMessage {
   /**
    * Debug message types.
    */
-  export type DebugMessageType =
-    | 'request'
-    | 'response'
-    | 'event';
+  export type DebugMessageType = 'request' | 'response' | 'event';
 
   /**
    * Base interface for debug protocol message.
    */
-  export interface IDebugProtocolMsg<T extends DebugMessageType = DebugMessageType>
-  {
+  export interface IDebugProtocolMsg<
+    T extends DebugMessageType = DebugMessageType
+  > {
     seq: number;
     type: T;
   }

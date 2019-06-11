@@ -19,10 +19,11 @@ declare var setImmediate: any;
  * is considered done when the `idle` status is received.
  *
  */
-export class KernelFutureHandler<
-  REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
-  REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
+export abstract class KernelFutureHandler<
+  REQUEST extends KernelMessage.IShellControlMessage = KernelMessage.IShellControlMessage,
+  REPLY extends KernelMessage.IShellControlMessage = KernelMessage.IShellControlMessage
 > extends DisposableDelegate implements Kernel.IFuture<REQUEST, REPLY> {
+  abstract async handleMsg(msg: KernelMessage.IMessage): Promise<void>;
   /**
    * Construct a new KernelFutureHandler.
    */
@@ -89,24 +90,6 @@ export class KernelFutureHandler<
   }
 
   /**
-   * Get the stdin handler.
-   */
-  get onStdin(): (
-    msg: KernelMessage.IStdinMessage
-  ) => void | PromiseLike<void> {
-    return this._stdin;
-  }
-
-  /**
-   * Set the stdin handler.
-   */
-  set onStdin(
-    cb: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void>
-  ) {
-    this._stdin = cb;
-  }
-
-  /**
    * Register hook for IOPub messages.
    *
    * @param hook - The callback invoked for an IOPub message.
@@ -152,17 +135,9 @@ export class KernelFutureHandler<
   }
 
   /**
-   * Send an `input_reply` message.
-   */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void {
-    this._kernel.sendInputReply(content);
-  }
-
-  /**
    * Dispose and unregister the future.
    */
   dispose(): void {
-    this._stdin = Private.noOp;
     this._iopub = Private.noOp;
     this._reply = Private.noOp;
     this._hooks = null;
@@ -189,26 +164,7 @@ export class KernelFutureHandler<
     super.dispose();
   }
 
-  /**
-   * Handle an incoming kernel message.
-   */
-  async handleMsg(msg: KernelMessage.IMessage): Promise<void> {
-    switch (msg.channel) {
-      case 'shell':
-        await this._handleReply(msg as REPLY);
-        break;
-      case 'stdin':
-        await this._handleStdin(msg as KernelMessage.IStdinMessage);
-        break;
-      case 'iopub':
-        await this._handleIOPub(msg as KernelMessage.IIOPubMessage);
-        break;
-      default:
-        break;
-    }
-  }
-
-  private async _handleReply(msg: REPLY): Promise<void> {
+  protected async _handleReply(msg: REPLY): Promise<void> {
     let reply = this._reply;
     if (reply) {
       // tslint:disable-next-line:await-promise
@@ -221,15 +177,9 @@ export class KernelFutureHandler<
     }
   }
 
-  private async _handleStdin(msg: KernelMessage.IStdinMessage): Promise<void> {
-    let stdin = this._stdin;
-    if (stdin) {
-      // tslint:disable-next-line:await-promise
-      await stdin(msg);
-    }
-  }
-
-  private async _handleIOPub(msg: KernelMessage.IIOPubMessage): Promise<void> {
+  protected async _handleIOPub(
+    msg: KernelMessage.IIOPubMessage
+  ): Promise<void> {
     let process = await this._hooks.process(msg);
     let iopub = this._iopub;
     if (process && iopub) {
@@ -276,9 +226,6 @@ export class KernelFutureHandler<
 
   private _msg: REQUEST;
   private _status = 0;
-  private _stdin: (
-    msg: KernelMessage.IStdinMessage
-  ) => void | PromiseLike<void> = Private.noOp;
   private _iopub: (
     msg: KernelMessage.IIOPubMessage
   ) => void | PromiseLike<void> = Private.noOp;
@@ -287,7 +234,96 @@ export class KernelFutureHandler<
   private _replyMsg: REPLY;
   private _hooks = new Private.HookList<KernelMessage.IIOPubMessage>();
   private _disposeOnDone = true;
-  private _kernel: Kernel.IKernel;
+  protected _kernel: Kernel.IKernel;
+}
+
+export class KernelControlFutureHandler<
+  REQUEST extends KernelMessage.IControlMessage = KernelMessage.IControlMessage,
+  REPLY extends KernelMessage.IControlMessage = KernelMessage.IControlMessage
+> extends KernelFutureHandler<REQUEST, REPLY>
+  implements Kernel.IControlFuture<REQUEST, REPLY> {
+  async handleMsg(msg: KernelMessage.IMessage): Promise<void> {
+    switch (msg.channel) {
+      case 'control':
+        await this._handleReply(msg as REPLY);
+        break;
+      case 'iopub':
+        await this._handleIOPub(msg as KernelMessage.IIOPubMessage);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+export class KernelShellFutureHandler<
+  REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
+  REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
+> extends KernelFutureHandler<REQUEST, REPLY>
+  implements Kernel.IShellFuture<REQUEST, REPLY> {
+  /**
+   * Get the stdin handler.
+   */
+  get onStdin(): (
+    msg: KernelMessage.IStdinMessage
+  ) => void | PromiseLike<void> {
+    return this._stdin;
+  }
+
+  /**
+   * Set the stdin handler.
+   */
+  set onStdin(
+    cb: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void>
+  ) {
+    this._stdin = cb;
+  }
+
+  /**
+   * Send an `input_reply` message.
+   */
+  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void {
+    this._kernel.sendInputReply(content);
+  }
+
+  /**
+   * Handle an incoming kernel message.
+   */
+  async handleMsg(msg: KernelMessage.IMessage): Promise<void> {
+    switch (msg.channel) {
+      case 'shell':
+        await this._handleReply(msg as REPLY);
+        break;
+      case 'stdin':
+        await this._handleStdin(msg as KernelMessage.IStdinMessage);
+        break;
+      case 'iopub':
+        await this._handleIOPub(msg as KernelMessage.IIOPubMessage);
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Dispose and unregister the future.
+   */
+  dispose(): void {
+    this._stdin = Private.noOp;
+    super.dispose();
+  }
+
+  private async _handleStdin(msg: KernelMessage.IStdinMessage): Promise<void> {
+    let stdin = this._stdin;
+    if (stdin) {
+      // tslint:disable-next-line:await-promise
+      await stdin(msg);
+    }
+  }
+
+  private _stdin: (
+    msg: KernelMessage.IStdinMessage
+  ) => void | PromiseLike<void> = Private.noOp;
 }
 
 namespace Private {

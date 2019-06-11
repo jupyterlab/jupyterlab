@@ -103,7 +103,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     data?: JSONObject,
     metadata?: JSONObject,
     buffers: (ArrayBuffer | ArrayBufferView)[] = []
-  ): Kernel.IFuture {
+  ): Kernel.IShellFuture {
     if (this.isDisposed || this._kernel.isDisposed) {
       throw new Error('Cannot open');
     }
@@ -136,7 +136,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     metadata?: JSONObject,
     buffers: (ArrayBuffer | ArrayBufferView)[] = [],
     disposeOnDone: boolean = true
-  ): Kernel.IFuture {
+  ): Kernel.IShellFuture {
     if (this.isDisposed || this._kernel.isDisposed) {
       throw new Error('Cannot send');
     }
@@ -170,7 +170,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     data?: JSONObject,
     metadata?: JSONObject,
     buffers: (ArrayBuffer | ArrayBufferView)[] = []
-  ): Kernel.IFuture {
+  ): Kernel.IShellFuture {
     if (this.isDisposed || this._kernel.isDisposed) {
       throw new Error('Cannot close');
     }

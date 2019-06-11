@@ -130,8 +130,13 @@ export namespace Kernel {
       msg: KernelMessage.IShellMessage<T>,
       expectReply?: boolean,
       disposeOnDone?: boolean
-    ): Kernel.IFuture<KernelMessage.IShellMessage<T>>;
+    ): Kernel.IShellFuture<KernelMessage.IShellMessage<T>>;
 
+    sendControlMessage<T extends KernelMessage.ControlMessageType>(
+      msg: KernelMessage.IControlMessage<T>,
+      expectReply?: boolean,
+      disposeOnDone?: boolean
+    ): Kernel.IControlFuture<KernelMessage.IControlMessage<T>>;
     /**
      * Reconnect to a disconnected kernel.
      *
@@ -268,9 +273,17 @@ export namespace Kernel {
       content: KernelMessage.IExecuteRequestMsg['content'],
       disposeOnDone?: boolean,
       metadata?: JSONObject
-    ): Kernel.IFuture<
+    ): Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
+    >;
+
+    requestDebug(
+      content: KernelMessage.IDebugRequest,
+      disposeOnDone?: boolean
+    ): Kernel.IControlFuture<
+      KernelMessage.IDebugRequestMsg,
+      KernelMessage.IDebugReplyMsg
     >;
 
     /**
@@ -743,8 +756,8 @@ export namespace Kernel {
    * responses that may come from the kernel.
    */
   export interface IFuture<
-    REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
-    REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
+    REQUEST extends KernelMessage.IShellMessage | KernelMessage.IControlMessage,
+    REPLY extends KernelMessage.IShellMessage | KernelMessage.IControlMessage
   > extends IDisposable {
     /**
      * The original outgoing message.
@@ -773,15 +786,6 @@ export namespace Kernel {
      * been called.
      */
     onReply: (msg: REPLY) => void | PromiseLike<void>;
-
-    /**
-     * The stdin handler for the kernel future.
-     *
-     * #### Notes
-     * If the handler returns a promise, all kernel message processing pauses
-     * until the promise is resolved.
-     */
-    onStdin: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void>;
 
     /**
      * The iopub handler for the kernel future.
@@ -826,12 +830,31 @@ export namespace Kernel {
     removeMessageHook(
       hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>
     ): void;
+  }
+
+  export interface IShellFuture<
+    REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
+    REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
+  > extends IFuture<REQUEST, REPLY> {
+    /**
+     * The stdin handler for the kernel future.
+     *
+     * #### Notes
+     * If the handler returns a promise, all kernel message processing pauses
+     * until the promise is resolved.
+     */
+    onStdin: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void>;
 
     /**
      * Send an `input_reply` message.
      */
     sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
   }
+
+  export interface IControlFuture<
+    REQUEST extends KernelMessage.IControlMessage = KernelMessage.IControlMessage,
+    REPLY extends KernelMessage.IControlMessage = KernelMessage.IControlMessage
+  > extends IFuture<REQUEST, REPLY> {}
 
   /**
    * A client side Comm interface.
@@ -883,7 +906,7 @@ export namespace Kernel {
       data?: JSONValue,
       metadata?: JSONObject,
       buffers?: (ArrayBuffer | ArrayBufferView)[]
-    ): IFuture;
+    ): IShellFuture;
 
     /**
      * Send a `comm_msg` message to the kernel.
@@ -906,7 +929,7 @@ export namespace Kernel {
       metadata?: JSONObject,
       buffers?: (ArrayBuffer | ArrayBufferView)[],
       disposeOnDone?: boolean
-    ): IFuture;
+    ): IShellFuture;
 
     /**
      * Close the comm.
@@ -927,7 +950,7 @@ export namespace Kernel {
       data?: JSONValue,
       metadata?: JSONObject,
       buffers?: (ArrayBuffer | ArrayBufferView)[]
-    ): IFuture;
+    ): IShellFuture;
   }
 
   /**
