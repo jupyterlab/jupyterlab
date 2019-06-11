@@ -20,7 +20,7 @@
     "@jupyterlab/terminal": "^1.0.0-alpha.10",
     "@jupyterlab/testutils": "^1.0.0-alpha.10",
     "@phosphor/messaging": "^1.2.2",
-    "@phosphor/widgets": "^1.7.0",
+    "@phosphor/widgets": "^1.7.1",
     "chai": "^4.2.0"
   },
   "devDependencies": {

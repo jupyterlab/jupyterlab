@@ -15,7 +15,7 @@
     "@jupyterlab/inspector": "^1.0.0-alpha.10",
     "@jupyterlab/testutils": "^1.0.0-alpha.10",
     "@phosphor/signaling": "^1.2.2",
-    "@phosphor/widgets": "^1.7.0",
+    "@phosphor/widgets": "^1.7.1",
     "chai": "^4.2.0",
     "jest": "^24.7.1",
     "jest-junit": "^6.3.0",

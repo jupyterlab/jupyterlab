@@ -41,7 +41,7 @@
     "@jupyterlab/docregistry": "^1.0.0-alpha.10",
     "@jupyterlab/documentsearch": "^1.0.0-alpha.11",
     "@jupyterlab/mainmenu": "^1.0.0-alpha.10",
-    "@phosphor/datagrid": "^0.1.6",
+    "@phosphor/datagrid": "^0.1.8",
     "@phosphor/signaling": "^1.2.2"
   },
   "devDependencies": {
