@@ -978,6 +978,9 @@ function addCommands(
         const cursor = editor.getCursorPosition();
         let srcLines = editor.model.value.text.split('\n');
         let curLine = selection.start.line;
+        while (curLine < editor.lineCount && !editor.getLine(curLine)) {
+          curLine += 1;
+        }
         let firstLine = curLine;
         let lastLine = curLine + 1;
         while (true) {
@@ -997,12 +1000,13 @@ function addCommands(
 
           if (completed) {
             code = srcLines.slice(firstLine, lastLine).join('\n');
-            if (lastLine < editor.lineCount) {
-              editor.setCursorPosition({
-                line: lastLine,
-                column: cursor.column
-              });
+            while (lastLine < editor.lineCount && !srcLines[lastLine]) {
+              lastLine += 1;
             }
+            editor.setCursorPosition({
+              line: lastLine,
+              column: cursor.column
+            });
             break;
           } else if (lastLine < editor.lineCount) {
             // if incomplete and there are more lines, add the line and check again
@@ -1014,13 +1018,14 @@ function addCommands(
           } else {
             // if we have looked everything but could not find a complete statement,
             // submit only the current line while knowing it is incomplete
-            code = editor.getLine(curLine);
-            if (curLine + 1 < editor.lineCount) {
-              editor.setCursorPosition({
-                line: curLine + 1,
-                column: cursor.column
-              });
+            code = srcLines[curLine];
+            while (curLine + 1 < editor.lineCount && !srcLines[curLine + 1]) {
+              curLine += 1;
             }
+            editor.setCursorPosition({
+              line: curLine + 1,
+              column: cursor.column
+            });
             break;
           }
         }
