@@ -1592,19 +1592,19 @@
   resolved "https://registry.yarnpkg.com/@phosphor/coreutils/-/coreutils-1.3.1.tgz#441e34f42340f7faa742a88b2a181947a88d7226"
   integrity sha512-9OHCn8LYRcPU/sbHm5v7viCA16Uev3gbdkwqoQqlV+EiauDHl70jmeL7XVDXdigl66Dz0LI11C99XOxp+s3zOA==
 
-"@phosphor/datagrid@^0.1.6":
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/@phosphor/datagrid/-/datagrid-0.1.7.tgz#255dd65ba8cd9e9c92d93f18b28e3d2bd3bbb8ae"
-  integrity sha512-VY+G3Umwj0xLrvyrUBU0RpYS8uPihYSO0wicfpvOazmgskDrU0LdVgS+UldQnWeVJ6GrcEwXwnMlTkyPszk+vg==
+"@phosphor/datagrid@^0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@phosphor/datagrid/-/datagrid-0.1.8.tgz#e1578322f0810a979016896ac8820c57a549aab4"
+  integrity sha512-mvZ5bW4fo0WDJkcrsiTxBDbgJbkMoRWm5pU3f30SKr4Y+AfMQ91rd8293P7/FUpmh1c3md2jKfRqh6RskuiwbA==
   dependencies:
     "@phosphor/algorithm" "^1.1.3"
     "@phosphor/coreutils" "^1.3.1"
     "@phosphor/disposable" "^1.1.3"
     "@phosphor/domutils" "^1.1.3"
-    "@phosphor/dragdrop" "^1.3.1"
+    "@phosphor/dragdrop" "^1.3.2"
     "@phosphor/messaging" "^1.2.3"
     "@phosphor/signaling" "^1.2.3"
-    "@phosphor/widgets" "^1.7.0"
+    "@phosphor/widgets" "^1.7.1"
 
 "@phosphor/disposable@^1.1.2", "@phosphor/disposable@^1.1.3":
   version "1.1.3"
@@ -1618,10 +1618,18 @@
   resolved "https://registry.yarnpkg.com/@phosphor/domutils/-/domutils-1.1.3.tgz#5aeeaefb4bbfcc7c0942e5287a29d3c7f2b1a2bc"
   integrity sha512-5CtLAhURQXXHhNXfQydDk/luG1cDVnhlu/qw7gz8/9pht0KXIAmNg/M0LKxx2oJ9+YMNCLVWxAnHAU0yrDpWSA==
 
-"@phosphor/dragdrop@^1.3.0", "@phosphor/dragdrop@^1.3.1":
+"@phosphor/dragdrop@^1.3.1":
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/@phosphor/dragdrop/-/dragdrop-1.3.1.tgz#a16a274f9418916a34ea7edf9ba53bd0d0890b78"
   integrity sha512-SkxyV43QiBlDU9I9Y8ou+U2Ty8BwwRbEsiet+ZTaDBp5TKDmSOfsZ/dsfUpKBDfGe4Lj95h8z9Dn8pjJsnoEuQ==
+  dependencies:
+    "@phosphor/coreutils" "^1.3.1"
+    "@phosphor/disposable" "^1.1.3"
+
+"@phosphor/dragdrop@^1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@phosphor/dragdrop/-/dragdrop-1.3.2.tgz#8f4e77398b881ae34f9529451ce8d07368f3925b"
+  integrity sha512-eP+QgQvMuyYbracmvCb+/Qh+k1V/hQyz4Ko++clNb8AmNbsYK/cKS8A5RGcCdgonahzUrJNwm0uf7MJWPa2hHw==
   dependencies:
     "@phosphor/coreutils" "^1.3.1"
     "@phosphor/disposable" "^1.1.3"
@@ -1669,6 +1677,23 @@
     "@phosphor/disposable" "^1.1.3"
     "@phosphor/domutils" "^1.1.3"
     "@phosphor/dragdrop" "^1.3.1"
+    "@phosphor/keyboard" "^1.1.3"
+    "@phosphor/messaging" "^1.2.3"
+    "@phosphor/properties" "^1.1.3"
+    "@phosphor/signaling" "^1.2.3"
+    "@phosphor/virtualdom" "^1.1.3"
+
+"@phosphor/widgets@^1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@phosphor/widgets/-/widgets-1.7.1.tgz#7f2abc9c6b2c8844b650dc52d123469b9efccbdd"
+  integrity sha512-G1+ysjeh5+RBiedqnyz9e39nHrEtPU9xXF3Sx62wjoU/8ksIe/nm3aouRCTZNqaYZqdmApLz1CmANvgwn7qILA==
+  dependencies:
+    "@phosphor/algorithm" "^1.1.3"
+    "@phosphor/commands" "^1.6.2"
+    "@phosphor/coreutils" "^1.3.1"
+    "@phosphor/disposable" "^1.1.3"
+    "@phosphor/domutils" "^1.1.3"
+    "@phosphor/dragdrop" "^1.3.2"
     "@phosphor/keyboard" "^1.1.3"
     "@phosphor/messaging" "^1.2.3"
     "@phosphor/properties" "^1.1.3"
