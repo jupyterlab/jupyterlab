@@ -53,7 +53,9 @@
   },
   "jupyterlab": {
     "extraStyles": {
-      "xterm": ["src/xterm.css"]
+      "xterm": [
+        "src/xterm.css"
+      ]
     }
   }
 }
