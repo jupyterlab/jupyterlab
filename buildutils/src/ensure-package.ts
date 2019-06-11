@@ -129,7 +129,7 @@ export async function ensurePackage(
 
   // Template the CSS index file.
   if (cssImports && fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
-    let cssIndex = CSS_HEADER;
+    let cssIndex = CSS_HEADER.trim();
     cssImports.forEach(cssImport => {
       cssIndex += `\n@import url('~${cssImport}');`;
     });
