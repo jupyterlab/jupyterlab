@@ -30,14 +30,15 @@ let UNUSED: Dict<string[]> = {
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/testutils': ['node-fetch', 'identity-obj-proxy'],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
-  '@jupyterlab/vega5-extension': ['vega', 'vega-lite']
+  '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],
+  '@jupyterlab/ui-components': ['@blueprintjs/icons']
 };
 
 let SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
   '@jupyterlab/application-extension': ['@jupyterlab/apputils'],
   '@jupyterlab/completer': ['@jupyterlab/codeeditor'],
-  '@jupyterlab/docmanager': ['@jupyterlab/statusbar'], // Statusbar styles should not be by status reporters
+  '@jupyterlab/docmanager': ['@jupyterlab/statusbar'], // Statusbar styles should not be used by status reporters
   '@jupyterlab/docregistry': [
     '@jupyterlab/codeeditor', // Only used for model
     '@jupyterlab/codemirror', // Only used for Mode.findByFileName
@@ -316,7 +317,7 @@ export async function ensureIntegrity(): Promise<boolean> {
   }
 
   // Validate each package.
-  for (let name in pkgData) {
+  for (let name in locals) {
     let unused = UNUSED[name] || [];
     // Allow jest-junit to be unused in the test suite.
     if (name.indexOf('@jupyterlab/test-') === 0) {
