@@ -6,13 +6,15 @@
 require('es6-promise/auto');  // polyfill Promise on IE
 
 import {
-  PageConfig, URLExt
+  PageConfig
 } from '@jupyterlab/coreutils';
 
-__webpack_public_path__ = PageConfig.getOption('frontendUrl');
+// eslint-disable-next-line no-undef
+__webpack_public_path__ = PageConfig.getOption('fullStaticUrl') + '/';
 
-// This needs to come after __webpack_public_path__ is set.
-require('font-awesome/css/font-awesome.min.css');
+// This must be after the public path is set.
+// This cannot be extracted because the public path is dynamic.
+require('./imports.css');
 
 /**
  * The main entry point for the application.
@@ -67,6 +69,8 @@ function main() {
 
   // Handle the registered mime extensions.
   var mimeExtensions = [];
+  var extension;
+  var extMod;
   {{#each jupyterlab_mime_extensions}}
   try {
     if (isDeferred('{{key}}')) {
@@ -76,12 +80,12 @@ function main() {
     if (isDisabled('{{@key}}')) {
       disabled.matches.push('{{@key}}');
     } else {
-      var module = require('{{@key}}/{{this}}');
-      var extension = module.default;
+      extMod = require('{{@key}}/{{this}}');
+      extension = extMod.default;
 
       // Handle CommonJS exports.
-      if (!module.hasOwnProperty('__esModule')) {
-        extension = module;
+      if (!extMod.hasOwnProperty('__esModule')) {
+        extension = extMod;
       }
 
       if (Array.isArray(extension)) {
@@ -115,12 +119,12 @@ function main() {
     if (isDisabled('{{@key}}')) {
       disabled.matches.push('{{@key}}');
     } else {
-      module = require('{{@key}}/{{this}}');
-      extension = module.default;
+      extMod = require('{{@key}}/{{this}}');
+      extension = extMod.default;
 
       // Handle CommonJS exports.
-      if (!module.hasOwnProperty('__esModule')) {
-        extension = module;
+      if (!extMod.hasOwnProperty('__esModule')) {
+        extension = extMod;
       }
 
       if (Array.isArray(extension)) {
@@ -169,7 +173,7 @@ function main() {
     var reported = false;
     var timeout = 25000;
 
-    var report = function(errors) {
+    var report = function() {
       if (reported) {
         return;
       }
