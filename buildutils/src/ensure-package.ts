@@ -133,7 +133,7 @@ export async function ensurePackage(
     cssImports.forEach(cssImport => {
       cssIndex += `\n@import url('~${cssImport}');`;
     });
-    cssIndex += "\n\n@import url('./base.css');";
+    cssIndex += "\n\n@import url('./base.css');\n";
     const cssPath = path.join(pkgPath, 'style/index.css');
     const prev = fs.readFileSync(cssPath, { encoding: 'utf8' });
     if (prev !== cssIndex) {
