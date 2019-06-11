@@ -1,3 +1,8 @@
+trigger:
+  branches:
+    include:
+    - '*'  
+    - refs/tags/*
 jobs:
   - job: 'Linux'
     pool:
@@ -94,3 +99,18 @@ jobs:
           testResultsFiles: '$(testResultsFiles)'
           testRunTitle: 'Windows - $(name)'
           mergeTestResults: true
+  - job: GitHub_Release
+    displayName: Release to GitHub
+    dependsOn: 
+    - Windows
+    - Linux
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v1.'))  
+    steps:
+    - task: GitHubRelease@0
+      displayName: 'GitHub release (create)'
+      inputs:
+        gitHubConnection: 'github-zenithworks'
+        title: JupyterLab Release version $(Build.SourceBranchName) 
+        releaseNotesSource: input
+        releaseNotes: |         
+          [Installation](https://github.com/zenithworks/jupyterlab/blob/master/README.md#installation)   |   [Getting Started](https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html)   |   [Changelog](https://jupyterlab.readthedocs.io/en/latest/getting_started/changelog.html)     
