@@ -53,9 +53,11 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extraStyles": [
-      "blueprintjs/icons/lib/css/blueprint-icons.css",
-      "blueprintjs/core/lib/css/blueprint.css"
-    ]
+    "extraStyles": {
+      "blueprintjs": [
+        "icons/lib/css/blueprint-icons.css",
+        "core/lib/css/blueprint.css"
+      ]
+    }
   }
 }

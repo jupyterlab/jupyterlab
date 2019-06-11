@@ -52,8 +52,8 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extraStyles": [
-      "xterm/src/xterm.css"
-    ]
+    "extraStyles": {
+      "xterm": ["src/xterm.css"]
+    }
   }
 }

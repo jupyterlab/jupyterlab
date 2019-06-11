@@ -57,23 +57,25 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extraStyles": [
-      "codemirror/lib/codemirror.css",
-      "codemirror/addon/dialog/dialog.css",
-      "codemirror/addon/fold/foldgutter.css",
-      "codemirror/theme/material.css",
-      "codemirror/theme/zenburn.css",
-      "codemirror/theme/abcdef.css",
-      "codemirror/theme/base16-light.css",
-      "codemirror/theme/base16-dark.css",
-      "codemirror/theme/dracula.css",
-      "codemirror/theme/hopscotch.css",
-      "codemirror/theme/mbo.css",
-      "codemirror/theme/mdn-like.css",
-      "codemirror/theme/seti.css",
-      "codemirror/theme/solarized.css",
-      "codemirror/theme/the-matrix.css",
-      "codemirror/theme/xq-light.css"
-    ]
+    "extraStyles": {
+      "codemirror": [
+        "lib/codemirror.css",
+        "addon/dialog/dialog.css",
+        "addon/fold/foldgutter.css",
+        "theme/material.css",
+        "theme/zenburn.css",
+        "theme/abcdef.css",
+        "theme/base16-light.css",
+        "theme/base16-dark.css",
+        "theme/dracula.css",
+        "theme/hopscotch.css",
+        "theme/mbo.css",
+        "theme/mdn-like.css",
+        "theme/seti.css",
+        "theme/solarized.css",
+        "theme/the-matrix.css",
+        "theme/xq-light.css"
+      ]
+    }
   }
 }
