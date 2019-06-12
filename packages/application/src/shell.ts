@@ -742,7 +742,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     const dock = this._dockPanel;
     const mode = options.mode || 'tab-after';
-    let ref: Widget | null = null;
+    let ref: Widget | null = this.currentWidget;
 
     if (options.ref) {
       ref = find(dock.widgets(), value => value.id === options.ref!) || null;
