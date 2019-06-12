@@ -1514,7 +1514,7 @@ export class Notebook extends StaticNotebook {
         let lastLine = editor.lineCount - 1;
         editor.setCursorPosition({ line: lastLine, column: 0 });
       }
-    } else {
+    } else if (location === 'bottom') {
       this.activeCellIndex++;
       // Move the cursor to the first character.
       if (this.activeCellIndex > prev) {
