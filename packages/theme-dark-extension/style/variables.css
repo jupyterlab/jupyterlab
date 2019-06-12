@@ -181,7 +181,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   --jp-code-font-size: 13px;
   --jp-code-line-height: 1.3077; /* 17px for 13px base */
-  --jp-code-padding: 5px; /* 5px for 13px base */
+  --jp-code-padding: 5px; /* 5px for 13px base, codemirror highlighting needs integer px value */
   --jp-code-font-family-default: Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   --jp-code-font-family: var(--jp-code-font-family-default);
 
