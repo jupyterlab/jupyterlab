@@ -30,11 +30,6 @@ const MATERIAL_CLASS = 'jp-MaterialIcon';
 const BREADCRUMB_CLASS = 'jp-BreadCrumbs';
 
 /**
- * The class name added to add the home icon for the breadcrumbs
- */
-const BREADCRUMB_HOME = 'jp-HomeIcon';
-
-/**
  * The class named associated to the ellipses icon
  */
 const BREADCRUMB_ELLIPSES = 'jp-EllipsesIcon';
@@ -352,9 +347,9 @@ namespace Private {
    */
   export function createCrumbs(): ReadonlyArray<HTMLElement> {
     let home = document.createElement('span');
-    home.className =
-      MATERIAL_CLASS + ' ' + BREADCRUMB_HOME + ' ' + BREADCRUMB_ITEM_CLASS;
-    home.title = PageConfig.getOption('serverRoot') || 'Home';
+    home.textContent = 'Root';
+    home.className = BREADCRUMB_ITEM_CLASS;
+    home.title = PageConfig.getOption('serverRoot') || 'Jupyter Server Root';
     let ellipsis = document.createElement('span');
     ellipsis.className =
       MATERIAL_CLASS + ' ' + BREADCRUMB_ELLIPSES + ' ' + BREADCRUMB_ITEM_CLASS;
