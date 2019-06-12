@@ -984,8 +984,10 @@ function addCommands(
         ) {
           curLine += 1;
         }
-        let firstLine = curLine;
-        let lastLine = curLine + 1;
+        // if curLine > 0, we first do a search from beginning
+        let fromFirst = curLine > 0;
+        let firstLine = 0;
+        let lastLine = firstLine + 1;
         while (true) {
           code = srcLines.slice(firstLine, lastLine).join('\n');
           const msg: KernelMessage.IIsCompleteRequestMsg['content'] = {
@@ -1000,27 +1002,35 @@ function addCommands(
             });
 
           if (completed) {
-            while (
-              lastLine < editor.lineCount &&
-              !srcLines[lastLine].replace(/\s/g, '').length
-            ) {
-              lastLine += 1;
+            if (curLine < lastLine) {
+              // we find a block of complete statement containing the current line, great!
+              while (
+                lastLine < editor.lineCount &&
+                !srcLines[lastLine].replace(/\s/g, '').length
+              ) {
+                lastLine += 1;
+              }
+              editor.setCursorPosition({
+                line: lastLine,
+                column: cursor.column
+              });
+              break;
+            } else {
+              // discard the complete statement before the current line and continue
+              firstLine = lastLine;
+              lastLine = firstLine + 1;
             }
-            editor.setCursorPosition({
-              line: lastLine,
-              column: cursor.column
-            });
-            break;
           } else if (lastLine < editor.lineCount) {
             // if incomplete and there are more lines, add the line and check again
             lastLine += 1;
-          } else if (firstLine > 0) {
-            // if reached last line, try to look before the current line
-            firstLine -= 1;
+          } else if (fromFirst) {
+            // we search from the first line and failed, we search again from current line
+            firstLine = curLine;
             lastLine = curLine + 1;
+            fromFirst = false;
           } else {
-            // if we have looked everything but could not find a complete statement,
-            // submit only the current line while knowing it is incomplete
+            // if we have searched both from first line and from current line and we
+            // cannot find anything, we submit the current line.
             code = srcLines[curLine];
             while (
               curLine + 1 < editor.lineCount &&
