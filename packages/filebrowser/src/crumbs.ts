@@ -13,7 +13,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { DOMUtils, showErrorMessage } from '@jupyterlab/apputils';
 
-import { PathExt } from '@jupyterlab/coreutils';
+import { PathExt, PageConfig } from '@jupyterlab/coreutils';
 
 import { renameFile } from '@jupyterlab/docmanager';
 
@@ -355,6 +355,7 @@ namespace Private {
     home.className =
       MATERIAL_CLASS + ' ' + BREADCRUMB_HOME + ' ' + BREADCRUMB_ITEM_CLASS;
     home.title = 'Home';
+    home.title = PageConfig.getOption('serverRoot') || 'Home';
     let ellipsis = document.createElement('span');
     ellipsis.className =
       MATERIAL_CLASS + ' ' + BREADCRUMB_ELLIPSES + ' ' + BREADCRUMB_ITEM_CLASS;
