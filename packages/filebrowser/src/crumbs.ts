@@ -354,7 +354,6 @@ namespace Private {
     let home = document.createElement('span');
     home.className =
       MATERIAL_CLASS + ' ' + BREADCRUMB_HOME + ' ' + BREADCRUMB_ITEM_CLASS;
-    home.title = 'Home';
     home.title = PageConfig.getOption('serverRoot') || 'Home';
     let ellipsis = document.createElement('span');
     ellipsis.className =
