@@ -121,9 +121,8 @@ import { KernelMessage, Kernel } from '@jupyterlab/services';
 
 // Get a list of available kernels and connect to one.
 Kernel.listRunning().then(kernelModels => {
-    const kernel = Kernel.connectTo(kernelModels[0]);
-    console.log(kernel.name);
-  });
+  const kernel = Kernel.connectTo(kernelModels[0]);
+  console.log(kernel.name);
 });
 
 // Get info about the available kernels and start a new one.
