@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/statusbar-extension",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0-alpha.11",
   "description": "JupyterLab - Statusbar Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,16 +36,16 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.0.0-alpha.10",
-    "@jupyterlab/apputils": "^1.0.0-alpha.10",
-    "@jupyterlab/cells": "^1.0.0-alpha.11",
-    "@jupyterlab/console": "^1.0.0-alpha.10",
-    "@jupyterlab/coreutils": "^3.0.0-alpha.10",
-    "@jupyterlab/docregistry": "^1.0.0-alpha.10",
-    "@jupyterlab/fileeditor": "^1.0.0-alpha.10",
-    "@jupyterlab/mainmenu": "^1.0.0-alpha.10",
-    "@jupyterlab/notebook": "^1.0.0-alpha.11",
-    "@jupyterlab/statusbar": "^1.0.0-alpha.10",
+    "@jupyterlab/application": "^1.0.0-alpha.11",
+    "@jupyterlab/apputils": "^1.0.0-alpha.11",
+    "@jupyterlab/cells": "^1.0.0-alpha.12",
+    "@jupyterlab/console": "^1.0.0-alpha.11",
+    "@jupyterlab/coreutils": "^3.0.0-alpha.11",
+    "@jupyterlab/docregistry": "^1.0.0-alpha.11",
+    "@jupyterlab/fileeditor": "^1.0.0-alpha.11",
+    "@jupyterlab/mainmenu": "^1.0.0-alpha.11",
+    "@jupyterlab/notebook": "^1.0.0-alpha.12",
+    "@jupyterlab/statusbar": "^1.0.0-alpha.11",
     "@phosphor/widgets": "^1.7.1"
   },
   "devDependencies": {
