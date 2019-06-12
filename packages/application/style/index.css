@@ -7,6 +7,6 @@
 @import url('~@phosphor/widgets/style/index.css');
 @import url('~@jupyterlab/apputils/style/index.css');
 @import url('~@jupyterlab/docregistry/style/index.css');
-@import url('~font-awesome/css/font-awesome.css');
+@import url('~font-awesome/css/font-awesome.min.css');
 
 @import url('./base.css');

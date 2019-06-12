@@ -256,9 +256,9 @@ export async function ensureIntegrity(): Promise<boolean> {
     const skip = SKIP_CSS[name] || [];
     const cssData: Dict<Array<string>> = {};
 
-    if (data.jupyter && data.jupyter.extraStyles) {
-      Object.keys(data.jupyter.extraStyles).forEach(depName => {
-        cssData[depName] = data.jupyter.extraStyles[depName];
+    if (data.jupyterlab && data.jupyterlab.extraStyles) {
+      Object.keys(data.jupyterlab.extraStyles).forEach(depName => {
+        cssData[depName] = data.jupyterlab.extraStyles[depName];
       });
     }
 
@@ -279,7 +279,7 @@ export async function ensureIntegrity(): Promise<boolean> {
     graph.dependenciesOf(name).forEach(depName => {
       if (depName in cssData) {
         cssData[depName].forEach(cssPath => {
-          cssImports[name].push(depName + '/' + cssPath);
+          cssImports[name].push(`${depName}/${cssPath}`);
         });
       }
     });
