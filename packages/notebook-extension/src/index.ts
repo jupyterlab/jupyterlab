@@ -987,11 +987,9 @@ function addCommands(
         let firstLine = curLine;
         let lastLine = curLine + 1;
         while (true) {
-          // at least for ipykernel, a = [1, \n 2] returns "incomplete" so
-          // we need to join lines by space, not by newline, but this might
-          // not work for all languages/kernels.
+          code = srcLines.slice(firstLine, lastLine).join('\n');
           const msg: KernelMessage.IIsCompleteRequestMsg['content'] = {
-            code: srcLines.slice(firstLine, lastLine).join(' ')
+            code: code
           };
 
           let completed = false;
@@ -1002,7 +1000,6 @@ function addCommands(
             });
 
           if (completed) {
-            code = srcLines.slice(firstLine, lastLine).join('\n');
             while (
               lastLine < editor.lineCount &&
               !srcLines[lastLine].replace(/\s/g, '').length
