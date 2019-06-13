@@ -23,6 +23,7 @@ import { IChangedArgs, ISettingRegistry, Time } from '@jupyterlab/coreutils';
 
 import {
   renameDialog,
+  getOpenPath,
   DocumentManager,
   IDocumentManager,
   PathStatus,
@@ -52,6 +53,8 @@ namespace CommandIDs {
   export const open = 'docmanager:open';
 
   export const openBrowserTab = 'docmanager:open-browser-tab';
+
+  export const openDirect = 'docmanager:open-direct';
 
   export const reload = 'docmanager:reload';
 
@@ -365,6 +368,34 @@ function addCommands(
     label: () => 'Open in New Browser Tab'
   });
 
+  commands.addCommand(CommandIDs.openDirect, {
+    label: () => 'Open From Path...',
+    caption: 'Open from path',
+    isEnabled: () => true,
+    execute: () => {
+      return getOpenPath(docManager.services.contents).then(path => {
+        if (!path) {
+          return;
+        }
+        docManager.services.contents.get(path, { content: false }).then(
+          args => {
+            // exists
+            return commands.execute(CommandIDs.open, { path: path });
+          },
+          () => {
+            // does not exist
+            return showDialog({
+              title: 'Cannot open',
+              body: 'File not found',
+              buttons: [Dialog.okButton()]
+            });
+          }
+        );
+        return;
+      });
+    }
+  });
+
   commands.addCommand(CommandIDs.reload, {
     label: () =>
       `Reload ${fileType(shell.currentWidget, docManager)} from Disk`,
@@ -518,6 +549,7 @@ function addCommands(
 
   if (palette) {
     [
+      CommandIDs.openDirect,
       CommandIDs.reload,
       CommandIDs.restoreCheckpoint,
       CommandIDs.save,
