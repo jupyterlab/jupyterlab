@@ -370,7 +370,12 @@ namespace Private {
    */
   export function createCrumbSeparators(): ReadonlyArray<HTMLElement> {
     let items: HTMLElement[] = [];
-    for (let i = 0; i < 4; i++) {
+    // The maximum number of directories that will be shown in the crumbs
+    const MAX_DIRECTORIES = 2;
+
+    // Make separators for after each directory, one at the beginning, and one
+    // after a possible ellipsis.
+    for (let i = 0; i < MAX_DIRECTORIES + 2; i++) {
       let item = document.createElement('span');
       item.textContent = '/';
       items.push(item);
