@@ -38,7 +38,7 @@
     "@blueprintjs/select": "^3.3.0",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/virtualdom": "^1.1.2",
-    "@phosphor/widgets": "^1.7.0",
+    "@phosphor/widgets": "^1.7.1",
     "react": "~16.8.4",
     "typestyle": "^2.0.1"
   },
