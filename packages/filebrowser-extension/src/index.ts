@@ -428,9 +428,14 @@ function addCommands(
   commands.addCommand(CommandIDs.navigate, {
     execute: args => {
       const path = (args.path as string) || '';
+      const type = (args.type as string) || '';
       return Private.navigateToPath(path, factory)
         .then(() => {
-          return commands.execute('docmanager:open', { path });
+          // If executed explicitly on a directory, do nop after navigateToPath
+          // If no type provided, execute docmanager:open as before
+          if (type !== 'directory') {
+            return commands.execute('docmanager:open', { path });
+          }
         })
         .catch((reason: any) => {
           console.warn(

@@ -378,15 +378,18 @@ function addCommands(
           return;
         }
         docManager.services.contents.get(path, { content: false }).then(
-          args => {
+          item => {
             // exists
-            return commands.execute(CommandIDs.open, { path: path });
+            return commands.execute('filebrowser:navigate', {
+              path: path,
+              type: item.type
+            });
           },
           () => {
             // does not exist
             return showDialog({
               title: 'Cannot open',
-              body: 'File not found',
+              body: 'No such file or directory found',
               buttons: [Dialog.okButton()]
             });
           }
