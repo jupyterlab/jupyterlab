@@ -431,7 +431,7 @@ function addCommands(
       return Private.navigateToPath(path, factory)
         .then(model => {
           if (model.type === 'directory') {
-            return commands.execute(CommandIDs.showBrowser, { path: model.path });
+            return commands.execute(CommandIDs.showBrowser, { path });
           }
           return commands.execute('docmanager:open', { path });
         })
