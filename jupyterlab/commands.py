@@ -24,7 +24,7 @@ from urllib.request import Request, urlopen, urljoin, quote
 from urllib.error import URLError
 
 from jupyter_core.paths import jupyter_config_path
-from jupyterlab_server.process import which, Process, WatchHelper
+from jupyterlab_server.process import which, Process, WatchHelper, list2cmdline
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 
 from .semver import Range, gte, lt, lte, gt, make_semver
@@ -36,6 +36,75 @@ WEBPACK_EXPECT = re.compile(r'.*/index.out.js')
 
 # The dev mode directory.
 DEV_DIR = osp.abspath(os.path.join(HERE, '..', 'dev_mode'))
+
+
+class ProgressProcess(Process):
+
+    def __init__(self, cmd, logger=None, cwd=None, kill_event=None,
+                 env=None):
+        """Start a subprocess that can be run asynchronously.
+
+        Parameters
+        ----------
+        cmd: list
+            The command to run.
+        logger: :class:`~logger.Logger`, optional
+            The logger instance.
+        cwd: string, optional
+            The cwd of the process.
+        env: dict, optional
+            The environment for the process.
+        kill_event: :class:`~threading.Event`, optional
+            An event used to kill the process operation.
+        quiet: bool, optional
+            Whether to suppress output.
+        """
+        if not isinstance(cmd, (list, tuple)):
+            raise ValueError('Command must be given as a list')
+
+        if kill_event and kill_event.is_set():
+            raise ValueError('Process aborted')
+
+        self.logger = logger = logger or logging.getLogger('jupyterlab')
+        self._last_line = ''
+        self.cmd = cmd
+        self.logger.debug('> ' + list2cmdline(cmd))
+
+        self.proc = self._create_process(
+            cwd=cwd,
+            env=env,
+            stderr=subprocess.STDOUT,
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
+        )
+        self._kill_event = kill_event or Event()
+
+        Process._procs.add(self)
+
+    def wait(self):
+        cache = []
+        proc = self.proc
+        kill_event = self._kill_event
+        import itertools
+        spinner = itertools.cycle(['-', '/', '|', '\\'])
+        while proc.poll() is None:
+            sys.stdout.write(next(spinner))   # write the next character
+            sys.stdout.flush()                # flush stdout buffer (actual character display)
+            sys.stdout.write('\b')
+            if kill_event.is_set():
+                self.terminate()
+                raise ValueError('Process was aborted')
+            try:
+                out, _ = proc.communicate(timeout=.1)
+                cache.append(out)
+            except subprocess.TimeoutExpired:
+                continue
+        if proc.returncode:
+            self.logger.error('\n'.join(cache))
+        else:
+            self.logger.debug('\n'.join(cache))
+            sys.stdout.flush()
+        return self.terminate()
 
 
 def pjoin(*args):
@@ -98,13 +167,13 @@ def dedupe_yarn(path, logger=None):
         version expected at publication time, but core should aggressively set
         pins above, for example, known-bad versions
     """
-    had_dupes = Process(
+    had_dupes = ProgressProcess(
         ['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
         cwd=path, logger=logger
     ).wait() != 0
 
     if had_dupes:
-        yarn_proc = Process(['node', YARN_PATH], cwd=path, logger=logger)
+        yarn_proc = ProgressProcess(['node', YARN_PATH], cwd=path, logger=logger)
         yarn_proc.wait()
 
 
@@ -114,12 +183,12 @@ def ensure_node_modules(cwd, logger=None):
     Returns true if the node_modules was updated.
     """
     logger = _ensure_logger(logger)
-    yarn_proc = Process(['node', YARN_PATH, 'check', '--verify-tree'], cwd=cwd, logger=logger)
+    yarn_proc = ProgressProcess(['node', YARN_PATH, 'check', '--verify-tree'], cwd=cwd, logger=logger)
     ret = yarn_proc.wait()
 
     # Update node_modules if needed.
     if ret != 0:
-        yarn_proc = Process(['node', YARN_PATH], cwd=cwd, logger=logger)
+        yarn_proc = ProgressProcess(['node', YARN_PATH], cwd=cwd, logger=logger)
         yarn_proc.wait()
         parent = pjoin(HERE, '..')
         dedupe_yarn(parent, logger)
@@ -136,7 +205,7 @@ def ensure_dev(logger=None):
 
     # Determine whether to build.
     if ensure_node_modules(parent, logger) or not osp.exists(target):
-        yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=parent,
+        yarn_proc = ProgressProcess(['node', YARN_PATH, 'build'], cwd=parent,
                             logger=logger)
         yarn_proc.wait()
 
@@ -151,7 +220,7 @@ def ensure_core(logger=None):
     target = pjoin(HERE, 'static', 'index.html')
     if not osp.exists(target):
         ensure_node_modules(staging, logger)
-        yarn_proc = Process(['node', YARN_PATH, 'build'], cwd=staging,
+        yarn_proc = ProgressProcess(['node', YARN_PATH, 'build'], cwd=staging,
                             logger=logger)
         yarn_proc.wait()
 
@@ -473,6 +542,8 @@ class _AppHandler(object):
               command='build:prod', clean_staging=False):
         """Build the application.
         """
+        self.logger.info('Building jupyterlab assets')
+
         # Set up the build directory.
         app_dir = self.app_dir
 
@@ -1358,7 +1429,7 @@ class _AppHandler(object):
         info['path'] = target
         return info
 
-    def _extract_package(self, source, tempdir, quiet=False):
+    def _extract_package(self, source, tempdir):
         """Call `npm pack` for an extension.
 
         The pack command will download the package tar if `source` is
@@ -1367,11 +1438,11 @@ class _AppHandler(object):
         """
         is_dir = osp.exists(source) and osp.isdir(source)
         if is_dir and not osp.exists(pjoin(source, 'node_modules')):
-            self._run(['node', YARN_PATH, 'install'], cwd=source, quiet=quiet)
+            self._run(['node', YARN_PATH, 'install'], cwd=source)
 
         info = dict(source=source, is_dir=is_dir)
 
-        ret = self._run([which('npm'), 'pack', source], cwd=tempdir, quiet=quiet)
+        ret = self._run([which('npm'), 'pack', source], cwd=tempdir)
         if ret != 0:
             msg = '"%s" is not a valid npm package'
             raise ValueError(msg % source)
@@ -1458,7 +1529,7 @@ class _AppHandler(object):
         if not keys:
             return versions
         with TemporaryDirectory() as tempdir:
-            ret = self._run([which('npm'), 'pack'] + keys, cwd=tempdir, quiet=True)
+            ret = self._run([which('npm'), 'pack'] + keys, cwd=tempdir)
             if ret != 0:
                 msg = '"%s" is not a valid npm package'
                 raise ValueError(msg % keys)
@@ -1527,7 +1598,7 @@ class _AppHandler(object):
 
         kwargs['logger'] = self.logger
         kwargs['kill_event'] = self.kill_event
-        proc = Process(cmd, **kwargs)
+        proc = ProgressProcess(cmd, **kwargs)
         return proc.wait()
 
 
@@ -1537,7 +1608,7 @@ def _node_check(logger):
     node = which('node')
     try:
         output = subprocess.check_output([node, 'node-version-check.js'], cwd=HERE)
-        logger.info(output.decode('utf-8'))
+        logger.debug(output.decode('utf-8'))
     except Exception:
         data = _get_core_data()
         ver = data['engines']['node']
