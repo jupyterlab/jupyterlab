@@ -72,7 +72,7 @@ export class Popup extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     document.addEventListener('click', this, false);
-    this.node.addEventListener('keypress', this, false);
+    this.node.addEventListener('keydown', this, false);
     window.addEventListener('resize', this, false);
   }
 
@@ -81,7 +81,7 @@ export class Popup extends Widget {
    */
   protected onAfterDetach(msg: Message): void {
     document.removeEventListener('click', this, false);
-    this.node.removeEventListener('keypress', this, false);
+    this.node.removeEventListener('keydown', this, false);
     window.removeEventListener('resize', this, false);
   }
 
