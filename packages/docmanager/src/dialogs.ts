@@ -176,7 +176,7 @@ class OpenDirectWidget extends Widget {
  */
 export function getOpenPath(contentsManager: any): Promise<string | undefined> {
   return showDialog({
-    title: 'Open File or Directory',
+    title: 'Open Path',
     body: new OpenDirectWidget(),
     buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OPEN' })],
     focusNodeSelector: 'input'
@@ -220,11 +220,11 @@ namespace Private {
   export function createOpenNode(): HTMLElement {
     let body = document.createElement('div');
     let existingLabel = document.createElement('label');
-    existingLabel.textContent = 'Enter Path:';
+    existingLabel.textContent = 'Path:';
 
     let input = document.createElement('input');
     input.value = '';
-    input.placeholder = '/path/from/launch/directory';
+    input.placeholder = '/path/relative/to/jlab/root';
 
     body.appendChild(existingLabel);
     body.appendChild(input);

@@ -380,10 +380,7 @@ function addCommands(
         docManager.services.contents.get(path, { content: false }).then(
           item => {
             // exists
-            return commands.execute('filebrowser:navigate', {
-              path: path,
-              type: item.type
-            });
+            return commands.execute('filebrowser:navigate', { path: path });
           },
           () => {
             // does not exist

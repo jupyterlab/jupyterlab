@@ -428,14 +428,12 @@ function addCommands(
   commands.addCommand(CommandIDs.navigate, {
     execute: args => {
       const path = (args.path as string) || '';
-      const type = (args.type as string) || '';
       return Private.navigateToPath(path, factory)
-        .then(() => {
-          // If executed explicitly on a directory, do nop after navigateToPath
-          // If no type provided, execute docmanager:open as before
-          if (type !== 'directory') {
-            return commands.execute('docmanager:open', { path });
+        .then(model => {
+          if (model.type === 'directory') {
+            return;
           }
+          return commands.execute('docmanager:open', { path });
         })
         .catch((reason: any) => {
           console.warn(
@@ -870,7 +868,7 @@ namespace Private {
   export function navigateToPath(
     path: string,
     factory: IFileBrowserFactory
-  ): Promise<any> {
+  ): Promise<Contents.IModel> {
     const browserForPath = Private.getBrowserForPath(path, factory);
     const { services } = browserForPath.model.manager;
     const localPath = services.contents.localPath(path);
@@ -882,10 +880,16 @@ namespace Private {
         const { restored } = model;
 
         if (value.type === 'directory') {
-          return restored.then(() => model.cd(`/${localPath}`));
+          return restored.then(() => {
+            model.cd(`/${localPath}`);
+            return value;
+          });
         }
 
-        return restored.then(() => model.cd(`/${PathExt.dirname(localPath)}`));
+        return restored.then(() => {
+          model.cd(`/${PathExt.dirname(localPath)}`);
+          return value;
+        });
       });
   }
 }
