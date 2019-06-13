@@ -397,10 +397,8 @@ const sidebar: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.switchSidebar, {
       label: 'Switch Sidebar Side',
       execute: () => {
-        // First, try to find the right panel based on the
-        // application context menu click,
-        // If we can't find it there, look for use the active
-        // left/right widgets.
+        // First, try to find the correct panel based on the
+        // application context menu click.
         const contextNode: HTMLElement = app.contextMenuHitTest(
           node => !!node.dataset.id
         );
@@ -415,14 +413,10 @@ const sidebar: JupyterFrontEndPlugin<void> = {
           } else {
             side = 'left';
           }
-        } else if (app.shell.dataset.leftSidebarWidget) {
-          id = app.shell.dataset.leftSidebarWidget;
-          side = 'right';
-        } else if (app.shell.dataset.rightSidebarWidget) {
-          id = app.shell.dataset.rightSidebarWidget;
-          side = 'left';
+        } else {
+          // Bail if we don't find a sidebar for the widget.
+          return;
         }
-
         // Move the panel to the other side.
         const newOverrides = { ...overrides };
         newOverrides[id] = side;

@@ -1028,7 +1028,6 @@ namespace Private {
      * Construct a new side bar handler.
      */
     constructor(side: string) {
-      // this._side = side;
       this._sideBar = new TabBar<Widget>({
         insertBehavior: 'none',
         removeBehavior: 'none',
@@ -1200,12 +1199,6 @@ namespace Private {
         newWidget.show();
       }
       this._lastCurrent = newWidget || oldWidget;
-      // if (newWidget) {
-      //   const id = newWidget.id;
-      //   this.node.setAttribute(`data-${this._side}-sidebar-widget`, id);
-      // } else {
-      //   this.node.removeAttribute(`data-${this._side}-sidebar-widget`);
-      // }
       this._refreshVisibility();
     }
 
@@ -1232,7 +1225,6 @@ namespace Private {
     }
 
     private _items = new Array<Private.IRankItem>();
-    // private _side: string;
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
     private _lastCurrent: Widget | null;
