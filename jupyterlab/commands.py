@@ -1404,8 +1404,8 @@ class _AppHandler(object):
                     raise ValueError(msg)
 
                 if version and name:
-                    self.logger.warning('Incompatible extension:\n%s', msg)
-                    self.logger.warning('Found compatible version: %s', version)
+                    self.logger.debug('Incompatible extension:\n%s', name)
+                    self.logger.debug('Found compatible version: %s', version)
                     with TemporaryDirectory() as tempdir2:
                         return self._install_extension(
                             '%s@%s' % (name, version), tempdir2)
