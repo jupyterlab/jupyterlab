@@ -415,11 +415,11 @@ const sidebar: JupyterFrontEndPlugin<void> = {
           } else {
             side = 'left';
           }
-        } else if (document.body.dataset.leftSidebarWidget) {
-          id = document.body.dataset.leftSidebarWidget;
+        } else if (app.shell.dataset.leftSidebarWidget) {
+          id = app.shell.dataset.leftSidebarWidget;
           side = 'right';
-        } else if (document.body.dataset.rightSidebarWidget) {
-          id = document.body.dataset.rightSidebarWidget;
+        } else if (app.shell.dataset.rightSidebarWidget) {
+          id = app.shell.dataset.rightSidebarWidget;
           side = 'left';
         }
 
