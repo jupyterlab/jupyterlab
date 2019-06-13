@@ -113,4 +113,4 @@ jobs:
         title: JupyterLab Release version $(Build.SourceBranchName) 
         releaseNotesSource: input
         releaseNotes: |         
-          [Installation](https://github.com/zenithworks/jupyterlab/blob/master/README.md#installation)   |   [Getting Started](https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html)   |   [Changelog](https://jupyterlab.readthedocs.io/en/latest/getting_started/changelog.html)     
+          [Installation](https://github.com/jupyterlab/jupyterlab/blob/master/README.md#installation)   |   [Getting Started](https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html)   |   [Changelog](https://jupyterlab.readthedocs.io/en/latest/getting_started/changelog.html)     
