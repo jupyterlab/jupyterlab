@@ -343,7 +343,11 @@ export class OutputArea extends Widget {
    */
   private _insertOutput(index: number, model: IOutputModel): void {
     let output = this.createOutputItem(model);
-    output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
+    if (output) {
+      output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
+    } else {
+      output = new Widget();
+    }
     let layout = this.layout as PanelLayout;
     layout.insertWidget(index, output);
   }
@@ -351,8 +355,15 @@ export class OutputArea extends Widget {
   /**
    * Create an output item with a prompt and actual output
    */
-  protected createOutputItem(model: IOutputModel): Widget {
+  protected createOutputItem(model: IOutputModel): Widget | null {
+    let output = this.createRenderedMimetype(model);
+
+    if (!output) {
+      return null;
+    }
+
     let panel = new Panel();
+
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
     let prompt = this.contentFactory.createOutputPrompt();
@@ -360,60 +371,52 @@ export class OutputArea extends Widget {
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
-    let output = this.createRenderedMimetype(model);
     output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(output);
-
     return panel;
   }
 
   /**
    * Render a mimetype
    */
-  protected createRenderedMimetype(model: IOutputModel): Widget {
-    let widget: Widget;
+  protected createRenderedMimetype(model: IOutputModel): Widget | null {
     let mimeType = this.rendermime.preferredMimeType(
       model.data,
       model.trusted ? 'any' : 'ensure'
     );
-    if (mimeType) {
-      let metadata = model.metadata;
-      let mimeMd = metadata[mimeType] as ReadonlyJSONObject;
-      let isolated = false;
-      // mime-specific higher priority
-      if (mimeMd && mimeMd['isolated'] !== undefined) {
-        isolated = mimeMd['isolated'] as boolean;
-      } else {
-        // fallback on global
-        isolated = metadata['isolated'] as boolean;
-      }
 
-      let output = this.rendermime.createRenderer(mimeType);
-      if (isolated === true) {
-        output = new Private.IsolatedRenderer(output);
-      }
-      output.renderModel(model).catch(error => {
-        // Manually append error message to output
-        const pre = document.createElement('pre');
-        pre.textContent = `Javascript Error: ${error.message}`;
-        output.node.appendChild(pre);
-
-        // Remove mime-type-specific CSS classes
-        output.node.className = 'p-Widget jp-RenderedText';
-        output.node.setAttribute(
-          'data-mime-type',
-          'application/vnd.jupyter.stderr'
-        );
-      });
-      widget = output;
-    } else {
-      widget = new Widget();
-      widget.node.innerHTML =
-        `No ${model.trusted ? '' : '(safe) '}renderer could be ` +
-        'found for output. It has the following MIME types: ' +
-        Object.keys(model.data).join(', ');
+    if (!mimeType) {
+      return null;
     }
-    return widget;
+    let metadata = model.metadata;
+    let mimeMd = metadata[mimeType] as ReadonlyJSONObject;
+    let isolated = false;
+    // mime-specific higher priority
+    if (mimeMd && mimeMd['isolated'] !== undefined) {
+      isolated = mimeMd['isolated'] as boolean;
+    } else {
+      // fallback on global
+      isolated = metadata['isolated'] as boolean;
+    }
+
+    let output = this.rendermime.createRenderer(mimeType);
+    if (isolated === true) {
+      output = new Private.IsolatedRenderer(output);
+    }
+    output.renderModel(model).catch(error => {
+      // Manually append error message to output
+      const pre = document.createElement('pre');
+      pre.textContent = `Javascript Error: ${error.message}`;
+      output.node.appendChild(pre);
+
+      // Remove mime-type-specific CSS classes
+      output.node.className = 'p-Widget jp-RenderedText';
+      output.node.setAttribute(
+        'data-mime-type',
+        'application/vnd.jupyter.stderr'
+      );
+    });
+    return output;
   }
 
   /**
@@ -511,9 +514,11 @@ export class SimplifiedOutputArea extends OutputArea {
   /**
    * Create an output item without a prompt, just the output widgets
    */
-  protected createOutputItem(model: IOutputModel): Widget {
+  protected createOutputItem(model: IOutputModel): Widget | null {
     let output = this.createRenderedMimetype(model);
-    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    if (output) {
+      output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    }
     return output;
   }
 }
