@@ -12,7 +12,10 @@ import {
   Clipboard,
   InstanceTracker,
   MainAreaWidget,
-  ToolbarButton
+  ToolbarButton,
+  ICommandPalette,
+  Dialog,
+  showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -25,11 +28,14 @@ import {
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
+import { IMainMenu } from '@jupyterlab/mainmenu';
+
 import {
   FileBrowserModel,
   FileBrowser,
   FileUploadStatus,
-  IFileBrowserFactory
+  IFileBrowserFactory,
+  getOpenPath
 } from '@jupyterlab/filebrowser';
 
 import { Launcher } from '@jupyterlab/launcher';
@@ -72,6 +78,8 @@ namespace CommandIDs {
 
   export const open = 'filebrowser:open';
 
+  export const openDirect = 'filebrowser:open-direct';
+
   export const openBrowserTab = 'filebrowser:open-browser-tab';
 
   export const paste = 'filebrowser:paste';
@@ -107,6 +115,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     ILayoutRestorer,
     ISettingRegistry
   ],
+  optional: [ICommandPalette, IMainMenu],
   autoStart: true
 };
 
@@ -238,7 +247,9 @@ function activateBrowser(
   docManager: IDocumentManager,
   labShell: ILabShell,
   restorer: ILayoutRestorer,
-  settingRegistry: ISettingRegistry
+  settingRegistry: ISettingRegistry,
+  palette: ICommandPalette,
+  mainMenu: IMainMenu
 ): void {
   const browser = factory.defaultBrowser;
   const { commands } = app;
@@ -251,7 +262,7 @@ function activateBrowser(
   // responsible for their own restoration behavior, if any.
   restorer.add(browser, namespace);
 
-  addCommands(app, factory, labShell, docManager);
+  addCommands(app, factory, labShell, docManager, palette, mainMenu);
 
   browser.title.iconClass = 'jp-FolderIcon jp-SideBar-tabIcon';
   browser.title.caption = 'File Browser';
@@ -347,7 +358,9 @@ function addCommands(
   app: JupyterFrontEnd,
   factory: IFileBrowserFactory,
   labShell: ILabShell,
-  docManager: IDocumentManager
+  docManager: IDocumentManager,
+  palette: ICommandPalette | null,
+  mainMenu: IMainMenu | null
 ): void {
   const registry = app.docRegistry;
   const { commands } = app;
@@ -484,6 +497,50 @@ function addCommands(
     label: args => (args['label'] || args['factory'] || 'Open') as string,
     mnemonic: 0
   });
+
+  commands.addCommand(CommandIDs.openDirect, {
+    label: () => 'Open From Path...',
+    caption: 'Open from path',
+    isEnabled: () => true,
+    execute: () => {
+      return getOpenPath(docManager.services.contents).then(path => {
+        if (!path) {
+          return;
+        }
+        docManager.services.contents.get(path, { content: false }).then(
+          item => {
+            // exists
+            if (item.type === 'directory') {
+              return browser.model.cd(item.name);
+            }
+            return commands.execute('docmanager:open', {
+              path: item.path
+            });
+          },
+          () => {
+            // does not exist
+            return showDialog({
+              title: 'Cannot open',
+              body: 'No such file or directory found',
+              buttons: [Dialog.okButton()]
+            });
+          }
+        );
+        return;
+      });
+    }
+  });
+  // Add the openDirect command to the command palette
+  if (palette) {
+    palette.addItem({
+      command: CommandIDs.openDirect,
+      category: 'File Operations'
+    });
+  }
+  // Add the openDirect command to the File menu
+  if (mainMenu) {
+    mainMenu.fileMenu.addGroup([{ command: CommandIDs.openDirect }], 0);
+  }
 
   commands.addCommand(CommandIDs.openBrowserTab, {
     execute: () => {

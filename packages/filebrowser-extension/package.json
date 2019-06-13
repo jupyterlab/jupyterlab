@@ -42,6 +42,7 @@
     "@jupyterlab/docmanager": "^1.0.0-alpha.10",
     "@jupyterlab/filebrowser": "^1.0.0-alpha.10",
     "@jupyterlab/launcher": "^1.0.0-alpha.10",
+    "@jupyterlab/mainmenu": "^1.0.0-alpha.10",
     "@jupyterlab/services": "^4.0.0-alpha.10",
     "@jupyterlab/statusbar": "^1.0.0-alpha.10",
     "@phosphor/algorithm": "^1.1.2",
