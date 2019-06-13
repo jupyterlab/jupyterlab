@@ -18,14 +18,11 @@ export class TabBarSvg<T> extends TabBar<T> {
    *
    * @param options - The options for initializing the tab bar.
    */
-  constructor(
-    options: { kind: IconKindType; skipbad?: boolean } & TabBar.IOptions<T>
-  ) {
+  constructor(options: TabBarSvg.IOptions<T>) {
     options.renderer = options.renderer || TabBarSvg.defaultRenderer;
     super(options);
 
     this._kind = options.kind;
-    this._skipbad = options.skipbad;
   }
 
   /**
@@ -46,18 +43,20 @@ export class TabBarSvg<T> extends TabBar<T> {
           name: title.iconClass,
           container: iconNode,
           center: true,
-          kind: this._kind,
-          skipbad: this._skipbad
+          kind: this._kind
         });
       }
     }
   }
 
   protected _kind: IconKindType;
-  protected _skipbad: boolean;
 }
 
 export namespace TabBarSvg {
+  export interface IOptions<T> extends TabBar.IOptions<T> {
+    kind: IconKindType;
+  }
+
   /**
    * A modified implementation of the TabBar Renderer.
    */
@@ -97,7 +96,6 @@ export class DockPanelSvg extends DockPanel {
       // can't add a constructor to Renderer, so have to set properties here
       let renderer = new DockPanelSvg.Renderer();
       renderer._kind = options.kind || renderer._kind;
-      renderer._skipbad = options.skipbad || renderer._skipbad;
       options.renderer = renderer;
     }
 
@@ -118,14 +116,12 @@ export namespace DockPanelSvg {
      */
     createTabBar(): TabBarSvg<Widget> {
       let bar = new TabBarSvg<Widget>({
-        kind: this._kind,
-        skipbad: this._skipbad
+        kind: this._kind
       });
       bar.addClass('p-DockPanel-tabBar');
       return bar;
     }
 
     _kind: IconKindType = 'dockPanelBar';
-    _skipbad: boolean = false;
   }
 }

@@ -179,8 +179,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     let topPanel = (this._topPanel = new Panel());
     let hboxPanel = new BoxPanel();
     let dockPanel = (this._dockPanel = new DockPanelSvg({
-      kind: 'dockPanelBar',
-      skipbad: true
+      kind: 'dockPanelBar'
     }));
     let headerPanel = (this._headerPanel = new Panel());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
@@ -1035,7 +1034,6 @@ namespace Private {
     constructor(side: string) {
       this._sideBar = new TabBarSvg<Widget>({
         kind: 'sideBar',
-        skipbad: true,
         insertBehavior: 'none',
         removeBehavior: 'none',
         allowDeselect: true

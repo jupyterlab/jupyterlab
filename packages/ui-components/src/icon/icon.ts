@@ -27,30 +27,30 @@ import folderSvg from '../../style/icons/sidebar/folder.svg'; // originally ic-f
 import paletteSvg from '../../style/icons/sidebar/palette.svg'; // originally ic-palette-24px.svg
 import runningSvg from '../../style/icons/sidebar/running.svg'; // originally stop-circle.svg
 import tabSvg from '../../style/icons/sidebar/tab.svg'; // originally ic-tab-24px.svg
-
-export const defaultIcons: ReadonlyArray<Icon.IModel> = [
-  { name: 'jupyter-favicon', svg: jupyterFaviconSvg },
-
-  { name: 'html5', svg: html5Svg },
-  { name: 'react', svg: reactSvg },
-
-  { name: 'kernel', svg: kernelSvg },
-  { name: 'line-form', svg: lineFormSvg },
-  { name: 'not-trusted', svg: notTrustedSvg },
-  { name: 'status-bar', svg: statusBarSvg },
-  { name: 'terminal', svg: terminalSvg },
-  { name: 'trusted', svg: trustedSvg },
-
-  { name: 'build', svg: buildSvg },
-  { name: 'extension', svg: extensionSvg },
-  { name: 'folder', svg: folderSvg },
-  { name: 'palette', svg: paletteSvg },
-  { name: 'running', svg: runningSvg },
-  { name: 'tab', svg: tabSvg }
-];
 /* tslint:enable */
 
 export namespace Icon {
+  export const defaultIcons: ReadonlyArray<IModel> = [
+    { name: 'jupyter-favicon', svg: jupyterFaviconSvg },
+
+    { name: 'html5', svg: html5Svg },
+    { name: 'react', svg: reactSvg },
+
+    { name: 'kernel', svg: kernelSvg },
+    { name: 'line-form', svg: lineFormSvg },
+    { name: 'not-trusted', svg: notTrustedSvg },
+    { name: 'status-bar', svg: statusBarSvg },
+    { name: 'terminal', svg: terminalSvg },
+    { name: 'trusted', svg: trustedSvg },
+
+    { name: 'build', svg: buildSvg },
+    { name: 'extension', svg: extensionSvg },
+    { name: 'folder', svg: folderSvg },
+    { name: 'palette', svg: paletteSvg },
+    { name: 'running', svg: runningSvg },
+    { name: 'tab', svg: tabSvg }
+  ];
+
   export interface IModel {
     name: string;
     className?: string;
