@@ -17,5 +17,5 @@
   },
   "esModuleInterop": true,
   "jsx": "react",
-  "types": ["webpack-env"]
+  "types": ["webpack-env", "node"]
 }
