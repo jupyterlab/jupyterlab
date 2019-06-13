@@ -738,11 +738,14 @@ export class DirListing extends Widget {
       content.appendChild(node);
     }
 
-    // Remove extra classes from the nodes.
+    // Remove extra classes/data from the nodes.
     nodes.forEach(item => {
       item.classList.remove(SELECTED_CLASS);
       item.classList.remove(RUNNING_CLASS);
       item.classList.remove(CUT_CLASS);
+      if (item.children[0]) {
+        delete (item.children[0] as HTMLElement).dataset.icon;
+      }
     });
 
     // Add extra classes to item nodes based on widget state.
@@ -1763,7 +1766,7 @@ export namespace DirListing {
           // add icon as svg node. Can be styled using CSS
           defaultIconRegistry.icon({
             name: fileType.iconClass,
-            className: '',
+            className: ITEM_ICON_CLASS,
             title: fileType.iconLabel,
             container: icon,
             center: true,

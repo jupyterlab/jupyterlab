@@ -41,6 +41,7 @@ const iconCSSCenter: NestedCSSProperties = {
  * icon kind specific styles
  */
 const iconCSSDockPanelBar: NestedCSSProperties = {
+  height: '14px',
   width: '14px'
 };
 
