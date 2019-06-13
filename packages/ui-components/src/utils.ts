@@ -16,3 +16,13 @@ export function camelize(str: string, upper: boolean = false): string {
     }
   });
 }
+
+export function nameFromPath(pth: string): string {
+  return pth
+    .split('\\')
+    .pop()
+    .split('/')
+    .pop()
+    .split('.')
+    .shift();
+}

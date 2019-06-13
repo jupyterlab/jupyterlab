@@ -34,7 +34,6 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.9.0",
-    "@blueprintjs/icons": "^3.3.0",
     "@blueprintjs/select": "^3.3.0",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/virtualdom": "^1.1.2",
@@ -44,6 +43,7 @@
   },
   "devDependencies": {
     "@types/react": "~16.8.18",
+    "@types/webpack-env": "^1.13.9",
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
     "typescript": "~3.5.1"
