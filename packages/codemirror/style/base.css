@@ -7,14 +7,14 @@
   line-height: var(--jp-code-line-height);
   font-size: var(--jp-code-font-size);
   font-family: var(--jp-code-font-family);
+  border: 0;
+  border-radius: 0;
   height: auto;
   /* Changed to auto to autogrow */
 }
 
 .CodeMirror pre {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
+  padding: 0 var(--jp-code-padding);
 }
 
 .jp-CodeMirrorEditor[data-type='inline'] .CodeMirror-dialog {
@@ -26,11 +26,6 @@
 /* May not cause it not because we changed it! */
 .CodeMirror-lines {
   padding: var(--jp-code-padding) 0;
-}
-
-/* Set horizontal padding on line nodes for correct margins */
-pre.CodeMirror-line {
-  padding: 0 var(--jp-code-padding);
 }
 
 .CodeMirror-linenumber {
