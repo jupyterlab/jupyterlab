@@ -2,7 +2,7 @@ trigger:
   branches:
     include:
     - '*'  
-    - refs/tags/*
+    - refs/tags/v1.*
 jobs:
   - job: 'Linux'
     pool:
