@@ -14,7 +14,7 @@ import badSvg from '../../style/icons/bad.svg';
  * The icon registry class.
  */
 export class IconRegistry {
-  constructor(options?: IconRegistry.IOptions) {
+  constructor(options: IconRegistry.IOptions = {}) {
     this._debug = !!options.debug;
 
     let icons = options.initialIcons || Icon.defaultIcons;
@@ -35,6 +35,10 @@ export class IconRegistry {
     });
   }
 
+  contains(name: string): boolean {
+    return name in this._svg;
+  }
+
   /**
    * Get the icon as an HTMLElement of tag <svg><svg/>
    */
@@ -44,13 +48,18 @@ export class IconRegistry {
     const { name, className, title, container, ...propsStyle } = props;
 
     // if name not in _svg, assume we've been handed a className in place of name
-    let svg = this.resolveSvg(name);
-    if (!svg) {
-      // bail
+    let resolvedName = this.resolveName(name);
+    if (
+      !resolvedName ||
+      (container &&
+        container.dataset.icon &&
+        container.dataset.icon === resolvedName)
+    ) {
+      // bail if failing silently or icon node is already set
       return;
     }
 
-    let svgNode = Private.parseSvg(svg);
+    let svgNode = Private.parseSvg(this.svg(resolvedName));
 
     if (title) {
       Private.setTitleSvg(svgNode, title);
@@ -59,13 +68,14 @@ export class IconRegistry {
     if (container) {
       // clear any existing icon in container (and all other child elements)
       container.textContent = '';
+      container.dataset.icon = resolvedName;
       container.appendChild(svgNode);
 
       let styleClass = propsStyle ? iconStyle(propsStyle) : '';
       if (className || className === '') {
         // override the className, if explicitly passed
         container.className = classes(className, styleClass);
-      } else if (!(styleClass in container.classList)) {
+      } else if (!container.classList.contains(styleClass)) {
         // add icon styling class to the container's class, if not already present
         container.className = classes(container.className, styleClass);
       }
@@ -90,11 +100,14 @@ export class IconRegistry {
     const { name, className, title, tag, ...propsStyle } = props;
     const Tag = tag || 'div';
 
-    let svg = this.resolveSvg(name);
-    if (!svg) {
-      // bail
+    // if name not in _svg, assume we've been handed a className in place of name
+    let resolvedName = this.resolveName(name);
+    if (!resolvedName) {
+      // bail if failing silently
       return;
     }
+
+    let svg = this.svg(resolvedName);
 
     return (
       <Tag
@@ -113,30 +126,19 @@ export class IconRegistry {
         }
       }
       // couldn't resolve name, mark as bad
-      return 'bad';
+      if (this._debug) {
+        console.error(`Invalid icon name: ${name}`);
+        return 'bad';
+      } else {
+        return '';
+      }
     }
 
     return name;
   }
 
-  resolveSvg(name: string): string {
-    let svgname = this.resolveName(name);
-
-    if (svgname === 'bad') {
-      if (this._debug) {
-        // log a warning and mark missing icons with an X
-        console.error(`Invalid icon name: ${name}`);
-      } else {
-        // silently return empty string
-        return '';
-      }
-    }
-
-    return this._svg[svgname];
-  }
-
-  get svg() {
-    return this._svg;
+  svg(name: string): string {
+    return this._svg[name];
   }
 
   static iconClassName(name: string): string {

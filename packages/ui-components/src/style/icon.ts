@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { style } from 'typestyle/lib';
+import { cssRule, style } from 'typestyle/lib';
 import { NestedCSSProperties } from 'typestyle/lib/types';
 
 export type IconKindType =
@@ -26,9 +26,9 @@ export interface IIconStyle extends NestedCSSProperties {
 /**
  * styles for centering node inside of containers
  */
-const iconContainerCSSCenter: NestedCSSProperties = {
+const containerCSSCenter: NestedCSSProperties = {
   alignItems: 'center',
-  display: 'flex !important'
+  display: 'flex'
 };
 
 const iconCSSCenter: NestedCSSProperties = {
@@ -41,7 +41,7 @@ const iconCSSCenter: NestedCSSProperties = {
  * icon kind specific styles
  */
 const iconCSSDockPanelBar: NestedCSSProperties = {
-  height: '14px'
+  width: '14px'
 };
 
 const iconCSSListing: NestedCSSProperties = {
@@ -70,6 +70,30 @@ const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
 };
 
 /**
+ * container kind specific styles
+ */
+const containerCSSDockPanelBar: NestedCSSProperties = {
+  marginRight: '4px'
+};
+
+const containerCSSListing: NestedCSSProperties = {
+  flex: '0 0 20px',
+  marginRight: '4px'
+};
+
+const containerCSSSideBar: NestedCSSProperties = {
+  transform: 'rotate(90deg)'
+};
+
+const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
+  dockPanelBar: containerCSSDockPanelBar,
+  listing: containerCSSListing,
+  sideBar: containerCSSSideBar,
+  statusBar: {},
+  unset: {}
+};
+
+/**
  * for putting together the icon kind style with any user input styling,
  * as well as styling from optional flags like `center`
  */
@@ -84,11 +108,24 @@ function iconCSS(props: IIconStyle): NestedCSSProperties {
 }
 
 /**
+ * for putting together the container kind style with any
+ * styling from optional flags like `center`
+ */
+function containerCSS(props: IIconStyle): NestedCSSProperties {
+  const { kind, center } = props;
+
+  return {
+    ...(center ? containerCSSCenter : {}),
+    ...(kind ? containerCSSKind[kind] : {})
+  };
+}
+
+/**
  * for setting the style on the container of an svg node representing an icon
  */
 export const iconStyle = (props: IIconStyle): string => {
   return style({
-    ...(props.center ? iconContainerCSSCenter : {}),
+    ...containerCSS(props),
     $nest: {
       ['svg']: iconCSS(props)
     }
@@ -101,3 +138,19 @@ export const iconStyle = (props: IIconStyle): string => {
 export const iconStyleFlat = (props: IIconStyle): string => {
   return style(iconCSS(props));
 };
+
+// TODO: Figure out a better cludge for styling current sidebar tab selection
+cssRule(
+  `.p-TabBar-tab.p-mod-current .${iconStyle({
+    center: true,
+    kind: 'sideBar'
+  })}`,
+  {
+    transform:
+      'rotate(90deg)\n' +
+      '    translate(\n' +
+      '      calc(-0.5 * var(--jp-border-width)),\n' +
+      '      calc(-0.5 * var(--jp-border-width))\n' +
+      '    )'
+  }
+);

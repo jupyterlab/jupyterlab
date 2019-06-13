@@ -37,10 +37,11 @@ export class TabBarSvg<T> extends TabBar<T> {
       let title = this.titles[itab];
       let iconNode = tab.children ? (tab.children[0] as HTMLElement) : null;
 
-      if (iconNode && iconNode.children.length < 1) {
+      if (iconNode) {
         // add the svg node, if not already present
         defaultIconRegistry.icon({
           name: title.iconClass,
+          className: '',
           container: iconNode,
           center: true,
           kind: this._kind
@@ -89,9 +90,7 @@ export class DockPanelSvg extends DockPanel {
    *
    * @param options - The options for initializing the panel.
    */
-  constructor(
-    options: { kind?: IconKindType; skipbad?: boolean } & DockPanel.IOptions
-  ) {
+  constructor(options: { kind?: IconKindType } & DockPanel.IOptions) {
     if (!options.renderer) {
       // can't add a constructor to Renderer, so have to set properties here
       let renderer = new DockPanelSvg.Renderer();

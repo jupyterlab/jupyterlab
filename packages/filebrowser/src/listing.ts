@@ -1759,13 +1759,11 @@ export namespace DirListing {
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       if (fileType) {
-        // TODO: should inline svg icons still get the same className?
-        icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
-
-        if (fileType.iconName) {
+        if (defaultIconRegistry.contains(fileType.iconClass)) {
           // add icon as svg node. Can be styled using CSS
           defaultIconRegistry.icon({
-            name: fileType.iconName,
+            name: fileType.iconClass,
+            className: '',
             title: fileType.iconLabel,
             container: icon,
             center: true,
@@ -1773,6 +1771,7 @@ export namespace DirListing {
           });
         } else {
           // add icon as CSS background image. Can't be styled using CSS
+          icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
           icon.textContent = fileType.iconLabel || '';
         }
       } else {

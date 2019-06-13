@@ -20,11 +20,6 @@ import {
 } from '@jupyterlab/htmlviewer';
 
 /**
- * The CSS class for an HTML5 icon.
- */
-const CSS_ICON_CLASS = 'jp-Html5Icon';
-
-/**
  * The name for an HTML5 icon.
  */
 const ICON_NAME = 'html5';
@@ -63,8 +58,7 @@ function activateHTMLViewer(
     displayName: 'HTML File',
     extensions: ['.html'],
     mimeTypes: ['text/html'],
-    iconClass: CSS_ICON_CLASS,
-    iconName: ICON_NAME
+    iconClass: ICON_NAME
   };
   app.docRegistry.addFileType(ft);
 
