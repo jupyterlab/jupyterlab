@@ -196,7 +196,7 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   activate: (app: JupyterFrontEnd, state: IStateDB, labShell: ILabShell) => {
     const first = app.started;
     const registry = app.commands;
-    const restorer = new LayoutRestorer({ first, registry, state });
+    const restorer = new LayoutRestorer({ connector: state, first, registry });
 
     void restorer.fetch().then(saved => {
       labShell.restoreLayout(saved);
