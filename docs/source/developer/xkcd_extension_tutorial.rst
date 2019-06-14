@@ -707,7 +707,7 @@ Finally, rewrite the ``activate`` function so that it:
 
 1. Declares a widget variable, but does not create an instance
    immediately
-2. Constructs an ``WidgetTracker`` and tells the ``ILayoutRestorer``
+2. Constructs a ``WidgetTracker`` and tells the ``ILayoutRestorer``
    to use it to save/restore panel state
 3. Creates, tracks, shows, and refreshes the widget panel appropriately
 
