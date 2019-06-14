@@ -49,6 +49,22 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
+    describe('#onUpdateRequest()', () => {
+      it('should propagate to the content', () => {
+        let updated: boolean;
+        const content = new (class extends Widget {
+          onUpdateRequest() {
+            updated = true;
+          }
+        })();
+        const widget = new MainAreaWidget({ content });
+        Widget.attach(widget, document.body);
+        updated = false;
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        expect(updated).to.equal(true);
+      });
+    });
+
     describe('title', () => {
       it('should proxy from content to main', () => {
         const content = new Widget();
