@@ -151,10 +151,8 @@ async function activateConsole(
       path: panel.console.session.path,
       name: panel.console.session.name,
       kernelPreference: {
-        name: panel.console.session.kernel && panel.console.session.kernel.name,
-        language:
-          panel.console.session.language &&
-          panel.console.session.kernel.language
+        name: panel.console.session.kernelPreference.name,
+        language: panel.console.session.kernelPreference.language
       }
     }),
     name: panel => panel.console.session.path,
