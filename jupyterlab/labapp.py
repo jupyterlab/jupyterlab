@@ -137,7 +137,7 @@ class LabWorkspaceExportApp(JupyterApp):
 
         if len(self.extra_args) > 1:
             print('Too many arguments were provided for workspace export.')
-            sys.exit(1)
+            self.exit(1)
 
         raw = (page_url if not self.extra_args
                else ujoin(config.workspaces_url, self.extra_args[0]))
@@ -187,7 +187,7 @@ class LabWorkspaceImportApp(JupyterApp):
 
         if len(self.extra_args) != 1:
             print('One argument is required for workspace import.')
-            sys.exit(1)
+            self.exit(1)
 
         workspace = dict()
         with self._smart_open() as fid:
@@ -195,14 +195,14 @@ class LabWorkspaceImportApp(JupyterApp):
                 workspace = self._validate(fid, base_url, page_url, workspaces_url)
             except Exception as e:
                 print('%s is not a valid workspace:\n%s' % (fid.name, e))
-                sys.exit(1)
+                self.exit(1)
 
         if not osp.exists(directory):
             try:
                 os.makedirs(directory)
             except Exception as e:
                 print('Workspaces directory could not be created:\n%s' % e)
-                sys.exit(1)
+                self.exit(1)
 
         slug = slugify(workspace['metadata']['id'], base_url)
         workspace_path = pjoin(directory, slug + WORKSPACE_EXTENSION)
@@ -223,7 +223,7 @@ class LabWorkspaceImportApp(JupyterApp):
 
             if not osp.exists(file_path):
                 print('%s does not exist.' % file_name)
-                sys.exit(1)
+                self.exit(1)
 
             return open(file_path)
 
@@ -275,7 +275,7 @@ class LabWorkspaceApp(JupyterApp):
     def start(self):
         super().start()
         print('Either `export` or `import` must be specified.')
-        sys.exit(1)
+        self.exit(1)
 
 
 lab_aliases = dict(aliases)

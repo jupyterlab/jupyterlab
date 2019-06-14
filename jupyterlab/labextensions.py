@@ -212,7 +212,7 @@ class CheckLabExtensionsApp(BaseExtensionApp):
                 logger=self.log)
             for arg in self.extra_args)
         if not all_enabled:
-            exit(1)
+            self.exit(1)
 
 
 _examples = """
@@ -248,7 +248,7 @@ class LabExtensionApp(JupyterApp):
         # The above should have called a subcommand and raised NoStart; if we
         # get here, it didn't, so we should self.log.info a message.
         subcmds = ", ".join(sorted(self.subcommands))
-        sys.exit("Please supply at least one subcommand: %s" % subcmds)
+        self.exit("Please supply at least one subcommand: %s" % subcmds)
 
 
 main = LabExtensionApp.launch_instance
