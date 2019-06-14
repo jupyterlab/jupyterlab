@@ -99,11 +99,8 @@ class ProgressProcess(Process):
                 cache.append(out)
             except subprocess.TimeoutExpired:
                 continue
-        if proc.returncode:
-            self.logger.error('\n'.join(cache))
-        else:
-            self.logger.debug('\n'.join(cache))
-            sys.stdout.flush()
+        self.logger.debug('\n'.join(cache))
+        sys.stdout.flush()
         return self.terminate()
 
 
@@ -558,7 +555,7 @@ class _AppHandler(object):
         ret = self._run(['node', YARN_PATH, 'install', '--non-interactive'], cwd=staging)
         if ret != 0:
             msg = 'npm dependencies failed to install'
-            self.logger.error(msg)
+            self.logger.debug(msg)
             raise RuntimeError(msg)
 
         dedupe_yarn(staging, self.logger)
@@ -567,7 +564,7 @@ class _AppHandler(object):
         ret = self._run(['node', YARN_PATH, 'run', command], cwd=staging)
         if ret != 0:
             msg = 'JupyterLab failed to build'
-            self.logger.error(msg)
+            self.logger.debug(msg)
             raise RuntimeError(msg)
 
     def watch(self):
