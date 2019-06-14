@@ -17,6 +17,7 @@ from notebook.utils import url_path_join as ujoin
 from traitlets import Bool, Unicode
 
 from ._version import __version__
+from .debuglog import DebugLogFileMixin
 from .extension import load_config, load_jupyter_server_extension
 from .commands import (
     build, clean, get_app_dir, get_app_version, get_user_settings_dir,
@@ -38,7 +39,7 @@ if version != app_version:
     version = '%s (dev), %s (app)' % (__version__, app_version)
 
 
-class LabBuildApp(JupyterApp):
+class LabBuildApp(JupyterApp, DebugLogFileMixin):
     version = version
     description = """
     Build the JupyterLab application
@@ -69,12 +70,13 @@ class LabBuildApp(JupyterApp):
         command = 'build:prod' if not self.dev_build else 'build'
         app_dir = self.app_dir or get_app_dir()
         self.log.info('JupyterLab %s', version)
-        if self.pre_clean:
-            self.log.info('Cleaning %s' % app_dir)
-            clean(self.app_dir)
-        self.log.info('Building in %s', app_dir)
-        build(app_dir=app_dir, name=self.name, version=self.version,
-              command=command, logger=self.log)
+        with self.debug_logging():
+            if self.pre_clean:
+                self.log.info('Cleaning %s' % app_dir)
+                clean(self.app_dir)
+            self.log.info('Building in %s', app_dir)
+            build(app_dir=app_dir, name=self.name, version=self.version,
+                command=command, logger=self.log)
 
 
 clean_aliases = dict(base_aliases)
