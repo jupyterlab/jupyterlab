@@ -15,8 +15,6 @@ import {
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { JSONExt } from '@phosphor/coreutils';
-
 /**
  * The command IDs used by the FAQ plugin.
  */
