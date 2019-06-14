@@ -3,21 +3,11 @@
 
 import { InstanceTracker } from '@jupyterlab/coreutils';
 
-import { ArrayExt } from '@phosphor/algorithm';
-
-import { PromiseDelegate } from '@phosphor/coreutils';
-
 import { IDisposable } from '@phosphor/disposable';
-
-import { AttachedProperty } from '@phosphor/properties';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { FocusTracker, Widget } from '@phosphor/widgets';
-
-interface IObservableDisposable extends IDisposable {
-  disposed: ISignal<any, void>;
-}
 
 /**
  * A tracker that tracks widgets.
@@ -128,7 +118,10 @@ export class WidgetTracker<T extends Widget = Widget>
   constructor(options: WidgetTracker.IOptions) {
     this.namespace = options.namespace;
     this._instanceTracker = new InstanceTracker(options);
-    this._focusTracker.currentChanged.connect(this._onCurrentChanged, this);
+    this._instanceTracker.currentChanged.connect((_, value) => {
+      this.onCurrentChanged(value);
+    }, this);
+    this._focusTracker.currentChanged.connect(this._onFocusChanged, this);
   }
 
   /**
@@ -322,65 +315,15 @@ export class WidgetTracker<T extends Widget = Widget>
   /**
    * Handle the current change signal from the internal focus tracker.
    */
-  private _onCurrentChanged(
-    sender: any,
-    args: FocusTracker.IChangedArgs<T>
-  ): void {
-    // Bail if the active widget did not change.
-    if (args.newValue === this._currentWidget) {
+  private _onFocusChanged(_: any, args: FocusTracker.IChangedArgs<T>): void {
+    if (args.newValue === this.currentWidget) {
       return;
     }
-
-    this._currentWidget = args.newValue;
-    this.onCurrentChanged(args.newValue);
-    this._currentChanged.emit(args.newValue);
-  }
-
-  /**
-   * Clean up after disposed widgets.
-   */
-  private _onWidgetDisposed(widget: T): void {
-    const injected = Private.injectedProperty.get(widget);
-
-    if (injected) {
-      return;
-    }
-
-    // Handle widget removal.
-    ArrayExt.removeFirstOf(this._widgets, widget);
-
-    // Handle the current widget being disposed.
-    if (widget === this._currentWidget) {
-      this._currentWidget =
-        this._tracker.currentWidget ||
-        this._widgets[this._widgets.length - 1] ||
-        null;
-      this.onCurrentChanged(this._currentWidget);
-      this._currentChanged.emit(this._currentWidget);
-    }
-
-    // If there is no restore data, return.
-    if (!this._restore) {
-      return;
-    }
-
-    const { connector } = this._restore;
-    const name = Private.nameProperty.get(widget);
-
-    if (name) {
-      void connector.remove(name);
-    }
+    this._instanceTracker.current = args.newValue;
   }
 
   private _focusTracker = new FocusTracker<T>();
-  private _hasRestored = false;
   private _instanceTracker: InstanceTracker<T>;
-  private _restore: WidgetTracker.IRestoreOptions<T> | null = null;
-  private _restored = new PromiseDelegate<void>();
-  private _currentChanged = new Signal<this, T | null>(this);
-  private _widgetAdded = new Signal<this, T>(this);
-  private _widgetUpdated = new Signal<this, T>(this);
-  private _widgets: T[] = [];
   private _isDisposed = false;
 }
 
@@ -403,31 +346,4 @@ export namespace WidgetTracker {
    */
   export interface IRestoreOptions<T extends Widget>
     extends InstanceTracker.IRestoreOptions<T> {}
-}
-
-/*
- * A namespace for private data.
- */
-namespace Private {
-  /**
-   * An attached property to indicate whether an instance has been injected.
-   */
-  export const injectedProperty = new AttachedProperty<
-    IObservableDisposable,
-    boolean
-  >({
-    name: 'injected',
-    create: () => false
-  });
-
-  /**
-   * An attached property for an instance's ID.
-   */
-  export const nameProperty = new AttachedProperty<
-    IObservableDisposable,
-    string
-  >({
-    name: 'name',
-    create: () => ''
-  });
 }
