@@ -16,13 +16,15 @@ import traceback
 from traitlets import HasTraits, Unicode, default
 
 class DebugLogFileMixin(HasTraits):
-    debug_log_path = Unicode('', config=True, help='TODO')
+    debug_log_path = Unicode('', config=True, help='Path to use for the debug log file')
 
     @contextlib.contextmanager
     def debug_logging(self):
         log_path = self.debug_log_path
+        if os.path.isdir(log_path):
+            log_path = os.path.join(log_path, 'jupyterlab-debug.log')
         if not log_path:
-            handle, log_path = tempfile.mkstemp(prefix='jupyterlab-log-', suffix='.log')
+            handle, log_path = tempfile.mkstemp(prefix='jupyterlab-debug-', suffix='.log')
             os.close(handle)
         log = self.log
 

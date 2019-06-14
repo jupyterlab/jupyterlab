@@ -30,6 +30,7 @@ build_aliases['app-dir'] = 'LabBuildApp.app_dir'
 build_aliases['name'] = 'LabBuildApp.name'
 build_aliases['version'] = 'LabBuildApp.version'
 build_aliases['dev-build'] = 'LabBuildApp.dev_build'
+build_aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 
 build_flags = dict(flags)
 
