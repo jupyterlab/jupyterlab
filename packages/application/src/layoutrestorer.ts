@@ -3,9 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { InstanceTracker } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
 
-import { IStateDB } from '@jupyterlab/coreutils';
+import { IDataConnector } from '@jupyterlab/coreutils';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -13,6 +13,7 @@ import {
   JSONObject,
   PromiseDelegate,
   ReadonlyJSONObject,
+  ReadonlyJSONValue,
   Token
 } from '@phosphor/coreutils';
 
@@ -52,9 +53,9 @@ export interface ILayoutRestorer {
    *
    * @param options - The restoration options.
    */
-  restore(
-    tracker: InstanceTracker<any>,
-    options: ILayoutRestorer.IRestoreOptions<any>
+  restore<T extends Widget = Widget>(
+    tracker: WidgetTracker<T>,
+    options: ILayoutRestorer.IRestoreOptions<T>
   ): void;
 }
 
@@ -65,7 +66,7 @@ export namespace ILayoutRestorer {
   /**
    * The state restoration configuration options.
    */
-  export interface IRestoreOptions<T extends Widget> {
+  export interface IRestoreOptions<T extends Widget = Widget> {
     /**
      * The command to execute when restoring instances.
      */
@@ -93,7 +94,7 @@ export namespace ILayoutRestorer {
 }
 
 /**
- * The state database key for restorer data.
+ * The data connector key for restorer data.
  */
 const KEY = 'layout-restorer:data';
 
@@ -104,8 +105,8 @@ const KEY = 'layout-restorer:data';
  * The lifecycle for state restoration is subtle. The sequence of events is:
  *
  * 1. The layout restorer plugin is instantiated and makes a `fetch` call to
- *    the database that stores the layout restoration data. The `fetch` call
- *    returns a promise that resolves in step 6, below.
+ *    the data connector that stores the layout restoration data. The `fetch`
+ *    call returns a promise that resolves in step 6, below.
  *
  * 2. Other plugins that care about state restoration require the layout
  *    restorer as a dependency.
@@ -140,9 +141,9 @@ const KEY = 'layout-restorer:data';
  * 7. Once the application shell has finished restoring the layout, the
  *    JupyterLab application's `restored` promise is resolved.
  *
- * Of particular note are steps 5 and 6: since state restoration of plugins
+ * Of particular note are steps 5 and 6: since data restoration of plugins
  * is accomplished by executing commands, the command that is used to restore
- * the state of each plugin must return a promise that only resolves when the
+ * the data of each plugin must return a promise that only resolves when the
  * widget has been created and added to the plugin's instance tracker.
  */
 export class LayoutRestorer implements ILayoutRestorer {
@@ -150,9 +151,9 @@ export class LayoutRestorer implements ILayoutRestorer {
    * Create a layout restorer.
    */
   constructor(options: LayoutRestorer.IOptions) {
-    this._registry = options.registry;
-    this._state = options.state;
+    this._connector = options.connector;
     this._first = options.first;
+    this._registry = options.registry;
 
     void this._first
       .then(() => {
@@ -200,7 +201,7 @@ export class LayoutRestorer implements ILayoutRestorer {
       leftArea: null,
       rightArea: null
     };
-    const layout = this._state.fetch(KEY);
+    const layout = this._connector.fetch(KEY);
 
     return Promise.all([layout, this.restored])
       .then(([data]) => {
@@ -235,7 +236,7 @@ export class LayoutRestorer implements ILayoutRestorer {
    * @param options - The restoration options.
    */
   restore(
-    tracker: InstanceTracker<Widget>,
+    tracker: WidgetTracker,
     options: ILayoutRestorer.IRestoreOptions<Widget>
   ): Promise<any> {
     const warning = 'restore() can only be called before `first` has resolved.';
@@ -247,7 +248,7 @@ export class LayoutRestorer implements ILayoutRestorer {
 
     const { namespace } = tracker;
     if (this._trackers.has(namespace)) {
-      let warning = `A tracker namespaced ${namespace} was already restored.`;
+      const warning = `A tracker namespaced ${namespace} was already restored.`;
       console.warn(warning);
       return Promise.reject(warning);
     }
@@ -258,7 +259,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     this._trackers.add(namespace);
 
     // Whenever a new widget is added to the tracker, record its name.
-    tracker.widgetAdded.connect((sender: any, widget: Widget) => {
+    tracker.widgetAdded.connect((_, widget) => {
       const widgetName = name(widget);
       if (widgetName) {
         this.add(widget, `${namespace}:${widgetName}`);
@@ -266,10 +267,10 @@ export class LayoutRestorer implements ILayoutRestorer {
     }, this);
 
     // Whenever a widget is updated, get its new name.
-    tracker.widgetUpdated.connect((sender, widget) => {
+    tracker.widgetUpdated.connect((_, widget) => {
       const widgetName = name(widget);
       if (widgetName) {
-        let name = `${namespace}:${widgetName}`;
+        const name = `${namespace}:${widgetName}`;
         Private.nameProperty.set(widget, name);
         this._widgets.set(name, widget);
       }
@@ -280,9 +281,9 @@ export class LayoutRestorer implements ILayoutRestorer {
       .restore({
         args,
         command,
+        connector: this._connector,
         name,
         registry: this._registry,
-        state: this._state,
         when: when ? [first].concat(when) : first
       })
       .catch(error => {
@@ -315,7 +316,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     // Dehydrate right area.
     dehydrated.right = this._dehydrateSideArea(data.rightArea);
 
-    return this._state.save(KEY, dehydrated);
+    return this._connector.save(KEY, dehydrated);
   }
 
   /**
@@ -413,13 +414,13 @@ export class LayoutRestorer implements ILayoutRestorer {
     this._widgets.delete(name);
   }
 
+  private _connector: IDataConnector<ReadonlyJSONValue>;
   private _first: Promise<any>;
   private _firstDone = false;
   private _promisesDone = false;
   private _promises: Promise<any>[] = [];
   private _restored = new PromiseDelegate<void>();
   private _registry: CommandRegistry;
-  private _state: IStateDB;
   private _trackers = new Set<string>();
   private _widgets = new Map<string, Widget>();
 }
@@ -433,6 +434,11 @@ export namespace LayoutRestorer {
    */
   export interface IOptions {
     /**
+     * The data connector used for layout saving and fetching.
+     */
+    connector: IDataConnector<ReadonlyJSONValue>;
+
+    /**
      * The initial promise that has to be resolved before restoration.
      *
      * #### Notes
@@ -444,11 +450,6 @@ export namespace LayoutRestorer {
      * The application command registry.
      */
     registry: CommandRegistry;
-
-    /**
-     * The state database instance.
-     */
-    state: IStateDB;
   }
 }
 
@@ -460,10 +461,9 @@ namespace Private {
    * The dehydrated state of the application layout.
    *
    * #### Notes
-   * This format is JSON serializable and saved in the state database.
-   * It is meant to be a data structure can translate into an
-   * `LabShell.ILayout` data structure for consumption by
-   * the application shell.
+   * This format is JSON serializable and saved with the data connector.
+   * It is meant to be a data structure can translate into a `LabShell.ILayout`
+   * data structure for consumption by the application shell.
    */
   export interface ILayout extends JSONObject {
     /**
@@ -568,7 +568,7 @@ namespace Private {
   }
 
   /**
-   * An attached property for a widget's ID in the state database.
+   * An attached property for a widget's ID in the serialized restore data.
    */
   export const nameProperty = new AttachedProperty<Widget, string>({
     name: 'name',
