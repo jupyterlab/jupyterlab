@@ -714,7 +714,7 @@ export class WidgetTracker<T extends Widget = Widget> {
    * @param obj - The instance whose existence is being checked.
    */
   has(obj: any): boolean {
-    return this._tracker.has(widget as any);
+    return this._tracker.has(obj as any);
   }
 
   /**
