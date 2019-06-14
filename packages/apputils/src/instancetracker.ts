@@ -17,38 +17,43 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { FocusTracker, Widget } from '@phosphor/widgets';
 
+interface IObservableDisposable extends IDisposable {
+  disposed: ISignal<any, void>;
+}
+
 /**
- * An object that tracks widget instances.
+ * An object that tracks instances of a generic objects.
  */
-export interface IInstanceTracker<T extends Widget> extends IDisposable {
+export interface IInstanceTracker<T extends IObservableDisposable>
+  extends IDisposable {
   /**
-   * A signal emitted when the current widget changes.
+   * A signal emitted when an instance is added.
    *
    * #### Notes
-   * If the last widget being tracked is disposed, `null` will be emitted.
+   * This signal will only fire when an instance is added to the tracker.
+   * It will not fire if an instance is injected into the tracker.
    */
-  readonly currentChanged: ISignal<this, T | null>;
+  readonly added: ISignal<this, T>;
 
   /**
-   * A signal emitted when a widget is added.
-   *
-   * #### Notes
-   * This signal will only fire when a widget is added to the tracker. It will
-   * not fire if a widget is injected into the tracker.
-   */
-  readonly widgetAdded: ISignal<this, T>;
-
-  /**
-   * The current widget is the most recently focused or added widget.
+   * The current instance is the most recently focused or added instance.
    *
    * #### Notes
    * It is the most recently focused widget, or the most recently added
    * widget if no widget has taken focus.
    */
-  readonly currentWidget: T | null;
+  readonly current: T | null;
 
   /**
-   * The number of widgets held by the tracker.
+   * A signal emitted when the current instance changes.
+   *
+   * #### Notes
+   * If the last instance being tracked is disposed, `null` will be emitted.
+   */
+  readonly currentChanged: ISignal<this, T | null>;
+
+  /**
+   * The number of instances held by the tracker.
    */
   readonly size: number;
 
@@ -66,52 +71,436 @@ export interface IInstanceTracker<T extends Widget> extends IDisposable {
   readonly restored: Promise<void>;
 
   /**
-   * Find the first widget in the tracker that satisfies a filter function.
+   * A signal emitted when an instance is updated.
+   */
+  readonly updated: ISignal<this, T>;
+
+  /**
+   * Find the first instance in the tracker that satisfies a filter function.
    *
-   * @param - fn The filter function to call on each widget.
+   * @param - fn The filter function to call on each instance.
    *
    * #### Notes
-   * If no widget is found, the value returned is `undefined`.
+   * If nothing is found, the value returned is `undefined`.
    */
-  find(fn: (widget: T) => boolean): T | undefined;
+  find(fn: (obj: T) => boolean): T | undefined;
 
   /**
-   * Iterate through each widget in the tracker.
+   * Iterate through each instance in the tracker.
    *
-   * @param fn - The function to call on each widget.
+   * @param fn - The function to call on each instance.
    */
-  forEach(fn: (widget: T) => void): void;
+  forEach(fn: (obj: T) => void): void;
 
   /**
-   * Filter the widgets in the tracker based on a predicate.
+   * Filter the instances in the tracker based on a predicate.
    *
    * @param fn - The function by which to filter.
    */
-  filter(fn: (widget: T) => boolean): T[];
+  filter(fn: (obj: T) => boolean): T[];
 
   /**
-   * Check if this tracker has the specified widget.
+   * Check if this tracker has the specified instance.
    *
-   * @param widget - The widget whose existence is being checked.
+   * @param obj - The object whose existence is being checked.
    */
-  has(widget: Widget): boolean;
+  has(obj: T): boolean;
 
   /**
-   * Inject a foreign widget into the instance tracker.
+   * Inject an instance into the instance tracker without the tracker handling
+   * its restoration lifecycle.
    *
-   * @param widget - The widget to inject into the tracker.
+   * @param obj - The instance to inject into the tracker.
+   */
+  inject(obj: T): void;
+}
+
+/**
+ * A class that keeps track of widget instances on an Application shell.
+ */
+export class InstanceTracker<T extends IObservableDisposable>
+  implements IInstanceTracker<T> {
+  /**
+   * Create a new instance tracker.
+   *
+   * @param options - The instantiation options for an instance tracker.
+   */
+  constructor(options: InstanceTracker.IOptions) {
+    this.namespace = options.namespace;
+  }
+
+  /**
+   * A signal emitted when an object instance is added.
    *
    * #### Notes
-   * Any widgets injected into an instance tracker will not have their state
-   * saved by the tracker. The primary use case for widget injection is for a
-   * plugin that offers a sub-class of an extant plugin to have its instances
-   * share the same commands as the parent plugin (since most relevant commands
-   * will use the `currentWidget` of the parent plugin's instance tracker). In
-   * this situation, the sub-class plugin may well have its own instance tracker
-   * for layout and state restoration in addition to injecting its widgets into
-   * the parent plugin's instance tracker.
+   * This signal will only fire when an instance is added to the tracker.
+   * It will not fire if an instance injected into the tracker.
    */
-  inject(widget: T): void;
+  get added(): ISignal<this, T> {
+    return this._added;
+  }
+
+  /**
+   * A namespace for all tracked instances.
+   */
+  readonly namespace: string;
+
+  /**
+   * The current instance.
+   */
+  get current(): T | null {
+    return this._current;
+  }
+  set current(obj: T) {
+    if (this._current === obj) {
+      return;
+    }
+    this._current = obj;
+    this.onCurrentChanged(this._current);
+    this._currentChanged.emit(this._current);
+  }
+
+  /**
+   * A signal emitted when the current widget changes.
+   */
+  get currentChanged(): ISignal<this, T | null> {
+    return this._currentChanged;
+  }
+
+  /**
+   * A promise resolved when the instance tracker has been restored.
+   */
+  get restored(): Promise<void> {
+    return this._restored.promise;
+  }
+
+  /**
+   * The number of instances held by the tracker.
+   */
+  get size(): number {
+    return this._instances.size;
+  }
+
+  /**
+   * A signal emitted when an instance is updated.
+   */
+  get updated(): ISignal<this, T> {
+    return this._updated;
+  }
+
+  /**
+   * Add a new instance to the tracker.
+   *
+   * @param obj - The object instance being added.
+   */
+  async add(obj: T): Promise<void> {
+    if (obj.isDisposed) {
+      const warning = 'A disposed object cannot be added.';
+      console.warn(warning, obj);
+      throw new Error(warning);
+    }
+
+    if (this._instances.has(obj)) {
+      const warning = 'This object already exists in the tracker.';
+      console.warn(warning, obj);
+      throw new Error(warning);
+    }
+
+    this._instances.add(obj);
+
+    if (Private.injectedProperty.get(obj)) {
+      return;
+    }
+
+    // Handle instance being disposed.
+    obj.disposed.connect(this._onInstanceDisposed, this);
+
+    // Handle instance state restoration.
+    if (this._restore) {
+      const { state } = this._restore;
+      const objName = this._restore.name(obj);
+
+      if (objName) {
+        const name = `${this.namespace}:${objName}`;
+        const data = this._restore.args(obj);
+
+        Private.nameProperty.set(obj, name);
+        await state.save(name, { data });
+      }
+    }
+
+    // If there is no current instance, set this as the current instance.
+    if (this.current === null) {
+      this.current = obj;
+    }
+
+    // Emit the added signal.
+    this._added.emit(obj);
+  }
+
+  /**
+   * Test whether the tracker is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the tracker.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._current = null;
+    this._instances.clear();
+    this._isDisposed = true;
+    Signal.clearData(this);
+  }
+
+  /**
+   * Find the first instance in the tracker that satisfies a filter function.
+   *
+   * @param - fn The filter function to call on each instance.
+   */
+  find(fn: (obj: T) => boolean): T | undefined {
+    const values = this._instances.values();
+    for (let value of values) {
+      if (fn(value)) {
+        return value;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Iterate through each instance in the tracker.
+   *
+   * @param fn - The function to call on each instance.
+   */
+  forEach(fn: (obj: T) => void): void {
+    this._instances.forEach(fn);
+  }
+
+  /**
+   * Filter the instances in the tracker based on a predicate.
+   *
+   * @param fn - The function by which to filter.
+   */
+  filter(fn: (obj: T) => boolean): T[] {
+    const filtered: T[] = [];
+    this.forEach(obj => {
+      if (fn(obj)) {
+        filtered.push(obj);
+      }
+    });
+    return filtered;
+  }
+
+  /**
+   * Inject an instance into the instance tracker without the tracker handling
+   * its restoration lifecycle.
+   *
+   * @param obj - The instance to inject into the tracker.
+   */
+  inject(obj: T): Promise<void> {
+    Private.injectedProperty.set(obj, true);
+    return this.add(obj);
+  }
+
+  /**
+   * Check if this tracker has the specified instance.
+   *
+   * @param obj - The object whose existence is being checked.
+   */
+  has(obj: T): boolean {
+    return this._instances.has(obj);
+  }
+
+  /**
+   * Restore the instances in this tracker's namespace.
+   *
+   * @param options - The configuration options that describe restoration.
+   *
+   * @returns A promise that resolves when restoration has completed.
+   *
+   * #### Notes
+   * This function should almost never be invoked by client code. Its primary
+   * use case is to be invoked by a layout restorer plugin that handles
+   * multiple instance trackers and, when ready, asks them each to restore their
+   * respective instances.
+   */
+  async restore(options: InstanceTracker.IRestoreOptions<T>): Promise<any> {
+    if (this._hasRestored) {
+      throw new Error('Instance tracker has already restored');
+    }
+
+    this._hasRestored = true;
+
+    const { command, registry, state, when } = options;
+    const namespace = this.namespace;
+    const promises = when
+      ? [state.list(namespace)].concat(when)
+      : [state.list(namespace)];
+
+    this._restore = options;
+
+    const [saved] = await Promise.all(promises);
+    const values = await Promise.all(
+      saved.ids.map((id, index) => {
+        const value = saved.values[index];
+        const args = value && (value as any).data;
+
+        if (args === undefined) {
+          return state.remove(id);
+        }
+
+        // Execute the command and if it fails, delete the state restore data.
+        return registry.execute(command, args).catch(() => state.remove(id));
+      })
+    );
+    this._restored.resolve();
+    return values;
+  }
+
+  /**
+   * Save the restore data for a given instance.
+   *
+   * @param obj - The instance being saved.
+   */
+  async save(obj: T): Promise<void> {
+    const injected = Private.injectedProperty.get(obj);
+
+    if (!this._restore || !this.has(obj) || injected) {
+      return;
+    }
+
+    const { state } = this._restore;
+    const objName = this._restore.name(obj);
+    const oldName = Private.nameProperty.get(obj);
+    const newName = objName ? `${this.namespace}:${objName}` : '';
+
+    if (oldName && oldName !== newName) {
+      await state.remove(oldName);
+    }
+
+    // Set the name property irrespective of whether the new name is null.
+    Private.nameProperty.set(obj, newName);
+
+    if (newName) {
+      const data = this._restore.args(obj);
+      await state.save(newName, { data });
+    }
+
+    if (oldName !== newName) {
+      this._updated.emit(obj);
+    }
+  }
+
+  /**
+   * Handle the current change event.
+   *
+   * #### Notes
+   * The default implementation is a no-op.
+   */
+  protected onCurrentChanged(value: T | null): void {
+    /* no-op */
+  }
+
+  /**
+   * Clean up after disposed instances.
+   */
+  private _onInstanceDisposed(obj: T): void {
+    // Handle widget removal.
+    this._instances.delete(obj);
+
+    if (Private.injectedProperty.get(obj)) {
+      return;
+    }
+
+    // Handle the current instance being disposed.
+    if (obj === this._current) {
+      this._current = null;
+      this.onCurrentChanged(this._current);
+      this._currentChanged.emit(this._current);
+    }
+
+    // If there is no restore data, return.
+    if (!this._restore) {
+      return;
+    }
+
+    const { state } = this._restore;
+    const name = Private.nameProperty.get(obj);
+
+    if (name) {
+      void state.remove(name);
+    }
+  }
+
+  private _added = new Signal<this, T>(this);
+  private _current: T | null = null;
+  private _currentChanged = new Signal<this, T | null>(this);
+  private _hasRestored = false;
+  private _instances = new Set<T>();
+  private _isDisposed = false;
+  private _restore: InstanceTracker.IRestoreOptions<T> | null = null;
+  private _restored = new PromiseDelegate<void>();
+  private _updated = new Signal<this, T>(this);
+}
+
+/**
+ * A namespace for `InstanceTracker` statics.
+ */
+export namespace InstanceTracker {
+  /**
+   * The instantiation options for an instance tracker.
+   */
+  export interface IOptions {
+    /**
+     * A namespace for all tracked widgets, (e.g., `notebook`).
+     */
+    namespace: string;
+  }
+
+  /**
+   * The state restoration configuration options.
+   */
+  export interface IRestoreOptions<T extends IObservableDisposable> {
+    /**
+     * The command to execute when restoring instances.
+     */
+    command: string;
+
+    /**
+     * A function that returns the args needed to restore an instance.
+     */
+    args: (widget: T) => ReadonlyJSONObject;
+
+    /**
+     * A function that returns a unique persistent name for this instance.
+     */
+    name: (widget: T) => string;
+
+    /**
+     * The command registry which holds the restore command.
+     */
+    registry: CommandRegistry;
+
+    /**
+     * The state database instance.
+     */
+    state: IStateDB;
+
+    /**
+     * The point after which it is safe to restore state.
+     *
+     * #### Notes
+     * By definition, this promise or promises will happen after the application
+     * has `started`.
+     */
+    when?: Promise<any> | Array<Promise<any>>;
+  }
 }
 
 /**
@@ -124,8 +513,7 @@ export interface IInstanceTracker<T extends Widget> extends IDisposable {
  * wish to keep track of newly created widgets. This class, however, can be used
  * internally by plugins to restore state as well.
  */
-export class InstanceTracker<T extends Widget>
-  implements IInstanceTracker<T>, IDisposable {
+export class WidgetTracker<T extends Widget = Widget> {
   /**
    * Create a new instance tracker.
    *
@@ -484,76 +872,28 @@ export class InstanceTracker<T extends Widget>
   private _isDisposed = false;
 }
 
-/**
- * A namespace for `InstanceTracker` statics.
- */
-export namespace InstanceTracker {
-  /**
-   * The instantiation options for an instance tracker.
-   */
-  export interface IOptions {
-    /**
-     * A namespace for all tracked widgets, (e.g., `notebook`).
-     */
-    namespace: string;
-  }
-
-  /**
-   * The state restoration configuration options.
-   */
-  export interface IRestoreOptions<T extends Widget> {
-    /**
-     * The command to execute when restoring instances.
-     */
-    command: string;
-
-    /**
-     * A function that returns the args needed to restore an instance.
-     */
-    args: (widget: T) => ReadonlyJSONObject;
-
-    /**
-     * A function that returns a unique persistent name for this instance.
-     */
-    name: (widget: T) => string;
-
-    /**
-     * The command registry which holds the restore command.
-     */
-    registry: CommandRegistry;
-
-    /**
-     * The state database instance.
-     */
-    state: IStateDB;
-
-    /**
-     * The point after which it is safe to restore state.
-     *
-     * #### Notes
-     * By definition, this promise or promises will happen after the application
-     * has `started`.
-     */
-    when?: Promise<any> | Array<Promise<any>>;
-  }
-}
-
 /*
  * A namespace for private data.
  */
 namespace Private {
   /**
-   * An attached property to indicate whether a widget has been injected.
+   * An attached property to indicate whether an instance has been injected.
    */
-  export const injectedProperty = new AttachedProperty<Widget, boolean>({
+  export const injectedProperty = new AttachedProperty<
+    IObservableDisposable,
+    boolean
+  >({
     name: 'injected',
     create: () => false
   });
 
   /**
-   * An attached property for a widget's ID in the state database.
+   * An attached property for an instance's ID.
    */
-  export const nameProperty = new AttachedProperty<Widget, string>({
+  export const nameProperty = new AttachedProperty<
+    IObservableDisposable,
+    string
+  >({
     name: 'name',
     create: () => ''
   });
