@@ -750,11 +750,7 @@ Finally, rewrite the ``activate`` function so that it:
 
       // Track and restore the widget state
       let tracker = new WidgetTracker({ namespace: 'xkcd' });
-      restorer.restore(tracker, {
-        command,
-        args: () => JSONExt.emptyObject,
-        name: () => 'xkcd'
-      });
+      restorer.restore(tracker, { command, name: () => 'xkcd' });
     };
 
 Rebuild your extension one last time and refresh your browser tab.

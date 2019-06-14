@@ -137,7 +137,6 @@ describe('apputils', () => {
         await state.save(key, { data: null });
         ready.resolve(undefined);
         await restorer.restore(tracker, {
-          args: () => null,
           name: () => tracker.namespace,
           command: tracker.namespace
         });

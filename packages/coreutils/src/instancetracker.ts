@@ -6,6 +6,7 @@ import { ArrayExt, each, find } from '@phosphor/algorithm';
 import { CommandRegistry } from '@phosphor/commands';
 
 import {
+  JSONExt,
   PromiseDelegate,
   ReadonlyJSONObject,
   ReadonlyJSONValue
@@ -477,7 +478,7 @@ export namespace InstanceTracker {
     /**
      * A function that returns the args needed to restore an instance.
      */
-    args: (obj: T) => ReadonlyJSONObject;
+    args?: (obj: T) => ReadonlyJSONObject;
 
     /**
      * A function that returns a unique persistent name for this instance.
@@ -741,7 +742,7 @@ export class WidgetTracker<T extends Widget = Widget> {
       ? [connector.list(namespace)].concat(when)
       : [connector.list(namespace)];
 
-    this._restore = options;
+    this._restore = { args: () => JSONExt.emptyObject, ...options };
 
     const [saved] = await Promise.all(promises);
     const values = await Promise.all(

@@ -99,11 +99,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
 
     // Handle state restoration.
     if (restorer) {
-      restorer.restore(tracker, {
-        command,
-        args: () => null,
-        name: () => 'inspector'
-      });
+      restorer.restore(tracker, { command, name: () => 'inspector' });
     }
 
     // Create a proxy to pass the `source` to the current inspector.
