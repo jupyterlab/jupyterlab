@@ -7,7 +7,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { InstanceTracker } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
@@ -61,7 +61,7 @@ function activate(
   rendermime.addFactory(markdownRendererFactory);
 
   const namespace = 'markdownviewer-widget';
-  const tracker = new InstanceTracker<MarkdownDocument>({
+  const tracker = new WidgetTracker<MarkdownDocument>({
     namespace
   });
 

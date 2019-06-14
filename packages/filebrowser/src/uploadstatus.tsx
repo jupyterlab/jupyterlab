@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 //
 
-import { VDomRenderer, InstanceTracker, VDomModel } from '@jupyterlab/apputils';
+import { VDomRenderer, VDomModel, WidgetTracker } from '@jupyterlab/apputils';
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
@@ -98,7 +98,7 @@ export class FileUploadStatus extends VDomRenderer<FileUploadStatus.Model> {
   }
 
   private _onBrowserChange = (
-    tracker: InstanceTracker<FileBrowser>,
+    tracker: WidgetTracker<FileBrowser>,
     browser: FileBrowser | null
   ) => {
     if (browser === null) {
@@ -108,7 +108,7 @@ export class FileUploadStatus extends VDomRenderer<FileUploadStatus.Model> {
     }
   };
 
-  private _tracker: InstanceTracker<FileBrowser>;
+  private _tracker: WidgetTracker<FileBrowser>;
 }
 
 /**
@@ -211,7 +211,7 @@ export namespace FileUploadStatus {
     /**
      * The application file browser tracker.
      */
-    readonly tracker: InstanceTracker<FileBrowser>;
+    readonly tracker: WidgetTracker<FileBrowser>;
   }
 }
 

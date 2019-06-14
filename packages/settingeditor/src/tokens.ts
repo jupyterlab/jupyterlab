@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IInstanceTracker, MainAreaWidget } from '@jupyterlab/apputils';
+import { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 
 import { Token } from '@phosphor/coreutils';
 
@@ -20,4 +20,4 @@ export const ISettingEditorTracker = new Token<ISettingEditorTracker>(
  * A class that tracks the setting editor.
  */
 export interface ISettingEditorTracker
-  extends IInstanceTracker<MainAreaWidget<SettingEditor>> {}
+  extends IWidgetTracker<MainAreaWidget<SettingEditor>> {}

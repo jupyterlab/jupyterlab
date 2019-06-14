@@ -11,11 +11,11 @@ import { PanelLayout, Panel, Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
-import { InstanceTracker } from './instancetracker';
+import { Styling } from './styling';
 
 import { ReactWidget } from './vdom';
 
-import { Styling } from './styling';
+import { WidgetTracker } from './widgettracker';
 
 /**
  * Create and show a dialog.
@@ -749,7 +749,7 @@ export namespace Dialog {
   /**
    * The dialog instance tracker.
    */
-  export const tracker = new InstanceTracker<Dialog<any>>({
+  export const tracker = new WidgetTracker<Dialog<any>>({
     namespace: '@jupyterlab/apputils:Dialog'
   });
 }

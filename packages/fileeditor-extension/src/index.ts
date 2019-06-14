@@ -7,7 +7,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
+import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 
 import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 
@@ -204,7 +204,7 @@ function activate(
     }
   });
   const { commands, restored, shell } = app;
-  const tracker = new InstanceTracker<IDocumentWidget<FileEditor>>({
+  const tracker = new WidgetTracker<IDocumentWidget<FileEditor>>({
     namespace
   });
   const isEnabled = () =>

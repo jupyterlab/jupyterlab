@@ -6,27 +6,21 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
-  InstanceTracker,
   IThemeManager,
-  InputDialog
+  InputDialog,
+  WidgetTracker
 } from '@jupyterlab/apputils';
-
-import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
-
 import {
   CSVViewer,
   TextRenderConfig,
   CSVViewerFactory,
   TSVViewerFactory
 } from '@jupyterlab/csvviewer';
-
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-
-import { DataGrid } from '@phosphor/datagrid';
-
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
+import { DataGrid } from '@phosphor/datagrid';
 import { CSVSearchProvider } from './searchprovider';
 
 /**
@@ -62,7 +56,7 @@ const tsv: JupyterFrontEndPlugin<void> = {
  */
 function addMenuEntries(
   mainMenu: IMainMenu,
-  tracker: InstanceTracker<IDocumentWidget<CSVViewer>>
+  tracker: WidgetTracker<IDocumentWidget<CSVViewer>>
 ) {
   // Add go to line capability to the edit menu.
   mainMenu.editMenu.goToLiners.add({
@@ -96,7 +90,7 @@ function activateCsv(
     defaultFor: ['csv'],
     readOnly: true
   });
-  const tracker = new InstanceTracker<IDocumentWidget<CSVViewer>>({
+  const tracker = new WidgetTracker<IDocumentWidget<CSVViewer>>({
     namespace: 'csvviewer'
   });
 
@@ -166,7 +160,7 @@ function activateTsv(
     defaultFor: ['tsv'],
     readOnly: true
   });
-  const tracker = new InstanceTracker<IDocumentWidget<CSVViewer>>({
+  const tracker = new WidgetTracker<IDocumentWidget<CSVViewer>>({
     namespace: 'tsvviewer'
   });
 

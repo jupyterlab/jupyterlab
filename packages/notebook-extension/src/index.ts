@@ -11,9 +11,9 @@ import {
 import {
   Dialog,
   ICommandPalette,
-  InstanceTracker,
   MainAreaWidget,
-  showDialog
+  showDialog,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import { CodeCell } from '@jupyterlab/cells';
@@ -534,7 +534,7 @@ function activateNotebookHandler(
   });
   const { commands } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
-  const clonedOutputs = new InstanceTracker<
+  const clonedOutputs = new WidgetTracker<
     MainAreaWidget<Private.ClonedOutputArea>
   >({
     namespace: 'cloned-outputs'
@@ -858,7 +858,7 @@ function addCommands(
   docManager: IDocumentManager,
   services: ServiceManager,
   tracker: NotebookTracker,
-  clonedOutputs: InstanceTracker<MainAreaWidget>
+  clonedOutputs: WidgetTracker<MainAreaWidget>
 ): void {
   const { commands, shell } = app;
 

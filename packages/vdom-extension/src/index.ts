@@ -7,7 +7,7 @@ import {
   ILayoutRestorer
 } from '@jupyterlab/application';
 
-import { InstanceTracker } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
 
 import { MimeDocumentFactory, MimeDocument } from '@jupyterlab/docregistry';
 
@@ -43,7 +43,7 @@ const plugin: JupyterFrontEndPlugin<IVDOMTracker> = {
     notebooks: INotebookTracker,
     restorer: ILayoutRestorer
   ) => {
-    const tracker = new InstanceTracker<MimeDocument>({
+    const tracker = new WidgetTracker<MimeDocument>({
       namespace: 'vdom-widget'
     });
 

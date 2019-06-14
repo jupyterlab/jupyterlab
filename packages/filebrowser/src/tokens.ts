@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { InstanceTracker } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
 
 import { IStateDB } from '@jupyterlab/coreutils';
 
@@ -48,7 +48,7 @@ export interface IFileBrowserFactory {
   /**
    * The instance tracker used by the factory to track file browsers.
    */
-  readonly tracker: InstanceTracker<FileBrowser>;
+  readonly tracker: WidgetTracker<FileBrowser>;
 
   /**
    * The default file browser for the application.

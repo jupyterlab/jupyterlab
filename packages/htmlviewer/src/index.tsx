@@ -5,7 +5,7 @@
 
 import {
   IFrame,
-  IInstanceTracker,
+  IWidgetTracker,
   ReactWidget,
   ToolbarButton,
   ToolbarButtonComponent,
@@ -30,7 +30,7 @@ import * as React from 'react';
 /**
  * A class that tracks HTML viewer widgets.
  */
-export interface IHTMLViewerTracker extends IInstanceTracker<HTMLViewer> {}
+export interface IHTMLViewerTracker extends IWidgetTracker<HTMLViewer> {}
 
 /**
  * The HTML viewer tracker token.

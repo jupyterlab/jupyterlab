@@ -11,9 +11,9 @@ import {
   Dialog,
   ICommandPalette,
   IFrame,
-  InstanceTracker,
   MainAreaWidget,
-  showDialog
+  showDialog,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
@@ -116,7 +116,7 @@ function activate(
   const namespace = 'help-doc';
   const baseUrl = PageConfig.getBaseUrl();
   const { commands, shell, serviceManager } = app;
-  const tracker = new InstanceTracker<MainAreaWidget>({ namespace });
+  const tracker = new WidgetTracker<MainAreaWidget>({ namespace });
 
   // Handle state restoration.
   if (restorer) {

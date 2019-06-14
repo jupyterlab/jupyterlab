@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IInstanceTracker } from '@jupyterlab/apputils';
+import { IWidgetTracker } from '@jupyterlab/apputils';
 
 import { ArrayExt } from '@phosphor/algorithm';
 
@@ -36,7 +36,7 @@ export interface IMenuExtender<T extends Widget> {
   /**
    * A widget tracker for identifying the appropriate extender.
    */
-  tracker: IInstanceTracker<T>;
+  tracker: IWidgetTracker<T>;
 
   /**
    * An additional function that determines whether the extender

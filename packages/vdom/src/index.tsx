@@ -5,7 +5,7 @@ import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-import { IClientSession, IInstanceTracker } from '@jupyterlab/apputils';
+import { IClientSession, IWidgetTracker } from '@jupyterlab/apputils';
 
 import { DocumentRegistry, MimeDocument } from '@jupyterlab/docregistry';
 
@@ -29,7 +29,7 @@ const CSS_CLASS = 'jp-RenderedVDOM';
 /**
  * A class that tracks VDOM widgets.
  */
-export interface IVDOMTracker extends IInstanceTracker<MimeDocument> {}
+export interface IVDOMTracker extends IWidgetTracker<MimeDocument> {}
 
 /**
  * The VDOM tracker token.

@@ -7,7 +7,7 @@ import { CommandRegistry } from '@phosphor/commands';
 
 import { Widget } from '@phosphor/widgets';
 
-import { InstanceTracker } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
 
 import { EditMenu, IEditMenu } from '@jupyterlab/mainmenu';
 
@@ -21,7 +21,7 @@ describe('@jupyterlab/mainmenu', () => {
   describe('EditMenu', () => {
     let commands: CommandRegistry;
     let menu: EditMenu;
-    let tracker: InstanceTracker<Wodget>;
+    let tracker: WidgetTracker<Wodget>;
     let wodget: Wodget;
 
     beforeAll(() => {
@@ -31,7 +31,7 @@ describe('@jupyterlab/mainmenu', () => {
     beforeEach(() => {
       wodget = new Wodget();
       menu = new EditMenu({ commands });
-      tracker = new InstanceTracker<Wodget>({ namespace: 'wodget' });
+      tracker = new WidgetTracker<Wodget>({ namespace: 'wodget' });
       void tracker.add(wodget);
     });
 

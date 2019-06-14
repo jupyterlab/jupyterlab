@@ -9,7 +9,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
+import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
@@ -71,7 +71,7 @@ function activateHTMLViewer(
   });
 
   // Create an instance tracker for HTML documents.
-  const tracker = new InstanceTracker<HTMLViewer>({
+  const tracker = new WidgetTracker<HTMLViewer>({
     namespace: 'htmlviewer'
   });
 

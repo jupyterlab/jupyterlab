@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IInstanceTracker, InstanceTracker } from '@jupyterlab/apputils';
+import { IWidgetTracker, WidgetTracker } from '@jupyterlab/apputils';
 
 import {
   MimeDocumentFactory,
@@ -24,7 +24,7 @@ import { ILayoutRestorer } from './layoutrestorer';
 /**
  * A class that tracks mime documents.
  */
-export interface IMimeDocumentTracker extends IInstanceTracker<MimeDocument> {}
+export interface IMimeDocumentTracker extends IWidgetTracker<MimeDocument> {}
 
 /* tslint:disable */
 /**
@@ -44,7 +44,7 @@ export function createRendermimePlugins(
   const plugins: JupyterFrontEndPlugin<void | IMimeDocumentTracker>[] = [];
 
   const namespace = 'application-mimedocuments';
-  const tracker = new InstanceTracker<MimeDocument>({ namespace });
+  const tracker = new WidgetTracker<MimeDocument>({ namespace });
 
   extensions.forEach(mod => {
     let data = mod.default;
@@ -91,7 +91,7 @@ export function createRendermimePlugins(
  * Create rendermime plugins for rendermime extension modules.
  */
 export function createRendermimePlugin(
-  tracker: InstanceTracker<MimeDocument>,
+  tracker: WidgetTracker<MimeDocument>,
   item: IRenderMime.IExtension
 ): JupyterFrontEndPlugin<void> {
   return {
