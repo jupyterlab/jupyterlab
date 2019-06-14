@@ -10,6 +10,7 @@ import { IDataConnector } from '@jupyterlab/coreutils';
 import { CommandRegistry } from '@phosphor/commands';
 
 import {
+  JSONExt,
   JSONObject,
   PromiseDelegate,
   ReadonlyJSONObject,
@@ -75,7 +76,7 @@ export namespace ILayoutRestorer {
     /**
      * A function that returns the args needed to restore an instance.
      */
-    args: (widget: T) => ReadonlyJSONObject;
+    args?: (widget: T) => ReadonlyJSONObject;
 
     /**
      * A function that returns a unique persistent name for this instance.
@@ -279,7 +280,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     const first = this._first;
     const promise = tracker
       .restore({
-        args,
+        args: args || (() => JSONExt.emptyObject),
         command,
         connector: this._connector,
         name,
