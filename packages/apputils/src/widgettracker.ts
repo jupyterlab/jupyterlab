@@ -118,8 +118,15 @@ export class WidgetTracker<T extends Widget = Widget>
   constructor(options: WidgetTracker.IOptions) {
     this.namespace = options.namespace;
     this._instanceTracker = new InstanceTracker(options);
+    this._instanceTracker.added.connect((_, value) => {
+      this._widgetAdded.emit(value);
+    }, this);
     this._instanceTracker.currentChanged.connect((_, value) => {
       this.onCurrentChanged(value);
+      this._currentChanged.emit(value);
+    }, this);
+    this._instanceTracker.updated.connect((_, value) => {
+      this._widgetUpdated.emit(value);
     }, this);
     this._focusTracker.currentChanged.connect(this._onFocusChanged, this);
   }
@@ -127,8 +134,8 @@ export class WidgetTracker<T extends Widget = Widget>
   /**
    * A signal emitted when the current widget changes.
    */
-  get currentChanged(): ISignal<any, T | null> {
-    return this._instanceTracker.currentChanged;
+  get currentChanged(): ISignal<this, T | null> {
+    return this._currentChanged;
   }
 
   /**
@@ -138,15 +145,15 @@ export class WidgetTracker<T extends Widget = Widget>
    * This signal will only fire when a widget is added to the tracker. It will
    * not fire if a widget is injected into the tracker.
    */
-  get widgetAdded(): ISignal<any, T> {
-    return this._instanceTracker.added;
+  get widgetAdded(): ISignal<this, T> {
+    return this._widgetAdded;
   }
 
   /**
    * A signal emitted when a widget is updated.
    */
-  get widgetUpdated(): ISignal<any, T> {
-    return this._instanceTracker.updated;
+  get widgetUpdated(): ISignal<this, T> {
+    return this._widgetUpdated;
   }
 
   /**
@@ -162,7 +169,7 @@ export class WidgetTracker<T extends Widget = Widget>
    * widget if no widget has taken focus.
    */
   get currentWidget(): T | null {
-    return this._instanceTracker.current;
+    return this._instanceTracker.current || null;
   }
 
   /**
@@ -322,9 +329,12 @@ export class WidgetTracker<T extends Widget = Widget>
     this._instanceTracker.current = args.newValue;
   }
 
+  private _currentChanged = new Signal<this, T>(this);
   private _focusTracker = new FocusTracker<T>();
   private _instanceTracker: InstanceTracker<T>;
   private _isDisposed = false;
+  private _widgetAdded = new Signal<this, T>(this);
+  private _widgetUpdated = new Signal<this, T>(this);
 }
 
 /**
