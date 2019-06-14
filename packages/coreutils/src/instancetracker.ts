@@ -1,12 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each, find } from '@phosphor/algorithm';
-
 import { CommandRegistry } from '@phosphor/commands';
 
 import {
-  JSONExt,
   PromiseDelegate,
   ReadonlyJSONObject,
   ReadonlyJSONValue
@@ -17,8 +14,6 @@ import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
 import { AttachedProperty } from '@phosphor/properties';
 
 import { ISignal, Signal } from '@phosphor/signaling';
-
-import { FocusTracker, Widget } from '@phosphor/widgets';
 
 import { IDataConnector } from './interfaces';
 
@@ -409,21 +404,18 @@ export class InstanceTracker<T extends IObservableDisposable>
    * Clean up after disposed instances.
    */
   private _onInstanceDisposed(obj: T): void {
-    // Handle widget removal.
     this._instances.delete(obj);
 
-    if (Private.injectedProperty.get(obj)) {
-      return;
-    }
-
-    // Handle the current instance being disposed.
     if (obj === this._current) {
       this._current = null;
       this.onCurrentChanged(this._current);
       this._currentChanged.emit(this._current);
     }
 
-    // If there is no restore data, return.
+    if (Private.injectedProperty.get(obj)) {
+      return;
+    }
+
     if (!this._restore) {
       return;
     }
@@ -499,377 +491,6 @@ export namespace InstanceTracker {
      */
     when?: Promise<any> | Array<Promise<any>>;
   }
-}
-
-/**
- * A class that keeps track of widget instances on an Application shell.
- *
- * #### Notes
- * The API surface area of this concrete implementation is substantially larger
- * than the instance tracker interface it implements. The interface is intended
- * for export by JupyterLab plugins that create widgets and have clients who may
- * wish to keep track of newly created widgets. This class, however, can be used
- * internally by plugins to restore state as well.
- */
-export class WidgetTracker<T extends Widget = Widget> {
-  /**
-   * Create a new instance tracker.
-   *
-   * @param options - The instantiation options for an instance tracker.
-   */
-  constructor(options: InstanceTracker.IOptions) {
-    this.namespace = options.namespace;
-    this._tracker.currentChanged.connect(this._onCurrentChanged, this);
-  }
-
-  /**
-   * A signal emitted when the current widget changes.
-   */
-  get currentChanged(): ISignal<this, T | null> {
-    return this._currentChanged;
-  }
-
-  /**
-   * A signal emitted when a widget is added.
-   *
-   * #### Notes
-   * This signal will only fire when a widget is added to the tracker. It will
-   * not fire if a widget is injected into the tracker.
-   */
-  get widgetAdded(): ISignal<this, T> {
-    return this._widgetAdded;
-  }
-
-  /**
-   * A signal emitted when a widget is updated.
-   */
-  get widgetUpdated(): ISignal<this, T> {
-    return this._widgetUpdated;
-  }
-
-  /**
-   * A namespace for all tracked widgets, (e.g., `notebook`).
-   */
-  readonly namespace: string;
-
-  /**
-   * The current widget is the most recently focused or added widget.
-   *
-   * #### Notes
-   * It is the most recently focused widget, or the most recently added
-   * widget if no widget has taken focus.
-   */
-  get currentWidget(): T | null {
-    return this._currentWidget;
-  }
-
-  /**
-   * A promise resolved when the instance tracker has been restored.
-   */
-  get restored(): Promise<void> {
-    return this._restored.promise;
-  }
-
-  /**
-   * The number of widgets held by the tracker.
-   */
-  get size(): number {
-    return this._tracker.widgets.length;
-  }
-
-  /**
-   * Add a new widget to the tracker.
-   *
-   * @param widget - The widget being added.
-   *
-   * #### Notes
-   * When widget is added its state is saved with the data connector.
-   * This function returns a promise that is resolved when that saving
-   * is completed. However, the instance is added to the in-memory tracker
-   * synchronously, and is available to use before the promise is resolved.
-   */
-  add(widget: T): Promise<void> {
-    if (widget.isDisposed) {
-      const warning = `${widget.id} is disposed and cannot be tracked.`;
-      console.warn(warning);
-      return Promise.reject(warning);
-    }
-    if (this._tracker.has(widget)) {
-      const warning = `${widget.id} already exists in the tracker.`;
-      console.warn(warning);
-      return Promise.reject(warning);
-    }
-    this._tracker.add(widget);
-    this._widgets.push(widget);
-
-    let injected = Private.injectedProperty.get(widget);
-    let promise: Promise<void> = Promise.resolve(void 0);
-
-    if (injected) {
-      return promise;
-    }
-
-    widget.disposed.connect(this._onWidgetDisposed, this);
-
-    // Handle widget state restoration.
-    if (this._restore) {
-      const { connector } = this._restore;
-      const widgetName = this._restore.name(widget);
-
-      if (widgetName) {
-        let name = `${this.namespace}:${widgetName}`;
-        let data = this._restore.args(widget);
-
-        Private.nameProperty.set(widget, name);
-        promise = connector.save(name, { data });
-      }
-    }
-
-    // If there is no focused widget, set this as the current widget.
-    if (!this._tracker.currentWidget) {
-      this._currentWidget = widget;
-      this.onCurrentChanged(widget);
-      this._currentChanged.emit(widget);
-    }
-
-    // Emit the widget added signal.
-    this._widgetAdded.emit(widget);
-
-    return promise;
-  }
-
-  /**
-   * Test whether the tracker is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
-   * Dispose of the resources held by the tracker.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
-    Signal.clearData(this);
-    this._tracker.dispose();
-  }
-
-  /**
-   * Find the first widget in the tracker that satisfies a filter function.
-   *
-   * @param - fn The filter function to call on each widget.
-   *
-   * #### Notes
-   * If no widget is found, the value returned is `undefined`.
-   */
-  find(fn: (widget: T) => boolean): T | undefined {
-    return find(this._tracker.widgets, fn);
-  }
-
-  /**
-   * Iterate through each widget in the tracker.
-   *
-   * @param fn - The function to call on each widget.
-   */
-  forEach(fn: (widget: T) => void): void {
-    each(this._tracker.widgets, widget => {
-      fn(widget);
-    });
-  }
-
-  /**
-   * Filter the widgets in the tracker based on a predicate.
-   *
-   * @param fn - The function by which to filter.
-   */
-  filter(fn: (widget: T) => boolean): T[] {
-    return this._tracker.widgets.filter(fn);
-  }
-
-  /**
-   * Inject a foreign widget into the instance tracker.
-   *
-   * @param widget - The widget to inject into the tracker.
-   *
-   * #### Notes
-   * Any widgets injected into an instance tracker will not have their state
-   * saved by the tracker. The primary use case for widget injection is for a
-   * plugin that offers a sub-class of an extant plugin to have its instances
-   * share the same commands as the parent plugin (since most relevant commands
-   * will use the `currentWidget` of the parent plugin's instance tracker). In
-   * this situation, the sub-class plugin may well have its own instance tracker
-   * for layout and state restoration in addition to injecting its widgets into
-   * the parent plugin's instance tracker.
-   */
-  inject(widget: T): void {
-    Private.injectedProperty.set(widget, true);
-    void this.add(widget);
-  }
-
-  /**
-   * Check if this tracker has the specified object instance.
-   *
-   * @param obj - The instance whose existence is being checked.
-   */
-  has(obj: any): boolean {
-    return this._tracker.has(obj as any);
-  }
-
-  /**
-   * Restore the instances in this tracker's namespace.
-   *
-   * @param options - The configuration options that describe restoration.
-   *
-   * @returns A promise that resolves when restoration has completed.
-   *
-   * #### Notes
-   * This function should almost never be invoked by client code. Its primary
-   * use case is to be invoked by a restorer that handles multiple instance
-   * trackers and, when ready, asks them each to restore their respective
-   * contents.
-   */
-  async restore(options: InstanceTracker.IRestoreOptions<T>): Promise<any> {
-    if (this._hasRestored) {
-      throw new Error('Instance tracker has already restored');
-    }
-    this._hasRestored = true;
-    const { command, connector, registry, when } = options;
-    const namespace = this.namespace;
-    const promises = when
-      ? [connector.list(namespace)].concat(when)
-      : [connector.list(namespace)];
-
-    this._restore = { args: () => JSONExt.emptyObject, ...options };
-
-    const [saved] = await Promise.all(promises);
-    const values = await Promise.all(
-      saved.ids.map((id, index) => {
-        const value = saved.values[index];
-        const args = value && (value as any).data;
-        if (args === undefined) {
-          return connector.remove(id);
-        }
-
-        // Execute the command and if it fails, delete the state restore data.
-        return registry
-          .execute(command, args)
-          .catch(() => connector.remove(id));
-      })
-    );
-    this._restored.resolve(undefined);
-    return values;
-  }
-
-  /**
-   * Save the restore data for a given widget.
-   *
-   * @param widget - The widget being saved.
-   */
-  async save(widget: T): Promise<void> {
-    const injected = Private.injectedProperty.get(widget);
-
-    if (!this._restore || !this.has(widget) || injected) {
-      return;
-    }
-
-    const { connector } = this._restore;
-    const widgetName = this._restore.name(widget);
-    const oldName = Private.nameProperty.get(widget);
-    const newName = widgetName ? `${this.namespace}:${widgetName}` : '';
-
-    if (oldName && oldName !== newName) {
-      await connector.remove(oldName);
-    }
-
-    // Set the name property irrespective of whether the new name is null.
-    Private.nameProperty.set(widget, newName);
-
-    if (newName) {
-      const data = this._restore.args(widget);
-      await connector.save(newName, { data });
-    }
-
-    if (oldName !== newName) {
-      this._widgetUpdated.emit(widget);
-    }
-  }
-
-  /**
-   * Handle the current change event.
-   *
-   * #### Notes
-   * The default implementation is a no-op.
-   */
-  protected onCurrentChanged(value: T | null): void {
-    /* no-op */
-  }
-
-  /**
-   * Handle the current change signal from the internal focus tracker.
-   */
-  private _onCurrentChanged(
-    sender: any,
-    args: FocusTracker.IChangedArgs<T>
-  ): void {
-    // Bail if the active widget did not change.
-    if (args.newValue === this._currentWidget) {
-      return;
-    }
-
-    this._currentWidget = args.newValue;
-    this.onCurrentChanged(args.newValue);
-    this._currentChanged.emit(args.newValue);
-  }
-
-  /**
-   * Clean up after disposed widgets.
-   */
-  private _onWidgetDisposed(widget: T): void {
-    const injected = Private.injectedProperty.get(widget);
-
-    if (injected) {
-      return;
-    }
-
-    // Handle widget removal.
-    ArrayExt.removeFirstOf(this._widgets, widget);
-
-    // Handle the current widget being disposed.
-    if (widget === this._currentWidget) {
-      this._currentWidget =
-        this._tracker.currentWidget ||
-        this._widgets[this._widgets.length - 1] ||
-        null;
-      this.onCurrentChanged(this._currentWidget);
-      this._currentChanged.emit(this._currentWidget);
-    }
-
-    // If there is no restore data, return.
-    if (!this._restore) {
-      return;
-    }
-
-    const { connector } = this._restore;
-    const name = Private.nameProperty.get(widget);
-
-    if (name) {
-      void connector.remove(name);
-    }
-  }
-
-  private _hasRestored = false;
-  private _restore: InstanceTracker.IRestoreOptions<T> | null = null;
-  private _restored = new PromiseDelegate<void>();
-  private _tracker = new FocusTracker<T>();
-  private _currentChanged = new Signal<this, T | null>(this);
-  private _widgetAdded = new Signal<this, T>(this);
-  private _widgetUpdated = new Signal<this, T>(this);
-  private _widgets: T[] = [];
-  private _currentWidget: T | null = null;
-  private _isDisposed = false;
 }
 
 /*
