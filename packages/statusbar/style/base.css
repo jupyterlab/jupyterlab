@@ -11,11 +11,11 @@
  * icons for light themes
  */
 
-[data-theme-light='true'] .jp-StatusItem-kernel {
+[data-jp-theme-light='true'] .jp-StatusItem-kernel {
   background-image: url('./kernel-icon-light.svg');
 }
 
-[data-theme-light='true'] .jp-StatusItem-terminal {
+[data-jp-theme-light='true'] .jp-StatusItem-terminal {
   background-image: url('./terminal-icon-light.svg');
 }
 
@@ -23,10 +23,10 @@
  * icons for dark themes
  */
 
-[data-theme-light='false'] .jp-StatusItem-kernel {
+[data-jp-theme-light='false'] .jp-StatusItem-kernel {
   background-image: url('./kernel-icon-dark.svg');
 }
 
-[data-theme-light='false'] .jp-StatusItem-terminal {
+[data-jp-theme-light='false'] .jp-StatusItem-terminal {
   background-image: url('./terminal-icon-dark.svg');
 }

@@ -418,16 +418,16 @@
 }
 
 /* Change color behind transparent images if they need it... */
-[data-theme-light='false'] .jp-RenderedImage img.jp-needs-light-background {
+[data-jp-theme-light='false'] .jp-RenderedImage img.jp-needs-light-background {
   background-color: var(--jp-inverse-layout-color1);
 }
-[data-theme-light='true'] .jp-RenderedImage img.jp-needs-dark-background {
+[data-jp-theme-light='true'] .jp-RenderedImage img.jp-needs-dark-background {
   background-color: var(--jp-inverse-layout-color1);
 }
 /* ...or leave it untouched if they don't */
-[data-theme-light='false'] .jp-RenderedImage img.jp-needs-dark-background {
+[data-jp-theme-light='false'] .jp-RenderedImage img.jp-needs-dark-background {
 }
-[data-theme-light='true'] .jp-RenderedImage img.jp-needs-light-background {
+[data-jp-theme-light='true'] .jp-RenderedImage img.jp-needs-light-background {
 }
 
 .jp-RenderedHTMLCommon img,
