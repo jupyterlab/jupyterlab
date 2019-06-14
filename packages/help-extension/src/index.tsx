@@ -116,7 +116,7 @@ function activate(
   const namespace = 'help-doc';
   const baseUrl = PageConfig.getBaseUrl();
   const { commands, shell, serviceManager } = app;
-  const tracker = new WidgetTracker<MainAreaWidget>({ namespace });
+  const tracker = new WidgetTracker<MainAreaWidget<IFrame>>({ namespace });
 
   // Handle state restoration.
   if (restorer) {
@@ -133,7 +133,7 @@ function activate(
   /**
    * Create a new HelpWidget widget.
    */
-  function newHelpWidget(url: string, text: string): MainAreaWidget {
+  function newHelpWidget(url: string, text: string): MainAreaWidget<IFrame> {
     // Allow scripts and forms so that things like
     // readthedocs can use their search functionality.
     // We *don't* allow same origin requests, which
