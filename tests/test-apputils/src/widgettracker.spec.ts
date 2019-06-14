@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { InstanceTracker } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
 
 import { signalToPromise, testEmission } from '@jupyterlab/testutils';
 
@@ -15,7 +15,7 @@ import { simulate } from 'simulate-event';
 
 const namespace = 'instance-tracker-test';
 
-class TestTracker<T extends Widget> extends InstanceTracker<T> {
+class TestTracker<T extends Widget> extends WidgetTracker<T> {
   methods: string[] = [];
 
   protected onCurrentChanged(widget: T): void {
@@ -33,17 +33,17 @@ function createWidget(): Widget {
 }
 
 describe('@jupyterlab/apputils', () => {
-  describe('InstanceTracker', () => {
+  describe('WidgetTracker', () => {
     describe('#constructor()', () => {
-      it('should create an InstanceTracker', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
-        expect(tracker).to.be.an.instanceof(InstanceTracker);
+      it('should create an WidgetTracker', () => {
+        const tracker = new WidgetTracker<Widget>({ namespace });
+        expect(tracker).to.be.an.instanceof(WidgetTracker);
       });
     });
 
     describe('#currentChanged', () => {
       it('should emit when the current widget has been updated', async () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widget = new Widget();
         widget.node.tabIndex = -1;
         let promise = signalToPromise(tracker.currentChanged);
@@ -58,7 +58,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#widgetAdded', () => {
       it('should emit when a widget has been added', async () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widget = new Widget();
         let promise = signalToPromise(tracker.widgetAdded);
         void tracker.add(widget);
@@ -68,7 +68,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should not emit when a widget has been injected', async () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const one = new Widget();
         const two = new Widget();
         two.node.tabIndex = -1;
@@ -93,12 +93,12 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#currentWidget', () => {
       it('should default to null', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         expect(tracker.currentWidget).to.be.null;
       });
 
       it('should be updated when a widget is added', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widget = new Widget();
         widget.node.tabIndex = -1;
         void tracker.add(widget);
@@ -107,7 +107,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should be updated if when the first widget is focused', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const panel = new Panel();
         const widget0 = createWidget();
         void tracker.add(widget0);
@@ -138,7 +138,7 @@ describe('@jupyterlab/apputils', () => {
 
       it('should preserve the tracked widget on widget disposal', () => {
         const panel = new Panel();
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widgets = [createWidget(), createWidget(), createWidget()];
         each(widgets, widget => {
           void tracker.add(widget);
@@ -165,7 +165,7 @@ describe('@jupyterlab/apputils', () => {
 
       it('should select the previously added widget on widget disposal', () => {
         const panel = new Panel();
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widgets = [createWidget(), createWidget(), createWidget()];
         each(widgets, widget => {
           void tracker.add(widget);
@@ -189,7 +189,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#isDisposed', () => {
       it('should test whether the tracker is disposed', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         expect(tracker.isDisposed).to.equal(false);
         tracker.dispose();
         expect(tracker.isDisposed).to.equal(true);
@@ -198,7 +198,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#add()', () => {
       it('should add a widget to the tracker', async () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widget = new Widget();
         expect(tracker.has(widget)).to.equal(false);
         await tracker.add(widget);
@@ -206,7 +206,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should reject a widget that already exists', async () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widget = new Widget();
         let failed = false;
         expect(tracker.has(widget)).to.equal(false);
@@ -221,7 +221,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should reject a widget that is disposed', async () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widget = new Widget();
         let failed = false;
         expect(tracker.has(widget)).to.equal(false);
@@ -235,7 +235,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should remove an added widget if it is disposed', async () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widget = new Widget();
         await tracker.add(widget);
         expect(tracker.has(widget)).to.equal(true);
@@ -246,14 +246,14 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the tracker', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         expect(tracker.isDisposed).to.equal(false);
         tracker.dispose();
         expect(tracker.isDisposed).to.equal(true);
       });
 
       it('should be safe to call multiple times', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         expect(tracker.isDisposed).to.equal(false);
         tracker.dispose();
         tracker.dispose();
@@ -263,7 +263,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#find()', () => {
       it('should find a tracked item that matches a filter function', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widgetA = new Widget();
         const widgetB = new Widget();
         const widgetC = new Widget();
@@ -277,7 +277,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return a void if no item is found', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widgetA = new Widget();
         const widgetB = new Widget();
         const widgetC = new Widget();
@@ -293,7 +293,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#filter()', () => {
       it('should filter according to a predicate function', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widgetA = new Widget();
         const widgetB = new Widget();
         const widgetC = new Widget();
@@ -312,7 +312,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return an empty array if no item is found', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widgetA = new Widget();
         const widgetB = new Widget();
         const widgetC = new Widget();
@@ -327,7 +327,7 @@ describe('@jupyterlab/apputils', () => {
     });
     describe('#forEach()', () => {
       it('should iterate through all the tracked items', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widgetA = new Widget();
         const widgetB = new Widget();
         const widgetC = new Widget();
@@ -347,7 +347,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#has()', () => {
       it('should return `true` if an item exists in the tracker', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widget = new Widget();
         expect(tracker.has(widget)).to.equal(false);
         void tracker.add(widget);
@@ -357,7 +357,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#inject()', () => {
       it('should inject a widget into the tracker', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widget = new Widget();
         expect(tracker.has(widget)).to.equal(false);
         tracker.inject(widget);
@@ -365,7 +365,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should remove an injected widget if it is disposed', () => {
-        const tracker = new InstanceTracker<Widget>({ namespace });
+        const tracker = new WidgetTracker<Widget>({ namespace });
         const widget = new Widget();
         tracker.inject(widget);
         expect(tracker.has(widget)).to.equal(true);

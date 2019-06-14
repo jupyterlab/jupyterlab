@@ -1,15 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IStateDB } from '@jupyterlab/coreutils';
-
 import { ArrayExt, each, find } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
+import {
+  PromiseDelegate,
+  ReadonlyJSONObject,
+  ReadonlyJSONValue
+} from '@phosphor/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
 
 import { AttachedProperty } from '@phosphor/properties';
 
@@ -17,12 +19,10 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { FocusTracker, Widget } from '@phosphor/widgets';
 
-interface IObservableDisposable extends IDisposable {
-  disposed: ISignal<any, void>;
-}
+import { IDataConnector } from './interfaces';
 
 /**
- * An object that tracks instances of a generic objects.
+ * A tracker that tracks instances of a generic objects.
  */
 export interface IInstanceTracker<T extends IObservableDisposable>
   extends IDisposable {
@@ -217,7 +217,7 @@ export class InstanceTracker<T extends IObservableDisposable>
 
     // Handle instance state restoration.
     if (this._restore) {
-      const { state } = this._restore;
+      const { connector } = this._restore;
       const objName = this._restore.name(obj);
 
       if (objName) {
@@ -225,13 +225,8 @@ export class InstanceTracker<T extends IObservableDisposable>
         const data = this._restore.args(obj);
 
         Private.nameProperty.set(obj, name);
-        await state.save(name, { data });
+        await connector.save(name, { data });
       }
-    }
-
-    // If there is no current instance, set this as the current instance.
-    if (this.current === null) {
-      this.current = obj;
     }
 
     // Emit the added signal.
@@ -337,11 +332,11 @@ export class InstanceTracker<T extends IObservableDisposable>
 
     this._hasRestored = true;
 
-    const { command, registry, state, when } = options;
+    const { command, connector, registry, when } = options;
     const namespace = this.namespace;
     const promises = when
-      ? [state.list(namespace)].concat(when)
-      : [state.list(namespace)];
+      ? [connector.list(namespace)].concat(when)
+      : [connector.list(namespace)];
 
     this._restore = options;
 
@@ -352,11 +347,13 @@ export class InstanceTracker<T extends IObservableDisposable>
         const args = value && (value as any).data;
 
         if (args === undefined) {
-          return state.remove(id);
+          return connector.remove(id);
         }
 
         // Execute the command and if it fails, delete the state restore data.
-        return registry.execute(command, args).catch(() => state.remove(id));
+        return registry
+          .execute(command, args)
+          .catch(() => connector.remove(id));
       })
     );
     this._restored.resolve();
@@ -375,13 +372,13 @@ export class InstanceTracker<T extends IObservableDisposable>
       return;
     }
 
-    const { state } = this._restore;
+    const { connector } = this._restore;
     const objName = this._restore.name(obj);
     const oldName = Private.nameProperty.get(obj);
     const newName = objName ? `${this.namespace}:${objName}` : '';
 
     if (oldName && oldName !== newName) {
-      await state.remove(oldName);
+      await connector.remove(oldName);
     }
 
     // Set the name property irrespective of whether the new name is null.
@@ -389,7 +386,7 @@ export class InstanceTracker<T extends IObservableDisposable>
 
     if (newName) {
       const data = this._restore.args(obj);
-      await state.save(newName, { data });
+      await connector.save(newName, { data });
     }
 
     if (oldName !== newName) {
@@ -430,11 +427,11 @@ export class InstanceTracker<T extends IObservableDisposable>
       return;
     }
 
-    const { state } = this._restore;
+    const { connector } = this._restore;
     const name = Private.nameProperty.get(obj);
 
     if (name) {
-      void state.remove(name);
+      void connector.remove(name);
     }
   }
 
@@ -473,24 +470,24 @@ export namespace InstanceTracker {
     command: string;
 
     /**
+     * The data connector to fetch restore data.
+     */
+    connector: IDataConnector<ReadonlyJSONValue>;
+
+    /**
      * A function that returns the args needed to restore an instance.
      */
-    args: (widget: T) => ReadonlyJSONObject;
+    args: (obj: T) => ReadonlyJSONObject;
 
     /**
      * A function that returns a unique persistent name for this instance.
      */
-    name: (widget: T) => string;
+    name: (obj: T) => string;
 
     /**
      * The command registry which holds the restore command.
      */
     registry: CommandRegistry;
-
-    /**
-     * The state database instance.
-     */
-    state: IStateDB;
 
     /**
      * The point after which it is safe to restore state.
@@ -585,9 +582,9 @@ export class WidgetTracker<T extends Widget = Widget> {
    * @param widget - The widget being added.
    *
    * #### Notes
-   * When a widget is added its state is saved to the state database.
+   * When widget is added its state is saved with the data connector.
    * This function returns a promise that is resolved when that saving
-   * is completed. However, the widget is added to the in-memory tracker
+   * is completed. However, the instance is added to the in-memory tracker
    * synchronously, and is available to use before the promise is resolved.
    */
   add(widget: T): Promise<void> {
@@ -615,15 +612,15 @@ export class WidgetTracker<T extends Widget = Widget> {
 
     // Handle widget state restoration.
     if (this._restore) {
-      let { state } = this._restore;
-      let widgetName = this._restore.name(widget);
+      const { connector } = this._restore;
+      const widgetName = this._restore.name(widget);
 
       if (widgetName) {
         let name = `${this.namespace}:${widgetName}`;
         let data = this._restore.args(widget);
 
         Private.nameProperty.set(widget, name);
-        promise = state.save(name, { data });
+        promise = connector.save(name, { data });
       }
     }
 
@@ -712,16 +709,16 @@ export class WidgetTracker<T extends Widget = Widget> {
   }
 
   /**
-   * Check if this tracker has the specified widget.
+   * Check if this tracker has the specified object instance.
    *
-   * @param widget - The widget whose existence is being checked.
+   * @param obj - The instance whose existence is being checked.
    */
-  has(widget: Widget): boolean {
+  has(obj: any): boolean {
     return this._tracker.has(widget as any);
   }
 
   /**
-   * Restore the widgets in this tracker's namespace.
+   * Restore the instances in this tracker's namespace.
    *
    * @param options - The configuration options that describe restoration.
    *
@@ -729,20 +726,20 @@ export class WidgetTracker<T extends Widget = Widget> {
    *
    * #### Notes
    * This function should almost never be invoked by client code. Its primary
-   * use case is to be invoked by a layout restorer plugin that handles
-   * multiple instance trackers and, when ready, asks them each to restore their
-   * respective widgets.
+   * use case is to be invoked by a restorer that handles multiple instance
+   * trackers and, when ready, asks them each to restore their respective
+   * contents.
    */
   async restore(options: InstanceTracker.IRestoreOptions<T>): Promise<any> {
     if (this._hasRestored) {
       throw new Error('Instance tracker has already restored');
     }
     this._hasRestored = true;
-    const { command, registry, state, when } = options;
+    const { command, connector, registry, when } = options;
     const namespace = this.namespace;
     const promises = when
-      ? [state.list(namespace)].concat(when)
-      : [state.list(namespace)];
+      ? [connector.list(namespace)].concat(when)
+      : [connector.list(namespace)];
 
     this._restore = options;
 
@@ -752,11 +749,13 @@ export class WidgetTracker<T extends Widget = Widget> {
         const value = saved.values[index];
         const args = value && (value as any).data;
         if (args === undefined) {
-          return state.remove(id);
+          return connector.remove(id);
         }
 
         // Execute the command and if it fails, delete the state restore data.
-        return registry.execute(command, args).catch(() => state.remove(id));
+        return registry
+          .execute(command, args)
+          .catch(() => connector.remove(id));
       })
     );
     this._restored.resolve(undefined);
@@ -775,13 +774,13 @@ export class WidgetTracker<T extends Widget = Widget> {
       return;
     }
 
-    const { state } = this._restore;
+    const { connector } = this._restore;
     const widgetName = this._restore.name(widget);
     const oldName = Private.nameProperty.get(widget);
     const newName = widgetName ? `${this.namespace}:${widgetName}` : '';
 
     if (oldName && oldName !== newName) {
-      await state.remove(oldName);
+      await connector.remove(oldName);
     }
 
     // Set the name property irrespective of whether the new name is null.
@@ -789,7 +788,7 @@ export class WidgetTracker<T extends Widget = Widget> {
 
     if (newName) {
       const data = this._restore.args(widget);
-      await state.save(newName, { data });
+      await connector.save(newName, { data });
     }
 
     if (oldName !== newName) {
@@ -852,11 +851,11 @@ export class WidgetTracker<T extends Widget = Widget> {
       return;
     }
 
-    const { state } = this._restore;
+    const { connector } = this._restore;
     const name = Private.nameProperty.get(widget);
 
     if (name) {
-      void state.remove(name);
+      void connector.remove(name);
     }
   }
 
