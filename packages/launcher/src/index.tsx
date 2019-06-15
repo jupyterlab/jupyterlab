@@ -347,7 +347,7 @@ function Card(
   const args = { ...item.args, cwd: launcher.cwd };
   const caption = commands.caption(command, args);
   const label = commands.label(command, args);
-  const title = caption || label;
+  const title = kernel ? label : caption || label;
 
   // Build the onclick handler.
   let onclick = () => {
@@ -375,12 +375,22 @@ function Card(
       });
   };
 
+  // With tabindex working, you can now pick a kernel by tabbing around and
+  // pressing Enter.
+  let onkeypress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      onclick();
+    }
+  };
+
   // Return the VDOM element.
   return (
     <div
       className="jp-LauncherCard"
       title={title}
       onClick={onclick}
+      onKeyPress={onkeypress}
+      tabIndex={100}
       data-category={item.category || 'Other'}
       key={Private.keyProperty.get(item)}
     >
@@ -400,7 +410,7 @@ function Card(
         )}
       </div>
       <div className="jp-LauncherCard-label" title={title}>
-        {label}
+        <p>{label}</p>
       </div>
     </div>
   );
