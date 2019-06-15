@@ -19,6 +19,7 @@ from .commands import (
     link_package, unlink_package, build, get_app_version, HERE,
     update_extension,
 )
+from .debuglog import DebugLogFileMixin
 
 
 flags = dict(base_flags)
@@ -52,11 +53,12 @@ uninstall_flags['all'] = (
 aliases = dict(base_aliases)
 aliases['app-dir'] = 'BaseExtensionApp.app_dir'
 aliases['dev-build'] = 'BaseExtensionApp.dev_build'
+aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 
 VERSION = get_app_version()
 
 
-class BaseExtensionApp(JupyterApp):
+class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     version = VERSION
     flags = flags
     aliases = aliases
@@ -76,20 +78,12 @@ class BaseExtensionApp(JupyterApp):
     def start(self):
         if self.app_dir and self.app_dir.startswith(HERE):
             raise ValueError('Cannot run lab extension commands in core app')
-        try:
+        with self.debug_logging():
             ans = self.run_task()
             if ans and self.should_build:
                 command = 'build:prod' if not self.dev_build else 'build'
                 build(app_dir=self.app_dir, clean_staging=self.should_clean,
                       logger=self.log, command=command)
-        except Exception as ex:
-            _, _, exc_traceback = sys.exc_info()
-            msg = traceback.format_exception(ex.__class__, ex, exc_traceback)
-            for line in msg:
-                self.log.debug(line)
-            self.log.error('\nErrored, use --debug for full output:')
-            self.log.error(msg[-1].strip())
-            sys.exit(1)
 
     def run_task(self):
         pass
@@ -212,7 +206,7 @@ class CheckLabExtensionsApp(BaseExtensionApp):
                 logger=self.log)
             for arg in self.extra_args)
         if not all_enabled:
-            exit(1)
+            self.exit(1)
 
 
 _examples = """
@@ -248,7 +242,7 @@ class LabExtensionApp(JupyterApp):
         # The above should have called a subcommand and raised NoStart; if we
         # get here, it didn't, so we should self.log.info a message.
         subcmds = ", ".join(sorted(self.subcommands))
-        sys.exit("Please supply at least one subcommand: %s" % subcmds)
+        self.exit("Please supply at least one subcommand: %s" % subcmds)
 
 
 main = LabExtensionApp.launch_instance

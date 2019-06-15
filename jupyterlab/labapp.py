@@ -17,6 +17,7 @@ from notebook.utils import url_path_join as ujoin
 from traitlets import Bool, Unicode
 
 from ._version import __version__
+from .debuglog import DebugLogFileMixin
 from .extension import load_config, load_jupyter_server_extension
 from .commands import (
     build, clean, get_app_dir, get_app_version, get_user_settings_dir,
@@ -29,6 +30,7 @@ build_aliases['app-dir'] = 'LabBuildApp.app_dir'
 build_aliases['name'] = 'LabBuildApp.name'
 build_aliases['version'] = 'LabBuildApp.version'
 build_aliases['dev-build'] = 'LabBuildApp.dev_build'
+build_aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 
 build_flags = dict(flags)
 
@@ -38,7 +40,7 @@ if version != app_version:
     version = '%s (dev), %s (app)' % (__version__, app_version)
 
 
-class LabBuildApp(JupyterApp):
+class LabBuildApp(JupyterApp, DebugLogFileMixin):
     version = version
     description = """
     Build the JupyterLab application
@@ -69,12 +71,13 @@ class LabBuildApp(JupyterApp):
         command = 'build:prod' if not self.dev_build else 'build'
         app_dir = self.app_dir or get_app_dir()
         self.log.info('JupyterLab %s', version)
-        if self.pre_clean:
-            self.log.info('Cleaning %s' % app_dir)
-            clean(self.app_dir)
-        self.log.info('Building in %s', app_dir)
-        build(app_dir=app_dir, name=self.name, version=self.version,
-              command=command, logger=self.log)
+        with self.debug_logging():
+            if self.pre_clean:
+                self.log.info('Cleaning %s' % app_dir)
+                clean(self.app_dir)
+            self.log.info('Building in %s', app_dir)
+            build(app_dir=app_dir, name=self.name, version=self.version,
+                command=command, logger=self.log)
 
 
 clean_aliases = dict(base_aliases)
@@ -137,7 +140,7 @@ class LabWorkspaceExportApp(JupyterApp):
 
         if len(self.extra_args) > 1:
             print('Too many arguments were provided for workspace export.')
-            sys.exit(1)
+            self.exit(1)
 
         raw = (app_url if not self.extra_args
                else ujoin(config.workspaces_url, self.extra_args[0]))
@@ -187,7 +190,7 @@ class LabWorkspaceImportApp(JupyterApp):
 
         if len(self.extra_args) != 1:
             print('One argument is required for workspace import.')
-            sys.exit(1)
+            self.exit(1)
 
         workspace = dict()
         with self._smart_open() as fid:
@@ -195,14 +198,14 @@ class LabWorkspaceImportApp(JupyterApp):
                 workspace = self._validate(fid, base_url, app_url, workspaces_url)
             except Exception as e:
                 print('%s is not a valid workspace:\n%s' % (fid.name, e))
-                sys.exit(1)
+                self.exit(1)
 
         if not osp.exists(directory):
             try:
                 os.makedirs(directory)
             except Exception as e:
                 print('Workspaces directory could not be created:\n%s' % e)
-                sys.exit(1)
+                self.exit(1)
 
         slug = slugify(workspace['metadata']['id'], base_url)
         workspace_path = pjoin(directory, slug + WORKSPACE_EXTENSION)
@@ -223,7 +226,7 @@ class LabWorkspaceImportApp(JupyterApp):
 
             if not osp.exists(file_path):
                 print('%s does not exist.' % file_name)
-                sys.exit(1)
+                self.exit(1)
 
             return open(file_path)
 
@@ -275,7 +278,7 @@ class LabWorkspaceApp(JupyterApp):
     def start(self):
         super().start()
         print('Either `export` or `import` must be specified.')
-        sys.exit(1)
+        self.exit(1)
 
 
 lab_aliases = dict(aliases)
