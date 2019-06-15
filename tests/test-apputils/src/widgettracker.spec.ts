@@ -25,10 +25,11 @@ class TestTracker<T extends Widget> extends WidgetTracker<T> {
 }
 
 function createWidget(): Widget {
-  const widget = new Widget();
+  const widget = new Widget({ node: document.createElement('button') });
   widget.node.style.minHeight = '20px';
   widget.node.style.minWidth = '20px';
   widget.node.tabIndex = -1;
+  widget.node.textContent = 'Test Button';
   return widget;
 }
 
@@ -126,17 +127,18 @@ describe('@jupyterlab/apputils', () => {
         widget1.dispose();
       });
 
-      it.skip('should revert to last added widget on widget disposal', async () => {
-        const tracker = new TestTracker<Widget>({ namespace });
-        const widget0 = new Widget();
-        const widget1 = new Widget();
+      it('should revert to last added widget on widget disposal', async () => {
+        const tracker = new WidgetTracker({ namespace });
+        const one = createWidget();
+        const two = createWidget();
 
-        await tracker.add(widget0);
-        await tracker.add(widget1);
-        expect(tracker.currentWidget).to.equal(widget1);
-        widget1.dispose();
-        await signalToPromise(tracker.currentChanged);
-        expect(tracker.currentWidget).to.equal(widget0);
+        await tracker.add(one);
+        await tracker.add(two);
+        one.node.focus();
+        two.node.focus();
+        expect(tracker.currentWidget).to.equal(two);
+        two.dispose();
+        expect(tracker.currentWidget).to.equal(one);
       });
 
       it('should preserve the tracked widget on widget disposal', () => {
@@ -166,15 +168,17 @@ describe('@jupyterlab/apputils', () => {
         });
       });
 
-      it.skip('should select the previously added widget on widget disposal', () => {
+      it('should select the previously added widget on widget disposal', () => {
         const panel = new Panel();
         const tracker = new WidgetTracker({ namespace });
         const widgets = [createWidget(), createWidget(), createWidget()];
-        each(widgets, widget => {
+
+        Widget.attach(panel, document.body);
+        widgets.forEach(widget => {
           void tracker.add(widget);
           panel.addWidget(widget);
+          widget.node.focus();
         });
-        Widget.attach(panel, document.body);
 
         let called = false;
         tracker.currentChanged.connect(() => {
@@ -368,7 +372,7 @@ describe('@jupyterlab/apputils', () => {
         expect(tracker.has(widget)).to.equal(true);
       });
 
-      it.skip('should remove an injected widget if it is disposed', async () => {
+      it('should remove an injected widget if it is disposed', async () => {
         const tracker = new WidgetTracker({ namespace });
         const widget = new Widget();
         void tracker.inject(widget);
@@ -379,10 +383,10 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#onCurrentChanged()', () => {
-      it.skip('should be called when the current widget is changed', () => {
-        const tracker = new TestTracker<Widget>({ namespace });
+      it('should be called when the current widget is changed', async () => {
+        const tracker = new TestTracker({ namespace });
         const widget = new Widget();
-        void tracker.add(widget);
+        await tracker.add(widget);
         expect(tracker.methods).to.contain('onCurrentChanged');
       });
     });
