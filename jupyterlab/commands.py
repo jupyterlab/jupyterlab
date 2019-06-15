@@ -52,12 +52,10 @@ class ProgressProcess(Process):
             The logger instance.
         cwd: string, optional
             The cwd of the process.
-        env: dict, optional
-            The environment for the process.
         kill_event: :class:`~threading.Event`, optional
             An event used to kill the process operation.
-        quiet: bool, optional
-            Whether to suppress output.
+        env: dict, optional
+            The environment for the process.
         """
         if not isinstance(cmd, (list, tuple)):
             raise ValueError('Command must be given as a list')
