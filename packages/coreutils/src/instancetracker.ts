@@ -152,7 +152,6 @@ export class InstanceTracker<T extends IObservableDisposable>
       return;
     }
     this._current = obj;
-    this.onCurrentChanged(this._current);
     this._currentChanged.emit(this._current);
   }
 
@@ -208,10 +207,8 @@ export class InstanceTracker<T extends IObservableDisposable>
       return;
     }
 
-    // Handle instance being disposed.
     obj.disposed.connect(this._onInstanceDisposed, this);
 
-    // Handle instance state restoration.
     if (this._restore) {
       const { connector } = this._restore;
       const objName = this._restore.name(obj);
@@ -391,16 +388,6 @@ export class InstanceTracker<T extends IObservableDisposable>
   }
 
   /**
-   * Handle the current change event.
-   *
-   * #### Notes
-   * The default implementation is a no-op.
-   */
-  protected onCurrentChanged(value: T | null): void {
-    /* no-op */
-  }
-
-  /**
    * Clean up after disposed instances.
    */
   private _onInstanceDisposed(obj: T): void {
@@ -408,7 +395,6 @@ export class InstanceTracker<T extends IObservableDisposable>
 
     if (obj === this._current) {
       this._current = null;
-      this.onCurrentChanged(this._current);
       this._currentChanged.emit(this._current);
     }
 

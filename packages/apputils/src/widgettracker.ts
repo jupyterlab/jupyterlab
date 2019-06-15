@@ -116,19 +116,26 @@ export class WidgetTracker<T extends Widget = Widget>
    * @param options - The instantiation options for an instance tracker.
    */
   constructor(options: WidgetTracker.IOptions) {
+    const focus = (this._focusTracker = new FocusTracker());
+    const instances = (this._instanceTracker = new InstanceTracker(options));
+
     this.namespace = options.namespace;
-    this._instanceTracker = new InstanceTracker(options);
-    this._instanceTracker.added.connect((_, value) => {
+    focus.currentChanged.connect((_, args) => {
+      if (args.newValue === this.currentWidget) {
+        return;
+      }
+      this._instanceTracker.current = args.newValue;
+    }, this);
+    instances.added.connect((_, value) => {
       this._widgetAdded.emit(value);
     }, this);
-    this._instanceTracker.currentChanged.connect((_, value) => {
+    instances.currentChanged.connect((_, value) => {
       this.onCurrentChanged(value);
       this._currentChanged.emit(value);
     }, this);
-    this._instanceTracker.updated.connect((_, value) => {
+    instances.updated.connect((_, value) => {
       this._widgetUpdated.emit(value);
     }, this);
-    this._focusTracker.currentChanged.connect(this._onFocusChanged, this);
   }
 
   /**
@@ -317,18 +324,8 @@ export class WidgetTracker<T extends Widget = Widget>
     /* no-op */
   }
 
-  /**
-   * Handle the current change signal from the internal focus tracker.
-   */
-  private _onFocusChanged(_: any, args: FocusTracker.IChangedArgs<T>): void {
-    if (args.newValue === this.currentWidget) {
-      return;
-    }
-    this._instanceTracker.current = args.newValue;
-  }
-
   private _currentChanged = new Signal<this, T>(this);
-  private _focusTracker = new FocusTracker<T>();
+  private _focusTracker: FocusTracker<T>;
   private _instanceTracker: InstanceTracker<T>;
   private _isDisposed = false;
   private _widgetAdded = new Signal<this, T>(this);
