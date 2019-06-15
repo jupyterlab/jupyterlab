@@ -200,9 +200,7 @@ export class WidgetTracker<T extends Widget = Widget>
   async add(widget: T): Promise<void> {
     this._focusTracker.add(widget);
     await this._instanceTracker.add(widget);
-    if (!this._focusTracker.currentWidget) {
-      this._instanceTracker.current = widget;
-    }
+    this._instanceTracker.current = widget;
   }
 
   /**
