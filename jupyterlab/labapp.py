@@ -133,13 +133,13 @@ class LabWorkspaceExportApp(JupyterApp):
         base_url = app.base_url
         config = load_config(app)
         directory = config.workspaces_dir
-        page_url = config.page_url
+        app_url = config.app_url
 
         if len(self.extra_args) > 1:
             print('Too many arguments were provided for workspace export.')
             sys.exit(1)
 
-        raw = (page_url if not self.extra_args
+        raw = (app_url if not self.extra_args
                else ujoin(config.workspaces_url, self.extra_args[0]))
         slug = slugify(raw, base_url)
         workspace_path = pjoin(directory, slug + WORKSPACE_EXTENSION)
@@ -182,7 +182,7 @@ class LabWorkspaceImportApp(JupyterApp):
         base_url = app.base_url
         config = load_config(app)
         directory = config.workspaces_dir
-        page_url = config.page_url
+        app_url = config.app_url
         workspaces_url = config.workspaces_url
 
         if len(self.extra_args) != 1:
@@ -192,7 +192,7 @@ class LabWorkspaceImportApp(JupyterApp):
         workspace = dict()
         with self._smart_open() as fid:
             try:  # to load, parse, and validate the workspace file.
-                workspace = self._validate(fid, base_url, page_url, workspaces_url)
+                workspace = self._validate(fid, base_url, app_url, workspaces_url)
             except Exception as e:
                 print('%s is not a valid workspace:\n%s' % (fid.name, e))
                 sys.exit(1)
@@ -227,7 +227,7 @@ class LabWorkspaceImportApp(JupyterApp):
 
             return open(file_path)
 
-    def _validate(self, data, base_url, page_url, workspaces_url):
+    def _validate(self, data, base_url, app_url, workspaces_url):
         workspace = json.load(data)
 
         if 'data' not in workspace:
@@ -237,7 +237,7 @@ class LabWorkspaceImportApp(JupyterApp):
         # name into the workspace metadata.
         if self.workspace_name is not None:
             if self.workspace_name == "":
-                workspace_id = ujoin(base_url, page_url)
+                workspace_id = ujoin(base_url, app_url)
             else:
                 workspace_id = ujoin(base_url, workspaces_url, self.workspace_name)
             workspace['metadata'] = {'id': workspace_id}
@@ -247,8 +247,8 @@ class LabWorkspaceImportApp(JupyterApp):
                 raise Exception('The `id` field is missing in `metadata`.')
             else:
                 id = workspace['metadata']['id']
-                if id != ujoin(base_url, page_url) and not id.startswith(ujoin(base_url, workspaces_url)):
-                    error = '%s does not match page_url or start with workspaces_url.'
+                if id != ujoin(base_url, app_url) and not id.startswith(ujoin(base_url, workspaces_url)):
+                    error = '%s does not match app_url or start with workspaces_url.'
                     raise Exception(error % id)
 
         return workspace
