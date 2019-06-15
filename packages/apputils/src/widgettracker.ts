@@ -111,32 +111,45 @@ export interface IWidgetTracker<T extends Widget = Widget> extends IDisposable {
 export class WidgetTracker<T extends Widget = Widget>
   implements IWidgetTracker<T> {
   /**
-   * Create a new instance tracker.
+   * Create a new widget tracker.
    *
-   * @param options - The instantiation options for an instance tracker.
+   * @param options - The instantiation options for a widget tracker.
    */
   constructor(options: WidgetTracker.IOptions) {
     const focus = (this._focusTracker = new FocusTracker());
     const instances = (this._instanceTracker = new InstanceTracker(options));
 
     this.namespace = options.namespace;
-    focus.currentChanged.connect((_, args) => {
-      if (args.newValue === this.currentWidget) {
+
+    focus.currentChanged.connect((_, current) => {
+      if (current.newValue !== this.currentWidget) {
+        instances.current = current.newValue;
+      }
+    }, this);
+
+    instances.added.connect((_, widget) => {
+      this._widgetAdded.emit(widget);
+    }, this);
+
+    instances.currentChanged.connect((_, widget) => {
+      if (widget === null && focus.currentWidget) {
+        instances.current = focus.currentWidget;
         return;
       }
-      this._instanceTracker.current = args.newValue;
+      this.onCurrentChanged(widget);
+      this._currentChanged.emit(widget);
     }, this);
-    instances.added.connect((_, value) => {
-      this._widgetAdded.emit(value);
-    }, this);
-    instances.currentChanged.connect((_, value) => {
-      this.onCurrentChanged(value);
-      this._currentChanged.emit(value);
-    }, this);
-    instances.updated.connect((_, value) => {
-      this._widgetUpdated.emit(value);
+
+    // InstanceTracker#updated
+    instances.updated.connect((_, widget) => {
+      this._widgetUpdated.emit(widget);
     }, this);
   }
+
+  /**
+   * A namespace for all tracked widgets, (e.g., `notebook`).
+   */
+  readonly namespace: string;
 
   /**
    * A signal emitted when the current widget changes.
@@ -144,29 +157,6 @@ export class WidgetTracker<T extends Widget = Widget>
   get currentChanged(): ISignal<this, T | null> {
     return this._currentChanged;
   }
-
-  /**
-   * A signal emitted when a widget is added.
-   *
-   * #### Notes
-   * This signal will only fire when a widget is added to the tracker. It will
-   * not fire if a widget is injected into the tracker.
-   */
-  get widgetAdded(): ISignal<this, T> {
-    return this._widgetAdded;
-  }
-
-  /**
-   * A signal emitted when a widget is updated.
-   */
-  get widgetUpdated(): ISignal<this, T> {
-    return this._widgetUpdated;
-  }
-
-  /**
-   * A namespace for all tracked widgets, (e.g., `notebook`).
-   */
-  readonly namespace: string;
 
   /**
    * The current widget is the most recently focused or added widget.
@@ -191,6 +181,24 @@ export class WidgetTracker<T extends Widget = Widget>
    */
   get size(): number {
     return this._instanceTracker.size;
+  }
+
+  /**
+   * A signal emitted when a widget is added.
+   *
+   * #### Notes
+   * This signal will only fire when a widget is added to the tracker. It will
+   * not fire if a widget is injected into the tracker.
+   */
+  get widgetAdded(): ISignal<this, T> {
+    return this._widgetAdded;
+  }
+
+  /**
+   * A signal emitted when a widget is updated.
+   */
+  get widgetUpdated(): ISignal<this, T> {
+    return this._widgetUpdated;
   }
 
   /**
