@@ -202,12 +202,11 @@ export class InstanceTracker<T extends IObservableDisposable>
     }
 
     this._instances.add(obj);
+    obj.disposed.connect(this._onInstanceDisposed, this);
 
     if (Private.injectedProperty.get(obj)) {
       return;
     }
-
-    obj.disposed.connect(this._onInstanceDisposed, this);
 
     if (this._restore) {
       const { connector } = this._restore;
