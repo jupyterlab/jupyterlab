@@ -193,6 +193,8 @@ export class Toaster implements IToaster {
   /**
    * Return the model of all active toasts.
    *
+   * Note: the toast keys will not be returned (unavailable in BluePrint API)
+   *
    * @returns Array of active toast models
    */
   getToasts(): IToaster.IModel[] {
