@@ -114,8 +114,9 @@ export interface IInstanceTracker<T extends IObservableDisposable>
 /**
  * A class that keeps track of widget instances on an Application shell.
  */
-export class InstanceTracker<T extends IObservableDisposable>
-  implements IInstanceTracker<T> {
+export class InstanceTracker<
+  T extends IObservableDisposable = IObservableDisposable
+> implements IInstanceTracker<T> {
   /**
    * Create a new instance tracker.
    *
@@ -143,6 +144,10 @@ export class InstanceTracker<T extends IObservableDisposable>
 
   /**
    * The current instance.
+   *
+   * #### Notes
+   * If `current` is set to an instance that does not exist in the tracker, it
+   * is a no-op.
    */
   get current(): T | null {
     return this._current;
@@ -151,8 +156,10 @@ export class InstanceTracker<T extends IObservableDisposable>
     if (this._current === obj) {
       return;
     }
-    this._current = obj;
-    this._currentChanged.emit(this._current);
+    if (this._instances.has(obj)) {
+      this._current = obj;
+      this._currentChanged.emit(this._current);
+    }
   }
 
   /**
