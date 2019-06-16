@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
+
+import { ISignal } from '@phosphor/signaling';
 
 /**
  * A generic interface for change emitter payloads.
@@ -96,6 +98,90 @@ export interface IDataConnector<T, U = T, V = string> {
    * type `T` being saved while others may return no content.
    */
   save(id: V, value: U): Promise<any>;
+}
+
+/**
+ * A tracker that tracks instances of a generic objects.
+ *
+ * @typeparam T - The type of object being tracked.
+ */
+export interface IInstanceTracker<T extends IObservableDisposable>
+  extends IDisposable {
+  /**
+   * A signal emitted when an instance is added.
+   *
+   * ####
+   * This signal does not emit if an instance is added using `inject()`.
+   */
+  readonly added: ISignal<this, T>;
+
+  /**
+   * The current object instance.
+   */
+  readonly current: T | null;
+
+  /**
+   * A signal emitted when the current instance changes.
+   *
+   * #### Notes
+   * If the last instance being tracked is disposed, `null` will be emitted.
+   */
+  readonly currentChanged: ISignal<this, T | null>;
+
+  /**
+   * The number of instances held by the tracker.
+   */
+  readonly size: number;
+
+  /**
+   * A promise that is resolved when the instance tracker has been
+   * restored from a serialized state.
+   */
+  readonly restored: Promise<void>;
+
+  /**
+   * A signal emitted when an instance is updated.
+   */
+  readonly updated: ISignal<this, T>;
+
+  /**
+   * Find the first instance in the tracker that satisfies a filter function.
+   *
+   * @param - fn The filter function to call on each instance.
+   *
+   * #### Notes
+   * If nothing is found, the value returned is `undefined`.
+   */
+  find(fn: (obj: T) => boolean): T | undefined;
+
+  /**
+   * Iterate through each instance in the tracker.
+   *
+   * @param fn - The function to call on each instance.
+   */
+  forEach(fn: (obj: T) => void): void;
+
+  /**
+   * Filter the instances in the tracker based on a predicate.
+   *
+   * @param fn - The function by which to filter.
+   */
+  filter(fn: (obj: T) => boolean): T[];
+
+  /**
+   * Check if this tracker has the specified instance.
+   *
+   * @param obj - The object whose existence is being checked.
+   */
+  has(obj: T): boolean;
+
+  /**
+   * Inject an instance into the instance tracker without the tracker handling
+   * its restoration lifecycle.
+   *
+   * @param obj - The instance to inject into the tracker.
+   */
+  inject(obj: T): void;
 }
 
 /**

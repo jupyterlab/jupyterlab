@@ -9,110 +9,18 @@ import {
   ReadonlyJSONValue
 } from '@phosphor/coreutils';
 
-import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
+import { IObservableDisposable } from '@phosphor/disposable';
 
 import { AttachedProperty } from '@phosphor/properties';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { IDataConnector } from './interfaces';
-
-/**
- * A tracker that tracks instances of a generic objects.
- */
-export interface IInstanceTracker<T extends IObservableDisposable>
-  extends IDisposable {
-  /**
-   * A signal emitted when an instance is added.
-   *
-   * #### Notes
-   * This signal will only fire when an instance is added to the tracker.
-   * It will not fire if an instance is injected into the tracker.
-   */
-  readonly added: ISignal<this, T>;
-
-  /**
-   * The current instance is the most recently focused or added instance.
-   *
-   * #### Notes
-   * It is the most recently focused widget, or the most recently added
-   * widget if no widget has taken focus.
-   */
-  readonly current: T | null;
-
-  /**
-   * A signal emitted when the current instance changes.
-   *
-   * #### Notes
-   * If the last instance being tracked is disposed, `null` will be emitted.
-   */
-  readonly currentChanged: ISignal<this, T | null>;
-
-  /**
-   * The number of instances held by the tracker.
-   */
-  readonly size: number;
-
-  /**
-   * A promise that is resolved when the instance tracker has been
-   * restored from a serialized state.
-   *
-   * #### Notes
-   * Most client code will not need to use this, since they can wait
-   * for the whole application to restore. However, if an extension
-   * wants to perform actions during the application restoration, but
-   * after the restoration of another instance tracker, they can use
-   * this promise.
-   */
-  readonly restored: Promise<void>;
-
-  /**
-   * A signal emitted when an instance is updated.
-   */
-  readonly updated: ISignal<this, T>;
-
-  /**
-   * Find the first instance in the tracker that satisfies a filter function.
-   *
-   * @param - fn The filter function to call on each instance.
-   *
-   * #### Notes
-   * If nothing is found, the value returned is `undefined`.
-   */
-  find(fn: (obj: T) => boolean): T | undefined;
-
-  /**
-   * Iterate through each instance in the tracker.
-   *
-   * @param fn - The function to call on each instance.
-   */
-  forEach(fn: (obj: T) => void): void;
-
-  /**
-   * Filter the instances in the tracker based on a predicate.
-   *
-   * @param fn - The function by which to filter.
-   */
-  filter(fn: (obj: T) => boolean): T[];
-
-  /**
-   * Check if this tracker has the specified instance.
-   *
-   * @param obj - The object whose existence is being checked.
-   */
-  has(obj: T): boolean;
-
-  /**
-   * Inject an instance into the instance tracker without the tracker handling
-   * its restoration lifecycle.
-   *
-   * @param obj - The instance to inject into the tracker.
-   */
-  inject(obj: T): void;
-}
+import { IDataConnector, IInstanceTracker } from './interfaces';
 
 /**
  * A class that keeps track of widget instances on an Application shell.
+ *
+ * @typeparam T - The type of object being tracked.
  */
 export class InstanceTracker<
   T extends IObservableDisposable = IObservableDisposable
@@ -143,9 +51,11 @@ export class InstanceTracker<
   readonly namespace: string;
 
   /**
-   * The current instance.
+   * The current object instance.
    *
    * #### Notes
+   * The instance tracker does not set `current`. It is intended for client use.
+   *
    * If `current` is set to an instance that does not exist in the tracker, it
    * is a no-op.
    */
