@@ -1,17 +1,44 @@
 .jp-toast {
-  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+  font-family: var(--jp-ui-font-family);
+  color: var(--jp-ui-font-color1);
+  border-width: var(--jp-border-width);
+  border-radius: var(--jp-border-radius);
+  border-color: var(--jp-border-color1);
+  background-color: var(--jp-layout-color1);
+  box-shadow: var(--jp-elevation-z4);
 }
 
-/* .jp-toast > .button {
-  color: transparent;
-  background-size: 16px;
-  height: 16px;
-  width: 16px;
-  background-image: var(--jp-icon-close);
-  background-position: center;
-  background-repeat: no-repeat;
+.jp-toast-button.bp3-button {
+  color: var(--jp-ui-font-color1);
 }
 
-.jp-toast > button:hover {
-  background-image: var(--jp-icon-close-circle);
-} */
+.jp-toast .bp3-button-group.bp3-minimal .bp3-button:hover {
+  background-color: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-toast .bp3-button .bp3-icon {
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-toast:not([class*='bp3-intent-']) .bp3-button .bp3-icon:hover {
+  background-color: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-toast.jp-mod-danger {
+  background-color: var(--jp-error-color1);
+}
+
+.jp-toast.jp-mod-warning {
+  background-color: var(--jp-warn-color1);
+}
+
+.jp-toast.jp-mod-primary {
+  background-color: var(--jp-info-color1);
+}
+
+.jp-toast.jp-mod-success {
+  background-color: var(--jp-success-color1);
+}

@@ -12,8 +12,6 @@ import { Intent } from '@jupyterlab/ui-components';
 
 import { Token } from '@phosphor/coreutils';
 
-import '../style/toast.css';
-
 export const TOASTERCLASSNAME = 'jp-toaster';
 
 export const TOASTCLASSNAME = 'jp-toast';
@@ -271,11 +269,23 @@ export class Toaster implements IToaster {
         className: TOASTBUTTONCLASSNAME
       };
     }
+
+    let className = TOASTCLASSNAME;
+    const intent = model.type ? model.type : 'none';
+    const classIntent: { [intent: string]: string } = {
+      none: '',
+      primary: 'jp-mod-primary',
+      success: 'jp-mod-success',
+      warning: 'jp-mod-warning',
+      danger: 'jp-mod-danger'
+    };
+    className += ' ' + classIntent[intent];
+
     return {
       action,
-      className: TOASTCLASSNAME,
+      className,
       icon: model.icon as IconName,
-      intent: model.type,
+      intent,
       message: model.message,
       onDismiss: model.onDismiss,
       timeout: model.timeout
