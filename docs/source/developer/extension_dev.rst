@@ -25,7 +25,7 @@ See :ref:`xkcd_extension_tutorial` to learn how to make a simple JupyterLab exte
 
 A JupyterLab application is comprised of:
 
--  A core Application object
+-  A core Applicaztion object
 -  Plugins
 
 Plugins
@@ -515,6 +515,11 @@ This would look something like the following in a ``Widget`` subclass:
 
 .. |dependencies| image:: dependency-graph.svg
 
+
+Using React
+^^^^^^^^^^^
+We also provide support for using :ref:`react` in your JupyterLab
+extensions, as well as in the core codebase.
 
 
 .. _ext-author-companion-packages:
