@@ -19,7 +19,8 @@ import {
   showDialog,
   ClientSession,
   Dialog,
-  IClientSession
+  IClientSession,
+  showErrorMessage
 } from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
@@ -630,9 +631,8 @@ export class Context<T extends DocumentRegistry.IModel>
     err: Error | ServerConnection.ResponseError,
     title: string
   ): Promise<void> {
-    let buttons = [Dialog.okButton()];
-
     // Check for a more specific error message.
+    let error = { message: '' };
     if (err instanceof ServerConnection.ResponseError) {
       const text = await err.response.text();
       let body = '';
@@ -641,14 +641,12 @@ export class Context<T extends DocumentRegistry.IModel>
       } catch (e) {
         body = text;
       }
-      body = body || err.message;
-      await showDialog({ title, body, buttons });
-      return;
+      error.message = body || err.message;
     } else {
-      let body = err.message;
-      await showDialog({ title, body, buttons });
-      return;
+      error.message = err.message;
     }
+    await showErrorMessage(title, error);
+    return;
   }
 
   /**

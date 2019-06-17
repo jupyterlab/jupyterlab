@@ -48,13 +48,25 @@ export function showErrorMessage(
 ): Promise<void> {
   console.warn('Showing error:', error);
 
-  return showDialog({
-    title: title,
-    body: error.message || title,
-    buttons: buttons
-  }).then(() => {
-    /* no-op */
-  });
+  // Cache promises to prevent multiple copies of identical dialogs showing
+  // to the user.
+  let body = error.message || title;
+  let key = title + '----' + body;
+  let promise = Private.errorMessagePromiseCache.get(key);
+  if (promise) {
+    console.log(key);
+    return promise;
+  } else {
+    let dialogPromise = showDialog({
+      title: title,
+      body: body,
+      buttons: buttons
+    }).then(() => {
+      Private.errorMessagePromiseCache.delete(key);
+    });
+    Private.errorMessagePromiseCache.set(key, dialogPromise);
+    return dialogPromise;
+  }
 }
 
 /**
@@ -751,6 +763,8 @@ namespace Private {
    * The queue for launching dialogs.
    */
   export let launchQueue: Promise<Dialog.IResult<any>>[] = [];
+
+  export let errorMessagePromiseCache: Map<string, Promise<void>> = new Map();
 
   /**
    * Handle the input options for a dialog.
