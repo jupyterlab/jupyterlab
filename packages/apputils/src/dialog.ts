@@ -54,7 +54,6 @@ export function showErrorMessage(
   let key = title + '----' + body;
   let promise = Private.errorMessagePromiseCache.get(key);
   if (promise) {
-    console.log(key);
     return promise;
   } else {
     let dialogPromise = showDialog({
