@@ -13,7 +13,6 @@ import {
   JSONExt,
   JSONObject,
   PromiseDelegate,
-  ReadonlyJSONObject,
   ReadonlyJSONValue,
   Token
 } from '@phosphor/coreutils';
@@ -56,42 +55,8 @@ export interface ILayoutRestorer extends IRestorer {
    */
   restore<T extends Widget>(
     tracker: WidgetTracker<T>,
-    options: ILayoutRestorer.IRestoreOptions<T>
+    options: IRestorer.IOptions<T>
   ): Promise<any>;
-}
-
-/**
- * A namespace for the layout restorer.
- */
-export namespace ILayoutRestorer {
-  /**
-   * The state restoration configuration options.
-   */
-  export interface IRestoreOptions<T extends Widget = Widget> {
-    /**
-     * The command to execute when restoring instances.
-     */
-    command: string;
-
-    /**
-     * A function that returns the args needed to restore an instance.
-     */
-    args?: (widget: T) => ReadonlyJSONObject;
-
-    /**
-     * A function that returns a unique persistent name for this instance.
-     */
-    name: (widget: T) => string;
-
-    /**
-     * The point after which it is safe to restore state.
-     *
-     * #### Notes
-     * By definition, this promise or promises will happen after the application
-     * has `started`.
-     */
-    when?: Promise<any> | Array<Promise<any>>;
-  }
 }
 
 /**
@@ -239,7 +204,7 @@ export class LayoutRestorer implements ILayoutRestorer {
    */
   restore(
     tracker: WidgetTracker,
-    options: ILayoutRestorer.IRestoreOptions<Widget>
+    options: IRestorer.IOptions<Widget>
   ): Promise<any> {
     const warning = 'restore() can only be called before `first` has resolved.';
 

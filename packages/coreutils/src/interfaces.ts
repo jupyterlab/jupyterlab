@@ -240,6 +240,38 @@ export interface IRestorer<
 }
 
 /**
+ * A namespace for `IRestorer` interface definitions.
+ */
+export namespace IRestorer {
+  /**
+   * The state restoration configuration options.
+   *
+   * @typeparam T - The type of object held by the restorable collection.
+   */
+  export interface IOptions<T extends IObservableDisposable> {
+    /**
+     * The command to execute when restoring instances.
+     */
+    command: string;
+
+    /**
+     * A function that returns the args needed to restore an instance.
+     */
+    args?: (obj: T) => ReadonlyJSONObject;
+
+    /**
+     * A function that returns a unique persistent name for this instance.
+     */
+    name: (obj: T) => string;
+
+    /**
+     * The point after which it is safe to restore state.
+     */
+    when?: Promise<any> | Array<Promise<any>>;
+  }
+}
+
+/**
  * An interface for objects that can be restored.
  *
  * @typeparam T - The type of object held by the restorable collection.
@@ -272,35 +304,16 @@ export namespace IRestorable {
    *
    * @typeparam T - The type of object held by the restorable collection.
    */
-  export interface IOptions<T extends IObservableDisposable> {
-    /**
-     * The command to execute when restoring instances.
-     */
-    command: string;
-
+  export interface IOptions<T extends IObservableDisposable>
+    extends IRestorer.IOptions<T> {
     /**
      * The data connector to fetch restore data.
      */
     connector: IDataConnector<ReadonlyJSONValue>;
 
     /**
-     * A function that returns the args needed to restore an instance.
-     */
-    args?: (obj: T) => ReadonlyJSONObject;
-
-    /**
-     * A function that returns a unique persistent name for this instance.
-     */
-    name: (obj: T) => string;
-
-    /**
      * The command registry which holds the restore command.
      */
     registry: CommandRegistry;
-
-    /**
-     * The point after which it is safe to restore state.
-     */
-    when?: Promise<any> | Array<Promise<any>>;
   }
 }
