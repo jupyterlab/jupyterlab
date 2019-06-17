@@ -42,7 +42,7 @@
     "@jupyterlab/launcher": "^1.0.0-alpha.11",
     "@jupyterlab/mainmenu": "^1.0.0-alpha.11",
     "@jupyterlab/terminal": "^1.0.0-alpha.11",
-    "@phosphor/widgets": "^1.7.1"
+    "@phosphor/widgets": "^1.8.0"
   },
   "devDependencies": {
     "@types/webpack-env": "^1.13.9",
