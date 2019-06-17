@@ -3,7 +3,7 @@
 
 import { JSONExt, PromiseDelegate } from '@phosphor/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IObservableDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -180,7 +180,7 @@ export namespace IPoll {
  * Defaults to `standby`, which already exists in the `Phase` type.
  */
 export class Poll<T = any, U = any, V extends string = 'standby'>
-  implements IDisposable, IPoll<T, U, V> {
+  implements IObservableDisposable, IPoll<T, U, V> {
   /**
    * Instantiate a new poll with exponential backoff in case of failure.
    *
