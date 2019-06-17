@@ -141,7 +141,7 @@ async function activateConsole(
   const { commands, shell } = app;
   const category = 'Console';
 
-  // Create widget tracker for all console panels.
+  // Create a widget tracker for all console panels.
   const tracker = new WidgetTracker<ConsolePanel>({ namespace: 'console' });
 
   // Handle state restoration.
