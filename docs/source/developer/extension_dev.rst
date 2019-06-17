@@ -25,7 +25,7 @@ See :ref:`xkcd_extension_tutorial` to learn how to make a simple JupyterLab exte
 
 A JupyterLab application is comprised of:
 
--  A core Applicaztion object
+-  A core Application object
 -  Plugins
 
 Plugins
