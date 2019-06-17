@@ -43,9 +43,9 @@ override the ``render`` method to return a React element:
     import { ReactWidget } from '@jupyterlab/apputils';
 
     class MyWidget extends ReactWidget {
-        render() {
-            return <div>My Widget</div>
-        }
+      render() {
+        return <div>My Widget</div>;
+      }
     }
     const myWidget: Widget = new MyWidget();
 
