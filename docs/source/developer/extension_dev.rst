@@ -233,6 +233,9 @@ that points to the parent directory's ``karma`` config, and a test runner,
 ``run-test.py`` that starts a Jupyter server.
 
 
+
+.. _rendermime:
+
 Mime Renderer Extensions
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

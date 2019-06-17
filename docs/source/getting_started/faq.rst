@@ -24,12 +24,13 @@ Development
 -  In the classic Notebook, `I could use custom Javascript outputed by a cell to programatically
    control the Notebook <https://stackoverflow.com/a/32769976/907060>`__. Can I do the same thing in JupyterLab?
 
-   We intentially do not support this workflow. Instead, we reccomend you display a new mimetype and define a
-   custom renderer for that in a JupyterLab extension. This makes sure the output is not tied directly to JupyterLab
-   so that another frontend could still render it. Also, if the JupyterLab API changes then
-   this change can be supported in your extension and the existing notebooks will still work without changing their
-   outputs. If you have comments or suggestions on changes here, we have `an issue <https://github.com/jupyterlab/jupyterlab/issues/4623>`__
-   to discuss this decision.
+   JupyterLab was built to support a wide variety of extensibility, including dynamic behavior based on notebook
+   outputs.To access this extensability, you should write a custom JuptyerLab extension. If you would
+   like trigger some behavior in response to the user executing some code in a notebook, you can output a custom
+   mimetype (:ref:`rendermime`). We currently don't allow access to the JupyterLab
+   API from the Javsacript renderer, because this would tie the kernel and the notebook output to JupyterLab
+   and make it hard for other frontends to support it. 
+   If you have comments or suggestions on changes here, please comment on `this issue <https://github.com/jupyterlab/jupyterlab/issues/4623>`__.
 
 
 Tips and Tricks
