@@ -384,10 +384,10 @@ might want to use them in your extensions.
 - ``@jupyterlab/fileeditor:IEditorTracker``: A widget tracker for file editors.
   Use this if you want to be able to iterate over and interact with file editors
   created by the application.
-- ``@jupyterlab/htmlviewer:IHTMLViewerTracker``: An instance tracker for rendered HTML documents.
+- ``@jupyterlab/htmlviewer:IHTMLViewerTracker``: A widget tracker for rendered HTML documents.
   Use this if you want to be able to iterate over and interact with HTML documents
   viewed by the application.
-- ``@jupyterlab/imageviewer:IImageTracker``: An instance tracker for images.
+- ``@jupyterlab/imageviewer:IImageTracker``: A widget tracker for images.
   Use this if you want to be able to iterate over and interact with images
   viewed by the application.
 - ``@jupyterlab/inspector:IInspector``: An interface for adding variable inspectors to widgets.
@@ -396,7 +396,7 @@ might want to use them in your extensions.
   Use this to add your extension activities to the launcher panel.
 - ``@jupyterlab/mainmenu:IMainMenu``: An interface to the main menu bar for the application.
   Use this if you want to add your own menu items.
-- ``@jupyterlab/markdownviewer:IMarkdownViewerTracker``: An instance tracker for markdown
+- ``@jupyterlab/markdownviewer:IMarkdownViewerTracker``: A widget tracker for markdown
   document viewers. Use this if you want to iterate over and interact with rendered markdown documents.
 - ``@jupyterlab/notebook:INotebookTools``: An interface to the ``Notebook Tools`` panel in the
   application left area. Use this to add your own functionality to the panel.
@@ -416,12 +416,12 @@ might want to use them in your extensions.
   created by the application.
 - ``@jupyterlab/statusbar:IStatusBar``: An interface to the status bar on the application.
   Use this if you want to add new status bar items.
-- ``@jupyterlab/terminal:ITerminalTracker``: An instance tracker for terminals.
+- ``@jupyterlab/terminal:ITerminalTracker``: A widget tracker for terminals.
   Use this if you want to be able to iterate over and interact with terminals
   created by the application.
 - ``@jupyterlab/tooltip:ITooltipManager``: An interface to the tooltip manager for the application.
   Use this to allow your extension to invoke a tooltip.
-- ``@jupyterlab/vdom:IVDOMTracker``: An instance tracker for virtual DOM (VDOM) documents.
+- ``@jupyterlab/vdom:IVDOMTracker``: A widget tracker for virtual DOM (VDOM) documents.
   Use the to iterate over and interact with VDOM instances created by the application.
 
 Standard Extension Example
