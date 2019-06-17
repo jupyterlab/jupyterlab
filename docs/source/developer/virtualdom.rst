@@ -55,8 +55,8 @@ data that changes over time in JupyterLab.
 To have your React element change in response to a signal event, use the ``UseSignal`` component,
 which implements the `"render props" <https://reactjs.org/docs/render-props.html>`__.
 
-The `running component <https://github.com/jupyterlab/jupyterlab/blob/79e03992b2964063a917184072be3c8819cefa19/packages/running/src/index.tsx>`__
-and the `search overlay <https://github.com/jupyterlab/jupyterlab/blob/2834c11945232c3901282a870224ba80a009cf8f/packages/documentsearch/src/searchoverlay.tsx#L439-L458>`__
+The `running component <https://github.com/jupyterlab/jupyterlab/blob/master/packages/running/src/index.tsx>`__
+and the ``createSearchOverlay`` function in the `search overlay <https://github.com/jupyterlab/jupyterlab/blob/master/packages/documentsearch/src/searchoverlay.tsx>`__
 use both of these features and serve as a good reference for best practices.
 
 We follow the `React documentation <https://reactjs.org/docs/thinking-in-react.html>`__ and
