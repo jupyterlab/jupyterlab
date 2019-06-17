@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { InstanceTracker } from '@jupyterlab/coreutils';
+import { RestorablePool } from '@jupyterlab/coreutils';
 
 import { signalToPromise } from '@jupyterlab/testutils';
 
@@ -11,7 +11,7 @@ import { IObservableDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-const namespace = 'instance-tracker-test';
+const namespace = 'restorable-pool-test';
 
 class ObservableDisposable implements IObservableDisposable {
   constructor(public id: string = '') {
@@ -40,53 +40,53 @@ class ObservableDisposable implements IObservableDisposable {
 }
 
 describe('@jupyterlab/coreutils', () => {
-  describe('InstanceTracker', () => {
-    let tracker: InstanceTracker<ObservableDisposable>;
+  describe('RestorablePool', () => {
+    let pool: RestorablePool<ObservableDisposable>;
 
     beforeEach(() => {
-      tracker = new InstanceTracker({ namespace });
+      pool = new RestorablePool({ namespace });
     });
 
     afterEach(() => {
-      tracker.dispose();
+      pool.dispose();
     });
 
     describe('#constructor()', () => {
-      it('should create an InstanceTracker', () => {
-        expect(tracker).to.be.an.instanceof(InstanceTracker);
+      it('should create a RestorablePool', () => {
+        expect(pool).to.be.an.instanceof(RestorablePool);
       });
     });
 
     describe('#added', () => {
       it('should emit when an instance has been added', async () => {
         const instance = new ObservableDisposable();
-        const promise = signalToPromise(tracker.added);
-        await tracker.add(instance);
+        const promise = signalToPromise(pool.added);
+        await pool.add(instance);
         const [sender, args] = await promise;
-        expect(sender).to.equal(tracker);
+        expect(sender).to.equal(pool);
         expect(args).to.equal(instance);
         instance.dispose();
       });
     });
     describe('#current', () => {
       it('should default to null', () => {
-        expect(tracker.current).to.be.null;
+        expect(pool.current).to.be.null;
       });
 
       it('should be settable by client code', async () => {
         const instance = new ObservableDisposable();
-        void tracker.add(instance);
-        expect(tracker.current).to.equal(null);
-        tracker.current = instance;
-        expect(tracker.current).to.equal(instance);
+        void pool.add(instance);
+        expect(pool.current).to.equal(null);
+        pool.current = instance;
+        expect(pool.current).to.equal(instance);
         instance.dispose();
       });
 
       it('should be a no-op if set to an untracked instance', async () => {
         const instance = new ObservableDisposable();
-        expect(tracker.current).to.equal(null);
-        tracker.current = instance;
-        expect(tracker.current).to.equal(null);
+        expect(pool.current).to.equal(null);
+        pool.current = instance;
+        expect(pool.current).to.equal(null);
         instance.dispose();
       });
     });
@@ -94,38 +94,38 @@ describe('@jupyterlab/coreutils', () => {
     describe('#currentChanged', () => {
       it('should emit when the current object has been updated', async () => {
         const instance = new ObservableDisposable();
-        const promise = signalToPromise(tracker.currentChanged);
-        void tracker.add(instance);
-        tracker.current = instance;
+        const promise = signalToPromise(pool.currentChanged);
+        void pool.add(instance);
+        pool.current = instance;
         await promise;
         instance.dispose();
       });
     });
 
     describe('#isDisposed', () => {
-      it('should test whether the tracker is disposed', () => {
-        expect(tracker.isDisposed).to.equal(false);
-        tracker.dispose();
-        expect(tracker.isDisposed).to.equal(true);
+      it('should test whether the pool is disposed', () => {
+        expect(pool.isDisposed).to.equal(false);
+        pool.dispose();
+        expect(pool.isDisposed).to.equal(true);
       });
     });
 
     describe('#add()', () => {
-      it('should add an instance to the tracker', async () => {
+      it('should add an instance to the pool', async () => {
         const instance = new ObservableDisposable();
-        expect(tracker.has(instance)).to.equal(false);
-        await tracker.add(instance);
-        expect(tracker.has(instance)).to.equal(true);
+        expect(pool.has(instance)).to.equal(false);
+        await pool.add(instance);
+        expect(pool.has(instance)).to.equal(true);
       });
 
       it('should reject an instance that already exists', async () => {
         const instance = new ObservableDisposable();
         let failed = false;
-        expect(tracker.has(instance)).to.equal(false);
-        await tracker.add(instance);
-        expect(tracker.has(instance)).to.equal(true);
+        expect(pool.has(instance)).to.equal(false);
+        await pool.add(instance);
+        expect(pool.has(instance)).to.equal(true);
         try {
-          await tracker.add(instance);
+          await pool.add(instance);
         } catch (error) {
           failed = true;
         }
@@ -135,10 +135,10 @@ describe('@jupyterlab/coreutils', () => {
       it('should reject an instance that is disposed', async () => {
         const instance = new ObservableDisposable();
         let failed = false;
-        expect(tracker.has(instance)).to.equal(false);
+        expect(pool.has(instance)).to.equal(false);
         instance.dispose();
         try {
-          await tracker.add(instance);
+          await pool.add(instance);
         } catch (error) {
           failed = true;
         }
@@ -147,25 +147,25 @@ describe('@jupyterlab/coreutils', () => {
 
       it('should remove an added instance if it is disposed', async () => {
         const instance = new ObservableDisposable();
-        await tracker.add(instance);
-        expect(tracker.has(instance)).to.equal(true);
+        await pool.add(instance);
+        expect(pool.has(instance)).to.equal(true);
         instance.dispose();
-        expect(tracker.has(instance)).to.equal(false);
+        expect(pool.has(instance)).to.equal(false);
       });
     });
 
     describe('#dispose()', () => {
-      it('should dispose of the resources used by the tracker', () => {
-        expect(tracker.isDisposed).to.equal(false);
-        tracker.dispose();
-        expect(tracker.isDisposed).to.equal(true);
+      it('should dispose of the resources used by the pool', () => {
+        expect(pool.isDisposed).to.equal(false);
+        pool.dispose();
+        expect(pool.isDisposed).to.equal(true);
       });
 
       it('should be safe to call multiple times', () => {
-        expect(tracker.isDisposed).to.equal(false);
-        tracker.dispose();
-        tracker.dispose();
-        expect(tracker.isDisposed).to.equal(true);
+        expect(pool.isDisposed).to.equal(false);
+        pool.dispose();
+        pool.dispose();
+        expect(pool.isDisposed).to.equal(true);
       });
     });
 
@@ -174,10 +174,10 @@ describe('@jupyterlab/coreutils', () => {
         const instanceA = new ObservableDisposable('A');
         const instanceB = new ObservableDisposable('B');
         const instanceC = new ObservableDisposable('C');
-        void tracker.add(instanceA);
-        void tracker.add(instanceB);
-        void tracker.add(instanceC);
-        expect(tracker.find(obj => obj.id === 'B')).to.equal(instanceB);
+        void pool.add(instanceA);
+        void pool.add(instanceB);
+        void pool.add(instanceC);
+        expect(pool.find(obj => obj.id === 'B')).to.equal(instanceB);
         instanceA.dispose();
         instanceB.dispose();
         instanceC.dispose();
@@ -187,10 +187,10 @@ describe('@jupyterlab/coreutils', () => {
         const instanceA = new ObservableDisposable('A');
         const instanceB = new ObservableDisposable('B');
         const instanceC = new ObservableDisposable('C');
-        void tracker.add(instanceA);
-        void tracker.add(instanceB);
-        void tracker.add(instanceC);
-        expect(tracker.find(widget => widget.id === 'D')).to.not.be.ok;
+        void pool.add(instanceA);
+        void pool.add(instanceB);
+        void pool.add(instanceC);
+        expect(pool.find(widget => widget.id === 'D')).to.not.be.ok;
         instanceA.dispose();
         instanceB.dispose();
         instanceC.dispose();
@@ -202,10 +202,10 @@ describe('@jupyterlab/coreutils', () => {
         const instanceA = new ObservableDisposable('include-A');
         const instanceB = new ObservableDisposable('include-B');
         const instanceC = new ObservableDisposable('exclude-C');
-        void tracker.add(instanceA);
-        void tracker.add(instanceB);
-        void tracker.add(instanceC);
-        const list = tracker.filter(obj => obj.id.indexOf('include') !== -1);
+        void pool.add(instanceA);
+        void pool.add(instanceB);
+        void pool.add(instanceC);
+        const list = pool.filter(obj => obj.id.indexOf('include') !== -1);
         expect(list.length).to.equal(2);
         expect(list[0]).to.equal(instanceA);
         expect(list[1]).to.equal(instanceB);
@@ -218,10 +218,10 @@ describe('@jupyterlab/coreutils', () => {
         const instanceA = new ObservableDisposable('A');
         const instanceB = new ObservableDisposable('B');
         const instanceC = new ObservableDisposable('C');
-        void tracker.add(instanceA);
-        void tracker.add(instanceB);
-        void tracker.add(instanceC);
-        expect(tracker.filter(widget => widget.id === 'D').length).to.equal(0);
+        void pool.add(instanceA);
+        void pool.add(instanceB);
+        void pool.add(instanceC);
+        expect(pool.filter(widget => widget.id === 'D').length).to.equal(0);
         instanceA.dispose();
         instanceB.dispose();
         instanceC.dispose();
@@ -234,10 +234,10 @@ describe('@jupyterlab/coreutils', () => {
         const instanceB = new ObservableDisposable('B');
         const instanceC = new ObservableDisposable('C');
         let visited = '';
-        void tracker.add(instanceA);
-        void tracker.add(instanceB);
-        void tracker.add(instanceC);
-        tracker.forEach(obj => {
+        void pool.add(instanceA);
+        void pool.add(instanceB);
+        void pool.add(instanceC);
+        pool.forEach(obj => {
           visited += obj.id;
         });
         expect(visited).to.equal('ABC');
@@ -245,11 +245,11 @@ describe('@jupyterlab/coreutils', () => {
     });
 
     describe('#has()', () => {
-      it('should return `true` if an item exists in the tracker', () => {
+      it('should return `true` if an item exists in the pool', () => {
         const instance = new ObservableDisposable();
-        expect(tracker.has(instance)).to.equal(false);
-        void tracker.add(instance);
-        expect(tracker.has(instance)).to.equal(true);
+        expect(pool.has(instance)).to.equal(false);
+        void pool.add(instance);
+        expect(pool.has(instance)).to.equal(true);
       });
     });
   });

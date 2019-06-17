@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { InstanceTracker, IRestorable } from '@jupyterlab/coreutils';
+import { IRestorable, RestorablePool } from '@jupyterlab/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -121,31 +121,30 @@ export class WidgetTracker<T extends Widget = Widget>
    */
   constructor(options: WidgetTracker.IOptions) {
     const focus = (this._focusTracker = new FocusTracker());
-    const instances = (this._instanceTracker = new InstanceTracker(options));
+    const pool = (this._pool = new RestorablePool(options));
 
     this.namespace = options.namespace;
 
     focus.currentChanged.connect((_, current) => {
       if (current.newValue !== this.currentWidget) {
-        instances.current = current.newValue;
+        pool.current = current.newValue;
       }
     }, this);
 
-    instances.added.connect((_, widget) => {
+    pool.added.connect((_, widget) => {
       this._widgetAdded.emit(widget);
     }, this);
 
-    instances.currentChanged.connect((_, widget) => {
+    pool.currentChanged.connect((_, widget) => {
       if (widget === null && focus.currentWidget) {
-        instances.current = focus.currentWidget;
+        pool.current = focus.currentWidget;
         return;
       }
       this.onCurrentChanged(widget);
       this._currentChanged.emit(widget);
     }, this);
 
-    // InstanceTracker#updated
-    instances.updated.connect((_, widget) => {
+    pool.updated.connect((_, widget) => {
       this._widgetUpdated.emit(widget);
     }, this);
   }
@@ -170,21 +169,21 @@ export class WidgetTracker<T extends Widget = Widget>
    * widget if no widget has taken focus.
    */
   get currentWidget(): T | null {
-    return this._instanceTracker.current || null;
+    return this._pool.current || null;
   }
 
   /**
-   * A promise resolved when the instance tracker has been restored.
+   * A promise resolved when the tracker has been restored.
    */
   get restored(): Promise<void> {
-    return this._instanceTracker.restored;
+    return this._pool.restored;
   }
 
   /**
    * The number of widgets held by the tracker.
    */
   get size(): number {
-    return this._instanceTracker.size;
+    return this._pool.size;
   }
 
   /**
@@ -209,17 +208,11 @@ export class WidgetTracker<T extends Widget = Widget>
    * Add a new widget to the tracker.
    *
    * @param widget - The widget being added.
-   *
-   * #### Notes
-   * When widget is added its state is saved with the data connector.
-   * This function returns a promise that is resolved when that saving
-   * is completed. However, the instance is added to the in-memory tracker
-   * synchronously, and is available to use before the promise is resolved.
    */
   async add(widget: T): Promise<void> {
     this._focusTracker.add(widget);
-    await this._instanceTracker.add(widget);
-    this._instanceTracker.current = widget;
+    await this._pool.add(widget);
+    this._pool.current = widget;
   }
 
   /**
@@ -237,7 +230,7 @@ export class WidgetTracker<T extends Widget = Widget>
       return;
     }
     this._isDisposed = true;
-    this._instanceTracker.dispose();
+    this._pool.dispose();
     this._focusTracker.dispose();
     Signal.clearData(this);
   }
@@ -251,7 +244,7 @@ export class WidgetTracker<T extends Widget = Widget>
    * If no widget is found, the value returned is `undefined`.
    */
   find(fn: (widget: T) => boolean): T | undefined {
-    return this._instanceTracker.find(fn);
+    return this._pool.find(fn);
   }
 
   /**
@@ -260,7 +253,7 @@ export class WidgetTracker<T extends Widget = Widget>
    * @param fn - The function to call on each widget.
    */
   forEach(fn: (widget: T) => void): void {
-    return this._instanceTracker.forEach(fn);
+    return this._pool.forEach(fn);
   }
 
   /**
@@ -269,26 +262,27 @@ export class WidgetTracker<T extends Widget = Widget>
    * @param fn - The function by which to filter.
    */
   filter(fn: (widget: T) => boolean): T[] {
-    return this._instanceTracker.filter(fn);
+    return this._pool.filter(fn);
   }
 
   /**
-   * Inject a foreign widget into the instance tracker.
+   * Inject a foreign widget into the widget tracker.
    *
    * @param widget - The widget to inject into the tracker.
    *
    * #### Notes
-   * Any widgets injected into an instance tracker will not have their state
-   * saved by the tracker. The primary use case for widget injection is for a
-   * plugin that offers a sub-class of an extant plugin to have its instances
-   * share the same commands as the parent plugin (since most relevant commands
-   * will use the `currentWidget` of the parent plugin's instance tracker). In
-   * this situation, the sub-class plugin may well have its own instance tracker
-   * for layout and state restoration in addition to injecting its widgets into
-   * the parent plugin's instance tracker.
+   * Injected widgets will not have their state saved by the tracker.
+   *
+   * The primary use case for widget injection is for a plugin that offers a
+   * sub-class of an extant plugin to have its instances share the same commands
+   * as the parent plugin (since most relevant commands will use the
+   * `currentWidget` of the parent plugin's widget tracker). In this situation,
+   * the sub-class plugin may well have its own widget tracker for layout and
+   * state restoration in addition to injecting its widgets into the parent
+   * plugin's widget tracker.
    */
   inject(widget: T): Promise<void> {
-    return this._instanceTracker.inject(widget);
+    return this._pool.inject(widget);
   }
 
   /**
@@ -297,7 +291,7 @@ export class WidgetTracker<T extends Widget = Widget>
    * @param widget - The widget whose existence is being checked.
    */
   has(widget: Widget): boolean {
-    return this._instanceTracker.has(widget as any);
+    return this._pool.has(widget as any);
   }
 
   /**
@@ -308,13 +302,11 @@ export class WidgetTracker<T extends Widget = Widget>
    * @returns A promise that resolves when restoration has completed.
    *
    * #### Notes
-   * This function should almost never be invoked by client code. Its primary
-   * use case is to be invoked by a layout restorer plugin that handles
-   * multiple instance trackers and, when ready, asks them each to restore their
-   * respective widgets.
+   * This function should not typically be invoked by client code.
+   * Its primary use case is to be invoked by a restorer.
    */
   async restore(options: IRestorable.IOptions<T>): Promise<any> {
-    return this._instanceTracker.restore(options);
+    return this._pool.restore(options);
   }
 
   /**
@@ -323,7 +315,7 @@ export class WidgetTracker<T extends Widget = Widget>
    * @param widget - The widget being saved.
    */
   async save(widget: T): Promise<void> {
-    return this._instanceTracker.save(widget);
+    return this._pool.save(widget);
   }
 
   /**
@@ -338,7 +330,7 @@ export class WidgetTracker<T extends Widget = Widget>
 
   private _currentChanged = new Signal<this, T>(this);
   private _focusTracker: FocusTracker<T>;
-  private _instanceTracker: InstanceTracker<T>;
+  private _pool: RestorablePool<T>;
   private _isDisposed = false;
   private _widgetAdded = new Signal<this, T>(this);
   private _widgetUpdated = new Signal<this, T>(this);

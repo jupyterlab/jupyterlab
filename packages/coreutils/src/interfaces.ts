@@ -105,17 +105,17 @@ export interface IDataConnector<T, U = T, V = string> {
 }
 
 /**
- * A tracker that tracks instances of a generic objects.
+ * A pool of objects whose disposable lifecycle is tracked.
  *
- * @typeparam T - The type of object being tracked.
+ * @typeparam T - The type of object held in the pool.
  */
-export interface IInstanceTracker<T extends IObservableDisposable>
+export interface IObjectPool<T extends IObservableDisposable>
   extends IDisposable {
   /**
-   * A signal emitted when an instance is added.
+   * A signal emitted when an object is added.
    *
    * ####
-   * This signal does not emit if an instance is added using `inject()`.
+   * This signal does not emit if an object is added using `inject()`.
    */
   readonly added: ISignal<this, T>;
 
@@ -125,7 +125,7 @@ export interface IInstanceTracker<T extends IObservableDisposable>
   readonly current: T | null;
 
   /**
-   * A signal emitted when the current instance changes.
+   * A signal emitted when the current object instance changes.
    *
    * #### Notes
    * If the last instance being tracked is disposed, `null` will be emitted.
@@ -136,12 +136,6 @@ export interface IInstanceTracker<T extends IObservableDisposable>
    * The number of instances held by the tracker.
    */
   readonly size: number;
-
-  /**
-   * A promise that is resolved when the instance tracker has been
-   * restored from a serialized state.
-   */
-  readonly restored: Promise<void>;
 
   /**
    * A signal emitted when an instance is updated.
@@ -219,10 +213,13 @@ export interface IRateLimiter<T = any, U = any> extends IDisposable {
  * @typeparam T - The restorable collection's type.
  *
  * @typeparam U - The type of object held by the restorable collection.
+ *
+ * @typeparam V - The `restored` promise resolution type. Defaults to `any`.
  */
 export interface IRestorer<
   T extends IRestorable<U> = IRestorable<IObservableDisposable>,
-  U extends IObservableDisposable = IObservableDisposable
+  U extends IObservableDisposable = IObservableDisposable,
+  V = any
 > {
   /**
    * Restore the objects in a given restorable collection.
@@ -231,27 +228,39 @@ export interface IRestorer<
    *
    * @param options - The configuration options that describe restoration.
    *
-   * @returns A promise that settles when restoration has completed with `any`
-   * results.
+   * @returns A promise that settles when restored with `any` results.
    *
    */
-  restore(restorable: T, options: IRestorable.IOptions<U>): Promise<any>;
+  restore(restorable: T, options: IRestorable.IOptions<U>): Promise<V>;
+
+  /**
+   * A promise that settles when the collection has been restored.
+   */
+  readonly restored: Promise<V>;
 }
 
 /**
  * An interface for objects that can be restored.
+ *
+ * @typeparam T - The type of object held by the restorable collection.
+ *
+ * @typeparam U - The `restored` promise resolution type. Defaults to `any`.
  */
-export interface IRestorable<T extends IObservableDisposable> {
+export interface IRestorable<T extends IObservableDisposable, U = any> {
   /**
-   * Restore the objects this restorable collection.
+   * Restore the objects in this restorable collection.
    *
    * @param options - The configuration options that describe restoration.
    *
-   * @returns A promise that settles when restoration has completed with `any`
-   * results.
+   * @returns A promise that settles when restored with `any` results.
    *
    */
-  restore(options: IRestorable.IOptions<T>): Promise<any>;
+  restore(options: IRestorable.IOptions<T>): Promise<U>;
+
+  /**
+   * A promise that settles when the collection has been restored.
+   */
+  readonly restored: Promise<U>;
 }
 
 /**

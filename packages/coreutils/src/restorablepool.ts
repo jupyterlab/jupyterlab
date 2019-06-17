@@ -9,22 +9,22 @@ import { AttachedProperty } from '@phosphor/properties';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { IInstanceTracker, IRestorable } from './interfaces';
+import { IObjectPool, IRestorable } from './interfaces';
 
 /**
- * A class that keeps track of widget instances on an Application shell.
+ * An object pool that supports restoration.
  *
  * @typeparam T - The type of object being tracked.
  */
-export class InstanceTracker<
+export class RestorablePool<
   T extends IObservableDisposable = IObservableDisposable
-> implements IInstanceTracker<T>, IRestorable<T> {
+> implements IObjectPool<T>, IRestorable<T> {
   /**
    * Create a new instance tracker.
    *
    * @param options - The instantiation options for an instance tracker.
    */
-  constructor(options: InstanceTracker.IOptions) {
+  constructor(options: RestorablePool.IOptions) {
     this.namespace = options.namespace;
   }
 
@@ -336,15 +336,15 @@ export class InstanceTracker<
 }
 
 /**
- * A namespace for `InstanceTracker` statics.
+ * A namespace for `RestorablePool` statics.
  */
-export namespace InstanceTracker {
+export namespace RestorablePool {
   /**
-   * The instantiation options for an instance tracker.
+   * The instantiation options for the restorable pool.
    */
   export interface IOptions {
     /**
-     * A namespace for all tracked widgets, (e.g., `notebook`).
+     * A namespace designating objects from this pool.
      */
     namespace: string;
   }
