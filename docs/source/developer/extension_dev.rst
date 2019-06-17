@@ -3,11 +3,6 @@
 Extension Developer Guide
 -------------------------
 
-.. warning::
-
-   The extension developer API is not stable and will evolve in JupyterLab
-   releases in the near future.
-
 JupyterLab can be extended in four ways via:
 
 -  **application plugins (top level):** Application plugins extend the
@@ -315,6 +310,8 @@ with each other through typed interfaces that are provided by ``Token`` objects.
 An extension can provide a ``Token`` to the application,
 which other extensions can then request for their own use.
 
+.. _tokens:
+
 Core Tokens
 ^^^^^^^^^^^
 
@@ -326,7 +323,7 @@ might want to use them in your extensions.
   when JupyterLab has lost its connection to the server. Use this if, for some reason,
   you want to bring up the "connection lost" dialog under new circumstances.
 - ``@jupyterlab/application:IInfo``: A token providing metadata about the current
- application, including currently disabled extensions and whether dev mode is enabled.
+  application, including currently disabled extensions and whether dev mode is enabled.
 - ``@jupyterlab/application:IPaths``: A token providing information about various
   URLs and server paths for the current application. Use this token if you want to
   assemble URLs to use the JupyterLab REST API.
