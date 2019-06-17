@@ -5,7 +5,7 @@
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 
-import { IDataConnector } from '@jupyterlab/coreutils';
+import { IDataConnector, IRestorer } from '@jupyterlab/coreutils';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -36,7 +36,7 @@ export const ILayoutRestorer = new Token<ILayoutRestorer>(
 /**
  * A static class that restores the widgets of the application when it reloads.
  */
-export interface ILayoutRestorer {
+export interface ILayoutRestorer extends IRestorer {
   /**
    * A promise resolved when the layout restorer is ready to receive signals.
    */
@@ -54,10 +54,10 @@ export interface ILayoutRestorer {
    *
    * @param options - The restoration options.
    */
-  restore<T extends Widget = Widget>(
+  restore<T extends Widget>(
     tracker: WidgetTracker<T>,
     options: ILayoutRestorer.IRestoreOptions<T>
-  ): void;
+  ): Promise<any>;
 }
 
 /**
@@ -112,30 +112,31 @@ const KEY = 'layout-restorer:data';
  * 2. Other plugins that care about state restoration require the layout
  *    restorer as a dependency.
  *
- * 3. As each load-time plugin initializes (which happens before the lab
+ * 3. As each load-time plugin initializes (which happens before the front-end
  *    application has `started`), it instructs the layout restorer whether
- *    the restorer ought to `restore` its state by passing in its tracker.
+ *    the restorer ought to `restore` its widgets by passing in its widget
+ *    tracker.
  *    Alternatively, a plugin that does not require its own instance tracker
  *    (because perhaps it only creates a single widget, like a command palette),
  *    can simply `add` its widget along with a persistent unique name to the
  *    layout restorer so that its layout state can be restored when the lab
  *    application restores.
  *
- * 4. After all the load-time plugins have finished initializing, the lab
+ * 4. After all the load-time plugins have finished initializing, the front-end
  *    application `started` promise will resolve. This is the `first`
  *    promise that the layout restorer waits for. By this point, all of the
  *    plugins that care about restoration will have instructed the layout
- *    restorer to `restore` their state.
+ *    restorer to `restore` their widget trackers.
  *
- * 5. The layout restorer will then instruct each plugin's instance tracker
+ * 5. The layout restorer will then instruct each plugin's widget tracker
  *    to restore its state and reinstantiate whichever widgets it wants. The
  *    tracker returns a promise to the layout restorer that resolves when it
  *    has completed restoring the tracked widgets it cares about.
  *
  * 6. As each instance tracker finishes restoring the widget instances it cares
- *    about, it resolves the promise that was made to the layout restorer
+ *    about, it resolves the promise that was returned to the layout restorer
  *    (in step 5). After all of the promises that the restorer is awaiting have
- *    resolved, the restorer then resolves the outstanding `fetch` promise
+ *    settled, the restorer then resolves the outstanding `fetch` promise
  *    (from step 1) and hands off a layout state object to the application
  *    shell's `restoreLayout` method for restoration.
  *

@@ -70,7 +70,7 @@ export function createRendermimePlugins(
     autoStart: true,
     activate: (app: JupyterFrontEnd, restorer: ILayoutRestorer | null) => {
       if (restorer) {
-        restorer.restore(tracker, {
+        void restorer.restore(tracker, {
           command: 'docmanager:open',
           args: widget => ({
             path: widget.context.path,

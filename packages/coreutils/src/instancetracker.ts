@@ -1,13 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@phosphor/commands';
-
-import {
-  PromiseDelegate,
-  ReadonlyJSONObject,
-  ReadonlyJSONValue
-} from '@phosphor/coreutils';
+import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { IObservableDisposable } from '@phosphor/disposable';
 
@@ -15,7 +9,7 @@ import { AttachedProperty } from '@phosphor/properties';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { IDataConnector, IInstanceTracker } from './interfaces';
+import { IInstanceTracker, IRestorable } from './interfaces';
 
 /**
  * A class that keeps track of widget instances on an Application shell.
@@ -24,7 +18,7 @@ import { IDataConnector, IInstanceTracker } from './interfaces';
  */
 export class InstanceTracker<
   T extends IObservableDisposable = IObservableDisposable
-> implements IInstanceTracker<T> {
+> implements IInstanceTracker<T>, IRestorable<T> {
   /**
    * Create a new instance tracker.
    *
@@ -234,7 +228,7 @@ export class InstanceTracker<
    * multiple instance trackers and, when ready, asks them each to restore their
    * respective instances.
    */
-  async restore(options: InstanceTracker.IRestoreOptions<T>): Promise<any> {
+  async restore(options: IRestorable.IOptions<T>): Promise<any> {
     if (this._hasRestored) {
       throw new Error('Instance tracker has already restored');
     }
@@ -336,7 +330,7 @@ export class InstanceTracker<
   private _hasRestored = false;
   private _instances = new Set<T>();
   private _isDisposed = false;
-  private _restore: InstanceTracker.IRestoreOptions<T> | null = null;
+  private _restore: IRestorable.IOptions<T> | null = null;
   private _restored = new PromiseDelegate<void>();
   private _updated = new Signal<this, T>(this);
 }
@@ -353,45 +347,6 @@ export namespace InstanceTracker {
      * A namespace for all tracked widgets, (e.g., `notebook`).
      */
     namespace: string;
-  }
-
-  /**
-   * The state restoration configuration options.
-   */
-  export interface IRestoreOptions<T extends IObservableDisposable> {
-    /**
-     * The command to execute when restoring instances.
-     */
-    command: string;
-
-    /**
-     * The data connector to fetch restore data.
-     */
-    connector: IDataConnector<ReadonlyJSONValue>;
-
-    /**
-     * A function that returns the args needed to restore an instance.
-     */
-    args?: (obj: T) => ReadonlyJSONObject;
-
-    /**
-     * A function that returns a unique persistent name for this instance.
-     */
-    name: (obj: T) => string;
-
-    /**
-     * The command registry which holds the restore command.
-     */
-    registry: CommandRegistry;
-
-    /**
-     * The point after which it is safe to restore state.
-     *
-     * #### Notes
-     * By definition, this promise or promises will happen after the application
-     * has `started`.
-     */
-    when?: Promise<any> | Array<Promise<any>>;
   }
 }
 

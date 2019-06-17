@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { InstanceTracker } from '@jupyterlab/coreutils';
+import { InstanceTracker, IRestorable } from '@jupyterlab/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -113,7 +113,7 @@ export interface IWidgetTracker<T extends Widget = Widget> extends IDisposable {
  * internally by plugins to restore state as well.
  */
 export class WidgetTracker<T extends Widget = Widget>
-  implements IWidgetTracker<T> {
+  implements IWidgetTracker<T>, IRestorable<T> {
   /**
    * Create a new widget tracker.
    *
@@ -313,7 +313,7 @@ export class WidgetTracker<T extends Widget = Widget>
    * multiple instance trackers and, when ready, asks them each to restore their
    * respective widgets.
    */
-  async restore(options: WidgetTracker.IRestoreOptions<T>): Promise<any> {
+  async restore(options: IRestorable.IOptions<T>): Promise<any> {
     return this._instanceTracker.restore(options);
   }
 
@@ -357,10 +357,4 @@ export namespace WidgetTracker {
      */
     namespace: string;
   }
-
-  /**
-   * The state restoration configuration options.
-   */
-  export interface IRestoreOptions<T extends Widget>
-    extends InstanceTracker.IRestoreOptions<T> {}
 }

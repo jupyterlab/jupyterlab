@@ -1,6 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { CommandRegistry } from '@phosphor/commands';
+
+import { ReadonlyJSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
+
 import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
 
 import { ISignal } from '@phosphor/signaling';
@@ -207,4 +211,87 @@ export interface IRateLimiter<T = any, U = any> extends IDisposable {
    * Stop the function if it is mid-flight.
    */
   stop(): Promise<void>;
+}
+
+/**
+ * An interface for a state restorer.
+ *
+ * @typeparam T - The restorable collection's type.
+ *
+ * @typeparam U - The type of object held by the restorable collection.
+ */
+export interface IRestorer<
+  T extends IRestorable<U> = IRestorable<IObservableDisposable>,
+  U extends IObservableDisposable = IObservableDisposable
+> {
+  /**
+   * Restore the objects in a given restorable collection.
+   *
+   * @param restorable - The restorable collection being restored.
+   *
+   * @param options - The configuration options that describe restoration.
+   *
+   * @returns A promise that settles when restoration has completed with `any`
+   * results.
+   *
+   */
+  restore(restorable: T, options: IRestorable.IOptions<U>): Promise<any>;
+}
+
+/**
+ * An interface for objects that can be restored.
+ */
+export interface IRestorable<T extends IObservableDisposable> {
+  /**
+   * Restore the objects this restorable collection.
+   *
+   * @param options - The configuration options that describe restoration.
+   *
+   * @returns A promise that settles when restoration has completed with `any`
+   * results.
+   *
+   */
+  restore(options: IRestorable.IOptions<T>): Promise<any>;
+}
+
+/**
+ * A namespace for `IRestorable` interface definitions.
+ */
+export namespace IRestorable {
+  /**
+   * The state restoration configuration options.
+   *
+   * @typeparam T - The type of object held by the restorable collection.
+   */
+  export interface IOptions<T extends IObservableDisposable> {
+    /**
+     * The command to execute when restoring instances.
+     */
+    command: string;
+
+    /**
+     * The data connector to fetch restore data.
+     */
+    connector: IDataConnector<ReadonlyJSONValue>;
+
+    /**
+     * A function that returns the args needed to restore an instance.
+     */
+    args?: (obj: T) => ReadonlyJSONObject;
+
+    /**
+     * A function that returns a unique persistent name for this instance.
+     */
+    name: (obj: T) => string;
+
+    /**
+     * The command registry which holds the restore command.
+     */
+    registry: CommandRegistry;
+
+    /**
+     * The point after which it is safe to restore state.
+     */
+    when?: Promise<any> | Array<Promise<any>>;
+  }
 }
