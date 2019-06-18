@@ -978,11 +978,10 @@ function addCommands(
         // no selection, find the complete statement around the current line
         const cursor = editor.getCursorPosition();
         let srcLines = editor.model.value.text.split('\n');
+        // indentation levels, -1 for empty lines
+        let srcIndents = srcLines.map(x => x.search(/\S/));
         let curLine = selection.start.line;
-        while (
-          curLine < editor.lineCount &&
-          !srcLines[curLine].replace(/\s/g, '').length
-        ) {
+        while (curLine < editor.lineCount && srcIndents[curLine] === -1) {
           curLine += 1;
         }
         // if curLine > 0, we first do a search from beginning
@@ -990,6 +989,22 @@ function addCommands(
         let firstLine = 0;
         let lastLine = firstLine + 1;
         while (true) {
+          // move to first non-empty line
+          while (firstLine < editor.lineCount && srcIndents[firstLine] === -1) {
+            firstLine += 1;
+          }
+          // if firstLine/lastLine was pointing to an empty lines, move lastLine as well
+          if (lastLine <= firstLine) {
+            lastLine = firstLine + 1;
+          }
+          // search for lastLine whose indent is equal to or smaller than the first
+          while (
+            lastLine < editor.lineCount &&
+            (srcIndents[lastLine] === -1 ||
+              srcIndents[lastLine] > srcIndents[firstLine])
+          ) {
+            lastLine += 1;
+          }
           code = srcLines.slice(firstLine, lastLine).join('\n');
           let reply = await current.context.session.kernel.requestIsComplete({
             // ipython needs an empty line at the end to correctly identify completeness of indented code
@@ -1000,7 +1015,7 @@ function addCommands(
               // we find a block of complete statement containing the current line, great!
               while (
                 lastLine < editor.lineCount &&
-                !srcLines[lastLine].replace(/\s/g, '').length
+                srcIndents[lastLine] === -1
               ) {
                 lastLine += 1;
               }
@@ -1028,7 +1043,7 @@ function addCommands(
             code = srcLines[curLine];
             while (
               curLine + 1 < editor.lineCount &&
-              !srcLines[curLine + 1].replace(/\s/g, '').length
+              srcIndents[curLine + 1] === -1
             ) {
               curLine += 1;
             }
