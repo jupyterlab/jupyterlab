@@ -97,6 +97,22 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     return new NotebookPanel({ context, content });
   }
 
+  protected clone(
+    widget: NotebookPanel,
+    context: DocumentRegistry.IContext<INotebookModel>
+  ): NotebookPanel {
+    let nbOptions = {
+      rendermime: widget.rendermime,
+      contentFactory: widget.content.contentFactory,
+      mimeTypeService: this.mimeTypeService,
+      editorConfig: widget.content.editorConfig,
+      notebookConfig: widget.content.notebookConfig
+    };
+    let content = this.contentFactory.createNotebook(nbOptions);
+
+    return new NotebookPanel({ context, content });
+  }
+
   /**
    * Default factory for toolbar items to be added after the widget is created.
    */

@@ -136,5 +136,29 @@ describe('@jupyterlab/notebook', () => {
         expect(toArray(panel2.toolbar.children()).length).to.equal(2);
       });
     });
+
+    describe('#clone()', () => {
+      it('should create a new `NotebookPanel` widget', () => {
+        const factory = createFactory();
+        const panel = factory.createNew(context);
+        const clone = factory.clone(panel, panel.context);
+        expect(clone).to.be.an.instanceof(NotebookPanel);
+      });
+
+      it('should point to the same attributes where possible', () => {
+        const factory = createFactory();
+        const panel = factory.createNew(context);
+        const clone = factory.clone(panel, panel.context);
+        expect(clone).to.be.an.instanceof(NotebookPanel);
+        expect(clone.rendermime).to.equal(panel.rendermime);
+        expect(clone.content.editorConfig).to.equal(panel.content.editorConfig);
+        expect(clone.content.contentFactory).to.equal(
+          panel.content.contentFactory
+        );
+        expect(clone.content.notebookConfig).to.equal(
+          panel.content.notebookConfig
+        );
+      });
+    });
   });
 });
