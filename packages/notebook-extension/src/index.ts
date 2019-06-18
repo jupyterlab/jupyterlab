@@ -993,7 +993,7 @@ function addCommands(
           while (firstLine < editor.lineCount && srcIndents[firstLine] === -1) {
             firstLine += 1;
           }
-          // if firstLine/lastLine was pointing to an empty lines, move lastLine as well
+          // if firstLine moves away from an empty line, move lastLine as well
           if (lastLine <= firstLine) {
             lastLine = firstLine + 1;
           }
