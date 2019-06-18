@@ -20,38 +20,38 @@ export class RestorablePool<
   T extends IObservableDisposable = IObservableDisposable
 > implements IObjectPool<T>, IRestorable<T> {
   /**
-   * Create a new instance tracker.
+   * Create a new restorable pool.
    *
-   * @param options - The instantiation options for an instance tracker.
+   * @param options - The instantiation options for a restorable pool.
    */
   constructor(options: RestorablePool.IOptions) {
     this.namespace = options.namespace;
   }
 
   /**
-   * A signal emitted when an object instance is added.
+   * A signal emitted when an object object is added.
    *
    * #### Notes
-   * This signal will only fire when an instance is added to the tracker.
-   * It will not fire if an instance injected into the tracker.
+   * This signal will only fire when an object is added to the pool.
+   * It will not fire if an object injected into the pool.
    */
   get added(): ISignal<this, T> {
     return this._added;
   }
 
   /**
-   * A namespace for all tracked instances.
+   * A namespace for all tracked objects.
    */
   readonly namespace: string;
 
   /**
-   * The current object instance.
+   * The current object.
    *
    * #### Notes
-   * The instance tracker does not set `current`. It is intended for client use.
+   * The restorable pool does not set `current`. It is intended for client use.
    *
-   * If `current` is set to an instance that does not exist in the tracker, it
-   * is a no-op.
+   * If `current` is set to an object that does not exist in the pool, it is a
+   * no-op.
    */
   get current(): T | null {
     return this._current;
@@ -60,7 +60,7 @@ export class RestorablePool<
     if (this._current === obj) {
       return;
     }
-    if (this._instances.has(obj)) {
+    if (this._objects.has(obj)) {
       this._current = obj;
       this._currentChanged.emit(this._current);
     }
@@ -74,30 +74,30 @@ export class RestorablePool<
   }
 
   /**
-   * A promise resolved when the instance tracker has been restored.
+   * A promise resolved when the restorable pool has been restored.
    */
   get restored(): Promise<void> {
     return this._restored.promise;
   }
 
   /**
-   * The number of instances held by the tracker.
+   * The number of objects held by the pool.
    */
   get size(): number {
-    return this._instances.size;
+    return this._objects.size;
   }
 
   /**
-   * A signal emitted when an instance is updated.
+   * A signal emitted when an object is updated.
    */
   get updated(): ISignal<this, T> {
     return this._updated;
   }
 
   /**
-   * Add a new instance to the tracker.
+   * Add a new object to the pool.
    *
-   * @param obj - The object instance being added.
+   * @param obj - The object object being added.
    */
   async add(obj: T): Promise<void> {
     if (obj.isDisposed) {
@@ -106,13 +106,13 @@ export class RestorablePool<
       throw new Error(warning);
     }
 
-    if (this._instances.has(obj)) {
-      const warning = 'This object already exists in the tracker.';
+    if (this._objects.has(obj)) {
+      const warning = 'This object already exists in the pool.';
       console.warn(warning, obj);
       throw new Error(warning);
     }
 
-    this._instances.add(obj);
+    this._objects.add(obj);
     obj.disposed.connect(this._onInstanceDisposed, this);
 
     if (Private.injectedProperty.get(obj)) {
@@ -137,32 +137,32 @@ export class RestorablePool<
   }
 
   /**
-   * Test whether the tracker is disposed.
+   * Test whether the pool is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
   }
 
   /**
-   * Dispose of the resources held by the tracker.
+   * Dispose of the resources held by the pool.
    */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
     this._current = null;
-    this._instances.clear();
     this._isDisposed = true;
+    this._objects.clear();
     Signal.clearData(this);
   }
 
   /**
-   * Find the first instance in the tracker that satisfies a filter function.
+   * Find the first object in the pool that satisfies a filter function.
    *
-   * @param - fn The filter function to call on each instance.
+   * @param - fn The filter function to call on each object.
    */
   find(fn: (obj: T) => boolean): T | undefined {
-    const values = this._instances.values();
+    const values = this._objects.values();
     for (let value of values) {
       if (fn(value)) {
         return value;
@@ -172,16 +172,16 @@ export class RestorablePool<
   }
 
   /**
-   * Iterate through each instance in the tracker.
+   * Iterate through each object in the pool.
    *
-   * @param fn - The function to call on each instance.
+   * @param fn - The function to call on each object.
    */
   forEach(fn: (obj: T) => void): void {
-    this._instances.forEach(fn);
+    this._objects.forEach(fn);
   }
 
   /**
-   * Filter the instances in the tracker based on a predicate.
+   * Filter the objects in the pool based on a predicate.
    *
    * @param fn - The function by which to filter.
    */
@@ -196,10 +196,10 @@ export class RestorablePool<
   }
 
   /**
-   * Inject an instance into the instance tracker without the tracker handling
-   * its restoration lifecycle.
+   * Inject an object into the restorable pool without the pool handling its
+   * restoration lifecycle.
    *
-   * @param obj - The instance to inject into the tracker.
+   * @param obj - The object to inject into the pool.
    */
   inject(obj: T): Promise<void> {
     Private.injectedProperty.set(obj, true);
@@ -207,16 +207,16 @@ export class RestorablePool<
   }
 
   /**
-   * Check if this tracker has the specified instance.
+   * Check if this pool has the specified object.
    *
    * @param obj - The object whose existence is being checked.
    */
   has(obj: T): boolean {
-    return this._instances.has(obj);
+    return this._objects.has(obj);
   }
 
   /**
-   * Restore the instances in this tracker's namespace.
+   * Restore the objects in this pool's namespace.
    *
    * @param options - The configuration options that describe restoration.
    *
@@ -225,12 +225,12 @@ export class RestorablePool<
    * #### Notes
    * This function should almost never be invoked by client code. Its primary
    * use case is to be invoked by a layout restorer plugin that handles
-   * multiple instance trackers and, when ready, asks them each to restore their
-   * respective instances.
+   * multiple restorable pools and, when ready, asks them each to restore their
+   * respective objects.
    */
   async restore(options: IRestorable.IOptions<T>): Promise<any> {
     if (this._hasRestored) {
-      throw new Error('Instance tracker has already restored');
+      throw new Error('This pool has already been restored.');
     }
 
     this._hasRestored = true;
@@ -264,9 +264,9 @@ export class RestorablePool<
   }
 
   /**
-   * Save the restore data for a given instance.
+   * Save the restore data for a given object.
    *
-   * @param obj - The instance being saved.
+   * @param obj - The object being saved.
    */
   async save(obj: T): Promise<void> {
     const injected = Private.injectedProperty.get(obj);
@@ -298,10 +298,10 @@ export class RestorablePool<
   }
 
   /**
-   * Clean up after disposed instances.
+   * Clean up after disposed objects.
    */
   private _onInstanceDisposed(obj: T): void {
-    this._instances.delete(obj);
+    this._objects.delete(obj);
 
     if (obj === this._current) {
       this._current = null;
@@ -328,8 +328,8 @@ export class RestorablePool<
   private _current: T | null = null;
   private _currentChanged = new Signal<this, T | null>(this);
   private _hasRestored = false;
-  private _instances = new Set<T>();
   private _isDisposed = false;
+  private _objects = new Set<T>();
   private _restore: IRestorable.IOptions<T> | null = null;
   private _restored = new PromiseDelegate<void>();
   private _updated = new Signal<this, T>(this);
@@ -355,7 +355,7 @@ export namespace RestorablePool {
  */
 namespace Private {
   /**
-   * An attached property to indicate whether an instance has been injected.
+   * An attached property to indicate whether an object has been injected.
    */
   export const injectedProperty = new AttachedProperty<
     IObservableDisposable,
@@ -366,7 +366,7 @@ namespace Private {
   });
 
   /**
-   * An attached property for an instance's ID.
+   * An attached property for an object's ID.
    */
   export const nameProperty = new AttachedProperty<
     IObservableDisposable,

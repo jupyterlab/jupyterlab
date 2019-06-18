@@ -750,8 +750,6 @@ Finally, rewrite the ``activate`` function so that it:
 
       // Track and restore the widget state.
       let tracker = new WidgetTracker({ namespace: 'xkcd' });
-
-      // It is safe to ignore the returned restoration promise.
       void restorer.restore(tracker, { command, name: () => 'xkcd' });
     };
 
