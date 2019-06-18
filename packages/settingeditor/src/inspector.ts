@@ -25,7 +25,9 @@ export function createInspector(
   rendermime?: IRenderMimeRegistry
 ): InspectorPanel {
   const connector = new InspectorConnector(editor);
-  const inspector = new InspectorPanel();
+  const inspector = new InspectorPanel({
+    initialContent: 'Any errors will be listed here'
+  });
   const handler = new InspectionHandler({
     connector,
     rendermime:
@@ -76,7 +78,10 @@ class InspectorConnector extends DataConnector<
         const errors = this._validate(request.text);
 
         if (!errors) {
-          return resolve(null);
+          return resolve({
+            data: { 'text/markdown': 'No errors found' },
+            metadata: {}
+          });
         }
 
         resolve({ data: Private.render(errors), metadata: {} });
