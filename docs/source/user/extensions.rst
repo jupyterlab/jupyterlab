@@ -49,7 +49,7 @@ Using the Extension Manager
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To manage your extensions, you can use the extension manager. By default, the
-manager is disabled, but you can enable it with the following steps:
+manager is disabled. You can enable it by searching **Extension Manager** in the command platte. You can also enable it with the following steps:
 
 
    - Go into advanced settings editor.
