@@ -3,24 +3,39 @@
 JupyterLab Changelog
 ====================
 
-v1.0.0 (not released yet)
--------------------------
+v1.0.0 (pre release)
+--------------------
+
 
 See the `JupyterLab
-0.xx.0 <https://github.com/jupyterlab/jupyterlab/milestone/xx?closed=1>`__
+1.0.0 <https://github.com/jupyterlab/jupyterlab/milestone/2?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
-* Restyle The Launcher, Enable Keyboard Navigation (`#6587 <https://github.com/jupyterlab/jupyterlab/pull/6587>`__)
-* Updates To A Mainareawidget Should Propagate To The Content (`#6586 <https://github.com/jupyterlab/jupyterlab/pull/6586>`__, `#6571 <https://github.com/jupyterlab/jupyterlab/issues/6571>`__)
+
 * Lab Config Urls (`#6585 <https://github.com/jupyterlab/jupyterlab/pull/6585>`__, `#6584 <https://github.com/jupyterlab/jupyterlab/issues/6584>`__)
-* Make Extension Management Quiet (`#6567 <https://github.com/jupyterlab/jupyterlab/pull/6567>`__, `#6499 <https://github.com/jupyterlab/jupyterlab/issues/6499>`__, `#5986 <https://github.com/jupyterlab/jupyterlab/issues/5986>`__)
-* Move Theme Dataset Attributes To The Body Element And Namespace Them (`#6566 <https://github.com/jupyterlab/jupyterlab/pull/6566>`__, `#6554 <https://github.com/jupyterlab/jupyterlab/issues/6554>`__)
-* Render An Empty Widget If We Don’t Have A Renderer For The Mimebundle Types. (`#6559 <https://github.com/jupyterlab/jupyterlab/pull/6559>`__, `#6216 <https://github.com/jupyterlab/jupyterlab/issues/6216>`__)
-* Fixes #6557 (`#6558 <https://github.com/jupyterlab/jupyterlab/pull/6558>`__)
-* Fixes #6439: Underhang In Highlighting Of Multiline Selections (`#6556 <https://github.com/jupyterlab/jupyterlab/pull/6556>`__)
-* Change The Filebrowser Home Icon To A Folder (`#6553 <https://github.com/jupyterlab/jupyterlab/pull/6553>`__)
-* Add Home Tooltip Showing Server Root If Available For User Information. (`#6552 <https://github.com/jupyterlab/jupyterlab/pull/6552>`__)
+
+
+UI Changes
+^^^^^^^^^^
+* Support longer kernel names in the launcher and adds support for keyboard navigation (`#6587 <https://github.com/jupyterlab/jupyterlab/pull/6587>`__)
+* If there is no builtin renderer for a MimeType in an output, it will not be displayed instead of showing a warning. (`#6559 <https://github.com/jupyterlab/jupyterlab/pull/6559>`__, `#6216 <https://github.com/jupyterlab/jupyterlab/issues/6216>`__)
+* Fixes a bug when navigating inside of a cell with the keyboard  (`#6558 <https://github.com/jupyterlab/jupyterlab/pull/6558>`__)
+* Fixes a minor UI bug for highlights in a code cell (`#6556 <https://github.com/jupyterlab/jupyterlab/pull/6556>`__)
+* Changes the filebrowser home icon to be a folder and uses a slash to seperate folders in the breadcrumbs (`#6553 <https://github.com/jupyterlab/jupyterlab/pull/6553>`__)
+* Add tooltip to home inon showing server root, if it is available (`#6552 <https://github.com/jupyterlab/jupyterlab/pull/6552>`__)
 * By Default, Add A New Activity In The Main Area After The Current Widget (`#6550 <https://github.com/jupyterlab/jupyterlab/pull/6550>`__, `#6549 <https://github.com/jupyterlab/jupyterlab/issues/6549>`__)
+
+
+Extension Install Changes
+^^^^^^^^^^^^^^^^^^^^^^^^^
+* Installing extensions will be quieter and adds a ``--debug`` to extension installing (`#6567 <https://github.com/jupyterlab/jupyterlab/pull/6567>`__, `#6499 <https://github.com/jupyterlab/jupyterlab/issues/6499>`__, `#5986 <https://github.com/jupyterlab/jupyterlab/issues/5986>`__)
+
+
+Extension Developer Changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* ``updateRequest`` messages on the ``MainAreaWidget`` should propogate to the ``content``, so that you can call update on the parent widget and it will be forwarded (`#6586 <https://github.com/jupyterlab/jupyterlab/pull/6586>`__, `#6571 <https://github.com/jupyterlab/jupyterlab/issues/6571>`__)
+* Renames the data theme attributes and moves them to the body element. If you are relying on these attributes in CSS to conditionally style based on the theme, you should update their names. For example ``data-theme-light`` is now ``data-jp-theme-light``.  (`#6566 <https://github.com/jupyterlab/jupyterlab/pull/6566>`__, `#6554 <https://github.com/jupyterlab/jupyterlab/issues/6554>`__)
+
 * Handle Small Tabs Overflowing And Preserve The Border Bridging For The Active Tab (`#6548 <https://github.com/jupyterlab/jupyterlab/pull/6548>`__, `#6532 <https://github.com/jupyterlab/jupyterlab/issues/6532>`__, `#3986 <https://github.com/jupyterlab/jupyterlab/issues/3986>`__)
 * Fix Jupyterlab/services Readme (`#6547 <https://github.com/jupyterlab/jupyterlab/pull/6547>`__)
 * Added Download Attribute To Download Context Menu Option (`#6546 <https://github.com/jupyterlab/jupyterlab/pull/6546>`__)
@@ -397,12 +412,6 @@ milestone on GitHub for the full list of pull requests and issues closed.
 * Replace Ansi_up With Code From Classic Notebook (`#5336 <https://github.com/jupyterlab/jupyterlab/pull/5336>`__, `#3773 <https://github.com/jupyterlab/jupyterlab/issues/3773>`__)
 
 
-2019
-^^^^
-
-See the `JupyterLab
-1.0.0 <https://github.com/jupyterlab/jupyterlab/milestone/2?closed=1>`__
-milestone on GitHub for the full list of pull requests and issues closed.
 
 Changes in 1.0.0a5
 ^^^^^^^^^^^^^^^^^^
