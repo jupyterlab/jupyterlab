@@ -65,8 +65,11 @@ const RESOURCES = [
     url: 'https://jupyterlab.readthedocs.io/en/stable/'
   },
   {
-    text: 'Notebook Reference',
-    url: 'https://jupyter-notebook.readthedocs.io/en/latest/'
+    text: 'JupyterLab FAQ',
+    url: 'https://jupyterlab.readthedocs.io/en/stable/getting_started/faq.html'
+  },
+  {
+    url: 'https://jupyter.org/documentation'
   },
   {
     text: 'Markdown Reference',
@@ -242,7 +245,7 @@ function activate(
             body,
             buttons: [
               Dialog.createButton({
-                label: 'DISMISS',
+                label: 'Dismiss',
                 className: 'jp-About-button jp-mod-reject jp-mod-styled'
               })
             ]
@@ -335,7 +338,7 @@ function activate(
         body,
         buttons: [
           Dialog.createButton({
-            label: 'DISMISS',
+            label: 'Dismiss',
             className: 'jp-About-button jp-mod-reject jp-mod-styled'
           })
         ]
