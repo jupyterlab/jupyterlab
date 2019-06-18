@@ -86,7 +86,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
   ): NotebookPanel {
     let nbOptions = {
       rendermime: source
-        ? source.rendermime
+        ? source.content.rendermime
         : this.rendermime.clone({ resolver: context.urlResolver }),
       contentFactory: this.contentFactory,
       mimeTypeService: this.mimeTypeService,

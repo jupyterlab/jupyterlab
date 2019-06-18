@@ -102,7 +102,7 @@ describe('@jupyterlab/notebook', () => {
       it('should create a clone of the rendermime', () => {
         const factory = createFactory();
         const panel = factory.createNew(context);
-        expect(panel.rendermime).to.not.equal(rendermime);
+        expect(panel.content.rendermime).to.not.equal(rendermime);
       });
 
       it('should pass the editor config to the notebook', () => {
@@ -141,7 +141,7 @@ describe('@jupyterlab/notebook', () => {
         const panel = factory.createNew(context);
         const clone = factory.createNew(panel.context, panel);
         expect(clone).to.be.an.instanceof(NotebookPanel);
-        expect(clone.rendermime).to.equal(panel.rendermime);
+        expect(clone.content.rendermime).to.equal(panel.content.rendermime);
         expect(clone.content.editorConfig).to.equal(panel.content.editorConfig);
         expect(clone.content.notebookConfig).to.equal(
           panel.content.notebookConfig
