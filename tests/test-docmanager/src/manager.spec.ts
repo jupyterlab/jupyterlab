@@ -47,16 +47,13 @@ class CloneTestWidget extends DocumentWidget {
  */
 class WidgetFactoryWithSharedState extends ABCWidgetFactory<CloneTestWidget> {
   protected createNewWidget(
-    context: DocumentRegistry.Context
+    context: DocumentRegistry.Context,
+    source: CloneTestWidget
   ): CloneTestWidget {
-    return new CloneTestWidget({ context, content: new Widget(), count: 0 });
-  }
-
-  clone(widget: CloneTestWidget, context: DocumentRegistry.Context) {
     return new CloneTestWidget({
       context,
       content: new Widget(),
-      count: widget.counter + 1
+      count: source ? source.counter + 1 : 0
     });
   }
 }
@@ -356,7 +353,7 @@ describe('@jupyterlab/docmanager', () => {
         expect(manager.cloneWidget(widget)).to.be.undefined;
       });
 
-      it('should allow widget factories to override clone', () => {
+      it('should allow widget factories to have custom clone behavior', () => {
         widget = manager.createNew('foo', 'CloneTestWidget');
         const clonedWidget: CloneTestWidget = manager.cloneWidget(
           widget
