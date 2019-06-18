@@ -39,7 +39,7 @@ export function showDialog<T>(
  * @param error - the error to show in the dialog body (either a string
  *   or an object with a string `message` property).
  */
-export function showErrorMessage(
+export async function showErrorMessage(
   title: string,
   error: any,
   buttons: ReadonlyArray<Dialog.IButton> = [
@@ -60,11 +60,13 @@ export function showErrorMessage(
       title: title,
       body: body,
       buttons: buttons
-    }).then(() => {
-      Private.errorMessagePromiseCache.delete(key);
     });
     Private.errorMessagePromiseCache.set(key, dialogPromise);
-    return dialogPromise;
+    try {
+      await dialogPromise;
+    } finally {
+      Private.errorMessagePromiseCache.delete(key);
+    }
   }
 }
 
