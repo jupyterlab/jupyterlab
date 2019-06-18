@@ -25,7 +25,7 @@ Development
    control the Notebook <https://stackoverflow.com/a/32769976/907060>`__. Can I do the same thing in JupyterLab?
 
    JupyterLab was built to support a wide variety of extensibility, including dynamic behavior based on notebook
-   outputs. To access this extensability, you should write a custom JuptyerLab extension. If you would
+   outputs. To access this extensibility, you should write a custom JupyterLab extension. If you would
    like trigger some behavior in response to the user executing some code in a notebook, you can output a custom
    mimetype (:ref:`rendermime`). We currently don't allow access to the JupyterLab
    API from the Javsacript renderer, because this would tie the kernel and the notebook output to JupyterLab
