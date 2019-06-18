@@ -994,14 +994,10 @@ function addCommands(
             code: code
           };
 
-          let completed = false;
-          await current.context.session.kernel
-            .requestIsComplete(msg)
-            .then(reply => {
-              completed = reply.content.status === 'complete';
-            });
-
-          if (completed) {
+          let reply = await current.context.session.kernel.requestIsComplete(
+            msg
+          );
+          if (reply.content.status === 'complete') {
             if (curLine < lastLine) {
               // we find a block of complete statement containing the current line, great!
               while (
