@@ -22,7 +22,7 @@ export function doBuild(builder: Builder.IManager): Promise<void> {
           body: 'Build successfully completed, reload page?',
           buttons: [
             Dialog.cancelButton(),
-            Dialog.warnButton({ label: 'RELOAD' })
+            Dialog.warnButton({ label: 'Reload' })
           ]
         });
       })

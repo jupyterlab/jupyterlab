@@ -54,11 +54,6 @@ const ACTIVE_CLASS = 'jp-mod-active';
  */
 const DEFAULT_RANK = 500;
 
-/**
- * The data attribute added to the document body indicating shell's mode.
- */
-const MODE_ATTRIBUTE = 'data-shell-mode';
-
 const ACTIVITY_CLASS = 'jp-Activity';
 
 /* tslint:disable */
@@ -361,8 +356,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         dock.activateWidget(this.currentWidget);
       }
 
-      // Set the mode data attribute on the document body.
-      document.body.setAttribute(MODE_ATTRIBUTE, mode);
+      // Set the mode data attribute on the application shell node.
+      this.node.dataset.shellMode = mode;
       return;
     }
 
@@ -401,8 +396,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       dock.activateWidget(applicationCurrentWidget);
     }
 
-    // Set the mode data attribute on the document body.
-    document.body.setAttribute(MODE_ATTRIBUTE, mode);
+    // Set the mode data attribute on the applications shell node.
+    this.node.dataset.shellMode = mode;
   }
 
   /**
@@ -694,7 +689,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Handle `after-attach` messages for the application shell.
    */
   protected onAfterAttach(msg: Message): void {
-    document.body.setAttribute(MODE_ATTRIBUTE, this.mode);
+    this.node.dataset.shellMode = this.mode;
   }
 
   /**
@@ -1033,7 +1028,6 @@ namespace Private {
      * Construct a new side bar handler.
      */
     constructor(side: string) {
-      this._side = side;
       this._sideBar = new TabBar<Widget>({
         insertBehavior: 'none',
         removeBehavior: 'none',
@@ -1205,12 +1199,6 @@ namespace Private {
         newWidget.show();
       }
       this._lastCurrent = newWidget || oldWidget;
-      if (newWidget) {
-        const id = newWidget.id;
-        document.body.setAttribute(`data-${this._side}-sidebar-widget`, id);
-      } else {
-        document.body.removeAttribute(`data-${this._side}-sidebar-widget`);
-      }
       this._refreshVisibility();
     }
 
@@ -1237,7 +1225,6 @@ namespace Private {
     }
 
     private _items = new Array<Private.IRankItem>();
-    private _side: string;
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
     private _lastCurrent: Widget | null;

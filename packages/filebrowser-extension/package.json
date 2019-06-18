@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/filebrowser-extension",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0-alpha.11",
   "description": "JupyterLab - Filebrowser Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,15 +36,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.0.0-alpha.10",
-    "@jupyterlab/apputils": "^1.0.0-alpha.10",
-    "@jupyterlab/coreutils": "^3.0.0-alpha.10",
-    "@jupyterlab/docmanager": "^1.0.0-alpha.10",
-    "@jupyterlab/filebrowser": "^1.0.0-alpha.10",
-    "@jupyterlab/launcher": "^1.0.0-alpha.10",
-    "@jupyterlab/mainmenu": "^1.0.0-alpha.10",
-    "@jupyterlab/services": "^4.0.0-alpha.10",
-    "@jupyterlab/statusbar": "^1.0.0-alpha.10",
+    "@jupyterlab/application": "^1.0.0-alpha.11",
+    "@jupyterlab/apputils": "^1.0.0-alpha.11",
+    "@jupyterlab/coreutils": "^3.0.0-alpha.11",
+    "@jupyterlab/docmanager": "^1.0.0-alpha.11",
+    "@jupyterlab/filebrowser": "^1.0.0-alpha.11",
+    "@jupyterlab/launcher": "^1.0.0-alpha.11",
+    "@jupyterlab/services": "^4.0.0-alpha.11",
+    "@jupyterlab/statusbar": "^1.0.0-alpha.11",
     "@phosphor/algorithm": "^1.1.2",
     "@phosphor/commands": "^1.6.1",
     "@phosphor/messaging": "^1.2.2",

@@ -128,8 +128,8 @@ namespace Private {
         'and some may introduce security risks. ' +
         'Do you want to continue?',
       buttons: [
-        Dialog.cancelButton({ label: 'DISABLE' }),
-        Dialog.warnButton({ label: 'ENABLE' })
+        Dialog.cancelButton({ label: 'Disable' }),
+        Dialog.warnButton({ label: 'Enable' })
       ]
     }).then(result => {
       if (result.button.accept) {

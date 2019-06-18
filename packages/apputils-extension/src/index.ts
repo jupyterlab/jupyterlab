@@ -130,13 +130,15 @@ const themes: JupyterFrontEndPlugin<IThemeManager> = {
     // Set data attributes on the application shell for the current theme.
     manager.themeChanged.connect((sender, args) => {
       currentTheme = args.newValue;
-      app.shell.dataset.themeLight = String(manager.isLight(currentTheme));
-      app.shell.dataset.themeName = currentTheme;
+      document.body.dataset.jpThemeLight = String(
+        manager.isLight(currentTheme)
+      );
+      document.body.dataset.jpThemeName = currentTheme;
       if (
-        app.shell.dataset.themeScrollbars !==
+        document.body.dataset.jpThemeScrollbars !==
         String(manager.themeScrollbars(currentTheme))
       ) {
-        app.shell.dataset.themeScrollbars = String(
+        document.body.dataset.jpThemeScrollbars = String(
           manager.themeScrollbars(currentTheme)
         );
       }

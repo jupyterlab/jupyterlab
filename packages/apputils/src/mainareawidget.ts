@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { BoxLayout, Widget } from '@phosphor/widgets';
 
@@ -152,6 +152,13 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget
    */
   protected onCloseRequest(msg: Message): void {
     this.dispose();
+  }
+
+  /**
+   * Handle `'update-request'` messages by forwarding them to the content.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    MessageLoop.sendMessage(this._content, msg);
   }
 
   /**

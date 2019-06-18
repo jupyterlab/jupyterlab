@@ -17,6 +17,7 @@ from notebook.utils import url_path_join as ujoin
 from traitlets import Bool, Unicode
 
 from ._version import __version__
+from .debuglog import DebugLogFileMixin
 from .extension import load_config, load_jupyter_server_extension
 from .commands import (
     build, clean, get_app_dir, get_app_version, get_user_settings_dir,
@@ -29,6 +30,7 @@ build_aliases['app-dir'] = 'LabBuildApp.app_dir'
 build_aliases['name'] = 'LabBuildApp.name'
 build_aliases['version'] = 'LabBuildApp.version'
 build_aliases['dev-build'] = 'LabBuildApp.dev_build'
+build_aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 
 build_flags = dict(flags)
 
@@ -38,7 +40,7 @@ if version != app_version:
     version = '%s (dev), %s (app)' % (__version__, app_version)
 
 
-class LabBuildApp(JupyterApp):
+class LabBuildApp(JupyterApp, DebugLogFileMixin):
     version = version
     description = """
     Build the JupyterLab application
@@ -69,12 +71,13 @@ class LabBuildApp(JupyterApp):
         command = 'build:prod' if not self.dev_build else 'build'
         app_dir = self.app_dir or get_app_dir()
         self.log.info('JupyterLab %s', version)
-        if self.pre_clean:
-            self.log.info('Cleaning %s' % app_dir)
-            clean(self.app_dir)
-        self.log.info('Building in %s', app_dir)
-        build(app_dir=app_dir, name=self.name, version=self.version,
-              command=command, logger=self.log)
+        with self.debug_logging():
+            if self.pre_clean:
+                self.log.info('Cleaning %s' % app_dir)
+                clean(self.app_dir)
+            self.log.info('Building in %s', app_dir)
+            build(app_dir=app_dir, name=self.name, version=self.version,
+                command=command, logger=self.log)
 
 
 clean_aliases = dict(base_aliases)
@@ -133,13 +136,13 @@ class LabWorkspaceExportApp(JupyterApp):
         base_url = app.base_url
         config = load_config(app)
         directory = config.workspaces_dir
-        page_url = config.page_url
+        app_url = config.app_url
 
         if len(self.extra_args) > 1:
             print('Too many arguments were provided for workspace export.')
-            sys.exit(1)
+            self.exit(1)
 
-        raw = (page_url if not self.extra_args
+        raw = (app_url if not self.extra_args
                else ujoin(config.workspaces_url, self.extra_args[0]))
         slug = slugify(raw, base_url)
         workspace_path = pjoin(directory, slug + WORKSPACE_EXTENSION)
@@ -182,27 +185,27 @@ class LabWorkspaceImportApp(JupyterApp):
         base_url = app.base_url
         config = load_config(app)
         directory = config.workspaces_dir
-        page_url = config.page_url
+        app_url = config.app_url
         workspaces_url = config.workspaces_url
 
         if len(self.extra_args) != 1:
             print('One argument is required for workspace import.')
-            sys.exit(1)
+            self.exit(1)
 
         workspace = dict()
         with self._smart_open() as fid:
             try:  # to load, parse, and validate the workspace file.
-                workspace = self._validate(fid, base_url, page_url, workspaces_url)
+                workspace = self._validate(fid, base_url, app_url, workspaces_url)
             except Exception as e:
                 print('%s is not a valid workspace:\n%s' % (fid.name, e))
-                sys.exit(1)
+                self.exit(1)
 
         if not osp.exists(directory):
             try:
                 os.makedirs(directory)
             except Exception as e:
                 print('Workspaces directory could not be created:\n%s' % e)
-                sys.exit(1)
+                self.exit(1)
 
         slug = slugify(workspace['metadata']['id'], base_url)
         workspace_path = pjoin(directory, slug + WORKSPACE_EXTENSION)
@@ -223,11 +226,11 @@ class LabWorkspaceImportApp(JupyterApp):
 
             if not osp.exists(file_path):
                 print('%s does not exist.' % file_name)
-                sys.exit(1)
+                self.exit(1)
 
             return open(file_path)
 
-    def _validate(self, data, base_url, page_url, workspaces_url):
+    def _validate(self, data, base_url, app_url, workspaces_url):
         workspace = json.load(data)
 
         if 'data' not in workspace:
@@ -237,7 +240,7 @@ class LabWorkspaceImportApp(JupyterApp):
         # name into the workspace metadata.
         if self.workspace_name is not None:
             if self.workspace_name == "":
-                workspace_id = ujoin(base_url, page_url)
+                workspace_id = ujoin(base_url, app_url)
             else:
                 workspace_id = ujoin(base_url, workspaces_url, self.workspace_name)
             workspace['metadata'] = {'id': workspace_id}
@@ -247,8 +250,8 @@ class LabWorkspaceImportApp(JupyterApp):
                 raise Exception('The `id` field is missing in `metadata`.')
             else:
                 id = workspace['metadata']['id']
-                if id != ujoin(base_url, page_url) and not id.startswith(ujoin(base_url, workspaces_url)):
-                    error = '%s does not match page_url or start with workspaces_url.'
+                if id != ujoin(base_url, app_url) and not id.startswith(ujoin(base_url, workspaces_url)):
+                    error = '%s does not match app_url or start with workspaces_url.'
                     raise Exception(error % id)
 
         return workspace
@@ -275,7 +278,7 @@ class LabWorkspaceApp(JupyterApp):
     def start(self):
         super().start()
         print('Either `export` or `import` must be specified.')
-        sys.exit(1)
+        self.exit(1)
 
 
 lab_aliases = dict(aliases)

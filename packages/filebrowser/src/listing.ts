@@ -381,7 +381,7 @@ export class DirListing extends Widget {
       return showDialog({
         title: 'Delete',
         body: message,
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'DELETE' })]
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
       }).then(result => {
         if (!this.isDisposed && result.button.accept) {
           return this._delete(names);
