@@ -43,18 +43,29 @@ export function showErrorMessage(
   title: string,
   error: any,
   buttons: ReadonlyArray<Dialog.IButton> = [
-    Dialog.okButton({ label: 'DISMISS' })
+    Dialog.okButton({ label: 'Dismiss' })
   ]
 ): Promise<void> {
   console.warn('Showing error:', error);
 
-  return showDialog({
-    title: title,
-    body: error.message || title,
-    buttons: buttons
-  }).then(() => {
-    /* no-op */
-  });
+  // Cache promises to prevent multiple copies of identical dialogs showing
+  // to the user.
+  let body = error.message || title;
+  let key = title + '----' + body;
+  let promise = Private.errorMessagePromiseCache.get(key);
+  if (promise) {
+    return promise;
+  } else {
+    let dialogPromise = showDialog({
+      title: title,
+      body: body,
+      buttons: buttons
+    }).then(() => {
+      Private.errorMessagePromiseCache.delete(key);
+    });
+    Private.errorMessagePromiseCache.set(key, dialogPromise);
+    return dialogPromise;
+  }
 }
 
 /**
@@ -522,7 +533,7 @@ export namespace Dialog {
    */
   export function createButton(value: Partial<IButton>): Readonly<IButton> {
     value.accept = value.accept !== false;
-    let defaultLabel = value.accept ? 'OK' : 'CANCEL';
+    let defaultLabel = value.accept ? 'OK' : 'Cancel';
     return {
       label: value.label || defaultLabel,
       iconClass: value.iconClass || '',
@@ -751,6 +762,8 @@ namespace Private {
    * The queue for launching dialogs.
    */
   export let launchQueue: Promise<Dialog.IResult<any>>[] = [];
+
+  export let errorMessagePromiseCache: Map<string, Promise<void>> = new Map();
 
   /**
    * Handle the input options for a dialog.

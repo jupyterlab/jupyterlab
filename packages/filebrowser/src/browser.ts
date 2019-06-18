@@ -245,23 +245,18 @@ export class FileBrowser extends Widget {
    */
   private _onConnectionFailure(sender: FileBrowserModel, args: Error): void {
     if (
-      !this._showingError &&
       args instanceof ServerConnection.ResponseError &&
       args.response.status === 404
     ) {
       const title = 'Directory not found';
       args.message = `Directory not found: "${this.model.path}"`;
-      this._showingError = true;
-      void showErrorMessage(title, args).then(() => {
-        this._showingError = false;
-      });
+      void showErrorMessage(title, args);
     }
   }
 
   private _crumbs: BreadCrumbs;
   private _listing: DirListing;
   private _manager: IDocumentManager;
-  private _showingError = false;
   private _directoryPending: boolean;
 }
 

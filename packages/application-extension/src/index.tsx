@@ -127,7 +127,7 @@ const main: JupyterFrontEndPlugin<void> = {
             body: 'Build successfully completed, reload page?',
             buttons: [
               Dialog.cancelButton(),
-              Dialog.warnButton({ label: 'RELOAD' })
+              Dialog.warnButton({ label: 'Reload' })
             ]
           });
         })
@@ -164,7 +164,7 @@ const main: JupyterFrontEndPlugin<void> = {
         void showDialog({
           title: 'Build Recommended',
           body,
-          buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'BUILD' })]
+          buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Build' })]
         }).then(result => (result.button.accept ? build() : undefined));
       });
     }

@@ -415,7 +415,7 @@ export class FileBrowserModel implements IDisposable {
       body: `The file size is ${Math.round(
         file.size / (1024 * 1024)
       )} MB. Do you still want to upload it?`,
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'UPLOAD' })]
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Upload' })]
     });
     return button.accept;
   }

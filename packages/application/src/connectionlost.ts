@@ -14,28 +14,11 @@ export const ConnectionLost: IConnectionLost = async function(
   manager: ServiceManager.IManager,
   err: ServerConnection.NetworkError
 ): Promise<void> {
-  if (Private.showingError) {
-    return;
-  }
-  Private.showingError = true;
-
   const title = 'Server Connection Error';
   const networkMsg =
     'A connection to the Jupyter server could not be established.\n' +
     'JupyterLab will continue trying to reconnect.\n' +
     'Check your network connection or Jupyter server configuration.\n';
 
-  return showErrorMessage(title, { message: networkMsg }).then(() => {
-    Private.showingError = false;
-  });
+  return showErrorMessage(title, { message: networkMsg });
 };
-
-/**
- * A namespace for module private functionality.
- */
-namespace Private {
-  /**
-   * Whether the connection lost error is currently being shown.
-   */
-  export let showingError = false;
-}
