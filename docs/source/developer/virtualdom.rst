@@ -15,7 +15,8 @@ which have some additional features over native DOM elements, including:
 We support wrapping React components to turn them into Phosphor
 widgets using the ``ReactWidget`` class from ``@jupyterlab/apputils``:
 
-.. literalinclude:: virtualdom.create.jsx
+.. literalinclude:: virtualdom.create.tsx
+   :force:
 
 
 Here we use the ``create`` static method to transform a React element
@@ -27,7 +28,8 @@ or add other methods to it, you can subbclass ``ReactWidget`` and
 override the ``render`` method to return a React element:
 
 
-.. literalinclude:: virtualdom.reactwidget.jsx
+.. literalinclude:: virtualdom.reactwidget.tsx
+   :force:
 
 
 We use Phosphor `Signals <https://phosphorjs.github.io/phosphor/api/signaling/interfaces/isignal.html>`__ to represent
