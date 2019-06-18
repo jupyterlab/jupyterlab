@@ -161,7 +161,7 @@ export class LayoutRestorer implements ILayoutRestorer {
    * Fetching the layout relies on all widget restoration to be complete, so
    * calls to `fetch` are guaranteed to return after restoration is complete.
    */
-  fetch(): Promise<ILabShell.ILayout> {
+  async fetch(): Promise<ILabShell.ILayout> {
     const blank: ILabShell.ILayout = {
       fresh: true,
       mainArea: null,
@@ -170,29 +170,31 @@ export class LayoutRestorer implements ILayoutRestorer {
     };
     const layout = this._connector.fetch(KEY);
 
-    return Promise.all([layout, this.restored])
-      .then(([data]) => {
-        if (!data) {
-          return blank;
-        }
+    try {
+      const [data] = await Promise.all([layout, this.restored]);
 
-        const { main, left, right } = data as Private.ILayout;
+      if (!data) {
+        return blank;
+      }
 
-        // If any data exists, then this is not a fresh session.
-        const fresh = false;
+      const { main, left, right } = data as Private.ILayout;
 
-        // Rehydrate main area.
-        const mainArea = this._rehydrateMainArea(main);
+      // If any data exists, then this is not a fresh session.
+      const fresh = false;
 
-        // Rehydrate left area.
-        const leftArea = this._rehydrateSideArea(left);
+      // Rehydrate main area.
+      const mainArea = this._rehydrateMainArea(main);
 
-        // Rehydrate right area.
-        const rightArea = this._rehydrateSideArea(right);
+      // Rehydrate left area.
+      const leftArea = this._rehydrateSideArea(left);
 
-        return { fresh, mainArea, leftArea, rightArea };
-      })
-      .catch(() => blank); // Let fetch fail gracefully; return blank slate.
+      // Rehydrate right area.
+      const rightArea = this._rehydrateSideArea(right);
+
+      return { fresh, mainArea, leftArea, rightArea };
+    } catch (error) {
+      return blank;
+    }
   }
 
   /**
