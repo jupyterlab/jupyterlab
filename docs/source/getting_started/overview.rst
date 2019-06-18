@@ -52,8 +52,12 @@ classic Jupyter Notebook.
 JupyterLab Releases
 ~~~~~~~~~~~~~~~~~~~
 
-The current release of JupyterLab is suitable for general daily use. Please
-review the :ref:`changelog` for detailed descriptions of each release.
+Since JupyterLab 0.32 (February 2018), the releases of JupyterLab are suitable
+for general daily use by both Jupter novices and users experienced with the
+Classic Notebook interface. As of the 1.0 release (June 2019), it is
+additionally ready for extension writers who wish to further customize the
+JupyterLab experience for others. Please review the :ref:`changelog` for
+detailed descriptions of each release.
 
 The extension developer API is evolving, and we also are currently iterating on UI/UX improvements.
 We appreciate feedback on our `GitHub issues page <https://github.com/jupyterlab/jupyterlab/issues>`__
