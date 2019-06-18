@@ -120,32 +120,32 @@ export interface IObjectPool<T extends IObservableDisposable>
   readonly added: ISignal<this, T>;
 
   /**
-   * The current object instance.
+   * The current object.
    */
   readonly current: T | null;
 
   /**
-   * A signal emitted when the current object instance changes.
+   * A signal emitted when the current object changes.
    *
    * #### Notes
-   * If the last instance being tracked is disposed, `null` will be emitted.
+   * If the last object being tracked is disposed, `null` will be emitted.
    */
   readonly currentChanged: ISignal<this, T | null>;
 
   /**
-   * The number of instances held by the tracker.
+   * The number of objects held by the pool.
    */
   readonly size: number;
 
   /**
-   * A signal emitted when an instance is updated.
+   * A signal emitted when an object is updated.
    */
   readonly updated: ISignal<this, T>;
 
   /**
-   * Find the first instance in the tracker that satisfies a filter function.
+   * Find the first object in the pool that satisfies a filter function.
    *
-   * @param - fn The filter function to call on each instance.
+   * @param - fn The filter function to call on each object.
    *
    * #### Notes
    * If nothing is found, the value returned is `undefined`.
@@ -153,33 +153,25 @@ export interface IObjectPool<T extends IObservableDisposable>
   find(fn: (obj: T) => boolean): T | undefined;
 
   /**
-   * Iterate through each instance in the tracker.
+   * Iterate through each object in the pool.
    *
-   * @param fn - The function to call on each instance.
+   * @param fn - The function to call on each object.
    */
   forEach(fn: (obj: T) => void): void;
 
   /**
-   * Filter the instances in the tracker based on a predicate.
+   * Filter the objects in the pool based on a predicate.
    *
    * @param fn - The function by which to filter.
    */
   filter(fn: (obj: T) => boolean): T[];
 
   /**
-   * Check if this tracker has the specified instance.
+   * Check if this pool has the specified object.
    *
    * @param obj - The object whose existence is being checked.
    */
   has(obj: T): boolean;
-
-  /**
-   * Inject an instance into the widget tracker without the tracker handling
-   * its restoration lifecycle.
-   *
-   * @param obj - The instance to inject into the tracker.
-   */
-  inject(obj: T): void;
 }
 
 /**
