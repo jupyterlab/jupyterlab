@@ -990,15 +990,12 @@ export namespace DocumentRegistry {
     /**
      * Create a new widget given a context.
      *
+     * @param source - A widget to clone
+     *
      * #### Notes
      * It should emit the [widgetCreated] signal with the new widget.
      */
-    createNew(context: IContext<U>): T;
-
-    /**
-     * Clone an existing widget given a context
-     */
-    clone(widget: T, context: IContext<U>): T;
+    createNew(context: IContext<U>, source?: T): T;
   }
 
   /**
