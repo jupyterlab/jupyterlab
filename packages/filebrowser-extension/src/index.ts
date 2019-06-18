@@ -12,7 +12,10 @@ import {
   Clipboard,
   InstanceTracker,
   MainAreaWidget,
-  ToolbarButton
+  ToolbarButton,
+  ICommandPalette,
+  Dialog,
+  showDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -25,11 +28,14 @@ import {
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
+import { IMainMenu } from '@jupyterlab/mainmenu';
+
 import {
   FileBrowserModel,
   FileBrowser,
   FileUploadStatus,
-  IFileBrowserFactory
+  IFileBrowserFactory,
+  askUserForPath
 } from '@jupyterlab/filebrowser';
 
 import { Launcher } from '@jupyterlab/launcher';
@@ -68,7 +74,9 @@ namespace CommandIDs {
   // For main browser only.
   export const hideBrowser = 'filebrowser:hide-main';
 
-  export const navigate = 'filebrowser:navigate';
+  export const goToPath = 'filebrowser:go-to-path';
+
+  export const openPath = 'filebrowser:open-path';
 
   export const open = 'filebrowser:open';
 
@@ -107,6 +115,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     ILayoutRestorer,
     ISettingRegistry
   ],
+  optional: [ICommandPalette, IMainMenu],
   autoStart: true
 };
 
@@ -238,7 +247,9 @@ function activateBrowser(
   docManager: IDocumentManager,
   labShell: ILabShell,
   restorer: ILayoutRestorer,
-  settingRegistry: ISettingRegistry
+  settingRegistry: ISettingRegistry,
+  palette: ICommandPalette,
+  mainMenu: IMainMenu
 ): void {
   const browser = factory.defaultBrowser;
   const { commands } = app;
@@ -251,7 +262,7 @@ function activateBrowser(
   // responsible for their own restoration behavior, if any.
   restorer.add(browser, namespace);
 
-  addCommands(app, factory, labShell, docManager);
+  addCommands(app, factory, labShell, docManager, palette, mainMenu);
 
   browser.title.iconClass = 'jp-FolderIcon jp-SideBar-tabIcon';
   browser.title.caption = 'File Browser';
@@ -292,22 +303,21 @@ function activateBrowser(
       });
 
     // Whether to automatically navigate to a document's current directory
-    labShell.currentChanged.connect((_, change) => {
+    labShell.currentChanged.connect(async (_, change) => {
       if (navigateToCurrentDirectory && change.newValue) {
         const { newValue } = change;
         const context = docManager.contextForWidget(newValue);
         if (context) {
           const { path } = context;
-          Private.navigateToPath(path, factory)
-            .then(() => {
-              labShell.currentWidget.activate();
-            })
-            .catch((reason: any) => {
-              console.warn(
-                `${CommandIDs.navigate} failed to open: ${path}`,
-                reason
-              );
-            });
+          try {
+            await Private.navigateToPath(path, factory);
+            labShell.currentWidget.activate();
+          } catch (reason) {
+            console.warn(
+              `${CommandIDs.goToPath} failed to open: ${path}`,
+              reason
+            );
+          }
         }
       }
     });
@@ -347,7 +357,9 @@ function addCommands(
   app: JupyterFrontEnd,
   factory: IFileBrowserFactory,
   labShell: ILabShell,
-  docManager: IDocumentManager
+  docManager: IDocumentManager,
+  palette: ICommandPalette | null,
+  mainMenu: IMainMenu | null
 ): void {
   const registry = app.docRegistry;
   const { commands } = app;
@@ -425,24 +437,57 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.navigate, {
-    execute: args => {
+  commands.addCommand(CommandIDs.goToPath, {
+    execute: async args => {
       const path = (args.path as string) || '';
-      return Private.navigateToPath(path, factory)
-        .then(model => {
-          if (model.type === 'directory') {
-            return commands.execute(CommandIDs.showBrowser, { path });
-          }
-          return commands.execute('docmanager:open', { path });
-        })
-        .catch((reason: any) => {
-          console.warn(
-            `${CommandIDs.navigate} failed to open: ${path}`,
-            reason
-          );
-        });
+      try {
+        await Private.navigateToPath(path, factory);
+      } catch (reason) {
+        console.warn(`${CommandIDs.goToPath} failed to go to: ${path}`, reason);
+      }
+
+      return commands.execute(CommandIDs.showBrowser, { path });
     }
   });
+
+  commands.addCommand(CommandIDs.openPath, {
+    label: () => 'Open From Path...',
+    caption: 'Open from path',
+    isEnabled: () => true,
+    execute: async () => {
+      const path = await askUserForPath(docManager.services.contents);
+      if (!path) {
+        return;
+      }
+      try {
+        const item = await docManager.services.contents.get(path, {
+          content: false
+        });
+        await commands.execute(CommandIDs.goToPath, { path });
+        if (item.type === 'directory') {
+          return;
+        }
+        return commands.execute('docmanager:open', { path });
+      } catch {
+        return showDialog({
+          title: 'Cannot open',
+          body: 'No such file or directory found',
+          buttons: [Dialog.okButton()]
+        });
+      }
+    }
+  });
+  // Add the openPath command to the command palette
+  if (palette) {
+    palette.addItem({
+      command: CommandIDs.openPath,
+      category: 'File Operations'
+    });
+  }
+  // Add the openPath command to the File menu
+  if (mainMenu) {
+    mainMenu.fileMenu.addGroup([{ command: CommandIDs.openPath }], 0);
+  }
 
   commands.addCommand(CommandIDs.open, {
     execute: args => {
@@ -850,7 +895,7 @@ namespace Private {
       if (!browserForPath) {
         // warn that no filebrowser could be found for this driveName
         console.warn(
-          `${CommandIDs.navigate} failed to find filebrowser for path: ${path}`
+          `${CommandIDs.goToPath} failed to find filebrowser for path: ${path}`
         );
         return;
       }
@@ -863,9 +908,9 @@ namespace Private {
   }
 
   /**
-   * Navigate to a path.
+   * Navigate to a path or the path containing a file.
    */
-  export function navigateToPath(
+  export async function navigateToPath(
     path: string,
     factory: IFileBrowserFactory
   ): Promise<Contents.IModel> {
@@ -873,23 +918,15 @@ namespace Private {
     const { services } = browserForPath.model.manager;
     const localPath = services.contents.localPath(path);
 
-    return services.ready
-      .then(() => services.contents.get(path, { content: false }))
-      .then(value => {
-        const { model } = browserForPath;
-        const { restored } = model;
-
-        if (value.type === 'directory') {
-          return restored.then(() => {
-            model.cd(`/${localPath}`);
-            return value;
-          });
-        }
-
-        return restored.then(() => {
-          model.cd(`/${PathExt.dirname(localPath)}`);
-          return value;
-        });
-      });
+    await services.ready;
+    let item = await services.contents.get(path, { content: false });
+    const { model } = browserForPath;
+    await model.restored;
+    if (item.type === 'directory') {
+      await model.cd(`/${localPath}`);
+    } else {
+      await model.cd(`/${PathExt.dirname(localPath)}`);
+    }
+    return item;
   }
 }

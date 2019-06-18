@@ -277,7 +277,7 @@ const tree: JupyterFrontEndPlugin<void> = {
         router.navigate(url);
 
         try {
-          await commands.execute('filebrowser:navigate', { path });
+          await commands.execute('filebrowser:go-to-path', { path });
           await commands.execute('apputils:save-statedb', { immediate });
         } catch (error) {
           console.warn('Tree routing failed.', error);
