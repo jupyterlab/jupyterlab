@@ -65,7 +65,7 @@ import {
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { ServiceManager, KernelMessage } from '@jupyterlab/services';
+import { ServiceManager } from '@jupyterlab/services';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
@@ -990,13 +990,9 @@ function addCommands(
         let lastLine = firstLine + 1;
         while (true) {
           code = srcLines.slice(firstLine, lastLine).join('\n');
-          const msg: KernelMessage.IIsCompleteRequestMsg['content'] = {
+          let reply = await current.context.session.kernel.requestIsComplete({
             code: code
-          };
-
-          let reply = await current.context.session.kernel.requestIsComplete(
-            msg
-          );
+          });
           if (reply.content.status === 'complete') {
             if (curLine < lastLine) {
               // we find a block of complete statement containing the current line, great!
