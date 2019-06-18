@@ -145,7 +145,7 @@ async function activateConsole(
   const tracker = new WidgetTracker<ConsolePanel>({ namespace: 'console' });
 
   // Handle state restoration.
-  restorer.restore(tracker, {
+  void restorer.restore(tracker, {
     command: CommandIDs.create,
     args: panel => ({
       path: panel.console.session.path,

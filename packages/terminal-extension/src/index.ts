@@ -101,7 +101,7 @@ function activate(
 
   // Handle state restoration.
   if (restorer) {
-    restorer.restore(tracker, {
+    void restorer.restore(tracker, {
       command: CommandIDs.createNew,
       args: widget => ({ name: widget.content.session.name }),
       name: widget => widget.content.session.name

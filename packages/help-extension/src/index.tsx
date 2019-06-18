@@ -120,7 +120,7 @@ function activate(
 
   // Handle state restoration.
   if (restorer) {
-    restorer.restore(tracker, {
+    void restorer.restore(tracker, {
       command: CommandIDs.open,
       args: widget => ({
         url: widget.content.url,

@@ -542,13 +542,13 @@ function activateNotebookHandler(
 
   // Handle state restoration.
   if (restorer) {
-    restorer.restore(tracker, {
+    void restorer.restore(tracker, {
       command: 'docmanager:open',
       args: panel => ({ path: panel.context.path, factory: FACTORY }),
       name: panel => panel.context.path,
       when: services.ready
     });
-    restorer.restore(clonedOutputs, {
+    void restorer.restore(clonedOutputs, {
       command: CommandIDs.createOutputView,
       args: widget => ({
         path: widget.content.path,

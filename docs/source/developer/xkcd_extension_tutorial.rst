@@ -748,9 +748,11 @@ Finally, rewrite the ``activate`` function so that it:
       // Add the command to the palette.
       palette.addItem({ command, category: 'Tutorial' });
 
-      // Track and restore the widget state
+      // Track and restore the widget state.
       let tracker = new WidgetTracker({ namespace: 'xkcd' });
-      restorer.restore(tracker, { command, name: () => 'xkcd' });
+
+      // It is safe to ignore the returned restoration promise.
+      void restorer.restore(tracker, { command, name: () => 'xkcd' });
     };
 
 Rebuild your extension one last time and refresh your browser tab.

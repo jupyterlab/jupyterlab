@@ -79,7 +79,7 @@ function activate(
   let editor: SettingEditor;
 
   // Handle state restoration.
-  restorer.restore(tracker, {
+  void restorer.restore(tracker, {
     command: CommandIDs.open,
     args: widget => ({}),
     name: widget => namespace

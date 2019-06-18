@@ -99,7 +99,7 @@ function activateCsv(
   let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
 
   // Handle state restoration.
-  restorer.restore(tracker, {
+  void restorer.restore(tracker, {
     command: 'docmanager:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY_CSV }),
     name: widget => widget.context.path
@@ -169,7 +169,7 @@ function activateTsv(
   let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
 
   // Handle state restoration.
-  restorer.restore(tracker, {
+  void restorer.restore(tracker, {
     command: 'docmanager:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY_TSV }),
     name: widget => widget.context.path

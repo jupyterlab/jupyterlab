@@ -86,7 +86,7 @@ function activate(
 
   if (restorer) {
     // Handle state restoration.
-    restorer.restore(tracker, {
+    void restorer.restore(tracker, {
       command: 'docmanager:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path
