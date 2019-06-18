@@ -44,7 +44,7 @@ Here is a sample block of code that adds a command to the application (given by 
 This example adds a new command, which, when triggered, calls the ``execute`` function.
 ``isEnabled`` indicates whether the command is enabled, and is determined whether
 renderings of it are greyed out.
-``isToggled`` indicates whether to render a checkmark next to the command.
+``isToggled`` indicates whether to render a check mark next to the command.
 ``isVisible`` indicates whether to render the command at all.
 ``iconClass`` specifies a CSS class which can be used to display an icon next to renderings of the command.
 
@@ -96,17 +96,103 @@ There are three main ways to extend JupyterLab's main menu.
 
 1. You can add your own menu to the menu bar.
 2. You can add new commands to the existing menus.
-3. You can register your extension with one of the existing menu metacommands.
+3. You can register your extension with one of the existing semantic menu items.
+
+In all three cases, you should request the ``IMainMenu`` token for your extension.
 
 Adding a New Menu
 ^^^^^^^^^^^^^^^^^
 
+To add a new menu to the menu bar, you need to create a new
+`Phosphor menu <https://phosphorjs.github.io/phosphor/api/widgets/classes/menu.html>`__.
+
+You can then add commands to the menu in a similar way to the command palette,
+and add that menu to the main menu bar:
+
+.. code:: typescript
+
+    const menu = new Menu({ commands: app.commands });
+    menu.addItem({
+      command: commandID,
+      args: {},
+    });
+
+    mainMenu.addMenu(menu, { rank: 40 });
+
+As with the command palette, you can optionally pass in ``args`` to customize the
+rendering and execution behavior of the command in the menu context.
+
+
 Adding a New Command to an Existing Menu
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Registering a Metacommand Handler
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In many cases you will want to add your commands to the existing JupyterLab menus
+rather than creating a separate menu for your extension.
+Because the top-level JupyterLab menus are shared among many extensions,
+the API for adding items is slightly different.
+In this case, you provide a list of commands and a rank,
+and these commands will be displayed together in a separate group with an existing menu.
 
+For instance, to add a command group with ``firstCommandID`` and ``secondCommandID``
+to the File menu, you would do the following:
+
+.. code:: typescript
+
+    mainMenu.fileMenu.addGroup([
+      {
+        command: firstCommandID,
+      },
+      {
+        command: secondCommandID,
+      }
+    ], 40 /* rank */);
+
+
+Registering a Semantic Menu Item
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+There are some commands in the JupyterLab menu system that are considered
+common and important enough that they are treated differently.
+
+For instance, we anticipate that many activities may want to provide a command
+to close themselves and perform some cleanup operation (like closing a console and shutting down its kernel).
+Rather than having a proliferation of similar menu items for this common operation
+of "closing-and-cleanup", we provide a single command that can adapt itself to this use case,
+which we term "semantic menu items".
+For this example, it is the File Menu ``closeAndCleaners`` set.
+
+Here is an example of using the ``closeAndCleaners`` semantic menu item:
+
+.. code:: typescript
+
+    mainMenu.fileMenu.closeAndCleaners.add({
+      tracker,
+      action: 'Shutdown',
+      name: 'My Activity',
+      closeAndCleanup: current => {
+        current.close();
+        return current.shutdown();
+      }
+    });
+
+In this example, ``tracker`` is a :ref:`widget-tracker`, which allows the menu
+item to determine whether to delegate the menu command to your activity,
+``name`` is a name given to your activity in the menu label,
+``action`` is a verb given to the cleanup operation in the menu label,
+and ``closeAndCleanup`` is the actual function that performs the cleanup operation.
+
+More examples for how to register semantic menu items are found throughout the JupyterLab code base.
+The available semantic menu items are:
+
+- ``IEditMenu.IUndoer``: an activity that knows how to undo and redo.
+- ``IEditMenu.IClearer``: an activity that knows how to clear its content.
+- ``IEditMenu.IGoToLiner``: an activity that knows how to jump to a given line.
+- ``IFileMenu.ICloseAndCleaner``: an activity that knows how to close and clean up after itself.
+- ``IFileMenu.IConsoleCreator``: an activity that knows how to create an attached code console for itself.
+- ``IHelpMenu.IKernelUser``: an activity that knows how to get a related kernel session.
+- ``IKernelMenu.IKernelUser``: an activity that can perform various kernel-related operations.
+- ``IRunMenu.ICodeRunner``: an activity that can run code from its content.
+- ``IViewMenu.IEditorViewer``: an activity that knows how to set various view-related options on a text editor that it owns.
 
 
 Context Menu
@@ -177,7 +263,7 @@ declaring default keyboard shortcuts for a command:
       ]
     }
 
-Shortuts added to the settings system will be editable by users.
+Shortcuts added to the settings system will be editable by users.
 
 
 Launcher
@@ -204,10 +290,29 @@ Left/Right Areas
 Status Bar
 ~~~~~~~~~~
 
-Widget Trackers
-~~~~~~~~~~~~~~~
+.. _widget-tracker:
 
-``RenderMimeRegistry`` and Documents
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Widget Tracker
+~~~~~~~~~~~~~~
+
+Often extensions will want to interact with documents and activities created by other extensions.
+For instance, an extension may want to inject some text into a notebook cell,
+or set a custom keymap, or close all documents of a certain type.
+Actions like these are typically done by widget trackers.
+Extensions keep track of instances of their activities in ``WidgetTrackers``,
+which are then provided as tokens so that other extensions may request them.
+
+For instance, if you want to interact with notebooks, you should request the ``INotebookTracker`` token.
+You can then use this tracker to iterate over, filter, and search all open notebooks.
+You can also use it to be notified via signals when notebooks are added and removed from the tracker.
+
+Widget tracker tokens are provided for many activities in JupyterLab, including
+notebooks, consoles, text files, mime documents, and terminals.
+If you are adding your own activities to JupyterLab, you might consider providing
+a ``WidgetTracker`` token of your own, so that other extensions can make use of it.
+
+
+RenderMime Registry and Documents
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
