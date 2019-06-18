@@ -36,11 +36,11 @@ export class InspectorPanel extends Panel
     if (options.initialContent instanceof Widget) {
       this._content = options.initialContent;
     } else if (typeof options.initialContent === 'string') {
-      this._content = InspectorPanel.generateContentWidget(
+      this._content = InspectorPanel._generateContentWidget(
         `<p>${options.initialContent}</p>`
       );
     } else {
-      this._content = InspectorPanel.generateContentWidget(
+      this._content = InspectorPanel._generateContentWidget(
         '<p>Click on a function to see documentation.</p>'
       );
     }
@@ -131,7 +131,7 @@ export class InspectorPanel extends Panel
   /**
    * Generate content widget from string
    */
-  private static generateContentWidget(message: string): Widget {
+  private static _generateContentWidget(message: string): Widget {
     const widget = new Widget();
     widget.node.innerHTML = message;
     widget.addClass(CONTENT_CLASS);
