@@ -110,7 +110,7 @@ function activate(
     defaultRendered: ['markdown']
   });
   factory.widgetCreated.connect((sender, widget) => {
-    // Notify the instance tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
     });

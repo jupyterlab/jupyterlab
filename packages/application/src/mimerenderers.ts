@@ -62,7 +62,7 @@ export function createRendermimePlugins(
   });
 
   // Also add a meta-plugin handling state restoration
-  // and exposing the mime document instance tracker.
+  // and exposing the mime document widget tracker.
   plugins.push({
     id: '@jupyterlab/application:mimedocument',
     optional: [ILayoutRestorer],
@@ -147,7 +147,7 @@ export function createRendermimePlugin(
 
         factory.widgetCreated.connect((sender, widget) => {
           Private.factoryNameProperty.set(widget, factory.name);
-          // Notify the instance tracker if restore data needs to update.
+          // Notify the widget tracker if restore data needs to update.
           widget.context.pathChanged.connect(() => {
             void tracker.save(widget);
           });

@@ -574,7 +574,7 @@ function activateNotebookHandler(
     // If the notebook panel does not have an ID, assign it one.
     widget.id = widget.id || `notebook-${++id}`;
     widget.title.icon = NOTEBOOK_ICON_CLASS;
-    // Notify the instance tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
     });
@@ -1632,7 +1632,7 @@ function addCommands(
       current.context.pathChanged.connect(updateCloned);
       current.content.model.cells.changed.connect(updateCloned);
 
-      // Add the cloned output to the output instance tracker.
+      // Add the cloned output to the output widget tracker.
       void clonedOutputs.add(widget);
 
       // Remove the output view if the parent notebook is closed.

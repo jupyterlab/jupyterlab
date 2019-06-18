@@ -43,14 +43,14 @@ export interface IWidgetTracker<T extends Widget = Widget> extends IDisposable {
   readonly size: number;
 
   /**
-   * A promise that is resolved when the instance tracker has been
+   * A promise that is resolved when the widget tracker has been
    * restored from a serialized state.
    *
    * #### Notes
    * Most client code will not need to use this, since they can wait
    * for the whole application to restore. However, if an extension
    * wants to perform actions during the application restoration, but
-   * after the restoration of another instance tracker, they can use
+   * after the restoration of another widget tracker, they can use
    * this promise.
    */
   readonly restored: Promise<void>;
@@ -92,7 +92,7 @@ export interface IWidgetTracker<T extends Widget = Widget> extends IDisposable {
   has(obj: Widget): boolean;
 
   /**
-   * Inject an instance into the instance tracker without the tracker handling
+   * Inject an instance into the widget tracker without the tracker handling
    * its restoration lifecycle.
    *
    * @param obj - The instance to inject into the tracker.
@@ -341,7 +341,7 @@ export class WidgetTracker<T extends Widget = Widget>
  */
 export namespace WidgetTracker {
   /**
-   * The instantiation options for an instance tracker.
+   * The instantiation options for a widget tracker.
    */
   export interface IOptions {
     /**

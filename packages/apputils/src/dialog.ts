@@ -747,7 +747,7 @@ export namespace Dialog {
   export const defaultRenderer = new Renderer();
 
   /**
-   * The dialog instance tracker.
+   * The dialog widget tracker.
    */
   export const tracker = new WidgetTracker<Dialog<any>>({
     namespace: '@jupyterlab/apputils:Dialog'

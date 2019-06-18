@@ -273,7 +273,7 @@ function activate(
   factory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = EDITOR_ICON_CLASS;
 
-    // Notify the instance tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
     });

@@ -70,14 +70,14 @@ function activateHTMLViewer(
     readOnly: true
   });
 
-  // Create an instance tracker for HTML documents.
+  // Create a widget tracker for HTML documents.
   const tracker = new WidgetTracker<HTMLViewer>({
     namespace: 'htmlviewer'
   });
 
   // Handle state restoration.
   if (restorer) {
-    restorer.restore(tracker, {
+    void restorer.restore(tracker, {
       command: 'docmanager:open',
       args: widget => ({ path: widget.context.path, factory: 'HTML Viewer' }),
       name: widget => widget.context.path
@@ -88,7 +88,7 @@ function activateHTMLViewer(
   factory.widgetCreated.connect((sender, widget) => {
     // Track the widget.
     void tracker.add(widget);
-    // Notify the instance tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
     });

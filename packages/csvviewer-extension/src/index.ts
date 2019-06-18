@@ -110,7 +110,7 @@ function activateCsv(
   factory.widgetCreated.connect((sender, widget) => {
     // Track the widget.
     void tracker.add(widget);
-    // Notify the instance tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
     });
@@ -180,7 +180,7 @@ function activateTsv(
   factory.widgetCreated.connect((sender, widget) => {
     // Track the widget.
     void tracker.add(widget);
-    // Notify the instance tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
     });

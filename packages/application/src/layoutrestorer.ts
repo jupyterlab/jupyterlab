@@ -47,9 +47,9 @@ export interface ILayoutRestorer extends IRestorer {
   add(widget: Widget, name: string): void;
 
   /**
-   * Restore the widgets of a particular instance tracker.
+   * Restore the widgets of a particular widget tracker.
    *
-   * @param tracker - The instance tracker whose widgets will be restored.
+   * @param tracker - The widget tracker whose widgets will be restored.
    *
    * @param options - The restoration options.
    */
@@ -81,7 +81,7 @@ const KEY = 'layout-restorer:data';
  *    application has `started`), it instructs the layout restorer whether
  *    the restorer ought to `restore` its widgets by passing in its widget
  *    tracker.
- *    Alternatively, a plugin that does not require its own instance tracker
+ *    Alternatively, a plugin that does not require its own widget tracker
  *    (because perhaps it only creates a single widget, like a command palette),
  *    can simply `add` its widget along with a persistent unique name to the
  *    layout restorer so that its layout state can be restored when the lab
@@ -98,7 +98,7 @@ const KEY = 'layout-restorer:data';
  *    tracker returns a promise to the layout restorer that resolves when it
  *    has completed restoring the tracked widgets it cares about.
  *
- * 6. As each instance tracker finishes restoring the widget instances it cares
+ * 6. As each widget tracker finishes restoring the widget instances it cares
  *    about, it resolves the promise that was returned to the layout restorer
  *    (in step 5). After all of the promises that the restorer is awaiting have
  *    settled, the restorer then resolves the outstanding `fetch` promise
@@ -111,7 +111,7 @@ const KEY = 'layout-restorer:data';
  * Of particular note are steps 5 and 6: since data restoration of plugins
  * is accomplished by executing commands, the command that is used to restore
  * the data of each plugin must return a promise that only resolves when the
- * widget has been created and added to the plugin's instance tracker.
+ * widget has been created and added to the plugin's widget tracker.
  */
 export class LayoutRestorer implements ILayoutRestorer {
   /**
@@ -196,9 +196,9 @@ export class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
-   * Restore the widgets of a particular instance tracker.
+   * Restore the widgets of a particular widget tracker.
    *
-   * @param tracker - The instance tracker whose widgets will be restored.
+   * @param tracker - The widget tracker whose widgets will be restored.
    *
    * @param options - The restoration options.
    */

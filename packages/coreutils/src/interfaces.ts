@@ -174,7 +174,7 @@ export interface IObjectPool<T extends IObservableDisposable>
   has(obj: T): boolean;
 
   /**
-   * Inject an instance into the instance tracker without the tracker handling
+   * Inject an instance into the widget tracker without the tracker handling
    * its restoration lifecycle.
    *
    * @param obj - The instance to inject into the tracker.

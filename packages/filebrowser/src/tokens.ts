@@ -46,7 +46,7 @@ export interface IFileBrowserFactory {
   ): FileBrowser;
 
   /**
-   * The instance tracker used by the factory to track file browsers.
+   * The widget tracker used by the factory to track file browsers.
    */
   readonly tracker: WidgetTracker<FileBrowser>;
 
