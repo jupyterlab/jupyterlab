@@ -1354,6 +1354,7 @@ export class DirListing extends Widget {
     this._selectItem(index, false);
 
     return Private.doRename(nameNode, this._editNode).then(newName => {
+      this.node.focus();
       if (!newName || newName === original) {
         this._inRename = false;
         return original;
