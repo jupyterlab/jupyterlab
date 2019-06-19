@@ -43,7 +43,7 @@ A plugin adds a core functionality to the application:
    interface, by exporting a plugin object or array of plugin objects as
    the default export.
 
-   We provide two cookie cutters to create JuptyerLab plugin extensions in
+   We provide two cookie cutters to create JupyterLab plugin extensions in
    `CommonJS <https://github.com/jupyterlab/extension-cookiecutter-js>`__ and
    `TypeScript <https://github.com/jupyterlab/extension-cookiecutter-ts>`__.
 
@@ -299,6 +299,9 @@ location of your choice, and start making desired changes.
 
 The theme extension is installed in the same way as a regular extension (see
 `extension authoring <#extension-authoring>`__).
+
+It is also possible to create a new theme using the
+`TypeScript theme cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`__.
 
 Standard (General-Purpose) Extensions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
