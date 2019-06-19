@@ -534,6 +534,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   });
   palette.addItem({ command: CommandIDs.activatePreviousTab, category });
 
+  // A CSS selector targeting tabs in the main area.
+  const tabSelector = '.p-DockPanel .p-TabBar-tab';
+
   commands.addCommand(CommandIDs.close, {
     label: () => 'Close Tab',
     isEnabled: () =>
@@ -547,7 +550,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   palette.addItem({ command: CommandIDs.close, category });
   contextMenu.addItem({
     command: CommandIDs.close,
-    selector: '.p-TabBar-tab',
+    selector: tabSelector,
     rank: 4
   });
 
@@ -581,7 +584,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   palette.addItem({ command: CommandIDs.closeOtherTabs, category });
   contextMenu.addItem({
     command: CommandIDs.closeOtherTabs,
-    selector: '.p-TabBar-tab',
+    selector: tabSelector,
     rank: 4
   });
 
@@ -600,7 +603,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   palette.addItem({ command: CommandIDs.closeRightTabs, category });
   contextMenu.addItem({
     command: CommandIDs.closeRightTabs,
-    selector: '.p-TabBar-tab',
+    selector: tabSelector,
     rank: 5
   });
 
