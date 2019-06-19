@@ -992,7 +992,8 @@ function addCommands(
         while (true) {
           code = srcLines.slice(firstLine, lastLine).join('\n');
           let reply = await current.context.session.kernel.requestIsComplete({
-            code: code
+            // ipython needs an empty line at the end to correctly identify completeness of indented code
+            code: code + '\n\n'
           });
           if (reply.content.status === 'complete') {
             if (curLine < lastLine) {
