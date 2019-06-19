@@ -69,6 +69,7 @@ const RESOURCES = [
     url: 'https://jupyterlab.readthedocs.io/en/stable/getting_started/faq.html'
   },
   {
+    text: 'Jupyter Reference',
     url: 'https://jupyter.org/documentation'
   },
   {
