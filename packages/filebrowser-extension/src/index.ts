@@ -453,7 +453,7 @@ function addCommands(
     label: 'Open From Path…',
     caption: 'Open from path',
     execute: async () => {
-      const { value: path } = await InputDialog.getText({
+      let { value: path } = await InputDialog.getText({
         label: 'Path',
         placeholder: '/path/relative/to/jlab/root',
         title: 'Open Path',
@@ -463,9 +463,19 @@ function addCommands(
         return;
       }
       try {
-        const item = await docManager.services.contents.get(path, {
+        let trailingSlash = path !== '/' && path.endsWith('/');
+        if (trailingSlash) {
+          // The normal contents service errors on paths ending in slash
+          path = path.slice(0, path.length - 1);
+        }
+        const browserForPath = Private.getBrowserForPath(path, factory);
+        const { services } = browserForPath.model.manager;
+        const item = await services.contents.get(path, {
           content: false
         });
+        if (trailingSlash && item.type !== 'directory') {
+          throw new Error(`Path ${path}/ is not a directory`);
+        }
         await commands.execute(CommandIDs.goToPath, { path });
         if (item.type === 'directory') {
           return;
