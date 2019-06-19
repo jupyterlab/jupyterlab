@@ -188,7 +188,7 @@ subsequently reversed by running
 This will remove the package metadata from the source tree and delete
 all of the package files.
 
-The package should export EMCAScript 5 compatible JavaScript. It can
+The package should export EMCAScript 6 compatible JavaScript. It can
 import CSS using the syntax ``require('foo.css')``. The CSS files can
 also import CSS from other packages using the syntax
 ``@import url('~foo/index.css')``, where ``foo`` is the name of the
