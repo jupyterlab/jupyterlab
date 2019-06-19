@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "webpack",
-    "build:prod": "webpack --config webpack.prod.config.js",
+    "build:prod": "node --max_old_space_size=4096 ./node_modules/webpack/bin/webpack.js --config webpack.prod.config.js",
     "build:prod:stats": "webpack --profile --config webpack.prod.config.js --json > stats.json",
     "build:stats": "webpack --profile --json > stats.json",
     "clean": "rimraf build",

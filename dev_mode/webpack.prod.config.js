@@ -21,7 +21,8 @@ config[0] = merge(config[0], {
         },
         cache: process.platform !== 'win32'
       })
-    ]
+    ],
+    splitChunks: { chunks: 'all' }
   }
 });
 
