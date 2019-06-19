@@ -54,7 +54,6 @@
     "@jupyterlab/documentsearch-extension": "^1.0.0-alpha.13",
     "@jupyterlab/extensionmanager": "^1.0.0-alpha.11",
     "@jupyterlab/extensionmanager-extension": "^1.0.0-alpha.11",
-    "@jupyterlab/faq-extension": "^1.0.0-alpha.11",
     "@jupyterlab/filebrowser": "^1.0.0-alpha.11",
     "@jupyterlab/filebrowser-extension": "^1.0.0-alpha.11",
     "@jupyterlab/fileeditor": "^1.0.0-alpha.11",
