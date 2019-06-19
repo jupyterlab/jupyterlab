@@ -271,14 +271,12 @@ const tree: JupyterFrontEndPlugin<void> = {
             : paths.urls.app) +
           args.search +
           args.hash;
-        const immediate = true;
 
         // Remove the tree portion of the URL leaving the rest intact.
         router.navigate(url);
 
         try {
           await commands.execute('filebrowser:navigate', { path });
-          await commands.execute('apputils:save-statedb', { immediate });
         } catch (error) {
           console.warn('Tree routing failed.', error);
         }
