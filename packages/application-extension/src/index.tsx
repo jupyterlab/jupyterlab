@@ -534,8 +534,11 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   });
   palette.addItem({ command: CommandIDs.activatePreviousTab, category });
 
-  // A CSS selector targeting tabs in the main area.
-  const tabSelector = '.p-DockPanel .p-TabBar-tab';
+  // A CSS selector targeting tabs in the main area. This is a very
+  // specific selector since we really only want tabs that are
+  // in the main area, as opposed to those in sidebars, ipywidgets, etc.
+  const tabSelector =
+    '#jp-main-dock-panel > .p-TabBar > .p-TabBar-content > .p-TabBar-tab';
 
   commands.addCommand(CommandIDs.close, {
     label: () => 'Close Tab',
