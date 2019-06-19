@@ -142,7 +142,7 @@ While authoring the extension, you can use the command:
 This causes the builder to re-install the source folder before building
 the application files. You can re-build at any time using
 ``jupyter lab build`` and it will reinstall these packages. You can also
-link other local npm packages that you are working on simultaneously
+link other local ``npm`` packages that you are working on simultaneously
 using ``jupyter labextension link``; they will be re-installed but not
 considered as extensions. Local extensions and linked packages are
 included in ``jupyter labextension list``.
@@ -177,8 +177,8 @@ If you must install a extension into a development branch of JupyterLab, you hav
     jlpm run add:sibling <path-or-url>
 
 in the JupyterLab root directory, where ``<path-or-url>`` refers either
-to an extension npm package on the local file system, or a URL to a git
-repository for an extension npm package. This operation may be
+to an extension ``npm`` package on the local file system, or a URL to a git
+repository for an extension ``npm`` package. This operation may be
 subsequently reversed by running
 
 ::
@@ -207,13 +207,13 @@ of your extension.
 If your JavaScript is written in any other dialect than
 EMCAScript 6 (2015) it should be converted using an appropriate tool.
 You can use Webpack to pre-build your extension to use any of it's features
-not enabled in our build config. To build a compatible package set
-``output.libraryTarget`` to ``"commonjs2"`` in your Webpack config.
+not enabled in our build configuration. To build a compatible package set
+``output.libraryTarget`` to ``"commonjs2"`` in your Webpack configuration.
 (see `this <https://github.com/saulshanabrook/jupyterlab-webpack>`__ example repo).
 
 If you publish your extension on ``npm.org``, users will be able to install
 it as simply ``jupyter labextension install <foo>``, where ``<foo>`` is
-the name of the published npm package. You can alternatively provide a
+the name of the published ``npm`` package. You can alternatively provide a
 script that runs ``jupyter labextension install`` against a local folder
 path on the user's machine or a provided tarball. Any valid
 ``npm install`` specifier can be used in
@@ -221,7 +221,7 @@ path on the user's machine or a provided tarball. Any valid
 ``path/to/folder``, and ``path/to/tar.gz``).
 
 There are a number of helper functions in ``testutils`` in this repo (which
-is a public npm package called ``@jupyterlab/testutils``) that can be used when
+is a public ``npm`` package called ``@jupyterlab/testutils``) that can be used when
 writing tests for an extension.  See ``tests/test-application`` for an example
 of the infrastructure needed to run tests.  There is a ``karma`` config file
 that points to the parent directory's ``karma`` config, and a test runner,
@@ -284,7 +284,7 @@ theme asset entry point is specified ``package.json`` under the ``"jupyterlab"``
 key as ``"themePath"``. See the `JupyterLab Light
 Theme <https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light-extension>`__
 for an example. Ensure that the theme files are included in the
-``"files"`` metadata in package.json.  Note that if you want to use SCSS, SASS, or LESS files,
+``"files"`` metadata in ``package.json``.  Note that if you want to use SCSS, SASS, or LESS files,
 you must compile them to CSS and point JupyterLab to the CSS files.
 
 To quickly create a theme based on the JupyterLab Light Theme, follow
@@ -327,7 +327,7 @@ might want to use them in your extensions.
 - ``@jupyterlab/application:IPaths``: A token providing information about various
   URLs and server paths for the current application. Use this token if you want to
   assemble URLs to use the JupyterLab REST API.
-- ``@jupyterlab/application:ILabStatus``: An interface for interacting with tge application busy/dirty
+- ``@jupyterlab/application:ILabStatus``: An interface for interacting with the application busy/dirty
   status. Use this if you want to set the application "busy" favicon, or to set
   the application "dirty" status, which asks the user for confirmation before leaving.
 - ``@jupyterlab/application:ILabShell``: An interface to the JupyterLab shell.
