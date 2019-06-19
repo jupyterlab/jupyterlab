@@ -50,7 +50,7 @@ export function showErrorMessage(
 
   // Cache promises to prevent multiple copies of identical dialogs showing
   // to the user.
-  let body = error.message || title;
+  let body = typeof error === 'string' ? error : error.message;
   let key = title + '----' + body;
   let promise = Private.errorMessagePromiseCache.get(key);
   if (promise) {
