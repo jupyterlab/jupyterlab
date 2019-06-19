@@ -131,13 +131,6 @@ export class SettingEditor extends Widget {
   }
 
   /**
-   * Whether the debug panel is visible.
-   */
-  get isDebugVisible(): boolean {
-    return this._editor.raw.isDebugVisible;
-  }
-
-  /**
    * The currently loaded settings.
    */
   get settings(): ISettingRegistry.ISettings {
@@ -178,13 +171,6 @@ export class SettingEditor extends Widget {
    */
   save(): Promise<void> {
     return this._editor.raw.save();
-  }
-
-  /**
-   * Toggle the debug functionality.
-   */
-  toggleDebug(): void {
-    this._editor.raw.toggleDebug();
   }
 
   /**
@@ -365,11 +351,6 @@ export namespace SettingEditor {
        * The command registry.
        */
       registry: CommandRegistry;
-
-      /**
-       * The debug command ID.
-       */
-      debug: string;
 
       /**
        * The revert command ID.
