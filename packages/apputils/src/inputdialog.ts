@@ -36,6 +36,16 @@ export namespace InputDialog {
      * default renderer.
      */
     renderer?: Dialog.IRenderer;
+
+    /**
+     * Label for ok button.
+     */
+    okLabel?: string;
+
+    /**
+     * Label for cancel button.
+     */
+    cancelLabel?: string;
   }
 
   /**
@@ -61,7 +71,10 @@ export namespace InputDialog {
     return showDialog({
       ...options,
       body: new InputBooleanDialog(options),
-      buttons: [Dialog.cancelButton(), Dialog.okButton()],
+      buttons: [
+        Dialog.cancelButton({ label: options.cancelLabel }),
+        Dialog.okButton({ label: options.okLabel })
+      ],
       focusNodeSelector: 'input'
     });
   }
@@ -89,7 +102,10 @@ export namespace InputDialog {
     return showDialog({
       ...options,
       body: new InputNumberDialog(options),
-      buttons: [Dialog.cancelButton(), Dialog.okButton()],
+      buttons: [
+        Dialog.cancelButton({ label: options.cancelLabel }),
+        Dialog.okButton({ label: options.okLabel })
+      ],
       focusNodeSelector: 'input'
     });
   }
@@ -132,7 +148,10 @@ export namespace InputDialog {
     return showDialog({
       ...options,
       body: new InputItemsDialog(options),
-      buttons: [Dialog.cancelButton(), Dialog.okButton()],
+      buttons: [
+        Dialog.cancelButton({ label: options.cancelLabel }),
+        Dialog.okButton({ label: options.okLabel })
+      ],
       focusNodeSelector: options.editable ? 'input' : 'select'
     });
   }
@@ -164,7 +183,10 @@ export namespace InputDialog {
     return showDialog({
       ...options,
       body: new InputTextDialog(options),
-      buttons: [Dialog.cancelButton(), Dialog.okButton()],
+      buttons: [
+        Dialog.cancelButton({ label: options.cancelLabel }),
+        Dialog.okButton({ label: options.okLabel })
+      ],
       focusNodeSelector: 'input'
     });
   }
