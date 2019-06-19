@@ -153,11 +153,9 @@ function activate(
 
   // Populate the Help menu.
   const helpMenu = mainMenu.helpMenu;
-  const labGroup = [
-    CommandIDs.about,
-    'faq-jupyterlab:open',
-    CommandIDs.launchClassic
-  ].map(command => ({ command }));
+  const labGroup = [CommandIDs.about, CommandIDs.launchClassic].map(
+    command => ({ command })
+  );
   helpMenu.addGroup(labGroup, 0);
   const resourcesGroup = RESOURCES.map(args => ({
     args,
