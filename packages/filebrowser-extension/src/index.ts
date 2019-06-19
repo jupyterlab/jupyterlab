@@ -14,9 +14,8 @@ import {
   MainAreaWidget,
   ToolbarButton,
   ICommandPalette,
-  Dialog,
-  showDialog,
-  InputDialog
+  InputDialog,
+  showErrorMessage
 } from '@jupyterlab/apputils';
 
 import {
@@ -29,8 +28,6 @@ import {
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import {
   FileBrowserModel,
   FileBrowser,
@@ -39,6 +36,8 @@ import {
 } from '@jupyterlab/filebrowser';
 
 import { Launcher } from '@jupyterlab/launcher';
+
+import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { Contents } from '@jupyterlab/services';
 
@@ -451,20 +450,18 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.openPath, {
-    label: () => 'Open From Path...',
+    label: 'Open From Path…',
     caption: 'Open from path',
-    isEnabled: () => true,
     execute: async () => {
-      const result = await InputDialog.getText({
+      const { value: path } = await InputDialog.getText({
         label: 'Path',
         placeholder: '/path/relative/to/jlab/root',
         title: 'Open Path',
         okLabel: 'Open'
       });
-      if (result.button.label !== 'Open' || !result.value) {
+      if (!path) {
         return;
       }
-      const path = result.value;
       try {
         const item = await docManager.services.contents.get(path, {
           content: false
@@ -474,12 +471,8 @@ function addCommands(
           return;
         }
         return commands.execute('docmanager:open', { path });
-      } catch {
-        return showDialog({
-          title: 'Cannot open',
-          body: 'No such file or directory found',
-          buttons: [Dialog.okButton()]
-        });
+      } catch (e) {
+        return showErrorMessage('Cannot open', e);
       }
     }
   });

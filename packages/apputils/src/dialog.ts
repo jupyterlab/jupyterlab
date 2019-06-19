@@ -449,7 +449,7 @@ export namespace Dialog {
     host: HTMLElement;
 
     /**
-     * The to buttons to display. Defaults to cancel and accept buttons.
+     * The buttons to display. Defaults to cancel and accept buttons.
      */
     buttons: ReadonlyArray<IButton>;
 
