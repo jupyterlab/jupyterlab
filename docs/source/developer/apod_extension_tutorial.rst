@@ -1,18 +1,13 @@
 .. _xkcd_extension_tutorial:
 
-Let's Make an xkcd JupyterLab Extension
----------------------------------------
-
-.. warning::
-
-   The extension developer API is not stable and will evolve in JupyterLab
-   releases in the near future.
+Let's Make an Astronomy Picture of the Day JupyterLab Extension
+----------------------------------------------------------------
 
 JupyterLab extensions add features to the user experience. This page
 describes how to create one type of extension, an *application plugin*,
 that:
 
--  Adds a "Random `xkcd <https://xkcd.com>`__ comic" command to the
+-  Adds a "Random `Astronomy Picture of the Day <https://apod.nasa.gov/apod/astropix.html>`__" command to the
    *command palette* sidebar
 -  Fetches the comic image and metadata when activated
 -  Shows the image and metadata in a tab panel
@@ -30,7 +25,7 @@ By working through this tutorial, you'll learn:
 -  How to version control your work with git
 -  How to release your extension for others to enjoy
 
-|Completed xkcd extension screenshot|
+|Completed apod extension screenshot|
 
 Sound like fun? Excellent. Here we go!
 
@@ -105,9 +100,9 @@ cookiecutter prompts.
 ::
 
     author_name []: Your Name
-    extension_name [myextension]: jupyterlab_xkcd
-    project_short_description [A JupyterLab extension.]: Show a random xkcd.com comic in a JupyterLab panel
-    repository [https://github.com/my_name/jupyterlab_myextension]: https://github.com/my_name/jupyterlab_xkcd
+    extension_name [myextension]: jupyterlab_apod
+    project_short_description [A JupyterLab extension.]: Show a random NASA Astronomy Picture of the Day in a JupyterLab panel
+    repository [https://github.com/my_name/jupyterlab_myextension]: https://github.com/my_name/jupyterlab_apod
 
 Note: if not using a repository, leave the field blank. You can come
 back and edit the repository links in the ``package.json`` file later.
@@ -116,7 +111,7 @@ Change to the directory the cookiecutter created and list the files.
 
 .. code:: bash
 
-    cd jupyterlab_xkcd
+    cd jupyterlab_apod
     ls
 
 You should see a list like the following.
@@ -171,7 +166,7 @@ by following the instructions for your browser:
    Firefox <https://developer.mozilla.org/en-US/docs/Tools/Web_Console/Opening_the_Web_Console>`__
 
 After you reload the page with the console open, you should see a message that says
-``JupyterLab extension jupyterlab_xkcd is activated!`` in the console.
+``JupyterLab extension jupyterlab_apod is activated!`` in the console.
 If you do, congrats, you're ready to start modifying the the extension!
 If not, go back, make sure you didn't miss a step, and `reach
 out <https://github.com/jupyterlab/jupyterlab/blob/master/README.md#getting-help>`__ if you're stuck.
@@ -182,23 +177,23 @@ open.
 Commit what you have to git
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Run the following commands in your ``jupyterlab_xkcd`` folder to
+Run the following commands in your ``jupyterlab_apod`` folder to
 initialize it as a git repository and commit the current code.
 
 .. code:: bash
 
     git init
     git add .
-    git commit -m 'Seed xkcd project from cookiecutter'
+    git commit -m 'Seed apod project from cookiecutter'
 
 Note: This step is not technically necessary, but it is good practice to
 track changes in version control system in case you need to rollback to
 an earlier version or want to collaborate with others. For example, you
 can compare your work throughout this tutorial with the commits in a
-reference version of ``jupyterlab_xkcd`` on GitHub at
-https://github.com/jupyterlab/jupyterlab_xkcd.
+reference version of ``jupyterlab_apod`` on GitHub at
+https://github.com/jupyterlab/jupyterlab_apod.
 
-Add an xkcd widget
+Add an Astronomy Picture of the Day widget
 ~~~~~~~~~~~~~~~~~~
 
 Show an empty panel
@@ -233,14 +228,14 @@ definition so that it reads like so:
 .. code:: typescript
 
     /**
-     * Initialization data for the jupyterlab_xkcd extension.
+     * Initialization data for the jupyterlab_apod extension.
      */
     const extension: JupyterFrontEndPlugin<void> = {
-      id: 'jupyterlab_xkcd',
+      id: 'jupyterlab_apod',
       autoStart: true,
       requires: [ICommandPalette],
       activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
-        console.log('JupyterLab extension jupyterlab_xkcd is activated!');
+        console.log('JupyterLab extension jupyterlab_apod is activated!');
         console.log('ICommandPalette:', palette);
       }
     };
@@ -269,7 +264,7 @@ of the build command for errors and correct your code.
 
 ::
 
-    JupyterLab extension jupyterlab_xkcd is activated!
+    JupyterLab extension jupyterlab_apod is activated!
     ICommandPalette: Palette {_palette: CommandPalette}
 
 Note that we had to run ``jlpm run build`` in order for the bundle to
@@ -301,18 +296,19 @@ code:
 .. code-block:: typescript
 
       activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
-        console.log('JupyterLab extension jupyterlab_xkcd is activated!');
+        console.log('JupyterLab extension jupyterlab_apod is activated!');
 
-        // Create a single widget
-        let widget: Widget = new Widget();
-        widget.id = 'xkcd-jupyterlab';
-        widget.title.label = 'xkcd.com';
+        // Create a blank content widget inside of a MainAreaWidget
+        const content = new Widget();
+        const widget = new MainAreaWidget({content});
+        widget.id = 'apod-jupyterlab';
+        widget.title.label = 'Astronomy Picture';
         widget.title.closable = true;
 
         // Add an application command
-        const command: string = 'xkcd:open';
+        const command: string = 'apod:open';
         app.commands.addCommand(command, {
-          label: 'Random xkcd comic',
+          label: 'Random Astronomy Picture',
           execute: () => {
             if (!widget.isAttached) {
               // Attach the widget to the main work area if it's not there
@@ -327,73 +323,105 @@ code:
         palette.addItem({command, category: 'Tutorial'});
       }
 
-The first new block of code creates a ``Widget`` instance, assigns it a
-unique ID, gives it a label that will appear as its tab title, and makes
-the tab closable by the user. The second block of code add a new command
-labeled *Random xkcd comic* to JupyterLab. When the command executes,
+The first new block of code creates a ``MainAreaWidget`` instance, assigns it a
+unique ID, gives it a label that will appear as its tab title, makes
+the tab closable by the user, and adds a empty content ``Widget`` as its child. 
+The second block of code add a new command labeled *Random Astronomy Picture* 
+to JupyterLab. When the command executes,
 it attaches the widget to the main display area if it is not already
 present and then makes it the active tab. The last new line of code adds
 the command to the command palette in a section called *Tutorial*.
 
 Build your extension again using ``jlpm run build`` (unless you are using
 ``jlpm run watch`` already) and refresh the browser tab. Open the command
-palette on the left side by clicking on *Commands* and type *xkcd* in
-the search box. Your *Random xkcd comic*
+palette on the left side by clicking on *Commands* and type *Astronomy* in
+the search box. Your *Random Astronomy Picture*
 command should appear. Click it or select it with the keyboard and press
 *Enter*. You should see a new, blank panel appear with the tab title
-*xkcd.com*. Click the *x* on the tab to close it and activate the
+*Astronomy Picture*. Click the *x* on the tab to close it and activate the
 command again. The tab should reappear. Finally, click one of the
-launcher tabs so that the *xkcd.com* panel is still open but no longer
+launcher tabs so that the *Astronomy Picture* panel is still open but no longer
 active. Now run the *Random xkcd comic* command one more time. The
 single *xkcd.com* tab should come to the foreground.
 
-|Empty xkcd extension panel|
+|Empty apod extension panel|
 
 If your widget is not behaving, compare your code with the reference
 project state at the `01-show-a-panel
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.34-01-show-a-panel>`__.
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-01-show-a-panel>`__.
 Once you've got everything working properly, git commit your changes and
 carry on.
 
 .. code-block:: bash
 
     git add .
-    git commit -m 'Show xkcd command on panel'
+    git commit -m 'Show Astronomy Picture command in palette'
 
-Show a comic in the panel
+Show a picture in the panel
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You've got an empty panel. It's time to add a comic to it. Go back to
+You've got an empty panel. It's time to add a picture to it. Go back to
 your code editor. Add the following code below the lines that create a
 ``Widget`` instance and above the lines that define the command.
 
 .. code-block:: typescript
 
-        // Add an image element to the panel
+        // Add an image element to the content
         let img = document.createElement('img');
-        widget.node.appendChild(img);
+        content.node.appendChild(img);
 
-        // Fetch info about a random comic
-        fetch('https:////egszlpbmle.execute-api.us-east-1.amazonaws.com/prod').then(response => {
-          return response.json();
-        }).then(data => {
-          img.src = data.img;
-          img.alt = data.title;
-          img.title = data.alt;
-        });
+        // Get a random date string in YYYY-MM-DD format
+        function randomDate() {
+          const start = new Date(2010, 1, 1);
+          const end = new Date();
+          const randomDate = new Date(start.getTime() + Math.random()*(end.getTime() - start.getTime()));
+          return randomDate.toISOString().slice(0, 10);
+        }
+
+        // Fetch info about a random picture
+        const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${randomDate()}`);
+        const data = await response.json() as APODResponse;
+
+        if (data.media_type === 'image') {
+          // Populate the image
+          img.src = data.url;
+          img.title = data.title;
+        } else {
+          console.log('Random APOD was not a picture.');
+        }
+
+Now define the ``APODResponse`` type that was introduced in the code above
+
+.. code-block:: typescript
+
+        interface APODResponse {
+          copyright: string;
+          date: string;
+          explanation: string;
+          media_type: 'video' | 'image';
+          title: string;
+          url: string;
+        };
+
+And update the ``activate`` method to be ``async``
+
+.. code-block:: typescript
+
+        activate: async (app: JupyterFrontEnd, palette: ICommandPalette) =>
+
 
 The first two lines create a new HTML ``<img>`` element and add it to
 the widget DOM node. The next lines make a request using the HTML
 `fetch <https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch>`__
-API that returns information about a random xkcd comic, and set the
-image source, alternate text, and title attributes based on the
+API that returns information about a random Astronomy Picture, and set the
+image source and title attributes based on the
 response.
 
 Rebuild your extension if necessary (``jlpm run build``), refresh your
-browser tab, and run the *Random xkcd comic* command again. You should
-now see a comic in the xkcd.com panel when it opens.
+browser tab, and run the *Random Astronomy Picture* command again. You should
+now see a picture in the panel when it opens.
 
-|Single xkcd extension panel|
+|Single apod extension panel|
 
 Note that the comic is not centered in the panel nor does the panel
 scroll if the comic is larger than the panel area. Also note that the
@@ -402,97 +430,115 @@ panel. You'll address both of these problems in the upcoming sections.
 
 If you don't see a comic at all, compare your code with the
 `02-show-a-comic
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.34-02-show-a-comic>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-02-show-a-picture>`__
 in the reference project. When it's working, make another git commit.
 
 .. code:: bash
 
     git add .
-    git commit -m 'Show a comic in the panel'
+    git commit -m 'Show a picture in the panel'
 
 Improve the widget behavior
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Center the comic and add attribution
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Center the comic, add attribution, and error messaging
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Open ``style/index.css`` in our extension project directory for editing.
 Add the following lines to it.
 
 .. code-block:: css
 
-    .jp-xkcdWidget {
-        display: flex;
-        flex-direction: column;
-        overflow: auto;
-    }
-
-    .jp-xkcdCartoon {
-        margin: auto;
-    }
-
-    .jp-xkcdAttribution {
-        margin: 20px auto;
+    .my-apodWidget {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: auto;
     }
 
 The first rule stacks content vertically within the widget panel and
-lets the panel scroll when the content overflows. The other rules center
-the cartoon and attribution badge horizontally and space them out
-vertically.
+lets the panel scroll when the content overflows.
 
 Return to the ``index.ts`` file. Note that there is already an import of
 the CSS file in the ``index.ts`` file. Modify the the ``activate``
-function to apply the CSS classes and add the attribution badge markup.
+function to apply the CSS classes, the copyright information, and error handling
+for the API response.
 The beginning of the function should read like the following:
 
 .. code-block:: typescript
-      :emphasize-lines: 9,13,16-23
+      :emphasize-lines: 6,15,16,28-49
 
-      activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
-        console.log('JupyterLab extension jupyterlab_xkcd is activated!');
+      activate: async (app: JupyterFrontEnd, palette: ICommandPalette) => {
+          console.log('JupyterLab extension jupyterlab_apod is activated!');
 
-        // Create a single widget
-        let widget: Widget = new Widget();
-        widget.id = 'xkcd-jupyterlab';
-        widget.title.label = 'xkcd.com';
-        widget.title.closable = true;
-        widget.addClass('jp-xkcdWidget'); // new line
+          // Create a blank content widget inside of a MainAreaWidget
+          const content = new Widget();
+          content.addClass('my-apodWidget'); // new line
+          const widget = new MainAreaWidget({content});
+          widget.id = 'apod-jupyterlab';
+          widget.title.label = 'Astronomy Picture';
+          widget.title.closable = true;
+          // Add an image element to the content
+          let img = document.createElement('img');
+          content.node.appendChild(img);
 
-        // Add an image element to the panel
-        let img = document.createElement('img');
-        img.className = 'jp-xkcdCartoon'; // new line
-        widget.node.appendChild(img);
+          let summary = document.createElement('p');
+          content.node.appendChild(summary);
 
-        // New: add an attribution badge
-        img.insertAdjacentHTML('afterend',
-          `<div class="jp-xkcdAttribution">
-            <a href="https://creativecommons.org/licenses/by-nc/2.5/" class="jp-xkcdAttribution" target="_blank">
-              <img src="https://licensebuttons.net/l/by-nc/2.5/80x15.png" />
-            </a>
-          </div>`
-        );
+          // Get a random date string in YYYY-MM-DD format
+          function randomDate() {
+            const start = new Date(2010, 1, 1);
+            const end = new Date();
+            const randomDate = new Date(start.getTime() + Math.random()*(end.getTime() - start.getTime()));
+            return randomDate.toISOString().slice(0, 10);
+          }
+
+          // Fetch info about a random picture
+          const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${randomDate()}`);
+          if (!response.ok) {
+            const data = await response.json();
+            if (data.error) {
+              summary.innerText = data.error.message;
+            } else {
+              summary.innerText = response.statusText;
+            }
+          } else {
+            const data = await response.json() as APODResponse;
+
+            if (data.media_type === 'image') {
+              // Populate the image
+              img.src = data.url;
+              img.title = data.title;
+              summary.innerText = data.title;
+              if (data.copyright) {
+                summary.innerText += ` (Copyright ${data.copyright})`;
+              }
+            } else {
+              summary.innerText = 'Random APOD fetched was not an image.';
+            }
+          }
 
         // Keep all the remaining fetch and command lines the same
         // as before from here down ...
 
 Build your extension if necessary (``jlpm run build``) and refresh your
-JupyterLab browser tab. Invoke the *Random xkcd comic* command and
-confirm the comic is centered with an attribution badge below it. Resize
+JupyterLab browser tab. Invoke the *Random Astronomy Picture* command and
+confirm the comic is centered with the copyright information below it. Resize
 the browser window or the panel so that the comic is larger than the
 available area. Make sure you can scroll the panel over the entire area
 of the comic.
 
-|Styled xkcd panel with attribution|
+|Styled apod panel with attribution|
 
 If anything is misbehaving, compare your code with the reference project
 `03-style-and-attribute
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.34-03-style-and-attribute>`__.
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-03-style-and-attribute>`__.
 When everything is working as expected, make another commit.
 
 .. code:: bash
 
     git add .
-    git commit -m 'Add styling, attribution'
+    git commit -m 'Add styling, attribution, error handling'
 
 Show a new comic on demand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -501,12 +547,12 @@ The ``activate`` function has grown quite long, and there's still more
 functionality to add. You should refactor the code into two separate
 parts:
 
-1. An ``XkcdWidget`` that encapsulates the xkcd panel elements,
+1. An ``APODWidget`` that encapsulates the Astronomy Picture panel elements,
    configuration, and soon-to-be-added update behavior
 2. An ``activate`` function that adds the widget instance to the UI and
-   decide when the comic should refresh
+   decide when the picture should refresh
 
-Start by refactoring the widget code into the new ``XkcdWidget`` class.
+Start by refactoring the widget code into the new ``APODWidget`` class.
 Add the following additional import to the top of the file.
 
 .. code-block:: typescript
@@ -527,50 +573,75 @@ file.
 
 .. code-block:: typescript
 
-    /**
-     * An xckd comic viewer.
-     */
-    class XkcdWidget extends Widget {
+    class APODWidget extends Widget {
       /**
-       * Construct a new xkcd widget.
-       */
+      * Construct a new APOD widget.
+      */
       constructor() {
         super();
 
-        this.id = 'xkcd-jupyterlab';
-        this.title.label = 'xkcd.com';
-        this.title.closable = true;
-        this.addClass('jp-xkcdWidget');
+        this.addClass('my-apodWidget'); // new line
 
+        // Add an image element to the panel
         this.img = document.createElement('img');
-        this.img.className = 'jp-xkcdCartoon';
         this.node.appendChild(this.img);
 
-        this.img.insertAdjacentHTML('afterend',
-          `<div class="jp-xkcdAttribution">
-            <a href="https://creativecommons.org/licenses/by-nc/2.5/" class="jp-xkcdAttribution" target="_blank">
-              <img src="https://licensebuttons.net/l/by-nc/2.5/80x15.png" />
-            </a>
-          </div>`
-        );
+        // Add a summary element to the panel
+        this.summary = document.createElement('p');
+        this.node.appendChild(this.summary);
+
       }
 
       /**
-       * The image element associated with the widget.
-       */
+      * The image element associated with the widget.
+      */
       readonly img: HTMLImageElement;
 
       /**
-       * Handle update requests for the widget.
-       */
-      onUpdateRequest(msg: Message): void {
-        fetch('https://egszlpbmle.execute-api.us-east-1.amazonaws.com/prod').then(response => {
-          return response.json();
-        }).then(data => {
-          this.img.src = data.img;
-          this.img.alt = data.title;
-          this.img.title = data.alt;
-        });
+      * The summary text element associated with the widget.
+      */
+      readonly summary: HTMLParagraphElement;
+
+      /**
+      * Handle update requests for the widget.
+      */
+      async onUpdateRequest(msg: Message): Promise<void> {
+
+        const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${this.randomDate()}`);
+
+        if (!response.ok) {
+          const data = await response.json();
+          if (data.error) {
+            this.summary.innerText = data.error.message;
+          } else {
+            this.summary.innerText = response.statusText;
+          }
+          return;
+        }
+
+        const data = await response.json() as APODResponse;
+
+        if (data.media_type === 'image') {
+          // Populate the image
+          this.img.src = data.url;
+          this.img.title = data.title;
+          this.summary.innerText = data.title;
+          if (data.copyright) {
+            this.summary.innerText += ` (Copyright ${data.copyright})`;
+          }
+        } else {
+          this.summary.innerText = 'Random APOD fetched was not an image.';
+        }
+      }
+
+      /**
+      * Get a random date string in YYYY-MM-DD format.
+      */
+      randomDate(): string {
+        const start = new Date(2010, 1, 1);
+        const end = new Date();
+        const randomDate = new Date(start.getTime() + Math.random()*(end.getTime() - start.getTime()));
+        return randomDate.toISOString().slice(0, 10);
       }
     };
 
@@ -579,7 +650,7 @@ to use instance variables and move the comic request to its own
 function.
 
 Next move the remaining logic in ``activate`` to a new, top-level
-function just below the ``XkcdWidget`` class definition. Modify the code
+function just below the ``APODWidget`` class definition. Modify the code
 to create a widget when one does not exist in the main JupyterLab area
 or to refresh the comic in the exist widget when the command runs again.
 The code for the ``activate`` function should read as follows after
@@ -588,25 +659,29 @@ these changes:
 .. code-block:: typescript
 
     /**
-     * Activate the xckd widget extension.
-     */
+    * Activate the APOD widget extension.
+    */
     function activate(app: JupyterFrontEnd, palette: ICommandPalette) {
-      console.log('JupyterLab extension jupyterlab_xkcd is activated!');
+      console.log('JupyterLab extension jupyterlab_apod is activated!');
 
       // Create a single widget
-      let widget: XkcdWidget = new XkcdWidget();
+      const content = new APODWidget();
+      const widget = new MainAreaWidget({content});
+      widget.id = 'apod-jupyterlab';
+      widget.title.label = 'Astronomy Picture';
+      widget.title.closable = true;
 
       // Add an application command
-      const command: string = 'xkcd:open';
+      const command: string = 'apod:open';
       app.commands.addCommand(command, {
-        label: 'Random xkcd comic',
+        label: 'Random Astronomy Picture',
         execute: () => {
           if (!widget.isAttached) {
             // Attach the widget to the main work area if it's not there
             app.shell.add(widget, 'main');
           }
-          // Refresh the comic in the widget
-          widget.update();
+          // Refresh the picture in the widget
+          content.update();
           // Activate the widget
           app.shell.activateById(widget.id);
         }
@@ -623,7 +698,7 @@ like so:
 .. code-block:: typescript
 
     const extension: JupyterFrontEndPlugin<void> = {
-      id: 'jupyterlab_xkcd',
+      id: 'jupyterlab_apod',
       autoStart: true,
       requires: [ICommandPalette],
       activate: activate
@@ -631,14 +706,14 @@ like so:
 
 Make sure you retain the ``export default extension;`` line in the file.
 Now build the extension again and refresh the JupyterLab browser tab.
-Run the *Random xkcd comic* command more than once without closing the
-panel. The comic should update each time you execute the command. Close
+Run the *Random Astronomy Picture* command more than once without closing the
+panel. The picture should update each time you execute the command. Close
 the panel, run the command, and it should both reappear and show a new
 comic.
 
 If anything is amiss, compare your code with the
 `04-refactor-and-refresh
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.34-04-refactor-and-refresh>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-04-refactor-and-refresh>`__
 to debug. Once it's working properly, commit it.
 
 .. code:: bash
@@ -697,7 +772,7 @@ third parameter of the ``activate``.
 .. code:: typescript
 
     const extension: JupyterFrontEndPlugin<void> = {
-      id: 'jupyterlab_xkcd',
+      id: 'jupyterlab_apod',
       autoStart: true,
       requires: [ICommandPalette, ILayoutRestorer],
       activate: activate
@@ -714,20 +789,23 @@ Finally, rewrite the ``activate`` function so that it:
 .. code-block:: typescript
 
     function activate(app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer) {
-      console.log('JupyterLab extension jupyterlab_xkcd is activated!');
+      console.log('JupyterLab extension jupyterlab_apod is activated!');
 
       // Declare a widget variable
-      let widget: XkcdWidget;
+      let widget: MainAreaWidget<APODWidget>;
 
       // Add an application command
-      const command: string = 'xkcd:open';
+      const command: string = 'apod:open';
       app.commands.addCommand(command, {
-        label: 'Random xkcd comic',
+        label: 'Random Astronomy Picture',
         execute: () => {
           if (!widget) {
             // Create a new widget if one does not exist
-            widget = new XkcdWidget();
-            widget.update();
+            const content = new APODWidget();
+            widget = new MainAreaWidget({content});
+            widget.id = 'apod-jupyterlab';
+            widget.title.label = 'Astronomy Picture';
+            widget.title.closable = true;
           }
           if (!tracker.has(widget)) {
             // Track the state of the widget for later restoration
@@ -736,10 +814,9 @@ Finally, rewrite the ``activate`` function so that it:
           if (!widget.isAttached) {
             // Attach the widget to the main work area if it's not there
             app.shell.add(widget, 'main');
-          } else {
-            // Refresh the comic in the widget
-            widget.update();
           }
+          widget.content.update();
+
           // Activate the widget
           app.shell.activateById(widget.id);
         }
@@ -748,20 +825,30 @@ Finally, rewrite the ``activate`` function so that it:
       // Add the command to the palette.
       palette.addItem({ command, category: 'Tutorial' });
 
+<<<<<<< HEAD:docs/source/developer/xkcd_extension_tutorial.rst
       // Track and restore the widget state.
       let tracker = new WidgetTracker({ namespace: 'xkcd' });
       void restorer.restore(tracker, { command, name: () => 'xkcd' });
+=======
+      // Track and restore the widget state
+      let tracker = new InstanceTracker<Widget>({ namespace: 'apod' });
+      restorer.restore(tracker, {
+        command,
+        args: () => { return {}; },
+        name: () => 'apod'
+      });
+>>>>>>> 975c4838d... Update the extension tutorial to follow APOD:docs/source/developer/apod_extension_tutorial.rst
     };
 
 Rebuild your extension one last time and refresh your browser tab.
-Execute the *Random xkcd comic* command and validate that the panel
+Execute the *Random Astronomy Picture* command and validate that the panel
 appears with a comic in it. Refresh the browser tab again. You should
-see an xkcd panel appear immediately without running the command. Close
+see an Astronomy Picture panel appear immediately without running the command. Close
 the panel and refresh the browser tab. You should not see an xkcd tab
 after the refresh.
 
 Refer to the `05-restore-panel-state
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.34-05-restore-panel-state>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-05-restore-panel-state>`__
 if your extension is misbehaving. Make a commit when the state of your
 extension persists properly.
 
@@ -788,7 +875,7 @@ the prompts.
 
 Next, open the project ``package.json`` file in your text editor. Prefix
 the ``name`` field value with ``@your-npm-username>/`` so that the
-entire field reads ``"name": "@your-npm-username/jupyterlab_xkcd"`` where
+entire field reads ``"name": "@your-npm-username/jupyterlab_apod"`` where
 you've replaced the string ``your-npm-username`` with your real
 username. Review the homepage, repository, license, and `other supported
 package.json <https://docs.npmjs.com/files/package.json>`__ fields while
@@ -799,7 +886,7 @@ file. For example:
 
 .. code:: bash
 
-    jupyter labextension install @your-npm-username/jupyterlab_xkcd
+    jupyter labextension install @your-npm-username/jupyterlab_apod
 
 Return to your terminal window and make one more git commit:
 
@@ -816,12 +903,12 @@ Now run the following command to publish your package:
 
 Check that your package appears on the npm website. You can either
 search for it from the homepage or visit
-``https://www.npmjs.com/package/@your-username/jupyterlab_xkcd``
+``https://www.npmjs.com/package/@your-username/jupyterlab_apod``
 directly. If it doesn't appear, make sure you've updated the package
 name properly in the ``package.json`` and run the npm command correctly.
 Compare your work with the state of the reference project at the
 `06-prepare-to-publish
-tag <https://github.com/jupyterlab/jupyterlab_xkcd/tree/0.34-06-prepare-to-publish>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-06-prepare-to-publish>`__
 for further debugging.
 
 |Extension page on npmjs.com|
@@ -833,9 +920,9 @@ username where appropriate
 
 .. code:: bash
 
-    conda create -n jupyterlab-xkcd jupyterlab nodejs
+    conda create -n jupyterlab-apod jupyterlab nodejs
     conda activate jupyterlab-xkcd
-    jupyter labextension install @your-npm-username/jupyterlab_xkcd
+    jupyter labextension install @your-npm-username/jupyterlab_apod
     jupyter lab
 
 You should see a fresh JupyterLab browser tab appear. When it does,
@@ -848,15 +935,18 @@ Learn more
 You've completed the tutorial. Nicely done! If you want to keep
 learning, here are some suggestions about what to try next:
 
--  Assign a hotkey to the *Random xkcd comic* command.
--  Make the image a link to the comic on https://xkcd.com.
+-  Assign a hotkey to the *Random Astronomy Picture* command.
+-  Make the image a link to the comic on https://apod.nasa.gov/apod/astropix.html.
 -  Push your extension git repository to GitHub.
 -  Give users the ability to pin comics in separate, permanent panels.
 -  Learn how to write :ref:`other kinds of
    extensions <developer_extensions>`.
 
-.. |Completed xkcd extension screenshot| image:: xkcd_tutorial_complete.png
-.. |Empty xkcd extension panel| image:: xkcd_tutorial_empty.png
-.. |Single xkcd extension panel| image:: xkcd_tutorial_single.png
-.. |Styled xkcd panel with attribution| image:: xkcd_tutorial_complete.png
+
+TODO: All images need to be updated
+
+.. |Completed apod extension screenshot| image:: xkcd_tutorial_complete.png
+.. |Empty apod extension panel| image:: xkcd_tutorial_empty.png
+.. |Single apod extension panel| image:: xkcd_tutorial_single.png
+.. |Styled apod panel with attribution| image:: xkcd_tutorial_complete.png
 .. |Extension page on npmjs.com| image:: xkcd_tutorial_npm.png
