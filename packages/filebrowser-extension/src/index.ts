@@ -360,10 +360,8 @@ function addCommands(
   palette: ICommandPalette | null,
   mainMenu: IMainMenu | null
 ): void {
-  const registry = app.docRegistry;
-  const { commands } = app;
-  const { defaultBrowser: browser } = factory;
-  const { tracker } = factory;
+  const { docRegistry: registry, commands } = app;
+  const { defaultBrowser: browser, tracker } = factory;
 
   commands.addCommand(CommandIDs.del, {
     execute: () => {
