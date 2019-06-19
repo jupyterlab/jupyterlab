@@ -58,6 +58,46 @@
   background: var(--jp-brand-color1);
 }
 
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-NotebookIcon {
+  background-image: var(--jp-icon-book-selected);
+}
+
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-OpenFolderIcon {
+  background-image: var(--jp-icon-directory-selected);
+}
+
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-FileIcon {
+  background-image: var(--jp-icon-file-selected);
+}
+
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-YamlIcon {
+  background-image: var(--jp-icon-yaml-selected);
+}
+
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-MarkdownIcon {
+  background-image: var(--jp-icon-markdown-selected);
+}
+
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-ImageIcon {
+  background-image: var(--jp-icon-image-selected);
+}
+
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-SpreadsheetIcon {
+  background-image: var(--jp-icon-spreadsheet-selected);
+}
+
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-JSONIcon {
+  background-image: var(--jp-icon-json-selected);
+}
+
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-PythonIcon {
+  background-image: var(--jp-icon-python-selected);
+}
+
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-RKernelIcon {
+  background-image: var(--jp-icon-r-selected);
+}
+
 #tab-manager .p-TabBar-tabIcon,
 #tab-manager .p-TabBar-tabLabel,
 #tab-manager .p-TabBar-tabCloseIcon {
