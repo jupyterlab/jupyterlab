@@ -25,8 +25,6 @@ import { RawEditor } from './raweditor';
 
 import { SettingEditor } from './settingeditor';
 
-import { TableEditor } from './tableeditor';
-
 /**
  * The class name added to all plugin editors.
  */
@@ -56,11 +54,9 @@ export class PluginEditor extends Widget {
       registry,
       rendermime
     });
-    this.table = this._tableEditor = new TableEditor({ onSaveError });
     this._rawEditor.handleMoved.connect(this._onStateChanged, this);
 
     layout.addWidget(this._rawEditor);
-    layout.addWidget(this._tableEditor);
   }
 
   /**
@@ -69,15 +65,10 @@ export class PluginEditor extends Widget {
   readonly raw: RawEditor;
 
   /**
-   * The plugin editor's table editor.
-   */
-  readonly table: TableEditor;
-
-  /**
    * Tests whether the settings have been modified and need saving.
    */
   get isDirty(): boolean {
-    return this._rawEditor.isDirty || this._tableEditor.isDirty;
+    return this._rawEditor.isDirty;
   }
 
   /**
@@ -92,9 +83,8 @@ export class PluginEditor extends Widget {
     }
 
     const raw = this._rawEditor;
-    const table = this._tableEditor;
 
-    this._settings = raw.settings = table.settings = settings;
+    this._settings = raw.settings = settings;
     this.update();
   }
 
@@ -102,18 +92,16 @@ export class PluginEditor extends Widget {
    * The plugin editor layout state.
    */
   get state(): SettingEditor.IPluginLayout {
-    const editor = this._editor;
     const plugin = this._settings ? this._settings.id : '';
     const { sizes } = this._rawEditor;
 
-    return { editor, plugin, sizes };
+    return { plugin, sizes };
   }
   set state(state: SettingEditor.IPluginLayout) {
     if (JSONExt.deepEqual(this.state, state)) {
       return;
     }
 
-    this._editor = state.editor;
     this._rawEditor.sizes = state.sizes;
     this.update();
   }
@@ -154,7 +142,6 @@ export class PluginEditor extends Widget {
 
     super.dispose();
     this._rawEditor.dispose();
-    this._tableEditor.dispose();
   }
 
   /**
@@ -168,9 +155,7 @@ export class PluginEditor extends Widget {
    * Handle `'update-request'` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    const editor = this._editor;
     const raw = this._rawEditor;
-    const table = this._tableEditor;
     const settings = this._settings;
 
     if (!settings) {
@@ -179,8 +164,7 @@ export class PluginEditor extends Widget {
     }
 
     this.show();
-    (editor === 'raw' ? table : raw).hide();
-    (editor === 'raw' ? raw : table).show();
+    raw.show();
   }
 
   /**
@@ -190,9 +174,7 @@ export class PluginEditor extends Widget {
     (this.stateChanged as Signal<any, void>).emit(undefined);
   }
 
-  private _editor: 'raw' | 'table' = 'raw';
   private _rawEditor: RawEditor;
-  private _tableEditor: TableEditor;
   private _settings: ISettingRegistry.ISettings | null = null;
   private _stateChanged = new Signal<this, void>(this);
 }

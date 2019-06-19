@@ -248,7 +248,6 @@ export class SettingEditor extends Widget {
   private _onStateChanged(): void {
     this._state.sizes = this._panel.relativeSizes();
     this._state.container = this._editor.state;
-    this._state.container.editor = this._list.editor;
     this._state.container.plugin = this._list.selection;
     this._saveState()
       .then(() => {
@@ -329,7 +328,6 @@ export class SettingEditor extends Widget {
           panel.addWidget(editor);
         }
         editor.settings = settings;
-        list.editor = container.editor;
         list.selection = container.plugin;
         this._setLayout();
       })
@@ -438,9 +436,6 @@ export namespace SettingEditor {
      * The current plugin being displayed.
      */
     plugin: string;
-
-    editor: 'raw' | 'table';
-
     sizes: number[];
   }
 }
@@ -496,10 +491,6 @@ namespace Private {
         : {};
 
     saved.container = {
-      editor:
-        container.editor === 'raw' || container.editor === 'table'
-          ? container.editor
-          : DEFAULT_LAYOUT.container.editor,
       plugin:
         typeof container.plugin === 'string'
           ? container.plugin
