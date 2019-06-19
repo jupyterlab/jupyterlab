@@ -1,74 +1,126 @@
 .. _developer-guide:
 
-The JupyterLab Developer Guide is for developing JupyterLab extensions or developing JupyterLab itself.
-
 General Codebase Orientation
 ----------------------------
 
-The ``jupyterlab/jupyterlab`` repository contains two packages:
+The ``jupyterlab`` repository is a monorepo: it contains code for many
+packages that are versioned and published independently.
 
--  an npm package indicated by a ``package.json`` file in the repo's
-   root directory
--  a Python package indicated by a ``setup.py`` file in the repo's root
-   directory
+In particular, there are many TypeScript packages and a single Python package.
+The Python package contains server-side code, and also distributes
+the bundled-and-compiled TypeScript code.
 
-The npm package and the Python package are both named ``jupyterlab``.
-
-See the `Contributing
-Guidelines <https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md>`__
-for developer installation instructions.
+See the `Contributing Guidelines <https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md>`__
+for detailed developer installation instructions.
 
 Directories
 ~~~~~~~~~~~
 
-NPM package: ``src/``, ``lib/``, ``typings/``, ``buildutils/``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The repository contains a number of top-level directories, the contents of which
+are described here.
 
--  ``src/``: the source typescript files.
+Python package: ``jupyterlab/``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-   -  ``jlpm run build`` builds the source files into javascript files
-      in ``lib/``.
-   -  ``jlpm run clean`` deletes the ``lib/`` directory.
+This, along with the ``setup.py``, comprises the Python code for the project.
+This includes the notebook server extension, JupyterLab's command line interface,
+entrypoints, and Python tests.
 
--  ``typings/``: type definitions for external libraries that typescript
-   needs.
--  ``buildutils/``: Utilities for managing the repo
+It also contains the final built JavaScript assets which are distributed with
+the Python package.
+
+
+NPM packages: ``packages/``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This contains the many TypeScript sub-packages which are independently versioned
+and published to ``npmjs.org``. These are compiled to JavaScript and bundled with
+the Python package.
+
+The bulk of JupyterLab's codebase resides in these packages.
+A common pattern for the various components in JupyterLab is to have one package
+that implements the component, and a second package postfixed with ``-extension``
+that integrates that component with the rest of the application.
+Inspection of the contents of this directory shows many such packages.
+
+You can build these packages by running ``jlpm build:packages``.
+
+Binder setup: ``binder/``
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This contains an environment specification for ``repo2docker`` which allows
+the repository to be tested on `mybinder.org <https://mybinder.org>`__.
+This specification is developer focused.
+For a more user-focused binder see the
+`JupyterLab demo <https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/master?urlpath=lab/tree/demo/Lorenz.ipynb>`__
+
+Build utilities: ``builtutils/``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+An ``npm`` package that contains several utility scripts for managing
+the JupyterLab build process.
+
+You can build this package by running ``jlpm build:utils``.
+
+Design: ``design/``
+^^^^^^^^^^^^^^^^^^^
+
+A directory containing a series of design documents motivating various
+choices made in the course of building JupyterLab.
+
+Development-Mode: ``dev_mode/``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+An application directory containing built JavaScript assets which are used
+when developing the TypeScript sources. If you are running JupyterLab
+in ``dev-mode``, you are serving the application out of this directory.
+
+Documentation: ``docs/``
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+This directory contains the Sphinx project for this documentation.
+You can create an environment to build the documentation using ``conda create -f environment.yml``,
+and you can build the documentation by running ``make html``.
+The entry point to the built docs will then be in ``docs/build/index.html``.
+
 
 Examples: ``examples/``
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``examples/`` directory contains stand-alone examples of components,
 such as a simple notebook on a page, a console, terminal, and a
-filebrowser. The ``lab`` example illustrates a simplified combination of
-components used in JupyterLab. This example shows multiple stand-alone
-components combined to create a more complex application.
+file browser. The ``app`` example illustrates a simplified combination of
+several of the components used in JupyterLab.
 
-Testing: ``test/``
-^^^^^^^^^^^^^^^^^^
+Jupyter Server Configuration: ``jupyter-config/``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The tests are stored and run in the ``test/`` directory. The source
-files are in ``test/src/``.
+This directory contains metadata distributed with the Python package that
+allows it to automatically enable the Jupyter server extension upon installation.
 
-Notebook extension: ``jupyterlab/``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``jupyterlab/`` directory contains the Jupyter server extension.
+Utility Scripts: ``scripts/``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The server extension includes a private npm package in order to build
-the **webpack bundle** which the extension serves. The private npm
-package depends on the ``jupyterlab`` npm package found in the repo's
-root directory.
+This directory contains a series of utility scripts which are primarily used
+in continuous integration testing for JupyterLab.
 
-Git hooks: ``git-hooks/``
-^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``git-hooks/`` directory stores some convenience git hooks that
-automatically rebuild the npm package and server extension every time
-you check out or merge (via pull request or direct push to master) in
-the git repo.
+Testing: ``tests/``
+^^^^^^^^^^^^^^^^^^^
 
-Documentation: ``docs/``
-^^^^^^^^^^^^^^^^^^^^^^^^
+Tests for the TypeScript packages in the ``packages/`` directory.
+These test directories are themselves small ``npm`` packages which pull in the
+TypeScript sources and exercise their APIs.
 
-After building the docs (``jlpm run docs``), ``docs/index.html`` is the
-entry point to the documentation.
+Test Utilities: ``testutils/``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A small ``npm`` package which is aids in running the tests in ``tests/``.
+
+
+TypeDoc Theming: ``typedoc-theme``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A small theme used to help render our 
+`TypeDoc <http://jupyterlab.github.io/jupyterlab/index.html>`__ documentation. 
