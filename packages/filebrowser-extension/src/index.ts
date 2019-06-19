@@ -471,8 +471,11 @@ function addCommands(
           return;
         }
         return commands.execute('docmanager:open', { path });
-      } catch (e) {
-        return showErrorMessage('Cannot open', e);
+      } catch (reason) {
+        if (reason.response && reason.response.status === 404) {
+          reason.message = `Could not find file or directory: ${path}`;
+        }
+        return showErrorMessage('Cannot open', reason);
       }
     }
   });
