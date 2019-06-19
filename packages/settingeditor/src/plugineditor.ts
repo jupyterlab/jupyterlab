@@ -44,6 +44,11 @@ export class PluginEditor extends Widget {
     this.addClass(PLUGIN_EDITOR_CLASS);
 
     const { commands, editorFactory, registry, rendermime } = options;
+
+    // TODO: Remove this layout. We were using this before when we
+    // when we had a way to switch between the raw and table editor
+    // Now, the raw editor is the only child and probably could merged into
+    // this class directly in the future.
     const layout = (this.layout = new StackedLayout());
     const { onSaveError } = Private;
 
