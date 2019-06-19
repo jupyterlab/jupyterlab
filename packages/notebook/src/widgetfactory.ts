@@ -81,16 +81,19 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
    * The factory will start the appropriate kernel.
    */
   protected createNewWidget(
-    context: DocumentRegistry.IContext<INotebookModel>
+    context: DocumentRegistry.IContext<INotebookModel>,
+    source?: NotebookPanel
   ): NotebookPanel {
-    let rendermime = this.rendermime.clone({ resolver: context.urlResolver });
-
     let nbOptions = {
-      rendermime,
+      rendermime: source
+        ? source.content.rendermime
+        : this.rendermime.clone({ resolver: context.urlResolver }),
       contentFactory: this.contentFactory,
       mimeTypeService: this.mimeTypeService,
-      editorConfig: this._editorConfig,
-      notebookConfig: this._notebookConfig
+      editorConfig: source ? source.content.editorConfig : this._editorConfig,
+      notebookConfig: source
+        ? source.content.notebookConfig
+        : this._notebookConfig
     };
     let content = this.contentFactory.createNotebook(nbOptions);
 

@@ -59,7 +59,10 @@ const plugin: JupyterFrontEndPlugin<IVDOMTracker> = {
 
     notebooks.widgetAdded.connect((sender, panel) => {
       // Get the notebook's context and rendermime;
-      const { context, rendermime } = panel;
+      const {
+        context,
+        content: { rendermime }
+      } = panel;
 
       // Add the renderer factory to the notebook's rendermime registry;
       rendermime.addFactory(

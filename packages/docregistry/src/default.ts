@@ -385,9 +385,9 @@ export abstract class ABCWidgetFactory<
    * #### Notes
    * It should emit the [widgetCreated] signal with the new widget.
    */
-  createNew(context: DocumentRegistry.IContext<U>): T {
+  createNew(context: DocumentRegistry.IContext<U>, source?: T): T {
     // Create the new widget
-    const widget = this.createNewWidget(context);
+    const widget = this.createNewWidget(context, source);
 
     // Add toolbar items
     let items: DocumentRegistry.IToolbarItem[];
@@ -407,21 +407,12 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * Clone a widget given a context
-   *
-   * ### Notes
-   * This implementation defaults to creating a new widget.
-   * Subclasses can override this if they wish to handle
-   * cloning a widget differently.
-   */
-  clone(widget: T, context: DocumentRegistry.IContext<U>): T {
-    return this.createNew(context);
-  }
-
-  /**
    * Create a widget for a context.
    */
-  protected abstract createNewWidget(context: DocumentRegistry.IContext<U>): T;
+  protected abstract createNewWidget(
+    context: DocumentRegistry.IContext<U>,
+    source?: T
+  ): T;
 
   /**
    * Default factory for toolbar items to be added after the widget is created.

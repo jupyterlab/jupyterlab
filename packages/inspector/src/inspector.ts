@@ -30,8 +30,21 @@ export class InspectorPanel extends Panel
   /**
    * Construct an inspector.
    */
-  constructor() {
+  constructor(options: InspectorPanel.IOptions = {}) {
     super();
+
+    if (options.initialContent instanceof Widget) {
+      this._content = options.initialContent;
+    } else if (typeof options.initialContent === 'string') {
+      this._content = InspectorPanel._generateContentWidget(
+        `<p>${options.initialContent}</p>`
+      );
+    } else {
+      this._content = InspectorPanel._generateContentWidget(
+        '<p>Click on a function to see documentation.</p>'
+      );
+    }
+
     this.addClass(PANEL_CLASS);
     (this.layout as PanelLayout).addWidget(this._content);
   }
@@ -115,18 +128,24 @@ export class InspectorPanel extends Panel
     this.source = null;
   }
 
-  private _content: Widget = Private.defaultContent();
+  /**
+   * Generate content widget from string
+   */
+  private static _generateContentWidget(message: string): Widget {
+    const widget = new Widget();
+    widget.node.innerHTML = message;
+    widget.addClass(CONTENT_CLASS);
+    widget.addClass(DEFAULT_CONTENT_CLASS);
+
+    return widget;
+  }
+
+  private _content: Widget = null;
   private _source: IInspector.IInspectable | null = null;
 }
 
-namespace Private {
-  export function defaultContent() {
-    const defaultContent = new Widget();
-    defaultContent.node.innerHTML =
-      '<p>Click on a function to see documentation.</p>';
-    defaultContent.addClass(CONTENT_CLASS);
-    defaultContent.addClass(DEFAULT_CONTENT_CLASS);
-
-    return defaultContent;
+export namespace InspectorPanel {
+  export interface IOptions {
+    initialContent?: Widget | string | undefined;
   }
 }

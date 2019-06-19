@@ -202,7 +202,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     // Create a handler for each notebook that is created.
     notebooks.widgetAdded.connect((sender, parent) => {
       const session = parent.session;
-      const rendermime = parent.rendermime;
+      const rendermime = parent.content.rendermime;
       const connector = new KernelConnector({ session });
       const handler = new InspectionHandler({ connector, rendermime });
 
