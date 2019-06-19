@@ -3,7 +3,6 @@
 
 export * from './browser';
 export * from './crumbs';
-export * from './dialog';
 export * from './tokens';
 export * from './listing';
 export * from './model';

@@ -15,7 +15,8 @@ import {
   ToolbarButton,
   ICommandPalette,
   Dialog,
-  showDialog
+  showDialog,
+  InputDialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -34,8 +35,7 @@ import {
   FileBrowserModel,
   FileBrowser,
   FileUploadStatus,
-  IFileBrowserFactory,
-  askUserForPath
+  IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
 
 import { Launcher } from '@jupyterlab/launcher';
@@ -455,10 +455,16 @@ function addCommands(
     caption: 'Open from path',
     isEnabled: () => true,
     execute: async () => {
-      const path = await askUserForPath(docManager.services.contents);
-      if (!path) {
+      const result = await InputDialog.getText({
+        label: 'Path',
+        placeholder: '/path/relative/to/jlab/root',
+        title: 'Open Path',
+        okLabel: 'Open'
+      });
+      if (result.button.label !== 'Open' || !result.value) {
         return;
       }
+      const path = result.value;
       try {
         const item = await docManager.services.contents.get(path, {
           content: false
