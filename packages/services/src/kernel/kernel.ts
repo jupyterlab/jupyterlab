@@ -756,8 +756,12 @@ export namespace Kernel {
    * responses that may come from the kernel.
    */
   export interface IFuture<
-    REQUEST extends KernelMessage.IShellMessage | KernelMessage.IControlMessage,
-    REPLY extends KernelMessage.IShellMessage | KernelMessage.IControlMessage
+    REQUEST extends
+      | KernelMessage.IShellMessage
+      | KernelMessage.IControlMessage = KernelMessage.IShellMessage,
+    REPLY extends
+      | KernelMessage.IShellMessage
+      | KernelMessage.IControlMessage = KernelMessage.IShellMessage
   > extends IDisposable {
     /**
      * The original outgoing message.
