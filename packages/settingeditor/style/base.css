@@ -130,7 +130,8 @@
 }
 
 #setting-editor .jp-SettingsRawEditor .jp-Toolbar-item {
-  margin-top: 2px;
+  margin-top: 1px;
+  align-items: center;
 }
 
 .jp-ToolbarButtonComponent-label
