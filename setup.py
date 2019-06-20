@@ -145,7 +145,8 @@ setup_args['extras_require'] = {
     'docs': [
         'sphinx',
         'recommonmark',
-        'sphinx_rtd_theme'
+        'sphinx_rtd_theme',
+        'sphinx-copybutton'
     ],
 }
 
