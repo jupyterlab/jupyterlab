@@ -29,6 +29,11 @@ export class RestorablePool<
   }
 
   /**
+   * A namespace for all tracked objects.
+   */
+  readonly namespace: string;
+
+  /**
    * A signal emitted when an object object is added.
    *
    * #### Notes
@@ -38,11 +43,6 @@ export class RestorablePool<
   get added(): ISignal<this, T> {
     return this._added;
   }
-
-  /**
-   * A namespace for all tracked objects.
-   */
-  readonly namespace: string;
 
   /**
    * The current object.
@@ -74,6 +74,13 @@ export class RestorablePool<
   }
 
   /**
+   * Test whether the pool is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
    * A promise resolved when the restorable pool has been restored.
    */
   get restored(): Promise<void> {
@@ -98,6 +105,12 @@ export class RestorablePool<
    * Add a new object to the pool.
    *
    * @param obj - The object object being added.
+   *
+   * #### Notes
+   * The object passed into the tracker is added synchronously; its existence in
+   * the tracker can be checked with the `has()` method. The promise this method
+   * returns resolves after the object has been added and saved to an underlying
+   * restoration connector, if one is available.
    */
   async add(obj: T): Promise<void> {
     if (obj.isDisposed) {
@@ -137,14 +150,11 @@ export class RestorablePool<
   }
 
   /**
-   * Test whether the pool is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
    * Dispose of the resources held by the pool.
+   *
+   * #### Notes
+   * Disposing a pool does not affect the underlying data in the data connector,
+   * it simply disposes the client-side pool without making any connector calls.
    */
   dispose(): void {
     if (this.isDisposed) {
@@ -245,7 +255,7 @@ export class RestorablePool<
 
     const [saved] = await Promise.all(promises);
     const values = await Promise.all(
-      saved.ids.map((id, index) => {
+      saved.ids.map(async (id, index) => {
         const value = saved.values[index];
         const args = value && (value as any).data;
 

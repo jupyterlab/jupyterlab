@@ -136,6 +136,8 @@ export class WidgetTracker<T extends Widget = Widget>
     }, this);
 
     pool.currentChanged.connect((_, widget) => {
+      // If the pool's current reference is `null` but the focus tracker has a
+      // current widget, update the pool to match the focus tracker.
       if (widget === null && focus.currentWidget) {
         pool.current = focus.currentWidget;
         return;
@@ -208,6 +210,12 @@ export class WidgetTracker<T extends Widget = Widget>
    * Add a new widget to the tracker.
    *
    * @param widget - The widget being added.
+   *
+   * #### Notes
+   * The widget passed into the tracker is added synchronously; its existence in
+   * the tracker can be checked with the `has()` method. The promise this method
+   * returns resolves after the widget has been added and saved to an underlying
+   * restoration connector, if one is available.
    */
   async add(widget: T): Promise<void> {
     this._focusTracker.add(widget);
