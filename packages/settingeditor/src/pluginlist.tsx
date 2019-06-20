@@ -253,7 +253,9 @@ namespace Private {
       const { id, schema, version } = plugin;
       const itemTitle = `${schema.description}\n${id}\n${version}`;
       const image = getHint(ICON_CLASS_KEY, registry, plugin);
-      const iconClass = `jp-PluginList-icon${image ? ' ' + image : ''}`;
+      const iconClass = `jp-MaterialIcon jp-PluginList-icon${
+        image ? ' ' + image : ''
+      }`;
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
 
       return (
