@@ -445,8 +445,8 @@ function addCommands(
       const browserForPath = Private.getBrowserForPath(path, factory);
       browserForPath.clearSelectedItems();
       const parts = path.split('/');
-      if (parts.length > 0) {
-        const name = parts[parts.length - 1];
+      const name = parts[parts.length - 1];
+      if (name) {
         browserForPath.selectItemByName(name);
       }
 
