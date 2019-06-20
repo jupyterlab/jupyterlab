@@ -92,7 +92,7 @@ This will create a new folder for your extension in your current directory.
 
 .. code:: bash
 
-    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts
+    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts --checkout v1.0
 
 When prompted, enter values like the following for all of the
 cookiecutter prompts.
