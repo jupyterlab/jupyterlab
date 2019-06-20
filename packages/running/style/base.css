@@ -118,7 +118,7 @@
 }
 
 .jp-RunningSessions-itemIcon.jp-mod-notebook {
-  background-image: var(--jp-icon-book);
+  background-image: var(--jp-icon-notebook);
 }
 
 .jp-RunningSessions-itemIcon.jp-mod-console {
