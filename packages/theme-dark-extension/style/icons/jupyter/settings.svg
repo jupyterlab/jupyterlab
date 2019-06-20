@@ -1,84 +1,478 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Generator: Adobe Illustrator 19.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 200 200" style="enable-background:new 0 0 200 200;" xml:space="preserve">
-<style type="text/css">
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="Layer_1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 200 200"
+   style="enable-background:new 0 0 200 200;"
+   xml:space="preserve"
+   sodipodi:docname="settings.svg"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"><metadata
+   id="metadata138"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
+   id="defs136" /><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="640"
+   inkscape:window-height="480"
+   id="namedview134"
+   showgrid="false"
+   inkscape:zoom="1.18"
+   inkscape:cx="100"
+   inkscape:cy="100"
+   inkscape:window-x="0"
+   inkscape:window-y="0"
+   inkscape:window-maximized="0"
+   inkscape:current-layer="Layer_1" />
+<style
+   type="text/css"
+   id="style2">
 	.st0{fill:#616161;}
 	.st1{display:none;}
 	.st2{display:inline;fill:none;stroke:#9E9E9E;stroke-width:0.25;stroke-miterlimit:10;}
 	.st3{fill:#FFFFFF;}
 </style>
-<g id="Layer_1_1_">
-	<rect x="20" y="20" class="st0" width="160" height="160"/>
-</g>
-<g class="st1">
-	<line class="st2" x1="100" y1="0" x2="100" y2="200"/>
-	<path class="st2" d="M195.9,100"/>
-	<path class="st2" d="M4,100"/>
-	<line class="st2" x1="0" y1="200" x2="200" y2="0"/>
-	<line class="st2" x1="100" y1="0" x2="200" y2="100"/>
-	<line class="st2" x1="0" y1="100" x2="100" y2="199.9"/>
-	<line class="st2" x1="200" y1="100" x2="100" y2="200"/>
-	<line class="st2" x1="100" y1="0.1" x2="0" y2="100"/>
-	<line class="st2" x1="130" y1="0" x2="130" y2="200"/>
-	<line class="st2" x1="70" y1="0" x2="70" y2="200"/>
-	<line class="st2" x1="30" y1="0" x2="30" y2="200"/>
-	<line class="st2" x1="170" y1="0" x2="170" y2="200"/>
-	<line class="st2" x1="200" y1="100" x2="0" y2="100"/>
-	<line class="st2" x1="200" y1="130" x2="0" y2="130"/>
-	<line class="st2" x1="200" y1="70" x2="0" y2="70"/>
-	<line class="st2" x1="200" y1="30" x2="0" y2="30"/>
-	<line class="st2" x1="200" y1="170" x2="0" y2="170"/>
-	<line class="st2" x1="20" y1="0.1" x2="20" y2="200.1"/>
-	<line class="st2" x1="180" y1="0" x2="180" y2="200"/>
-	<line class="st2" x1="0" y1="180" x2="200" y2="180"/>
-	<line class="st2" x1="0" y1="20" x2="200" y2="20"/>
-	<line class="st2" x1="160" y1="0" x2="160" y2="200"/>
-	<line class="st2" x1="100" y1="15" x2="185" y2="100"/>
-	<line class="st2" x1="15" y1="100" x2="100" y2="185"/>
-	<line class="st2" x1="185" y1="100" x2="100" y2="185"/>
-	<line class="st2" x1="100" y1="15" x2="15" y2="100"/>
-	<line class="st2" x1="0" y1="0" x2="200" y2="200"/>
-	<line class="st2" x1="60" y1="0" x2="60" y2="200"/>
-	<line class="st2" x1="140" y1="0" x2="140" y2="200"/>
-	<line class="st2" x1="0" y1="140" x2="200" y2="140"/>
-	<line class="st2" x1="0" y1="60" x2="200" y2="60"/>
-	<line class="st2" x1="190" y1="200" x2="0" y2="10"/>
-	<line class="st2" x1="10" y1="0" x2="200" y2="190"/>
-	<path class="st2" d="M200,200"/>
-	<path class="st2" d="M0,0"/>
-	<line class="st2" x1="190" y1="200" x2="0" y2="10"/>
-	<line class="st2" x1="10" y1="0" x2="200" y2="190"/>
-	<line class="st2" x1="0" y1="190" x2="190" y2="0"/>
-	<line class="st2" x1="200" y1="10" x2="10" y2="200"/>
-	<line class="st2" x1="40" y1="0" x2="40" y2="200"/>
-	<line class="st2" x1="200" y1="160" x2="0" y2="160"/>
-	<line class="st2" x1="200" y1="40" x2="0" y2="40"/>
+
+<g
+   class="st1"
+   id="g129">
+	<line
+   class="st2"
+   x1="100"
+   y1="0"
+   x2="100"
+   y2="200"
+   id="line7" />
+	<path
+   class="st2"
+   d="M195.9,100"
+   id="path9" />
+	<path
+   class="st2"
+   d="M4,100"
+   id="path11" />
+	<line
+   class="st2"
+   x1="0"
+   y1="200"
+   x2="200"
+   y2="0"
+   id="line13" />
+	<line
+   class="st2"
+   x1="100"
+   y1="0"
+   x2="200"
+   y2="100"
+   id="line15" />
+	<line
+   class="st2"
+   x1="0"
+   y1="100"
+   x2="100"
+   y2="199.9"
+   id="line17" />
+	<line
+   class="st2"
+   x1="200"
+   y1="100"
+   x2="100"
+   y2="200"
+   id="line19" />
+	<line
+   class="st2"
+   x1="100"
+   y1="0.1"
+   x2="0"
+   y2="100"
+   id="line21" />
+	<line
+   class="st2"
+   x1="130"
+   y1="0"
+   x2="130"
+   y2="200"
+   id="line23" />
+	<line
+   class="st2"
+   x1="70"
+   y1="0"
+   x2="70"
+   y2="200"
+   id="line25" />
+	<line
+   class="st2"
+   x1="30"
+   y1="0"
+   x2="30"
+   y2="200"
+   id="line27" />
+	<line
+   class="st2"
+   x1="170"
+   y1="0"
+   x2="170"
+   y2="200"
+   id="line29" />
+	<line
+   class="st2"
+   x1="200"
+   y1="100"
+   x2="0"
+   y2="100"
+   id="line31" />
+	<line
+   class="st2"
+   x1="200"
+   y1="130"
+   x2="0"
+   y2="130"
+   id="line33" />
+	<line
+   class="st2"
+   x1="200"
+   y1="70"
+   x2="0"
+   y2="70"
+   id="line35" />
+	<line
+   class="st2"
+   x1="200"
+   y1="30"
+   x2="0"
+   y2="30"
+   id="line37" />
+	<line
+   class="st2"
+   x1="200"
+   y1="170"
+   x2="0"
+   y2="170"
+   id="line39" />
+	<line
+   class="st2"
+   x1="20"
+   y1="0.1"
+   x2="20"
+   y2="200.1"
+   id="line41" />
+	<line
+   class="st2"
+   x1="180"
+   y1="0"
+   x2="180"
+   y2="200"
+   id="line43" />
+	<line
+   class="st2"
+   x1="0"
+   y1="180"
+   x2="200"
+   y2="180"
+   id="line45" />
+	<line
+   class="st2"
+   x1="0"
+   y1="20"
+   x2="200"
+   y2="20"
+   id="line47" />
+	<line
+   class="st2"
+   x1="160"
+   y1="0"
+   x2="160"
+   y2="200"
+   id="line49" />
+	<line
+   class="st2"
+   x1="100"
+   y1="15"
+   x2="185"
+   y2="100"
+   id="line51" />
+	<line
+   class="st2"
+   x1="15"
+   y1="100"
+   x2="100"
+   y2="185"
+   id="line53" />
+	<line
+   class="st2"
+   x1="185"
+   y1="100"
+   x2="100"
+   y2="185"
+   id="line55" />
+	<line
+   class="st2"
+   x1="100"
+   y1="15"
+   x2="15"
+   y2="100"
+   id="line57" />
+	<line
+   class="st2"
+   x1="0"
+   y1="0"
+   x2="200"
+   y2="200"
+   id="line59" />
+	<line
+   class="st2"
+   x1="60"
+   y1="0"
+   x2="60"
+   y2="200"
+   id="line61" />
+	<line
+   class="st2"
+   x1="140"
+   y1="0"
+   x2="140"
+   y2="200"
+   id="line63" />
+	<line
+   class="st2"
+   x1="0"
+   y1="140"
+   x2="200"
+   y2="140"
+   id="line65" />
+	<line
+   class="st2"
+   x1="0"
+   y1="60"
+   x2="200"
+   y2="60"
+   id="line67" />
+	<line
+   class="st2"
+   x1="190"
+   y1="200"
+   x2="0"
+   y2="10"
+   id="line69" />
+	<line
+   class="st2"
+   x1="10"
+   y1="0"
+   x2="200"
+   y2="190"
+   id="line71" />
+	<path
+   class="st2"
+   d="M200,200"
+   id="path73" />
+	<path
+   class="st2"
+   d="M0,0"
+   id="path75" />
+	<line
+   class="st2"
+   x1="190"
+   y1="200"
+   x2="0"
+   y2="10"
+   id="line77" />
+	<line
+   class="st2"
+   x1="10"
+   y1="0"
+   x2="200"
+   y2="190"
+   id="line79" />
+	<line
+   class="st2"
+   x1="0"
+   y1="190"
+   x2="190"
+   y2="0"
+   id="line81" />
+	<line
+   class="st2"
+   x1="200"
+   y1="10"
+   x2="10"
+   y2="200"
+   id="line83" />
+	<line
+   class="st2"
+   x1="40"
+   y1="0"
+   x2="40"
+   y2="200"
+   id="line85" />
+	<line
+   class="st2"
+   x1="200"
+   y1="160"
+   x2="0"
+   y2="160"
+   id="line87" />
+	<line
+   class="st2"
+   x1="200"
+   y1="40"
+   x2="0"
+   y2="40"
+   id="line89" />
 	
-		<rect x="71.7" y="71.7" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -41.4284 100.0642)" class="st2" width="56.7" height="56.7"/>
-	<line class="st2" x1="0" y1="150" x2="200" y2="150"/>
-	<line class="st2" x1="150" y1="200" x2="150" y2="0"/>
-	<line class="st2" x1="50" y1="200" x2="50" y2="0"/>
-	<line class="st2" x1="200" y1="50" x2="0" y2="50"/>
-	<line class="st2" x1="110" y1="0" x2="110" y2="200"/>
-	<line class="st2" x1="120" y1="0" x2="120" y2="200"/>
-	<line class="st2" x1="80" y1="200" x2="80" y2="0"/>
-	<line class="st2" x1="90" y1="200" x2="90" y2="0"/>
-	<line class="st2" x1="0" y1="70" x2="200" y2="70"/>
-	<line class="st2" x1="0" y1="130" x2="200" y2="130"/>
-	<line class="st2" x1="0" y1="90" x2="200" y2="90"/>
-	<line class="st2" x1="0" y1="80" x2="200" y2="80"/>
-	<line class="st2" x1="200" y1="120" x2="0" y2="120"/>
-	<line class="st2" x1="200" y1="110" x2="0" y2="110"/>
-	<line class="st2" x1="10" y1="0.1" x2="10" y2="200.1"/>
-	<line class="st2" x1="190" y1="0.1" x2="190" y2="200.1"/>
-	<line class="st2" x1="0" y1="10" x2="200" y2="10"/>
-	<line class="st2" x1="0" y1="190" x2="200" y2="190"/>
+		<rect
+   x="71.7"
+   y="71.7"
+   transform="matrix(0.7071 -0.7071 0.7071 0.7071 -41.4284 100.0642)"
+   class="st2"
+   width="56.7"
+   height="56.7"
+   id="rect91" />
+	<line
+   class="st2"
+   x1="0"
+   y1="150"
+   x2="200"
+   y2="150"
+   id="line93" />
+	<line
+   class="st2"
+   x1="150"
+   y1="200"
+   x2="150"
+   y2="0"
+   id="line95" />
+	<line
+   class="st2"
+   x1="50"
+   y1="200"
+   x2="50"
+   y2="0"
+   id="line97" />
+	<line
+   class="st2"
+   x1="200"
+   y1="50"
+   x2="0"
+   y2="50"
+   id="line99" />
+	<line
+   class="st2"
+   x1="110"
+   y1="0"
+   x2="110"
+   y2="200"
+   id="line101" />
+	<line
+   class="st2"
+   x1="120"
+   y1="0"
+   x2="120"
+   y2="200"
+   id="line103" />
+	<line
+   class="st2"
+   x1="80"
+   y1="200"
+   x2="80"
+   y2="0"
+   id="line105" />
+	<line
+   class="st2"
+   x1="90"
+   y1="200"
+   x2="90"
+   y2="0"
+   id="line107" />
+	<line
+   class="st2"
+   x1="0"
+   y1="70"
+   x2="200"
+   y2="70"
+   id="line109" />
+	<line
+   class="st2"
+   x1="0"
+   y1="130"
+   x2="200"
+   y2="130"
+   id="line111" />
+	<line
+   class="st2"
+   x1="0"
+   y1="90"
+   x2="200"
+   y2="90"
+   id="line113" />
+	<line
+   class="st2"
+   x1="0"
+   y1="80"
+   x2="200"
+   y2="80"
+   id="line115" />
+	<line
+   class="st2"
+   x1="200"
+   y1="120"
+   x2="0"
+   y2="120"
+   id="line117" />
+	<line
+   class="st2"
+   x1="200"
+   y1="110"
+   x2="0"
+   y2="110"
+   id="line119" />
+	<line
+   class="st2"
+   x1="10"
+   y1="0.1"
+   x2="10"
+   y2="200.1"
+   id="line121" />
+	<line
+   class="st2"
+   x1="190"
+   y1="0.1"
+   x2="190"
+   y2="200.1"
+   id="line123" />
+	<line
+   class="st2"
+   x1="0"
+   y1="10"
+   x2="200"
+   y2="10"
+   id="line125" />
+	<line
+   class="st2"
+   x1="0"
+   y1="190"
+   x2="200"
+   y2="190"
+   id="line127" />
 </g>
-<path class="st3" d="M138.4,105.4c0.2-1.6,0.4-3.3,0.4-5c0-1.7-0.2-3.4-0.4-5l10.9-8.5c1-0.8,1.2-2.2,0.6-3.3l-10.3-17.8
-	c-0.6-1.1-2-1.5-3.1-1.1l-12.8,5.1c-2.7-2.1-5.6-3.8-8.7-5l-2-13.6c-0.2-1.2-1.2-2.2-2.5-2.2H89.9c-1.3,0-2.4,0.9-2.5,2.2l-2,13.6
-	c-3.1,1.3-6,3-8.7,5l-12.8-5.1c-1.2-0.5-2.5,0-3.1,1.1L50.4,83.6c-0.7,1.1-0.4,2.5,0.6,3.3l10.9,8.5c-0.2,1.6-0.4,3.3-0.4,5
-	c0,1.7,0.2,3.4,0.4,5l-10.9,8.5c-1,0.8-1.2,2.2-0.6,3.3L60.7,135c0.6,1.1,2,1.5,3.1,1.1l12.8-5.1c2.7,2.1,5.6,3.8,8.7,5l2,13.6
-	c0.2,1.2,1.2,2.2,2.5,2.2h20.6c1.3,0,2.4-0.9,2.5-2.2l2-13.6c3.1-1.3,6-3,8.7-5l12.8,5.1c1.2,0.5,2.5,0,3.1-1.1l10.3-17.8
-	c0.6-1.1,0.4-2.5-0.6-3.3L138.4,105.4z M100.2,118.4c-9.9,0-18-8.1-18-18s8.1-18,18-18s18,8.1,18,18S110.1,118.4,100.2,118.4z"/>
+<path
+   class="st3"
+   d="M138.4,105.4c0.2-1.6,0.4-3.3,0.4-5c0-1.7-0.2-3.4-0.4-5l10.9-8.5c1-0.8,1.2-2.2,0.6-3.3l-10.3-17.8  c-0.6-1.1-2-1.5-3.1-1.1l-12.8,5.1c-2.7-2.1-5.6-3.8-8.7-5l-2-13.6c-0.2-1.2-1.2-2.2-2.5-2.2H89.9c-1.3,0-2.4,0.9-2.5,2.2l-2,13.6  c-3.1,1.3-6,3-8.7,5l-12.8-5.1c-1.2-0.5-2.5,0-3.1,1.1L50.4,83.6c-0.7,1.1-0.4,2.5,0.6,3.3l10.9,8.5c-0.2,1.6-0.4,3.3-0.4,5  c0,1.7,0.2,3.4,0.4,5l-10.9,8.5c-1,0.8-1.2,2.2-0.6,3.3L60.7,135c0.6,1.1,2,1.5,3.1,1.1l12.8-5.1c2.7,2.1,5.6,3.8,8.7,5l2,13.6  c0.2,1.2,1.2,2.2,2.5,2.2h20.6c1.3,0,2.4-0.9,2.5-2.2l2-13.6c3.1-1.3,6-3,8.7-5l12.8,5.1c1.2,0.5,2.5,0,3.1-1.1l10.3-17.8  c0.6-1.1,0.4-2.5-0.6-3.3L138.4,105.4z M100.2,118.4c-9.9,0-18-8.1-18-18s8.1-18,18-18s18,8.1,18,18S110.1,118.4,100.2,118.4z"
+   id="path131" />
 </svg>
