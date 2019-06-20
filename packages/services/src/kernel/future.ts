@@ -58,6 +58,17 @@ export abstract class KernelFutureHandler<
   }
 
   /**
+   * Get the stdin handler.
+   * @deprecated - This method exists to satisfy the `IFuture` interface and
+   * will be removed in a future version.
+   */
+  get onStdin(): (
+    msg: KernelMessage.IStdinMessage
+  ) => void | PromiseLike<void> {
+    return undefined;
+  }
+
+  /**
    * Get the reply handler.
    */
   get onReply(): (msg: REPLY) => void | PromiseLike<void> {
