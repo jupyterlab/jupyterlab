@@ -1,4 +1,4 @@
-.. _xkcd_extension_tutorial:
+.. _apod_extension_tutorial:
 
 Let's Make an Astronomy Picture of the Day JupyterLab Extension
 ----------------------------------------------------------------
@@ -201,7 +201,7 @@ Show an empty panel
 
 The *command palette* is the primary view of all commands available to
 you in JupyterLab. For your first addition, you're going to add a
-*Random xkcd comic* command to the palette and get it to show an *xkcd*
+*Random Astronomy Picture* command to the palette and get it to show an *Astronomy Picture*
 tab panel when invoked.
 
 Fire up your favorite text editor and open the ``src/index.ts`` file in
@@ -341,8 +341,8 @@ command should appear. Click it or select it with the keyboard and press
 *Astronomy Picture*. Click the *x* on the tab to close it and activate the
 command again. The tab should reappear. Finally, click one of the
 launcher tabs so that the *Astronomy Picture* panel is still open but no longer
-active. Now run the *Random xkcd comic* command one more time. The
-single *xkcd.com* tab should come to the foreground.
+active. Now run the *Random Astronomy Picture* command one more time. The
+single *Astronomy Picture* tab should come to the foreground.
 
 |Empty apod extension panel|
 
@@ -724,7 +724,7 @@ to debug. Once it's working properly, commit it.
 Restore panel state when the browser refreshes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You may notice that every time you refresh your browser tab, the xkcd
+You may notice that every time you refresh your browser tab, the Astronomy Picture
 panel disappears, even if it was open before you refreshed. Other open
 panels, like notebooks, terminals, and text editors, all reappear and
 return to where you left them in the panel layout. You can make your
@@ -844,7 +844,7 @@ Rebuild your extension one last time and refresh your browser tab.
 Execute the *Random Astronomy Picture* command and validate that the panel
 appears with a comic in it. Refresh the browser tab again. You should
 see an Astronomy Picture panel appear immediately without running the command. Close
-the panel and refresh the browser tab. You should not see an xkcd tab
+the panel and refresh the browser tab. You should not see an Astronomy Picture tab
 after the refresh.
 
 Refer to the `05-restore-panel-state
@@ -921,12 +921,12 @@ username where appropriate
 .. code:: bash
 
     conda create -n jupyterlab-apod jupyterlab nodejs
-    conda activate jupyterlab-xkcd
+    conda activate jupyterlab-apod
     jupyter labextension install @your-npm-username/jupyterlab_apod
     jupyter lab
 
 You should see a fresh JupyterLab browser tab appear. When it does,
-execute the *Random xkcd comic* command to prove that your extension
+execute the *Random Astronomy Picture* command to prove that your extension
 works when installed from npm.
 
 Learn more
