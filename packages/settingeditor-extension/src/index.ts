@@ -11,8 +11,8 @@ import {
 
 import {
   ICommandPalette,
-  InstanceTracker,
-  MainAreaWidget
+  MainAreaWidget,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
@@ -73,13 +73,13 @@ function activate(
   const namespace = 'setting-editor';
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor;
-  const tracker = new InstanceTracker<MainAreaWidget<SettingEditor>>({
+  const tracker = new WidgetTracker<MainAreaWidget<SettingEditor>>({
     namespace
   });
   let editor: SettingEditor;
 
   // Handle state restoration.
-  restorer.restore(tracker, {
+  void restorer.restore(tracker, {
     command: CommandIDs.open,
     args: widget => ({}),
     name: widget => namespace

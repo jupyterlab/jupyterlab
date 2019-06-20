@@ -38,7 +38,7 @@
     "@jupyterlab/apputils": "^1.0.0-alpha.11",
     "@jupyterlab/services": "^4.0.0-alpha.11",
     "@jupyterlab/ui-components": "^1.0.0-alpha.11",
-    "@phosphor/messaging": "^1.2.2",
+    "@phosphor/messaging": "^1.2.3",
     "react": "~16.8.4",
     "react-paginate": "^6.3.0",
     "semver": "^6.1.0"

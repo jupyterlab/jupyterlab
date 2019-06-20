@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IInstanceTracker } from '@jupyterlab/apputils';
+import { IWidgetTracker } from '@jupyterlab/apputils';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
@@ -13,7 +13,7 @@ import { ImageViewer } from './widget';
  * A class that tracks editor widgets.
  */
 export interface IImageTracker
-  extends IInstanceTracker<IDocumentWidget<ImageViewer>> {}
+  extends IWidgetTracker<IDocumentWidget<ImageViewer>> {}
 
 /* tslint:disable */
 /**

@@ -445,16 +445,6 @@
     react-paginate "^6.3.0"
     semver "^6.1.0"
 
-"@jupyterlab/faq-extension@^1.0.0-alpha.11":
-  version "1.0.0-alpha.11"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/faq-extension/-/faq-extension-1.0.0-alpha.11.tgz#9087d0d8986e7777f60bd0d118da64338fe3fcbc"
-  integrity sha512-jt25pbDfqBpWYEajrMkBh7tUWQ5e0yCFCBpI6U7MEaB13uGvrlQ4VSUZAIJ7AA49gY3yt/A1ICV5HMsICmMa/w==
-  dependencies:
-    "@jupyterlab/application" "^1.0.0-alpha.11"
-    "@jupyterlab/apputils" "^1.0.0-alpha.11"
-    "@jupyterlab/rendermime" "^1.0.0-alpha.11"
-    "@phosphor/coreutils" "^1.3.0"
-
 "@jupyterlab/filebrowser-extension@^1.0.0-alpha.11":
   version "1.0.0-alpha.11"
   resolved "https://registry.yarnpkg.com/@jupyterlab/filebrowser-extension/-/filebrowser-extension-1.0.0-alpha.11.tgz#530b6fb2c72ca718f4270f4e84f967e57f2bce12"
@@ -1131,6 +1121,15 @@
     "@phosphor/coreutils" "^1.3.1"
     "@phosphor/widgets" "^1.7.1"
 
+"@phosphor/application@^1.6.3":
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/@phosphor/application/-/application-1.6.3.tgz#69f5eab109b54ee06d39443fa2f0ded573c5a080"
+  integrity sha512-UaRR91MWBZwNBGt0ekLVaN98KSwffRE0nsu+UgAmd4s8J28vVCQAPqXx1SjNPnaYVILnXD5whmCA02Ca81bR/A==
+  dependencies:
+    "@phosphor/commands" "^1.6.3"
+    "@phosphor/coreutils" "^1.3.1"
+    "@phosphor/widgets" "^1.8.0"
+
 "@phosphor/collections@^1.1.3":
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/@phosphor/collections/-/collections-1.1.3.tgz#c938ee4138d97377bba1f0970102071ca3ac1420"
@@ -1146,6 +1145,18 @@
     "@phosphor/algorithm" "^1.1.3"
     "@phosphor/coreutils" "^1.3.1"
     "@phosphor/disposable" "^1.1.3"
+    "@phosphor/domutils" "^1.1.3"
+    "@phosphor/keyboard" "^1.1.3"
+    "@phosphor/signaling" "^1.2.3"
+
+"@phosphor/commands@^1.6.3":
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/@phosphor/commands/-/commands-1.6.3.tgz#d5481cc35dab34d0e60b3e04a64df00e1bbaffbd"
+  integrity sha512-PYNHWv6tbXAfAtKiqXuT0OBJvwbJ+RRTV60MBykMF7Vqz9UaZ9n2e/eB2EAGEFccF0PnjTCvBEZgarwwMVi8Hg==
+  dependencies:
+    "@phosphor/algorithm" "^1.1.3"
+    "@phosphor/coreutils" "^1.3.1"
+    "@phosphor/disposable" "^1.2.0"
     "@phosphor/domutils" "^1.1.3"
     "@phosphor/keyboard" "^1.1.3"
     "@phosphor/signaling" "^1.2.3"
@@ -1169,12 +1180,34 @@
     "@phosphor/signaling" "^1.2.3"
     "@phosphor/widgets" "^1.7.1"
 
+"@phosphor/datagrid@^0.1.9":
+  version "0.1.9"
+  resolved "https://registry.yarnpkg.com/@phosphor/datagrid/-/datagrid-0.1.9.tgz#7a20383f6dad254e10a226180f90de94fe08e612"
+  integrity sha512-8YV8u/o7jV9TJM/vh/jyqEg4xaDSce0D+iWs73ZQRjnGwbxHPsfA2bPpGli5Z28DLsPqKlsiXOxqzYXnTqaI4w==
+  dependencies:
+    "@phosphor/algorithm" "^1.1.3"
+    "@phosphor/coreutils" "^1.3.1"
+    "@phosphor/disposable" "^1.2.0"
+    "@phosphor/domutils" "^1.1.3"
+    "@phosphor/dragdrop" "^1.3.3"
+    "@phosphor/messaging" "^1.2.3"
+    "@phosphor/signaling" "^1.2.3"
+    "@phosphor/widgets" "^1.8.0"
+
 "@phosphor/disposable@^1.1.2", "@phosphor/disposable@^1.1.3":
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/@phosphor/disposable/-/disposable-1.1.3.tgz#912765c02e2f04b8d56efb26ecd7270207a40f41"
   integrity sha512-yH5/HZzOyp37y+G/6X1hem3EfQCsUMtiStacG9W5F7mRsO4UuIXGxY3/XyJHAzy9UFrInOJD7alurQc/4wYhbQ==
   dependencies:
     "@phosphor/algorithm" "^1.1.3"
+
+"@phosphor/disposable@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@phosphor/disposable/-/disposable-1.2.0.tgz#878b9b5863f2026bbf2935eb600c7fdc97d0d026"
+  integrity sha512-4PoWoffdrLyWOW5Qv7I8//owvZmv57YhaxetAMWeJl13ThXc901RprL0Gxhtue2ZxL2PtUjM1207HndKo2FVjA==
+  dependencies:
+    "@phosphor/algorithm" "^1.1.3"
+    "@phosphor/signaling" "^1.2.3"
 
 "@phosphor/domutils@^1.1.2", "@phosphor/domutils@^1.1.3":
   version "1.1.3"
@@ -1188,6 +1221,14 @@
   dependencies:
     "@phosphor/coreutils" "^1.3.1"
     "@phosphor/disposable" "^1.1.3"
+
+"@phosphor/dragdrop@^1.3.3":
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/@phosphor/dragdrop/-/dragdrop-1.3.3.tgz#9487d27a6eb8cd54bfe6d91eaffc9d0852817b61"
+  integrity sha512-+SrlGsVQwY8OHCWxE/Zvihpk6Rc6bytJDqOUUTZqdL8hvM9QZeopAFioPDxuo1pTj87Um6cR4ekvbTU4KZ/90w==
+  dependencies:
+    "@phosphor/coreutils" "^1.3.1"
+    "@phosphor/disposable" "^1.2.0"
 
 "@phosphor/keyboard@^1.1.3":
   version "1.1.3"
@@ -1232,6 +1273,23 @@
     "@phosphor/disposable" "^1.1.3"
     "@phosphor/domutils" "^1.1.3"
     "@phosphor/dragdrop" "^1.3.2"
+    "@phosphor/keyboard" "^1.1.3"
+    "@phosphor/messaging" "^1.2.3"
+    "@phosphor/properties" "^1.1.3"
+    "@phosphor/signaling" "^1.2.3"
+    "@phosphor/virtualdom" "^1.1.3"
+
+"@phosphor/widgets@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@phosphor/widgets/-/widgets-1.8.0.tgz#879a28366bc53df9077662eb3178af86ffa3e95e"
+  integrity sha512-Tkjk1bJks9Dtm7lhxTcpA+cSGwdNvRWG5TrolS0waSUiEdgrStWc8QnkMga3zwUZ9Wrz3cLZWnqBfxMjDqwMnA==
+  dependencies:
+    "@phosphor/algorithm" "^1.1.3"
+    "@phosphor/commands" "^1.6.3"
+    "@phosphor/coreutils" "^1.3.1"
+    "@phosphor/disposable" "^1.2.0"
+    "@phosphor/domutils" "^1.1.3"
+    "@phosphor/dragdrop" "^1.3.3"
     "@phosphor/keyboard" "^1.1.3"
     "@phosphor/messaging" "^1.2.3"
     "@phosphor/properties" "^1.1.3"

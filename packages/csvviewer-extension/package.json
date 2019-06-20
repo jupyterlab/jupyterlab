@@ -41,8 +41,8 @@
     "@jupyterlab/docregistry": "^1.0.0-alpha.11",
     "@jupyterlab/documentsearch": "^1.0.0-alpha.12",
     "@jupyterlab/mainmenu": "^1.0.0-alpha.11",
-    "@phosphor/datagrid": "^0.1.8",
-    "@phosphor/signaling": "^1.2.2"
+    "@phosphor/datagrid": "^0.1.9",
+    "@phosphor/signaling": "^1.2.3"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
