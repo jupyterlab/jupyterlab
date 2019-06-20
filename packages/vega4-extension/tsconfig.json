@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "lib",
     "types": ["webpack-env"],
-    "rootDir": "src"
+    "rootDir": "src",
+    "skipLibCheck": true
   },
   "include": ["src/*"],
   "references": [

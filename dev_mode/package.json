@@ -2,6 +2,11 @@
   "name": "@jupyterlab/application-top",
   "version": "1.0.0-alpha.12",
   "private": true,
+  "workspaces": {
+    "nohoist": [
+      "**/vega**"
+    ]
+  },
   "scripts": {
     "build": "webpack",
     "build:prod": "webpack --config webpack.prod.config.js",

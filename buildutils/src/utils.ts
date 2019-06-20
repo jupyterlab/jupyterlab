@@ -15,7 +15,7 @@ export function getLernaPaths(basePath = '.'): string[] {
   basePath = path.resolve(basePath);
   let baseConfig = require(path.join(basePath, 'package.json'));
   let paths: string[] = [];
-  for (let config of baseConfig.workspaces) {
+  for (let config of baseConfig.workspaces.packages) {
     paths = paths.concat(glob.sync(path.join(basePath, config)));
   }
   return paths.filter(pkgPath => {
@@ -227,7 +227,13 @@ export function getPackageGraph(): DepGraph<Dict<any>> {
         if (depName in locals) {
           depData = locals[depName];
         } else {
-          depData = require(`${depName}/package.json`);
+          try {
+            depData = require(`${depName}/package.json`);
+          } catch {
+            // This will fail on dependencies that are not hoisted.
+            // Don't worry about these (vega-embed), they have no CSS we care about.
+            return;
+          }
         }
         graph.addNode(depName, depData);
       }

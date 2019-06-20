@@ -68,7 +68,9 @@ let SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/application',
     '@jupyterlab/apputils'
   ],
-  '@jupyterlab/ui-extension': ['@blueprintjs/icons']
+  '@jupyterlab/ui-extension': ['@blueprintjs/icons'],
+  '@jupyterlab/vega4-extension': ['vega-embed'],
+  '@jupyterlab/vega5-extension': ['vega-embed', 'vega-lite', 'vega']
 };
 
 let pkgData: Dict<any> = {};
