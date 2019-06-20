@@ -4,5 +4,6 @@ channels:
 dependencies:
 - python=3.5
 - sphinx>=1.8
+- sphinx-copybutton
 - sphinx_rtd_theme
 - recommonmark
