@@ -478,7 +478,7 @@ function addCommands(
           return '';
         }
       } else {
-        return 'jp-MaterialIcon jp-OpenFolderIcon';
+        return 'jp-MaterialIcon jp-FolderIcon';
       }
     },
     label: args => (args['label'] || args['factory'] || 'Open') as string,
