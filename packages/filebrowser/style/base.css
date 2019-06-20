@@ -232,44 +232,44 @@
   left: -8px;
 }
 
-.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-NotebookIcon {
-  background-image: var(--jp-icon-book-selected);
-}
-
-.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-OpenFolderIcon {
-  background-image: var(--jp-icon-directory-selected);
-}
-
 .jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-FileIcon {
   background-image: var(--jp-icon-file-selected);
 }
 
-.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-YamlIcon {
-  background-image: var(--jp-icon-yaml-selected);
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-NotebookIcon {
+  background-image: var(--jp-icon-notebook-selected);
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-FolderIcon {
+  background-image: var(--jp-icon-folder-selected);
 }
 
 .jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-MarkdownIcon {
   background-image: var(--jp-icon-markdown-selected);
 }
 
-.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-ImageIcon {
-  background-image: var(--jp-icon-image-selected);
-}
-
-.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-SpreadsheetIcon {
-  background-image: var(--jp-icon-spreadsheet-selected);
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-PythonIcon {
+  background-image: var(--jp-icon-python-selected);
 }
 
 .jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-JSONIcon {
   background-image: var(--jp-icon-json-selected);
 }
 
-.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-PythonIcon {
-  background-image: var(--jp-icon-python-selected);
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-SpreadsheetIcon {
+  background-image: var(--jp-icon-spreadsheet-selected);
 }
 
 .jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-RKernelIcon {
   background-image: var(--jp-icon-r-selected);
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-YAMLIcon {
+  background-image: var(--jp-icon-yaml-selected);
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-ImageIcon {
+  background-image: var(--jp-icon-image-selected);
 }
 
 .jp-DirListing-item.p-mod-drag-image,
