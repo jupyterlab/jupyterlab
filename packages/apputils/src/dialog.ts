@@ -60,9 +60,16 @@ export function showErrorMessage(
       title: title,
       body: body,
       buttons: buttons
-    }).then(() => {
-      Private.errorMessagePromiseCache.delete(key);
-    });
+    }).then(
+      () => {
+        Private.errorMessagePromiseCache.delete(key);
+      },
+      error => {
+        // TODO: Use .finally() above when supported
+        Private.errorMessagePromiseCache.delete(key);
+        throw error;
+      }
+    );
     Private.errorMessagePromiseCache.set(key, dialogPromise);
     return dialogPromise;
   }
