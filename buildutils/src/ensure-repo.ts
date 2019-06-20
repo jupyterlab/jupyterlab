@@ -35,7 +35,7 @@ let UNUSED: Dict<string[]> = {
 };
 
 // Packages that are allowed to have differing versions
-let DIFFERENT_VERSIONS: Array<string> = ['vega-embed'];
+let DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega'];
 
 let SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
@@ -69,7 +69,7 @@ let SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/apputils'
   ],
   '@jupyterlab/ui-extension': ['@blueprintjs/icons'],
-  '@jupyterlab/vega4-extension': ['vega-embed'],
+  '@jupyterlab/vega4-extension': ['vega-embed', 'vega-lite', 'vega'],
   '@jupyterlab/vega5-extension': ['vega-embed', 'vega-lite', 'vega']
 };
 

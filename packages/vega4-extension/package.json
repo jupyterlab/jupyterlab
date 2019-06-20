@@ -37,7 +37,9 @@
     "@jupyterlab/rendermime-interfaces": "^1.3.0-alpha.11",
     "@phosphor/coreutils": "^1.3.0",
     "@phosphor/widgets": "^1.7.1",
-    "vega-embed": "3.18.2"
+    "vega": "^4.4.0",
+    "vega-embed": "^4.2.0",
+    "vega-lite": "^2.6.0"
   },
   "devDependencies": {
     "@types/webpack-env": "^1.13.9",
