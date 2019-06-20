@@ -35,7 +35,7 @@ let UNUSED: Dict<string[]> = {
 };
 
 // Packages that are allowed to have differing versions
-let DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega'];
+let DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega', 'vega-embed'];
 
 let SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
