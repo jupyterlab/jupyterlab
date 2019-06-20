@@ -44,8 +44,8 @@
   --jp-icon-circle: url('icons/md/circle.svg');
   --jp-icon-close-circle: url('icons/md/close-circle.svg');
   --jp-icon-close: url('icons/md/close.svg');
-  --jp-icon-console: url('icons/jupyter/console.svg');
   --jp-icon-console-selected: url('icons/jupyter/console_selected.svg');
+  --jp-icon-console: url('icons/jupyter/console.svg');
   --jp-icon-copy: url('icons/md/copy.svg');
   --jp-icon-cut: url('icons/md/cut.svg');
   --jp-icon-download: url('icons/md/download.svg');
@@ -102,7 +102,8 @@
   --jp-icon-stop-circle: url('icons/md/stop-circle.svg');
   --jp-icon-tab: url('icons/md/ic_tab_24px.svg');
   --jp-icon-terminal: url('icons/jupyter/terminal.svg');
-  --jp-icon-text-editor: url('icons/jupyter/texteditor.svg');
+  --jp-icon-text-editor-selected: url('icons/md/ic_format_align_left_24px_selected.svg');
+  --jp-icon-text-editor: url('icons/md/ic_format_align_left_24px.svg');
   --jp-icon-undo: url('icons/md/undo.svg');
   --jp-icon-vega: url('icons/jupyter/vega.svg');
   --jp-icon-yaml-selected: url('icons/jupyter/yml_selected.svg');
