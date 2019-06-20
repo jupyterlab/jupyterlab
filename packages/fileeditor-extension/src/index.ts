@@ -7,7 +7,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
+import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 
 import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 
@@ -204,7 +204,7 @@ function activate(
     }
   });
   const { commands, restored, shell } = app;
-  const tracker = new InstanceTracker<IDocumentWidget<FileEditor>>({
+  const tracker = new WidgetTracker<IDocumentWidget<FileEditor>>({
     namespace
   });
   const isEnabled = () =>
@@ -215,7 +215,7 @@ function activate(
 
   // Handle state restoration.
   if (restorer) {
-    restorer.restore(tracker, {
+    void restorer.restore(tracker, {
       command: 'docmanager:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path
@@ -273,7 +273,7 @@ function activate(
   factory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = EDITOR_ICON_CLASS;
 
-    // Notify the instance tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
     });

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IInstanceTracker } from '@jupyterlab/apputils';
+import { IWidgetTracker } from '@jupyterlab/apputils';
 
 import { Token } from '@phosphor/coreutils';
 
@@ -18,4 +18,4 @@ export const IMarkdownViewerTracker = new Token<IMarkdownViewerTracker>(
  * A class that tracks markdown viewer widgets.
  */
 export interface IMarkdownViewerTracker
-  extends IInstanceTracker<MarkdownDocument> {}
+  extends IWidgetTracker<MarkdownDocument> {}

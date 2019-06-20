@@ -7,7 +7,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
+import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
@@ -80,13 +80,13 @@ function activate(
     defaultFor: FILE_TYPES,
     readOnly: true
   });
-  const tracker = new InstanceTracker<IDocumentWidget<ImageViewer>>({
+  const tracker = new WidgetTracker<IDocumentWidget<ImageViewer>>({
     namespace
   });
 
   if (restorer) {
     // Handle state restoration.
-    restorer.restore(tracker, {
+    void restorer.restore(tracker, {
       command: 'docmanager:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path
@@ -96,7 +96,7 @@ function activate(
   app.docRegistry.addWidgetFactory(factory);
 
   factory.widgetCreated.connect((sender, widget) => {
-    // Notify the instance tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
     });

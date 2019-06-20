@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/terminal-extension",
-  "version": "1.0.0-alpha.11",
+  "version": "1.0.0-alpha.12",
   "description": "JupyterLab - Terminal Emulator Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,13 +36,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.0.0-alpha.11",
-    "@jupyterlab/apputils": "^1.0.0-alpha.11",
-    "@jupyterlab/coreutils": "^3.0.0-alpha.11",
-    "@jupyterlab/launcher": "^1.0.0-alpha.11",
-    "@jupyterlab/mainmenu": "^1.0.0-alpha.11",
-    "@jupyterlab/terminal": "^1.0.0-alpha.11",
-    "@phosphor/widgets": "^1.7.1"
+    "@jupyterlab/application": "^1.0.0-alpha.12",
+    "@jupyterlab/apputils": "^1.0.0-alpha.12",
+    "@jupyterlab/coreutils": "^3.0.0-alpha.12",
+    "@jupyterlab/launcher": "^1.0.0-alpha.12",
+    "@jupyterlab/mainmenu": "^1.0.0-alpha.12",
+    "@jupyterlab/terminal": "^1.0.0-alpha.12",
+    "@phosphor/widgets": "^1.8.0"
   },
   "devDependencies": {
     "@types/webpack-env": "^1.13.9",

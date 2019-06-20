@@ -122,13 +122,6 @@ export class RawEditor extends SplitPanel {
   }
 
   /**
-   * Whether the debug panel is visible.
-   */
-  get isDebugVisible(): boolean {
-    return this._inspector.isVisible;
-  }
-
-  /**
    * Tests whether the settings have been modified and need saving.
    */
   get isDirty(): boolean {
@@ -235,20 +228,6 @@ export class RawEditor extends SplitPanel {
   }
 
   /**
-   * Toggle the debug functionality.
-   */
-  toggleDebug(): void {
-    const inspector = this._inspector;
-
-    if (inspector.isHidden) {
-      inspector.show();
-    } else {
-      inspector.hide();
-    }
-    this._updateToolbar();
-  }
-
-  /**
    * Handle `after-attach` messages.
    */
   protected onAfterAttach(msg: Message): void {
@@ -313,11 +292,7 @@ export class RawEditor extends SplitPanel {
 
     this._canRevert = revert;
     this._canSave = save;
-    this._commandsChanged.emit([
-      commands.debug,
-      commands.revert,
-      commands.save
-    ]);
+    this._commandsChanged.emit([commands.revert, commands.save]);
   }
 
   private _canRevert = false;
@@ -344,11 +319,6 @@ export namespace RawEditor {
      * The command registry.
      */
     registry: CommandRegistry;
-
-    /**
-     * The debug command ID.
-     */
-    debug: string;
 
     /**
      * The revert command ID.
@@ -420,14 +390,14 @@ namespace Private {
     commands: RawEditor.ICommandBundle,
     toolbar: Toolbar<Widget>
   ): void {
-    const { debug, registry, revert, save } = commands;
+    const { registry, revert, save } = commands;
 
     toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
     // Note the button order. The rationale here is that no matter what state
     // the toolbar is in, the relative location of the revert button in the
     // toolbar remains the same.
-    [revert, debug, save].forEach(name => {
+    [revert, save].forEach(name => {
       const item = new CommandToolbarButton({ commands: registry, id: name });
       toolbar.addItem(name, item);
     });

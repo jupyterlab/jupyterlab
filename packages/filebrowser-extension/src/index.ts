@@ -10,9 +10,9 @@ import {
 
 import {
   Clipboard,
-  InstanceTracker,
   MainAreaWidget,
   ToolbarButton,
+  WidgetTracker,
   ICommandPalette,
   InputDialog,
   showErrorMessage
@@ -201,7 +201,7 @@ function activateFactory(
   state: IStateDB
 ): IFileBrowserFactory {
   const { commands } = app;
-  const tracker = new InstanceTracker<FileBrowser>({ namespace });
+  const tracker = new WidgetTracker<FileBrowser>({ namespace });
   const createFileBrowser = (
     id: string,
     options: IFileBrowserFactory.IOptions = {}

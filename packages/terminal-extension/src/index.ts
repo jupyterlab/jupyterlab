@@ -11,9 +11,9 @@ import {
 
 import {
   ICommandPalette,
-  InstanceTracker,
   IThemeManager,
-  MainAreaWidget
+  MainAreaWidget,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import { ILauncher } from '@jupyterlab/launcher';
@@ -87,7 +87,7 @@ function activate(
   const { serviceManager, commands } = app;
   const category = 'Terminal';
   const namespace = 'terminal';
-  const tracker = new InstanceTracker<MainAreaWidget<ITerminal.ITerminal>>({
+  const tracker = new WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>({
     namespace
   });
 
@@ -101,7 +101,7 @@ function activate(
 
   // Handle state restoration.
   if (restorer) {
-    restorer.restore(tracker, {
+    void restorer.restore(tracker, {
       command: CommandIDs.createNew,
       args: widget => ({ name: widget.content.session.name }),
       name: widget => widget.content.session.name
@@ -262,7 +262,7 @@ function activate(
  */
 export function addCommands(
   app: JupyterFrontEnd,
-  tracker: InstanceTracker<MainAreaWidget<ITerminal.ITerminal>>,
+  tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
   settingRegistry: ISettingRegistry,
   options: Partial<ITerminal.IOptions>
 ) {

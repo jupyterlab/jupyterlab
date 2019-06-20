@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IInstanceTracker } from '@jupyterlab/apputils';
+import { IWidgetTracker } from '@jupyterlab/apputils';
 
 import { Token } from '@phosphor/coreutils';
 
@@ -19,4 +19,4 @@ export const IConsoleTracker = new Token<IConsoleTracker>(
 /**
  * A class that tracks console widgets.
  */
-export interface IConsoleTracker extends IInstanceTracker<ConsolePanel> {}
+export interface IConsoleTracker extends IWidgetTracker<ConsolePanel> {}

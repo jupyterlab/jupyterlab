@@ -11,9 +11,9 @@ import {
   Dialog,
   ICommandPalette,
   IFrame,
-  InstanceTracker,
   MainAreaWidget,
-  showDialog
+  showDialog,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
@@ -69,6 +69,7 @@ const RESOURCES = [
     url: 'https://jupyterlab.readthedocs.io/en/stable/getting_started/faq.html'
   },
   {
+    text: 'Jupyter Reference',
     url: 'https://jupyter.org/documentation'
   },
   {
@@ -115,11 +116,11 @@ function activate(
   const namespace = 'help-doc';
   const baseUrl = PageConfig.getBaseUrl();
   const { commands, shell, serviceManager } = app;
-  const tracker = new InstanceTracker<MainAreaWidget>({ namespace });
+  const tracker = new WidgetTracker<MainAreaWidget<IFrame>>({ namespace });
 
   // Handle state restoration.
   if (restorer) {
-    restorer.restore(tracker, {
+    void restorer.restore(tracker, {
       command: CommandIDs.open,
       args: widget => ({
         url: widget.content.url,
@@ -132,7 +133,7 @@ function activate(
   /**
    * Create a new HelpWidget widget.
    */
-  function newHelpWidget(url: string, text: string): MainAreaWidget {
+  function newHelpWidget(url: string, text: string): MainAreaWidget<IFrame> {
     // Allow scripts and forms so that things like
     // readthedocs can use their search functionality.
     // We *don't* allow same origin requests, which
@@ -152,11 +153,9 @@ function activate(
 
   // Populate the Help menu.
   const helpMenu = mainMenu.helpMenu;
-  const labGroup = [
-    CommandIDs.about,
-    'faq-jupyterlab:open',
-    CommandIDs.launchClassic
-  ].map(command => ({ command }));
+  const labGroup = [CommandIDs.about, CommandIDs.launchClassic].map(
+    command => ({ command })
+  );
   helpMenu.addGroup(labGroup, 0);
   const resourcesGroup = RESOURCES.map(args => ({
     args,

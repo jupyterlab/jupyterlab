@@ -11,11 +11,11 @@ import { PanelLayout, Panel, Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
-import { InstanceTracker } from './instancetracker';
+import { Styling } from './styling';
 
 import { ReactWidget } from './vdom';
 
-import { Styling } from './styling';
+import { WidgetTracker } from './widgettracker';
 
 /**
  * Create and show a dialog.
@@ -60,9 +60,16 @@ export function showErrorMessage(
       title: title,
       body: body,
       buttons: buttons
-    }).then(() => {
-      Private.errorMessagePromiseCache.delete(key);
-    });
+    }).then(
+      () => {
+        Private.errorMessagePromiseCache.delete(key);
+      },
+      error => {
+        // TODO: Use .finally() above when supported
+        Private.errorMessagePromiseCache.delete(key);
+        throw error;
+      }
+    );
     Private.errorMessagePromiseCache.set(key, dialogPromise);
     return dialogPromise;
   }
@@ -747,9 +754,9 @@ export namespace Dialog {
   export const defaultRenderer = new Renderer();
 
   /**
-   * The dialog instance tracker.
+   * The dialog widget tracker.
    */
-  export const tracker = new InstanceTracker<Dialog<any>>({
+  export const tracker = new WidgetTracker<Dialog<any>>({
     namespace: '@jupyterlab/apputils:Dialog'
   });
 }

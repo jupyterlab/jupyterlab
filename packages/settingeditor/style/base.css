@@ -8,7 +8,6 @@
   --jp-private-settingeditor-key-width: 150px;
   --jp-private-settingeditor-legend-height: 16px;
   --jp-private-settingeditor-row-height: 16px;
-  --jp-private-settingeditor-switcher-height: 32px;
   --jp-private-settingeditor-toolbar-height: 28px;
   --jp-private-settingeditor-type-width: 75px;
 }
@@ -66,35 +65,6 @@
   width: 175px;
 }
 
-#setting-editor .jp-PluginList-switcher {
-  height: var(--jp-private-settingeditor-switcher-height);
-  position: absolute;
-  top: 1px;
-  left: 0;
-  right: 0;
-  display: flex;
-}
-
-#setting-editor .jp-PluginList-switcher button {
-  background: var(--jp-layout-color2);
-  color: var(--jp-ui-font-color2);
-  border: 0;
-  border-bottom: 1px solid var(--jp-ui-font-color3);
-  margin: 0;
-  padding: 0;
-  height: var(--jp-private-settingeditor-switcher-height);
-  flex: 1;
-}
-
-#setting-editor .jp-PluginList-switcher button:first-child {
-  border-right: 1px solid var(--jp-ui-font-color3);
-}
-
-#setting-editor .jp-PluginList-switcher button:disabled {
-  background: var(--jp-layout-color1);
-  color: var(--jp-ui-font-color0);
-}
-
 #setting-editor .jp-PluginList ul {
   background-color: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
@@ -104,7 +74,7 @@
   padding: 0;
   overflow-y: auto;
   position: absolute;
-  top: var(--jp-private-settingeditor-switcher-height);
+  top: 0;
   bottom: 0;
   left: 0;
   right: 0;

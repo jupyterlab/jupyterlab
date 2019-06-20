@@ -45,21 +45,6 @@ export class PluginList extends Widget {
   }
 
   /**
-   * The editor type currently selected.
-   */
-  get editor(): 'raw' | 'table' {
-    return this._editor;
-  }
-  set editor(editor: 'raw' | 'table') {
-    if (this._editor === editor) {
-      return;
-    }
-
-    this._editor = editor;
-    this.update();
-  }
-
-  /**
    * The selection value of the plugin list.
    */
   get scrollTop(): number {
@@ -120,10 +105,9 @@ export class PluginList extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     const { node, registry } = this;
-    const type = this._editor;
     const selection = this._selection;
 
-    Private.populateList(registry, type, selection, node);
+    Private.populateList(registry, selection, node);
     node.querySelector('ul').scrollTop = this._scrollTop;
   }
 
@@ -139,15 +123,6 @@ export class PluginList extends Widget {
     let id = target.getAttribute('data-id');
 
     if (id === this._selection) {
-      return;
-    }
-
-    const editor = target.getAttribute('data-editor');
-
-    if (editor) {
-      this._editor = editor as 'raw' | 'table';
-      this._changed.emit(undefined);
-      this.update();
       return;
     }
 
@@ -176,7 +151,6 @@ export class PluginList extends Widget {
 
   private _changed = new Signal<this, void>(this);
   private _confirm: () => Promise<void>;
-  private _editor: 'raw' | 'table' = 'raw';
   private _scrollTop = 0;
   private _selection = '';
 }
@@ -264,7 +238,6 @@ namespace Private {
    */
   export function populateList(
     registry: ISettingRegistry,
-    type: 'raw' | 'table',
     selection: string,
     node: HTMLElement
   ): void {
@@ -297,20 +270,7 @@ namespace Private {
     });
 
     ReactDOM.unmountComponentAtNode(node);
-    ReactDOM.render(
-      <React.Fragment>
-        <div className="jp-PluginList-switcher">
-          <button data-editor="raw" disabled={type === 'raw'}>
-            Raw View
-          </button>
-          <button data-editor="table" disabled={type === 'table'}>
-            Table View
-          </button>
-        </div>
-        <ul>{items}</ul>
-      </React.Fragment>,
-      node
-    );
+    ReactDOM.render(<ul>{items}</ul>, node);
   }
 
   /**
