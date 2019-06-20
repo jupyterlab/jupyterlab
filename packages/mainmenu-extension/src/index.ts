@@ -528,7 +528,7 @@ export function createKernelMenu(app: JupyterFrontEnd, menu: KernelMenu): void {
         body: 'Shut down all kernels?',
         buttons: [
           Dialog.cancelButton(),
-          Dialog.warnButton({ label: 'SHUT DOWN ALL' })
+          Dialog.warnButton({ label: 'Shut Down All' })
         ]
       }).then(result => {
         if (result.button.accept) {

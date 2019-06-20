@@ -56,7 +56,6 @@ let SKIP_CSS: Dict<string[]> = {
   ],
   '@jupyterlab/filebrowser': ['@jupyterlab/statusbar'],
   '@jupyterlab/fileeditor': ['@jupyterlab/statusbar'],
-  '@jupyterlab/faq-extension': ['@jupyterlab/application'],
   '@jupyterlab/help-extension': ['@jupyterlab/application'],
   '@jupyterlab/shortcuts-extension': ['@jupyterlab/application'],
   '@jupyterlab/tabmanager-extension': ['@jupyterlab/application'],

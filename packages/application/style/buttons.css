@@ -17,21 +17,45 @@ button {
 }
 
 button.jp-mod-styled.jp-mod-accept {
-  background: var(--jp-brand-color1);
+  background: var(--md-blue-500);
+  border: 0;
   color: white;
-  border: 1px solid var(--jp-brand-color1);
+}
+
+button.jp-mod-styled.jp-mod-accept:hover {
+  background: var(--md-blue-600);
+}
+
+button.jp-mod-styled.jp-mod-accept:active {
+  background: var(--md-blue-700);
 }
 
 button.jp-mod-styled.jp-mod-reject {
   background: var(--md-grey-500);
-  border: 1px solid var(--md-grey-500);
+  border: 0;
   color: white;
+}
+
+button.jp-mod-styled.jp-mod-reject:hover {
+  background: var(--md-grey-600);
+}
+
+button.jp-mod-styled.jp-mod-reject:active {
+  background: var(--md-grey-700);
 }
 
 button.jp-mod-styled.jp-mod-warn {
   background: var(--jp-error-color1);
+  border: 0;
   color: white;
-  border: 1px solid var(--jp-error-color1);
+}
+
+button.jp-mod-styled.jp-mod-warn:hover {
+  background: var(--md-red-600);
+}
+
+button.jp-mod-styled.jp-mod-warn:active {
+  background: var(--md-red-700);
 }
 
 .jp-Button-flat {

@@ -11,11 +11,11 @@ import { PanelLayout, Panel, Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
-import { InstanceTracker } from './instancetracker';
+import { Styling } from './styling';
 
 import { ReactWidget } from './vdom';
 
-import { Styling } from './styling';
+import { WidgetTracker } from './widgettracker';
 
 /**
  * Create and show a dialog.
@@ -43,18 +43,36 @@ export function showErrorMessage(
   title: string,
   error: any,
   buttons: ReadonlyArray<Dialog.IButton> = [
-    Dialog.okButton({ label: 'DISMISS' })
+    Dialog.okButton({ label: 'Dismiss' })
   ]
 ): Promise<void> {
   console.warn('Showing error:', error);
 
-  return showDialog({
-    title: title,
-    body: error.message || title,
-    buttons: buttons
-  }).then(() => {
-    /* no-op */
-  });
+  // Cache promises to prevent multiple copies of identical dialogs showing
+  // to the user.
+  let body = error.message || title;
+  let key = title + '----' + body;
+  let promise = Private.errorMessagePromiseCache.get(key);
+  if (promise) {
+    return promise;
+  } else {
+    let dialogPromise = showDialog({
+      title: title,
+      body: body,
+      buttons: buttons
+    }).then(
+      () => {
+        Private.errorMessagePromiseCache.delete(key);
+      },
+      error => {
+        // TODO: Use .finally() above when supported
+        Private.errorMessagePromiseCache.delete(key);
+        throw error;
+      }
+    );
+    Private.errorMessagePromiseCache.set(key, dialogPromise);
+    return dialogPromise;
+  }
 }
 
 /**
@@ -522,7 +540,7 @@ export namespace Dialog {
    */
   export function createButton(value: Partial<IButton>): Readonly<IButton> {
     value.accept = value.accept !== false;
-    let defaultLabel = value.accept ? 'OK' : 'CANCEL';
+    let defaultLabel = value.accept ? 'OK' : 'Cancel';
     return {
       label: value.label || defaultLabel,
       iconClass: value.iconClass || '',
@@ -736,9 +754,9 @@ export namespace Dialog {
   export const defaultRenderer = new Renderer();
 
   /**
-   * The dialog instance tracker.
+   * The dialog widget tracker.
    */
-  export const tracker = new InstanceTracker<Dialog<any>>({
+  export const tracker = new WidgetTracker<Dialog<any>>({
     namespace: '@jupyterlab/apputils:Dialog'
   });
 }
@@ -751,6 +769,8 @@ namespace Private {
    * The queue for launching dialogs.
    */
   export let launchQueue: Promise<Dialog.IResult<any>>[] = [];
+
+  export let errorMessagePromiseCache: Map<string, Promise<void>> = new Map();
 
   /**
    * Handle the input options for a dialog.

@@ -11,9 +11,9 @@ import {
 import {
   Dialog,
   ICommandPalette,
-  InstanceTracker,
   MainAreaWidget,
-  showDialog
+  showDialog,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import { CodeCell } from '@jupyterlab/cells';
@@ -534,7 +534,7 @@ function activateNotebookHandler(
   });
   const { commands } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
-  const clonedOutputs = new InstanceTracker<
+  const clonedOutputs = new WidgetTracker<
     MainAreaWidget<Private.ClonedOutputArea>
   >({
     namespace: 'cloned-outputs'
@@ -542,13 +542,13 @@ function activateNotebookHandler(
 
   // Handle state restoration.
   if (restorer) {
-    restorer.restore(tracker, {
+    void restorer.restore(tracker, {
       command: 'docmanager:open',
       args: panel => ({ path: panel.context.path, factory: FACTORY }),
       name: panel => panel.context.path,
       when: services.ready
     });
-    restorer.restore(clonedOutputs, {
+    void restorer.restore(clonedOutputs, {
       command: CommandIDs.createOutputView,
       args: widget => ({
         path: widget.content.path,
@@ -574,7 +574,7 @@ function activateNotebookHandler(
     // If the notebook panel does not have an ID, assign it one.
     widget.id = widget.id || `notebook-${++id}`;
     widget.title.icon = NOTEBOOK_ICON_CLASS;
-    // Notify the instance tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
     });
@@ -858,7 +858,7 @@ function addCommands(
   docManager: IDocumentManager,
   services: ServiceManager,
   tracker: NotebookTracker,
-  clonedOutputs: InstanceTracker<MainAreaWidget>
+  clonedOutputs: WidgetTracker<MainAreaWidget>
 ): void {
   const { commands, shell } = app;
 
@@ -975,14 +975,69 @@ function addCommands(
         const end = editor.getOffsetAt(selection.end);
         code = editor.model.value.text.substring(start, end);
       } else {
-        // no selection, submit whole line and advance
-        code = editor.getLine(selection.start.line);
+        // no selection, find the complete statement around the current line
         const cursor = editor.getCursorPosition();
-        if (cursor.line + 1 !== editor.lineCount) {
-          editor.setCursorPosition({
-            line: cursor.line + 1,
-            column: cursor.column
+        let srcLines = editor.model.value.text.split('\n');
+        let curLine = selection.start.line;
+        while (
+          curLine < editor.lineCount &&
+          !srcLines[curLine].replace(/\s/g, '').length
+        ) {
+          curLine += 1;
+        }
+        // if curLine > 0, we first do a search from beginning
+        let fromFirst = curLine > 0;
+        let firstLine = 0;
+        let lastLine = firstLine + 1;
+        while (true) {
+          code = srcLines.slice(firstLine, lastLine).join('\n');
+          let reply = await current.context.session.kernel.requestIsComplete({
+            // ipython needs an empty line at the end to correctly identify completeness of indented code
+            code: code + '\n\n'
           });
+          if (reply.content.status === 'complete') {
+            if (curLine < lastLine) {
+              // we find a block of complete statement containing the current line, great!
+              while (
+                lastLine < editor.lineCount &&
+                !srcLines[lastLine].replace(/\s/g, '').length
+              ) {
+                lastLine += 1;
+              }
+              editor.setCursorPosition({
+                line: lastLine,
+                column: cursor.column
+              });
+              break;
+            } else {
+              // discard the complete statement before the current line and continue
+              firstLine = lastLine;
+              lastLine = firstLine + 1;
+            }
+          } else if (lastLine < editor.lineCount) {
+            // if incomplete and there are more lines, add the line and check again
+            lastLine += 1;
+          } else if (fromFirst) {
+            // we search from the first line and failed, we search again from current line
+            firstLine = curLine;
+            lastLine = curLine + 1;
+            fromFirst = false;
+          } else {
+            // if we have searched both from first line and from current line and we
+            // cannot find anything, we submit the current line.
+            code = srcLines[curLine];
+            while (
+              curLine + 1 < editor.lineCount &&
+              !srcLines[curLine + 1].replace(/\s/g, '').length
+            ) {
+              curLine += 1;
+            }
+            editor.setCursorPosition({
+              line: curLine + 1,
+              column: cursor.column
+            });
+            break;
+          }
         }
       }
 
@@ -1577,7 +1632,7 @@ function addCommands(
       current.context.pathChanged.connect(updateCloned);
       current.content.model.cells.changed.connect(updateCloned);
 
-      // Add the cloned output to the output instance tracker.
+      // Add the cloned output to the output widget tracker.
       void clonedOutputs.add(widget);
 
       // Remove the output view if the parent notebook is closed.

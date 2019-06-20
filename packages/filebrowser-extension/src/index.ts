@@ -10,9 +10,9 @@ import {
 
 import {
   Clipboard,
-  InstanceTracker,
   MainAreaWidget,
-  ToolbarButton
+  ToolbarButton,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import {
@@ -193,7 +193,7 @@ function activateFactory(
   state: IStateDB
 ): IFileBrowserFactory {
   const { commands } = app;
-  const tracker = new InstanceTracker<FileBrowser>({ namespace });
+  const tracker = new WidgetTracker<FileBrowser>({ namespace });
   const createFileBrowser = (
     id: string,
     options: IFileBrowserFactory.IOptions = {}
@@ -478,7 +478,7 @@ function addCommands(
           return '';
         }
       } else {
-        return 'jp-MaterialIcon jp-OpenFolderIcon';
+        return 'jp-MaterialIcon jp-FolderIcon';
       }
     },
     label: args => (args['label'] || args['factory'] || 'Open') as string,

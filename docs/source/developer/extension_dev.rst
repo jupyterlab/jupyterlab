@@ -319,7 +319,7 @@ might want to use them in your extensions.
 - ``@jupyterlab/application:ILayoutRestorer``: An interface to the application layout
   restoration functionality. Use this to have your activities restored across
   page loads.
-- ``@jupyterlab/application:IMimeDocumentTracker``: An instance tracker for documents
+- ``@jupyterlab/application:IMimeDocumentTracker``: A widget tracker for documents
   rendered using a mime renderer extension. Use this if you want to list and interact
   with documents rendered by such extensions.
 - ``@jupyterlab/application:IRouter``: The URL router used by the application.
@@ -340,7 +340,7 @@ might want to use them in your extensions.
   UI elements.
 - ``@jupyterlab/completer:ICompletionManager``: An interface to the completion manager
   for the application. Use this to allow your extension to invoke a completer.
-- ``@jupyterlab/console:IConsoleTracker``: An instance tracker for code consoles.
+- ``@jupyterlab/console:IConsoleTracker``: A widget tracker for code consoles.
   Use this if you want to be able to iterate over and interact with code consoles
   created by the application.
 - ``@jupyterlab/console:IContentFactory``: A factory object that creates new code
@@ -357,10 +357,10 @@ might want to use them in your extensions.
 - ``@jupyterlab/filebrowser:IFileBrowserFactory``: A factory object that creates file browsers.
   Use this if you want to create your own file browser (e.g., for a custom storage backend),
   or to interact with other file browsers that have been created by extensions.
-- ``@jupyterlab/fileeditor:IEditorTracker``: An instance tracker for file editors.
+- ``@jupyterlab/fileeditor:IEditorTracker``: A widget tracker for file editors.
   Use this if you want to be able to iterate over and interact with file editors
   created by the application.
-- ``@jupyterlab/imageviewer:IImageTracker``: An instance tracker for images.
+- ``@jupyterlab/imageviewer:IImageTracker``: A widget tracker for images.
   Use this if you want to be able to iterate over and interact with images
   viewed by the application.
 - ``@jupyterlab/inspector:IInspector``: An interface for adding variable inspectors to widgets.
@@ -373,7 +373,7 @@ might want to use them in your extensions.
   application left area. Use this to add your own functionality to the panel.
 - ``@jupyterlab/notebook:IContentFactory``: A factory object that creates new notebooks.
   Use this if you want to create and host notebooks in your own UI elements.
-- ``@jupyterlab/notebook:INotebookTracker``: An instance tracker for code consoles.
+- ``@jupyterlab/notebook:INotebookTracker``: A widget tracker for notebooks.
   Use this if you want to be able to iterate over and interact with notebooks
   created by the application.
 - ``@jupyterlab/rendermime:IRenderMimeRegistry``: An interface to the rendermime registry
@@ -382,10 +382,10 @@ might want to use them in your extensions.
   `mime renderer extension <#mime-renderer-extensions>`__.
 - ``@jupyterlab/rendermime:ILatexTypesetter``: An interface to the LaTeX typesetter for the
   application. Use this if you want to typeset math in your extension.
-- ``@jupyterlab/settingeditor:ISettingEditorTracker``: An instance tracker for setting editors.
+- ``@jupyterlab/settingeditor:ISettingEditorTracker``: A widget tracker for setting editors.
   Use this if you want to be able to iterate over and interact with setting editors
   created by the application.
-- ``@jupyterlab/terminal:ITerminalTracker``: An instance tracker for terminals.
+- ``@jupyterlab/terminal:ITerminalTracker``: A widget tracker for terminals.
   Use this if you want to be able to iterate over and interact with terminals
   created by the application.
 - ``@jupyterlab/tooltip:ITooltipManager``: An interface to the tooltip manager for the application.

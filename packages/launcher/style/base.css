@@ -110,8 +110,8 @@
   height: var(--jp-private-launcher-card-size);
   margin: 8px;
   padding: 0px;
-  border: 1px solid var(--jp-border-color1);
-  background: var(--jp-layout-color1);
+  border: 1px solid var(--jp-border-color2);
+  background: var(--jp-layout-color0);
   box-shadow: var(--jp-elevation-z2);
   transition: 0.2s box-shadow;
   border-radius: var(--jp-border-radius);
@@ -124,6 +124,7 @@
 
 .jp-LauncherCard:hover {
   box-shadow: var(--jp-elevation-z6);
+  background: var(--jp-layout-color1);
 }
 
 .jp-LauncherCard:active {

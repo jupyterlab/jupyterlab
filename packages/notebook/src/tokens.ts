@@ -1,13 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IWidgetTracker } from '@jupyterlab/apputils';
+import { Cell } from '@jupyterlab/cells';
 import { Token } from '@phosphor/coreutils';
 import { ISignal } from '@phosphor/signaling';
 import { Widget } from '@phosphor/widgets';
-
-import { IInstanceTracker } from '@jupyterlab/apputils';
-import { Cell } from '@jupyterlab/cells';
-
 import { NotebookPanel } from './panel';
 import { NotebookTools } from './notebooktools';
 
@@ -74,7 +72,7 @@ export const INotebookTracker = new Token<INotebookTracker>(
 /**
  * An object that tracks notebook widgets.
  */
-export interface INotebookTracker extends IInstanceTracker<NotebookPanel> {
+export interface INotebookTracker extends IWidgetTracker<NotebookPanel> {
   /**
    * The currently focused cell.
    *

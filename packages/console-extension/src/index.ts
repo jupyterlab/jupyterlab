@@ -12,8 +12,8 @@ import {
   Dialog,
   IClientSession,
   ICommandPalette,
-  InstanceTracker,
-  showDialog
+  showDialog,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
@@ -141,20 +141,18 @@ async function activateConsole(
   const { commands, shell } = app;
   const category = 'Console';
 
-  // Create an instance tracker for all console panels.
-  const tracker = new InstanceTracker<ConsolePanel>({ namespace: 'console' });
+  // Create a widget tracker for all console panels.
+  const tracker = new WidgetTracker<ConsolePanel>({ namespace: 'console' });
 
   // Handle state restoration.
-  restorer.restore(tracker, {
+  void restorer.restore(tracker, {
     command: CommandIDs.create,
     args: panel => ({
       path: panel.console.session.path,
       name: panel.console.session.name,
       kernelPreference: {
-        name: panel.console.session.kernel && panel.console.session.kernel.name,
-        language:
-          panel.console.session.language &&
-          panel.console.session.kernel.language
+        name: panel.console.session.kernelPreference.name,
+        language: panel.console.session.kernelPreference.language
       }
     }),
     name: panel => panel.console.session.path,

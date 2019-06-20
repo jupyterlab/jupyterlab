@@ -11,9 +11,9 @@ import {
 
 import {
   ICommandPalette,
-  InstanceTracker,
   IThemeManager,
-  MainAreaWidget
+  MainAreaWidget,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import { ILauncher } from '@jupyterlab/launcher';
@@ -87,7 +87,7 @@ function activate(
   const { serviceManager, commands } = app;
   const category = 'Terminal';
   const namespace = 'terminal';
-  const tracker = new InstanceTracker<MainAreaWidget<ITerminal.ITerminal>>({
+  const tracker = new WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>({
     namespace
   });
 
@@ -101,7 +101,7 @@ function activate(
 
   // Handle state restoration.
   if (restorer) {
-    restorer.restore(tracker, {
+    void restorer.restore(tracker, {
       command: CommandIDs.createNew,
       args: widget => ({ name: widget.content.session.name }),
       name: widget => widget.content.session.name
@@ -109,13 +109,18 @@ function activate(
   }
 
   // The cached terminal options from the setting editor.
-  let options: Partial<ITerminal.IOptions>;
+  let options: Partial<ITerminal.IOptions> = {};
 
   /**
    * Update the cached option values.
    */
   function updateOptions(settings: ISettingRegistry.ISettings): void {
-    options = settings.composite;
+    // Update the cached options by doing a shallow copy of key/values.
+    // This is needed because options is passed and used in addCommands and needs
+    // to reflect the current cached values.
+    Object.keys(settings.composite).forEach((key: keyof ITerminal.IOptions) => {
+      (options as any)[key] = settings.composite[key];
+    });
   }
 
   /**
@@ -151,7 +156,9 @@ function activate(
     })
     .catch(Private.showErrorMessage);
 
-  // Subscribe to changes in theme.
+  // Subscribe to changes in theme. This is needed as the theme
+  // is computed dynamically based on the string value and DOM
+  // properties.
   themeManager.themeChanged.connect((sender, args) => {
     tracker.forEach(widget => {
       const terminal = widget.content;
@@ -255,7 +262,7 @@ function activate(
  */
 export function addCommands(
   app: JupyterFrontEnd,
-  tracker: InstanceTracker<MainAreaWidget<ITerminal.ITerminal>>,
+  tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
   settingRegistry: ISettingRegistry,
   options: Partial<ITerminal.IOptions>
 ) {
@@ -337,7 +344,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.increaseFont, {
     label: 'Increase Terminal Font Size',
     execute: async () => {
-      let { fontSize } = ITerminal.defaultOptions;
+      let { fontSize } = options;
       if (fontSize < 72) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
@@ -351,7 +358,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.decreaseFont, {
     label: 'Decrease Terminal Font Size',
     execute: async () => {
-      let { fontSize } = ITerminal.defaultOptions;
+      let { fontSize } = options;
       if (fontSize > 9) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);

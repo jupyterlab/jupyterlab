@@ -381,7 +381,7 @@ export class DirListing extends Widget {
       return showDialog({
         title: 'Delete',
         body: message,
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'DELETE' })]
+        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
       }).then(result => {
         if (!this.isDisposed && result.button.accept) {
           return this._delete(names);
@@ -1354,6 +1354,7 @@ export class DirListing extends Widget {
     this._selectItem(index, false);
 
     return Private.doRename(nameNode, this._editNode).then(newName => {
+      this.node.focus();
       if (!newName || newName === original) {
         this._inRename = false;
         return original;

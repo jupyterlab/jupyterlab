@@ -219,7 +219,7 @@ function Section<M>(props: SessionProps<M>) {
       title: `Shut Down All ${props.name} Sessions?`,
       buttons: [
         Dialog.cancelButton(),
-        Dialog.warnButton({ label: 'SHUT DOWN ALL' })
+        Dialog.warnButton({ label: 'Shut Down All' })
       ]
     }).then(result => {
       if (result.button.accept) {

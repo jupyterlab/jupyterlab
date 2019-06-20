@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-notebook",
-  "version": "1.0.0-alpha.11",
+  "version": "1.0.0-alpha.12",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -16,18 +16,18 @@
     "watch:src": "tsc -p src --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^1.0.0-alpha.11",
-    "@jupyterlab/cells": "^1.0.0-alpha.12",
-    "@jupyterlab/codemirror": "^1.0.0-alpha.11",
-    "@jupyterlab/coreutils": "^3.0.0-alpha.11",
-    "@jupyterlab/docregistry": "^1.0.0-alpha.11",
-    "@jupyterlab/notebook": "^1.0.0-alpha.12",
-    "@jupyterlab/observables": "^2.2.0-alpha.11",
-    "@jupyterlab/testutils": "^1.0.0-alpha.11",
-    "@phosphor/algorithm": "^1.1.2",
-    "@phosphor/coreutils": "^1.3.0",
-    "@phosphor/messaging": "^1.2.2",
-    "@phosphor/widgets": "^1.7.1",
+    "@jupyterlab/apputils": "^1.0.0-alpha.12",
+    "@jupyterlab/cells": "^1.0.0-alpha.13",
+    "@jupyterlab/codemirror": "^1.0.0-alpha.12",
+    "@jupyterlab/coreutils": "^3.0.0-alpha.12",
+    "@jupyterlab/docregistry": "^1.0.0-alpha.12",
+    "@jupyterlab/notebook": "^1.0.0-alpha.13",
+    "@jupyterlab/observables": "^2.2.0-alpha.12",
+    "@jupyterlab/testutils": "^1.0.0-alpha.12",
+    "@phosphor/algorithm": "^1.1.3",
+    "@phosphor/coreutils": "^1.3.1",
+    "@phosphor/messaging": "^1.2.3",
+    "@phosphor/widgets": "^1.8.0",
     "chai": "^4.2.0",
     "simulate-event": "~1.4.0"
   },

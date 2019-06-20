@@ -5,7 +5,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { Token } from '@phosphor/coreutils';
 
-import { IInstanceTracker, MainAreaWidget } from '@jupyterlab/apputils';
+import { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 
 import { TerminalSession } from '@jupyterlab/services';
 
@@ -13,7 +13,7 @@ import { TerminalSession } from '@jupyterlab/services';
  * A class that tracks editor widgets.
  */
 export interface ITerminalTracker
-  extends IInstanceTracker<MainAreaWidget<ITerminal.ITerminal>> {}
+  extends IWidgetTracker<MainAreaWidget<ITerminal.ITerminal>> {}
 
 /* tslint:disable */
 /**

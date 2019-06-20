@@ -666,7 +666,7 @@ entire list of import statements looks like the following:
     } from '@jupyterlab/application';
 
     import {
-      ICommandPalette, InstanceTracker // new
+      ICommandPalette, WidgetTracker // new
     } from '@jupyterlab/apputils';
 
     import {
@@ -707,7 +707,7 @@ Finally, rewrite the ``activate`` function so that it:
 
 1. Declares a widget variable, but does not create an instance
    immediately
-2. Constructs an ``InstanceTracker`` and tells the ``ILayoutRestorer``
+2. Constructs a ``WidgetTracker`` and tells the ``ILayoutRestorer``
    to use it to save/restore panel state
 3. Creates, tracks, shows, and refreshes the widget panel appropriately
 
@@ -748,13 +748,9 @@ Finally, rewrite the ``activate`` function so that it:
       // Add the command to the palette.
       palette.addItem({ command, category: 'Tutorial' });
 
-      // Track and restore the widget state
-      let tracker = new InstanceTracker<Widget>({ namespace: 'xkcd' });
-      restorer.restore(tracker, {
-        command,
-        args: () => JSONExt.emptyObject,
-        name: () => 'xkcd'
-      });
+      // Track and restore the widget state.
+      let tracker = new WidgetTracker({ namespace: 'xkcd' });
+      void restorer.restore(tracker, { command, name: () => 'xkcd' });
     };
 
 Rebuild your extension one last time and refresh your browser tab.
