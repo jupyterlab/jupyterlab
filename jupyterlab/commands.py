@@ -1482,7 +1482,7 @@ class _AppHandler(object):
                 # Verify that the version is a valid extension.
                 with TemporaryDirectory() as tempdir:
                     info = self._extract_package(
-                        '%s@%s' % (name, version), tempdir, quiet=True)
+                        '%s@%s' % (name, version), tempdir)
                 if _validate_extension(info['data']):
                     # Invalid, do not consider other versions
                     return
