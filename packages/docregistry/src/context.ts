@@ -47,7 +47,7 @@ export class Context<T extends DocumentRegistry.IModel>
     let manager = (this._manager = options.manager);
     this._factory = options.factory;
     this._opener = options.opener || Private.noOp;
-    this._path = options.path;
+    this._path = this._manager.contents.normalize(options.path);
     const localPath = this._manager.contents.localPath(this._path);
     let lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
