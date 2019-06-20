@@ -442,6 +442,13 @@ function addCommands(
       } catch (reason) {
         console.warn(`${CommandIDs.goToPath} failed to go to: ${path}`, reason);
       }
+      const browserForPath = Private.getBrowserForPath(path, factory);
+      browserForPath.clearSelectedItems();
+      const parts = path.split('/');
+      if (parts.length > 0) {
+        const name = parts[parts.length - 1];
+        browserForPath.selectItemByName(name);
+      }
 
       return commands.execute(CommandIDs.showBrowser, { path });
     }
@@ -483,7 +490,7 @@ function addCommands(
         return commands.execute('docmanager:open', { path });
       } catch (reason) {
         if (reason.response && reason.response.status === 404) {
-          reason.message = `Could not find file or directory: ${path}`;
+          reason.message = `Could not find path: ${path}`;
         }
         return showErrorMessage('Cannot open', reason);
       }

@@ -559,9 +559,16 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Clear the selected items.
+   */
+  clearSelectedItems() {
+    this._selection = Object.create(null);
+  }
+
+  /**
    * Select an item by name.
    *
-   * @parem name - The name of the item to select.
+   * @param name - The name of the item to select.
    *
    * @returns A promise that resolves when the name is selected.
    */
@@ -1411,7 +1418,7 @@ export class DirListing extends Widget {
     // Selected the given row(s)
     let items = this._sortedItems;
     if (!keepExisting) {
-      this._selection = Object.create(null);
+      this.clearSelectedItems();
     }
     let name = items[index].name;
     this._selection[name] = true;

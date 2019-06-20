@@ -123,6 +123,19 @@ export class FileBrowser extends Widget {
   }
 
   /**
+   * Select an item by name.
+   *
+   * @param name - The name of the item to select.
+   */
+  selectItemByName(name: string) {
+    this._listing.selectItemByName(name);
+  }
+
+  clearSelectedItems() {
+    this._listing.clearSelectedItems();
+  }
+
+  /**
    * Rename the first currently selected item.
    *
    * @returns A promise that resolves with the new name of the item.
