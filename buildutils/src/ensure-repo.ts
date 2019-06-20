@@ -29,8 +29,8 @@ let UNUSED: Dict<string[]> = {
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/testutils': ['node-fetch', 'identity-obj-proxy'],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
-  '@jupyterlab/vega4-extension': ['vega', 'vega-lite'],
-  '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],
+  '@jupyterlab/vega4-extension': ['vega', 'vega-lite', 'vega-embed'],
+  '@jupyterlab/vega5-extension': ['vega', 'vega-lite', 'vega-embed'],
   '@jupyterlab/ui-components': ['@blueprintjs/icons']
 };
 

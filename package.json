@@ -17,7 +17,7 @@
       "jupyterlab/tests/mock_packages/extension"
     ],
     "nohoist": [
-      "**/vega**"
+      "**/vega*/**"
     ]
   },
   "scripts": {
