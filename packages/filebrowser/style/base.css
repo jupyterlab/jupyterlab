@@ -236,6 +236,10 @@
   background-image: var(--jp-icon-file-selected);
 }
 
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-TextEditorIcon {
+  background-image: var(--jp-icon-text-editor-selected);
+}
+
 .jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-NotebookIcon {
   background-image: var(--jp-icon-notebook-selected);
 }
