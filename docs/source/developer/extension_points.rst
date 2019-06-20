@@ -7,7 +7,7 @@ Most of the component parts of JupyterLab are designed to be extensible,
 and they provide public APIs via that can be requested in extensions via tokens.
 A list of tokens that extension authors can request is documented in :ref:`tokens`.
 
-This is not an exhaustive list of extension points for the application components,
+This is not an exhaustive account of how to extend the application components,
 it is instead intended to be a guide for some of the most common extension points.
 
 
@@ -286,6 +286,23 @@ In addition to providing a command ID, you also provide a category in which to p
 
 Left/Right Areas
 ~~~~~~~~~~~~~~~~
+
+The left and right areas of JupyterLab are intended to host more persistent user interface
+elements than the main area. That being said, extension authors are free to add whatever
+components they like to these areas. The outermost-level of the object that you add is expected
+to be a Phosphor ``Widget``, but that can host any content you like (such as React components).
+
+As an example, the following code executes an application command to a terminal widget
+and then adds the terminal to the right area:
+
+.. code:: typescript
+
+  app.commands
+    .execute('terminal:create-new')
+    .then((terminal: WidgetModuleType.Terminal) => {
+      app.shell.add(terminal, 'right');
+    });
+
 
 Status Bar
 ~~~~~~~~~~
