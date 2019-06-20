@@ -373,7 +373,7 @@ might want to use them in your extensions.
   application left area. Use this to add your own functionality to the panel.
 - ``@jupyterlab/notebook:IContentFactory``: A factory object that creates new notebooks.
   Use this if you want to create and host notebooks in your own UI elements.
-- ``@jupyterlab/notebook:INotebookTracker``: A widget tracker for code consoles.
+- ``@jupyterlab/notebook:INotebookTracker``: A widget tracker for notebooks.
   Use this if you want to be able to iterate over and interact with notebooks
   created by the application.
 - ``@jupyterlab/rendermime:IRenderMimeRegistry``: An interface to the rendermime registry
