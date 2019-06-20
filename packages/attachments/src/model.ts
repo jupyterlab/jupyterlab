@@ -68,6 +68,10 @@ export interface IAttachmentsModel extends IDisposable {
   set(key: string, attachment: nbformat.IMimeBundle): void;
 
   /**
+   * Remove the attachment whose name is the specified key
+   */
+  remove(key: string): void;
+  /**
    * Clear all of the attachments.
    */
   clear(): void;
@@ -232,6 +236,13 @@ export class AttachmentsModel implements IAttachmentsModel {
     // Normalize stream data.
     let item = this._createItem({ value });
     this._map.set(key, item);
+  }
+
+  /**
+   * Remove the attachment whose name is the specified key
+   */
+  remove(key: string): void {
+    this._map.delete(key);
   }
 
   /**
