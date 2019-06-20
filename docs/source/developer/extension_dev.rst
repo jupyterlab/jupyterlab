@@ -16,7 +16,7 @@ JupyterLab can be extended in four ways via:
    extend the functionality of document widgets added to the
    application, and we cover them in :ref:`documents`.
 
-See :ref:`xkcd_extension_tutorial` to learn how to make a simple JupyterLab extension.
+See :ref:`apod_extension_tutorial` to learn how to make a simple JupyterLab extension.
 
 A JupyterLab application is comprised of:
 

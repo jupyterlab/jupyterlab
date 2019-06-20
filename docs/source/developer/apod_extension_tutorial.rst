@@ -194,7 +194,7 @@ reference version of ``jupyterlab_apod`` on GitHub at
 https://github.com/jupyterlab/jupyterlab_apod.
 
 Add an Astronomy Picture of the Day widget
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Show an empty panel
 ^^^^^^^^^^^^^^^^^^^
@@ -358,7 +358,7 @@ carry on.
     git commit -m 'Show Astronomy Picture command in palette'
 
 Show a picture in the panel
-^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You've got an empty panel. It's time to add a picture to it. Go back to
 your code editor. Add the following code below the lines that create a
