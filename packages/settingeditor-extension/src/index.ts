@@ -30,8 +30,6 @@ import {
  * The command IDs used by the setting editor.
  */
 namespace CommandIDs {
-  export const debug = 'settingeditor:debug';
-
   export const open = 'settingeditor:open';
 
   export const revert = 'settingeditor:revert';
@@ -85,15 +83,6 @@ function activate(
     name: widget => namespace
   });
 
-  commands.addCommand(CommandIDs.debug, {
-    execute: () => {
-      tracker.currentWidget.content.toggleDebug();
-    },
-    iconClass: 'jp-MaterialIcon jp-BugIcon',
-    label: 'Debug User Settings In Inspector',
-    isToggled: () => tracker.currentWidget.content.isDebugVisible
-  });
-
   commands.addCommand(CommandIDs.open, {
     execute: () => {
       if (tracker.currentWidget) {
@@ -107,7 +96,6 @@ function activate(
       editor = new SettingEditor({
         commands: {
           registry: commands,
-          debug: CommandIDs.debug,
           revert: CommandIDs.revert,
           save: CommandIDs.save
         },

@@ -3,11 +3,6 @@
   "description": "Setting editor settings.",
   "jupyter.lab.shortcuts": [
     {
-      "command": "settingeditor:debug",
-      "keys": ["Accel I"],
-      "selector": ".jp-SettingEditor"
-    },
-    {
       "command": "settingeditor:open",
       "keys": ["Accel ,"],
       "selector": "body"

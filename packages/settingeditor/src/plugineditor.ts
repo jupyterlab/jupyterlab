@@ -202,11 +202,6 @@ export namespace PluginEditor {
       registry: CommandRegistry;
 
       /**
-       * The debug command ID.
-       */
-      debug: string;
-
-      /**
        * The revert command ID.
        */
       revert: string;
