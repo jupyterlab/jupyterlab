@@ -307,6 +307,29 @@ and then adds the terminal to the right area:
 Status Bar
 ~~~~~~~~~~
 
+JupyterLab's status bar is intended to show small pieces of contextual information.
+Like the left and right areas, it only expects a Phosphor ``Widget``,
+which might contain any kind of content. Since the status bar has limited space,
+you should endeavor to only add small widgets to it.
+
+The following example shows how to place a status item that displays the current
+"busy" status for the application. This information is available from the ``ILabStatus``
+token, which we reference by a variable named ``labStatus``.
+We place the ``statusWidget`` in the middle of the status bar.
+When the ``labStatus`` busy state changes, we update the text content of the
+``statusWidget`` to reflect that.
+
+.. code:: typescript
+
+    const statusWidget = new Widget();
+    labStatus.busySignal.connect(() => {
+      statusWidget.node.textContent = labStatus.isBusy ? 'Busy' : 'Idle';
+    });
+    statusBar.registerStatusItem('lab-status', {
+      align: 'middle',
+      item: statusWidget
+    });
+
 .. _widget-tracker:
 
 Widget Tracker
