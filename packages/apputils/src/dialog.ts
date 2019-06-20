@@ -62,7 +62,7 @@ export function showErrorMessage(
       buttons: buttons
     }).then(() => {
       Private.errorMessagePromiseCache.delete(key);
-    }).catch((error) => {  // TODO: Use .finally() above when supported
+    }, (error) => {  // TODO: Use .finally() above when supported
       Private.errorMessagePromiseCache.delete(key);
       throw(error);
     });
