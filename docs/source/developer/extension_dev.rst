@@ -38,7 +38,7 @@ A plugin adds a core functionality to the application:
    interface, by exporting a plugin object or array of plugin objects as
    the default export.
 
-   We provide two cookie cutters to create JupyterLab plugin extensions in
+   We provide two cookiecutters to create JupyterLab plugin extensions in
    `CommonJS <https://github.com/jupyterlab/extension-cookiecutter-js>`__ and
    `TypeScript <https://github.com/jupyterlab/extension-cookiecutter-ts>`__.
 
@@ -255,6 +255,10 @@ The JupyterLab repo has an example mime renderer extension for
 files. It provides a mime renderer for pdf data and registers itself as
 a document renderer for pdf file types.
 
+The JupyterLab organization also has a mime renderer extension tutorial
+which adds mp4 video rendering to the application
+`here <https://github.com/jupyterlab/jupyterlab-mp4>`__.
+
 The ``rendermime-interfaces`` package is intended to be the only
 JupyterLab package needed to create a mime renderer extension (using the
 interfaces in TypeScript or as a form of documentation if using plain
@@ -289,14 +293,6 @@ Theme <https://github.com/jupyterlab/jupyterlab/tree/master/packages/theme-light
 for an example. Ensure that the theme files are included in the
 ``"files"`` metadata in ``package.json``.  Note that if you want to use SCSS, SASS, or LESS files,
 you must compile them to CSS and point JupyterLab to the CSS files.
-
-To quickly create a theme based on the JupyterLab Light Theme, follow
-the instructions in the `contributing
-guide <https://github.com/jupyterlab/jupyterlab/blob/d9bbf0822be5309d063249da6776e640dba7984c/CONTRIBUTING.md#setting-up-a-development-environment>`__ and
-then run ``jlpm run create:theme`` from the repository root directory.
-Once you select a name, title and a description, a new theme folder will
-be created in the current directory. You can move that new folder to a
-location of your choice, and start making desired changes.
 
 The theme extension is installed in the same way as a regular extension (see
 `extension authoring <#extension-authoring>`__).
