@@ -103,7 +103,7 @@
     "@jupyterlab/ui-components": "^1.0.0-alpha.12",
     "@jupyterlab/vdom": "^1.0.0-alpha.12",
     "@jupyterlab/vdom-extension": "^1.0.0-alpha.12",
-    "@jupyterlab/vega4-extension": "^1.0.0-alpha.11",
+    "@jupyterlab/vega4-extension": "^1.0.0-alpha.12",
     "@jupyterlab/vega5-extension": "^1.0.0-alpha.12"
   },
   "devDependencies": {
