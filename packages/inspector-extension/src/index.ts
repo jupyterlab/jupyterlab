@@ -82,7 +82,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         inspector.isDisposed ||
         !inspector.isAttached ||
         !inspector.isVisible,
-      label: label;
+      label,
       iconClass: args =>
         args.isLauncher ? 'jp-MaterialIcon jp-InspectorIcon' : '',
       execute: () => openInspector()
