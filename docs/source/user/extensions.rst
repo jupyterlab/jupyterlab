@@ -51,7 +51,7 @@ Using the Extension Manager
 To manage your extensions, you can use the extension manager. By default, the
 manager is disabled. You can enable it by searching **Extension Manager** in the command platte. 
 
-.. figure:: images/extension_manager_enable_manger.png
+.. figure:: images/extension_manager_enable_manager.png
    :align: center
    :class: jp-screenshot
 
