@@ -128,8 +128,7 @@ const plugins = [
   new webpack.HashedModuleIdsPlugin(),
   new JupyterFrontEndPlugin({}),
   new MiniCssExtractPlugin({
-    filename: '[name].css',
-    chunkFilename: '[id].css'
+    filename: '[name].[chunkhash].css'
   })
 ];
 
