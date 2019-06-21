@@ -1,20 +1,25 @@
 {
   "private": true,
-  "workspaces": [
-    "dev_mode",
-    "examples/*",
-    "packages/*",
-    "packages/services/examples/node",
-    "packages/services/examples/browser",
-    "packages/services/examples/typescript-browser-with-output",
-    "buildutils",
-    "buildutils/template",
-    "buildutils/test-template",
-    "tests",
-    "tests/test-*",
-    "testutils",
-    "jupyterlab/tests/mock_packages/extension"
-  ],
+  "workspaces": {
+    "packages": [
+      "dev_mode",
+      "examples/*",
+      "packages/*",
+      "packages/services/examples/node",
+      "packages/services/examples/browser",
+      "packages/services/examples/typescript-browser-with-output",
+      "buildutils",
+      "buildutils/template",
+      "buildutils/test-template",
+      "tests",
+      "tests/test-*",
+      "testutils",
+      "jupyterlab/tests/mock_packages/extension"
+    ],
+    "nohoist": [
+      "@jupyterlab/vega*-extension/vega*/**"
+    ]
+  },
   "scripts": {
     "add:sibling": "node buildutils/lib/add-sibling.js",
     "analyze": "jlpm run analyze:dev",

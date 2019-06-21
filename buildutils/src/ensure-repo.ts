@@ -29,9 +29,13 @@ let UNUSED: Dict<string[]> = {
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/testutils': ['node-fetch', 'identity-obj-proxy'],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
+  '@jupyterlab/vega4-extension': ['vega', 'vega-lite'],
   '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],
   '@jupyterlab/ui-components': ['@blueprintjs/icons']
 };
+
+// Packages that are allowed to have differing versions
+let DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega', 'vega-embed'];
 
 let SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
@@ -308,7 +312,8 @@ export async function ensureIntegrity(): Promise<boolean> {
       missing: MISSING[name],
       unused,
       locals,
-      cssImports: cssImports[name]
+      cssImports: cssImports[name],
+      differentVersions: DIFFERENT_VERSIONS
     };
 
     if (name === '@jupyterlab/metapackage') {
