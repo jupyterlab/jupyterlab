@@ -289,7 +289,7 @@ export function createEditMenu(app: JupyterFrontEnd, menu: EditMenu): void {
 export function createFileMenu(
   app: JupyterFrontEnd,
   menu: FileMenu,
-  router: IRouter,
+  router: IRouter
 ): void {
   const commands = menu.menu.commands;
 
