@@ -13,7 +13,9 @@ import {
   MainAreaWidget,
   ToolbarButton,
   WidgetTracker,
-  ICommandPalette
+  ICommandPalette,
+  InputDialog,
+  showErrorMessage
 } from '@jupyterlab/apputils';
 
 import {
@@ -26,8 +28,6 @@ import {
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import {
   FileBrowserModel,
   FileBrowser,
@@ -36,6 +36,8 @@ import {
 } from '@jupyterlab/filebrowser';
 
 import { Launcher } from '@jupyterlab/launcher';
+
+import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { Contents } from '@jupyterlab/services';
 
@@ -71,7 +73,9 @@ namespace CommandIDs {
   // For main browser only.
   export const hideBrowser = 'filebrowser:hide-main';
 
-  export const navigate = 'filebrowser:navigate';
+  export const goToPath = 'filebrowser:go-to-path';
+
+  export const openPath = 'filebrowser:open-path';
 
   export const open = 'filebrowser:open';
 
@@ -311,22 +315,21 @@ function activateBrowser(
       });
 
     // Whether to automatically navigate to a document's current directory
-    labShell.currentChanged.connect((_, change) => {
+    labShell.currentChanged.connect(async (_, change) => {
       if (navigateToCurrentDirectory && change.newValue) {
         const { newValue } = change;
         const context = docManager.contextForWidget(newValue);
         if (context) {
           const { path } = context;
-          Private.navigateToPath(path, factory)
-            .then(() => {
-              labShell.currentWidget.activate();
-            })
-            .catch((reason: any) => {
-              console.warn(
-                `${CommandIDs.navigate} failed to open: ${path}`,
-                reason
-              );
-            });
+          try {
+            await Private.navigateToPath(path, factory);
+            labShell.currentWidget.activate();
+          } catch (reason) {
+            console.warn(
+              `${CommandIDs.goToPath} failed to open: ${path}`,
+              reason
+            );
+          }
         }
       }
     });
@@ -371,10 +374,8 @@ function addCommands(
   commandPalette: ICommandPalette | null,
   mainMenu: IMainMenu | null
 ): void {
-  const registry = app.docRegistry;
-  const { commands } = app;
-  const { defaultBrowser: browser } = factory;
-  const { tracker } = factory;
+  const { docRegistry: registry, commands } = app;
+  const { defaultBrowser: browser, tracker } = factory;
 
   commands.addCommand(CommandIDs.del, {
     execute: () => {
@@ -447,21 +448,75 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.navigate, {
-    execute: args => {
+  commands.addCommand(CommandIDs.goToPath, {
+    execute: async args => {
       const path = (args.path as string) || '';
-      return Private.navigateToPath(path, factory)
-        .then(() => {
-          return commands.execute('docmanager:open', { path });
-        })
-        .catch((reason: any) => {
-          console.warn(
-            `${CommandIDs.navigate} failed to open: ${path}`,
-            reason
-          );
-        });
+      try {
+        await Private.navigateToPath(path, factory);
+      } catch (reason) {
+        console.warn(`${CommandIDs.goToPath} failed to go to: ${path}`, reason);
+      }
+      const browserForPath = Private.getBrowserForPath(path, factory);
+      browserForPath.clearSelectedItems();
+      const parts = path.split('/');
+      const name = parts[parts.length - 1];
+      if (name) {
+        await browserForPath.selectItemByName(name);
+      }
+
+      return commands.execute(CommandIDs.showBrowser, { path });
     }
   });
+
+  commands.addCommand(CommandIDs.openPath, {
+    label: args => (args.path ? `Open ${args.path}` : 'Open from Path…'),
+    caption: args => (args.path ? `Open ${args.path}` : 'Open from path'),
+    execute: async ({ path }: { path?: string }) => {
+      if (!path) {
+        path = (await InputDialog.getText({
+          label: 'Path',
+          placeholder: '/path/relative/to/jlab/root',
+          title: 'Open Path',
+          okLabel: 'Open'
+        })).value;
+      }
+      if (!path) {
+        return;
+      }
+      try {
+        let trailingSlash = path !== '/' && path.endsWith('/');
+        if (trailingSlash) {
+          // The normal contents service errors on paths ending in slash
+          path = path.slice(0, path.length - 1);
+        }
+        const browserForPath = Private.getBrowserForPath(path, factory);
+        const { services } = browserForPath.model.manager;
+        const item = await services.contents.get(path, {
+          content: false
+        });
+        if (trailingSlash && item.type !== 'directory') {
+          throw new Error(`Path ${path}/ is not a directory`);
+        }
+        await commands.execute(CommandIDs.goToPath, { path });
+        if (item.type === 'directory') {
+          return;
+        }
+        return commands.execute('docmanager:open', { path });
+      } catch (reason) {
+        if (reason.response && reason.response.status === 404) {
+          reason.message = `Could not find path: ${path}`;
+        }
+        return showErrorMessage('Cannot open', reason);
+      }
+    }
+  });
+  // Add the openPath command to the command palette
+  if (commandPalette) {
+    commandPalette.addItem({
+      command: CommandIDs.openPath,
+      category: 'File Operations'
+    });
+  }
 
   commands.addCommand(CommandIDs.open, {
     execute: args => {
@@ -897,7 +952,7 @@ namespace Private {
       if (!browserForPath) {
         // warn that no filebrowser could be found for this driveName
         console.warn(
-          `${CommandIDs.navigate} failed to find filebrowser for path: ${path}`
+          `${CommandIDs.goToPath} failed to find filebrowser for path: ${path}`
         );
         return;
       }
@@ -910,27 +965,25 @@ namespace Private {
   }
 
   /**
-   * Navigate to a path.
+   * Navigate to a path or the path containing a file.
    */
-  export function navigateToPath(
+  export async function navigateToPath(
     path: string,
     factory: IFileBrowserFactory
-  ): Promise<any> {
+  ): Promise<Contents.IModel> {
     const browserForPath = Private.getBrowserForPath(path, factory);
     const { services } = browserForPath.model.manager;
     const localPath = services.contents.localPath(path);
 
-    return services.ready
-      .then(() => services.contents.get(path, { content: false }))
-      .then(value => {
-        const { model } = browserForPath;
-        const { restored } = model;
-
-        if (value.type === 'directory') {
-          return restored.then(() => model.cd(`/${localPath}`));
-        }
-
-        return restored.then(() => model.cd(`/${PathExt.dirname(localPath)}`));
-      });
+    await services.ready;
+    let item = await services.contents.get(path, { content: false });
+    const { model } = browserForPath;
+    await model.restored;
+    if (item.type === 'directory') {
+      await model.cd(`/${localPath}`);
+    } else {
+      await model.cd(`/${PathExt.dirname(localPath)}`);
+    }
+    return item;
   }
 }

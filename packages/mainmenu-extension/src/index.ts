@@ -409,11 +409,12 @@ export function createFileMenu(
     { command: 'filebrowser:create-main-launcher' }
   ];
 
+  const openGroup = [{ command: 'filebrowser:open-path' }];
+
   const newViewGroup = [
     { command: 'docmanager:clone' },
     { command: CommandIDs.createConsole },
-    inspector ? { command: 'inspector:open' } : null,
-    { command: 'docmanager:open-direct' }
+    inspector ? { command: 'inspector:open' } : null
   ].filter(item => !!item);
 
   // Add the close group
@@ -451,10 +452,11 @@ export function createFileMenu(
   const printGroup = [{ command: 'apputils:print' }];
 
   menu.addGroup(newGroup, 0);
-  menu.addGroup(newViewGroup, 1);
-  menu.addGroup(closeGroup, 2);
-  menu.addGroup(saveGroup, 3);
-  menu.addGroup(reGroup, 4);
+  menu.addGroup(openGroup, 1);
+  menu.addGroup(newViewGroup, 2);
+  menu.addGroup(closeGroup, 3);
+  menu.addGroup(saveGroup, 4);
+  menu.addGroup(reGroup, 5);
   menu.addGroup(printGroup, 98);
   if (menu.quitEntry) {
     menu.addGroup(quitGroup, 99);
