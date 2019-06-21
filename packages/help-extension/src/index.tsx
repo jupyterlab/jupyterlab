@@ -18,6 +18,8 @@ import {
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
+import { IInspector } from '@jupyterlab/inspector';
+
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { KernelMessage } from '@jupyterlab/services';
@@ -89,7 +91,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
   activate,
   id: '@jupyterlab/help-extension:plugin',
   requires: [IMainMenu],
-  optional: [ICommandPalette, ILayoutRestorer],
+  optional: [ICommandPalette, ILayoutRestorer, IInspector],
   autoStart: true
 };
 
@@ -109,7 +111,8 @@ function activate(
   app: JupyterFrontEnd,
   mainMenu: IMainMenu,
   palette: ICommandPalette | null,
-  restorer: ILayoutRestorer | null
+  restorer: ILayoutRestorer | null,
+  inspector: IInspector | null
 ): void {
   let counter = 0;
   const category = 'Help';
@@ -153,9 +156,11 @@ function activate(
 
   // Populate the Help menu.
   const helpMenu = mainMenu.helpMenu;
-  const labGroup = [CommandIDs.about, CommandIDs.launchClassic].map(
-    command => ({ command })
-  );
+  const labGroup = [
+    CommandIDs.about,
+    inspector ? 'inspector:open' : null,
+    CommandIDs.launchClassic
+  ].map(command => ({ command }));
   helpMenu.addGroup(labGroup, 0);
   const resourcesGroup = RESOURCES.map(args => ({
     args,
