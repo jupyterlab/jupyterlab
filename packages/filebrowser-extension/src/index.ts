@@ -99,6 +99,9 @@ namespace CommandIDs {
 
   // For main browser only.
   export const toggleBrowser = 'filebrowser:toggle-main';
+
+  export const toggleNavigateToCurrentDirectory =
+    'filebrowser:toggle-navigate-to-current-directory';
 }
 
 /**
@@ -247,7 +250,7 @@ function activateBrowser(
   labShell: ILabShell,
   restorer: ILayoutRestorer,
   settingRegistry: ISettingRegistry,
-  palette: ICommandPalette,
+  commandPalette: ICommandPalette,
   mainMenu: IMainMenu
 ): void {
   const browser = factory.defaultBrowser;
@@ -261,7 +264,15 @@ function activateBrowser(
   // responsible for their own restoration behavior, if any.
   restorer.add(browser, namespace);
 
-  addCommands(app, factory, labShell, docManager, palette, mainMenu);
+  addCommands(
+    app,
+    factory,
+    labShell,
+    docManager,
+    settingRegistry,
+    commandPalette,
+    mainMenu
+  );
 
   browser.title.iconClass = 'jp-FolderIcon jp-SideBar-tabIcon';
   browser.title.caption = 'File Browser';
@@ -296,9 +307,11 @@ function activateBrowser(
           navigateToCurrentDirectory = settings.get(
             'navigateToCurrentDirectory'
           ).composite as boolean;
+          browser.navigateToCurrentDirectory = navigateToCurrentDirectory;
         });
         navigateToCurrentDirectory = settings.get('navigateToCurrentDirectory')
           .composite as boolean;
+        browser.navigateToCurrentDirectory = navigateToCurrentDirectory;
       });
 
     // Whether to automatically navigate to a document's current directory
@@ -357,7 +370,8 @@ function addCommands(
   factory: IFileBrowserFactory,
   labShell: ILabShell,
   docManager: IDocumentManager,
-  palette: ICommandPalette | null,
+  settingRegistry: ISettingRegistry,
+  commandPalette: ICommandPalette | null,
   mainMenu: IMainMenu | null
 ): void {
   const { docRegistry: registry, commands } = app;
@@ -497,8 +511,8 @@ function addCommands(
     }
   });
   // Add the openPath command to the command palette
-  if (palette) {
-    palette.addItem({
+  if (commandPalette) {
+    commandPalette.addItem({
       command: CommandIDs.openPath,
       category: 'File Operations'
     });
@@ -545,7 +559,7 @@ function addCommands(
           return '';
         }
       } else {
-        return 'jp-MaterialIcon jp-OpenFolderIcon';
+        return 'jp-MaterialIcon jp-FolderIcon';
       }
     },
     label: args => (args['label'] || args['factory'] || 'Open') as string,
@@ -707,6 +721,34 @@ function addCommands(
     label: 'New Launcher',
     execute: () => Private.createLauncher(commands, browser)
   });
+
+  commands.addCommand(CommandIDs.toggleNavigateToCurrentDirectory, {
+    label: 'Show Active File in File Browser',
+    isToggled: () => browser.navigateToCurrentDirectory,
+    execute: () => {
+      const value = !browser.navigateToCurrentDirectory;
+      const key = 'navigateToCurrentDirectory';
+      return settingRegistry
+        .set('@jupyterlab/filebrowser-extension:browser', key, value)
+        .catch((reason: Error) => {
+          console.error(`Failed to set navigateToCurrentDirectory setting`);
+        });
+    }
+  });
+
+  if (mainMenu) {
+    mainMenu.settingsMenu.addGroup(
+      [{ command: CommandIDs.toggleNavigateToCurrentDirectory }],
+      5
+    );
+  }
+
+  if (commandPalette) {
+    commandPalette.addItem({
+      command: CommandIDs.toggleNavigateToCurrentDirectory,
+      category: 'File Operations'
+    });
+  }
 
   /**
    * A menu widget that dynamically populates with different widget factories

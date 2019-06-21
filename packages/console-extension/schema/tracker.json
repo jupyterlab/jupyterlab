@@ -1,6 +1,8 @@
 {
-  "title": "Console",
-  "description": "Console settings.",
+  "title": "Code Console",
+  "description": "Code Console settings.",
+  "jupyter.lab.setting-icon-class": "jp-CodeConsoleIcon",
+  "jupyter.lab.setting-icon-label": "Code Console Settings",
   "jupyter.lab.shortcuts": [
     {
       "command": "console:linebreak",

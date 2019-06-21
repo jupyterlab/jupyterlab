@@ -1183,7 +1183,7 @@ export namespace DocumentRegistry {
     extensions: [],
     mimeTypes: ['text/directory'],
     contentType: 'directory',
-    iconClass: 'jp-MaterialIcon jp-OpenFolderIcon'
+    iconClass: 'jp-MaterialIcon jp-FolderIcon'
   };
 
   /**
@@ -1240,7 +1240,7 @@ export namespace DocumentRegistry {
       displayName: 'YAML File',
       mimeTypes: ['text/x-yaml', 'text/yaml'],
       extensions: ['.yaml', '.yml'],
-      iconClass: 'jp-MaterialIcon jp-YamlIcon'
+      iconClass: 'jp-MaterialIcon jp-YAMLIcon'
     },
     {
       name: 'svg',

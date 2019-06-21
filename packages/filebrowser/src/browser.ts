@@ -267,10 +267,22 @@ export class FileBrowser extends Widget {
     }
   }
 
+  /**
+   * Whether to show active file in file browser
+   */
+  get navigateToCurrentDirectory(): boolean {
+    return this._navigateToCurrentDirectory;
+  }
+
+  set navigateToCurrentDirectory(value: boolean) {
+    this._navigateToCurrentDirectory = value;
+  }
+
   private _crumbs: BreadCrumbs;
   private _listing: DirListing;
   private _manager: IDocumentManager;
   private _directoryPending: boolean;
+  private _navigateToCurrentDirectory: boolean;
 }
 
 /**

@@ -43,7 +43,7 @@ A plugin adds a core functionality to the application:
    interface, by exporting a plugin object or array of plugin objects as
    the default export.
 
-   We provide two cookie cutters to create JuptyerLab plugin extensions in
+   We provide two cookie cutters to create JupyterLab plugin extensions in
    `CommonJS <https://github.com/jupyterlab/extension-cookiecutter-js>`__ and
    `TypeScript <https://github.com/jupyterlab/extension-cookiecutter-ts>`__.
 
@@ -233,6 +233,9 @@ that points to the parent directory's ``karma`` config, and a test runner,
 ``run-test.py`` that starts a Jupyter server.
 
 
+
+.. _rendermime:
+
 Mime Renderer Extensions
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -299,6 +302,9 @@ location of your choice, and start making desired changes.
 
 The theme extension is installed in the same way as a regular extension (see
 `extension authoring <#extension-authoring>`__).
+
+It is also possible to create a new theme using the
+`TypeScript theme cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`__.
 
 Standard (General-Purpose) Extensions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -515,6 +521,11 @@ This would look something like the following in a ``Widget`` subclass:
 
 .. |dependencies| image:: dependency-graph.svg
 
+
+Using React
+^^^^^^^^^^^
+We also provide support for using :ref:`react` in your JupyterLab
+extensions, as well as in the core codebase.
 
 
 .. _ext-author-companion-packages:

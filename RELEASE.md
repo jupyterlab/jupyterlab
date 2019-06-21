@@ -97,6 +97,7 @@ JupyterLab itself, run `jlpm run bumpversion major`.
   - [ ] https://github.com/jupyterlab/extension-cookiecutter-ts
   - [ ] https://github.com/jupyterlab/mimerender-cookiecutter
   - [ ] https://github.com/jupyterlab/mimerender-cookiecutter-ts
+  - [ ] https://github.com/jupyterlab/theme-cookiecutter
   - [ ] https://github.com/jupyterlab/jupyter-renderers
   - [ ] https://github.com/jupyterhub/jupyterlab-hub
 - [ ] Add a tag to [ts cookiecutter](https://github.com/jupyterlab/extension-cookiecutter-ts) with the new JupyterLab version
