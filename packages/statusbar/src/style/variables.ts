@@ -7,6 +7,7 @@ export default {
   backgroundColor: 'var(--jp-layout-color2)',
   height: '24px',
   fontSize: 'var(--jp-ui-font-size1)',
+  fontFamily: 'var(--jp-ui-font-family)',
   textColor: 'var(--jp-ui-font-color1)',
   textClickColor: 'white',
   itemMargin: '2px',
