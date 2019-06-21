@@ -146,11 +146,10 @@ module.exports = [
     optimization: {
       splitChunks: {
         chunks: 'all'
-          }
+      }
     },
     module: {
       rules: [
-        {
         { test: /\.css$/, use: ['style-loader', 'css-loader'] },
         { test: /\.md$/, use: 'raw-loader' },
         { test: /\.txt$/, use: 'raw-loader' },
