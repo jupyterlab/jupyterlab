@@ -79,12 +79,12 @@ Application Object
 A Jupyter front-end application object is given to each plugin in its
 ``activate()`` function. The application object has:
 
--  commands - an extensible registry used to add and execute commands in the application.
--  commandLinker - used to connect DOM nodes with the command registry so that clicking on them executes a command.
--  docRegistry - an extensible registry containing the document types that the application is able to read and render.
--  restored - a promise that is resolved when the application has finished loading.
--  serviceManager - low-level manager for talking to the Jupyter REST API.
--  shell - a generic Jupyter front-end shell instance, which holds the user interface for the application.
+-  ``commands`` - an extensible registry used to add and execute commands in the application.
+-  ``commandLinker`` - used to connect DOM nodes with the command registry so that clicking on them executes a command.
+-  ``docRegistry`` - an extensible registry containing the document types that the application is able to read and render.
+-  ``restored`` - a promise that is resolved when the application has finished loading.
+-  ``serviceManager`` - low-level manager for talking to the Jupyter REST API.
+-  ``shell`` - a generic Jupyter front-end shell instance, which holds the user interface for the application.
 
 Jupyter Front-End Shell
 ~~~~~~~~~~~~~~~~~~~~~~~
