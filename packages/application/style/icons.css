@@ -107,6 +107,10 @@
   background-image: var(--jp-icon-circle);
 }
 
+.jp-FilterListIcon {
+  background-image: var(--jp-icon-filter-list);
+}
+
 .jp-FolderIcon {
   background-image: var(--jp-icon-folder);
 }

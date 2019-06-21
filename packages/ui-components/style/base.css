@@ -48,12 +48,14 @@ a:hover {
   outline-offset: unset;
   -moz-outline-radius: unset;
 }
+
 /* Styles for ui-components */
 .jp-Button {
   border-radius: var(--jp-border-radius);
   padding: 0px 12px;
   font-size: var(--jp-ui-font-size1);
 }
+
 /* Use our own theme for hover styles */
 button.jp-Button.bp3-button.bp3-minimal:hover {
   background-color: var(--jp-layout-color2);
@@ -65,6 +67,7 @@ button.jp-Button.bp3-button.bp3-minimal:hover {
 .jp-Button.jp-ToolbarButtonComponent {
   text-transform: none;
 }
+
 .jp-InputGroup input {
   box-sizing: border-box;
   border-radius: 0;
@@ -78,16 +81,20 @@ button.jp-Button.bp3-button.bp3-minimal:hover {
       var(--jp-input-active-box-shadow-color),
     inset 0 0 0 3px var(--jp-input-active-box-shadow-color);
 }
+
 .jp-InputGroup input::placeholder,
 input::placeholder {
   color: var(--jp-ui-font-color3);
 }
+
 .jp-Icon {
   color: var(--jp-layout-color4);
 }
+
 .jp-InputGroupAction {
   padding: 6px;
 }
+
 .jp-HTMLSelect.bp3-html-select.bp3-minimal select {
   height: 24;
   font-size: var(--jp-ui-font-size1);
@@ -96,6 +103,7 @@ input::placeholder {
   display: block;
   color: var(--jp-ui-font-color0);
 }
+
 /* Use our own theme for hover styles */
 .jp-HTMLSelect.bp3-html-select.bp3-minimal select:hover {
   color: var(--jp-ui-font-color0);

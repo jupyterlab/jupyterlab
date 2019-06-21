@@ -105,10 +105,18 @@
   background: var(--jp-layout-color2);
 }
 
-.p-CommandPalette-header:hover::before {
-  content: '\2026'; /* ellipsis */
+.p-CommandPalette-header:hover::after {
+  content: '';
+  min-width: 12px;
+  min-height: 12px;
+  background-size: 14px;
+  margin-right: 16px;
   float: right;
-  margin-right: 4px;
+  display: inline-block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: var(--jp-icon-filter-list);
 }
 
 .p-CommandPalette-header > mark {
