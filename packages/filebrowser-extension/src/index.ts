@@ -517,10 +517,6 @@ function addCommands(
       category: 'File Operations'
     });
   }
-  // Add the openPath command to the File menu
-  if (mainMenu) {
-    mainMenu.fileMenu.addGroup([{ command: CommandIDs.openPath }], 0);
-  }
 
   commands.addCommand(CommandIDs.open, {
     execute: args => {
