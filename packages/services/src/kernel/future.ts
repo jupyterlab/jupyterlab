@@ -23,7 +23,6 @@ export abstract class KernelFutureHandler<
   REQUEST extends KernelMessage.IShellControlMessage,
   REPLY extends KernelMessage.IShellControlMessage
 > extends DisposableDelegate implements Kernel.IFuture<REQUEST, REPLY> {
-  abstract async handleMsg(msg: KernelMessage.IMessage): Promise<void>;
   /**
    * Construct a new KernelFutureHandler.
    */
@@ -190,8 +189,19 @@ export abstract class KernelFutureHandler<
     super.dispose();
   }
 
-  protected async handleDefaultMsg(msg: KernelMessage.IMessage): Promise<void> {
+  async handleMsg(msg: KernelMessage.IMessage): Promise<void> {
     switch (msg.channel) {
+      case 'control':
+      case 'shell':
+        if (
+          msg.channel === this.msg.channel &&
+          (msg.parent_header as KernelMessage.IHeader<
+            KernelMessage.MessageType
+          >).msg_id === this.msg.header.msg_id
+        ) {
+          await this.handleReply(msg as REPLY);
+        }
+        break;
       case 'stdin':
         await this.handleStdin(msg as KernelMessage.IStdinMessage);
         break;
@@ -289,35 +299,13 @@ export class KernelControlFutureHandler<
   REQUEST extends KernelMessage.IControlMessage = KernelMessage.IControlMessage,
   REPLY extends KernelMessage.IControlMessage = KernelMessage.IControlMessage
 > extends KernelFutureHandler<REQUEST, REPLY>
-  implements Kernel.IControlFuture<REQUEST, REPLY> {
-  /**
-   * Handle an incoming kernel message.
-   */
-  async handleMsg(msg: KernelMessage.IMessage): Promise<void> {
-    if (msg.channel === 'control') {
-      await this.handleReply(msg as REPLY);
-    } else {
-      await this.handleDefaultMsg(msg);
-    }
-  }
-}
+  implements Kernel.IControlFuture<REQUEST, REPLY> {}
 
 export class KernelShellFutureHandler<
   REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
   REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
 > extends KernelFutureHandler<REQUEST, REPLY>
-  implements Kernel.IShellFuture<REQUEST, REPLY> {
-  /**
-   * Handle an incoming kernel message.
-   */
-  async handleMsg(msg: KernelMessage.IMessage): Promise<void> {
-    if (msg.channel === 'shell') {
-      await this.handleReply(msg as REPLY);
-    } else {
-      await this.handleDefaultMsg(msg);
-    }
-  }
-}
+  implements Kernel.IShellFuture<REQUEST, REPLY> {}
 
 namespace Private {
   /**
