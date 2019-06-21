@@ -314,14 +314,21 @@ export class FileBrowserModel implements IDisposable {
    */
   download(path: string): Promise<void> {
     return this.manager.services.contents.getDownloadUrl(path).then(url => {
-      let element = document.createElement('a');
-      document.body.appendChild(element);
-      element.setAttribute('href', url);
-      element.setAttribute('target', '_blank');
-      element.setAttribute('download', '');
-      element.click();
-      document.body.removeChild(element);
-      return void 0;
+      // Check the browser is Chrome https://stackoverflow.com/a/9851769
+      const chrome = (window as any).chrome;
+      const isChrome = !!chrome && (!!chrome.webstore || !!chrome.runtime);
+      if (isChrome) {
+        // Workaround https://bugs.chromium.org/p/chromium/issues/detail?id=455987
+        window.open(url);
+      } else {
+        let element = document.createElement('a');
+        document.body.appendChild(element);
+        element.setAttribute('href', url);
+        element.setAttribute('download', '');
+        element.click();
+        document.body.removeChild(element);
+        return void 0;
+      }
     });
   }
 
