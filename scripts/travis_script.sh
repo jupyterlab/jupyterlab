@@ -153,11 +153,11 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension disable -h
 
     # Make sure we can add and remove a sibling package.
-    jlpm run add:sibling jupyterlab/tests/mock_packages/extension
-    jlpm run build
-    jlpm run remove:package extension
-    jlpm run build
-    jlpm run integrity --force  # Should have a clean tree now
+    # jlpm run add:sibling jupyterlab/tests/mock_packages/extension
+    # jlpm run build
+    # jlpm run remove:package extension
+    # jlpm run build
+    # jlpm run integrity --force  # Should have a clean tree now
 
     # Test cli tools
     jlpm run get:dependency mocha

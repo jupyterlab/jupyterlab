@@ -186,7 +186,7 @@ namespace Private {
       return vegaReady;
     }
 
-    vegaReady = import('vega-embed');
+    vegaReady = import('./built-vega-embed') as any;
 
     return vegaReady;
   }

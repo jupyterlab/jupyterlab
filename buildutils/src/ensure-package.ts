@@ -59,6 +59,10 @@ export async function ensurePackage(
 
   // Verify devDependencies are consistent.
   promises = Object.keys(devDeps).map(async name => {
+    if (differentVersions.indexOf(name) !== -1) {
+      // Skip processing packages that can have different versions
+      return;
+    }
     if (!(name in seenDeps)) {
       seenDeps[name] = await getDependency(name);
     }
