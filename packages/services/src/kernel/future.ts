@@ -202,21 +202,21 @@ export abstract class KernelFutureHandler<
             KernelMessage.MessageType
           >).msg_id === this.msg.header.msg_id
         ) {
-          await this.handleReply(msg as REPLY);
+          await this._handleReply(msg as REPLY);
         }
         break;
       case 'stdin':
-        await this.handleStdin(msg as KernelMessage.IStdinMessage);
+        await this._handleStdin(msg as KernelMessage.IStdinMessage);
         break;
       case 'iopub':
-        await this.handleIOPub(msg as KernelMessage.IIOPubMessage);
+        await this._handleIOPub(msg as KernelMessage.IIOPubMessage);
         break;
       default:
         break;
     }
   }
 
-  protected async handleReply(msg: REPLY): Promise<void> {
+  private async _handleReply(msg: REPLY): Promise<void> {
     let reply = this._reply;
     if (reply) {
       // tslint:disable-next-line:await-promise
@@ -229,7 +229,7 @@ export abstract class KernelFutureHandler<
     }
   }
 
-  protected async handleStdin(msg: KernelMessage.IStdinMessage): Promise<void> {
+  private async _handleStdin(msg: KernelMessage.IStdinMessage): Promise<void> {
     let stdin = this._stdin;
     if (stdin) {
       // tslint:disable-next-line:await-promise
@@ -237,7 +237,7 @@ export abstract class KernelFutureHandler<
     }
   }
 
-  protected async handleIOPub(msg: KernelMessage.IIOPubMessage): Promise<void> {
+  private async _handleIOPub(msg: KernelMessage.IIOPubMessage): Promise<void> {
     let process = await this._hooks.process(msg);
     let iopub = this._iopub;
     if (process && iopub) {
@@ -295,7 +295,7 @@ export abstract class KernelFutureHandler<
   private _replyMsg: REPLY;
   private _hooks = new Private.HookList<KernelMessage.IIOPubMessage>();
   private _disposeOnDone = true;
-  protected _kernel: Kernel.IKernel;
+  private _kernel: Kernel.IKernel;
 }
 
 export class KernelControlFutureHandler<
