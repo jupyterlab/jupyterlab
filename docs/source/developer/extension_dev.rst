@@ -62,8 +62,7 @@ The default plugins in the JupyterLab application include:
    - Adds the ability to launch Jupyter Console instances for
    interactive kernel console sessions.
 
-A dependency graph for the core JupyterLab plugins (along with links to
-their source) is shown here: |dependencies|
+Here is a dependency graph for the core JupyterLab components: |dependencies|
 
 .. danger::
 
@@ -80,8 +79,12 @@ Application Object
 A Jupyter front-end application object is given to each plugin in its
 ``activate()`` function. The application object has:
 
--  commands - used to add and execute commands in the application.
--  shell - a generic Jupyter front-end shell instance.
+-  commands - an extensible registry used to add and execute commands in the application.
+-  commandLinker - used to connect DOM nodes with the command registry so that clicking on them executes a command.
+-  docRegistry - an extensible registry containing the document types that the application is able to read and render.
+-  restored - a promise that is resolved when the application has finished loading.
+-  serviceManager - low-level manager for talking to the Jupyter REST API.
+-  shell - a generic Jupyter front-end shell instance, which holds the user interface for the application.
 
 Jupyter Front-End Shell
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -425,7 +428,7 @@ Standard Extension Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For a concrete example of a standard extension, see :ref:`How to extend the Notebook plugin <extend-notebook-plugin>`.
-Notice that the mime renderer and themes extensions above use a limited,
+Notice that the mime renderer extensions use a limited,
 simplified interface to JupyterLab's extension system. Modifying the
 notebook plugin requires the full, general-purpose interface to the
 extension system.
