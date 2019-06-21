@@ -208,7 +208,7 @@ namespace Private {
    * The number of bytes in each memory unit.
    */
   export const MEMORY_UNIT_LIMITS: {
-    readonly [U in MemoryUsage.MemoryUnit]: number
+    readonly [U in MemoryUsage.MemoryUnit]: number;
   } = {
     B: 1,
     KB: 1024,

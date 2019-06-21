@@ -371,9 +371,7 @@ export class DirListing extends Widget {
         names.push(item.name);
       }
     });
-    let message = `Are you sure you want to permanently delete the ${
-      names.length
-    } files/folders selected?`;
+    let message = `Are you sure you want to permanently delete the ${names.length} files/folders selected?`;
     if (names.length === 1) {
       message = `Are you sure you want to permanently delete: ${names[0]}?`;
     }
