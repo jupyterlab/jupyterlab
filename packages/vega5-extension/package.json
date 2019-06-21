@@ -28,6 +28,7 @@
   },
   "scripts": {
     "build": "tsc -b && webpack",
+    "build:webpack": "webpack",
     "clean": "rimraf lib",
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "npm run build",
