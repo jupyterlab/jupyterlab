@@ -122,7 +122,7 @@ export namespace ITerminal {
     shutdownOnClose: false,
     cursorBlink: true,
     initialCommand: '',
-    screenReaderMode: true,
+    screenReaderMode: false, // False by default, can cause scrollbar rendering issues.
     pasteWithCtrlV: true
   };
 
