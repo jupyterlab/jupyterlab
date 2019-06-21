@@ -278,14 +278,6 @@ export namespace Kernel {
       KernelMessage.IExecuteReplyMsg
     >;
 
-    requestDebug(
-      content: KernelMessage.IDebugRequest,
-      disposeOnDone?: boolean
-    ): Kernel.IControlFuture<
-      KernelMessage.IDebugRequestMsg,
-      KernelMessage.IDebugReplyMsg
-    >;
-
     /**
      * Send an `is_complete_request` message.
      *

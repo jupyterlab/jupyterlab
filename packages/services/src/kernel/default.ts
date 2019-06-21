@@ -596,30 +596,6 @@ export class DefaultKernel implements Kernel.IKernel {
     >;
   }
 
-  requestDebug(
-    content: KernelMessage.IDebugRequest,
-    disposeOnDone: boolean = true
-  ): Kernel.IControlFuture<
-    KernelMessage.IDebugRequestMsg,
-    KernelMessage.IDebugReplyMsg
-  > {
-    let msg = KernelMessage.createMessage({
-      msgType: 'debug_request',
-      channel: 'control',
-      username: this._username,
-      session: this._clientId,
-      content
-    });
-    return this.sendControlMessage(
-      msg,
-      true,
-      disposeOnDone
-    ) as Kernel.IControlFuture<
-      KernelMessage.IDebugRequestMsg,
-      KernelMessage.IDebugReplyMsg
-    >;
-  }
-
   /**
    * Send an `is_complete_request` message.
    *

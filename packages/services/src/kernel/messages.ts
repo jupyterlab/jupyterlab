@@ -108,13 +108,6 @@ export namespace KernelMessage {
   export function createMessage<T extends IUpdateDisplayDataMsg>(
     options: IOptions<T>
   ): T;
-  export function createMessage<T extends IDebugRequestMsg>(
-    options: IOptions<T>
-  ): T;
-
-  export function createMessage<T extends IDebugReplyMsg>(
-    options: IOptions<T>
-  ): T;
 
   export function createMessage<T extends Message>(options: IOptions<T>): T {
     return {
@@ -163,7 +156,7 @@ export namespace KernelMessage {
   /**
    * Control message types.
    */
-  export type ControlMessageType = 'debug_request' | 'debug_reply';
+  export type ControlMessageType = 'never';
 
   /**
    * IOPub message types.
@@ -293,7 +286,14 @@ export namespace KernelMessage {
     channel: 'control';
   }
 
+  /**
+   * A message type for shell or control messages.
+   *
+   * #### Notes
+   * This convenience is so we can use it as a generic type constraint.
+   */
   export type IShellControlMessage = IShellMessage | IControlMessage;
+
   /**
    * A kernel message on the `'iopub'` channel.
    */
@@ -340,9 +340,7 @@ export namespace KernelMessage {
     | IIsCompleteRequestMsg
     | IStatusMsg
     | IStreamMsg
-    | IUpdateDisplayDataMsg
-    | IDebugRequestMsg
-    | IDebugReplyMsg;
+    | IUpdateDisplayDataMsg;
 
   //////////////////////////////////////////////////
   // IOPub Messages
@@ -980,55 +978,6 @@ export namespace KernelMessage {
    */
   export function isExecuteReplyMsg(msg: IMessage): msg is IExecuteReplyMsg {
     return msg.header.msg_type === 'execute_reply';
-  }
-
-  /**
-   * Debug message types.
-   */
-  export type DebugMessageType = 'request' | 'response' | 'event';
-
-  /**
-   * Base interface for debug protocol message.
-   */
-  export interface IDebugProtocolMsg<
-    T extends DebugMessageType = DebugMessageType
-  > {
-    seq: number;
-    type: T;
-  }
-
-  /**
-   * The content of a `'debug_request'` message.
-   */
-  export interface IDebugRequest extends IDebugProtocolMsg<'request'> {
-    command: string;
-    arguments?: any;
-  }
-
-  /**
-   * A `'debug_request'` message on the `'control'` channel.
-   */
-  export interface IDebugRequestMsg extends IControlMessage<'debug_request'> {
-    content: IDebugRequest;
-  }
-
-  /**
-   * The content of a `'debug_reply'` message.
-   */
-  export interface IDebugResponse extends IDebugProtocolMsg<'response'> {
-    request_seq: number;
-    success: boolean;
-    command: string;
-    message?: string;
-    body?: any;
-  }
-
-  /**
-   * A `'debug_reply'` message on the `'control'` channel.
-   */
-  export interface IDebugReplyMsg extends IControlMessage<'debug_reply'> {
-    parent_header: IHeader<'debug_request'>;
-    content: IDebugResponse;
   }
 
   /**
