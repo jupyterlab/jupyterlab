@@ -11,6 +11,6 @@ export const baseText: NestedCSSProperties = {
 };
 
 export const textItem = style(baseText, {
-  lineHeight: '26px',
+  lineHeight: '24px',
   color: vars.textColor
 });
