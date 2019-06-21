@@ -97,8 +97,6 @@ export namespace ITerminal {
 
     /**
      * Whether to enable screen reader support.
-     *
-     * Set to false if you run into performance problems from DOM overhead
      */
     screenReaderMode: boolean;
 
@@ -122,7 +120,7 @@ export namespace ITerminal {
     shutdownOnClose: false,
     cursorBlink: true,
     initialCommand: '',
-    screenReaderMode: true,
+    screenReaderMode: false, // False by default, can cause scrollbar mouse interaction issues.
     pasteWithCtrlV: true
   };
 
