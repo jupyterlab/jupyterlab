@@ -127,8 +127,8 @@ export class FileBrowser extends Widget {
    *
    * @param name - The name of the item to select.
    */
-  selectItemByName(name: string) {
-    this._listing.selectItemByName(name);
+  async selectItemByName(name: string) {
+    await this._listing.selectItemByName(name);
   }
 
   clearSelectedItems() {

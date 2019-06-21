@@ -461,7 +461,7 @@ function addCommands(
       const parts = path.split('/');
       const name = parts[parts.length - 1];
       if (name) {
-        browserForPath.selectItemByName(name);
+        await browserForPath.selectItemByName(name);
       }
 
       return commands.execute(CommandIDs.showBrowser, { path });

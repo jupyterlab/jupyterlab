@@ -572,21 +572,21 @@ export class DirListing extends Widget {
    *
    * @returns A promise that resolves when the name is selected.
    */
-  selectItemByName(name: string): Promise<void> {
+  async selectItemByName(name: string): Promise<void> {
     // Make sure the file is available.
-    return this.model.refresh().then(() => {
-      if (this.isDisposed) {
-        throw new Error('File browser is disposed.');
-      }
-      let items = this._sortedItems;
-      let index = ArrayExt.findFirstIndex(items, value => value.name === name);
-      if (index === -1) {
-        throw new Error('Item does not exist.');
-      }
-      this._selectItem(index, false);
-      MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
-      ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
-    });
+    await this.model.refresh();
+
+    if (this.isDisposed) {
+      throw new Error('File browser is disposed.');
+    }
+    let items = this._sortedItems;
+    let index = ArrayExt.findFirstIndex(items, value => value.name === name);
+    if (index === -1) {
+      throw new Error('Item does not exist.');
+    }
+    this._selectItem(index, false);
+    MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
+    ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
   }
 
   /**
