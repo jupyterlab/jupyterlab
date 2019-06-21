@@ -51,7 +51,7 @@ function NotebookTrustComponent(
   props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> {
   const source = cellTrust(props)[1];
-  return <IconItem source={source} offset={{ x: 0, y: 2 }} />;
+  return <IconItem source={source} />;
 }
 
 /**

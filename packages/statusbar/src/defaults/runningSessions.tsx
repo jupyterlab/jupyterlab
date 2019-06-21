@@ -34,11 +34,11 @@ function RunningSessionsComponent(
     <GroupItem spacing={HALF_SPACING} onClick={props.handleClick}>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
-        <IconItem source={'jp-StatusItem-terminal'} offset={{ x: 1, y: 3 }} />
+        <IconItem source={'jp-StatusItem-terminal'} />
       </GroupItem>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.kernels} />
-        <IconItem source={'jp-StatusItem-kernel'} offset={{ x: 0, y: 2 }} />
+        <IconItem source={'jp-StatusItem-kernel'} />
       </GroupItem>
     </GroupItem>
   );
