@@ -108,25 +108,13 @@ function activate(
     });
   }
 
-  // The cached terminal options from the setting editor.
-  let options: Partial<ITerminal.IOptions> = {};
-
-  /**
-   * Update the cached option values.
-   */
-  function updateOptions(settings: ISettingRegistry.ISettings): void {
-    // Update the cached options by doing a shallow copy of key/values.
-    // This is needed because options is passed and used in addCommands and needs
-    // to reflect the current cached values.
-    Object.keys(settings.composite).forEach((key: keyof ITerminal.IOptions) => {
-      (options as any)[key] = settings.composite[key];
-    });
-  }
-
   /**
    * Update terminal
    */
-  function updateTerminal(widget: MainAreaWidget<ITerminal.ITerminal>): void {
+  function updateTerminal(
+    widget: MainAreaWidget<ITerminal.ITerminal>,
+    options: Partial<ITerminal.IOptions>
+  ): Promise<void> {
     const terminal = widget.content;
     if (!terminal) {
       return;
@@ -139,19 +127,18 @@ function activate(
   /**
    * Update the settings of the current tracker instances.
    */
-  function updateTracker(): void {
-    tracker.forEach(widget => updateTerminal(widget));
+  function updateTracker(settings: ISettingRegistry.ISettings): void {
+    const options: Partial<ITerminal.IOptions> = settings.composite;
+    tracker.forEach(widget => updateTerminal(widget, options));
   }
 
   // Fetch the initial state of the settings.
   settingRegistry
     .load(plugin.id)
     .then(settings => {
-      updateOptions(settings);
-      updateTracker();
+      updateTracker(settings);
       settings.changed.connect(() => {
-        updateOptions(settings);
-        updateTracker();
+        updateTracker(settings);
       });
     })
     .catch(Private.showErrorMessage);
@@ -168,7 +155,7 @@ function activate(
     });
   });
 
-  addCommands(app, tracker, settingRegistry, options);
+  addCommands(app, tracker, settingRegistry);
 
   if (mainMenu) {
     // Add "Terminal Theme" menu below "JupyterLab Themes" menu.
@@ -263,10 +250,12 @@ function activate(
 export function addCommands(
   app: JupyterFrontEnd,
   tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
-  settingRegistry: ISettingRegistry,
-  options: Partial<ITerminal.IOptions>
+  settingRegistry: ISettingRegistry
 ) {
   const { commands, serviceManager } = app;
+  async function getOptions(): Promise<Partial<ITerminal.IOptions>> {
+    return (await settingRegistry.load(plugin.id)).composite;
+  }
 
   // Add terminal commands.
   commands.addCommand(CommandIDs.createNew, {
@@ -290,7 +279,7 @@ export function addCommands(
             .catch(() => serviceManager.terminals.startNew())
         : serviceManager.terminals.startNew());
 
-      const term = new Terminal(session, options);
+      const term = new Terminal(session, await getOptions());
 
       term.title.icon = TERMINAL_ICON_CLASS;
       term.title.label = '...';
@@ -344,7 +333,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.increaseFont, {
     label: 'Increase Terminal Font Size',
     execute: async () => {
-      let { fontSize } = options;
+      let { fontSize } = await getOptions();
       if (fontSize < 72) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
@@ -358,7 +347,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.decreaseFont, {
     label: 'Decrease Terminal Font Size',
     execute: async () => {
-      let { fontSize } = options;
+      let { fontSize } = await getOptions();
       if (fontSize > 9) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);
