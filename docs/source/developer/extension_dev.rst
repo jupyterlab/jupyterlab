@@ -519,6 +519,11 @@ This would look something like the following in a ``Widget`` subclass:
 .. |dependencies| image:: dependency-graph.svg
 
 
+Using React
+^^^^^^^^^^^
+We also provide support for using :ref:`react` in your JupyterLab
+extensions, as well as in the core codebase.
+
 
 .. _ext-author-companion-packages:
 
