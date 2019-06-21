@@ -52,7 +52,7 @@
       "default": "inherit"
     },
     "screenReaderMode": {
-      "title": "Screen Reader Mod3",
+      "title": "Screen Reader Mode",
       "description": "Whether add accessibility elements for use with screen readers.",
       "type": "boolean",
       "default": false
