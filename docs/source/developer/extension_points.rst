@@ -7,8 +7,8 @@ Most of the component parts of JupyterLab are designed to be extensible,
 and they provide public APIs via that can be requested in extensions via tokens.
 A list of tokens that extension authors can request is documented in :ref:`tokens`.
 
-This is not an exhaustive account of how to extend the application components,
-it is instead intended to be a guide for some of the most common extension points.
+This is intended to be a guide for some of JupyterLab's most commonly-used extension points.
+However, it is not an exhaustive account of how to extend the application components,
 
 
 Commands
@@ -16,7 +16,7 @@ Commands
 
 Perhaps the most common way to add functionality to JupyterLab is via commands.
 These are lightweight objects that include a function to execute combined with
-additional such as how they are labeled and when they are enabled.
+additional metadata, including how they are labeled and when they are to be enabled.
 The application has a single command registry, keyed by string command IDs,
 to which you can add your custom commands.
 
@@ -37,13 +37,12 @@ Here is a sample block of code that adds a command to the application (given by 
       isToggled: () => toggled,
       iconClass: 'some-css-icon-class',
       execute: () => {
-        console.log(`Activated ${commandID}`);
+        console.log(`Executed ${commandID}`);
         toggled = !toggled;
     });
 
 This example adds a new command, which, when triggered, calls the ``execute`` function.
-``isEnabled`` indicates whether the command is enabled, and is determined whether
-renderings of it are greyed out.
+``isEnabled`` indicates whether the command is enabled, and determines whether renderings of it are greyed out.
 ``isToggled`` indicates whether to render a check mark next to the command.
 ``isVisible`` indicates whether to render the command at all.
 ``iconClass`` specifies a CSS class which can be used to display an icon next to renderings of the command.
@@ -59,8 +58,9 @@ There are several more options which can be passed into the command registry whe
 adding new commands. These are documented 
 `here <http://phosphorjs.github.io/phosphor/api/commands/interfaces/commandregistry.icommandoptions.html>`__.
 
-Once a command has been added to the application, it can then be added
-to various places in the application user interface.
+After a command has been added to the application command registry
+you can add them to various places in the application user interface,
+where they will be rendered using the metadata you provided.
 
 Command Palette
 ~~~~~~~~~~~~~~~
@@ -77,8 +77,8 @@ Here is an example showing how to add a command to the command palette (given by
       args: {}
     });
 
-The command ID is the same ID as you used when registering the command.
-You must also provide a ``category``, which determines the subcategory of
+The command ID is the same ID that you used when registering the command.
+You must also provide a ``category``, which determines the subheading of
 the command palette in which to render the command.
 It can be a preexisting category (e.g., ``'notebook'``), or a new one of your own choosing.
 
@@ -131,7 +131,7 @@ rather than creating a separate menu for your extension.
 Because the top-level JupyterLab menus are shared among many extensions,
 the API for adding items is slightly different.
 In this case, you provide a list of commands and a rank,
-and these commands will be displayed together in a separate group with an existing menu.
+and these commands will be displayed together in a separate group within an existing menu.
 
 For instance, to add a command group with ``firstCommandID`` and ``secondCommandID``
 to the File menu, you would do the following:
@@ -158,7 +158,7 @@ For instance, we anticipate that many activities may want to provide a command
 to close themselves and perform some cleanup operation (like closing a console and shutting down its kernel).
 Rather than having a proliferation of similar menu items for this common operation
 of "closing-and-cleanup", we provide a single command that can adapt itself to this use case,
-which we term "semantic menu items".
+which we term a "semantic menu item".
 For this example, it is the File Menu ``closeAndCleaners`` set.
 
 Here is an example of using the ``closeAndCleaners`` semantic menu item:
@@ -180,6 +180,9 @@ item to determine whether to delegate the menu command to your activity,
 ``name`` is a name given to your activity in the menu label,
 ``action`` is a verb given to the cleanup operation in the menu label,
 and ``closeAndCleanup`` is the actual function that performs the cleanup operation.
+So if the current application activity is held in the ``tracker``,
+then the menu item will show ``Shutdown My Activity``, and delegate to the
+``closeAndCleanup`` function that was provided.
 
 More examples for how to register semantic menu items are found throughout the JupyterLab code base.
 The available semantic menu items are:
@@ -350,9 +353,3 @@ Widget tracker tokens are provided for many activities in JupyterLab, including
 notebooks, consoles, text files, mime documents, and terminals.
 If you are adding your own activities to JupyterLab, you might consider providing
 a ``WidgetTracker`` token of your own, so that other extensions can make use of it.
-
-
-RenderMime Registry and Documents
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
