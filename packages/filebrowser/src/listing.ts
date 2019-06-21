@@ -879,7 +879,7 @@ export class DirListing extends Widget {
       let altered = event.metaKey || event.shiftKey || event.ctrlKey;
       // See if we need to clear the other selection.
       if (!altered && event.button === 0) {
-        this._selection = Object.create(null);
+        this.clearSelectedItems();
         this._selection[this._softSelection] = true;
         this.update();
       }
@@ -1274,7 +1274,7 @@ export class DirListing extends Widget {
       // Default to selecting the only the item.
     } else {
       // Select only the given item.
-      this._selection = Object.create(null);
+      this.clearSelectedItems();
       this._selection[name] = true;
     }
     this.update();
@@ -1431,7 +1431,7 @@ export class DirListing extends Widget {
   private _onModelRefreshed(): void {
     // Update the selection.
     let existing = Object.keys(this._selection);
-    this._selection = Object.create(null);
+    this.clearSelectedItems();
     each(this._model.items(), item => {
       let name = item.name;
       if (existing.indexOf(name) !== -1) {
@@ -1451,7 +1451,7 @@ export class DirListing extends Widget {
    */
   private _onPathChanged(): void {
     // Reset the selection.
-    this._selection = Object.create(null);
+    this.clearSelectedItems();
     // Update the sorted items.
     this.sort(this.sortState);
   }
