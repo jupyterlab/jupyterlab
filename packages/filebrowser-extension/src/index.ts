@@ -455,7 +455,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.openPath, {
-    label: args => (args.path ? `Open ${args.path}` : 'Open From Path…'),
+    label: args => (args.path ? `Open ${args.path}` : 'Open from Path…'),
     caption: args => (args.path ? `Open ${args.path}` : 'Open from path'),
     execute: async ({ path }: { path?: string }) => {
       if (!path) {
