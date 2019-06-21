@@ -144,7 +144,7 @@ export class OutputArea extends Widget {
   /**
    * The kernel future associated with the output area.
    */
-  get future(): Kernel.IFuture<
+  get future(): Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
   > | null {
@@ -152,7 +152,7 @@ export class OutputArea extends Widget {
   }
 
   set future(
-    value: Kernel.IFuture<
+    value: Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
     > | null
@@ -284,7 +284,7 @@ export class OutputArea extends Widget {
    */
   protected onInputRequest(
     msg: KernelMessage.IInputRequestMsg,
-    future: Kernel.IFuture
+    future: Kernel.IShellFuture
   ): void {
     // Add an output widget to the end.
     let factory = this.contentFactory;
@@ -493,7 +493,7 @@ export class OutputArea extends Widget {
   };
 
   private _minHeightTimeout: number = null;
-  private _future: Kernel.IFuture<
+  private _future: Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
   > | null = null;
@@ -506,7 +506,7 @@ export class SimplifiedOutputArea extends OutputArea {
    */
   protected onInputRequest(
     msg: KernelMessage.IInputRequestMsg,
-    future: Kernel.IFuture
+    future: Kernel.IShellFuture
   ): void {
     return;
   }
@@ -755,7 +755,7 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
-  private _future: Kernel.IFuture = null;
+  private _future: Kernel.IShellFuture = null;
   private _input: HTMLInputElement = null;
   private _value: string;
   private _promise = new PromiseDelegate<void>();
@@ -779,7 +779,7 @@ export namespace Stdin {
     /**
      * The kernel future associated with the request.
      */
-    future: Kernel.IFuture;
+    future: Kernel.IShellFuture;
   }
 }
 

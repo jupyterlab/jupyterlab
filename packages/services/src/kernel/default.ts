@@ -19,7 +19,11 @@ import { Kernel } from './kernel';
 
 import { KernelMessage } from './messages';
 
-import { KernelFutureHandler } from './future';
+import {
+  KernelFutureHandler,
+  KernelShellFutureHandler,
+  KernelControlFutureHandler
+} from './future';
 
 import * as serialize from './serialize';
 
@@ -263,7 +267,60 @@ export class DefaultKernel implements Kernel.IKernel {
     msg: KernelMessage.IShellMessage<T>,
     expectReply = false,
     disposeOnDone = true
-  ): Kernel.IFuture<KernelMessage.IShellMessage<T>> {
+  ): Kernel.IShellFuture<KernelMessage.IShellMessage<T>> {
+    return this._sendKernelShellControl(
+      KernelShellFutureHandler,
+      msg,
+      expectReply,
+      disposeOnDone
+    ) as Kernel.IShellFuture<KernelMessage.IShellMessage<T>>;
+  }
+
+  /**
+   * Send a control message to the kernel.
+   *
+   * #### Notes
+   * Send a message to the kernel's control channel, yielding a future object
+   * for accepting replies.
+   *
+   * If `expectReply` is given and `true`, the future is disposed when both a
+   * control reply and an idle status message are received. If `expectReply`
+   * is not given or is `false`, the future is resolved when an idle status
+   * message is received.
+   * If `disposeOnDone` is not given or is `true`, the Future is disposed at this point.
+   * If `disposeOnDone` is given and `false`, it is up to the caller to dispose of the Future.
+   *
+   * All replies are validated as valid kernel messages.
+   *
+   * If the kernel status is `dead`, this will throw an error.
+   */
+  sendControlMessage<T extends KernelMessage.ControlMessageType>(
+    msg: KernelMessage.IControlMessage<T>,
+    expectReply = false,
+    disposeOnDone = true
+  ): Kernel.IControlFuture<KernelMessage.IControlMessage<T>> {
+    return this._sendKernelShellControl(
+      KernelControlFutureHandler,
+      msg,
+      expectReply,
+      disposeOnDone
+    ) as Kernel.IControlFuture<KernelMessage.IControlMessage<T>>;
+  }
+
+  private _sendKernelShellControl<
+    REQUEST extends KernelMessage.IShellControlMessage,
+    REPLY extends KernelMessage.IShellControlMessage,
+    KFH extends new (...params: any[]) => KernelFutureHandler<REQUEST, REPLY>,
+    T extends KernelMessage.IMessage
+  >(
+    ctor: KFH,
+    msg: T,
+    expectReply = false,
+    disposeOnDone = true
+  ): Kernel.IFuture<
+    KernelMessage.IShellControlMessage,
+    KernelMessage.IShellControlMessage
+  > {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
@@ -273,7 +330,7 @@ export class DefaultKernel implements Kernel.IKernel {
       this._ws.send(serialize.serialize(msg));
     }
     this._anyMessage.emit({ msg, direction: 'send' });
-    let future = new KernelFutureHandler(
+    let future = new ctor(
       () => {
         let msgId = msg.header.msg_id;
         this._futures.delete(msgId);
@@ -513,7 +570,7 @@ export class DefaultKernel implements Kernel.IKernel {
     content: KernelMessage.IExecuteRequestMsg['content'],
     disposeOnDone: boolean = true,
     metadata?: JSONObject
-  ): Kernel.IFuture<
+  ): Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
   > {
@@ -531,7 +588,11 @@ export class DefaultKernel implements Kernel.IKernel {
       session: this._clientId,
       content: { ...defaults, ...content }
     });
-    return this.sendShellMessage(msg, true, disposeOnDone) as Kernel.IFuture<
+    return this.sendShellMessage(
+      msg,
+      true,
+      disposeOnDone
+    ) as Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
     >;
@@ -899,7 +960,13 @@ export class DefaultKernel implements Kernel.IKernel {
     });
     this._msgChain = Promise.resolve();
     this._kernelSession = '';
-    this._futures = new Map<string, KernelFutureHandler>();
+    this._futures = new Map<
+      string,
+      KernelFutureHandler<
+        KernelMessage.IShellControlMessage,
+        KernelMessage.IShellControlMessage
+      >
+    >();
     this._comms = new Map<string, Kernel.IComm>();
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
@@ -1232,7 +1299,13 @@ export class DefaultKernel implements Kernel.IKernel {
   private _isReady = false;
   private _readyPromise = new PromiseDelegate<void>();
   private _initialized = false;
-  private _futures = new Map<string, KernelFutureHandler>();
+  private _futures = new Map<
+    string,
+    KernelFutureHandler<
+      KernelMessage.IShellControlMessage,
+      KernelMessage.IShellControlMessage
+    >
+  >();
   private _comms = new Map<string, Kernel.IComm>();
   private _targetRegistry: {
     [key: string]: (

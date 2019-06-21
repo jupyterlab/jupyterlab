@@ -154,6 +154,11 @@ export namespace KernelMessage {
     | 'shutdown_request';
 
   /**
+   * Control message types.
+   */
+  export type ControlMessageType = never;
+
+  /**
    * IOPub message types.
    */
   export type IOPubMessageType =
@@ -180,12 +185,13 @@ export namespace KernelMessage {
   export type MessageType =
     | IOPubMessageType
     | ShellMessageType
+    | ControlMessageType
     | StdinMessageType;
 
   /**
    * The valid Jupyter channel names in a message to a frontend.
    */
-  export type Channel = 'shell' | 'iopub' | 'stdin';
+  export type Channel = 'shell' | 'control' | 'iopub' | 'stdin';
 
   /**
    * Kernel message header content.
@@ -270,6 +276,23 @@ export namespace KernelMessage {
     extends IMessage<T> {
     channel: 'shell';
   }
+
+  /**
+   * A kernel message on the `'control'` channel.
+   */
+  export interface IControlMessage<
+    T extends ControlMessageType = ControlMessageType
+  > extends IMessage<T> {
+    channel: 'control';
+  }
+
+  /**
+   * A message type for shell or control messages.
+   *
+   * #### Notes
+   * This convenience is so we can use it as a generic type constraint.
+   */
+  export type IShellControlMessage = IShellMessage | IControlMessage;
 
   /**
    * A kernel message on the `'iopub'` channel.
