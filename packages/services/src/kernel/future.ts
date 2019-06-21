@@ -189,6 +189,9 @@ export abstract class KernelFutureHandler<
     super.dispose();
   }
 
+  /**
+   * Handle an incoming kernel message.
+   */
   async handleMsg(msg: KernelMessage.IMessage): Promise<void> {
     switch (msg.channel) {
       case 'control':
