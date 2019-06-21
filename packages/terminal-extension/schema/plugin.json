@@ -53,7 +53,7 @@
     },
     "screenReaderMode": {
       "title": "Screen Reader Mode",
-      "description": "Whether add accessibility elements for use with screen readers.",
+      "description": "Add accessibility elements for use with screen readers.",
       "type": "boolean",
       "default": false
     },
@@ -65,13 +65,13 @@
     },
     "shutdownOnClose": {
       "title": "Shut down on close",
-      "description": "Whether to shut down or not the session when closing the terminal.",
+      "description": "Shut down the session when closing the terminal.",
       "type": "boolean",
       "default": false
     },
     "pasteWithCtrlV": {
       "title": "Paste with Ctrl+V",
-      "description": "Whether to enable pasting with Ctrl+V.  This can be disabled to use Ctrl+V in the vi editor, for instance.  This setting has no effect on macOS, where Cmd+V is available",
+      "description": "Enable pasting with Ctrl+V.  This can be disabled to use Ctrl+V in the vi editor, for instance.  This setting has no effect on macOS, where Cmd+V is available",
       "type": "boolean",
       "default": true
     }
