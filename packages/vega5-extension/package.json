@@ -27,7 +27,7 @@
     "lib": "lib/"
   },
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc -b && webpack",
     "clean": "rimraf lib",
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "npm run build",
@@ -45,7 +45,8 @@
     "@types/webpack-env": "^1.13.9",
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
-    "typescript": "~3.5.1"
+    "typescript": "~3.5.1",
+    "webpack": "^4.32.2"
   },
   "publishConfig": {
     "access": "public"
