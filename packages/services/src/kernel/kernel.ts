@@ -748,24 +748,9 @@ export namespace Kernel {
    * responses that may come from the kernel.
    */
   export interface IFuture<
-    REQUEST extends
-      | KernelMessage.IShellMessage
-      | KernelMessage.IControlMessage = KernelMessage.IShellMessage,
-    REPLY extends
-      | KernelMessage.IShellMessage
-      | KernelMessage.IControlMessage = KernelMessage.IShellMessage
+    REQUEST extends KernelMessage.IShellMessage | KernelMessage.IControlMessage,
+    REPLY extends KernelMessage.IShellMessage | KernelMessage.IControlMessage
   > extends IDisposable {
-    /**
-     * The stdin handler for the kernel future.
-     * @deprecated - This handler properly belongs in `IShellFuture` and will be
-     * removed in a future version of `@jupyterlab/services`.
-     *
-     * #### Notes
-     * If the handler returns a promise, all kernel message processing pauses
-     * until the promise is resolved.
-     */
-    onStdin: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void>;
-
     /**
      * The original outgoing message.
      */
@@ -804,6 +789,15 @@ export namespace Kernel {
     onIOPub: (msg: KernelMessage.IIOPubMessage) => void | PromiseLike<void>;
 
     /**
+     * The stdin handler for the kernel future.
+     *
+     * #### Notes
+     * If the handler returns a promise, all kernel message processing pauses
+     * until the promise is resolved.
+     */
+    onStdin: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void>;
+
+    /**
      * Register hook for IOPub messages.
      *
      * @param hook - The callback invoked for an IOPub message.
@@ -837,26 +831,17 @@ export namespace Kernel {
     removeMessageHook(
       hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>
     ): void;
-  }
-
-  export interface IShellFuture<
-    REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
-    REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
-  > extends IFuture<REQUEST, REPLY> {
-    /**
-     * The stdin handler for the kernel future.
-     *
-     * #### Notes
-     * If the handler returns a promise, all kernel message processing pauses
-     * until the promise is resolved.
-     */
-    onStdin: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void>;
 
     /**
      * Send an `input_reply` message.
      */
     sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
   }
+
+  export interface IShellFuture<
+    REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
+    REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
+  > extends IFuture<REQUEST, REPLY> {}
 
   export interface IControlFuture<
     REQUEST extends KernelMessage.IControlMessage = KernelMessage.IControlMessage,

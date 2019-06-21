@@ -308,7 +308,9 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   private _sendKernelShellControl<
-    KFH extends new (...params: any[]) => KernelFutureHandler,
+    REQUEST extends KernelMessage.IShellControlMessage,
+    REPLY extends KernelMessage.IShellControlMessage,
+    KFH extends new (...params: any[]) => KernelFutureHandler<REQUEST, REPLY>,
     T extends KernelMessage.IMessage
   >(
     ctor: KFH,
@@ -958,7 +960,13 @@ export class DefaultKernel implements Kernel.IKernel {
     });
     this._msgChain = Promise.resolve();
     this._kernelSession = '';
-    this._futures = new Map<string, KernelFutureHandler>();
+    this._futures = new Map<
+      string,
+      KernelFutureHandler<
+        KernelMessage.IShellControlMessage,
+        KernelMessage.IShellControlMessage
+      >
+    >();
     this._comms = new Map<string, Kernel.IComm>();
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
@@ -1291,7 +1299,13 @@ export class DefaultKernel implements Kernel.IKernel {
   private _isReady = false;
   private _readyPromise = new PromiseDelegate<void>();
   private _initialized = false;
-  private _futures = new Map<string, KernelFutureHandler>();
+  private _futures = new Map<
+    string,
+    KernelFutureHandler<
+      KernelMessage.IShellControlMessage,
+      KernelMessage.IShellControlMessage
+    >
+  >();
   private _comms = new Map<string, Kernel.IComm>();
   private _targetRegistry: {
     [key: string]: (

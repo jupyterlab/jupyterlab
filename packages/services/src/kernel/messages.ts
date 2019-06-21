@@ -156,7 +156,7 @@ export namespace KernelMessage {
   /**
    * Control message types.
    */
-  export type ControlMessageType = 'never';
+  export type ControlMessageType = never;
 
   /**
    * IOPub message types.

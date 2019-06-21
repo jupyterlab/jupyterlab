@@ -7,7 +7,7 @@ import { Kernel, KernelMessage } from '@jupyterlab/services';
 
 import { KernelTester } from '../utils';
 
-describe('Kernel.IFuture', () => {
+describe('Kernel.IShellFuture', () => {
   let tester: KernelTester;
 
   afterEach(() => {
@@ -37,7 +37,7 @@ describe('Kernel.IFuture', () => {
       };
       const calls: string[] = [];
       tester = new KernelTester();
-      let future: Kernel.IFuture;
+      let future: Kernel.IShellFuture;
       let kernel: Kernel.IKernel;
 
       tester.onMessage(message => {
@@ -130,7 +130,7 @@ describe('Kernel.IFuture', () => {
       };
       const calls: string[] = [];
       tester = new KernelTester();
-      let future: Kernel.IFuture;
+      let future: Kernel.IShellFuture;
       let kernel: Kernel.IKernel;
 
       tester.onMessage(message => {
@@ -203,7 +203,7 @@ describe('Kernel.IFuture', () => {
       };
       const calls: string[] = [];
       tester = new KernelTester();
-      let future: Kernel.IFuture;
+      let future: Kernel.IShellFuture;
 
       tester.onMessage(message => {
         // send a reply
@@ -273,7 +273,7 @@ describe('Kernel.IFuture', () => {
       };
       const calls: string[] = [];
       tester = new KernelTester();
-      let future: Kernel.IFuture;
+      let future: Kernel.IShellFuture;
 
       const toDelete = (msg: KernelMessage.IIOPubMessage) => {
         calls.push('delete');

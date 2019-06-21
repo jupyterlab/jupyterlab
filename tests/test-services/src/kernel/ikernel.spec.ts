@@ -888,7 +888,7 @@ describe('Kernel.IKernel', () => {
         session: defaultKernel.clientId
       };
 
-      let future: Kernel.IFuture;
+      let future: Kernel.IShellFuture;
       const tester = new KernelTester();
 
       tester.onMessage(msg => {
@@ -1009,7 +1009,7 @@ describe('Kernel.IKernel', () => {
         stop_on_error: false
       };
       const calls: string[] = [];
-      let future: Kernel.IFuture;
+      let future: Kernel.IShellFuture;
 
       let kernel: Kernel.IKernel;
 
@@ -1097,7 +1097,7 @@ describe('Kernel.IKernel', () => {
       const calls: string[] = [];
 
       const tester = new KernelTester();
-      let future: Kernel.IFuture;
+      let future: Kernel.IShellFuture;
       let kernel: Kernel.IKernel;
 
       tester.onMessage(message => {
@@ -1173,7 +1173,7 @@ describe('Kernel.IKernel', () => {
       };
       const calls: string[] = [];
       const tester = new KernelTester();
-      let future: Kernel.IFuture;
+      let future: Kernel.IShellFuture;
       let kernel: Kernel.IKernel;
 
       tester.onMessage(message => {
@@ -1246,7 +1246,7 @@ describe('Kernel.IKernel', () => {
       };
       const calls: string[] = [];
       const tester = new KernelTester();
-      let future: Kernel.IFuture;
+      let future: Kernel.IShellFuture;
       let kernel: Kernel.IKernel;
 
       tester.onMessage(message => {
