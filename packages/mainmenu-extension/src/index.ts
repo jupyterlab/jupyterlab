@@ -18,8 +18,6 @@ import { ICommandPalette, showDialog, Dialog } from '@jupyterlab/apputils';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
-import { IInspector } from '@jupyterlab/inspector';
-
 import {
   IMainMenu,
   IMenuExtender,
@@ -117,13 +115,12 @@ export namespace CommandIDs {
 const plugin: JupyterFrontEndPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
   requires: [ICommandPalette, IRouter],
-  optional: [IInspector, ILabShell],
+  optional: [ILabShell],
   provides: IMainMenu,
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
     router: IRouter,
-    inspector: IInspector | null,
     labShell: ILabShell | null
   ): IMainMenu => {
     const { commands } = app;
@@ -142,7 +139,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 
     // Create the application menus.
     createEditMenu(app, menu.editMenu);
-    createFileMenu(app, menu.fileMenu, router, inspector);
+    createFileMenu(app, menu.fileMenu, router);
     createKernelMenu(app, menu.kernelMenu);
     createRunMenu(app, menu.runMenu);
     createSettingsMenu(app, menu.settingsMenu);
@@ -292,8 +289,7 @@ export function createEditMenu(app: JupyterFrontEnd, menu: EditMenu): void {
 export function createFileMenu(
   app: JupyterFrontEnd,
   menu: FileMenu,
-  router: IRouter,
-  inspector: IInspector | null
+  router: IRouter
 ): void {
   const commands = menu.menu.commands;
 
@@ -413,8 +409,7 @@ export function createFileMenu(
 
   const newViewGroup = [
     { command: 'docmanager:clone' },
-    { command: CommandIDs.createConsole },
-    inspector ? { command: 'inspector:open' } : null
+    { command: CommandIDs.createConsole }
   ].filter(item => !!item);
 
   // Add the close group

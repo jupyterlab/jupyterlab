@@ -39,7 +39,6 @@
     "@jupyterlab/application": "^1.0.0-alpha.13",
     "@jupyterlab/apputils": "^1.0.0-alpha.13",
     "@jupyterlab/coreutils": "^3.0.0-alpha.13",
-    "@jupyterlab/inspector": "^1.0.0-alpha.13",
     "@jupyterlab/mainmenu": "^1.0.0-alpha.13",
     "@jupyterlab/services": "^4.0.0-alpha.13",
     "@phosphor/algorithm": "^1.1.3",

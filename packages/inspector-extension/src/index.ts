@@ -50,8 +50,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
   ): IInspector => {
     const { commands, shell } = app;
     const command = CommandIDs.open;
-    const label = 'Open Contextual Help';
-    const title = 'Contextual Help';
+    const label = 'Contextual Help';
     const namespace = 'inspector';
     const tracker = new WidgetTracker<MainAreaWidget<InspectorPanel>>({
       namespace
@@ -63,7 +62,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       if (!inspector || inspector.isDisposed) {
         inspector = new MainAreaWidget({ content: new InspectorPanel() });
         inspector.id = 'jp-inspector';
-        inspector.title.label = title;
+        inspector.title.label = label;
         void tracker.add(inspector);
         source = source && !source.isDisposed ? source : null;
         inspector.content.source = source;
@@ -83,7 +82,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         inspector.isDisposed ||
         !inspector.isAttached ||
         !inspector.isVisible,
-      label: args => (args.isLauncher ? title : label),
+      label,
       iconClass: args =>
         args.isLauncher ? 'jp-MaterialIcon jp-InspectorIcon' : '',
       execute: () => openInspector()
@@ -91,7 +90,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
 
     // Add command to UI where possible.
     if (palette) {
-      palette.addItem({ command, category: title });
+      palette.addItem({ command, category: label });
     }
     if (launcher) {
       launcher.add({ command, args: { isLauncher: true } });
