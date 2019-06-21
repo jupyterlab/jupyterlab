@@ -312,17 +312,18 @@ export class FileBrowserModel implements IDisposable {
    * @returns A promise which resolves when the file has begun
    *   downloading.
    */
-  download(path: string): Promise<void> {
-    return this.manager.services.contents.getDownloadUrl(path).then(url => {
-      let element = document.createElement('a');
-      document.body.appendChild(element);
-      element.setAttribute('href', url);
-      element.setAttribute('target', '_blank');
-      element.setAttribute('download', '');
-      element.click();
-      document.body.removeChild(element);
-      return void 0;
-    });
+  async download(path: string): Promise<void> {
+    const url = await this.manager.services.contents.getDownloadUrl(path);
+    let element = document.createElement('a');
+    document.body.appendChild(element);
+    element.setAttribute('href', url);
+    // Chrome doesn't get the right name automatically
+    const parts = path.split('/');
+    const name = parts[parts.length - 1];
+    element.setAttribute('download', name);
+    element.click();
+    document.body.removeChild(element);
+    return void 0;
   }
 
   /**
