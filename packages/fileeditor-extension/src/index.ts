@@ -7,7 +7,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
+import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 
 import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 
@@ -49,12 +49,12 @@ import { Menu } from '@phosphor/widgets';
 /**
  * The class name for the text editor icon from the default theme.
  */
-const EDITOR_ICON_CLASS = 'jp-TextEditorIcon';
+const EDITOR_ICON_CLASS = 'jp-MaterialIcon jp-TextEditorIcon';
 
 /**
  * The class name for the text editor icon from the default theme.
  */
-const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
+const MARKDOWN_ICON_CLASS = 'jp-MaterialIcon jp-MarkdownIcon';
 
 /**
  * The name of the factory that creates editor widgets.
@@ -204,7 +204,7 @@ function activate(
     }
   });
   const { commands, restored, shell } = app;
-  const tracker = new InstanceTracker<IDocumentWidget<FileEditor>>({
+  const tracker = new WidgetTracker<IDocumentWidget<FileEditor>>({
     namespace
   });
   const isEnabled = () =>
@@ -215,7 +215,7 @@ function activate(
 
   // Handle state restoration.
   if (restorer) {
-    restorer.restore(tracker, {
+    void restorer.restore(tracker, {
       command: 'docmanager:open',
       args: widget => ({ path: widget.context.path, factory: FACTORY }),
       name: widget => widget.context.path
@@ -273,7 +273,7 @@ function activate(
   factory.widgetCreated.connect((sender, widget) => {
     widget.title.icon = EDITOR_ICON_CLASS;
 
-    // Notify the instance tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
     });

@@ -34,6 +34,9 @@ let UNUSED: Dict<string[]> = {
   '@jupyterlab/ui-components': ['@blueprintjs/icons']
 };
 
+// Packages that are allowed to have differing versions
+let DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega', 'vega-embed'];
+
 let SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
   '@jupyterlab/application-extension': ['@jupyterlab/apputils'],
@@ -53,7 +56,6 @@ let SKIP_CSS: Dict<string[]> = {
   ],
   '@jupyterlab/filebrowser': ['@jupyterlab/statusbar'],
   '@jupyterlab/fileeditor': ['@jupyterlab/statusbar'],
-  '@jupyterlab/faq-extension': ['@jupyterlab/application'],
   '@jupyterlab/help-extension': ['@jupyterlab/application'],
   '@jupyterlab/shortcuts-extension': ['@jupyterlab/application'],
   '@jupyterlab/tabmanager-extension': ['@jupyterlab/application'],
@@ -310,7 +312,8 @@ export async function ensureIntegrity(): Promise<boolean> {
       missing: MISSING[name],
       unused,
       locals,
-      cssImports: cssImports[name]
+      cssImports: cssImports[name],
+      differentVersions: DIFFERENT_VERSIONS
     };
 
     if (name === '@jupyterlab/metapackage') {

@@ -1,9 +1,0 @@
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
-
-/* A status bar icon */
-.jp-StatusBarIcon {
-  background-image: url('./status-bar-icon.svg');
-}

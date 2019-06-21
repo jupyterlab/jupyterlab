@@ -9,7 +9,6 @@ button.jp-mod-styled {
   color: var(--jp-ui-font-color0);
   border: none;
   box-sizing: border-box;
-  text-transform: uppercase;
   text-align: center;
   line-height: 32px;
   height: 32px;

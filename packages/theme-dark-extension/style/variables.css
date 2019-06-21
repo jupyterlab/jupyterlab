@@ -90,7 +90,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   --jp-border-width: 1px;
   --jp-border-color0: var(--md-grey-700);
-  --jp-border-color1: var(--md-grey-800);
+  --jp-border-color1: var(--md-grey-700);
   --jp-border-color2: var(--md-grey-800);
   --jp-border-color3: var(--md-grey-900);
   --jp-border-radius: 2px;

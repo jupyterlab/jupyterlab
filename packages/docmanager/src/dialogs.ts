@@ -48,7 +48,7 @@ export function renameDialog(
     title: 'Rename File',
     body: new RenameHandler(oldPath),
     focusNodeSelector: 'input',
-    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'RENAME' })]
+    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Rename' })]
   }).then(result => {
     if (!result.value) {
       return;
@@ -98,7 +98,7 @@ export function shouldOverwrite(path: string): Promise<boolean> {
   let options = {
     title: 'Overwrite file?',
     body: `"${path}" already exists, overwrite?`,
-    buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'OVERWRITE' })]
+    buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Overwrite' })]
   };
   return showDialog(options).then(result => {
     return Promise.resolve(result.button.accept);
@@ -178,10 +178,10 @@ export function getOpenPath(contentsManager: any): Promise<string | undefined> {
   return showDialog({
     title: 'Open File',
     body: new OpenDirectWidget(),
-    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OPEN' })],
+    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Open' })],
     focusNodeSelector: 'input'
   }).then((result: any) => {
-    if (result.button.label === 'OPEN') {
+    if (result.button.label === 'Open') {
       return result.value;
     }
     return;

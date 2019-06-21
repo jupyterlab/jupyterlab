@@ -10,6 +10,7 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
 var DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
 var Visualizer = require('webpack-visualizer-plugin');
+var MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 var Build = require('@jupyterlab/buildutils').Build;
 var package_data = require('./package.json');
@@ -125,7 +126,13 @@ const plugins = [
     title: jlab.name || 'JupyterLab'
   }),
   new webpack.HashedModuleIdsPlugin(),
-  new JupyterFrontEndPlugin({})
+  new JupyterFrontEndPlugin({}),
+  new MiniCssExtractPlugin({
+    // Options similar to the same options in webpackOptions.output
+    // both options are optional
+    filename: '[name].css',
+    chunkFilename: '[id].css'
+  })
 ];
 
 if (process.argv.includes('--analyze')) {
@@ -145,12 +152,24 @@ module.exports = [
     },
     optimization: {
       splitChunks: {
-        chunks: 'all'
+        chunks: 'all',
+        // Put all CSS in one chunk, otherwise we get some out of order issues
+        cacheGroups: {
+          styles: {
+            name: 'styles',
+            test: /\.css$/,
+            chunks: 'all',
+            enforce: true
+          }
+        }
       }
     },
     module: {
       rules: [
-        { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+        {
+          test: /\.css$/,
+          use: [MiniCssExtractPlugin.loader, 'css-loader']
+        },
         { test: /\.md$/, use: 'raw-loader' },
         { test: /\.txt$/, use: 'raw-loader' },
         {

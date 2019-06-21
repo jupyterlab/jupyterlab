@@ -197,7 +197,7 @@ export class DocumentWidgetManager implements IDisposable {
     if (!factory) {
       return undefined;
     }
-    let newWidget = factory.clone(widget as IDocumentWidget, context);
+    let newWidget = factory.createNew(context, widget as IDocumentWidget);
     this._initializeWidget(newWidget, factory, context);
     return newWidget;
   }

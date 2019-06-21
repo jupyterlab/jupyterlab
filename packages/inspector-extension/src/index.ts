@@ -10,8 +10,8 @@ import {
 
 import {
   ICommandPalette,
-  InstanceTracker,
-  MainAreaWidget
+  MainAreaWidget,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import { IConsoleTracker } from '@jupyterlab/console';
@@ -53,7 +53,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
     const label = 'Open Interactive Help';
     const title = 'Interactive Help';
     const namespace = 'inspector';
-    const tracker = new InstanceTracker<MainAreaWidget<InspectorPanel>>({
+    const tracker = new WidgetTracker<MainAreaWidget<InspectorPanel>>({
       namespace
     });
 
@@ -99,11 +99,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
 
     // Handle state restoration.
     if (restorer) {
-      restorer.restore(tracker, {
-        command,
-        args: () => null,
-        name: () => 'inspector'
-      });
+      void restorer.restore(tracker, { command, name: () => 'inspector' });
     }
 
     // Create a proxy to pass the `source` to the current inspector.
@@ -202,7 +198,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     // Create a handler for each notebook that is created.
     notebooks.widgetAdded.connect((sender, parent) => {
       const session = parent.session;
-      const rendermime = parent.rendermime;
+      const rendermime = parent.content.rendermime;
       const connector = new KernelConnector({ session });
       const handler = new InspectionHandler({ connector, rendermime });
 

@@ -7,7 +7,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { InstanceTracker } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
@@ -61,7 +61,7 @@ function activate(
   rendermime.addFactory(markdownRendererFactory);
 
   const namespace = 'markdownviewer-widget';
-  const tracker = new InstanceTracker<MarkdownDocument>({
+  const tracker = new WidgetTracker<MarkdownDocument>({
     namespace
   });
 
@@ -110,7 +110,7 @@ function activate(
     defaultRendered: ['markdown']
   });
   factory.widgetCreated.connect((sender, widget) => {
-    // Notify the instance tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
     });
@@ -121,7 +121,7 @@ function activate(
   docRegistry.addWidgetFactory(factory);
 
   // Handle state restoration.
-  restorer.restore(tracker, {
+  void restorer.restore(tracker, {
     command: 'docmanager:open',
     args: widget => ({ path: widget.context.path, factory: FACTORY }),
     name: widget => widget.context.path

@@ -15,7 +15,7 @@ export function getLernaPaths(basePath = '.'): string[] {
   basePath = path.resolve(basePath);
   let baseConfig = require(path.join(basePath, 'package.json'));
   let paths: string[] = [];
-  for (let config of baseConfig.workspaces) {
+  for (let config of baseConfig.workspaces.packages) {
     paths = paths.concat(glob.sync(path.join(basePath, config)));
   }
   return paths.filter(pkgPath => {
@@ -227,7 +227,7 @@ export function getPackageGraph(): DepGraph<Dict<any>> {
         if (depName in locals) {
           depData = locals[depName];
         } else {
-          depData = require(`${depName}/package.json`);
+          depData = requirePackage(name, depName);
         }
         graph.addNode(depName, depData);
       }
@@ -236,4 +236,25 @@ export function getPackageGraph(): DepGraph<Dict<any>> {
   });
 
   return graph;
+}
+
+/**
+ * Resolve a `package.json` in the `module` starting at resolution from the `parentModule`.
+ *
+ * We could just use "require(`${depName}/package.json`)", however this won't work for modules
+ * that are not hoisted to the top level.
+ */
+function requirePackage(parentModule: string, module: string) {
+  const packagePath = `${module}/package.json`;
+  let parentModulePath: string;
+  // This will fail when the parent module cannot be loaded, like `@jupyterlab/test-root`
+  try {
+    parentModulePath = require.resolve(parentModule);
+  } catch {
+    return require(packagePath);
+  }
+  const requirePath = require.resolve(packagePath, {
+    paths: [parentModulePath]
+  });
+  return require(requirePath);
 }

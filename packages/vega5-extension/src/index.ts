@@ -134,13 +134,13 @@ const extension: IRenderMime.IExtension = {
   dataType: 'json',
   documentWidgetFactoryOptions: [
     {
-      name: 'Vega',
+      name: 'Vega5',
       primaryFileType: 'vega5',
       fileTypes: ['vega5', 'json'],
       defaultFor: ['vega5']
     },
     {
-      name: 'Vega-Lite',
+      name: 'Vega-Lite3',
       primaryFileType: 'vega-lite3',
       fileTypes: ['vega-lite3', 'json'],
       defaultFor: ['vega-lite3']

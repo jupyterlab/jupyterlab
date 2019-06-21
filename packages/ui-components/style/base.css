@@ -53,7 +53,6 @@ a:hover {
   border-radius: var(--jp-border-radius);
   padding: 0px 12px;
   font-size: var(--jp-ui-font-size1);
-  text-transform: uppercase;
 }
 /* Use our own theme for hover styles */
 button.jp-Button.bp3-button.bp3-minimal:hover {

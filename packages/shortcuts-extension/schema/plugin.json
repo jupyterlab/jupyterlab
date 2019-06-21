@@ -1,6 +1,6 @@
 {
   "jupyter.lab.setting-deprecated": true,
-  "jupyter.lab.setting-icon-class": "jp-LauncherIcon",
+  "jupyter.lab.setting-icon-class": "jp-KeyboardIcon",
   "jupyter.lab.setting-icon-label": "Keyboard Shortcuts",
   "title": "Keyboard Shortcuts",
   "description": "Keyboard shortcut settings for JupyterLab.",

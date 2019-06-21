@@ -601,8 +601,8 @@ export class ClientSession implements IClientSession {
       return Promise.resolve();
     }
     const buttons = cancelable
-      ? [Dialog.cancelButton(), Dialog.okButton({ label: 'SELECT' })]
-      : [Dialog.okButton({ label: 'SELECT' })];
+      ? [Dialog.cancelButton(), Dialog.okButton({ label: 'Select' })]
+      : [Dialog.okButton({ label: 'Select' })];
 
     let dialog = (this._dialog = new Dialog({
       title: 'Select Kernel',
@@ -881,7 +881,7 @@ export namespace ClientSession {
   export async function restartKernel(
     kernel: Kernel.IKernelConnection
   ): Promise<boolean> {
-    let restartBtn = Dialog.warnButton({ label: 'RESTART ' });
+    let restartBtn = Dialog.warnButton({ label: 'Restart' });
     const result = await showDialog({
       title: 'Restart Kernel?',
       body:

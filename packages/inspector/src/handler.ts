@@ -167,7 +167,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
    * Handle changes to the editor state, debouncing.
    */
   private _onChange(): void {
-    this._debouncer.invoke();
+    void this._debouncer.invoke();
   }
 
   private _cleared = new Signal<InspectionHandler, void>(this);

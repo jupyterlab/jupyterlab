@@ -1,5 +1,5 @@
 {
-  "jupyter.lab.setting-icon-class": "jp-FileIcon",
+  "jupyter.lab.setting-icon-class": "jp-FolderIcon",
   "jupyter.lab.setting-icon-label": "File Browser",
   "title": "File Browser",
   "description": "File Browser settings.",
