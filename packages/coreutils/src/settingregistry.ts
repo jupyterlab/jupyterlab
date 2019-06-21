@@ -443,7 +443,7 @@ export class SettingRegistry implements ISettingRegistry {
   transform(
     plugin: string,
     transforms: {
-      [phase in ISettingRegistry.IPlugin.Phase]?: ISettingRegistry.IPlugin.Transform
+      [phase in ISettingRegistry.IPlugin.Phase]?: ISettingRegistry.IPlugin.Transform;
     }
   ): IDisposable {
     const transformers = this._transformers;
@@ -628,7 +628,7 @@ export class SettingRegistry implements ISettingRegistry {
   private _timeout: number;
   private _transformers: {
     [plugin: string]: {
-      [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform
+      [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform;
     };
   } = Object.create(null);
 }

@@ -18,23 +18,17 @@ function cellTrust(
 ): string[] {
   if (props.trustedCells === props.totalCells) {
     return [
-      `Notebook trusted: ${props.trustedCells} of ${
-        props.totalCells
-      } cells trusted.`,
+      `Notebook trusted: ${props.trustedCells} of ${props.totalCells} cells trusted.`,
       'jp-StatusItem-trusted'
     ];
   } else if (props.activeCellTrusted) {
     return [
-      `Active cell trusted: ${props.trustedCells} of ${
-        props.totalCells
-      } cells trusted. `,
+      `Active cell trusted: ${props.trustedCells} of ${props.totalCells} cells trusted. `,
       'jp-StatusItem-trusted'
     ];
   } else {
     return [
-      `Notebook not trusted: ${props.trustedCells} of ${
-        props.totalCells
-      } cells trusted.`,
+      `Notebook not trusted: ${props.trustedCells} of ${props.totalCells} cells trusted.`,
       'jp-StatusItem-untrusted'
     ];
   }
