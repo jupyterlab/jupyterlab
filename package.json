@@ -17,7 +17,12 @@
       "jupyterlab/tests/mock_packages/extension"
     ],
     "nohoist": [
-      "@jupyterlab/vega*-extension/vega*/**"
+      "**/vega-embed",
+      "**/vega-lite",
+      "**/vega",
+      "**/vega-embed/**",
+      "**/vega-lite/**",
+      "**/vega/**"
     ]
   },
   "scripts": {
