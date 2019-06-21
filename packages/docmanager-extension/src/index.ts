@@ -123,7 +123,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       manager,
       opener,
       when,
-      setBusy: status.setBusy.bind(app)
+      setBusy: status && (() => status.setBusy())
     });
 
     // Register the file operations commands.
