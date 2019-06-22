@@ -32,33 +32,26 @@ We have integrated the `JupyterLab Status Bar package <https://github.com/jupyte
 JupyterHub Integration
 ^^^^^^^^^^^^^^^^^^^^^^
 
-* Add JupyterHub integration into JupyterLab, so you no longer need to install ``@jupyterlab/hub-extension``. (`#6451 <https://github.com/jupyterlab/jupyterlab/pull/6451>`__, `#6428 <https://github.com/jupyterlab/jupyterlab/issues/6428>`__)
-* Add logout button when running with JupyterHub (`#6087 <https://github.com/jupyterlab/jupyterlab/pull/6087>`__, `#5966 <https://github.com/jupyterlab/jupyterlab/issues/5966>`__)
+* We now include the JupyterHub extension in core JupyterLab, so you no longer need to install ``@jupyterlab/hub-extension``. (`#6451 <https://github.com/jupyterlab/jupyterlab/pull/6451>`__, `#6428 <https://github.com/jupyterlab/jupyterlab/issues/6428>`__)
+* JupyterLab now has a File > Logout menu entry when running with JupyterHub (`#6087 <https://github.com/jupyterlab/jupyterlab/pull/6087>`__, `#5966 <https://github.com/jupyterlab/jupyterlab/issues/5966>`__)
 
 
 Printing
 ^^^^^^^^
-We now have a printing system that allows extensions to define how they would like to be printed. (`#5850 <https://github.com/jupyterlab/jupyterlab/pull/5850>`__, `#1314 <https://github.com/jupyterlab/jupyterlab/issues/1314>`__)
-
-
+We now have a printing system that allows extensions to customize how documents and activities are printed. (`#5850 <https://github.com/jupyterlab/jupyterlab/pull/5850>`__, `#1314 <https://github.com/jupyterlab/jupyterlab/issues/1314>`__)
 
 Other User Facing Changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 * The launcher displays longer kernel names and supports keyboard navigation (`#6587 <https://github.com/jupyterlab/jupyterlab/pull/6587>`__)
 * If there is no builtin renderer for a MimeType in an output, it will not be displayed instead of showing a warning. (`#6559 <https://github.com/jupyterlab/jupyterlab/pull/6559>`__, `#6216 <https://github.com/jupyterlab/jupyterlab/issues/6216>`__)
-
 * Add tooltip to file browser root breadcrumb icon showing the server root, if it is available (`#6552 <https://github.com/jupyterlab/jupyterlab/pull/6552>`__)
 * Downloading a file will no longer open a new browser window (`#6546 <https://github.com/jupyterlab/jupyterlab/pull/6546>`__)
 * Rename the help "Inspector" to "Interactive Help" (`#6493 <https://github.com/jupyterlab/jupyterlab/pull/6493>`__, `#6488 <https://github.com/jupyterlab/jupyterlab/issues/6488>`__)
 * Change the default keyboard shortcut for closing a tab to be ``Alt+w`` instead of ``Cmd/Ctrl+w`` to avoid conflicts with operating systems. (`#6486 <https://github.com/jupyterlab/jupyterlab/pull/6486>`__, `#6357 <https://github.com/jupyterlab/jupyterlab/issues/6357>`__)
 * Show help text in Inspector window to describe you should select a function (`#6476 <https://github.com/jupyterlab/jupyterlab/pull/6476>`__)
-* TODO: better note: Fixes SVG rendering (`#6469 <https://github.com/jupyterlab/jupyterlab/pull/6469>`__, `#6295 <https://github.com/jupyterlab/jupyterlab/issues/6295>`__)
+* Fixes SVG rendering (`#6469 <https://github.com/jupyterlab/jupyterlab/pull/6469>`__, `#6295 <https://github.com/jupyterlab/jupyterlab/issues/6295>`__)
 * Add support for dropping a tab in the tab bar area. (`#6454 <https://github.com/jupyterlab/jupyterlab/pull/6454>`__, `#5406 <https://github.com/jupyterlab/jupyterlab/issues/5406>`__)
-
 * Switch some default shortcuts to use ``Accel`` instead of ``Ctrl`` so they are more natural for Mac users  (`#6447 <https://github.com/jupyterlab/jupyterlab/pull/6447>`__, `#5023 <https://github.com/jupyterlab/jupyterlab/issues/5023>`__)
-
-* Fixes bug when trying to execute currently running cell  (`#6412 <https://github.com/jupyterlab/jupyterlab/pull/6412>`__, `#5779 <https://github.com/jupyterlab/jupyterlab/issues/5779>`__)
-* Fix undo and redo while doing completions (`#6409 <https://github.com/jupyterlab/jupyterlab/pull/6409>`__, `#5872 <https://github.com/jupyterlab/jupyterlab/issues/5872>`__)
 * Add ability to tell between hover and selected command palette items (`#6407 <https://github.com/jupyterlab/jupyterlab/pull/6407>`__, `#279 <https://github.com/jupyterlab/jupyterlab/issues/279>`__)
 * Hide the "Last Modified" column when the filebrowser is narrow (`#6406 <https://github.com/jupyterlab/jupyterlab/pull/6406>`__, `#6093 <https://github.com/jupyterlab/jupyterlab/issues/6093>`__)
 * Support copy/paste in terminal and Mac OS using ``Ctrl+C`` and ``Ctrl+V`` (`#6391 <https://github.com/jupyterlab/jupyterlab/pull/6391>`__, `#6385 <https://github.com/jupyterlab/jupyterlab/issues/6385>`__, `#1146 <https://github.com/jupyterlab/jupyterlab/issues/1146>`__)
@@ -67,43 +60,35 @@ Other User Facing Changes
 * Turn On Accessibility In Xterm.js to make it more compatible for screen readers (`#6359 <https://github.com/jupyterlab/jupyterlab/pull/6359>`__)
 * When selecting cells using the keyboard shortcuts, we now skip collapsed cells (`#6356 <https://github.com/jupyterlab/jupyterlab/pull/6356>`__, `#3233 <https://github.com/jupyterlab/jupyterlab/issues/3233>`__)
 * Supporting opening ``.geojson`` files in JSON viewer (`#6349 <https://github.com/jupyterlab/jupyterlab/pull/6349>`__)
-* Fixes how some progress bars are displayed (`#6304 <https://github.com/jupyterlab/jupyterlab/pull/6304>`__, `#4202 <https://github.com/jupyterlab/jupyterlab/issues/4202>`__)
+* Performance fixes for text-based progress bars (`#6304 <https://github.com/jupyterlab/jupyterlab/pull/6304>`__, `#4202 <https://github.com/jupyterlab/jupyterlab/issues/4202>`__)
 * Add support for rendering Vega 5 and Vega Lite 3 (`#6294 <https://github.com/jupyterlab/jupyterlab/pull/6294>`__, `#6133 <https://github.com/jupyterlab/jupyterlab/pull/6133>`__, `#6128 <https://github.com/jupyterlab/jupyterlab/issues/6128>`__)
-* Adds an option to shut down terminals and notebook kernels when they are closed (`#6285 <https://github.com/jupyterlab/jupyterlab/pull/6285>`__, `#6275 <https://github.com/jupyterlab/jupyterlab/pull/6275>`__)
-* Drag Drop Console Cells Into Notebook (`#5585 <https://github.com/jupyterlab/jupyterlab/pull/5585>`__, `#4847 <https://github.com/jupyterlab/jupyterlab/issues/4847>`__)
-* Add "render All Markdown Cells" Command, Or Automatically Render Markdown (`#6029 <https://github.com/jupyterlab/jupyterlab/pull/6029>`__, `#6017 <https://github.com/jupyterlab/jupyterlab/issues/6017>`__)
+* Drag and drop console cells into a notebook or text editor (`#5585 <https://github.com/jupyterlab/jupyterlab/pull/5585>`__, `#4847 <https://github.com/jupyterlab/jupyterlab/issues/4847>`__)
+* Drag and drop notebook cells into a console or text editor (`#5571 <https://github.com/jupyterlab/jupyterlab/pull/5571>`__, `#3732 <https://github.com/jupyterlab/jupyterlab/issues/3732>`__)
 * The extenson manager search now sorts extensions by the score assigned to them by NPM instead of alphabetically (`#5649 <https://github.com/jupyterlab/jupyterlab/pull/5649>`__)
-
 * Notify the user when a kernel is automatically restarted, for example, if crashes from an out of memory error (`#6246 <https://github.com/jupyterlab/jupyterlab/pull/6246>`__, `#4273 <https://github.com/jupyterlab/jupyterlab/issues/4273>`__)
 * Expose the extension manager in a command and menu item (`#6200 <https://github.com/jupyterlab/jupyterlab/pull/6200>`__)
 * Add command to render all all Markdown cells (`#6029 <https://github.com/jupyterlab/jupyterlab/pull/6029>`__, `#6017 <https://github.com/jupyterlab/jupyterlab/issues/6017>`__)
-* Add an option to turn on custom scrollbar styling so they appear better in dark mode (`#6026 <https://github.com/jupyterlab/jupyterlab/pull/6026>`__, `#4867 <https://github.com/jupyterlab/jupyterlab/issues/4867>`__)
-* BETTER NOTE: Supports using shift to select text in output area (`#6015 <https://github.com/jupyterlab/jupyterlab/pull/6015>`__, `#4800 <https://github.com/jupyterlab/jupyterlab/issues/4800>`__)
+* Supports using shift to select text in output area (`#6015 <https://github.com/jupyterlab/jupyterlab/pull/6015>`__, `#4800 <https://github.com/jupyterlab/jupyterlab/issues/4800>`__)
 * Output areas that opened in new views are restored properly now on reload (`#5981 <https://github.com/jupyterlab/jupyterlab/pull/5981>`__, `#5976 <https://github.com/jupyterlab/jupyterlab/issues/5976>`__)
 * Add support for managing notebook metadata under a new "Advanced Tools" section in the cell tools area. The cell and notebook metadata now always reflect the current state of the notebook (`#5968 <https://github.com/jupyterlab/jupyterlab/pull/5968>`__, `#5200 <https://github.com/jupyterlab/jupyterlab/issues/5200>`__)
 * Inherit terminal theme from core theme (`#5964 <https://github.com/jupyterlab/jupyterlab/pull/5964>`__)
 * Adds a built in HTML viewer so that you can view HTML files (`#5962 <https://github.com/jupyterlab/jupyterlab/pull/5962>`__, `#5855 <https://github.com/jupyterlab/jupyterlab/pull/5855>`__, `#2369 <https://github.com/jupyterlab/jupyterlab/issues/2369>`__)
 * New workspaces are now automatically generated when you create a new window with the same workspace name. (`#5950 <https://github.com/jupyterlab/jupyterlab/pull/5950>`__, `#5854 <https://github.com/jupyterlab/jupyterlab/issues/5854>`__, `#5830 <https://github.com/jupyterlab/jupyterlab/pull/5830>`__, `#5214 <https://github.com/jupyterlab/jupyterlab/issues/5214>`__)
 * We now add a hint to the context menu to describe how you can access the native browser menu (`#5940 <https://github.com/jupyterlab/jupyterlab/pull/5940>`__, `#4023 <https://github.com/jupyterlab/jupyterlab/issues/4023>`__)
-* The tabs on the left panel have changed to make them more relevent (`#5920 <https://github.com/jupyterlab/jupyterlab/pull/5920>`__, `#5269 <https://github.com/jupyterlab/jupyterlab/issues/5269>`__)
+* The tabs on the left panel have changed to make them more understandable (`#5920 <https://github.com/jupyterlab/jupyterlab/pull/5920>`__, `#5269 <https://github.com/jupyterlab/jupyterlab/issues/5269>`__)
 * Start a new terminal when the page is refreshed and the old terminal has died (`#5917 <https://github.com/jupyterlab/jupyterlab/pull/5917>`__)
 * Add a command to open the main menus, which can be assigned to a keyboard shortcut to open and navigate menus without a mouse (`#5910 <https://github.com/jupyterlab/jupyterlab/pull/5910>`__, `#3074 <https://github.com/jupyterlab/jupyterlab/issues/3074>`__)
 * The inspector now updates based on changes in the cursor from the mouse instead of just from the keyboard (`#5906 <https://github.com/jupyterlab/jupyterlab/pull/5906>`__, `#5899 <https://github.com/jupyterlab/jupyterlab/issues/5899>`__)
 * The launcher now updates the available kernels if you add or remove one on the server (`#5904 <https://github.com/jupyterlab/jupyterlab/pull/5904>`__, `#5676 <https://github.com/jupyterlab/jupyterlab/issues/5676>`__)
-* We have fixed a few inconsistancies between the classic Notebook completer and the JupyerLab behavior (`#5858 <https://github.com/jupyterlab/jupyterlab/pull/5858>`__, `#4305 <https://github.com/jupyterlab/jupyterlab/issues/4305>`__, `#4165 <https://github.com/jupyterlab/jupyterlab/issues/4165>`__, `#2360 <https://github.com/jupyterlab/jupyterlab/issues/2360>`__)
 * Retain cell autoscroll behavior even when a cell output is cleared (`#5817 <https://github.com/jupyterlab/jupyterlab/pull/5817>`__, `#4028 <https://github.com/jupyterlab/jupyterlab/issues/4028>`__)
 * If you link to a relative path that is not a file in a markdown cell, this will now be preserved instead of changing it to a file URL (`#5814 <https://github.com/jupyterlab/jupyterlab/pull/5814>`__)
 * Adds the ability to link to a certain row in a CSV file and have the datagrid open to that row (`#5727 <https://github.com/jupyterlab/jupyterlab/pull/5727>`__, `#5720 <https://github.com/jupyterlab/jupyterlab/issues/5720>`__)
 * We have improved the performance of switching to a large notebook (`#5700 <https://github.com/jupyterlab/jupyterlab/pull/5700>`__, `#4292 <https://github.com/jupyterlab/jupyterlab/issues/4292>`__, `#2639 <https://github.com/jupyterlab/jupyterlab/issues/2639>`__)
-* Adds the ability for the file browser to switch to the directory of whatever document is currently active (`#5698 <https://github.com/jupyterlab/jupyterlab/pull/5698>`__, `#4258 <https://github.com/jupyterlab/jupyterlab/issues/4258>`__)
 * The vdom extension now supports event handling, so that you can have kernel code run in response to user interaction with the UI (`#5670 <https://github.com/jupyterlab/jupyterlab/pull/5670>`__)
 * Adds the ability to run "Run All Code" and "Restart Kernel and Run All Code" in code and markdown files (`#5641 <https://github.com/jupyterlab/jupyterlab/pull/5641>`__, `#5579 <https://github.com/jupyterlab/jupyterlab/issues/5579>`__)
-* Fixes rendering of code blocks in bullet in markdown (`#5628 <https://github.com/jupyterlab/jupyterlab/pull/5628>`__, `#5616 <https://github.com/jupyterlab/jupyterlab/issues/5616>`__)
 * We now remember what line ending a text file has when loading it, so that files with ``CRLF`` line endings will properly be saved with the same endings (`#5622 <https://github.com/jupyterlab/jupyterlab/pull/5622>`__, `#4464 <https://github.com/jupyterlab/jupyterlab/issues/4464>`__, `#3901 <https://github.com/jupyterlab/jupyterlab/issues/3901>`__, `#3706 <https://github.com/jupyterlab/jupyterlab/issues/3706>`__)
 * Fixes rendering of SVG elements in HTML mimetype output (`#5610 <https://github.com/jupyterlab/jupyterlab/pull/5610>`__, `#5610 <https://github.com/jupyterlab/jupyterlab/issues/5610>`__, `#5589 <https://github.com/jupyterlab/jupyterlab/issues/5589>`__)
-* Adds the ability to drag console cells into notebooks (`#5585 <https://github.com/jupyterlab/jupyterlab/pull/5585>`__, `#4847 <https://github.com/jupyterlab/jupyterlab/issues/4847>`__)
 * Allow copying files by holding down ``ctrl`` when dragging them in the filebrowser (`#5584 <https://github.com/jupyterlab/jupyterlab/pull/5584>`__, `#3235 <https://github.com/jupyterlab/jupyterlab/issues/3235>`__)
-* Allowing dragging and dropping code cells to text files or consoles (`#5571 <https://github.com/jupyterlab/jupyterlab/pull/5571>`__, `#3732 <https://github.com/jupyterlab/jupyterlab/issues/3732>`__)
 * Switch the hover modified time in the file browser to use the local format (`#5567 <https://github.com/jupyterlab/jupyterlab/pull/5567>`__)
 * We have added a default keyboard shortcut of ``Ctrl Shift Q`` for closing and cleaning up a file (`#5534 <https://github.com/jupyterlab/jupyterlab/pull/5534>`__, `#4390 <https://github.com/jupyterlab/jupyterlab/issues/4390>`__)
 * Adds the ability to find and go to a certain line in the CSV viewer (`#5523 <https://github.com/jupyterlab/jupyterlab/pull/5523>`__)
@@ -111,21 +96,23 @@ Other User Facing Changes
 * A "New Folder" option has been added to the file browser context menu (`#5447 <https://github.com/jupyterlab/jupyterlab/pull/5447>`__)
 * The ANSI colors are now the same as those in the classic notebook (`#5336 <https://github.com/jupyterlab/jupyterlab/pull/5336>`__, `#3773 <https://github.com/jupyterlab/jupyterlab/issues/3773>`__)
 * Send complete statements instead of current lines when stepping through code in a cell (`#6515 <https://github.com/jupyterlab/jupyterlab/pull/6515>`__, `#6063 <https://github.com/jupyterlab/jupyterlab/pull/6063>`__)
+* Description list styles (``dl``, ``dt``, ``dd``) are improved to be consistant with the nteract project (`#5682 <https://github.com/jupyterlab/jupyterlab/pull/5682>`__, `#2399 <https://github.com/jupyterlab/jupyterlab/issues/2399>`__)
 
 Settings
 ^^^^^^^^
 * The settings system has been rewritten (`#5470 <https://github.com/jupyterlab/jupyterlab/pull/5470>`__, `#5298 <https://github.com/jupyterlab/jupyterlab/issues/5298>`__) and now uses json5 as the syntax, which supports comments and other features for better human readability (`#6343 <https://github.com/jupyterlab/jupyterlab/pull/6343>`__, `#6199 <https://github.com/jupyterlab/jupyterlab/issues/6199>`__).
-* The keyboard setting system has been rewritten and now displays a list of system commands in the comments (`#5812 <https://github.com/jupyterlab/jupyterlab/pull/5812>`__, `#5562 <https://github.com/jupyterlab/jupyterlab/issues/5562>`__).
-* TODO: add note in extension development? We have refactored how we are handling keyboard shortcuts and settings. If you previously defined keyboard shortcuts or used the settings mechanism, you will need to update your extension.   (`#5470 <https://github.com/jupyterlab/jupyterlab/pull/5470>`__, `#5298 <https://github.com/jupyterlab/jupyterlab/issues/5298>`__)
+* The keyboard shortcut system has been rewritten and now displays a list of system commands in the settings comments (`#5812 <https://github.com/jupyterlab/jupyterlab/pull/5812>`__, `#5562 <https://github.com/jupyterlab/jupyterlab/issues/5562>`__).
 
 There are new settings for many following items, including:
+
+* Adds an option to shut down terminals and notebook kernels when they are closed (`#6285 <https://github.com/jupyterlab/jupyterlab/pull/6285>`__, `#6275 <https://github.com/jupyterlab/jupyterlab/pull/6275>`__)
 * Scrolling past the end of a notebooks and text editor document (`#5542 <https://github.com/jupyterlab/jupyterlab/pull/5542>`__, `#5271 <https://github.com/jupyterlab/jupyterlab/issues/5271>`__, `#5652 <https://github.com/jupyterlab/jupyterlab/pull/5652>`__, `#4429 <https://github.com/jupyterlab/jupyterlab/issues/4429>`__)
 * Text editor code folding, rulers, and active line highlighting (`#5761 <https://github.com/jupyterlab/jupyterlab/pull/5761>`__, `#4083 <https://github.com/jupyterlab/jupyterlab/issues/4083>`__, `#5750 <https://github.com/jupyterlab/jupyterlab/pull/5750>`__, `#4179 <https://github.com/jupyterlab/jupyterlab/issues/4179>`__, `#5529 <https://github.com/jupyterlab/jupyterlab/pull/5529>`__, `#5528 <https://github.com/jupyterlab/jupyterlab/issues/5528>`__)
 * Markdown viewer options (`#5901 <https://github.com/jupyterlab/jupyterlab/pull/5901>`__, `#3940 <https://github.com/jupyterlab/jupyterlab/issues/3940>`__)
 * Terminal scrollback and other settings (`#5609 <https://github.com/jupyterlab/jupyterlab/pull/5609>`__, `#3985 <https://github.com/jupyterlab/jupyterlab/issues/3985>`__)
 * The autosave interval (`#5645 <https://github.com/jupyterlab/jupyterlab/pull/5645>`__, `#5619 <https://github.com/jupyterlab/jupyterlab/issues/5619>`__)
 * The file browser showing the current active file (`#5698 <https://github.com/jupyterlab/jupyterlab/pull/5698>`__, `#4258 <https://github.com/jupyterlab/jupyterlab/issues/4258>`__)
-
+* Custom scrollbar styling for dark themes (`#6026 <https://github.com/jupyterlab/jupyterlab/pull/6026>`__, `#4867 <https://github.com/jupyterlab/jupyterlab/issues/4867>`__)
 
 Command Line Changes
 ^^^^^^^^^^^^^^^^^^^^
@@ -138,6 +125,7 @@ Command Line Changes
 
 Extension Development Changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* We have rewritten how extensions provide keyboard shortcuts and interact with the settings system. If you previously defined keyboard shortcuts or used the settings mechanism, you will need to update your extension (`#5470 <https://github.com/jupyterlab/jupyterlab/pull/5470>`__, `#5298 <https://github.com/jupyterlab/jupyterlab/issues/5298>`__)
 * We have renamed the plugin type from ``JupyterLabPlugin`` to ``JupyterFrontEndPlugin``. The application arg is also renamed from ``JupyterLab`` to  ``JupyterFrontEnd`` and some its functionality has been moved to a separate ``ILabShell`` plugin (`#5845 <https://github.com/jupyterlab/jupyterlab/pull/5845>`__, `#5919 <https://github.com/jupyterlab/jupyterlab/pull/5919>`__)
 * Rename ``pageUrl`` to ``appUrl`` in the server connection (`#6509 <https://github.com/jupyterlab/jupyterlab/pull/6509>`__, `#6508 <https://github.com/jupyterlab/jupyterlab/issues/6508>`__, `#6585 <https://github.com/jupyterlab/jupyterlab/pull/6585>`__, `#6584 <https://github.com/jupyterlab/jupyterlab/issues/6584>`__)
 * ``MainAreaWidget`` instances now forward update requests to their ``content`` (`#6586 <https://github.com/jupyterlab/jupyterlab/pull/6586>`__, `#6571 <https://github.com/jupyterlab/jupyterlab/issues/6571>`__)
@@ -171,8 +159,8 @@ Extension Development Changes
 
 
 
-Minor changes and bugfixes
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Other bugfixes and changes (Delete from changelog?)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * Fixes a bug when navigating inside of a cell with the keyboard  (`#6558 <https://github.com/jupyterlab/jupyterlab/pull/6558>`__)
 * Fixes a minor UI bug for highlights in a code cell (`#6556 <https://github.com/jupyterlab/jupyterlab/pull/6556>`__)
 * Changes the filebrowser home icon to be a folder and uses a slash to separate folders in the breadcrumbs (`#6553 <https://github.com/jupyterlab/jupyterlab/pull/6553>`__)
@@ -186,8 +174,11 @@ Minor changes and bugfixes
 * Fixes some styling for the editor in dark mode (`#6261 <https://github.com/jupyterlab/jupyterlab/pull/6261>`__)
 * Fixes a bug where input prompts will sometimes appear on markdown cells (`#6126 <https://github.com/jupyterlab/jupyterlab/pull/6126>`__, `#5669 <https://github.com/jupyterlab/jupyterlab/issues/5669>`__)
 * Fixes CSV Delimiter dropdown in dark theme (`#6097 <https://github.com/jupyterlab/jupyterlab/pull/6097>`__, `#6095 <https://github.com/jupyterlab/jupyterlab/issues/6095>`__)
-* Description list styles (``dl``, ``dt``, ``dd``) are improved to be consistant with  ``nteract`` (`#5682 <https://github.com/jupyterlab/jupyterlab/pull/5682>`__, `#2399 <https://github.com/jupyterlab/jupyterlab/issues/2399>`__)
 * Fixes bug so terminals are properly removed from the ``TerminalManager`` when they are terminated. (`#6364 <https://github.com/jupyterlab/jupyterlab/pull/6364>`__, `#6363 <https://github.com/jupyterlab/jupyterlab/issues/6363>`__)
+* Fixes bug when trying to execute currently running cell  (`#6412 <https://github.com/jupyterlab/jupyterlab/pull/6412>`__, `#5779 <https://github.com/jupyterlab/jupyterlab/issues/5779>`__)
+* Fix undo and redo while doing completions (`#6409 <https://github.com/jupyterlab/jupyterlab/pull/6409>`__, `#5872 <https://github.com/jupyterlab/jupyterlab/issues/5872>`__)
+* We have fixed a few inconsistancies between the classic Notebook completer and the JupyerLab behavior (`#5858 <https://github.com/jupyterlab/jupyterlab/pull/5858>`__, `#4305 <https://github.com/jupyterlab/jupyterlab/issues/4305>`__, `#4165 <https://github.com/jupyterlab/jupyterlab/issues/4165>`__, `#2360 <https://github.com/jupyterlab/jupyterlab/issues/2360>`__)
+* Fixes rendering of code blocks in bullets in markdown (`#5628 <https://github.com/jupyterlab/jupyterlab/pull/5628>`__, `#5616 <https://github.com/jupyterlab/jupyterlab/issues/5616>`__)
 
 
 
