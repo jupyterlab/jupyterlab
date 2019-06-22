@@ -53,11 +53,11 @@
   text-transform: uppercase;
 }
 
-[data-theme-light='true'] .jp-TableOfContents-icon {
+[data-jp-theme-light='true'] .jp-TableOfContents-icon {
   background-image: url(list-light.svg);
 }
 
-[data-theme-light='false'] .jp-TableOfContents-icon {
+[data-jp-theme-light='false'] .jp-TableOfContents-icon {
   background-image: url(list-dark.svg);
 }
 
@@ -109,27 +109,27 @@
   border-radius: 2px;
 }
 
-[data-theme-light='true'] .toc-toolbar-code-icon {
+[data-jp-theme-light='true'] .toc-toolbar-code-icon {
   background-image: url('img/code.svg');
 }
 
-[data-theme-light='false'] .toc-toolbar-code-icon {
+[data-jp-theme-light='false'] .toc-toolbar-code-icon {
   background-image: url('img/code_darktheme.svg');
 }
 
-[data-theme-light='true'] .toc-toolbar-markdown-icon {
+[data-jp-theme-light='true'] .toc-toolbar-markdown-icon {
   background-image: url('img/markdown.svg');
 }
 
-[data-theme-light='false'] .toc-toolbar-markdown-icon {
+[data-jp-theme-light='false'] .toc-toolbar-markdown-icon {
   background-image: url('img/markdown_darktheme.svg');
 }
 
-[data-theme-light='true'] .toc-toolbar-auto-numbering-icon {
+[data-jp-theme-light='true'] .toc-toolbar-auto-numbering-icon {
   background-image: url('img/autonumbering.svg');
 }
 
-[data-theme-light='false'] .toc-toolbar-auto-numbering-icon {
+[data-jp-theme-light='false'] .toc-toolbar-auto-numbering-icon {
   background-image: url('img/autonumbering_darktheme.svg');
 }
 
@@ -139,27 +139,27 @@
   margin: 4px 9px 4px 4px;
 }
 
-[data-theme-light='true'] .toc-toolbar-tag-icon {
+[data-jp-theme-light='true'] .toc-toolbar-tag-icon {
   background-image: url('img/tag.svg');
 }
 
-[data-theme-light='false'] .toc-toolbar-tag-icon {
+[data-jp-theme-light='false'] .toc-toolbar-tag-icon {
   background-image: url('img/tag_darktheme.svg');
 }
 
-[data-theme-light='true'] .toc-toolbar-icon:hover {
+[data-jp-theme-light='true'] .toc-toolbar-icon:hover {
   background-color: var(--jp-input-background);
 }
 
-[data-theme-light='false'] .toc-toolbar-icon:hover {
+[data-jp-theme-light='false'] .toc-toolbar-icon:hover {
   background-color: #3a3a3a;
 }
 
-[data-theme-light='true'] .toc-toolbar-icon-selected {
+[data-jp-theme-light='true'] .toc-toolbar-icon-selected {
   background-color: var(--jp-layout-color2);
 }
 
-[data-theme-light='false'] .toc-toolbar-icon-selected {
+[data-jp-theme-light='false'] .toc-toolbar-icon-selected {
   background-color: #565656;
 }
 
@@ -228,11 +228,11 @@
   height: 6px;
 }
 
-[data-theme-light='true'] .toc-downarrow-img {
+[data-jp-theme-light='true'] .toc-downarrow-img {
   background-image: url('img/toggle_down.svg');
 }
 
-[data-theme-light='false'] .toc-downarrow-img {
+[data-jp-theme-light='false'] .toc-downarrow-img {
   background-image: url('img/toggle_down_darktheme.svg');
 }
 
@@ -241,11 +241,11 @@
   height: 12px;
 }
 
-[data-theme-light='true'] .toc-rightarrow-img {
+[data-jp-theme-light='true'] .toc-rightarrow-img {
   background-image: url('img/toggle_right.svg');
 }
 
-[data-theme-light='false'] .toc-rightarrow-img {
+[data-jp-theme-light='false'] .toc-rightarrow-img {
   background-image: url('img/toggle_right_darktheme.svg');
 }
 

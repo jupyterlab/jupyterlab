@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/toc",
-  "version": "1.0.0-pre.2",
+  "version": "1.0.0-rc.0",
   "private": false,
   "description": "Table of Contents extension for JupyterLab",
   "keywords": [
@@ -12,6 +12,10 @@
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab-toc/issues"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab-toc.git"
+  },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "files": [
@@ -20,10 +24,6 @@
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab-toc.git"
-  },
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib",
@@ -31,49 +31,49 @@
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "watch": "tsc -w"
   },
-  "dependencies": {
-    "@jupyterlab/application": "^1.0.0-alpha.8",
-    "@jupyterlab/apputils": "^1.0.0-alpha.8",
-    "@jupyterlab/cells": "^1.0.0-alpha.8",
-    "@jupyterlab/coreutils": "^3.0.0-alpha.8",
-    "@jupyterlab/docmanager": "^1.0.0-alpha.8",
-    "@jupyterlab/docregistry": "^1.0.0-alpha.8",
-    "@jupyterlab/fileeditor": "^1.0.0-alpha.8",
-    "@jupyterlab/markdownviewer": "^1.0.0-alpha.8",
-    "@jupyterlab/notebook": "^1.0.0-alpha.9",
-    "@jupyterlab/rendermime": "^1.0.0-alpha.8",
-    "@phosphor/algorithm": "^1.1.2",
-    "@phosphor/coreutils": "^1.3.0",
-    "@phosphor/messaging": "^1.2.2",
-    "@phosphor/widgets": "^1.6.0",
-    "react": "~16.4.2",
-    "react-dom": "~16.4.2"
-  },
-  "devDependencies": {
-    "@types/react": "~16.4.13",
-    "@types/react-dom": "~16.0.5",
-    "husky": "^0.14.3",
-    "lint-staged": "^7.2.0",
-    "prettier": "^1.13.7",
-    "rimraf": "^2.6.1",
-    "tslint": "^5.10.0",
-    "tslint-config-prettier": "^1.13.0",
-    "tslint-plugin-prettier": "^1.3.0",
-    "typescript": "~3.1.1"
-  },
-  "jupyterlab": {
-    "extension": "lib/extension.js"
-  },
   "lint-staged": {
     "**/*{.ts,.tsx,.css,.json,.md}": [
       "prettier --write",
       "git add"
     ]
   },
+  "dependencies": {
+    "@jupyterlab/application": "^1.0.0-rc.0",
+    "@jupyterlab/apputils": "^1.0.0-rc.0",
+    "@jupyterlab/cells": "^1.0.0-rc.0",
+    "@jupyterlab/coreutils": "^3.0.0-rc.0",
+    "@jupyterlab/docmanager": "^1.0.0-rc.0",
+    "@jupyterlab/docregistry": "^1.0.0-rc.0",
+    "@jupyterlab/fileeditor": "^1.0.0-rc.0",
+    "@jupyterlab/markdownviewer": "^1.0.0-rc.0",
+    "@jupyterlab/notebook": "^1.0.0-rc.0",
+    "@jupyterlab/rendermime": "^1.0.0-rc.0",
+    "@phosphor/algorithm": "^1.1.3",
+    "@phosphor/coreutils": "^1.3.1",
+    "@phosphor/messaging": "^1.2.3",
+    "@phosphor/widgets": "^1.8.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
+  },
+  "devDependencies": {
+    "@types/react": "^16.8.22",
+    "@types/react-dom": "^16.8.4",
+    "husky": "^2.4.1",
+    "lint-staged": "^8.2.1",
+    "prettier": "^1.18.2",
+    "rimraf": "^2.6.3",
+    "tslint": "^5.18.0",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-plugin-prettier": "^2.0.1",
+    "typescript": "^3.5.2"
+  },
   "resolutions": {
     "@types/react": "~16.4.13"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "jupyterlab": {
+    "extension": "lib/extension.js"
   }
 }

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IInstanceTracker } from '@jupyterlab/apputils';
+import { IWidgetTracker } from '@jupyterlab/apputils';
 
 import { Token } from '@phosphor/coreutils';
 
@@ -73,7 +73,7 @@ export namespace TableOfContentsRegistry {
     /**
      * An instance tracker for the widget.
      */
-    tracker: IInstanceTracker<W>;
+    tracker: IWidgetTracker<W>;
 
     /**
      * A function to test whether to generate a ToC for a widget.
