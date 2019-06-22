@@ -15,7 +15,8 @@ export function getLernaPaths(basePath = '.'): string[] {
   basePath = path.resolve(basePath);
   let baseConfig = require(path.join(basePath, 'package.json'));
   let paths: string[] = [];
-  for (let config of baseConfig.workspaces.packages) {
+  let packages = baseConfig.workspaces.packages || baseConfig.workspaces;
+  for (let config of packages) {
     paths = paths.concat(glob.sync(path.join(basePath, config)));
   }
   return paths.filter(pkgPath => {
