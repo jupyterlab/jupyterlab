@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/metapackage",
-  "version": "1.0.0-rc.0",
+  "version": "1.0.0-rc.1",
   "description": "JupyterLab - Meta Package.  All of the packages used by the core JupyterLab application",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -76,7 +76,7 @@
     "@jupyterlab/markdownviewer-extension": "^1.0.0-rc.0",
     "@jupyterlab/mathjax2": "^1.0.0-rc.0",
     "@jupyterlab/mathjax2-extension": "^1.0.0-rc.0",
-    "@jupyterlab/nbconvert-css": "^0.1.1-rc.0",
+    "@jupyterlab/nbconvert-css": "^0.1.1-rc.1",
     "@jupyterlab/notebook": "^1.0.0-rc.0",
     "@jupyterlab/notebook-extension": "^1.0.0-rc.0",
     "@jupyterlab/observables": "^2.2.0-rc.0",

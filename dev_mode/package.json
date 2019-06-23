@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application-top",
-  "version": "1.0.0-rc.0",
+  "version": "1.0.0-rc.1",
   "private": true,
   "scripts": {
     "build": "webpack",
@@ -86,7 +86,7 @@
     "url-parse": "~1.4.3"
   },
   "devDependencies": {
-    "@jupyterlab/buildutils": "^1.0.0-rc.0",
+    "@jupyterlab/buildutils": "^1.0.0-rc.1",
     "css-loader": "~2.1.1",
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
     "file-loader": "~3.0.1",
