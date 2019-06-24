@@ -473,7 +473,6 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       };
 
       this._cm.setSelection(selRange);
-
       this._cm.scrollIntoView(
         {
           from: fromPos,
