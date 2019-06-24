@@ -441,7 +441,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       if (!cursor.find(reverse)) {
         // if we don't want to loop, no more matches found, reset the cursor and exit
         if (this.isSubProvider) {
-          this._cm.setCursorPosition(position);
+          this._cm.setCursorPosition(position, { scroll: false });
           this._currentMatch = null;
           return null;
         }
@@ -474,7 +474,6 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
 
       this._cm.setSelection(selRange);
 
-      console.log('scrolling from to: ', fromPos, toPos);
       this._cm.scrollIntoView(
         {
           from: fromPos,

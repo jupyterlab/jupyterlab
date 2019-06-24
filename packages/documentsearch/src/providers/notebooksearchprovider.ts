@@ -160,7 +160,6 @@ export class NotebookSearchProvider implements ISearchProvider {
     });
     this._unRenderedMarkdownCells = [];
 
-    console.log('setting active cell index to: ', index);
     this._searchTarget.content.activeCellIndex = index;
     this._searchTarget.content.mode = 'edit';
     this._searchTarget = null;
@@ -281,7 +280,6 @@ export class NotebookSearchProvider implements ISearchProvider {
     steps = 0
   ): Promise<ISearchMatch | undefined> {
     const notebook = this._searchTarget.content;
-    // const activeCell: Cell = notebook.activeCell;
     const cellIndex = notebook.widgets.indexOf(activeCell);
     const numCells = notebook.widgets.length;
     const { provider } = this._cmSearchProviders[cellIndex];
@@ -302,8 +300,7 @@ export class NotebookSearchProvider implements ISearchProvider {
       }
       const nextIndex =
         ((reverse ? cellIndex - 1 : cellIndex + 1) + numCells) % numCells;
-      console.log('nextindex: ', nextIndex);
-      const editor = notebook.activeCell.editor as CodeMirrorEditor;
+      const editor = notebook.widgets[nextIndex].editor as CodeMirrorEditor;
       // move the cursor of the next cell to the start/end of the cell so it can
       // search the whole thing
       const newPosCM = reverse
@@ -313,10 +310,11 @@ export class NotebookSearchProvider implements ISearchProvider {
         line: newPosCM.line,
         column: newPosCM.ch
       };
-      editor.setCursorPosition(newPos);
+      editor.setCursorPosition(newPos, { scroll: false });
       return this._stepNext(notebook.widgets[nextIndex], reverse, steps + 1);
     }
 
+    notebook.activeCellIndex = cellIndex;
     return match;
   }
 
