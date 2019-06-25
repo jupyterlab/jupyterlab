@@ -227,7 +227,7 @@ module.exports = [
       fs: 'empty'
     },
     bail: true,
-    devtool: 'source-map',
+    devtool: 'inline-source-map',
     externals: ['node-fetch', 'ws'],
     plugins,
     stats: {
