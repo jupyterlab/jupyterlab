@@ -13,6 +13,7 @@
     "noUnusedLocals": true,
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
+    "sourceMap": true,
     "target": "es2017",
     "types": []
   }

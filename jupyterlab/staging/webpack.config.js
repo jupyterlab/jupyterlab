@@ -220,7 +220,8 @@ module.exports = [
         });
         ignoreCache[localPath] = ignore;
         return ignore;
-      }
+      },
+      poll: 100
     },
     node: {
       fs: 'empty'
