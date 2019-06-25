@@ -108,6 +108,15 @@ export namespace KernelMessage {
   export function createMessage<T extends IUpdateDisplayDataMsg>(
     options: IOptions<T>
   ): T;
+  export function createMessage<T extends IDebugRequestMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IDebugReplyMsg>(
+    options: IOptions<T>
+  ): T;
+  export function createMessage<T extends IDebugEventMsg>(
+    options: IOptions<T>
+  ): T;
 
   export function createMessage<T extends Message>(options: IOptions<T>): T {
     return {
@@ -156,7 +165,7 @@ export namespace KernelMessage {
   /**
    * Control message types.
    */
-  export type ControlMessageType = never;
+  export type ControlMessageType = 'debug_request' | 'debug_reply';
 
   /**
    * IOPub message types.
@@ -172,7 +181,8 @@ export namespace KernelMessage {
     | 'execute_result'
     | 'status'
     | 'stream'
-    | 'update_display_data';
+    | 'update_display_data'
+    | 'debug_event';
 
   /**
    * Stdin message types.
@@ -340,7 +350,10 @@ export namespace KernelMessage {
     | IIsCompleteRequestMsg
     | IStatusMsg
     | IStreamMsg
-    | IUpdateDisplayDataMsg;
+    | IUpdateDisplayDataMsg
+    | IDebugRequestMsg
+    | IDebugReplyMsg
+    | IDebugEventMsg;
 
   //////////////////////////////////////////////////
   // IOPub Messages
@@ -501,6 +514,22 @@ export namespace KernelMessage {
    */
   export function isClearOutputMsg(msg: IMessage): msg is IClearOutputMsg {
     return msg.header.msg_type === 'clear_output';
+  }
+
+  /**
+   * A `'debug_event'` message on the `'iopub'` channel
+   */
+  export interface IDebugEventMsg extends IIOPubMessage<'debug_event'> {
+    content: {
+      seq: number;
+      type: 'event';
+      event: string;
+      body?: any;
+    };
+  }
+
+  export function isDebugEventMsg(msg: IMessage): msg is IDebugEventMsg {
+    return msg.header.msg_type === 'debug_event';
   }
 
   //////////////////////////////////////////////////
@@ -1020,6 +1049,51 @@ export namespace KernelMessage {
   export interface ICommInfoReplyMsg extends IShellMessage<'comm_info_reply'> {
     parent_header: IHeader<'comm_info_request'>;
     content: ReplyContent<ICommInfoReply>;
+  }
+
+  /////////////////////////////////////////////////
+  // Control Messages
+  /////////////////////////////////////////////////
+
+  /**
+   * A `'debug_request'` messsage on the `'control'` channel.
+   */
+  export interface IDebugRequestMsg extends IControlMessage<'debug_request'> {
+    content: {
+      seq: number;
+      type: 'request';
+      command: string;
+      arguments?: any;
+    };
+  }
+
+  /**
+   * Test whether a kernel message is an `'debug_request'` message.
+   */
+  export function isDebugRequestMsg(msg: IMessage): msg is IDebugRequestMsg {
+    return msg.header.msg_type === 'debug_request';
+  }
+
+  /**
+   * A `'debug_reply'` messsage on the `'control'` channel.
+   */
+  export interface IDebugReplyMsg extends IControlMessage<'debug_reply'> {
+    content: {
+      seq: number;
+      type: 'response';
+      request_seq: number;
+      success: boolean;
+      command: string;
+      message?: string;
+      body?: any;
+    };
+  }
+
+  /**
+   * Test whether a kernel message is an `'debug_reply'` message.
+   */
+  export function isDebugReplyMsg(msg: IMessage): msg is IDebugReplyMsg {
+    return msg.header.msg_type === 'debug_reply';
   }
 
   //////////////////////////////////////////////////

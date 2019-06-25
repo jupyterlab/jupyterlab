@@ -279,6 +279,23 @@ export namespace Kernel {
     >;
 
     /**
+     * Send an `execute_request` message.
+     *
+     * @param content - The content of the request.
+     *
+     * @param disposeOnDone - Whether to dispose of the future when done.
+     *
+     * @returns A kernel future.
+     */
+    requestDebug(
+      content: KernelMessage.IDebugRequestMsg['content'],
+      disposeOnDone?: boolean
+    ): Kernel.IControlFuture<
+      KernelMessage.IDebugRequestMsg,
+      KernelMessage.IDebugReplyMsg
+    >;
+
+    /**
      * Send an `is_complete_request` message.
      *
      * @param content - The content of the request.
