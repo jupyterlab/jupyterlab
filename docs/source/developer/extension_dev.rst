@@ -239,9 +239,8 @@ Mime Renderer Extensions
 
 Mime Renderer extensions are a convenience for creating an extension
 that can render mime data and potentially render files of a given type.
-We provide cookiecutters for Mime render extensions in
-`JavaScript <https://github.com/jupyterlab/mimerender-cookiecutter>`__ and
-`TypeScript <https://github.com/jupyterlab/mimerender-cookiecutter-ts>`__.
+We provide a cookiecutters for mime renderer extensions in TypeScript
+`here <https://github.com/jupyterlab/mimerender-cookiecutter-ts>`__.
 
 Mime renderer extensions are more declarative than standard extensions.
 The extension is treated the same from the command line perspective
