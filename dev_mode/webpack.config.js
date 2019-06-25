@@ -120,18 +120,10 @@ const plugins = [
     }
   }),
   new HtmlWebpackPlugin({
-    cache: false,
-    chunksSortMode: 'none',
     template: path.join('templates', 'template.html'),
     title: jlab.name || 'JupyterLab'
   }),
   new webpack.HashedModuleIdsPlugin(),
-  new webpack.SourceMapDevToolPlugin({
-    filename: null,
-    exclude: [/node_modules/],
-    // apply this plugin only to .ts files - the rest is taken care of
-    test: /\.ts($|\?)/i
-  }),
   new JupyterFrontEndPlugin({})
 ];
 
@@ -160,27 +152,15 @@ module.exports = [
         { test: /\.css$/, use: ['style-loader', 'css-loader'] },
         { test: /\.md$/, use: 'raw-loader' },
         { test: /\.txt$/, use: 'raw-loader' },
-        // {
-        //   test: /\.js$/,
-        //   use: ['source-map-loader'],
-        //   enforce: 'pre',
-        //   // eslint-disable-next-line no-undef
-        //   exclude: /node_modules/
-        // },
-        { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
-        // { test: /\.js.map$/, use: 'file-loader' },
         {
-          test: /\.tsx?$/,
-          exclude: /node_modules/,
-          use: [
-            {
-              loader: 'ts-loader',
-              options: {
-                experimentalWatchApi: true
-              }
-            }
-          ]
+          test: /\.js$/,
+          use: ['source-map-loader'],
+          enforce: 'pre',
+          // eslint-disable-next-line no-undef
+          exclude: /node_modules/
         },
+        { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
+        { test: /\.js.map$/, use: 'file-loader' },
         {
           test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
           use: 'url-loader?limit=10000&mimetype=application/font-woff'
@@ -215,9 +195,11 @@ module.exports = [
         var baseName = localPath.replace(/^.*[\\\/]/, ''); // eslint-disable-line
         if (
           ignorePatterns.some(function(rexp) {
+            console.error(`${localPath}: ${baseName.match(rexp)}`);
             return baseName.match(rexp);
           })
         ) {
+          console.error(`${localPath}: true`);
           return true;
         }
 
@@ -228,6 +210,7 @@ module.exports = [
           var rootPath = localLinked[name];
           var contained = localPath.indexOf(rootPath + path.sep) !== -1;
           if (localPath !== rootPath && !contained) {
+            console.error(`${localPath}: false`);
             return false;
           }
           var rest = localPath.slice(rootPath.length);
@@ -235,9 +218,11 @@ module.exports = [
             ignore = false;
             maybeSync(localPath, name, rest);
           }
+          console.error(`${localPath}: true`);
           return true;
         });
         ignoreCache[localPath] = ignore;
+        console.error(`${localPath}: ${ignore}`);
         return ignore;
       },
       poll: 100
