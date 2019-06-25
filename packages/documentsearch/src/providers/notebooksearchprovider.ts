@@ -302,7 +302,7 @@ export class NotebookSearchProvider implements ISearchProvider {
         ((reverse ? cellIndex - 1 : cellIndex + 1) + numCells) % numCells;
       const editor = notebook.widgets[nextIndex].editor as CodeMirrorEditor;
       // move the cursor of the next cell to the start/end of the cell so it can
-      // search the whole thing
+      // search the whole thing (but don't scroll because we haven't found anything yet)
       const newPosCM = reverse
         ? CodeMirror.Pos(editor.lastLine())
         : CodeMirror.Pos(editor.firstLine(), 0);

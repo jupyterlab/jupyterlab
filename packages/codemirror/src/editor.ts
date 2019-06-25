@@ -527,7 +527,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     options?: { bias?: number; origin?: string; scroll?: boolean }
   ): void {
     const cursor = this._toCodeMirrorPosition(position);
-    this.doc.setCursor(cursor.line, cursor.ch, options);
+    this.doc.setCursor(cursor, undefined, options);
     // If the editor does not have focus, this cursor change
     // will get screened out in _onCursorsChanged(). Make an
     // exception for this method.
