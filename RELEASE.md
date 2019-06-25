@@ -20,17 +20,13 @@ makes sure that we don't have any extra tags or commits in our repo (especially
 since we will push our tags later in the process), and that we are on the master
 branch.
 
-Note that right now, we pin tornado to version 5 because there are some
-incompatibilities with tornado 6. See
-https://github.com/jupyterlab/jupyterlab/issues/6131.
-
 ```bash
 cd release
 conda deactivate
 conda remove --all -y -n jlabrelease
 rm -rf jupyterlab
 
-conda create -c conda-forge -y -n jlabrelease notebook nodejs twine 'tornado<6'
+conda create -c conda-forge -y -n jlabrelease notebook nodejs twine
 conda activate jlabrelease
 git clone git@github.com:jupyterlab/jupyterlab.git
 cd jupyterlab
