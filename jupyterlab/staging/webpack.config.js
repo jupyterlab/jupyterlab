@@ -120,11 +120,18 @@ const plugins = [
     }
   }),
   new HtmlWebpackPlugin({
+    cache: false,
     chunksSortMode: 'none',
     template: path.join('templates', 'template.html'),
     title: jlab.name || 'JupyterLab'
   }),
   new webpack.HashedModuleIdsPlugin(),
+  new webpack.SourceMapDevToolPlugin({
+    filename: null,
+    exclude: [/node_modules/],
+    // apply this plugin only to .ts files - the rest is taken care of
+    test: /\.ts($|\?)/i
+  }),
   new JupyterFrontEndPlugin({})
 ];
 
@@ -153,15 +160,27 @@ module.exports = [
         { test: /\.css$/, use: ['style-loader', 'css-loader'] },
         { test: /\.md$/, use: 'raw-loader' },
         { test: /\.txt$/, use: 'raw-loader' },
-        {
-          test: /\.js$/,
-          use: ['source-map-loader'],
-          enforce: 'pre',
-          // eslint-disable-next-line no-undef
-          exclude: /node_modules/
-        },
+        // {
+        //   test: /\.js$/,
+        //   use: ['source-map-loader'],
+        //   enforce: 'pre',
+        //   // eslint-disable-next-line no-undef
+        //   exclude: /node_modules/
+        // },
         { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
-        { test: /\.js.map$/, use: 'file-loader' },
+        // { test: /\.js.map$/, use: 'file-loader' },
+        {
+          test: /\.tsx?$/,
+          exclude: /node_modules/,
+          use: [
+            {
+              loader: 'ts-loader',
+              options: {
+                experimentalWatchApi: true
+              }
+            }
+          ]
+        },
         {
           test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
           use: 'url-loader?limit=10000&mimetype=application/font-woff'
@@ -227,7 +246,7 @@ module.exports = [
       fs: 'empty'
     },
     bail: true,
-    devtool: 'inline-source-map',
+    devtool: 'source-map',
     externals: ['node-fetch', 'ws'],
     plugins,
     stats: {
