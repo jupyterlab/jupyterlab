@@ -11,9 +11,8 @@ var webpack = require('webpack');
 var DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
 var Visualizer = require('webpack-visualizer-plugin');
 
-var Build = require('@jupyterlab/buildutils').Build;
+var utils = require('@jupyterlab/buildutils');
 var package_data = require('./package.json');
-var webpackPlugins = require('./webpack_plugins');
 
 // Handle the extensions.
 var jlab = package_data.jupyterlab;
@@ -29,7 +28,7 @@ if (fs.existsSync(buildDir)) {
 fs.ensureDirSync(buildDir);
 
 // Build the assets
-var extraConfig = Build.ensureAssets({
+var extraConfig = utils.Build.ensureAssets({
   packageNames: packageNames,
   output: jlab.outputDir
 });
@@ -50,8 +49,70 @@ fs.copySync(
   plib.join(buildDir, 'imports.css')
 );
 
+// Set up variables for the watch mode ignore plugins
+let watched = {};
+let ignoreCache = Object.create(null);
+Object.keys(jlab.watchedPackages).forEach(function(name) {
+  if (name in watched) return;
+  const localPkgPath = require.resolve(plib.join(name, 'package.json'));
+  watched[name] = plib.dirname(localPkgPath);
+});
+
+/**
+ * Sync a local path to a linked package path if they are files and differ.
+ */
+function maybeSync(localPath, name, rest) {
+  const stats = fs.statSync(localPath);
+  if (!stats.isFile(localPath)) {
+    return;
+  }
+  const source = fs.realpathSync(plib.join(jlab.watchedPackages[name], rest));
+  if (source === fs.realpathSync(localPath)) {
+    return;
+  }
+  fs.watchFile(source, { interval: 500 }, function(curr) {
+    if (!curr || curr.nlink === 0) {
+      return;
+    }
+    try {
+      fs.copySync(source, localPath);
+    } catch (err) {
+      console.error(err);
+    }
+  });
+}
+
+/**
+ * A filter function set up to exclude all files that are not
+ * in a package contained by the Jupyterlab repo
+ */
+function ignored(path) {
+  path = plib.resolve(path);
+  if (path in ignoreCache) {
+    return ignoreCache[path];
+  }
+
+  // Limit the watched files to those in our local linked package dirs.
+  let ignore = true;
+  Object.keys(watched).some(name => {
+    // Bail if already found.
+    const rootPath = watched[name];
+    const contained = path.indexOf(rootPath + plib.sep) !== -1;
+    if (path !== rootPath && !contained) {
+      return false;
+    }
+    const rest = path.slice(rootPath.length);
+    if (rest.indexOf('node_modules') === -1) {
+      ignore = false;
+      maybeSync(path, name, rest);
+    }
+    return true;
+  });
+  ignoreCache[path] = ignore;
+  return ignore;
+}
+
 const plugins = [
-  new webpackPlugins.JupyterWatchIgnorePlugin(),
   new DuplicatePackageCheckerPlugin({
     verbose: true,
     exclude(instance) {
@@ -67,7 +128,11 @@ const plugins = [
     title: jlab.name || 'JupyterLab'
   }),
   new webpack.HashedModuleIdsPlugin(),
-  new webpackPlugins.JupyterFrontEndPlugin({})
+
+  // custom plugin for ignoring files during a `--watch` build
+  new utils.Webpack.FilterWatchIgnorePlugin(ignored),
+  // custom plugin that copies the assets to the static directory
+  new utils.Webpack.FrontEndPlugin(buildDir, jlab.staticDir)
 ];
 
 if (process.argv.includes('--analyze')) {
