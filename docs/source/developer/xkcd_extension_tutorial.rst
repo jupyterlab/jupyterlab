@@ -52,7 +52,7 @@ Next create a conda environment that includes:
 
 1. the latest release of JupyterLab
 2. `cookiecutter <https://github.com/audreyr/cookiecutter>`__, the tool
-   you'll use to bootstrap your extension project structure
+   you'll use to bootstrap your extension project structure (this is a Python tool, do not try to install with `npm`)
 3. `NodeJS <https://nodejs.org>`__, the JavaScript runtime you'll use to
    compile the web assets (e.g., TypeScript, CSS) for your extension
 4. `git <https://git-scm.com>`__, a version control system you'll use to
