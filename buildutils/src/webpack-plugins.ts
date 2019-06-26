@@ -53,7 +53,9 @@ export namespace WPPlugin {
     }
 
     checkIgnore(result: any): any | null {
-      if (!result) return result;
+      if (!result) {
+        return result;
+      }
       return this.ignored(result.resource) ? result : null;
     }
 
@@ -101,7 +103,9 @@ export namespace WPPlugin {
           dirTimestamps: any,
           removedFiles: any
         ) => {
-          if (err) return callback(err);
+          if (err) {
+            return callback(err);
+          }
           for (const path of ignoredFiles) {
             fileTimestamps.set(path, 1);
           }
