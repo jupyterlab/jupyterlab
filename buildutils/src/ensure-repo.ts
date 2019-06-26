@@ -144,6 +144,7 @@ function ensureJupyterlab(): string[] {
   corePackage.jupyterlab.extensions = {};
   corePackage.jupyterlab.mimeExtensions = {};
   corePackage.jupyterlab.linkedPackages = {};
+  corePackage.jupyterlab.watchedPackages = {};
   corePackage.dependencies = {};
 
   let singletonPackages = corePackage.jupyterlab.singletonPackages;
@@ -209,6 +210,20 @@ function ensureJupyterlab(): string[] {
       }
       corePackage.jupyterlab[item + 's'][data.name] = ext;
     });
+  });
+
+  utils.getLernaPaths().forEach(pkgPath => {
+    let dataPath = path.join(pkgPath, 'package.json');
+    let data: any;
+    try {
+      data = utils.readJSONFile(dataPath);
+    } catch (e) {
+      return;
+    }
+
+    // watch all src, build, and test files in the Jupyterlab project
+    let relativePath = `../${path.relative(basePath, pkgPath)}`;
+    corePackage.jupyterlab.watchedPackages[data.name] = relativePath;
   });
 
   // Write the package.json back to disk.

@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-var path = require('path');
+var plib = require('path');
 var fs = require('fs-extra');
 var Handlebars = require('handlebars');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -21,7 +21,7 @@ var mimeExtensions = jlab.mimeExtensions;
 var packageNames = Object.keys(mimeExtensions).concat(Object.keys(extensions));
 
 // Ensure a clear build directory.
-var buildDir = path.resolve(jlab.buildDir);
+var buildDir = plib.resolve(jlab.buildDir);
 if (fs.existsSync(buildDir)) {
   fs.removeSync(buildDir);
 }
@@ -42,21 +42,21 @@ var data = {
 };
 var result = template(data);
 
-fs.writeFileSync(path.join(buildDir, 'index.out.js'), result);
-fs.copySync('./package.json', path.join(buildDir, 'package.json'));
+fs.writeFileSync(plib.join(buildDir, 'index.out.js'), result);
+fs.copySync('./package.json', plib.join(buildDir, 'package.json'));
 fs.copySync(
-  path.join(jlab.outputDir, 'imports.css'),
-  path.join(buildDir, 'imports.css')
+  plib.join(jlab.outputDir, 'imports.css'),
+  plib.join(buildDir, 'imports.css')
 );
 
 // Set up variables for watch mode.
-var localLinked = {};
+var watched = {};
 var ignoreCache = Object.create(null);
-Object.keys(jlab.linkedPackages).forEach(function(name) {
-  var localPath = require.resolve(path.join(name, 'package.json'));
-  localLinked[name] = path.dirname(localPath);
+Object.keys(jlab.watchedPackages).forEach(function(name) {
+  if (name in watched) return;
+  var localPath = require.resolve(plib.join(name, 'package.json'));
+  watched[name] = plib.dirname(localPath);
 });
-var ignorePatterns = [/^\.\#/]; // eslint-disable-line
 
 /**
  * Sync a local path to a linked package path if they are files and differ.
@@ -66,7 +66,7 @@ function maybeSync(localPath, name, rest) {
   if (!stats.isFile(localPath)) {
     return;
   }
-  var source = fs.realpathSync(path.join(jlab.linkedPackages[name], rest));
+  var source = fs.realpathSync(plib.join(jlab.watchedPackages[name], rest));
   if (source === fs.realpathSync(localPath)) {
     return;
   }
@@ -109,7 +109,125 @@ JupyterFrontEndPlugin.prototype.apply = function(compiler) {
 
 JupyterFrontEndPlugin.prototype._first = true;
 
+const ignored = path => {
+  path = plib.resolve(path);
+  if (path in ignoreCache) {
+    return ignoreCache[path];
+  }
+
+  // Limit the watched files to those in our local linked package dirs.
+  var ignore = true;
+  Object.keys(watched).some(function(name) {
+    console.error(name);
+    // Bail if already found.
+    var rootPath = watched[name];
+    var contained = path.indexOf(rootPath + plib.sep) !== -1;
+    if (path !== rootPath && !contained) {
+      return false;
+    }
+    var rest = path.slice(rootPath.length);
+    if (rest.indexOf('node_modules') === -1) {
+      ignore = false;
+      maybeSync(path, name, rest);
+    }
+    return true;
+  });
+  ignoreCache[path] = ignore;
+  return ignore;
+};
+
+class JupyterIgnorePlugin extends webpack.IgnorePlugin {
+  constructor() {
+    super({});
+  }
+
+  checkIgnore(result) {
+    if (!result) return result;
+    return ignored(result.resource) ? result : null;
+  }
+}
+
+class JupyterIgnoringWatchFileSystem {
+  constructor(wfs) {
+    this.wfs = wfs;
+  }
+
+  watch(files, dirs, missing, startTime, options, callback, callbackUndelayed) {
+    const notIgnored = path => !ignored(path);
+
+    const ignoredFiles = files.filter(ignored);
+    const ignoredDirs = dirs.filter(ignored);
+
+    const watcher = this.wfs.watch(
+      files.filter(notIgnored),
+      dirs.filter(notIgnored),
+      missing,
+      startTime,
+      options,
+      (
+        err,
+        filesModified,
+        dirsModified,
+        missingModified,
+        fileTimestamps,
+        dirTimestamps,
+        removedFiles
+      ) => {
+        if (err) return callback(err);
+        for (const path of ignoredFiles) {
+          fileTimestamps.set(path, 1);
+        }
+
+        for (const path of ignoredDirs) {
+          dirTimestamps.set(path, 1);
+        }
+
+        callback(
+          err,
+          filesModified,
+          dirsModified,
+          missingModified,
+          fileTimestamps,
+          dirTimestamps,
+          removedFiles
+        );
+      },
+      callbackUndelayed
+    );
+
+    return {
+      close: () => watcher.close(),
+      pause: () => watcher.pause(),
+      getContextTimestamps: () => {
+        const dirTimestamps = watcher.getContextTimestamps();
+        for (const path of ignoredDirs) {
+          dirTimestamps.set(path, 1);
+        }
+        return dirTimestamps;
+      },
+      getFileTimestamps: () => {
+        const fileTimestamps = watcher.getFileTimestamps();
+        for (const path of ignoredFiles) {
+          fileTimestamps.set(path, 1);
+        }
+        return fileTimestamps;
+      }
+    };
+  }
+}
+
+class JupyterWatchIgnorePlugin {
+  apply(compiler) {
+    compiler.hooks.afterEnvironment.tap('WatchIgnorePlugin', () => {
+      compiler.watchFileSystem = new JupyterIgnoringWatchFileSystem(
+        compiler.watchFileSystem
+      );
+    });
+  }
+}
+
 const plugins = [
+  new JupyterWatchIgnorePlugin(),
   new DuplicatePackageCheckerPlugin({
     verbose: true,
     exclude(instance) {
@@ -120,7 +238,7 @@ const plugins = [
     }
   }),
   new HtmlWebpackPlugin({
-    template: path.join('templates', 'template.html'),
+    template: plib.join('templates', 'template.html'),
     title: jlab.name || 'JupyterLab'
   }),
   new webpack.HashedModuleIdsPlugin(),
@@ -135,10 +253,10 @@ module.exports = [
   {
     mode: 'development',
     entry: {
-      main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')]
+      main: ['whatwg-fetch', plib.resolve(buildDir, 'index.out.js')]
     },
     output: {
-      path: path.resolve(buildDir),
+      path: plib.resolve(buildDir),
       publicPath: '{{page_config.fullStaticUrl}}/',
       filename: '[name].[chunkhash].js'
     },
@@ -185,53 +303,14 @@ module.exports = [
       ]
     },
     watchOptions: {
-      ignored: function(localPath) {
-        localPath = path.resolve(localPath);
-        if (localPath in ignoreCache) {
-          return ignoreCache[localPath];
-        }
-
-        // Ignore files with certain patterns
-        var baseName = localPath.replace(/^.*[\\\/]/, ''); // eslint-disable-line
-        if (
-          ignorePatterns.some(function(rexp) {
-            console.error(`${localPath}: ${baseName.match(rexp)}`);
-            return baseName.match(rexp);
-          })
-        ) {
-          console.error(`${localPath}: true`);
-          return true;
-        }
-
-        // Limit the watched files to those in our local linked package dirs.
-        var ignore = true;
-        Object.keys(localLinked).some(function(name) {
-          // Bail if already found.
-          var rootPath = localLinked[name];
-          var contained = localPath.indexOf(rootPath + path.sep) !== -1;
-          if (localPath !== rootPath && !contained) {
-            console.error(`${localPath}: false`);
-            return false;
-          }
-          var rest = localPath.slice(rootPath.length);
-          if (rest.indexOf('node_modules') === -1) {
-            ignore = false;
-            maybeSync(localPath, name, rest);
-          }
-          console.error(`${localPath}: true`);
-          return true;
-        });
-        ignoreCache[localPath] = ignore;
-        console.error(`${localPath}: ${ignore}`);
-        return ignore;
-      },
-      poll: 100
+      ignored: /node_modules/,
+      poll: 333
     },
     node: {
       fs: 'empty'
     },
     bail: true,
-    devtool: 'source-map',
+    devtool: 'inline-source-map',
     externals: ['node-fetch', 'ws'],
     plugins,
     stats: {
