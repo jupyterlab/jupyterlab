@@ -1,3 +1,5 @@
+.. _css:
+
 CSS Patterns
 ------------
 
@@ -201,6 +203,8 @@ only the desired children.
 
 When in doubt, there is little harm done in parents adding selectors to
 children.
+
+.. _css-selectors:
 
 Commonly used CSS selectors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
