@@ -8,6 +8,7 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { Cell, MarkdownCell } from '@jupyterlab/cells';
 
 import { Signal, ISignal } from '@phosphor/signaling';
+import { Widget } from '@phosphor/widgets';
 
 import CodeMirror from 'codemirror';
 
@@ -23,8 +24,9 @@ export class NotebookSearchProvider implements ISearchProvider {
    *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: NotebookPanel): any {
-    const activeCell = searchTarget.content.activeCell;
+  getInitialQuery(searchTarget: Widget): any {
+    const notebookPanel = searchTarget as NotebookPanel;
+    const activeCell = notebookPanel.content.activeCell;
     const selection = (activeCell.editor as CodeMirrorEditor).doc.getSelection();
     // if there are newlines, just return empty string
     return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
@@ -41,9 +43,9 @@ export class NotebookSearchProvider implements ISearchProvider {
    */
   async startQuery(
     query: RegExp,
-    searchTarget: NotebookPanel
+    searchTarget: Widget
   ): Promise<ISearchMatch[]> {
-    this._searchTarget = searchTarget;
+    this._searchTarget = searchTarget as NotebookPanel;
     const cells = this._searchTarget.content.widgets;
 
     this._query = query;
