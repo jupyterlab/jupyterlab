@@ -935,9 +935,11 @@ You've completed the tutorial. Nicely done! If you want to keep
 learning, here are some suggestions about what to try next:
 
 -  Assign a hotkey to the *Random Astronomy Picture* command.
--  Make the image a link to the comic on https://apod.nasa.gov/apod/astropix.html.
+-  Make the image a link to the picture on the NASA website (URLs are of the form ``https://apod.nasa.gov/apod/apYYMMDD.html``).
+-  Add the image description to the panel.
+-  Make the image title and description update after the image loads so that the picture and description are always synced.
+-  Give users the ability to pin pictures in separate, permanent panels.
 -  Push your extension git repository to GitHub.
--  Give users the ability to pin comics in separate, permanent panels.
 -  Learn how to write :ref:`other kinds of
    extensions <developer_extensions>`.
 
