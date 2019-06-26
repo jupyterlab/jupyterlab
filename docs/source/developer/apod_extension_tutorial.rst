@@ -280,6 +280,10 @@ top of the file.
 .. code:: typescript
 
     import {
+      ICommandPalette, MainAreaWidget
+    } from '@jupyterlab/apputils';
+
+    import {
       Widget
     } from '@phosphor/widgets';
 
@@ -741,7 +745,7 @@ entire list of import statements looks like the following:
     } from '@jupyterlab/application';
 
     import {
-      ICommandPalette, WidgetTracker // new
+      ICommandPalette, MainAreaWidget, WidgetTracker // new
     } from '@jupyterlab/apputils';
 
     import {
@@ -825,19 +829,14 @@ Finally, rewrite the ``activate`` function so that it:
       // Add the command to the palette.
       palette.addItem({ command, category: 'Tutorial' });
 
-<<<<<<< HEAD:docs/source/developer/xkcd_extension_tutorial.rst
-      // Track and restore the widget state.
-      let tracker = new WidgetTracker({ namespace: 'xkcd' });
-      void restorer.restore(tracker, { command, name: () => 'xkcd' });
-=======
       // Track and restore the widget state
-      let tracker = new InstanceTracker<Widget>({ namespace: 'apod' });
+      let tracker = new WidgetTracker<MainAreaWidget<APODWidget>>({
+        namespace: 'apod'
+      });
       restorer.restore(tracker, {
         command,
-        args: () => { return {}; },
         name: () => 'apod'
       });
->>>>>>> 975c4838d... Update the extension tutorial to follow APOD:docs/source/developer/apod_extension_tutorial.rst
     };
 
 Rebuild your extension one last time and refresh your browser tab.
