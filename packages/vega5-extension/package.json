@@ -27,8 +27,7 @@
     "lib": "lib/"
   },
   "scripts": {
-    "build": "tsc -b && webpack",
-    "build:webpack": "webpack",
+    "build": "tsc -b",
     "clean": "rimraf lib",
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "npm run build",
@@ -44,10 +43,7 @@
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
     "typescript": "~3.5.1",
-    "vega": "^5.4.0",
-    "vega-embed": "^4.2.0",
-    "vega-lite": "^3.3.0",
-    "webpack": "^4.32.2"
+    "vega-embed": "^4.2.0"
   },
   "publishConfig": {
     "access": "public"
