@@ -1475,6 +1475,10 @@ class _AppHandler(object):
         for version, data in sorted(versions.items(),
                                     key=sort_key,
                                     reverse=True):
+            # skip deprecated versions
+            if 'deprecated' in data:
+                continue
+
             deps = data.get('dependencies', {})
             errors = _validate_compatibility(name, deps, core_data)
             if not errors:
@@ -1512,6 +1516,11 @@ class _AppHandler(object):
             for version, data in sorted(versions.items(),
                                         key=sort_key,
                                         reverse=True):
+
+                # skip deprecated versions
+                if 'deprecated' in data:
+                    continue
+
                 deps = data.get('dependencies', {})
                 errors = _validate_compatibility(name, deps, core_data)
                 if not errors:
