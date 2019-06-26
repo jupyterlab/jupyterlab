@@ -1475,14 +1475,17 @@ class _AppHandler(object):
         for version, data in sorted(versions.items(),
                                     key=sort_key,
                                     reverse=True):
-            # skip deprecated versions
-            if 'deprecated' in data:
-                continue
-
             deps = data.get('dependencies', {})
             errors = _validate_compatibility(name, deps, core_data)
             if not errors:
                 # Found a compatible version
+                # skip deprecated versions
+                if 'deprecated' in data:
+                    self.logger.debug(
+                        'Disregarding compatible version of package as it is deprecated: %s@%s'
+                        % (name, version)
+                    )
+                    continue
                 # Verify that the version is a valid extension.
                 with TemporaryDirectory() as tempdir:
                     info = self._extract_package(
