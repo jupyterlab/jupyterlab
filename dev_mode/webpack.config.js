@@ -85,7 +85,8 @@ function maybeSync(localPath, name, rest) {
 
 /**
  * A filter function set up to exclude all files that are not
- * in a package contained by the Jupyterlab repo
+ * in a package contained by the Jupyterlab repo. Used to ignore
+ * files during a `--watch` build.
  */
 function ignored(path) {
   path = plib.resolve(path);

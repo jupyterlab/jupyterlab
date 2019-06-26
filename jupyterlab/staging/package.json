@@ -211,6 +211,7 @@
     ],
     "version": "1.0.0rc0",
     "linkedPackages": {},
+    "watchedPackages": {},
     "staticDir": "../static"
   }
 }
