@@ -4,11 +4,14 @@ Common Extension Points
 -----------------------
 
 Most of the component parts of JupyterLab are designed to be extensible,
-and they provide public APIs via that can be requested in extensions via tokens.
+and they provide public APIs that can be requested in extensions via tokens.
 A list of tokens that extension authors can request is documented in :ref:`tokens`.
 
 This is intended to be a guide for some of JupyterLab's most commonly-used extension points.
 However, it is not an exhaustive account of how to extend the application components,
+and more detailed descriptions of their public APIs may be found in the
+`JupyterLab <http://jupyterlab.github.io/jupyterlab/index.html>`__ and
+`Phosphor <http://phosphorjs.github.io/docs.html>`__ API documentation.
 
 
 Commands

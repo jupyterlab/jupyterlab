@@ -330,7 +330,7 @@ might want to use them in your extensions.
   the application "dirty" status, which asks the user for confirmation before leaving.
 - ``@jupyterlab/application:ILabShell``: An interface to the JupyterLab shell.
   The top-level application object also has a reference to the shell, but it has a restricted
-  interface in order to be agnostic to different spins on the applcation.
+  interface in order to be agnostic to different spins on the application.
   Use this to get more detailed information about currently active widgets and layout state.
 - ``@jupyterlab/application:ILayoutRestorer``: An interface to the application layout
   restoration functionality. Use this to have your activities restored across
@@ -417,7 +417,7 @@ might want to use them in your extensions.
 - ``@jupyterlab/tooltip:ITooltipManager``: An interface to the tooltip manager for the application.
   Use this to allow your extension to invoke a tooltip.
 - ``@jupyterlab/vdom:IVDOMTracker``: A widget tracker for virtual DOM (VDOM) documents.
-  Use the to iterate over and interact with VDOM instances created by the application.
+  Use this to iterate over and interact with VDOM instances created by the application.
 
 Standard Extension Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
