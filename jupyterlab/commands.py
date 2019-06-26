@@ -780,6 +780,7 @@ class _AppHandler(object):
         except URLError:
             return False
         if latest is None:
+            self.logger.warn('No compatible version found for %s!' % (name,))
             return False
         if latest == self.info['extensions'][name]['version']:
             self.logger.info('Extension %r already up to date' % name)
