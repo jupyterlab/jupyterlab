@@ -440,11 +440,12 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
   // We avoid a click event by calling preventDefault in mousedown, and
   // we bind the button action to `mousedown`.
   const handleMouseDown = (event: React.MouseEvent) => {
-    // Fire action only when left button is pressed.
-    if (event.button === 0) {
-      event.preventDefault();
-      props.onClick();
-    }
+    event.preventDefault();
+  };
+
+  const handleMouseUp = (event: React.MouseEvent) => {
+    event.preventDefault();
+    props.onClick();
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -463,6 +464,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
       }
       disabled={props.enabled === false}
       onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
       onKeyDown={handleKeyDown}
       title={props.tooltip || props.iconLabel}
       minimal
