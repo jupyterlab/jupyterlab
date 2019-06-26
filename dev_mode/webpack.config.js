@@ -62,6 +62,7 @@ const plugins = [
     }
   }),
   new HtmlWebpackPlugin({
+    chunksSortMode: 'none',
     template: plib.join('templates', 'template.html'),
     title: jlab.name || 'JupyterLab'
   }),
