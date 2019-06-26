@@ -443,7 +443,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
     event.preventDefault();
   };
 
-  const handleMouseUp = (event: React.MouseEvent) => {
+  const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
     props.onClick();
   };
@@ -464,7 +464,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
       }
       disabled={props.enabled === false}
       onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
+      onClick={handleClick}
       onKeyDown={handleKeyDown}
       title={props.tooltip || props.iconLabel}
       minimal
