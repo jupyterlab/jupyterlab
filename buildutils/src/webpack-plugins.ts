@@ -6,7 +6,7 @@
 import * as webpack from 'webpack';
 import * as fs from 'fs-extra';
 
-export namespace Webpack {
+export namespace WPPlugin {
   /**
    * A WebPack Plugin that copies the assets to the static directory
    */

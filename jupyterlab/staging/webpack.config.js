@@ -11,7 +11,8 @@ var webpack = require('webpack');
 var DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
 var Visualizer = require('webpack-visualizer-plugin');
 
-var utils = require('@jupyterlab/buildutils');
+var Build = require('@jupyterlab/buildutils').Build;
+var WPPlugin = require('@jupyterlab/buildutils').WPPlugin;
 var package_data = require('./package.json');
 
 // Handle the extensions.
@@ -28,7 +29,7 @@ if (fs.existsSync(buildDir)) {
 fs.ensureDirSync(buildDir);
 
 // Build the assets
-var extraConfig = utils.Build.ensureAssets({
+var extraConfig = Build.ensureAssets({
   packageNames: packageNames,
   output: jlab.outputDir
 });
@@ -130,9 +131,9 @@ const plugins = [
   new webpack.HashedModuleIdsPlugin(),
 
   // custom plugin for ignoring files during a `--watch` build
-  new utils.Webpack.FilterWatchIgnorePlugin(ignored),
+  new WPPlugin.FilterWatchIgnorePlugin(ignored),
   // custom plugin that copies the assets to the static directory
-  new utils.Webpack.FrontEndPlugin(buildDir, jlab.staticDir)
+  new WPPlugin.FrontEndPlugin(buildDir, jlab.staticDir)
 ];
 
 if (process.argv.includes('--analyze')) {
