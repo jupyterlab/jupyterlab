@@ -10,6 +10,7 @@ const package_data = require('./package.json');
 
 // get the data from ./package.json
 const jlab = package_data.jupyterlab;
+const buildDir = plib.resolve(jlab.buildDir);
 
 // Set up variables for the watch mode ignore plugins
 let watched = {};
