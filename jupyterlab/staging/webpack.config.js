@@ -52,7 +52,7 @@ fs.copySync(
 // Set up variables for the watch mode ignore plugins
 let watched = {};
 let ignoreCache = Object.create(null);
-Object.keys(jlab.watchedPackages).forEach(function(name) {
+Object.keys(jlab.linkedPackages).forEach(function(name) {
   if (name in watched) return;
   const localPkgPath = require.resolve(plib.join(name, 'package.json'));
   watched[name] = plib.dirname(localPkgPath);
@@ -66,7 +66,7 @@ function maybeSync(localPath, name, rest) {
   if (!stats.isFile(localPath)) {
     return;
   }
-  const source = fs.realpathSync(plib.join(jlab.watchedPackages[name], rest));
+  const source = fs.realpathSync(plib.join(jlab.linkedPackages[name], rest));
   if (source === fs.realpathSync(localPath)) {
     return;
   }

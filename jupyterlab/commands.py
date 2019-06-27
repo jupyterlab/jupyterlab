@@ -4,7 +4,6 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 import contextlib
-from copy import deepcopy
 from distutils.version import LooseVersion
 import errno
 import glob
@@ -935,7 +934,6 @@ class _AppHandler(object):
         info['disabled'] = page_config.get('disabledExtensions', [])
         info['local_extensions'] = self._get_local_extensions()
         info['linked_packages'] = self._get_linked_packages()
-        info['watched_packages'] = deepcopy(info['linked_packages'])
         info['app_extensions'] = app = []
         info['sys_extensions'] = sys = []
         for (name, data) in extensions.items():
@@ -1073,7 +1071,6 @@ class _AppHandler(object):
         data = self.info['core_data']
         local = self.info['local_extensions']
         linked = self.info['linked_packages']
-        watched = self.info['watched_packages']
         extensions = self.info['extensions']
         jlab = data['jupyterlab']
 
@@ -1085,12 +1082,10 @@ class _AppHandler(object):
             return path
 
         jlab['linkedPackages'] = dict()
-        jlab['watchedPackages'] = dict()
 
         # Handle local extensions.
         for (key, source) in local.items():
             jlab['linkedPackages'][key] = source
-            jlab['watchedPackages'][key] = source
 
         # Handle linked packages.
         for (key, item) in linked.items():
@@ -1098,10 +1093,6 @@ class _AppHandler(object):
             path = pjoin(path, item['filename'])
             data['dependencies'][key] = format_path(path)
             jlab['linkedPackages'][key] = item['source']
-
-        # Handle watched packages.
-        for (key, item) in watched.items():
-            jlab['watchedPackages'][key] = item['source']
 
         # Handle extensions
         compat_errors = self._get_extension_compat()

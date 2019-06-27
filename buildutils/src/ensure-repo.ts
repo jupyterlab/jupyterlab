@@ -144,7 +144,6 @@ function ensureJupyterlab(): string[] {
   corePackage.jupyterlab.extensions = {};
   corePackage.jupyterlab.mimeExtensions = {};
   corePackage.jupyterlab.linkedPackages = {};
-  corePackage.jupyterlab.watchedPackages = {};
   corePackage.dependencies = {};
 
   let singletonPackages = corePackage.jupyterlab.singletonPackages;
@@ -180,8 +179,6 @@ function ensureJupyterlab(): string[] {
 
     // Make sure it is included as a dependency.
     corePackage.dependencies[data.name] = '^' + String(data.version);
-    let relativePath = `../packages/${path.basename(pkgPath)}`;
-    corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
     // Add its dependencies to the core dependencies if they are in the
     // singleton packages or vendor packages.
     let deps = data.dependencies || {};
@@ -223,7 +220,7 @@ function ensureJupyterlab(): string[] {
 
     // watch all src, build, and test files in the Jupyterlab project
     let relativePath = `../${path.relative(basePath, pkgPath)}`;
-    corePackage.jupyterlab.watchedPackages[data.name] = relativePath;
+    corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
   });
 
   // Write the package.json back to disk.
