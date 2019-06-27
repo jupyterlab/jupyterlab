@@ -425,12 +425,12 @@ now see a picture in the panel when it opens.
 
 |Single apod extension panel|
 
-Note that the comic is not centered in the panel nor does the panel
-scroll if the comic is larger than the panel area. Also note that the
-comic does not update no matter how many times you close and reopen the
+Note that the image is not centered in the panel nor does the panel
+scroll if the image is larger than the panel area. Also note that the
+image does not update no matter how many times you close and reopen the
 panel. You'll address both of these problems in the upcoming sections.
 
-If you don't see a comic at all, compare your code with the
+If you don't see a image at all, compare your code with the
 `02-show-a-comic
 tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-02-show-a-picture>`__
 in the reference project. When it's working, make another git commit.
@@ -443,7 +443,7 @@ in the reference project. When it's working, make another git commit.
 Improve the widget behavior
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Center the comic, add attribution, and error messaging
+Center the image, add attribution, and error messaging
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Open ``style/index.css`` in our extension project directory for editing.
@@ -525,10 +525,10 @@ The beginning of the function should read like the following:
 
 Build your extension if necessary (``jlpm run build``) and refresh your
 JupyterLab browser tab. Invoke the *Random Astronomy Picture* command and
-confirm the comic is centered with the copyright information below it. Resize
-the browser window or the panel so that the comic is larger than the
+confirm the image is centered with the copyright information below it. Resize
+the browser window or the panel so that the image is larger than the
 available area. Make sure you can scroll the panel over the entire area
-of the comic.
+of the image.
 
 |Styled apod panel with attribution|
 
@@ -542,7 +542,7 @@ When everything is working as expected, make another commit.
     git add .
     git commit -m 'Add styling, attribution, error handling'
 
-Show a new comic on demand
+Show a new image on demand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``activate`` function has grown quite long, and there's still more
@@ -648,13 +648,13 @@ file.
     };
 
 You've written all of the code before. All you've done is restructure it
-to use instance variables and move the comic request to its own
+to use instance variables and move the image request to its own
 function.
 
 Next move the remaining logic in ``activate`` to a new, top-level
 function just below the ``APODWidget`` class definition. Modify the code
 to create a widget when one does not exist in the main JupyterLab area
-or to refresh the comic in the exist widget when the command runs again.
+or to refresh the image in the exist widget when the command runs again.
 The code for the ``activate`` function should read as follows after
 these changes:
 
@@ -711,7 +711,7 @@ Now build the extension again and refresh the JupyterLab browser tab.
 Run the *Random Astronomy Picture* command more than once without closing the
 panel. The picture should update each time you execute the command. Close
 the panel, run the command, and it should both reappear and show a new
-comic.
+image.
 
 If anything is amiss, compare your code with the
 `04-refactor-and-refresh
@@ -721,7 +721,7 @@ to debug. Once it's working properly, commit it.
 .. code:: bash
 
     git add .
-    git commit -m 'Refactor, refresh comic'
+    git commit -m 'Refactor, refresh image'
 
 Restore panel state when the browser refreshes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -839,7 +839,7 @@ Finally, rewrite the ``activate`` function so that it:
 
 Rebuild your extension one last time and refresh your browser tab.
 Execute the *Random Astronomy Picture* command and validate that the panel
-appears with a comic in it. Refresh the browser tab again. You should
+appears with a image in it. Refresh the browser tab again. You should
 see an Astronomy Picture panel appear immediately without running the command. Close
 the panel and refresh the browser tab. You should not see an Astronomy Picture tab
 after the refresh.
