@@ -91,13 +91,13 @@ function maybeSync(localPath, name, rest) {
 function ignored(path) {
   path = plib.resolve(path);
   if (path in ignoreCache) {
+    // Bail if already found.
     return ignoreCache[path];
   }
 
   // Limit the watched files to those in our local linked package dirs.
   let ignore = true;
   Object.keys(watched).some(name => {
-    // Bail if already found.
     const rootPath = watched[name];
     const contained = path.indexOf(rootPath + plib.sep) !== -1;
     if (path !== rootPath && !contained) {
@@ -195,7 +195,6 @@ module.exports = [
       ]
     },
     watchOptions: {
-      ignored: /node_modules/,
       poll: 333
     },
     node: {

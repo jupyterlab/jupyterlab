@@ -15,6 +15,7 @@ data['jupyterlab']['buildDir'] = './build';
 data['jupyterlab']['outputDir'] = '..';
 data['jupyterlab']['staticDir'] = '../static';
 data['jupyterlab']['linkedPackages'] = {};
+data['jupyterlab']['watchedPackages'] = {};
 
 let staging = './jupyterlab/staging';
 utils.writePackageData(path.join(staging, 'package.json'), data);
