@@ -780,6 +780,7 @@ class _AppHandler(object):
         except URLError:
             return False
         if latest is None:
+            self.logger.warn('No compatible version found for %s!' % (name,))
             return False
         if latest == self.info['extensions'][name]['version']:
             self.logger.info('Extension %r already up to date' % name)
@@ -1475,14 +1476,17 @@ class _AppHandler(object):
         for version, data in sorted(versions.items(),
                                     key=sort_key,
                                     reverse=True):
-            # skip deprecated versions
-            if 'deprecated' in data:
-                continue
-
             deps = data.get('dependencies', {})
             errors = _validate_compatibility(name, deps, core_data)
             if not errors:
                 # Found a compatible version
+                # skip deprecated versions
+                if 'deprecated' in data:
+                    self.logger.debug(
+                        'Disregarding compatible version of package as it is deprecated: %s@%s'
+                        % (name, version)
+                    )
+                    continue
                 # Verify that the version is a valid extension.
                 with TemporaryDirectory() as tempdir:
                     info = self._extract_package(
