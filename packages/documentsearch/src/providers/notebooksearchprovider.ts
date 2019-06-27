@@ -108,7 +108,7 @@ export class NotebookSearchProvider implements ISearchProvider {
       });
     }
 
-    this._currentMatch = await this._stepNext();
+    this._currentMatch = await this._stepNext(searchTarget.content.activeCell);
 
     return allMatches;
   }
@@ -173,7 +173,9 @@ export class NotebookSearchProvider implements ISearchProvider {
    * @returns A promise that resolves once the action has completed.
    */
   async highlightNext(): Promise<ISearchMatch | undefined> {
-    this._currentMatch = await this._stepNext();
+    this._currentMatch = await this._stepNext(
+      this._searchTarget.content.activeCell
+    );
     return this._currentMatch;
   }
 
@@ -183,7 +185,10 @@ export class NotebookSearchProvider implements ISearchProvider {
    * @returns A promise that resolves once the action has completed.
    */
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
-    this._currentMatch = await this._stepNext(true);
+    this._currentMatch = await this._stepNext(
+      this._searchTarget.content.activeCell,
+      true
+    );
     return this._currentMatch;
   }
 
@@ -270,11 +275,11 @@ export class NotebookSearchProvider implements ISearchProvider {
   readonly isReadOnly = false;
 
   private async _stepNext(
+    activeCell: Cell,
     reverse = false,
     steps = 0
   ): Promise<ISearchMatch | undefined> {
     const notebook = this._searchTarget.content;
-    const activeCell: Cell = notebook.activeCell;
     const cellIndex = notebook.widgets.indexOf(activeCell);
     const numCells = notebook.widgets.length;
     const { provider } = this._cmSearchProviders[cellIndex];
@@ -293,11 +298,11 @@ export class NotebookSearchProvider implements ISearchProvider {
       if (steps === numCells) {
         return undefined;
       }
-      notebook.activeCellIndex =
+      const nextIndex =
         ((reverse ? cellIndex - 1 : cellIndex + 1) + numCells) % numCells;
-      const editor = notebook.activeCell.editor as CodeMirrorEditor;
+      const editor = notebook.widgets[nextIndex].editor as CodeMirrorEditor;
       // move the cursor of the next cell to the start/end of the cell so it can
-      // search the whole thing
+      // search the whole thing (but don't scroll because we haven't found anything yet)
       const newPosCM = reverse
         ? CodeMirror.Pos(editor.lastLine())
         : CodeMirror.Pos(editor.firstLine(), 0);
@@ -305,10 +310,11 @@ export class NotebookSearchProvider implements ISearchProvider {
         line: newPosCM.line,
         column: newPosCM.ch
       };
-      editor.setCursorPosition(newPos);
-      return this._stepNext(reverse, steps + 1);
+      editor.setCursorPosition(newPos, { scroll: false });
+      return this._stepNext(notebook.widgets[nextIndex], reverse, steps + 1);
     }
 
+    notebook.activeCellIndex = cellIndex;
     return match;
   }
 
