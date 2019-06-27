@@ -7,18 +7,15 @@ JupyterLab extensions add features to the user experience. This page
 describes how to create one type of extension, an *application plugin*,
 that:
 
--  Adds a "Random `Astronomy Picture of the Day <https://apod.nasa.gov/apod/astropix.html>`__" command to the
+-  Adds a "Random `Astronomy Picture <https://apod.nasa.gov/apod/astropix.html>`__" command to the
    *command palette* sidebar
--  Fetches the comic image and metadata when activated
+-  Fetches the image and metadata when activated
 -  Shows the image and metadata in a tab panel
 
 By working through this tutorial, you'll learn:
 
--  How to setup an extension development environment from scratch on a
-   Linux or OSX machine.
-
-   -  Windows users: You'll need to modify the commands slightly.
-
+-  How to set up an extension development environment from scratch on a
+   Linux or OSX machine. (You'll need to modify the commands slightly if you are on Windows.)
 -  How to start an extension project from
    `jupyterlab/extension-cookiecutter-ts <https://github.com/jupyterlab/extension-cookiecutter-ts>`__
 -  How to iteratively code, build, and load your extension in JupyterLab
@@ -29,8 +26,8 @@ By working through this tutorial, you'll learn:
 
 Sound like fun? Excellent. Here we go!
 
-Setup a development environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Set up a development environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Install conda using miniconda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -47,20 +44,21 @@ Next create a conda environment that includes:
 
 1. the latest release of JupyterLab
 2. `cookiecutter <https://github.com/audreyr/cookiecutter>`__, the tool
-   you'll use to bootstrap your extension project structure; this is a Python tool, install with e.g. `pip install cookiecutter`
+   you'll use to bootstrap your extension project structure (this is a Python tool
+   which we'll install using conda below).
 3. `NodeJS <https://nodejs.org>`__, the JavaScript runtime you'll use to
    compile the web assets (e.g., TypeScript, CSS) for your extension
 4. `git <https://git-scm.com>`__, a version control system you'll use to
    take snapshots of your work as you progress through this tutorial
 
-It's best practice to leave the root conda environment, the one created
-by the miniconda installer, untouched and install your project specific
+It's best practice to leave the root conda environment (i.e., the environment created
+by the miniconda installer) untouched and install your project-specific
 dependencies in a named conda environment. Run this command to create a
 new environment named ``jupyterlab-ext``.
 
 .. code:: bash
 
-    conda create -n jupyterlab-ext -c conda-forge --override-channels nodejs jupyterlab cookiecutter git
+    conda create -n jupyterlab-ext -c conda-forge --override-channels jupyterlab cookiecutter nodejs git
 
 Now activate the new environment so that all further commands you run
 work out of that environment.
@@ -76,8 +74,8 @@ before you can work with the tools you installed in the
 Create a repository
 ~~~~~~~~~~~~~~~~~~~
 
-Create a new repository for your extension. For example, on
-`GitHub <https://help.github.com/articles/create-a-repo/>`__. This is an
+Create a new repository for your extension (see, for example, the
+`GitHub instructions <https://help.github.com/articles/create-a-repo/>`__. This is an
 optional step but highly recommended if you want to share your
 extension.
 
@@ -104,8 +102,8 @@ cookiecutter prompts.
     project_short_description [A JupyterLab extension.]: Show a random NASA Astronomy Picture of the Day in a JupyterLab panel
     repository [https://github.com/my_name/jupyterlab_myextension]: https://github.com/my_name/jupyterlab_apod
 
-Note: if not using a repository, leave the field blank. You can come
-back and edit the repository links in the ``package.json`` file later.
+Note: if not using a repository, leave the repository field blank. You can come
+back and edit the repository field in the ``package.json`` file later.
 
 Change to the directory the cookiecutter created and list the files.
 
@@ -157,7 +155,7 @@ See the initial extension in action
 After building with your extension, JupyterLab should open in your
 default web browser.
 
-In that window open the JavaScript console
+In that browser window, open the JavaScript console
 by following the instructions for your browser:
 
 -  `Accessing the DevTools in Google
@@ -167,8 +165,8 @@ by following the instructions for your browser:
 
 After you reload the page with the console open, you should see a message that says
 ``JupyterLab extension jupyterlab_apod is activated!`` in the console.
-If you do, congrats, you're ready to start modifying the the extension!
-If not, go back, make sure you didn't miss a step, and `reach
+If you do, congratulations, you're ready to start modifying the extension!
+If not, go back make sure you didn't miss a step, and `reach
 out <https://github.com/jupyterlab/jupyterlab/blob/master/README.md#getting-help>`__ if you're stuck.
 
 Note: Leave the terminal running the ``jupyter lab --watch`` command
@@ -330,7 +328,7 @@ code:
 The first new block of code creates a ``MainAreaWidget`` instance, assigns it a
 unique ID, gives it a label that will appear as its tab title, makes
 the tab closable by the user, and adds a empty content ``Widget`` as its child. 
-The second block of code add a new command labeled *Random Astronomy Picture* 
+The second block of code adds a new command labeled *Random Astronomy Picture* 
 to JupyterLab. When the command executes,
 it attaches the widget to the main display area if it is not already
 present and then makes it the active tab. The last new line of code adds
@@ -946,8 +944,8 @@ learning, here are some suggestions about what to try next:
 
 TODO: All images need to be updated
 
-.. |Completed apod extension screenshot| image:: xkcd_tutorial_complete.png
-.. |Empty apod extension panel| image:: xkcd_tutorial_empty.png
-.. |Single apod extension panel| image:: xkcd_tutorial_single.png
-.. |Styled apod panel with attribution| image:: xkcd_tutorial_complete.png
+.. |Completed apod extension screenshot| image:: extension_tutorial_complete.png
+.. |Empty apod extension panel| image:: extension_tutorial_empty.png
+.. |Single apod extension panel| image:: extension_tutorial_single.png
+.. |Styled apod panel with attribution| image:: extension_tutorial_complete.png
 .. |Extension page on npmjs.com| image:: xkcd_tutorial_npm.png
