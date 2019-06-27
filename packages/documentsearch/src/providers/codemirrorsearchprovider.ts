@@ -36,23 +36,23 @@ import { MainAreaWidget } from '@jupyterlab/apputils';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ISignal, Signal } from '@phosphor/signaling';
-import { Widget } from '@phosphor/widgets';
 
 import * as CodeMirror from 'codemirror';
 import { FileEditor } from '@jupyterlab/fileeditor';
+import { Widget } from '@phosphor/widgets';
 
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
-export class CodeMirrorSearchProvider implements ISearchProvider {
+export class CodeMirrorSearchProvider
+  implements ISearchProvider<MainAreaWidget> {
   /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
    *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: Widget): any {
-    const target = searchTarget as MainAreaWidget;
-    const content = target.content as FileEditor;
+  getInitialQuery(searchTarget: MainAreaWidget): any {
+    const content = searchTarget.content as FileEditor;
     const cm = content.editor as CodeMirrorEditor;
     const selection = cm.doc.getSelection();
     // if there are newlines, just return empty string
@@ -70,7 +70,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
    */
   async startQuery(
     query: RegExp,
-    searchTarget: Widget
+    searchTarget: MainAreaWidget
   ): Promise<ISearchMatch[]> {
     if (!CodeMirrorSearchProvider.canSearchOn(searchTarget)) {
       throw new Error('Cannot find Codemirror instance to search');
@@ -78,8 +78,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
 
     // Extract the codemirror object from the editor widget. Each of these casts
     // is justified by the canSearchOn call above.
-    const target = searchTarget as MainAreaWidget;
-    const content = target.content as FileEditor;
+    const content = searchTarget.content as FileEditor;
     this._cm = content.editor as CodeMirrorEditor;
     return this._startQuery(query);
   }

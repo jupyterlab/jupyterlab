@@ -12,8 +12,8 @@ import { Widget } from '@phosphor/widgets';
 /**
  * Represents a search on a single widget.
  */
-export class SearchInstance implements IDisposable {
-  constructor(widget: Widget, searchProvider: ISearchProvider) {
+export class SearchInstance<T extends Widget> implements IDisposable {
+  constructor(widget: T, searchProvider: ISearchProvider<T>) {
     this._widget = widget;
     this._activeProvider = searchProvider;
 
@@ -189,7 +189,7 @@ export class SearchInstance implements IDisposable {
     this._updateDisplay();
   }
 
-  private _widget: Widget;
+  private _widget: T;
   private _displayState: IDisplayState = {
     currentIndex: 0,
     totalMatches: 0,
@@ -205,7 +205,7 @@ export class SearchInstance implements IDisposable {
     replaceEntryShown: false
   };
   private _displayUpdateSignal = new Signal<this, IDisplayState>(this);
-  private _activeProvider: ISearchProvider;
+  private _activeProvider: ISearchProvider<T>;
   private _searchWidget: Widget;
   private _isDisposed = false;
   private _disposed = new Signal<this, void>(this);

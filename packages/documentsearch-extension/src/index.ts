@@ -86,7 +86,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     registry.register('jp-notebookSearchProvider', NotebookSearchProvider);
     registry.register('jp-codeMirrorSearchProvider', CodeMirrorSearchProvider);
 
-    const activeSearches = new Map<string, SearchInstance>();
+    const activeSearches = new Map<string, SearchInstance<any>>();
 
     const startCommand: string = 'documentsearch:start';
     const nextCommand: string = 'documentsearch:highlightNext';

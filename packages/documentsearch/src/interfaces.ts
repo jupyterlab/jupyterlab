@@ -97,15 +97,15 @@ export interface ISearchMatch {
  * This interface is meant to enforce that SearchProviders implement the static
  * canSearchOn function.
  */
-export interface ISearchProviderConstructor {
-  new (): ISearchProvider;
+export interface ISearchProviderConstructor<T extends Widget> {
+  new (): ISearchProvider<T>;
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
   canSearchOn(domain: Widget): boolean;
 }
 
-export interface ISearchProvider {
+export interface ISearchProvider<T extends Widget> {
   /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
@@ -114,7 +114,7 @@ export interface ISearchProvider {
    *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: Widget): any;
+  getInitialQuery(searchTarget: T): any;
   /**
    * Initialize the search using the provided options.  Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
@@ -124,7 +124,7 @@ export interface ISearchProvider {
    *
    * @returns A promise that resolves with a list of all matches
    */
-  startQuery(query: RegExp, searchTarget: Widget): Promise<ISearchMatch[]>;
+  startQuery(query: RegExp, searchTarget: T): Promise<ISearchMatch[]>;
 
   /**
    * Clears state of a search provider to prepare for startQuery to be called
@@ -179,7 +179,7 @@ export interface ISearchProvider {
   /**
    * Signal indicating that something in the search has changed, so the UI should update
    */
-  readonly changed: ISignal<ISearchProvider, void>;
+  readonly changed: ISignal<ISearchProvider<T>, void>;
 
   /**
    * The current index of the selected match.

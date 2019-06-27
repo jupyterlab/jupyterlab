@@ -4,12 +4,14 @@ import { ISearchProvider, ISearchMatch } from '@jupyterlab/documentsearch';
 import { CSVViewer } from '@jupyterlab/csvviewer';
 import { IDocumentWidget, DocumentWidget } from '@jupyterlab/docregistry';
 import { Signal, ISignal } from '@phosphor/signaling';
+import { Widget } from '@phosphor/widgets';
 
-export class CSVSearchProvider implements ISearchProvider {
+export class CSVSearchProvider
+  implements ISearchProvider<IDocumentWidget<CSVViewer>> {
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
-  static canSearchOn(domain: any): boolean {
+  static canSearchOn(domain: Widget): boolean {
     // check to see if the CMSearchProvider can search on the
     // first cell, false indicates another editor is present
     return (
