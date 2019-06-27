@@ -431,8 +431,8 @@ image does not update no matter how many times you close and reopen the
 panel. You'll address both of these problems in the upcoming sections.
 
 If you don't see a image at all, compare your code with the
-`02-show-a-comic
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-02-show-a-picture>`__
+`02-show-an-image
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-02-show-an-image>`__
 in the reference project. When it's working, make another git commit.
 
 .. code:: bash

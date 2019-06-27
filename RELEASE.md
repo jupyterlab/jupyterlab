@@ -126,7 +126,7 @@ the next release:
 - Clone the repo if you don't have it
 
 ```bash
-git clone git@github.com:jupyterlab/jupyterlab_xkcd.git
+git clone git@github.com:jupyterlab/jupyterlab_apod.git
 ```
 
 #### Simple updates by rebasing
@@ -157,8 +157,8 @@ git rm -rf .
 git clean -dfx
 cookiecutter path-to-local-extension-cookiecutter-ts
 # Fill in the values from the previous branch package.json initial commit
-cp -r jupyterlab_xkcd/ .
-rm -rf jupyterlab_xkcd
+cp -r jupyterlab_apod/ .
+rm -rf jupyterlab_apod
 ```
 
 - Create a new PR in JupyterLab.
@@ -168,14 +168,14 @@ rm -rf jupyterlab_xkcd
   file from the previous branch, as well as the `package.json` fields up to
   `license`. Bump the version number in preparation for publishing to npm.
 
-#### Publishing xkcd tutorial changes
+#### Publishing extension tutorial changes
 
 - Replace the tag references in the tutorial with the new branch number, e.g.
-  replace `0.28-` with `0.29-`. Prefix the new tags with the branch name, e.g.
-  `0.28-01-show-a-panel`
+  replace `1.0-` with `1.1-`. Prefix the new tags with the branch name, e.g.
+  `1.0-01-show-a-panel`
   ```bash
   git tag 0.XX-01-show-a-panel HEAD~5
-  git tag 0.XX-02-show-a-comic HEAD~4
+  git tag 0.XX-02-show-an-image HEAD~4
   git tag 0.XX-03-style-and-attribute HEAD~3
   git tag 0.XX-04-refactor-and-refresh HEAD~2
   git tag 0.XX-05-restore-panel-state HEAD~1
@@ -185,9 +185,9 @@ rm -rf jupyterlab_xkcd
   ```bash
   git push origin 0.XX --tags
   ```
-  Set the branch as the default branch (see `github.com/jupyterlab/jupyterlab_xkcd/settings/branches`).
+  Set the branch as the default branch (see `github.com/jupyterlab/jupyterlab_apod/settings/branches`).
 - If there were changes to the example in the documentation, submit a PR to JupyterLab
-- Publish the new `@jupyterlab/xkcd` npm package. Make sure to update the version
+- Publish the new `@jupyterlab/apod` npm package. Make sure to update the version
   number in the last commit of the branch.
   ```bash
   npm publish
