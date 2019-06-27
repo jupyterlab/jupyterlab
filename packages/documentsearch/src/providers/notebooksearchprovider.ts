@@ -110,7 +110,9 @@ export class NotebookSearchProvider implements ISearchProvider {
       });
     }
 
-    this._currentMatch = await this._stepNext(searchTarget.content.activeCell);
+    this._currentMatch = await this._stepNext(
+      this._searchTarget.content.activeCell
+    );
 
     return allMatches;
   }
