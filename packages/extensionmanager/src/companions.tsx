@@ -152,13 +152,13 @@ export function presentCompanions(
     </div>
   );
   return showDialog({
-    title: 'Kernel companions',
+    title: 'Kernel and Server Companions',
     body,
     buttons: [
       Dialog.cancelButton(),
       Dialog.okButton({
         label: 'OK',
-        caption: 'Install the Jupyterlab extension.'
+        caption: 'Install the JupyterLab extension.'
       })
     ]
   }).then(result => {
