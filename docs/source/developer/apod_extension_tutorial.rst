@@ -459,10 +459,13 @@ Add the following lines to it.
     }
 
 The first rule stacks content vertically within the widget panel and
-lets the panel scroll when the content overflows.
+lets the panel scroll when the content overflows. This CSS file is included
+on the page automatically by JupyterLab because the ``package.json`` file has
+a ``style`` field pointing to it. In general, you should import all of your styles
+into a single CSS file and put the path to that CSS file in the ``package.json`` file
+``style`` field.
 
-Return to the ``index.ts`` file. Note that there is already an import of
-the CSS file in the ``index.ts`` file. Modify the the ``activate``
+Return to the ``index.ts`` file. Modify the the ``activate``
 function to apply the CSS classes, the copyright information, and error handling
 for the API response.
 The beginning of the function should read like the following:
