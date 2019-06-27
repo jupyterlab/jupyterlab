@@ -15,14 +15,6 @@
       "tests/test-*",
       "testutils",
       "jupyterlab/tests/mock_packages/extension"
-    ],
-    "nohoist": [
-      "**/vega-embed",
-      "**/vega-lite",
-      "**/vega",
-      "**/vega-embed/**",
-      "**/vega-lite/**",
-      "**/vega/**"
     ]
   },
   "scripts": {
@@ -40,7 +32,9 @@
     "build:test": "lerna run build --scope \"@jupyterlab/test-*\" --concurrency 1",
     "build:testutils": "cd testutils && jlpm run build",
     "build:utils": "cd buildutils && jlpm run build",
-    "build:vega": "lerna run build:webpack --scope \"@jupyterlab/vega*-extension\" --concurrency 1",
+    "build:vega": "jlpm run build:vega:4 && jlpm run build:vega:5",
+    "build:vega:4": "cd prebuild/vega4 && jlpm && jlpm run build",
+    "build:vega:5": "cd prebuild/vega5 && jlpm && jlpm run build",
     "bump:js:major": "node buildutils/lib/bump-js-major.js",
     "bumpversion": "node buildutils/lib/bumpversion.js",
     "clean": "jlpm run clean:dev && jlpm run clean:packages",
