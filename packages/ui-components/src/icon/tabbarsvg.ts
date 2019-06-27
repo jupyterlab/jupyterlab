@@ -37,10 +37,11 @@ export class TabBarSvg<T> extends TabBar<T> {
       let title = this.titles[itab];
       let iconNode = tab.children ? (tab.children[0] as HTMLElement) : null;
 
-      if (iconNode) {
+      let iconName = defaultIconRegistry.resolveName(title.iconClass);
+      if (iconNode && iconName) {
         // add the svg node, if not already present
         defaultIconRegistry.icon({
-          name: title.iconClass,
+          name: iconName,
           className: '',
           container: iconNode,
           center: true,

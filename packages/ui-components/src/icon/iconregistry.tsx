@@ -9,6 +9,7 @@ import { camelize } from '../utils';
 import { IIconStyle, iconStyle, iconStyleFlat } from '../style/icon';
 
 import badSvg from '../../style/icons/bad.svg';
+import blankSvg from '../../style/icons/blank.svg';
 
 /**
  * The icon registry class.
@@ -20,8 +21,11 @@ export class IconRegistry {
     let icons = options.initialIcons || Icon.defaultIcons;
     this.addIcon(...icons);
 
-    // add the bad state icon
-    this.addIcon({ name: 'bad', svg: badSvg });
+    // add the bad state and blank icons
+    this.addIcon(
+      { name: 'bad', svg: badSvg },
+      { name: 'blank', svg: blankSvg }
+    );
   }
 
   addIcon(...icons: Icon.IModel[]): void {
@@ -47,15 +51,15 @@ export class IconRegistry {
   ): HTMLElement {
     const { name, className, title, container, ...propsStyle } = props;
 
-    // if name not in _svg, assume we've been handed a className in place of name
-    let resolvedName = this.resolveName(name);
+    // we may have been handed a className in place of name
+    let resolvedName = this.resolveName(name) || 'blank';
+
     if (
-      !resolvedName ||
-      (container &&
-        container.dataset.icon &&
-        container.dataset.icon === resolvedName)
+      container &&
+      container.dataset.icon &&
+      container.dataset.icon === resolvedName
     ) {
-      // bail if failing silently or icon node is already set
+      // bail if icon node is already set
       return;
     }
 
@@ -100,19 +104,13 @@ export class IconRegistry {
     const { name, className, title, tag, ...propsStyle } = props;
     const Tag = tag || 'div';
 
-    // if name not in _svg, assume we've been handed a className in place of name
-    let resolvedName = this.resolveName(name);
-    if (!resolvedName) {
-      // bail if failing silently
-      return;
-    }
-
-    let svg = this.svg(resolvedName);
+    // we may have been handed a className in place of name
+    let resolvedName = this.resolveName(name) || 'blank';
 
     return (
       <Tag
         className={classes(className, propsStyle ? iconStyle(propsStyle) : '')}
-        dangerouslySetInnerHTML={{ __html: svg }}
+        dangerouslySetInnerHTML={{ __html: this.svg(resolvedName) }}
       />
     );
   }
@@ -125,11 +123,12 @@ export class IconRegistry {
           return this._classNameToName[className];
         }
       }
-      // couldn't resolve name, mark as bad
       if (this._debug) {
+        // couldn't resolve name, mark as bad and warn
         console.error(`Invalid icon name: ${name}`);
         return 'bad';
       } else {
+        // couldn't resolve name, fail silently
         return '';
       }
     }
