@@ -179,8 +179,6 @@ function ensureJupyterlab(): string[] {
 
     // Make sure it is included as a dependency.
     corePackage.dependencies[data.name] = '^' + String(data.version);
-    let relativePath = `../packages/${path.basename(pkgPath)}`;
-    corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
     // Add its dependencies to the core dependencies if they are in the
     // singleton packages or vendor packages.
     let deps = data.dependencies || {};
@@ -209,6 +207,20 @@ function ensureJupyterlab(): string[] {
       }
       corePackage.jupyterlab[item + 's'][data.name] = ext;
     });
+  });
+
+  utils.getLernaPaths().forEach(pkgPath => {
+    let dataPath = path.join(pkgPath, 'package.json');
+    let data: any;
+    try {
+      data = utils.readJSONFile(dataPath);
+    } catch (e) {
+      return;
+    }
+
+    // watch all src, build, and test files in the Jupyterlab project
+    let relativePath = `../${path.relative(basePath, pkgPath)}`;
+    corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
   });
 
   // Write the package.json back to disk.
