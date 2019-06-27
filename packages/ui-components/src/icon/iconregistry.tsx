@@ -52,14 +52,14 @@ export class IconRegistry {
     const { name, className, title, container, ...propsStyle } = props;
 
     // we may have been handed a className in place of name
-    let resolvedName = this.resolveName(name) || 'blank';
-
+    let resolvedName = this.resolveName(name);
     if (
-      container &&
-      container.dataset.icon &&
-      container.dataset.icon === resolvedName
+      !resolvedName ||
+      (container &&
+        container.dataset.icon &&
+        container.dataset.icon === resolvedName)
     ) {
-      // bail if icon node is already set
+      // bail if failing silently or icon node is already set
       return;
     }
 
@@ -105,12 +105,13 @@ export class IconRegistry {
     const Tag = tag || 'div';
 
     // we may have been handed a className in place of name
-    let resolvedName = this.resolveName(name) || 'blank';
-
+    let resolvedName = this.resolveName(name);
     return (
       <Tag
         className={classes(className, propsStyle ? iconStyle(propsStyle) : '')}
-        dangerouslySetInnerHTML={{ __html: this.svg(resolvedName) }}
+        dangerouslySetInnerHTML={{
+          __html: resolvedName ? this.svg(resolvedName) : ''
+        }}
       />
     );
   }
