@@ -97,7 +97,7 @@ export interface ISearchMatch {
  * This interface is meant to enforce that SearchProviders implement the static
  * canSearchOn function.
  */
-export interface ISearchProviderConstructor<T extends Widget> {
+export interface ISearchProviderConstructor<T extends Widget = Widget> {
   new (): ISearchProvider<T>;
   /**
    * Report whether or not this provider has the ability to search on the given object
@@ -105,7 +105,7 @@ export interface ISearchProviderConstructor<T extends Widget> {
   canSearchOn(domain: Widget): boolean;
 }
 
-export interface ISearchProvider<T extends Widget> {
+export interface ISearchProvider<T extends Widget = Widget> {
   /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query

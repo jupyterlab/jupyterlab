@@ -12,7 +12,7 @@ import { Widget } from '@phosphor/widgets';
 /**
  * Represents a search on a single widget.
  */
-export class SearchInstance<T extends Widget> implements IDisposable {
+export class SearchInstance<T extends Widget = Widget> implements IDisposable {
   constructor(widget: T, searchProvider: ISearchProvider<T>) {
     this._widget = widget;
     this._activeProvider = searchProvider;
