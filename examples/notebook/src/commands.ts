@@ -75,7 +75,7 @@ export const SetupCommands = (
     execute: () => nbWidget.context.save()
   });
 
-  let searchInstance: SearchInstance;
+  let searchInstance: SearchInstance<NotebookPanel>;
   commands.addCommand(cmdIds.startSearch, {
     label: 'Find...',
     execute: () => {
