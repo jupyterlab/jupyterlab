@@ -439,6 +439,8 @@ video).
    :align: center
    :class: jp-screenshot
 
+   The in-progress extension, showing the `Astronomy Picture of the Day for 19 Jan 2014 <https://apod.nasa.gov/apod/ap140119.html>`__.
+
 Note that the image is not centered in the panel nor does the panel
 scroll if the image is larger than the panel area. Also note that the
 image does not update no matter how many times you close and reopen the
