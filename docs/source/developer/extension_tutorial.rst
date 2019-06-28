@@ -1,4 +1,4 @@
-.. _apod_extension_tutorial:
+.. _extension_tutorial:
 
 Let's Make an Astronomy Picture of the Day JupyterLab Extension
 ----------------------------------------------------------------
