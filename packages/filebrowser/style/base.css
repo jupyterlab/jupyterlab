@@ -256,7 +256,7 @@
   background-image: var(--jp-icon-python-selected);
 }
 
-.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-JSONIcon {
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-JsonIcon {
   background-image: var(--jp-icon-json-selected);
 }
 
@@ -268,7 +268,7 @@
   background-image: var(--jp-icon-r-selected);
 }
 
-.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-YAMLIcon {
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-YamlIcon {
   background-image: var(--jp-icon-yaml-selected);
 }
 
