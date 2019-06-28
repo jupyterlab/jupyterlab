@@ -22,7 +22,12 @@ By working through this tutorial, you'll learn:
 -  How to version control your work with git
 -  How to release your extension for others to enjoy
 
-|Completed apod extension screenshot|
+.. figure:: extension_tutorial_complete.png
+   :align: center
+   :class: jp-screenshot
+   :alt: The completed extension, showing the Astronomy Picture of the Day for 24 Jul 2015.
+
+   The completed extension, showing the `Astronomy Picture of the Day for 24 Jul 2015 <https://apod.nasa.gov/apod/ap150724.html>`__.
 
 Sound like fun? Excellent. Here we go!
 
@@ -76,7 +81,7 @@ Create a repository
 
 Create a new repository for your extension (see, for example, the
 `GitHub instructions <https://help.github.com/articles/create-a-repo/>`__. This is an
-optional step but highly recommended if you want to share your
+optional step, but highly recommended if you want to share your
 extension.
 
 Create an extension project
@@ -92,8 +97,9 @@ This will create a new folder for your extension in your current directory.
 
     cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts --checkout v1.0
 
-When prompted, enter values like the following for all of the
-cookiecutter prompts.
+When prompted, enter values like the following for all of the cookiecutter
+prompts (``apod`` stands for Astronomy Picture of the Day, the NASA service we
+are using to fetch pictures).
 
 ::
 
@@ -272,8 +278,7 @@ can open a third terminal, and run the ``jlpm run watch`` command from
 your extension directory, which will automatically compile the
 TypeScript files as they change.
 
-Now return to your editor. Add the following additional import to the
-top of the file.
+Now return to your editor. Modify the imports at the top of the file to add a few more imports:
 
 .. code:: typescript
 
@@ -285,7 +290,7 @@ top of the file.
       Widget
     } from '@phosphor/widgets';
 
-Install this dependency as well:
+Install this new dependency as well:
 
 .. code:: bash
 
@@ -325,13 +330,14 @@ code:
         palette.addItem({command, category: 'Tutorial'});
       }
 
-The first new block of code creates a ``MainAreaWidget`` instance, assigns it a
-unique ID, gives it a label that will appear as its tab title, makes
-the tab closable by the user, and adds a empty content ``Widget`` as its child. 
-The second block of code adds a new command labeled *Random Astronomy Picture* 
+The first new block of code creates a ``MainAreaWidget`` instance with an empty
+content ``Widget`` as its child. It also assigns the main area widget a unique
+ID, gives it a label that will appear as its tab title, and makes the tab
+closable by the user.
+The second block of code adds a new command with id ``apod:open`` and label *Random Astronomy Picture* 
 to JupyterLab. When the command executes,
 it attaches the widget to the main display area if it is not already
-present and then makes it the active tab. The last new line of code adds
+present and then makes it the active tab. The last new line of code uses the command id to add
 the command to the command palette in a section called *Tutorial*.
 
 Build your extension again using ``jlpm run build`` (unless you are using
@@ -346,7 +352,12 @@ launcher tabs so that the *Astronomy Picture* panel is still open but no longer
 active. Now run the *Random Astronomy Picture* command one more time. The
 single *Astronomy Picture* tab should come to the foreground.
 
-|Empty apod extension panel|
+.. figure:: extension_tutorial_empty.png
+   :align: center
+   :class: jp-screenshot
+   :alt: The in-progress extension, showing a blank panel.
+
+   The in-progress extension, showing a blank panel.
 
 If your widget is not behaving, compare your code with the reference
 project state at the `01-show-a-panel
@@ -362,9 +373,9 @@ carry on.
 Show a picture in the panel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You've got an empty panel. It's time to add a picture to it. Go back to
+You now have an empty panel. It's time to add a picture to it. Go back to
 your code editor. Add the following code below the lines that create a
-``Widget`` instance and above the lines that define the command.
+``MainAreaWidget`` instance and above the lines that define the command.
 
 .. code-block:: typescript
 
@@ -392,7 +403,14 @@ your code editor. Add the following code below the lines that create a
           console.log('Random APOD was not a picture.');
         }
 
-Now define the ``APODResponse`` type that was introduced in the code above
+The first two lines create a new HTML ``<img>`` element and add it to
+the widget DOM node. The next lines define a function get a random date in the form ``YYYY-MM-DD`` format, and then the function is used to make a request using the HTML
+`fetch <https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch>`__
+API that returns information about the Astronomy Picture of the Day for that date. Finally, we set the
+image source and title attributes based on the response.
+
+Now define the ``APODResponse`` type that was introduced in the code above. Put
+this definition just under the imports at the top of the file.
 
 .. code-block:: typescript
 
@@ -405,25 +423,21 @@ Now define the ``APODResponse`` type that was introduced in the code above
           url: string;
         };
 
-And update the ``activate`` method to be ``async``
+And update the ``activate`` method to be ``async`` since we are now using
+``await`` in the method body.
 
 .. code-block:: typescript
 
         activate: async (app: JupyterFrontEnd, palette: ICommandPalette) =>
 
+Rebuild your extension if necessary (``jlpm run build``), refresh your browser
+tab, and run the *Random Astronomy Picture* command again. You should now see a
+picture in the panel when it opens (if that random date had a picture and not a
+video).
 
-The first two lines create a new HTML ``<img>`` element and add it to
-the widget DOM node. The next lines make a request using the HTML
-`fetch <https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch>`__
-API that returns information about a random Astronomy Picture, and set the
-image source and title attributes based on the
-response.
-
-Rebuild your extension if necessary (``jlpm run build``), refresh your
-browser tab, and run the *Random Astronomy Picture* command again. You should
-now see a picture in the panel when it opens.
-
-|Single apod extension panel|
+.. figure:: extension_tutorial_single.png
+   :align: center
+   :class: jp-screenshot
 
 Note that the image is not centered in the panel nor does the panel
 scroll if the image is larger than the panel area. Also note that the
@@ -458,73 +472,74 @@ Add the following lines to it.
       overflow: auto;
     }
 
-The first rule stacks content vertically within the widget panel and
-lets the panel scroll when the content overflows. This CSS file is included
-on the page automatically by JupyterLab because the ``package.json`` file has
-a ``style`` field pointing to it. In general, you should import all of your styles
-into a single CSS file and put the path to that CSS file in the ``package.json`` file
-``style`` field.
+This CSS stacks content vertically within the widget panel and lets the panel
+scroll when the content overflows. This CSS file is included on the page
+automatically by JupyterLab because the ``package.json`` file has a ``style``
+field pointing to it. In general, you should import all of your styles into a
+single CSS file, such as this ``index.css`` file, and put the path to that CSS
+file in the ``package.json`` file ``style`` field.
 
-Return to the ``index.ts`` file. Modify the the ``activate``
+Return to the ``index.ts`` file. Modify the ``activate``
 function to apply the CSS classes, the copyright information, and error handling
 for the API response.
 The beginning of the function should read like the following:
 
 .. code-block:: typescript
-      :emphasize-lines: 6,15,16,28-49
+      :emphasize-lines: 6,16-17,28-50
 
       activate: async (app: JupyterFrontEnd, palette: ICommandPalette) => {
-          console.log('JupyterLab extension jupyterlab_apod is activated!');
+        console.log('JupyterLab extension jupyterlab_apod is activated!');
 
-          // Create a blank content widget inside of a MainAreaWidget
-          const content = new Widget();
-          content.addClass('my-apodWidget'); // new line
-          const widget = new MainAreaWidget({content});
-          widget.id = 'apod-jupyterlab';
-          widget.title.label = 'Astronomy Picture';
-          widget.title.closable = true;
-          // Add an image element to the content
-          let img = document.createElement('img');
-          content.node.appendChild(img);
+        // Create a blank content widget inside of a MainAreaWidget
+        const content = new Widget();
+        content.addClass('my-apodWidget'); // new line
+        const widget = new MainAreaWidget({content});
+        widget.id = 'apod-jupyterlab';
+        widget.title.label = 'Astronomy Picture';
+        widget.title.closable = true;
 
-          let summary = document.createElement('p');
-          content.node.appendChild(summary);
+        // Add an image element to the content
+        let img = document.createElement('img');
+        content.node.appendChild(img);
 
-          // Get a random date string in YYYY-MM-DD format
-          function randomDate() {
-            const start = new Date(2010, 1, 1);
-            const end = new Date();
-            const randomDate = new Date(start.getTime() + Math.random()*(end.getTime() - start.getTime()));
-            return randomDate.toISOString().slice(0, 10);
+        let summary = document.createElement('p');
+        content.node.appendChild(summary);
+
+        // Get a random date string in YYYY-MM-DD format
+        function randomDate() {
+          const start = new Date(2010, 1, 1);
+          const end = new Date();
+          const randomDate = new Date(start.getTime() + Math.random()*(end.getTime() - start.getTime()));
+          return randomDate.toISOString().slice(0, 10);
+        }
+
+        // Fetch info about a random picture
+        const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${randomDate()}`);
+        if (!response.ok) {
+          const data = await response.json();
+          if (data.error) {
+            summary.innerText = data.error.message;
+          } else {
+            summary.innerText = response.statusText;
           }
+        } else {
+          const data = await response.json() as APODResponse;
 
-          // Fetch info about a random picture
-          const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${randomDate()}`);
-          if (!response.ok) {
-            const data = await response.json();
-            if (data.error) {
-              summary.innerText = data.error.message;
-            } else {
-              summary.innerText = response.statusText;
+          if (data.media_type === 'image') {
+            // Populate the image
+            img.src = data.url;
+            img.title = data.title;
+            summary.innerText = data.title;
+            if (data.copyright) {
+              summary.innerText += ` (Copyright ${data.copyright})`;
             }
           } else {
-            const data = await response.json() as APODResponse;
-
-            if (data.media_type === 'image') {
-              // Populate the image
-              img.src = data.url;
-              img.title = data.title;
-              summary.innerText = data.title;
-              if (data.copyright) {
-                summary.innerText += ` (Copyright ${data.copyright})`;
-              }
-            } else {
-              summary.innerText = 'Random APOD fetched was not an image.';
-            }
+            summary.innerText = 'Random APOD fetched was not an image.';
           }
+        }
 
-        // Keep all the remaining fetch and command lines the same
-        // as before from here down ...
+      // Keep all the remaining fetch and command lines the same
+      // as before from here down ...
 
 Build your extension if necessary (``jlpm run build``) and refresh your
 JupyterLab browser tab. Invoke the *Random Astronomy Picture* command and
@@ -533,9 +548,7 @@ the browser window or the panel so that the image is larger than the
 available area. Make sure you can scroll the panel over the entire area
 of the image.
 
-|Styled apod panel with attribution|
-
-If anything is misbehaving, compare your code with the reference project
+If anything is not working correctly, compare your code with the reference project
 `03-style-and-attribute
 tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-03-style-and-attribute>`__.
 When everything is working as expected, make another commit.
@@ -549,7 +562,7 @@ Show a new image on demand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``activate`` function has grown quite long, and there's still more
-functionality to add. You should refactor the code into two separate
+functionality to add. Let's refactor the code into two separate
 parts:
 
 1. An ``APODWidget`` that encapsulates the Astronomy Picture panel elements,
@@ -594,7 +607,6 @@ file.
         // Add a summary element to the panel
         this.summary = document.createElement('p');
         this.node.appendChild(this.summary);
-
       }
 
       /**
@@ -638,17 +650,6 @@ file.
           this.summary.innerText = 'Random APOD fetched was not an image.';
         }
       }
-
-      /**
-      * Get a random date string in YYYY-MM-DD format.
-      */
-      randomDate(): string {
-        const start = new Date(2010, 1, 1);
-        const end = new Date();
-        const randomDate = new Date(start.getTime() + Math.random()*(end.getTime() - start.getTime()));
-        return randomDate.toISOString().slice(0, 10);
-      }
-    };
 
 You've written all of the code before. All you've done is restructure it
 to use instance variables and move the image request to its own
@@ -694,11 +695,11 @@ these changes:
 
       // Add the command to the palette.
       palette.addItem({ command, category: 'Tutorial' });
-    };
+    }
 
 Remove the ``activate`` function definition from the
 ``JupyterFrontEndPlugin`` object and refer instead to the top-level function
-like so:
+like this:
 
 .. code-block:: typescript
 
@@ -716,10 +717,10 @@ panel. The picture should update each time you execute the command. Close
 the panel, run the command, and it should both reappear and show a new
 image.
 
-If anything is amiss, compare your code with the
+If anything is not working correctly, compare your code with the
 `04-refactor-and-refresh
 tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-04-refactor-and-refresh>`__
-to debug. Once it's working properly, commit it.
+to debug. Once it is working properly, commit it.
 
 .. code:: bash
 
@@ -739,19 +740,15 @@ Update the imports at the top of your ``index.ts`` file so that the
 entire list of import statements looks like the following:
 
 .. code-block:: typescript
-    :emphasize-lines: 2,6,9-11
+    :emphasize-lines: 2,6
 
     import {
-      JupyterFrontEnd, JupyterFrontEndPlugin, ILayoutRestorer // new
+      ILayoutRestorer, JupyterFrontEnd, JupyterFrontEndPlugin
     } from '@jupyterlab/application';
 
     import {
-      ICommandPalette, MainAreaWidget, WidgetTracker // new
+      ICommandPalette, MainAreaWidget, WidgetTracker
     } from '@jupyterlab/apputils';
-
-    import {
-      JSONExt // new
-    } from '@phosphor/coreutils';
 
     import {
       Message
@@ -761,20 +758,18 @@ entire list of import statements looks like the following:
       Widget
     } from '@phosphor/widgets';
 
-    import '../style/index.css';
-
-
 Install this dependency:
 
 .. code:: bash
 
     jlpm add @phosphor/coreutils
 
-Then, add the ``ILayoutRestorer`` interface to the ``JupyterFrontEndPlugin``
-definition. This addition passes the global ``LayoutRestorer`` to the
-third parameter of the ``activate``.
+Then add the ``ILayoutRestorer`` interface to the ``JupyterFrontEndPlugin``
+definition. This addition passes the global ``LayoutRestorer`` as the
+third parameter of the ``activate`` function.
 
-.. code:: typescript
+.. code-block:: typescript
+    :emphasize-lines: 4
 
     const extension: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab_apod',
@@ -786,10 +781,10 @@ third parameter of the ``activate``.
 Finally, rewrite the ``activate`` function so that it:
 
 1. Declares a widget variable, but does not create an instance
-   immediately
+   immediately.
 2. Constructs a ``WidgetTracker`` and tells the ``ILayoutRestorer``
-   to use it to save/restore panel state
-3. Creates, tracks, shows, and refreshes the widget panel appropriately
+   to use it to save/restore panel state.
+3. Creates, tracks, shows, and refreshes the widget panel appropriately.
 
 .. code-block:: typescript
 
@@ -838,18 +833,25 @@ Finally, rewrite the ``activate`` function so that it:
         command,
         name: () => 'apod'
       });
-    };
+    }
 
 Rebuild your extension one last time and refresh your browser tab.
 Execute the *Random Astronomy Picture* command and validate that the panel
-appears with a image in it. Refresh the browser tab again. You should
-see an Astronomy Picture panel appear immediately without running the command. Close
-the panel and refresh the browser tab. You should not see an Astronomy Picture tab
+appears with an image in it. Refresh the browser tab again. You should
+see an Astronomy Picture panel reappear immediately without running the command. Close
+the panel and refresh the browser tab. You should then not see an Astronomy Picture tab
 after the refresh.
+
+.. figure:: extension_tutorial_complete.png
+   :align: center
+   :class: jp-screenshot
+   :alt: The completed extension, showing the Astronomy Picture of the Day for 24 Jul 2015.
+
+   The completed extension, showing the `Astronomy Picture of the Day for 24 Jul 2015 <https://apod.nasa.gov/apod/ap150724.html>`__.
 
 Refer to the `05-restore-panel-state
 tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-05-restore-panel-state>`__
-if your extension is misbehaving. Make a commit when the state of your
+if your extension is not working correctly. Make a commit when the state of your
 extension persists properly.
 
 .. code:: bash
@@ -857,7 +859,7 @@ extension persists properly.
     git add .
     git commit -m 'Restore panel state'
 
-Congrats! You've implemented all of the behaviors laid out at the start
+Congratulations! You've implemented all of the behaviors laid out at the start
 of this tutorial. Now how about sharing it with the world?
 
 .. _publish-your-extension-to-npmjsorg:
@@ -911,8 +913,6 @@ Compare your work with the state of the reference project at the
 tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-06-prepare-to-publish>`__
 for further debugging.
 
-|Extension page on npmjs.com|
-
 You can now try installing your extension as a user would. Open a new
 terminal and run the following commands, again substituting your npm
 username where appropriate
@@ -935,20 +935,11 @@ Learn more
 You've completed the tutorial. Nicely done! If you want to keep
 learning, here are some suggestions about what to try next:
 
--  Assign a hotkey to the *Random Astronomy Picture* command.
+-  Add the image description that comes in the API response to the panel.
+-  Assign a default hotkey to the *Random Astronomy Picture* command.
 -  Make the image a link to the picture on the NASA website (URLs are of the form ``https://apod.nasa.gov/apod/apYYMMDD.html``).
--  Add the image description to the panel.
 -  Make the image title and description update after the image loads so that the picture and description are always synced.
 -  Give users the ability to pin pictures in separate, permanent panels.
+-  Add a setting for the user to put in their `API key <https://api.nasa.gov/api.html#authentication>`__ so they can make many more requests per hour than the demo key allows.
 -  Push your extension git repository to GitHub.
--  Learn how to write :ref:`other kinds of
-   extensions <developer_extensions>`.
-
-
-TODO: All images need to be updated
-
-.. |Completed apod extension screenshot| image:: extension_tutorial_complete.png
-.. |Empty apod extension panel| image:: extension_tutorial_empty.png
-.. |Single apod extension panel| image:: extension_tutorial_single.png
-.. |Styled apod panel with attribution| image:: extension_tutorial_complete.png
-.. |Extension page on npmjs.com| image:: xkcd_tutorial_npm.png
+-  Learn how to write :ref:`other kinds of extensions <developer_extensions>`.
