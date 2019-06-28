@@ -4,9 +4,9 @@
 import React from 'react';
 import { classes } from 'typestyle/lib';
 
-import { Icon } from './icon';
+import { IIconRegistry, Icon } from './icon';
 import { camelize } from '../utils';
-import { IIconStyle, iconStyle, iconStyleFlat } from '../style/icon';
+import { iconStyle, iconStyleFlat } from '../style/icon';
 
 import badSvg from '../../style/icons/bad.svg';
 import blankSvg from '../../style/icons/blank.svg';
@@ -14,7 +14,7 @@ import blankSvg from '../../style/icons/blank.svg';
 /**
  * The icon registry class.
  */
-export class IconRegistry {
+export class IconRegistry implements IIconRegistry {
   constructor(options: IconRegistry.IOptions = {}) {
     this._debug = !!options.debug;
 
@@ -47,8 +47,8 @@ export class IconRegistry {
    * Get the icon as an HTMLElement of tag <svg><svg/>
    */
   icon(
-    props: IconRegistry.IIconOptions & { container: HTMLElement } & IIconStyle
-  ): HTMLElement {
+    props: Icon.INodeOptions & { container: HTMLElement }
+  ): HTMLElement | null {
     const { name, className, title, container, ...propsStyle } = props;
 
     // we may have been handed a className in place of name
@@ -99,7 +99,7 @@ export class IconRegistry {
    * TODO: figure out how to remove the unnecessary outer <tag>
    */
   iconReact(
-    props: IconRegistry.IIconOptions & { tag?: 'div' | 'span' } & IIconStyle
+    props: Icon.INodeOptions & { tag?: 'div' | 'span' }
   ): React.ReactElement {
     const { name, className, title, tag, ...propsStyle } = props;
     const Tag = tag || 'div';
@@ -160,7 +160,7 @@ export const defaultIconRegistry: IconRegistry = new IconRegistry();
  * Alias for defaultIconRegistry.iconReact that can be used as a React component
  */
 export const IconReact = (
-  props: IconRegistry.IIconOptions & { tag?: 'div' | 'span' } & IIconStyle
+  props: Icon.INodeOptions & { tag?: 'div' | 'span' }
 ): React.ReactElement => {
   return defaultIconRegistry.iconReact(props);
 };
@@ -182,15 +182,6 @@ export namespace IconRegistry {
      * will fail silently.
      */
     debug?: boolean;
-  }
-
-  /**
-   * The options used to set an icon
-   */
-  export interface IIconOptions {
-    name: string;
-    className?: string;
-    title?: string;
   }
 }
 

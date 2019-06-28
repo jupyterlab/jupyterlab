@@ -43,6 +43,8 @@ import { Contents } from '@jupyterlab/services';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
+import { IIconRegistry } from '@jupyterlab/ui-components';
+
 import { IIterator, map, reduce, toArray } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
@@ -115,7 +117,8 @@ const browser: JupyterFrontEndPlugin<void> = {
     IDocumentManager,
     ILabShell,
     ILayoutRestorer,
-    ISettingRegistry
+    ISettingRegistry,
+    IIconRegistry
   ],
   optional: [ICommandPalette, IMainMenu],
   autoStart: true
@@ -249,6 +252,7 @@ function activateBrowser(
   docManager: IDocumentManager,
   labShell: ILabShell,
   restorer: ILayoutRestorer,
+  iconRegistry: IIconRegistry,
   settingRegistry: ISettingRegistry,
   commandPalette: ICommandPalette,
   mainMenu: IMainMenu
