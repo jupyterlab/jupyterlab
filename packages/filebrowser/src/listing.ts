@@ -20,7 +20,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { Contents } from '@jupyterlab/services';
 
-import { defaultIconRegistry } from '@jupyterlab/ui-components';
+import { IIconRegistry } from '@jupyterlab/ui-components';
 
 import {
   ArrayExt,
@@ -188,7 +188,9 @@ export class DirListing extends Widget {
    */
   constructor(options: DirListing.IOptions) {
     super({
-      node: (options.renderer || DirListing.defaultRenderer).createNode()
+      node: (options.renderer =
+        options.renderer ||
+        new DirListing.Renderer(options.model.iconRegistry)).createNode()
     });
     this.addClass(DIR_LISTING_CLASS);
     this._model = options.model;
@@ -198,7 +200,7 @@ export class DirListing extends Widget {
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
     this._manager = this._model.manager;
-    this._renderer = options.renderer || DirListing.defaultRenderer;
+    this._renderer = options.renderer;
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
@@ -1643,6 +1645,10 @@ export namespace DirListing {
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
+    constructor(icoReg: IIconRegistry) {
+      this._iconRegistry = icoReg;
+    }
+
     /**
      * Create the DOM node for a dir listing.
      */
@@ -1762,9 +1768,9 @@ export namespace DirListing {
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       if (fileType) {
-        if (defaultIconRegistry.contains(fileType.iconClass)) {
+        if (this._iconRegistry.contains(fileType.iconClass)) {
           // add icon as svg node. Can be styled using CSS
-          defaultIconRegistry.icon({
+          this._iconRegistry.icon({
             name: fileType.iconClass,
             className: ITEM_ICON_CLASS,
             title: fileType.iconLabel,
@@ -1862,12 +1868,8 @@ export namespace DirListing {
       node.appendChild(icon);
       return node;
     }
+    _iconRegistry: IIconRegistry;
   }
-
-  /**
-   * The default `IRenderer` instance.
-   */
-  export const defaultRenderer = new Renderer();
 }
 
 /**

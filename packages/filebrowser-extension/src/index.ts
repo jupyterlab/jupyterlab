@@ -117,8 +117,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     IDocumentManager,
     ILabShell,
     ILayoutRestorer,
-    ISettingRegistry,
-    IIconRegistry
+    ISettingRegistry
   ],
   optional: [ICommandPalette, IMainMenu],
   autoStart: true
@@ -131,7 +130,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
-  requires: [IDocumentManager, IStateDB]
+  requires: [IIconRegistry, IDocumentManager, IStateDB]
 };
 
 /**
@@ -203,6 +202,7 @@ export default plugins;
  */
 function activateFactory(
   app: JupyterFrontEnd,
+  icoReg: IIconRegistry,
   docManager: IDocumentManager,
   state: IStateDB
 ): IFileBrowserFactory {
@@ -213,6 +213,7 @@ function activateFactory(
     options: IFileBrowserFactory.IOptions = {}
   ) => {
     const model = new FileBrowserModel({
+      iconRegistry: icoReg,
       manager: docManager,
       driveName: options.driveName || '',
       refreshInterval: options.refreshInterval,
@@ -252,7 +253,6 @@ function activateBrowser(
   docManager: IDocumentManager,
   labShell: ILabShell,
   restorer: ILayoutRestorer,
-  iconRegistry: IIconRegistry,
   settingRegistry: ISettingRegistry,
   commandPalette: ICommandPalette,
   mainMenu: IMainMenu

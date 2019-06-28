@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { showDialog, Dialog } from '@jupyterlab/apputils';
+
 import {
   IChangedArgs,
   IStateDB,
@@ -12,6 +14,8 @@ import {
 import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
 
 import { Contents, Kernel, Session } from '@jupyterlab/services';
+
+import { IIconRegistry } from '@jupyterlab/ui-components';
 
 import {
   ArrayIterator,
@@ -27,8 +31,6 @@ import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
-
-import { showDialog, Dialog } from '@jupyterlab/apputils';
 
 /**
  * The default duration of the auto-refresh in ms
@@ -68,6 +70,7 @@ export class FileBrowserModel implements IDisposable {
    * Construct a new file browser model.
    */
   constructor(options: FileBrowserModel.IOptions) {
+    this.iconRegistry = options.iconRegistry;
     this.manager = options.manager;
     this._driveName = options.driveName || '';
     let rootPath = this._driveName ? this._driveName + ':' : '';
@@ -108,6 +111,11 @@ export class FileBrowserModel implements IDisposable {
       standby: 'when-hidden'
     });
   }
+
+  /**
+   * The icon registry instance used by the file browser model.
+   */
+  readonly iconRegistry: IIconRegistry;
 
   /**
    * The document manager instance used by the file browser model.
@@ -638,6 +646,11 @@ export namespace FileBrowserModel {
    */
   export interface IOptions {
     /**
+     * An icon registry instance.
+     */
+    iconRegistry: IIconRegistry;
+
+    /**
      * A document manager instance.
      */
     manager: IDocumentManager;
@@ -650,15 +663,15 @@ export namespace FileBrowserModel {
     driveName?: string;
 
     /**
+     * The time interval for browser refreshing, in ms.
+     */
+    refreshInterval?: number;
+
+    /**
      * An optional state database. If provided, the model will restore which
      * folder was last opened when it is restored.
      */
     state?: IStateDB;
-
-    /**
-     * The time interval for browser refreshing, in ms.
-     */
-    refreshInterval?: number;
   }
 }
 
