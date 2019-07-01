@@ -9,7 +9,7 @@ import {
 import { IIconRegistry, defaultIconRegistry } from '@jupyterlab/ui-components';
 
 const iconRegistry: JupyterFrontEndPlugin<IIconRegistry> = {
-  id: '@jupyterlab/ui-components-extension:icon-registry',
+  id: '@jupyterlab/ui-components-extension:default-icon-registry',
   provides: IIconRegistry,
   autoStart: true,
   activate: (app: JupyterFrontEnd) => {
