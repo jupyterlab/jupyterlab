@@ -240,7 +240,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
-  static canSearchOn(domain: Widget): boolean {
+  static canSearchOn(domain: Widget): domain is NotebookPanel {
     // check to see if the CMSearchProvider can search on the
     // first cell, false indicates another editor is present
     return domain instanceof NotebookPanel;

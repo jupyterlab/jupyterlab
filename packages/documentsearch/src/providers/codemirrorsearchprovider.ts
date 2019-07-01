@@ -30,30 +30,35 @@
   THE SOFTWARE.
 */
 
-import { ISearchProvider, ISearchMatch } from '../interfaces';
+import * as CodeMirror from 'codemirror';
+
+import { ISignal, Signal } from '@phosphor/signaling';
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ISignal, Signal } from '@phosphor/signaling';
 
-import * as CodeMirror from 'codemirror';
 import { FileEditor } from '@jupyterlab/fileeditor';
 import { Widget } from '@phosphor/widgets';
 
+import { ISearchProvider, ISearchMatch } from '../interfaces';
+
+// The type for which canSearchFor returns true
+export type CMMainAreaWidget = MainAreaWidget & { content: FileEditor } & {
+  content: { editor: CodeMirrorEditor };
+};
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
 export class CodeMirrorSearchProvider
-  implements ISearchProvider<MainAreaWidget> {
+  implements ISearchProvider<CMMainAreaWidget> {
   /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
    *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: MainAreaWidget): any {
-    const content = searchTarget.content as FileEditor;
-    const cm = content.editor as CodeMirrorEditor;
+  getInitialQuery(searchTarget: CMMainAreaWidget): any {
+    const cm = searchTarget.content.editor;
     const selection = cm.doc.getSelection();
     // if there are newlines, just return empty string
     return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
@@ -70,17 +75,17 @@ export class CodeMirrorSearchProvider
    */
   async startQuery(
     query: RegExp,
-    searchTarget: MainAreaWidget
+    searchTarget: Widget
   ): Promise<ISearchMatch[]> {
     if (!CodeMirrorSearchProvider.canSearchOn(searchTarget)) {
       throw new Error('Cannot find Codemirror instance to search');
     }
 
-    // Extract the codemirror object from the editor widget. Each of these casts
-    // is justified by the canSearchOn call above.
-    const content = searchTarget.content as FileEditor;
-    this._cm = content.editor as CodeMirrorEditor;
+    // canSearchOn is a type guard that guarantees the type of .editor
+    this._cm = searchTarget.content.editor;
     return this._startQuery(query);
+
+    throw new Error('Cannot find Codemirror instance to search');
   }
 
   /**
@@ -236,7 +241,7 @@ export class CodeMirrorSearchProvider
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
-  static canSearchOn(domain: Widget): boolean {
+  static canSearchOn(domain: Widget): domain is CMMainAreaWidget {
     return (
       domain instanceof MainAreaWidget &&
       domain.content instanceof FileEditor &&

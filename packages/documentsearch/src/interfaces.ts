@@ -94,15 +94,17 @@ export interface ISearchMatch {
 }
 
 /**
- * This interface is meant to enforce that SearchProviders implement the static
- * canSearchOn function.
+ * This interface is meant to enforce that SearchProviders implement
+ * the static canSearchOn function.
  */
 export interface ISearchProviderConstructor<T extends Widget = Widget> {
   new (): ISearchProvider<T>;
   /**
-   * Report whether or not this provider has the ability to search on the given object
+   * Report whether or not this provider has the ability to search on the
+   * given object. The function is a type guard, meaning that it returns
+   * a boolean, but has a type predicate (`x is T`) for its return signature.
    */
-  canSearchOn(domain: Widget): boolean;
+  canSearchOn(domain: Widget): domain is T;
 }
 
 export interface ISearchProvider<T extends Widget = Widget> {
