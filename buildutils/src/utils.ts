@@ -15,10 +15,13 @@ export function getLernaPaths(basePath = '.'): string[] {
   basePath = path.resolve(basePath);
   let baseConfig = require(path.join(basePath, 'package.json'));
   let paths: string[] = [];
-  let packages =
-    baseConfig.workspaces.packages ||
-    baseConfig.workspaces ||
-    baseConfig.packages;
+  let packages;
+  if (baseConfig.workspaces) {
+    packages = baseConfig.workspaces.packages || baseConfig.workspaces;
+  } else {
+    let baseConfig = require(path.join(basePath, 'lerna.json'));
+    packages = baseConfig.packages;
+  }
   for (let config of packages) {
     paths = paths.concat(glob.sync(path.join(basePath, config)));
   }
