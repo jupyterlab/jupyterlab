@@ -7,17 +7,19 @@ import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 
+import { BreadCrumbs, FileBrowserModel } from '@jupyterlab/filebrowser';
+
 import { ServiceManager } from '@jupyterlab/services';
+
+import { framePromise, signalToPromise } from '@jupyterlab/testutils';
+
+import { defaultIconRegistry, IIconRegistry } from '@jupyterlab/ui-components';
 
 import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
 
 import { simulate } from 'simulate-event';
-
-import { BreadCrumbs, FileBrowserModel } from '@jupyterlab/filebrowser';
-
-import { framePromise, signalToPromise } from '@jupyterlab/testutils';
 
 const ITEM_CLASS = 'jp-BreadCrumbs-item';
 
@@ -47,6 +49,7 @@ class LogCrumbs extends BreadCrumbs {
 }
 
 describe('filebrowser/model', () => {
+  let iconRegistry: IIconRegistry;
   let manager: IDocumentManager;
   let serviceManager: ServiceManager.IManager;
   let registry: DocumentRegistry;
@@ -68,6 +71,7 @@ describe('filebrowser/model', () => {
       textModelFactory: new TextModelFactory()
     });
     serviceManager = new ServiceManager({ standby: 'never' });
+    iconRegistry = defaultIconRegistry;
     manager = new DocumentManager({
       registry,
       opener,
@@ -91,7 +95,7 @@ describe('filebrowser/model', () => {
   });
 
   beforeEach(async () => {
-    model = new FileBrowserModel({ manager });
+    model = new FileBrowserModel({ iconRegistry, manager });
     await model.cd(path);
     crumbs = new LogCrumbs({ model });
   });
@@ -198,7 +202,7 @@ describe('filebrowser/model', () => {
 
     describe('#onUpdateRequest()', () => {
       it('should be called when the model updates', async () => {
-        const model = new FileBrowserModel({ manager });
+        const model = new FileBrowserModel({ iconRegistry, manager });
         await model.cd(path);
         crumbs = new LogCrumbs({ model });
         await model.cd('..');
