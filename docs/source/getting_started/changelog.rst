@@ -3,8 +3,8 @@
 JupyterLab Changelog
 ====================
 
-v1.0.0 (pre release)
---------------------
+v1.0.0
+------
 
 
 See the `JupyterLab
