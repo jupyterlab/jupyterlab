@@ -17,7 +17,8 @@ config[0] = merge(config[0], {
           output: {
             beautify: false,
             comments: false
-          }
+          },
+          safari10: true
         },
         cache: process.platform !== 'win32'
       })
