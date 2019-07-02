@@ -13,11 +13,11 @@ if os.name == 'nt':
             dnames.remove('node_modules')
 
 
+subprocess.check_call('python -m pip uninstall -y jupyterlab'.split(), cwd=here)
+
 git_clean_exclude = [
     '-e',
     '/.vscode',
 ]
 git_clean_command = ['git', 'clean', '-dfx'] + git_clean_exclude
 subprocess.check_call(git_clean_command, cwd=here)
-
-subprocess.call('python -m pip uninstall -y jupyterlab'.split(), cwd=here)

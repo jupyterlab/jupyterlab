@@ -67,9 +67,11 @@ JupyterLab itself, run `jlpm run bumpversion major`.
 
 - Run `jlpm run bumpversion build` to create a new `alpha` version.
 - Push the commits and tags as prompted.
-- Run `jlpm run publish:all` to publish the JS and Python packages.
+- Run `npm run publish:all` to publish the JS and Python packages.
+  Note that the use of `npm` instead of `jlpm` is
+  [significant on Windows](https://github.com/jupyterlab/jupyterlab/issues/6733).
   Execute the suggested commands after doing a quick sanity check.
-  If there is a network error during JS publish, run `jlpm run publish:all --skip-build` to resume publish without requiring another
+  If there is a network error during JS publish, run `npm run publish:all --skip-build` to resume publish without requiring another
   clean and build phase of the JS packages.
 - Run `jlpm run bumpversion release` to switch to an `rc` version.
   (running `jlpm run bumpversion build` will then increment `rc` versions).
@@ -106,7 +108,7 @@ Now do the actual final release:
 
 - [ ] Run `jlpm run bumpversion release` to switch to final release
 - [ ] Push the commit and tags to master
-- [ ] Run `jlpm run publish:all` to publish the packages
+- [ ] Run `npm run publish:all` to publish the packages
 - [ ] Create a branch for the release and push to GitHub
 - [ ] Merge the PRs on the other repos and set the default branch of the
       xckd repo
@@ -117,7 +119,7 @@ the next release:
 
 - [ ] Run `jlpm run bumpversion minor` to bump to alpha for the next alpha release
 - [ ] Put the commit and tags to master
-- [ ] Run `jlpm run publish:all` to publish the packages
+- [ ] Run `npm run publish:all` to publish the packages
 - [ ] Release the other repos as appropriate
 - [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#update-version-for-binder)
 
