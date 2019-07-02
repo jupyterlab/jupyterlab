@@ -13,15 +13,24 @@ type Dict<T> = { [key: string]: T };
  */
 export function getLernaPaths(basePath = '.'): string[] {
   basePath = path.resolve(basePath);
-  let baseConfig = require(path.join(basePath, 'package.json'));
-  let paths: string[] = [];
   let packages;
-  if (baseConfig.workspaces) {
-    packages = baseConfig.workspaces.packages || baseConfig.workspaces;
-  } else {
-    let baseConfig = require(path.join(basePath, 'lerna.json'));
-    packages = baseConfig.packages;
+  try {
+    let baseConfig = require(path.join(basePath, 'package.json'));
+    if (baseConfig.workspaces) {
+      packages = baseConfig.workspaces.packages || baseConfig.workspaces;
+    } else {
+      baseConfig = require(path.join(basePath, 'lerna.json'));
+      packages = baseConfig.packages;
+    }
+  } catch (e) {
+    if (e.code === 'MODULE_NOT_FOUND') {
+      throw new Error(
+        `No yarn workspace / lerna package list found in ${basePath}`
+      );
+    }
+    throw e;
   }
+  let paths: string[] = [];
   for (let config of packages) {
     paths = paths.concat(glob.sync(path.join(basePath, config)));
   }
