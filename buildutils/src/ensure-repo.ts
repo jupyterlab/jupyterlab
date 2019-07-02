@@ -219,7 +219,9 @@ function ensureJupyterlab(): string[] {
     }
 
     // watch all src, build, and test files in the Jupyterlab project
-    let relativePath = `../${path.relative(basePath, pkgPath)}`;
+    let relativePath = utils.ensureUnixPathSep(
+      path.join('..', path.relative(basePath, pkgPath))
+    );
     corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
   });
 

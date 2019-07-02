@@ -8,6 +8,8 @@ import coreutils = require('@phosphor/coreutils');
 
 type Dict<T> = { [key: string]: T };
 
+const backSlash = /\\/g;
+
 /**
  * Get all of the lerna package paths.
  */
@@ -261,4 +263,14 @@ function requirePackage(parentModule: string, module: string) {
     paths: [parentModulePath]
   });
   return require(requirePath);
+}
+
+/**
+ * Ensure the given path uses '/' as path separator.
+ */
+export function ensureUnixPathSep(source: string) {
+  if (path.sep === '/') {
+    return source;
+  }
+  return source.replace(backSlash, '/');
 }
