@@ -4,7 +4,7 @@
 const fs = require('fs');
 const TeXFont = require('mathjax3/mathjax3/output/chtml/fonts/tex');
 
-const CssStyles = require('mathjax3/mathjax3/output/chtml/CssStyles');
+const CssStyles = require('mathjax3/mathjax3/output/common/CssStyles');
 
 class myFont extends TeXFont.TeXFont {}
 myFont.defaultVariants = [];
@@ -14,7 +14,7 @@ myFont.defaultVariantClasses = {};
 myFont.defaultStyles = {};
 
 const font = new myFont({
-  fontURL: '~mathjax3/mathjax2/css' // Path to fonts.
+  fontURL: '~mathjax3/mathjax3-ts/output/chtml/fonts/tex-woff-v2' // Path to fonts.
 });
 
 const styles = new CssStyles.CssStyles();

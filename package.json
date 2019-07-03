@@ -31,17 +31,17 @@
     "build": "tsc",
     "clean": "rimraf lib",
     "generate:css": "node scripts/generate-css.js",
-    "prepack": "npm run clean && npm run build",
+    "prepack": "npm run clean && npm run generate:css && npm run build",
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.0.0-alpha.3",
-    "@jupyterlab/rendermime": "^1.0.0-alpha.3",
-    "mathjax3": "^3.0.0-beta.2"
+    "@jupyterlab/application": "^1.0.0",
+    "@jupyterlab/rendermime": "^1.0.0",
+    "mathjax3": "^3.0.0-beta.4"
   },
   "devDependencies": {
     "rimraf": "^2.6.2",
-    "typescript": "~3.1.1"
+    "typescript": "~3.5.1"
   },
   "jupyterlab": {
     "extension": true
