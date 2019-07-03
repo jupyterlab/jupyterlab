@@ -44,7 +44,7 @@ import { Widget } from '@phosphor/widgets';
 import { ISearchProvider, ISearchMatch } from '../interfaces';
 
 // The type for which canSearchFor returns true
-export type CMMainAreaWidget = MainAreaWidget & { content: FileEditor } & {
+export type CMMainAreaWidget = MainAreaWidget<FileEditor> & {
   content: { editor: CodeMirrorEditor };
 };
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };

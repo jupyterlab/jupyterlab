@@ -2,19 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 import { ISearchProvider, ISearchMatch } from '@jupyterlab/documentsearch';
 import { CSVViewer } from '@jupyterlab/csvviewer';
-import { DocumentWidget } from '@jupyterlab/docregistry';
+import { IDocumentWidget, DocumentWidget } from '@jupyterlab/docregistry';
 import { Signal, ISignal } from '@phosphor/signaling';
 import { Widget } from '@phosphor/widgets';
 
 // The type for which canSearchFor returns true
-export type CSVDocumentWidget = DocumentWidget & { content: CSVViewer };
+export type CSVDocumentWidget = IDocumentWidget<CSVViewer>;
 
 export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
   static canSearchOn(domain: Widget): domain is CSVViewer {
-    // check to see if the CMSearchProvider can search on the
+    // check to see if the CSVSearchProvider can search on the
     // first cell, false indicates another editor is present
     return (
       domain instanceof DocumentWidget && domain.content instanceof CSVViewer
