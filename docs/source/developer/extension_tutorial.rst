@@ -209,22 +209,27 @@ you in JupyterLab. For your first addition, you're going to add a
 tab panel when invoked.
 
 Fire up your favorite text editor and open the ``src/index.ts`` file in
-your extension project. Add the following import at the top of the file
-to get a reference to the command palette interface.
+your extension project. Change the import at the top of the file to get 
+a reference to the command palette interface and the Jupyter front end.
 
 .. code:: typescript
-
+    
+    import {
+      JupyterFrontEnd, JupyterFrontEndPlugin
+    } from '@jupyterlab/application';
+    
     import {
       ICommandPalette
     } from '@jupyterlab/apputils';
 
-You will also need to install this dependency. Run the following command in the
+You will also need to install these dependencies. Run the following commands in the
 repository root folder install the dependency and save it to your
 `package.json`:
 
 .. code:: bash
 
     jlpm add @jupyterlab/apputils
+    jlpm add @jupyterlab/application
 
 Locate the ``extension`` object of type ``JupyterFrontEndPlugin``. Change the
 definition so that it reads like so:
