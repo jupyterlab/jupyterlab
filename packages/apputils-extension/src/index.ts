@@ -260,7 +260,7 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
         const pool =
           'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         const random = pool[Math.floor(Math.random() * pool.length)];
-        const path = URLExt.join(base, workspaces, `auto-${random}`) + rest;
+        const path = URLExt.join(base, workspaces, `auto-${random}`, rest);
 
         // Clone the originally requested workspace after redirecting.
         query['clone'] = workspace;
