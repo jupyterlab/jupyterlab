@@ -223,6 +223,9 @@ path on the user's machine or a provided tarball. Any valid
 ``jupyter labextension install`` (e.g. ``foo@latest``, ``bar@3.0.0.0``,
 ``path/to/folder``, and ``path/to/tar.gz``).
 
+Testing your extension
+^^^^^^^^^^^^^^^^^^^^^^
+
 There are a number of helper functions in ``testutils`` in this repo (which
 is a public ``npm`` package called ``@jupyterlab/testutils``) that can be used when
 writing tests for an extension.  See ``tests/test-application`` for an example
@@ -231,6 +234,49 @@ that points to the parent directory's ``karma`` config, and a test runner,
 ``run-test.py`` that starts a Jupyter server.
 
 
+If you are using `jest <https://jestjs.io/>`__ to test your extension, you will
+need to transpile the jupyterlab packages to ``commonjs`` as they are using ES6 modules
+that ``node`` does not support.
+
+To transpile jupyterlab packages, you need to install the following package:
+
+::
+
+   jlpm add --dev jest@^24 ts-jest@^24 @babel/core@^7 @babel/preset-env@^7
+
+Then in `jest.config.js`, you will specify to use babel for js files and ignore
+all node modules except the jupyterlab ones:
+
+::
+
+   module.exports = {
+     preset: 'ts-jest/presets/js-with-babel',
+     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+     transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
+     globals: {
+       'ts-jest': {
+         tsConfig: 'tsconfig.json'
+       }
+     },
+     ... // Other options useful for your extension
+   };
+
+Finally, you will need to configure babel with a ``babel.config.js`` file containing:
+
+::
+
+   module.exports = {
+     presets: [
+       [
+         '@babel/preset-env',
+         {
+           targets: {
+             node: 'current'
+           }
+         }
+       ]
+     ]
+   };
 
 .. _rendermime:
 
