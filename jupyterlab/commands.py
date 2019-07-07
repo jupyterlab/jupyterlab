@@ -1548,7 +1548,7 @@ class _AppHandler(object):
                 # Verify that the version is a valid extension.
                 if not _validate_extension(data):
                     # Valid
-                    versions[key] = data['version']
+                    versions[data['name']] = data['version']
         return versions
 
     def _format_no_compatible_package_version(self, name):
