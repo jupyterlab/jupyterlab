@@ -106,7 +106,8 @@ export class CodeMirrorSearchProvider
     query: RegExp,
     refreshOverlay: boolean = true
   ): Promise<ISearchMatch[]> {
-    await this.endQuery();
+    // no point in removing overlay in the middle of the search
+    await this.endQuery(false);
 
     this._query = query;
 
@@ -137,10 +138,11 @@ export class CodeMirrorSearchProvider
    * @returns A promise that resolves when the search provider is ready to
    * begin a new search.
    */
-  async endQuery(): Promise<void> {
+  async endQuery(removeOverlay = true): Promise<void> {
     this._matchState = {};
     this._currentMatch = null;
-    this._cm.removeOverlay(this._overlay);
+
+    if (removeOverlay) this._cm.removeOverlay(this._overlay);
     const from = this._cm.getCursor('from');
     const to = this._cm.getCursor('to');
     // Setting a reverse selection to allow search-as-you-type to maintain the

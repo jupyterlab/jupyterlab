@@ -138,7 +138,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     this._unRenderedMarkdownCells.forEach((cell: MarkdownCell) => {
       // Guard against the case where markdown cells have been deleted
       if (!cell.isDisposed) {
-        cell.rendered = true;
+        cell.editor_activated_for_search = false;
       }
     });
     this._unRenderedMarkdownCells = [];
@@ -162,7 +162,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
 
     this._cmSearchProviders = [];
     this._unRenderedMarkdownCells.forEach((cell: MarkdownCell) => {
-      cell.rendered = true;
+      cell.editor_activated_for_search = false;
     });
     this._unRenderedMarkdownCells = [];
 
