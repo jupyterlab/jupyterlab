@@ -452,18 +452,19 @@ function addCommands(
     execute: async args => {
       const path = (args.path as string) || '';
       try {
-        await Private.navigateToPath(path, factory);
+        const item = await Private.navigateToPath(path, factory);
+        if (item.type !== 'directory') {
+          const browserForPath = Private.getBrowserForPath(path, factory);
+          browserForPath.clearSelectedItems();
+          const parts = path.split('/');
+          const name = parts[parts.length - 1];
+          if (name) {
+            await browserForPath.selectItemByName(name);
+          }
+        }
       } catch (reason) {
         console.warn(`${CommandIDs.goToPath} failed to go to: ${path}`, reason);
       }
-      const browserForPath = Private.getBrowserForPath(path, factory);
-      browserForPath.clearSelectedItems();
-      const parts = path.split('/');
-      const name = parts[parts.length - 1];
-      if (name) {
-        await browserForPath.selectItemByName(name);
-      }
-
       return commands.execute(CommandIDs.showBrowser, { path });
     }
   });

@@ -12,6 +12,7 @@ var DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-p
 var Visualizer = require('webpack-visualizer-plugin');
 
 var Build = require('@jupyterlab/buildutils').Build;
+var WPPlugin = require('@jupyterlab/buildutils').WPPlugin;
 var package_data = require('./package.json');
 
 // Handle the extensions.
@@ -84,7 +85,8 @@ function maybeSync(localPath, name, rest) {
 
 /**
  * A filter function set up to exclude all files that are not
- * in a package contained by the Jupyterlab repo
+ * in a package contained by the Jupyterlab repo. Used to ignore
+ * files during a `--watch` build.
  */
 function ignored(path) {
   path = plib.resolve(path);
@@ -112,120 +114,6 @@ function ignored(path) {
   return ignore;
 }
 
-// custom webpack plugin definitions.
-// These can be removed the next time @jupyterlab/buildutils is published on npm
-class FrontEndPlugin {
-  constructor(buildDir, staticDir) {
-    this.buildDir = buildDir;
-    this.staticDir = staticDir;
-
-    this._first = true;
-  }
-
-  apply(compiler) {
-    compiler.hooks.afterEmit.tap('JupyterFrontEndPlugin', () => {
-      // bail if no staticDir
-      if (!this.staticDir) {
-        return;
-      }
-
-      // ensure a clean static directory on the first emit
-      if (this._first && fs.existsSync(this.staticDir)) {
-        fs.removeSync(this.staticDir);
-      }
-      this._first = false;
-
-      fs.copySync(this.buildDir, this.staticDir);
-    });
-  }
-}
-
-class FilterIgnoringWatchFileSystem {
-  constructor(wfs, ignored) {
-    this.wfs = wfs;
-    // ignored should be a callback function that filters the build files
-    this.ignored = ignored;
-  }
-
-  watch(files, dirs, missing, startTime, options, callback, callbackUndelayed) {
-    const notIgnored = path => !this.ignored(path);
-
-    const ignoredFiles = files.filter(ignored);
-    const ignoredDirs = dirs.filter(ignored);
-
-    const watcher = this.wfs.watch(
-      files.filter(notIgnored),
-      dirs.filter(notIgnored),
-      missing,
-      startTime,
-      options,
-      (
-        err,
-        filesModified,
-        dirsModified,
-        missingModified,
-        fileTimestamps,
-        dirTimestamps,
-        removedFiles
-      ) => {
-        if (err) return callback(err);
-        for (const path of ignoredFiles) {
-          fileTimestamps.set(path, 1);
-        }
-
-        for (const path of ignoredDirs) {
-          dirTimestamps.set(path, 1);
-        }
-
-        callback(
-          err,
-          filesModified,
-          dirsModified,
-          missingModified,
-          fileTimestamps,
-          dirTimestamps,
-          removedFiles
-        );
-      },
-      callbackUndelayed
-    );
-
-    return {
-      close: () => watcher.close(),
-      pause: () => watcher.pause(),
-      getContextTimestamps: () => {
-        const dirTimestamps = watcher.getContextTimestamps();
-        for (const path of ignoredDirs) {
-          dirTimestamps.set(path, 1);
-        }
-        return dirTimestamps;
-      },
-      getFileTimestamps: () => {
-        const fileTimestamps = watcher.getFileTimestamps();
-        for (const path of ignoredFiles) {
-          fileTimestamps.set(path, 1);
-        }
-        return fileTimestamps;
-      }
-    };
-  }
-}
-
-class FilterWatchIgnorePlugin {
-  constructor(ignored) {
-    this.ignored = ignored;
-  }
-
-  apply(compiler) {
-    compiler.hooks.afterEnvironment.tap('FilterWatchIgnorePlugin', () => {
-      compiler.watchFileSystem = new FilterIgnoringWatchFileSystem(
-        compiler.watchFileSystem,
-        this.ignored
-      );
-    });
-  }
-}
-
 const plugins = [
   new DuplicatePackageCheckerPlugin({
     verbose: true,
@@ -244,9 +132,9 @@ const plugins = [
   new webpack.HashedModuleIdsPlugin(),
 
   // custom plugin for ignoring files during a `--watch` build
-  new FilterWatchIgnorePlugin(ignored),
+  new WPPlugin.FilterWatchIgnorePlugin(ignored),
   // custom plugin that copies the assets to the static directory
-  new FrontEndPlugin(buildDir, jlab.staticDir)
+  new WPPlugin.FrontEndPlugin(buildDir, jlab.staticDir)
 ];
 
 if (process.argv.includes('--analyze')) {

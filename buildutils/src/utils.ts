@@ -8,17 +8,31 @@ import coreutils = require('@phosphor/coreutils');
 
 type Dict<T> = { [key: string]: T };
 
+const backSlash = /\\/g;
+
 /**
  * Get all of the lerna package paths.
  */
 export function getLernaPaths(basePath = '.'): string[] {
   basePath = path.resolve(basePath);
-  let baseConfig = require(path.join(basePath, 'package.json'));
+  let packages;
+  try {
+    let baseConfig = require(path.join(basePath, 'package.json'));
+    if (baseConfig.workspaces) {
+      packages = baseConfig.workspaces.packages || baseConfig.workspaces;
+    } else {
+      baseConfig = require(path.join(basePath, 'lerna.json'));
+      packages = baseConfig.packages;
+    }
+  } catch (e) {
+    if (e.code === 'MODULE_NOT_FOUND') {
+      throw new Error(
+        `No yarn workspace / lerna package list found in ${basePath}`
+      );
+    }
+    throw e;
+  }
   let paths: string[] = [];
-  let packages =
-    baseConfig.workspaces.packages ||
-    baseConfig.workspaces ||
-    baseConfig.packages;
   for (let config of packages) {
     paths = paths.concat(glob.sync(path.join(basePath, config)));
   }
@@ -261,4 +275,14 @@ function requirePackage(parentModule: string, module: string) {
     paths: [parentModulePath]
   });
   return require(requirePath);
+}
+
+/**
+ * Ensure the given path uses '/' as path separator.
+ */
+export function ensureUnixPathSep(source: string) {
+  if (path.sep === '/') {
+    return source;
+  }
+  return source.replace(backSlash, '/');
 }

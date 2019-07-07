@@ -8,7 +8,7 @@ import * as glob from 'glob';
 import * as path from 'path';
 import * as utils from './utils';
 
-utils.run('jlpm run clean:slate');
+utils.run('npm run clean:slate');
 utils.run('lerna run prepublishOnly');
 
 utils.getLernaPaths().forEach(pkgPath => {
