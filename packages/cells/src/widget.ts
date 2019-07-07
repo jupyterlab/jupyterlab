@@ -1129,6 +1129,20 @@ export class MarkdownCell extends Cell {
     }
   }
 
+  set editor_activated_for_search(value: boolean) {
+    value = !value;
+    if (value === this._rendered) {
+      return;
+    }
+    this._rendered = value;
+    if (!this._rendered) {
+      this.showEditor();
+    } else {
+      void this._updateRenderedInput();
+      this.renderInput(this._renderer);
+    }
+  }
+
   /**
    * Render an input instead of the text editor.
    */

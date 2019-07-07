@@ -95,16 +95,25 @@ export class CodeMirrorSearchProvider
     searchTarget: CodeMirrorEditor
   ): Promise<ISearchMatch[]> {
     this._cm = searchTarget;
-    return this._startQuery(query);
+    return this._startQuery(query, false);
   }
 
-  private async _startQuery(query: RegExp): Promise<ISearchMatch[]> {
+  refreshOverlay() {
+    this._refreshOverlay();
+  }
+
+  private async _startQuery(
+    query: RegExp,
+    refreshOverlay: boolean = true
+  ): Promise<ISearchMatch[]> {
     await this.endQuery();
 
     this._query = query;
 
     CodeMirror.on(this._cm.doc, 'change', this._onDocChanged.bind(this));
-    this._refreshOverlay();
+    if (refreshOverlay) {
+      this._refreshOverlay();
+    }
     this._setInitialMatches(query);
 
     const matches = this._parseMatchesFromState();

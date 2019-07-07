@@ -70,7 +70,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       // or if there are no matches
       let cellShouldReRender = false;
       if (cell instanceof MarkdownCell && cell.rendered) {
-        cell.rendered = false;
+        cell.editor_activated_for_search = true;
         cellShouldReRender = true;
       }
 
@@ -88,8 +88,11 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
           // un-render markdown cells with matches
           this._unRenderedMarkdownCells.push(cell);
         } else if (cellShouldReRender) {
-          cell.rendered = true;
+          cell.editor_activated_for_search = false;
         }
+      }
+      if (matchesFromCell.length !== 0) {
+        cmSearchProvider.refreshOverlay();
       }
 
       // update the match indices to reflect the whole document index values
