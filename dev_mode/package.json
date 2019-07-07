@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "build": "webpack",
-    "build:prod": "webpack --config webpack.prod.config.js",
-    "build:prod:stats": "webpack --profile --config webpack.prod.config.js --json > stats.json",
+    "build:prod": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack.prod.config.js",
+    "build:prod:stats": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --profile --config webpack.prod.config.js --json > stats.json",
     "build:stats": "webpack --profile --json > stats.json",
     "clean": "rimraf build",
     "prepublishOnly": "npm run build",
@@ -77,6 +77,7 @@
     "@phosphor/widgets": "^1.8.0",
     "ajv": "^6.5.5",
     "codemirror": "~5.47.0",
+    "cross-env": "^5.2.0",
     "es6-promise": "~4.2.6",
     "json5": "^2.1.0",
     "moment": "^2.24.0",
