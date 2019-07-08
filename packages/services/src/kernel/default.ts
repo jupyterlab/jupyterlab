@@ -586,7 +586,8 @@ export class DefaultKernel implements Kernel.IKernel {
       channel: 'shell',
       username: this._username,
       session: this._clientId,
-      content: { ...defaults, ...content }
+      content: { ...defaults, ...content },
+      metadata
     });
     return this.sendShellMessage(
       msg,
