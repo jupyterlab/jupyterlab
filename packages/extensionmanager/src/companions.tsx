@@ -151,8 +151,18 @@ export function presentCompanions(
       </p>
     </div>
   );
+  const hasKernelCompanions = kernelCompanions.length > 0;
+  const hasServerCompanion = !!serverCompanion;
+  let title = '';
+  if (hasKernelCompanions && hasServerCompanion) {
+    title = 'Kernel and Server Companions';
+  } else if (hasKernelCompanions) {
+    title = 'Kernel Companions';
+  } else {
+    title = 'Server Companion';
+  }
   return showDialog({
-    title: 'Kernel and Server Companions',
+    title,
     body,
     buttons: [
       Dialog.cancelButton(),
