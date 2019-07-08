@@ -370,21 +370,21 @@ namespace Private {
    * The current theme.
    */
   export const inheritTheme = (): ITerminal.IThemeObject => ({
-    foreground: getComputedStyle(document.body).getPropertyValue(
-      '--jp-ui-font-color0'
-    ),
-    background: getComputedStyle(document.body).getPropertyValue(
-      '--jp-layout-color0'
-    ),
-    cursor: getComputedStyle(document.body).getPropertyValue(
-      '--jp-ui-font-color1'
-    ),
-    cursorAccent: getComputedStyle(document.body).getPropertyValue(
-      '--jp-ui-inverse-font-color0'
-    ),
-    selection: getComputedStyle(document.body).getPropertyValue(
-      '--jp-ui-font-color3'
-    )
+    foreground: getComputedStyle(document.body)
+      .getPropertyValue('--jp-ui-font-color0')
+      .trim(),
+    background: getComputedStyle(document.body)
+      .getPropertyValue('--jp-layout-color0')
+      .trim(),
+    cursor: getComputedStyle(document.body)
+      .getPropertyValue('--jp-ui-font-color1')
+      .trim(),
+    cursorAccent: getComputedStyle(document.body)
+      .getPropertyValue('--jp-ui-inverse-font-color0')
+      .trim(),
+    selection: getComputedStyle(document.body)
+      .getPropertyValue('--jp-ui-font-color3')
+      .trim()
   });
 
   export function getXTermTheme(
