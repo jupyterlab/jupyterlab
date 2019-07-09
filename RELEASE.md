@@ -97,11 +97,10 @@ JupyterLab itself, run `jlpm run bumpversion major`.
   - [ ] https://github.com/jupyterlab/mimerender-cookiecutter-ts
   - [ ] https://github.com/jupyterlab/theme-cookiecutter
   - [ ] https://github.com/jupyterlab/jupyter-renderers
-  - [ ] https://github.com/jupyterhub/jupyterlab-hub
 - [ ] Add a tag to [ts cookiecutter](https://github.com/jupyterlab/extension-cookiecutter-ts) with the new JupyterLab version
 - [ ] Update the extension examples:
   - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/developer/notebook.rst#adding-a-button-to-the-toolbar)
-- [ ] Update the [xkcd tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-xkcd-tutorial)
+- [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-extension-tutorial)
 - [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
 
 Now do the actual final release:
@@ -123,7 +122,7 @@ the next release:
 - [ ] Release the other repos as appropriate
 - [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#update-version-for-binder)
 
-### Updating the xkcd tutorial
+### Updating the extension tutorial
 
 - Clone the repo if you don't have it
 
@@ -146,12 +145,12 @@ git rebase -i --root
 "Edit" the commits that involve installing packages, so you can update the
 `package.json`. Amend the last commit to bump the version number in package.json
 in preparation for publishing to npm. Then skip down to the step below about
-publishing the xkcd tutorial. If the edits are more substantial than just
+publishing the extension tutorial. If the edits are more substantial than just
 updating package versions, then do the next steps instead.
 
 #### Creating the tutorial from scratch
 
-- Create a new empty branch in the xkcd repo.
+- Create a new empty branch in the extension repo.
 
 ```bash
 git checkout --orphan name-of-branch
