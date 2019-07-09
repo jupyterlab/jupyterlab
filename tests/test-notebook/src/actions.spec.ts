@@ -65,7 +65,7 @@ describe('@jupyterlab/notebook', () => {
 
     after(() => {
       return Promise.all([session.shutdown(), ipySession.shutdown()]);
-    }).timeout(30000); // Allow for slower CI
+    });
 
     describe('#executed', () => {
       it('should emit when Markdown and code cells are run', async () => {
