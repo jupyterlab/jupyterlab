@@ -697,11 +697,11 @@ The JupyterLab extension can be bundled in a package on PyPI and conda-forge so
 that it ends up in the user's application directory.  Note that the user will still have to run ``jupyter lab build``
 (or build when prompted in the UI) in order to use the extension.
 The general idea is to pack the Jupyterlab extension using ``npm pack``, and then
-use the ``data_files`` logic in ``setup.py`` to ensure the file ends up in
-n the ``<jupyterlab_application>/share/jupyter/lab/extensions``
+use the ``data_files`` logic in ``setup.py`` to ensure the file ends up in the
+``<jupyterlab_application>/share/jupyter/lab/extensions``
 directory.
 
-Note that even if the JupyterLab extension is not usable without the
+Note that even if the JupyterLab extension is unusable without the
 server extension, as long as you use the companion package metadata it is still
 useful to publish it to npmjs.org so it is discoverable by the JupyterLab extension manager.
 
