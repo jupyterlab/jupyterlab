@@ -13,7 +13,7 @@ export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
-  static canSearchOn(domain: Widget): domain is CSVViewer {
+  static canSearchOn(domain: Widget): domain is CSVDocumentWidget {
     // check to see if the CSVSearchProvider can search on the
     // first cell, false indicates another editor is present
     return (

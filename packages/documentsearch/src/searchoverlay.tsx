@@ -462,7 +462,7 @@ export function createSearchOverlay(
 
 namespace createSearchOverlay {
   export interface IOptions {
-    widgetChanged: Signal<SearchInstance<any>, IDisplayState>;
+    widgetChanged: Signal<SearchInstance, IDisplayState>;
     overlayState: IDisplayState;
     onCaseSensitiveToggled: Function;
     onRegexToggled: Function;

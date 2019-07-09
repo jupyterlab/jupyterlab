@@ -30,18 +30,17 @@
   THE SOFTWARE.
 */
 
-import * as CodeMirror from 'codemirror';
-
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISearchProvider, ISearchMatch } from '../interfaces';
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { FileEditor } from '@jupyterlab/fileeditor';
-import { Widget } from '@phosphor/widgets';
 
-import { ISearchProvider, ISearchMatch } from '../interfaces';
+import * as CodeMirror from 'codemirror';
+
+import { ISignal, Signal } from '@phosphor/signaling';
+import { Widget } from '@phosphor/widgets';
 
 // The type for which canSearchFor returns true
 export type CMMainAreaWidget = MainAreaWidget<FileEditor> & {
