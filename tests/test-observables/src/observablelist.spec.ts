@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { toArray } from '@phosphor/algorithm';
 
-import { ObservableList } from '@jupyterlab/observables/src';
+import { ObservableList } from '@jupyterlab/observables';
 
 describe('@jupyterlab/observables', () => {
   describe('ObservableList', () => {

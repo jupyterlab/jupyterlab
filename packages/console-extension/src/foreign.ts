@@ -1,7 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterLabPlugin, JupyterLab } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
 
@@ -19,9 +22,10 @@ import { ReadonlyJSONObject } from '@phosphor/coreutils';
 /**
  * The console widget tracker provider.
  */
-export const foreign: JupyterLabPlugin<void> = {
+export const foreign: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/console-extension:foreign',
-  requires: [IConsoleTracker, ICommandPalette],
+  requires: [IConsoleTracker],
+  optional: [ICommandPalette],
   activate: activateForeign,
   autoStart: true
 };
@@ -29,10 +33,11 @@ export const foreign: JupyterLabPlugin<void> = {
 export default foreign;
 
 function activateForeign(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   tracker: IConsoleTracker,
-  palette: ICommandPalette
+  palette: ICommandPalette | null
 ) {
+  const { shell } = app;
   tracker.widgetAdded.connect((sender, panel) => {
     const console = panel.console;
 
@@ -46,7 +51,7 @@ function activateForeign(
     });
   });
 
-  const { commands, shell } = app;
+  const { commands } = app;
   const category = 'Console';
   const toggleShowAllActivity = 'console:toggle-show-all-kernel-activity';
 
@@ -75,14 +80,16 @@ function activateForeign(
       Private.foreignHandlerProperty.get(tracker.currentWidget.console).enabled,
     isEnabled: () =>
       tracker.currentWidget !== null &&
-      tracker.currentWidget === app.shell.currentWidget
+      tracker.currentWidget === shell.currentWidget
   });
 
-  palette.addItem({
-    command: toggleShowAllActivity,
-    category,
-    args: { isPalette: true }
-  });
+  if (palette) {
+    palette.addItem({
+      command: toggleShowAllActivity,
+      category,
+      args: { isPalette: true }
+    });
+  }
 
   app.contextMenu.addItem({
     command: toggleShowAllActivity,

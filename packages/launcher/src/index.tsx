@@ -28,8 +28,6 @@ import { Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
-import '../style/index.css';
-
 /**
  * The class name added to Launcher instances.
  */
@@ -75,13 +73,6 @@ export interface ILauncher {
  * LauncherItems, which the Launcher will render.
  */
 export class LauncherModel extends VDomModel implements ILauncher {
-  /**
-   * Create a new launcher model.
-   */
-  constructor() {
-    super();
-  }
-
   /**
    * Add a command item to the launcher, and trigger re-render event for parent
    * widget.
@@ -354,7 +345,9 @@ function Card(
   // Get some properties of the command
   const command = item.command;
   const args = { ...item.args, cwd: launcher.cwd };
+  const caption = commands.caption(command, args);
   const label = commands.label(command, args);
+  const title = kernel ? label : caption || label;
 
   // Build the onclick handler.
   let onclick = () => {
@@ -364,7 +357,7 @@ function Card(
       return;
     }
     launcher.pending = true;
-    commands
+    void commands
       .execute(command, {
         ...item.args,
         cwd: launcher.cwd
@@ -378,42 +371,46 @@ function Card(
       })
       .catch(err => {
         launcher.pending = false;
-        showErrorMessage('Launcher Error', err);
+        void showErrorMessage('Launcher Error', err);
       });
+  };
+
+  // With tabindex working, you can now pick a kernel by tabbing around and
+  // pressing Enter.
+  let onkeypress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      onclick();
+    }
   };
 
   // Return the VDOM element.
   return (
     <div
       className="jp-LauncherCard"
-      title={label}
+      title={title}
       onClick={onclick}
+      onKeyPress={onkeypress}
+      tabIndex={100}
       data-category={item.category || 'Other'}
       key={Private.keyProperty.get(item)}
     >
       <div className="jp-LauncherCard-icon">
-        {item.kernelIconUrl &&
-          kernel && (
-            <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
-          )}
-        {!item.kernelIconUrl &&
-          !kernel && (
-            <div
-              className={`${commands.iconClass(
-                command,
-                args
-              )} jp-Launcher-icon`}
-            />
-          )}
-        {!item.kernelIconUrl &&
-          kernel && (
-            <div className="jp-LauncherCard-noKernelIcon">
-              {label[0].toUpperCase()}
-            </div>
-          )}
+        {item.kernelIconUrl && kernel && (
+          <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
+        )}
+        {!item.kernelIconUrl && !kernel && (
+          <div
+            className={`${commands.iconClass(command, args)} jp-Launcher-icon`}
+          />
+        )}
+        {!item.kernelIconUrl && kernel && (
+          <div className="jp-LauncherCard-noKernelIcon">
+            {label[0].toUpperCase()}
+          </div>
+        )}
       </div>
-      <div className="jp-LauncherCard-label" title={label}>
-        {label}
+      <div className="jp-LauncherCard-label" title={title}>
+        <p>{label}</p>
       </div>
     </div>
   );

@@ -34,14 +34,8 @@ export class CompletionHandler implements IDisposable {
    */
   constructor(options: CompletionHandler.IOptions) {
     this.completer = options.completer;
-    this.completer.selected.connect(
-      this.onCompletionSelected,
-      this
-    );
-    this.completer.visibilityChanged.connect(
-      this.onVisibilityChanged,
-      this
-    );
+    this.completer.selected.connect(this.onCompletionSelected, this);
+    this.completer.visibilityChanged.connect(this.onVisibilityChanged, this);
     this._connector = options.connector;
   }
 
@@ -93,6 +87,7 @@ export class CompletionHandler implements IDisposable {
       const model = editor.model;
 
       editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
+      editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
       model.value.changed.disconnect(this.onTextChanged, this);
     }
@@ -107,14 +102,8 @@ export class CompletionHandler implements IDisposable {
       const model = editor.model;
 
       this._enabled = false;
-      model.selections.changed.connect(
-        this.onSelectionsChanged,
-        this
-      );
-      model.value.changed.connect(
-        this.onTextChanged,
-        this
-      );
+      model.selections.changed.connect(this.onSelectionsChanged, this);
+      model.value.changed.connect(this.onTextChanged, this);
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
     }
@@ -177,26 +166,22 @@ export class CompletionHandler implements IDisposable {
   /**
    * Handle a completion selected signal from the completion widget.
    */
-  protected onCompletionSelected(completer: Completer, value: string): void {
+  protected onCompletionSelected(completer: Completer, val: string): void {
     const model = completer.model;
     const editor = this._editor;
     if (!editor || !model) {
       return;
     }
 
-    const patch = model.createPatch(value);
+    const patch = model.createPatch(val);
 
     if (!patch) {
       return;
     }
 
-    const { offset, text } = patch;
-    editor.model.value.text = text;
-
-    const position = editor.getPositionAt(offset);
-    if (position) {
-      editor.setCursorPosition(position);
-    }
+    const { start, end, value } = patch;
+    editor.model.value.remove(start, end);
+    editor.model.value.insert(start, value);
   }
 
   /**
@@ -258,6 +243,12 @@ export class CompletionHandler implements IDisposable {
     if (!model) {
       this._enabled = false;
       host.classList.remove(COMPLETER_ENABLED_CLASS);
+      return;
+    }
+
+    // If we are currently performing a subset match,
+    // return without resetting the completer.
+    if (model.subsetMatch) {
       return;
     }
 

@@ -13,10 +13,7 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
    * Construct a new activity monitor.
    */
   constructor(options: ActivityMonitor.IOptions<Sender, Args>) {
-    options.signal.connect(
-      this._onSignalFired,
-      this
-    );
+    options.signal.connect(this._onSignalFired, this);
     this._timeout = options.timeout || 1000;
   }
 
@@ -68,7 +65,7 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
     clearTimeout(this._timer);
     this._sender = sender;
     this._args = args;
-    this._timer = window.setTimeout(() => {
+    this._timer = setTimeout(() => {
       this._activityStopped.emit({
         sender: this._sender,
         args: this._args
@@ -76,7 +73,7 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
     }, this._timeout);
   }
 
-  private _timer = -1;
+  private _timer: any = -1;
   private _timeout = -1;
   private _sender: Sender;
   private _args: Args;

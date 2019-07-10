@@ -6,7 +6,7 @@ import { expect } from 'chai';
 import {
   validateContentsModel,
   validateCheckpointModel
-} from '@jupyterlab/services/src/contents/validate';
+} from '@jupyterlab/services/lib/contents/validate';
 
 import { DEFAULT_FILE } from '../utils';
 

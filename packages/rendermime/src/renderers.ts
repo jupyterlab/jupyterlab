@@ -15,7 +15,7 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { toArray } from '@phosphor/algorithm';
 
-import escape = require('lodash.escape');
+import escape from 'lodash.escape';
 
 import { removeMath, replaceMath } from './latex';
 
@@ -418,6 +418,12 @@ export function renderSVG(options: renderSVG.IRenderOptions): Promise<void> {
     return Promise.resolve(undefined);
   }
 
+  // Add missing SVG namespace (if actually missing)
+  let patt = '<svg[^>]+xmlns=[^>]+svg';
+  if (source.search(patt) < 0) {
+    source = source.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+  }
+
   // Render in img so that user can save it easily
   const img = new Image();
   img.src = `data:image/svg+xml,${encodeURIComponent(source)}`;
@@ -468,13 +474,17 @@ export namespace renderSVG {
  */
 export function renderText(options: renderText.IRenderOptions): Promise<void> {
   // Unpack the options.
-  let { host, source } = options;
+  const { host, sanitizer, source } = options;
 
   // Create the HTML content.
-  let content = Private.ansiSpan(source);
+  const content = sanitizer.sanitize(Private.ansiSpan(source), {
+    allowedTags: ['span']
+  });
 
-  // Set the inner HTML for the host node.
-  host.innerHTML = `<pre>${content}</pre>`;
+  // Set the sanitized content for the host node.
+  const pre = document.createElement('pre');
+  pre.innerHTML = content;
+  host.appendChild(pre);
 
   // Return the rendered promise.
   return Promise.resolve(undefined);
@@ -492,6 +502,11 @@ export namespace renderText {
      * The host node for the text content.
      */
     host: HTMLElement;
+
+    /**
+     * The html sanitizer for untrusted source.
+     */
+    sanitizer: ISanitizer;
 
     /**
      * The source text to render.

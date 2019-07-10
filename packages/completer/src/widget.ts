@@ -1,6 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { HoverBox, defaultSanitizer } from '@jupyterlab/apputils';
+
+import { CodeEditor } from '@jupyterlab/codeeditor';
+
 import { IIterator, IterableOrArrayLike, toArray } from '@phosphor/algorithm';
 
 import { JSONObject, JSONExt } from '@phosphor/coreutils';
@@ -14,10 +18,6 @@ import { Message } from '@phosphor/messaging';
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
-
-import { HoverBox, defaultSanitizer } from '@jupyterlab/apputils';
-
-import { CodeEditor } from '@jupyterlab/codeeditor';
 
 /**
  * The class name added to completer menu items.
@@ -114,10 +114,7 @@ export class Completer extends Widget {
     }
     this._model = model;
     if (this._model) {
-      this._model.stateChanged.connect(
-        this.onModelStateChanged,
-        this
-      );
+      this._model.stateChanged.connect(this.onModelStateChanged, this);
     }
   }
 
@@ -241,9 +238,13 @@ export class Completer extends Widget {
       return;
     }
 
-    // If there is only one item, signal and bail.
-    if (items.length === 1) {
-      this._selected.emit(items[0].raw);
+    // If there is only one option, signal and bail.
+    // We don't test the filtered `items`, as that
+    // is too aggressive of completer behavior, it can
+    // lead to double typing of an option.
+    const options = toArray(model.options());
+    if (options.length === 1) {
+      this._selected.emit(options[0]);
       this.reset();
       return;
     }
@@ -271,10 +272,8 @@ export class Completer extends Widget {
 
     // If this is the first time the current completer session has loaded,
     // populate any initial subset match.
-    if (model.subsetMatch) {
+    if (!model.query) {
       const populated = this._populateSubset();
-
-      model.subsetMatch = false;
       if (populated) {
         this.update();
         return;
@@ -298,16 +297,35 @@ export class Completer extends Widget {
    * `down` cycles will remain on the last index. When the user cycles `up` to
    * the first item, subsequent `up` cycles will remain on the first cycle.
    */
-  private _cycle(direction: 'up' | 'down'): void {
+  private _cycle(direction: Private.scrollType): void {
     let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
     let index = this._activeIndex;
     let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
     active.classList.remove(ACTIVE_CLASS);
+
     if (direction === 'up') {
       this._activeIndex = index === 0 ? index : index - 1;
-    } else {
+    } else if (direction === 'down') {
       this._activeIndex = index < items.length - 1 ? index + 1 : index;
+    } else {
+      // Measure the number of items on a page.
+      const boxHeight = this.node.getBoundingClientRect().height;
+      const itemHeight = active.getBoundingClientRect().height;
+      const pageLength = Math.floor(boxHeight / itemHeight);
+
+      // Update the index
+      if (direction === 'pageUp') {
+        this._activeIndex = index - pageLength;
+      } else {
+        this._activeIndex = index + pageLength;
+      }
+      // Clamp to the length of the list.
+      this._activeIndex = Math.min(
+        Math.max(0, this._activeIndex),
+        items.length - 1
+      );
     }
+
     active = items[this._activeIndex] as HTMLElement;
     active.classList.add(ACTIVE_CLASS);
     ElementExt.scrollIntoViewIfNeeded(this.node, active);
@@ -333,13 +351,18 @@ export class Completer extends Widget {
         if (!model) {
           return;
         }
-        model.subsetMatch = true;
         let populated = this._populateSubset();
-        model.subsetMatch = false;
-        if (populated) {
-          return;
+        // If there is a common subset in the options,
+        // then emit a completion signal with that subset.
+        if (model.query) {
+          model.subsetMatch = true;
+          this._selected.emit(model.query);
+          model.subsetMatch = false;
         }
-        this.selectActive();
+        // If the query changed, update rendering of the options.
+        if (populated) {
+          this.update();
+        }
         return;
       case 27: // Esc key
         event.preventDefault();
@@ -347,12 +370,15 @@ export class Completer extends Widget {
         event.stopImmediatePropagation();
         this.reset();
         return;
+      case 33: // PageUp
+      case 34: // PageDown
       case 38: // Up arrow key
       case 40: // Down arrow key
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        this._cycle(event.keyCode === 38 ? 'up' : 'down');
+        const cycle = Private.keyCodeMap[event.keyCode];
+        this._cycle(cycle);
         return;
       default:
         return;
@@ -636,14 +662,19 @@ export namespace Completer {
    */
   export interface IPatch {
     /**
-     * The patched text.
+     * The start of the range to be patched.
      */
-    text: string;
+    start: number;
 
     /**
-     * The offset of the cursor.
+     * The end of the range to be patched.
      */
-    offset: number;
+    end: number;
+
+    /**
+     * The value to be patched in.
+     */
+    value: string;
   }
 
   /**
@@ -746,6 +777,21 @@ export namespace Completer {
  * A namespace for completer widget private data.
  */
 namespace Private {
+  /**
+   * Types of scrolling through the completer.
+   */
+  export type scrollType = 'up' | 'down' | 'pageUp' | 'pageDown';
+
+  /**
+   * Mapping from keyCodes to scrollTypes.
+   */
+  export const keyCodeMap: { [n: number]: scrollType } = {
+    38: 'up',
+    40: 'down',
+    33: 'pageUp',
+    34: 'pageDown'
+  };
+
   /**
    * Returns the common subset string that a list of strings shares.
    */

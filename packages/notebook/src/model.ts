@@ -26,6 +26,7 @@ import {
 } from '@jupyterlab/observables';
 
 import { CellList } from './celllist';
+import { showDialog, Dialog } from '@jupyterlab/apputils';
 
 /**
  * The definition of a model object for a notebook widget.
@@ -55,6 +56,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * The metadata associated with the notebook.
    */
   readonly metadata: IObservableJSON;
+
   /**
    * The array of deleted cells since the notebook was last run.
    */
@@ -73,14 +75,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     let factory = options.contentFactory || NotebookModel.defaultContentFactory;
     this.contentFactory = factory.clone(this.modelDB.view('cells'));
     this._cells = new CellList(this.modelDB, this.contentFactory);
-    // Add an initial code cell by default.
-    if (!this._cells.length) {
-      this._cells.push(factory.createCodeCell({}));
-    }
-    this._cells.changed.connect(
-      this._onCellsChanged,
-      this
-    );
+    this._cells.changed.connect(this._onCellsChanged, this);
 
     // Handle initial metadata.
     let metadata = this.modelDB.createMap('metadata');
@@ -89,10 +84,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       metadata.set('language_info', { name });
     }
     this._ensureMetadata();
-    metadata.changed.connect(
-      this.triggerContentChange,
-      this
-    );
+    metadata.changed.connect(this.triggerContentChange, this);
     this._deletedCells = [];
   }
 
@@ -136,12 +128,14 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     let spec = this.metadata.get('kernelspec') as nbformat.IKernelspecMetadata;
     return spec ? spec.name : '';
   }
+
   /**
-   * The default kernel name of the document.
+   * A list of deleted cells for the notebook..
    */
   get deletedCells(): string[] {
     return this._deletedCells;
   }
+
   /**
    * The default kernel language of the document.
    */
@@ -238,6 +232,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     let newValue = 0;
     this._nbformatMinor = nbformat.MINOR_VERSION;
     this._nbformat = nbformat.MAJOR_VERSION;
+    const origNbformat = value.metadata.orig_nbformat;
 
     if (value.nbformat !== this._nbformat) {
       oldValue = this._nbformat;
@@ -249,6 +244,28 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       this._nbformatMinor = newValue = value.nbformat_minor;
       this.triggerStateChange({ name: 'nbformatMinor', oldValue, newValue });
     }
+
+    // Alert the user if the format changes.
+    if (origNbformat !== undefined && this._nbformat !== origNbformat) {
+      const newer = this._nbformat > origNbformat;
+      const msg = `This notebook has been converted from ${
+        newer ? 'an older' : 'a newer'
+      } notebook format (v${origNbformat}) to the current notebook format (v${
+        this._nbformat
+      }). The next time you save this notebook, the current notebook format (v${
+        this._nbformat
+      }) will be used. ${
+        newer
+          ? 'Older versions of Jupyter may not be able to read the new format.'
+          : 'Some features of the original notebook may not be available.'
+      }  To preserve the original format version, close the notebook without saving it.`;
+      void showDialog({
+        title: 'Notebook converted',
+        body: msg,
+        buttons: [Dialog.okButton()]
+      });
+    }
+
     // Update the metadata.
     this.metadata.clear();
     let metadata = value.metadata;
@@ -281,35 +298,18 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     switch (change.type) {
       case 'add':
         change.newValues.forEach(cell => {
-          cell.contentChanged.connect(
-            this.triggerContentChange,
-            this
-          );
+          cell.contentChanged.connect(this.triggerContentChange, this);
         });
         break;
       case 'remove':
         break;
       case 'set':
         change.newValues.forEach(cell => {
-          cell.contentChanged.connect(
-            this.triggerContentChange,
-            this
-          );
+          cell.contentChanged.connect(this.triggerContentChange, this);
         });
         break;
       default:
         break;
-    }
-    let factory = this.contentFactory;
-    // Add code cell if there are no cells remaining.
-    if (!this.cells.length) {
-      // Add the cell in a new context to avoid triggering another
-      // cell changed event during the handling of this signal.
-      requestAnimationFrame(() => {
-        if (!this.isDisposed && !this.cells.length) {
-          this.cells.push(factory.createCodeCell({}));
-        }
-      });
     }
     this.triggerContentChange();
   }
@@ -374,6 +374,19 @@ export namespace NotebookModel {
     modelDB: IModelDB;
 
     /**
+     * Create a new cell by cell type.
+     *
+     * @param type:  the type of the cell to create.
+     *
+     * @param options: the cell creation options.
+     *
+     * #### Notes
+     * This method is intended to be a convenience method to programmaticaly
+     * call the other cell creation methods in the factory.
+     */
+    createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel;
+
+    /**
      * Create a new code cell.
      *
      * @param options - The options used to create the cell.
@@ -431,6 +444,31 @@ export namespace NotebookModel {
      * The IModelDB in which to put the notebook data.
      */
     readonly modelDB: IModelDB | undefined;
+
+    /**
+     * Create a new cell by cell type.
+     *
+     * @param type:  the type of the cell to create.
+     *
+     * @param options: the cell creation options.
+     *
+     * #### Notes
+     * This method is intended to be a convenience method to programmaticaly
+     * call the other cell creation methods in the factory.
+     */
+    createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel {
+      switch (type) {
+        case 'code':
+          return this.createCodeCell(opts);
+          break;
+        case 'markdown':
+          return this.createMarkdownCell(opts);
+          break;
+        case 'raw':
+        default:
+          return this.createRawCell(opts);
+      }
+    }
 
     /**
      * Create a new code cell.

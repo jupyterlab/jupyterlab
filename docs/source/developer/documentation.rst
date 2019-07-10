@@ -108,27 +108,34 @@ Our documentation should contain screenshots and animations that
 illustrate and demonstrate the software. Here are some guidelines for
 preparing them:
 
--  Set screen resolution to non-hidpi (non-retina)
+-  Make sure the screenshot does not contain copyrighted material (preferable),
+   or the license is allowed in our documentation and clearly stated.
 
--  Set browser viewport to 1280x720 px.
-   The Firefox Web Developer extension and Chrome Developer Tools offer
-   device specific rendering that enables you to set this viewport resolution.
+-  If taking a png screenshot, use the Firefox or Chrome developer tools to do the following:
 
--  Capture the viewport, **not the full browser window**,
-   using the capture software of your choice. **Do not include any of the
-   desktop background**.
+   - set the browser viewport to 1280x720 pixels
+   - set the device pixel ratio to 1:1 (i.e., non-hidpi, non-retina)
+   - screenshot the entire *viewport* using the browser developer tools. Screenshots should
+     not include any browser elements such as the browser address bar, browser title bar, etc.,
+     and should not contain any desktop background.
 
--  For PNGs, reduce their size using pngquant.
-   For movies, upload them to the IPython/Juptyter YouTube channel
-   and embed them in the docs with an iframe. The pngs can live in the main repository.
-   The movies should be added to the ``jupyterlab-media`` repository.
+-  If creating a movie, adjust the settings as above (1280x720 viewport resolution, non-hidpi)
+   and use a screen capture utility of your choice to capture just the browser viewport.
 
--  Use `www.youtube-nocookie.com` website, which can be found by
-   clicking on the 'privacy-enhanced' embedding option in the Share dialog on YouTube.
-   Add the following parameters the end of the URL ``?rel=0&amp;showinfo=0``.
-   This disables the video title and related video suggestions.
+-  For PNGs, reduce their size using ``pngquant --speed 1 <filename>``. The
+   resulting filename will have ``-fs8`` appended, so make sure to rename it and
+   use the resulting file. Commit the optimized png file to the main repository.
+   Each png file should be no more than a few hundred kilobytes.
 
--  Screenshots or animations should be proceeded by a sentence
+-  For movies, upload them to the IPython/Jupyter YouTube channel and add them
+   to the `jupyterlab-media <https://github.com/jupyterlab/jupyterlab-media>`__
+   repository. To embed a movie in the documentation, use the
+   ``www.youtube-nocookie.com`` website, which can be found by clicking on the
+   'privacy-enhanced' embedding option in the Share dialog on YouTube. Add the
+   following parameters the end of the URL ``?rel=0&amp;showinfo=0``. This
+   disables the video title and related video suggestions.
+
+-  Screenshots or animations should be preceded by a sentence
    describing the content, such as "To open a file, double-click on its
    name in the File Browser:".
 

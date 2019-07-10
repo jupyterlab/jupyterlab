@@ -221,10 +221,7 @@ export namespace CodeEditor {
 
       let mimeType = this.modelDB.createValue('mimeType');
       mimeType.set(options.mimeType || 'text/plain');
-      mimeType.changed.connect(
-        this._onMimeTypeChanged,
-        this
-      );
+      mimeType.changed.connect(this._onMimeTypeChanged, this);
 
       this.modelDB.createMap('selections');
     }
@@ -643,6 +640,11 @@ export namespace CodeEditor {
      * Column index at which rulers should be added.
      */
     rulers: Array<number>;
+
+    /**
+     * Wheter to allow code folding
+     */
+    codeFolding: boolean;
   }
 
   /**
@@ -660,7 +662,8 @@ export namespace CodeEditor {
     insertSpaces: true,
     matchBrackets: true,
     autoClosingBrackets: true,
-    rulers: []
+    rulers: [],
+    codeFolding: false
   };
 
   /**

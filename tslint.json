@@ -3,6 +3,7 @@
   "rules": {
     "prettier": [true, { "singleQuote": true }],
     "align": [true, "parameters", "statements"],
+    "await-promise": true,
     "ban": [
       true,
       ["_", "forEach"],
@@ -36,6 +37,7 @@
     "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,
+    "no-floating-promises": true,
     "no-inferrable-types": false,
     "no-internal-module": true,
     "no-invalid-this": [true, "check-function-in-method"],

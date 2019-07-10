@@ -3,6 +3,8 @@
 
 import { UseSignal, ReactWidget } from './vdom';
 
+import { Kernel } from '@jupyterlab/services';
+
 import { Button } from '@jupyterlab/ui-components';
 
 import { IIterator, find, map, some } from '@phosphor/algorithm';
@@ -245,6 +247,62 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   }
 
   /**
+   * Insert an item into the toolbar at the after a target item.
+   *
+   * @param at - The target item to insert after.
+   *
+   * @param name - The name of the item.
+   *
+   * @param widget - The widget to add.
+   *
+   * @returns Whether the item was added to the toolbar. Returns false if
+   *   an item of the same name is already in the toolbar.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   * The item can be removed from the toolbar by setting its parent to `null`.
+   */
+  insertAfter(at: string, name: string, widget: T): boolean {
+    return this._insertRelative(at, 1, name, widget);
+  }
+
+  /**
+   * Insert an item into the toolbar at the before a target item.
+   *
+   * @param at - The target item to insert before.
+   *
+   * @param name - The name of the item.
+   *
+   * @param widget - The widget to add.
+   *
+   * @returns Whether the item was added to the toolbar. Returns false if
+   *   an item of the same name is already in the toolbar.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   * The item can be removed from the toolbar by setting its parent to `null`.
+   */
+  insertBefore(at: string, name: string, widget: T): boolean {
+    return this._insertRelative(at, 0, name, widget);
+  }
+
+  private _insertRelative(
+    at: string,
+    offset: number,
+    name: string,
+    widget: T
+  ): boolean {
+    let nameWithIndex = map(this.names(), (name, i) => {
+      return { name: name, index: i };
+    });
+    let target = find(nameWithIndex, x => x.name === at);
+    if (target) {
+      return this.insertItem(target.index + offset, name, widget);
+    }
+    return false;
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -290,10 +348,10 @@ export namespace Toolbar {
    */
   export function createInterruptButton(session: IClientSession): Widget {
     return new ToolbarButton({
-      iconClassName: 'jp-StopIcon jp-Icon jp-Icon-16',
+      iconClassName: 'jp-StopIcon',
       onClick: () => {
         if (session.kernel) {
-          session.kernel.interrupt();
+          void session.kernel.interrupt();
         }
       },
       tooltip: 'Interrupt the kernel'
@@ -305,9 +363,9 @@ export namespace Toolbar {
    */
   export function createRestartButton(session: IClientSession): Widget {
     return new ToolbarButton({
-      iconClassName: 'jp-RefreshIcon jp-Icon jp-Icon-16',
+      iconClassName: 'jp-RefreshIcon',
       onClick: () => {
-        session.restart();
+        void session.restart();
       },
       tooltip: 'Restart the kernel'
     });
@@ -344,8 +402,7 @@ export namespace Toolbar {
    * Create a kernel status indicator item.
    *
    * #### Notes
-   * It show display a busy status if the kernel status is
-   * not idle.
+   * It will show a busy status if the kernel status is busy.
    * It will show the current status in the node title.
    * It can handle a change to the context or the kernel.
    */
@@ -378,9 +435,16 @@ export namespace ToolbarButtonComponent {
  * @param props - The props for ToolbarButtonComponent.
  */
 export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
-  const handleClick = (event: React.MouseEvent) => {
-    event.preventDefault();
-    props.onClick();
+  // In some browsers, a button click event moves the focus from the main
+  // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
+  // We avoid a click event by calling preventDefault in mousedown, and
+  // we bind the button action to `mousedown`.
+  const handleMouseDown = (event: React.MouseEvent) => {
+    // Fire action only when left button is pressed.
+    if (event.button === 0) {
+      event.preventDefault();
+      props.onClick();
+    }
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -398,14 +462,17 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
           : 'jp-ToolbarButtonComponent'
       }
       disabled={props.enabled === false}
-      onClick={handleClick}
+      onMouseDown={handleMouseDown}
       onKeyDown={handleKeyDown}
       title={props.tooltip || props.iconLabel}
       minimal
     >
       {props.iconClassName && (
         <span
-          className={props.iconClassName + ' jp-ToolbarButtonComponent-icon'}
+          className={
+            props.iconClassName +
+            ' jp-ToolbarButtonComponent-icon jp-Icon jp-Icon-16'
+          }
         />
       )}
       {props.label && (
@@ -477,9 +544,9 @@ export function CommandToolbarButtonComponent(
 }
 
 /*
-  * Adds the command toolbar button class to the command toolbar widget.
-  * @param w Command toolbar button widget.
-  */
+ * Adds the command toolbar button class to the command toolbar widget.
+ * @param w Command toolbar button widget.
+ */
 export function addCommandToolbarButtonClass(w: Widget): Widget {
   w.addClass('jp-CommandToolbarButton');
   return w;
@@ -523,7 +590,7 @@ namespace Private {
     }
     const tooltip = commands.caption(id) || label || iconLabel;
     const onClick = () => {
-      commands.execute(id);
+      void commands.execute(id);
     };
     const enabled = commands.isEnabled(id);
     return { className, iconClassName, tooltip, onClick, enabled, label };
@@ -605,10 +672,7 @@ namespace Private {
       super();
       this.addClass(TOOLBAR_KERNEL_STATUS_CLASS);
       this._onStatusChanged(session);
-      session.statusChanged.connect(
-        this._onStatusChanged,
-        this
-      );
+      session.statusChanged.connect(this._onStatusChanged, this);
     }
 
     /**
@@ -619,10 +683,20 @@ namespace Private {
         return;
       }
       let status = session.status;
-      this.toggleClass(TOOLBAR_IDLE_CLASS, status === 'idle');
-      this.toggleClass(TOOLBAR_BUSY_CLASS, status !== 'idle');
+      const busy = this._isBusy(status);
+      this.toggleClass(TOOLBAR_BUSY_CLASS, busy);
+      this.toggleClass(TOOLBAR_IDLE_CLASS, !busy);
       let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
       this.node.title = title;
+    }
+
+    /**
+     * Check if status should be shown as busy.
+     */
+    private _isBusy(status: Kernel.Status): boolean {
+      return (
+        status === 'busy' || status === 'starting' || status === 'restarting'
+      );
     }
   }
 }

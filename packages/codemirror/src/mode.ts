@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ArrayExt } from '@phosphor/algorithm';
 import { JSONValue } from '@phosphor/coreutils';
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
@@ -51,6 +52,37 @@ export namespace Mode {
   }
 
   /**
+   * The interface for a codemirror spec resolver.
+   */
+  export interface ISpecLoader {
+    /**
+     * A function which returns whether it was successfully loaded
+     */
+    (spec: ISpec): Promise<boolean>;
+  }
+
+  let specLoaders: Private.IRankItem[] = [
+    {
+      // Simplest, cheapest check by mode name.
+      loader: async spec => CodeMirror.modes.hasOwnProperty(spec.mode),
+      rank: 0
+    },
+    {
+      // Fetch the mode asynchronously.
+      loader: function(spec) {
+        return new Promise<boolean>((resolve, reject) => {
+          // An arrow function below seems to miscompile in our current webpack to
+          // invalid js.
+          require([`codemirror/mode/${spec.mode}/${spec.mode}.js`], function() {
+            resolve(true);
+          });
+        });
+      },
+      rank: 99
+    }
+  ];
+
+  /**
    * Get the raw list of available modes specs.
    */
   export function getModeInfo(): ISpec[] {
@@ -76,22 +108,22 @@ export namespace Mode {
    *
    * @returns A promise that resolves when the mode is available.
    */
-  export function ensure(mode: string | ISpec): Promise<ISpec> {
+  export async function ensure(mode: string | ISpec): Promise<ISpec> {
     let spec = findBest(mode);
 
-    // Simplest, cheapest check by mode name.
-    if (CodeMirror.modes.hasOwnProperty(spec.mode)) {
-      return Promise.resolve(spec);
+    for (let specLoader of specLoaders) {
+      if (await specLoader.loader(spec)) {
+        return spec;
+      }
     }
 
-    // Fetch the mode asynchronously.
-    return new Promise<ISpec>((resolve, reject) => {
-      // An arrow function below seems to miscompile in our current webpack to
-      // invalid js.
-      require([`codemirror/mode/${spec.mode}/${spec.mode}.js`], function() {
-        resolve(spec);
-      });
-    });
+    return null;
+  }
+
+  export function addSpecLoader(loader: ISpecLoader, rank: number) {
+    let item = { loader, rank };
+    let index = ArrayExt.upperBound(specLoaders, item, Private.itemCmp);
+    ArrayExt.insert(specLoaders, index, item);
   }
 
   /**
@@ -146,5 +178,26 @@ export namespace Mode {
         return mode;
       }
     }
+  }
+}
+
+namespace Private {
+  export interface IRankItem {
+    /**
+     * The loader for the item
+     */
+    loader: Mode.ISpecLoader;
+
+    /**
+     * The sort rank of the widget.
+     */
+    rank: number;
+  }
+
+  /**
+   * A less-than comparison function for the loader rank
+   */
+  export function itemCmp(first: IRankItem, second: IRankItem): number {
+    return first.rank - second.rank;
   }
 }

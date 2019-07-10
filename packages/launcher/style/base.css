@@ -1,0 +1,195 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/* Private CSS variables */
+
+:root {
+  --jp-private-launcher-top-padding: 16px;
+  --jp-private-launcher-side-padding: 32px;
+  --jp-private-launcher-card-size: 100px;
+  --jp-private-launcher-card-label-height: 32px;
+  --jp-private-launcher-card-icon-height: 68px;
+  --jp-private-launcher-large-icon-size: 52px;
+  --jp-private-launcher-small-icon-size: 32px;
+}
+
+/* Launcher */
+
+.jp-Launcher {
+  margin: 0;
+  padding: 0;
+  outline: none;
+  background: var(--jp-layout-color0);
+  box-sizing: border-box;
+  min-width: 120px;
+  min-height: 120px;
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-Launcher-body {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.jp-Launcher-cwd h3 {
+  font-size: var(--jp-ui-font-size2);
+  font-weight: normal;
+  color: var(--jp-ui-font-color1);
+  margin: 1em 0px;
+}
+
+.jp-Launcher-content {
+  width: 85%;
+  height: 100%;
+  padding-top: var(--jp-private-launcher-top-padding);
+  padding-left: var(--jp-private-launcher-side-padding);
+  padding-right: var(--jp-private-launcher-side-padding);
+  box-sizing: border-box;
+}
+
+/* Launcher section */
+
+.jp-Launcher-section {
+  width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 12px;
+}
+
+.jp-Launcher-sectionHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  box-sizing: border-box;
+  /* This is custom tuned to get the section header to align with the cards */
+  margin-left: 5px;
+  border-bottom: 1px solid var(--jp-border-color2);
+  padding-bottom: 0px;
+  margin-bottom: 8px;
+}
+
+.jp-Launcher-sectionHeader .jp-Launcher-sectionIcon {
+  box-sizing: border-box;
+  margin-right: 12px;
+  height: var(--jp-private-launcher-small-icon-size);
+  width: var(--jp-private-launcher-small-icon-size);
+  background-size: var(--jp-private-launcher-small-icon-size)
+    var(--jp-private-launcher-small-icon-size);
+}
+
+.jp-Launcher-sectionTitle {
+  font-size: var(--jp-ui-font-size2);
+  font-weight: normal;
+  color: var(--jp-ui-font-color1);
+  box-sizing: border-box;
+}
+
+/* Launcher cards */
+
+.jp-Launcher-cardContainer {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.jp-LauncherCard {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  width: var(--jp-private-launcher-card-size);
+  height: var(--jp-private-launcher-card-size);
+  margin: 8px;
+  padding: 0px;
+  border: 1px solid var(--jp-border-color2);
+  background: var(--jp-layout-color0);
+  box-shadow: var(--jp-elevation-z2);
+  transition: 0.2s box-shadow;
+  border-radius: var(--jp-border-radius);
+}
+
+.jp-LauncherCard:focus:not(:active) {
+  border: 1px solid var(--jp-brand-color1);
+  box-shadow: var(--jp-elevation-z6);
+}
+
+.jp-LauncherCard:hover {
+  box-shadow: var(--jp-elevation-z6);
+  background: var(--jp-layout-color1);
+}
+
+.jp-LauncherCard:active {
+  box-shadow: var(--jp-elevation-z4);
+}
+
+.jp-LauncherCard-icon {
+  width: 100%;
+  height: var(--jp-private-launcher-card-icon-height);
+  box-sizing: border-box;
+  margin: 0px;
+  padding: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.jp-LauncherCard-noKernelIcon {
+  font-weight: normal;
+  font-size: var(--jp-private-launcher-large-icon-size);
+}
+
+.jp-LauncherCard[data-category='Notebook'] .jp-LauncherCard-noKernelIcon {
+  /* This color is copied from the notebook icon. */
+  color: #ef6c00;
+}
+
+.jp-LauncherCard[data-category='Console'] .jp-LauncherCard-noKernelIcon {
+  /* This color is copied from the console icon. */
+  color: #0288d1;
+}
+
+.jp-LauncherCard-label {
+  width: 100%;
+  height: var(--jp-private-launcher-card-label-height);
+  padding: 0 4px 4px 4px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.jp-LauncherCard-label p {
+  height: 28px;
+  word-break: break-word;
+  text-align: center;
+  color: var(--jp-ui-font-color1);
+  line-height: 14px;
+  font-size: 12px;
+  overflow: hidden;
+}
+
+/* Icons, kernel icons */
+
+.jp-Launcher-icon {
+  margin: 0px;
+  padding: 0px;
+  height: var(--jp-private-launcher-large-icon-size);
+  width: var(--jp-private-launcher-large-icon-size);
+  background-size: var(--jp-private-launcher-large-icon-size)
+    var(--jp-private-launcher-large-icon-size);
+  background-repeat: no-repeat;
+}
+
+.jp-Launcher-kernelIcon {
+  width: var(--jp-private-launcher-large-icon-size);
+  height: var(--jp-private-launcher-large-icon-size);
+  margin: 0px;
+  padding: 0px;
+}

@@ -68,13 +68,13 @@ export class TextRenderConfig {
 export class GridSearchService {
   constructor(grid: DataGrid) {
     this._grid = grid;
-    this._searchText = '';
+    this._query = null;
     this._row = 0;
-    this._column = 0;
+    this._column = -1;
   }
 
   /**
-   * Returs a cellrenderer config function to render each cell background.
+   * Returns a cellrenderer config function to render each cell background.
    * If cell match, background is matchBackgroundColor, if it's the current
    * match, background is currentMatchBackgroundColor.
    */
@@ -82,8 +82,8 @@ export class GridSearchService {
     config: TextRenderConfig
   ): CellRenderer.ConfigFunc<string> {
     return ({ value, row, column }) => {
-      if (this._searchText) {
-        if ((value as string).indexOf(this._searchText) !== -1) {
+      if (this._query) {
+        if ((value as string).match(this._query)) {
           if (this._row === row && this._column === column) {
             return config.currentMatchBackgroundColor;
           }
@@ -94,17 +94,29 @@ export class GridSearchService {
   }
 
   /**
+   * Clear the search.
+   */
+  clear() {
+    this._query = null;
+    this._row = 0;
+    this._column = -1;
+    this._grid.repaint();
+  }
+
+  /**
    * incrementally look for searchText.
    */
-  find(searchText: string) {
+  find(query: RegExp, reverse = false): boolean {
     const model = this._grid.model;
-    if (this._searchText !== searchText) {
+    const rowCount = model.rowCount('body');
+    const columnCount = model.columnCount('body');
+
+    if (this._query !== query) {
       // reset search
       this._row = 0;
       this._column = -1;
     }
-    this._column++; // incremental search
-    this._searchText = searchText;
+    this._query = query;
 
     // check if the match is in current viewport
     const minRow = this._grid.scrollY / this._grid.baseRowSize;
@@ -113,49 +125,99 @@ export class GridSearchService {
     const minColumn = this._grid.scrollX / this._grid.baseColumnSize;
     const maxColumn =
       (this._grid.scrollX + this._grid.pageWidth) / this._grid.baseColumnSize;
-    const isMatchInViewport = () => {
+    const isInViewport = (row: number, column: number) => {
       return (
-        this._row >= minRow &&
-        this._row <= maxRow &&
-        this._column >= minColumn &&
-        this._column <= maxColumn
+        row >= minRow &&
+        row <= maxRow &&
+        column >= minColumn &&
+        column <= maxColumn
       );
     };
 
-    for (; this._row < model.rowCount('body'); this._row++) {
-      for (; this._column < model.columnCount('body'); this._column++) {
-        const cellData = model.data('body', this._row, this._column) as string;
-        if (cellData.indexOf(searchText) !== -1) {
+    const increment = reverse ? -1 : 1;
+    this._column += increment;
+    for (
+      let row = this._row;
+      reverse ? row >= 0 : row < rowCount;
+      row += increment
+    ) {
+      for (
+        let col = this._column;
+        reverse ? col >= 0 : col < columnCount;
+        col += increment
+      ) {
+        const cellData = model.data('body', row, col) as string;
+        if (cellData.match(query)) {
           // to update the background of matching cells.
+
+          // TODO: we only really need to invalidate the previous and current
+          // cell rects, not the entire grid.
           this._grid.repaint();
-          if (!isMatchInViewport()) {
+
+          if (!isInViewport(row, col)) {
             // scroll the matching cell into view
-            let scrollX = this._grid.scrollX;
-            let scrollY = this._grid.scrollY;
+            let scrollX = 0;
+            let scrollY = 0;
             /* see also https://github.com/jupyterlab/jupyterlab/pull/5523#issuecomment-432621391 */
-            for (let i = scrollY; i < this._row - 1; i++) {
+            for (let i = 0; i < row - 1; i++) {
               scrollY += this._grid.sectionSize('row', i);
             }
-            for (let j = scrollX; j < this._column - 1; j++) {
+            for (let j = 0; j < col - 1; j++) {
               scrollX += this._grid.sectionSize('column', j);
             }
             this._grid.scrollTo(scrollX, scrollY);
           }
-          return;
+          this._row = row;
+          this._column = col;
+          return true;
         }
       }
-      this._column = 0;
+      this._column = reverse ? columnCount - 1 : 0;
+    }
+    // We've finished searching all the way to the limits of the grid. If this
+    // is the first time through (looping is true), wrap the indices and search
+    // again. Otherwise, give up.
+    if (this._looping) {
+      this._looping = false;
+      this._row = reverse ? 0 : rowCount - 1;
+      this._wrapRows(reverse);
+      try {
+        return this.find(query, reverse);
+      } finally {
+        this._looping = true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Wrap indices if needed to just before the start or just after the end.
+   */
+  private _wrapRows(reverse = false) {
+    const model = this._grid.model;
+    const rowCount = model.rowCount('body');
+    const columnCount = model.columnCount('body');
+
+    if (reverse && this._row <= 0) {
+      // if we are at the front, wrap to just past the end.
+      this._row = rowCount - 1;
+      this._column = columnCount;
+    } else if (!reverse && this._row >= rowCount - 1) {
+      // if we are at the end, wrap to just before the front.
+      this._row = 0;
+      this._column = -1;
     }
   }
 
-  get searchText(): string {
-    return this._searchText;
+  get query(): RegExp {
+    return this._query;
   }
 
   private _grid: DataGrid;
-  private _searchText: string;
+  private _query: RegExp | null;
   private _row: number;
   private _column: number;
+  private _looping = true;
 }
 
 /**
@@ -185,7 +247,7 @@ export class CSVViewer extends Widget {
 
     this._searchService = new GridSearchService(this._grid);
 
-    this._context.ready.then(() => {
+    void this._context.ready.then(() => {
       this._updateGrid();
       this._revealed.resolve(undefined);
       // Throttle the rendering rate of the widget.
@@ -193,10 +255,7 @@ export class CSVViewer extends Widget {
         signal: context.model.contentChanged,
         timeout: RENDER_TIMEOUT
       });
-      this._monitor.activityStopped.connect(
-        this._updateGrid,
-        this
-      );
+      this._monitor.activityStopped.connect(this._updateGrid, this);
     });
   }
 
@@ -369,7 +428,7 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
     topRow = topRow.split('-')[0];
 
     // go to that row
-    this.context.ready.then(() => {
+    void this.context.ready.then(() => {
       this.content.goToLine(Number(topRow));
     });
   }

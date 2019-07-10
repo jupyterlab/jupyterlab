@@ -84,7 +84,7 @@ export namespace ToolbarItems {
           buttons: [Dialog.okButton()]
         });
       }
-      panel.context.save().then(() => {
+      void panel.context.save().then(() => {
         if (!panel.isDisposed) {
           return panel.context.createCheckpoint();
         }
@@ -95,7 +95,7 @@ export namespace ToolbarItems {
         <UseSignal signal={panel.context.fileChanged}>
           {() => (
             <ToolbarButtonComponent
-              iconClassName={TOOLBAR_SAVE_CLASS + ' jp-Icon jp-Icon-16'}
+              iconClassName={TOOLBAR_SAVE_CLASS}
               onClick={onClick}
               tooltip="Save the notebook contents and create checkpoint"
               enabled={
@@ -118,7 +118,7 @@ export namespace ToolbarItems {
    */
   export function createInsertButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_INSERT_CLASS + ' jp-Icon jp-Icon-16',
+      iconClassName: TOOLBAR_INSERT_CLASS,
       onClick: () => {
         NotebookActions.insertBelow(panel.content);
       },
@@ -131,7 +131,7 @@ export namespace ToolbarItems {
    */
   export function createCutButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_CUT_CLASS + ' jp-Icon jp-Icon-16',
+      iconClassName: TOOLBAR_CUT_CLASS,
       onClick: () => {
         NotebookActions.cut(panel.content);
       },
@@ -144,7 +144,7 @@ export namespace ToolbarItems {
    */
   export function createCopyButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_COPY_CLASS + ' jp-Icon jp-Icon-16',
+      iconClassName: TOOLBAR_COPY_CLASS,
       onClick: () => {
         NotebookActions.copy(panel.content);
       },
@@ -157,7 +157,7 @@ export namespace ToolbarItems {
    */
   export function createPasteButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_PASTE_CLASS + ' jp-Icon jp-Icon-16',
+      iconClassName: TOOLBAR_PASTE_CLASS,
       onClick: () => {
         NotebookActions.paste(panel.content);
       },
@@ -170,9 +170,9 @@ export namespace ToolbarItems {
    */
   export function createRunButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_RUN_CLASS + ' jp-Icon jp-Icon-16',
+      iconClassName: TOOLBAR_RUN_CLASS,
       onClick: () => {
-        NotebookActions.runAndAdvance(panel.content, panel.session);
+        void NotebookActions.runAndAdvance(panel.content, panel.session);
       },
       tooltip: 'Run the selected cells and advance'
     });
@@ -242,15 +242,9 @@ export class CellTypeSwitcher extends ReactWidget {
     if (widget.model) {
       this.update();
     }
-    widget.activeCellChanged.connect(
-      this.update,
-      this
-    );
+    widget.activeCellChanged.connect(this.update, this);
     // Follow a change in the selection.
-    widget.selectionChanged.connect(
-      this.update,
-      this
-    );
+    widget.selectionChanged.connect(this.update, this);
   }
 
   /**
@@ -292,6 +286,10 @@ export class CellTypeSwitcher extends ReactWidget {
         onChange={this.handleChange}
         onKeyDown={this.handleKeyDown}
         value={value}
+        iconProps={{
+          icon: <span className="jp-MaterialIcon jp-DownCaretIcon bp3-icon" />
+        }}
+        aria-label="Cell type"
         minimal
       >
         <option value="-">-</option>

@@ -18,7 +18,7 @@ import {
   IDocumentWidget,
   TextModelFactory,
   Context
-} from '@jupyterlab/docregistry/src';
+} from '@jupyterlab/docregistry';
 
 import { ServiceManager } from '@jupyterlab/services';
 
@@ -232,6 +232,19 @@ describe('docregistry/default', () => {
         const context = createFileContext();
         const widget = factory.createNew(context);
         expect(widget).to.be.an.instanceof(Widget);
+      });
+
+      it('should take an optional source widget for cloning', () => {
+        const factory = createFactory();
+        const context = createFileContext();
+        const widget = factory.createNew(context);
+        const clonedWidget: IDocumentWidget = factory.createNew(
+          context,
+          widget
+        );
+        expect(clonedWidget).to.not.equal(widget);
+        expect(clonedWidget.hasClass('WidgetFactory')).to.be.true;
+        expect(clonedWidget.context).to.equal(widget.context);
       });
     });
   });
@@ -544,7 +557,7 @@ describe('docregistry/default', () => {
     };
 
     beforeAll(async () => {
-      manager = new ServiceManager();
+      manager = new ServiceManager({ standby: 'never' });
       await manager.ready;
     });
 
@@ -587,7 +600,7 @@ describe('docregistry/default', () => {
         // Our promise should resolve before the widget reveal promise.
         expect(await Promise.race([widget.revealed, reveal])).to.equal(x);
         // The context ready promise should also resolve first.
-        context.initialize(true);
+        void context.initialize(true);
         expect(
           await Promise.race([widget.revealed, contextReady])
         ).to.deep.equal([undefined, x]);

@@ -262,7 +262,10 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
     const model = notebook.model;
-    const cell = model.contentFactory.createCodeCell({});
+    const cell = model.contentFactory.createCell(
+      notebook.notebookConfig.defaultCell,
+      {}
+    );
     const active = notebook.activeCellIndex;
 
     model.cells.insert(active, cell);
@@ -291,7 +294,10 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
     const model = notebook.model;
-    const cell = model.contentFactory.createCodeCell({});
+    const cell = model.contentFactory.createCell(
+      notebook.notebookConfig.defaultCell,
+      {}
+    );
 
     model.cells.insert(notebook.activeCellIndex + 1, cell);
 
@@ -446,7 +452,10 @@ export namespace NotebookActions {
     const model = notebook.model;
 
     if (notebook.activeCellIndex === notebook.widgets.length - 1) {
-      const cell = model.contentFactory.createCodeCell({});
+      const cell = model.contentFactory.createCell(
+        notebook.notebookConfig.defaultCell,
+        {}
+      );
 
       model.cells.push(cell);
       notebook.activeCellIndex++;
@@ -484,7 +493,10 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
     const promise = Private.runSelected(notebook, session);
     const model = notebook.model;
-    const cell = model.contentFactory.createCodeCell({});
+    const cell = model.contentFactory.createCell(
+      notebook.notebookConfig.defaultCell,
+      {}
+    );
 
     model.cells.insert(notebook.activeCellIndex + 1, cell);
     notebook.activeCellIndex++;
@@ -522,6 +534,32 @@ export namespace NotebookActions {
 
     const promise = Private.runSelected(notebook, session);
 
+    Private.handleRunState(notebook, state, true);
+    return promise;
+  }
+
+  export function renderAllMarkdown(
+    notebook: Notebook,
+    session?: IClientSession
+  ): Promise<boolean> {
+    if (!notebook.model || !notebook.activeCell) {
+      return Promise.resolve(false);
+    }
+    const previousIndex = notebook.activeCellIndex;
+    const state = Private.getState(notebook);
+    notebook.widgets.forEach((child, index) => {
+      if (child.model.type === 'markdown') {
+        notebook.select(child);
+        // This is to make sure that the activeCell
+        // does not get executed
+        notebook.activeCellIndex = index;
+      }
+    });
+    if (notebook.activeCell.model.type !== 'markdown') {
+      return Promise.resolve(true);
+    }
+    const promise = Private.runSelected(notebook, session);
+    notebook.activeCellIndex = previousIndex;
     Private.handleRunState(notebook, state, true);
     return promise;
   }
@@ -606,6 +644,7 @@ export namespace NotebookActions {
    * #### Notes
    * The widget mode will be preserved.
    * This is a no-op if the first cell is the active cell.
+   * This will skip any collapsed cells.
    * The existing selection will be cleared.
    */
   export function selectAbove(notebook: Notebook): void {
@@ -616,9 +655,22 @@ export namespace NotebookActions {
       return;
     }
 
+    let possibleNextCell = notebook.activeCellIndex - 1;
+
+    // find first non hidden cell above current cell
+    if (notebook.mode === 'edit') {
+      while (notebook.widgets[possibleNextCell].inputHidden) {
+        // If we are at the top cell, we cannot change selection.
+        if (possibleNextCell === 0) {
+          return;
+        }
+        possibleNextCell -= 1;
+      }
+    }
+
     const state = Private.getState(notebook);
 
-    notebook.activeCellIndex -= 1;
+    notebook.activeCellIndex = possibleNextCell;
     notebook.deselectAll();
     Private.handleState(notebook, state, true);
   }
@@ -631,19 +683,34 @@ export namespace NotebookActions {
    * #### Notes
    * The widget mode will be preserved.
    * This is a no-op if the last cell is the active cell.
+   * This will skip any collapsed cells.
    * The existing selection will be cleared.
    */
   export function selectBelow(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
-    if (notebook.activeCellIndex === notebook.widgets.length - 1) {
+    const maxCellIndex = notebook.widgets.length - 1;
+    if (notebook.activeCellIndex === maxCellIndex) {
       return;
+    }
+
+    let possibleNextCell = notebook.activeCellIndex + 1;
+
+    // find first non hidden cell below current cell
+    if (notebook.mode === 'edit') {
+      while (notebook.widgets[possibleNextCell].inputHidden) {
+        // If we are at the bottom cell, we cannot change selection.
+        if (possibleNextCell === maxCellIndex) {
+          return;
+        }
+        possibleNextCell += 1;
+      }
     }
 
     const state = Private.getState(notebook);
 
-    notebook.activeCellIndex += 1;
+    notebook.activeCellIndex = possibleNextCell;
     notebook.deselectAll();
     Private.handleState(notebook, state, true);
   }
@@ -1168,58 +1235,6 @@ export namespace NotebookActions {
   }
 
   /**
-   * Persists the collapsed state of all code cell outputs to the model.
-   *
-   * @param notebook - The target notebook widget.
-   */
-  export function persistViewState(notebook: Notebook): void {
-    if (!notebook.model) {
-      return;
-    }
-
-    const state = Private.getState(notebook);
-
-    notebook.widgets.forEach(cell => {
-      const { model, inputHidden } = cell;
-      const metadata = model.metadata;
-      const jupyter = (metadata.get('jupyter') as any) || {};
-
-      if (inputHidden) {
-        jupyter.source_hidden = true;
-      } else {
-        delete jupyter.source_hidden;
-      }
-
-      if (cell.model.type === 'code') {
-        const { outputHidden, outputsScrolled } = cell as CodeCell;
-
-        // set both metadata keys
-        // https://github.com/jupyterlab/jupyterlab/pull/3981#issuecomment-391139167
-        if (outputHidden) {
-          model.metadata.set('collapsed', true);
-          jupyter.outputs_hidden = true;
-        } else {
-          model.metadata.delete('collapsed');
-          delete jupyter.outputs_hidden;
-        }
-
-        if (outputsScrolled) {
-          model.metadata.set('scrolled', true);
-        } else {
-          model.metadata.delete('scrolled');
-        }
-      }
-
-      if (Object.keys(jupyter).length === 0) {
-        metadata.delete('jupyter');
-      } else {
-        metadata.set('jupyter', jupyter);
-      }
-    });
-    Private.handleState(notebook, state);
-  }
-
-  /**
    * Set the markdown header level.
    *
    * @param notebook - The target notebook widget.
@@ -1421,9 +1436,12 @@ namespace Private {
       })
       .catch(reason => {
         if (reason.message === 'KernelReplyNotOK') {
-          selected.map((cell: CodeCell) => {
+          selected.map(cell => {
             // Remove '*' prompt from cells that didn't execute
-            if (cell.model.executionCount == null) {
+            if (
+              cell.model.type === 'code' &&
+              (cell as CodeCell).model.executionCount == null
+            ) {
               cell.setPrompt('');
             }
           });
@@ -1470,7 +1488,7 @@ namespace Private {
               }
 
               if (reply.content.status === 'ok') {
-                const content = reply.content as KernelMessage.IExecuteOkReply;
+                const content = reply.content;
 
                 if (content.payload && content.payload.length) {
                   handlePayload(content, notebook, cell);
@@ -1514,7 +1532,7 @@ namespace Private {
    * See [Payloads (DEPRECATED)](https://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
    */
   function handlePayload(
-    content: KernelMessage.IExecuteOkReply,
+    content: KernelMessage.IExecuteReply,
     notebook: Notebook,
     cell: Cell
   ) {
@@ -1681,7 +1699,12 @@ namespace Private {
       // within the compound operation to make the deletion of
       // a notebook's last cell undoable.
       if (!cells.length) {
-        cells.push(model.contentFactory.createCodeCell({}));
+        cells.push(
+          model.contentFactory.createCell(
+            notebook.notebookConfig.defaultCell,
+            {}
+          )
+        );
       }
       cells.endCompoundOperation();
 

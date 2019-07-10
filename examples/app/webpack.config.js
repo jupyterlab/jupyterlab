@@ -24,8 +24,8 @@ module.exports = [
       fs: 'empty'
     },
     bail: true,
-    devtool: 'cheap-source-map',
-    mode: 'production',
+    devtool: 'source-map',
+    mode: 'development',
     module: {
       rules: [
         { test: /\.css$/, use: ['style-loader', 'css-loader'] },

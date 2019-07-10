@@ -43,9 +43,8 @@ export function removeMath(text: string): { text: string; math: string[] } {
         wholematch.replace(/\$/g, '~D')
       );
     deTilde = (text: string) => {
-      return text.replace(
-        /~([TD])/g,
-        (wholematch, character) => (character === 'T' ? '~' : inline)
+      return text.replace(/~([TD])/g, (wholematch, character) =>
+        character === 'T' ? '~' : inline
       );
     };
   } else {

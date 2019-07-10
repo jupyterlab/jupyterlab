@@ -170,7 +170,7 @@ export class ListModel extends VDomModel {
   }
   set query(value: string | null) {
     this._query = value;
-    this.update();
+    void this.update();
   }
 
   /**
@@ -186,7 +186,7 @@ export class ListModel extends VDomModel {
   }
   set page(value: number) {
     this._page = value;
-    this.update();
+    void this.update();
   }
 
   /**
@@ -202,7 +202,7 @@ export class ListModel extends VDomModel {
   }
   set pagination(value: number) {
     this._pagination = value;
-    this.update();
+    void this.update();
   }
 
   /**
@@ -215,8 +215,8 @@ export class ListModel extends VDomModel {
   /**
    * Initialize the model.
    */
-  initialize() {
-    this.update()
+  initialize(): Promise<void> {
+    return this.update()
       .then(() => {
         this.initialized = true;
         this.stateChanged.emit(undefined);
@@ -239,23 +239,23 @@ export class ListModel extends VDomModel {
    *
    * @param entry An entry indicating which extension to install.
    */
-  install(entry: IEntry) {
+  async install(entry: IEntry): Promise<void> {
     if (entry.installed) {
       // Updating
-      return this._performAction('install', entry).then(data => {
+      await this._performAction('install', entry).then(data => {
         if (data.status !== 'ok') {
           reportInstallError(entry.name, data.message);
         }
-        this.update();
+        return this.update();
       });
     }
-    this.checkCompanionPackages(entry).then(shouldInstall => {
+    await this.checkCompanionPackages(entry).then(shouldInstall => {
       if (shouldInstall) {
         return this._performAction('install', entry).then(data => {
           if (data.status !== 'ok') {
             reportInstallError(entry.name, data.message);
           }
-          this.update();
+          return this.update();
         });
       }
     });
@@ -266,13 +266,12 @@ export class ListModel extends VDomModel {
    *
    * @param entry An entry indicating which extension to uninstall.
    */
-  uninstall(entry: IEntry) {
+  async uninstall(entry: IEntry): Promise<void> {
     if (!entry.installed) {
       throw new Error(`Not installed, cannot uninstall: ${entry.name}`);
     }
-    this._performAction('uninstall', entry).then(data => {
-      this.update();
-    });
+    await this._performAction('uninstall', entry);
+    return this.update();
   }
 
   /**
@@ -280,13 +279,12 @@ export class ListModel extends VDomModel {
    *
    * @param entry An entry indicating which extension to enable.
    */
-  enable(entry: IEntry) {
+  async enable(entry: IEntry): Promise<void> {
     if (entry.enabled) {
       throw new Error(`Already enabled: ${entry.name}`);
     }
-    this._performAction('enable', entry).then(data => {
-      this.update();
-    });
+    await this._performAction('enable', entry);
+    await this.update();
   }
 
   /**
@@ -294,13 +292,12 @@ export class ListModel extends VDomModel {
    *
    * @param entry An entry indicating which extension to disable.
    */
-  disable(entry: IEntry) {
+  async disable(entry: IEntry): Promise<void> {
     if (!entry.enabled) {
       throw new Error(`Already disabled: ${entry.name}`);
     }
-    this._performAction('disable', entry).then(data => {
-      this.update();
-    });
+    await this._performAction('disable', entry);
+    await this.update();
   }
 
   /**
@@ -410,8 +407,8 @@ export class ListModel extends VDomModel {
           'homepage' in pkg.links
             ? pkg.links.homepage
             : 'repository' in pkg.links
-              ? pkg.links.repository
-              : pkg.links.npm,
+            ? pkg.links.repository
+            : pkg.links.npm,
         installed: false,
         enabled: false,
         status: null,

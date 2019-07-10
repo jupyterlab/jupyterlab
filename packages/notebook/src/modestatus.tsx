@@ -92,18 +92,9 @@ export namespace CommandEditStatus {
         this._notebookMode = 'command';
       } else {
         this._notebookMode = this._notebook.mode;
-        this._notebook.stateChanged.connect(
-          this._onChanged,
-          this
-        );
-        this._notebook.activeCellChanged.connect(
-          this._onChanged,
-          this
-        );
-        this._notebook.modelContentChanged.connect(
-          this._onChanged,
-          this
-        );
+        this._notebook.stateChanged.connect(this._onChanged, this);
+        this._notebook.activeCellChanged.connect(this._onChanged, this);
+        this._notebook.modelContentChanged.connect(this._onChanged, this);
       }
 
       this._triggerChange(oldMode, this._notebookMode);

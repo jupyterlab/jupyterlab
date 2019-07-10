@@ -2,24 +2,25 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ILabStatus,
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
   Dialog,
   IClientSession,
   ICommandPalette,
-  InstanceTracker,
-  showDialog
+  showDialog,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
-import { ISettingRegistry, PageConfig } from '@jupyterlab/coreutils';
+import { ISettingRegistry, PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -38,7 +39,9 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { find } from '@phosphor/algorithm';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, JSONObject } from '@phosphor/coreutils';
+
+import { DisposableSet } from '@phosphor/disposable';
 
 import { DockLayout, Menu } from '@phosphor/widgets';
 
@@ -80,7 +83,7 @@ namespace CommandIDs {
 /**
  * The console widget tracker provider.
  */
-const tracker: JupyterLabPlugin<IConsoleTracker> = {
+const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   id: '@jupyterlab/console-extension:tracker',
   provides: IConsoleTracker,
   requires: [
@@ -93,7 +96,7 @@ const tracker: JupyterLabPlugin<IConsoleTracker> = {
     IRenderMimeRegistry,
     ISettingRegistry
   ],
-  optional: [ILauncher],
+  optional: [ILauncher, ILabStatus],
   activate: activateConsole,
   autoStart: true
 };
@@ -101,12 +104,12 @@ const tracker: JupyterLabPlugin<IConsoleTracker> = {
 /**
  * The console widget content factory.
  */
-const factory: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
+const factory: JupyterFrontEndPlugin<ConsolePanel.IContentFactory> = {
   id: '@jupyterlab/console-extension:factory',
   provides: ConsolePanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
-  activate: (app: JupyterLab, editorServices: IEditorServices) => {
+  activate: (app: JupyterFrontEnd, editorServices: IEditorServices) => {
     const editorFactory = editorServices.factoryService.newInlineEditor;
     return new ConsolePanel.ContentFactory({ editorFactory });
   }
@@ -115,14 +118,14 @@ const factory: JupyterLabPlugin<ConsolePanel.IContentFactory> = {
 /**
  * Export the plugins as the default.
  */
-const plugins: JupyterLabPlugin<any>[] = [factory, tracker, foreign];
+const plugins: JupyterFrontEndPlugin<any>[] = [factory, tracker, foreign];
 export default plugins;
 
 /**
  * Activate the console extension.
  */
 async function activateConsole(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   mainMenu: IMainMenu,
   palette: ICommandPalette,
   contentFactory: ConsolePanel.IContentFactory,
@@ -131,21 +134,26 @@ async function activateConsole(
   browserFactory: IFileBrowserFactory,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
-  launcher: ILauncher | null
+  launcher: ILauncher | null,
+  status: ILabStatus | null
 ): Promise<IConsoleTracker> {
   const manager = app.serviceManager;
   const { commands, shell } = app;
   const category = 'Console';
 
-  // Create an instance tracker for all console panels.
-  const tracker = new InstanceTracker<ConsolePanel>({ namespace: 'console' });
+  // Create a widget tracker for all console panels.
+  const tracker = new WidgetTracker<ConsolePanel>({ namespace: 'console' });
 
   // Handle state restoration.
-  restorer.restore(tracker, {
-    command: CommandIDs.open,
+  void restorer.restore(tracker, {
+    command: CommandIDs.create,
     args: panel => ({
       path: panel.console.session.path,
-      name: panel.console.session.name
+      name: panel.console.session.name,
+      kernelPreference: {
+        name: panel.console.session.kernelPreference.name,
+        language: panel.console.session.kernelPreference.language
+      }
     }),
     name: panel => panel.console.session.path,
     when: manager.ready
@@ -153,27 +161,39 @@ async function activateConsole(
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
-    manager.ready.then(() => {
-      const specs = manager.specs;
-      if (!specs) {
-        return;
-      }
-      let baseUrl = PageConfig.getBaseUrl();
-      for (let name in specs.kernelspecs) {
-        let rank = name === specs.default ? 0 : Infinity;
-        let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
-        if (kernelIconUrl) {
-          let index = kernelIconUrl.indexOf('kernelspecs');
-          kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
+    void manager.ready.then(() => {
+      let disposables: DisposableSet | null = null;
+      const onSpecsChanged = () => {
+        if (disposables) {
+          disposables.dispose();
+          disposables = null;
         }
-        launcher.add({
-          command: CommandIDs.create,
-          args: { isLauncher: true, kernelPreference: { name } },
-          category: 'Console',
-          rank,
-          kernelIconUrl
-        });
-      }
+        const specs = manager.specs;
+        if (!specs) {
+          return;
+        }
+        disposables = new DisposableSet();
+        let baseUrl = PageConfig.getBaseUrl();
+        for (let name in specs.kernelspecs) {
+          let rank = name === specs.default ? 0 : Infinity;
+          let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
+          if (kernelIconUrl) {
+            let index = kernelIconUrl.indexOf('kernelspecs');
+            kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
+          }
+          disposables.add(
+            launcher.add({
+              command: CommandIDs.create,
+              args: { isLauncher: true, kernelPreference: { name } },
+              category: 'Console',
+              rank,
+              kernelIconUrl
+            })
+          );
+        }
+      };
+      onSpecsChanged();
+      manager.specsChanged.connect(onSpecsChanged);
     });
   }
 
@@ -206,14 +226,14 @@ async function activateConsole(
    * Create a console for a given path.
    */
   async function createConsole(options: ICreateOptions): Promise<ConsolePanel> {
-    let panel: ConsolePanel;
     await manager.ready;
-    panel = new ConsolePanel({
+
+    const panel = new ConsolePanel({
       manager,
       contentFactory,
       mimeTypeService: editorServices.mimeTypeService,
       rendermime,
-      setBusy: app.setBusy.bind(app),
+      setBusy: status && (() => status.setBusy()),
       ...(options as Partial<ConsolePanel.IOptions>)
     });
 
@@ -223,13 +243,12 @@ async function activateConsole(
     )).composite as string;
     panel.console.node.dataset.jpInteractionMode = interactionMode;
 
-    await panel.session.ready;
-
-    // Add the console panel to the tracker.
-    tracker.add(panel);
+    // Add the console panel to the tracker. We want the panel to show up before
+    // any kernel selection dialog, so we do not await panel.session.ready;
+    await tracker.add(panel);
     panel.session.propertyChanged.connect(() => tracker.save(panel));
 
-    shell.addToMainArea(panel, {
+    shell.add(panel, 'main', {
       ref: options.ref,
       mode: options.insertMode,
       activate: options.activate
@@ -248,7 +267,7 @@ async function activateConsole(
   }
   settingRegistry.pluginChanged.connect((sender, plugin) => {
     if (plugin === pluginId) {
-      updateSettings();
+      void updateSettings();
     }
   });
   await updateSettings();
@@ -259,7 +278,7 @@ async function activateConsole(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === app.shell.currentWidget
+      tracker.currentWidget === shell.currentWidget
     );
   }
 
@@ -363,7 +382,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      current.console.execute(true);
+      return current.console.execute(true);
     },
     isEnabled
   });
@@ -408,20 +427,21 @@ async function activateConsole(
   });
 
   commands.addCommand(CommandIDs.closeAndShutdown, {
-    label: 'Close and Shutdown…',
+    label: 'Close and Shut Down…',
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
         return;
       }
       return showDialog({
-        title: 'Shutdown the console?',
+        title: 'Shut down the console?',
         body: `Are you sure you want to close "${current.title.label}"?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          current.console.session.shutdown().then(() => {
+          return current.console.session.shutdown().then(() => {
             current.dispose();
+            return true;
           });
         } else {
           return false;
@@ -439,7 +459,10 @@ async function activateConsole(
           if (args['activate'] !== false) {
             shell.activateById(widget.id);
           }
-          widget.console.inject(args['code'] as string);
+          void widget.console.inject(
+            args['code'] as string,
+            args['metadata'] as JSONObject
+          );
           return true;
         }
         return false;
@@ -485,12 +508,12 @@ async function activateConsole(
     name: 'Console',
     closeAndCleanup: (current: ConsolePanel) => {
       return showDialog({
-        title: 'Shutdown the console?',
+        title: 'Shut down the console?',
         body: `Are you sure you want to close "${current.title.label}"?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          current.console.session.shutdown().then(() => {
+          return current.console.session.shutdown().then(() => {
             current.dispose();
           });
         } else {

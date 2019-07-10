@@ -3,6 +3,8 @@
 
 import { PathExt } from '@jupyterlab/coreutils';
 
+import { Printing } from '@jupyterlab/apputils';
+
 import {
   ABCWidgetFactory,
   DocumentRegistry,
@@ -24,7 +26,7 @@ const IMAGE_CLASS = 'jp-ImageViewer';
 /**
  * A widget for images.
  */
-export class ImageViewer extends Widget {
+export class ImageViewer extends Widget implements Printing.IPrintable {
   /**
    * Construct a new image widget.
    */
@@ -38,12 +40,9 @@ export class ImageViewer extends Widget {
     this.node.appendChild(this._img);
 
     this._onTitleChanged();
-    context.pathChanged.connect(
-      this._onTitleChanged,
-      this
-    );
+    context.pathChanged.connect(this._onTitleChanged, this);
 
-    context.ready.then(() => {
+    void context.ready.then(() => {
       if (this.isDisposed) {
         return;
       }
@@ -51,16 +50,17 @@ export class ImageViewer extends Widget {
       this._format = contents.format === 'base64' ? ';base64' : '';
       this._mimeType = contents.mimetype;
       this._render();
-      context.model.contentChanged.connect(
-        this.update,
-        this
-      );
-      context.fileChanged.connect(
-        this.update,
-        this
-      );
+      context.model.contentChanged.connect(this.update, this);
+      context.fileChanged.connect(this.update, this);
       this._ready.resolve(void 0);
     });
+  }
+
+  /**
+   * Print in iframe.
+   */
+  [Printing.symbol]() {
+    return () => Printing.printWidget(this);
   }
 
   /**

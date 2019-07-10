@@ -9,7 +9,7 @@ import { JSONExt } from '@phosphor/coreutils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { CompleterModel, Completer } from '@jupyterlab/completer/src';
+import { CompleterModel, Completer } from '@jupyterlab/completer';
 
 function makeState(text: string): Completer.ITextState {
   return {
@@ -361,8 +361,9 @@ describe('completer/model', () => {
         let model = new CompleterModel();
         let patch = 'foobar';
         let want: Completer.IPatch = {
-          text: patch,
-          offset: patch.length
+          start: 0,
+          end: 3,
+          value: patch
         };
         let cursor: Completer.ICursorSpan = { start: 0, end: 3 };
         model.original = makeState('foo');
@@ -382,8 +383,9 @@ describe('completer/model', () => {
         let start = currentValue.length;
         let end = currentValue.length;
         let want: Completer.IPatch = {
-          text: currentValue + patch,
-          offset: currentValue.length + patch.length
+          start,
+          end,
+          value: patch
         };
         let cursor: Completer.ICursorSpan = { start, end };
         model.original = makeState(currentValue);

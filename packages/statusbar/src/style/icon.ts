@@ -4,12 +4,11 @@
 import vars from './variables';
 import { NestedCSSProperties } from 'typestyle/lib/types';
 
-export default ({ x, y }: { x: number; y: number }): NestedCSSProperties => {
+export default (): NestedCSSProperties => {
   return {
     backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
     backgroundSize: vars.iconImageSize,
-    backgroundPositionY: y !== 0 ? `${y}px` : undefined,
-    backgroundPositionX: x !== 0 ? `${x}px` : undefined,
     minHeight: vars.height,
     width: vars.iconWidth
   };

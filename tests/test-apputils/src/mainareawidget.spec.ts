@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { MainAreaWidget, Toolbar } from '@jupyterlab/apputils/src';
+import { MainAreaWidget, Toolbar } from '@jupyterlab/apputils';
 
 import { MessageLoop } from '@phosphor/messaging';
 
@@ -46,6 +46,22 @@ describe('@jupyterlab/apputils', () => {
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.CloseRequest);
         expect(widget.isDisposed).to.equal(true);
+      });
+    });
+
+    describe('#onUpdateRequest()', () => {
+      it('should propagate to the content', () => {
+        let updated: boolean;
+        const content = new (class extends Widget {
+          onUpdateRequest() {
+            updated = true;
+          }
+        })();
+        const widget = new MainAreaWidget({ content });
+        Widget.attach(widget, document.body);
+        updated = false;
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        expect(updated).to.equal(true);
       });
     });
 

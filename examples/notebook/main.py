@@ -20,20 +20,20 @@ from traitlets import Unicode
 
 HERE = os.path.dirname(__file__)
 
-class NotebookHandler(IPythonHandler):
+class ExampleHandler(IPythonHandler):
     """
     Serve a notebook file from the filesystem in the notebook interface
     """
 
-    def get(self, notebook_path):
+    def get(self):
         """Get the main page for the application's interface."""
         # Options set here can be read with PageConfig.getOption
         config_data = {
             # Use camelCase here, since that's what the lab components expect
             'baseUrl': self.base_url,
             'token': self.settings['token'],
-            'notebookPath': notebook_path,
-            'bundleUrl': ujoin(self.base_url, 'build/'),
+            'notebookPath': 'test.ipynb',
+            'frontendUrl': ujoin(self.base_url, 'example/'),
             # FIXME: Don't use a CDN here
             'mathjaxUrl': "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
             'mathjaxConfig': "TeX-AMS_CHTML-full,Safe"
@@ -54,15 +54,16 @@ class NotebookHandler(IPythonHandler):
 
 class ExampleApp(NotebookApp):
 
-    default_url = Unicode('/notebook/test.ipynb')
+    default_url = Unicode('/example')
 
     def init_webapp(self):
         """initialize tornado webapp and httpserver.
         """
         super(ExampleApp, self).init_webapp()
+
         default_handlers = [
-            (ujoin(self.base_url, r'notebook/(.*)?'), NotebookHandler),
-            (ujoin(self.base_url, r"build/(.*)"), FileFindHandler,
+            (ujoin(self.base_url, r'/example/?'), ExampleHandler),
+            (ujoin(self.base_url, r"/example/(.*)"), FileFindHandler,
                 {'path': os.path.join(HERE, 'build')})
         ]
         self.web_app.add_handlers('.*$', default_handlers)

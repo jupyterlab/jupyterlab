@@ -13,7 +13,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { DOMUtils, showErrorMessage } from '@jupyterlab/apputils';
 
-import { PathExt } from '@jupyterlab/coreutils';
+import { PathExt, PageConfig } from '@jupyterlab/coreutils';
 
 import { renameFile } from '@jupyterlab/docmanager';
 
@@ -30,9 +30,9 @@ const MATERIAL_CLASS = 'jp-MaterialIcon';
 const BREADCRUMB_CLASS = 'jp-BreadCrumbs';
 
 /**
- * The class name added to add the home icon for the breadcrumbs
+ * The class name added to add the folder icon for the breadcrumbs
  */
-const BREADCRUMB_HOME = 'jp-HomeIcon';
+const BREADCRUMB_HOME = 'jp-FolderIcon';
 
 /**
  * The class named associated to the ellipses icon
@@ -75,10 +75,7 @@ export class BreadCrumbs extends Widget {
     this._crumbs = Private.createCrumbs();
     this._crumbSeps = Private.createCrumbSeparators();
     this.node.appendChild(this._crumbs[Private.Crumb.Home]);
-    this._model.refreshed.connect(
-      this.update,
-      this
-    );
+    this._model.refreshed.connect(this.update, this);
   }
 
   /**
@@ -272,8 +269,8 @@ export class BreadCrumbs extends Widget {
       let newPath = PathExt.join(path, name);
       promises.push(renameFile(manager, oldPath, newPath));
     }
-    Promise.all(promises).catch(err => {
-      showErrorMessage('Move Error', err);
+    void Promise.all(promises).catch(err => {
+      return showErrorMessage('Move Error', err);
     });
   }
 
@@ -326,27 +323,28 @@ namespace Private {
     while (firstChild && firstChild.nextSibling) {
       node.removeChild(firstChild.nextSibling);
     }
+    node.appendChild(separators[0]);
 
     let parts = path.split('/');
     if (parts.length > 2) {
-      node.appendChild(separators[0]);
       node.appendChild(breadcrumbs[Crumb.Ellipsis]);
       let grandParent = parts.slice(0, parts.length - 2).join('/');
       breadcrumbs[Crumb.Ellipsis].title = grandParent;
+      node.appendChild(separators[1]);
     }
 
     if (path) {
       if (parts.length >= 2) {
-        node.appendChild(separators[1]);
         breadcrumbs[Crumb.Parent].textContent = parts[parts.length - 2];
         node.appendChild(breadcrumbs[Crumb.Parent]);
         let parent = parts.slice(0, parts.length - 1).join('/');
         breadcrumbs[Crumb.Parent].title = parent;
+        node.appendChild(separators[2]);
       }
-      node.appendChild(separators[2]);
       breadcrumbs[Crumb.Current].textContent = parts[parts.length - 1];
       node.appendChild(breadcrumbs[Crumb.Current]);
       breadcrumbs[Crumb.Current].title = path;
+      node.appendChild(separators[3]);
     }
   }
 
@@ -355,9 +353,8 @@ namespace Private {
    */
   export function createCrumbs(): ReadonlyArray<HTMLElement> {
     let home = document.createElement('span');
-    home.className =
-      MATERIAL_CLASS + ' ' + BREADCRUMB_HOME + ' ' + BREADCRUMB_ITEM_CLASS;
-    home.title = 'Home';
+    home.className = `${MATERIAL_CLASS} ${BREADCRUMB_HOME} ${BREADCRUMB_ITEM_CLASS}`;
+    home.title = PageConfig.getOption('serverRoot') || 'Jupyter Server Root';
     let ellipsis = document.createElement('span');
     ellipsis.className =
       MATERIAL_CLASS + ' ' + BREADCRUMB_ELLIPSES + ' ' + BREADCRUMB_ITEM_CLASS;
@@ -373,9 +370,14 @@ namespace Private {
    */
   export function createCrumbSeparators(): ReadonlyArray<HTMLElement> {
     let items: HTMLElement[] = [];
-    for (let i = 0; i < 3; i++) {
-      let item = document.createElement('i');
-      item.className = 'fa fa-angle-right';
+    // The maximum number of directories that will be shown in the crumbs
+    const MAX_DIRECTORIES = 2;
+
+    // Make separators for after each directory, one at the beginning, and one
+    // after a possible ellipsis.
+    for (let i = 0; i < MAX_DIRECTORIES + 2; i++) {
+      let item = document.createElement('span');
+      item.textContent = '/';
       items.push(item);
     }
     return items;

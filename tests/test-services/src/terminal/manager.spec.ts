@@ -9,7 +9,8 @@ import {
   ServerConnection,
   TerminalSession,
   TerminalManager
-} from '@jupyterlab/services/src';
+} from '@jupyterlab/services';
+import { testEmission } from '../utils';
 
 describe('terminal', () => {
   let manager: TerminalSession.IManager;
@@ -20,7 +21,7 @@ describe('terminal', () => {
   });
 
   beforeEach(() => {
-    manager = new TerminalManager();
+    manager = new TerminalManager({ standby: 'never' });
     return manager.ready;
   });
 
@@ -36,14 +37,15 @@ describe('terminal', () => {
     describe('#constructor()', () => {
       it('should accept no options', () => {
         manager.dispose();
-        manager = new TerminalManager();
+        manager = new TerminalManager({ standby: 'never' });
         expect(manager).to.be.an.instanceof(TerminalManager);
       });
 
       it('should accept options', () => {
         manager.dispose();
         manager = new TerminalManager({
-          serverSettings: ServerConnection.makeSettings()
+          serverSettings: ServerConnection.makeSettings(),
+          standby: 'never'
         });
         expect(manager).to.be.an.instanceof(TerminalManager);
       });
@@ -53,8 +55,9 @@ describe('terminal', () => {
       it('should get the server settings', () => {
         manager.dispose();
         const serverSettings = ServerConnection.makeSettings();
+        const standby = 'never';
         const token = serverSettings.token;
-        manager = new TerminalManager({ serverSettings });
+        manager = new TerminalManager({ serverSettings, standby });
         expect(manager.serverSettings.token).to.equal(token);
       });
     });
@@ -62,7 +65,7 @@ describe('terminal', () => {
     describe('#isReady', () => {
       it('should test whether the manager is ready', async () => {
         manager.dispose();
-        manager = new TerminalManager();
+        manager = new TerminalManager({ standby: 'never' });
         expect(manager.isReady).to.equal(false);
         await manager.ready;
         expect(manager.isReady).to.equal(true);
@@ -121,27 +124,27 @@ describe('terminal', () => {
       });
 
       it('should emit a runningChanged signal', async () => {
-        let called = false;
         session = await manager.startNew();
-        manager.runningChanged.connect((sender, args) => {
-          expect(session.isDisposed).to.equal(false);
-          called = true;
+        const emission = testEmission(manager.runningChanged, {
+          test: () => {
+            expect(session.isDisposed).to.equal(false);
+          }
         });
         await manager.shutdown(session.name);
-        expect(called).to.equal(true);
+        await emission;
       });
     });
 
     describe('#runningChanged', () => {
       it('should be emitted when the running terminals changed', async () => {
-        let called = false;
-        manager.runningChanged.connect((sender, args) => {
-          expect(sender).to.equal(manager);
-          expect(toArray(args).length).to.be.greaterThan(0);
-          called = true;
+        const emission = testEmission(manager.runningChanged, {
+          test: (sender, args) => {
+            expect(sender).to.equal(manager);
+            expect(toArray(args).length).to.be.greaterThan(0);
+          }
         });
         await manager.startNew();
-        expect(called).to.equal(true);
+        await emission;
       });
     });
 

@@ -3,13 +3,14 @@ Copyright (c) Jupyter Development Team.
 Distributed under the terms of the Modified BSD License.
 """
 from notebook.notebookapp import NotebookApp
-import os
+import os.path as osp
 from jinja2 import FileSystemLoader
 from notebook.base.handlers import IPythonHandler, FileFindHandler
+from notebook.utils import url_path_join as ujoin
 from traitlets import Unicode
 
 
-HERE = os.path.dirname(__file__)
+HERE = osp.dirname(__file__)
 LOADER = FileSystemLoader(HERE)
 
 
@@ -33,12 +34,11 @@ class ExampleApp(NotebookApp):
     default_url = Unicode('/example')
 
     def start(self):
-        path = os.path.join(HERE, 'build')
-        handlers = [
-            (r'/example/?', ExampleHander),
-            (r'/example/(.*)', FileFindHandler, {'path': path}),
+        default_handlers = [
+            (ujoin(self.base_url, r'/example/?'), ExampleHander),
+            (ujoin(self.base_url, r'/example/(.*)'), FileFindHandler, {'path': osp.join(HERE, 'build')}),
         ]
-        self.web_app.add_handlers('.*$', handlers)
+        self.web_app.add_handlers('.*$', default_handlers)
         super(ExampleApp, self).start()
 
 

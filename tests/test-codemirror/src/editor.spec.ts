@@ -10,7 +10,7 @@ import { generate, simulate } from 'simulate-event';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { CodeMirrorEditor } from '@jupyterlab/codemirror/src';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 const UP_ARROW = 38;
 

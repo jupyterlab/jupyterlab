@@ -48,13 +48,13 @@ export function renameDialog(
     title: 'Rename File',
     body: new RenameHandler(oldPath),
     focusNodeSelector: 'input',
-    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'RENAME' })]
+    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Rename' })]
   }).then(result => {
     if (!result.value) {
       return;
     }
     if (!isValidFileName(result.value)) {
-      showErrorMessage(
+      void showErrorMessage(
         'Rename Error',
         Error(
           `"${result.value}" is not a valid name for a file. ` +
@@ -98,7 +98,7 @@ export function shouldOverwrite(path: string): Promise<boolean> {
   let options = {
     title: 'Overwrite file?',
     body: `"${path}" already exists, overwrite?`,
-    buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'OVERWRITE' })]
+    buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Overwrite' })]
   };
   return showDialog(options).then(result => {
     return Promise.resolve(result.button.accept);
@@ -145,49 +145,6 @@ class RenameHandler extends Widget {
   }
 }
 
-/*
- * A widget used to open a file directly.
- */
-class OpenDirectWidget extends Widget {
-  /**
-   * Construct a new open file widget.
-   */
-  constructor() {
-    super({ node: Private.createOpenNode() });
-  }
-
-  /**
-   * Get the value of the widget.
-   */
-  getValue(): string {
-    return this.inputNode.value;
-  }
-
-  /**
-   * Get the input text node.
-   */
-  get inputNode(): HTMLInputElement {
-    return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
-  }
-}
-
-/**
- * Create the node for the open handler.
- */
-export function getOpenPath(contentsManager: any): Promise<string | undefined> {
-  return showDialog({
-    title: 'Open File',
-    body: new OpenDirectWidget(),
-    buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'OPEN' })],
-    focusNodeSelector: 'input'
-  }).then((result: any) => {
-    if (result.button.label === 'OPEN') {
-      return result.value;
-    }
-    return;
-  });
-}
-
 /**
  * A namespace for private data.
  */
@@ -211,23 +168,6 @@ namespace Private {
     body.appendChild(existingPath);
     body.appendChild(nameTitle);
     body.appendChild(name);
-    return body;
-  }
-
-  /**
-   * Create the node for a open widget.
-   */
-  export function createOpenNode(): HTMLElement {
-    let body = document.createElement('div');
-    let existingLabel = document.createElement('label');
-    existingLabel.textContent = 'File Path:';
-
-    let input = document.createElement('input');
-    input.value = '';
-    input.placeholder = '/path/to/file';
-
-    body.appendChild(existingLabel);
-    body.appendChild(input);
     return body;
   }
 }

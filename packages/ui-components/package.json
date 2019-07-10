@@ -1,10 +1,14 @@
 {
   "name": "@jupyterlab/ui-components",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "JupyterLab - UI components written in React",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
@@ -14,14 +18,14 @@
     "lib/*.js",
     "style/*.css"
   ],
+  "sideEffects": [
+    "style/**/*"
+  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc -b",
@@ -34,18 +38,26 @@
     "@blueprintjs/core": "^3.9.0",
     "@blueprintjs/icons": "^3.3.0",
     "@blueprintjs/select": "^3.3.0",
-    "react": "~16.4.2"
+    "react": "~16.8.4"
   },
   "devDependencies": {
-    "@types/react": "~16.4.13",
+    "@types/react": "~16.8.18",
     "rimraf": "~2.6.2",
-    "typedoc": "~0.12.0",
-    "typescript": "~3.1.1"
+    "typedoc": "^0.14.2",
+    "typescript": "~3.5.1"
   },
   "peerDependencies": {
-    "react": "~16.4.2"
+    "react": "~16.8.4"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "jupyterlab": {
+    "extraStyles": {
+      "blueprintjs": [
+        "icons/lib/css/blueprint-icons.css",
+        "core/lib/css/blueprint.css"
+      ]
+    }
   }
 }

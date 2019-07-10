@@ -43,8 +43,8 @@
 }
 
 .p-CommandPalette.p-mod-focused .p-CommandPalette-wrapper {
-  box-shadow: inset 0 0 0 1px rgba(19, 124, 189, 0.3),
-    inset 0 0 0 3px rgba(19, 124, 189, 0.3);
+  box-shadow: inset 0 0 0 1px var(--jp-input-active-box-shadow-color),
+    inset 0 0 0 3px var(--jp-input-active-box-shadow-color);
 }
 
 .p-CommandPalette-wrapper::after {
@@ -105,15 +105,24 @@
   background: var(--jp-layout-color2);
 }
 
-.p-CommandPalette-header:hover::before {
-  content: '\2026'; /* ellipsis */
+.p-CommandPalette-header:hover::after {
+  content: '';
+  min-width: 12px;
+  min-height: 12px;
+  background-size: 14px;
+  margin-right: 16px;
   float: right;
-  margin-right: 4px;
+  display: inline-block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: var(--jp-icon-filter-list);
 }
 
 .p-CommandPalette-header > mark {
   background-color: transparent;
   font-weight: bold;
+  color: var(--jp-ui-font-color1);
 }
 
 .p-CommandPalette-item {
@@ -130,6 +139,10 @@
 
 .p-CommandPalette-item.p-mod-active {
   background: var(--jp-layout-color3);
+}
+
+.p-CommandPalette-item.p-mod-active:hover:not(.p-mod-disabled) {
+  background: var(--jp-layout-color4);
 }
 
 .p-CommandPalette-item:hover:not(.p-mod-active):not(.p-mod-disabled) {

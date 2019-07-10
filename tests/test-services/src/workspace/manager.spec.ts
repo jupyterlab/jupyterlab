@@ -13,7 +13,7 @@ init();
 describe('workspace', () => {
   describe('WorkspaceManager', () => {
     const manager = new WorkspaceManager({
-      serverSettings: ServerConnection.makeSettings({ pageUrl: 'lab' })
+      serverSettings: ServerConnection.makeSettings({ appUrl: 'lab' })
     });
 
     describe('#constructor()', () => {
@@ -49,16 +49,17 @@ describe('workspace', () => {
       });
     });
 
-    // describe('#list()', async () => {
-    //   it('should fetch a workspace list supporting arbitrary IDs', async () => {
-    //     const ids = ['foo', 'bar', 'baz', 'f/o/o', 'b/a/r', 'b/a/z'];
+    describe('#list()', () => {
+      it('should fetch a workspace list supporting arbitrary IDs', async () => {
+        const ids = ['foo', 'bar', 'baz', 'f/o/o', 'b/a/r', 'b/a/z'];
+        const promises = ids.map(id =>
+          manager.save(id, { data: {}, metadata: { id } })
+        );
 
-    //     ids.forEach(async id => {
-    //       await manager.save(id, { data: {}, metadata: { id } });
-    //     });
-    //     expect((await manager.list()).sort()).to.deep.equal(ids.sort());
-    //   });
-    // });
+        await Promise.all(promises);
+        expect((await manager.list()).ids.sort()).to.deep.equal(ids.sort());
+      });
+    });
 
     describe('#remove()', () => {
       it('should remove a workspace', async () => {

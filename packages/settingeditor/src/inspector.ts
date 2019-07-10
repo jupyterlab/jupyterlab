@@ -8,6 +8,7 @@ import { DataConnector, ISchemaValidator } from '@jupyterlab/coreutils';
 import { InspectionHandler, InspectorPanel } from '@jupyterlab/inspector';
 
 import {
+  IRenderMimeRegistry,
   RenderMimeRegistry,
   standardRendererFactories
 } from '@jupyterlab/rendermime';
@@ -21,10 +22,12 @@ import { RawEditor } from './raweditor';
  */
 export function createInspector(
   editor: RawEditor,
-  rendermime?: RenderMimeRegistry
+  rendermime?: IRenderMimeRegistry
 ): InspectorPanel {
   const connector = new InspectorConnector(editor);
-  const inspector = new InspectorPanel();
+  const inspector = new InspectorPanel({
+    initialContent: 'Any errors will be listed here'
+  });
   const handler = new InspectionHandler({
     connector,
     rendermime:
@@ -34,12 +37,7 @@ export function createInspector(
       })
   });
 
-  inspector.add({
-    className: 'jp-SettingsDebug',
-    name: 'Debug',
-    rank: 0,
-    type: 'hints'
-  });
+  inspector.addClass('jp-SettingsDebug');
   inspector.source = handler;
   handler.editor = editor.source;
 
@@ -80,7 +78,10 @@ class InspectorConnector extends DataConnector<
         const errors = this._validate(request.text);
 
         if (!errors) {
-          return resolve(null);
+          return resolve({
+            data: { 'text/markdown': 'No errors found' },
+            metadata: {}
+          });
         }
 
         resolve({ data: Private.render(errors), metadata: {} });
@@ -90,6 +91,9 @@ class InspectorConnector extends DataConnector<
 
   private _validate(raw: string): ISchemaValidator.IError[] | null {
     const editor = this._editor;
+    if (!editor.settings) {
+      return null;
+    }
     const { id, schema, version } = editor.settings;
     const data = { composite: {}, user: {} };
     const validator = editor.registry.validator;

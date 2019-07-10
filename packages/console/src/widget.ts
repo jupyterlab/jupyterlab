@@ -22,13 +22,13 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { KernelMessage } from '@jupyterlab/services';
 
 import { each } from '@phosphor/algorithm';
 
-import { MimeData } from '@phosphor/coreutils';
+import { MimeData, JSONObject } from '@phosphor/coreutils';
 
 import { Drag } from '@phosphor/dragdrop';
 
@@ -134,14 +134,8 @@ export class CodeConsole extends Widget {
     });
 
     this._onKernelChanged();
-    this.session.kernelChanged.connect(
-      this._onKernelChanged,
-      this
-    );
-    this.session.statusChanged.connect(
-      this._onKernelStatusChanged,
-      this
-    );
+    this.session.kernelChanged.connect(this._onKernelChanged, this);
+    this.session.statusChanged.connect(this._onKernelStatusChanged, this);
   }
 
   /**
@@ -171,7 +165,7 @@ export class CodeConsole extends Widget {
   /**
    * The rendermime instance used by the console.
    */
-  readonly rendermime: RenderMimeRegistry;
+  readonly rendermime: IRenderMimeRegistry;
 
   /**
    * The client session used by the console.
@@ -218,10 +212,7 @@ export class CodeConsole extends Widget {
       this._msgIds.set(msgId, cell);
       this._msgIdCells.set(cell, msgId);
     }
-    cell.disposed.connect(
-      this._onCellDisposed,
-      this
-    );
+    cell.disposed.connect(this._onCellDisposed, this);
     this.update();
   }
 
@@ -233,10 +224,7 @@ export class CodeConsole extends Widget {
       // An old banner just becomes a normal cell now.
       let cell = this._banner;
       this._cells.push(this._banner);
-      cell.disposed.connect(
-        this._onCellDisposed,
-        this
-      );
+      cell.disposed.connect(this._onCellDisposed, this);
     }
     // Create the banner.
     let model = this.modelFactory.createRawCell({});
@@ -244,7 +232,7 @@ export class CodeConsole extends Widget {
     let banner = (this._banner = new RawCell({
       model,
       contentFactory: this.contentFactory
-    }));
+    })).initializeState();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
     this._content.addWidget(banner);
@@ -349,9 +337,12 @@ export class CodeConsole extends Widget {
    *
    * @returns A promise that indicates when the injected cell's execution ends.
    */
-  inject(code: string): Promise<void> {
+  inject(code: string, metadata: JSONObject = {}): Promise<void> {
     let cell = this.createCodeCell();
     cell.model.value.text = code;
+    for (let key of Object.keys(metadata)) {
+      cell.model.metadata.set(key, metadata[key]);
+    }
     this.addCell(cell);
     return this._execute(cell);
   }
@@ -460,14 +451,18 @@ export class CodeConsole extends Widget {
         event.clientY
       )
     ) {
-      this._startDrag(data.index, event.clientX, event.clientY);
+      void this._startDrag(data.index, event.clientX, event.clientY);
     }
   }
 
   /**
    * Start a drag event
    */
-  private _startDrag(index: number, clientX: number, clientY: number) {
+  private _startDrag(
+    index: number,
+    clientX: number,
+    clientY: number
+  ): Promise<void> {
     const cellModel = this._focusedCell.model as ICodeCellModel;
     let selected: nbformat.ICell[] = [cellModel.toJSON()];
 
@@ -492,7 +487,7 @@ export class CodeConsole extends Widget {
 
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
-    this._drag.start(clientX, clientY).then(() => {
+    return this._drag.start(clientX, clientY).then(() => {
       if (this.isDisposed) {
         return;
       }
@@ -645,16 +640,13 @@ export class CodeConsole extends Widget {
       this.clear();
       return Promise.resolve(void 0);
     }
-    cell.model.contentChanged.connect(
-      this.update,
-      this
-    );
+    cell.model.contentChanged.connect(this.update, this);
     let onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
       if (this.isDisposed) {
         return;
       }
       if (value && value.content.status === 'ok') {
-        let content = value.content as KernelMessage.IExecuteOkReply;
+        let content = value.content;
         // Use deprecated payloads for backwards compatibility.
         if (content.payload && content.payload.length) {
           let setNextInput = content.payload.filter(i => {
@@ -690,7 +682,11 @@ export class CodeConsole extends Widget {
   /**
    * Update the console based on the kernel info.
    */
-  private _handleInfo(info: KernelMessage.IInfoReply): void {
+  private _handleInfo(info: KernelMessage.IInfoReplyMsg['content']): void {
+    if (info.status !== 'ok') {
+      this._banner.model.value.text = 'Error in getting kernel banner';
+      return;
+    }
     this._banner.model.value.text = info.banner;
     let lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);
@@ -792,8 +788,7 @@ export class CodeConsole extends Widget {
       if (!kernel) {
         return;
       }
-      kernel
-        .requestKernelInfo()
+      kernel.ready
         .then(() => {
           if (this.isDisposed || !kernel || !kernel.info) {
             return;
@@ -805,6 +800,7 @@ export class CodeConsole extends Widget {
         });
     } else if (this.session.status === 'restarting') {
       this.addBanner();
+      this._handleInfo(this.session.kernel.info);
     }
   }
 
@@ -845,7 +841,7 @@ export namespace CodeConsole {
     /**
      * The mime renderer for the console widget.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
 
     /**
      * The client session for the console widget.
@@ -889,7 +885,7 @@ export namespace CodeConsole {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new CodeCell(options);
+      return new CodeCell(options).initializeState();
     }
 
     /**
@@ -903,7 +899,7 @@ export namespace CodeConsole {
       if (!options.contentFactory) {
         options.contentFactory = this;
       }
-      return new RawCell(options);
+      return new RawCell(options).initializeState();
     }
   }
 

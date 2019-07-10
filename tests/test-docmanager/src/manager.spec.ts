@@ -30,6 +30,34 @@ class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
   }
 }
 
+/**
+ * A test documentWidget that maintains some state in
+ * count
+ */
+class CloneTestWidget extends DocumentWidget {
+  constructor(args: any) {
+    super(args);
+    this.counter = args.count;
+  }
+  counter: number = 0;
+}
+
+/**
+ * A widget factory for CloneTestWidget widgets
+ */
+class WidgetFactoryWithSharedState extends ABCWidgetFactory<CloneTestWidget> {
+  protected createNewWidget(
+    context: DocumentRegistry.Context,
+    source: CloneTestWidget
+  ): CloneTestWidget {
+    return new CloneTestWidget({
+      context,
+      content: new Widget(),
+      count: source ? source.counter + 1 : 0
+    });
+  }
+}
+
 describe('@jupyterlab/docmanager', () => {
   let manager: DocumentManager;
   let services: ServiceManager.IManager;
@@ -42,15 +70,20 @@ describe('@jupyterlab/docmanager', () => {
     canStartKernel: true,
     preferKernel: true
   });
+  const widgetFactoryShared = new WidgetFactoryWithSharedState({
+    name: 'CloneTestWidget',
+    fileTypes: []
+  });
 
   before(() => {
-    services = new ServiceManager();
+    services = new ServiceManager({ standby: 'never' });
     return services.ready;
   });
 
   beforeEach(() => {
     const registry = new DocumentRegistry({ textModelFactory });
     registry.addWidgetFactory(widgetFactory);
+    registry.addWidgetFactory(widgetFactoryShared);
     DocumentRegistry.defaultFileTypes.forEach(ft => {
       registry.addFileType(ft);
     });
@@ -252,6 +285,35 @@ describe('@jupyterlab/docmanager', () => {
       it('should fail to find a widget', () => {
         expect(manager.findWidget('foo')).to.be.undefined;
       });
+
+      it('should fail to find a widget with non default factory and the default widget name', async () => {
+        const widgetFactory2 = new WidgetFactory({
+          name: 'test2',
+          fileTypes: ['text']
+        });
+        manager.registry.addWidgetFactory(widgetFactory2);
+        const model = await services.contents.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        widget = manager.createNew(model.path, 'test2');
+        expect(manager.findWidget(model.path)).to.be.undefined;
+      });
+
+      it('should find a widget with non default factory given a file and a null widget name', async () => {
+        const widgetFactory2 = new WidgetFactory({
+          name: 'test2',
+          fileTypes: ['text']
+        });
+        manager.registry.addWidgetFactory(widgetFactory2);
+        const model = await services.contents.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        widget = manager.createNew(model.path, 'test2');
+        expect(manager.findWidget(model.path, null)).to.equal(widget);
+        await dismissDialog();
+      });
     });
 
     describe('#contextForWidget()', () => {
@@ -289,6 +351,22 @@ describe('@jupyterlab/docmanager', () => {
       it('should return undefined if the source widget is not managed', () => {
         widget = new Widget();
         expect(manager.cloneWidget(widget)).to.be.undefined;
+      });
+
+      it('should allow widget factories to have custom clone behavior', () => {
+        widget = manager.createNew('foo', 'CloneTestWidget');
+        const clonedWidget: CloneTestWidget = manager.cloneWidget(
+          widget
+        ) as CloneTestWidget;
+        expect(clonedWidget.counter).to.equal(1);
+        const newWidget: CloneTestWidget = manager.createNew(
+          'bar',
+          'CloneTestWidget'
+        ) as CloneTestWidget;
+        expect(newWidget.counter).to.equal(0);
+        expect(
+          (manager.cloneWidget(clonedWidget) as CloneTestWidget).counter
+        ).to.equal(2);
       });
     });
 

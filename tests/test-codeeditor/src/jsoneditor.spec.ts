@@ -7,7 +7,7 @@ import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 
 import { ObservableJSON } from '@jupyterlab/observables';
 
-import { JSONEditor } from '@jupyterlab/codeeditor/src';
+import { JSONEditor } from '@jupyterlab/codeeditor';
 
 import { framePromise } from '@jupyterlab/testutils';
 
@@ -69,53 +69,10 @@ describe('codeeditor', () => {
       });
     });
 
-    describe('#collapsible', () => {
-      it('should default to false', () => {
-        expect(editor.collapsible).to.be.false;
-      });
-
-      it('should be settable in the constructor', () => {
-        let newEditor = new JSONEditor({ editorFactory, collapsible: true });
-        expect(newEditor.collapsible).to.be.true;
-      });
-    });
-
-    describe('#editorTitle', () => {
-      it('should default to empty string', () => {
-        expect(editor.editorTitle).to.equal('');
-      });
-
-      it('should be settable in the constructor', () => {
-        let newEditor = new JSONEditor({ editorFactory, title: 'foo' });
-        expect(newEditor.editorTitle).to.equal('foo');
-      });
-
-      it('should be settable', () => {
-        editor.editorTitle = 'foo';
-        expect(editor.editorTitle).to.equal('foo');
-      });
-    });
-
     describe('#headerNode', () => {
       it('should be the header node used by the editor', () => {
         expect(Array.from(editor.headerNode.classList)).to.contain(
           'jp-JSONEditor-header'
-        );
-      });
-    });
-
-    describe('#titleNode', () => {
-      it('should be the title node used by the editor', () => {
-        expect(Array.from(editor.titleNode.classList)).to.contain(
-          'jp-JSONEditor-title'
-        );
-      });
-    });
-
-    describe('#collapserNode', () => {
-      it('should be the collapser node used by the editor', () => {
-        expect(Array.from(editor.collapserNode.classList)).to.contain(
-          'jp-JSONEditor-collapser'
         );
       });
     });
@@ -339,23 +296,6 @@ describe('codeeditor', () => {
           simulate(editor.commitButtonNode, 'click');
           let expected = '{\n    "foo": 2,\n    "bar": 3\n}';
           expect(editor.model.value.text).to.equal(expected);
-        });
-
-        it('should collapse the editor', () => {
-          editor.dispose();
-          editor = new LogEditor({ editorFactory, collapsible: true });
-          Widget.attach(editor, document.body);
-          simulate(editor.titleNode, 'click');
-          expect(Array.from(editor.editorHostNode.classList)).to.contain(
-            'jp-mod-collapsed'
-          );
-        });
-
-        it('should have no effect if the editor is not collapsible', () => {
-          simulate(editor.titleNode, 'click');
-          expect(Array.from(editor.editorHostNode.classList)).to.not.contain(
-            'jp-mod-collapsed'
-          );
         });
       });
     });

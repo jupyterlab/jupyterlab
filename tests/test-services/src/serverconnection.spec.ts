@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
-import { ServerConnection } from '@jupyterlab/services/src';
+import { ServerConnection } from '@jupyterlab/services';
 
 import { getRequestHandler } from './utils';
 

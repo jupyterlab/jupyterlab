@@ -1,6 +1,11 @@
 
 # -*- coding: utf-8 -*-
+"""
+This module is meant to run JupyterLab in a headless browser, making sure
+the application launches and starts up without errors.
+"""
 from concurrent.futures import ThreadPoolExecutor
+import logging
 from os import path as osp
 import os
 import shutil
@@ -12,6 +17,7 @@ from notebook.notebookapp import flags, aliases
 from traitlets import Bool
 
 from .labapp import LabApp, get_app_dir
+from .tests.test_app import TestEnv
 
 
 here = osp.abspath(osp.dirname(__file__))
@@ -30,8 +36,69 @@ test_aliases = dict(aliases)
 test_aliases['app-dir'] = 'BrowserApp.app_dir'
 
 
-class BrowserApp(LabApp):
+class LogErrorHandler(logging.Handler):
+    """A handler that exits with 1 on a logged error."""
 
+    def __init__(self):
+        super().__init__(level=logging.ERROR)
+        self.errored = False
+
+    def filter(self, record):
+        # known startup error message
+        if 'paste' in record.msg:
+            return
+        return super().filter(record)
+
+    def emit(self, record):
+        print(record.msg, file=sys.stderr)
+        self.errored = True
+
+
+def run_test(app, func):
+    """Run a test against the application.
+
+    func is a function that accepts an app url as a parameter and returns a result.
+    """
+    handler = LogErrorHandler()
+
+    env_patch = TestEnv()
+    env_patch.start()
+
+    def finished(future):
+        try:
+            result = future.result()
+        except Exception as e:
+            app.log.error(str(e))
+        app.log.info('Stopping server...')
+        app.stop()
+        if handler.errored:
+            app.log.critical('Exiting with 1 due to errors')
+            result = 1
+        elif result != 0:
+            app.log.critical('Exiting with %s due to errors' % result)
+        else:
+            app.log.info('Exiting normally')
+            result = 0
+
+        app.http_server.stop()
+        app.io_loop.stop()
+        env_patch.stop()
+        try:
+            os._exit(result)
+        except Exception as e:
+            self.log.error(str(e))
+            os._exit(1)
+
+    app.log.addHandler(handler)
+    pool = ThreadPoolExecutor()
+    future = pool.submit(func, app.display_url)
+    IOLoop.current().add_future(future, finished)
+
+
+class BrowserApp(LabApp):
+    """An app the launches JupyterLab and waits for it to start up, checking for
+    JS console errors, JS errors, and Python logged errors.
+    """
     open_browser = Bool(False)
     base_url = '/foo/'
     ip = '127.0.0.1'
@@ -43,18 +110,8 @@ class BrowserApp(LabApp):
         web_app.settings.setdefault('page_config_data', dict())
         web_app.settings['page_config_data']['browserTest'] = True
         web_app.settings['page_config_data']['buildAvailable'] = False
-
-        pool = ThreadPoolExecutor()
-        future = pool.submit(run_browser, self.display_url)
-        IOLoop.current().add_future(future, self._browser_finished)
-        super(BrowserApp, self).start()
-
-    def _browser_finished(self, future):
-        try:
-            sys.exit(future.result())
-        except Exception as e:
-            self.log.error(str(e))
-            sys.exit(1)
+        run_test(self, run_browser)
+        super().start()
 
 
 def run_browser(url):

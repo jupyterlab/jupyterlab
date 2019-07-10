@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { BoxLayout, Widget } from '@phosphor/widgets';
 
@@ -10,6 +10,8 @@ import { Spinner } from './spinner';
 import { Toolbar } from './toolbar';
 
 import { DOMUtils } from './domutils';
+
+import { Printing } from './printing';
 
 /**
  * A widget meant to be contained in the JupyterLab main area.
@@ -20,7 +22,8 @@ import { DOMUtils } from './domutils';
  * This widget is automatically disposed when closed.
  * This widget ensures its own focus when activated.
  */
-export class MainAreaWidget<T extends Widget = Widget> extends Widget {
+export class MainAreaWidget<T extends Widget = Widget> extends Widget
+  implements Printing.IPrintable {
   /**
    * Construct a new main area widget.
    *
@@ -48,15 +51,9 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget {
     content.node.tabIndex = -1;
 
     this._updateTitle();
-    content.title.changed.connect(
-      this._updateTitle,
-      this
-    );
+    content.title.changed.connect(this._updateTitle, this);
     this.title.closable = true;
-    this.title.changed.connect(
-      this._updateContentTitle,
-      this
-    );
+    this.title.changed.connect(this._updateContentTitle, this);
 
     if (options.reveal) {
       this.node.appendChild(spinner.node);
@@ -100,6 +97,13 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget {
       this._isRevealed = true;
       this._revealed = Promise.resolve(undefined);
     }
+  }
+
+  /**
+   * Print method. Defered to content.
+   */
+  [Printing.symbol](): Printing.OptionalAsyncThunk {
+    return Printing.getPrintFunction(this._content);
   }
 
   /**
@@ -148,6 +152,13 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget {
    */
   protected onCloseRequest(msg: Message): void {
     this.dispose();
+  }
+
+  /**
+   * Handle `'update-request'` messages by forwarding them to the content.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    MessageLoop.sendMessage(this._content, msg);
   }
 
   /**

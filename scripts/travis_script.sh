@@ -21,11 +21,6 @@ if [[ $GROUP == js ]]; then
     jlpm build:test
     FORCE_COLOR=1 jlpm coverage --loglevel success
 
-    # Run the services node example.
-    pushd packages/services/examples/node
-    python main.py
-    popd
-
     jlpm run clean
 fi
 
@@ -41,7 +36,7 @@ if [[ $GROUP == docs ]]; then
 
     # Verify tutorial docs build
     pushd docs
-    pip install sphinx sphinx_rtd_theme recommonmark
+    pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark
     make linkcheck
     make html
     popd
@@ -58,11 +53,12 @@ if [[ $GROUP == integrity ]]; then
     # Lint our files.
     jlpm run lint:check || (echo 'Please run `jlpm run lint` locally and push changes' && exit 1)
 
+
+    # Build the vega bundles
+    jlpm run build:vega
+
     # Build the packages individually.
     jlpm run build:src
-
-    # Make sure the examples build
-    jlpm run build:examples
 
     # Make sure we have CSS that can be converted with postcss
     jlpm global add postcss-cli
@@ -70,11 +66,144 @@ if [[ $GROUP == integrity ]]; then
     jlpm config set prefix ~/.yarn
     ~/.yarn/bin/postcss packages/**/style/*.css --dir /tmp
 
+    # run twine check on the python build assets.
+    # this must be done before altering any versions below.
+    python -m pip install -U twine wheel
+    python setup.py sdist
+    python setup.py bdist_wheel
+    twine check dist/*
+
+    # Make sure we can bump the version
+    # This must be done at the end so as not to interfere
+    # with the other checks
+    git config --global user.email "you@example.com"
+    git config --global user.name "CI"
+    git stash
+    git checkout -b commit_${BUILD_SOURCEVERSION}
+    git clean -df
+    jlpm bumpversion minor --force
+    git commit -a -m "minor"
+    jlpm bumpversion major --force
+    git commit -a -m "major"
+    jlpm bumpversion release --force # switch to rc
+    git commit -a -m "release"
+    jlpm bumpversion build --force
+    git commit -a -m "build"
+    VERSION=$(python setup.py --version)
+    if [[ $VERSION != *rc1 ]]; then exit 1; fi
+
+    # make sure we can patch release
+    jlpm bumpversion release --force  # switch to final
+    git commit -a -m "release"
+    jlpm patch:release --force
+    git commit -a -m "patched"
+    jlpm patch:release console --force
+    git commit -a -m "patched single"
+    jlpm patch:release filebrowser notebook --force
+    git commit -a -m "patched multiple"
+
+    # make sure we can bump major JS releases
+    jlpm bumpversion minor --force
+    jlpm bump:js:major console --force
+    jlpm bump:js:major console notebook --force
+
+    # Make sure that a prepublish would include the proper files.
+    jlpm run prepublish:check
+fi
+
+
+if [[ $GROUP == usage ]]; then
+    # Build the examples.
+    jlpm run build:packages
+    jlpm run build:examples
+
+    # Test the examples
+    jlpm run test:examples
+
+    # Test the cli apps.
+    jupyter lab clean
+    jupyter lab build
+    jupyter lab path
+    pushd jupyterlab/tests/mock_packages
+    jupyter labextension link extension --no-build
+    jupyter labextension unlink extension --no-build
+    jupyter labextension link extension --no-build
+    jupyter labextension unlink  @jupyterlab/mock-extension --no-build
+    jupyter labextension install extension  --no-build
+    jupyter labextension list
+    jupyter labextension disable @jupyterlab/mock-extension
+    jupyter labextension enable @jupyterlab/mock-extension
+    jupyter labextension disable @jupyterlab/notebook-extension
+    jupyter labextension uninstall @jupyterlab/mock-extension --no-build
+    jupyter labextension uninstall @jupyterlab/notebook-extension --no-build
+    popd
+    jupyter lab workspaces export > workspace.json
+    jupyter lab workspaces import --name newspace workspace.json
+    jupyter lab workspaces export newspace > newspace.json
+    rm workspace.json newspace.json
+
+
+    # Make sure we can call help on all the cli apps.
+    jupyter lab -h
+    jupyter lab build -h
+    jupyter lab clean -h
+    jupyter lab path -h
+    jupyter labextension link -h
+    jupyter labextension unlink -h
+    jupyter labextension install -h
+    jupyter labextension uninstall -h
+    jupyter labextension list -h
+    jupyter labextension enable -h
+    jupyter labextension disable -h
+
+    # Make sure we can add and remove a sibling package.
+    # jlpm run add:sibling jupyterlab/tests/mock_packages/extension
+    # jlpm run build
+    # jlpm run remove:package extension
+    # jlpm run build
+    # jlpm run integrity --force  # Should have a clean tree now
+
+    # Test cli tools
+    jlpm run get:dependency mocha
+    jlpm run update:dependency mocha
+    jlpm run remove:dependency mocha
+    jlpm run get:dependency @jupyterlab/buildutils
+    jlpm run get:dependency typescript
+    jlpm run get:dependency react-native
+
+    # Test theme creation - make sure we can add it as a package, build,
+    # and run browser
+    pip install -q pexpect
+    python scripts/create_theme.py
+    mv foo packages
+    jlpm run integrity
+    jlpm run build:packages
+    jlpm run build:dev
+    python -m jupyterlab.browser_check --dev-mode
+    rm -rf packages/foo
+    jlpm run integrity
+
+    ## Test app directory support being a symlink
+    mkdir tmp
+    pushd tmp
+    mkdir real_app_dir
+    ln -s real_app_dir link_app_dir
+    # verify that app directory is not resolved
+    env JUPYTERLAB_DIR=./link_app_dir jupyter lab path | grep link_app_dir
+    popd
+
+    # Build the examples.
+    jlpm run build:examples
+
+    # Test the examples
+    jlpm run test:examples
+
     # Make sure we can successfully load the dev app.
     python -m jupyterlab.browser_check --dev-mode
 
     # Make sure core mode works
     jlpm run build:core
+    # Make sure we have a final released version of JupyterLab server
     python -m jupyterlab.browser_check --core-mode
 
     # Make sure we can run the built app.
@@ -100,65 +229,4 @@ if [[ $GROUP == integrity ]]; then
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
-fi
-
-
-if [[ $GROUP == cli ]]; then
-    # Test the cli apps.
-    jupyter lab clean
-    jupyter lab build
-    jupyter lab path
-    pushd jupyterlab/tests/mock_packages
-    jupyter labextension link extension --no-build
-    jupyter labextension unlink extension --no-build
-    jupyter labextension link extension --no-build
-    jupyter labextension unlink  @jupyterlab/mock-extension --no-build
-    jupyter labextension install extension  --no-build
-    jupyter labextension list
-    jupyter labextension disable @jupyterlab/mock-extension
-    jupyter labextension enable @jupyterlab/mock-extension
-    jupyter labextension disable @jupyterlab/notebook-extension
-    jupyter labextension uninstall @jupyterlab/mock-extension --no-build
-    jupyter labextension uninstall @jupyterlab/notebook-extension --no-build
-    popd
-
-    # Make sure we can call help on all the cli apps.
-    jupyter lab -h
-    jupyter lab build -h
-    jupyter lab clean -h
-    jupyter lab path -h
-    jupyter labextension link -h
-    jupyter labextension unlink -h
-    jupyter labextension install -h
-    jupyter labextension uninstall -h
-    jupyter labextension list -h
-    jupyter labextension enable -h
-    jupyter labextension disable -h
-
-    # Make sure we can add and remove a sibling package.
-    jlpm run add:sibling jupyterlab/tests/mock_packages/extension
-    jlpm run build
-    jlpm run remove:package extension
-    jlpm run build
-    jlpm run integrity --force  # Should have a clean tree now
-
-    # Test cli tools
-    jlpm run get:dependency mocha
-    jlpm run update:dependency mocha
-    jlpm run remove:dependency mocha
-    jlpm run get:dependency @jupyterlab/buildutils
-    jlpm run get:dependency typescript
-    jlpm run get:dependency react-native
-
-    # Test theme creation - make sure we can add it as a package, build,
-    # and run browser
-    pip install -q pexpect
-    python scripts/create_theme.py
-    mv foo packages
-    jlpm run integrity
-    jlpm run build:packages
-    jlpm run build:dev
-    python -m jupyterlab.browser_check --dev-mode
-    rm -rf packages/foo
-    jlpm run integrity
 fi

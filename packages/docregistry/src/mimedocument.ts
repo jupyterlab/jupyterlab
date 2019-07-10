@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { showErrorMessage } from '@jupyterlab/apputils';
+import { showErrorMessage, Printing } from '@jupyterlab/apputils';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 
 import {
   IRenderMime,
-  RenderMimeRegistry,
+  IRenderMimeRegistry,
   MimeModel
 } from '@jupyterlab/rendermime';
 
@@ -57,10 +57,7 @@ export class MimeContent extends Widget {
           signal: this._context.model.contentChanged,
           timeout: options.renderTimeout
         });
-        this._monitor.activityStopped.connect(
-          this.update,
-          this
-        );
+        this._monitor.activityStopped.connect(this.update, this);
 
         this._ready.resolve(undefined);
       })
@@ -69,7 +66,10 @@ export class MimeContent extends Widget {
         requestAnimationFrame(() => {
           this.dispose();
         });
-        showErrorMessage(`Renderer Failure: ${this._context.path}`, reason);
+        void showErrorMessage(
+          `Renderer Failure: ${this._context.path}`,
+          reason
+        );
       });
   }
 
@@ -77,6 +77,13 @@ export class MimeContent extends Widget {
    * The mimetype for this rendered content.
    */
   readonly mimeType: string;
+
+  /**
+   * Print method. Defered to the renderer.
+   */
+  [Printing.symbol]() {
+    return Printing.getPrintFunction(this.renderer);
+  }
 
   /**
    * A promise that resolves when the widget is ready.
@@ -112,7 +119,7 @@ export class MimeContent extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     if (this._context.isReady) {
-      this._render();
+      void this._render();
       this._fragment = '';
     }
   }
@@ -163,7 +170,7 @@ export class MimeContent extends Widget {
       requestAnimationFrame(() => {
         this.dispose();
       });
-      showErrorMessage(`Renderer Failure: ${context.path}`, reason);
+      void showErrorMessage(`Renderer Failure: ${context.path}`, reason);
     }
   }
 
@@ -286,7 +293,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
     return widget;
   }
 
-  private _rendermime: RenderMimeRegistry;
+  private _rendermime: IRenderMimeRegistry;
   private _renderTimeout: number;
   private _dataType: 'string' | 'json';
   private _fileType: DocumentRegistry.IFileType;
@@ -309,7 +316,7 @@ export namespace MimeDocumentFactory {
     /**
      * The rendermime instance.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
 
     /**
      * The render timeout.

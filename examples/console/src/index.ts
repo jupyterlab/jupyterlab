@@ -1,8 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'es6-promise/auto'; // polyfill Promise on IE
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+// @ts-ignore
+__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
+
 import '@jupyterlab/application/style/index.css';
+import '@jupyterlab/console/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';
 import '../index.css';
 
@@ -24,6 +28,7 @@ import {
 let TITLE = 'Console';
 
 function main(): void {
+  console.log('in main');
   let path = '';
   let query: { [key: string]: string } = Object.create(null);
 
@@ -42,7 +47,7 @@ function main(): void {
   }
 
   let manager = new ServiceManager();
-  manager.ready.then(() => {
+  void manager.ready.then(() => {
     startApp(path, manager);
   });
 }
@@ -51,6 +56,7 @@ function main(): void {
  * Start the application.
  */
 function startApp(path: string, manager: ServiceManager.IManager) {
+  console.log('starting app');
   // Initialize the command registry with the key bindings.
   let commands = new CommandRegistry();
 
@@ -109,7 +115,7 @@ function startApp(path: string, manager: ServiceManager.IManager) {
   commands.addCommand(command, {
     label: 'Execute Prompt',
     execute: () => {
-      consolePanel.console.execute();
+      return consolePanel.console.execute();
     }
   });
   palette.addItem({ command, category });
@@ -119,7 +125,7 @@ function startApp(path: string, manager: ServiceManager.IManager) {
   commands.addCommand(command, {
     label: 'Execute Cell (forced)',
     execute: () => {
-      consolePanel.console.execute(true);
+      return consolePanel.console.execute(true);
     }
   });
   palette.addItem({ command, category });
@@ -134,6 +140,8 @@ function startApp(path: string, manager: ServiceManager.IManager) {
   });
   palette.addItem({ command, category });
   commands.addKeyBinding({ command, selector, keys: ['Ctrl Enter'] });
+
+  console.log('Example started!');
 }
 
 window.addEventListener('load', main);

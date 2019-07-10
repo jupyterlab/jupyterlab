@@ -23,14 +23,8 @@ export class SaveHandler implements IDisposable {
     this._minInterval = interval * 1000;
     this._interval = this._minInterval;
     // Restart the timer when the contents model is updated.
-    this._context.fileChanged.connect(
-      this._setTimer,
-      this
-    );
-    this._context.disposed.connect(
-      this.dispose,
-      this
-    );
+    this._context.fileChanged.connect(this._setTimer, this);
+    this._context.disposed.connect(this.dispose, this);
   }
 
   /**

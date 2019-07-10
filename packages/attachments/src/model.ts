@@ -143,10 +143,7 @@ export class AttachmentsModel implements IAttachmentsModel {
         this.set(key, options.values[key]);
       }
     }
-    this._map.changed.connect(
-      this._onMapChanged,
-      this
-    );
+    this._map.changed.connect(this._onMapChanged, this);
 
     // If we are given a IModelDB, keep an up-to-date
     // serialized copy of the AttachmentsModel in it.
@@ -158,10 +155,7 @@ export class AttachmentsModel implements IAttachmentsModel {
       } else {
         this._serialized.set(this.toJSON());
       }
-      this._serialized.changed.connect(
-        this._onSerializedChanged,
-        this
-      );
+      this._serialized.changed.connect(this._onSerializedChanged, this);
     }
   }
 
@@ -280,10 +274,7 @@ export class AttachmentsModel implements IAttachmentsModel {
   private _createItem(options: IAttachmentModel.IOptions): IAttachmentModel {
     let factory = this.contentFactory;
     let item = factory.createAttachmentModel(options);
-    item.changed.connect(
-      this._onGenericChange,
-      this
-    );
+    item.changed.connect(this._onGenericChange, this);
     return item;
   }
 

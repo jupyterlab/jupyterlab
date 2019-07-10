@@ -9,7 +9,7 @@
     "lib.es2015.promise.d.ts",
     "lib.dom.d.ts"
   ],
-  "out": "../../docs/api/statusbar-extension",
+  "out": "../../docs/api/statusbar",
   "baseUrl": ".",
   "paths": {
     "@jupyterlab/*": ["../packages/*"]

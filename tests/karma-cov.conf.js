@@ -8,7 +8,10 @@ module.exports = function(config) {
     // instrument only testing sources with Istanbul
     {
       test: /\.js$/,
-      use: { loader: 'istanbul-instrumenter-loader' },
+      use: {
+        loader: 'istanbul-instrumenter-loader',
+        options: { esModules: true }
+      },
       include: process.env.KARMA_COVER_FOLDER
     }
   );

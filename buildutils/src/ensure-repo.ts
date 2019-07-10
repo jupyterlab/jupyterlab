@@ -15,26 +15,68 @@ import * as path from 'path';
 import * as utils from './utils';
 import { ensurePackage, IEnsurePackageOptions } from './ensure-package';
 
+type Dict<T> = { [key: string]: T };
+
 // Data to ignore.
-let MISSING: { [key: string]: string[] } = {
-  '@jupyterlab/buildutils': ['path']
+let MISSING: Dict<string[]> = {
+  '@jupyterlab/buildutils': ['path'],
+  '@jupyterlab/vega4-extension': ['vega-embed'],
+  '@jupyterlab/vega5-extension': ['vega-embed']
 };
 
-let UNUSED: { [key: string]: string[] } = {
+let UNUSED: Dict<string[]> = {
   '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/application': ['font-awesome'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
-  '@jupyterlab/services': ['ws'],
+  '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/testutils': ['node-fetch', 'identity-obj-proxy'],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
-  '@jupyterlab/vega4-extension': ['vega', 'vega-lite']
+  '@jupyterlab/vega4-extension': ['vega', 'vega-lite'],
+  '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],
+  '@jupyterlab/ui-components': ['@blueprintjs/icons']
 };
 
-let pkgData: { [key: string]: any } = {};
-let pkgPaths: { [key: string]: string } = {};
-let pkgNames: { [key: string]: string } = {};
-let depCache: { [key: string]: string } = {};
-let locals: { [key: string]: string } = {};
+// Packages that are allowed to have differing versions
+let DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega', 'vega-embed'];
+
+let SKIP_CSS: Dict<string[]> = {
+  '@jupyterlab/application': ['@jupyterlab/rendermime'],
+  '@jupyterlab/application-extension': ['@jupyterlab/apputils'],
+  '@jupyterlab/completer': ['@jupyterlab/codeeditor'],
+  '@jupyterlab/docmanager': ['@jupyterlab/statusbar'], // Statusbar styles should not be used by status reporters
+  '@jupyterlab/docregistry': [
+    '@jupyterlab/codeeditor', // Only used for model
+    '@jupyterlab/codemirror', // Only used for Mode.findByFileName
+    '@jupyterlab/rendermime' // Only used for model
+  ],
+  '@jupyterlab/documentsearch': [
+    '@jupyterlab/cells',
+    '@jupyterlab/codeeditor',
+    '@jupyterlab/codemirror',
+    '@jupyterlab/fileeditor',
+    '@jupyterlab/notebook'
+  ],
+  '@jupyterlab/filebrowser': ['@jupyterlab/statusbar'],
+  '@jupyterlab/fileeditor': ['@jupyterlab/statusbar'],
+  '@jupyterlab/help-extension': ['@jupyterlab/application'],
+  '@jupyterlab/shortcuts-extension': ['@jupyterlab/application'],
+  '@jupyterlab/tabmanager-extension': ['@jupyterlab/application'],
+  '@jupyterlab/theme-dark-extension': [
+    '@jupyterlab/application',
+    '@jupyterlab/apputils'
+  ],
+  '@jupyterlab/theme-light-extension': [
+    '@jupyterlab/application',
+    '@jupyterlab/apputils'
+  ],
+  '@jupyterlab/ui-extension': ['@blueprintjs/icons']
+};
+
+let pkgData: Dict<any> = {};
+let pkgPaths: Dict<string> = {};
+let pkgNames: Dict<string> = {};
+let depCache: Dict<string> = {};
+let locals: Dict<string> = {};
 
 /**
  * Ensure the metapackage package.
@@ -47,7 +89,7 @@ function ensureMetaPackage(): string[] {
   let mpJson = path.join(mpPath, 'package.json');
   let mpData = utils.readJSONFile(mpJson);
   let messages: string[] = [];
-  let seen: { [key: string]: boolean } = {};
+  let seen: Dict<boolean> = {};
 
   utils.getCorePaths().forEach(pkgPath => {
     if (path.resolve(pkgPath) === path.resolve(mpPath)) {
@@ -95,17 +137,12 @@ function ensureMetaPackage(): string[] {
  * Ensure the jupyterlab application package.
  */
 function ensureJupyterlab(): string[] {
-  // Get the current version of JupyterLab
-  let cmd = 'python setup.py --version';
-  let version = utils.run(cmd, { stdio: 'pipe' }, true);
-
   let basePath = path.resolve('.');
   let corePath = path.join(basePath, 'dev_mode', 'package.json');
   let corePackage = utils.readJSONFile(corePath);
 
   corePackage.jupyterlab.extensions = {};
   corePackage.jupyterlab.mimeExtensions = {};
-  corePackage.jupyterlab.version = version;
   corePackage.jupyterlab.linkedPackages = {};
   corePackage.dependencies = {};
 
@@ -120,14 +157,28 @@ function ensureJupyterlab(): string[] {
     } catch (e) {
       return;
     }
-    if (data.private === true || data.name === '@jupyterlab/metapackage') {
+    // Determine whether to include the package.
+    if (!data.jupyterlab) {
+      return;
+    }
+    // Skip if explicitly marked as not a core dep.
+    if (
+      'coreDependency' in data.jupyterlab &&
+      !data.jupyterlab.coreDependency
+    ) {
+      return;
+    }
+    // Skip if it is not marked as an extension or a core dep.
+    if (
+      !data.jupyterlab.coreDependency &&
+      !data.jupyterlab.extension &&
+      !data.jupyterlab.mimeExtension
+    ) {
       return;
     }
 
     // Make sure it is included as a dependency.
     corePackage.dependencies[data.name] = '^' + String(data.version);
-    let relativePath = `../packages/${path.basename(pkgPath)}`;
-    corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
     // Add its dependencies to the core dependencies if they are in the
     // singleton packages or vendor packages.
     let deps = data.dependencies || {};
@@ -158,6 +209,22 @@ function ensureJupyterlab(): string[] {
     });
   });
 
+  utils.getLernaPaths().forEach(pkgPath => {
+    let dataPath = path.join(pkgPath, 'package.json');
+    let data: any;
+    try {
+      data = utils.readJSONFile(dataPath);
+    } catch (e) {
+      return;
+    }
+
+    // watch all src, build, and test files in the Jupyterlab project
+    let relativePath = utils.ensureUnixPathSep(
+      path.join('..', path.relative(basePath, pkgPath))
+    );
+    corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
+  });
+
   // Write the package.json back to disk.
   if (utils.writePackageData(corePath, corePackage)) {
     return ['Updated dev mode'];
@@ -169,7 +236,7 @@ function ensureJupyterlab(): string[] {
  * Ensure the repo integrity.
  */
 export async function ensureIntegrity(): Promise<boolean> {
-  let messages: { [key: string]: string[] } = {};
+  let messages: Dict<string[]> = {};
 
   // Pick up all the package versions.
   let paths = utils.getLernaPaths();
@@ -179,6 +246,12 @@ export async function ensureIntegrity(): Promise<boolean> {
   paths.push('./jupyterlab/tests/mock_packages/extension');
   paths.push('./jupyterlab/tests/mock_packages/mimeextension');
 
+  const cssImports: Dict<Array<string>> = {};
+
+  // Get the package graph.
+  const graph = utils.getPackageGraph();
+
+  // Gather all of our package data and other metadata.
   paths.forEach(pkgPath => {
     // Read in the package.json.
     let data: any;
@@ -195,6 +268,42 @@ export async function ensureIntegrity(): Promise<boolean> {
     locals[data.name] = pkgPath;
   });
 
+  // Build up an ordered list of CSS imports for each local package.
+  Object.keys(locals).forEach(name => {
+    const data = pkgData[name];
+    const deps: Dict<string> = data.dependencies || {};
+    const skip = SKIP_CSS[name] || [];
+    const cssData: Dict<Array<string>> = {};
+
+    if (data.jupyterlab && data.jupyterlab.extraStyles) {
+      Object.keys(data.jupyterlab.extraStyles).forEach(depName => {
+        cssData[depName] = data.jupyterlab.extraStyles[depName];
+      });
+    }
+
+    Object.keys(deps).forEach(depName => {
+      // Bail for skipped imports and known extra styles.
+      if (skip.indexOf(depName) !== -1 || depName in cssData) {
+        return;
+      }
+      const depData = graph.getNodeData(depName);
+      if (depData.style) {
+        cssData[depName] = [depData.style];
+      }
+    });
+
+    // Get our CSS imports in dependency order.
+    cssImports[name] = [];
+
+    graph.dependenciesOf(name).forEach(depName => {
+      if (depName in cssData) {
+        cssData[depName].forEach(cssPath => {
+          cssImports[name].push(`${depName}/${cssPath}`);
+        });
+      }
+    });
+  });
+
   // Update the metapackage.
   let pkgMessages = ensureMetaPackage();
   if (pkgMessages.length > 0) {
@@ -206,19 +315,27 @@ export async function ensureIntegrity(): Promise<boolean> {
   }
 
   // Validate each package.
-  for (let name in pkgData) {
+  for (let name in locals) {
+    let unused = UNUSED[name] || [];
+    // Allow jest-junit to be unused in the test suite.
+    if (name.indexOf('@jupyterlab/test-') === 0) {
+      unused.push('jest-junit');
+    }
     let options: IEnsurePackageOptions = {
       pkgPath: pkgPaths[name],
       data: pkgData[name],
       depCache,
       missing: MISSING[name],
-      unused: UNUSED[name],
-      locals
+      unused,
+      locals,
+      cssImports: cssImports[name],
+      differentVersions: DIFFERENT_VERSIONS
     };
 
     if (name === '@jupyterlab/metapackage') {
       options.noUnused = false;
     }
+
     let pkgMessages = await ensurePackage(options);
     if (pkgMessages.length > 0) {
       messages[name] = pkgMessages;
@@ -263,5 +380,5 @@ export async function ensureIntegrity(): Promise<boolean> {
 }
 
 if (require.main === module) {
-  ensureIntegrity();
+  void ensureIntegrity();
 }

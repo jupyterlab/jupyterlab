@@ -1,0 +1,14 @@
+{
+  "title": "Print",
+  "description": "Print settings.",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "apputils:print",
+      "keys": ["Accel P"],
+      "selector": "body"
+    }
+  ],
+  "additionalProperties": false,
+  "properties": {},
+  "type": "object"
+}

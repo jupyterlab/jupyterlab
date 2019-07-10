@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Poll } from '@jupyterlab/coreutils';
+
 import { ArrayExt, IIterator, iter } from '@phosphor/algorithm';
 
 import { JSONExt } from '@phosphor/coreutils';
@@ -25,60 +27,43 @@ export class KernelManager implements Kernel.IManager {
       options.serverSettings || ServerConnection.makeSettings();
 
     // Initialize internal data.
-    this._readyPromise = this._refreshSpecs().then(() => {
-      return this._refreshRunning();
+    this._ready = Promise.all([this.requestRunning(), this.requestSpecs()])
+      .then(_ => undefined)
+      .catch(_ => undefined)
+      .then(() => {
+        if (this.isDisposed) {
+          return;
+        }
+        this._isReady = true;
+      });
+
+    // Start model and specs polling with exponential backoff.
+    this._pollModels = new Poll({
+      auto: false,
+      factory: () => this.requestRunning(),
+      frequency: {
+        interval: 10 * 1000,
+        backoff: true,
+        max: 300 * 1000
+      },
+      name: `@jupyterlab/services:KernelManager#models`,
+      standby: options.standby || 'when-hidden'
     });
-
-    // Set up polling.
-    this._modelsTimer = (setInterval as any)(() => {
-      if (typeof document !== 'undefined' && document.hidden) {
-        // Don't poll when nobody's looking.
-        return;
-      }
-      this._refreshRunning();
-    }, 10000);
-    this._specsTimer = (setInterval as any)(() => {
-      if (typeof document !== 'undefined' && document.hidden) {
-        // Don't poll when nobody's looking.
-        return;
-      }
-      this._refreshSpecs();
-    }, 61000);
-  }
-
-  /**
-   * A signal emitted when the specs change.
-   */
-  get specsChanged(): ISignal<this, Kernel.ISpecModels> {
-    return this._specsChanged;
-  }
-
-  /**
-   * A signal emitted when the running kernels change.
-   */
-  get runningChanged(): ISignal<this, Kernel.IModel[]> {
-    return this._runningChanged;
-  }
-
-  /**
-   * Test whether the terminal manager is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
-   * Dispose of the resources used by the manager.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
-    clearInterval(this._modelsTimer);
-    clearInterval(this._specsTimer);
-    Signal.clearData(this);
-    this._models = [];
+    this._pollSpecs = new Poll({
+      auto: false,
+      factory: () => this.requestSpecs(),
+      frequency: {
+        interval: 61 * 1000,
+        backoff: true,
+        max: 300 * 1000
+      },
+      name: `@jupyterlab/services:KernelManager#specs`,
+      standby: options.standby || 'when-hidden'
+    });
+    void this.ready.then(() => {
+      void this._pollModels.start();
+      void this._pollSpecs.start();
+    });
   }
 
   /**
@@ -87,10 +72,10 @@ export class KernelManager implements Kernel.IManager {
   readonly serverSettings: ServerConnection.ISettings;
 
   /**
-   * Get the most recently fetched kernel specs.
+   * Test whether the terminal manager is disposed.
    */
-  get specs(): Kernel.ISpecModels | null {
-    return this._specs;
+  get isDisposed(): boolean {
+    return this._isDisposed;
   }
 
   /**
@@ -104,71 +89,35 @@ export class KernelManager implements Kernel.IManager {
    * A promise that fulfills when the manager is ready.
    */
   get ready(): Promise<void> {
-    return this._readyPromise;
+    return this._ready;
   }
 
   /**
-   * Create an iterator over the most recent running kernels.
-   *
-   * @returns A new iterator over the running kernels.
+   * A signal emitted when the running kernels change.
    */
-  running(): IIterator<Kernel.IModel> {
-    return iter(this._models);
+  get runningChanged(): ISignal<this, Kernel.IModel[]> {
+    return this._runningChanged;
   }
 
   /**
-   * Force a refresh of the specs from the server.
-   *
-   * @returns A promise that resolves when the specs are fetched.
-   *
-   * #### Notes
-   * This is intended to be called only in response to a user action,
-   * since the manager maintains its internal state.
+   * Get the most recently fetched kernel specs.
    */
-  refreshSpecs(): Promise<void> {
-    return this._refreshSpecs();
+  get specs(): Kernel.ISpecModels | null {
+    return this._specs;
   }
 
   /**
-   * Force a refresh of the running kernels.
-   *
-   * @returns A promise that with the list of running sessions.
-   *
-   * #### Notes
-   * This is not typically meant to be called by the user, since the
-   * manager maintains its own internal state.
+   * A signal emitted when the specs change.
    */
-  refreshRunning(): Promise<void> {
-    return this._refreshRunning();
+  get specsChanged(): ISignal<this, Kernel.ISpecModels> {
+    return this._specsChanged;
   }
 
   /**
-   * Start a new kernel.
-   *
-   * @param options - The kernel options to use.
-   *
-   * @returns A promise that resolves with the kernel instance.
-   *
-   * #### Notes
-   * The manager `serverSettings` will be always be used.
+   * A signal emitted when there is a connection failure.
    */
-  startNew(options: Kernel.IOptions = {}): Promise<Kernel.IKernel> {
-    let newOptions = { ...options, serverSettings: this.serverSettings };
-    return Kernel.startNew(newOptions).then(kernel => {
-      this._onStarted(kernel);
-      return kernel;
-    });
-  }
-
-  /**
-   * Find a kernel by id.
-   *
-   * @param id - The id of the target kernel.
-   *
-   * @returns A promise that resolves with the kernel's model.
-   */
-  findById(id: string): Promise<Kernel.IModel> {
-    return Kernel.findById(id, this.serverSettings);
+  get connectionFailure(): ISignal<this, Error> {
+    return this._connectionFailure;
   }
 
   /**
@@ -185,6 +134,68 @@ export class KernelManager implements Kernel.IManager {
   }
 
   /**
+   * Dispose of the resources used by the manager.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._models.length = 0;
+    this._pollModels.dispose();
+    this._pollSpecs.dispose();
+    Signal.clearData(this);
+  }
+
+  /**
+   * Find a kernel by id.
+   *
+   * @param id - The id of the target kernel.
+   *
+   * @returns A promise that resolves with the kernel's model.
+   */
+  findById(id: string): Promise<Kernel.IModel> {
+    return Kernel.findById(id, this.serverSettings);
+  }
+
+  /**
+   * Force a refresh of the running kernels.
+   *
+   * @returns A promise that resolves when the running list has been refreshed.
+   *
+   * #### Notes
+   * This is not typically meant to be called by the user, since the
+   * manager maintains its own internal state.
+   */
+  async refreshRunning(): Promise<void> {
+    await this._pollModels.refresh();
+    await this._pollModels.tick;
+  }
+
+  /**
+   * Force a refresh of the specs from the server.
+   *
+   * @returns A promise that resolves when the specs are fetched.
+   *
+   * #### Notes
+   * This is intended to be called only in response to a user action,
+   * since the manager maintains its internal state.
+   */
+  async refreshSpecs(): Promise<void> {
+    await this._pollSpecs.refresh();
+    await this._pollSpecs.tick;
+  }
+
+  /**
+   * Create an iterator over the most recent running kernels.
+   *
+   * @returns A new iterator over the running kernels.
+   */
+  running(): IIterator<Kernel.IModel> {
+    return iter(this._models);
+  }
+
+  /**
    * Shut down a kernel by id.
    *
    * @param id - The id of the target kernel.
@@ -195,28 +206,29 @@ export class KernelManager implements Kernel.IManager {
    * This will emit [[runningChanged]] if the running kernels list
    * changes.
    */
-  shutdown(id: string): Promise<void> {
-    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
+  async shutdown(id: string): Promise<void> {
+    const models = this._models;
+    const kernels = this._kernels;
+    const index = ArrayExt.findFirstIndex(models, value => value.id === id);
+
     if (index === -1) {
       return;
     }
 
     // Proactively remove the model.
-    this._models.splice(index, 1);
-    this._runningChanged.emit(this._models.slice());
+    models.splice(index, 1);
+    this._runningChanged.emit(models.slice());
 
-    return Kernel.shutdown(id, this.serverSettings).then(() => {
-      let toRemove: Kernel.IKernel[] = [];
-      this._kernels.forEach(k => {
-        if (k.id === id) {
-          k.dispose();
-          toRemove.push(k);
-        }
-      });
-      toRemove.forEach(k => {
-        this._kernels.delete(k);
-      });
+    // Delete and dispose the kernel locally.
+    kernels.forEach(kernel => {
+      if (kernel.id === id) {
+        kernels.delete(kernel);
+        kernel.dispose();
+      }
     });
+
+    // Shut down the remote session.
+    await Kernel.shutdown(id, this.serverSettings);
   }
 
   /**
@@ -224,42 +236,89 @@ export class KernelManager implements Kernel.IManager {
    *
    * @returns A promise that resolves when all of the kernels are shut down.
    */
-  shutdownAll(): Promise<void> {
-    // Proactively remove all models.
-    let models = this._models;
-    if (models.length > 0) {
-      this._models = [];
-      this._runningChanged.emit([]);
-    }
-
-    return this._refreshRunning().then(() => {
-      return Promise.all(
-        models.map(model => {
-          return Kernel.shutdown(model.id, this.serverSettings).then(() => {
-            let toRemove: Kernel.IKernel[] = [];
-            this._kernels.forEach(k => {
-              k.dispose();
-              toRemove.push(k);
-            });
-            toRemove.forEach(k => {
-              this._kernels.delete(k);
-            });
-          });
-        })
-      ).then(() => {
-        return undefined;
+  async shutdownAll(): Promise<void> {
+    // Update the list of models then shut down every session.
+    try {
+      await this.requestRunning();
+      await Promise.all(
+        this._models.map(({ id }) => Kernel.shutdown(id, this.serverSettings))
+      );
+    } finally {
+      // Dispose every kernel and clear the set.
+      this._kernels.forEach(kernel => {
+        kernel.dispose();
       });
-    });
+      this._kernels.clear();
+
+      // Remove all models even if we had an error.
+      if (this._models.length) {
+        this._models.length = 0;
+        this._runningChanged.emit([]);
+      }
+    }
   }
 
   /**
-   * Handle a kernel terminating.
+   * Start a new kernel.
+   *
+   * @param options - The kernel options to use.
+   *
+   * @returns A promise that resolves with the kernel instance.
+   *
+   * #### Notes
+   * The manager `serverSettings` will be always be used.
    */
-  private _onTerminated(id: string): void {
-    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
-    if (index !== -1) {
-      this._models.splice(index, 1);
-      this._runningChanged.emit(this._models.slice());
+  async startNew(options: Kernel.IOptions = {}): Promise<Kernel.IKernel> {
+    const newOptions = { ...options, serverSettings: this.serverSettings };
+    const kernel = await Kernel.startNew(newOptions);
+    this._onStarted(kernel);
+    return kernel;
+  }
+
+  /**
+   * Execute a request to the server to poll running kernels and update state.
+   */
+  protected async requestRunning(): Promise<void> {
+    const models = await Kernel.listRunning(this.serverSettings).catch(err => {
+      // Check for a network error, or a 503 error, which is returned
+      // by a JupyterHub when a server is shut down.
+      if (
+        err instanceof ServerConnection.NetworkError ||
+        (err.response && err.response.status === 503)
+      ) {
+        this._connectionFailure.emit(err);
+        return [] as Kernel.IModel[];
+      }
+      throw err;
+    });
+    if (this._isDisposed) {
+      return;
+    }
+    if (!JSONExt.deepEqual(models, this._models)) {
+      const ids = models.map(({ id }) => id);
+      const kernels = this._kernels;
+      kernels.forEach(kernel => {
+        if (ids.indexOf(kernel.id) === -1) {
+          kernel.dispose();
+          kernels.delete(kernel);
+        }
+      });
+      this._models = models.slice();
+      this._runningChanged.emit(models);
+    }
+  }
+
+  /**
+   * Execute a request to the server to poll specs and update state.
+   */
+  protected async requestSpecs(): Promise<void> {
+    const specs = await Kernel.getSpecs(this.serverSettings);
+    if (this._isDisposed) {
+      return;
+    }
+    if (!JSONExt.deepEqual(specs, this._specs)) {
+      this._specs = specs;
+      this._specsChanged.emit(specs);
     }
   }
 
@@ -280,51 +339,27 @@ export class KernelManager implements Kernel.IManager {
   }
 
   /**
-   * Refresh the specs.
+   * Handle a kernel terminating.
    */
-  private _refreshSpecs(): Promise<void> {
-    return Kernel.getSpecs(this.serverSettings).then(specs => {
-      if (!JSONExt.deepEqual(specs, this._specs)) {
-        this._specs = specs;
-        this._specsChanged.emit(specs);
-      }
-    });
+  private _onTerminated(id: string): void {
+    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
+    if (index !== -1) {
+      this._models.splice(index, 1);
+      this._runningChanged.emit(this._models.slice());
+    }
   }
 
-  /**
-   * Refresh the running sessions.
-   */
-  private _refreshRunning(): Promise<void> {
-    return Kernel.listRunning(this.serverSettings).then(models => {
-      this._isReady = true;
-      if (!JSONExt.deepEqual(models, this._models)) {
-        let ids = models.map(r => r.id);
-        let toRemove: Kernel.IKernel[] = [];
-        this._kernels.forEach(k => {
-          if (ids.indexOf(k.id) === -1) {
-            k.dispose();
-            toRemove.push(k);
-          }
-        });
-        toRemove.forEach(s => {
-          this._kernels.delete(s);
-        });
-        this._models = models.slice();
-        this._runningChanged.emit(models);
-      }
-    });
-  }
-
-  private _models: Kernel.IModel[] = [];
-  private _kernels = new Set<Kernel.IKernel>();
-  private _specs: Kernel.ISpecModels | null = null;
   private _isDisposed = false;
-  private _modelsTimer = -1;
-  private _specsTimer = -1;
-  private _readyPromise: Promise<void>;
   private _isReady = false;
-  private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
+  private _kernels = new Set<Kernel.IKernel>();
+  private _models: Kernel.IModel[] = [];
+  private _pollModels: Poll;
+  private _pollSpecs: Poll;
+  private _ready: Promise<void>;
   private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
+  private _specs: Kernel.ISpecModels | null = null;
+  private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
+  private _connectionFailure = new Signal<this, Error>(this);
 }
 
 /**
@@ -339,5 +374,10 @@ export namespace KernelManager {
      * The server settings for the manager.
      */
     serverSettings?: ServerConnection.ISettings;
+
+    /**
+     * When the manager stops polling the API. Defaults to `when-hidden`.
+     */
+    standby?: Poll.Standby;
   }
 }

@@ -7,9 +7,9 @@ import { UUID } from '@phosphor/coreutils';
 
 import { toArray } from '@phosphor/algorithm';
 
-import { ServerConnection } from '@jupyterlab/services/src/serverconnection';
+import { ServerConnection } from '@jupyterlab/services';
 
-import { Session } from '@jupyterlab/services/src/session';
+import { Session } from '@jupyterlab/services';
 
 import {
   expectFailure,

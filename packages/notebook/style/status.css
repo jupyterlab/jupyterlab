@@ -1,0 +1,28 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*
+ * icons for light themes
+ */
+
+[data-jp-theme-light='true'] .jp-StatusItem-untrusted {
+  background-image: url('./not-trusted-icon-light.svg');
+}
+
+[data-jp-theme-light='true'] .jp-StatusItem-trusted {
+  background-image: url('./trusted-icon-light.svg');
+}
+
+/*
+ * icons for dark themes
+ */
+
+[data-jp-theme-light='false'] .jp-StatusItem-untrusted {
+  background-image: url('./not-trusted-icon-dark.svg');
+}
+
+[data-jp-theme-light='false'] .jp-StatusItem-trusted {
+  background-image: url('./trusted-icon-dark.svg');
+}

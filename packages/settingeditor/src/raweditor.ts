@@ -7,7 +7,7 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -84,10 +84,7 @@ export class RawEditor extends SplitPanel {
 
     user.addClass(USER_CLASS);
     user.editor.model.mimeType = 'text/javascript';
-    user.editor.model.value.changed.connect(
-      this._onTextChanged,
-      this
-    );
+    user.editor.model.value.changed.connect(this._onTextChanged, this);
 
     // Create and set up an inspector.
     this._inspector = createInspector(this, options.rendermime);
@@ -125,13 +122,6 @@ export class RawEditor extends SplitPanel {
   }
 
   /**
-   * Whether the debug panel is visible.
-   */
-  get isDebugVisible(): boolean {
-    return this._inspector.isVisible;
-  }
-
-  /**
    * Tests whether the settings have been modified and need saving.
    */
   get isDirty(): boolean {
@@ -166,10 +156,7 @@ export class RawEditor extends SplitPanel {
 
     if (settings) {
       this._settings = settings;
-      this._settings.changed.connect(
-        this._onSettingsChanged,
-        this
-      );
+      this._settings.changed.connect(this._onSettingsChanged, this);
       this._onSettingsChanged();
     } else {
       this._settings = null;
@@ -241,20 +228,6 @@ export class RawEditor extends SplitPanel {
   }
 
   /**
-   * Toggle the debug functionality.
-   */
-  toggleDebug(): void {
-    const inspector = this._inspector;
-
-    if (inspector.isHidden) {
-      inspector.show();
-    } else {
-      inspector.hide();
-    }
-    this._updateToolbar();
-  }
-
-  /**
    * Handle `after-attach` messages.
    */
   protected onAfterAttach(msg: Message): void {
@@ -319,11 +292,7 @@ export class RawEditor extends SplitPanel {
 
     this._canRevert = revert;
     this._canSave = save;
-    this._commandsChanged.emit([
-      commands.debug,
-      commands.revert,
-      commands.save
-    ]);
+    this._commandsChanged.emit([commands.revert, commands.save]);
   }
 
   private _canRevert = false;
@@ -350,11 +319,6 @@ export namespace RawEditor {
      * The command registry.
      */
     registry: CommandRegistry;
-
-    /**
-     * The debug command ID.
-     */
-    debug: string;
 
     /**
      * The revert command ID.
@@ -394,7 +358,7 @@ export namespace RawEditor {
     /**
      * The optional MIME renderer to use for rendering debug messages.
      */
-    rendermime?: RenderMimeRegistry;
+    rendermime?: IRenderMimeRegistry;
   }
 }
 
@@ -426,14 +390,14 @@ namespace Private {
     commands: RawEditor.ICommandBundle,
     toolbar: Toolbar<Widget>
   ): void {
-    const { debug, registry, revert, save } = commands;
+    const { registry, revert, save } = commands;
 
     toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
     // Note the button order. The rationale here is that no matter what state
     // the toolbar is in, the relative location of the revert button in the
     // toolbar remains the same.
-    [revert, debug, save].forEach(name => {
+    [revert, save].forEach(name => {
       const item = new CommandToolbarButton({ commands: registry, id: name });
       toolbar.addItem(name, item);
     });

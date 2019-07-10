@@ -522,7 +522,8 @@ export class DocumentRegistry implements IDisposable {
       name,
       language,
       shouldStart: widgetFactory.preferKernel,
-      canStart: widgetFactory.canStartKernel
+      canStart: widgetFactory.canStartKernel,
+      shutdownOnClose: widgetFactory.shutdownOnClose
     };
   }
 
@@ -932,6 +933,11 @@ export namespace DocumentRegistry {
     readonly canStartKernel?: boolean;
 
     /**
+     * Whether the kernel should be shutdown when the widget is closed.
+     */
+    readonly shutdownOnClose?: boolean;
+
+    /**
      * A function producing toolbar widgets, overriding the default toolbar widgets.
      */
     readonly toolbarFactory?: (widget: T) => DocumentRegistry.IToolbarItem[];
@@ -960,6 +966,14 @@ export namespace DocumentRegistry {
      * Whether to activate the widget.  Defaults to `true`.
      */
     activate?: boolean;
+
+    /**
+     * The rank order of the widget among its siblings.
+     *
+     * #### Notes
+     * This field may be used or ignored depending on shell implementation.
+     */
+    rank?: number;
   }
 
   /**
@@ -976,10 +990,12 @@ export namespace DocumentRegistry {
     /**
      * Create a new widget given a context.
      *
+     * @param source - A widget to clone
+     *
      * #### Notes
      * It should emit the [widgetCreated] signal with the new widget.
      */
-    createNew(context: IContext<U>): T;
+    createNew(context: IContext<U>, source?: T): T;
   }
 
   /**
@@ -1167,7 +1183,7 @@ export namespace DocumentRegistry {
     extensions: [],
     mimeTypes: ['text/directory'],
     contentType: 'directory',
-    iconClass: 'jp-MaterialIcon jp-OpenFolderIcon'
+    iconClass: 'jp-MaterialIcon jp-FolderIcon'
   };
 
   /**
@@ -1224,7 +1240,7 @@ export namespace DocumentRegistry {
       displayName: 'YAML File',
       mimeTypes: ['text/x-yaml', 'text/yaml'],
       extensions: ['.yaml', '.yml'],
-      iconClass: 'jp-MaterialIcon jp-YamlIcon'
+      iconClass: 'jp-MaterialIcon jp-YAMLIcon'
     },
     {
       name: 'svg',

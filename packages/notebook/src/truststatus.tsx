@@ -18,24 +18,18 @@ function cellTrust(
 ): string[] {
   if (props.trustedCells === props.totalCells) {
     return [
-      `Notebook trusted: ${props.trustedCells} of ${
-        props.totalCells
-      } cells trusted.`,
-      'trusted-item'
+      `Notebook trusted: ${props.trustedCells} of ${props.totalCells} cells trusted.`,
+      'jp-StatusItem-trusted'
     ];
   } else if (props.activeCellTrusted) {
     return [
-      `Active cell trusted: ${props.trustedCells} of ${
-        props.totalCells
-      } cells trusted. `,
-      'trusted-item'
+      `Active cell trusted: ${props.trustedCells} of ${props.totalCells} cells trusted. `,
+      'jp-StatusItem-trusted'
     ];
   } else {
     return [
-      `Notebook not trusted: ${props.trustedCells} of ${
-        props.totalCells
-      } cells trusted.`,
-      'not-trusted-item'
+      `Notebook not trusted: ${props.trustedCells} of ${props.totalCells} cells trusted.`,
+      'jp-StatusItem-untrusted'
     ];
   }
 }
@@ -51,7 +45,7 @@ function NotebookTrustComponent(
   props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> {
   const source = cellTrust(props)[1];
-  return <IconItem source={source} offset={{ x: 0, y: 2 }} />;
+  return <IconItem source={source} />;
 }
 
 /**
@@ -177,10 +171,7 @@ export namespace NotebookTrustStatus {
           this._onActiveCellChanged,
           this
         );
-        this._notebook.modelContentChanged.connect(
-          this._onModelChanged,
-          this
-        );
+        this._notebook.modelContentChanged.connect(this._onModelChanged, this);
 
         // Derive values
         if (this._notebook.activeCell !== undefined) {

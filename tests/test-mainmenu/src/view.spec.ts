@@ -7,9 +7,9 @@ import { CommandRegistry } from '@phosphor/commands';
 
 import { Widget } from '@phosphor/widgets';
 
-import { InstanceTracker } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
 
-import { ViewMenu, IViewMenu } from '@jupyterlab/mainmenu/src';
+import { ViewMenu, IViewMenu } from '@jupyterlab/mainmenu';
 
 import { delegateExecute, delegateToggled } from './util';
 
@@ -23,7 +23,7 @@ describe('@jupyterlab/mainmenu', () => {
   describe('ViewMenu', () => {
     let commands: CommandRegistry;
     let menu: ViewMenu;
-    let tracker: InstanceTracker<Wodget>;
+    let tracker: WidgetTracker<Wodget>;
     let wodget: Wodget;
 
     beforeAll(() => {
@@ -33,8 +33,8 @@ describe('@jupyterlab/mainmenu', () => {
     beforeEach(() => {
       wodget = new Wodget();
       menu = new ViewMenu({ commands });
-      tracker = new InstanceTracker<Wodget>({ namespace: 'wodget' });
-      tracker.add(wodget);
+      tracker = new WidgetTracker<Wodget>({ namespace: 'wodget' });
+      void tracker.add(wodget);
     });
 
     afterEach(() => {
@@ -82,9 +82,9 @@ describe('@jupyterlab/mainmenu', () => {
           delegateToggled(wodget, menu.editorViewers, 'lineNumbersToggled')
         ).to.equal(false);
 
-        delegateExecute(wodget, menu.editorViewers, 'toggleLineNumbers');
-        delegateExecute(wodget, menu.editorViewers, 'toggleMatchBrackets');
-        delegateExecute(wodget, menu.editorViewers, 'toggleWordWrap');
+        void delegateExecute(wodget, menu.editorViewers, 'toggleLineNumbers');
+        void delegateExecute(wodget, menu.editorViewers, 'toggleMatchBrackets');
+        void delegateExecute(wodget, menu.editorViewers, 'toggleWordWrap');
 
         expect(
           delegateToggled(wodget, menu.editorViewers, 'matchBracketsToggled')

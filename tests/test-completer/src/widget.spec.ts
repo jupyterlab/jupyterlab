@@ -15,9 +15,10 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
-import { Completer, CompleterModel } from '@jupyterlab/completer/src';
+import { Completer, CompleterModel } from '@jupyterlab/completer';
 
 import { framePromise, sleep } from '@jupyterlab/testutils';
+
 const TEST_ITEM_CLASS = 'jp-TestItem';
 
 const ITEM_CLASS = 'jp-Completer-item';
@@ -122,7 +123,7 @@ describe('completer/widget', () => {
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(value).to.equal('');
-        simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab
+        widget.selectActive();
         expect(value).to.equal('foo');
         widget.dispose();
         anchor.dispose();
@@ -400,7 +401,7 @@ describe('completer/widget', () => {
           anchor.dispose();
         });
 
-        it('should mark common subset on start and select on tab', async () => {
+        it('should mark common subset on start and complete that subset on tab', async () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
           let options: Completer.IOptions = {
@@ -465,6 +466,7 @@ describe('completer/widget', () => {
 
           let item = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`)[1];
 
+          simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab key
           expect(model.query).to.equal('ba');
           simulate(item, 'mousedown');
           expect(value).to.equal('baz');

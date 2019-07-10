@@ -2,12 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 export default {
-  hoverColor: '#8a8a8a',
-  clickColor: '#a6a6a6',
-  backgroundColor: '#757575',
+  hoverColor: 'var(--jp-layout-color3)',
+  clickColor: 'var(--jp-brand-color1)',
+  backgroundColor: 'var(--jp-layout-color2)',
   height: '24px',
   fontSize: 'var(--jp-ui-font-size1)',
-  textColor: '#EEEEEE',
+  fontFamily: 'var(--jp-ui-font-family)',
+  textColor: 'var(--jp-ui-font-color1)',
+  textClickColor: 'white',
   itemMargin: '2px',
   itemPadding: '6px',
   textIconHalfSpacing: '3px',

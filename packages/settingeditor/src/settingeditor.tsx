@@ -7,7 +7,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
 
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -89,18 +89,9 @@ export class SettingEditor extends Widget {
     SplitPanel.setStretch(instructions, 1);
     SplitPanel.setStretch(editor, 1);
 
-    editor.stateChanged.connect(
-      this._onStateChanged,
-      this
-    );
-    list.changed.connect(
-      this._onStateChanged,
-      this
-    );
-    panel.handleMoved.connect(
-      this._onStateChanged,
-      this
-    );
+    editor.stateChanged.connect(this._onStateChanged, this);
+    list.changed.connect(this._onStateChanged, this);
+    panel.handleMoved.connect(this._onStateChanged, this);
   }
 
   /**
@@ -137,13 +128,6 @@ export class SettingEditor extends Widget {
    */
   get commandsChanged(): ISignal<any, string[]> {
     return this._editor.raw.commandsChanged;
-  }
-
-  /**
-   * Whether the debug panel is visible.
-   */
-  get isDebugVisible(): boolean {
-    return this._editor.raw.isDebugVisible;
   }
 
   /**
@@ -187,13 +171,6 @@ export class SettingEditor extends Widget {
    */
   save(): Promise<void> {
     return this._editor.raw.save();
-  }
-
-  /**
-   * Toggle the debug functionality.
-   */
-  toggleDebug(): void {
-    this._editor.raw.toggleDebug();
   }
 
   /**
@@ -257,7 +234,6 @@ export class SettingEditor extends Widget {
   private _onStateChanged(): void {
     this._state.sizes = this._panel.relativeSizes();
     this._state.container = this._editor.state;
-    this._state.container.editor = this._list.editor;
     this._state.container.plugin = this._list.selection;
     this._saveState()
       .then(() => {
@@ -338,7 +314,6 @@ export class SettingEditor extends Widget {
           panel.addWidget(editor);
         }
         editor.settings = settings;
-        list.editor = container.editor;
         list.selection = container.plugin;
         this._setLayout();
       })
@@ -378,11 +353,6 @@ export namespace SettingEditor {
       registry: CommandRegistry;
 
       /**
-       * The debug command ID.
-       */
-      debug: string;
-
-      /**
        * The revert command ID.
        */
       revert: string;
@@ -411,7 +381,7 @@ export namespace SettingEditor {
     /**
      * The optional MIME renderer to use for rendering debug messages.
      */
-    rendermime?: RenderMimeRegistry;
+    rendermime?: IRenderMimeRegistry;
 
     /**
      * The state database used to store layout.
@@ -447,9 +417,6 @@ export namespace SettingEditor {
      * The current plugin being displayed.
      */
     plugin: string;
-
-    editor: 'raw' | 'table';
-
     sizes: number[];
   }
 }
@@ -505,10 +472,6 @@ namespace Private {
         : {};
 
     saved.container = {
-      editor:
-        container.editor === 'raw' || container.editor === 'table'
-          ? container.editor
-          : DEFAULT_LAYOUT.container.editor,
       plugin:
         typeof container.plugin === 'string'
           ? container.plugin

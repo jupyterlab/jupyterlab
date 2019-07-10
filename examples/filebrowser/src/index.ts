@@ -1,9 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'es6-promise/auto'; // polyfill Promise on IE
-import 'font-awesome/css/font-awesome.min.css';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+// @ts-ignore
+__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
+
 import '@jupyterlab/application/style/index.css';
+import '@jupyterlab/codemirror/style/index.css';
+import '@jupyterlab/filebrowser/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';
 import '../index.css';
 
@@ -32,7 +36,7 @@ import { FileEditorFactory } from '@jupyterlab/fileeditor';
 
 function main(): void {
   let manager = new ServiceManager();
-  manager.ready.then(() => {
+  void manager.ready.then(() => {
     createApp(manager);
   });
 }
@@ -91,7 +95,7 @@ function createApp(manager: ServiceManager.IManager): void {
   let creator = new ToolbarButton({
     iconClassName: 'jp-AddIcon jp-Icon jp-Icon-16',
     onClick: () => {
-      docManager
+      void docManager
         .newUntitled({
           type: 'file',
           path: fbModel.path
@@ -138,13 +142,13 @@ function createApp(manager: ServiceManager.IManager): void {
     icon: 'fa fa-edit',
     mnemonic: 0,
     execute: () => {
-      fbWidget.rename();
+      return fbWidget.rename();
     }
   });
   commands.addCommand('file-save', {
     execute: () => {
       let context = docManager.contextForWidget(activeWidget);
-      context.save();
+      return context.save();
     }
   });
   commands.addCommand('file-cut', {
@@ -167,7 +171,7 @@ function createApp(manager: ServiceManager.IManager): void {
     icon: 'fa fa-remove',
     mnemonic: 0,
     execute: () => {
-      fbWidget.delete();
+      return fbWidget.delete();
     }
   });
   commands.addCommand('file-duplicate', {
@@ -175,7 +179,7 @@ function createApp(manager: ServiceManager.IManager): void {
     icon: 'fa fa-copy',
     mnemonic: 0,
     execute: () => {
-      fbWidget.duplicate();
+      return fbWidget.duplicate();
     }
   });
   commands.addCommand('file-paste', {
@@ -183,21 +187,21 @@ function createApp(manager: ServiceManager.IManager): void {
     icon: 'fa fa-paste',
     mnemonic: 0,
     execute: () => {
-      fbWidget.paste();
+      return fbWidget.paste();
     }
   });
   commands.addCommand('file-download', {
     label: 'Download',
     icon: 'fa fa-download',
     execute: () => {
-      fbWidget.download();
+      return fbWidget.download();
     }
   });
   commands.addCommand('file-shutdown-kernel', {
-    label: 'Shutdown Kernel',
+    label: 'Shut Down Kernel',
     icon: 'fa fa-stop-circle-o',
     execute: () => {
-      fbWidget.shutdownKernels();
+      return fbWidget.shutdownKernels();
     }
   });
   commands.addCommand('file-dialog-demo', {
@@ -210,7 +214,7 @@ function createApp(manager: ServiceManager.IManager): void {
     label: 'Info Demo',
     execute: () => {
       let msg = 'The quick brown fox jumped over the lazy dog';
-      showDialog({
+      void showDialog({
         title: 'Cool Title',
         body: msg,
         buttons: [Dialog.okButton()]
@@ -262,6 +266,8 @@ function createApp(manager: ServiceManager.IManager): void {
   window.addEventListener('resize', () => {
     panel.update();
   });
+
+  console.log('Example started!');
 }
 
 /**
@@ -282,7 +288,7 @@ function dialogDemo(): void {
   selector.appendChild(option1);
   body.appendChild(input);
   body.appendChild(selector);
-  showDialog({
+  void showDialog({
     title: 'Create new notebook'
   });
 }

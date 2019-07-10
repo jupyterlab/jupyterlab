@@ -2,7 +2,8 @@
   "extends": "../../tsconfigbase",
   "compilerOptions": {
     "outDir": "lib",
-    "rootDir": "src"
+    "rootDir": "src",
+    "types": ["webpack-env"]
   },
   "include": ["src/*"],
   "references": [
@@ -20,9 +21,6 @@
     },
     {
       "path": "../mainmenu"
-    },
-    {
-      "path": "../services"
     },
     {
       "path": "../terminal"

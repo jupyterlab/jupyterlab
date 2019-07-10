@@ -1,10 +1,14 @@
 {
   "name": "@jupyterlab/codemirror-extension",
-  "version": "0.19.1",
+  "version": "1.0.1",
   "description": "JupyterLab - CodeMirror Provider Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
@@ -12,16 +16,17 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "schema/*.json"
+    "schema/*.json",
+    "style/**/*.css"
+  ],
+  "sideEffects": [
+    "style/**/*.css"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc -b",
@@ -31,21 +36,21 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.19.1",
-    "@jupyterlab/codeeditor": "^0.19.1",
-    "@jupyterlab/codemirror": "^0.19.1",
-    "@jupyterlab/coreutils": "^2.2.1",
-    "@jupyterlab/docregistry": "^0.19.1",
-    "@jupyterlab/fileeditor": "^0.19.1",
-    "@jupyterlab/mainmenu": "^0.8.1",
-    "@jupyterlab/statusbar": "^0.7.1",
-    "@phosphor/widgets": "^1.6.0",
-    "codemirror": "~5.42.0"
+    "@jupyterlab/application": "^1.0.1",
+    "@jupyterlab/codeeditor": "^1.0.0",
+    "@jupyterlab/codemirror": "^1.0.1",
+    "@jupyterlab/coreutils": "^3.0.0",
+    "@jupyterlab/docregistry": "^1.0.1",
+    "@jupyterlab/fileeditor": "^1.0.1",
+    "@jupyterlab/mainmenu": "^1.0.1",
+    "@jupyterlab/statusbar": "^1.0.1",
+    "@phosphor/widgets": "^1.8.0",
+    "codemirror": "~5.47.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typedoc": "~0.12.0",
-    "typescript": "~3.1.1"
+    "typedoc": "^0.14.2",
+    "typescript": "~3.5.1"
   },
   "publishConfig": {
     "access": "public"

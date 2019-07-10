@@ -1,0 +1,49 @@
+{
+  "tagName": "div",
+  "attributes": {},
+  "children": [
+    {
+      "tagName": "h1",
+      "attributes": {},
+      "children": "Our Incredibly Declarative Example",
+      "key": 0
+    },
+    {
+      "tagName": "p",
+      "attributes": {},
+      "children": [
+        "Can you believe we wrote this ",
+        {
+          "tagName": "b",
+          "attributes": {},
+          "children": "in Python",
+          "key": 1
+        },
+        "?"
+      ],
+      "key": 1
+    },
+    {
+      "tagName": "img",
+      "attributes": {
+        "src": "https://media.giphy.com/media/xUPGcguWZHRC2HyBRS/giphy.gif"
+      },
+      "key": 2
+    },
+    {
+      "tagName": "p",
+      "attributes": {},
+      "children": [
+        "What will ",
+        {
+          "tagName": "b",
+          "attributes": {},
+          "children": "you",
+          "key": 1
+        },
+        " create next?"
+      ],
+      "key": 3
+    }
+  ]
+}

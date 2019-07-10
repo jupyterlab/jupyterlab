@@ -64,13 +64,16 @@
       "path": "../docregistry"
     },
     {
+      "path": "../documentsearch"
+    },
+    {
+      "path": "../documentsearch-extension"
+    },
+    {
       "path": "../extensionmanager"
     },
     {
       "path": "../extensionmanager-extension"
-    },
-    {
-      "path": "../faq-extension"
     },
     {
       "path": "../filebrowser"
@@ -86,6 +89,15 @@
     },
     {
       "path": "../help-extension"
+    },
+    {
+      "path": "../htmlviewer"
+    },
+    {
+      "path": "../htmlviewer-extension"
+    },
+    {
+      "path": "../hub-extension"
     },
     {
       "path": "../imageviewer"
@@ -116,6 +128,9 @@
     },
     {
       "path": "../mainmenu-extension"
+    },
+    {
+      "path": "../markdownviewer"
     },
     {
       "path": "../markdownviewer-extension"
@@ -199,10 +214,16 @@
       "path": "../ui-components"
     },
     {
+      "path": "../vdom"
+    },
+    {
       "path": "../vdom-extension"
     },
     {
       "path": "../vega4-extension"
+    },
+    {
+      "path": "../vega5-extension"
     }
   ]
 }

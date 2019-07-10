@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { defaultSanitizer } from '@jupyterlab/apputils/src';
+import { defaultSanitizer } from '@jupyterlab/apputils';
 
 describe('defaultSanitizer', () => {
   describe('#sanitize()', () => {
@@ -108,14 +108,14 @@ describe('defaultSanitizer', () => {
     // Test unwanted inline CSS style stripping
 
     it('should allow harmless inline CSS', () => {
-      const div = '<div style="color:green;"></div>';
+      const div = '<div style="color:green"></div>';
       expect(defaultSanitizer.sanitize(div)).to.equal(div);
     });
 
     it("should strip 'content' properties from inline CSS", () => {
       const div = '<div style="color: green; content: attr(title)"></div>';
       expect(defaultSanitizer.sanitize(div)).to.equal(
-        '<div style="color:green;"></div>'
+        '<div style="color:green"></div>'
       );
     });
 

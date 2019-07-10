@@ -1,0 +1,117 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-ConsolePanel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  margin-top: -1px;
+  min-width: 240px;
+  min-height: 120px;
+}
+
+.jp-ConsolePanel::before {
+  content: '';
+  display: block;
+  height: var(--jp-toolbar-micro-height);
+  background: var(--jp-toolbar-background);
+  border-bottom: 1px solid var(--jp-toolbar-border-color);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  z-index: 1;
+}
+
+.jp-CodeConsole {
+  height: 100%;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-CodeConsole .jp-Cell {
+  padding: var(--jp-cell-padding);
+}
+
+/*-----------------------------------------------------------------------------
+| Content (already run cells)
+|----------------------------------------------------------------------------*/
+
+.jp-CodeConsole-content {
+  background: var(--jp-layout-color0);
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: var(--jp-console-padding);
+}
+
+.jp-CodeConsole-content .jp-Cell:not(.jp-mod-active) .jp-InputPrompt {
+  opacity: var(--jp-cell-prompt-not-active-opacity);
+  color: var(--jp-cell-inprompt-font-color);
+  cursor: move;
+}
+
+.jp-CodeConsole-content .jp-Cell:not(.jp-mod-active) .jp-OutputPrompt {
+  opacity: var(--jp-cell-prompt-not-active-opacity);
+  color: var(--jp-cell-outprompt-font-color);
+}
+
+/* This rule is for styling cell run by another activity in this console */
+.jp-CodeConsole-content .jp-Cell.jp-CodeConsole-foreignCell {
+}
+
+.jp-CodeConsole-content .jp-InputArea-editor.jp-InputArea-editor {
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.jp-CodeConsole-content .jp-CodeConsole-banner .jp-InputPrompt {
+  display: none;
+}
+
+/* collapser is hovered */
+.jp-CodeConsole-content .jp-Cell .jp-Collapser:hover {
+  box-shadow: var(--jp-elevation-z2);
+  background: var(--jp-brand-color1);
+  opacity: var(--jp-cell-collapser-not-active-hover-opacity);
+}
+
+/*-----------------------------------------------------------------------------
+| Input/prompt cell
+|----------------------------------------------------------------------------*/
+
+.jp-CodeConsole-input {
+  max-height: 80%;
+  flex: 0 0 auto;
+  overflow: auto;
+  border-top: var(--jp-border-width) solid var(--jp-toolbar-border-color);
+  padding: var(--jp-cell-padding) var(--jp-console-padding);
+  /* This matches the box shadow on the notebook toolbar, eventually we should create
+   * CSS variables for this */
+  box-shadow: 0px 0.4px 6px 0px rgba(0, 0, 0, 0.1);
+  background: var(--jp-layout-color1);
+}
+
+.jp-CodeConsole-input .jp-CodeConsole-prompt .jp-InputArea {
+  height: 100%;
+  min-height: 100%;
+}
+
+.jp-CodeConsole-promptCell .jp-InputArea-editor.jp-mod-focused {
+  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
+  box-shadow: var(--jp-input-box-shadow);
+  background-color: var(--jp-cell-editor-active-background);
+}
+
+/*-----------------------------------------------------------------------------
+| Presentation Mode (.jp-mod-presentationMode)
+|----------------------------------------------------------------------------*/
+
+.jp-mod-presentationMode .jp-CodeConsole {
+  --jp-content-font-size1: var(--jp-content-presentation-font-size1);
+  --jp-code-font-size: var(--jp-code-presentation-font-size);
+}
+
+.jp-mod-presentationMode .jp-CodeConsole .jp-Cell .jp-InputPrompt,
+.jp-mod-presentationMode .jp-CodeConsole .jp-Cell .jp-OutputPrompt {
+  flex: 0 0 110px;
+}

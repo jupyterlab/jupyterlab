@@ -1,0 +1,175 @@
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-running-button-height: 28px;
+  --jp-private-running-button-width: 48px;
+  --jp-private-running-item-height: 24px;
+  --jp-private-running-shutdown-button-height: 24px;
+}
+
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-RunningSessions {
+  display: flex;
+  flex-direction: column;
+  min-width: var(--jp-sidebar-min-width);
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-RunningSessions-header {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  margin: var(--jp-toolbar-header-margin);
+  justify-content: flex-end;
+}
+
+.jp-RunningSessions-header .jp-ToolbarButtonComponent {
+  padding: 0px 16px;
+}
+
+.jp-RunningSessions-shutdownAll {
+  flex: 1 1 auto;
+  height: var(--jp-private-running-button-height);
+  width: var(--jp-private-running-button-width);
+  max-width: 100px;
+  min-width: 16px;
+  min-height: 16px;
+  padding: 4px 6px;
+  background: var(--jp-layout-color1);
+  border: none;
+  outline: 0;
+  background-image: var(--jp-icon-close);
+  background-size: 16px;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.jp-RunningSessions-section {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.jp-RunningSessions-sectionHeader {
+  flex: 0 0 auto;
+  align-items: center;
+  height: 28px;
+  display: flex;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  margin-top: 8px;
+}
+
+.jp-RunningSessions-sectionHeader h2 {
+  flex: 0 0 auto;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: var(--jp-ui-font-size0);
+  padding: 8px 8px 8px 12px;
+  margin: 0px;
+}
+
+.jp-RunningSessions-sectionHeader .jp-ToolbarButtonComponent {
+  flex: 0 0 auto;
+}
+
+.jp-RunningSessions-sectionContainer {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+.jp-RunningSessions-sectionList {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.jp-RunningSessions-item {
+  display: flex;
+  flex-direction: row;
+  color: var(--jp-ui-font-color1);
+  height: var(--jp-private-running-item-height);
+  line-height: var(--jp-private-running-item-height);
+}
+
+.jp-RunningSessions-itemIcon {
+  flex: 0 0 auto;
+  padding: 0px 8px;
+  margin-right: 4px;
+  margin-left: 12px;
+  vertical-align: baseline;
+  background-size: 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.jp-RunningSessions-itemIcon.jp-mod-notebook {
+  background-image: var(--jp-icon-notebook);
+}
+
+.jp-RunningSessions-itemIcon.jp-mod-console {
+  background-image: var(--jp-icon-console);
+}
+
+.jp-RunningSessions-itemIcon.jp-mod-file:before {
+  background-image: var(--jp-icon-file);
+}
+
+.jp-RunningSessions-itemIcon.jp-mod-terminal {
+  background-image: var(--jp-icon-terminal);
+}
+
+.jp-RunningSessions-itemLabel {
+  font-size: var(--jp-ui-font-size1);
+  flex: 1 1 auto;
+  margin-right: 4px;
+  padding-left: 4px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  border-radius: 2px;
+  transition: background-color 0.1s ease;
+}
+
+.jp-RunningSessions-itemLabel:hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-RunningSessions-itemLabel:focus {
+  background-color: rgba(153, 153, 153, 0.2);
+}
+
+.jp-RunningSessions-itemShutdown.jp-mod-styled {
+  margin: 0px 4px;
+  color: var(--jp-warn-color1);
+  font-weight: 500;
+  background-color: transparent;
+  height: var(--jp-private-running-shutdown-button-height);
+  line-height: var(--jp-private-running-shutdown-button-height);
+  transition: background-color 0.1s ease;
+  border-radius: 2px;
+}
+
+.jp-RunningSessions-itemShutdown.jp-mod-styled:hover {
+  background-color: rgba(153, 153, 153, 0.1);
+}
+
+.jp-RunningSessions-itemShutdown.jp-mod-styled:focus {
+  border: none;
+  box-shadow: none;
+  background-color: rgba(153, 153, 153, 0.2);
+}

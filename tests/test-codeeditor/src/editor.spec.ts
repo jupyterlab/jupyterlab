@@ -3,7 +3,9 @@
 
 import { expect } from 'chai';
 
-import { CodeEditor } from '@jupyterlab/codeeditor/src';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+
+import { IObservableString } from '@jupyterlab/observables';
 
 describe('CodeEditor.Model', () => {
   let model: CodeEditor.Model;
@@ -58,37 +60,52 @@ describe('CodeEditor.Model', () => {
   describe('#value', () => {
     it('should be the observable value of the model', () => {
       let called = false;
-      model.value.changed.connect((sender, args) => {
+      const handler = (
+        sender: IObservableString,
+        args: IObservableString.IChangedArgs
+      ) => {
         expect(sender).to.equal(model.value);
         expect(args.type).to.equal('set');
         expect(args.value).to.equal('foo');
         called = true;
-      });
+      };
+      model.value.changed.connect(handler);
       model.value.text = 'foo';
       expect(called).to.be.true;
+      model.value.changed.disconnect(handler);
     });
 
     it('should handle an insert', () => {
       let called = false;
-      model.value.changed.connect((sender, args) => {
+      const handler = (
+        sender: IObservableString,
+        args: IObservableString.IChangedArgs
+      ) => {
         expect(args.type).to.equal('insert');
         expect(args.value).to.equal('foo');
         called = true;
-      });
+      };
+      model.value.changed.connect(handler);
       model.value.insert(0, 'foo');
       expect(called).to.be.true;
+      model.value.changed.disconnect(handler);
     });
 
     it('should handle a remove', () => {
       let called = false;
       model.value.text = 'foo';
-      model.value.changed.connect((sender, args) => {
+      const handler = (
+        sender: IObservableString,
+        args: IObservableString.IChangedArgs
+      ) => {
         expect(args.type).to.equal('remove');
         expect(args.value).to.equal('f');
         called = true;
-      });
+      };
+      model.value.changed.connect(handler);
       model.value.remove(0, 1);
       expect(called).to.be.true;
+      model.value.changed.disconnect(handler);
     });
   });
 

@@ -47,6 +47,9 @@
           "items": {
             "type": "number"
           }
+        },
+        "codeFolding": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -70,7 +73,8 @@
         "insertSpaces": true,
         "tabSize": 4,
         "wordWrapColumn": 80,
-        "rulers": []
+        "rulers": [],
+        "codeFolding": false
       }
     }
   },

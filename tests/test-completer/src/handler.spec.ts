@@ -14,7 +14,7 @@ import {
   CompletionHandler,
   CompleterModel,
   KernelConnector
-} from '@jupyterlab/completer/src';
+} from '@jupyterlab/completer';
 
 import { createClientSession } from '@jupyterlab/testutils';
 
@@ -122,6 +122,20 @@ describe('@jupyterlab/completer', () => {
         handler.editor = two.editor;
         expect(handler.editor).to.equal(two.editor);
       });
+
+      it('should remove the completer active and enabled classes of the old editor', () => {
+        const handler = new CompletionHandler({
+          connector,
+          completer: new Completer({ editor: null })
+        });
+        const widget = createEditorWidget();
+        handler.editor = widget.editor;
+        widget.toggleClass('jp-mod-completer-enabled');
+        widget.toggleClass('jp-mod-completer-active');
+        handler.editor = null;
+        expect(widget.hasClass('jp-mod-completer-enabled')).to.equal(false);
+        expect(widget.hasClass('jp-mod-completer-active')).to.equal(false);
+      });
     });
 
     describe('#isDisposed', () => {
@@ -186,7 +200,7 @@ describe('@jupyterlab/completer', () => {
         editor.setCursorPosition({ line: 0, column: 2 });
         // This signal is emitted (again) because the cursor position that
         // a natural user would create need to be recreated here.
-        (editor.model.value.changed as any).emit(void 0);
+        (editor.model.value.changed as any).emit({ type: 'set', value: 'bar' });
         expect(model.methods).to.contain('handleTextChange');
       });
     });
@@ -223,9 +237,11 @@ describe('@jupyterlab/completer', () => {
         const editor = createEditorWidget().editor;
         const text = 'eggs\nfoo # comment\nbaz';
         const want = 'eggs\nfoobar # comment\nbaz';
+        const line = 1;
+        const column = 5;
         const request: Completer.ITextState = {
-          column: 5,
-          line: 1,
+          column,
+          line,
           lineHeight: 0,
           charWidth: 0,
           coords: null,
@@ -234,10 +250,65 @@ describe('@jupyterlab/completer', () => {
 
         handler.editor = editor;
         handler.editor.model.value.text = text;
+        handler.editor.setCursorPosition({ line, column: column + 3 });
         model.original = request;
-        model.cursor = { start: 5, end: 8 };
+        model.cursor = { start: column, end: column + 3 };
         (completer.selected as any).emit(patch);
         expect(handler.editor.model.value.text).to.equal(want);
+        expect(handler.editor.getCursorPosition()).to.eql({
+          line,
+          column: column + 6
+        });
+      });
+
+      it('should be undoable and redoable', () => {
+        const model = new CompleterModel();
+        const patch = 'foobar';
+        const completer = new Completer({ editor: null, model });
+        const handler = new TestCompletionHandler({ completer, connector });
+        const editor = createEditorWidget().editor;
+        const text = 'eggs\nfoo # comment\nbaz';
+        const want = 'eggs\nfoobar # comment\nbaz';
+        const line = 1;
+        const column = 5;
+        const request: Completer.ITextState = {
+          column,
+          line,
+          lineHeight: 0,
+          charWidth: 0,
+          coords: null,
+          text
+        };
+
+        handler.editor = editor;
+        handler.editor.model.value.text = text;
+        handler.editor.setCursorPosition({ line, column: column + 3 });
+        model.original = request;
+        model.cursor = { start: column, end: column + 3 };
+        // Make the completion, check its value and cursor position.
+        (completer.selected as any).emit(patch);
+        expect(editor.model.value.text).to.equal(want);
+        expect(editor.getCursorPosition()).to.eql({
+          line,
+          column: column + 6
+        });
+        console.warn(editor.getCursorPosition());
+        // Undo the completion, check its value and cursor position.
+        editor.undo();
+        expect(editor.model.value.text).to.equal(text);
+        expect(editor.getCursorPosition()).to.eql({
+          line,
+          column: column + 3
+        });
+        console.warn(editor.getCursorPosition());
+        // Redo the completion, check its value and cursor position.
+        editor.redo();
+        expect(editor.model.value.text).to.equal(want);
+        expect(editor.getCursorPosition()).to.eql({
+          line,
+          column: column + 6
+        });
+        console.warn(editor.getCursorPosition());
       });
     });
   });

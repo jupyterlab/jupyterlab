@@ -4,20 +4,22 @@ If you're reading this section, you're probably interested in contributing to
 JupyterLab. Welcome and thanks for your interest in contributing!
 
 Please take a look at the Contributor documentation, familiarize yourself with
-using JupyterLab, and introduce yourself on the mailing list and share
-what area of the project you are interested in working on. Please see also the
-Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
+using JupyterLab, and introduce yourself to the community (on the mailing list
+or discourse) and share what area of the project you are interested in working
+on. Please also see the Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
 
 We have labeled some issues as [good first issue](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) or [help wanted](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
 that we believe are good examples of small, self-contained changes.
 We encourage those that are new to the code base to implement and/or ask
 questions about these issues.
 
-## Tag Issues with Labels
+If you believe you’ve found a security vulnerability in JupyterLab or any
+Jupyter project, please report it to
+[security@ipython.org](mailto:security@ipython.org). If you prefer to encrypt your
+security reports, you can use [this PGP public
+key](https://jupyter-notebook.readthedocs.io/en/stable/_downloads/ipython_security.asc).
 
-Users without the commit rights to the jupyterlab repository can also tag the issues with labels. For example: To apply the label `foo` and `bar baz` to an issue, comment `@meeseeksdev tag foo "bar baz"` on the issue.
-
-## General Guidelines
+## General Guidelines for Contributing
 
 For general documentation about contributing to Jupyter projects, see the
 [Project Jupyter Contributor Documentation](https://jupyter.readthedocs.io/en/latest/contributor/content-contributor.html) and [Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
@@ -39,7 +41,23 @@ installing a prettier
 extension for your code editor and configuring it to format your code with
 a keyboard shortcut or automatically on save.
 
+## Submitting a Pull Request Contribution
+
+Generally, an issue should be opened describing a piece of proposed work and the
+issues it solves before a pull request is opened. This lets community members
+participate in the design discussion, makes others aware of work being done, and
+sets the stage for a fruitful community interaction. A pull request should
+reference the issue it is addressing.
+
+### Tag Issues with Labels
+
+Users without the commit rights to the JupyterLab repository can tag issues with
+labels using the `@meeseeksdev` bot. For example: To apply the label `foo` and
+`bar baz` to an issue, comment `@meeseeksdev tag foo "bar baz"` on the issue.
+
 ## Setting Up a Development Environment
+
+You can launch a binder with the latest JupyterLab master to test something (this may take a few minutes to load): [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/)
 
 ### Installing Node.js and jlpm
 
@@ -69,7 +87,7 @@ If you use `conda`, you can install notebook using:
 conda install -c conda-forge notebook
 ```
 
-You may also want to install `nb_conda_kernels` to have a kernel option for different [conda environments](http://conda.pydata.org/docs/using/envs.html)
+You may also want to install `nb_conda_kernels` to have a kernel option for different [conda environments](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)
 
 ```bash
 conda install -c conda-forge nb_conda_kernels
@@ -136,9 +154,11 @@ jupyter lab --dev-mode
 ```
 
 Development mode ensures that you are running the JavaScript assets that are
-built in the dev-installed Python package. When running in dev mode, a red
-stripe will appear at the top of the page; this is to indicate running
-an unreleased version.
+built in the dev-installed Python package. Note that when running in dev mode,
+extensions will not be activated by default.
+
+When running in dev mode, a red stripe will appear at the top of the page;
+this is to indicate running an unreleased version.
 
 ### Build and Run the Tests
 
@@ -192,8 +212,8 @@ jlpm create:test <package-directory-name>
 #### Running Jest Tests
 
 For those test folders that use `jest`, they can be run as `jlpm test` to run the files
-directly. You can also use `jlpm test --namePattern=<regex>` to specify specific test
-suite names, and `jlpm test --pathPattern=<regex>` to specify specific test module names. In order to watch the code, add a `debugger` line in your code and run `jlpm watch`. This will start a node V8 debugger, which can be debugged
+directly. You can also use `jlpm test --testNamePattern=<regex>` to specify specific test
+suite names, and `jlpm test --testPathPattern=<regex>` to specify specific test module names. In order to watch the code, add a `debugger` line in your code and run `jlpm watch`. This will start a node V8 debugger, which can be debugged
 in Chrome by browsing to `chrome://inspect/` and launching the remote session.
 
 ## Performance Testing
@@ -520,7 +540,10 @@ a package by importing from it in the TypeScript file, and then running:
 `jlpm run integrity` from the repo root.
 
 We also have scripts for creating and removing packages in `packages/`,
-`jlpm run create:package` and `jlpm run remove:package`.
+`jlpm run create:package` and `jlpm run remove:package`. When creating a package,
+if it is meant to be included in the core bundle, add the `jupyterlab: { coreDependency: true }`
+metadata to the `package.json`. Packages with `extension` or `mimeExtension` metadata
+are considered to be a core dependency unless they are explicitly marked otherwise.
 
 ## Testing Changes to External Packages
 

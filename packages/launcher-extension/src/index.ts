@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  ILabShell,
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
 
@@ -13,8 +17,6 @@ import { JSONObject } from '@phosphor/coreutils';
 
 import { Widget } from '@phosphor/widgets';
 
-import '../style/index.css';
-
 /**
  * The command IDs used by the launcher plugin.
  */
@@ -25,10 +27,10 @@ namespace CommandIDs {
 /**
  * A service providing an interface to the the launcher.
  */
-const plugin: JupyterLabPlugin<ILauncher> = {
+const plugin: JupyterFrontEndPlugin<ILauncher> = {
   activate,
   id: '@jupyterlab/launcher-extension:plugin',
-  requires: [ICommandPalette],
+  requires: [ICommandPalette, ILabShell],
   provides: ILauncher,
   autoStart: true
 };
@@ -41,8 +43,12 @@ export default plugin;
 /**
  * Activate the launcher.
  */
-function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
-  const { commands, shell } = app;
+function activate(
+  app: JupyterFrontEnd,
+  palette: ICommandPalette,
+  labShell: ILabShell
+): ILauncher {
+  const { commands } = app;
   const model = new LauncherModel();
 
   commands.addCommand(CommandIDs.create, {
@@ -51,7 +57,7 @@ function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
       const cwd = args['cwd'] ? String(args['cwd']) : '';
       const id = `launcher-${Private.id++}`;
       const callback = (item: Widget) => {
-        shell.addToMainArea(item, { ref: id });
+        labShell.add(item, 'main', { ref: id });
       };
       const launcher = new Launcher({ cwd, callback, commands });
 
@@ -62,18 +68,15 @@ function activate(app: JupyterLab, palette: ICommandPalette): ILauncher {
       let main = new MainAreaWidget({ content: launcher });
 
       // If there are any other widgets open, remove the launcher close icon.
-      main.title.closable = !!toArray(shell.widgets('main')).length;
+      main.title.closable = !!toArray(labShell.widgets('main')).length;
       main.id = id;
 
-      shell.addToMainArea(main, { activate: args['activate'] as boolean });
+      labShell.add(main, 'main', { activate: args['activate'] as boolean });
 
-      shell.layoutModified.connect(
-        () => {
-          // If there is only a launcher open, remove the close icon.
-          main.title.closable = toArray(shell.widgets('main')).length > 1;
-        },
-        main
-      );
+      labShell.layoutModified.connect(() => {
+        // If there is only a launcher open, remove the close icon.
+        main.title.closable = toArray(labShell.widgets('main')).length > 1;
+      }, main);
 
       return main;
     }

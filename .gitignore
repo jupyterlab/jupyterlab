@@ -2,15 +2,20 @@ MANIFEST
 build
 dist
 lib
+
+jupyterlab/imports.css
 jupyterlab/static
 jupyterlab/schemas
 jupyterlab/themes
 jupyterlab/geckodriver
+
 dev_mode/schemas
 dev_mode/static
 dev_mode/themes
 dev_mode/workspaces
 dev_mode/stats.json
+
+packages/nbconvert-css/style/
 
 packages/theme-*/static
 node_modules
@@ -46,3 +51,5 @@ lerna-debug.log
 yarn-error.log
 
 junit.xml
+
+*.tsbuildinfo

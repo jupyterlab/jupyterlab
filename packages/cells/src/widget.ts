@@ -25,10 +25,10 @@ import {
 import {
   IRenderMime,
   MimeModel,
-  RenderMimeRegistry
+  IRenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
-import { KernelMessage } from '@jupyterlab/services';
+import { KernelMessage, Kernel } from '@jupyterlab/services';
 
 import { JSONValue, PromiseDelegate, JSONObject } from '@phosphor/coreutils';
 
@@ -100,11 +100,6 @@ const CELL_INPUT_COLLAPSER_CLASS = 'jp-Cell-inputCollapser';
  * The CSS class added to the cell output collapser.
  */
 const CELL_OUTPUT_COLLAPSER_CLASS = 'jp-Cell-outputCollapser';
-
-/**
- * The class name added to the cell when collapsed.
- */
-const COLLAPSED_CLASS = 'jp-mod-collapsed';
 
 /**
  * The class name added to the cell when readonly.
@@ -204,17 +199,21 @@ export class Cell extends Widget {
         }
       );
     }
+
+    model.metadata.changed.connect(this.onMetadataChanged, this);
   }
 
   /**
-   * Modify some state for initialization.
+   * Initialize view state from model.
    *
-   * Should be called at the end of the subclasses's constructor.
+   * #### Notes
+   * Should be called after construction. For convenience, returns this, so it
+   * can be chained in the construction, like `new Foo().initializeState();`
    */
-  protected initializeState() {
-    const jupyter = this.model.metadata.get('jupyter') || ({} as any);
-    this.inputHidden = jupyter.source_hidden === true;
-    this._readOnly = this.model.metadata.get('editable') === false;
+  initializeState(): this {
+    this.loadCollapseState();
+    this.loadEditableState();
+    return this;
   }
 
   /**
@@ -273,7 +272,38 @@ export class Cell extends Widget {
       return;
     }
     this._readOnly = value;
+    if (this.syncEditable) {
+      this.saveEditableState();
+    }
     this.update();
+  }
+
+  /**
+   * Save view editable state to model
+   */
+  saveEditableState() {
+    const { metadata } = this.model;
+    const current = metadata.get('editable');
+
+    if (
+      (this.readOnly && current === false) ||
+      (!this.readOnly && current === undefined)
+    ) {
+      return;
+    }
+
+    if (this.readOnly) {
+      this.model.metadata.set('editable', false);
+    } else {
+      this.model.metadata.delete('editable');
+    }
+  }
+
+  /**
+   * Load view editable state from model.
+   */
+  loadEditableState() {
+    this.readOnly = this.model.metadata.get('editable') === false;
   }
 
   /**
@@ -309,7 +339,43 @@ export class Cell extends Widget {
       layout.addWidget(this._input);
     }
     this._inputHidden = value;
+    if (this.syncCollapse) {
+      this.saveCollapseState();
+    }
     this.handleInputHidden(value);
+  }
+
+  /**
+   * Save view collapse state to model
+   */
+  saveCollapseState() {
+    const jupyter = { ...(this.model.metadata.get('jupyter') as any) };
+
+    if (
+      (this.inputHidden && jupyter.source_hidden === true) ||
+      (!this.inputHidden && jupyter.source_hidden === undefined)
+    ) {
+      return;
+    }
+
+    if (this.inputHidden) {
+      jupyter.source_hidden = true;
+    } else {
+      delete jupyter.source_hidden;
+    }
+    if (Object.keys(jupyter).length === 0) {
+      this.model.metadata.delete('jupyter');
+    } else {
+      this.model.metadata.set('jupyter', jupyter);
+    }
+  }
+
+  /**
+   * Revert view collapse state from model.
+   */
+  loadCollapseState() {
+    const jupyter = (this.model.metadata.get('jupyter') as any) || {};
+    this.inputHidden = !!jupyter.source_hidden;
   }
 
   /**
@@ -322,6 +388,38 @@ export class Cell extends Widget {
    */
   protected handleInputHidden(value: boolean): void {
     return;
+  }
+
+  /**
+   * Whether to sync the collapse state to the cell model.
+   */
+  get syncCollapse(): boolean {
+    return this._syncCollapse;
+  }
+  set syncCollapse(value: boolean) {
+    if (this._syncCollapse === value) {
+      return;
+    }
+    this._syncCollapse = value;
+    if (value) {
+      this.loadCollapseState();
+    }
+  }
+
+  /**
+   * Whether to sync the editable state to the cell model.
+   */
+  get syncEditable(): boolean {
+    return this._syncEditable;
+  }
+  set syncEditable(value: boolean) {
+    if (this._syncEditable === value) {
+      return;
+    }
+    this._syncEditable = value;
+    if (value) {
+      this.loadEditableState();
+    }
   }
 
   /**
@@ -365,6 +463,14 @@ export class Cell extends Widget {
   }
 
   /**
+   * Handle `fit-request` messages.
+   */
+  protected onFitRequest(msg: Message): void {
+    // need this for for when a theme changes font size
+    this.editor.refresh();
+  }
+
+  /**
    * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
@@ -378,12 +484,37 @@ export class Cell extends Widget {
     }
   }
 
+  /**
+   * Handle changes in the metadata.
+   */
+  protected onMetadataChanged(
+    model: IObservableMap<JSONValue>,
+    args: IObservableMap.IChangedArgs<JSONValue>
+  ): void {
+    switch (args.key) {
+      case 'jupyter':
+        if (this.syncCollapse) {
+          this.loadCollapseState();
+        }
+        break;
+      case 'editable':
+        if (this.syncEditable) {
+          this.loadEditableState();
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
   private _readOnly = false;
   private _model: ICellModel = null;
   private _inputHidden = false;
   private _input: InputArea = null;
   private _inputWrapper: Widget = null;
   private _inputPlaceholder: InputPlaceholder = null;
+  private _syncCollapse = false;
+  private _syncEditable = false;
 }
 
 /**
@@ -558,10 +689,7 @@ export class CodeCell extends Cell {
     if (model.outputs.length === 0) {
       this.addClass(NO_OUTPUTS_CLASS);
     }
-    output.outputLengthChanged.connect(
-      this._outputLengthHandler,
-      this
-    );
+    output.outputLengthChanged.connect(this._outputLengthHandler, this);
     outputWrapper.addWidget(outputCollapser);
     outputWrapper.addWidget(output);
     (this.layout as PanelLayout).insertWidget(2, outputWrapper);
@@ -569,17 +697,7 @@ export class CodeCell extends Cell {
     this._outputPlaceholder = new OutputPlaceholder(() => {
       this.outputHidden = !this.outputHidden;
     });
-
-    // Modify state
-    this.initializeState();
-    model.stateChanged.connect(
-      this.onStateChanged,
-      this
-    );
-    model.metadata.changed.connect(
-      this.onMetadataChanged,
-      this
-    );
+    model.stateChanged.connect(this.onStateChanged, this);
   }
 
   /**
@@ -588,21 +706,18 @@ export class CodeCell extends Cell {
   readonly model: ICodeCellModel;
 
   /**
-   * Modify some state for initialization.
+   * Initialize view state from model.
    *
-   * Should be called at the end of the subclasses's constructor.
+   * #### Notes
+   * Should be called after construction. For convenience, returns this, so it
+   * can be chained in the construction, like `new Foo().initializeState();`
    */
-  protected initializeState() {
+  initializeState(): this {
     super.initializeState();
-
-    const metadataScrolled = this.model.metadata.get('scrolled');
-    this.outputsScrolled = metadataScrolled === true;
-
-    const jupyter = this.model.metadata.get('jupyter') || ({} as any);
-    const collapsed = this.model.metadata.get('collapsed');
-    this.outputHidden = collapsed === true || jupyter.outputs_hidden === true;
+    this.loadScrolledState();
 
     this.setPrompt(`${this.model.executionCount || ''}`);
+    return this;
   }
 
   /**
@@ -637,6 +752,56 @@ export class CodeCell extends Cell {
       layout.addWidget(this._output);
     }
     this._outputHidden = value;
+    if (this.syncCollapse) {
+      this.saveCollapseState();
+    }
+  }
+
+  /**
+   * Save view collapse state to model
+   */
+  saveCollapseState() {
+    // Because collapse state for a code cell involves two different pieces of
+    // metadata (the `collapsed` and `jupyter` metadata keys), we block reacting
+    // to changes in metadata until we have fully committed our changes.
+    // Otherwise setting one key can trigger a write to the other key to
+    // maintain the synced consistency.
+    this._savingMetadata = true;
+
+    try {
+      super.saveCollapseState();
+
+      const metadata = this.model.metadata;
+      const collapsed = this.model.metadata.get('collapsed');
+
+      if (
+        (this.outputHidden && collapsed === true) ||
+        (!this.outputHidden && collapsed === undefined)
+      ) {
+        return;
+      }
+
+      // Do not set jupyter.outputs_hidden since it is redundant. See
+      // and https://github.com/jupyter/nbformat/issues/137
+      if (this.outputHidden) {
+        metadata.set('collapsed', true);
+      } else {
+        metadata.delete('collapsed');
+      }
+    } finally {
+      this._savingMetadata = false;
+    }
+  }
+
+  /**
+   * Revert view collapse state from model.
+   *
+   * We consider the `collapsed` metadata key as the source of truth for outputs
+   * being hidden.
+   */
+  loadCollapseState() {
+    super.loadCollapseState();
+    this.outputHidden = !!this.model.metadata.get('collapsed');
   }
 
   /**
@@ -648,6 +813,59 @@ export class CodeCell extends Cell {
   set outputsScrolled(value: boolean) {
     this.toggleClass('jp-mod-outputsScrolled', value);
     this._outputsScrolled = value;
+    if (this.syncScrolled) {
+      this.saveScrolledState();
+    }
+  }
+
+  /**
+   * Save view collapse state to model
+   */
+  saveScrolledState() {
+    const { metadata } = this.model;
+    const current = metadata.get('scrolled');
+
+    if (
+      (this.outputsScrolled && current === true) ||
+      (!this.outputsScrolled && current === undefined)
+    ) {
+      return;
+    }
+    if (this.outputsScrolled) {
+      metadata.set('scrolled', true);
+    } else {
+      metadata.delete('scrolled');
+    }
+  }
+
+  /**
+   * Revert view collapse state from model.
+   */
+  loadScrolledState() {
+    const metadata = this.model.metadata;
+
+    // We don't have the notion of 'auto' scrolled, so we make it false.
+    if (metadata.get('scrolled') === 'auto') {
+      this.outputsScrolled = false;
+    } else {
+      this.outputsScrolled = !!metadata.get('scrolled');
+    }
+  }
+
+  /**
+   * Whether to sync the scrolled state to the cell model.
+   */
+  get syncScrolled(): boolean {
+    return this._syncScrolled;
+  }
+  set syncScrolled(value: boolean) {
+    if (this._syncScrolled === value) {
+      return;
+    }
+    this._syncScrolled = value;
+    if (value) {
+      this.loadScrolledState();
+    }
   }
 
   /**
@@ -708,18 +926,6 @@ export class CodeCell extends Cell {
   }
 
   /**
-   * Handle `update-request` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    let value = this.model.metadata.get('collapsed') as boolean;
-    this.toggleClass(COLLAPSED_CLASS, value);
-    if (this._output) {
-      // TODO: handle scrolled state.
-    }
-    super.onUpdateRequest(msg);
-  }
-
-  /**
    * Handle changes in the model.
    */
   protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
@@ -739,17 +945,25 @@ export class CodeCell extends Cell {
     model: IObservableMap<JSONValue>,
     args: IObservableMap.IChangedArgs<JSONValue>
   ): void {
+    if (this._savingMetadata) {
+      // We are in middle of a metadata transaction, so don't react to it.
+      return;
+    }
     switch (args.key) {
-      case 'collapsed':
       case 'scrolled':
-        this.update();
+        if (this.syncScrolled) {
+          this.loadScrolledState();
+        }
         break;
-      case 'editable':
-        this.readOnly = !args.newValue;
+      case 'collapsed':
+        if (this.syncCollapse) {
+          this.loadCollapseState();
+        }
         break;
       default:
         break;
     }
+    super.onMetadataChanged(model, args);
   }
 
   /**
@@ -758,18 +972,16 @@ export class CodeCell extends Cell {
   private _outputLengthHandler(sender: OutputArea, args: number) {
     let force = args === 0 ? true : false;
     this.toggleClass(NO_OUTPUTS_CLASS, force);
-    /* Turn off scrolling outputs if there are none */
-    if (force) {
-      this.outputsScrolled = false;
-    }
   }
 
-  private _rendermime: RenderMimeRegistry = null;
+  private _rendermime: IRenderMimeRegistry = null;
   private _outputHidden = false;
   private _outputsScrolled: boolean;
   private _outputWrapper: Widget = null;
   private _outputPlaceholder: OutputPlaceholder = null;
   private _output: OutputArea = null;
+  private _syncScrolled = false;
+  private _savingMetadata = false;
 }
 
 /**
@@ -788,23 +1000,23 @@ export namespace CodeCell {
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
   }
 
   /**
    * Execute a cell given a client session.
    */
-  export function execute(
+  export async function execute(
     cell: CodeCell,
     session: IClientSession,
     metadata?: JSONObject
-  ): Promise<KernelMessage.IExecuteReplyMsg> {
+  ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     let model = cell.model;
     let code = model.value.text;
     if (!code.trim() || !session.kernel) {
       model.executionCount = null;
       model.outputs.clear();
-      return Promise.resolve(void 0);
+      return;
     }
 
     let cellId = { cellId: model.id };
@@ -814,17 +1026,29 @@ export namespace CodeCell {
     cell.setPrompt('*');
     model.trusted = true;
 
-    return OutputArea.execute(code, cell.outputArea, session, metadata)
-      .then(msg => {
-        model.executionCount = msg.content.execution_count;
-        return msg;
-      })
-      .catch(e => {
-        if (e.message === 'Canceled') {
-          cell.setPrompt('');
-        }
-        throw e;
-      });
+    let future: Kernel.IFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >;
+    try {
+      const msgPromise = OutputArea.execute(
+        code,
+        cell.outputArea,
+        session,
+        metadata
+      );
+      // Save this execution's future so we can compare in the catch below.
+      future = cell.outputArea.future;
+      const msg = await msgPromise;
+      model.executionCount = msg.content.execution_count;
+      return msg;
+    } catch (e) {
+      // If this is still the current execution, clear the prompt.
+      if (e.message === 'Canceled' && cell.outputArea.future === future) {
+        cell.setPrompt('');
+      }
+      throw e;
+    }
   }
 }
 
@@ -861,21 +1085,16 @@ export class MarkdownCell extends Cell {
       signal: this.model.contentChanged,
       timeout: RENDER_TIMEOUT
     });
-    this._monitor.activityStopped.connect(
-      () => {
-        if (this._rendered) {
-          this.update();
-        }
-      },
-      this
-    );
+    this._monitor.activityStopped.connect(() => {
+      if (this._rendered) {
+        this.update();
+      }
+    }, this);
 
-    this._updateRenderedInput().then(() => {
+    void this._updateRenderedInput().then(() => {
       this._ready.resolve(void 0);
     });
     this.renderInput(this._renderer);
-
-    super.initializeState();
   }
 
   /**
@@ -902,6 +1121,12 @@ export class MarkdownCell extends Cell {
     }
     this._rendered = value;
     this._handleRendered();
+    // Refreshing an editor can be really expensive, so we don't call it from
+    // _handleRendered, since _handledRendered is also called on every update
+    // request.
+    if (!this._rendered) {
+      this.editor.refresh();
+    }
   }
 
   /**
@@ -936,7 +1161,9 @@ export class MarkdownCell extends Cell {
     if (!this._rendered) {
       this.showEditor();
     } else {
-      this._updateRenderedInput();
+      // TODO: It would be nice for the cell to provide a way for
+      // its consumers to hook into when the rendering is done.
+      void this._updateRenderedInput();
       this.renderInput(this._renderer);
     }
   }
@@ -974,7 +1201,7 @@ export class MarkdownCell extends Cell {
 
   private _monitor: ActivityMonitor<any, any> = null;
   private _renderer: IRenderMime.IRenderer = null;
-  private _rendermime: RenderMimeRegistry;
+  private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
   private _prevText = '';
   private _ready = new PromiseDelegate<void>();
@@ -996,7 +1223,7 @@ export namespace MarkdownCell {
     /**
      * The mime renderer for the cell widget.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
   }
 }
 
@@ -1014,7 +1241,6 @@ export class RawCell extends Cell {
   constructor(options: Cell.IOptions) {
     super(options);
     this.addClass(RAW_CELL_CLASS);
-    super.initializeState();
   }
 
   /**

@@ -3,8 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import '../style/index.css';
-
 export * from './celldragutils';
 export * from './collapser';
 export * from './headerfooter';

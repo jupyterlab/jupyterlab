@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables/src';
+import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
 
 describe('@jupyterlab/observables', () => {
   describe('ObservableJSON', () => {
@@ -41,7 +41,7 @@ describe('@jupyterlab/observables', () => {
   describe('ObservableJSON.ChangeMessage', () => {
     describe('#constructor()', () => {
       it('should create a new message', () => {
-        const message = new ObservableJSON.ChangeMessage({
+        const message = new ObservableJSON.ChangeMessage('jsonvalue-changed', {
           key: 'foo',
           type: 'add',
           oldValue: 1,
@@ -59,7 +59,10 @@ describe('@jupyterlab/observables', () => {
           oldValue: 'ho',
           newValue: 'hi'
         };
-        const message = new ObservableJSON.ChangeMessage(args);
+        const message = new ObservableJSON.ChangeMessage(
+          'jsonvalue-changed',
+          args
+        );
         expect(message.args).to.equal(args);
       });
     });

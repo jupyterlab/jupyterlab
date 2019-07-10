@@ -1,11 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray, iter } from '@phosphor/algorithm';
+import { some, map, each } from '@phosphor/algorithm';
 
-import { Widget, DockLayout } from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  ILabShell,
+  ILabStatus,
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 
 import {
   showDialog,
@@ -18,7 +23,6 @@ import { IChangedArgs, ISettingRegistry, Time } from '@jupyterlab/coreutils';
 
 import {
   renameDialog,
-  getOpenPath,
   DocumentManager,
   IDocumentManager,
   PathStatus,
@@ -36,23 +40,10 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { IDisposable } from '@phosphor/disposable';
 
 /**
- * The name of the factory that creates markdown widgets.
- */
-const MARKDOWN_FACTORY = 'Markdown Preview';
-
-/**
  * The command IDs used by the document manager plugin.
  */
 namespace CommandIDs {
   export const clone = 'docmanager:clone';
-
-  export const close = 'docmanager:close';
-
-  export const closeAllFiles = 'docmanager:close-all-files';
-
-  export const closeOtherTabs = 'docmanager:close-other-tabs';
-
-  export const closeRightTabs = 'docmanager:close-right-tabs';
 
   export const deleteFile = 'docmanager:delete-file';
 
@@ -61,8 +52,6 @@ namespace CommandIDs {
   export const open = 'docmanager:open';
 
   export const openBrowserTab = 'docmanager:open-browser-tab';
-
-  export const openDirect = 'docmanager:open-direct';
 
   export const reload = 'docmanager:reload';
 
@@ -79,8 +68,6 @@ namespace CommandIDs {
   export const toggleAutosave = 'docmanager:toggle-autosave';
 
   export const showInFileBrowser = 'docmanager:show-in-file-browser';
-
-  export const markdownPreview = 'markdownviewer:open';
 }
 
 const pluginId = '@jupyterlab/docmanager-extension:plugin';
@@ -88,21 +75,24 @@ const pluginId = '@jupyterlab/docmanager-extension:plugin';
 /**
  * The default document manager provider.
  */
-const docManagerPlugin: JupyterLabPlugin<IDocumentManager> = {
+const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
   id: pluginId,
   provides: IDocumentManager,
-  requires: [ICommandPalette, IMainMenu, ISettingRegistry],
+  requires: [ISettingRegistry],
+  optional: [ILabStatus, ICommandPalette, ILabShell, IMainMenu],
   activate: (
-    app: JupyterLab,
-    palette: ICommandPalette,
-    menu: IMainMenu,
-    settingRegistry: ISettingRegistry
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry,
+    status: ILabStatus | null,
+    palette: ICommandPalette | null,
+    labShell: ILabShell | null,
+    mainMenu: IMainMenu | null
   ): IDocumentManager => {
+    const { shell } = app;
     const manager = app.serviceManager;
     const contexts = new WeakSet<DocumentRegistry.Context>();
     const opener: DocumentManager.IWidgetOpener = {
       open: (widget, options) => {
-        const shell = app.shell;
         if (!widget.id) {
           widget.id = `document-manager-${++Private.id}`;
         }
@@ -111,14 +101,14 @@ const docManagerPlugin: JupyterLabPlugin<IDocumentManager> = {
           ...widget.title.dataset
         };
         if (!widget.isAttached) {
-          app.shell.addToMainArea(widget, options || {});
+          shell.add(widget, 'main', options || {});
         }
         shell.activateById(widget.id);
 
         // Handle dirty state for open documents.
         let context = docManager.contextForWidget(widget);
         if (!contexts.has(context)) {
-          handleContext(app, context);
+          handleContext(status, context);
           contexts.add(context);
         }
       }
@@ -130,11 +120,19 @@ const docManagerPlugin: JupyterLabPlugin<IDocumentManager> = {
       manager,
       opener,
       when,
-      setBusy: app.setBusy.bind(app)
+      setBusy: status && (() => status.setBusy())
     });
 
     // Register the file operations commands.
-    addCommands(app, docManager, palette, opener, settingRegistry);
+    addCommands(
+      app,
+      docManager,
+      opener,
+      settingRegistry,
+      labShell,
+      palette,
+      mainMenu
+    );
 
     // Keep up to date with the settings registry.
     const onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
@@ -158,7 +156,6 @@ const docManagerPlugin: JupyterLabPlugin<IDocumentManager> = {
       .catch((reason: Error) => {
         console.error(reason.message);
       });
-    menu.settingsMenu.addGroup([{ command: CommandIDs.toggleAutosave }], 5);
 
     return docManager;
   }
@@ -167,75 +164,67 @@ const docManagerPlugin: JupyterLabPlugin<IDocumentManager> = {
 /**
  * A plugin for adding a saving status item to the status bar.
  */
-export const savingStatusPlugin: JupyterLabPlugin<void> = {
+export const savingStatusPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:saving-status',
   autoStart: true,
-  requires: [IStatusBar, IDocumentManager],
+  requires: [IStatusBar, IDocumentManager, ILabShell],
   activate: (
-    app: JupyterLab,
+    _: JupyterFrontEnd,
     statusBar: IStatusBar,
-    docManager: IDocumentManager
+    docManager: IDocumentManager,
+    labShell: ILabShell
   ) => {
-    let item = new SavingStatus({ docManager });
+    const saving = new SavingStatus({ docManager });
 
     // Keep the currently active widget synchronized.
-    item.model!.widget = app.shell.currentWidget;
-    app.shell.currentChanged.connect(
-      () => (item.model!.widget = app.shell.currentWidget)
-    );
+    saving.model!.widget = labShell.currentWidget;
+    labShell.currentChanged.connect(() => {
+      saving.model!.widget = labShell.currentWidget;
+    });
 
-    statusBar.registerStatusItem(
-      '@jupyterlab.docmanager-extension:saving-status',
-      {
-        item,
-        align: 'middle',
-        isActive: () => {
-          return true;
-        },
-        activeStateChanged: item.model!.stateChanged
-      }
-    );
+    statusBar.registerStatusItem(savingStatusPlugin.id, {
+      item: saving,
+      align: 'middle',
+      isActive: () => true,
+      activeStateChanged: saving.model!.stateChanged
+    });
   }
 };
 
 /**
  * A plugin providing a file path widget to the status bar.
  */
-export const pathStatusPlugin: JupyterLabPlugin<void> = {
+export const pathStatusPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:path-status',
   autoStart: true,
-  requires: [IStatusBar, IDocumentManager],
+  requires: [IStatusBar, IDocumentManager, ILabShell],
   activate: (
-    app: JupyterLab,
+    _: JupyterFrontEnd,
     statusBar: IStatusBar,
-    docManager: IDocumentManager
+    docManager: IDocumentManager,
+    labShell: ILabShell
   ) => {
-    let item = new PathStatus({ docManager });
+    const path = new PathStatus({ docManager });
 
     // Keep the file path widget up-to-date with the application active widget.
-    item.model!.widget = app.shell.currentWidget;
-    app.shell.currentChanged.connect(() => {
-      item.model!.widget = app.shell.currentWidget;
+    path.model!.widget = labShell.currentWidget;
+    labShell.currentChanged.connect(() => {
+      path.model!.widget = labShell.currentWidget;
     });
 
-    statusBar.registerStatusItem(
-      '@jupyterlab/docmanager-extension:path-status',
-      {
-        item,
-        align: 'right',
-        rank: 0,
-        isActive: () => {
-          return true;
-        }
-      }
-    );
+    statusBar.registerStatusItem(pathStatusPlugin.id, {
+      item: path,
+      align: 'right',
+      rank: 0,
+      isActive: () => true
+    });
   }
 };
 
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   docManagerPlugin,
   pathStatusPlugin,
   savingStatusPlugin
@@ -255,17 +244,32 @@ class RevertConfirmWidget extends Widget {
   }
 }
 
+// Returns the file type for a widget.
+function fileType(widget: Widget, docManager: IDocumentManager): string {
+  if (!widget) {
+    return 'File';
+  }
+  const context = docManager.contextForWidget(widget);
+  if (!context) {
+    return '';
+  }
+  const fts = docManager.registry.getFileTypesForPath(context.path);
+  return fts.length && fts[0].displayName ? fts[0].displayName : 'File';
+}
+
 /**
  * Add the file operations commands to the application's command registry.
  */
 function addCommands(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   docManager: IDocumentManager,
-  palette: ICommandPalette,
   opener: DocumentManager.IWidgetOpener,
-  settingRegistry: ISettingRegistry
+  settingRegistry: ISettingRegistry,
+  labShell: ILabShell | null,
+  palette: ICommandPalette | null,
+  mainMenu: IMainMenu | null
 ): void {
-  const { commands, docRegistry, shell } = app;
+  const { commands, shell } = app;
   const category = 'File Operations';
   const isEnabled = () => {
     const { currentWidget } = shell;
@@ -285,142 +289,13 @@ function addCommands(
     );
   };
 
-  // fetches the doc widget associated with the most recent contextmenu event
-  const contextMenuWidget = (): Widget => {
-    const pathRe = /[Pp]ath:\s?(.*)\n?/;
-    const test = (node: HTMLElement) =>
-      node['title'] && !!node['title'].match(pathRe);
-    const node = app.contextMenuFirst(test);
-
-    if (!node) {
-      // fall back to active doc widget if path cannot be obtained from event
-      return app.shell.currentWidget;
-    }
-    const pathMatch = node['title'].match(pathRe);
-    return docManager.findWidget(pathMatch[1]);
-  };
-
-  // operates on active widget by default
-  const fileType = (widget: Widget = shell.currentWidget) => {
-    if (!widget) {
-      return 'File';
-    }
-    const context = docManager.contextForWidget(widget);
-    if (!context) {
-      return '';
-    }
-    const fts = docRegistry.getFileTypesForPath(context.path);
-    return fts.length && fts[0].displayName ? fts[0].displayName : 'File';
-  };
-  const closeWidgets = (widgets: Array<Widget>): void => {
-    widgets.forEach(widget => widget.close());
-  };
-  const findTab = (
-    area: DockLayout.AreaConfig,
-    widget: Widget
-  ): DockLayout.ITabAreaConfig | null => {
-    switch (area.type) {
-      case 'split-area':
-        const iterator = iter(area.children);
-        let tab: DockLayout.ITabAreaConfig | null = null;
-        let value: DockLayout.AreaConfig | null = null;
-        do {
-          value = iterator.next();
-          if (value) {
-            tab = findTab(value, widget);
-          }
-        } while (!tab && value);
-        return tab;
-      case 'tab-area':
-        const { id } = widget;
-        return area.widgets.some(widget => widget.id === id) ? area : null;
-      default:
-        return null;
-    }
-  };
-  const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
-    const { mainArea } = shell.saveLayout();
-    if (mainArea.mode !== 'multiple-document') {
-      return null;
-    }
-    let area = mainArea.dock.main;
-    if (!area) {
-      return null;
-    }
-    return findTab(area, widget);
-  };
-  const widgetsRightOf = (widget: Widget): Array<Widget> => {
-    const { id } = widget;
-    const tabArea = tabAreaFor(widget);
-    const widgets = tabArea ? tabArea.widgets || [] : [];
-    const index = widgets.findIndex(widget => widget.id === id);
-    if (index < 0) {
-      return [];
-    }
-    return widgets.slice(index + 1);
-  };
-
-  commands.addCommand(CommandIDs.close, {
-    label: () => {
-      const widget = shell.currentWidget;
-      let name = 'File';
-      if (widget) {
-        const typeName = fileType();
-        name = typeName || widget.title.label;
-      }
-      return `Close ${name}`;
-    },
-    isEnabled: () =>
-      !!shell.currentWidget && !!shell.currentWidget.title.closable,
-    execute: () => {
-      if (shell.currentWidget) {
-        shell.currentWidget.close();
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.closeAllFiles, {
-    label: 'Close All',
-    execute: () => {
-      shell.closeAll();
-    }
-  });
-
-  commands.addCommand(CommandIDs.closeOtherTabs, {
-    label: () => `Close Other Tabs`,
-    isEnabled: () => {
-      // Ensure there are at least two widgets.
-      const iterator = shell.widgets('main');
-      return !!iterator.next() && !!iterator.next();
-    },
-    execute: () => {
-      const widget = contextMenuWidget();
-      if (!widget) {
-        return;
-      }
-      const { id } = widget;
-      const otherWidgets = toArray(shell.widgets('main')).filter(
-        widget => widget.id !== id
-      );
-      closeWidgets(otherWidgets);
-    }
-  });
-
-  commands.addCommand(CommandIDs.closeRightTabs, {
-    label: () => `Close Tabs to Right`,
-    isEnabled: () =>
-      contextMenuWidget() && widgetsRightOf(contextMenuWidget()).length > 0,
-    execute: () => {
-      const widget = contextMenuWidget();
-      if (!widget) {
-        return;
-      }
-      closeWidgets(widgetsRightOf(widget));
-    }
-  });
+  // If inside a rich application like JupyterLab, add additional functionality.
+  if (labShell) {
+    addLabCommands(app, docManager, labShell, opener, palette);
+  }
 
   commands.addCommand(CommandIDs.deleteFile, {
-    label: () => `Delete ${fileType()}`,
+    label: () => `Delete ${fileType(shell.currentWidget, docManager)}`,
     execute: args => {
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
@@ -490,36 +365,9 @@ function addCommands(
     label: () => 'Open in New Browser Tab'
   });
 
-  commands.addCommand(CommandIDs.openDirect, {
-    label: () => 'Open From Path...',
-    caption: 'Open from path',
-    isEnabled: () => true,
-    execute: () => {
-      return getOpenPath(docManager.services.contents).then(path => {
-        if (!path) {
-          return;
-        }
-        docManager.services.contents.get(path, { content: false }).then(
-          args => {
-            // exists
-            return commands.execute(CommandIDs.open, { path: path });
-          },
-          () => {
-            // does not exist
-            return showDialog({
-              title: 'Cannot open',
-              body: 'File not found',
-              buttons: [Dialog.okButton()]
-            });
-          }
-        );
-        return;
-      });
-    }
-  });
-
   commands.addCommand(CommandIDs.reload, {
-    label: () => `Reload ${fileType()} from Disk`,
+    label: () =>
+      `Reload ${fileType(shell.currentWidget, docManager)} from Disk`,
     caption: 'Reload contents from disk',
     isEnabled,
     execute: () => {
@@ -527,7 +375,7 @@ function addCommands(
         return;
       }
       const context = docManager.contextForWidget(shell.currentWidget);
-      const type = fileType();
+      const type = fileType(shell.currentWidget, docManager);
       return showDialog({
         title: `Reload ${type} from Disk`,
         body: `Are you sure you want to reload
@@ -542,7 +390,8 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.restoreCheckpoint, {
-    label: () => `Revert ${fileType()} to Checkpoint`,
+    label: () =>
+      `Revert ${fileType(shell.currentWidget, docManager)} to Checkpoint`,
     caption: 'Revert contents to previous checkpoint',
     isEnabled,
     execute: () => {
@@ -558,7 +407,7 @@ function addCommands(
         if (!lastCheckpoint) {
           return;
         }
-        const type = fileType();
+        const type = fileType(shell.currentWidget, docManager);
         return showDialog({
           title: `Revert ${type} to checkpoint`,
           body: new RevertConfirmWidget(lastCheckpoint, type),
@@ -582,7 +431,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.save, {
-    label: () => `Save ${fileType()}`,
+    label: () => `Save ${fileType(shell.currentWidget, docManager)}`,
     caption: 'Save and create checkpoint',
     isEnabled: isWritable,
     execute: () => {
@@ -613,78 +462,33 @@ function addCommands(
     label: () => 'Save All',
     caption: 'Save all open documents',
     isEnabled: () => {
-      const iterator = shell.widgets('main');
-      let widget = iterator.next();
-      while (widget) {
-        let context = docManager.contextForWidget(widget);
-        if (
-          context &&
-          context.contentsModel &&
-          context.contentsModel.writable
-        ) {
-          return true;
-        }
-        widget = iterator.next();
-      }
-      // disable saveAll if all of the widgets models
-      // have writable === false
-      return false;
+      return some(
+        map(shell.widgets('main'), w => docManager.contextForWidget(w)),
+        c => c && c.contentsModel && c.contentsModel.writable
+      );
     },
     execute: () => {
-      const iterator = shell.widgets('main');
       const promises: Promise<void>[] = [];
       const paths = new Set<string>(); // Cache so we don't double save files.
-      let widget = iterator.next();
-      while (widget) {
+      each(shell.widgets('main'), widget => {
         const context = docManager.contextForWidget(widget);
         if (context && !context.model.readOnly && !paths.has(context.path)) {
           paths.add(context.path);
           promises.push(context.save());
         }
-        widget = iterator.next();
-      }
+      });
       return Promise.all(promises);
     }
   });
 
   commands.addCommand(CommandIDs.saveAs, {
-    label: () => `Save ${fileType()} As…`,
+    label: () => `Save ${fileType(shell.currentWidget, docManager)} As…`,
     caption: 'Save with new path',
     isEnabled,
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(shell.currentWidget);
         return context.saveAs();
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.rename, {
-    label: () => `Rename ${fileType(contextMenuWidget())}…`,
-    isEnabled,
-    execute: () => {
-      if (isEnabled()) {
-        let context = docManager.contextForWidget(contextMenuWidget());
-        return renameDialog(docManager, context!.path);
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.clone, {
-    label: () => `New View for ${fileType(contextMenuWidget())}`,
-    isEnabled,
-    execute: args => {
-      const widget = contextMenuWidget();
-      const options = (args['options'] as DocumentRegistry.IOpenOptions) || {
-        mode: 'split-right'
-      };
-      if (!widget) {
-        return;
-      }
-      // Clone the widget.
-      let child = docManager.cloneWidget(widget);
-      if (child) {
-        opener.open(child, options);
       }
     }
   });
@@ -703,33 +507,104 @@ function addCommands(
     }
   });
 
+  // .jp-mod-current added so that the console-creation command is only shown
+  // on the current document.
+  // Otherwise it will delegate to the wrong widget.
+  app.contextMenu.addItem({
+    command: 'filemenu:create-console',
+    selector: '[data-type="document-title"].jp-mod-current',
+    rank: 6
+  });
+
+  if (palette) {
+    [
+      CommandIDs.reload,
+      CommandIDs.restoreCheckpoint,
+      CommandIDs.save,
+      CommandIDs.saveAs,
+      CommandIDs.toggleAutosave
+    ].forEach(command => {
+      palette.addItem({ command, category });
+    });
+  }
+
+  if (mainMenu) {
+    mainMenu.settingsMenu.addGroup([{ command: CommandIDs.toggleAutosave }], 5);
+  }
+}
+
+function addLabCommands(
+  app: JupyterFrontEnd,
+  docManager: IDocumentManager,
+  labShell: ILabShell,
+  opener: DocumentManager.IWidgetOpener,
+  palette: ICommandPalette | null
+): void {
+  const { commands } = app;
+
+  // Returns the doc widget associated with the most recent contextmenu event.
+  const contextMenuWidget = (): Widget => {
+    const pathRe = /[Pp]ath:\s?(.*)\n?/;
+    const test = (node: HTMLElement) =>
+      node['title'] && !!node['title'].match(pathRe);
+    const node = app.contextMenuHitTest(test);
+
+    if (!node) {
+      // Fall back to active doc widget if path cannot be obtained from event.
+      return labShell.currentWidget;
+    }
+    const pathMatch = node['title'].match(pathRe);
+    return docManager.findWidget(pathMatch[1], null);
+  };
+
+  // Returns `true` if the current widget has a document context.
+  const isEnabled = () => {
+    const { currentWidget } = labShell;
+    return !!(currentWidget && docManager.contextForWidget(currentWidget));
+  };
+
+  commands.addCommand(CommandIDs.clone, {
+    label: () => `New View for ${fileType(contextMenuWidget(), docManager)}`,
+    isEnabled,
+    execute: args => {
+      const widget = contextMenuWidget();
+      const options = (args['options'] as DocumentRegistry.IOpenOptions) || {
+        mode: 'split-right'
+      };
+      if (!widget) {
+        return;
+      }
+      // Clone the widget.
+      let child = docManager.cloneWidget(widget);
+      if (child) {
+        opener.open(child, options);
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.rename, {
+    label: () => `Rename ${fileType(contextMenuWidget(), docManager)}…`,
+    isEnabled,
+    execute: () => {
+      if (isEnabled()) {
+        let context = docManager.contextForWidget(contextMenuWidget());
+        return renameDialog(docManager, context!.path);
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.showInFileBrowser, {
     label: () => `Show in File Browser`,
     isEnabled,
-    execute: () => {
+    execute: async () => {
       let context = docManager.contextForWidget(contextMenuWidget());
       if (!context) {
         return;
       }
 
       // 'activate' is needed if this command is selected in the "open tabs" sidebar
-      commands.execute('filebrowser:activate', { path: context.path });
-      commands.execute('filebrowser:navigate', { path: context.path });
-    }
-  });
-
-  commands.addCommand(CommandIDs.markdownPreview, {
-    label: 'Markdown Preview',
-    execute: args => {
-      let path = args['path'];
-      if (typeof path !== 'string') {
-        return;
-      }
-      return commands.execute('docmanager:open', {
-        path,
-        factory: MARKDOWN_FACTORY,
-        options: args['options']
-      });
+      await commands.execute('filebrowser:activate', { path: context.path });
+      await commands.execute('filebrowser:go-to-path', { path: context.path });
     }
   });
 
@@ -748,46 +623,13 @@ function addCommands(
     selector: '[data-type="document-title"]',
     rank: 3
   });
-  app.contextMenu.addItem({
-    command: CommandIDs.closeOtherTabs,
-    selector: '[data-type="document-title"]',
-    rank: 4
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.closeRightTabs,
-    selector: '[data-type="document-title"]',
-    rank: 5
-  });
-  // .jp-mod-current added so that the console-creation command is only shown on the current document.
-  // Otherwise it will delegate to the wrong widget.
-  app.contextMenu.addItem({
-    command: 'filemenu:create-console',
-    selector: '[data-type="document-title"].jp-mod-current',
-    rank: 6
-  });
-
-  [
-    CommandIDs.openDirect,
-    CommandIDs.save,
-    CommandIDs.reload,
-    CommandIDs.restoreCheckpoint,
-    CommandIDs.saveAs,
-    CommandIDs.clone,
-    CommandIDs.close,
-    CommandIDs.closeAllFiles,
-    CommandIDs.closeOtherTabs,
-    CommandIDs.closeRightTabs,
-    CommandIDs.toggleAutosave
-  ].forEach(command => {
-    palette.addItem({ command, category });
-  });
 }
 
 /**
  * Handle dirty state for a context.
  */
 function handleContext(
-  app: JupyterLab,
+  status: ILabStatus,
   context: DocumentRegistry.Context
 ): void {
   let disposable: IDisposable | null = null;
@@ -795,7 +637,7 @@ function handleContext(
     if (args.name === 'dirty') {
       if (args.newValue === true) {
         if (!disposable) {
-          disposable = app.setDirty();
+          disposable = status.setDirty();
         }
       } else if (disposable) {
         disposable.dispose();
@@ -803,10 +645,10 @@ function handleContext(
       }
     }
   };
-  context.ready.then(() => {
+  void context.ready.then(() => {
     context.model.stateChanged.connect(onStateChanged);
     if (context.model.dirty) {
-      disposable = app.setDirty();
+      disposable = status.setDirty();
     }
   });
   context.disposed.connect(() => {

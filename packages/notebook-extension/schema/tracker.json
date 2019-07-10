@@ -254,6 +254,9 @@
           "items": {
             "type": "number"
           }
+        },
+        "codeFolding": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -277,8 +280,22 @@
         "insertSpaces": true,
         "tabSize": 4,
         "wordWrapColumn": 80,
-        "rulers": []
+        "rulers": [],
+        "codeFolding": false
       }
+    },
+    "defaultCell": {
+      "title": "Default cell type",
+      "description": "The default type (markdown, code, or raw) for new cells",
+      "type": "string",
+      "enum": ["code", "markdown", "raw"],
+      "default": "code"
+    },
+    "kernelShutdown": {
+      "title": "Shut down kernel",
+      "description": "Whether to shut down or not the kernel when closing a notebook.",
+      "type": "boolean",
+      "default": false
     },
     "markdownCellConfig": {
       "title": "Markdown Cell Configuration",
@@ -296,7 +313,8 @@
         "insertSpaces": true,
         "tabSize": 4,
         "wordWrapColumn": 80,
-        "rulers": []
+        "rulers": [],
+        "codeFolding": false
       }
     },
     "rawCellConfig": {
@@ -315,7 +333,8 @@
         "insertSpaces": true,
         "tabSize": 4,
         "wordWrapColumn": 80,
-        "rulers": []
+        "rulers": [],
+        "codeFolding": false
       }
     },
     "scrollPastEnd": {

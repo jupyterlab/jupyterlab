@@ -1,10 +1,14 @@
 {
   "name": "@jupyterlab/codemirror",
-  "version": "0.19.1",
+  "version": "1.0.1",
   "description": "JupyterLab - CodeMirror Editor Provider",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
@@ -14,14 +18,12 @@
     "lib/*.js",
     "style/*.css"
   ],
+  "sideEffects": true,
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc -b",
@@ -31,27 +33,49 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.19.1",
-    "@jupyterlab/codeeditor": "^0.19.1",
-    "@jupyterlab/coreutils": "^2.2.1",
-    "@jupyterlab/observables": "^2.1.1",
-    "@jupyterlab/statusbar": "^0.7.1",
-    "@phosphor/algorithm": "^1.1.2",
-    "@phosphor/commands": "^1.6.1",
-    "@phosphor/coreutils": "^1.3.0",
-    "@phosphor/disposable": "^1.1.2",
-    "@phosphor/signaling": "^1.2.2",
-    "@phosphor/widgets": "^1.6.0",
-    "codemirror": "~5.42.0",
-    "react": "~16.4.2"
+    "@jupyterlab/apputils": "^1.0.1",
+    "@jupyterlab/codeeditor": "^1.0.0",
+    "@jupyterlab/coreutils": "^3.0.0",
+    "@jupyterlab/observables": "^2.2.0",
+    "@jupyterlab/statusbar": "^1.0.1",
+    "@phosphor/algorithm": "^1.1.3",
+    "@phosphor/commands": "^1.6.3",
+    "@phosphor/coreutils": "^1.3.1",
+    "@phosphor/disposable": "^1.2.0",
+    "@phosphor/signaling": "^1.2.3",
+    "@phosphor/widgets": "^1.8.0",
+    "codemirror": "~5.47.0",
+    "react": "~16.8.4"
   },
   "devDependencies": {
-    "@types/codemirror": "~0.0.46",
+    "@types/codemirror": "^0.0.74",
     "rimraf": "~2.6.2",
-    "typedoc": "~0.12.0",
-    "typescript": "~3.1.1"
+    "typedoc": "^0.14.2",
+    "typescript": "~3.5.1"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "jupyterlab": {
+    "extraStyles": {
+      "codemirror": [
+        "lib/codemirror.css",
+        "addon/dialog/dialog.css",
+        "addon/fold/foldgutter.css",
+        "theme/material.css",
+        "theme/zenburn.css",
+        "theme/abcdef.css",
+        "theme/base16-light.css",
+        "theme/base16-dark.css",
+        "theme/dracula.css",
+        "theme/hopscotch.css",
+        "theme/mbo.css",
+        "theme/mdn-like.css",
+        "theme/seti.css",
+        "theme/solarized.css",
+        "theme/the-matrix.css",
+        "theme/xq-light.css"
+      ]
+    }
   }
 }

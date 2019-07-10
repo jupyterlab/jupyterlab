@@ -1,26 +1,31 @@
 {
   "name": "@jupyterlab/csvviewer-extension",
-  "version": "0.19.1",
+  "version": "1.0.1",
   "description": "JupyterLab - CSV Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "files": [
     "lib/*.d.ts",
     "lib/*.js.map",
-    "lib/*.js"
+    "lib/*.js",
+    "style/**/*.css"
+  ],
+  "sideEffects": [
+    "style/**/*.css"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc -b",
@@ -30,17 +35,20 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.19.1",
-    "@jupyterlab/apputils": "^0.19.1",
-    "@jupyterlab/csvviewer": "^0.19.1",
-    "@jupyterlab/docregistry": "^0.19.1",
-    "@jupyterlab/mainmenu": "^0.8.1",
-    "@phosphor/datagrid": "^0.1.6"
+    "@jupyterlab/application": "^1.0.1",
+    "@jupyterlab/apputils": "^1.0.1",
+    "@jupyterlab/csvviewer": "^1.0.1",
+    "@jupyterlab/docregistry": "^1.0.1",
+    "@jupyterlab/documentsearch": "^1.0.1",
+    "@jupyterlab/mainmenu": "^1.0.1",
+    "@phosphor/datagrid": "^0.1.9",
+    "@phosphor/signaling": "^1.2.3",
+    "@phosphor/widgets": "^1.8.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typedoc": "~0.12.0",
-    "typescript": "~3.1.1"
+    "typedoc": "^0.14.2",
+    "typescript": "~3.5.1"
   },
   "publishConfig": {
     "access": "public"

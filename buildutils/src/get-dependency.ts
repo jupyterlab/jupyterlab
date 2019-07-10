@@ -84,7 +84,7 @@ if (require.main === module) {
     process.exit(1);
   }
   let name = process.argv[2];
-  getDependency(name).then(version => {
+  void getDependency(name).then(version => {
     console.log('dependency of: ', allDeps);
     console.log('devDependency of:', allDevDeps);
     console.log(`\n    "${name}": "${version}"`);

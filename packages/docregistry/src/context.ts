@@ -19,7 +19,8 @@ import {
   showDialog,
   ClientSession,
   Dialog,
-  IClientSession
+  IClientSession,
+  showErrorMessage
 } from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
@@ -46,7 +47,7 @@ export class Context<T extends DocumentRegistry.IModel>
     let manager = (this._manager = options.manager);
     this._factory = options.factory;
     this._opener = options.opener || Private.noOp;
-    this._path = options.path;
+    this._path = this._manager.contents.normalize(options.path);
     const localPath = this._manager.contents.localPath(this._path);
     let lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
@@ -72,14 +73,8 @@ export class Context<T extends DocumentRegistry.IModel>
       kernelPreference: options.kernelPreference || { shouldStart: false },
       setBusy: options.setBusy
     });
-    this.session.propertyChanged.connect(
-      this._onSessionChanged,
-      this
-    );
-    manager.contents.fileChanged.connect(
-      this._onFileChanged,
-      this
-    );
+    this.session.propertyChanged.connect(this._onSessionChanged, this);
+    manager.contents.fileChanged.connect(this._onFileChanged, this);
 
     this.urlResolver = new RenderMimeRegistry.UrlResolver({
       session: this.session,
@@ -223,7 +218,7 @@ export class Context<T extends DocumentRegistry.IModel>
       return this._modelDB.connected.then(() => {
         if (this._modelDB.isPrepopulated) {
           this._model.initialize();
-          this._save();
+          void this._save();
           return void 0;
         } else {
           return this._revert(true);
@@ -387,13 +382,13 @@ export class Context<T extends DocumentRegistry.IModel>
         };
       }
       this._path = newPath;
-      this.session.setPath(newPath);
+      void this.session.setPath(newPath);
       const updateModel = {
         ...this._contentsModel,
         ...changeModel
       };
       const localPath = this._manager.contents.localPath(newPath);
-      this.session.setName(PathExt.basename(localPath));
+      void this.session.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
       this._pathChanged.emit(this._path);
     }
@@ -456,7 +451,10 @@ export class Context<T extends DocumentRegistry.IModel>
         name,
         language: this._model.defaultKernelLanguage
       };
-      this.session.initialize();
+      // Note: we don't wait on the session to initialize
+      // so that the user can be shown the content before
+      // any kernel has started.
+      void this.session.initialize();
     });
   }
 
@@ -512,7 +510,7 @@ export class Context<T extends DocumentRegistry.IModel>
         // Otherwise show an error message and throw the error.
         const localPath = this._manager.contents.localPath(this._path);
         const name = PathExt.basename(localPath);
-        this._handleError(err, `File Save Error for ${name}`);
+        void this._handleError(err, `File Save Error for ${name}`);
         throw err;
       })
       .then(
@@ -585,7 +583,7 @@ export class Context<T extends DocumentRegistry.IModel>
         if (err.message === 'Invalid response: 400 bad format') {
           err = new Error('JupyterLab is unable to open this file type.');
         }
-        this._handleError(err, `File Load Error for ${name}`);
+        void this._handleError(err, `File Load Error for ${name}`);
         throw err;
       });
   }
@@ -629,28 +627,26 @@ export class Context<T extends DocumentRegistry.IModel>
   /**
    * Handle a save/load error with a dialog.
    */
-  private _handleError(
+  private async _handleError(
     err: Error | ServerConnection.ResponseError,
     title: string
-  ): void {
-    let buttons = [Dialog.okButton()];
-
+  ): Promise<void> {
     // Check for a more specific error message.
+    let error = { message: '' };
     if (err instanceof ServerConnection.ResponseError) {
-      err.response.text().then(text => {
-        let body = '';
-        try {
-          body = JSON.parse(text).message;
-        } catch (e) {
-          body = text;
-        }
-        body = body || err.message;
-        showDialog({ title, body, buttons });
-      });
+      const text = await err.response.text();
+      let body = '';
+      try {
+        body = JSON.parse(text).message;
+      } catch (e) {
+        body = text;
+      }
+      error.message = body || err.message;
     } else {
-      let body = err.message;
-      showDialog({ title, body, buttons });
+      error.message = err.message;
     }
+    await showErrorMessage(title, error);
+    return;
   }
 
   /**
@@ -697,12 +693,12 @@ export class Context<T extends DocumentRegistry.IModel>
         `${tDisk}`
     );
     let body =
-      `The file has changed on disk since the last time it ` +
+      `"${this.path}" has changed on disk since the last time it ` +
       `was opened or saved. ` +
       `Do you want to overwrite the file on disk with the version ` +
       ` open here, or load the version on disk (revert)?`;
-    let revertBtn = Dialog.okButton({ label: 'REVERT' });
-    let overwriteBtn = Dialog.warnButton({ label: 'OVERWRITE' });
+    let revertBtn = Dialog.okButton({ label: 'Revert' });
+    let overwriteBtn = Dialog.warnButton({ label: 'Overwrite' });
     return showDialog({
       title: 'File Changed',
       body,
@@ -711,10 +707,10 @@ export class Context<T extends DocumentRegistry.IModel>
       if (this.isDisposed) {
         return Promise.reject(new Error('Disposed'));
       }
-      if (result.button.label === 'OVERWRITE') {
+      if (result.button.label === 'Overwrite') {
         return this._manager.contents.save(this._path, options);
       }
-      if (result.button.label === 'REVERT') {
+      if (result.button.label === 'Revert') {
         return this.revert().then(() => {
           return model;
         });
@@ -728,7 +724,7 @@ export class Context<T extends DocumentRegistry.IModel>
    */
   private _maybeOverWrite(path: string): Promise<void> {
     let body = `"${path}" already exists. Do you want to replace it?`;
-    let overwriteBtn = Dialog.warnButton({ label: 'OVERWRITE' });
+    let overwriteBtn = Dialog.warnButton({ label: 'Overwrite' });
     return showDialog({
       title: 'File Overwrite?',
       body,
@@ -737,9 +733,9 @@ export class Context<T extends DocumentRegistry.IModel>
       if (this.isDisposed) {
         return Promise.reject(new Error('Disposed'));
       }
-      if (result.button.label === 'OVERWRITE') {
+      if (result.button.label === 'Overwrite') {
         return this._manager.contents.delete(path).then(() => {
-          this._finishSaveAs(path);
+          return this._finishSaveAs(path);
         });
       }
     });
@@ -753,7 +749,7 @@ export class Context<T extends DocumentRegistry.IModel>
     return this.session
       .setPath(newPath)
       .then(() => {
-        this.session.setName(newPath.split('/').pop()!);
+        void this.session.setName(newPath.split('/').pop()!);
         return this.save();
       })
       .then(() => {
@@ -837,13 +833,13 @@ namespace Private {
    * Get a new file path from the user.
    */
   export function getSavePath(path: string): Promise<string | undefined> {
-    let saveBtn = Dialog.okButton({ label: 'SAVE' });
+    let saveBtn = Dialog.okButton({ label: 'Save' });
     return showDialog({
       title: 'Save File As..',
       body: new SaveWidget(path),
       buttons: [Dialog.cancelButton(), saveBtn]
     }).then(result => {
-      if (result.button.label === 'SAVE') {
+      if (result.button.label === 'Save') {
         return result.value;
       }
       return;

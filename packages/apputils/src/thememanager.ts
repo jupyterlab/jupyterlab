@@ -5,8 +5,6 @@ import { IChangedArgs, ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
 
 import { each } from '@phosphor/algorithm';
 
-import { Token } from '@phosphor/coreutils';
-
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { Widget } from '@phosphor/widgets';
@@ -17,19 +15,7 @@ import { Dialog, showDialog } from './dialog';
 
 import { ISplashScreen } from './splash';
 
-/* tslint:disable */
-/**
- * The theme manager token.
- */
-export const IThemeManager = new Token<IThemeManager>(
-  '@jupyterlab/apputils:IThemeManager'
-);
-/* tslint:enable */
-
-/**
- * An interface for a theme manager.
- */
-export interface IThemeManager extends ThemeManager {}
+import { IThemeManager } from './tokens';
 
 /**
  * The number of milliseconds between theme loading attempts.
@@ -44,7 +30,7 @@ const REQUEST_THRESHOLD = 20;
 /**
  * A class that provides theme management.
  */
-export class ThemeManager {
+export class ThemeManager implements IThemeManager {
   /**
    * Construct a new theme manager.
    */
@@ -54,14 +40,11 @@ export class ThemeManager {
 
     this._base = url;
     this._host = host;
-    this._splash = splash;
+    this._splash = splash || null;
 
-    registry.load(key).then(settings => {
+    void registry.load(key).then(settings => {
       this._settings = settings;
-      this._settings.changed.connect(
-        this._loadSettings,
-        this
-      );
+      this._settings.changed.connect(this._loadSettings, this);
       this._loadSettings();
     });
   }
@@ -122,7 +105,7 @@ export class ThemeManager {
    *
    * @returns A disposable that can be used to unregister the theme.
    */
-  register(theme: ThemeManager.ITheme): IDisposable {
+  register(theme: IThemeManager.ITheme): IDisposable {
     const { name } = theme;
     const themes = this._themes;
 
@@ -149,6 +132,17 @@ export class ThemeManager {
    */
   isLight(name: string): boolean {
     return this._themes[name].isLight;
+  }
+
+  /**
+   * Test whether a given theme styles scrollbars,
+   * and if the user has scrollbar styling enabled.
+   */
+  themeScrollbars(name: string): boolean {
+    return (
+      !!this._settings.composite['theme-scrollbars'] &&
+      !!this._themes[name].themeScrollbars
+    );
   }
 
   /**
@@ -227,7 +221,9 @@ export class ThemeManager {
     const current = this._current;
     const links = this._links;
     const themes = this._themes;
-    const splash = this._splash.show(themes[theme].isLight);
+    const splash = this._splash
+      ? this._splash.show(themes[theme].isLight)
+      : new DisposableDelegate(() => undefined);
 
     // Unload any CSS files that have been loaded.
     links.forEach(link => {
@@ -243,12 +239,22 @@ export class ThemeManager {
     return Promise.all([old, themes[theme].load()])
       .then(() => {
         this._current = theme;
-        Private.fitAll(this._host);
-        splash.dispose();
         this._themeChanged.emit({
           name: 'theme',
           oldValue: current,
           newValue: theme
+        });
+
+        // Need to force a redraw of the app here to avoid a Chrome rendering
+        // bug that can leave the scrollbars in an invalid state
+        this._host.hide();
+
+        // If we hide/show the widget too quickly, no redraw will happen.
+        // requestAnimationFrame delays until after the next frame render.
+        requestAnimationFrame(() => {
+          this._host.show();
+          Private.fitAll(this._host);
+          splash.dispose();
         });
       })
       .catch(reason => {
@@ -261,7 +267,7 @@ export class ThemeManager {
    * Handle a theme error.
    */
   private _onError(reason: any): void {
-    showDialog({
+    void showDialog({
       title: 'Error Loading Theme',
       body: String(reason),
       buttons: [Dialog.okButton({ label: 'OK' })]
@@ -276,14 +282,11 @@ export class ThemeManager {
   private _pending = 0;
   private _requests: { [theme: string]: number } = {};
   private _settings: ISettingRegistry.ISettings;
-  private _splash: ISplashScreen;
-  private _themes: { [key: string]: ThemeManager.ITheme } = {};
+  private _splash: ISplashScreen | null;
+  private _themes: { [key: string]: IThemeManager.ITheme } = {};
   private _themeChanged = new Signal<this, IChangedArgs<string>>(this);
 }
 
-/**
- * A namespace for `ThemeManager` statics.
- */
 export namespace ThemeManager {
   /**
    * The options used to create a theme manager.
@@ -307,43 +310,12 @@ export namespace ThemeManager {
     /**
      * The splash screen to show when loading themes.
      */
-    splash: ISplashScreen;
+    splash?: ISplashScreen;
 
     /**
      * The url for local theme loading.
      */
     url: string;
-  }
-
-  /**
-   * An interface for a theme.
-   */
-  export interface ITheme {
-    /**
-     * The display name of the theme.
-     */
-    name: string;
-
-    /**
-     * Whether the theme is light or dark. Downstream authors
-     * of extensions can use this information to customize their
-     * UI depending upon the current theme.
-     */
-    isLight: boolean;
-
-    /**
-     * Load the theme.
-     *
-     * @returns A promise that resolves when the theme has loaded.
-     */
-    load(): Promise<void>;
-
-    /**
-     * Unload the theme.
-     *
-     * @returns A promise that resolves when the theme has unloaded.
-     */
-    unload(): Promise<void>;
   }
 }
 

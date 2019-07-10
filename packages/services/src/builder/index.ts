@@ -8,7 +8,7 @@ import { ServerConnection } from '../serverconnection';
 /**
  * The url for the lab build service.
  */
-const BUILD_SETTINGS_URL = 'lab/api/build';
+const BUILD_SETTINGS_URL = 'api/build';
 
 /**
  * The build API service manager.
@@ -20,6 +20,8 @@ export class BuildManager {
   constructor(options: BuildManager.IOptions = {}) {
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
+    const { baseUrl, appUrl } = this.serverSettings;
+    this._url = URLExt.join(baseUrl, appUrl, BUILD_SETTINGS_URL);
   }
 
   /**
@@ -45,10 +47,8 @@ export class BuildManager {
    * Get whether the application should be built.
    */
   getStatus(): Promise<BuildManager.IStatus> {
-    const base = this.serverSettings.baseUrl;
-    const url = URLExt.join(base, BUILD_SETTINGS_URL);
-    const { serverSettings } = this;
-    const promise = ServerConnection.makeRequest(url, {}, serverSettings);
+    const { _url, serverSettings } = this;
+    const promise = ServerConnection.makeRequest(_url, {}, serverSettings);
 
     return promise
       .then(response => {
@@ -73,20 +73,16 @@ export class BuildManager {
    * Build the application.
    */
   build(): Promise<void> {
-    const base = this.serverSettings.baseUrl;
-    const url = URLExt.join(base, BUILD_SETTINGS_URL);
-    const { serverSettings } = this;
+    const { _url, serverSettings } = this;
     const init = { method: 'POST' };
-    const promise = ServerConnection.makeRequest(url, init, serverSettings);
+    const promise = ServerConnection.makeRequest(_url, init, serverSettings);
 
     return promise.then(response => {
       if (response.status === 400) {
         throw new ServerConnection.ResponseError(response, 'Build aborted');
       }
       if (response.status !== 200) {
-        let message = `Build failed with ${
-          response.status
-        }, please run 'jupyter lab build' on the server for full output`;
+        let message = `Build failed with ${response.status}, please run 'jupyter lab build' on the server for full output`;
         throw new ServerConnection.ResponseError(response, message);
       }
     });
@@ -96,11 +92,9 @@ export class BuildManager {
    * Cancel an active build.
    */
   cancel(): Promise<void> {
-    const base = this.serverSettings.baseUrl;
-    const url = URLExt.join(base, BUILD_SETTINGS_URL);
-    const { serverSettings } = this;
+    const { _url, serverSettings } = this;
     const init = { method: 'DELETE' };
-    const promise = ServerConnection.makeRequest(url, init, serverSettings);
+    const promise = ServerConnection.makeRequest(_url, init, serverSettings);
 
     return promise.then(response => {
       if (response.status !== 204) {
@@ -108,6 +102,8 @@ export class BuildManager {
       }
     });
   }
+
+  private _url = '';
 }
 
 /**

@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
-import { KernelMessage, Kernel } from '@jupyterlab/services/src/kernel';
+import { KernelMessage, Kernel } from '@jupyterlab/services';
 
 import { init } from '../utils';
 
@@ -20,12 +20,14 @@ comm.close("goodbye")
 `;
 
 const RECEIVE = `
-def _recv(msg):
-    data = msg["content"]["data"]
-    if data == "quit":
-         comm.close("goodbye")
-    else:
-         comm.send(data)
+def create_recv(comm):
+  def _recv(msg):
+      data = msg["content"]["data"]
+      if data == "quit":
+          comm.close("goodbye")
+      else:
+          comm.send(data)
+  return _recv
 `;
 
 const SEND = `
@@ -33,13 +35,13 @@ ${RECEIVE}
 from ipykernel.comm import Comm
 comm = Comm(target_name="test", data="hello")
 comm.send(data="hello")
-comm.on_msg(_recv)
+comm.on_msg(create_recv(comm))
 `;
 
 const TARGET = `
 ${RECEIVE}
 def target_func(comm, msg):
-    comm.on_msg(_recv)
+    comm.on_msg(create_recv(comm))
 get_ipython().kernel.comm_manager.register_target("test", target_func)
 `;
 
@@ -122,6 +124,10 @@ describe('jupyter.services - Comm', () => {
         // Ask the kernel for the list of current comms.
         const msg = await kernel.requestCommInfo({});
 
+        if (msg.content.status !== 'ok') {
+          throw new Error('Message error');
+        }
+
         // Test to make sure the comm we just created is listed.
         const comms = msg.content.comms;
         expect(comms[comm.commId].target_name).to.equal('test');
@@ -134,6 +140,9 @@ describe('jupyter.services - Comm', () => {
       it('should allow an optional target', async () => {
         await kernel.requestExecute({ code: SEND }, true).done;
         const msg = await kernel.requestCommInfo({ target: 'test' });
+        if (msg.content.status !== 'ok') {
+          throw new Error('Message error');
+        }
         const comms = msg.content.comms;
         for (const id in comms) {
           expect(comms[id].target_name).to.equal('test');
@@ -218,14 +227,17 @@ describe('jupyter.services - Comm', () => {
           called = true;
         };
         expect(typeof comm.onMsg).to.equal('function');
-        const options: KernelMessage.IOptions = {
+        const msg = KernelMessage.createMessage({
           msgType: 'comm_msg',
           channel: 'iopub',
           username: kernel.username,
-          session: kernel.clientId
-        };
-        const msg = KernelMessage.createMessage(options);
-        comm.onMsg(msg as KernelMessage.ICommMsgMsg);
+          session: kernel.clientId,
+          content: {
+            comm_id: 'abcd',
+            data: {}
+          }
+        });
+        comm.onMsg(msg);
         expect(called).to.equal(true);
       });
 
@@ -248,11 +260,11 @@ describe('jupyter.services - Comm', () => {
         await future.done;
         const encoder = new TextEncoder();
         const data = encoder.encode('hello');
-        future = comm.open({ foo: 'bar' }, { fizz: 'buzz' }, [
+        let future2 = comm.open({ foo: 'bar' }, { fizz: 'buzz' }, [
           data,
           data.buffer
         ]);
-        await future.done;
+        await future2.done;
       });
     });
 

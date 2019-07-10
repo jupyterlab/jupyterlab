@@ -51,10 +51,6 @@
   background-image: var(--jp-icon-build);
 }
 
-.jp-ChatIcon {
-  background-image: var(--jp-icon-chat);
-}
-
 .jp-CircleIcon {
   background-image: var(--jp-icon-kernel-running);
 }
@@ -99,14 +95,6 @@
   background-image: var(--jp-icon-ellipses);
 }
 
-.jp-ExpandLessIcon {
-  background-image: var(--jp-icon-expand-less);
-}
-
-.jp-ExpandMoreIcon {
-  background-image: var(--jp-icon-expand-more);
-}
-
 .jp-ExtensionIcon {
   background-image: var(--jp-icon-extension);
 }
@@ -117,6 +105,10 @@
 
 .jp-FilledCircleIcon {
   background-image: var(--jp-icon-circle);
+}
+
+.jp-FilterListIcon {
+  background-image: var(--jp-icon-filter-list);
 }
 
 .jp-FolderIcon {
@@ -146,6 +138,14 @@
   margin-left: 8px;
   margin-right: 0px;
   padding-right: 0px;
+}
+
+.jp-KernelIcon {
+  background-image: var(--jp-icon-kernel);
+}
+
+.jp-KeyboardIcon {
+  background-image: var(--jp-icon-keyboard);
 }
 
 .jp-LauncherIcon {
@@ -182,11 +182,11 @@
 }
 
 .jp-NotebookIcon {
-  background-image: var(--jp-icon-book);
+  background-image: var(--jp-icon-notebook);
 }
 
-.jp-OpenFolderIcon {
-  background-image: var(--jp-icon-directory);
+.jp-FolderIcon {
+  background-image: var(--jp-icon-folder);
 }
 
 .jp-PaletteIcon {
@@ -211,6 +211,10 @@
 
 .jp-RunIcon {
   background-image: var(--jp-icon-run);
+}
+
+.jp-RunningIcon {
+  background-image: var(--jp-icon-stop-circle);
 }
 
 .jp-SaveIcon {
@@ -249,14 +253,10 @@
   background-image: var(--jp-icon-file-upload);
 }
 
-.jp-YamlIcon {
+.jp-YAMLIcon {
   background-image: var(--jp-icon-yaml);
 }
 
 .jp-VegaIcon {
   background-image: var(--jp-icon-vega);
-}
-
-.jp-QuestionMarkIcon {
-  background-image: var(--jp-icon-question-mark);
 }

@@ -42,6 +42,7 @@ describe('@jupyterlab/notebook', () => {
         kernelPreference: { name: 'ipython' }
       });
       await Promise.all([ipySession.initialize(), session.initialize()]);
+      await Promise.all([ipySession.kernel.ready, session.kernel.ready]);
     });
 
     beforeEach(() => {
@@ -549,6 +550,10 @@ describe('@jupyterlab/notebook', () => {
         widget.select(child);
         widget.activeCell.model.value.text = ERROR_INPUT;
         const result = await NotebookActions.run(widget, ipySession);
+        // Markdown rendering is asynchronous, but the cell
+        // provides no way to hook into that. Sleep here
+        // to make sure it finishes.
+        await sleep(100);
         expect(result).to.equal(false);
         expect(child.rendered).to.equal(true);
         await ipySession.kernel.restart();
@@ -634,6 +639,10 @@ describe('@jupyterlab/notebook', () => {
         cell.rendered = false;
         widget.select(cell);
         const result = await NotebookActions.runAndAdvance(widget, ipySession);
+        // Markdown rendering is asynchronous, but the cell
+        // provides no way to hook into that. Sleep here
+        // to make sure it finishes.
+        await sleep(100);
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
@@ -708,6 +717,10 @@ describe('@jupyterlab/notebook', () => {
         cell.rendered = false;
         widget.select(cell);
         const result = await NotebookActions.runAndInsert(widget, ipySession);
+        // Markdown rendering is asynchronous, but the cell
+        // provides no way to hook into that. Sleep here
+        // to make sure it finishes.
+        await sleep(100);
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
@@ -774,13 +787,17 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         const result = await NotebookActions.runAll(widget, ipySession);
+        // Markdown rendering is asynchronous, but the cell
+        // provides no way to hook into that. Sleep here
+        // to make sure it finishes.
+        await sleep(100);
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         await ipySession.kernel.restart();
       }).timeout(60000); // Allow for slower CI
     });
 
-    describe('#selectAbove(`)', () => {
+    describe('#selectAbove()', () => {
       it('should select the cell above the active cell', () => {
         widget.activeCellIndex = 1;
         NotebookActions.selectAbove(widget);
@@ -805,6 +822,34 @@ describe('@jupyterlab/notebook', () => {
         widget.mode = 'edit';
         NotebookActions.selectAbove(widget);
         expect(widget.mode).to.equal('edit');
+      });
+
+      it('should skip collapsed cells in edit mode', () => {
+        widget.activeCellIndex = 3;
+        widget.mode = 'edit';
+        widget.widgets[1].inputHidden = true;
+        widget.widgets[2].inputHidden = true;
+        widget.widgets[3].inputHidden = false;
+        NotebookActions.selectAbove(widget);
+        expect(widget.activeCellIndex).to.equal(0);
+      });
+
+      it('should not change if in edit mode and no non-collapsed cells above', () => {
+        widget.activeCellIndex = 1;
+        widget.mode = 'edit';
+        widget.widgets[0].inputHidden = true;
+        NotebookActions.selectAbove(widget);
+        expect(widget.activeCellIndex).to.equal(1);
+      });
+
+      it('should not skip collapsed cells and in command mode', () => {
+        widget.activeCellIndex = 3;
+        widget.mode = 'command';
+        widget.widgets[1].inputHidden = true;
+        widget.widgets[2].inputHidden = true;
+        widget.widgets[3].inputHidden = false;
+        NotebookActions.selectAbove(widget);
+        expect(widget.activeCellIndex).to.equal(2);
       });
     });
 
@@ -833,6 +878,34 @@ describe('@jupyterlab/notebook', () => {
         widget.mode = 'edit';
         NotebookActions.selectBelow(widget);
         expect(widget.mode).to.equal('edit');
+      });
+
+      it('should skip collapsed cells in edit mode', () => {
+        widget.activeCellIndex = 0;
+        widget.mode = 'edit';
+        widget.widgets[1].inputHidden = true;
+        widget.widgets[2].inputHidden = true;
+        widget.widgets[3].inputHidden = false;
+        NotebookActions.selectBelow(widget);
+        expect(widget.activeCellIndex).to.equal(3);
+      });
+
+      it('should not change if in edit mode and no non-collapsed cells below', () => {
+        widget.activeCellIndex = widget.widgets.length - 2;
+        widget.mode = 'edit';
+        widget.widgets[widget.widgets.length - 1].inputHidden = true;
+        NotebookActions.selectBelow(widget);
+        expect(widget.activeCellIndex).to.equal(widget.widgets.length - 2);
+      });
+
+      it('should not skip collapsed cells and in command mode', () => {
+        widget.activeCellIndex = 0;
+        widget.mode = 'command';
+        widget.widgets[1].inputHidden = true;
+        widget.widgets[2].inputHidden = true;
+        widget.widgets[3].inputHidden = false;
+        NotebookActions.selectBelow(widget);
+        expect(widget.activeCellIndex).to.equal(1);
       });
     });
 
@@ -1292,71 +1365,6 @@ describe('@jupyterlab/notebook', () => {
         widget.model = null;
         NotebookActions.clearAllOutputs(widget);
         expect(widget.activeCellIndex).to.equal(-1);
-      });
-    });
-
-    describe('#persistViewState()', () => {
-      it('input hidden, output hidden and scrolled', () => {
-        for (const cell of widget.widgets) {
-          cell.inputHidden = true;
-          if (cell instanceof CodeCell) {
-            cell.outputHidden = true;
-            cell.outputsScrolled = true;
-          }
-        }
-        NotebookActions.persistViewState(widget);
-        for (const cell of widget.widgets) {
-          if (cell instanceof CodeCell) {
-            expect(cell.model.metadata.get('collapsed')).to.equal(true);
-            expect(cell.model.metadata.get('scrolled')).to.equal(true);
-            expect(cell.model.metadata.get('jupyter')).to.deep.equal({
-              source_hidden: true,
-              outputs_hidden: true
-            });
-          } else {
-            expect(cell.model.metadata.get('jupyter')).to.deep.equal({
-              source_hidden: true
-            });
-          }
-        }
-      });
-
-      it('input hidden, output hidden and not scrolled', () => {
-        for (const cell of widget.widgets) {
-          cell.inputHidden = false;
-          if (cell instanceof CodeCell) {
-            cell.outputHidden = false;
-            cell.outputsScrolled = false;
-          }
-        }
-        NotebookActions.persistViewState(widget);
-        for (const cell of widget.widgets) {
-          if (cell instanceof CodeCell) {
-            expect(cell.model.metadata.has('collapsed')).to.equal(false);
-            expect(cell.model.metadata.has('scrolled')).to.equal(false);
-          }
-          expect(cell.model.metadata.has('jupyter')).to.equal(false);
-        }
-      });
-
-      it('input hidden, output shown and not scrolled', () => {
-        for (const cell of widget.widgets) {
-          cell.inputHidden = true;
-          if (cell instanceof CodeCell) {
-            cell.outputHidden = false;
-            cell.outputsScrolled = false;
-          }
-        }
-        NotebookActions.persistViewState(widget);
-        for (const cell of widget.widgets) {
-          if (cell instanceof CodeCell) {
-            expect(cell.model.metadata.has('collapsed')).to.equal(false);
-            expect(cell.model.metadata.has('scrolled')).to.equal(false);
-          }
-          expect(cell.model.metadata.get('jupyter')).to.deep.equal({
-            source_hidden: true
-          });
-        }
       });
     });
 

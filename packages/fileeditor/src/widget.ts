@@ -52,13 +52,13 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     this.node.dataset[UNDOER] = 'true';
 
     editor.model.value.text = context.model.toString();
-    context.ready.then(() => {
+    void context.ready.then(() => {
       this._onContextReady();
     });
 
     if (context.model.modelDB.isCollaborative) {
       let modelDB = context.model.modelDB;
-      modelDB.connected.then(() => {
+      void modelDB.connected.then(() => {
         let collaborators = modelDB.collaborators;
         if (!collaborators) {
           return;
@@ -73,10 +73,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
           color: localCollaborator.color
         };
 
-        collaborators.changed.connect(
-          this._onCollaboratorsChanged,
-          this
-        );
+        collaborators.changed.connect(this._onCollaboratorsChanged, this);
         // Trigger an initial onCollaboratorsChanged event.
         this._onCollaboratorsChanged();
       });
@@ -115,10 +112,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     editor.clearHistory();
 
     // Wire signal connections.
-    contextModel.contentChanged.connect(
-      this._onContentChanged,
-      this
-    );
+    contextModel.contentChanged.connect(this._onContentChanged, this);
 
     // Resolve the ready promise.
     this._ready.resolve(undefined);
@@ -178,10 +172,7 @@ export class FileEditor extends Widget {
     this.model = editorWidget.model;
 
     // Listen for changes to the path.
-    context.pathChanged.connect(
-      this._onPathChanged,
-      this
-    );
+    context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged();
 
     let layout = (this.layout = new StackedLayout());

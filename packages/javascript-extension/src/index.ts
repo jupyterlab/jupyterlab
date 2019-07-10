@@ -30,11 +30,18 @@ export class ExperimentalRenderedJavascript extends RenderedJavaScript {
     };
     if (!model.trusted) {
       // If output is not trusted or if arbitrary Javascript execution is not enabled, render an informative error message
-      this.node.innerHTML = `<pre>Are you sure that you want to run arbitrary Javascript within your JupyterLab session?</pre>
-      <button>Run</button>`;
-      this.node.querySelector('button').onclick = event => {
-        this.node.innerHTML = '';
-        renderJavascript();
+      const pre = document.createElement('pre');
+      pre.textContent =
+        'Are you sure that you want to run arbitrary Javascript within your JupyterLab session?';
+      const button = document.createElement('button');
+      button.textContent = 'Run';
+
+      this.node.appendChild(pre);
+      this.node.appendChild(button);
+
+      button.onclick = event => {
+        this.node.textContent = '';
+        void renderJavascript();
       };
       return Promise.resolve();
     }

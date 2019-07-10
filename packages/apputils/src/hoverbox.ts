@@ -133,10 +133,10 @@ export namespace HoverBox {
       privilege === 'forceAbove'
         ? false
         : privilege === 'forceBelow'
-          ? true
-          : privilege === 'above'
-            ? spaceAbove < maxHeight && spaceAbove < spaceBelow
-            : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
+        ? true
+        : privilege === 'above'
+        ? spaceAbove < maxHeight && spaceAbove < spaceBelow
+        : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
 
     if (renderBelow) {
       maxHeight = Math.min(spaceBelow - marginTop, maxHeight);

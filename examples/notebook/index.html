@@ -7,7 +7,7 @@
     <script id='jupyter-config-data' type="application/json">
       {{ config_data|tojson }}
     </script>
-    <script src="{{base_url}}build/bundle.js"></script>
+    <script src="{{config_data['frontendUrl']}}bundle.js"></script>
 
     <script type="text/javascript">
       /* Remove token from URL. */
@@ -19,6 +19,6 @@
         }
       })();
     </script>
-  
+
   </body>
 </html>

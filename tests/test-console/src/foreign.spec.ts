@@ -34,7 +34,11 @@ class TestParent extends Panel implements ForeignHandler.IReceiver {
   createCodeCell(): CodeCell {
     const contentFactory = NBTestUtils.createCodeCellFactory();
     const model = new CodeCellModel({});
-    const cell = new CodeCell({ model, rendermime, contentFactory });
+    const cell = new CodeCell({
+      model,
+      rendermime,
+      contentFactory
+    }).initializeState();
     return cell;
   }
 
@@ -105,6 +109,7 @@ describe('@jupyterlab/console', () => {
       [local, foreign] = await Promise.all(sessions);
       session = await createClientSession({ path: local.path });
       await (session as ClientSession).initialize();
+      await session.kernel.ready;
     });
 
     beforeEach(() => {
@@ -208,7 +213,7 @@ describe('@jupyterlab/console', () => {
           promise.resolve(void 0);
         });
         await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
-        await promise;
+        await promise.promise;
         expect(called).to.equal(true);
       });
 
@@ -225,7 +230,7 @@ describe('@jupyterlab/console', () => {
           promise.resolve(void 0);
         });
         await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
-        await promise;
+        await promise.promise;
         expect(called).to.equal(true);
       });
 
@@ -244,7 +249,7 @@ describe('@jupyterlab/console', () => {
           }
         });
         await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
-        await promise;
+        await promise.promise;
         expect(called).to.equal(true);
       });
     });

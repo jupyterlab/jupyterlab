@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { URLExt } from '@jupyterlab/coreutils';
+import { DataConnector, URLExt } from '@jupyterlab/coreutils';
 
 import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
@@ -15,11 +15,12 @@ const SERVICE_WORKSPACES_URL = 'api/workspaces';
 /**
  * The workspaces API service manager.
  */
-export class WorkspaceManager {
+export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
   /**
    * Create a new workspace manager.
    */
   constructor(options: WorkspaceManager.IOptions = {}) {
+    super();
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
   }
@@ -38,9 +39,9 @@ export class WorkspaceManager {
    */
   async fetch(id: string): Promise<Workspace.IWorkspace> {
     const { serverSettings } = this;
-    const { baseUrl, pageUrl } = serverSettings;
+    const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
-    const base = baseUrl + pageUrl;
+    const base = baseUrl + appUrl;
     const url = Private.url(base, id);
     const response = await makeRequest(url, {}, serverSettings);
 
@@ -56,11 +57,11 @@ export class WorkspaceManager {
    *
    * @returns A promise that resolves if successful.
    */
-  async list(): Promise<string[]> {
+  async list(): Promise<{ ids: string[]; values: Workspace.IWorkspace[] }> {
     const { serverSettings } = this;
-    const { baseUrl, pageUrl } = serverSettings;
+    const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
-    const base = baseUrl + pageUrl;
+    const base = baseUrl + appUrl;
     const url = Private.url(base, '');
     const response = await makeRequest(url, {}, serverSettings);
 
@@ -82,9 +83,9 @@ export class WorkspaceManager {
    */
   async remove(id: string): Promise<void> {
     const { serverSettings } = this;
-    const { baseUrl, pageUrl } = serverSettings;
+    const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
-    const base = baseUrl + pageUrl;
+    const base = baseUrl + appUrl;
     const url = Private.url(base, id);
     const init = { method: 'DELETE' };
     const response = await makeRequest(url, init, serverSettings);
@@ -105,9 +106,9 @@ export class WorkspaceManager {
    */
   async save(id: string, workspace: Workspace.IWorkspace): Promise<void> {
     const { serverSettings } = this;
-    const { baseUrl, pageUrl } = serverSettings;
+    const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
-    const base = baseUrl + pageUrl;
+    const base = baseUrl + appUrl;
     const url = Private.url(base, id);
     const init = { body: JSON.stringify(workspace), method: 'PUT' };
     const response = await makeRequest(url, init, serverSettings);

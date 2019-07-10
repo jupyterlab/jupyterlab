@@ -1,10 +1,14 @@
 {
   "name": "@jupyterlab/statusbar-extension",
-  "version": "0.5.0",
+  "version": "1.0.1",
   "description": "JupyterLab - Statusbar Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter, Richa Gadgil, Takahiro Shimokobe, Declan Kelly",
@@ -12,18 +16,17 @@
     "lib/**/*.d.ts",
     "lib/**/*.js.map",
     "lib/**/*.js",
-    "style/*.css",
-    "style/images/*.svg",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
     "schema/*.json"
+  ],
+  "sideEffects": [
+    "style/**/*"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc -b",
@@ -33,22 +36,24 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.19.1",
-    "@jupyterlab/apputils": "^0.19.1",
-    "@jupyterlab/cells": "^0.19.1",
-    "@jupyterlab/console": "^0.19.1",
-    "@jupyterlab/docregistry": "^0.19.1",
-    "@jupyterlab/fileeditor": "^0.19.1",
-    "@jupyterlab/notebook": "^0.19.2",
-    "@jupyterlab/statusbar": "^0.7.1",
-    "@phosphor/widgets": "^1.6.0"
+    "@jupyterlab/application": "^1.0.1",
+    "@jupyterlab/apputils": "^1.0.1",
+    "@jupyterlab/cells": "^1.0.1",
+    "@jupyterlab/console": "^1.0.1",
+    "@jupyterlab/coreutils": "^3.0.0",
+    "@jupyterlab/docregistry": "^1.0.1",
+    "@jupyterlab/fileeditor": "^1.0.1",
+    "@jupyterlab/mainmenu": "^1.0.1",
+    "@jupyterlab/notebook": "^1.0.1",
+    "@jupyterlab/statusbar": "^1.0.1",
+    "@phosphor/widgets": "^1.8.0"
   },
   "devDependencies": {
-    "@types/react": "~16.4.13",
-    "@types/react-dom": "~16.0.7",
+    "@types/react": "~16.8.18",
+    "@types/react-dom": "^16.8.4",
     "rimraf": "~2.6.2",
-    "typedoc": "~0.12.0",
-    "typescript": "~3.1.1"
+    "typedoc": "^0.14.2",
+    "typescript": "~3.5.1"
   },
   "publishConfig": {
     "access": "public"

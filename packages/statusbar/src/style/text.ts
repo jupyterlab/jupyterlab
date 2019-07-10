@@ -7,11 +7,10 @@ import { style } from 'typestyle/lib';
 
 export const baseText: NestedCSSProperties = {
   fontSize: vars.fontSize,
-  fontFamily:
-    '"HelveticaNeue-Regular", "Helvetica Neue Regular", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif'
+  fontFamily: vars.fontFamily
 };
 
 export const textItem = style(baseText, {
-  lineHeight: '26px',
+  lineHeight: '24px',
   color: vars.textColor
 });

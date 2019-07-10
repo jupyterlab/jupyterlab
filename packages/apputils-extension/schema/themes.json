@@ -9,6 +9,12 @@
       "title": "Selected Theme",
       "description": "Application-level visual styling theme",
       "default": "JupyterLab Light"
+    },
+    "theme-scrollbars": {
+      "type": "boolean",
+      "title": "Scrollbar Theming",
+      "description": "Enable/disable styling of the application scrollbars",
+      "default": false
     }
   },
   "type": "object"

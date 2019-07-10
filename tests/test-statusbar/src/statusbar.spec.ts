@@ -7,7 +7,7 @@ import { Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
 
-import { StatusBar } from '@jupyterlab/statusbar/src';
+import { StatusBar } from '@jupyterlab/statusbar';
 
 describe('@jupyterlab/statusbar', () => {
   describe('StatusBar', () => {

@@ -9,67 +9,67 @@ import { DSVModel } from '@jupyterlab/csvviewer';
 const CSV_TEST_FILES = [
   [
     'comma_in_quotes',
-    require('csv-spectrum/csvs/comma_in_quotes.csv'),
+    require('csv-spectrum/csvs/comma_in_quotes.csv').default,
     require('csv-spectrum/json/comma_in_quotes.json')
   ],
 
   [
     'empty',
-    require('csv-spectrum/csvs/empty.csv'),
+    require('csv-spectrum/csvs/empty.csv').default,
     require('csv-spectrum/json/empty.json')
   ],
 
   [
     'empty_crlf',
-    require('csv-spectrum/csvs/empty_crlf.csv'),
+    require('csv-spectrum/csvs/empty_crlf.csv').default,
     require('csv-spectrum/json/empty_crlf.json')
   ],
 
   [
     'escaped_quotes',
-    require('csv-spectrum/csvs/escaped_quotes.csv'),
+    require('csv-spectrum/csvs/escaped_quotes.csv').default,
     require('csv-spectrum/json/escaped_quotes.json')
   ],
 
   [
     'json',
-    require('csv-spectrum/csvs/json.csv'),
+    require('csv-spectrum/csvs/json.csv').default,
     require('csv-spectrum/json/json.json')
   ],
 
   [
     'newlines',
-    require('csv-spectrum/csvs/newlines.csv'),
+    require('csv-spectrum/csvs/newlines.csv').default,
     require('csv-spectrum/json/newlines.json')
   ],
 
   [
     'newlines_crlf',
-    require('csv-spectrum/csvs/newlines_crlf.csv'),
+    require('csv-spectrum/csvs/newlines_crlf.csv').default,
     require('csv-spectrum/json/newlines_crlf.json')
   ],
 
   [
     'quotes_and_newlines',
-    require('csv-spectrum/csvs/quotes_and_newlines.csv'),
+    require('csv-spectrum/csvs/quotes_and_newlines.csv').default,
     require('csv-spectrum/json/quotes_and_newlines.json')
   ],
 
   [
     'simple',
-    require('csv-spectrum/csvs/simple.csv'),
+    require('csv-spectrum/csvs/simple.csv').default,
     require('csv-spectrum/json/simple.json')
   ],
 
   [
     'simple_crlf',
-    require('csv-spectrum/csvs/simple_crlf.csv'),
+    require('csv-spectrum/csvs/simple_crlf.csv').default,
     require('csv-spectrum/json/simple_crlf.json')
   ],
 
   [
     'utf8',
-    require('csv-spectrum/csvs/utf8.csv'),
+    require('csv-spectrum/csvs/utf8.csv').default,
     require('csv-spectrum/json/utf8.json')
   ]
 ];
