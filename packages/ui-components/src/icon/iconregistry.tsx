@@ -41,9 +41,6 @@ export class IconRegistry implements IIconRegistry {
   }
 
   contains(name: string): boolean {
-    // // we may have been handed multiple class names. Just check the first
-    // name = name.split(/\s+/)[0];
-
     return name in this._svg || name in this._classNameToName;
   }
 
@@ -51,7 +48,7 @@ export class IconRegistry implements IIconRegistry {
    * Get the icon as an HTMLElement of tag <svg><svg/>
    */
   icon(
-    props: Icon.INodeOptions & { container: HTMLElement }
+    props: Icon.INodeOptions & { container?: HTMLElement }
   ): HTMLElement | null {
     const { name, className, title, container, ...propsStyle } = props;
 

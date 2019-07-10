@@ -5,6 +5,7 @@ import { cssRule, style } from 'typestyle/lib';
 import { NestedCSSProperties } from 'typestyle/lib/types';
 
 export type IconKindType =
+  | 'breadCrumb'
   | 'dockPanelBar'
   | 'listing'
   | 'settingsEditor'
@@ -41,6 +42,28 @@ const iconCSSCenter: NestedCSSProperties = {
 /**
  * icon kind specific styles
  */
+const iconCSSBreadCrumb: NestedCSSProperties = {
+  borderRadius: 'var(--jp-border-radius)',
+  cursor: 'pointer',
+  margin: '0px 2px',
+  padding: '0px 2px',
+  height: '16px',
+  width: '16px',
+  verticalAlign: 'middle',
+  $nest: {
+    '&:hover': {
+      backgroundColor: 'var(--jp-layout-color2)'
+    },
+    '&:first-child': {
+      marginLeft: '0px'
+    },
+    ['.jp-mod-dropTarget']: {
+      backgroundColor: 'var(--jp-brand-color2)',
+      opacity: 0.7
+    }
+  }
+};
+
 const iconCSSDockPanelBar: NestedCSSProperties = {
   height: '14px',
   width: '14px'
@@ -69,6 +92,7 @@ const iconCSSStatusBar: NestedCSSProperties = {
 };
 
 const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
+  breadCrumb: iconCSSBreadCrumb,
   dockPanelBar: iconCSSDockPanelBar,
   listing: iconCSSListing,
   settingsEditor: iconCSSSettingsEditor,
@@ -90,13 +114,6 @@ const containerCSSListing: NestedCSSProperties = {
   position: 'relative'
 };
 
-// flex: 0 0 20px;
-// margin-right: 1px;
-// position: relative;
-// width: 20px;
-// height: 20px;
-// display: inline-block;
-// margin-left: 2px;
 const containerCSSSettingsEditor: NestedCSSProperties = {
   display: 'inline-block',
   flex: '0 0 20px',
@@ -112,6 +129,7 @@ const containerCSSSideBar: NestedCSSProperties = {
 };
 
 const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
+  breadCrumb: {},
   dockPanelBar: containerCSSDockPanelBar,
   listing: containerCSSListing,
   settingsEditor: containerCSSSettingsEditor,
