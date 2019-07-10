@@ -5,5 +5,10 @@
     "types": ["webpack-env", "node"],
     "rootDir": "src"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "references": [
+    {
+      "path": "../coreutils"
+    }
+  ]
 }

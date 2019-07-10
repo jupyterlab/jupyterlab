@@ -26,7 +26,7 @@ import {
   Select as BPSelect,
   ISelectProps
 } from '@blueprintjs/select/lib/cjs/components/select/select';
-import { combineClassNames } from './utils';
+import { combineClasses } from './utils';
 
 export { Intent } from '@blueprintjs/core/lib/cjs/common/intent';
 
@@ -44,7 +44,7 @@ type CommonProps<T> = React.DOMAttributes<T>;
 export const Button = (props: IButtonProps & CommonProps<any>) => (
   <BPButton
     {...props}
-    className={combineClassNames(
+    className={combineClasses(
       props.className,
       props.minimal && 'minimal',
       'jp-Button'
@@ -57,7 +57,7 @@ export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
     return (
       <BPInputGroup
         {...props}
-        className={combineClassNames(props.className, 'jp-InputGroup')}
+        className={combineClasses(props.className, 'jp-InputGroup')}
         rightElement={
           <div className="jp-InputGroupAction">
             <BPIcon className={'jp-Icon'} icon={props.rightIcon} />
@@ -69,7 +69,7 @@ export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
   return (
     <BPInputGroup
       {...props}
-      className={combineClassNames(props.className, 'jp-InputGroup')}
+      className={combineClasses(props.className, 'jp-InputGroup')}
     />
   );
 };
@@ -81,13 +81,13 @@ export const Collapse = (props: ICollapseProps & CommonProps<any>) => (
 export const HTMLSelect = (props: IHTMLSelectProps & CommonProps<any>) => (
   <BPHTMLSelect
     {...props}
-    className={combineClassNames(props.className, 'jp-HTMLSelect')}
+    className={combineClasses(props.className, 'jp-HTMLSelect')}
   />
 );
 
 export const Select = (props: ISelectProps<any> & CommonProps<any>) => (
   <BPSelect
     {...props}
-    className={combineClassNames(props.className, 'jp-Select')}
+    className={combineClasses(props.className, 'jp-Select')}
   />
 );

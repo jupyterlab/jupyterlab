@@ -1,6 +1,7 @@
 import { Token } from '@phosphor/coreutils';
 
-import { nameFromPath } from '../utils';
+import { PathExt } from '@jupyterlab/coreutils';
+
 import { IIconStyle } from '../style/icon';
 import React from 'react';
 
@@ -71,7 +72,7 @@ export namespace Icon {
     const excset = new Set(exclude);
 
     return r.keys().reduce((svgs: IModel[], item: string, index: number) => {
-      const name = nameFromPath(item);
+      const name = PathExt.stem(item);
       if (!excset.has(name)) {
         svgs.push({ name: name, svg: r(item).default });
       }

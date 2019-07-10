@@ -1,7 +1,6 @@
 {
   "jupyter.lab.setting-icon-class": "jp-SettingsIcon",
   "jupyter.lab.setting-icon-label": "Status Bar",
-  "jupyter.lab.setting-icon-name": "status-bar",
   "title": "Status Bar",
   "description": "Status Bar settings.",
   "properties": {

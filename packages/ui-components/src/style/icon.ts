@@ -7,6 +7,7 @@ import { NestedCSSProperties } from 'typestyle/lib/types';
 export type IconKindType =
   | 'dockPanelBar'
   | 'listing'
+  | 'settingsEditor'
   | 'sideBar'
   | 'statusBar'
   | 'unset';
@@ -50,6 +51,11 @@ const iconCSSListing: NestedCSSProperties = {
   width: '16px'
 };
 
+const iconCSSSettingsEditor: NestedCSSProperties = {
+  height: '16px',
+  width: '16px'
+};
+
 const iconCSSSideBar: NestedCSSProperties = {
   width: '20px'
 };
@@ -65,6 +71,7 @@ const iconCSSStatusBar: NestedCSSProperties = {
 const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   dockPanelBar: iconCSSDockPanelBar,
   listing: iconCSSListing,
+  settingsEditor: iconCSSSettingsEditor,
   sideBar: iconCSSSideBar,
   statusBar: iconCSSStatusBar,
   unset: {}
@@ -83,6 +90,23 @@ const containerCSSListing: NestedCSSProperties = {
   position: 'relative'
 };
 
+// flex: 0 0 20px;
+// margin-right: 1px;
+// position: relative;
+// width: 20px;
+// height: 20px;
+// display: inline-block;
+// margin-left: 2px;
+const containerCSSSettingsEditor: NestedCSSProperties = {
+  display: 'inline-block',
+  flex: '0 0 20px',
+  marginLeft: '2px',
+  marginRight: '1px',
+  position: 'relative',
+  height: '20px',
+  width: '20px'
+};
+
 const containerCSSSideBar: NestedCSSProperties = {
   transform: 'rotate(90deg)'
 };
@@ -90,6 +114,7 @@ const containerCSSSideBar: NestedCSSProperties = {
 const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   dockPanelBar: containerCSSDockPanelBar,
   listing: containerCSSListing,
+  settingsEditor: containerCSSSettingsEditor,
   sideBar: containerCSSSideBar,
   statusBar: {},
   unset: {}

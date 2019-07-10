@@ -5,7 +5,11 @@
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-import { IconReact } from '@jupyterlab/ui-components';
+import {
+  combineClasses,
+  DefaultIconReact,
+  defaultIconRegistry
+} from '@jupyterlab/ui-components';
 
 import { Message } from '@phosphor/messaging';
 
@@ -196,12 +200,6 @@ namespace Private {
    */
   const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
 
-  /**e
-   * The JupyterLab plugin schema key for IconRegistry name
-   * of the setting editor icon of a plugin
-   */
-  const ICON_NAME_KEY = 'jupyter.lab.setting-icon-name';
-
   /**
    * Check the plugin for a rendering hint's value.
    *
@@ -261,9 +259,12 @@ namespace Private {
       const { id, schema, version } = plugin;
       const itemTitle = `${schema.description}\n${id}\n${version}`;
       const image = getHint(ICON_CLASS_KEY, registry, plugin);
-      const iconClass = `jp-PluginList-icon${image ? ' ' + image : ''}`;
+      const iconClass = combineClasses(
+        image,
+        'jp-PluginList-icon',
+        'jp-MaterialIcon'
+      );
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
-      const iconName = getHint(ICON_NAME_KEY, registry, plugin);
 
       return (
         <li
@@ -272,13 +273,13 @@ namespace Private {
           key={id}
           title={itemTitle}
         >
-          {iconName ? (
-            <IconReact
-              name={iconName}
+          {defaultIconRegistry.contains(image) ? (
+            <DefaultIconReact
+              name={image}
               title={iconTitle}
-              className={iconClass}
+              className={''}
               tag={'span'}
-              kind={'listing'}
+              kind={'settingsEditor'}
             />
           ) : (
             <span className={iconClass} title={iconTitle} />

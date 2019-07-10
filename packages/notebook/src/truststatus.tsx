@@ -6,7 +6,7 @@ import { INotebookModel, Notebook } from '.';
 
 import { Cell } from '@jupyterlab/cells';
 
-import { IconReact } from '@jupyterlab/ui-components';
+import { DefaultIconReact } from '@jupyterlab/ui-components';
 
 import { toArray } from '@phosphor/algorithm';
 
@@ -45,9 +45,11 @@ function NotebookTrustComponent(
   props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> {
   if (props.allCellsTrusted) {
-    return <IconReact name="trusted" top={'2px'} kind={'statusBar'} />;
+    return <DefaultIconReact name="trusted" top={'2px'} kind={'statusBar'} />;
   } else {
-    return <IconReact name="not-trusted" top={'2px'} kind={'statusBar'} />;
+    return (
+      <DefaultIconReact name="not-trusted" top={'2px'} kind={'statusBar'} />
+    );
   }
 }
 

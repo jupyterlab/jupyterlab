@@ -7,7 +7,7 @@ import { VDomRenderer, VDomModel, ReactWidget } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IconReact } from '@jupyterlab/ui-components';
+import { DefaultIconReact } from '@jupyterlab/ui-components';
 
 import { classes } from 'typestyle/lib';
 
@@ -116,7 +116,7 @@ class LineFormComponent extends React.Component<
               }}
             />
             <div className={lineFormButtonDiv}>
-              <IconReact
+              <DefaultIconReact
                 name="line-form"
                 className={lineFormButtonIcon}
                 center={true}

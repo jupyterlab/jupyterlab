@@ -3,3 +3,4 @@
 
 export * from './blueprint';
 export * from './icon';
+export * from './utils';

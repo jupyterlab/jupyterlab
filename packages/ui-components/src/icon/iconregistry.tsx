@@ -4,8 +4,9 @@
 import React from 'react';
 import { classes } from 'typestyle/lib';
 
+import { Text } from '@jupyterlab/coreutils';
+
 import { IIconRegistry, Icon } from './icon';
-import { camelize } from '../utils';
 import { iconStyle, iconStyleFlat } from '../style/icon';
 
 import badSvg from '../../style/icons/bad.svg';
@@ -40,6 +41,9 @@ export class IconRegistry implements IIconRegistry {
   }
 
   contains(name: string): boolean {
+    // // we may have been handed multiple class names. Just check the first
+    // name = name.split(/\s+/)[0];
+
     return name in this._svg || name in this._classNameToName;
   }
 
@@ -142,7 +146,7 @@ export class IconRegistry implements IIconRegistry {
   }
 
   static iconClassName(name: string): string {
-    return 'jp-' + camelize(name, true) + 'Icon';
+    return 'jp-' + Text.camelCase(name, true) + 'Icon';
   }
 
   private _classNameToName: { [key: string]: string } = Object.create(null);
@@ -159,7 +163,7 @@ export const defaultIconRegistry: IconRegistry = new IconRegistry();
 /**
  * Alias for defaultIconRegistry.iconReact that can be used as a React component
  */
-export const IconReact = (
+export const DefaultIconReact = (
   props: Icon.INodeOptions & { tag?: 'div' | 'span' }
 ): React.ReactElement => {
   return defaultIconRegistry.iconReact(props);

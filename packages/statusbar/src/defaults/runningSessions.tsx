@@ -13,7 +13,7 @@ import {
   SessionManager
 } from '@jupyterlab/services';
 
-import { IconReact } from '@jupyterlab/ui-components';
+import { DefaultIconReact } from '@jupyterlab/ui-components';
 
 import { GroupItem, interactiveItem, TextItem } from '..';
 
@@ -36,7 +36,7 @@ function RunningSessionsComponent(
     <GroupItem spacing={HALF_SPACING} onClick={props.handleClick}>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
-        <IconReact
+        <DefaultIconReact
           name={'terminal'}
           left={'1px'}
           top={'3px'}
@@ -45,7 +45,7 @@ function RunningSessionsComponent(
       </GroupItem>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.kernels} />
-        <IconReact name={'kernel'} top={'2px'} kind={'statusBar'} />
+        <DefaultIconReact name={'kernel'} top={'2px'} kind={'statusBar'} />
       </GroupItem>
     </GroupItem>
   );
