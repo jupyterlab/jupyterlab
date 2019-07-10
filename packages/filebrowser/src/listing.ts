@@ -1770,7 +1770,7 @@ export namespace DirListing {
       if (fileType) {
         // add icon as svg node. Can be styled using CSS
         if (
-          this._iconRegistry.icon({
+          !this._iconRegistry.icon({
             name: fileType.iconClass,
             className: ITEM_ICON_CLASS,
             title: fileType.iconLabel,
@@ -1779,9 +1779,7 @@ export namespace DirListing {
             kind: 'listing'
           })
         ) {
-        }
-        // add icon as CSS background image. Can't be styled using CSS
-        else {
+          // add icon as CSS background image. Can't be styled using CSS
           icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
           icon.textContent = fileType.iconLabel || '';
         }
