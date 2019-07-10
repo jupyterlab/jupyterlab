@@ -79,7 +79,8 @@ const containerCSSDockPanelBar: NestedCSSProperties = {
 
 const containerCSSListing: NestedCSSProperties = {
   flex: '0 0 20px',
-  marginRight: '4px'
+  marginRight: '4px',
+  position: 'relative'
 };
 
 const containerCSSSideBar: NestedCSSProperties = {
