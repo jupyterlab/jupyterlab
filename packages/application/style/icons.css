@@ -145,10 +145,6 @@
   width: 20px;
 }
 
-.jp-MarkdownIcon {
-  background-image: var(--jp-icon-markdown);
-}
-
 .jp-MoreHorizIcon {
   background-image: var(--jp-icon-more);
 }
@@ -159,14 +155,6 @@
 
 .jp-PasteIcon {
   background-image: var(--jp-icon-paste);
-}
-
-.jp-PythonIcon {
-  background-image: var(--jp-icon-python);
-}
-
-.jp-RKernelIcon {
-  background-image: var(--jp-icon-r);
 }
 
 .jp-RefreshIcon {
@@ -183,10 +171,6 @@
 
 .jp-SettingsIcon {
   background-image: var(--jp-icon-settings);
-}
-
-.jp-SpreadsheetIcon {
-  background-image: var(--jp-icon-spreadsheet);
 }
 
 .jp-StopIcon {
@@ -209,15 +193,31 @@
   background-image: var(--jp-icon-file-upload);
 }
 
-.jp-YamlIcon {
-  background-image: var(--jp-icon-yaml);
-}
-
 .jp-VegaIcon {
   background-image: var(--jp-icon-vega);
 }
 
-/* disabled/replaced by svg */
+/* disabled/replaced by inline svg */
+
+/*.jp-MarkdownIcon {*/
+/*  background-image: var(--jp-icon-markdown);*/
+/*}*/
+
+/*.jp-PythonIcon {*/
+/*  background-image: var(--jp-icon-python);*/
+/*}*/
+
+/*.jp-RKernelIcon {*/
+/*  background-image: var(--jp-icon-r);*/
+/*}*/
+
+/*.jp-SpreadsheetIcon {*/
+/*  background-image: var(--jp-icon-spreadsheet);*/
+/*}*/
+
+/*.jp-YamlIcon {*/
+/*  background-image: var(--jp-icon-yaml);*/
+/*}*/
 
 /*.jp-FileIcon {*/
 /*  background-image: var(--jp-icon-file);*/
