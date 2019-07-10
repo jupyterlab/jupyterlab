@@ -688,7 +688,7 @@ Shipping Packages
 ^^^^^^^^^^^^^^^^^
 Most extensions are single JavaScript packages, and can be shipped on npmjs.org.
 This makes them discoverable by the JupyterLab extension manager, provided they
-have the ``"extension"`` metadata in their ``package.json``.  If the package also
+have the ``jupyterlab-extension`` keyword  in their ``package.json``.  If the package also
 contains a server extension (Python package), the author has two options.
 The server extension and the JupyterLab extension can be shipped in a single package,
 or they can be shipped separately.
