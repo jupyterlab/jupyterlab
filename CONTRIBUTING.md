@@ -218,26 +218,23 @@ in Chrome by browsing to `chrome://inspect/` and launching the remote session.
 
 ## Performance Testing
 
-Let's say that you make some change to how JupyterLab builds, or add a large dependency and want to see
-what effect that has on the performance of loading the JupyterLab application. You could look at the
-size of bundle produced, but this on only gives you a partial picture of the full effect on a user loading JupyterLab.
+If you are making a change that might affect how long it takes to load JupyterLab in the browser,
+we recommend doing some performance testing using [Lighthouse](https://github.com/GoogleChrome/lighthouse).
+It let's you easily compute a number of metrics, like page load time, for the site.
 
-Instead, you can use the [Lighthouse](https://github.com/GoogleChrome/lighthouse) tool to run a number of analysis
-against JupyterLab and compare your results.
-
-First, build JupyterLab in dev mode:
+To use it, first build JupyterLab in dev mode:
 
 ```bash
 jlpm run build:dev
 ```
 
-Then, startup JupyterLab using this dev build:
+Then, start JupyterLab using the dev build:
 
 ```bash
 jupyter lab --dev
 ```
 
-Now you can tell Lighthouse to run against your local server and show your results:
+Now run Lighthouse against this local server and show the results:
 
 ```bash
 jlpm run lighthouse --view
@@ -248,7 +245,7 @@ jlpm run lighthouse --view
 ### Using throttling
 
 Lighthouse recommends using the system level [`comcast`](https://github.com/tylertreat/comcast) tool to throttle your network connection
-and emulate different scenarios. First, install that tool:
+and emulate different scenarios. To use it, first install that tool using `go`:
 
 ```bash
 go get github.com/tylertreat/comcast
@@ -269,7 +266,7 @@ Then run the lighthouse tests:
 jlpm run lighthouse [...]
 ```
 
-Then you can disable the throttling after you are done:
+Then disable the throttling after you are done:
 
 ```bash
 jlpm run lighthouse:throttling:stop
@@ -277,16 +274,20 @@ jlpm run lighthouse:throttling:stop
 
 ### Comparing results
 
+Performance results are usually only useful in comparison to other results.
+For that reason, we have included a comparison script that can take two
+lighthouse results and show the changes between them.
+
 Let's say we want to compare the results of the production build of JupyterLab with the normal build. The production build minifies all the JavaScript, so should load a bit faster.
 
 First, we build JupyterLab normally, start it up, profile it and save the results:
 
 ```bash
-jupyter lab build:dev
+jlpm build:dev
 jupyter lab --dev
 
 # in new window
-yarn run lighthouse --output json --output-path normal.json
+jlpm run lighthouse --output json --output-path normal.json
 ```
 
 Then rebuild with the production build and retest:
@@ -296,7 +297,7 @@ jupyter lab build:dev:prod
 jupyter lab --dev
 
 # in new window
-yarn run lighthouse --output json --output-path prod.json
+jlpm run lighthouse --output json --output-path prod.json
 ```
 
 Now we can use compare the two outputs:
