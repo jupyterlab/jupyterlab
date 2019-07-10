@@ -17,16 +17,15 @@ interface ICellSearchPair {
   provider: CodeMirrorSearchProvider;
 }
 
-export class NotebookSearchProvider implements ISearchProvider {
+export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
    *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: Widget): any {
-    const notebookPanel = searchTarget as NotebookPanel;
-    const activeCell = notebookPanel.content.activeCell;
+  getInitialQuery(searchTarget: NotebookPanel): any {
+    const activeCell = searchTarget.content.activeCell;
     const selection = (activeCell.editor as CodeMirrorEditor).doc.getSelection();
     // if there are newlines, just return empty string
     return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
@@ -43,9 +42,9 @@ export class NotebookSearchProvider implements ISearchProvider {
    */
   async startQuery(
     query: RegExp,
-    searchTarget: Widget
+    searchTarget: NotebookPanel
   ): Promise<ISearchMatch[]> {
-    this._searchTarget = searchTarget as NotebookPanel;
+    this._searchTarget = searchTarget;
     const cells = this._searchTarget.content.widgets;
 
     this._query = query;
@@ -241,7 +240,7 @@ export class NotebookSearchProvider implements ISearchProvider {
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
-  static canSearchOn(domain: any): boolean {
+  static canSearchOn(domain: Widget): domain is NotebookPanel {
     // check to see if the CMSearchProvider can search on the
     // first cell, false indicates another editor is present
     return domain instanceof NotebookPanel;

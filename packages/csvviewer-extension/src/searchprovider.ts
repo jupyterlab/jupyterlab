@@ -2,15 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 import { ISearchProvider, ISearchMatch } from '@jupyterlab/documentsearch';
 import { CSVViewer } from '@jupyterlab/csvviewer';
-import { IDocumentWidget, DocumentWidget } from '@jupyterlab/docregistry';
+import { DocumentWidget } from '@jupyterlab/docregistry';
 import { Signal, ISignal } from '@phosphor/signaling';
+import { Widget } from '@phosphor/widgets';
 
-export class CSVSearchProvider implements ISearchProvider {
+// The type for which canSearchFor returns true
+export type CSVDocumentWidget = DocumentWidget<CSVViewer>;
+
+export class CSVSearchProvider implements ISearchProvider<CSVDocumentWidget> {
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
-  static canSearchOn(domain: any): boolean {
-    // check to see if the CMSearchProvider can search on the
+  static canSearchOn(domain: Widget): domain is CSVDocumentWidget {
+    // check to see if the CSVSearchProvider can search on the
     // first cell, false indicates another editor is present
     return (
       domain instanceof DocumentWidget && domain.content instanceof CSVViewer
@@ -23,7 +27,7 @@ export class CSVSearchProvider implements ISearchProvider {
    *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: IDocumentWidget<CSVViewer>): any {
+  getInitialQuery(searchTarget: CSVDocumentWidget): any {
     // CSV Viewer does not support selection
     return null;
   }
@@ -39,7 +43,7 @@ export class CSVSearchProvider implements ISearchProvider {
    */
   async startQuery(
     query: RegExp,
-    searchTarget: IDocumentWidget<CSVViewer>
+    searchTarget: CSVDocumentWidget
   ): Promise<ISearchMatch[]> {
     this._target = searchTarget;
     this._query = query;
@@ -132,7 +136,7 @@ export class CSVSearchProvider implements ISearchProvider {
    */
   readonly isReadOnly = true;
 
-  private _target: IDocumentWidget<CSVViewer>;
+  private _target: CSVDocumentWidget;
   private _query: RegExp;
   private _changed = new Signal<this, void>(this);
 }
