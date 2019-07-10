@@ -82,8 +82,8 @@ export namespace Icon {
   // create the array of default icon models
   let icons: IModel[];
   try {
+    // require.context is supplied by Webpack, and doesn't play nice with jest
     icons = importSvgs(
-      // require.context is supplied by Webpack, and doesn't play nice with jest
       require.context('raw-loader!../../style/icons', true, /\.svg$/),
       ['bad', 'blank']
     );

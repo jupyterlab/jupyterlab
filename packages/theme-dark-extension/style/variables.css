@@ -223,6 +223,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-brand-color1: var(--md-blue-500);
   --jp-brand-color2: var(--md-blue-300);
   --jp-brand-color3: var(--md-blue-100);
+  --jp-brand-color4: var(--md-blue-50);
 
   --jp-accent-color0: var(--md-green-700);
   --jp-accent-color1: var(--md-green-500);

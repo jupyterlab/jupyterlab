@@ -6,29 +6,35 @@
 /* CSS for generic svg icons */
 /* recolor the primary elements of an icon */
 .jp-icon0[fill] {
-  fill: var(--jp-ui-font-color0);
+  fill: var(--jp-inverse-layout-color0);
 }
 .jp-icon1[fill] {
-  fill: var(--jp-ui-font-color1);
+  fill: var(--jp-inverse-layout-color1);
 }
 .jp-icon2[fill] {
-  fill: var(--jp-ui-font-color2);
+  fill: var(--jp-inverse-layout-color2);
 }
 .jp-icon3[fill] {
-  fill: var(--jp-ui-font-color3);
+  fill: var(--jp-inverse-layout-color3);
+}
+.jp-icon4[fill] {
+  fill: var(--jp-inverse-layout-color4);
 }
 
 .jp-icon0[stroke] {
-  stroke: var(--jp-ui-font-color0);
+  stroke: var(--jp-inverse-layout-color0);
 }
 .jp-icon1[stroke] {
-  stroke: var(--jp-ui-font-color1);
+  stroke: var(--jp-inverse-layout-color1);
 }
 .jp-icon2[stroke] {
-  stroke: var(--jp-ui-font-color2);
+  stroke: var(--jp-inverse-layout-color2);
 }
 .jp-icon3[stroke] {
-  stroke: var(--jp-ui-font-color3);
+  stroke: var(--jp-inverse-layout-color3);
+}
+.jp-icon4[stroke] {
+  stroke: var(--jp-inverse-layout-color4);
 }
 
 /* recolor the accent elements of an icon */
@@ -64,7 +70,7 @@
   stroke: var(--jp-layout-color4);
 }
 
-/* misc icons colors taken from the theme stylesheets */
+/* brand icon colors. Same for light and dark */
 .jp-icon-brand0[fill] {
   fill: var(--jp-brand-color0);
 }
@@ -76,6 +82,9 @@
 }
 .jp-icon-brand3[fill] {
   fill: var(--jp-brand-color3);
+}
+.jp-icon-brand4[fill] {
+  fill: var(--jp-brand-color4);
 }
 
 .jp-icon-brand0[stroke] {
@@ -90,13 +99,35 @@
 .jp-icon-brand3[stroke] {
   stroke: var(--jp-brand-color3);
 }
+.jp-icon-brand4[stroke] {
+  stroke: var(--jp-brand-color4);
+}
 
+/* warn icon colors. Same for light and dark */
 .jp-icon-warn0[fill] {
   fill: var(--jp-warn-color0);
+}
+.jp-icon-warn1[fill] {
+  fill: var(--jp-warn-color1);
+}
+.jp-icon-warn2[fill] {
+  fill: var(--jp-warn-color2);
+}
+.jp-icon-warn3[fill] {
+  fill: var(--jp-warn-color3);
 }
 
 .jp-icon-warn0[stroke] {
   stroke: var(--jp-warn-color0);
+}
+.jp-icon-warn1[stroke] {
+  stroke: var(--jp-warn-color1);
+}
+.jp-icon-warn2[stroke] {
+  stroke: var(--jp-warn-color2);
+}
+.jp-icon-warn3[stroke] {
+  stroke: var(--jp-warn-color3);
 }
 
 /* CSS for specific icons */
