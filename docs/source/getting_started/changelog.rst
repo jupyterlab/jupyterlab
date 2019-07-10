@@ -157,7 +157,8 @@ Extension Development Changes
 * Creating a new services session now requires passing a kernel model instead of a kernel instance (`#6503 <https://github.com/jupyterlab/jupyterlab/pull/6503>`__, `#6142 <https://github.com/jupyterlab/jupyterlab/issues/6142>`__)
 * We upgraded the Webpack raw file loader. The new version of the raw loader exports ES2015 modules, so this may require changes in extensions that import files using the raw loader. For example, if you did ``require('myfile.md')`` to get the content of `myfile.md` as a string, you now should import it using ES2015 `import` syntax, or use `require('myfile.md').default`.
 * Widget factories now can support custom cloning behavior from an optional source widget  (`#6060 <https://github.com/jupyterlab/jupyterlab/pull/6060>`__, `#6044 <https://github.com/jupyterlab/jupyterlab/issues/6044>`__)
-
+* We have renamed the type ``InstanceTracker`` to ``WidgetTracker`` (`#6569 <https://github.com/jupyterlab/jupyterlab/commit/da8e7bda5eebd22319f59e5abbaaa9917872a7e8>`__).
+* In order to add widgets to the main area (e.g. as in the old XKCD extension tutorial), the correct syntax is now ``app.shell.add(widget)`` or ``app.shell.add(widget, 'main')``, see `here <https://github.com/jupyterlab/jupyterlab/blob/da8e7bda5eebd22319f59e5abbaaa9917872a7e8/packages/application/src/shell.ts#L500>`__.
 
 `v0.35.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.35.0>`__
 ---------------------------------------------------------------------------
