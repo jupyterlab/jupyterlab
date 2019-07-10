@@ -55,7 +55,11 @@ export class TabBarSvg<T> extends TabBar<T> {
 
 export namespace TabBarSvg {
   export interface IOptions<T> extends TabBar.IOptions<T> {
-    kind: IconKindType;
+    /**
+     * The kind of icon this tab bar widget should render.
+     * Adds preset styling to the icons.
+     */
+    kind?: IconKindType;
   }
 
   /**
@@ -90,12 +94,9 @@ export class DockPanelSvg extends DockPanel {
    *
    * @param options - The options for initializing the panel.
    */
-  constructor(options: { kind?: IconKindType } & DockPanel.IOptions) {
+  constructor(options: DockPanelSvg.IOptions) {
     if (!options.renderer) {
-      // can't add a constructor to Renderer, so have to set properties here
-      let renderer = new DockPanelSvg.Renderer();
-      renderer._kind = options.kind || renderer._kind;
-      options.renderer = renderer;
+      options.renderer = new DockPanelSvg.Renderer(options.kind);
     }
 
     super(options);
@@ -103,10 +104,23 @@ export class DockPanelSvg extends DockPanel {
 }
 
 export namespace DockPanelSvg {
+  export interface IOptions extends DockPanel.IOptions {
+    /**
+     * The kind of icon this dock panel widget should render.
+     * Adds preset styling to the icons.
+     */
+    kind?: IconKindType;
+  }
+
   /**
    * A modified implementation of the DockPanel Renderer.
    */
   export class Renderer extends DockPanel.Renderer {
+    constructor(kind?: IconKindType) {
+      super();
+      this._kind = kind;
+    }
+
     /**
      * Create a new tab bar (with inline svg icons enabled
      * for use with a dock panel.
@@ -121,6 +135,6 @@ export namespace DockPanelSvg {
       return bar;
     }
 
-    _kind: IconKindType = 'dockPanelBar';
+    _kind: IconKindType;
   }
 }

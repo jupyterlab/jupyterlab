@@ -1768,8 +1768,8 @@ export namespace DirListing {
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       if (fileType) {
-        if (this._iconRegistry.contains(fileType.iconClass)) {
-          // add icon as svg node. Can be styled using CSS
+        // add icon as svg node. Can be styled using CSS
+        if (
           this._iconRegistry.icon({
             name: fileType.iconClass,
             className: ITEM_ICON_CLASS,
@@ -1777,9 +1777,11 @@ export namespace DirListing {
             container: icon,
             center: true,
             kind: 'listing'
-          });
-        } else {
-          // add icon as CSS background image. Can't be styled using CSS
+          })
+        ) {
+        }
+        // add icon as CSS background image. Can't be styled using CSS
+        else {
           icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
           icon.textContent = fileType.iconLabel || '';
         }
