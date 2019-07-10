@@ -1,5 +1,7 @@
 /**
  * Compares two files lighthouse outputs, listing changes between the numeric audits.
+ *
+ * Outputs in Markdown for easy posting in Github.
  */
 import { readFileSync } from 'fs';
 
