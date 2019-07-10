@@ -40,7 +40,7 @@ export class IconRegistry implements IIconRegistry {
   }
 
   contains(name: string): boolean {
-    return name in this._svg;
+    return name in this._svg || name in this._classNameToName;
   }
 
   /**

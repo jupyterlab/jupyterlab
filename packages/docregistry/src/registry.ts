@@ -1120,7 +1120,7 @@ export namespace DocumentRegistry {
     name: 'default',
     extensions: [],
     mimeTypes: [],
-    iconClass: 'jp-MaterialIcon jp-FileIcon',
+    iconClass: 'jp-FileIcon',
     iconLabel: '',
     contentType: 'file',
     fileFormat: 'text'
@@ -1171,7 +1171,7 @@ export namespace DocumentRegistry {
     extensions: ['.ipynb'],
     contentType: 'notebook',
     fileFormat: 'json',
-    iconClass: 'jp-MaterialIcon jp-NotebookIcon'
+    iconClass: 'jp-NotebookIcon'
   };
 
   /**
@@ -1183,7 +1183,7 @@ export namespace DocumentRegistry {
     extensions: [],
     mimeTypes: ['text/directory'],
     contentType: 'directory',
-    iconClass: 'jp-MaterialIcon jp-FolderIcon'
+    iconClass: 'jp-FolderIcon'
   };
 
   /**
@@ -1198,56 +1198,56 @@ export namespace DocumentRegistry {
       displayName: 'Markdown File',
       extensions: ['.md'],
       mimeTypes: ['text/markdown'],
-      iconClass: 'jp-MaterialIcon jp-MarkdownIcon'
+      iconClass: 'jp-MarkdownIcon'
     },
     {
       name: 'python',
       displayName: 'Python File',
       extensions: ['.py'],
       mimeTypes: ['text/x-python'],
-      iconClass: 'jp-MaterialIcon jp-PythonIcon'
+      iconClass: 'jp-PythonIcon'
     },
     {
       name: 'json',
       displayName: 'JSON File',
       extensions: ['.json'],
       mimeTypes: ['application/json'],
-      iconClass: 'jp-MaterialIcon jp-JsonIcon'
+      iconClass: 'jp-JsonIcon'
     },
     {
       name: 'csv',
       displayName: 'CSV File',
       extensions: ['.csv'],
       mimeTypes: ['text/csv'],
-      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+      iconClass: 'jp-SpreadsheetIcon'
     },
     {
       name: 'tsv',
       displayName: 'TSV File',
       extensions: ['.tsv'],
       mimeTypes: ['text/csv'],
-      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+      iconClass: 'jp-SpreadsheetIcon'
     },
     {
       name: 'r',
       displayName: 'R File',
       mimeTypes: ['text/x-rsrc'],
       extensions: ['.r'],
-      iconClass: 'jp-MaterialIcon jp-RKernelIcon'
+      iconClass: 'jp-RKernelIcon'
     },
     {
       name: 'yaml',
       displayName: 'YAML File',
       mimeTypes: ['text/x-yaml', 'text/yaml'],
       extensions: ['.yaml', '.yml'],
-      iconClass: 'jp-MaterialIcon jp-YamlIcon'
+      iconClass: 'jp-YamlIcon'
     },
     {
       name: 'svg',
       displayName: 'Image',
       mimeTypes: ['image/svg+xml'],
       extensions: ['.svg'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconClass: 'jp-ImageIcon',
       fileFormat: 'base64'
     },
     {
@@ -1255,7 +1255,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/tiff'],
       extensions: ['.tif', '.tiff'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconClass: 'jp-ImageIcon',
       fileFormat: 'base64'
     },
     {
@@ -1263,7 +1263,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/jpeg'],
       extensions: ['.jpg', '.jpeg'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconClass: 'jp-ImageIcon',
       fileFormat: 'base64'
     },
     {
@@ -1271,7 +1271,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/gif'],
       extensions: ['.gif'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconClass: 'jp-ImageIcon',
       fileFormat: 'base64'
     },
     {
@@ -1279,7 +1279,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/png'],
       extensions: ['.png'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconClass: 'jp-ImageIcon',
       fileFormat: 'base64'
     },
     {
@@ -1287,7 +1287,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/bmp'],
       extensions: ['.bmp'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconClass: 'jp-ImageIcon',
       fileFormat: 'base64'
     }
   ];

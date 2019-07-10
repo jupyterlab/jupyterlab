@@ -95,10 +95,6 @@
   background-image: var(--jp-icon-ellipses);
 }
 
-.jp-FileIcon {
-  background-image: var(--jp-icon-file);
-}
-
 .jp-FilledCircleIcon {
   background-image: var(--jp-icon-circle);
 }
@@ -115,14 +111,6 @@
   vertical-align: sub;
 }
 
-.jp-ImageIcon {
-  background-image: var(--jp-icon-image);
-}
-
-.jp-JsonIcon {
-  background-image: var(--jp-icon-json);
-}
-
 .jp-JupyterIcon {
   background-image: var(--jp-image-jupyter);
   background-size: 16px;
@@ -130,10 +118,6 @@
   margin-left: 8px;
   margin-right: 0px;
   padding-right: 0px;
-}
-
-.jp-KernelIcon {
-  background-image: var(--jp-icon-kernel);
 }
 
 .jp-KeyboardIcon {
@@ -171,14 +155,6 @@
 
 .jp-NewFolderIcon {
   background-image: var(--jp-icon-new-folder);
-}
-
-.jp-NotebookIcon {
-  background-image: var(--jp-icon-notebook);
-}
-
-.jp-FolderIcon {
-  background-image: var(--jp-icon-folder);
 }
 
 .jp-PasteIcon {
@@ -241,11 +217,31 @@
   background-image: var(--jp-icon-vega);
 }
 
-.jp-QuestionMarkIcon {
-  background-image: var(--jp-icon-question-mark);
-}
-
 /* disabled/replaced by svg */
+
+/*.jp-FileIcon {*/
+/*  background-image: var(--jp-icon-file);*/
+/*}*/
+
+/*.jp-KernelIcon {*/
+/*  background-image: var(--jp-icon-kernel);*/
+/*}*/
+
+/*.jp-ImageIcon {*/
+/*  background-image: var(--jp-icon-image);*/
+/*}*/
+
+/*.jp-JsonIcon {*/
+/*  background-image: var(--jp-icon-json);*/
+/*}*/
+
+/*.jp-NotebookIcon {*/
+/*  background-image: var(--jp-icon-notebook);*/
+/*}*/
+
+/*.jp-FolderIcon {*/
+/*  background-image: var(--jp-icon-folder);*/
+/*}*/
 
 /*.jp-BuildIcon {*/
 /*  background-image: var(--jp-icon-build);*/
