@@ -109,7 +109,6 @@ describe('filebrowser/model', () => {
   describe('BreadCrumbs', () => {
     describe('#constructor()', () => {
       it('should create a new BreadCrumbs instance', () => {
-        debugger;
         const bread = new BreadCrumbs({ model });
         expect(bread).to.be.an.instanceof(BreadCrumbs);
         const items = crumbs.node.querySelectorAll(ITEM_QUERY);
