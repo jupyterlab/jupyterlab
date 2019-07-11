@@ -469,6 +469,8 @@ export namespace Kernel {
      */
     iopubMessage: ISignal<this, KernelMessage.IIOPubMessage>;
 
+    unhandledIOPubMessage: ISignal<this, KernelMessage.IIOPubMessage>;
+
     /**
      * A signal emitted for unhandled non-iopub kernel messages that claimed to
      * be responses for messages we sent using this kernel object.

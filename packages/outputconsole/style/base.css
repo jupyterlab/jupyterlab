@@ -1,0 +1,51 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.lab-output-console-widget {
+  overflow-y: auto;
+}
+
+.lab-output-console-widget .clear-icon {
+  transform: rotate(90deg);
+}
+
+.lab-output-console-line {
+  border-bottom: 1px solid #202020;
+  padding: 2px;
+  font-size: 13px;
+}
+
+.lab-output-console-line .log-count {
+  display: inline-block;
+  width: 30px;
+  padding-right: 3px;
+  color: #6b6b6b;
+  text-align: right;
+  vertical-align: top;
+}
+.lab-output-console-line .log-header {
+  display: inline-block;
+  width: 90px;
+  padding-left: 3px;
+  color: #949494;
+  vertical-align: top;
+}
+.lab-output-console-line .log-time {
+  display: inline-block;
+  width: 100%;
+  color: #949494;
+  vertical-align: top;
+}
+.lab-output-console-line .log-sender {
+  display: inline-block;
+  width: 100%;
+  color: #cc9f58;
+  vertical-align: top;
+}
+.lab-output-console-line .log-content {
+  display: inline-block;
+  color: #eeeeee;
+  width: calc(100% - 135px);
+}

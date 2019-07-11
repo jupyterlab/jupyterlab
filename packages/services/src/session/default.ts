@@ -68,6 +68,10 @@ export class DefaultSession implements Session.ISession {
     return this._iopubMessage;
   }
 
+  get unhandledIOPubMessage(): ISignal<this, KernelMessage.IIOPubMessage> {
+    return this._unhandledIOPubMessage;
+  }
+
   /**
    * A signal emitted for an unhandled kernel message.
    */
@@ -316,6 +320,7 @@ export class DefaultSession implements Session.ISession {
     kernel.statusChanged.connect(this.onKernelStatus, this);
     kernel.unhandledMessage.connect(this.onUnhandledMessage, this);
     kernel.iopubMessage.connect(this.onIOPubMessage, this);
+    kernel.unhandledIOPubMessage.connect(this.onUnhandledIOPubMessage, this);
     kernel.anyMessage.connect(this.onAnyMessage, this);
   }
 
@@ -344,6 +349,14 @@ export class DefaultSession implements Session.ISession {
     msg: KernelMessage.IMessage
   ) {
     this._unhandledMessage.emit(msg);
+  }
+
+  protected onUnhandledIOPubMessage(
+    sender: Kernel.IKernel,
+    msg: KernelMessage.IIOPubMessage
+  ) {
+    (msg.header as any).sourceSession = this.id;
+    this._unhandledIOPubMessage.emit(msg);
   }
 
   /**
@@ -409,6 +422,10 @@ export class DefaultSession implements Session.ISession {
   private _kernelChanged = new Signal<this, Session.IKernelChangedArgs>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
+  private _unhandledIOPubMessage = new Signal<
+    this,
+    KernelMessage.IIOPubMessage
+  >(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);

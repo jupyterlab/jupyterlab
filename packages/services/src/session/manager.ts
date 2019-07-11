@@ -9,7 +9,7 @@ import { JSONExt } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { Kernel } from '../kernel';
+import { Kernel, KernelMessage } from '../kernel';
 
 import { ServerConnection } from '../serverconnection';
 
@@ -173,6 +173,21 @@ export class SessionManager implements Session.IManager {
     await this._pollModels.tick;
   }
 
+  get unhandledIOPubMessage(): ISignal<this, KernelMessage.IIOPubMessage> {
+    return this._unhandledIOPubMessage;
+  }
+
+  protected onUnhandledIOPubMessage(
+    sender: Session.ISession,
+    msg: KernelMessage.IIOPubMessage
+  ) {
+    if ((msg as any).msg_id === this._lastMessageId) {
+      return;
+    }
+    this._lastMessageId = (msg as any).msg_id;
+    this._unhandledIOPubMessage.emit(msg);
+  }
+
   /**
    * Start a new session.  See also [[startNewSession]].
    *
@@ -181,6 +196,7 @@ export class SessionManager implements Session.IManager {
   async startNew(options: Session.IOptions): Promise<Session.ISession> {
     const { serverSettings } = this;
     const session = await Session.startNew({ ...options, serverSettings });
+    session.unhandledIOPubMessage.connect(this.onUnhandledIOPubMessage, this);
     this._onStarted(session);
     return session;
   }
@@ -389,6 +405,11 @@ export class SessionManager implements Session.IManager {
   private _sessions = new Set<Session.ISession>();
   private _specs: Kernel.ISpecModels | null = null;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
+  private _unhandledIOPubMessage = new Signal<
+    this,
+    KernelMessage.IIOPubMessage
+  >(this);
+  private _lastMessageId: string;
 }
 
 /**

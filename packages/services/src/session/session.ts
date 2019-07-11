@@ -48,6 +48,8 @@ export namespace Session {
      */
     iopubMessage: ISignal<this, KernelMessage.IIOPubMessage>;
 
+    unhandledIOPubMessage: ISignal<this, KernelMessage.IIOPubMessage>;
+
     /**
      * A signal emitted for unhandled kernel message.
      */

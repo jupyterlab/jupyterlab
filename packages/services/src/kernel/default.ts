@@ -124,6 +124,10 @@ export class DefaultKernel implements Kernel.IKernel {
     return this._unhandledMessage;
   }
 
+  get unhandledIOPubMessage(): ISignal<this, KernelMessage.IIOPubMessage> {
+    return this._unhandledIOPubMessage;
+  }
+
   /**
    * A signal emitted for any kernel message.
    *
@@ -1248,6 +1252,10 @@ export class DefaultKernel implements Kernel.IKernel {
         console.error(error);
       });
 
+    if (msg.channel === 'iopub') {
+      this._unhandledIOPubMessage.emit(msg as KernelMessage.IIOPubMessage);
+    }
+
     // Emit the message receive signal
     this._anyMessage.emit({ msg, direction: 'recv' });
   };
@@ -1393,6 +1401,10 @@ export class DefaultKernel implements Kernel.IKernel {
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
+  private _unhandledIOPubMessage = new Signal<
+    this,
+    KernelMessage.IIOPubMessage
+  >(this);
   private _displayIdToParentIds = new Map<string, string[]>();
   private _msgIdToDisplayIds = new Map<string, string[]>();
   private _terminated = new Signal<this, void>(this);

@@ -81,6 +81,8 @@
     "@jupyterlab/notebook-extension": "^1.1.0-alpha.1",
     "@jupyterlab/observables": "^2.3.0-alpha.1",
     "@jupyterlab/outputarea": "^1.1.0-alpha.1",
+    "@jupyterlab/outputconsole": "^0.1.0-alpha.1",
+    "@jupyterlab/outputconsole-extension": "^0.1.0-alpha.1",
     "@jupyterlab/pdf-extension": "^1.1.0-alpha.1",
     "@jupyterlab/rendermime": "^1.1.0-alpha.1",
     "@jupyterlab/rendermime-extension": "^1.1.0-alpha.1",

@@ -154,6 +154,12 @@
       "path": "../outputarea"
     },
     {
+      "path": "../outputconsole"
+    },
+    {
+      "path": "../outputconsole-extension"
+    },
+    {
       "path": "../pdf-extension"
     },
     {
