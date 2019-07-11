@@ -118,10 +118,12 @@ class OutputConsoleView extends Widget {
       const logLine = document.createElement('div');
       logLine.className = 'lab-output-console-line';
       logLine.innerHTML = `
-        <div class="log-count">${++this._logCounter})</div>
-        <div class="log-header">
-          <div class="log-time">${logTime}</div>
-          <div class="log-sender">${sender}</div>
+        <div class="log-meta">
+          <div class="log-count-time">
+            <div class="log-count">${++this._logCounter})</div>
+            <div class="log-time">${logTime}</div>
+          </div>
+          <div class="log-sender" title="${sender}">${sender}</div>
         </div>
         <div class="log-content"></div>`;
 
