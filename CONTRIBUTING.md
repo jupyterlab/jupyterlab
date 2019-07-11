@@ -231,7 +231,7 @@ jlpm run build:dev
 Then, start JupyterLab using the dev build:
 
 ```bash
-jupyter lab --dev --NotebookApp.token=''
+jupyter lab --dev --NotebookApp.token=''  --no-browser
 ```
 
 Now run Lighthouse against this local server and show the results:
@@ -284,7 +284,7 @@ First, we build JupyterLab normally, start it up, profile it and save the result
 
 ```bash
 jlpm build:dev
-jupyter lab --dev --NotebookApp.token=''
+jupyter lab --dev --NotebookApp.token='' --no-browser
 
 # in new window
 jlpm run lighthouse --output json --output-path normal.json
@@ -294,7 +294,7 @@ Then rebuild with the production build and retest:
 
 ```bash
 jlpm run build:dev:prod
-jupyter lab --dev --NotebookApp.token=''
+jupyter lab --dev --NotebookApp.token='' --no-browser
 
 # in new window
 jlpm run lighthouse --output json --output-path prod.json
