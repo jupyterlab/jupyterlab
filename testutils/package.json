@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@types/node-fetch": "^2.3.4",
-    "lighthouse": "4.0.0-alpha.2-3.2.1",
+    "lighthouse": "5.1.0",
     "typescript": "~3.5.1"
   }
 }

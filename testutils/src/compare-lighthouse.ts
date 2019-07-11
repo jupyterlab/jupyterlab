@@ -17,7 +17,7 @@ interface IOutput {
       description: string;
       scoreDisplayMode: string;
       displayValue: string;
-      rawValue: number;
+      numericValue: number;
     };
   };
 }
@@ -34,7 +34,9 @@ for (const auditName in first.audits) {
   }
   const secondAudit = second.audits[auditName];
   const percentChange =
-    ((secondAudit.rawValue - firstAudit.rawValue) / firstAudit.rawValue) * 100;
+    ((secondAudit.numericValue - firstAudit.numericValue) /
+      firstAudit.numericValue) *
+    100;
 
   if (isNaN(percentChange)) {
     continue;
