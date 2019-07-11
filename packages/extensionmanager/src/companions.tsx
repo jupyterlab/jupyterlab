@@ -151,14 +151,24 @@ export function presentCompanions(
       </p>
     </div>
   );
+  const hasKernelCompanions = kernelCompanions.length > 0;
+  const hasServerCompanion = !!serverCompanion;
+  let title = '';
+  if (hasKernelCompanions && hasServerCompanion) {
+    title = 'Kernel and Server Companions';
+  } else if (hasKernelCompanions) {
+    title = 'Kernel Companions';
+  } else {
+    title = 'Server Companion';
+  }
   return showDialog({
-    title: 'Kernel companions',
+    title,
     body,
     buttons: [
       Dialog.cancelButton(),
       Dialog.okButton({
         label: 'OK',
-        caption: 'Install the Jupyterlab extension.'
+        caption: 'Install the JupyterLab extension.'
       })
     ]
   }).then(result => {
