@@ -179,11 +179,11 @@
 }
 
 /* CSS for selected tabs in the sidebar tab manager */
-#tab-manager .p-TabBar-tab.jp-mod-current .jp-icon-selectable[fill] {
+#tab-manager .p-TabBar-tab.jp-mod-active .jp-icon-selectable[fill] {
   fill: white;
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-current .jp-icon-selectable-inverse[fill] {
+#tab-manager .p-TabBar-tab.jp-mod-active .jp-icon-selectable-inverse[fill] {
   fill: var(--jp-brand-color1);
 }
 

@@ -4,6 +4,14 @@
 import { cssRule, style } from 'typestyle/lib';
 import { NestedCSSProperties } from 'typestyle/lib/types';
 
+/**
+ * - breadCrumb: The path icons above the filebrowser
+ * - dockPanelBar: The tab icons above the main area
+ * - listing: The icons to the left of the filebrowser listing items
+ * - settingsEditor: The icons to the left of each section of the settings editor
+ * - sideBar: The icons for the sidebar (default to the left of the main window)
+ * - tabManager: The icons for the (vertical) tabManager in the sidebar
+ */
 export type IconKindType =
   | 'breadCrumb'
   | 'dockPanelBar'
@@ -11,6 +19,7 @@ export type IconKindType =
   | 'settingsEditor'
   | 'sideBar'
   | 'statusBar'
+  | 'tabManager'
   | 'unset';
 
 export interface IIconStyle extends NestedCSSProperties {
@@ -91,6 +100,11 @@ const iconCSSStatusBar: NestedCSSProperties = {
   position: 'relative'
 };
 
+const iconCSSTabManager: NestedCSSProperties = {
+  height: '16px',
+  width: '16px'
+};
+
 const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   breadCrumb: iconCSSBreadCrumb,
   dockPanelBar: iconCSSDockPanelBar,
@@ -98,6 +112,7 @@ const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   settingsEditor: iconCSSSettingsEditor,
   sideBar: iconCSSSideBar,
   statusBar: iconCSSStatusBar,
+  tabManager: iconCSSTabManager,
   unset: {}
 };
 
@@ -128,6 +143,11 @@ const containerCSSSideBar: NestedCSSProperties = {
   transform: 'rotate(90deg)'
 };
 
+const containerCSSTabManager: NestedCSSProperties = {
+  marginRight: '2px',
+  position: 'relative'
+};
+
 const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   breadCrumb: {},
   dockPanelBar: containerCSSDockPanelBar,
@@ -135,6 +155,7 @@ const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   settingsEditor: containerCSSSettingsEditor,
   sideBar: containerCSSSideBar,
   statusBar: {},
+  tabManager: containerCSSTabManager,
   unset: {}
 };
 

@@ -26,7 +26,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
   ): void => {
     const { shell } = app;
     const tabs = new TabBarSvg<Widget>({
-      kind: 'listing',
+      kind: 'tabManager',
       orientation: 'vertical'
     });
     const header = document.createElement('header');
