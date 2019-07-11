@@ -21,7 +21,9 @@ import { Widget } from '@phosphor/widgets';
 
 import { simulate } from 'simulate-event';
 
+const HOME_ITEM_CLASS = 'jp-BreadCrumbs-home';
 const ITEM_CLASS = 'jp-BreadCrumbs-item';
+const ITEM_QUERY = `.${HOME_ITEM_CLASS}, .${ITEM_CLASS}`;
 
 class LogCrumbs extends BreadCrumbs {
   methods: string[] = [];
@@ -107,9 +109,10 @@ describe('filebrowser/model', () => {
   describe('BreadCrumbs', () => {
     describe('#constructor()', () => {
       it('should create a new BreadCrumbs instance', () => {
+        debugger;
         const bread = new BreadCrumbs({ model });
         expect(bread).to.be.an.instanceof(BreadCrumbs);
-        const items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+        const items = crumbs.node.querySelectorAll(ITEM_QUERY);
         expect(items.length).to.equal(1);
       });
 
@@ -123,26 +126,26 @@ describe('filebrowser/model', () => {
         it('should switch to the parent directory', async () => {
           Widget.attach(crumbs, document.body);
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
-          let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+          let items = crumbs.node.querySelectorAll(ITEM_QUERY);
           expect(items.length).to.equal(4);
           const promise = signalToPromise(model.pathChanged);
           expect(items[2].textContent).to.equal(second);
           simulate(items[2], 'click');
           await promise;
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
-          items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+          items = crumbs.node.querySelectorAll(ITEM_QUERY);
           expect(items.length).to.equal(3);
         });
 
         it('should switch to the home directory', async () => {
           Widget.attach(crumbs, document.body);
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
-          let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+          let items = crumbs.node.querySelectorAll(ITEM_QUERY);
           const promise = signalToPromise(model.pathChanged);
           simulate(items[0], 'click');
           await promise;
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
-          items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+          items = crumbs.node.querySelectorAll(ITEM_QUERY);
           expect(items.length).to.equal(1);
           expect(model.path).to.equal('');
         });
@@ -150,12 +153,12 @@ describe('filebrowser/model', () => {
         it('should switch to the grandparent directory', async () => {
           Widget.attach(crumbs, document.body);
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
-          let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+          let items = crumbs.node.querySelectorAll(ITEM_QUERY);
           const promise = signalToPromise(model.pathChanged);
           simulate(items[1], 'click');
           await promise;
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
-          items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+          items = crumbs.node.querySelectorAll(ITEM_QUERY);
           expect(items.length).to.equal(2);
           expect(model.path).to.equal(first);
         });
@@ -163,13 +166,13 @@ describe('filebrowser/model', () => {
         it('should refresh the current directory', async () => {
           Widget.attach(crumbs, document.body);
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
-          let items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+          let items = crumbs.node.querySelectorAll(ITEM_QUERY);
           const promise = signalToPromise(model.refreshed);
           expect(items[3].textContent).to.equal(third);
           simulate(items[3], 'click');
           await promise;
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
-          items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+          items = crumbs.node.querySelectorAll(ITEM_QUERY);
           expect(items.length).to.equal(4);
           expect(model.path).to.equal(path);
         });
@@ -209,7 +212,7 @@ describe('filebrowser/model', () => {
         await framePromise();
 
         expect(crumbs.methods).to.contain('onUpdateRequest');
-        const items = crumbs.node.getElementsByClassName(ITEM_CLASS);
+        const items = crumbs.node.querySelectorAll(ITEM_QUERY);
         expect(items.length).to.equal(3);
         model.dispose();
       });
