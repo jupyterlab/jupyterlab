@@ -192,7 +192,6 @@ export class SessionManager implements Session.IManager {
   async startNew(options: Session.IOptions): Promise<Session.ISession> {
     const { serverSettings } = this;
     const session = await Session.startNew({ ...options, serverSettings });
-    session.unhandledIOPubMessage.connect(this.onUnhandledIOPubMessage, this);
     this._onStarted(session);
     return session;
   }
@@ -381,6 +380,7 @@ export class SessionManager implements Session.IManager {
     session.kernelChanged.connect(() => {
       this._onChanged(session.model);
     });
+    session.unhandledIOPubMessage.connect(this.onUnhandledIOPubMessage, this);
   }
 
   /**
