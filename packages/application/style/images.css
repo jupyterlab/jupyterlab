@@ -157,6 +157,36 @@
   stroke: var(--jp-icon-contrast-color3);
 }
 
+/* CSS for selected items in the settings editor */
+#setting-editor .jp-PluginList .jp-mod-selected .jp-icon-selectable[fill] {
+  fill: white;
+}
+
+#setting-editor
+  .jp-PluginList
+  .jp-mod-selected
+  .jp-icon-selectable-inverse[fill] {
+  fill: var(--jp-brand-color1);
+}
+
+/* CSS for selected filebrowser listing items */
+.jp-DirListing-item.jp-mod-selected .jp-icon-selectable[fill] {
+  fill: white;
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-icon-selectable-inverse[fill] {
+  fill: var(--jp-brand-color1);
+}
+
+/* CSS for selected tabs in the sidebar tab manager */
+#tab-manager .p-TabBar-tab.jp-mod-current .jp-icon-selectable[fill] {
+  fill: white;
+}
+
+#tab-manager .p-TabBar-tab.jp-mod-current .jp-icon-selectable-inverse[fill] {
+  fill: var(--jp-brand-color1);
+}
+
 /* CSS for specific icons */
 
 .jp-ImageJupyterLab {
