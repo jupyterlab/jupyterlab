@@ -8,9 +8,11 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
+import { TabBarSvg } from '@jupyterlab/ui-components';
+
 import { each } from '@phosphor/algorithm';
 
-import { TabBar, Widget } from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
 /**
  * The default tab manager extension.
@@ -23,7 +25,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
     restorer: ILayoutRestorer | null
   ): void => {
     const { shell } = app;
-    const tabs = new TabBar<Widget>({ orientation: 'vertical' });
+    const tabs = new TabBarSvg<Widget>({
+      kind: 'listing',
+      orientation: 'vertical'
+    });
     const header = document.createElement('header');
 
     if (restorer) {
