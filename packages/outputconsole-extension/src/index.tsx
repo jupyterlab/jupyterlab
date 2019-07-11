@@ -94,13 +94,11 @@ function activateOutputConsole(
                 ? CONSOLE_ICON_CLASS
                 : undefined;
 
-            outputConsoleWidget.outputConsole.logMessage(
-              {
-                sourceName: session.name,
-                sourceIconClassName: sourceIconClassName
-              },
-              msg
-            );
+            outputConsoleWidget.outputConsole.logMessage({
+              sourceName: session.name,
+              sourceIconClassName: sourceIconClassName,
+              msg: msg
+            });
           });
       }
     );

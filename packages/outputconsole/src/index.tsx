@@ -7,6 +7,8 @@ import { Widget, BoxLayout } from '@phosphor/widgets';
 
 import { UUID, Token } from '@phosphor/coreutils';
 
+import { ISignal, Signal } from '@phosphor/signaling';
+
 import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
 import { nbformat } from '@jupyterlab/coreutils';
@@ -21,32 +23,26 @@ export const IOutputConsole = new Token<IOutputConsole>(
   '@jupyterlab/outputconsole:IOutputConsole'
 );
 
-export interface IOutputLogOptions {
+export interface IOutputLogPayload {
   sourceName?: string;
   sourceIconClassName?: string;
+  msg: KernelMessage.IIOPubMessage;
 }
 
 export interface IOutputConsole {
-  logMessage(
-    options: IOutputLogOptions,
-    msg: KernelMessage.IIOPubMessage
-  ): void;
+  logMessage(payload: IOutputLogPayload): void;
 }
 
 export class OutputConsole implements IOutputConsole {
-  logMessage(options: IOutputLogOptions, msg: KernelMessage.IIOPubMessage) {
-    if (this._onMessageHandler) {
-      this._onMessageHandler(options, msg);
-    } else {
-      console.log(`IOutputConsole: ${msg}`);
-    }
+  logMessage(payload: IOutputLogPayload) {
+    this._onLogMessage.emit(payload);
   }
 
-  onMessage(handler: any) {
-    this._onMessageHandler = handler;
+  get onLogMessage(): ISignal<this, IOutputLogPayload> {
+    return this._onLogMessage;
   }
 
-  private _onMessageHandler: any;
+  private _onLogMessage = new Signal<this, IOutputLogPayload>(this);
 }
 
 export class OutputConsoleWidget extends Widget {
@@ -99,10 +95,10 @@ class OutputConsoleView extends Widget {
 
     this._outputConsole = new OutputConsole();
 
-    this._outputConsole.onMessage(
-      (options: IOutputLogOptions, msg: KernelMessage.IIOPubMessage) => {
-        const output = msg.content as nbformat.IOutput;
-        output.output_type = msg.header.msg_type as nbformat.OutputType;
+    this._outputConsole.onLogMessage.connect(
+      (sender: OutputConsole, payload: IOutputLogPayload) => {
+        const output = payload.msg.content as nbformat.IOutput;
+        output.output_type = payload.msg.header.msg_type as nbformat.OutputType;
 
         const outputView = new OutputArea({
           rendermime: rendermime,
@@ -122,11 +118,11 @@ class OutputConsoleView extends Widget {
             <div class="log-count">${++this._logCounter})</div>
             <div class="log-time">${logTime}</div>
           </div>
-          <div class="log-sender" title="${options.sourceName}">
+          <div class="log-sender" title="${payload.sourceName}">
             <div class="log-sender-icon ${
-              options.sourceIconClassName ? options.sourceIconClassName : ''
+              payload.sourceIconClassName ? payload.sourceIconClassName : ''
             }"></div>
-            ${options.sourceName}
+            ${payload.sourceName}
           </div>
         </div>
         <div class="log-content"></div>`;
