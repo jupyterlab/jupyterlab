@@ -59,7 +59,7 @@
     "integrity": "node buildutils/lib/ensure-repo.js",
     "lighthouse": "lighthouse http://localhost:8888/ --chrome-flags='--headless' --disable-device-emulation --throttling-method=provided --only-categories performance",
     "lighthouse:compare": "node testutils/lib/compare-lighthouse.js",
-    "lighthouse:throttling:start": "comcast --latency=40 --target-bw=30000",
+    "lighthouse:throttling:start": "comcast --latency=40 --target-bw=30000 --packet-loss=0.2%",
     "lighthouse:throttling:stop": "comcast --stop",
     "lint": "jlpm && jlpm run prettier && jlpm run eslint && jlpm run tslint",
     "lint:check": "jlpm run prettier:check && jlpm run eslint:check && jlpm run tslint:check",
