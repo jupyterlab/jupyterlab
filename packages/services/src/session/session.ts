@@ -228,6 +228,30 @@ export namespace Session {
   }
 
   /**
+   * Find a session by kernel clientId.
+   *
+   * @param id - The id of the kernel client of session.
+   *
+   * @param settings - The server settings.
+   *
+   * @returns A promise that resolves with the session model.
+   *
+   * #### Notes
+   * If the session was already started via `startNew`, the existing
+   * Session object's information is used in the fulfillment value.
+   *
+   * Otherwise, we attempt to find to the existing session.
+   * The promise is fulfilled when the session is found,
+   * otherwise the promise is rejected.
+   */
+  export function findByKernelClientId(
+    id: string,
+    settings?: ServerConnection.ISettings
+  ): Promise<Session.IModel> {
+    return DefaultSession.findByKernelClientId(id, settings);
+  }
+
+  /**
    * Find a session by path.
    *
    * @param path - The path of the target session.

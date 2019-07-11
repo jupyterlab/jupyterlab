@@ -355,7 +355,6 @@ export class DefaultSession implements Session.ISession {
     sender: Kernel.IKernel,
     msg: KernelMessage.IIOPubMessage
   ) {
-    (msg.header as any).sourceSession = this.id;
     this._unhandledIOPubMessage.emit(msg);
   }
 
@@ -462,6 +461,16 @@ export namespace DefaultSession {
     settings?: ServerConnection.ISettings
   ): Promise<Session.IModel> {
     return Private.findById(id, settings);
+  }
+
+  /**
+   * Find a session by id.
+   */
+  export function findByKernelClientId(
+    id: string,
+    settings?: ServerConnection.ISettings
+  ): Promise<Session.IModel> {
+    return Private.findByKernelClientId(id, settings);
   }
 
   /**
@@ -585,6 +594,28 @@ namespace Private {
     settings = settings || ServerConnection.makeSettings();
     let running = runningSessions.get(settings.baseUrl) || [];
     let session = find(running, value => value.id === id);
+    if (session) {
+      return Promise.resolve(session.model);
+    }
+
+    return getSessionModel(id, settings).catch(() => {
+      throw new Error(`No running session for id: ${id}`);
+    });
+  }
+
+  /**
+   * Find a session by kernel clientId.
+   */
+  export function findByKernelClientId(
+    id: string,
+    settings?: ServerConnection.ISettings
+  ): Promise<Session.IModel> {
+    settings = settings || ServerConnection.makeSettings();
+    let running = runningSessions.get(settings.baseUrl) || [];
+    let session = find(
+      running,
+      value => value.kernel && value.kernel.clientId === id
+    );
     if (session) {
       return Promise.resolve(session.model);
     }

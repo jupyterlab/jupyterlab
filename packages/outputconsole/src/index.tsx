@@ -15,18 +15,28 @@ import { OutputArea, OutputAreaModel } from '@jupyterlab/outputarea';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
+import { KernelMessage } from '@jupyterlab/services';
+
 export const IOutputConsole = new Token<IOutputConsole>(
   '@jupyterlab/outputconsole:IOutputConsole'
 );
 
+export interface IOutputLogOptions {
+  sourceName?: string;
+  sourceIconClassName?: string;
+}
+
 export interface IOutputConsole {
-  logMessage(sender: string, msg: any): void;
+  logMessage(
+    options: IOutputLogOptions,
+    msg: KernelMessage.IIOPubMessage
+  ): void;
 }
 
 export class OutputConsole implements IOutputConsole {
-  logMessage(sender: string, msg: any) {
+  logMessage(options: IOutputLogOptions, msg: KernelMessage.IIOPubMessage) {
     if (this._onMessageHandler) {
-      this._onMessageHandler(sender, msg);
+      this._onMessageHandler(options, msg);
     } else {
       console.log(`IOutputConsole: ${msg}`);
     }
@@ -89,56 +99,51 @@ class OutputConsoleView extends Widget {
 
     this._outputConsole = new OutputConsole();
 
-    this._outputConsole.onMessage((sender: string, msg: any) => {
-      if (
-        ![
-          'execute_result',
-          'display_data',
-          'stream',
-          'error',
-          'update_display_data'
-        ].includes(msg.header.msg_type)
-      ) {
-        return;
-      }
+    this._outputConsole.onMessage(
+      (options: IOutputLogOptions, msg: KernelMessage.IIOPubMessage) => {
+        const output = msg.content as nbformat.IOutput;
+        output.output_type = msg.header.msg_type as nbformat.OutputType;
 
-      const output = msg.content as nbformat.IOutput;
-      output.output_type = msg.header.msg_type as nbformat.OutputType;
+        const outputView = new OutputArea({
+          rendermime: rendermime,
+          contentFactory: OutputArea.defaultContentFactory,
+          model: new OutputAreaModel()
+        });
 
-      const outputView = new OutputArea({
-        rendermime: rendermime,
-        contentFactory: OutputArea.defaultContentFactory,
-        model: new OutputAreaModel()
-      });
+        outputView.update();
 
-      outputView.update();
-
-      const now = new Date();
-      const logTime = now.toLocaleTimeString();
-      const logLine = document.createElement('div');
-      logLine.className = 'lab-output-console-line';
-      logLine.innerHTML = `
+        const now = new Date();
+        const logTime = now.toLocaleTimeString();
+        const logLine = document.createElement('div');
+        logLine.className = 'lab-output-console-line';
+        logLine.innerHTML = `
         <div class="log-meta">
           <div class="log-count-time">
             <div class="log-count">${++this._logCounter})</div>
             <div class="log-time">${logTime}</div>
           </div>
-          <div class="log-sender" title="${sender}">${sender}</div>
+          <div class="log-sender" title="${options.sourceName}">
+            <div class="log-sender-icon ${
+              options.sourceIconClassName ? options.sourceIconClassName : ''
+            }"></div>
+            ${options.sourceName}
+          </div>
         </div>
         <div class="log-content"></div>`;
 
-      this.node.appendChild(logLine);
+        this.node.appendChild(logLine);
 
-      logLine.querySelector('.log-content').appendChild(outputView.node);
+        logLine.querySelector('.log-content').appendChild(outputView.node);
 
-      outputView.model.add(output);
+        outputView.model.add(output);
 
-      this.node.scrollTo({
-        left: 0,
-        top: this.node.scrollHeight,
-        behavior: 'smooth'
-      });
-    });
+        this.node.scrollTo({
+          left: 0,
+          top: this.node.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    );
   }
 
   get outputConsole(): IOutputConsole {

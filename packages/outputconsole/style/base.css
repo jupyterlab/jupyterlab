@@ -38,6 +38,12 @@
   color: var(--jp-ui-font-color2);
   vertical-align: top;
 }
+.lab-output-console-line .log-sender-icon {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  vertical-align: middle;
+}
 .lab-output-console-line .log-sender {
   display: inline-block;
   box-sizing: border-box;

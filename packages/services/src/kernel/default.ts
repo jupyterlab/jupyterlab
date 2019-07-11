@@ -1252,9 +1252,7 @@ export class DefaultKernel implements Kernel.IKernel {
         console.error(error);
       });
 
-    if (msg.channel === 'iopub') {
-      this._unhandledIOPubMessage.emit(msg as KernelMessage.IIOPubMessage);
-    }
+    this._unhandledIOPubMessage.emit(msg as KernelMessage.IIOPubMessage);
 
     // Emit the message receive signal
     this._anyMessage.emit({ msg, direction: 'recv' });

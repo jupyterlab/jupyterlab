@@ -181,10 +181,6 @@ export class SessionManager implements Session.IManager {
     sender: Session.ISession,
     msg: KernelMessage.IIOPubMessage
   ) {
-    if ((msg as any).msg_id === this._lastMessageId) {
-      return;
-    }
-    this._lastMessageId = (msg as any).msg_id;
     this._unhandledIOPubMessage.emit(msg);
   }
 
@@ -229,6 +225,13 @@ export class SessionManager implements Session.IManager {
    */
   findById(id: string): Promise<Session.IModel> {
     return Session.findById(id, this.serverSettings);
+  }
+
+  /**
+   * Find a session by kernel clientId.
+   */
+  findByKernelClientId(id: string): Promise<Session.IModel> {
+    return Session.findByKernelClientId(id, this.serverSettings);
   }
 
   /**
@@ -409,7 +412,6 @@ export class SessionManager implements Session.IManager {
     this,
     KernelMessage.IIOPubMessage
   >(this);
-  private _lastMessageId: string;
 }
 
 /**

@@ -24,6 +24,9 @@ const outputConsolePlugin: JupyterFrontEndPlugin<IOutputConsole> = {
   autoStart: true
 };
 
+const NOTEBOOK_ICON_CLASS = 'jp-NotebookIcon';
+const CONSOLE_ICON_CLASS = 'jp-CodeConsoleIcon';
+
 function activateOutputConsole(
   app: JupyterFrontEnd,
   mainMenu: IMainMenu,
@@ -40,18 +43,64 @@ function activateOutputConsole(
     app.shell.activateById(outputConsoleWidget.id);
   };
 
+  let lastKernelSession = '';
+  let lastMsg: KernelMessage.IIOPubMessage = null;
+
+  const messageCanBeRendered = (msg: KernelMessage.IMessage) => {
+    return (
+      msg.channel === 'iopub' &&
+      [
+        'execute_result',
+        'display_data',
+        'stream',
+        'error',
+        'update_display_data'
+      ].includes(msg.header.msg_type)
+    );
+  };
+
+  const isSameMessage = (msg: KernelMessage.IMessage) => {
+    return (
+      lastMsg &&
+      msg.header.msg_type === lastMsg.header.msg_type &&
+      msg.header.msg_id === lastMsg.header.msg_id &&
+      lastKernelSession === msg.header.session
+    );
+  };
+
   app.started.then(() => {
     app.serviceManager.unhandledSessionIOPubMessage.connect(
-      (sender: SessionManager, msg: KernelMessage.IIOPubMessage) => {
-        sender
-          .findById((msg.header as any).sourceSession)
+      (sessionManager: SessionManager, msg: KernelMessage.IIOPubMessage) => {
+        if (!messageCanBeRendered(msg) || isSameMessage(msg)) {
+          return;
+        }
+
+        lastMsg = msg;
+        lastKernelSession = msg.header.session;
+
+        sessionManager
+          .findByKernelClientId(
+            (msg.parent_header as KernelMessage.IHeader).session
+          )
           .then((session: Session.IModel) => {
-            console.log('SESSION', session.name);
             if (!outputConsoleWidget.isAttached) {
               addWidgetToMainArea();
             }
 
-            outputConsoleWidget.outputConsole.logMessage(session.name, msg);
+            const sourceIconClassName =
+              session.type === 'notebook'
+                ? NOTEBOOK_ICON_CLASS
+                : session.type === 'console'
+                ? CONSOLE_ICON_CLASS
+                : undefined;
+
+            outputConsoleWidget.outputConsole.logMessage(
+              {
+                sourceName: session.name,
+                sourceIconClassName: sourceIconClassName
+              },
+              msg
+            );
           });
       }
     );
