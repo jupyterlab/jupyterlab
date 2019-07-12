@@ -376,8 +376,6 @@ describe('docregistry/registry', () => {
 
     describe('#setDefaultWidgetFactory()', () => {
       it('should override the default widget factory for a file type', () => {
-        const factory = createFactory();
-        registry.addWidgetFactory(factory);
         const mdFactory = new WidgetFactory({
           name: 'markdown',
           fileTypes: ['markdown', 'foobar'],
@@ -423,6 +421,20 @@ describe('docregistry/registry', () => {
         expect(() => {
           registry.setDefaultWidgetFactory('foobar', 'markdown');
         }).to.throw(/cannot view/);
+      });
+
+      it('should revert to the default widget factory if the override is removed', () => {
+        const factory = createFactory();
+        registry.addWidgetFactory(factory);
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown', 'foobar'],
+          defaultFor: []
+        });
+        const disposable = registry.addWidgetFactory(mdFactory);
+        registry.setDefaultWidgetFactory('foobar', 'markdown');
+        disposable.dispose();
+        expect(registry.defaultWidgetFactory('a.foo.bar')).to.equal(factory);
       });
     });
 

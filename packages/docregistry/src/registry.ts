@@ -171,6 +171,11 @@ export class DocumentRegistry implements IDisposable {
           delete this._widgetFactoriesForFileType[ext];
         }
       }
+      for (let ext of Object.keys(this._defaultWidgetFactoryOverrides)) {
+        if (this._defaultWidgetFactoryOverrides[ext] === name) {
+          delete this._defaultWidgetFactoryOverrides[ext];
+        }
+      }
       this._changed.emit({
         type: 'widgetFactory',
         name,
