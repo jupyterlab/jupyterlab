@@ -6,7 +6,7 @@ import { classes } from 'typestyle/lib';
 
 import { Text } from '@jupyterlab/coreutils';
 
-import { IIconRegistry, Icon } from './icon';
+import { IIconRegistry, Icon } from './interfaces';
 import { IconImports } from './iconimports';
 import { iconStyle, iconStyleFlat } from '../style/icon';
 

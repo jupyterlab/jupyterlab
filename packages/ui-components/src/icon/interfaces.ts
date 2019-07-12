@@ -1,7 +1,5 @@
 import { Token } from '@phosphor/coreutils';
 
-// import { PathExt } from '@jupyterlab/coreutils';
-
 import { IIconStyle } from '../style/icon';
 import React from 'react';
 
