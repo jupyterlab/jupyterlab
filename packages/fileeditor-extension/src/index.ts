@@ -54,7 +54,7 @@ const EDITOR_ICON_CLASS = 'jp-MaterialIcon jp-TextEditorIcon';
 /**
  * The class name for the text editor icon from the default theme.
  */
-const MARKDOWN_ICON_CLASS = 'jp-MaterialIcon jp-MarkdownIcon';
+const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
 
 /**
  * The name of the factory that creates editor widgets.

@@ -8,6 +8,11 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  DefaultIconReact,
+  defaultIconRegistry
+} from '@jupyterlab/ui-components';
+
+import {
   ArrayExt,
   ArrayIterator,
   IIterator,
@@ -384,6 +389,7 @@ function Card(
   };
 
   // Return the VDOM element.
+  const iconClass = kernel ? '' : commands.iconClass(command, args);
   return (
     <div
       className="jp-LauncherCard"
@@ -394,21 +400,30 @@ function Card(
       data-category={item.category || 'Other'}
       key={Private.keyProperty.get(item)}
     >
-      <div className="jp-LauncherCard-icon">
-        {item.kernelIconUrl && kernel && (
-          <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
-        )}
-        {!item.kernelIconUrl && !kernel && (
+      {kernel ? (
+        <div className="jp-LauncherCard-icon">
+          {item.kernelIconUrl ? (
+            <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
+          ) : (
+            <div className="jp-LauncherCard-noKernelIcon">
+              {label[0].toUpperCase()}
+            </div>
+          )}
+        </div>
+      ) : defaultIconRegistry.contains(iconClass) ? (
+        <DefaultIconReact
+          name={iconClass}
+          className={''}
+          kind={'launcherCard'}
+          center={true}
+        />
+      ) : (
+        <div className="jp-LauncherCard-icon">
           <div
             className={`${commands.iconClass(command, args)} jp-Launcher-icon`}
           />
-        )}
-        {!item.kernelIconUrl && kernel && (
-          <div className="jp-LauncherCard-noKernelIcon">
-            {label[0].toUpperCase()}
-          </div>
-        )}
-      </div>
+        </div>
+      )}
       <div className="jp-LauncherCard-label" title={title}>
         <p>{label}</p>
       </div>

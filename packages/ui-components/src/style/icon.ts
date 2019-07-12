@@ -7,14 +7,16 @@ import { NestedCSSProperties } from 'typestyle/lib/types';
 /**
  * - breadCrumb: The path icons above the filebrowser
  * - dockPanelBar: The tab icons above the main area
+ * - launcherCard: The icons for the cards at the bottom of the launcher
  * - listing: The icons to the left of the filebrowser listing items
  * - settingsEditor: The icons to the left of each section of the settings editor
  * - sideBar: The icons for the sidebar (default to the left of the main window)
- * - tabManager: The icons for the (vertical) tabManager in the sidebar
+ * - tabManager: The icons for the tabManager in the sidebar
  */
 export type IconKindType =
   | 'breadCrumb'
   | 'dockPanelBar'
+  | 'launcherCard'
   | 'listing'
   | 'settingsEditor'
   | 'sideBar'
@@ -78,6 +80,11 @@ const iconCSSDockPanelBar: NestedCSSProperties = {
   width: '14px'
 };
 
+const iconCSSLauncherCard: NestedCSSProperties = {
+  height: 'var(--jp-private-launcher-large-icon-size)',
+  width: 'var(--jp-private-launcher-large-icon-size)'
+};
+
 const iconCSSListing: NestedCSSProperties = {
   height: '16px',
   width: '16px'
@@ -108,6 +115,7 @@ const iconCSSTabManager: NestedCSSProperties = {
 const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   breadCrumb: iconCSSBreadCrumb,
   dockPanelBar: iconCSSDockPanelBar,
+  launcherCard: iconCSSLauncherCard,
   listing: iconCSSListing,
   settingsEditor: iconCSSSettingsEditor,
   sideBar: iconCSSSideBar,
@@ -121,6 +129,10 @@ const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
  */
 const containerCSSDockPanelBar: NestedCSSProperties = {
   marginRight: '4px'
+};
+
+const containerCSSLauncherCard: NestedCSSProperties = {
+  height: 'var(--jp-private-launcher-card-icon-height)'
 };
 
 const containerCSSListing: NestedCSSProperties = {
@@ -151,6 +163,7 @@ const containerCSSTabManager: NestedCSSProperties = {
 const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   breadCrumb: {},
   dockPanelBar: containerCSSDockPanelBar,
+  launcherCard: containerCSSLauncherCard,
   listing: containerCSSListing,
   settingsEditor: containerCSSSettingsEditor,
   sideBar: containerCSSSideBar,
