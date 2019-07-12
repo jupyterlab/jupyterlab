@@ -465,7 +465,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
       onMouseDown={handleMouseDown}
       onKeyDown={handleKeyDown}
       title={props.tooltip || props.iconLabel}
-      minimal
+      variant="text"
     >
       {props.iconClassName && (
         <span

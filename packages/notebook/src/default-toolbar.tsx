@@ -228,6 +228,12 @@ export namespace ToolbarItems {
   }
 }
 
+// const DropDownIcon = () => (
+//   <Icon>
+//     <span className="jp-MaterialIcon jp-DownCaretIcon" />
+//   </Icon>
+// );
+
 /**
  * A toolbar widget that switches cell types.
  */
@@ -286,11 +292,8 @@ export class CellTypeSwitcher extends ReactWidget {
         onChange={this.handleChange}
         onKeyDown={this.handleKeyDown}
         value={value}
-        iconProps={{
-          icon: <span className="jp-MaterialIcon jp-DownCaretIcon bp3-icon" />
-        }}
+        // IconComponent={DropDownIcon}
         aria-label="Cell type"
-        minimal
       >
         <option value="-">-</option>
         <option value="code">Code</option>

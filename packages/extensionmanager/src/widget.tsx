@@ -98,10 +98,10 @@ function BuildPrompt(props: BuildPrompt.IProperties): React.ReactElement<any> {
       <div className="jp-extensionmanager-buildmessage">
         A build is needed to include the latest changes
       </div>
-      <Button onClick={props.performBuild} minimal small>
+      <Button onClick={props.performBuild} variant="text" size="small">
         Rebuild
       </Button>
-      <Button onClick={props.ignoreBuild} minimal small>
+      <Button onClick={props.ignoreBuild} variant="text" size="small">
         Ignore
       </Button>
     </div>
@@ -163,8 +163,8 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           {!entry.installed && (
             <Button
               onClick={() => props.performAction('install', entry)}
-              minimal
-              small
+              variant="text"
+              size="small"
             >
               Install
             </Button>
@@ -172,8 +172,8 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           {ListModel.entryHasUpdate(entry) && (
             <Button
               onClick={() => props.performAction('install', entry)}
-              minimal
-              small
+              variant="text"
+              size="small"
             >
               Update
             </Button>
@@ -181,8 +181,8 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           {entry.installed && (
             <Button
               onClick={() => props.performAction('uninstall', entry)}
-              minimal
-              small
+              variant="text"
+              size="small"
             >
               Uninstall
             </Button>
@@ -190,8 +190,8 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           {entry.enabled && (
             <Button
               onClick={() => props.performAction('disable', entry)}
-              minimal
-              small
+              variant="text"
+              size="small"
             >
               Disable
             </Button>
@@ -199,8 +199,8 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           {!entry.enabled && (
             <Button
               onClick={() => props.performAction('enable', entry)}
-              minimal
-              small
+              variant="text"
+              size="small"
             >
               Enable
             </Button>
@@ -357,7 +357,7 @@ export class CollapsibleSection extends React.Component<
           </span>
           {this.props.headerElements}
         </header>
-        <Collapse isOpen={this.state.isOpen}>{this.props.children}</Collapse>
+        <Collapse in={this.state.isOpen}>{this.props.children}</Collapse>
       </>
     );
   }

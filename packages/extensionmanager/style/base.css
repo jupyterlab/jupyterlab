@@ -90,7 +90,7 @@
   padding: 4px;
 }
 
-.jp-extensionmanager-search-wrapper input {
+.jp-extensionmanager-search-wrapper .jp-InputGroup{
   background: transparent;
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color0);
@@ -99,7 +99,7 @@
   border-radius: 0;
 }
 
-.jp-extensionmanager-search-wrapper input:focus {
+.jp-extensionmanager-search-wrapper .jp-InputGroup:focus {
   box-shadow: inset 0 0 0 1px var(--jp-input-active-box-shadow-color),
     inset 0 0 0 3px var(--jp-input-active-box-shadow-color);
 }

@@ -16,7 +16,8 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "style/*.css"
+    "style/*.css",
+    "style/font/*.*"
   ],
   "sideEffects": [
     "style/**/*"
@@ -35,9 +36,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@blueprintjs/core": "^3.9.0",
-    "@blueprintjs/icons": "^3.3.0",
-    "@blueprintjs/select": "^3.3.0",
+    "@material-ui/core": "^4.2.0",
     "react": "~16.8.4"
   },
   "devDependencies": {
@@ -53,11 +52,6 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extraStyles": {
-      "blueprintjs": [
-        "icons/lib/css/blueprint-icons.css",
-        "core/lib/css/blueprint.css"
-      ]
-    }
+    "extraStyles": {}
   }
 }

@@ -2,98 +2,81 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
+import { default as MButton, ButtonProps } from '@material-ui/core/Button';
 import {
-  Button as BPButton,
-  IButtonProps as IBPButtonProps
-} from '@blueprintjs/core/lib/cjs/components/button/buttons';
+  default as MIcon,
+  IconProps as IIconProps
+} from '@material-ui/core/Icon';
 import {
-  Icon as BPIcon,
-  IIconProps
-} from '@blueprintjs/core/lib/cjs/components/icon/icon';
-import {
-  Collapse as BPCollapse,
-  ICollapseProps
-} from '@blueprintjs/core/lib/cjs/components/collapse/collapse';
-import {
-  InputGroup as BPInputGroup,
-  IInputGroupProps as IBPInputGroupProps
-} from '@blueprintjs/core/lib/cjs/components/forms/inputGroup';
-import {
-  HTMLSelect as BPHTMLSelect,
-  IHTMLSelectProps
-} from '@blueprintjs/core/lib/cjs/components/html-select/htmlSelect';
-import {
-  Select as BPSelect,
-  ISelectProps
-} from '@blueprintjs/select/lib/cjs/components/select/select';
+  default as MCollapse,
+  CollapseProps
+} from '@material-ui/core/Collapse';
+import { default as Input, InputProps } from '@material-ui/core/Input';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import { default as MSelect, SelectProps } from '@material-ui/core/Select';
 import { combineClassNames } from './utils';
 
-export { Intent } from '@blueprintjs/core/lib/cjs/common/intent';
-
-interface IButtonProps extends IBPButtonProps {
+interface IButtonProps extends ButtonProps {
   title?: string;
   type?: 'button' | 'submit' | 'reset';
 }
 
-interface IInputGroupProps extends IBPInputGroupProps {
-  rightIcon?: IIconProps['icon'];
+interface IInputGroupProps extends InputProps {
+  className: string;
+  rightIcon?: any;
 }
 
 type CommonProps<T> = React.DOMAttributes<T>;
 
 export const Button = (props: IButtonProps & CommonProps<any>) => (
-  <BPButton
+  <MButton
     {...props}
-    className={combineClassNames(
-      props.className,
-      props.minimal && 'minimal',
-      'jp-Button'
-    )}
+    className={combineClassNames(props.className, 'jp-Button')}
   />
 );
 
 export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
-  if (props.rightIcon) {
+  const { rightIcon, ...oprops } = props;
+
+  if (rightIcon) {
     return (
-      <BPInputGroup
-        {...props}
-        className={combineClassNames(props.className, 'jp-InputGroup')}
-        rightElement={
-          <div className="jp-InputGroupAction">
-            <Icon className="jp-Icon" icon={props.rightIcon} />
-          </div>
+      <Input
+        {...oprops}
+        className={combineClassNames(oprops.className, 'jp-InputGroup')}
+        endAdornment={
+          <InputAdornment position="end">
+            <MIcon className={'jp-Icon'}>{rightIcon}</MIcon>
+          </InputAdornment>
         }
       />
     );
   }
   return (
-    <BPInputGroup
-      {...props}
-      className={combineClassNames(props.className, 'jp-InputGroup')}
+    <Input
+      {...oprops}
+      className={combineClassNames(oprops.className, 'jp-InputGroup')}
     />
   );
 };
 
 export const Icon = (props: IIconProps) => (
-  <BPIcon
-    {...props}
-    className={combineClassNames(props.className, 'jp-Icon')}
-  />
+  <MIcon {...props} className={combineClassNames(props.className, 'jp-Icon')} />
 );
 
-export const Collapse = (props: ICollapseProps & CommonProps<any>) => (
-  <BPCollapse {...props} />
+export const Collapse = (props: CollapseProps & CommonProps<any>) => (
+  <MCollapse {...props} />
 );
 
-export const HTMLSelect = (props: IHTMLSelectProps & CommonProps<any>) => (
-  <BPHTMLSelect
+export const HTMLSelect = (props: SelectProps & CommonProps<any>) => (
+  <MSelect
+    native
     {...props}
     className={combineClassNames(props.className, 'jp-HTMLSelect')}
   />
 );
 
-export const Select = (props: ISelectProps<any> & CommonProps<any>) => (
-  <BPSelect
+export const Select = (props: SelectProps & CommonProps<any>) => (
+  <MSelect
     {...props}
     className={combineClassNames(props.className, 'jp-Select')}
   />
