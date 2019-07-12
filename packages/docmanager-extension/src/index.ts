@@ -167,7 +167,15 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       // Set the default factory overrides. If not provided, this has the
       // effect of unsetting any previous overrides.
       each(registry.fileTypes(), ft => {
-        registry.setDefaultWidgetFactory(ft.name, overrides[ft.name]);
+        try {
+          registry.setDefaultWidgetFactory(ft.name, overrides[ft.name]);
+        } catch {
+          console.warn(
+            `Failed to set default viewer ${overrides[ft.name]} for file type ${
+              ft.name
+            }`
+          );
+        }
       });
     };
 

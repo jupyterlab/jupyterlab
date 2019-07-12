@@ -449,9 +449,10 @@ export class DocumentRegistry implements IDisposable {
       throw Error(`Cannot find widget factory ${factory}`);
     }
     factory = factory.toLowerCase();
+    const factories = this._widgetFactoriesForFileType[fileType];
     if (
-      !this._widgetFactoriesForFileType[fileType] ||
-      !this._widgetFactoriesForFileType[fileType].includes(factory)
+      factory !== this._defaultWidgetFactory &&
+      !(factories && factories.includes(factory))
     ) {
       throw Error(`Factory ${factory} cannot view file type ${fileType}`);
     }
