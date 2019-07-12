@@ -107,6 +107,11 @@ export class IconRegistry implements IIconRegistry {
 
     // we may have been handed a className in place of name
     let resolvedName = this.resolveName(name);
+    if (!resolvedName) {
+      // bail if failing silently
+      return <></>;
+    }
+
     return (
       <Tag
         className={classes(className, propsStyle ? iconStyle(propsStyle) : '')}

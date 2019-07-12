@@ -8,6 +8,7 @@ import { NestedCSSProperties } from 'typestyle/lib/types';
  * - breadCrumb: The path icons above the filebrowser
  * - dockPanelBar: The tab icons above the main area
  * - launcherCard: The icons for the cards at the bottom of the launcher
+ * - launcherSection: The icons to left of the Launcher section headers
  * - listing: The icons to the left of the filebrowser listing items
  * - settingsEditor: The icons to the left of each section of the settings editor
  * - sideBar: The icons for the sidebar (default to the left of the main window)
@@ -17,6 +18,7 @@ export type IconKindType =
   | 'breadCrumb'
   | 'dockPanelBar'
   | 'launcherCard'
+  | 'launcherSection'
   | 'listing'
   | 'settingsEditor'
   | 'sideBar'
@@ -85,6 +87,12 @@ const iconCSSLauncherCard: NestedCSSProperties = {
   width: 'var(--jp-private-launcher-large-icon-size)'
 };
 
+const iconCSSLauncherSection: NestedCSSProperties = {
+  marginRight: '12px',
+  height: 'var(--jp-private-launcher-small-icon-size)',
+  width: 'var(--jp-private-launcher-small-icon-size)'
+};
+
 const iconCSSListing: NestedCSSProperties = {
   height: '16px',
   width: '16px'
@@ -116,6 +124,7 @@ const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   breadCrumb: iconCSSBreadCrumb,
   dockPanelBar: iconCSSDockPanelBar,
   launcherCard: iconCSSLauncherCard,
+  launcherSection: iconCSSLauncherSection,
   listing: iconCSSListing,
   settingsEditor: iconCSSSettingsEditor,
   sideBar: iconCSSSideBar,
@@ -164,6 +173,7 @@ const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   breadCrumb: {},
   dockPanelBar: containerCSSDockPanelBar,
   launcherCard: containerCSSLauncherCard,
+  launcherSection: {},
   listing: containerCSSListing,
   settingsEditor: containerCSSSettingsEditor,
   sideBar: containerCSSSideBar,

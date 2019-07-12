@@ -8,6 +8,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  combineClasses,
   DefaultIconReact,
   defaultIconRegistry
 } from '@jupyterlab/ui-components';
@@ -193,17 +194,31 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     // Now create the sections for each category
     orderedCategories.forEach(cat => {
       const item = categories[cat][0] as ILauncher.IItemOptions;
-      let iconClass =
-        `${this._commands.iconClass(item.command, {
-          ...item.args,
-          cwd: this.cwd
-        })} ` + 'jp-Launcher-sectionIcon jp-Launcher-icon';
+      let iconClass = this._commands.iconClass(item.command, {
+        ...item.args,
+        cwd: this.cwd
+      });
       let kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
       if (cat in categories) {
         section = (
           <div className="jp-Launcher-section" key={cat}>
             <div className="jp-Launcher-sectionHeader">
-              {kernel && <div className={iconClass} />}
+              {kernel && defaultIconRegistry.contains(iconClass) ? (
+                <DefaultIconReact
+                  name={iconClass}
+                  className={''}
+                  center={true}
+                  kind={'launcherSection'}
+                />
+              ) : (
+                <div
+                  className={combineClasses(
+                    iconClass,
+                    'jp-Launcher-sectionIcon',
+                    'jp-Launcher-icon'
+                  )}
+                />
+              )}
               <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
             </div>
             <div className="jp-Launcher-cardContainer">
@@ -414,14 +429,12 @@ function Card(
         <DefaultIconReact
           name={iconClass}
           className={''}
-          kind={'launcherCard'}
           center={true}
+          kind={'launcherCard'}
         />
       ) : (
         <div className="jp-LauncherCard-icon">
-          <div
-            className={`${commands.iconClass(command, args)} jp-Launcher-icon`}
-          />
+          <div className={`${iconClass} jp-Launcher-icon`} />
         </div>
       )}
       <div className="jp-LauncherCard-label" title={title}>
