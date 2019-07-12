@@ -308,11 +308,15 @@ export class DocumentRegistry implements IDisposable {
     // Get the ordered matching file types.
     let fts = this.getFileTypesForPath(PathExt.basename(path));
 
-    // Start with the file type default factories.
+    // Start with any user overrides for the defaults.
     fts.forEach(ft => {
       if (ft.name in this._defaultWidgetFactoryOverrides) {
         factories.add(this._defaultWidgetFactoryOverrides[ft.name]);
       }
+    });
+
+    // Next add the file type default factories.
+    fts.forEach(ft => {
       if (ft.name in this._defaultWidgetFactories) {
         factories.add(this._defaultWidgetFactories[ft.name]);
       }
@@ -425,12 +429,15 @@ export class DocumentRegistry implements IDisposable {
    * #### Notes
    * If `factory` is undefined, then any override will be unset, and the
    * default factory will revert to the original value.
+   *
+   * If `factory` or `fileType` are not known to the docregistry, or
+   * if `factory` cannot open files of type `fileType`, this will throw
+   * an error.
    */
   setDefaultWidgetFactory(fileType: string, factory: string | undefined): void {
     fileType = fileType.toLowerCase();
     if (!this.getFileType(fileType)) {
-      console.warn(`Cannot find file type ${fileType}`);
-      return;
+      throw Error(`Cannot find file type ${fileType}`);
     }
     if (!factory) {
       if (this._defaultWidgetFactoryOverrides[fileType]) {
@@ -439,10 +446,16 @@ export class DocumentRegistry implements IDisposable {
       return;
     }
     if (!this.getWidgetFactory(factory)) {
-      console.warn(`Cannot find widget factory ${factory}`);
-      return;
+      throw Error(`Cannot find widget factory ${factory}`);
     }
-    this._defaultWidgetFactoryOverrides[fileType] = factory.toLowerCase();
+    factory = factory.toLowerCase();
+    if (
+      !this._widgetFactoriesForFileType[fileType] ||
+      !this._widgetFactoriesForFileType[fileType].includes(factory)
+    ) {
+      throw Error(`Factory ${factory} cannot view file type ${fileType}`);
+    }
+    this._defaultWidgetFactoryOverrides[fileType] = factory;
   }
 
   /**

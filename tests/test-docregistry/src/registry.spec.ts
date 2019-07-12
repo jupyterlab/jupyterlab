@@ -353,6 +353,58 @@ describe('docregistry/registry', () => {
       });
     });
 
+    describe('#setDefaultWidgetFactory()', () => {
+      it('should override the default widget factory for a file type', () => {
+        const factory = createFactory();
+        registry.addWidgetFactory(factory);
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown', 'foobar'],
+          defaultFor: []
+        });
+        registry.addWidgetFactory(mdFactory);
+        registry.setDefaultWidgetFactory('foobar', 'markdown');
+        expect(registry.defaultWidgetFactory('a.foo.bar')).to.equal(mdFactory);
+      });
+
+      it('should revert to the default widget factory when unset', () => {
+        const factory = createFactory();
+        registry.addWidgetFactory(factory);
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown', 'foobar'],
+          defaultFor: []
+        });
+        registry.addWidgetFactory(mdFactory);
+        registry.setDefaultWidgetFactory('foobar', 'markdown');
+        registry.setDefaultWidgetFactory('foobar', undefined);
+        expect(registry.defaultWidgetFactory('a.foo.bar')).to.equal(factory);
+      });
+
+      it('should throw if the factory or file type do not exist', () => {
+        const factory = createFactory();
+        registry.addWidgetFactory(factory);
+        expect(() => {
+          registry.setDefaultWidgetFactory('foobar', 'fake');
+        }).to.throw(/Cannot find/);
+        expect(() => {
+          registry.setDefaultWidgetFactory('fake', undefined);
+        }).to.throw(/Cannot find/);
+      });
+
+      it('should throw if the factory cannot render a file type', () => {
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown'],
+          defaultFor: []
+        });
+        registry.addWidgetFactory(mdFactory);
+        expect(() => {
+          registry.setDefaultWidgetFactory('foobar', 'markdown');
+        }).to.throw(/cannot view/);
+      });
+    });
+
     describe('#defaultRenderedWidgetFactory()', () => {
       it('should get the default rendered widget factory for a given extension', () => {
         const factory = createFactory();
