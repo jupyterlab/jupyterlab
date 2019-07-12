@@ -138,6 +138,27 @@ describe('docregistry/registry', () => {
         disposable.dispose();
         expect(registry.getWidgetFactory('test')).to.be.undefined;
       });
+
+      it('should throw for an invalid factory name', () => {
+        expect(() => {
+          registry.addWidgetFactory(
+            new WidgetFactory({
+              name: 'default',
+              fileTypes: [],
+              defaultFor: []
+            })
+          );
+        }).to.throw(/Invalid/);
+        expect(() => {
+          registry.addWidgetFactory(
+            new WidgetFactory({
+              name: '',
+              fileTypes: [],
+              defaultFor: []
+            })
+          );
+        }).to.throw(/Invalid/);
+      });
     });
 
     describe('#addModelFactory()', () => {

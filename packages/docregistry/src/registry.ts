@@ -104,15 +104,19 @@ export class DocumentRegistry implements IDisposable {
    * @returns A disposable which will unregister the factory.
    *
    * #### Notes
-   * If a factory with the given `'displayName'` is already registered,
+   * If a factory with the given `'name'` is already registered,
    * a warning will be logged, and this will be a no-op.
    * If `'*'` is given as a default extension, the factory will be registered
    * as the global default.
    * If an extension or global default is already registered, this factory
    * will override the existing default.
+   * The factory cannot be named an empty string or the string `'default'`.
    */
   addWidgetFactory(factory: DocumentRegistry.WidgetFactory): IDisposable {
     let name = factory.name.toLowerCase();
+    if (!name || name === 'default') {
+      throw Error('Invalid factory name');
+    }
     if (this._widgetFactories[name]) {
       console.warn(`Duplicate registered factory ${name}`);
       return new DisposableDelegate(Private.noOp);
