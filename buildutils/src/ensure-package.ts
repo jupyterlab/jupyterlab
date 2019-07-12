@@ -310,28 +310,25 @@ export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
   const tab = '  ';
 
   const iconSrcDir = path.join(pkgPath, 'src/icon');
-  const svgs = glob.sync(path.join(pkgPath, 'style', '**/*.svg'));
+  const svgs = glob.sync(path.join(pkgPath, 'style/icons', '**/*.svg'));
 
   // build the per-icon import code
   let iconImportStatements: string[] = [];
   let iconModelDeclarations: string[] = [];
   svgs.forEach(svg => {
     const name = utils.stem(svg);
-    // skip the debug icons
-    if (name !== 'bad' && name !== 'blank') {
-      const nameCamel = utils.camelCase(name) + 'Svg';
-      iconImportStatements.push(
-        `import ${nameCamel} from '${path.relative(iconSrcDir, svg)}';`
-      );
-      iconModelDeclarations.push(
-        tab + tab + `{ name: '${name}', svg: ${nameCamel} }`
-      );
-    }
+    const nameCamel = utils.camelCase(name) + 'Svg';
+    iconImportStatements.push(
+      `import ${nameCamel} from '${path.relative(iconSrcDir, svg)}';`
+    );
+    iconModelDeclarations.push(
+      tab + tab + `{ name: '${name}', svg: ${nameCamel} }`
+    );
   });
 
   // generate the actual iconImports file
   let iconImports = generatedHeader('ensureUiComponents') + '\n\n';
-  iconImports += "import { Icon } from './icon';\n\n";
+  iconImports += "import { Icon } from './interfaces';\n\n";
 
   iconImports += '// icon svg import statements\n';
   iconImports += iconImportStatements.join('\n') + '\n\n';

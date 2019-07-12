@@ -10,8 +10,8 @@ import { IIconRegistry, Icon } from './interfaces';
 import { IconImports } from './iconimports';
 import { iconStyle, iconStyleFlat } from '../style/icon';
 
-import badSvg from '../../style/icons/bad.svg';
-import blankSvg from '../../style/icons/blank.svg';
+import badSvg from '../../style/debug/bad.svg';
+import blankSvg from '../../style/debug/blank.svg';
 
 /**
  * The icon registry class.
