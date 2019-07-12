@@ -1,1 +1,0 @@
-- The filebrowser sidebar icon can be found at `packages/ui-components/style/icons/filetype/folder.svg`

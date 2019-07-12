@@ -7,6 +7,7 @@ import { classes } from 'typestyle/lib';
 import { Text } from '@jupyterlab/coreutils';
 
 import { IIconRegistry, Icon } from './icon';
+import { IconImports } from './iconimports';
 import { iconStyle, iconStyleFlat } from '../style/icon';
 
 import badSvg from '../../style/icons/bad.svg';
@@ -19,7 +20,7 @@ export class IconRegistry implements IIconRegistry {
   constructor(options: IconRegistry.IOptions = {}) {
     this._debug = !!options.debug;
 
-    let icons = options.initialIcons || Icon.defaultIcons;
+    let icons = options.initialIcons || IconImports.defaultIcons;
     this.addIcon(...icons);
 
     // add the bad state and blank icons

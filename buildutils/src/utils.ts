@@ -286,3 +286,43 @@ export function ensureUnixPathSep(source: string) {
   }
   return source.replace(backSlash, '/');
 }
+
+/**
+ * Get the last portion of a path, without its extension (if any).
+ *
+ * @param path - The file path.
+ *
+ * @returns the last part of the path, sans extension.
+ */
+export function stem(path: string): string {
+  return path
+    .split('\\')
+    .pop()
+    .split('/')
+    .pop()
+    .split('.')
+    .shift();
+}
+
+/**
+ * Given a 'snake-case', 'snake_case', or 'snake case' string,
+ * will return the camel case version: 'snakeCase'.
+ *
+ * @param str: the snake-case input string.
+ *
+ * @param upper: default = false. If true, the first letter of the
+ * returned string will be capitalized.
+ *
+ * @returns the camel case version of the input string.
+ */
+export function camelCase(str: string, upper: boolean = false): string {
+  return str.replace(/(?:^\w|[A-Z]|\b\w|\s+|-+|_+)/g, function(match, index) {
+    if (+match === 0 || match[0] === '-') {
+      return '';
+    } else if (index === 0 && !upper) {
+      return match.toLowerCase();
+    } else {
+      return match.toUpperCase();
+    }
+  });
+}

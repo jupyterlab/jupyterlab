@@ -1,6 +1,6 @@
 import { Token } from '@phosphor/coreutils';
 
-import { PathExt } from '@jupyterlab/coreutils';
+// import { PathExt } from '@jupyterlab/coreutils';
 
 import { IIconStyle } from '../style/icon';
 import React from 'react';
@@ -62,35 +62,4 @@ export namespace Icon {
     className?: string;
     title?: string;
   }
-
-  /**
-   * Import all svgs from a directory. The input argument should be
-   * of the form `require.context('raw-loader!<path>', true, /\.svg$/)`.
-   * <path> should be a string literal path, as this is needed by `require`.
-   */
-  export function importSvgs(r: any, exclude: string[] = []): IModel[] {
-    const excset = new Set(exclude);
-
-    return r.keys().reduce((svgs: IModel[], item: string, index: number) => {
-      const name = PathExt.stem(item);
-      if (!excset.has(name)) {
-        svgs.push({ name: name, svg: r(item).default });
-      }
-      return svgs;
-    }, []);
-  }
-
-  // create the array of default icon models
-  let icons: IModel[];
-  try {
-    // require.context is supplied by Webpack, and doesn't play nice with jest
-    icons = importSvgs(
-      require.context('raw-loader!../../style/icons', true, /\.svg$/),
-      ['bad', 'blank']
-    );
-  } catch (e) {
-    // fallback for jest tests
-    icons = [];
-  }
-  export const defaultIcons: ReadonlyArray<IModel> = icons;
 }
