@@ -136,15 +136,32 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
 
     // Keep up to date with the settings registry.
     const onSettingsUpdated = (settings: ISettingRegistry.ISettings) => {
+      // Handle whether to autosave
       const autosave = settings.get('autosave').composite as boolean | null;
       docManager.autosave =
         autosave === true || autosave === false ? autosave : true;
       app.commands.notifyCommandChanged(CommandIDs.toggleAutosave);
 
+      // Handle autosave interval
       const autosaveInterval = settings.get('autosaveInterval').composite as
         | number
         | null;
       docManager.autosaveInterval = autosaveInterval || 120;
+
+      // Handle default widget factory overrides.
+      const factoryOverrides = settings.get('defaultViewers').composite as {
+        [ft: string]: string;
+      };
+      Object.keys(factoryOverrides).forEach(ft => {
+        if (!registry.getFileType(ft)) {
+          console.warn(`File Type ${ft} not found`);
+          return;
+        }
+        if (!registry.getWidgetFactory(factoryOverrides[ft])) {
+          console.warn(`Document viewer ${factoryOverrides[ft]} not found`);
+        }
+        registry.setDefaultWidgetFactory(ft, factoryOverrides[ft]);
+      });
     };
 
     // Fetch the initial state of the settings.

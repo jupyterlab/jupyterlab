@@ -27,6 +27,16 @@
       "title": "Autosave Interval",
       "description": "Length of save interval in seconds",
       "default": 120
+    },
+    "defaultViewers": {
+      "type": "object",
+      "title": "Default Viewers",
+      "default": {},
+      "description": "Overrides for the default viewers for file types",
+      "properties": {},
+      "additionalProperties": {
+        "type": "string"
+      }
     }
   },
   "additionalProperties": false,

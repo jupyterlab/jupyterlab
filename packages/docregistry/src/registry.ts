@@ -136,10 +136,10 @@ export class DocumentRegistry implements IDisposable {
     }
     // For convenience, store a mapping of file type name -> name
     for (let ft of factory.fileTypes) {
-      if (!this._widgetFactoryExtensions[ft]) {
-        this._widgetFactoryExtensions[ft] = [];
+      if (!this._widgetFactoriesForFileType[ft]) {
+        this._widgetFactoriesForFileType[ft] = [];
       }
-      this._widgetFactoryExtensions[ft].push(name);
+      this._widgetFactoriesForFileType[ft].push(name);
     }
     this._changed.emit({
       type: 'widgetFactory',
@@ -161,10 +161,10 @@ export class DocumentRegistry implements IDisposable {
           delete this._defaultRenderedWidgetFactories[ext];
         }
       }
-      for (let ext of Object.keys(this._widgetFactoryExtensions)) {
-        ArrayExt.removeFirstOf(this._widgetFactoryExtensions[ext], name);
-        if (this._widgetFactoryExtensions[ext].length === 0) {
-          delete this._widgetFactoryExtensions[ext];
+      for (let ext of Object.keys(this._widgetFactoriesForFileType)) {
+        ArrayExt.removeFirstOf(this._widgetFactoriesForFileType[ext], name);
+        if (this._widgetFactoriesForFileType[ext].length === 0) {
+          delete this._widgetFactoriesForFileType[ext];
         }
       }
       this._changed.emit({
@@ -329,16 +329,16 @@ export class DocumentRegistry implements IDisposable {
 
     // Add the file type factories in registration order.
     fts.forEach(ft => {
-      if (ft.name in this._widgetFactoryExtensions) {
-        each(this._widgetFactoryExtensions[ft.name], n => {
+      if (ft.name in this._widgetFactoriesForFileType) {
+        each(this._widgetFactoriesForFileType[ft.name], n => {
           factories.add(n);
         });
       }
     });
 
     // Add the rest of the global factories, in registration order.
-    if ('*' in this._widgetFactoryExtensions) {
-      each(this._widgetFactoryExtensions['*'], n => {
+    if ('*' in this._widgetFactoriesForFileType) {
+      each(this._widgetFactoriesForFileType['*'], n => {
         factories.add(n);
       });
     }
@@ -405,6 +405,40 @@ export class DocumentRegistry implements IDisposable {
       return this._widgetFactories[this._defaultWidgetFactory];
     }
     return this.preferredWidgetFactories(path)[0];
+  }
+
+  /**
+   * Set the default widget factory for a file type.
+   *
+   * Normally, a widget factory informs the document registry which file types
+   * it should be the default for using the `defaultFor` option in the
+   * IWidgetFactoryOptions. This function can be used to override that after
+   * the fact.
+   *
+   * @param fileType: The name of the file type.
+   *
+   * @param factory: The name of the factory.
+   *
+   * #### Notes
+   * If `factory` is undefined, then no factory will be default for the file
+   * type.
+   */
+  setDefaultWidgetFactory(fileType: string, factory: string | undefined): void {
+    if (!this.getFileType(fileType)) {
+      console.warn(`Cannot find file type ${fileType}`);
+      return;
+    }
+    if (!factory) {
+      if (this._defaultWidgetFactories[fileType]) {
+        delete this._defaultWidgetFactories[fileType];
+      }
+      return;
+    }
+    if (!this.getWidgetFactory(factory)) {
+      console.warn(`Cannot find widget factory ${factory}`);
+      return;
+    }
+    this._defaultWidgetFactories[fileType] = factory;
   }
 
   /**
@@ -610,9 +644,9 @@ export class DocumentRegistry implements IDisposable {
   private _defaultRenderedWidgetFactories: {
     [key: string]: string;
   } = Object.create(null);
-  private _widgetFactoryExtensions: { [key: string]: string[] } = Object.create(
-    null
-  );
+  private _widgetFactoriesForFileType: {
+    [key: string]: string[];
+  } = Object.create(null);
   private _fileTypes: DocumentRegistry.IFileType[] = [];
   private _extenders: {
     [key: string]: DocumentRegistry.WidgetExtension[];
