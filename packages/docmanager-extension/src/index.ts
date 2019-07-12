@@ -149,18 +149,25 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       docManager.autosaveInterval = autosaveInterval || 120;
 
       // Handle default widget factory overrides.
-      const factoryOverrides = settings.get('defaultViewers').composite as {
+      const defaultViewers = settings.get('defaultViewers').composite as {
         [ft: string]: string;
       };
-      Object.keys(factoryOverrides).forEach(ft => {
+      const overrides: { [ft: string]: string } = {};
+      // Filter the defaultViewers and file types for existing ones.
+      Object.keys(defaultViewers).forEach(ft => {
         if (!registry.getFileType(ft)) {
           console.warn(`File Type ${ft} not found`);
           return;
         }
-        if (!registry.getWidgetFactory(factoryOverrides[ft])) {
-          console.warn(`Document viewer ${factoryOverrides[ft]} not found`);
+        if (!registry.getWidgetFactory(defaultViewers[ft])) {
+          console.warn(`Document viewer ${defaultViewers[ft]} not found`);
         }
-        registry.setDefaultWidgetFactory(ft, factoryOverrides[ft]);
+        overrides[ft] = defaultViewers[ft];
+      });
+      // Set the default factory overrides. If not provided, this has the
+      // effect of unsetting any previous overrides.
+      each(registry.fileTypes(), ft => {
+        registry.setDefaultWidgetFactory(ft.name, overrides[ft.name]);
       });
     };
 

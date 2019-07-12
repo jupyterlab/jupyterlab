@@ -310,6 +310,9 @@ export class DocumentRegistry implements IDisposable {
 
     // Start with the file type default factories.
     fts.forEach(ft => {
+      if (ft.name in this._defaultWidgetFactoryOverrides) {
+        factories.add(this._defaultWidgetFactoryOverrides[ft.name]);
+      }
       if (ft.name in this._defaultWidgetFactories) {
         factories.add(this._defaultWidgetFactories[ft.name]);
       }
@@ -408,7 +411,7 @@ export class DocumentRegistry implements IDisposable {
   }
 
   /**
-   * Set the default widget factory for a file type.
+   * Set overrides for the default widget factory for a file type.
    *
    * Normally, a widget factory informs the document registry which file types
    * it should be the default for using the `defaultFor` option in the
@@ -420,17 +423,18 @@ export class DocumentRegistry implements IDisposable {
    * @param factory: The name of the factory.
    *
    * #### Notes
-   * If `factory` is undefined, then no factory will be default for the file
-   * type.
+   * If `factory` is undefined, then any override will be unset, and the
+   * default factory will revert to the original value.
    */
   setDefaultWidgetFactory(fileType: string, factory: string | undefined): void {
+    fileType = fileType.toLowerCase();
     if (!this.getFileType(fileType)) {
       console.warn(`Cannot find file type ${fileType}`);
       return;
     }
     if (!factory) {
-      if (this._defaultWidgetFactories[fileType]) {
-        delete this._defaultWidgetFactories[fileType];
+      if (this._defaultWidgetFactoryOverrides[fileType]) {
+        delete this._defaultWidgetFactoryOverrides[fileType];
       }
       return;
     }
@@ -438,7 +442,7 @@ export class DocumentRegistry implements IDisposable {
       console.warn(`Cannot find widget factory ${factory}`);
       return;
     }
-    this._defaultWidgetFactories[fileType] = factory;
+    this._defaultWidgetFactoryOverrides[fileType] = factory.toLowerCase();
   }
 
   /**
@@ -638,6 +642,9 @@ export class DocumentRegistry implements IDisposable {
     [key: string]: DocumentRegistry.WidgetFactory;
   } = Object.create(null);
   private _defaultWidgetFactory = '';
+  private _defaultWidgetFactoryOverrides: {
+    [key: string]: string;
+  } = Object.create(null);
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(
     null
   );
