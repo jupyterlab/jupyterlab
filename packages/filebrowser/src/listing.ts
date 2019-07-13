@@ -1663,7 +1663,7 @@ export namespace DirListing {
      */
     populateHeaderNode(node: HTMLElement): void {
       let name = this._createHeaderItemNode('Name');
-      let modified = this._createHeaderItemNode('Last Modified');
+      let modified = this._createHeaderItemNode('Hello From Texas');
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
       modified.classList.add(MODIFIED_ID_CLASS);
