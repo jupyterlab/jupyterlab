@@ -32,7 +32,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   }
 
   /**
-   * Initialize the search using the provided options.  Should update the UI
+   * Initialize the search using the provided options. Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
    *
    * @param query A RegExp to be use to perform the search
@@ -133,7 +133,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
 
   /**
    * Gradually refresh cells in the background so that the user will not
-   * experience frozen interface, 5 cells at a time
+   * experience frozen interface, 5 cells at a time.
    */
   private _refreshCellsEditorsInBackground(cells: Cell[], n: number = 5) {
     let i = 0;
@@ -150,7 +150,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   }
 
   /**
-   * Refresh the editor in the cell for the current match
+   * Refresh the editor in the cell for the current match.
    */
   private _refreshCurrentCellEditor() {
     const notebook = this._searchTarget.content;

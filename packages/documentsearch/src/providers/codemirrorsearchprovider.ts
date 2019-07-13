@@ -262,7 +262,7 @@ export class CodeMirrorSearchProvider
   }
 
   /**
-   * The same list of matches provided by the startQuery promise resoluton
+   * The same list of matches provided by the startQuery promise resolution
    */
   get matches(): ISearchMatch[] {
     return this._parseMatchesFromState();
