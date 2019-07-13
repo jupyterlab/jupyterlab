@@ -138,15 +138,15 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   private _refreshCellsEditorsInBackground(cells: Cell[], n: number = 5) {
     let i = 0;
 
-    let refreshNextCell = () => {
+    let refreshNextNCells = () => {
       for (let stop = i + n; i < stop && i < cells.length; i++) {
         cells[i].editor.refresh();
       }
       if (i < cells.length) {
-        window.setTimeout(refreshNextCell, 0);
+        window.setTimeout(refreshNextNCells, 0);
       }
     };
-    window.setTimeout(refreshNextCell, 0);
+    window.setTimeout(refreshNextNCells, 0);
   }
 
   /**
