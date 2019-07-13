@@ -3,6 +3,7 @@
   "description": "Document Manager settings.",
   "jupyter.lab.setting-icon-class": "jp-FileIcon",
   "jupyter.lab.setting-icon-label": "Document Manager",
+  "jupyter.lab.transform": true,
   "jupyter.lab.shortcuts": [
     {
       "command": "docmanager:save",

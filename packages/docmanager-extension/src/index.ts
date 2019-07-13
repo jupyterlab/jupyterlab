@@ -1,10 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { some, map, each } from '@phosphor/algorithm';
-
-import { Widget } from '@phosphor/widgets';
-
 import {
   ILabShell,
   ILabStatus,
@@ -37,7 +33,13 @@ import { Contents, Kernel } from '@jupyterlab/services';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
+import { each, map, some, toArray } from '@phosphor/algorithm';
+
+import { JSONExt } from '@phosphor/coreutils';
+
 import { IDisposable } from '@phosphor/disposable';
+
+import { Widget } from '@phosphor/widgets';
 
 /**
  * The command IDs used by the document manager plugin.
@@ -188,6 +190,45 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       .catch((reason: Error) => {
         console.error(reason.message);
       });
+
+    // Register a fetch transformer for the settings registry,
+    // allowing us to dynamically populate a help string with the
+    // available document viewers and file types for the default
+    // viewer overrides.
+    settingRegistry.transform(pluginId, {
+      fetch: plugin => {
+        // Get the available file types.
+        const fileTypes = toArray(registry.fileTypes())
+          .map(ft => ft.name)
+          .join('    \n');
+        // Get the available widget factories.
+        const factories = toArray(registry.widgetFactories())
+          .map(f => f.name)
+          .join('    \n');
+        // Generate the help string.
+        const description = `Overrides for the default viewers for file types.
+Specify a mapping from file type name to document viewer name, for example:
+
+defaultViewers: {
+  markdown: "Markdown Preview"
+}
+
+If you specify non-existent file types or viewers, or if a viewer cannot
+open a given file type, the override will not function.
+
+Available viewers:
+${factories}
+
+Available file types:
+${fileTypes}`;
+        const schema = JSONExt.deepCopy(plugin.schema);
+        schema.properties.defaultViewers.description = description;
+        return { ...plugin, schema };
+      }
+    });
+    // If the document registry gains or loses a factory or file type,
+    // regenerate the settings description with the available options.
+    registry.changed.connect(() => settingRegistry.reload(pluginId));
 
     return docManager;
   }
