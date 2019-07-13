@@ -1120,6 +1120,7 @@ export class MarkdownCell extends Cell {
       return;
     }
     this._rendered = value;
+    this._dirty = false;
     this._handleRendered();
     // Refreshing an editor can be really expensive, so we don't call it from
     // _handleRendered, since _handledRendered is also called on every update
@@ -1129,18 +1130,24 @@ export class MarkdownCell extends Cell {
     }
   }
 
-  set editor_activated_for_search(value: boolean) {
-    value = !value;
+  /**
+   * Whether the cell is rendered in "dirty" state (without proper re-paint).
+   *
+   * A variant of `rendered` property which does not refresh the editor,
+   * used during search operations due to increased performance.
+   */
+  get renderedDirty(): boolean {
+    return this._rendered && this._dirty;
+  }
+  set renderedDirty(value: boolean) {
     if (value === this._rendered) {
       return;
     }
     this._rendered = value;
-    if (!this._rendered) {
-      this.showEditor();
-    } else {
-      void this._updateRenderedInput();
-      this.renderInput(this._renderer);
-    }
+    this._handleRendered();
+    // do not refresh the editor as it invokes full re-paint,
+    // just mark as dirty
+    this._dirty = !this._rendered;
   }
 
   /**
@@ -1217,6 +1224,7 @@ export class MarkdownCell extends Cell {
   private _renderer: IRenderMime.IRenderer = null;
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
+  private _dirty = false;
   private _prevText = '';
   private _ready = new PromiseDelegate<void>();
 }

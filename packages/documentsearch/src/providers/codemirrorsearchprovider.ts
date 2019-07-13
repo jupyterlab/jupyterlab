@@ -142,7 +142,9 @@ export class CodeMirrorSearchProvider
     this._matchState = {};
     this._currentMatch = null;
 
-    if (removeOverlay) this._cm.removeOverlay(this._overlay);
+    if (removeOverlay) {
+      this._cm.removeOverlay(this._overlay);
+    }
     const from = this._cm.getCursor('from');
     const to = this._cm.getCursor('to');
     // Setting a reverse selection to allow search-as-you-type to maintain the
@@ -369,7 +371,7 @@ export class CodeMirrorSearchProvider
     return {
       /**
        * Token function is called when a line needs to be processed -
-       * when the overlay is intially created, it's called on all lines;
+       * when the overlay is initially created, it's called on all lines;
        * when a line is modified and needs to be re-evaluated, it's called
        * on just that line.
        *
