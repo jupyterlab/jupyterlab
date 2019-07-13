@@ -79,5 +79,11 @@ export namespace IRunMenu {
      * returns a promise of whether the action was performed.
      */
     restartAndRunAll?: (widget: T) => Promise<boolean>;
+    /**
+     * A function to restart and run all the code hosted by the widget
+     * up to the currently selected cell, which returns a promise of whether
+     * the action was performed.
+     */
+    restartAndRunToSelected?: (widget: T) => Promise<boolean>;
   }
 }

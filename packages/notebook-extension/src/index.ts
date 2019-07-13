@@ -2113,6 +2113,21 @@ function populateMenus(
         }
         return restarted;
       });
+    },
+    restartAndRunToSelected: current => {
+      const { context, content } = current;
+      return context.session.restart().then(restarted => {
+        if (restarted) {
+          void NotebookActions.runAllAbove(content, context.session).then(
+            executed => {
+              if (executed) {
+                void NotebookActions.run(content, context.session);
+              }
+            }
+          );
+        }
+        return restarted;
+      });
     }
   } as IRunMenu.ICodeRunner<NotebookPanel>);
 

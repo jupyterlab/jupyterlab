@@ -91,6 +91,8 @@ export namespace CommandIDs {
 
   export const restartAndRunAll = 'runmenu:restart-and-run-all';
 
+  export const restartAndRunToSelected = 'runmenu:restart-and-run-to-selected';
+
   export const runAbove = 'runmenu:run-above';
 
   export const runBelow = 'runmenu:run-below';
@@ -538,7 +540,8 @@ export function createKernelMenu(app: JupyterFrontEnd, menu: KernelMenu): void {
   const restartGroup = [
     CommandIDs.restartKernel,
     CommandIDs.restartKernelAndClear,
-    CommandIDs.restartAndRunAll
+    CommandIDs.restartAndRunAll,
+    CommandIDs.restartAndRunToSelected
   ].map(command => {
     return { command };
   });
@@ -686,6 +689,21 @@ export function createRunMenu(app: JupyterFrontEnd, menu: RunMenu): void {
       'restartAndRunAll'
     ),
     execute: Private.delegateExecute(app, menu.codeRunners, 'restartAndRunAll')
+  });
+  commands.addCommand(CommandIDs.restartAndRunToSelected, {
+    label: () => {
+      return `Restart Kernel and Run up to Selected Cell …`;
+    },
+    isEnabled: Private.delegateEnabled(
+      app,
+      menu.codeRunners,
+      'restartAndRunToSelected'
+    ),
+    execute: Private.delegateExecute(
+      app,
+      menu.codeRunners,
+      'restartAndRunToSelected'
+    )
   });
 
   const runAllGroup = [CommandIDs.runAll, CommandIDs.restartAndRunAll].map(
