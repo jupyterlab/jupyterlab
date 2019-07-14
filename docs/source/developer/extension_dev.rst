@@ -129,10 +129,21 @@ meets the following criteria:
 -  Has a ``jupyterlab`` key in its ``package.json`` which has
    ``"extension"`` metadata. The value can be ``true`` to use the main
    module of the package, or a string path to a specific module (e.g.
-   ``"lib/foo"``).
+   ``"lib/foo"``). Example::
+
+        "jupyterlab": {
+          "extension": true
+        }
+
 -  It is also recommended to include the keyword ``jupyterlab-extension``
    in the ``package.json``, to aid with discovery (e.g. by the extension
-   manager).
+   manager). Example::
+
+       "keywords": [
+         "jupyter",
+         "jupyterlab",
+         "jupyterlab-extension"
+       ],
 
 While authoring the extension, you can use the command:
 
