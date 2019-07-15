@@ -12,7 +12,12 @@ import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
 import React from 'react';
 
-import { SessionManager, KernelMessage, Session } from '@jupyterlab/services';
+import {
+  SessionManager,
+  Kernel,
+  KernelMessage,
+  Session
+} from '@jupyterlab/services';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -221,22 +226,24 @@ function activateOutputConsole(
   };
 
   let lastKernelSession = '';
-  let lastMsg: KernelMessage.IIOPubMessage = null;
+  let lastMsg: KernelMessage.IMessage = null;
 
-  const messageCanBeRendered = (msg: KernelMessage.IMessage) => {
+  const messageCanBeRendered = (msgInfo: Kernel.IAnyMessageArgs): boolean => {
     return (
-      msg.channel === 'iopub' &&
+      msgInfo.direction === 'recv' &&
+      msgInfo.msg.channel === 'iopub' &&
       [
         'execute_result',
         'display_data',
         'stream',
         'error',
         'update_display_data'
-      ].includes(msg.header.msg_type)
+      ].includes(msgInfo.msg.header.msg_type)
     );
   };
 
-  const isSameMessage = (msg: KernelMessage.IMessage) => {
+  const sameAsLastMessage = (msgInfo: Kernel.IAnyMessageArgs): boolean => {
+    const msg = msgInfo.msg;
     return (
       lastMsg &&
       msg.header.msg_type === lastMsg.header.msg_type &&
@@ -246,12 +253,13 @@ function activateOutputConsole(
   };
 
   app.started.then(() => {
-    app.serviceManager.unhandledSessionIOPubMessage.connect(
-      (sessionManager: SessionManager, msg: KernelMessage.IIOPubMessage) => {
-        if (!messageCanBeRendered(msg) || isSameMessage(msg)) {
+    app.serviceManager.anyMessage.connect(
+      (sessionManager: SessionManager, msgInfo: Kernel.IAnyMessageArgs) => {
+        if (!messageCanBeRendered(msgInfo) || sameAsLastMessage(msgInfo)) {
           return;
         }
 
+        const msg = msgInfo.msg;
         lastMsg = msg;
         lastKernelSession = msg.header.session;
 
@@ -270,7 +278,7 @@ function activateOutputConsole(
             outputConsoleWidget.outputConsole.logMessage({
               sourceName: session.name,
               sourceIconClassName: sourceIconClassName,
-              msg: msg
+              msg: msg as KernelMessage.IIOPubMessage
             });
           });
       }

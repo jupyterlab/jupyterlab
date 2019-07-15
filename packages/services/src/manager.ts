@@ -13,7 +13,7 @@ import { NbConvert, NbConvertManager } from './nbconvert';
 
 import { Contents, ContentsManager } from './contents';
 
-import { Kernel, KernelMessage } from './kernel';
+import { Kernel } from './kernel';
 
 import { Session, SessionManager } from './session';
 
@@ -112,11 +112,8 @@ export class ServiceManager implements ServiceManager.IManager {
     return this.sessions.specs;
   }
 
-  get unhandledSessionIOPubMessage(): ISignal<
-    SessionManager,
-    KernelMessage.IIOPubMessage
-  > {
-    return this.sessions.unhandledIOPubMessage;
+  get anyMessage(): ISignal<SessionManager, Kernel.IAnyMessageArgs> {
+    return this.sessions.anyMessage;
   }
 
   /**
