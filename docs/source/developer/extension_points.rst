@@ -356,3 +356,54 @@ Widget tracker tokens are provided for many activities in JupyterLab, including
 notebooks, consoles, text files, mime documents, and terminals.
 If you are adding your own activities to JupyterLab, you might consider providing
 a ``WidgetTracker`` token of your own, so that other extensions can make use of it.
+
+.. _copy_shareable_link:
+
+Copy Shareable Link
+~~~~~~~~~~~~~~~~~~~
+
+The file browser provides a context menu item "Copy Shareable Link". The
+desired behavior will vary by deployment and the users it serves. The file
+browser supports overriding the behavior of this item.
+
+.. code:: typescript
+
+   import {
+     IFileBrowserFactory
+   } from '@jupyterlab/filebrowser';
+
+   import {
+     JupyterFrontEnd, JupyterFrontEndPlugin
+   } from '@jupyterlab/application';
+
+
+   const shareFile: JupyterFrontEndPlugin<void> = {
+     activate: activateShareFile,
+     id: commandID,
+     requires: [IFileBrowserFactory],
+     autoStart: true
+   };
+
+   function activateShareFile(
+     app: JupyterFrontEnd,
+     factory: IFileBrowserFactory
+   ): void {
+     const { commands } = app;
+     const { tracker } = factory;
+
+     commands.addCommand('filebrowser:share-main', {
+       execute: () => {
+         const widget = tracker.currentWidget;
+         if (!widget) {
+           return;
+         }
+         const path = encodeURI(widget.selectedItems().next().path);
+         // Do something with path.
+       },
+       isVisible: () =>
+         tracker.currentWidget &&
+         toArray(tracker.currentWidget.selectedItems()).length === 1,
+       iconClass: 'jp-MaterialIcon jp-LinkIcon',
+       label: 'Copy Shareable Link'
+     });
+   }
