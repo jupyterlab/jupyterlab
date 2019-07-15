@@ -121,54 +121,54 @@
   background-image: var(--jp-icon-inverse-close-circle);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-current .p-TabBar-tabIcon.jp-FileIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-FileIcon {
   background-image: var(--jp-icon-file-selected);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-current .p-TabBar-tabIcon.jp-TextEditorIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-TextEditorIcon {
   background-image: var(--jp-icon-text-editor-selected);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-current .p-TabBar-tabIcon.jp-NotebookIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-NotebookIcon {
   background-image: var(--jp-icon-notebook-selected);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-current .p-TabBar-tabIcon.jp-FolderIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-FolderIcon {
   background-image: var(--jp-icon-folder-selected);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-current .p-TabBar-tabIcon.jp-MarkdownIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-MarkdownIcon {
   background-image: var(--jp-icon-markdown-selected);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-current .p-TabBar-tabIcon.jp-PythonIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-PythonIcon {
   background-image: var(--jp-icon-python-selected);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-current .p-TabBar-tabIcon.jp-JSONIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-JSONIcon {
   background-image: var(--jp-icon-json-selected);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-current .p-TabBar-tabIcon.jp-SpreadsheetIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-SpreadsheetIcon {
   background-image: var(--jp-icon-spreadsheet-selected);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-current .p-TabBar-tabIcon.jp-RKernelIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-RKernelIcon {
   background-image: var(--jp-icon-r-selected);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-current .p-TabBar-tabIcon.jp-YAMLIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-YAMLIcon {
   background-image: var(--jp-icon-yaml-selected);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-current .p-TabBar-tabIcon.jp-ImageIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-ImageIcon {
   background-image: var(--jp-icon-image-selected);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-current .p-TabBar-tabIcon.jp-CodeConsoleIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-CodeConsoleIcon {
   background-image: var(--jp-icon-console-selected);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-current .p-TabBar-tabIcon.jp-LauncherIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-LauncherIcon {
   background-image: var(--jp-icon-launcher-selected);
 }
