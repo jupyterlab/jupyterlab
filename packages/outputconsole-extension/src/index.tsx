@@ -252,38 +252,36 @@ function activateOutputConsole(
     );
   };
 
-  app.started.then(() => {
-    app.serviceManager.anyMessage.connect(
-      (sessionManager: SessionManager, msgInfo: Kernel.IAnyMessageArgs) => {
-        if (!messageCanBeRendered(msgInfo) || sameAsLastMessage(msgInfo)) {
-          return;
-        }
-
-        const msg = msgInfo.msg;
-        lastMsg = msg;
-        lastKernelSession = msg.header.session;
-
-        sessionManager
-          .findByKernelClientId(
-            (msg.parent_header as KernelMessage.IHeader).session
-          )
-          .then((session: Session.IModel) => {
-            const sourceIconClassName =
-              session.type === 'notebook'
-                ? NOTEBOOK_ICON_CLASS
-                : session.type === 'console'
-                ? CONSOLE_ICON_CLASS
-                : undefined;
-
-            outputConsoleWidget.outputConsole.logMessage({
-              sourceName: session.name,
-              sourceIconClassName: sourceIconClassName,
-              msg: msg as KernelMessage.IIOPubMessage
-            });
-          });
+  app.serviceManager.anyMessage.connect(
+    (sessionManager: SessionManager, msgInfo: Kernel.IAnyMessageArgs) => {
+      if (!messageCanBeRendered(msgInfo) || sameAsLastMessage(msgInfo)) {
+        return;
       }
-    );
-  });
+
+      const msg = msgInfo.msg;
+      lastMsg = msg;
+      lastKernelSession = msg.header.session;
+
+      sessionManager
+        .findByKernelClientId(
+          (msg.parent_header as KernelMessage.IHeader).session
+        )
+        .then((session: Session.IModel) => {
+          const sourceIconClassName =
+            session.type === 'notebook'
+              ? NOTEBOOK_ICON_CLASS
+              : session.type === 'console'
+              ? CONSOLE_ICON_CLASS
+              : undefined;
+
+          outputConsoleWidget.outputConsole.logMessage({
+            sourceName: session.name,
+            sourceIconClassName: sourceIconClassName,
+            msg: msg as KernelMessage.IIOPubMessage
+          });
+        });
+    }
+  );
 
   const command: string = 'log:jlab-output-console';
 
