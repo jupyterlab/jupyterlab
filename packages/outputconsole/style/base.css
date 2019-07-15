@@ -7,6 +7,10 @@
   overflow-y: auto;
 }
 
+.lab-output-console-icon {
+  line-height: var(--jp-private-horizontal-tab-height);
+}
+
 .lab-output-console-widget .clear-icon {
   transform: rotate(90deg);
   margin-top: -1px;

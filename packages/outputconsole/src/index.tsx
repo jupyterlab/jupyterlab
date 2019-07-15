@@ -66,6 +66,7 @@ export class OutputConsoleWidget extends Widget {
     this.id = UUID.uuid4();
     this.title.closable = true;
     this.title.label = 'Output Console';
+    this.title.iconClass = 'fa fa-list lab-output-console-icon';
     this.addClass('lab-output-console-widget');
 
     this._consoleView = new OutputConsoleView(rendermime);
