@@ -10,6 +10,9 @@
       "path": "../application"
     },
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../mainmenu"
     },
     {
@@ -20,6 +23,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../statusbar"
     }
   ]
 }

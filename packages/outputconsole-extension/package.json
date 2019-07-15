@@ -33,10 +33,13 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^1.1.0-alpha.1",
+    "@jupyterlab/apputils": "^1.1.0-alpha.1",
     "@jupyterlab/mainmenu": "^1.1.0-alpha.1",
     "@jupyterlab/outputconsole": "^0.1.0-alpha.1",
     "@jupyterlab/rendermime": "^1.1.0-alpha.1",
-    "@jupyterlab/services": "^4.1.0-alpha.1"
+    "@jupyterlab/services": "^4.1.0-alpha.1",
+    "@jupyterlab/statusbar": "^1.1.0-alpha.1",
+    "react": "~16.8.4"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

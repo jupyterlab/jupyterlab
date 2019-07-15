@@ -9,6 +9,8 @@ import { UUID, Token } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
+import { Message } from '@phosphor/messaging';
+
 import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
 import { nbformat } from '@jupyterlab/coreutils';
@@ -31,18 +33,30 @@ export interface IOutputLogPayload {
 
 export interface IOutputConsole {
   logMessage(payload: IOutputLogPayload): void;
+  onLogMessage: ISignal<IOutputConsole, IOutputLogPayload>;
+  logCount: number;
 }
 
 export class OutputConsole implements IOutputConsole {
   logMessage(payload: IOutputLogPayload) {
+    this._logCount++;
     this._onLogMessage.emit(payload);
   }
 
-  get onLogMessage(): ISignal<this, IOutputLogPayload> {
+  get onLogMessage(): ISignal<IOutputConsole, IOutputLogPayload> {
     return this._onLogMessage;
   }
 
-  private _onLogMessage = new Signal<this, IOutputLogPayload>(this);
+  get logCount(): number {
+    return this._logCount;
+  }
+
+  clearMessages(): void {
+    this._logCount = 0;
+  }
+
+  private _onLogMessage = new Signal<IOutputConsole, IOutputLogPayload>(this);
+  private _logCount: number = 0;
 }
 
 export class OutputConsoleWidget extends Widget {
@@ -62,6 +76,7 @@ export class OutputConsoleWidget extends Widget {
     let button = new ToolbarButton({
       onClick: (): void => {
         this._consoleView.clearMessages();
+        this._logsCleared.emit();
       },
       iconClassName: 'fa fa-ban clear-icon',
       tooltip: 'Clear',
@@ -80,11 +95,25 @@ export class OutputConsoleWidget extends Widget {
     this.layout = layout;
   }
 
+  onAfterAttach(msg: Message) {
+    this._madeVisible.emit();
+  }
+
   get outputConsole(): IOutputConsole {
     return this._consoleView.outputConsole;
   }
 
+  get logsCleared(): ISignal<this, void> {
+    return this._logsCleared;
+  }
+
+  get madeVisible(): ISignal<this, void> {
+    return this._madeVisible;
+  }
+
   private _consoleView: OutputConsoleView = null;
+  private _logsCleared = new Signal<this, void>(this);
+  private _madeVisible = new Signal<this, void>(this);
 }
 
 class OutputConsoleView extends Widget {
@@ -115,7 +144,7 @@ class OutputConsoleView extends Widget {
         logLine.innerHTML = `
         <div class="log-meta">
           <div class="log-count-time">
-            <div class="log-count">${++this._logCounter})</div>
+            <div class="log-count">${this._outputConsole.logCount})</div>
             <div class="log-time">${logTime}</div>
           </div>
           <div class="log-sender" title="${payload.sourceName}">
@@ -146,13 +175,17 @@ class OutputConsoleView extends Widget {
     return this._outputConsole;
   }
 
+  get logCount(): number {
+    return this._outputConsole.logCount;
+  }
+
   clearMessages(): void {
     while (this.node.lastChild) {
       this.node.removeChild(this.node.lastChild);
     }
-    this._logCounter = 0;
+
+    return this._outputConsole.clearMessages();
   }
 
-  private _logCounter: number = 0;
   private _outputConsole: OutputConsole = null;
 }
