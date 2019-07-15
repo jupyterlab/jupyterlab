@@ -72,7 +72,7 @@
 }
 
 .jp-extensionmanager-view header > .jp-ToolbarButtonComponent:hover {
-  /* border: 1px solid var(--jp-brand-color1); */
+  background-color: var(--jp-layout-color2);
 }
 
 /*
@@ -90,13 +90,14 @@
   padding: 4px;
 }
 
-.jp-extensionmanager-search-wrapper .jp-InputGroup{
+.jp-extensionmanager-search-wrapper.jp-InputGroup {
   background: transparent;
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color0);
   line-height: var(--jp-private-commandpalette-search-height);
   box-sizing: border-box;
   border-radius: 0;
+  width: 100%;
 }
 
 .jp-extensionmanager-search-wrapper .jp-InputGroup:focus {

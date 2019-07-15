@@ -43,9 +43,10 @@ export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
       <Input
         {...oprops}
         className={combineClassNames(oprops.className, 'jp-InputGroup')}
+        disableUnderline={true}
         endAdornment={
-          <InputAdornment position="end">
-            <MIcon className={'jp-Icon'}>{rightIcon}</MIcon>
+          <InputAdornment position="end" disablePointerEvents={true}>
+            <Icon>{rightIcon}</Icon>
           </InputAdornment>
         }
       />
@@ -54,6 +55,7 @@ export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
   return (
     <Input
       {...oprops}
+      disableUnderline={true}
       className={combineClassNames(oprops.className, 'jp-InputGroup')}
     />
   );
@@ -71,6 +73,9 @@ export const HTMLSelect = (props: SelectProps & CommonProps<any>) => (
   <MSelect
     native
     {...props}
+    input={
+      <Input {...(props.inputProps as InputProps)} disableUnderline={true} />
+    }
     className={combineClassNames(props.className, 'jp-HTMLSelect')}
   />
 );

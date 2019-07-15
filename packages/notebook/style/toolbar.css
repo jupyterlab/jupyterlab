@@ -31,5 +31,9 @@
 }
 
 .jp-Notebook-toolbarCellTypeDropdown span {
-  top: 5px !important;
+  top: 5px;
+  color: rgba(0, 0, 0, 0.54);
+  right: 0;
+  position: absolute;
+  pointer-events: none;
 }
