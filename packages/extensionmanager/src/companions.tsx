@@ -108,7 +108,7 @@ export function presentCompanions(
   let entries = [];
   if (serverCompanion) {
     entries.push(
-      <p>
+      <p key="server-companion">
         This package has indicated that it needs a corresponding server
         extension:
         <code> {serverCompanion.base.name!}</code>
