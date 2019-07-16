@@ -61,8 +61,8 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
     version = Unicode('', config=True,
         help="The version of the built application")
 
-    dev_build = Bool(True, config=True,
-        help="Whether to build in dev mode (defaults to dev mode)")
+    dev_build = Bool(False, config=True,
+        help="Whether to build in dev mode (defaults to prod mode)")
 
     pre_clean = Bool(False, config=True,
         help="Whether to clean before building (defaults to False)")

@@ -69,8 +69,8 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     should_build = Bool(True, config=True,
         help="Whether to build the app after the action")
 
-    dev_build = Bool(True, config=True,
-        help="Whether to build in dev mode (defaults to dev mode)")
+    dev_build = Bool(False, config=True,
+        help="Whether to build in dev mode (defaults to prod mode)")
 
     should_clean = Bool(False, config=True,
         help="Whether temporary files should be cleaned up after building jupyterlab")
