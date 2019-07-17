@@ -336,6 +336,7 @@ export async function ensurePackage(
  */
 export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
   const funcName = 'ensureUiComponents';
+  let msg: string;
   let messages: string[] = [];
 
   const svgs = glob.sync(path.join(pkgPath, 'style/icons', '**/*.svg'));
@@ -344,80 +345,60 @@ export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
   const iconSrcDir = path.join(pkgPath, 'src/icon');
 
   // build the per-icon import code
-  let iconImportStatements: string[] = [];
-  let iconModelDeclarations: string[] = [];
+  let _iconImportStatements: string[] = [];
+  let _iconModelDeclarations: string[] = [];
   svgs.forEach(svg => {
     const name = utils.stem(svg);
     const nameCamel = utils.camelCase(name) + 'Svg';
-    iconImportStatements.push(
+    _iconImportStatements.push(
       `import ${nameCamel} from '${path.relative(iconSrcDir, svg)}';`
     );
-    iconModelDeclarations.push(`{ name: '${name}', svg: ${nameCamel} }`);
+    _iconModelDeclarations.push(`{ name: '${name}', svg: ${nameCamel} }`);
   });
+  const iconImportStatements = _iconImportStatements.join('\n');
+  const iconModelDeclarations = _iconModelDeclarations.join(',\n');
 
   // generate the actual contents of the iconImports file
-  let iconImports = utils.fromTemplate(
-    HEADER_TEMPLATE,
-    { funcName },
-    { end: '\n\n' }
-  );
-  iconImports += utils.fromTemplate(ICON_IMPORTS_TEMPLATE, {
-    iconImportStatements
-  });
-  iconImports = utils.fromTemplate(
-    iconImports,
-    { iconModelDeclarations },
-    { join: ',\n' }
-  );
-
-  // write the iconImports file
   const iconImportsPath = path.join(iconSrcDir, 'iconImports.ts');
-  const iconImportsPrev = fs.readFileSync(iconImportsPath, {
-    encoding: 'utf8'
-  });
-  if (iconImportsPrev !== iconImports) {
-    messages.push(`Updated ./${iconImportsPath}`);
-    fs.writeFileSync(iconImportsPath, iconImports);
+  const iconImportsContents = utils.fromTemplate(
+    HEADER_TEMPLATE + ICON_IMPORTS_TEMPLATE,
+    { funcName, iconImportStatements, iconModelDeclarations }
+  );
+  if ((msg = ensureFile(iconImportsPath, iconImportsContents))) {
+    messages.push(msg);
   }
 
   /* support for deprecated icon CSS classes */
   const iconCSSDir = path.join(pkgPath, 'style');
 
   // build the per-icon import code
-  let iconCSSUrls: string[] = [];
-  let iconCSSDeclarations: string[] = [];
+  let _iconCSSUrls: string[] = [];
+  let _iconCSSDeclarations: string[] = [];
   svgs.forEach(svg => {
     const name = utils.stem(svg);
     const urlName = 'jp-icon-' + name;
     const className = 'jp-' + utils.camelCase(name, true) + 'Icon';
 
-    iconCSSUrls.push(`--${urlName}: url('${path.relative(iconCSSDir, svg)}');`);
+    _iconCSSUrls.push(
+      `--${urlName}: url('${path.relative(iconCSSDir, svg)}');`
+    );
 
     // be sure to match the delinted syntax style
-    iconCSSDeclarations.push(`.${className} {`);
-    iconCSSDeclarations.push(`  background-image: var(--${urlName});`);
-    iconCSSDeclarations.push(`}`);
+    _iconCSSDeclarations.push(`.${className} {`);
+    _iconCSSDeclarations.push(`  background-image: var(--${urlName});`);
+    _iconCSSDeclarations.push(`}`);
   });
+  const iconCSSUrls = _iconCSSUrls.join('\n');
+  const iconCSSDeclarations = _iconCSSDeclarations.join('\n');
 
   // generate the actual contents of the iconCSSClasses file
-  let iconCSSClasses = utils.fromTemplate(
-    HEADER_TEMPLATE,
-    { funcName },
-    { end: '\n\n' }
-  );
-  iconCSSClasses += utils.fromTemplate(ICON_CSS_CLASSES_TEMPLATE, {
-    iconCSSUrls,
-    iconCSSDeclarations
-  });
-
-  // write the iconCSSClasses file
   const iconCSSClassesPath = path.join(iconCSSDir, 'deprecated.css');
-  const iconCSSClassesPrev = fs.readFileSync(iconCSSClassesPath, {
-    encoding: 'utf8'
-  });
-  if (iconCSSClassesPrev !== iconCSSClasses) {
-    messages.push(`Updated ./${iconCSSClassesPath}`);
-    fs.writeFileSync(iconCSSClassesPath, iconCSSClasses);
+  const iconCSSClassesContent = utils.fromTemplate(
+    HEADER_TEMPLATE + ICON_CSS_CLASSES_TEMPLATE,
+    { funcName, iconCSSUrls, iconCSSDeclarations }
+  );
+  if ((msg = ensureFile(iconCSSClassesPath, iconCSSClassesContent))) {
+    messages.push(msg);
   }
 
   return messages;
@@ -471,6 +452,18 @@ export interface IEnsurePackageOptions {
    * Packages which are allowed to have multiple versions pulled in
    */
   differentVersions?: string[];
+}
+
+function ensureFile(path: string, contents: string): string | null {
+  const prev = fs.readFileSync(path, {
+    encoding: 'utf8'
+  });
+  if (prev !== contents) {
+    fs.writeFileSync(path, contents);
+    return `Updated ./${path}`;
+  } else {
+    return;
+  }
 }
 
 /**

@@ -1,3 +1,15 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/**
+ * This file contains support for deprecated CSS not covered in the
+ * auto-generated `deprecated.css`.
+ */
+
+/* vars for consuming "selected" icons as CSS background images */
+
 :root {
   --jp-icon-file-selected: url('deprecated/selected/file_selected.svg');
   --jp-icon-folder-selected: url('deprecated/selected/ic_folder_24px_selected.svg');

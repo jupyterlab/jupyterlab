@@ -132,43 +132,32 @@ export function writeJSONFile(filePath: string, data: any): boolean {
  * value is supplied as an array of strings.
  *
  * @param options.end: default = '\n'. Inserted at the end of
- * a template post-substitution.
+ * a template post-substitution and post-trim.
  *
- * @param options.join: default = '\n'. If using array substitution values, this is
- * the string that will be used to join each array.
- *
- * @returns the input template with all {{vars}} substituted.
+ * @returns the input template with all {{vars}} substituted, then `.trim`-ed.
  */
 export function fromTemplate(
   templ: string,
-  subs: Dict<string | string[]>,
-  options: { autoindent?: boolean; end?: string; join?: string } = {}
+  subs: Dict<string>,
+  options: { autoindent?: boolean; end?: string } = {}
 ) {
   // default options values
   const autoindent =
     options.autoindent === undefined ? true : options.autoindent;
   const end = options.end === undefined ? '\n' : options.end;
-  const join = options.join === undefined ? '\n' : options.join;
 
   Object.keys(subs).forEach(key => {
-    if (autoindent && subs[key] instanceof Array) {
-      // if val is an array of strings, assume one line per entry
+    const val = subs[key];
+
+    if (autoindent) {
+      // try to match the indentation level of the {{var}} in the input template.
       templ = templ.split(`{{${key}}}`).reduce((acc, cur) => {
-        // try to match the indentation level of the {{var}} in the input template.
         // Regex: 0 or more non-newline whitespaces followed by end of string
-        let indent = acc.match(/([^\S\r\n]*).*$/);
-        return (
-          acc +
-          (subs[key] as string[]).join(join + (indent ? indent[1] : '')) +
-          cur
-        );
+        let indentRe = acc.match(/([^\S\r\n]*).*$/);
+        let indent = indentRe ? indentRe[1] : '';
+        return acc + val.split('\n').join('\n' + indent) + cur;
       });
     } else {
-      const val =
-        subs[key] instanceof Array
-          ? (subs[key] as string[]).join(join)
-          : (subs[key] as string);
-
       templ = templ.split(`{{${key}}}`).join(val);
     }
   });
