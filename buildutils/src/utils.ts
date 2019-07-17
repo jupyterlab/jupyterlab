@@ -154,13 +154,12 @@ export function fromTemplate(
     if (autoindent && subs[key] instanceof Array) {
       // if val is an array of strings, assume one line per entry
       templ = templ.split(`{{${key}}}`).reduce((acc, cur) => {
-        // try to match the indentation level of the {{var}} in the input template
-        let leadingWhiteSpace = acc.match(/\n?(\s*).*$/);
+        // try to match the indentation level of the {{var}} in the input template.
+        // Regex: 0 or more non-newline whitespaces followed by end of string
+        let indent = acc.match(/([^\S\r\n]*).*$/);
         return (
           acc +
-          (subs[key] as string[]).join(
-            join + (leadingWhiteSpace ? leadingWhiteSpace[1] : '')
-          ) +
+          (subs[key] as string[]).join(join + (indent ? indent[1] : '')) +
           cur
         );
       });

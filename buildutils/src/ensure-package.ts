@@ -33,6 +33,22 @@ export namespace IconImports {
 }
 `;
 
+const ICON_CSS_CLASSES_TEMPLATE = `
+/**
+ * (DEPRECATED) Support for consuming icons as CSS background images
+ */
+
+/* Icons urls */
+
+:root {
+  {{iconCSSUrls}}
+}
+
+/* Icon CSS class declarations */
+
+{{iconCSSDeclarations}}
+`;
+
 /**
  * Ensure the integrity of a package.
  *
@@ -319,11 +335,13 @@ export async function ensurePackage(
  * @returns A list of changes that were made to ensure the package.
  */
 export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
+  const funcName = 'ensureUiComponents';
   let messages: string[] = [];
-  // const tab = '  ';
 
-  const iconSrcDir = path.join(pkgPath, 'src/icon');
   const svgs = glob.sync(path.join(pkgPath, 'style/icons', '**/*.svg'));
+
+  /* support for glob import of icon svgs */
+  const iconSrcDir = path.join(pkgPath, 'src/icon');
 
   // build the per-icon import code
   let iconImportStatements: string[] = [];
@@ -337,9 +355,7 @@ export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
     iconModelDeclarations.push(`{ name: '${name}', svg: ${nameCamel} }`);
   });
 
-  // generate the actual iconImports file
-  /* tslint:disable */
-  const funcName = 'ensureUiComponents';
+  // generate the actual contents of the iconImports file
   let iconImports = utils.fromTemplate(
     HEADER_TEMPLATE,
     { funcName },
@@ -353,14 +369,52 @@ export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
     { iconModelDeclarations },
     { join: ',\n' }
   );
-  /* tslint:enable */
 
   // write the iconImports file
   const iconImportsPath = path.join(iconSrcDir, 'iconImports.ts');
-  const prev = fs.readFileSync(iconImportsPath, { encoding: 'utf8' });
-  if (prev !== iconImports) {
+  const iconImportsPrev = fs.readFileSync(iconImportsPath, {
+    encoding: 'utf8'
+  });
+  if (iconImportsPrev !== iconImports) {
     messages.push(`Updated ./${iconImportsPath}`);
     fs.writeFileSync(iconImportsPath, iconImports);
+  }
+
+  /* support for deprecated icon CSS classes */
+  const iconCSSDir = path.join(pkgPath, 'style');
+
+  // build the per-icon import code
+  let iconCSSUrls: string[] = [];
+  let iconCSSDeclarations: string[] = [];
+  svgs.forEach(svg => {
+    const name = utils.stem(svg);
+    const urlName = 'jp-icon-' + name;
+    const className = 'jp-' + utils.camelCase(name, true) + 'Icon';
+    iconCSSUrls.push(`--${urlName}: url('${path.relative(iconCSSDir, svg)}');`);
+    iconCSSDeclarations.push(
+      `.${className} {background-image: var(--${urlName})}`
+    );
+  });
+
+  // generate the actual contents of the iconCSSClasses file
+  let iconCSSClasses = utils.fromTemplate(
+    HEADER_TEMPLATE,
+    { funcName },
+    { end: '\n\n' }
+  );
+  iconCSSClasses += utils.fromTemplate(ICON_CSS_CLASSES_TEMPLATE, {
+    iconCSSUrls,
+    iconCSSDeclarations
+  });
+
+  // write the iconCSSClasses file
+  const iconCSSClassesPath = path.join(iconCSSDir, 'deprecated.css');
+  const iconCSSClassesPrev = fs.readFileSync(iconCSSClassesPath, {
+    encoding: 'utf8'
+  });
+  if (iconCSSClassesPrev !== iconCSSClasses) {
+    messages.push(`Updated ./${iconCSSClassesPath}`);
+    fs.writeFileSync(iconCSSClassesPath, iconCSSClasses);
   }
 
   return messages;
