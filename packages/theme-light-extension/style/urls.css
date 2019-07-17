@@ -84,33 +84,15 @@
   --jp-icon-vega: url('icons/jupyter/vega.svg');
 
   /* to delete */
-  --jp-image-jupyter-favicon: url('images/jupyter-favicon.svg');
-
-  --jp-icon-build: url('icons/md/ic_build_24px.svg');
-  --jp-icon-extension: url('icons/md/ic_extension_24px.svg');
   --jp-icon-file-selected: url('icons/jupyter/file_selected.svg');
-  --jp-icon-file: url('icons/jupyter/file.svg');
   --jp-icon-folder-selected: url('icons/md/ic_folder_24px_selected.svg');
-  --jp-icon-folder: url('icons/md/ic_folder_24px.svg');
   --jp-icon-image-selected: url('icons/jupyter/image_selected.svg');
-  --jp-icon-image: url('icons/jupyter/image.svg');
   --jp-icon-json-selected: url('icons/jupyter/json_selected.svg');
-  --jp-icon-json: url('icons/jupyter/json.svg');
   --jp-icon-kernel-selected: url('icons/md/ic_memory_24px_selected.svg');
-  --jp-icon-kernel: url('icons/md/ic_memory_24px.svg');
   --jp-icon-markdown-selected: url('icons/jupyter/markdown_selected.svg');
-  --jp-icon-markdown: url('icons/jupyter/markdown.svg');
   --jp-icon-notebook-selected: url('icons/jupyter/notebook_selected.svg');
-  --jp-icon-notebook: url('icons/jupyter/notebook.svg');
-  --jp-icon-palette: url('icons/md/ic_palette_24px.svg');
   --jp-icon-python-selected: url('icons/jupyter/python_selected.svg');
-  --jp-icon-python: url('icons/jupyter/python.svg');
   --jp-icon-r-selected: url('icons/jupyter/r_selected.svg');
-  --jp-icon-r: url('icons/jupyter/r.svg');
   --jp-icon-spreadsheet-selected: url('icons/jupyter/csv_selected.svg');
-  --jp-icon-spreadsheet: url('icons/jupyter/csv.svg');
-  --jp-icon-tab: url('icons/md/ic_tab_24px.svg');
-  --jp-icon-terminal: url('icons/jupyter/terminal.svg');
   --jp-icon-yaml-selected: url('icons/jupyter/yml_selected.svg');
-  --jp-icon-yaml: url('icons/jupyter/yml.svg');
 }
