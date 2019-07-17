@@ -169,21 +169,19 @@ export async function ensurePackage(
   // Template the CSS index file.
   if (cssImports && fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
     const funcName = 'ensurePackage';
-    let cssIndex = utils.fromTemplate(
+    let cssIndexContents = utils.fromTemplate(
       HEADER_TEMPLATE,
       { funcName },
       { end: '' }
     );
     cssImports.forEach(cssImport => {
-      cssIndex += `\n@import url('~${cssImport}');`;
+      cssIndexContents += `\n@import url('~${cssImport}');`;
     });
-    cssIndex += "\n\n@import url('./base.css');\n";
-    const cssPath = path.join(pkgPath, 'style/index.css');
-    const prev = fs.readFileSync(cssPath, { encoding: 'utf8' });
-    if (prev !== cssIndex) {
-      messages.push(`Updated ./${data.style}`);
-      fs.writeFileSync(cssPath, cssIndex);
-    }
+    cssIndexContents += "\n\n@import url('./base.css');\n";
+
+    // write out cssIndexContents, if needed
+    const cssIndexPath = path.join(pkgPath, 'style/index.css');
+    messages.push(...ensureFile(cssIndexPath, cssIndexContents));
   }
 
   // Look for unused packages
@@ -336,7 +334,6 @@ export async function ensurePackage(
  */
 export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
   const funcName = 'ensureUiComponents';
-  let msg: string;
   let messages: string[] = [];
 
   const svgs = glob.sync(path.join(pkgPath, 'style/icons', '**/*.svg'));
@@ -364,9 +361,7 @@ export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
     HEADER_TEMPLATE + ICON_IMPORTS_TEMPLATE,
     { funcName, iconImportStatements, iconModelDeclarations }
   );
-  if ((msg = ensureFile(iconImportsPath, iconImportsContents))) {
-    messages.push(msg);
-  }
+  messages.push(...ensureFile(iconImportsPath, iconImportsContents));
 
   /* support for deprecated icon CSS classes */
   const iconCSSDir = path.join(pkgPath, 'style');
@@ -397,9 +392,7 @@ export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
     HEADER_TEMPLATE + ICON_CSS_CLASSES_TEMPLATE,
     { funcName, iconCSSUrls, iconCSSDeclarations }
   );
-  if ((msg = ensureFile(iconCSSClassesPath, iconCSSClassesContent))) {
-    messages.push(msg);
-  }
+  messages.push(...ensureFile(iconCSSClassesPath, iconCSSClassesContent));
 
   return messages;
 }
@@ -454,16 +447,38 @@ export interface IEnsurePackageOptions {
   differentVersions?: string[];
 }
 
-function ensureFile(path: string, contents: string): string | null {
+/**
+ * Ensure that contents of a file match a supplied string. If they do match,
+ * do nothing and return an empty array. If they don't match, overwrite the
+ * file and return an array with an update message.
+ *
+ * @param path - The path to the file being checked. The file must exist,
+ * or else this function does nothing.
+ *
+ * @param contents - The desired file contents.
+ *
+ * @returns a string array with 0 or 1 messages.
+ */
+function ensureFile(path: string, contents: string): string[] {
+  let messages: string[] = [];
+
+  if (!fs.existsSync(path)) {
+    // bail
+    messages.push(
+      `Tried to ensure the contents of ./${path}, but the file does not exist`
+    );
+    return messages;
+  }
+
   const prev = fs.readFileSync(path, {
     encoding: 'utf8'
   });
   if (prev !== contents) {
     fs.writeFileSync(path, contents);
-    return `Updated ./${path}`;
-  } else {
-    return;
+    messages.push(`Updated ./${path}`);
   }
+
+  return messages;
 }
 
 /**
