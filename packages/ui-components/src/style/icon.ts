@@ -12,6 +12,7 @@ import { NestedCSSProperties } from 'typestyle/lib/types';
  * - listing: The icons to the left of the filebrowser listing items
  * - settingsEditor: The icons to the left of each section of the settings editor
  * - sideBar: The icons for the sidebar (default to the left of the main window)
+ * - splash: The icon used for the splash screen
  * - tabManager: The icons for the tabManager in the sidebar
  */
 export type IconKindType =
@@ -22,6 +23,7 @@ export type IconKindType =
   | 'listing'
   | 'settingsEditor'
   | 'sideBar'
+  | 'splash'
   | 'statusBar'
   | 'tabManager'
   | 'unset';
@@ -107,6 +109,10 @@ const iconCSSSideBar: NestedCSSProperties = {
   width: '20px'
 };
 
+const iconCSSSplash: NestedCSSProperties = {
+  width: '100px'
+};
+
 const iconCSSStatusBar: NestedCSSProperties = {
   left: '0px',
   top: '0px',
@@ -128,6 +134,7 @@ const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   listing: iconCSSListing,
   settingsEditor: iconCSSSettingsEditor,
   sideBar: iconCSSSideBar,
+  splash: iconCSSSplash,
   statusBar: iconCSSStatusBar,
   tabManager: iconCSSTabManager,
   unset: {}
@@ -164,6 +171,13 @@ const containerCSSSideBar: NestedCSSProperties = {
   transform: 'rotate(90deg)'
 };
 
+const containerCSSSplash: NestedCSSProperties = {
+  animation: '0.3s fade-in linear forwards',
+  height: '100%',
+  width: '100%',
+  zIndex: 1
+};
+
 const containerCSSTabManager: NestedCSSProperties = {
   marginRight: '2px',
   position: 'relative'
@@ -177,6 +191,7 @@ const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   listing: containerCSSListing,
   settingsEditor: containerCSSSettingsEditor,
   sideBar: containerCSSSideBar,
+  splash: containerCSSSplash,
   statusBar: {},
   tabManager: containerCSSTabManager,
   unset: {}

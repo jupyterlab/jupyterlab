@@ -190,8 +190,15 @@
   fill: var(--jp-brand-color1);
 }
 
+/* special handling for splash icon CSS. While the theme CSS reloads during
+   splash, the splash icon can loose theming. To prevent that, we set a
+   default for its color variable */
+:root {
+  --jp-warn-color0: var(--md-orange-700);
+}
+
 /**
- * Deprecated support for icons as CSS `background-images`
+ * (DEPRECATED) Support for icons as CSS `background-images`
  */
 
 .jp-MaterialIcon {
