@@ -390,10 +390,13 @@ export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
     const name = utils.stem(svg);
     const urlName = 'jp-icon-' + name;
     const className = 'jp-' + utils.camelCase(name, true) + 'Icon';
+
     iconCSSUrls.push(`--${urlName}: url('${path.relative(iconCSSDir, svg)}');`);
-    iconCSSDeclarations.push(
-      `.${className} {background-image: var(--${urlName})}`
-    );
+
+    // be sure to match the delinted syntax style
+    iconCSSDeclarations.push(`.${className} {`);
+    iconCSSDeclarations.push(`  background-image: var(--${urlName});`);
+    iconCSSDeclarations.push(`}`);
   });
 
   // generate the actual contents of the iconCSSClasses file

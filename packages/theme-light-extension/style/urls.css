@@ -82,17 +82,4 @@
   --jp-icon-text-editor: url('icons/md/ic_format_align_left_24px.svg');
   --jp-icon-undo: url('icons/md/undo.svg');
   --jp-icon-vega: url('icons/jupyter/vega.svg');
-
-  /* to delete */
-  --jp-icon-file-selected: url('icons/jupyter/file_selected.svg');
-  --jp-icon-folder-selected: url('icons/md/ic_folder_24px_selected.svg');
-  --jp-icon-image-selected: url('icons/jupyter/image_selected.svg');
-  --jp-icon-json-selected: url('icons/jupyter/json_selected.svg');
-  --jp-icon-kernel-selected: url('icons/md/ic_memory_24px_selected.svg');
-  --jp-icon-markdown-selected: url('icons/jupyter/markdown_selected.svg');
-  --jp-icon-notebook-selected: url('icons/jupyter/notebook_selected.svg');
-  --jp-icon-python-selected: url('icons/jupyter/python_selected.svg');
-  --jp-icon-r-selected: url('icons/jupyter/r_selected.svg');
-  --jp-icon-spreadsheet-selected: url('icons/jupyter/csv_selected.svg');
-  --jp-icon-yaml-selected: url('icons/jupyter/yml_selected.svg');
 }

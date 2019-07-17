@@ -115,3 +115,4 @@ select {
 
 /* Sibling imports */
 @import './deprecated.css';
+@import './deprecatedExtra.css';
