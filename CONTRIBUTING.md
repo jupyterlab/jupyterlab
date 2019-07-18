@@ -17,7 +17,7 @@ If you believe you’ve found a security vulnerability in JupyterLab or any
 Jupyter project, please report it to
 [security@ipython.org](mailto:security@ipython.org). If you prefer to encrypt your
 security reports, you can use [this PGP public
-key](https://jupyter-notebook.readthedocs.io/en/stable/_downloads/ipython_security.asc).
+key](https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipython_security.asc).
 
 ## General Guidelines for Contributing
 
