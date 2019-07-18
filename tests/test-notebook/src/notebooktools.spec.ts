@@ -13,13 +13,16 @@ import { simulate } from 'simulate-event';
 
 import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 
+import { Context } from '@jupyterlab/docregistry';
+
 import { ObservableJSON } from '@jupyterlab/observables';
 
 import {
-  NotebookTools,
+  INotebookModel,
+  NotebookActions,
   NotebookPanel,
-  NotebookTracker,
-  NotebookActions
+  NotebookTools,
+  NotebookTracker
 } from '@jupyterlab/notebook';
 
 import {
@@ -103,15 +106,17 @@ describe('@jupyterlab/notebook', () => {
     let notebookTools: NotebookTools;
     let tabpanel: TabPanel;
     let tracker: NotebookTracker;
+    let context0: Context<INotebookModel>;
+    let context1: Context<INotebookModel>;
     let panel0: NotebookPanel;
     let panel1: NotebookPanel;
 
     beforeEach(async () => {
-      const context0 = await createNotebookContext();
+      context0 = await createNotebookContext();
       await context0.initialize(true);
       panel0 = NBTestUtils.createNotebookPanel(context0);
       NBTestUtils.populateNotebook(panel0.content);
-      const context1 = await createNotebookContext();
+      context1 = await createNotebookContext();
       await context1.initialize(true);
       panel1 = NBTestUtils.createNotebookPanel(context1);
       NBTestUtils.populateNotebook(panel1.content);
@@ -129,9 +134,16 @@ describe('@jupyterlab/notebook', () => {
       await sleep();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+      panel0.dispose();
+      panel1.dispose();
       tabpanel.dispose();
       notebookTools.dispose();
+
+      await context0.session.shutdown();
+      context0.dispose();
+      await context1.session.shutdown();
+      context1.dispose();
     });
 
     describe('NotebookTools', () => {

@@ -5,17 +5,17 @@ import { expect } from 'chai';
 
 import { toArray } from '@phosphor/algorithm';
 
-import { INotebookModel } from '@jupyterlab/notebook';
-
-import { NotebookPanel } from '@jupyterlab/notebook';
-
-import { NotebookWidgetFactory } from '@jupyterlab/notebook';
+import { ToolbarButton } from '@jupyterlab/apputils';
 
 import { DocumentRegistry, Context } from '@jupyterlab/docregistry';
 
-import { createNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
+import {
+  INotebookModel,
+  NotebookPanel,
+  NotebookWidgetFactory
+} from '@jupyterlab/notebook';
 
-import { ToolbarButton } from '@jupyterlab/apputils';
+import { createNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
 
 const contentFactory = NBTestUtils.createNotebookPanelFactory();
 const rendermime = NBTestUtils.defaultRenderMime();
