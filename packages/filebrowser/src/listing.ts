@@ -10,39 +10,40 @@ import {
 
 import { PathExt, Time } from '@jupyterlab/coreutils';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import {
   IDocumentManager,
   isValidFileName,
   renameFile
 } from '@jupyterlab/docmanager';
 
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
 import { Contents } from '@jupyterlab/services';
 
 import {
   ArrayExt,
   ArrayIterator,
-  IIterator,
   each,
   filter,
   find,
+  IIterator,
   map,
   toArray
 } from '@phosphor/algorithm';
 
 import { MimeData, PromiseDelegate } from '@phosphor/coreutils';
 
-import { Drag, IDragEvent } from '@phosphor/dragdrop';
-
 import { ElementExt } from '@phosphor/domutils';
 
+import { Drag, IDragEvent } from '@phosphor/dragdrop';
+
 import { Message, MessageLoop } from '@phosphor/messaging';
+
+import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
 
 import { FileBrowserModel } from './model';
-import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
  * The class name added to DirListing widget.
