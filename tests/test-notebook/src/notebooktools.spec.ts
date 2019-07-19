@@ -26,7 +26,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  createNotebookContext,
+  initNotebookContext,
   // sleep,
   NBTestUtils
 } from '@jupyterlab/testutils';
@@ -112,12 +112,10 @@ describe('@jupyterlab/notebook', () => {
     let panel1: NotebookPanel;
 
     beforeEach(async () => {
-      context0 = await createNotebookContext();
-      await context0.initialize(true);
+      context0 = await initNotebookContext();
       panel0 = NBTestUtils.createNotebookPanel(context0);
       NBTestUtils.populateNotebook(panel0.content);
-      context1 = await createNotebookContext();
-      await context1.initialize(true);
+      context1 = await initNotebookContext();
       panel1 = NBTestUtils.createNotebookPanel(context1);
       NBTestUtils.populateNotebook(panel1.content);
       tracker = new NotebookTracker({ namespace: 'notebook' });
@@ -130,29 +128,16 @@ describe('@jupyterlab/notebook', () => {
       tabpanel.addWidget(notebookTools);
       tabpanel.node.style.height = '800px';
       Widget.attach(tabpanel, document.body);
-      // // Give the posted messages a chance to be handled.
-      // await sleep();
-
-      await Promise.all([
-        await context0.session.initialize(),
-        await context1.session.initialize()
-      ]);
-      await Promise.all([
-        context0.session.kernel.ready,
-        context1.session.kernel.ready
-      ]);
     });
 
-    afterEach(async () => {
-      panel0.dispose();
-      panel1.dispose();
+    afterEach(() => {
       tabpanel.dispose();
       notebookTools.dispose();
+      panel1.dispose();
+      panel0.dispose();
 
-      await context0.session.shutdown();
-      context0.dispose();
-      await context1.session.shutdown();
       context1.dispose();
+      context0.dispose();
     });
 
     describe('NotebookTools', () => {
