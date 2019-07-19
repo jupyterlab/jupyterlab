@@ -1,0 +1,14 @@
+{
+  "title": "Debugger",
+  "description": "Debugger settings.",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "debugger:open",
+      "keys": ["Accel Shift I"],
+      "selector": "body"
+    }
+  ],
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}
