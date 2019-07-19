@@ -117,23 +117,23 @@ export function presentCompanions(
   }
   if (kernelCompanions.length > 0) {
     entries.push(
-      <p>
+      <p key={"kernal-companion"}>
         This package has indicated that it needs a corresponding package for the
         kernel.
       </p>
     );
-    for (let entry of kernelCompanions) {
+    for (let [index, entry] of kernelCompanions.entries()) {
       entries.push(
-        <p>
+        <p key={`compainion-${index}`}>
           The package
           <code>{entry.kernelInfo.base.name!}</code>, is required by the
           following kernels:
         </p>
       );
       let kernelEntries = [];
-      for (let kernel of entry.kernels) {
+      for (let [index, kernel] of entry.kernels.entries()) {
         kernelEntries.push(
-          <li>
+          <li key={`kernals-${index}`}>
             <code>{kernel.display_name}</code>
           </li>
         );
