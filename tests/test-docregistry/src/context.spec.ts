@@ -21,7 +21,7 @@ import {
   waitForDialog,
   acceptDialog,
   dismissDialog,
-  createNotebookContext,
+  initNotebookContext,
   NBTestUtils
 } from '@jupyterlab/testutils';
 
@@ -189,7 +189,7 @@ describe('docregistry/context', () => {
       });
 
       it('should initialize the model when the file is saved for the first time', async () => {
-        const context = await createNotebookContext();
+        const context = await initNotebookContext();
         context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(context.model.cells.canUndo).to.equal(true);
         await context.initialize(true);
@@ -198,7 +198,7 @@ describe('docregistry/context', () => {
       });
 
       it('should initialize the model when the file is reverted for the first time', async () => {
-        const context = await createNotebookContext();
+        const context = await initNotebookContext();
         await manager.contents.save(context.path, {
           type: 'notebook',
           format: 'json',
