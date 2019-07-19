@@ -117,7 +117,7 @@ export function presentCompanions(
   }
   if (kernelCompanions.length > 0) {
     entries.push(
-      <p key={"kernal-companion"}>
+      <p key={'kernal-companion'}>
         This package has indicated that it needs a corresponding package for the
         kernel.
       </p>
