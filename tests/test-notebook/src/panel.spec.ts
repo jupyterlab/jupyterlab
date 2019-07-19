@@ -22,6 +22,9 @@ describe('@jupyterlab/notebook', () => {
 
     beforeEach(async () => {
       context = await createNotebookContext();
+      await context.initialize(true);
+      await context.session.initialize();
+      await context.session.kernel.ready;
     });
 
     afterEach(async () => {

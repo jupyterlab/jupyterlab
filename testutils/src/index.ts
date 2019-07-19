@@ -209,7 +209,11 @@ export async function createNotebookContext(
     manager,
     factory,
     path,
-    kernelPreference: { name: manager.specs.default }
+    kernelPreference: {
+      shouldStart: true,
+      canStart: true,
+      name: manager.specs.default
+    }
   });
 }
 

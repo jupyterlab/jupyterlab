@@ -40,6 +40,8 @@ describe('@jupyterlab/notebook', () => {
       await context.initialize(true);
       panel = NBTestUtils.createNotebookPanel(context);
       context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
+      await context.session.initialize();
+      await context.session.kernel.ready;
     });
 
     afterEach(async () => {

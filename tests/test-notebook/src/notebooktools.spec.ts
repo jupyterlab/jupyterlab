@@ -27,7 +27,7 @@ import {
 
 import {
   createNotebookContext,
-  sleep,
+  // sleep,
   NBTestUtils
 } from '@jupyterlab/testutils';
 
@@ -130,8 +130,17 @@ describe('@jupyterlab/notebook', () => {
       tabpanel.addWidget(notebookTools);
       tabpanel.node.style.height = '800px';
       Widget.attach(tabpanel, document.body);
-      // Give the posted messages a chance to be handled.
-      await sleep();
+      // // Give the posted messages a chance to be handled.
+      // await sleep();
+
+      await Promise.all([
+        await context0.session.initialize(),
+        await context1.session.initialize()
+      ]);
+      await Promise.all([
+        context0.session.kernel.ready,
+        context1.session.kernel.ready
+      ]);
     });
 
     afterEach(async () => {
