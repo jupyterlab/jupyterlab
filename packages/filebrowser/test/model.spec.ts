@@ -195,6 +195,14 @@ describe('filebrowser/model', () => {
       });
     });
 
+    describe('#rootPath', () => {
+      it('should be and remain the root path of the model', async () => {
+        expect(model.rootPath).to.equal('');
+        await model.cd('src/');
+        expect(model.rootPath).to.equal('');
+      });
+    });
+
     describe('#items()', () => {
       it('should get an iterator of items in the current path', () => {
         const items = model.items();
