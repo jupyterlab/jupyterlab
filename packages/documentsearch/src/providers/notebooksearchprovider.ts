@@ -73,7 +73,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       // or if there are no matches
       let cellShouldReRender = false;
       if (cell instanceof MarkdownCell && cell.rendered) {
-        cell.renderedDirty = false;
+        cell.rendered = false;
         cellShouldReRender = true;
       }
 
@@ -92,7 +92,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
           this._unRenderedMarkdownCells.push(cell);
         } else if (cellShouldReRender) {
           // was rendered previously, no need to refresh
-          cell.renderedDirty = true;
+          cell.rendered = true;
         }
       }
       if (matchesFromCell.length !== 0) {
@@ -178,7 +178,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     this._unRenderedMarkdownCells.forEach((cell: MarkdownCell) => {
       // Guard against the case where markdown cells have been deleted
       if (!cell.isDisposed) {
-        cell.renderedDirty = true;
+        cell.rendered = true;
       }
     });
     this._unRenderedMarkdownCells = [];
@@ -213,7 +213,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
 
     this._cmSearchProviders = [];
     this._unRenderedMarkdownCells.forEach((cell: MarkdownCell) => {
-      cell.renderedDirty = true;
+      cell.rendered = true;
     });
     this._unRenderedMarkdownCells = [];
 
