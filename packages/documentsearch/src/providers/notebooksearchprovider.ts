@@ -133,7 +133,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
 
   /**
    * Gradually refresh cells in the background so that the user will not
-   * experience frozen interface, 5 cells at a time.
+   * experience frozen interface, `n` cells at a time.
    */
   private _refreshCellsEditorsInBackground(cells: Cell[], n: number = 5) {
     let i = 0;
