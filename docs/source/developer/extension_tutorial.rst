@@ -76,6 +76,12 @@ Note: You'll need to run the command above in each new terminal you open
 before you can work with the tools you installed in the
 ``jupyterlab-ext`` environment.
 
+Note: if you have an older version of jupyterlab previously installed, you may need to update
+the version of jupyterlab manually.
+
+.. code:: bash
+    conda install -c conda-forge jupyterlab=1.0.2
+
 Create a repository
 ~~~~~~~~~~~~~~~~~~~
 
