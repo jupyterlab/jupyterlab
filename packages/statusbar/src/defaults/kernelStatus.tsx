@@ -185,13 +185,13 @@ export namespace KernelStatus {
           // sync setting of status and display name
           this._kernelStatus = newValue.status;
           this._kernelName = spec.display_name;
+          this._triggerChange(oldState, this._getAllState());
         });
       } else {
         this._kernelStatus = 'unknown';
         this._kernelName = 'unknown';
+        this._triggerChange(oldState, this._getAllState());
       }
-
-      this._triggerChange(oldState, this._getAllState());
     };
 
     private _getAllState(): [string, string, string] {
