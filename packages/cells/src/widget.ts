@@ -1035,37 +1035,48 @@ export namespace CodeCell {
         session,
         metadata
       );
-    // cell.outputArea.future assigned synchronously in `execute`
-    if (recordTiming) {
-      cell.outputArea.future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
-        let label: string;
-        switch (msg.header.msg_type) {
-          case 'status':
-            label = `status.${(msg as KernelMessage.IStatusMsg).content.execution_state}`;
-            break;
-          case 'execute_input':
-            label = 'execute_input';
-            break;
-          default:
+      // cell.outputArea.future assigned synchronously in `execute`
+      if (recordTiming) {
+        const recordTimingHook = (msg: KernelMessage.IIOPubMessage) => {
+          let label: string;
+          switch (msg.header.msg_type) {
+            case 'status':
+              label = `status.${
+                (msg as KernelMessage.IStatusMsg).content.execution_state
+              }`;
+              break;
+            case 'execute_input':
+              label = 'execute_input';
+              break;
+            default:
+              return;
+          }
+          const value = msg.header.date;
+          if (!value) {
             return;
-        }
-        const value = msg.header.date;
-        if (!value) {
-          return;
-        }
-        model.metadata.set(`timing.iopub.${label}`, value);
-      }};
+          }
+          const timingInfo: any = model.metadata.get('timing') || {};
+          timingInfo[`iopub.${label}`] = value;
+          model.metadata.set('timing', timingInfo);
+          return true;
+        };
+        cell.outputArea.future.registerMessageHook(recordTimingHook);
+      }
       // Save this execution's future so we can compare in the catch below.
       future = cell.outputArea.future;
       const msg = await msgPromise;
       model.executionCount = msg.content.execution_count;
       const started = msg.metadata.started as string;
       if (recordTiming && started) {
-        model.metadata.set('timing.shell.execute_reply.started', started);
-      }
-      const date = msg.header.date as string;
-      if (recordTiming && date) {
-        model.metadata.set('timing.shell.execute_reply', date);
+        const timingInfo = (model.metadata.get('timing') as any) || {};
+        if (started) {
+          timingInfo['shell.execute_reply.started'] = started;
+        }
+        const date = msg.header.date as string;
+        if (date) {
+          timingInfo['shell.execute_reply'] = date;
+        }
+        model.metadata.set('timing', timingInfo);
       }
       return msg;
     } catch (e) {

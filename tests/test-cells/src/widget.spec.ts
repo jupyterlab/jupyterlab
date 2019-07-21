@@ -753,29 +753,29 @@ describe('cells/widget', () => {
         originalCount = widget.model.executionCount;
         await CodeCell.execute(widget, session);
         const executionCount = widget.model.executionCount;
-        expect(executionCount).to.not.equal(originalCount);
+        expect(executionCount).not.toEqual(originalCount);
       });
 
       const TIMING_KEYS = [
-        'timing.iopub.execute_input',
-        'timing.shell.execute_reply.started',
-        'timing.shell.execute_reply',
-        'timing.iopub.status.busy',
-        'timing.iopub.status.idle'
+        'iopub.execute_input',
+        'shell.execute_reply.started',
+        'shell.execute_reply',
+        'iopub.status.busy',
+        'iopub.status.idle'
       ];
 
       it('should not save timing info by default', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
         await CodeCell.execute(widget, session);
-        for (const key of TIMING_KEYS) {
-          expect(widget.model.metadata.get(key)).to.not.exist;
-        }
+        expect(widget.model.metadata.get('timing')).toBeUndefined();
       });
       it('should save timing info if requested', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
         await CodeCell.execute(widget, session, { recordTiming: true });
+        expect(widget.model.metadata.get('timing')).toBeDefined();
+        const timingInfo = widget.model.metadata.get('timing') as any;
         for (const key of TIMING_KEYS) {
-          expect(widget.model.metadata.get(key)).to.exist;
+          expect(timingInfo[key]).toBeDefined();
         }
       });
 
