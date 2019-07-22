@@ -5,7 +5,8 @@
   "scripts": {
     "build": "webpack",
     "build:prod": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack.prod.config.js",
-    "build:prod:stats": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --profile --config webpack.prod.config.js --json > stats.json",
+    "build:prod:minimize": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack.prod.minimize.config.js",
+    "build:prod:stats": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --profile --config webpack.prod.minimize.config.js --json > stats.json",
     "build:stats": "webpack --profile --json > stats.json",
     "clean": "rimraf build",
     "prepublishOnly": "npm run build",
