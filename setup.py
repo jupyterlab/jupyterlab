@@ -131,9 +131,9 @@ setup_args = dict(
 
 
 setup_args['install_requires'] = [
-    'notebook>=4.3.1',
+    'notebook>=4.3.1,<6.0',
     'tornado!=6.0.0, !=6.0.1, !=6.0.2',
-    'jupyterlab_server~=1.0.0rc0'
+    'jupyterlab_server>=1.0.0'
 ]
 
 setup_args['extras_require'] = {
