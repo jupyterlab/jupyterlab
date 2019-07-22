@@ -47,6 +47,11 @@ async function main() {
   console.info('Navigating to page:', URL);
   await page.goto(URL);
   console.info('Waiting for page to load...');
+  // Wait for the local file to redirect on noteboox >= 6.0,
+  // which happens after 1000ms.
+  await new Promise(resolve => {
+    setTimeout(resolve, 2000);
+  });
 
   const html = await page.content();
   if (inspect(html).indexOf('jupyter-config-data') === -1) {
