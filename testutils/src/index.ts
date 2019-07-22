@@ -217,7 +217,6 @@ export async function initNotebookContext(
     kernelPreference: {
       shouldStart: startKernel,
       canStart: startKernel,
-      // autoStartDefault: true,
       shutdownOnClose: true,
       name: manager.specs.default
     }

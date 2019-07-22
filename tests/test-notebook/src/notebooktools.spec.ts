@@ -25,11 +25,7 @@ import {
   NotebookTracker
 } from '@jupyterlab/notebook';
 
-import {
-  initNotebookContext,
-  // sleep,
-  NBTestUtils
-} from '@jupyterlab/testutils';
+import { initNotebookContext, sleep, NBTestUtils } from '@jupyterlab/testutils';
 
 class LogTool extends NotebookTools.Tool {
   methods: string[] = [];
@@ -128,6 +124,8 @@ describe('@jupyterlab/notebook', () => {
       tabpanel.addWidget(notebookTools);
       tabpanel.node.style.height = '800px';
       Widget.attach(tabpanel, document.body);
+      // Give the posted messages a chance to be handled.
+      await sleep();
     });
 
     afterEach(() => {
