@@ -9,7 +9,7 @@ import { INotebookModel, NotebookPanel, Notebook } from '@jupyterlab/notebook';
 
 import { Toolbar } from '@jupyterlab/apputils';
 
-import { createNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
+import { initNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
 
 /**
  * Default data.
@@ -21,11 +21,10 @@ describe('@jupyterlab/notebook', () => {
     let context: Context<INotebookModel>;
 
     beforeEach(async () => {
-      context = await createNotebookContext();
+      context = await initNotebookContext();
     });
 
-    afterEach(async () => {
-      await context.session.shutdown();
+    afterEach(() => {
       context.dispose();
     });
 
