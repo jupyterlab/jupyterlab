@@ -55,6 +55,12 @@
       "path": "../csvviewer-extension"
     },
     {
+      "path": "../datastore"
+    },
+    {
+      "path": "../datastore-extension"
+    },
+    {
       "path": "../docmanager"
     },
     {
