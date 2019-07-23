@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "build": "webpack",
+    "build:dev": "jlpm run build",
+    "build:dev:minimize": "jlpm run build:dev",
     "build:prod": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack.prod.config.js",
     "build:prod:minimize": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack.prod.minimize.config.js",
     "build:prod:stats": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --profile --config webpack.prod.minimize.config.js --json > stats.json",
@@ -106,6 +108,7 @@
     "svg-url-loader": "~2.3.2",
     "svgo": "~1.2.1",
     "svgo-loader": "~2.2.0",
+    "terser-webpack-plugin": "^1.3.0",
     "url-loader": "~1.1.2",
     "webpack": "^4.32.2",
     "webpack-cli": "^3.3.0",

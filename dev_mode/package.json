@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "build": "webpack",
+    "build:dev": "jlpm run build",
+    "build:dev:minimize": "jlpm run build:dev",
     "build:prod": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack.prod.config.js",
     "build:prod:minimize": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack.prod.minimize.config.js",
     "build:prod:stats": "cross-env NODE_OPTIONS=--max_old_space_size=4096 webpack --profile --config webpack.prod.minimize.config.js --json > stats.json",

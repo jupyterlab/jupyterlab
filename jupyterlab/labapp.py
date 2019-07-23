@@ -62,8 +62,8 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
     version = Unicode('', config=True,
         help="The version of the built application")
 
-    dev_build = Bool(False, config=True,
-        help="Whether to build in dev mode (defaults to prod mode)")
+    dev_build = Bool(None, allow_none=True, config=True,
+        help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (prod mode).")
 
     minimize = Bool(True, config=True,
         help="Whether to use a minifier during the Webpack build (defaults to True). Only affects production builds.")
@@ -72,13 +72,13 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
         help="Whether to clean before building (defaults to False)")
 
     def start(self):
-        if self.dev_build:
-            command = 'build'
-        else:
-            if self.minimize:
-                command = 'build:prod:minimize'
-            else:
-                command = 'build:prod'
+        parts = ['build']
+        parts.append('none' if self.dev_build is None else
+                     'dev' if self.dev_build else
+                     'prod')
+        if self.minimize:
+            parts.append('minimize')
+        command = ':'.join(parts)
 
         app_dir = self.app_dir or get_app_dir()
         self.log.info('JupyterLab %s', version)
@@ -88,7 +88,7 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
                 clean(self.app_dir)
             self.log.info('Building in %s', app_dir)
             build(app_dir=app_dir, name=self.name, version=self.version,
-                command=command, logger=self.log)
+                  command=command, logger=self.log)
 
 
 clean_aliases = dict(base_aliases)

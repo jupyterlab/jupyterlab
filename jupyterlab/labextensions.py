@@ -53,7 +53,9 @@ uninstall_flags['all'] = (
 aliases = dict(base_aliases)
 aliases['app-dir'] = 'BaseExtensionApp.app_dir'
 aliases['dev-build'] = 'BaseExtensionApp.dev_build'
+aliases['minimize'] = 'BaseExtensionApp.minimize'
 aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
+
 
 VERSION = get_app_version()
 
@@ -69,8 +71,11 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     should_build = Bool(True, config=True,
         help="Whether to build the app after the action")
 
-    dev_build = Bool(False, config=True,
-        help="Whether to build in dev mode (defaults to prod mode)")
+    dev_build = Bool(None, allow_none=True, config=True,
+        help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (prod mode).")
+
+    minimize = Bool(True, config=True,
+        help="Whether to use a minifier during the Webpack build (defaults to True). Only affects production builds.")
 
     should_clean = Bool(False, config=True,
         help="Whether temporary files should be cleaned up after building jupyterlab")
@@ -81,7 +86,14 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
         with self.debug_logging():
             ans = self.run_task()
             if ans and self.should_build:
-                command = 'build:prod' if not self.dev_build else 'build'
+                parts = ['build']
+                parts.append('none' if self.dev_build is None else
+                             'dev' if self.dev_build else
+                             'prod')
+                if self.minimize:
+                    parts.append('minimize')
+                command = ':'.join(parts)
+
                 build(app_dir=self.app_dir, clean_staging=self.should_clean,
                       logger=self.log, command=command)
 

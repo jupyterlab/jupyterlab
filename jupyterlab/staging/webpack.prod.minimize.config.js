@@ -8,7 +8,7 @@ config[0] = merge(config[0], {
   optimization: {
     minimizer: [
       new TerserPlugin({
-        parallel: false,
+        parallel: true,
         sourceMap: true,
         terserOptions: {
           compress: false,
