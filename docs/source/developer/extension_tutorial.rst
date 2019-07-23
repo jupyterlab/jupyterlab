@@ -249,7 +249,7 @@ in that function. The second ``console.log`` line exists only so that
 you can immediately check that your changes work.
 
 Now you will need to install these dependencies. Run the following commands in the
-repository root folder install the dependency and save it to your
+repository root folder to install the dependencies and save them to your
 `package.json`:
 
 .. code:: bash
