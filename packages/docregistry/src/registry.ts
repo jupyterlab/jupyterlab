@@ -15,6 +15,8 @@ import {
 
 import { JSONValue } from '@phosphor/coreutils';
 
+import { Schema } from '@phosphor/datastore';
+
 import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -206,6 +208,13 @@ export class DocumentRegistry implements IDisposable {
         name,
         change: 'removed'
       });
+    });
+  }
+
+  addModelDBFactory(name: string, factory: IModelDB.IFactory): IDisposable {
+    this._modelDbFactories[name] = factory;
+    return new DisposableDelegate(() => {
+      delete this._modelDbFactories[name];
     });
   }
 
@@ -408,6 +417,20 @@ export class DocumentRegistry implements IDisposable {
   }
 
   /**
+   * Get the preferred model DB factory for a path.
+   *
+   * @param path - The path to for which to find a model DB factory.
+   *
+   * @returns The model DB factory for the path.
+   */
+  getModelDBFactory(path: string): IModelDB.IFactory {
+    // TODO: Use some resolution to pick DB factory
+    for (let key in this._modelDbFactories) {
+      return this._modelDbFactories[key];
+    }
+  }
+
+  /**
    * Create an iterator over the widget factories that have been registered.
    *
    * @returns A new iterator of widget factories.
@@ -597,6 +620,9 @@ export class DocumentRegistry implements IDisposable {
     return fts;
   }
 
+  private _modelDbFactories: {
+    [key: string]: IModelDB.IFactory;
+  } = Object.create(null);
   private _modelFactories: {
     [key: string]: DocumentRegistry.ModelFactory;
   } = Object.create(null);
@@ -1050,6 +1076,11 @@ export namespace DocumentRegistry {
      * Get the preferred kernel language given a file path.
      */
     preferredLanguage(path: string): string;
+
+    /**
+     * The schemas for the datastore.
+     */
+    readonly schemas: ReadonlyArray<Schema>;
   }
 
   /**

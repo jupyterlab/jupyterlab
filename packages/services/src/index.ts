@@ -10,6 +10,7 @@ export * from './session';
 export * from './setting';
 export * from './terminal';
 export * from './workspace';
+export * from './wsconnection';
 export * from './nbconvert';
 
 export { Builder } from './builder';

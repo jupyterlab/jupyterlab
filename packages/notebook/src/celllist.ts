@@ -15,8 +15,6 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { ICellModel } from '@jupyterlab/cells';
 
 import {
-  IObservableMap,
-  ObservableMap,
   IObservableList,
   IObservableUndoableList,
   IModelDB
@@ -34,7 +32,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   constructor(modelDB: IModelDB, factory: NotebookModel.IContentFactory) {
     this._factory = factory;
     this._cellOrder = modelDB.createList<string>('cellOrder');
-    this._cellMap = new ObservableMap<ICellModel>();
+    this._cellMap = new Map();
 
     this._cellOrder.changed.connect(this._onOrderChanged, this);
   }
@@ -123,7 +121,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
     for (let cell of this._cellMap.values()) {
       cell.dispose();
     }
-    this._cellMap.dispose();
+    this._cellMap.clear();
     this._cellOrder.dispose();
   }
 
@@ -471,8 +469,8 @@ export class CellList implements IObservableUndoableList<ICellModel> {
     if (change.type === 'add' || change.type === 'set') {
       each(change.newValues, id => {
         if (!this._cellMap.has(id)) {
-          let cellDB = this._factory.modelDB;
-          let cellType = cellDB.createValue(id + '.type');
+          let cellDB = this._factory.modelDB.view(id);
+          let cellType = cellDB.createValue('type');
           let cell: ICellModel;
           switch (cellType.get()) {
             case 'code':
@@ -508,7 +506,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
 
   private _isDisposed: boolean = false;
   private _cellOrder: IObservableUndoableList<string> = null;
-  private _cellMap: IObservableMap<ICellModel> = null;
+  private _cellMap: Map<string, ICellModel> = null;
   private _changed = new Signal<this, IObservableList.IChangedArgs<ICellModel>>(
     this
   );

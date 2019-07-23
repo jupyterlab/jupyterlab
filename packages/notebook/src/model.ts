@@ -71,8 +71,13 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    super(options.languagePreference, options.modelDB);
-    let factory = options.contentFactory || NotebookModel.defaultContentFactory;
+    super(
+      'application/x-ipynb+json',
+      options.languagePreference,
+      options.modelDB
+    );
+    const factory =
+      options.contentFactory || NotebookModel.defaultContentFactory;
     this.contentFactory = factory.clone(this.modelDB.view('cells'));
     this._cells = new CellList(this.modelDB, this.contentFactory);
     this._cells.changed.connect(this._onCellsChanged, this);
@@ -206,21 +211,31 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Should emit a [contentChanged] signal.
    */
   fromJSON(value: nbformat.INotebookContent): void {
-    let cells: ICellModel[] = [];
-    let factory = this.contentFactory;
-    for (let cell of value.cells) {
-      switch (cell.cell_type) {
-        case 'code':
-          cells.push(factory.createCodeCell({ cell }));
-          break;
-        case 'markdown':
-          cells.push(factory.createMarkdownCell({ cell }));
-          break;
-        case 'raw':
-          cells.push(factory.createRawCell({ cell }));
-          break;
-        default:
+    this.modelDB.withTransaction(() => {
+      let oldValue = 0;
+      let newValue = 0;
+      this._nbformatMinor = nbformat.MINOR_VERSION;
+      this._nbformat = nbformat.MAJOR_VERSION;
+
+      if (value.nbformat !== this._nbformat) {
+        oldValue = this._nbformat;
+        this._nbformat = newValue = value.nbformat;
+        this.triggerStateChange({ name: 'nbformat', oldValue, newValue });
+      }
+      if (value.nbformat_minor > this._nbformatMinor) {
+        oldValue = this._nbformatMinor;
+        this._nbformatMinor = newValue = value.nbformat_minor;
+        this.triggerStateChange({ name: 'nbformatMinor', oldValue, newValue });
+      }
+      // Update the metadata.
+      this.metadata.clear();
+      let metadata = value.metadata;
+      for (let key in metadata) {
+        // orig_nbformat is not intended to be stored per spec.
+        if (key === 'orig_nbformat') {
           continue;
+        }
+        this.metadata.set(key, metadata[key]);
       }
     }
     this.cells.beginCompoundOperation();
@@ -274,9 +289,12 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       if (key === 'orig_nbformat') {
         continue;
       }
-      this.metadata.set(key, metadata[key]);
-    }
-    this._ensureMetadata();
+
+      this.cells.beginCompoundOperation();
+      this.cells.clear();
+      this.cells.pushAll(cells);
+      this.cells.endCompoundOperation();
+    });
     this.dirty = true;
   }
 
@@ -284,8 +302,21 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Initialize the model with its current state.
    */
   initialize(): void {
-    super.initialize();
-    this.cells.clearUndo();
+    this.modelDB.withTransaction(() => {
+      super.initialize();
+      // Add an initial code cell by default.
+      if (!this._cells.length && !this.modelDB.isPrepopulated) {
+        this._cells.push(this.contentFactory.createCodeCell({}));
+      }
+
+      const metadata = this.metadata;
+      if (!metadata.has('language_info')) {
+        const name = this.defaultKernelLanguage;
+        metadata.set('language_info', { name });
+      }
+      this._ensureMetadata();
+      this.cells.clearUndo();
+    });
   }
 
   /**
@@ -481,7 +512,7 @@ export namespace NotebookModel {
      *   `codeCellContentFactory` will be used.
      */
     createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel {
-      if (options.contentFactory) {
+      if (!options.contentFactory) {
         options.contentFactory = this.codeCellContentFactory;
       }
       if (this.modelDB) {
@@ -489,6 +520,11 @@ export namespace NotebookModel {
           options.id = UUID.uuid4();
         }
         options.modelDB = this.modelDB.view(options.id);
+        let cell;
+        this.modelDB.withTransaction(() => {
+          cell = new CodeCellModel(options);
+        });
+        return cell;
       }
       return new CodeCellModel(options);
     }
@@ -507,6 +543,11 @@ export namespace NotebookModel {
           options.id = UUID.uuid4();
         }
         options.modelDB = this.modelDB.view(options.id);
+        let cell;
+        this.modelDB.withTransaction(() => {
+          cell = new MarkdownCellModel(options);
+        });
+        return cell;
       }
       return new MarkdownCellModel(options);
     }
@@ -525,6 +566,11 @@ export namespace NotebookModel {
           options.id = UUID.uuid4();
         }
         options.modelDB = this.modelDB.view(options.id);
+        let cell;
+        this.modelDB.withTransaction(() => {
+          cell = new RawCellModel(options);
+        });
+        return cell;
       }
       return new RawCellModel(options);
     }

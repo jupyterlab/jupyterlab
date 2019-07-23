@@ -87,6 +87,10 @@ def load_jupyter_server_extension(nbapp):
         extensions_handler_path, ExtensionManager, ExtensionHandler
     )
     from .handlers.error_handler import ErrorHandler
+    from .datastore import (
+        CollaborationHandler, collaboration_path,
+        CollaborationsManagerHandler, datastore_rest_path
+    )
     from .commands import (
         DEV_DIR, HERE, ensure_app, ensure_core, ensure_dev, watch,
         watch_dev, get_app_dir
@@ -196,6 +200,20 @@ def load_jupyter_server_extension(nbapp):
             page_config['buildAvailable'] = False
 
         config.cache_files = False
+
+    base_url = web_app.settings['base_url']
+
+    build_url = ujoin(base_url, build_path)
+    builder = Builder(logger, core_mode, app_dir)
+    build_handler = (build_url, BuildHandler, {'builder': builder})
+
+    collaborations_url = ujoin(base_url, collaboration_path)
+    collaborations_handler = (collaborations_url, CollaborationHandler, {})
+
+    colab_manager_url = ujoin(base_url, datastore_rest_path)
+    colab_manager_handler = (colab_manager_url, CollaborationsManagerHandler, {})
+
+    handlers = [build_handler, collaborations_handler, colab_manager_handler]
 
     if not core_mode and not errored:
         ext_url = ujoin(base_url, extensions_handler_path)

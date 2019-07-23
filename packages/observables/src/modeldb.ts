@@ -3,9 +3,11 @@
 
 import { IDisposable, DisposableSet } from '@phosphor/disposable';
 
+import { Schema } from '@phosphor/datastore';
+
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { JSONExt, JSONValue, JSONObject } from '@phosphor/coreutils';
+import { JSONExt, JSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
 
 import { ObservableMap } from './observablemap';
 
@@ -49,17 +51,37 @@ export interface IObservableValue extends IObservable {
   /**
    * The changed signal.
    */
-  readonly changed: ISignal<IObservableValue, ObservableValue.IChangedArgs>;
+  readonly changed: ISignal<IObservableValue, IObservableValue.IChangedArgs>;
 
   /**
    * Get the current value, or `undefined` if it has not been set.
    */
-  get(): JSONValue | undefined;
+  get(): ReadonlyJSONValue | undefined;
 
   /**
    * Set the value.
    */
-  set(value: JSONValue): void;
+  set(value: ReadonlyJSONValue): void;
+}
+
+/**
+ * The namespace for the `ObservableValue` class statics.
+ */
+export namespace IObservableValue {
+  /**
+   * The changed args object emitted by the `IObservableValue`.
+   */
+  export class IChangedArgs {
+    /**
+     * The old value.
+     */
+    oldValue: ReadonlyJSONValue | undefined;
+
+    /**
+     * The new value.
+     */
+    newValue: ReadonlyJSONValue | undefined;
+  }
 }
 
 /**
@@ -188,7 +210,9 @@ export interface IModelDB extends IDisposable {
    * The list can only store objects that are simple
    * JSON Objects and primitives.
    */
-  createList<T extends JSONValue>(path: string): IObservableUndoableList<T>;
+  createList<T extends ReadonlyJSONValue>(
+    path: string
+  ): IObservableUndoableList<T>;
 
   /**
    * Create a map and insert it in the database.
@@ -218,7 +242,7 @@ export interface IModelDB extends IDisposable {
    *
    * @param path: the path for the value.
    */
-  getValue(path: string): JSONValue | undefined;
+  getValue(path: string): ReadonlyJSONValue | undefined;
 
   /**
    * Set a value at a path. That value must already have
@@ -228,7 +252,7 @@ export interface IModelDB extends IDisposable {
    *
    * @param value: the new value.
    */
-  setValue(path: string, value: JSONValue): void;
+  setValue(path: string, value: ReadonlyJSONValue): void;
 
   /**
    * Create a view onto a subtree of the model database.
@@ -241,9 +265,31 @@ export interface IModelDB extends IDisposable {
   view(basePath: string): IModelDB;
 
   /**
+   * Run a funcion where all changes become part of a transaction.
+   * @param fn: the function to run. It recevies the transaction id
+   *            as an argument.
+   */
+  withTransaction(fn: (transactionId?: string) => void): void;
+
+  /**
    * Dispose of the resources held by the database.
    */
   dispose(): void;
+}
+
+/**
+ * A namespace for the `IModelDB` interface.
+ */
+export namespace IModelDB {
+  /**
+   * A factory interface for creating `IModelDB` objects.
+   */
+  export interface IFactory {
+    /**
+     * Create a new `IModelDB` instance.
+     */
+    createNew(path: string, schemas: ReadonlyArray<Schema>): IModelDB;
+  }
 }
 
 /**
@@ -255,7 +301,7 @@ export class ObservableValue implements IObservableValue {
    *
    * @param initialValue: the starting value for the `ObservableValue`.
    */
-  constructor(initialValue: JSONValue = null) {
+  constructor(initialValue: ReadonlyJSONValue = null) {
     this._value = initialValue;
   }
 
@@ -276,21 +322,21 @@ export class ObservableValue implements IObservableValue {
   /**
    * The changed signal.
    */
-  get changed(): ISignal<this, ObservableValue.IChangedArgs> {
+  get changed(): ISignal<this, IObservableValue.IChangedArgs> {
     return this._changed;
   }
 
   /**
    * Get the current value, or `undefined` if it has not been set.
    */
-  get(): JSONValue {
+  get(): ReadonlyJSONValue {
     return this._value;
   }
 
   /**
    * Set the current value.
    */
-  set(value: JSONValue): void {
+  set(value: ReadonlyJSONValue): void {
     let oldValue = this._value;
     if (JSONExt.deepEqual(oldValue, value)) {
       return;
@@ -314,29 +360,9 @@ export class ObservableValue implements IObservableValue {
     this._value = null;
   }
 
-  private _value: JSONValue = null;
-  private _changed = new Signal<this, ObservableValue.IChangedArgs>(this);
+  private _value: ReadonlyJSONValue = null;
+  private _changed = new Signal<this, IObservableValue.IChangedArgs>(this);
   private _isDisposed = false;
-}
-
-/**
- * The namespace for the `ObservableValue` class statics.
- */
-export namespace ObservableValue {
-  /**
-   * The changed args object emitted by the `IObservableValue`.
-   */
-  export class IChangedArgs {
-    /**
-     * The old value.
-     */
-    oldValue: JSONValue | undefined;
-
-    /**
-     * The new value.
-     */
-    newValue: JSONValue | undefined;
-  }
 }
 
 /**
@@ -437,7 +463,9 @@ export class ModelDB implements IModelDB {
    * The list can only store objects that are simple
    * JSON Objects and primitives.
    */
-  createList<T extends JSONValue>(path: string): IObservableUndoableList<T> {
+  createList<T extends ReadonlyJSONValue>(
+    path: string
+  ): IObservableUndoableList<T> {
     let vec = new ObservableUndoableList<T>(
       new ObservableUndoableList.IdentitySerializer<T>()
     );
@@ -484,7 +512,7 @@ export class ModelDB implements IModelDB {
    *
    * @param path: the path for the value.
    */
-  getValue(path: string): JSONValue | undefined {
+  getValue(path: string): ReadonlyJSONValue | undefined {
     let val = this.get(path);
     if (!val || val.type !== 'Value') {
       throw Error('Can only call getValue for an ObservableValue');
@@ -500,7 +528,7 @@ export class ModelDB implements IModelDB {
    *
    * @param value: the new value.
    */
-  setValue(path: string, value: JSONValue): void {
+  setValue(path: string, value: ReadonlyJSONValue): void {
     let val = this.get(path);
     if (!val || val.type !== 'Value') {
       throw Error('Can only call setValue on an ObservableValue');
@@ -533,6 +561,15 @@ export class ModelDB implements IModelDB {
    */
   set(path: string, value: IObservable): void {
     this._db.set(this._resolvePath(path), value);
+  }
+
+  /**
+   * Run a funcion where all changes become part of a transaction.
+   * @param fn: the function to run. It recevies the transaction id
+   *            as an argument.
+   */
+  withTransaction(fn: (transactionId?: string) => void): void {
+    fn();
   }
 
   /**
@@ -584,15 +621,5 @@ export namespace ModelDB {
      * ModelDB. If none is given, it uses its own store.
      */
     baseDB?: ModelDB;
-  }
-
-  /**
-   * A factory interface for creating `IModelDB` objects.
-   */
-  export interface IFactory {
-    /**
-     * Create a new `IModelDB` instance.
-     */
-    createNew(path: string): IModelDB;
   }
 }

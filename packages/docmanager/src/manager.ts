@@ -13,6 +13,8 @@ import {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 
+import { IModelDB } from '@jupyterlab/observables';
+
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
 
 import { ArrayExt, find } from '@phosphor/algorithm';
@@ -439,7 +441,8 @@ export class DocumentManager implements IDocumentManager {
   private _createContext(
     path: string,
     factory: DocumentRegistry.ModelFactory,
-    kernelPreference: IClientSession.IKernelPreference
+    kernelPreference: IClientSession.IKernelPreference,
+    modelDBFactory: IModelDB.IFactory
   ): Private.IContext {
     // TODO: Make it impossible to open two different contexts for the same
     // path. Or at least prompt the closing of all widgets associated with the
@@ -456,8 +459,6 @@ export class DocumentManager implements IDocumentManager {
       this._widgetManager.adoptWidget(context, widget);
       this._opener.open(widget, options);
     };
-    let modelDBFactory =
-      this.services.contents.getModelDBFactory(path) || undefined;
     let context = new Context({
       opener: adopter,
       manager: this.services,
@@ -507,6 +508,10 @@ export class DocumentManager implements IDocumentManager {
     return registry.getWidgetFactory(widgetName);
   }
 
+  private _modelDBFactoryFor(path: string): IModelDB.IFactory {
+    return this.registry.getModelDBFactory(path);
+  }
+
   /**
    * Creates a new document, or loads one from disk, depending on the `which` argument.
    * If `which==='create'`, then it creates a new document. If `which==='open'`,
@@ -532,6 +537,8 @@ export class DocumentManager implements IDocumentManager {
       return undefined;
     }
 
+    let dbFactory = this._modelDBFactoryFor(path);
+
     // Handle the kernel pereference.
     let preference = this.registry.getKernelPreference(
       path,
@@ -547,13 +554,13 @@ export class DocumentManager implements IDocumentManager {
       // Use an existing context if available.
       context = this._findContext(path, factory.name) || null;
       if (!context) {
-        context = this._createContext(path, factory, preference);
+        context = this._createContext(path, factory, preference, dbFactory);
         // Populate the model, either from disk or a
         // model backend.
         ready = this._when.then(() => context.initialize(false));
       }
     } else if (which === 'create') {
-      context = this._createContext(path, factory, preference);
+      context = this._createContext(path, factory, preference, dbFactory);
       // Immediately save the contents to disk.
       ready = this._when.then(() => context.initialize(true));
     }

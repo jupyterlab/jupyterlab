@@ -7,10 +7,10 @@
   "include": ["src/*"],
   "references": [
     {
-      "path": "../datastore"
+      "path": "../application"
     },
     {
-      "path": "../application"
+      "path": "../datastore"
     }
   ]
 }
