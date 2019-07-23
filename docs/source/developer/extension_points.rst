@@ -407,3 +407,14 @@ browser supports overriding the behavior of this item.
        label: 'Copy Shareable Link'
      });
    }
+
+Note that before enabling this plugin in the usual way, you must *disable* the
+default plugin provided by the built-in file browser.
+
+.. code:: bash
+
+   jupyter labextension disable @jupyterlab/filebrowser-extension:share-file
+
+There are plans to, in a future release of JupyterLab, provide a way for
+extensions to describe which extension points they override, so that
+procedurally disabiling the default will no longer be necessary.
