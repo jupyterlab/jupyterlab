@@ -254,7 +254,9 @@ export class CollaborationClient extends WSConnection<
     msg: T,
     timeout = 0
   ): Promise<Collaboration.IReplyMap[T['msgType']]> {
-    const delegate = new PromiseDelegate<Collaboration.Reply>();
+    const delegate = new PromiseDelegate<
+      Collaboration.IReplyMap[T['msgType']]
+    >();
     this._delegates.set(msg.msgId, delegate);
 
     // .finally(), delete from delegate map
