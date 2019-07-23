@@ -77,7 +77,7 @@ before you can work with the tools you installed in the
 ``jupyterlab-ext`` environment.
 
 Note: if you have an older version of JupyterLab previously installed, you may need to update
-the version of jupyterlab manually.
+the version of JupyterLab manually.
 
 .. code:: bash
     conda install -c conda-forge jupyterlab=1
