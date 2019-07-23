@@ -20,9 +20,6 @@
     },
     {
       "path": "../statusbar"
-    },
-    {
-      "path": "../observables"
     }
   ]
 }

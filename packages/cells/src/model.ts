@@ -18,7 +18,9 @@ import { UUID } from '@phosphor/coreutils';
 import {
   IObservableJSON,
   IModelDB,
-  IObservableValue
+  IObservableValue,
+  ObservableValue,
+  IObservableMap
 } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
@@ -266,7 +268,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    */
   onTrustedChanged(
     trusted: IObservableValue,
-    args: IObservableValue.IChangedArgs
+    args: ObservableValue.IChangedArgs
   ): void {
     /* no-op */
   }
@@ -553,7 +555,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   onTrustedChanged(
     trusted: IObservableValue,
-    args: IObservableValue.IChangedArgs
+    args: ObservableValue.IChangedArgs
   ): void {
     if (this._outputs) {
       this._outputs.trusted = args.newValue as boolean;
@@ -570,7 +572,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   private _onExecutionCountChanged(
     count: IObservableValue,
-    args: IObservableValue.IChangedArgs
+    args: ObservableValue.IChangedArgs
   ): void {
     this.contentChanged.emit(void 0);
     this.stateChanged.emit({

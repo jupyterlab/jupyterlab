@@ -25,7 +25,7 @@ import {
 
 import { PathExt } from '@jupyterlab/coreutils';
 
-import { IModelDB } from '@jupyterlab/observables';
+import { IModelDB, ModelDB } from '@jupyterlab/observables';
 
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -54,7 +54,7 @@ export class Context<T extends DocumentRegistry.IModel>
     let dbFactory = options.modelDBFactory;
     if (dbFactory) {
       const localPath = manager.contents.localPath(this._path);
-      this._modelDB = dbFactory.createNew(localPath, this._factory.schemas);
+      this._modelDB = dbFactory.createNew(localPath);
       this._model = this._factory.createNew(lang, this._modelDB);
     } else {
       this._model = this._factory.createNew(lang);
@@ -811,7 +811,7 @@ export namespace Context {
     /**
      * An IModelDB factory method which may be used for the document.
      */
-    modelDBFactory?: IModelDB.IFactory;
+    modelDBFactory?: ModelDB.IFactory;
 
     /**
      * An optional callback for opening sibling widgets.

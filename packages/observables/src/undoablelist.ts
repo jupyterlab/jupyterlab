@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReadonlyJSONValue } from '@phosphor/coreutils';
+import { JSONValue } from '@phosphor/coreutils';
 
 import { each } from '@phosphor/algorithm';
 
@@ -15,12 +15,12 @@ export interface ISerializer<T> {
   /**
    * Convert the object to JSON.
    */
-  toJSON(value: T): ReadonlyJSONValue;
+  toJSON(value: T): JSONValue;
 
   /**
    * Deserialize the object from JSON.
    */
-  fromJSON(value: ReadonlyJSONValue): T;
+  fromJSON(value: JSONValue): T;
 }
 
 /**
@@ -190,9 +190,7 @@ export class ObservableUndoableList<T> extends ObservableList<T>
   /**
    * Undo a change event.
    */
-  private _undoChange(
-    change: IObservableList.IChangedArgs<ReadonlyJSONValue>
-  ): void {
+  private _undoChange(change: IObservableList.IChangedArgs<JSONValue>): void {
     let index = 0;
     let serializer = this._serializer;
     switch (change.type) {
@@ -224,9 +222,7 @@ export class ObservableUndoableList<T> extends ObservableList<T>
   /**
    * Redo a change event.
    */
-  private _redoChange(
-    change: IObservableList.IChangedArgs<ReadonlyJSONValue>
-  ): void {
+  private _redoChange(change: IObservableList.IChangedArgs<JSONValue>): void {
     let index = 0;
     let serializer = this._serializer;
     switch (change.type) {
@@ -260,12 +256,12 @@ export class ObservableUndoableList<T> extends ObservableList<T>
    */
   private _copyChange(
     change: IObservableList.IChangedArgs<T>
-  ): IObservableList.IChangedArgs<ReadonlyJSONValue> {
-    let oldValues: ReadonlyJSONValue[] = [];
+  ): IObservableList.IChangedArgs<JSONValue> {
+    let oldValues: JSONValue[] = [];
     each(change.oldValues, value => {
       oldValues.push(this._serializer.toJSON(value));
     });
-    let newValues: ReadonlyJSONValue[] = [];
+    let newValues: JSONValue[] = [];
     each(change.newValues, value => {
       newValues.push(this._serializer.toJSON(value));
     });
@@ -282,7 +278,7 @@ export class ObservableUndoableList<T> extends ObservableList<T>
   private _isUndoable = true;
   private _madeCompoundChange = false;
   private _index = -1;
-  private _stack: IObservableList.IChangedArgs<ReadonlyJSONValue>[][] = [];
+  private _stack: IObservableList.IChangedArgs<JSONValue>[][] = [];
   private _serializer: ISerializer<T>;
 }
 
@@ -293,19 +289,19 @@ export namespace ObservableUndoableList {
   /**
    * A default, identity serializer.
    */
-  export class IdentitySerializer<T extends ReadonlyJSONValue>
+  export class IdentitySerializer<T extends JSONValue>
     implements ISerializer<T> {
     /**
      * Identity serialize.
      */
-    toJSON(value: T): ReadonlyJSONValue {
+    toJSON(value: T): JSONValue {
       return value;
     }
 
     /**
      * Identity deserialize.
      */
-    fromJSON(value: ReadonlyJSONValue): T {
+    fromJSON(value: JSONValue): T {
       return value as T;
     }
   }

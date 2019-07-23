@@ -24,7 +24,7 @@ export interface IObservableString extends IDisposable, IObservable {
   /**
    * The value of the string.
    */
-  text: string | undefined;
+  text: string;
 
   /**
    * Insert a substring.

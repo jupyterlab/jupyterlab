@@ -13,6 +13,7 @@ import {
   IModelDB,
   ModelDB,
   IObservableValue,
+  ObservableValue,
   IObservableMap,
   IObservableString
 } from '@jupyterlab/observables';
@@ -281,13 +282,13 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
-      this.value.dispose();
+      this.value.text = '';
       Signal.clearData(this);
     }
 
     private _onMimeTypeChanged(
       mimeType: IObservableValue,
-      args: IObservableValue.IChangedArgs
+      args: ObservableValue.IChangedArgs
     ): void {
       this._mimeTypeChanged.emit({
         name: 'mimeType',
