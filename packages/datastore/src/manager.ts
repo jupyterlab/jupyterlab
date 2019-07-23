@@ -1,12 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IModelDB } from '@jupyterlab/observables';
-
 import { map, toArray } from '@phosphor/algorithm';
-
-import { UUID } from '@phosphor/coreutils';
-
 import { Schema, Datastore } from '@phosphor/datastore';
 
 import { IDisposable } from '@phosphor/disposable';
@@ -16,8 +11,6 @@ import { Message, IMessageHandler, MessageLoop } from '@phosphor/messaging';
 import { Signal, ISignal } from '@phosphor/signaling';
 
 import { CollaborationClient } from './client';
-
-import { DSModelDB } from './modeldb';
 
 /**
  *
@@ -220,31 +213,3 @@ export namespace DatastoreManager {
   }
 }
 
-/**
- *
- */
-export class DSModelDBFactory implements IModelDB.IFactory {
-  /**
-   * Create a new DSModelDB instance.
-   *
-   * @param path - The path of the file to model.
-   * @param schemas - The schemas for the model.
-   */
-  createNew(path: string, schemas: ReadonlyArray<Schema>) {
-    // Set up session to server:
-    // TODO: Keep path, or use UUID?
-    // Note: We probably want to use a UUID, as paths are mutable (rename)
-    //       Then, we need a way to map and sync paths to UUIDs.
-    let collaborationId = UUID.uuid4();
-    collaborationId = path.replace(/[^0-9a-zA-Z_\-]/, '');
-
-    const manager = new DatastoreManager(collaborationId, schemas, true);
-
-    return new DSModelDB({
-      schemas,
-      manager,
-      recordId: collaborationId,
-      schemaId: schemas[0].id
-    });
-  }
-}

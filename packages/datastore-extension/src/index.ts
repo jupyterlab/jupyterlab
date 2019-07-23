@@ -1,31 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ILabShell,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
+import { JupyterFrontEndPlugin } from '@jupyterlab/application';
 
-import { DatastoreManager } from '@jupyterlab/datastore';
-
+import { IDatastoreCreator, DatastoreCreator } from '@jupyterlab/datastore';
 const pluginId = '@jupyterlab/datastore-extension:plugin';
 
 /**
  * The default document manager provider.
  */
-const datastorePlugin: JupyterFrontEndPlugin<void> = {
+const datastorePlugin: JupyterFrontEndPlugin<IDatastoreCreator> = {
   id: pluginId,
   requires: [],
-  optional: [ILabShell],
   autoStart: true,
-  activate: (app: JupyterFrontEnd, labShell: ILabShell | null) => {
-    return new DatastoreManager({ schemas: [] });
+  provides: IDatastoreCreator,
+  activate: () => {
+    return new DatastoreCreator();
   }
 };
 
-/**
- * Export the plugins as default.
- */
-const plugins: JupyterFrontEndPlugin<any>[] = [datastorePlugin];
-export default plugins;
+export default [datastorePlugin];
