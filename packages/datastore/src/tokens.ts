@@ -2,14 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Token } from '@phosphor/coreutils';
+import { Datastore } from '@phosphor/datastore';
 
-export const IDataStore = new Token<IDataStore>(
-  '@jupyterlab/completer:IDataStore'
+export interface IDatastore extends Datastore {}
+
+export const IDatastore = new Token<IDatastore>(
+  '@jupyterlab/completer:IDatastore'
 );
-
-/**
- * A manager to register completers with parent widgets.
- */
-export interface IDataStore {
-  test(): void;
-}

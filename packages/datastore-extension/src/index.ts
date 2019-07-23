@@ -7,13 +7,13 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { IDataStore } from '@jupyterlab/datastore';
+import { IDatastore } from '@jupyterlab/datastore';
 
-const plugin: JupyterFrontEndPlugin<IDataStore> = {
+const plugin: JupyterFrontEndPlugin<IDatastore> = {
   id: '@jupyterlab/datastore-extension:datastore',
   autoStart: true,
-  provides: IDataStore,
-  activate: (app: JupyterFrontEnd): IDataStore => {
+  provides: IDatastore,
+  activate: (app: JupyterFrontEnd): IDatastore => {
     console.log('activating');
     return {
       test: () => null
