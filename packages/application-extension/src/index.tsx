@@ -262,7 +262,7 @@ const tree: JupyterFrontEndPlugin<void> = {
         const treeMatch = args.path.match(treePattern);
         const workspaceMatch = args.path.match(workspacePattern);
         const match = treeMatch || workspaceMatch;
-        const path = decodeURI(match[1]);
+        let path = decodeURI(match[1]);
         // const { page, workspaces } = info.urls;
         const workspace = PathExt.basename(resolver.name);
         const url =
@@ -274,6 +274,11 @@ const tree: JupyterFrontEndPlugin<void> = {
 
         // Remove the tree portion of the URL leaving the rest intact.
         router.navigate(url);
+
+        const query = URLExt.queryStringToObject(args.search);
+        if (query.filebrowserPath) {
+          path = query.filebrowserPath;
+        }
 
         try {
           await commands.execute('filebrowser:open-path', { path });
