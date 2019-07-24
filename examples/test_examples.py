@@ -16,11 +16,12 @@ here = osp.abspath(osp.dirname(__file__))
 
 def header(path):
     test_name = osp.basename(path)
-    print('\n')
-    print('*' * 40)
-    print('Starting %s test' % test_name)
-    print('*' * 40)
-
+    print('\n'.join((
+        '\n',
+        '*' * 40,
+        'Starting %s test' % test_name,
+        '*' * 40
+    )), flush=True)
 
 def main():
     paths = [i for i in glob.glob('%s/*' % here) if osp.isdir(i)]
