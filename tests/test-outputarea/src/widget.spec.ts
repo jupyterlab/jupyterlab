@@ -174,6 +174,60 @@ describe('outputarea/widget', () => {
         expect(widget.methods).to.contain('onModelChanged');
         expect(widget.widgets.length).to.equal(1);
       });
+
+      it('should rerender when preferred mimetype changes', () => {
+        // Add output with both safe and unsafe types
+        widget.model.clear();
+        widget.model.add({
+          output_type: 'display_data',
+          data: {
+            'image/svg+xml':
+              '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve"></svg>',
+            'text/plain': 'hello, world'
+          },
+          metadata: {}
+        });
+        expect(widget.node.innerHTML).to.contain(
+          '<img src="data:image/svg+xml'
+        );
+        widget.model.trusted = !widget.model.trusted;
+        expect(widget.node.innerHTML).to.not.contain(
+          '<img src="data:image/svg+xml'
+        );
+        widget.model.trusted = !widget.model.trusted;
+        expect(widget.node.innerHTML).to.contain(
+          '<img src="data:image/svg+xml'
+        );
+      });
+
+      it('should rerender when isolation changes', () => {
+        // Add output with both safe and unsafe types
+        widget.model.clear();
+        widget.model.add({
+          output_type: 'display_data',
+          data: {
+            'text/plain': 'hello, world'
+          }
+        });
+        expect(widget.node.innerHTML).to.not.contain('<iframe');
+        widget.model.set(0, {
+          output_type: 'display_data',
+          data: {
+            'text/plain': 'hello, world'
+          },
+          metadata: {
+            isolated: true
+          }
+        });
+        expect(widget.node.innerHTML).to.contain('<iframe');
+        widget.model.set(0, {
+          output_type: 'display_data',
+          data: {
+            'text/plain': 'hello, world'
+          }
+        });
+        expect(widget.node.innerHTML).to.not.contain('<iframe');
+      });
     });
 
     describe('.execute()', () => {

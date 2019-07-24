@@ -9,6 +9,8 @@ import {
 
 import { Message } from '@phosphor/messaging';
 
+import { AttachedProperty } from '@phosphor/properties';
+
 import { Signal } from '@phosphor/signaling';
 
 import { Panel, PanelLayout } from '@phosphor/widgets';
@@ -330,7 +332,19 @@ export class OutputArea extends Widget {
     let renderer = (panel.widgets
       ? panel.widgets[1]
       : panel) as IRenderMime.IRenderer;
-    if (renderer.renderModel) {
+    // Check whether it is safe to reuse renderer:
+    // - Preferred mime type has not changed
+    // - Isolation has not changed
+    let mimeType = this.rendermime.preferredMimeType(
+      model.data,
+      model.trusted ? 'any' : 'ensure'
+    );
+    if (
+      renderer.renderModel &&
+      Private.currentPreferredMimetype.get(renderer) === mimeType &&
+      OutputArea.isIsolated(mimeType, model.metadata) ===
+        renderer instanceof Private.IsolatedRenderer
+    ) {
       void renderer.renderModel(model);
     } else {
       layout.widgets[index].dispose();
@@ -388,21 +402,12 @@ export class OutputArea extends Widget {
     if (!mimeType) {
       return null;
     }
-    let metadata = model.metadata;
-    let mimeMd = metadata[mimeType] as ReadonlyJSONObject;
-    let isolated = false;
-    // mime-specific higher priority
-    if (mimeMd && mimeMd['isolated'] !== undefined) {
-      isolated = mimeMd['isolated'] as boolean;
-    } else {
-      // fallback on global
-      isolated = metadata['isolated'] as boolean;
-    }
-
     let output = this.rendermime.createRenderer(mimeType);
+    let isolated = OutputArea.isIsolated(mimeType, model.metadata);
     if (isolated === true) {
       output = new Private.IsolatedRenderer(output);
     }
+    Private.currentPreferredMimetype.set(output, mimeType);
     output.renderModel(model).catch(error => {
       // Manually append error message to output
       const pre = document.createElement('pre');
@@ -576,6 +581,20 @@ export namespace OutputArea {
     let future = session.kernel.requestExecute(content, false, metadata);
     output.future = future;
     return future.done;
+  }
+
+  export function isIsolated(
+    mimeType: string,
+    metadata: ReadonlyJSONObject
+  ): boolean {
+    let mimeMd = metadata[mimeType] as ReadonlyJSONObject | undefined;
+    // mime-specific higher priority
+    if (mimeMd && mimeMd['isolated'] !== undefined) {
+      return !!mimeMd['isolated'];
+    } else {
+      // fallback on global
+      return !!metadata['isolated'];
+    }
   }
 
   /**
@@ -874,4 +893,12 @@ namespace Private {
 
     private _wrapped: IRenderMime.IRenderer;
   }
+
+  export const currentPreferredMimetype = new AttachedProperty<
+    IRenderMime.IRenderer,
+    string
+  >({
+    name: 'preferredMimetype',
+    create: owner => ''
+  });
 }
