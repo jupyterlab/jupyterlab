@@ -177,6 +177,7 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 - Saul Shanabrook, Quansight (general development, extensions)
 - Steven Silvester, JPMorgan Chase (co-creator, release management, packaging,
   prolific contributions throughout the code base).
+- Vidar T. Fauske, JPMorgan Chase (general development, extensions).
 
 Maintainer emeritus:
 
