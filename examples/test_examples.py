@@ -24,9 +24,9 @@ def header(path):
     print('Starting %s test' % test_name)
     print('*' * 40)
 
-aliases = {'path': 'TestExamples.path'}
+aliases = {'path': 'RunTestExamples.path'}
 
-class TestExamples(Application):
+class RunTestExamples(Application):
     aliases = aliases
 
     path = Unicode(None, allow_none=True, config=True,
@@ -65,4 +65,4 @@ class TestExamples(Application):
         super().start()
 
 if __name__ == "__main__":
-    TestExamples.launch_instance()
+    RunTestExamples.launch_instance()
