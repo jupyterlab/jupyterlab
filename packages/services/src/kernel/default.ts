@@ -472,10 +472,13 @@ export class DefaultKernel implements Kernel.IKernel {
     if (this.isDisposed) {
       throw new Error('Disposed kernel');
     }
-    if (reply.content.status !== 'ok') {
+    // Relax the requirement that a kernel info reply has a status attribute,
+    // since this part of the spec is not yet widely conformed-to.
+    if (reply.content.status && reply.content.status !== 'ok') {
       throw new Error('Kernel info reply errored');
     }
-    this._info = reply.content;
+    // Type assertion is necessary until we can rely on the status message.
+    this._info = reply.content as KernelMessage.IInfoReply;
     return reply;
   }
 
