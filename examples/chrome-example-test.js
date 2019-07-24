@@ -48,7 +48,7 @@ async function main() {
   await page.goto(URL);
   console.info('Waiting for page to load...');
 
-  // Wait for the local file to redirect on noteboox >= 6.0. Refs:
+  // Wait for the local file to redirect on notebook >= 6.0. Refs:
   // https://jupyter-notebook.readthedocs.io/en/stable/changelog.html?highlight=redirect
   // https://stackoverflow.com/q/46948489/425458
   await page.waitForNavigation();

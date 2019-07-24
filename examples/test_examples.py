@@ -8,12 +8,9 @@ there are no console errors or uncaught errors prior to a sentinel
 string being printed.
 """
 import glob
-import os
 import os.path as osp
 import subprocess
 import sys
-from traitlets import Unicode
-from traitlets.config.application import Application
 
 here = osp.abspath(osp.dirname(__file__))
 
@@ -24,45 +21,33 @@ def header(path):
     print('Starting %s test' % test_name)
     print('*' * 40)
 
-aliases = {'path': 'RunTestExamples.path'}
 
-class RunTestExamples(Application):
-    aliases = aliases
+def main():
+    paths = [i for i in glob.glob('%s/*' % here) if osp.isdir(i)]
 
-    path = Unicode(None, allow_none=True, config=True,
-                   help='Path to example dir')
+    services_dir = osp.abspath(osp.join(here, '../packages/services/examples'))
+    paths += [i for i in glob.glob('%s/*' % services_dir)]
 
-    def start(self):
-        if self.path is None:
-            self.path = here
-            paths = [i for i in glob.glob('%s/*' % self.path) if osp.isdir(i)]
-
-            services_dir = osp.abspath(osp.join(self.path, '../packages/services/examples'))
-            paths += [i for i in glob.glob('%s/*' % services_dir)]
-        else:
-            paths = [dirpath for (dirpath, _, filenames) in os.walk(self.path) if 'main.py' in filenames]
-
-        count = 0
-        for path in sorted(paths):
-            if osp.basename(path) == 'node':
-                header(path)
-                runner = osp.join(path, 'main.py')
-                subprocess.check_call([sys.executable, runner])
-                count += 1
-                continue
-
-            if not osp.exists(osp.join(path, 'main.py')):
-                continue
-
-            count += 1
+    count = 0
+    for path in sorted(paths):
+        if osp.basename(path) == 'node':
             header(path)
-            runner = osp.join(here, 'example_check.py')
-            subprocess.check_call([sys.executable, runner, path])
+            runner = osp.join(path, 'main.py')
+            subprocess.check_call([sys.executable, runner])
+            count += 1
+            continue
 
-        print('\n\n%s tests complete!' % count)
+        if not osp.exists(osp.join(path, 'main.py')):
+            continue
 
-        # start subapps, if any
-        super().start()
+        count += 1
+        header(path)
+        runner = osp.join(here, 'example_check.py')
+        subprocess.check_call([sys.executable, runner, path])
+
+    print('\n\n%s tests complete!' % count)
+
 
 if __name__ == "__main__":
-    RunTestExamples.launch_instance()
+    main()
+
