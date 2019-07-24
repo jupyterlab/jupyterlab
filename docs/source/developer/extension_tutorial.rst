@@ -80,6 +80,7 @@ Note: if you have an older version of JupyterLab previously installed, you may n
 the version of JupyterLab manually.
 
 .. code:: bash
+
     conda install -c conda-forge jupyterlab=1
 
 Create a repository
