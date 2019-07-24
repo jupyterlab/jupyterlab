@@ -120,10 +120,12 @@ export class CollaborationClient extends WSConnection<
    * The transactions of the history will be sent to the set handler.
    */
   async replayHistory(checkpointId?: number): Promise<void> {
+    console.log('Replay history');
     const msg = Collaboration.createMessage('history-request', {
       checkpointId: checkpointId === undefined ? null : checkpointId
     });
     const reply = await this._requestMessageReply(msg);
+    console.log('handler', this.handler);
     const content = reply.content;
     // TODO: Set initial state
     if (this.handler !== null) {
@@ -231,6 +233,7 @@ export class CollaborationClient extends WSConnection<
   private _handleTransactions(
     transactions: ReadonlyArray<Collaboration.SerialTransaction>
   ) {
+    console.log('Handling transactions');
     if (this.handler !== null) {
       for (let t of transactions) {
         if (t.serial !== this._serverSerial + 1) {

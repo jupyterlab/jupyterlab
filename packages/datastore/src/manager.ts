@@ -100,6 +100,10 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
       return;
     }
     if (msg.type === 'remote-transactions') {
+      console.log('Sending to DS', {
+        remote: this._remoteDS,
+        local: this._localDS
+      });
       MessageLoop.sendMessage(
         this._remoteDS || this._localDS!,
         new Datastore.TransactionMessage(
@@ -212,4 +216,3 @@ export namespace DatastoreManager {
     datastore: Datastore;
   }
 }
-
