@@ -384,7 +384,7 @@ export class DirListing extends Widget {
     });
 
     if (!this.isDisposed && result.button.accept) {
-      return this._delete(items.map(item => item.path));
+      await this._delete(items.map(item => item.path));
     }
   }
 
