@@ -37,5 +37,5 @@ if (!fs.existsSync(packagePath)) {
 // Remove the package from the local tree.
 fs.removeSync(path.dirname(packagePath));
 
-// Update the core jupyterlab build dependencies.
-utils.run('npm run integrity');
+// Remove any dependencies on the package (will also run `jlpm integrity`)
+utils.run(`jlpm remove:dependency ${target}`);
