@@ -7,12 +7,6 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import {
-  ICommandPalette,
-  MainAreaWidget,
-  WidgetTracker
-} from '@jupyterlab/apputils';
-
 import { ILauncher } from '@jupyterlab/launcher';
 
 import { Debugger } from './debugger';
@@ -31,64 +25,33 @@ namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:plugin',
-  optional: [ICommandPalette, ILauncher, ILayoutRestorer],
+  optional: [ILauncher, ILayoutRestorer],
   provides: IDebugger,
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
-    palette: ICommandPalette | null,
     launcher: ILauncher | null,
     restorer: ILayoutRestorer | null
   ): IDebugger => {
     console.log(plugin.id, 'Hello, world.');
-    const { commands, shell } = app;
+    const { shell } = app;
     const command = CommandIDs.open;
     const label = 'Environment';
-    const namespace = 'debugger';
-    const tracker = new WidgetTracker<MainAreaWidget<Debugger>>({
-      namespace
-    });
+    const widget = new Debugger();
 
-    let widget: MainAreaWidget<Debugger>;
-    function openDebugger(): MainAreaWidget<Debugger> {
-      if (!widget || widget.isDisposed) {
-        widget = new MainAreaWidget({
-          content: new Debugger()
-        });
-        widget.id = 'jp-debugger';
-        widget.title.label = label;
-        void tracker.add(widget);
-      }
-      if (!widget.isAttached) {
-        shell.add(widget, 'right', { activate: false });
-      }
-      shell.activateById(widget.id);
-      return widget;
-    }
+    widget.id = 'jp-debugger';
+    widget.title.label = label;
+    shell.add(widget, 'right', { activate: false });
 
-    // Add command to registry.
-    commands.addCommand(command, {
-      caption: 'Environment inspector and code debugger',
-      isEnabled: () =>
-        !widget || widget.isDisposed || !widget.isAttached || !widget.isVisible,
-      label,
-      execute: () => openDebugger()
-    });
-
-    // Add command to UI where possible.
-    if (palette) {
-      palette.addItem({ command, category: label });
-    }
     if (launcher) {
       launcher.add({ command, args: { isLauncher: true } });
     }
 
-    // Handle state restoration.
     if (restorer) {
-      void restorer.restore(tracker, { command, name: () => namespace });
+      restorer.add(widget, widget.id);
     }
 
-    return {} as IDebugger;
+    return widget;
   }
 };
 
