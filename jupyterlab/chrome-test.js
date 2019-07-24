@@ -13,6 +13,9 @@ async function main() {
   await page.goto(URL);
   console.info('Waiting for page to load...');
 
+  // Wait for the local file to redirect on notebook >= 6.0
+  await page.waitForNavigation();
+
   const html = await page.content();
   if (inspect(html).indexOf('jupyter-config-data') === -1) {
     console.error('Error loading JupyterLab page:');
