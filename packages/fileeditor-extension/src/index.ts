@@ -32,19 +32,15 @@ import {
 
 import { ILauncher } from '@jupyterlab/launcher';
 
-import {
-  IEditMenu,
-  IFileMenu,
-  IMainMenu,
-  IRunMenu,
-  IViewMenu
-} from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { JSONObject, ReadonlyJSONObject } from '@phosphor/coreutils';
 
 import { Menu } from '@phosphor/widgets';
+
+import Commands from './commands';
 
 /**
  * The class name for the text editor icon from the default theme.
@@ -64,7 +60,7 @@ const FACTORY = 'Editor';
 /**
  * The command IDs used by the fileeditor plugin.
  */
-namespace CommandIDs {
+export namespace CommandIDs {
   export const createNew = 'fileeditor:create-new';
 
   export const createNewMarkdown = 'fileeditor:create-new-markdown-file';
@@ -636,115 +632,13 @@ function activate(
   }
 
   if (menu) {
-    // Add the editing commands to the settings menu.
-    const tabMenu = new Menu({ commands });
-    tabMenu.title.label = 'Text Editor Indentation';
-    let args: JSONObject = {
-      insertSpaces: false,
-      size: 4,
-      name: 'Indent with Tab'
-    };
-    let command = 'fileeditor:change-tabs';
-    tabMenu.addItem({ command, args });
-
-    for (let size of [1, 2, 4, 8]) {
-      let args: JSONObject = {
-        insertSpaces: true,
-        size,
-        name: `Spaces: ${size} `
-      };
-      tabMenu.addItem({ command, args });
-    }
-
-    menu.settingsMenu.addGroup(
-      [
-        {
-          command: CommandIDs.changeFontSize,
-          args: { name: 'Increase Text Editor Font Size', delta: +1 }
-        },
-        {
-          command: CommandIDs.changeFontSize,
-          args: { name: 'Decrease Text Editor Font Size', delta: -1 }
-        },
-        { type: 'submenu', submenu: tabMenu },
-        { command: CommandIDs.autoClosingBrackets }
-      ],
-      30
-    );
-
-    // Add new text file creation to the file menu.
-    menu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 30);
-
-    // Add new markdown file creation to the file menu.
-    menu.fileMenu.newMenu.addGroup(
-      [{ command: CommandIDs.createNewMarkdown }],
-      30
-    );
-
-    // Add undo/redo hooks to the edit menu.
-    menu.editMenu.undoers.add({
+    Commands.addMenuItems(
+      menu,
+      commands,
       tracker,
-      undo: widget => {
-        widget.content.editor.undo();
-      },
-      redo: widget => {
-        widget.content.editor.redo();
-      }
-    } as IEditMenu.IUndoer<IDocumentWidget<FileEditor>>);
-
-    // Add editor view options.
-    menu.viewMenu.editorViewers.add({
-      tracker,
-      toggleLineNumbers: widget => {
-        const lineNumbers = !widget.content.editor.getOption('lineNumbers');
-        widget.content.editor.setOption('lineNumbers', lineNumbers);
-      },
-      toggleWordWrap: widget => {
-        const oldValue = widget.content.editor.getOption('lineWrap');
-        const newValue = oldValue === 'off' ? 'on' : 'off';
-        widget.content.editor.setOption('lineWrap', newValue);
-      },
-      toggleMatchBrackets: widget => {
-        const matchBrackets = !widget.content.editor.getOption('matchBrackets');
-        widget.content.editor.setOption('matchBrackets', matchBrackets);
-      },
-      lineNumbersToggled: widget =>
-        widget.content.editor.getOption('lineNumbers'),
-      wordWrapToggled: widget =>
-        widget.content.editor.getOption('lineWrap') !== 'off',
-      matchBracketsToggled: widget =>
-        widget.content.editor.getOption('matchBrackets')
-    } as IViewMenu.IEditorViewer<IDocumentWidget<FileEditor>>);
-
-    // Add a console creator the the Kernel menu.
-    menu.fileMenu.consoleCreators.add({
-      tracker,
-      name: 'Editor',
+      consoleTracker,
       createConsole
-    } as IFileMenu.IConsoleCreator<IDocumentWidget<FileEditor>>);
-
-    // Add a code runner to the Run menu.
-    menu.runMenu.codeRunners.add({
-      tracker,
-      noun: 'Code',
-      isEnabled: current =>
-        !!consoleTracker.find(c => c.session.path === current.context.path),
-      run: () => commands.execute(CommandIDs.runCode),
-      runAll: () => commands.execute(CommandIDs.runAllCode),
-      restartAndRunAll: current => {
-        const console = consoleTracker.find(
-          console => console.session.path === current.context.path
-        );
-        if (console) {
-          return console.session.restart().then(restarted => {
-            if (restarted) {
-              void commands.execute(CommandIDs.runAllCode);
-            }
-            return restarted;
-          });
-        }
-      }
-    } as IRunMenu.ICodeRunner<IDocumentWidget<FileEditor>>);
+    );
   }
 
   app.contextMenu.addItem({
