@@ -6,6 +6,7 @@
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
 import * as path from 'path';
+import * as prettier from 'prettier';
 import * as ts from 'typescript';
 import { getDependency } from './get-dependency';
 import * as utils from './utils';
@@ -181,7 +182,7 @@ export async function ensurePackage(
 
     // write out cssIndexContents, if needed
     const cssIndexPath = path.join(pkgPath, 'style/index.css');
-    messages.push(...ensureFile(cssIndexPath, cssIndexContents));
+    messages.push(...ensureFile(cssIndexPath, cssIndexContents, false));
   }
 
   // Look for unused packages
@@ -377,11 +378,9 @@ export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
     _iconCSSUrls.push(
       `--${urlName}: url('${path.relative(iconCSSDir, svg)}');`
     );
-
-    // be sure to match the delinted syntax style
-    _iconCSSDeclarations.push(`.${className} {`);
-    _iconCSSDeclarations.push(`  background-image: var(--${urlName});`);
-    _iconCSSDeclarations.push(`}`);
+    _iconCSSDeclarations.push(
+      `.${className} {background-image: var(--${urlName})}`
+    );
   });
   const iconCSSUrls = _iconCSSUrls.join('\n');
   const iconCSSDeclarations = _iconCSSDeclarations.join('\n');
@@ -452,14 +451,22 @@ export interface IEnsurePackageOptions {
  * do nothing and return an empty array. If they don't match, overwrite the
  * file and return an array with an update message.
  *
- * @param path - The path to the file being checked. The file must exist,
+ * @param path: The path to the file being checked. The file must exist,
  * or else this function does nothing.
  *
- * @param contents - The desired file contents.
+ * @param contents: The desired file contents.
+ *
+ * @param prettify: default = true. If true, format the contents with
+ * `prettier` before comparing/writing. Set to false only if you already
+ * know your code won't be modified later by the `prettier` git commit hook.
  *
  * @returns a string array with 0 or 1 messages.
  */
-function ensureFile(path: string, contents: string): string[] {
+function ensureFile(
+  path: string,
+  contents: string,
+  prettify: boolean = true
+): string[] {
   let messages: string[] = [];
 
   if (!fs.existsSync(path)) {
@@ -468,6 +475,11 @@ function ensureFile(path: string, contents: string): string[] {
       `Tried to ensure the contents of ./${path}, but the file does not exist`
     );
     return messages;
+  }
+
+  // run the newly generated contents through prettier before comparing
+  if (prettify) {
+    contents = prettier.format(contents, { filepath: path, singleQuote: true });
   }
 
   const prev = fs.readFileSync(path, {
