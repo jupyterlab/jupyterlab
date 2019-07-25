@@ -1432,13 +1432,11 @@ class _AppHandler(object):
         a package name, or run `npm pack` locally if `source` is a
         directory.
         """
-        info = {"source": source}
-        if '@npm:' in source:
-            source = source.split('@npm:')[1]
         is_dir = osp.exists(source) and osp.isdir(source)
-        info['is_dir'] = is_dir
         if is_dir and not osp.exists(pjoin(source, 'node_modules')):
             self._run(['node', YARN_PATH, 'install'], cwd=source)
+
+        info = dict(source=source, is_dir=is_dir)
 
         ret = self._run([which('npm'), 'pack', source], cwd=tempdir)
         if ret != 0:
