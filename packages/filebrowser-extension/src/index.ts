@@ -532,7 +532,7 @@ function addCommands(
         toArray(
           map(widget.selectedItems(), item => {
             if (item.type === 'directory') {
-              return widget.model.cd(item.path);
+              return widget.model.cd(`/${item.path}`);
             }
 
             return commands.execute('docmanager:open', {

@@ -922,7 +922,7 @@ export class DirListing extends Widget {
     this._onItemOpened.emit(item);
     if (item.type === 'directory') {
       this._model
-        .cd(item.path)
+        .cd(`/${item.path}`)
         .catch(error => showErrorMessage('Open directory', error));
     } else {
       let path = item.path;
