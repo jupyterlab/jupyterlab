@@ -3,10 +3,7 @@
 
 import * as React from 'react';
 
-import { IIterator, toArray } from '@phosphor/algorithm';
-
-import { ISignal, Signal } from '@phosphor/signaling';
-
+import { ISignal } from '@phosphor/signaling';
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 
 import {
@@ -15,9 +12,7 @@ import {
   ToolbarButtonComponent
 } from '@jupyterlab/apputils';
 
-import { PathExt } from '@jupyterlab/coreutils';
-
-import { ServiceManager, Session, TerminalSession } from '@jupyterlab/services';
+import { Token } from '@phosphor/coreutils';
 
 /**
  * The class name added to a running widget.
@@ -69,107 +64,68 @@ const ITEM_LABEL_CLASS = 'jp-RunningSessions-itemLabel';
  */
 const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdown';
 
+/* tslint:disable */
 /**
- * The class name added to a notebook icon.
+ * The running sessions token.
  */
-const NOTEBOOK_ICON_CLASS = 'jp-mod-notebook';
-
-/**
- * The class name added to a console icon.
- */
-const CONSOLE_ICON_CLASS = 'jp-mod-console';
-
-/**
- * The class name added to a file icon.
- */
-const FILE_ICON_CLASS = 'jp-mod-file';
+export const IRunningSessionManagers = new Token<IRunningSessionManagers>(
+  '@jupyterlab/running:IRunningSessionManagers'
+);
+/* tslint:enable */
 
 /**
- * The class name added to a terminal icon.
+ * The running interface.
  */
-const TERMINAL_ICON_CLASS = 'jp-mod-terminal';
-
-/**
- * Properties for a session list displaying items of generic type `M`.
- */
-type SessionProps<M> = {
+export interface IRunningSessionManagers {
   /**
-   * A signal that tracks when the `open` is clicked on a session item.
+   * Add a running item manager.
+   *
+   * @param manager - The running item manager.
+   *
    */
-  openRequested: Signal<RunningSessions, M>;
-
+  add(manager: IRunningSessions.IManager): void;
   /**
-   * The session manager.
+   * Return an iterator of managers.
    */
-  manager: {
-    /**
-     * The function called when the shutdown all button is pressed.
-     */
-    shutdownAll(): void;
+  items(): ReadonlyArray<IRunningSessions.IManager>;
+}
 
-    /**
-     * A signal that should emit a new list of items whenever they are changed.
-     */
-    runningChanged: ISignal<any, M[]>;
-
-    /**
-     * Returns a list the running models.
-     */
-    running(): IIterator<M>;
-  };
+export class RunningSessionManagers implements IRunningSessionManagers {
+  /**
+   * Add a running item manager.
+   *
+   * @param manager - The running item manager.
+   *
+   */
+  add(manager: IRunningSessions.IManager): void {
+    this._managers.push(manager);
+  }
 
   /**
-   * The function called when the shutdown button is pressed on an item.
+   * Return an iterator of launcher items.
    */
-  shutdown: (model: M) => void;
+  items(): ReadonlyArray<IRunningSessions.IManager> {
+    return this._managers;
+  }
 
-  /**
-   * The filter that is applied to the items from `runningChanged`.
-   */
-  filterRunning?: (model: M) => boolean;
+  private _managers: IRunningSessions.IManager[] = [];
+}
 
-  /**
-   * The name displayed to the user.
-   */
-  name: string;
-
-  /**
-   * Returns the icon class for an item.
-   */
-  iconClass: (model: M) => string;
-
-  /**
-   * Returns the label for an item.
-   */
-  label: (model: M) => string;
-
-  /**
-   * Called to determine the `title` attribute for each item, which is revealed
-   * on hover.
-   */
-  labelTitle?: (model: M) => string;
-
-  /**
-   * Flag that sets whether it sessions should be displayed.
-   */
-  available: boolean;
-};
-
-function Item<M>(props: SessionProps<M> & { model: M }) {
-  const { model } = props;
+function Item(props: { runningItem: IRunningSessions.IRunningItem }) {
+  const { runningItem } = props;
   return (
     <li className={ITEM_CLASS}>
-      <span className={`${ITEM_ICON_CLASS} ${props.iconClass(model)}`} />
+      <span className={`${ITEM_ICON_CLASS} ${runningItem.iconClass()}`} />
       <span
         className={ITEM_LABEL_CLASS}
-        title={props.labelTitle ? props.labelTitle(model) : ''}
-        onClick={() => props.openRequested.emit(model)}
+        title={runningItem.labelTitle ? runningItem.labelTitle() : ''}
+        onClick={() => runningItem.open()}
       >
-        {props.label(model)}
+        {runningItem.label()}
       </span>
       <button
         className={`${SHUTDOWN_BUTTON_CLASS} jp-mod-styled`}
-        onClick={() => props.shutdown(model)}
+        onClick={() => runningItem.shutdown()}
       >
         SHUT&nbsp;DOWN
       </button>
@@ -177,32 +133,20 @@ function Item<M>(props: SessionProps<M> & { model: M }) {
   );
 }
 
-function ListView<M>(props: { models: M[] } & SessionProps<M>) {
-  const { models, ...rest } = props;
+function ListView(props: { runningItems: IRunningSessions.IRunningItem[] }) {
   return (
     <ul className={LIST_CLASS}>
-      {models.map((m, i) => (
-        <Item key={i} model={m} {...rest} />
+      {props.runningItems.map((item, i) => (
+        <Item key={i} runningItem={item} />
       ))}
     </ul>
   );
 }
 
-function List<M>(props: SessionProps<M>) {
-  const initialModels = toArray(props.manager.running());
-  const filterRunning = props.filterRunning || (_ => true);
-  function render(models: Array<M>) {
-    return <ListView models={models.filter(filterRunning)} {...props} />;
-  }
-  if (!props.available) {
-    return render(initialModels);
-  }
+function List(props: { manager: IRunningSessions.IManager }) {
   return (
-    <UseSignal
-      signal={props.manager.runningChanged}
-      initialArgs={initialModels}
-    >
-      {(sender: any, args: Array<M>) => render(args)}
+    <UseSignal signal={props.manager.runningChanged}>
+      {() => <ListView runningItems={props.manager.running()} />}
     </UseSignal>
   );
 }
@@ -213,14 +157,11 @@ function List<M>(props: SessionProps<M>) {
  *
  * It is specialized for each based on it's props.
  */
-function Section<M>(props: SessionProps<M>) {
+function Section(props: { manager: IRunningSessions.IManager }) {
   function onShutdown() {
-    void showDialog({
-      title: `Shut Down All ${props.name} Sessions?`,
-      buttons: [
-        Dialog.cancelButton(),
-        Dialog.warnButton({ label: 'Shut Down All' })
-      ]
+    showDialog({
+      title: `Shutdown All ${props.manager.name} Sessions?`,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })]
     }).then(result => {
       if (result.button.accept) {
         props.manager.shutdownAll();
@@ -229,89 +170,41 @@ function Section<M>(props: SessionProps<M>) {
   }
   return (
     <div className={SECTION_CLASS}>
-      {props.available && (
-        <>
-          <header className={SECTION_HEADER_CLASS}>
-            <h2>{props.name} Sessions</h2>
-            <ToolbarButtonComponent
-              tooltip={`Shut Down All ${props.name} Sessions…`}
-              iconClassName="jp-CloseIcon"
-              onClick={onShutdown}
-            />
-          </header>
+      <>
+        <header className={SECTION_HEADER_CLASS}>
+          <h2>{props.manager.name} Sessions</h2>
+          <ToolbarButtonComponent
+            tooltip={`Shutdown All ${props.manager.name} Sessions…`}
+            iconClassName="jp-CloseIcon jp-Icon jp-Icon-16"
+            onClick={onShutdown}
+          />
+        </header>
 
-          <div className={CONTAINER_CLASS}>
-            <List {...props} />
-          </div>
-        </>
-      )}
+        <div className={CONTAINER_CLASS}>
+          <List manager={props.manager} />
+        </div>
+      </>
     </div>
   );
 }
 
-interface IRunningSessionsProps {
-  manager: ServiceManager.IManager;
-  sessionOpenRequested: Signal<RunningSessions, Session.IModel>;
-  terminalOpenRequested: Signal<RunningSessions, TerminalSession.IModel>;
-}
-
-function RunningSessionsComponent({
-  manager,
-  sessionOpenRequested,
-  terminalOpenRequested
-}: IRunningSessionsProps) {
-  const terminalsAvailable = manager.terminals.isAvailable();
-
+function RunningSessionsComponent(props: {
+  managers: IRunningSessionManagers;
+}) {
   return (
     <>
       <div className={HEADER_CLASS}>
         <ToolbarButtonComponent
           tooltip="Refresh List"
-          iconClassName="jp-RefreshIcon"
-          onClick={() => {
-            if (terminalsAvailable) {
-              void manager.terminals.refreshRunning();
-            }
-            void manager.sessions.refreshRunning();
-          }}
+          iconClassName="jp-RefreshIcon jp-Icon jp-Icon-16"
+          onClick={() =>
+            props.managers.items().forEach(manager => manager.refreshRunning())
+          }
         />
       </div>
-      <Section
-        openRequested={terminalOpenRequested}
-        manager={manager.terminals}
-        name="Terminal"
-        iconClass={() => `${ITEM_ICON_CLASS} ${TERMINAL_ICON_CLASS}`}
-        label={m => `terminals/${m.name}`}
-        available={terminalsAvailable}
-        shutdown={m => manager.terminals.shutdown(m.name)}
-      />
-      <Section
-        openRequested={sessionOpenRequested}
-        manager={manager.sessions}
-        filterRunning={m =>
-          !!((m.name || PathExt.basename(m.path)).indexOf('.') !== -1 || m.name)
-        }
-        name="Kernel"
-        iconClass={m => {
-          if ((m.name || PathExt.basename(m.path)).indexOf('.ipynb') !== -1) {
-            return NOTEBOOK_ICON_CLASS;
-          } else if (m.type.toLowerCase() === 'console') {
-            return CONSOLE_ICON_CLASS;
-          }
-          return FILE_ICON_CLASS;
-        }}
-        label={m => m.name || PathExt.basename(m.path)}
-        available={true}
-        labelTitle={m => {
-          let kernelName = m.kernel.name;
-          if (manager.specs) {
-            const spec = manager.specs.kernelspecs[kernelName];
-            kernelName = spec ? spec.display_name : 'unknown';
-          }
-          return `Path: ${m.path}\nKernel: ${kernelName}`;
-        }}
-        shutdown={m => manager.sessions.shutdown(m.id)}
-      />
+      {props.managers.items().map(manager => (
+        <Section key={manager.name} manager={manager} />
+      ))}
     </>
   );
 }
@@ -323,56 +216,54 @@ export class RunningSessions extends ReactWidget {
   /**
    * Construct a new running widget.
    */
-  constructor(options: RunningSessions.IOptions) {
+  constructor(managers: IRunningSessionManagers) {
     super();
-    this.options = options;
+    this.managers = managers;
 
     // this can't be in the react element, because then it would be too nested
     this.addClass(RUNNING_CLASS);
   }
 
   protected render() {
-    return (
-      <RunningSessionsComponent
-        manager={this.options.manager}
-        sessionOpenRequested={this._sessionOpenRequested}
-        terminalOpenRequested={this._terminalOpenRequested}
-      />
-    );
+    return <RunningSessionsComponent managers={this.managers} />;
   }
 
-  /**
-   * A signal emitted when a kernel session open is requested.
-   */
-  get sessionOpenRequested(): ISignal<this, Session.IModel> {
-    return this._sessionOpenRequested;
-  }
-
-  /**
-   * A signal emitted when a terminal session open is requested.
-   */
-  get terminalOpenRequested(): ISignal<this, TerminalSession.IModel> {
-    return this._terminalOpenRequested;
-  }
-
-  private _sessionOpenRequested = new Signal<this, Session.IModel>(this);
-  private _terminalOpenRequested = new Signal<this, TerminalSession.IModel>(
-    this
-  );
-  private options: RunningSessions.IOptions;
+  private managers: IRunningSessionManagers;
 }
 
 /**
- * The namespace for the `RunningSessions` class statics.
+ * The namespace for the `IRunningSessions` class statics.
  */
-export namespace RunningSessions {
+export namespace IRunningSessions {
   /**
-   * An options object for creating a running sessions widget.
+   * A manager of running items grouped under a single section.
    */
-  export interface IOptions {
-    /**
-     * A service manager instance.
-     */
-    manager: ServiceManager.IManager;
+  export interface IManager {
+    // Name that is shown to the user
+    name: string;
+    // called when the shutdown all button is pressed
+    shutdownAll(): void;
+    // list the running models.
+    running(): IRunningItem[];
+    // Force a refresh of the running models.
+    refreshRunning(): void;
+    // A signal that should be emitted when the item list has changed.
+    runningChanged: ISignal<any, any>;
+  }
+
+  /**
+   * A running item.
+   */
+  export interface IRunningItem {
+    // called when the running item is clicked
+    open: () => void;
+    // called when the shutdown button is pressed on a particular item
+    shutdown: () => void;
+    // Class for the icon
+    iconClass: () => string;
+    // called to determine the label for each item
+    label: () => string;
+    // called to determine the `title` attribute for each item, which is revealed on hover
+    labelTitle?: () => string;
   }
 }

@@ -16,16 +16,21 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 
+import { TerminalSession } from '@jupyterlab/services';
+
 import { ILauncher } from '@jupyterlab/launcher';
 
 import { IFileMenu, IMainMenu } from '@jupyterlab/mainmenu';
 
 import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal';
+import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 
 // Name-only import so as to not trigger inclusion in main bundle
 import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
 
 import { Menu } from '@phosphor/widgets';
+
+import { toArray } from '@phosphor/algorithm';
 
 /**
  * The command IDs used by the terminal plugin.
@@ -50,6 +55,11 @@ namespace CommandIDs {
 const TERMINAL_ICON_CLASS = 'jp-TerminalIcon';
 
 /**
+ * The class name added to a running session item icon.
+ */
+const ITEM_ICON_CLASS = 'jp-RunningSessions-itemIcon';
+
+/**
  * The default terminal extension.
  */
 const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
@@ -62,7 +72,8 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
     ILauncher,
     ILayoutRestorer,
     IMainMenu,
-    IThemeManager
+    IThemeManager,
+    IRunningSessionManagers
   ],
   autoStart: true
 };
@@ -82,7 +93,8 @@ function activate(
   launcher: ILauncher | null,
   restorer: ILayoutRestorer | null,
   mainMenu: IMainMenu | null,
-  themeManager: IThemeManager
+  themeManager: IThemeManager | null,
+  runningSessionManagers: IRunningSessionManagers | null
 ): ITerminalTracker {
   const { serviceManager, commands } = app;
   const category = 'Terminal';
@@ -248,6 +260,11 @@ function activate(
     });
   }
 
+  // Add a sessions manager if the running extension is available
+  if (runningSessionManagers) {
+    addRunningSessionManager(runningSessionManagers, app);
+  }
+
   app.contextMenu.addItem({
     command: CommandIDs.refresh,
     selector: '.jp-Terminal',
@@ -255,6 +272,45 @@ function activate(
   });
 
   return tracker;
+}
+
+/**
+ * Add the running terminal manager to the running panel.
+ */
+function addRunningSessionManager(
+  managers: IRunningSessionManagers,
+  app: JupyterFrontEnd
+) {
+  let manager = app.serviceManager.terminals;
+
+  managers.add({
+    name: 'Terminal',
+    running: () =>
+      toArray(manager.running()).map(model => new RunningTerminal(model)),
+    shutdownAll: () => manager.shutdownAll(),
+    refreshRunning: () => manager.refreshRunning(),
+    runningChanged: manager.runningChanged
+  });
+
+  class RunningTerminal implements IRunningSessions.IRunningItem {
+    constructor(model: TerminalSession.IModel) {
+      this._model = model;
+    }
+    open() {
+      app.commands.execute('terminal:open', { name: this._model.name });
+    }
+    iconClass() {
+      return `${ITEM_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
+    }
+    label() {
+      return `terminals/${this._model.name}`;
+    }
+    shutdown() {
+      return manager.shutdown(this._model.name);
+    }
+
+    private _model: TerminalSession.IModel;
+  }
 }
 
 /**
