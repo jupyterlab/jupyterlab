@@ -92,7 +92,7 @@ them, bug reports, ideas, discussions, questions, refactoring, etc. If your
 company wants to contribute new features, we ask that you commit to maintaining
 those features for a period of at least 2-3 years. This isn't a legal contract,
 but we do want you to carefully consider the maintenance of your contributions.
-If a new feature is abandonded and we are unable to maintain it, it may be
+If a new feature is abandoned and we are unable to maintain it, it may be
 deprecated or removed.
 
 **Don't surprise us.** _Don't build us a new dog park, when what we really need
