@@ -303,7 +303,7 @@ def watch(app_dir=None, logger=None):
     return handler.watch()
 
 
-def install_extension(extension, app_dir=None, logger=None):
+def install_extension(extension, app_dir=None, logger=None, pin=None):
     """Install an extension package into JupyterLab.
 
     The extension is first validated.
@@ -313,7 +313,7 @@ def install_extension(extension, app_dir=None, logger=None):
     logger = _ensure_logger(logger)
     _node_check(logger)
     handler = _AppHandler(app_dir, logger)
-    return handler.install_extension(extension)
+    return handler.install_extension(extension, pin=pin)
 
 
 def uninstall_extension(name=None, app_dir=None, logger=None, all_=False):
@@ -487,7 +487,7 @@ class _AppHandler(object):
         # TODO: Make this configurable
         self.registry = 'https://registry.npmjs.org'
 
-    def install_extension(self, extension, existing=None):
+    def install_extension(self, extension, existing=None, pin=None):
         """Install an extension package into JupyterLab.
 
         The extension is first validated.
@@ -514,7 +514,7 @@ class _AppHandler(object):
 
         # Install the package using a temporary directory.
         with TemporaryDirectory() as tempdir:
-            info = self._install_extension(extension, tempdir)
+            info = self._install_extension(extension, tempdir, pin=pin)
 
         name = info['name']
 
@@ -775,6 +775,10 @@ class _AppHandler(object):
 
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
+        data = self.info['extensions'][name]
+        if data["package_name"]:
+            self.logger.warn("Skipping updating pinned extension '%s'." % name)
+            return False
         try:
             latest = self._latest_compatible_package_version(name)
         except URLError:
@@ -782,7 +786,7 @@ class _AppHandler(object):
         if latest is None:
             self.logger.warn('No compatible version found for %s!' % (name,))
             return False
-        if latest == self.info['extensions'][name]['version']:
+        if latest == data['version']:
             self.logger.info('Extension %r already up to date' % name)
             return False
         self.logger.info('Updating %s to version %s' % (name, latest))
@@ -1198,6 +1202,12 @@ class _AppHandler(object):
             name = data['name']
             jlab = data.get('jupyterlab', dict())
             path = osp.abspath(target)
+
+            filename = osp.basename(target)
+            if filename.startswith("pin:"):
+                alias = filename[len("pin:"):-len(".tgz")]
+            else:
+                alias = None
             # homepage, repository  are optional
             if 'homepage' in data:
                 url = data['homepage']
@@ -1205,10 +1215,12 @@ class _AppHandler(object):
                 url = data['repository'].get('url', '')
             else:
                 url = ''
-            extensions[name] = dict(path=path,
+            extensions[alias or name] = dict(path=path,
                                     filename=osp.basename(path),
                                     url=url,
                                     version=data['version'],
+                                    # Only save the package name if the extension name is an alias
+                                    package_name=name if alias else None,
                                     jupyterlab=jlab,
                                     dependencies=deps,
                                     tar_dir=osp.dirname(path),
@@ -1302,7 +1314,12 @@ class _AppHandler(object):
                 extra += ' %s' % GREEN_OK
             if data['is_local']:
                 extra += '*'
-            logger.info('        %s v%s%s' % (name, version, extra))
+            # If we have the package name in the data, this means this extension's name is the alias name
+            package_name = data['package_name']
+            if package_name:
+                logger.info('        %s %s v%s%s' % (name, package_name, version, extra))
+            else:
+                logger.info('        %s v%s%s' % (name, version, extra))
             if errors:
                 error_accumulator[name] = (version, errors)
 
@@ -1367,10 +1384,10 @@ class _AppHandler(object):
 
         return data
 
-    def _install_extension(self, extension, tempdir):
+    def _install_extension(self, extension, tempdir, pin=None):
         """Install an extension with validation and return the name and path.
         """
-        info = self._extract_package(extension, tempdir)
+        info = self._extract_package(extension, tempdir, pin=pin)
         data = info['data']
 
         # Verify that the package is an extension.
@@ -1425,7 +1442,7 @@ class _AppHandler(object):
         info['path'] = target
         return info
 
-    def _extract_package(self, source, tempdir):
+    def _extract_package(self, source, tempdir, pin=None):
         """Call `npm pack` for an extension.
 
         The pack command will download the package tar if `source` is
@@ -1452,6 +1469,12 @@ class _AppHandler(object):
             info['path'] = target
         else:
             info['path'] = path
+        # If we are pinning the package, rename it `pin:<name>``
+        if pin:
+            old_path = info['path']
+            new_path = pjoin(osp.dirname(old_path), 'pin:{}.tgz'.format(pin))
+            shutil.move(old_path, new_path)
+            info['path'] = new_path
 
         info['filename'] = osp.basename(info['path'])
         info['name'] = info['data']['name']

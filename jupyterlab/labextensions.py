@@ -11,7 +11,7 @@ from copy import copy
 
 from jupyter_core.application import JupyterApp, base_flags, base_aliases
 
-from traitlets import Bool, Unicode
+from traitlets import Bool, Unicode, Unicode
 
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
@@ -55,6 +55,9 @@ aliases['app-dir'] = 'BaseExtensionApp.app_dir'
 aliases['dev-build'] = 'BaseExtensionApp.dev_build'
 aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 
+install_aliases = copy(aliases)
+install_aliases['pin-version-as'] = 'InstallLabExtensionApp.pin'
+
 VERSION = get_app_version()
 
 
@@ -95,12 +98,23 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
 
 class InstallLabExtensionApp(BaseExtensionApp):
     description = "Install labextension(s)"
+    aliases = install_aliases
+
+    pin = Unicode('', config=True,
+        help="Pin this version with a certain alias")
 
     def run_task(self):
+        pinned_versions = self.pin.split(',')
         self.extra_args = self.extra_args or [os.getcwd()]
         return any([
-            install_extension(arg, self.app_dir, logger=self.log)
-            for arg in self.extra_args
+            install_extension(
+                arg,
+                self.app_dir,
+                logger=self.log,
+                # Pass in pinned alias if we have it
+                pin=pinned_versions[i] if i < len(pinned_versions) else None
+            )
+            for i, arg in enumerate(self.extra_args)
         ])
 
 
