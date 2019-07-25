@@ -1,3 +1,5 @@
+:orphan:
+
 The extension tutorial has moved!
 ----------------------------------
 
