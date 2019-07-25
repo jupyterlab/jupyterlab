@@ -3,7 +3,7 @@
  *
  * Outputs in Markdown for easy posting in Github.
  */
-import { readFileSync } from 'fs';
+import { readFileSync } from 'fs-extra';
 
 const firstFilePath = process.argv[2];
 const secondFilePath = process.argv[3];
