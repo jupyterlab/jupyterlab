@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/console-extension",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "JupyterLab - Code Console Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,7 +41,7 @@
     "@jupyterlab/codeeditor": "^1.0.0",
     "@jupyterlab/console": "^1.0.2",
     "@jupyterlab/coreutils": "^3.0.0",
-    "@jupyterlab/filebrowser": "^1.0.2",
+    "@jupyterlab/filebrowser": "^1.0.3",
     "@jupyterlab/launcher": "^1.0.2",
     "@jupyterlab/mainmenu": "^1.0.2",
     "@jupyterlab/rendermime": "^1.0.2",

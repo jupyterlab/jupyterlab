@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-filebrowser",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -12,7 +12,7 @@
     "@jupyterlab/codemirror": "^1.0.2",
     "@jupyterlab/docmanager": "^1.0.2",
     "@jupyterlab/docregistry": "^1.0.2",
-    "@jupyterlab/filebrowser": "^1.0.2",
+    "@jupyterlab/filebrowser": "^1.0.3",
     "@jupyterlab/fileeditor": "^1.0.2",
     "@jupyterlab/services": "^4.0.2",
     "@jupyterlab/theme-light-extension": "^1.0.2",

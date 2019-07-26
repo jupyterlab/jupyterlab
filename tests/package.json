@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-root",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "dependencies": {
     "@babel/preset-env": "^7.4.3",
@@ -14,7 +14,7 @@
     "@jupyterlab/csvviewer": "^1.0.2",
     "@jupyterlab/docmanager": "^1.0.2",
     "@jupyterlab/docregistry": "^1.0.2",
-    "@jupyterlab/filebrowser": "^1.0.2",
+    "@jupyterlab/filebrowser": "^1.0.3",
     "@jupyterlab/fileeditor": "^1.0.2",
     "@jupyterlab/imageviewer": "^1.0.2",
     "@jupyterlab/inspector": "^1.0.2",
