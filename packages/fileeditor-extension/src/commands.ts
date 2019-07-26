@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { JupyterFrontEnd } from '@jupyterlab/application';
+
 import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 
 import { IConsoleTracker } from '@jupyterlab/console';
@@ -8,6 +10,8 @@ import { IConsoleTracker } from '@jupyterlab/console';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileEditor } from '@jupyterlab/fileeditor';
+
+import { ILauncher } from '@jupyterlab/launcher';
 
 import {
   IEditMenu,
@@ -24,9 +28,22 @@ import { JSONObject } from '@phosphor/coreutils';
 import { Menu } from '@phosphor/widgets';
 
 import { CommandIDs } from './index';
-import { JupyterFrontEnd } from '@jupyterlab/application';
 
 export default class Commands {
+  static addLauncherItems(launcher: ILauncher) {
+    launcher.add({
+      command: CommandIDs.createNew,
+      category: 'Other',
+      rank: 1
+    });
+
+    launcher.add({
+      command: CommandIDs.createNewMarkdown,
+      category: 'Other',
+      rank: 2
+    });
+  }
+
   static addPaletteItems(palette: ICommandPalette) {
     const category = 'Text Editor';
     let args: JSONObject = {

@@ -582,17 +582,7 @@ function activate(
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
-    launcher.add({
-      command: CommandIDs.createNew,
-      category: 'Other',
-      rank: 1
-    });
-
-    launcher.add({
-      command: CommandIDs.createNewMarkdown,
-      category: 'Other',
-      rank: 2
-    });
+    Commands.addLauncherItems(launcher);
   }
 
   if (palette) {
