@@ -609,14 +609,7 @@ function activate(
     );
   }
 
-  app.contextMenu.addItem({
-    command: CommandIDs.createConsole,
-    selector: '.jp-FileEditor'
-  });
-  app.contextMenu.addItem({
-    command: CommandIDs.markdownPreview,
-    selector: '.jp-FileEditor'
-  });
+  Commands.addContextMenuItems(app);
 
   return tracker;
 }

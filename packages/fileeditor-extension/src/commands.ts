@@ -24,6 +24,7 @@ import { JSONObject } from '@phosphor/coreutils';
 import { Menu } from '@phosphor/widgets';
 
 import { CommandIDs } from './index';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 export default class Commands {
   static addPaletteItems(palette: ICommandPalette) {
@@ -178,5 +179,16 @@ export default class Commands {
         }
       }
     } as IRunMenu.ICodeRunner<IDocumentWidget<FileEditor>>);
+  }
+
+  static addContextMenuItems(app: JupyterFrontEnd) {
+    app.contextMenu.addItem({
+      command: CommandIDs.createConsole,
+      selector: '.jp-FileEditor'
+    });
+    app.contextMenu.addItem({
+      command: CommandIDs.markdownPreview,
+      selector: '.jp-FileEditor'
+    });
   }
 }
