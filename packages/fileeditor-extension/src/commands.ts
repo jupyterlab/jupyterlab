@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { WidgetTracker } from '@jupyterlab/apputils';
+import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
@@ -26,6 +26,42 @@ import { Menu } from '@phosphor/widgets';
 import { CommandIDs } from './index';
 
 export default class Commands {
+  static addPaletteItems(palette: ICommandPalette) {
+    const category = 'Text Editor';
+    let args: JSONObject = {
+      insertSpaces: false,
+      size: 4,
+      name: 'Indent with Tab'
+    };
+    let command = 'fileeditor:change-tabs';
+    palette.addItem({ command, args, category });
+
+    for (let size of [1, 2, 4, 8]) {
+      let args: JSONObject = {
+        insertSpaces: true,
+        size,
+        name: `Spaces: ${size} `
+      };
+      palette.addItem({ command, args, category });
+    }
+
+    args = { isPalette: true };
+    command = CommandIDs.createNew;
+    palette.addItem({ command, args, category });
+
+    args = { isPalette: true };
+    command = CommandIDs.createNewMarkdown;
+    palette.addItem({ command, args, category });
+
+    args = { name: 'Increase Font Size', delta: 1 };
+    command = CommandIDs.changeFontSize;
+    palette.addItem({ command, args, category });
+
+    args = { name: 'Decrease Font Size', delta: -1 };
+    command = CommandIDs.changeFontSize;
+    palette.addItem({ command, args, category });
+  }
+
   static addMenuItems(
     menu: IMainMenu,
     commands: CommandRegistry,

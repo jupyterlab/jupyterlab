@@ -596,39 +596,7 @@ function activate(
   }
 
   if (palette) {
-    const category = 'Text Editor';
-    let args: JSONObject = {
-      insertSpaces: false,
-      size: 4,
-      name: 'Indent with Tab'
-    };
-    let command = 'fileeditor:change-tabs';
-    palette.addItem({ command, args, category });
-
-    for (let size of [1, 2, 4, 8]) {
-      let args: JSONObject = {
-        insertSpaces: true,
-        size,
-        name: `Spaces: ${size} `
-      };
-      palette.addItem({ command, args, category });
-    }
-
-    args = { isPalette: true };
-    command = CommandIDs.createNew;
-    palette.addItem({ command, args, category });
-
-    args = { isPalette: true };
-    command = CommandIDs.createNewMarkdown;
-    palette.addItem({ command, args, category });
-
-    args = { name: 'Increase Font Size', delta: 1 };
-    command = CommandIDs.changeFontSize;
-    palette.addItem({ command, args, category });
-
-    args = { name: 'Decrease Font Size', delta: -1 };
-    command = CommandIDs.changeFontSize;
-    palette.addItem({ command, args, category });
+    Commands.addPaletteItems(palette);
   }
 
   if (menu) {
