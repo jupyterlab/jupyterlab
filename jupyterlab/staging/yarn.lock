@@ -250,17 +250,17 @@
     "@phosphor/signaling" "^1.2.3"
     "@phosphor/widgets" "^1.8.0"
 
-"@jupyterlab/console-extension@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/console-extension/-/console-extension-1.0.2.tgz#92de9ea5aeec2ba0cabfe16c2d6cec6d3275ee2d"
-  integrity sha512-v4FcZpNx8xnfJtfbn4UcS8rasbgRpK2jAhGMrheHr0MaRLxDZQ8K1qBG5jlrc6G4QXGm24RC9VSNXQRY9hy2yA==
+"@jupyterlab/console-extension@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/console-extension/-/console-extension-1.0.3.tgz#6d9a3c43a3498a8c3d14d327ecb8f3eeec034bc2"
+  integrity sha512-j/rbbgS0jb+QlyfINT+apJm+iGaq5GE2T7vly9PuB4IiVf6u0tSGnK1Yqck/RZMzlLnNyhTiI1nYnoykjRDrZg==
   dependencies:
     "@jupyterlab/application" "^1.0.2"
     "@jupyterlab/apputils" "^1.0.2"
     "@jupyterlab/codeeditor" "^1.0.0"
     "@jupyterlab/console" "^1.0.2"
     "@jupyterlab/coreutils" "^3.0.0"
-    "@jupyterlab/filebrowser" "^1.0.2"
+    "@jupyterlab/filebrowser" "^1.0.3"
     "@jupyterlab/launcher" "^1.0.2"
     "@jupyterlab/mainmenu" "^1.0.2"
     "@jupyterlab/rendermime" "^1.0.2"
@@ -448,16 +448,16 @@
     react-paginate "^6.3.0"
     semver "^6.1.0"
 
-"@jupyterlab/filebrowser-extension@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/filebrowser-extension/-/filebrowser-extension-1.0.3.tgz#f9cba2fded5a9d0e7746b0f88444e7daa187ba23"
-  integrity sha512-wUW3flvLop7v1XtKAHlchiOvcuy59d2nlAwYVvc9ZOhkZc8GD3KLbO7PJLI4DMjBlYL8/uhVZvHBHhtLUe7E5w==
+"@jupyterlab/filebrowser-extension@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/filebrowser-extension/-/filebrowser-extension-1.0.4.tgz#cb63c188fb9e843f6313103a8f3afd0a6a88e8ed"
+  integrity sha512-MTKKQH3+cZt5vSbymsA7UDNc1Pu94Eorx6gRyGTcLby0hJxWNOtG3wLBIdxOnb28xJkZU0oiAOJhufsD0h5pBQ==
   dependencies:
     "@jupyterlab/application" "^1.0.2"
     "@jupyterlab/apputils" "^1.0.2"
     "@jupyterlab/coreutils" "^3.0.0"
     "@jupyterlab/docmanager" "^1.0.2"
-    "@jupyterlab/filebrowser" "^1.0.2"
+    "@jupyterlab/filebrowser" "^1.0.3"
     "@jupyterlab/launcher" "^1.0.2"
     "@jupyterlab/mainmenu" "^1.0.2"
     "@jupyterlab/services" "^4.0.2"
@@ -467,10 +467,10 @@
     "@phosphor/messaging" "^1.2.3"
     "@phosphor/widgets" "^1.8.0"
 
-"@jupyterlab/filebrowser@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/filebrowser/-/filebrowser-1.0.2.tgz#ed7da993f69574df2e2ae7ca061f91e318c48c6f"
-  integrity sha512-uxJgCjAU/5hnj8V1ju3TgNeMJLd2znqt6Vssp4vVONtfao1I6YrMDQ8HoXhQSxXBv/GUndLJ1rvWnQZfCfF2GQ==
+"@jupyterlab/filebrowser@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/filebrowser/-/filebrowser-1.0.3.tgz#9fe887372d4f0488fadd30fa18ea6e00096758fb"
+  integrity sha512-i55vRjA8NZzRy/IHJrtYh6xjOnHj62xEhHp7OU/FqYjvyQ5B1wXQpTag8nkpxLKKQzuCLxqLO8Q+RZ273LS2mA==
   dependencies:
     "@jupyterlab/apputils" "^1.0.2"
     "@jupyterlab/coreutils" "^3.0.0"
@@ -488,10 +488,10 @@
     "@phosphor/widgets" "^1.8.0"
     react "~16.8.4"
 
-"@jupyterlab/fileeditor-extension@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/fileeditor-extension/-/fileeditor-extension-1.0.2.tgz#ddef25ad21a39d98d80136b62aeebc14c908f261"
-  integrity sha512-UgZAmWaj8ooDyR48PFRDrPiod3TNYDgNq2jW5KZplk3giHJbk2YNe9ZmVp6/LMl6twumG9JcLlA32C8B0yKQBg==
+"@jupyterlab/fileeditor-extension@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/fileeditor-extension/-/fileeditor-extension-1.0.3.tgz#50b3cababa9e0d314330719ea3f13368d0e48650"
+  integrity sha512-QaZhBSmofrowvxgWNt/q+pBN1y8OiXSQbdKI1Wn4+mJbVS26a8VMgT/1s3B0T+T2SGtbsdoJRQ06JHo2TTidbQ==
   dependencies:
     "@jupyterlab/application" "^1.0.2"
     "@jupyterlab/apputils" "^1.0.2"
@@ -499,7 +499,7 @@
     "@jupyterlab/console" "^1.0.2"
     "@jupyterlab/coreutils" "^3.0.0"
     "@jupyterlab/docregistry" "^1.0.2"
-    "@jupyterlab/filebrowser" "^1.0.2"
+    "@jupyterlab/filebrowser" "^1.0.3"
     "@jupyterlab/fileeditor" "^1.0.2"
     "@jupyterlab/launcher" "^1.0.2"
     "@jupyterlab/mainmenu" "^1.0.2"
@@ -736,10 +736,10 @@
     "@jupyterlab/rendermime-interfaces" "^1.3.0"
     "@phosphor/coreutils" "^1.3.1"
 
-"@jupyterlab/notebook-extension@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/notebook-extension/-/notebook-extension-1.0.2.tgz#66c1feed8ed5278bf5830d942ffa70f36bb00ef6"
-  integrity sha512-9WBbwvOYivbrLHpyVPwcrr4G2CsCJn+yoraD8iPQiWvagUWn6s2v2ppDYHlU8S5/kY4cmQGe478xkX5Pauktvw==
+"@jupyterlab/notebook-extension@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/notebook-extension/-/notebook-extension-1.0.3.tgz#fe9935bab5f2f556dfddb5f8b29d1abda8c4b05c"
+  integrity sha512-RUzHA0W1lytqlNq/8LP1Cb35vz2DrKx5bgvLzjdGqoQc4oLFWw4tRpgmv0kWJEPAl/852/ig/3BSpRhSoA80ZQ==
   dependencies:
     "@jupyterlab/application" "^1.0.2"
     "@jupyterlab/apputils" "^1.0.2"
@@ -747,7 +747,7 @@
     "@jupyterlab/codeeditor" "^1.0.0"
     "@jupyterlab/coreutils" "^3.0.0"
     "@jupyterlab/docmanager" "^1.0.2"
-    "@jupyterlab/filebrowser" "^1.0.2"
+    "@jupyterlab/filebrowser" "^1.0.3"
     "@jupyterlab/launcher" "^1.0.2"
     "@jupyterlab/mainmenu" "^1.0.2"
     "@jupyterlab/notebook" "^1.0.2"
@@ -6350,9 +6350,9 @@ webpack-visualizer-plugin@^0.1.11:
     react-dom "^0.14.0"
 
 webpack@^4.32.2:
-  version "4.37.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.37.0.tgz#3508ef10f7996612c2be6026076d89760f776f54"
-  integrity sha512-iJPPvL7XpbcbwOthbzpa2BSPlmGp8lGDokAj/LdWtK80rsPoPOdANSbDBf2GAVLKZD3GhCuQ/gGkgN9HWs0Keg==
+  version "4.38.0"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.38.0.tgz#6d77108404b08883c78f4e7e45a43c4e5c47c931"
+  integrity sha512-lbuFsVOq8PZY+1Ytz/mYOvYOo+d4IJ31hHk/7iyoeWtwN33V+5HYotSH+UIb9tq914ey0Hot7z6HugD+je3sWw==
   dependencies:
     "@webassemblyjs/ast" "1.8.5"
     "@webassemblyjs/helper-module-context" "1.8.5"
