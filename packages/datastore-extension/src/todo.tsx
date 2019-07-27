@@ -55,28 +55,28 @@ class TODO extends React.Component<TODOProps, TODOState> {
         <h1>TODO</h1>
         <ol>
           <UseSignal signal={this.state.tableManager.changed}>
-            {() => {
-              console.log(toArray(this.state.tableManager.table.iter()));
-              return toArray(this.state.tableManager.table.iter()).map(row => {
-                console.log(row);
-                return row.show ? (
+            {() =>
+              toArray(this.state.tableManager.table.iter()).map(row =>
+                row.show ? (
                   <li id={row.$id}>
                     {row.description}
                     <button
-                      onClick={() =>
+                      onClick={() => {
+                        this.state.tableManager.beginTransaction();
                         this.state.tableManager.table.update({
                           [row.$id]: { show: false }
-                        })
-                      }
+                        });
+                        this.state.tableManager.endTransaction();
+                      }}
                     >
                       Remove
                     </button>
                   </li>
                 ) : (
                   <></>
-                );
-              });
-            }}
+                )
+              )
+            }
           </UseSignal>
         </ol>
         <form
@@ -92,7 +92,6 @@ class TODO extends React.Component<TODOProps, TODOState> {
               }
             });
             this.state.tableManager.endTransaction();
-            console.log(this.state.tableManager);
             e.preventDefault();
           }}
         >
