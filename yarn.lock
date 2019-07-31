@@ -25,50 +25,50 @@
   dependencies:
     regenerator-runtime "^0.13.2"
 
-"@blueprintjs/core@^3.17.0", "@blueprintjs/core@^3.9.0":
-  version "3.17.1"
-  resolved "https://registry.npmjs.org/@blueprintjs/core/-/core-3.17.1.tgz#c6ea0df795e046848a16b3d9242225fef34091ee"
-  integrity sha512-VROTlhBaNaRN9kfscTQwZqRvGZmZYGfPkzcP8w50+wF/XMiK0xNEF4mRNQKXLNIduIZta5uPagZgIh68UG5dTg==
+"@blueprintjs/core@^3.18.0", "@blueprintjs/core@^3.9.0":
+  version "3.18.0"
+  resolved "https://registry.npmjs.org/@blueprintjs/core/-/core-3.18.0.tgz#8835ead10460e6535076465865d2ad7600ae1a07"
+  integrity sha512-dr3A6uhpAAWmf5muY6PFQp5EgEzinRLZa/TGQMA05q1P2xrOn/LYlsqJWJBUJ3j9tmh1RP8VPeu1HmosQb3J7w==
   dependencies:
-    "@blueprintjs/icons" "^3.8.0"
+    "@blueprintjs/icons" "^3.10.0"
     "@types/dom4" "^2.0.1"
     classnames "^2.2"
-    dom4 "^2.0.1"
-    normalize.css "^8.0.0"
-    popper.js "^1.14.1"
-    react-popper "^1.0.0"
-    react-transition-group "^2.2.1"
-    resize-observer-polyfill "^1.5.0"
-    tslib "^1.9.0"
+    dom4 "^2.1.5"
+    normalize.css "^8.0.1"
+    popper.js "^1.15.0"
+    react-popper "^1.3.3"
+    react-transition-group "^2.9.0"
+    resize-observer-polyfill "^1.5.1"
+    tslib "~1.9.0"
 
-"@blueprintjs/icons@^3.3.0", "@blueprintjs/icons@^3.8.0":
-  version "3.9.1"
-  resolved "https://registry.npmjs.org/@blueprintjs/icons/-/icons-3.9.1.tgz#064d43314313f0feb4b1dd7e0904ddc17c8652d1"
-  integrity sha512-2EU9Xot0lkztDp8xVnBi5/71jgG1Rmsfz0LycBX/T16H0qGO7i+XEbZbpJjSvmr/UzhTpxQ/Yh5XGBc2U2zG4w==
+"@blueprintjs/icons@^3.10.0", "@blueprintjs/icons@^3.3.0":
+  version "3.10.0"
+  resolved "https://registry.npmjs.org/@blueprintjs/icons/-/icons-3.10.0.tgz#45cdb3ca62110e74bcf9e741237a6b4e2cf2c3a4"
+  integrity sha512-lyAUpkr3qEStPcJpMnxRKuVAPvaRNSce1ySPbkE58zPmD4WBya2gNrWex41xoqRYM0GsiBSwH9CnpY8t6fZKUA==
   dependencies:
     classnames "^2.2"
-    tslib "^1.9.0"
+    tslib "~1.9.0"
 
 "@blueprintjs/select@^3.3.0":
-  version "3.9.0"
-  resolved "https://registry.npmjs.org/@blueprintjs/select/-/select-3.9.0.tgz#728fd9cea8ff1cb3226db99b3b3a1851da3e766a"
-  integrity sha512-TmInLtGFc3My78KTmf9JUw5gawxdO7oxn3bEQDQbWPuvb/1K0u0et+dTVlwGTk9GiNopQ2NtoCj+GQ75miF9QA==
+  version "3.10.0"
+  resolved "https://registry.npmjs.org/@blueprintjs/select/-/select-3.10.0.tgz#e5711a25416e62d236afb8a3062af45b3b4206ef"
+  integrity sha512-Akm/L5tndrOUuf05od9IJ0WSQgHdbJ4/i2RRoLLH5ZiI8s1OZiCbKJYDSCbCOTviCdZSuL0qkJsBcYhOI/Czeg==
   dependencies:
-    "@blueprintjs/core" "^3.17.0"
+    "@blueprintjs/core" "^3.18.0"
     classnames "^2.2"
-    tslib "^1.9.0"
+    tslib "~1.9.0"
 
 "@jupyterlab/application@^1.0.0":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/application/-/application-1.0.1.tgz#aac172235f30dec79c1047dda83b87718d3689ae"
-  integrity sha512-rcEIrcjWMukeM23GZ9WJYnS1+JPYCClyfM07qhyIbDIdm7afQs6oIFegeeuo/6Or/AJ+lYMpVAW9vTpLLQluKQ==
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/@jupyterlab/application/-/application-1.0.2.tgz#bdda0d710baa3348c1fe28ce273b9afafb11b29e"
+  integrity sha512-B0cpY7eLN4e6t6n1ktejfUYb4c1wsizSEhORrLvQ/EiKBG5t++I87SKwxOFyZE2e6QVZoUDkGDM+n4xTX6tFRg==
   dependencies:
-    "@jupyterlab/apputils" "^1.0.1"
+    "@jupyterlab/apputils" "^1.0.2"
     "@jupyterlab/coreutils" "^3.0.0"
-    "@jupyterlab/docregistry" "^1.0.1"
-    "@jupyterlab/rendermime" "^1.0.1"
+    "@jupyterlab/docregistry" "^1.0.2"
+    "@jupyterlab/rendermime" "^1.0.2"
     "@jupyterlab/rendermime-interfaces" "^1.3.0"
-    "@jupyterlab/services" "^4.0.1"
+    "@jupyterlab/services" "^4.0.2"
     "@phosphor/algorithm" "^1.1.3"
     "@phosphor/application" "^1.6.3"
     "@phosphor/commands" "^1.6.3"
@@ -80,30 +80,7 @@
     "@phosphor/widgets" "^1.8.0"
     font-awesome "~4.7.0"
 
-"@jupyterlab/apputils@^1.0.0", "@jupyterlab/apputils@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/apputils/-/apputils-1.0.1.tgz#66bf45b40953155869c24d849bda36098ab6b9c5"
-  integrity sha512-crY5PjndVrspFdo/k8JchaC+OU7aOYIXmYhcYGLD7uwt/G6CpZgHSEA/4YuoxulmL0mG9bu0GD19ARSROxISkQ==
-  dependencies:
-    "@jupyterlab/coreutils" "^3.0.0"
-    "@jupyterlab/services" "^4.0.1"
-    "@jupyterlab/ui-components" "^1.0.0"
-    "@phosphor/algorithm" "^1.1.3"
-    "@phosphor/commands" "^1.6.3"
-    "@phosphor/coreutils" "^1.3.1"
-    "@phosphor/disposable" "^1.2.0"
-    "@phosphor/domutils" "^1.1.3"
-    "@phosphor/messaging" "^1.2.3"
-    "@phosphor/properties" "^1.1.3"
-    "@phosphor/signaling" "^1.2.3"
-    "@phosphor/virtualdom" "^1.1.3"
-    "@phosphor/widgets" "^1.8.0"
-    "@types/react" "~16.8.18"
-    react "~16.8.4"
-    react-dom "~16.8.4"
-    sanitize-html "~1.20.1"
-
-"@jupyterlab/apputils@^1.0.2":
+"@jupyterlab/apputils@^1.0.0", "@jupyterlab/apputils@^1.0.2":
   version "1.0.2"
   resolved "https://registry.npmjs.org/@jupyterlab/apputils/-/apputils-1.0.2.tgz#6c3483d0803ab780f924e70d98b7a8599c135fdb"
   integrity sha512-3n/Dqau0s4v6+MjWLRuoZQrr/BdhEgmEj9Kfkw562b/KuXo+JtsLE3FVzvi7gMK2duPHqv4B56QP8sl1Z9Hyaw==
@@ -126,32 +103,32 @@
     react-dom "~16.8.4"
     sanitize-html "~1.20.1"
 
-"@jupyterlab/attachments@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/attachments/-/attachments-1.0.1.tgz#31551d8d05abae93831a665a551af558e6af8556"
-  integrity sha512-h4QKtw+1AwfGpxUdhQEpZ+8D1e+wI4mrjHeiAOVEdMm9tffuPIWaQDCD+e5YSZI0/Ip/tkbe9BpFpiAxIXPp2w==
+"@jupyterlab/attachments@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/@jupyterlab/attachments/-/attachments-1.0.2.tgz#0c6d46043c861e76e9a94c1ecb9045eb452bf3f5"
+  integrity sha512-M3fDgoaKFUUSM7B3OFCq+iXes4lel4fQpaVxePsYxZbisr1ajMW7mwtM9V1fSY6pujiik6rmbFFJAyhEz/CBZg==
   dependencies:
     "@jupyterlab/coreutils" "^3.0.0"
     "@jupyterlab/observables" "^2.2.0"
-    "@jupyterlab/rendermime" "^1.0.1"
+    "@jupyterlab/rendermime" "^1.0.2"
     "@jupyterlab/rendermime-interfaces" "^1.3.0"
     "@phosphor/disposable" "^1.2.0"
     "@phosphor/signaling" "^1.2.3"
 
-"@jupyterlab/cells@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/cells/-/cells-1.0.1.tgz#f149998d9dea4005cda695caf7380a3b8be9a258"
-  integrity sha512-oFBa02G2VbY584v/m8lCck8UTa+Wz/q3MuNQ18YSD+QJMdBmKHkeC/oEpmLJgXEq4Fdd7StRis5YKhN97ans0g==
+"@jupyterlab/cells@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/@jupyterlab/cells/-/cells-1.0.2.tgz#188ec23c84e0ea799463e73ab7bea758bbd6cff2"
+  integrity sha512-KTdYSWnyoRIaTY9FUb2kmtO08kjqTzdUnq9eJMHlJlBMi5sClyZTNU10LpiQo0stEiLsIk1OGuXutNtykVwqoA==
   dependencies:
-    "@jupyterlab/apputils" "^1.0.1"
-    "@jupyterlab/attachments" "^1.0.1"
+    "@jupyterlab/apputils" "^1.0.2"
+    "@jupyterlab/attachments" "^1.0.2"
     "@jupyterlab/codeeditor" "^1.0.0"
-    "@jupyterlab/codemirror" "^1.0.1"
+    "@jupyterlab/codemirror" "^1.0.2"
     "@jupyterlab/coreutils" "^3.0.0"
     "@jupyterlab/observables" "^2.2.0"
-    "@jupyterlab/outputarea" "^1.0.1"
-    "@jupyterlab/rendermime" "^1.0.1"
-    "@jupyterlab/services" "^4.0.1"
+    "@jupyterlab/outputarea" "^1.0.2"
+    "@jupyterlab/rendermime" "^1.0.2"
+    "@jupyterlab/services" "^4.0.2"
     "@phosphor/algorithm" "^1.1.3"
     "@phosphor/coreutils" "^1.3.1"
     "@phosphor/messaging" "^1.2.3"
@@ -174,25 +151,6 @@
     "@phosphor/signaling" "^1.2.3"
     "@phosphor/widgets" "^1.8.0"
 
-"@jupyterlab/codemirror@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/codemirror/-/codemirror-1.0.1.tgz#c3b38905428bc7a47198657daf63e0a507e73ba8"
-  integrity sha512-v/ncOhVA9EgDRCIT0Ry5Ze1l8VsEtC+5ewKY2Oz1cUkvfwoEFcppFPQuUxHR8K7Ib9IsbVtM6L21dG4O1XGZrg==
-  dependencies:
-    "@jupyterlab/apputils" "^1.0.1"
-    "@jupyterlab/codeeditor" "^1.0.0"
-    "@jupyterlab/coreutils" "^3.0.0"
-    "@jupyterlab/observables" "^2.2.0"
-    "@jupyterlab/statusbar" "^1.0.1"
-    "@phosphor/algorithm" "^1.1.3"
-    "@phosphor/commands" "^1.6.3"
-    "@phosphor/coreutils" "^1.3.1"
-    "@phosphor/disposable" "^1.2.0"
-    "@phosphor/signaling" "^1.2.3"
-    "@phosphor/widgets" "^1.8.0"
-    codemirror "~5.47.0"
-    react "~16.8.4"
-
 "@jupyterlab/codemirror@^1.0.2":
   version "1.0.2"
   resolved "https://registry.npmjs.org/@jupyterlab/codemirror/-/codemirror-1.0.2.tgz#a72d23b881e9ee4a507ded17e23320d4fd05942b"
@@ -212,18 +170,18 @@
     codemirror "~5.47.0"
     react "~16.8.4"
 
-"@jupyterlab/console@^1.0.0":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/console/-/console-1.0.1.tgz#7856934fc8a2ca52ec58a95491fc7022029c81ba"
-  integrity sha512-mLvcWuiOIBS8wP6smUj4PTMpe5Q+vhGEEZJlvd5lqFL7uBoLPH7q0ks7YKcELrbrAxg5LKsvpDHRi20iJxAMlA==
+"@jupyterlab/console@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/@jupyterlab/console/-/console-1.0.2.tgz#a8b6d09e85ddc84481c24ea80e5adcfd75d689ff"
+  integrity sha512-YcArxobyD6YBkI17GtvYFVb17gRxXRWTtL9Vqg5FOHIWZH+Cahb0VmWLA6iNE2t0ekiV/k1ubjNk8TYZ4pPOlA==
   dependencies:
-    "@jupyterlab/apputils" "^1.0.1"
-    "@jupyterlab/cells" "^1.0.1"
+    "@jupyterlab/apputils" "^1.0.2"
+    "@jupyterlab/cells" "^1.0.2"
     "@jupyterlab/codeeditor" "^1.0.0"
     "@jupyterlab/coreutils" "^3.0.0"
     "@jupyterlab/observables" "^2.2.0"
-    "@jupyterlab/rendermime" "^1.0.1"
-    "@jupyterlab/services" "^4.0.1"
+    "@jupyterlab/rendermime" "^1.0.2"
+    "@jupyterlab/services" "^4.0.2"
     "@phosphor/algorithm" "^1.1.3"
     "@phosphor/coreutils" "^1.3.1"
     "@phosphor/disposable" "^1.2.0"
@@ -248,26 +206,6 @@
     moment "^2.24.0"
     path-posix "~1.0.0"
     url-parse "~1.4.3"
-
-"@jupyterlab/docregistry@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/docregistry/-/docregistry-1.0.1.tgz#28ca14e7c43c161384d5582e011b0a70522bb8eb"
-  integrity sha512-2BXJl2SBGSXcPN0uLEAZJs2ZdGzXTjB6/NFO2UUjRf4Ixcj6OqqX+S4ys37Yag3/5csUabcrM+/vazRFqza5xQ==
-  dependencies:
-    "@jupyterlab/apputils" "^1.0.1"
-    "@jupyterlab/codeeditor" "^1.0.0"
-    "@jupyterlab/codemirror" "^1.0.1"
-    "@jupyterlab/coreutils" "^3.0.0"
-    "@jupyterlab/observables" "^2.2.0"
-    "@jupyterlab/rendermime" "^1.0.1"
-    "@jupyterlab/rendermime-interfaces" "^1.3.0"
-    "@jupyterlab/services" "^4.0.1"
-    "@phosphor/algorithm" "^1.1.3"
-    "@phosphor/coreutils" "^1.3.1"
-    "@phosphor/disposable" "^1.2.0"
-    "@phosphor/messaging" "^1.2.3"
-    "@phosphor/signaling" "^1.2.3"
-    "@phosphor/widgets" "^1.8.0"
 
 "@jupyterlab/docregistry@^1.0.2":
   version "1.0.2"
@@ -304,11 +242,11 @@
     react "~16.8.4"
 
 "@jupyterlab/launcher@^1.0.0":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/launcher/-/launcher-1.0.1.tgz#d75e6457e1abd329d111437bde1cec56fcc9338f"
-  integrity sha512-GarY6YGFYY0oyeaJZv8KYM7SYrrd2BcqRmgm36+q3uXqu8qbGegSp4N/sNanWVjaCSnXUG3ab0Kb1gcDi5AAZQ==
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/@jupyterlab/launcher/-/launcher-1.0.2.tgz#80ca71bac5edb322fadc2d9ac0f648fb92c62dbd"
+  integrity sha512-mQxCkNrPrdjX4/ySzhf0t7FZck3I7VC1Y9mIQyjNTq6COYZWxPxh4oPhedrQHvPf6rMYEEqxE3VqUnxsyOlZRQ==
   dependencies:
-    "@jupyterlab/apputils" "^1.0.1"
+    "@jupyterlab/apputils" "^1.0.2"
     "@phosphor/algorithm" "^1.1.3"
     "@phosphor/commands" "^1.6.3"
     "@phosphor/coreutils" "^1.3.1"
@@ -318,19 +256,19 @@
     react "~16.8.4"
 
 "@jupyterlab/notebook@^1.0.0":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/notebook/-/notebook-1.0.1.tgz#0b7d9b2c728bcc12897c30c4259d19121b84fa4b"
-  integrity sha512-36xsJjggzhL7BYQLFEwJJg9y3nj39K85Edj9GmzWquspfoI6RnjTrcvVZsvpKE8+0yFlzb27RdMCgCek4/o7Bg==
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/@jupyterlab/notebook/-/notebook-1.0.2.tgz#5f48bbac20f1c4de4f23d0961e72bd5f0ea6ac6b"
+  integrity sha512-s5hfNRUEuLoPsI5//8DSjJ4/cKKStn0/2i2WegQsX6SSYdj4yqxjwMdveGxK0ROcteVcmok3ECEg6rNDxkFiVw==
   dependencies:
-    "@jupyterlab/apputils" "^1.0.1"
-    "@jupyterlab/cells" "^1.0.1"
+    "@jupyterlab/apputils" "^1.0.2"
+    "@jupyterlab/cells" "^1.0.2"
     "@jupyterlab/codeeditor" "^1.0.0"
     "@jupyterlab/coreutils" "^3.0.0"
-    "@jupyterlab/docregistry" "^1.0.1"
+    "@jupyterlab/docregistry" "^1.0.2"
     "@jupyterlab/observables" "^2.2.0"
-    "@jupyterlab/rendermime" "^1.0.1"
-    "@jupyterlab/services" "^4.0.1"
-    "@jupyterlab/statusbar" "^1.0.1"
+    "@jupyterlab/rendermime" "^1.0.2"
+    "@jupyterlab/services" "^4.0.2"
+    "@jupyterlab/statusbar" "^1.0.2"
     "@jupyterlab/ui-components" "^1.0.0"
     "@phosphor/algorithm" "^1.1.3"
     "@phosphor/coreutils" "^1.3.1"
@@ -354,21 +292,22 @@
     "@phosphor/messaging" "^1.2.3"
     "@phosphor/signaling" "^1.2.3"
 
-"@jupyterlab/outputarea@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/outputarea/-/outputarea-1.0.1.tgz#1a9d5c53642d6bca1b224125b69b4e8cbcb2d788"
-  integrity sha512-6ZZXujp/E62DLfKhGj+gnN3k0OmaK4i+1SrY1sAUuevPRVgDflB37SE4slZiOXAT5wJE8WaedC+NhfJmZTbK8Q==
+"@jupyterlab/outputarea@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/@jupyterlab/outputarea/-/outputarea-1.0.2.tgz#8489c88670e0bcbf3ac1680206407c4f005aedad"
+  integrity sha512-W2LD/emLByNIJ7P1s1u6Xd+Pbq8MviipXAaeZEPF3/diQaCcKjCPZdiY56kXNCFxYupAZahIOA0QzMTLs23Zqg==
   dependencies:
-    "@jupyterlab/apputils" "^1.0.1"
+    "@jupyterlab/apputils" "^1.0.2"
     "@jupyterlab/coreutils" "^3.0.0"
     "@jupyterlab/observables" "^2.2.0"
-    "@jupyterlab/rendermime" "^1.0.1"
+    "@jupyterlab/rendermime" "^1.0.2"
     "@jupyterlab/rendermime-interfaces" "^1.3.0"
-    "@jupyterlab/services" "^4.0.1"
+    "@jupyterlab/services" "^4.0.2"
     "@phosphor/algorithm" "^1.1.3"
     "@phosphor/coreutils" "^1.3.1"
     "@phosphor/disposable" "^1.2.0"
     "@phosphor/messaging" "^1.2.3"
+    "@phosphor/properties" "^1.1.3"
     "@phosphor/signaling" "^1.2.3"
     "@phosphor/widgets" "^1.8.0"
 
@@ -379,25 +318,6 @@
   dependencies:
     "@phosphor/coreutils" "^1.3.1"
     "@phosphor/widgets" "^1.8.0"
-
-"@jupyterlab/rendermime@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/rendermime/-/rendermime-1.0.1.tgz#f5126b1a59c7daefb0b689ba7cd2f1192f7b7e8d"
-  integrity sha512-/ZwhIZ5nbv5AqMxZj6wTpZGfdqcBkVeHcQGAKvqD9MjICw+tlziE9M6kvzlkWZ3B8aW1kLas1fXDJTtQ0HCgbQ==
-  dependencies:
-    "@jupyterlab/apputils" "^1.0.1"
-    "@jupyterlab/codemirror" "^1.0.1"
-    "@jupyterlab/coreutils" "^3.0.0"
-    "@jupyterlab/observables" "^2.2.0"
-    "@jupyterlab/rendermime-interfaces" "^1.3.0"
-    "@jupyterlab/services" "^4.0.1"
-    "@phosphor/algorithm" "^1.1.3"
-    "@phosphor/coreutils" "^1.3.1"
-    "@phosphor/messaging" "^1.2.3"
-    "@phosphor/signaling" "^1.2.3"
-    "@phosphor/widgets" "^1.8.0"
-    lodash.escape "^4.0.1"
-    marked "0.6.2"
 
 "@jupyterlab/rendermime@^1.0.2":
   version "1.0.2"
@@ -418,20 +338,6 @@
     lodash.escape "^4.0.1"
     marked "0.6.2"
 
-"@jupyterlab/services@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/services/-/services-4.0.1.tgz#08a8b5c92ae45c095f84975c4bf99ee2407c3d16"
-  integrity sha512-gsErfZra65U3xh2jQu652/8mAb/LwAAYHVVybthTgZfh+ffWES04P80RDfq3nYBGIp8swXo/LFMKJEUGjaczyg==
-  dependencies:
-    "@jupyterlab/coreutils" "^3.0.0"
-    "@jupyterlab/observables" "^2.2.0"
-    "@phosphor/algorithm" "^1.1.3"
-    "@phosphor/coreutils" "^1.3.1"
-    "@phosphor/disposable" "^1.2.0"
-    "@phosphor/signaling" "^1.2.3"
-    node-fetch "^2.6.0"
-    ws "^7.0.0"
-
 "@jupyterlab/services@^4.0.2":
   version "4.0.2"
   resolved "https://registry.npmjs.org/@jupyterlab/services/-/services-4.0.2.tgz#88561f5ef6099bf8462efc1402541738a8b11f23"
@@ -445,24 +351,6 @@
     "@phosphor/signaling" "^1.2.3"
     node-fetch "^2.6.0"
     ws "^7.0.0"
-
-"@jupyterlab/statusbar@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@jupyterlab/statusbar/-/statusbar-1.0.1.tgz#ac147e1e9cd6a16ee2d9e04aa5c43e2eb1b56872"
-  integrity sha512-cmE38ejzCaFDS5ikpHN8Ucu9YjYyXSX6omFlz9Xn3Z+ERTCBhhZ4cXYh+mKmyXPy6z5cJmHBGw9X5w7zxKEn0w==
-  dependencies:
-    "@jupyterlab/apputils" "^1.0.1"
-    "@jupyterlab/codeeditor" "^1.0.0"
-    "@jupyterlab/coreutils" "^3.0.0"
-    "@jupyterlab/services" "^4.0.1"
-    "@phosphor/algorithm" "^1.1.3"
-    "@phosphor/coreutils" "^1.3.1"
-    "@phosphor/disposable" "^1.2.0"
-    "@phosphor/messaging" "^1.2.3"
-    "@phosphor/signaling" "^1.2.3"
-    "@phosphor/widgets" "^1.8.0"
-    react "~16.8.4"
-    typestyle "^2.0.1"
 
 "@jupyterlab/statusbar@^1.0.2":
   version "1.0.2"
@@ -815,7 +703,7 @@ dom-serializer@0:
     domelementtype "^1.3.0"
     entities "^1.1.1"
 
-dom4@^2.0.1:
+dom4@^2.1.5:
   version "2.1.5"
   resolved "https://registry.npmjs.org/dom4/-/dom4-2.1.5.tgz#f98a94eb67b340f0fa5b42b0ee9c38cda035428e"
   integrity sha512-gJbnVGq5zaBUY0lUh0LUEVGYrtN75Ks8ZwpwOYvnVFrKy/qzXK4R/1WuLIFExWj/tBxbRAkTzZUGJHXmqsBNjQ==
@@ -871,9 +759,9 @@ esprima@^4.0.0:
   integrity sha512-eGuFFw7Upda+g4p+QHvnW0RyTX/SVeJBDM/gCtMARO0cLuT2HcEKnTPvhjV6aGeqrCB/sbNop0Kszm0jsaWU4A==
 
 esutils@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/esutils/-/esutils-2.0.2.tgz#0abf4f1caa5bcb1f7a9d8acc6dea4faaa04bac9b"
-  integrity sha1-Cr9PHKpbyx96nYrMbepPqqBLrJs=
+  version "2.0.3"
+  resolved "https://registry.npmjs.org/esutils/-/esutils-2.0.3.tgz#74d2eb4de0b8da1293711910d50775b9b710ef64"
+  integrity sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==
 
 fast-deep-equal@^2.0.1:
   version "2.0.1"
@@ -966,9 +854,9 @@ has-flag@^3.0.0:
   integrity sha1-tdRU3CGZriJWmfNGfloH87lVuv0=
 
 highlight.js@^9.13.1:
-  version "9.15.8"
-  resolved "https://registry.npmjs.org/highlight.js/-/highlight.js-9.15.8.tgz#f344fda123f36f1a65490e932cf90569e4999971"
-  integrity sha512-RrapkKQWwE+wKdF73VsOa2RQdIoO3mxwJ4P8mhbI6KYJUraUHRKM5w5zQQKXNk0xNL4UVRdulV9SBJcmzJNzVA==
+  version "9.15.9"
+  resolved "https://registry.npmjs.org/highlight.js/-/highlight.js-9.15.9.tgz#865257da1dbb4a58c4552d46c4b3854f77f0e6d5"
+  integrity sha512-M0zZvfLr5p0keDMCAhNBp03XJbKBxUx5AfyfufMdFMEP4N/Xj6dh0IqC75ys7BAzceR34NgcvXjupRVaHBPPVQ==
 
 htmlparser2@^3.10.0:
   version "3.10.1"
@@ -1166,7 +1054,7 @@ node-fetch@^2.6.0:
   resolved "https://registry.npmjs.org/node-fetch/-/node-fetch-2.6.0.tgz#e633456386d4aa55863f676a7ab0daa8fdecb0fd"
   integrity sha512-8dG4H5ujfvFiqDmVu9fQ5bOHUC15JMjMY/Zumv26oOvvVJjM67KF8koCWIabKQ1GJIa9r2mMZscBq/TbdOcmNA==
 
-normalize.css@^8.0.0:
+normalize.css@^8.0.1:
   version "8.0.1"
   resolved "https://registry.npmjs.org/normalize.css/-/normalize.css-8.0.1.tgz#9b98a208738b9cc2634caacbc42d131c97487bf3"
   integrity sha512-qizSNPO93t1YUuUhP22btGOo3chcvDFqFaj2TRybP0DMxkHOCTYwp3n34fel4a31ORXy4m1Xq0Gyqpb5m33qIg==
@@ -1211,7 +1099,7 @@ path-posix@~1.0.0:
   resolved "https://registry.npmjs.org/path-posix/-/path-posix-1.0.0.tgz#06b26113f56beab042545a23bfa88003ccac260f"
   integrity sha1-BrJhE/Vr6rBCVFojv6iAA8ysJg8=
 
-popper.js@^1.14.1, popper.js@^1.14.4:
+popper.js@^1.14.4, popper.js@^1.15.0:
   version "1.15.0"
   resolved "https://registry.npmjs.org/popper.js/-/popper.js-1.15.0.tgz#5560b99bbad7647e9faa475c6b8056621f5a4ff2"
   integrity sha512-w010cY1oCUmI+9KwwlWki+r5jxKfTFDVoadl7MSrIujHU5MJ5OR6HTDj6Xo8aoR/QsA56x8jKjA59qGH4ELtrA==
@@ -1281,7 +1169,7 @@ react-lifecycles-compat@^3.0.4:
   resolved "https://registry.npmjs.org/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
-react-popper@^1.0.0:
+react-popper@^1.3.3:
   version "1.3.3"
   resolved "https://registry.npmjs.org/react-popper/-/react-popper-1.3.3.tgz#2c6cef7515a991256b4f0536cd4bdcb58a7b6af6"
   integrity sha512-ynMZBPkXONPc5K4P5yFWgZx5JGAUIP3pGGLNs58cfAPgK67olx7fmLp+AdpZ0+GoQ+ieFDa/z4cdV6u7sioH6w==
@@ -1293,7 +1181,7 @@ react-popper@^1.0.0:
     typed-styles "^0.0.7"
     warning "^4.0.2"
 
-react-transition-group@^2.2.1:
+react-transition-group@^2.9.0:
   version "2.9.0"
   resolved "https://registry.npmjs.org/react-transition-group/-/react-transition-group-2.9.0.tgz#df9cdb025796211151a436c69a8f3b97b5b07c8d"
   integrity sha512-+HzNTCHpeQyl4MJ/bdE0u6XRMe9+XG/+aL4mCxVN4DnPBQ0/5bfHWPDuOZUzYdMj94daZaZdCCc1Dzt9R/xSSg==
@@ -1339,7 +1227,7 @@ requires-port@^1.0.0:
   resolved "https://registry.npmjs.org/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
   integrity sha1-kl0mAdOaxIXgkc8NpcbmlNw9yv8=
 
-resize-observer-polyfill@^1.5.0:
+resize-observer-polyfill@^1.5.1:
   version "1.5.1"
   resolved "https://registry.npmjs.org/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz#0e9020dd3d21024458d4ebd27e23e40269810464"
   integrity sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==
@@ -1450,10 +1338,15 @@ supports-color@^6.1.0:
   dependencies:
     has-flag "^3.0.0"
 
-tslib@^1.7.1, tslib@^1.8.0, tslib@^1.8.1, tslib@^1.9.0:
+tslib@^1.7.1, tslib@^1.8.0, tslib@^1.8.1:
   version "1.10.0"
   resolved "https://registry.npmjs.org/tslib/-/tslib-1.10.0.tgz#c3c19f95973fb0a62973fb09d90d961ee43e5c8a"
   integrity sha512-qOebF53frne81cf0S9B41ByenJ3/IuH8yJKngAX35CmiZySA0khhkovshKK+jGCaMnVomla7gVlIcc3EvKPbTQ==
+
+tslib@~1.9.0:
+  version "1.9.3"
+  resolved "https://registry.npmjs.org/tslib/-/tslib-1.9.3.tgz#d7e4dd79245d85428c4d7e4822a79917954ca286"
+  integrity sha512-4krF8scpejhaOgqzBEcGM7yDIEfi0/8+8zDRZhNZZ2kjmHJ4hv3zCbQWxoJGz1iw5U0Jl0nma13xzHXcncMavQ==
 
 tslint-plugin-prettier@^2.0.1:
   version "2.0.1"

@@ -7,6 +7,8 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
+import { IConsoleTracker } from '@jupyterlab/console';
+
 import { IStateDB } from '@jupyterlab/coreutils';
 
 import { IEditorTracker } from '@jupyterlab/fileeditor';
@@ -68,10 +70,27 @@ const plugin: JupyterFrontEndPlugin<IDebugger> = {
 };
 
 /**
+ * A plugin that provides visual debugging support for consoles.
+ */
+const consoles: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger:consoles',
+  autoStart: true,
+  requires: [IDebugger],
+  optional: [IConsoleTracker],
+  activate: (_, debug, tracker: IConsoleTracker | null) => {
+    if (!tracker) {
+      console.log(`${consoles.id} load failed. There is no console tracker.`);
+      return;
+    }
+    console.log(`${consoles.id} has not been implemented.`, debug);
+  }
+};
+
+/**
  * A plugin that provides visual debugging support for file editors.
  */
 const files: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/debugger:notebooks',
+  id: '@jupyterlab/debugger:files',
   autoStart: true,
   requires: [IDebugger],
   optional: [IEditorTracker],
