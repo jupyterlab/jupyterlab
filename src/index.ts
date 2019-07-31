@@ -9,6 +9,10 @@ import {
 
 import { IStateDB } from '@jupyterlab/coreutils';
 
+import { IEditorTracker } from '@jupyterlab/fileeditor';
+
+import { INotebookTracker } from '@jupyterlab/notebook';
+
 import { Debugger } from './debugger';
 
 import { IDebugger } from './tokens';
@@ -64,7 +68,41 @@ const plugin: JupyterFrontEndPlugin<IDebugger> = {
 };
 
 /**
+ * A plugin that provides visual debugging support for file editors.
+ */
+const files: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger:notebooks',
+  autoStart: true,
+  requires: [IDebugger],
+  optional: [IEditorTracker],
+  activate: (_, debug, tracker: IEditorTracker | null) => {
+    if (!tracker) {
+      console.log(`${files.id} load failed. There is no files tracker.`);
+      return;
+    }
+    console.log(`${files.id} has not been implemented.`, debug);
+  }
+};
+
+/**
+ * A plugin that provides visual debugging support for notebooks.
+ */
+const notebooks: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger:notebooks',
+  autoStart: true,
+  requires: [IDebugger],
+  optional: [INotebookTracker],
+  activate: (_, debug, tracker: INotebookTracker | null) => {
+    if (!tracker) {
+      console.log(`${notebooks.id} load failed. There is no notebook tracker.`);
+      return;
+    }
+    console.log(`${notebooks.id} has not been implemented.`, debug);
+  }
+};
+
+/**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [plugin];
+const plugins: JupyterFrontEndPlugin<any>[] = [plugin, notebooks, files];
 export default plugins;
