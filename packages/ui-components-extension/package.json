@@ -34,7 +34,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.0.1",
+    "@jupyterlab/application": "^1.0.2",
     "@jupyterlab/ui-components": "^1.0.0"
   },
   "devDependencies": {
