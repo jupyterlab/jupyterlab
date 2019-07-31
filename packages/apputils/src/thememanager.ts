@@ -134,36 +134,24 @@ export class ThemeManager implements IThemeManager {
     return this._themes[name].isLight;
   }
 
-  get codeFontSize(): number {
+  /**
+   * Get a font size from the current theme, or the override
+   * setting if it exists
+   */
+  getFontSize(settingsKey: string, cssKey: string): string {
     return (
-      (this._settings.composite['code-font-size'] as number) ||
-      parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue(
-          '---jp-code-font-size'
-        )
-      )
+      (this._settings.composite[settingsKey] as string) ||
+      getComputedStyle(document.documentElement).getPropertyValue(cssKey)
     );
   }
 
-  get contentFontSize(): number {
-    return (
-      (this._settings.composite['content-font-size'] as number) ||
-      parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue(
-          '--jp-content-font-size1'
-        )
-      )
-    );
-  }
-
-  get uiFontSize(): number {
-    return (
-      (this._settings.composite['ui-font-size'] as number) ||
-      parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue(
-          '--jp-ui-font-size1'
-        )
-      )
+  /**
+   * Set a font size based on the return from getFontSize
+   */
+  setFontSize(settingsKey: string, cssKey: string): void {
+    document.documentElement.style.setProperty(
+      cssKey,
+      this.getFontSize(settingsKey, cssKey)
     );
   }
 
@@ -350,6 +338,12 @@ export namespace ThemeManager {
      */
     url: string;
   }
+
+  export const fontVars: { [key: string]: string } = {
+    'code-font-size': '--jp-code-font-size',
+    'content-font-size': '--jp-content-font-size1',
+    'ui-font-size': '--jp-ui-font-size1'
+  };
 }
 
 /**
