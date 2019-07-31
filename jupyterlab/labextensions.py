@@ -97,7 +97,20 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
 
 
 class InstallLabExtensionApp(BaseExtensionApp):
-    description = "Install labextension(s)"
+    description = """Install labextension(s)
+    
+     Usage
+    
+        jupyter labextension install [--pin-version-as <alias,...>] <package...>
+    
+    This installs JupyterLab extensions similar to yarn add or npm install.
+    
+    Pass a list of comma seperate names to the --pin-version-as flag
+    to use as alises for the packages providers. This is useful to
+    install multiple versions of the same extension.
+    These can be uninstalled with the alias you provided
+    to the flag, similar to the "alias" feature of yarn add.
+    """
     aliases = install_aliases
 
     pin = Unicode('', config=True,
