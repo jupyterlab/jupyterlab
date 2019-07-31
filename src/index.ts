@@ -123,5 +123,10 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [plugin, notebooks, files];
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  consoles,
+  files,
+  notebooks,
+  plugin
+];
 export default plugins;
