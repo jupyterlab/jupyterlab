@@ -109,6 +109,39 @@ export namespace KernelMessage {
     options: IOptions<T>
   ): T;
 
+  /**
+   * @hidden
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, this function is *NOT* considered
+   * part of the public API, and may change without notice.
+   */
+  export function createMessage<T extends IDebugRequestMsg>(
+    options: IOptions<T>
+  ): T;
+
+  /**
+   * @hidden
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, this function is *NOT* considered
+   * part of the public API, and may change without notice.
+   */
+  export function createMessage<T extends IDebugReplyMsg>(
+    options: IOptions<T>
+  ): T;
+
+  /**
+   * @hidden
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, this function is *NOT* considered
+   * part of the public API, and may change without notice.
+   */
+  export function createMessage<T extends IDebugEventMsg>(
+    options: IOptions<T>
+  ): T;
+
   export function createMessage<T extends Message>(options: IOptions<T>): T {
     return {
       buffers: options.buffers || [],
@@ -155,11 +188,21 @@ export namespace KernelMessage {
 
   /**
    * Control message types.
+   *
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, debug message types are *NOT*
+   * considered part of the public API, and may change without notice.
    */
-  export type ControlMessageType = never;
+  export type ControlMessageType = 'debug_request' | 'debug_reply';
 
   /**
    * IOPub message types.
+   *
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, debug message types are *NOT*
+   * considered part of the public API, and may change without notice.
    */
   export type IOPubMessageType =
     | 'clear_output'
@@ -172,7 +215,8 @@ export namespace KernelMessage {
     | 'execute_result'
     | 'status'
     | 'stream'
-    | 'update_display_data';
+    | 'update_display_data'
+    | 'debug_event';
 
   /**
    * Stdin message types.
@@ -310,6 +354,14 @@ export namespace KernelMessage {
     channel: 'stdin';
   }
 
+  /**
+   * Message types.
+   *
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, debug message types are *NOT*
+   * considered part of the public API, and may change without notice.
+   */
   export type Message =
     | IClearOutputMsg
     | ICommCloseMsg<'iopub'>
@@ -340,7 +392,10 @@ export namespace KernelMessage {
     | IIsCompleteRequestMsg
     | IStatusMsg
     | IStreamMsg
-    | IUpdateDisplayDataMsg;
+    | IUpdateDisplayDataMsg
+    | IDebugRequestMsg
+    | IDebugReplyMsg
+    | IDebugEventMsg;
 
   //////////////////////////////////////////////////
   // IOPub Messages
@@ -501,6 +556,40 @@ export namespace KernelMessage {
    */
   export function isClearOutputMsg(msg: IMessage): msg is IClearOutputMsg {
     return msg.header.msg_type === 'clear_output';
+  }
+
+  /**
+   * An experimental `'debug_event'` message on the `'iopub'` channel
+   *
+   * @hidden
+   *
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, this is *NOT* considered
+   * part of the public API, and may change without notice.
+   */
+  export interface IDebugEventMsg extends IIOPubMessage<'debug_event'> {
+    content: {
+      seq: number;
+      type: 'event';
+      event: string;
+      body?: any;
+    };
+  }
+
+  /**
+   * Test whether a kernel message is an experimental `'debug_event'` message.
+   *
+   * @hidden
+   *
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, this is *NOT* considered
+   * part of the public API, and may change without notice.
+   */
+
+  export function isDebugEventMsg(msg: IMessage): msg is IDebugEventMsg {
+    return msg.header.msg_type === 'debug_event';
   }
 
   //////////////////////////////////////////////////
@@ -1020,6 +1109,79 @@ export namespace KernelMessage {
   export interface ICommInfoReplyMsg extends IShellMessage<'comm_info_reply'> {
     parent_header: IHeader<'comm_info_request'>;
     content: ReplyContent<ICommInfoReply>;
+  }
+
+  /////////////////////////////////////////////////
+  // Control Messages
+  /////////////////////////////////////////////////
+
+  /**
+   * An experimental `'debug_request'` messsage on the `'control'` channel.
+   *
+   * @hidden
+   *
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, this function is *NOT* considered
+   * part of the public API, and may change without notice.
+   */
+  export interface IDebugRequestMsg extends IControlMessage<'debug_request'> {
+    content: {
+      seq: number;
+      type: 'request';
+      command: string;
+      arguments?: any;
+    };
+  }
+
+  /**
+   * Test whether a kernel message is an experimental `'debug_request'` message.
+   *
+   * @hidden
+   *
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, this is *NOT* considered
+   * part of the public API, and may change without notice.
+   */
+  export function isDebugRequestMsg(msg: IMessage): msg is IDebugRequestMsg {
+    return msg.header.msg_type === 'debug_request';
+  }
+
+  /**
+   * An experimental `'debug_reply'` messsage on the `'control'` channel.
+   *
+   * @hidden
+   *
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, this is *NOT* considered
+   * part of the public API, and may change without notice.
+   */
+  export interface IDebugReplyMsg extends IControlMessage<'debug_reply'> {
+    content: {
+      seq: number;
+      type: 'response';
+      request_seq: number;
+      success: boolean;
+      command: string;
+      message?: string;
+      body?: any;
+    };
+  }
+
+  /**
+   * Test whether a kernel message is an experimental `'debug_reply'` message.
+   *
+   * @hidden
+   *
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, this is *NOT* considered
+   * part of the public API, and may change without notice.
+   */
+  export function isDebugReplyMsg(msg: IMessage): msg is IDebugReplyMsg {
+    return msg.header.msg_type === 'debug_reply';
   }
 
   //////////////////////////////////////////////////
