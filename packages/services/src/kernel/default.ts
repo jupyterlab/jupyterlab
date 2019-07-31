@@ -600,7 +600,14 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
-   * Send an `debug_request` message.
+   * Send an experimental `debug_request` message.
+   *
+   * @hidden
+   *
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, this function is *NOT* considered
+   * part of the public API, and may change without notice.
    */
   requestDebug(
     content: KernelMessage.IDebugRequestMsg['content'],
