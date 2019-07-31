@@ -3,40 +3,40 @@
 
 import { IClientSession } from '@jupyterlab/apputils';
 
+import { IObjectPool } from '@jupyterlab/coreutils';
+
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { Token } from '@phosphor/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IObservableDisposable } from '@phosphor/disposable';
 
 /**
- * A visual debugger.
+ * An interface describing an application's visual debugger.
  */
-export interface IDebugger {
-  /**
-   * The active debugger session.
-   */
-  session: IDebugger.ISession | null;
-}
+export interface IDebugger extends IObjectPool<IDebugger.ISession> {}
 
 /**
- * A visual debugger.
+ * A namespace for visual debugger types.
  */
 export namespace IDebugger {
   /**
    * A visual debugger session.
    */
-  export interface ISession extends IDisposable {
+  export interface ISession extends IObservableDisposable {
     /**
      * The API client session to connect to a debugger.
      */
     client: IClientSession;
 
     /**
-     * The code editor to connect to a debugger.
+     * The code editors in a debugger session.
      */
-    editor: CodeEditor.IEditor;
+    editors: CodeEditor.IEditor[];
   }
 }
 
+/**
+ * A token for an application's visual debugger.
+ */
 export const IDebugger = new Token<IDebugger>('@jupyterlab/debugger');
