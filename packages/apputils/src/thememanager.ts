@@ -139,10 +139,7 @@ export class ThemeManager implements IThemeManager {
    * setting if it exists
    */
   getFontSize(settingsKey: string, cssKey: string): string {
-    return (
-      (this._settings.composite[settingsKey] as string) ||
-      getComputedStyle(document.documentElement).getPropertyValue(cssKey)
-    );
+    return (this._settings.composite[settingsKey] as string) || `initial`;
   }
 
   /**
