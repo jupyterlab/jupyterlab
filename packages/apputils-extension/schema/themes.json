@@ -15,6 +15,24 @@
       "title": "Scrollbar Theming",
       "description": "Enable/disable styling of the application scrollbars",
       "default": false
+    },
+    "code-font-size": {
+      "type": "number",
+      "title": "Code font size",
+      "description": "Set the code font size. Defaults to the `--jp-code-font-size` CSS variable from the theme.`",
+      "default": null
+    },
+    "content-font-size": {
+      "type": "number",
+      "title": "Content font size",
+      "description": "Set the content font size. Defaults to the `--jp-content-font-size1` CSS variable from the theme.`",
+      "default": null
+    },
+    "ui-font-size": {
+      "type": "number",
+      "title": "UI font size",
+      "description": "Set the UI font size. Defaults to the `--jp-ui-font-size1` CSS variable from the theme.`",
+      "default": null
     }
   },
   "type": "object"

@@ -129,8 +129,8 @@ const themes: JupyterFrontEndPlugin<IThemeManager> = {
     // can lead to an incorrect toggle on the currently used theme.
     let currentTheme: string;
 
-    // Set data attributes on the application shell for the current theme.
     manager.themeChanged.connect((sender, args) => {
+      // Set data attributes on the application shell for the current theme.
       currentTheme = args.newValue;
       document.body.dataset.jpThemeLight = String(
         manager.isLight(currentTheme)
@@ -144,6 +144,9 @@ const themes: JupyterFrontEndPlugin<IThemeManager> = {
           manager.themeScrollbars(currentTheme)
         );
       }
+
+      // Set any CSS overrides
+
       commands.notifyCommandChanged(CommandIDs.changeTheme);
     });
 

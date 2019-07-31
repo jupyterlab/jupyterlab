@@ -134,6 +134,39 @@ export class ThemeManager implements IThemeManager {
     return this._themes[name].isLight;
   }
 
+  get codeFontSize(): number {
+    return (
+      (this._settings.composite['code-font-size'] as number) ||
+      parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue(
+          '---jp-code-font-size'
+        )
+      )
+    );
+  }
+
+  get contentFontSize(): number {
+    return (
+      (this._settings.composite['content-font-size'] as number) ||
+      parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue(
+          '--jp-content-font-size1'
+        )
+      )
+    );
+  }
+
+  get uiFontSize(): number {
+    return (
+      (this._settings.composite['ui-font-size'] as number) ||
+      parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue(
+          '--jp-ui-font-size1'
+        )
+      )
+    );
+  }
+
   /**
    * Test whether a given theme styles scrollbars,
    * and if the user has scrollbar styling enabled.
