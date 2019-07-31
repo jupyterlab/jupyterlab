@@ -1179,7 +1179,6 @@ export namespace KernelMessage {
    * Debug messages are experimental messages that are not in the official
    * kernel message specification. As such, this is *NOT* considered
    * part of the public API, and may change without notice.
-
    */
   export function isDebugReplyMsg(msg: IMessage): msg is IDebugReplyMsg {
     return msg.header.msg_type === 'debug_reply';
