@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-Debugger {
+.jp-DebuggerSidebar {
   background: var(--jp-layout-color1);
   top: 0;
   bottom: 0;

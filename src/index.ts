@@ -85,7 +85,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
  * A plugin providing a condensed sidebar UI for debugging.
  */
 const sidebar: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/debugger:plugin',
+  id: '@jupyterlab/debugger:sidebar',
   optional: [ILayoutRestorer],
   autoStart: true,
   activate: (app: JupyterFrontEnd, restorer: ILayoutRestorer | null) => {
@@ -108,7 +108,7 @@ const sidebar: JupyterFrontEndPlugin<void> = {
  * A plugin providing a tracker code debuggers.
  */
 const tracker: JupyterFrontEndPlugin<IDebugger> = {
-  id: '@jupyterlab/debugger:plugin',
+  id: '@jupyterlab/debugger:tracker',
   optional: [ILayoutRestorer],
   requires: [IStateDB],
   provides: IDebugger,
