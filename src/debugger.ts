@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IRestorable, RestorablePool } from '@jupyterlab/coreutils';
+import { IDataConnector } from '@jupyterlab/coreutils';
 
 import { Widget } from '@phosphor/widgets';
 
-import { IDebugger } from './tokens';
+import { ReadonlyJSONValue, UUID } from '@phosphor/coreutils';
 
 export class Debugger extends Widget {
   constructor(options: Debugger.IOptions) {
@@ -15,33 +15,28 @@ export class Debugger extends Widget {
   }
 
   readonly model: Debugger.Model;
-
-  get session(): IDebugger.ISession | null {
-    return this.model.current;
-  }
-  set session(session: IDebugger.ISession | null) {
-    this.model.current = session;
-  }
 }
 
 /**
  * A namespace for `Debugger` statics.
  */
 export namespace Debugger {
-  export interface IOptions extends RestorablePool.IOptions {
-    restore?: IRestorable.IOptions<IDebugger.ISession>;
+  export interface IOptions {
+    connector?: IDataConnector<ReadonlyJSONValue>;
+
+    id?: string;
   }
 
-  export class Model extends RestorablePool<IDebugger.ISession>
-    implements IDebugger {
+  export class Model {
     constructor(options: Debugger.Model.IOptions) {
-      super({ namespace: options.namespace });
-      if (options.restore) {
-        requestAnimationFrame(() => {
-          void this.restore(options.restore);
-        });
-      }
+      this.connector = options.connector || null;
+      this.id = options.id || UUID.uuid4();
+      console.log('Create new Debugger.Model', this.id, this.connector);
     }
+
+    readonly connector: IDataConnector<ReadonlyJSONValue> | null;
+
+    readonly id: string;
   }
 
   export namespace Model {

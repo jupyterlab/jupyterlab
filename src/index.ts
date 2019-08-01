@@ -7,9 +7,11 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
+import { WidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
+
 import { IConsoleTracker } from '@jupyterlab/console';
 
-import { IStateDB, IRestorable } from '@jupyterlab/coreutils';
+import { IStateDB } from '@jupyterlab/coreutils';
 
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 
@@ -17,56 +19,16 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { Debugger } from './debugger';
 
+import { DebuggerSidebar } from './sidebar';
+
 import { IDebugger } from './tokens';
 
 /**
- * A plugin providing a UI for code debugging and environment inspection.
+ * The command IDs used by the debugger plugin.
  */
-const plugin: JupyterFrontEndPlugin<IDebugger> = {
-  id: '@jupyterlab/debugger:plugin',
-  optional: [ILayoutRestorer],
-  requires: [IStateDB],
-  provides: IDebugger,
-  autoStart: true,
-  activate: async (
-    app: JupyterFrontEnd,
-    state: IStateDB,
-    restorer: ILayoutRestorer | null
-  ): Promise<IDebugger> => {
-    const { shell } = app;
-    const label = 'Environment';
-    const namespace = 'jp-debugger';
-    const restore: IRestorable.IOptions<IDebugger.ISession> = {
-      command: 'debugger:restore',
-      connector: state,
-      name: _ => namespace,
-      registry: app.commands
-    };
-    const debug = new Debugger({ namespace, restore });
-
-    debug.id = namespace;
-    debug.title.label = label;
-    shell.add(debug, 'right', { activate: false });
-
-    const command = app.commands.addCommand(restore.command, {
-      execute: _ => {
-        console.log('Disposing restore command');
-        command.dispose();
-      }
-    });
-
-    window.requestAnimationFrame(async () => {
-      await debug.model.restored;
-      console.log('WAITED FOR RESTORATION OF MODEL.');
-    });
-
-    if (restorer) {
-      restorer.add(debug, debug.id);
-    }
-
-    return debug.model;
-  }
-};
+export namespace CommandIDs {
+  export const create = 'debugger:create';
+}
 
 /**
  * A plugin that provides visual debugging support for consoles.
@@ -120,12 +82,81 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin providing a condensed sidebar UI for debugging.
+ */
+const sidebar: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger:plugin',
+  optional: [ILayoutRestorer],
+  autoStart: true,
+  activate: (app: JupyterFrontEnd, restorer: ILayoutRestorer | null) => {
+    const { shell } = app;
+    const label = 'Environment';
+    const namespace = 'jp-debugger-sidebar';
+    const sidebar = new DebuggerSidebar(null);
+
+    sidebar.id = namespace;
+    sidebar.title.label = label;
+    shell.add(sidebar, 'right', { activate: false });
+
+    if (restorer) {
+      restorer.add(sidebar, sidebar.id);
+    }
+  }
+};
+
+/**
+ * A plugin providing a tracker code debuggers.
+ */
+const tracker: JupyterFrontEndPlugin<IDebugger> = {
+  id: '@jupyterlab/debugger:plugin',
+  optional: [ILayoutRestorer],
+  requires: [IStateDB],
+  provides: IDebugger,
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    state: IStateDB,
+    restorer: ILayoutRestorer | null
+  ): IDebugger => {
+    const tracker = new WidgetTracker<MainAreaWidget<Debugger>>({
+      namespace: 'debugger'
+    });
+
+    app.commands.addCommand(CommandIDs.create, {
+      execute: args => {
+        const id = (args.id as string) || '';
+
+        if (tracker.find(widget => id === widget.content.model.id)) {
+          return;
+        }
+
+        const widget = new Debugger({ connector: state, id });
+
+        return widget;
+      }
+    });
+
+    if (restorer) {
+      // Handle state restoration.
+      void restorer.restore(tracker, {
+        command: CommandIDs.create,
+        args: widget => ({ id: widget.content.model.id }),
+        name: widget => widget.content.model.id
+      });
+    }
+
+    return tracker;
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   consoles,
   files,
   notebooks,
-  plugin
+  sidebar,
+  tracker
 ];
 export default plugins;

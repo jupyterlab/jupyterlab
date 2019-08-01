@@ -55,7 +55,7 @@
     "rimraf": "~2.6.2",
     "tslint": "^5.18.0",
     "tslint-plugin-prettier": "^2.0.1",
-    "typedoc": "^0.14.2",
+    "typedoc": "^0.15.0",
     "typescript": "~3.5.1"
   },
   "publishConfig": {
