@@ -164,6 +164,22 @@ describe('kernel', () => {
       expect(kernel.id).to.equal(id);
       kernel.dispose();
     });
+
+    it('should turn off comm handling in the new connection if it was enabled in first kernel', () => {
+      expect(defaultKernel.handleComms).to.be.true;
+      const kernel = Kernel.connectTo(defaultKernel.model);
+      expect(kernel.handleComms).to.be.false;
+      kernel.dispose();
+    });
+
+    it('should turn on comm handling in the new connection if it was disabled in all other connections', async () => {
+      const kernel = await Kernel.startNew({ handleComms: false });
+      expect(kernel.handleComms).to.be.false;
+      const kernel2 = Kernel.connectTo(defaultKernel.model);
+      expect(kernel2.handleComms).to.be.true;
+      kernel.dispose();
+      kernel2.dispose();
+    });
   });
 
   describe('Kernel.shutdown()', () => {

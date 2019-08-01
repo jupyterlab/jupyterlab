@@ -153,12 +153,22 @@ export function signalToPromise<T, U>(signal: ISignal<T, U>): Promise<[T, U]> {
 /**
  * Test to see if a promise is fulfilled.
  *
+ * @param delay - optional delay in milliseconds before checking
  * @returns true if the promise is fulfilled (either resolved or rejected), and
  * false if the promise is still pending.
  */
-export async function isFulfilled<T>(p: PromiseLike<T>): Promise<boolean> {
+export async function isFulfilled<T>(
+  p: PromiseLike<T>,
+  delay = 0
+): Promise<boolean> {
   let x = Object.create(null);
-  let result = await Promise.race([p, x]).catch(() => false);
+  let race: any;
+  if (delay > 0) {
+    race = sleep(delay, x);
+  } else {
+    race = x;
+  }
+  let result = await Promise.race([p, race]).catch(() => false);
   return result !== x;
 }
 

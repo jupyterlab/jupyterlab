@@ -1702,7 +1702,10 @@ namespace Private {
       // them in our clone, since the comm message protocol has implicit
       // assumptions that only one connection is handling comm messages.
       // See https://github.com/jupyter/jupyter_client/issues/263
-      const handleComms = !some(runningKernels, k => k.handleComms);
+      const handleComms = !some(
+        runningKernels,
+        k => k.id === model.id && k.handleComms
+      );
       const newKernel = kernel.clone({ handleComms });
       return newKernel;
     }
