@@ -165,11 +165,13 @@ describe('kernel', () => {
       kernel.dispose();
     });
 
-    it('should turn off comm handling in the new connection if it was enabled in first kernel', () => {
-      expect(defaultKernel.handleComms).to.be.true;
-      const kernel = Kernel.connectTo(defaultKernel.model);
-      expect(kernel.handleComms).to.be.false;
+    it('should turn off comm handling in the new connection if it was enabled in first kernel', async () => {
+      const kernel = await Kernel.startNew();
+      expect(kernel.handleComms).to.be.true;
+      const kernel2 = Kernel.connectTo(kernel.model);
+      expect(kernel2.handleComms).to.be.false;
       kernel.dispose();
+      kernel2.dispose();
     });
 
     it('should turn on comm handling in the new connection if it was disabled in all other connections', async () => {
