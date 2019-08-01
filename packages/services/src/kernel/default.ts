@@ -61,7 +61,8 @@ export class DefaultKernel implements Kernel.IKernel {
       options.serverSettings || ServerConnection.makeSettings();
     this._clientId = options.clientId || UUID.uuid4();
     this._username = options.username || '';
-    this.handleComms = options.handleComms || true;
+    this.handleComms =
+      options.handleComms === undefined ? true : options.handleComms;
 
     void this._readyPromise.promise.then(() => {
       this._sendPending();
