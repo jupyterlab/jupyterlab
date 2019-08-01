@@ -9,13 +9,13 @@ import { toArray } from '@phosphor/algorithm';
 
 import { Kernel } from '@jupyterlab/services';
 
+import { expectFailure, testEmission } from '@jupyterlab/testutils';
+
 import {
-  expectFailure,
   KernelTester,
   makeSettings,
   PYTHON_SPEC,
-  getRequestHandler,
-  testEmission
+  getRequestHandler
 } from '../utils';
 
 const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));

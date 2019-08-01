@@ -9,7 +9,9 @@ import { UUID } from '@phosphor/coreutils';
 
 import { TerminalSession } from '@jupyterlab/services';
 
-import { handleRequest, testEmission } from '../utils';
+import { testEmission } from '@jupyterlab/testutils';
+
+import { handleRequest } from '../utils';
 
 describe('terminal', () => {
   let defaultSession: TerminalSession.ISession;

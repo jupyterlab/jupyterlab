@@ -9,12 +9,9 @@ import { JSONObject } from '@phosphor/coreutils';
 
 import { ConfigSection, ConfigWithDefaults } from '@jupyterlab/services';
 
-import {
-  expectFailure,
-  handleRequest,
-  makeSettings,
-  getRequestHandler
-} from '../utils';
+import { expectFailure } from '@jupyterlab/testutils';
+
+import { handleRequest, makeSettings, getRequestHandler } from '../utils';
 
 /**
  * Generate a random config section name.

@@ -9,12 +9,13 @@ import { JSONExt } from '@phosphor/coreutils';
 
 import { KernelManager, Kernel } from '@jupyterlab/services';
 
+import { testEmission } from '@jupyterlab/testutils';
+
 import {
   PYTHON_SPEC,
   KERNELSPECS,
   handleRequest,
-  makeSettings,
-  testEmission
+  makeSettings
 } from '../utils';
 
 class TestManager extends KernelManager {

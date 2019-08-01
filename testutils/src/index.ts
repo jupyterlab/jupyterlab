@@ -48,7 +48,7 @@ export { defaultRenderMime } from './rendermime';
  * The reason this function is asynchronous is so that the thing causing the
  * signal emission (such as a websocket message) can be asynchronous.
  */
-export function testEmission<T, U, V>(
+export async function testEmission<T, U, V>(
   signal: ISignal<T, U>,
   options: {
     find?: (a: T, b: U) => boolean;
@@ -72,6 +72,35 @@ export function testEmission<T, U, V>(
     }
   }, object);
   return done.promise;
+}
+
+/**
+ * Expect a failure on a promise with the given message.
+ */
+export async function expectFailure(
+  promise: Promise<any>,
+  message?: string
+): Promise<void> {
+  let called = false;
+  try {
+    await promise;
+    called = true;
+  } catch (err) {
+    if (message && err.message.indexOf(message) === -1) {
+      throw Error(`Error "${message}" not in: "${err.message}"`);
+    }
+  }
+  if (called) {
+    throw Error(`Failure was not triggered, message was: ${message}`);
+  }
+}
+
+/**
+ * Do something in the future ensuring total ordering with respect to promises.
+ */
+export async function doLater(cb: () => void): Promise<void> {
+  await Promise.resolve(void 0);
+  cb();
 }
 
 /**

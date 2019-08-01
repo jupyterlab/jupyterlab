@@ -11,12 +11,9 @@ import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import {
-  expectFailure,
-  KernelTester,
-  handleRequest,
-  testEmission
-} from '../utils';
+import { expectFailure, testEmission } from '@jupyterlab/testutils';
+
+import { KernelTester, handleRequest } from '../utils';
 
 describe('Kernel.IKernel', () => {
   let defaultKernel: Kernel.IKernel;

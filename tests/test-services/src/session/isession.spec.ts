@@ -13,13 +13,9 @@ import { Kernel, KernelMessage } from '@jupyterlab/services';
 
 import { Session } from '@jupyterlab/services';
 
-import {
-  expectFailure,
-  handleRequest,
-  SessionTester,
-  init,
-  testEmission
-} from '../utils';
+import { expectFailure, testEmission } from '@jupyterlab/testutils';
+
+import { handleRequest, SessionTester, init } from '../utils';
 
 init();
 
