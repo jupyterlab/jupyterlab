@@ -95,16 +95,26 @@ export class CodeMirrorSearchProvider
     searchTarget: CodeMirrorEditor
   ): Promise<ISearchMatch[]> {
     this._cm = searchTarget;
-    return this._startQuery(query);
+    return this._startQuery(query, false);
   }
 
-  private async _startQuery(query: RegExp): Promise<ISearchMatch[]> {
-    await this.endQuery();
+  refreshOverlay() {
+    this._refreshOverlay();
+  }
+
+  private async _startQuery(
+    query: RegExp,
+    refreshOverlay: boolean = true
+  ): Promise<ISearchMatch[]> {
+    // no point in removing overlay in the middle of the search
+    await this.endQuery(false);
 
     this._query = query;
 
     CodeMirror.on(this._cm.doc, 'change', this._onDocChanged.bind(this));
-    this._refreshOverlay();
+    if (refreshOverlay) {
+      this._refreshOverlay();
+    }
     this._setInitialMatches(query);
 
     const matches = this._parseMatchesFromState();
@@ -128,10 +138,13 @@ export class CodeMirrorSearchProvider
    * @returns A promise that resolves when the search provider is ready to
    * begin a new search.
    */
-  async endQuery(): Promise<void> {
+  async endQuery(removeOverlay = true): Promise<void> {
     this._matchState = {};
     this._currentMatch = null;
-    this._cm.removeOverlay(this._overlay);
+
+    if (removeOverlay) {
+      this._cm.removeOverlay(this._overlay);
+    }
     const from = this._cm.getCursor('from');
     const to = this._cm.getCursor('to');
     // Setting a reverse selection to allow search-as-you-type to maintain the
@@ -249,7 +262,7 @@ export class CodeMirrorSearchProvider
   }
 
   /**
-   * The same list of matches provided by the startQuery promise resoluton
+   * The same list of matches provided by the startQuery promise resolution
    */
   get matches(): ISearchMatch[] {
     return this._parseMatchesFromState();
@@ -358,7 +371,7 @@ export class CodeMirrorSearchProvider
     return {
       /**
        * Token function is called when a line needs to be processed -
-       * when the overlay is intially created, it's called on all lines;
+       * when the overlay is initially created, it's called on all lines;
        * when a line is modified and needs to be re-evaluated, it's called
        * on just that line.
        *

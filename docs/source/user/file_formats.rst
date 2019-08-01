@@ -144,7 +144,7 @@ Below is a table that shows the sizes of the largest test files we successfully 
 +---------+----------+
 | Browser | Max Size |
 +=========+==========+
-| Firefox |  250MB   |
+| Firefox |  1.04GB  |
 +---------+----------+
 | Chrome  |  730MB   |
 +---------+----------+

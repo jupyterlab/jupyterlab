@@ -613,6 +613,11 @@ export class CodeConsole extends Widget {
     if (event.keyCode === 13 && !editor.hasFocus()) {
       event.preventDefault();
       editor.focus();
+    } else if (event.keyCode === 27 && editor.hasFocus()) {
+      // Set to command mode
+      event.preventDefault();
+      event.stopPropagation();
+      this.node.focus();
     }
   }
 

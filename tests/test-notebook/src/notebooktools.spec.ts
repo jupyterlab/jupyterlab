@@ -13,20 +13,19 @@ import { simulate } from 'simulate-event';
 
 import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 
+import { Context } from '@jupyterlab/docregistry';
+
 import { ObservableJSON } from '@jupyterlab/observables';
 
 import {
-  NotebookTools,
+  INotebookModel,
+  NotebookActions,
   NotebookPanel,
-  NotebookTracker,
-  NotebookActions
+  NotebookTools,
+  NotebookTracker
 } from '@jupyterlab/notebook';
 
-import {
-  createNotebookContext,
-  sleep,
-  NBTestUtils
-} from '@jupyterlab/testutils';
+import { initNotebookContext, sleep, NBTestUtils } from '@jupyterlab/testutils';
 
 class LogTool extends NotebookTools.Tool {
   methods: string[] = [];
@@ -103,16 +102,16 @@ describe('@jupyterlab/notebook', () => {
     let notebookTools: NotebookTools;
     let tabpanel: TabPanel;
     let tracker: NotebookTracker;
+    let context0: Context<INotebookModel>;
+    let context1: Context<INotebookModel>;
     let panel0: NotebookPanel;
     let panel1: NotebookPanel;
 
     beforeEach(async () => {
-      const context0 = await createNotebookContext();
-      await context0.initialize(true);
+      context0 = await initNotebookContext();
       panel0 = NBTestUtils.createNotebookPanel(context0);
       NBTestUtils.populateNotebook(panel0.content);
-      const context1 = await createNotebookContext();
-      await context1.initialize(true);
+      context1 = await initNotebookContext();
       panel1 = NBTestUtils.createNotebookPanel(context1);
       NBTestUtils.populateNotebook(panel1.content);
       tracker = new NotebookTracker({ namespace: 'notebook' });
@@ -132,6 +131,11 @@ describe('@jupyterlab/notebook', () => {
     afterEach(() => {
       tabpanel.dispose();
       notebookTools.dispose();
+      panel1.dispose();
+      panel0.dispose();
+
+      context1.dispose();
+      context0.dispose();
     });
 
     describe('NotebookTools', () => {

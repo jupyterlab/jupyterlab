@@ -76,6 +76,13 @@ Note: You'll need to run the command above in each new terminal you open
 before you can work with the tools you installed in the
 ``jupyterlab-ext`` environment.
 
+Note: if you have an older version of JupyterLab previously installed, you may need to update
+the version of JupyterLab manually.
+
+.. code:: bash
+
+    conda install -c conda-forge jupyterlab=1
+
 Create a repository
 ~~~~~~~~~~~~~~~~~~~
 
@@ -222,15 +229,6 @@ a reference to the command palette interface and the Jupyter front end.
       ICommandPalette
     } from '@jupyterlab/apputils';
 
-You will also need to install these dependencies. Run the following commands in the
-repository root folder install the dependency and save it to your
-`package.json`:
-
-.. code:: bash
-
-    jlpm add @jupyterlab/apputils
-    jlpm add @jupyterlab/application
-
 Locate the ``extension`` object of type ``JupyterFrontEndPlugin``. Change the
 definition so that it reads like so:
 
@@ -257,7 +255,16 @@ will pass an instance of ``ICommandPalette`` as the second parameter of
 in that function. The second ``console.log`` line exists only so that
 you can immediately check that your changes work.
 
-Run the following to rebuild your extension.
+Now you will need to install these dependencies. Run the following commands in the
+repository root folder to install the dependencies and save them to your
+`package.json`:
+
+.. code:: bash
+
+    jlpm add @jupyterlab/apputils
+    jlpm add @jupyterlab/application
+
+Finally, run the following to rebuild your extension.
 
 .. code:: bash
 

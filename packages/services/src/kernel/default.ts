@@ -472,10 +472,13 @@ export class DefaultKernel implements Kernel.IKernel {
     if (this.isDisposed) {
       throw new Error('Disposed kernel');
     }
-    if (reply.content.status !== 'ok') {
+    // Relax the requirement that a kernel info reply has a status attribute,
+    // since this part of the spec is not yet widely conformed-to.
+    if (reply.content.status && reply.content.status !== 'ok') {
       throw new Error('Kernel info reply errored');
     }
-    this._info = reply.content;
+    // Type assertion is necessary until we can rely on the status message.
+    this._info = reply.content as KernelMessage.IInfoReply;
     return reply;
   }
 
@@ -596,6 +599,40 @@ export class DefaultKernel implements Kernel.IKernel {
     ) as Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
+    >;
+  }
+
+  /**
+   * Send an experimental `debug_request` message.
+   *
+   * @hidden
+   *
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, this function is *NOT* considered
+   * part of the public API, and may change without notice.
+   */
+  requestDebug(
+    content: KernelMessage.IDebugRequestMsg['content'],
+    disposeOnDone: boolean = true
+  ): Kernel.IControlFuture<
+    KernelMessage.IDebugRequestMsg,
+    KernelMessage.IDebugReplyMsg
+  > {
+    let msg = KernelMessage.createMessage({
+      msgType: 'debug_request',
+      channel: 'control',
+      username: this._username,
+      session: this._clientId,
+      content
+    });
+    return this.sendControlMessage(
+      msg,
+      true,
+      disposeOnDone
+    ) as Kernel.IControlFuture<
+      KernelMessage.IDebugRequestMsg,
+      KernelMessage.IDebugReplyMsg
     >;
   }
 

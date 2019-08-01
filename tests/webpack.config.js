@@ -1,8 +1,9 @@
 // Use sourcemaps if in watch or debug mode;
-var devtool = 'eval';
-if (process.argv.indexOf('--watch') !== -1) {
-  devtool = 'cheap-module-eval-sourcemap';
-}
+const devtool =
+  process.argv.indexOf('--watch') !== -1 ||
+  process.argv.indexOf('--debug') !== -1
+    ? 'source-map-inline'
+    : 'eval';
 
 module.exports = {
   resolve: {

@@ -180,7 +180,7 @@ if [[ $GROUP == usage ]]; then
     jlpm run build:packages
     jlpm run build:dev
     python -m jupyterlab.browser_check --dev-mode
-    rm -rf packages/foo
+    jlpm run remove:package foo
     jlpm run integrity
 
     ## Test app directory support being a symlink

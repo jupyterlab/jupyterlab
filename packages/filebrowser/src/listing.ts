@@ -10,39 +10,40 @@ import {
 
 import { PathExt, Time } from '@jupyterlab/coreutils';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import {
   IDocumentManager,
   isValidFileName,
   renameFile
 } from '@jupyterlab/docmanager';
 
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
 import { Contents } from '@jupyterlab/services';
 
 import {
   ArrayExt,
   ArrayIterator,
-  IIterator,
   each,
   filter,
   find,
+  IIterator,
   map,
   toArray
 } from '@phosphor/algorithm';
 
 import { MimeData, PromiseDelegate } from '@phosphor/coreutils';
 
-import { Drag, IDragEvent } from '@phosphor/dragdrop';
-
 import { ElementExt } from '@phosphor/domutils';
 
+import { Drag, IDragEvent } from '@phosphor/dragdrop';
+
 import { Message, MessageLoop } from '@phosphor/messaging';
+
+import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
 
 import { FileBrowserModel } from './model';
-import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
  * The class name added to DirListing widget.
@@ -364,29 +365,27 @@ export class DirListing extends Widget {
    *
    * @returns A promise that resolves when the operation is complete.
    */
-  delete(): Promise<void> {
-    let names: string[] = [];
-    each(this._sortedItems, item => {
-      if (this._selection[item.name]) {
-        names.push(item.name);
-      }
+  async delete(): Promise<void> {
+    const items = this._sortedItems.filter(item => this._selection[item.name]);
+
+    if (!items.length) {
+      return;
+    }
+
+    const message =
+      items.length === 1
+        ? `Are you sure you want to permanently delete: ${items[0].name}?`
+        : `Are you sure you want to permanently delete the ${items.length} ` +
+          `files/folders selected?`;
+    const result = await showDialog({
+      title: 'Delete',
+      body: message,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
     });
-    let message = `Are you sure you want to permanently delete the ${names.length} files/folders selected?`;
-    if (names.length === 1) {
-      message = `Are you sure you want to permanently delete: ${names[0]}?`;
+
+    if (!this.isDisposed && result.button.accept) {
+      await this._delete(items.map(item => item.path));
     }
-    if (names.length) {
-      return showDialog({
-        title: 'Delete',
-        body: message,
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
-      }).then(result => {
-        if (!this.isDisposed && result.button.accept) {
-          return this._delete(names);
-        }
-      });
-    }
-    return Promise.resolve(void 0);
   }
 
   /**
@@ -922,8 +921,9 @@ export class DirListing extends Widget {
   private _handleOpen(item: Contents.IModel): void {
     this._onItemOpened.emit(item);
     if (item.type === 'directory') {
+      const localPath = this._manager.services.contents.localPath(item.path);
       this._model
-        .cd(item.name)
+        .cd(`/${localPath}`)
         .catch(error => showErrorMessage('Open directory', error));
     } else {
       let path = item.path;
@@ -1328,19 +1328,16 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Delete the files with the given names.
+   * Delete the files with the given paths.
    */
-  private _delete(names: string[]): Promise<void> {
-    const promises: Promise<void>[] = [];
-    const basePath = this._model.path;
-    for (let name of names) {
-      let newPath = PathExt.join(basePath, name);
-      let promise = this._model.manager.deleteFile(newPath).catch(err => {
-        void showErrorMessage('Delete Failed', err);
-      });
-      promises.push(promise);
-    }
-    return Promise.all(promises).then(() => undefined);
+  private async _delete(paths: string[]): Promise<void> {
+    await Promise.all(
+      paths.map(path =>
+        this._model.manager.deleteFile(path).catch(err => {
+          void showErrorMessage('Delete Failed', err);
+        })
+      )
+    );
   }
 
   /**

@@ -193,24 +193,42 @@ export function createFileContext(
 }
 
 /**
- * Create a context for a notebook.
+ * Create and initialize context for a notebook.
  */
-export async function createNotebookContext(
-  path?: string,
-  manager?: ServiceManager.IManager
+export async function initNotebookContext(
+  options: {
+    path?: string;
+    manager?: ServiceManager.IManager;
+    startKernel?: boolean;
+  } = {}
 ): Promise<Context<INotebookModel>> {
   const factory = Private.notebookFactory;
 
-  manager = manager || Private.getManager();
-  path = path || UUID.uuid4() + '.ipynb';
+  const manager = options.manager || Private.getManager();
+  const path = options.path || UUID.uuid4() + '.ipynb';
+  const startKernel =
+    options.startKernel === undefined ? false : options.startKernel;
   await manager.ready;
 
-  return new Context({
+  let context = new Context({
     manager,
     factory,
     path,
-    kernelPreference: { name: manager.specs.default }
+    kernelPreference: {
+      shouldStart: startKernel,
+      canStart: startKernel,
+      shutdownOnClose: true,
+      name: manager.specs.default
+    }
   });
+  await context.initialize(true);
+
+  if (startKernel) {
+    await context.session.initialize();
+    await context.session.kernel.ready;
+  }
+
+  return context;
 }
 
 /**
