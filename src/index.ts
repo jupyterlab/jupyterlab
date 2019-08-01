@@ -9,7 +9,7 @@ import {
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
-import { IStateDB } from '@jupyterlab/coreutils';
+import { IStateDB, IRestorable } from '@jupyterlab/coreutils';
 
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 
@@ -24,48 +24,47 @@ import { IDebugger } from './tokens';
  */
 const plugin: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:plugin',
-  optional: [ILayoutRestorer, IStateDB],
+  optional: [ILayoutRestorer],
+  requires: [IStateDB],
   provides: IDebugger,
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
-    restorer: ILayoutRestorer | null,
-    state: IStateDB | null
+    state: IStateDB,
+    restorer: ILayoutRestorer | null
   ): Promise<IDebugger> => {
-    console.log(plugin.id, 'Hello, world.');
     const { shell } = app;
     const label = 'Environment';
-    const widget = new Debugger();
+    const namespace = 'jp-debugger';
+    const restore: IRestorable.IOptions<IDebugger.ISession> = {
+      command: 'debugger:restore',
+      connector: state,
+      name: _ => namespace,
+      registry: app.commands
+    };
+    const debug = new Debugger({ namespace, restore });
 
-    widget.id = 'jp-debugger';
-    widget.title.label = label;
-    shell.add(widget, 'right', { activate: false });
+    debug.id = namespace;
+    debug.title.label = label;
+    shell.add(debug, 'right', { activate: false });
+
+    const command = app.commands.addCommand(restore.command, {
+      execute: _ => {
+        console.log('Disposing restore command');
+        command.dispose();
+      }
+    });
+
+    window.requestAnimationFrame(async () => {
+      await debug.model.restored;
+      console.log('WAITED FOR RESTORATION OF MODEL.');
+    });
 
     if (restorer) {
-      restorer.add(widget, widget.id);
+      restorer.add(debug, debug.id);
     }
 
-    if (state) {
-      const command = 'debugger:restore';
-      const restore = app.commands.addCommand(command, {
-        execute: _ => {
-          console.log('Disposing restore command');
-          restore.dispose();
-        }
-      });
-      const restored = widget.model.restore({
-        connector: state,
-        registry: app.commands,
-        command: '',
-        name: () => widget.id
-      });
-      window.requestAnimationFrame(async () => {
-        await restored;
-        console.log('WAITED FOR RESTORATION OF MODEL.');
-      });
-    }
-
-    return widget.model;
+    return debug.model;
   }
 };
 
