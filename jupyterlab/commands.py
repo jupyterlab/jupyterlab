@@ -785,7 +785,7 @@ class _AppHandler(object):
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         data = self.info['extensions'][name]
-        if data["package_name"]:
+        if data["alias_package_source"]:
             self.logger.warn("Skipping updating pinned extension '%s'." % name)
             return False
         try:
@@ -1230,7 +1230,7 @@ class _AppHandler(object):
                                     url=url,
                                     version=data['version'],
                                     # Only save the package name if the extension name is an alias
-                                    package_name=name if alias else None,
+                                    alias_package_source=name if alias else None,
                                     jupyterlab=jlab,
                                     dependencies=deps,
                                     tar_dir=osp.dirname(path),
@@ -1325,9 +1325,9 @@ class _AppHandler(object):
             if data['is_local']:
                 extra += '*'
             # If we have the package name in the data, this means this extension's name is the alias name
-            package_name = data['package_name']
-            if package_name:
-                logger.info('        %s %s v%s%s' % (name, package_name, version, extra))
+            alias_package_source = data['alias_package_source']
+            if alias_package_source:
+                logger.info('        %s %s v%s%s' % (name, alias_package_source, version, extra))
             else:
                 logger.info('        %s v%s%s' % (name, version, extra))
             if errors:
