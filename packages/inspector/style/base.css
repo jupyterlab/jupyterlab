@@ -24,7 +24,6 @@
 
 .jp-Inspector-content {
   background: var(--jp-layout-color1);
-  display: flex;
   border: none;
 }
 
