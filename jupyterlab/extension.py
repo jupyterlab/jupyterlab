@@ -211,6 +211,7 @@ def load_jupyter_server_extension(nbapp):
         page_config['hubPrefix'] = nbapp.hub_prefix
         page_config['hubHost'] = nbapp.hub_host
         page_config['hubUser'] = nbapp.user
+        page_config['hubServerName'] = nbapp.server_name
         api_token = os.getenv('JUPYTERHUB_API_TOKEN', '')
         page_config['token'] = api_token
 

@@ -42,6 +42,8 @@ function activateHubExtension(
 ): void {
   const hubHost = paths.urls.hubHost || '';
   const hubPrefix = paths.urls.hubPrefix || '';
+  const hubUser = paths.urls.hubUser || '';
+  const hubServerName = paths.urls.hubServerName || '';
   const baseUrl = paths.urls.base;
 
   // Bail if not running on JupyterHub.
@@ -56,11 +58,16 @@ function activateHubExtension(
 
   const { commands } = app;
 
-  // TODO: use /spawn/:user/:name
-  // but that requires jupyterhub 1.0
-  // and jupyterlab to pass username, servername to PageConfig
+  // requires jupyterhub 1.0
   const restartUrl =
-    hubHost + URLExt.join(hubPrefix, `spawn?next=${hubPrefix}home`);
+    hubHost +
+    URLExt.join(
+      hubPrefix,
+      `spawn`,
+      hubUser,
+      hubServerName,
+      `?next=${hubPrefix}home`
+    );
 
   commands.addCommand(CommandIDs.restart, {
     label: 'Restart Server',
