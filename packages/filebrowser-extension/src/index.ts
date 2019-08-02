@@ -528,11 +528,13 @@ function addCommands(
         return;
       }
 
+      const { contents } = widget.model.manager.services;
       return Promise.all(
         toArray(
           map(widget.selectedItems(), item => {
             if (item.type === 'directory') {
-              return widget.model.cd(item.path);
+              const localPath = contents.localPath(item.path);
+              return widget.model.cd(`/${localPath}`);
             }
 
             return commands.execute('docmanager:open', {

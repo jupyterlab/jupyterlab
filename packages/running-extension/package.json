@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/running-extension",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "JupyterLab - Running Sessions Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,9 +35,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.0.1",
+    "@jupyterlab/application": "^1.0.2",
     "@jupyterlab/coreutils": "^3.0.0",
-    "@jupyterlab/running": "^1.0.1",
+    "@jupyterlab/running": "^1.0.2",
     "@jupyterlab/services": "^4.0.1",
     "@phosphor/algorithm": "^1.1.3"
   },

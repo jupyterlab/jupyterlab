@@ -279,6 +279,30 @@ export namespace Kernel {
     >;
 
     /**
+     * Send an experimental `debug_request` message.
+     *
+     * @hidden
+     *
+     * @param content - The content of the request.
+     *
+     * @param disposeOnDone - Whether to dispose of the future when done.
+     *
+     * @returns A kernel future.
+     *
+     * #### Notes
+     * Debug messages are experimental messages that are not in the official
+     * kernel message specification. As such, this function is *NOT* considered
+     * part of the public API, and may change without notice.
+     */
+    requestDebug(
+      content: KernelMessage.IDebugRequestMsg['content'],
+      disposeOnDone?: boolean
+    ): Kernel.IControlFuture<
+      KernelMessage.IDebugRequestMsg,
+      KernelMessage.IDebugReplyMsg
+    >;
+
+    /**
      * Send an `is_complete_request` message.
      *
      * @param content - The content of the request.

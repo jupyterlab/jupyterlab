@@ -534,10 +534,19 @@ class _AppHandler(object):
         return True
 
     def build(self, name=None, version=None, static_url=None,
-              command='build:prod', clean_staging=False):
+              command='build:prod:minimize', clean_staging=False):
         """Build the application.
         """
-        self.logger.info('Building jupyterlab assets')
+        # resolve the build type
+        parts = command.split(':')
+        if len(parts) < 2:
+            parts.append('dev')
+        elif parts[1] == 'none':
+            parts[1] = ('dev' if self.info['linked_packages'] or self.info['local_extensions'] else
+                        'prod')
+        command = ':'.join(parts)
+
+        self.logger.info(f'Building jupyterlab assets ({command})')
 
         # Set up the build directory.
         app_dir = self.app_dir
@@ -990,6 +999,7 @@ class _AppHandler(object):
 
         for fname in ['index.js', 'webpack.config.js',
                       'webpack.prod.config.js',
+                      'webpack.prod.minimize.config.js',
                       '.yarnrc', 'yarn.js']:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(HERE, 'staging', fname), target)

@@ -603,6 +603,40 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
+   * Send an experimental `debug_request` message.
+   *
+   * @hidden
+   *
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, this function is *NOT* considered
+   * part of the public API, and may change without notice.
+   */
+  requestDebug(
+    content: KernelMessage.IDebugRequestMsg['content'],
+    disposeOnDone: boolean = true
+  ): Kernel.IControlFuture<
+    KernelMessage.IDebugRequestMsg,
+    KernelMessage.IDebugReplyMsg
+  > {
+    let msg = KernelMessage.createMessage({
+      msgType: 'debug_request',
+      channel: 'control',
+      username: this._username,
+      session: this._clientId,
+      content
+    });
+    return this.sendControlMessage(
+      msg,
+      true,
+      disposeOnDone
+    ) as Kernel.IControlFuture<
+      KernelMessage.IDebugRequestMsg,
+      KernelMessage.IDebugReplyMsg
+    >;
+  }
+
+  /**
    * Send an `is_complete_request` message.
    *
    * #### Notes
