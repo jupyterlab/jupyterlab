@@ -146,6 +146,7 @@ function ensureJupyterlab(): string[] {
   corePackage.jupyterlab.mimeExtensions = {};
   corePackage.jupyterlab.linkedPackages = {};
   corePackage.dependencies = {};
+  corePackage.resolutions = {};
 
   let singletonPackages = corePackage.jupyterlab.singletonPackages;
   let vendorPackages = corePackage.jupyterlab.vendor;
@@ -179,13 +180,17 @@ function ensureJupyterlab(): string[] {
     }
 
     // Make sure it is included as a dependency.
-    corePackage.dependencies[data.name] = '^' + String(data.version);
+    corePackage.dependencies[data.name] = '~' + String(data.version);
+    corePackage.resolutions[data.name] = '~' + String(data.version);
     // Add its dependencies to the core dependencies if they are in the
     // singleton packages or vendor packages.
     let deps = data.dependencies || {};
     for (let dep in deps) {
       if (singletonPackages.indexOf(dep) !== -1) {
         corePackage.dependencies[dep] = deps[dep];
+        if (!(dep in corePackage.resolutions)) {
+          corePackage.resolutions[dep] = deps[dep];
+        }
       }
       if (vendorPackages.indexOf(dep) !== -1) {
         corePackage.dependencies[dep] = deps[dep];
