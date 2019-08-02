@@ -11,8 +11,9 @@ import { ServerConnection } from '@jupyterlab/services';
 
 import { Session } from '@jupyterlab/services';
 
+import { expectFailure } from '@jupyterlab/testutils';
+
 import {
-  expectFailure,
   makeSettings,
   SessionTester,
   createSessionModel,
