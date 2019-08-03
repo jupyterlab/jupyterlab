@@ -522,9 +522,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * #### Notes
    * This will remove any secondary cursors.
    */
-  setCursorPosition(position: CodeEditor.IPosition): void {
+  setCursorPosition(
+    position: CodeEditor.IPosition,
+    options?: { bias?: number; origin?: string; scroll?: boolean }
+  ): void {
     const cursor = this._toCodeMirrorPosition(position);
-    this.doc.setCursor(cursor);
+    this.doc.setCursor(cursor, undefined, options);
     // If the editor does not have focus, this cursor change
     // will get screened out in _onCursorsChanged(). Make an
     // exception for this method.

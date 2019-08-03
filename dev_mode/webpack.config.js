@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-var path = require('path');
+var plib = require('path');
 var fs = require('fs-extra');
 var Handlebars = require('handlebars');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -12,6 +12,7 @@ var DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-p
 var Visualizer = require('webpack-visualizer-plugin');
 
 var Build = require('@jupyterlab/buildutils').Build;
+var WPPlugin = require('@jupyterlab/buildutils').WPPlugin;
 var package_data = require('./package.json');
 
 // Handle the extensions.
@@ -21,7 +22,7 @@ var mimeExtensions = jlab.mimeExtensions;
 var packageNames = Object.keys(mimeExtensions).concat(Object.keys(extensions));
 
 // Ensure a clear build directory.
-var buildDir = path.resolve(jlab.buildDir);
+var buildDir = plib.resolve(jlab.buildDir);
 if (fs.existsSync(buildDir)) {
   fs.removeSync(buildDir);
 }
@@ -42,31 +43,31 @@ var data = {
 };
 var result = template(data);
 
-fs.writeFileSync(path.join(buildDir, 'index.out.js'), result);
-fs.copySync('./package.json', path.join(buildDir, 'package.json'));
+fs.writeFileSync(plib.join(buildDir, 'index.out.js'), result);
+fs.copySync('./package.json', plib.join(buildDir, 'package.json'));
 fs.copySync(
-  path.join(jlab.outputDir, 'imports.css'),
-  path.join(buildDir, 'imports.css')
+  plib.join(jlab.outputDir, 'imports.css'),
+  plib.join(buildDir, 'imports.css')
 );
 
-// Set up variables for watch mode.
-var localLinked = {};
-var ignoreCache = Object.create(null);
+// Set up variables for the watch mode ignore plugins
+let watched = {};
+let ignoreCache = Object.create(null);
 Object.keys(jlab.linkedPackages).forEach(function(name) {
-  var localPath = require.resolve(path.join(name, 'package.json'));
-  localLinked[name] = path.dirname(localPath);
+  if (name in watched) return;
+  const localPkgPath = require.resolve(plib.join(name, 'package.json'));
+  watched[name] = plib.dirname(localPkgPath);
 });
-var ignorePatterns = [/^\.\#/]; // eslint-disable-line
 
 /**
  * Sync a local path to a linked package path if they are files and differ.
  */
 function maybeSync(localPath, name, rest) {
-  var stats = fs.statSync(localPath);
+  const stats = fs.statSync(localPath);
   if (!stats.isFile(localPath)) {
     return;
   }
-  var source = fs.realpathSync(path.join(jlab.linkedPackages[name], rest));
+  const source = fs.realpathSync(plib.join(jlab.linkedPackages[name], rest));
   if (source === fs.realpathSync(localPath)) {
     return;
   }
@@ -83,31 +84,35 @@ function maybeSync(localPath, name, rest) {
 }
 
 /**
- * A WebPack Plugin that copies the assets to the static directory and
- * fixes the output of the HTMLWebpackPlugin
+ * A filter function set up to exclude all files that are not
+ * in a package contained by the Jupyterlab repo. Used to ignore
+ * files during a `--watch` build.
  */
-function JupyterFrontEndPlugin() {}
+function ignored(path) {
+  path = plib.resolve(path);
+  if (path in ignoreCache) {
+    // Bail if already found.
+    return ignoreCache[path];
+  }
 
-JupyterFrontEndPlugin.prototype.apply = function(compiler) {
-  compiler.hooks.afterEmit.tap(
-    'JupyterFrontEndPlugin',
-    function() {
-      // Copy the static assets.
-      var staticDir = jlab.staticDir;
-      if (!staticDir) {
-        return;
-      }
-      // Ensure a clean static directory on the first emit.
-      if (this._first && fs.existsSync(staticDir)) {
-        fs.removeSync(staticDir);
-      }
-      this._first = false;
-      fs.copySync(buildDir, staticDir);
-    }.bind(this)
-  );
-};
-
-JupyterFrontEndPlugin.prototype._first = true;
+  // Limit the watched files to those in our local linked package dirs.
+  let ignore = true;
+  Object.keys(watched).some(name => {
+    const rootPath = watched[name];
+    const contained = path.indexOf(rootPath + plib.sep) !== -1;
+    if (path !== rootPath && !contained) {
+      return false;
+    }
+    const rest = path.slice(rootPath.length);
+    if (rest.indexOf('node_modules') === -1) {
+      ignore = false;
+      maybeSync(path, name, rest);
+    }
+    return true;
+  });
+  ignoreCache[path] = ignore;
+  return ignore;
+}
 
 const plugins = [
   new DuplicatePackageCheckerPlugin({
@@ -121,11 +126,15 @@ const plugins = [
   }),
   new HtmlWebpackPlugin({
     chunksSortMode: 'none',
-    template: path.join('templates', 'template.html'),
+    template: plib.join('templates', 'template.html'),
     title: jlab.name || 'JupyterLab'
   }),
   new webpack.HashedModuleIdsPlugin(),
-  new JupyterFrontEndPlugin({})
+
+  // custom plugin for ignoring files during a `--watch` build
+  new WPPlugin.FilterWatchIgnorePlugin(ignored),
+  // custom plugin that copies the assets to the static directory
+  new WPPlugin.FrontEndPlugin(buildDir, jlab.staticDir)
 ];
 
 if (process.argv.includes('--analyze')) {
@@ -136,10 +145,10 @@ module.exports = [
   {
     mode: 'development',
     entry: {
-      main: ['whatwg-fetch', path.resolve(buildDir, 'index.out.js')]
+      main: ['whatwg-fetch', plib.resolve(buildDir, 'index.out.js')]
     },
     output: {
-      path: path.resolve(buildDir),
+      path: plib.resolve(buildDir),
       publicPath: '{{page_config.fullStaticUrl}}/',
       filename: '[name].[chunkhash].js'
     },
@@ -186,47 +195,13 @@ module.exports = [
       ]
     },
     watchOptions: {
-      ignored: function(localPath) {
-        localPath = path.resolve(localPath);
-        if (localPath in ignoreCache) {
-          return ignoreCache[localPath];
-        }
-
-        // Ignore files with certain patterns
-        var baseName = localPath.replace(/^.*[\\\/]/, ''); // eslint-disable-line
-        if (
-          ignorePatterns.some(function(rexp) {
-            return baseName.match(rexp);
-          })
-        ) {
-          return true;
-        }
-
-        // Limit the watched files to those in our local linked package dirs.
-        var ignore = true;
-        Object.keys(localLinked).some(function(name) {
-          // Bail if already found.
-          var rootPath = localLinked[name];
-          var contained = localPath.indexOf(rootPath + path.sep) !== -1;
-          if (localPath !== rootPath && !contained) {
-            return false;
-          }
-          var rest = localPath.slice(rootPath.length);
-          if (rest.indexOf('node_modules') === -1) {
-            ignore = false;
-            maybeSync(localPath, name, rest);
-          }
-          return true;
-        });
-        ignoreCache[localPath] = ignore;
-        return ignore;
-      }
+      poll: 333
     },
     node: {
       fs: 'empty'
     },
     bail: true,
-    devtool: 'source-map',
+    devtool: 'inline-source-map',
     externals: ['node-fetch', 'ws'],
     plugins,
     stats: {

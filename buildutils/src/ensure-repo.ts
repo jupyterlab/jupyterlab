@@ -19,7 +19,10 @@ type Dict<T> = { [key: string]: T };
 
 // Data to ignore.
 let MISSING: Dict<string[]> = {
-  '@jupyterlab/buildutils': ['path']
+  '@jupyterlab/buildutils': ['path'],
+  '@jupyterlab/testutils': ['fs'],
+  '@jupyterlab/vega4-extension': ['vega-embed'],
+  '@jupyterlab/vega5-extension': ['vega-embed']
 };
 
 let UNUSED: Dict<string[]> = {
@@ -29,9 +32,13 @@ let UNUSED: Dict<string[]> = {
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/testutils': ['node-fetch', 'identity-obj-proxy'],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
+  '@jupyterlab/vega4-extension': ['vega', 'vega-lite'],
   '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],
   '@jupyterlab/ui-components': ['@blueprintjs/icons']
 };
+
+// Packages that are allowed to have differing versions
+let DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega', 'vega-embed'];
 
 let SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
@@ -139,9 +146,10 @@ function ensureJupyterlab(): string[] {
   corePackage.jupyterlab.mimeExtensions = {};
   corePackage.jupyterlab.linkedPackages = {};
   corePackage.dependencies = {};
+  corePackage.resolutions = {};
 
   let singletonPackages = corePackage.jupyterlab.singletonPackages;
-  let vendorPackages = corePackage.jupyterlab.vendor;
+  const coreData = new Map<string, any>();
 
   utils.getCorePaths().forEach(pkgPath => {
     let dataPath = path.join(pkgPath, 'package.json');
@@ -151,58 +159,69 @@ function ensureJupyterlab(): string[] {
     } catch (e) {
       return;
     }
-    // Determine whether to include the package.
-    if (!data.jupyterlab) {
-      return;
-    }
-    // Skip if explicitly marked as not a core dep.
-    if (
-      'coreDependency' in data.jupyterlab &&
-      !data.jupyterlab.coreDependency
-    ) {
-      return;
-    }
-    // Skip if it is not marked as an extension or a core dep.
-    if (
-      !data.jupyterlab.coreDependency &&
-      !data.jupyterlab.extension &&
-      !data.jupyterlab.mimeExtension
-    ) {
+    coreData.set(data.name, data);
+  });
+
+  coreData.forEach((data, name) => {
+    // Insist on this version in the yarn resolution.
+    const version = `~${data.version}`;
+    corePackage.resolutions[name] = version;
+  });
+
+  coreData.forEach((data, name) => {
+    // Determine if the package wishes to be included in the top-level
+    // dependencies.
+    const meta = data.jupyterlab;
+    const keep = !!(
+      meta &&
+      (meta.coreDependency || meta.extension || meta.mimeExtension)
+    );
+    if (!keep) {
       return;
     }
 
     // Make sure it is included as a dependency.
-    corePackage.dependencies[data.name] = '^' + String(data.version);
-    let relativePath = `../packages/${path.basename(pkgPath)}`;
-    corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
-    // Add its dependencies to the core dependencies if they are in the
-    // singleton packages or vendor packages.
+    const version = `~${data.version}`;
+    corePackage.dependencies[data.name] = version;
+
+    // Add its dependencies to the resolutions if they are in the singleton
+    // packages packages. This lets yarn force the singleton status.
     let deps = data.dependencies || {};
     for (let dep in deps) {
       if (singletonPackages.indexOf(dep) !== -1) {
-        corePackage.dependencies[dep] = deps[dep];
+        if (!(dep in corePackage.resolutions)) {
+          corePackage.resolutions[dep] = deps[dep];
+        }
       }
-      if (vendorPackages.indexOf(dep) !== -1) {
-        corePackage.dependencies[dep] = deps[dep];
-      }
-    }
-
-    let jlab = data.jupyterlab;
-    if (!jlab) {
-      return;
     }
 
     // Handle extensions.
     ['extension', 'mimeExtension'].forEach(item => {
-      let ext = jlab[item];
+      let ext = meta[item];
       if (ext === true) {
         ext = '';
       }
       if (typeof ext !== 'string') {
         return;
       }
-      corePackage.jupyterlab[item + 's'][data.name] = ext;
+      corePackage.jupyterlab[`${item}s`][name] = ext;
     });
+  });
+
+  utils.getLernaPaths().forEach(pkgPath => {
+    let dataPath = path.join(pkgPath, 'package.json');
+    let data: any;
+    try {
+      data = utils.readJSONFile(dataPath);
+    } catch (e) {
+      return;
+    }
+
+    // watch all src, build, and test files in the Jupyterlab project
+    let relativePath = utils.ensureUnixPathSep(
+      path.join('..', path.relative(basePath, pkgPath))
+    );
+    corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
   });
 
   // Write the package.json back to disk.
@@ -308,7 +327,8 @@ export async function ensureIntegrity(): Promise<boolean> {
       missing: MISSING[name],
       unused,
       locals,
-      cssImports: cssImports[name]
+      cssImports: cssImports[name],
+      differentVersions: DIFFERENT_VERSIONS
     };
 
     if (name === '@jupyterlab/metapackage') {

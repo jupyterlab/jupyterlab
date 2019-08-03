@@ -1,0 +1,16 @@
+{
+  "name": "",
+  "version": "",
+  "scripts": {
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "vega": "^5.4.0",
+    "vega-embed": "^4.2.0",
+    "vega-lite": "^3.3.0",
+    "webpack": "^4.32.2"
+  },
+  "publishConfig": {
+    "access": "private"
+  }
+}

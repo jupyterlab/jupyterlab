@@ -24,7 +24,7 @@ commander
     // Optionally clean and build the python packages.
     if (!options.skipBuild) {
       // Ensure a clean state.
-      utils.run('jlpm run clean:slate');
+      utils.run('npm run clean:slate');
     }
 
     // Publish JS to the appropriate tag.

@@ -13,7 +13,7 @@ import {
   NotebookTracker
 } from '@jupyterlab/notebook';
 
-import { createNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
+import { initNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
 
 const namespace = 'notebook-tracker-test';
 
@@ -31,11 +31,10 @@ describe('@jupyterlab/notebook', () => {
     let context: Context<INotebookModel>;
 
     beforeEach(async () => {
-      context = await createNotebookContext();
+      context = await initNotebookContext();
     });
 
-    afterEach(async () => {
-      await context.session.shutdown();
+    afterEach(() => {
       context.dispose();
     });
 

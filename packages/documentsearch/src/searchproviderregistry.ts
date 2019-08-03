@@ -4,9 +4,9 @@
 import { ISearchProvider, ISearchProviderConstructor } from './interfaces';
 import { ISearchProviderRegistry } from './tokens';
 
-import { Widget } from '@phosphor/widgets';
 import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
 import { ISignal, Signal } from '@phosphor/signaling';
+import { Widget } from '@phosphor/widgets';
 
 export class SearchProviderRegistry implements ISearchProviderRegistry {
   /**
@@ -15,7 +15,10 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
    * @param key - The provider key.
    * @returns A disposable delegate that, when disposed, deregisters the given search provider
    */
-  register(key: string, provider: ISearchProviderConstructor): IDisposable {
+  register<T extends Widget = Widget>(
+    key: string,
+    provider: ISearchProviderConstructor<T>
+  ): IDisposable {
     this._providerMap.set(key, provider);
     this._changed.emit();
     return new DisposableDelegate(() => {
@@ -30,7 +33,9 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
    * @param widget - The widget to search over.
    * @returns the search provider, or undefined if none exists.
    */
-  getProviderForWidget(widget: Widget): ISearchProvider | undefined {
+  getProviderForWidget<T extends Widget = Widget>(
+    widget: T
+  ): ISearchProvider<T> | undefined {
     return this._findMatchingProvider(this._providerMap, widget);
   }
 
@@ -42,10 +47,10 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
     return this._changed;
   }
 
-  private _findMatchingProvider(
+  private _findMatchingProvider<T extends Widget = Widget>(
     providerMap: Private.ProviderMap,
-    widget: Widget
-  ): ISearchProvider | undefined {
+    widget: T
+  ): ISearchProvider<T> | undefined {
     // iterate through all providers and ask each one if it can search on the
     // widget.
     for (let P of providerMap.values()) {
@@ -59,10 +64,10 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
   private _changed = new Signal<this, void>(this);
   private _providerMap: Private.ProviderMap = new Map<
     string,
-    ISearchProviderConstructor
+    ISearchProviderConstructor<any>
   >();
 }
 
 namespace Private {
-  export type ProviderMap = Map<string, ISearchProviderConstructor>;
+  export type ProviderMap = Map<string, ISearchProviderConstructor<any>>;
 }

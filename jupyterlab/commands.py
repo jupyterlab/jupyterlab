@@ -534,10 +534,19 @@ class _AppHandler(object):
         return True
 
     def build(self, name=None, version=None, static_url=None,
-              command='build:prod', clean_staging=False):
+              command='build:prod:minimize', clean_staging=False):
         """Build the application.
         """
-        self.logger.info('Building jupyterlab assets')
+        # resolve the build type
+        parts = command.split(':')
+        if len(parts) < 2:
+            parts.append('dev')
+        elif parts[1] == 'none':
+            parts[1] = ('dev' if self.info['linked_packages'] or self.info['local_extensions'] else
+                        'prod')
+        command = ':'.join(parts)
+
+        self.logger.info(f'Building jupyterlab assets ({command})')
 
         # Set up the build directory.
         app_dir = self.app_dir
@@ -780,6 +789,7 @@ class _AppHandler(object):
         except URLError:
             return False
         if latest is None:
+            self.logger.warn('No compatible version found for %s!' % (name,))
             return False
         if latest == self.info['extensions'][name]['version']:
             self.logger.info('Extension %r already up to date' % name)
@@ -989,6 +999,7 @@ class _AppHandler(object):
 
         for fname in ['index.js', 'webpack.config.js',
                       'webpack.prod.config.js',
+                      'webpack.prod.minimize.config.js',
                       '.yarnrc', 'yarn.js']:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(HERE, 'staging', fname), target)
@@ -1479,6 +1490,13 @@ class _AppHandler(object):
             errors = _validate_compatibility(name, deps, core_data)
             if not errors:
                 # Found a compatible version
+                # skip deprecated versions
+                if 'deprecated' in data:
+                    self.logger.debug(
+                        'Disregarding compatible version of package as it is deprecated: %s@%s'
+                        % (name, version)
+                    )
+                    continue
                 # Verify that the version is a valid extension.
                 with TemporaryDirectory() as tempdir:
                     info = self._extract_package(
@@ -1512,6 +1530,11 @@ class _AppHandler(object):
             for version, data in sorted(versions.items(),
                                         key=sort_key,
                                         reverse=True):
+
+                # skip deprecated versions
+                if 'deprecated' in data:
+                    continue
+
                 deps = data.get('dependencies', {})
                 errors = _validate_compatibility(name, deps, core_data)
                 if not errors:
@@ -1535,7 +1558,7 @@ class _AppHandler(object):
                 # Verify that the version is a valid extension.
                 if not _validate_extension(data):
                     # Valid
-                    versions[key] = data['version']
+                    versions[data['name']] = data['version']
         return versions
 
     def _format_no_compatible_package_version(self, name):
@@ -1726,7 +1749,7 @@ def _get_static_data(app_dir):
 def _validate_compatibility(extension, deps, core_data):
     """Validate the compatibility of an extension.
     """
-    core_deps = core_data['dependencies']
+    core_deps = core_data['resolutions']
     singletons = core_data['jupyterlab']['singletonPackages']
 
     errors = []

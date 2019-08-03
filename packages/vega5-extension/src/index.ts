@@ -85,6 +85,10 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     this.node.textContent = '';
     this.node.appendChild(el);
 
+    if (this._result) {
+      this._result.view.finalize();
+    }
+
     this._result = await vega.default(el, spec, {
       actions: true,
       defaultStyle: true,
@@ -130,17 +134,17 @@ export const rendererFactory: IRenderMime.IRendererFactory = {
 const extension: IRenderMime.IExtension = {
   id: '@jupyterlab/vega5-extension:factory',
   rendererFactory,
-  rank: 50,
+  rank: 57,
   dataType: 'json',
   documentWidgetFactoryOptions: [
     {
-      name: 'Vega',
+      name: 'Vega5',
       primaryFileType: 'vega5',
       fileTypes: ['vega5', 'json'],
       defaultFor: ['vega5']
     },
     {
-      name: 'Vega-Lite',
+      name: 'Vega-Lite3',
       primaryFileType: 'vega-lite3',
       fileTypes: ['vega-lite3', 'json'],
       defaultFor: ['vega-lite3']
@@ -186,7 +190,7 @@ namespace Private {
       return vegaReady;
     }
 
-    vegaReady = import('vega-embed');
+    vegaReady = import('./built-vega-embed') as any;
 
     return vegaReady;
   }

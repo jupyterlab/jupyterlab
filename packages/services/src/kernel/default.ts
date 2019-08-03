@@ -5,7 +5,7 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
 
-import { ArrayExt, each, find } from '@phosphor/algorithm';
+import { ArrayExt, each, find, some } from '@phosphor/algorithm';
 
 import { JSONExt, JSONObject, PromiseDelegate } from '@phosphor/coreutils';
 
@@ -19,7 +19,11 @@ import { Kernel } from './kernel';
 
 import { KernelMessage } from './messages';
 
-import { KernelFutureHandler } from './future';
+import {
+  KernelFutureHandler,
+  KernelShellFutureHandler,
+  KernelControlFutureHandler
+} from './future';
 
 import * as serialize from './serialize';
 
@@ -57,6 +61,8 @@ export class DefaultKernel implements Kernel.IKernel {
       options.serverSettings || ServerConnection.makeSettings();
     this._clientId = options.clientId || UUID.uuid4();
     this._username = options.username || '';
+    this.handleComms =
+      options.handleComms === undefined ? true : options.handleComms;
 
     void this._readyPromise.promise.then(() => {
       this._sendPending();
@@ -77,6 +83,18 @@ export class DefaultKernel implements Kernel.IKernel {
    * The server settings for the kernel.
    */
   readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * Handle comm messages
+   *
+   * #### Notes
+   * The comm message protocol currently has implicit assumptions that only
+   * one kernel connection is handling comm messages. This option allows a
+   * kernel connection to opt out of handling comms.
+   *
+   * See https://github.com/jupyter/jupyter_client/issues/263
+   */
+  readonly handleComms: boolean;
 
   /**
    * A signal emitted when the kernel status changes.
@@ -211,12 +229,14 @@ export class DefaultKernel implements Kernel.IKernel {
   /**
    * Clone the current kernel with a new clientId.
    */
-  clone(): Kernel.IKernel {
+  clone(options: Kernel.IOptions = {}): Kernel.IKernel {
     return new DefaultKernel(
       {
         name: this._name,
         username: this._username,
-        serverSettings: this.serverSettings
+        serverSettings: this.serverSettings,
+        handleComms: this.handleComms,
+        ...options
       },
       this._id
     );
@@ -263,7 +283,60 @@ export class DefaultKernel implements Kernel.IKernel {
     msg: KernelMessage.IShellMessage<T>,
     expectReply = false,
     disposeOnDone = true
-  ): Kernel.IFuture<KernelMessage.IShellMessage<T>> {
+  ): Kernel.IShellFuture<KernelMessage.IShellMessage<T>> {
+    return this._sendKernelShellControl(
+      KernelShellFutureHandler,
+      msg,
+      expectReply,
+      disposeOnDone
+    ) as Kernel.IShellFuture<KernelMessage.IShellMessage<T>>;
+  }
+
+  /**
+   * Send a control message to the kernel.
+   *
+   * #### Notes
+   * Send a message to the kernel's control channel, yielding a future object
+   * for accepting replies.
+   *
+   * If `expectReply` is given and `true`, the future is disposed when both a
+   * control reply and an idle status message are received. If `expectReply`
+   * is not given or is `false`, the future is resolved when an idle status
+   * message is received.
+   * If `disposeOnDone` is not given or is `true`, the Future is disposed at this point.
+   * If `disposeOnDone` is given and `false`, it is up to the caller to dispose of the Future.
+   *
+   * All replies are validated as valid kernel messages.
+   *
+   * If the kernel status is `dead`, this will throw an error.
+   */
+  sendControlMessage<T extends KernelMessage.ControlMessageType>(
+    msg: KernelMessage.IControlMessage<T>,
+    expectReply = false,
+    disposeOnDone = true
+  ): Kernel.IControlFuture<KernelMessage.IControlMessage<T>> {
+    return this._sendKernelShellControl(
+      KernelControlFutureHandler,
+      msg,
+      expectReply,
+      disposeOnDone
+    ) as Kernel.IControlFuture<KernelMessage.IControlMessage<T>>;
+  }
+
+  private _sendKernelShellControl<
+    REQUEST extends KernelMessage.IShellControlMessage,
+    REPLY extends KernelMessage.IShellControlMessage,
+    KFH extends new (...params: any[]) => KernelFutureHandler<REQUEST, REPLY>,
+    T extends KernelMessage.IMessage
+  >(
+    ctor: KFH,
+    msg: T,
+    expectReply = false,
+    disposeOnDone = true
+  ): Kernel.IFuture<
+    KernelMessage.IShellControlMessage,
+    KernelMessage.IShellControlMessage
+  > {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
@@ -273,7 +346,7 @@ export class DefaultKernel implements Kernel.IKernel {
       this._ws.send(serialize.serialize(msg));
     }
     this._anyMessage.emit({ msg, direction: 'send' });
-    let future = new KernelFutureHandler(
+    let future = new ctor(
       () => {
         let msgId = msg.header.msg_id;
         this._futures.delete(msgId);
@@ -415,10 +488,13 @@ export class DefaultKernel implements Kernel.IKernel {
     if (this.isDisposed) {
       throw new Error('Disposed kernel');
     }
-    if (reply.content.status !== 'ok') {
+    // Relax the requirement that a kernel info reply has a status attribute,
+    // since this part of the spec is not yet widely conformed-to.
+    if (reply.content.status && reply.content.status !== 'ok') {
       throw new Error('Kernel info reply errored');
     }
-    this._info = reply.content;
+    // Type assertion is necessary until we can rely on the status message.
+    this._info = reply.content as KernelMessage.IInfoReply;
     return reply;
   }
 
@@ -513,7 +589,7 @@ export class DefaultKernel implements Kernel.IKernel {
     content: KernelMessage.IExecuteRequestMsg['content'],
     disposeOnDone: boolean = true,
     metadata?: JSONObject
-  ): Kernel.IFuture<
+  ): Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
   > {
@@ -529,11 +605,50 @@ export class DefaultKernel implements Kernel.IKernel {
       channel: 'shell',
       username: this._username,
       session: this._clientId,
-      content: { ...defaults, ...content }
+      content: { ...defaults, ...content },
+      metadata
     });
-    return this.sendShellMessage(msg, true, disposeOnDone) as Kernel.IFuture<
+    return this.sendShellMessage(
+      msg,
+      true,
+      disposeOnDone
+    ) as Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
+    >;
+  }
+
+  /**
+   * Send an experimental `debug_request` message.
+   *
+   * @hidden
+   *
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, this function is *NOT* considered
+   * part of the public API, and may change without notice.
+   */
+  requestDebug(
+    content: KernelMessage.IDebugRequestMsg['content'],
+    disposeOnDone: boolean = true
+  ): Kernel.IControlFuture<
+    KernelMessage.IDebugRequestMsg,
+    KernelMessage.IDebugReplyMsg
+  > {
+    let msg = KernelMessage.createMessage({
+      msgType: 'debug_request',
+      channel: 'control',
+      username: this._username,
+      session: this._clientId,
+      content
+    });
+    return this.sendControlMessage(
+      msg,
+      true,
+      disposeOnDone
+    ) as Kernel.IControlFuture<
+      KernelMessage.IDebugRequestMsg,
+      KernelMessage.IDebugReplyMsg
     >;
   }
 
@@ -613,11 +728,16 @@ export class DefaultKernel implements Kernel.IKernel {
    *
    * #### Notes
    * If a client-side comm already exists with the given commId, it is returned.
+   * An error is thrown if the kernel does not handle comms.
    */
   connectToComm(
     targetName: string,
     commId: string = UUID.uuid4()
   ): Kernel.IComm {
+    if (!this.handleComms) {
+      throw new Error('Comms are disabled on this kernel connection');
+    }
+
     if (this._comms.has(commId)) {
       return this._comms.get(commId);
     }
@@ -653,6 +773,10 @@ export class DefaultKernel implements Kernel.IKernel {
       msg: KernelMessage.ICommOpenMsg
     ) => void | PromiseLike<void>
   ): void {
+    if (!this.handleComms) {
+      return;
+    }
+
     this._targetRegistry[targetName] = callback;
   }
 
@@ -664,7 +788,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * @param callback - The callback to remove.
    *
    * #### Notes
-   * The comm target is only removed the callback argument matches.
+   * The comm target is only removed if the callback argument matches.
    */
   removeCommTarget(
     targetName: string,
@@ -673,6 +797,10 @@ export class DefaultKernel implements Kernel.IKernel {
       msg: KernelMessage.ICommOpenMsg
     ) => void | PromiseLike<void>
   ): void {
+    if (!this.handleComms) {
+      return;
+    }
+
     if (!this.isDisposed && this._targetRegistry[targetName] === callback) {
       delete this._targetRegistry[targetName];
     }
@@ -899,7 +1027,13 @@ export class DefaultKernel implements Kernel.IKernel {
     });
     this._msgChain = Promise.resolve();
     this._kernelSession = '';
-    this._futures = new Map<string, KernelFutureHandler>();
+    this._futures = new Map<
+      string,
+      KernelFutureHandler<
+        KernelMessage.IShellControlMessage,
+        KernelMessage.IShellControlMessage
+      >
+    >();
     this._comms = new Map<string, Kernel.IComm>();
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
@@ -1175,13 +1309,19 @@ export class DefaultKernel implements Kernel.IKernel {
           }
           break;
         case 'comm_open':
-          await this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);
+          if (this.handleComms) {
+            await this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);
+          }
           break;
         case 'comm_msg':
-          await this._handleCommMsg(msg as KernelMessage.ICommMsgMsg);
+          if (this.handleComms) {
+            await this._handleCommMsg(msg as KernelMessage.ICommMsgMsg);
+          }
           break;
         case 'comm_close':
-          await this._handleCommClose(msg as KernelMessage.ICommCloseMsg);
+          if (this.handleComms) {
+            await this._handleCommClose(msg as KernelMessage.ICommCloseMsg);
+          }
           break;
         default:
           break;
@@ -1232,7 +1372,13 @@ export class DefaultKernel implements Kernel.IKernel {
   private _isReady = false;
   private _readyPromise = new PromiseDelegate<void>();
   private _initialized = false;
-  private _futures = new Map<string, KernelFutureHandler>();
+  private _futures = new Map<
+    string,
+    KernelFutureHandler<
+      KernelMessage.IShellControlMessage,
+      KernelMessage.IShellControlMessage
+    >
+  >();
   private _comms = new Map<string, Kernel.IComm>();
   private _targetRegistry: {
     [key: string]: (
@@ -1552,7 +1698,16 @@ namespace Private {
       return value.id === model.id;
     });
     if (kernel) {
-      return kernel.clone();
+      // If there is already a kernel connection handling comms, don't handle
+      // them in our clone, since the comm message protocol has implicit
+      // assumptions that only one connection is handling comm messages.
+      // See https://github.com/jupyter/jupyter_client/issues/263
+      const handleComms = !some(
+        runningKernels,
+        k => k.id === model.id && k.handleComms
+      );
+      const newKernel = kernel.clone({ handleComms });
+      return newKernel;
     }
 
     return new DefaultKernel({ name: model.name, serverSettings }, model.id);

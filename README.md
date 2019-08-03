@@ -41,67 +41,27 @@ Read the latest version's documentation on [ReadTheDocs](http://jupyterlab.readt
 
 ### Installation
 
-[install](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html) JupyterLab using `conda`, `pip`, or `pipenv`. Conda is recommended if you have no installation preference.
+JupyterLab can be installed using `conda` or `pip`. For more detailed instructions, consult the [installation guide](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html).
 
 Project installation instructions from the git sources are available in the [contributor documentation](CONTRIBUTING.md).
 
-#### conda
+### conda
 
-Conda is an open source package management system and environment management system that runs on Windows, macOS, and Linux. Conda packages and distributes software for any language, and by default uses the Anaconda repository managed by Anaconda Inc. To install conda, please [see the conda installation instructions](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html).
+If you use `conda`, you can install it with:
 
-Install the [JupyterLab `conda` package](https://anaconda.org/conda-forge/jupyterlab) with:
-
-```bash
+```shell
 conda install -c conda-forge jupyterlab
 ```
 
-#### pip
+### pip
 
-pip is a package management system for installing and updating Python packages, and comes with any Python installation. On Ubuntu, SUSE Enterprise Linux, openSUSE, and Fedora Linux, use the system package manager to install the `python3-pip` package. [\_The Hitchhiker's Guide to Python_provides guidance on how to install Python](https://docs.python-guide.org/starting/installation/); Another option is to [install Python directly from python.org](https://www.python.org/getit/). We suggest you [upgrade pip](https://pip.pypa.io/en/stable/installing/) before using it to install other programs.
+If you use `pip`, you can install it with:
 
-JupyterLab requires Python 3.5 or higher.
-
-1.  When using Windows with Python version 3.5 or higher, use the [Python Launcher for Windows](https://docs.python.org/3/using/windows.html?highlight=shebang#python-launcher-for-windows) to use `pip` with Python version 3:
-    ```bash
-    py -3 -m pip install jupyterlab
-    ```
-2.  If the system has a `python3` command (standard on Unix-like systems), install with the comand:
-    ```bash
-    python3 -m pip install jupyterlab
-    ```
-3.  Using the `python` command directly is another option, but this will use the _current_ version of Python (which may be Python version 2 or version 3 if both are installed):
-    ```bash
-    python -m pip install jupyterlab
-    ```
-
-Some systems have a `pip3` command that has the same effect as `python3 -m pip` and/or a `pip` command that behaves the same as `python -m pip`.
-
-Adding `--user` after `pip install` will install the files to a local user install directory (typically `~/.local/` or `%APPDATA%\Python` on Windows) instead of the system-wide directory. This can be helpful, especially if writing to the system-wide directory is not permitted. However, the user-level `bin` directory must be added to the `PATH` environment variable in order to launch `jupyter lab`.
-
-#### pipenv
-
-`Pipenv` provides users and developers of applications with an easy method to setup a working environment, however Python must be installed first. See the [pipenv installation documentation](https://docs.pipenv.org/en/latest/install/) to use Pipenv if it is not installed.
-
-`pipenv` can be installed as:
-
-```bash
-pipenv install jupyterlab
-pipenv shell
+```shell
+pip install jupyterlab
 ```
 
-or from a git checkout:
-
-```bash
-pipenv install git+git://github.com/jupyterlab/jupyterlab.git#egg=jupyterlab
-pipenv shell
-```
-
-When using `pipenv`, in order to launch `jupyter lab`, activate the project's virtualenv. For example, in the directory where `pipenv`'s `Pipfile` and `Pipfile.lock` live (i.e., where the above commands were run):
-
-```bash
-pipenv shell
-jupyter lab
-```
+If installing using `pip install --user`, you must add the user-level `bin` directory to your `PATH` environment variable in order to launch `jupyter lab`.
 
 #### Installing with Previous Versions of Jupyter Notebook
 
@@ -177,6 +137,7 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 - Saul Shanabrook, Quansight (general development, extensions)
 - Steven Silvester, JPMorgan Chase (co-creator, release management, packaging,
   prolific contributions throughout the code base).
+- Vidar T. Fauske, JPMorgan Chase (general development, extensions).
 
 Maintainer emeritus:
 

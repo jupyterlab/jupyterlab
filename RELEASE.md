@@ -20,17 +20,13 @@ makes sure that we don't have any extra tags or commits in our repo (especially
 since we will push our tags later in the process), and that we are on the master
 branch.
 
-Note that right now, we pin tornado to version 5 because there are some
-incompatibilities with tornado 6. See
-https://github.com/jupyterlab/jupyterlab/issues/6131.
-
 ```bash
 cd release
 conda deactivate
 conda remove --all -y -n jlabrelease
 rm -rf jupyterlab
 
-conda create -c conda-forge -y -n jlabrelease notebook nodejs twine 'tornado<6'
+conda create -c conda-forge -y -n jlabrelease notebook nodejs twine
 conda activate jlabrelease
 git clone git@github.com:jupyterlab/jupyterlab.git
 cd jupyterlab
@@ -71,9 +67,11 @@ JupyterLab itself, run `jlpm run bumpversion major`.
 
 - Run `jlpm run bumpversion build` to create a new `alpha` version.
 - Push the commits and tags as prompted.
-- Run `jlpm run publish:all` to publish the JS and Python packages.
+- Run `npm run publish:all` to publish the JS and Python packages.
+  Note that the use of `npm` instead of `jlpm` is
+  [significant on Windows](https://github.com/jupyterlab/jupyterlab/issues/6733).
   Execute the suggested commands after doing a quick sanity check.
-  If there is a network error during JS publish, run `jlpm run publish:all --skip-build` to resume publish without requiring another
+  If there is a network error during JS publish, run `npm run publish:all --skip-build` to resume publish without requiring another
   clean and build phase of the JS packages.
 - Run `jlpm run bumpversion release` to switch to an `rc` version.
   (running `jlpm run bumpversion build` will then increment `rc` versions).
@@ -99,18 +97,17 @@ JupyterLab itself, run `jlpm run bumpversion major`.
   - [ ] https://github.com/jupyterlab/mimerender-cookiecutter-ts
   - [ ] https://github.com/jupyterlab/theme-cookiecutter
   - [ ] https://github.com/jupyterlab/jupyter-renderers
-  - [ ] https://github.com/jupyterhub/jupyterlab-hub
 - [ ] Add a tag to [ts cookiecutter](https://github.com/jupyterlab/extension-cookiecutter-ts) with the new JupyterLab version
 - [ ] Update the extension examples:
   - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/developer/notebook.rst#adding-a-button-to-the-toolbar)
-- [ ] Update the [xkcd tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-xkcd-tutorial)
+- [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-extension-tutorial)
 - [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
 
 Now do the actual final release:
 
 - [ ] Run `jlpm run bumpversion release` to switch to final release
 - [ ] Push the commit and tags to master
-- [ ] Run `jlpm run publish:all` to publish the packages
+- [ ] Run `npm run publish:all` to publish the packages
 - [ ] Create a branch for the release and push to GitHub
 - [ ] Merge the PRs on the other repos and set the default branch of the
       xckd repo
@@ -121,16 +118,16 @@ the next release:
 
 - [ ] Run `jlpm run bumpversion minor` to bump to alpha for the next alpha release
 - [ ] Put the commit and tags to master
-- [ ] Run `jlpm run publish:all` to publish the packages
+- [ ] Run `npm run publish:all` to publish the packages
 - [ ] Release the other repos as appropriate
 - [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#update-version-for-binder)
 
-### Updating the xkcd tutorial
+### Updating the extension tutorial
 
 - Clone the repo if you don't have it
 
 ```bash
-git clone git@github.com:jupyterlab/jupyterlab_xkcd.git
+git clone git@github.com:jupyterlab/jupyterlab_apod.git
 ```
 
 #### Simple updates by rebasing
@@ -148,12 +145,12 @@ git rebase -i --root
 "Edit" the commits that involve installing packages, so you can update the
 `package.json`. Amend the last commit to bump the version number in package.json
 in preparation for publishing to npm. Then skip down to the step below about
-publishing the xkcd tutorial. If the edits are more substantial than just
+publishing the extension tutorial. If the edits are more substantial than just
 updating package versions, then do the next steps instead.
 
 #### Creating the tutorial from scratch
 
-- Create a new empty branch in the xkcd repo.
+- Create a new empty branch in the extension repo.
 
 ```bash
 git checkout --orphan name-of-branch
@@ -161,8 +158,8 @@ git rm -rf .
 git clean -dfx
 cookiecutter path-to-local-extension-cookiecutter-ts
 # Fill in the values from the previous branch package.json initial commit
-cp -r jupyterlab_xkcd/ .
-rm -rf jupyterlab_xkcd
+cp -r jupyterlab_apod/ .
+rm -rf jupyterlab_apod
 ```
 
 - Create a new PR in JupyterLab.
@@ -172,14 +169,14 @@ rm -rf jupyterlab_xkcd
   file from the previous branch, as well as the `package.json` fields up to
   `license`. Bump the version number in preparation for publishing to npm.
 
-#### Publishing xkcd tutorial changes
+#### Publishing extension tutorial changes
 
 - Replace the tag references in the tutorial with the new branch number, e.g.
-  replace `0.28-` with `0.29-`. Prefix the new tags with the branch name, e.g.
-  `0.28-01-show-a-panel`
+  replace `1.0-` with `1.1-`. Prefix the new tags with the branch name, e.g.
+  `1.0-01-show-a-panel`
   ```bash
   git tag 0.XX-01-show-a-panel HEAD~5
-  git tag 0.XX-02-show-a-comic HEAD~4
+  git tag 0.XX-02-show-an-image HEAD~4
   git tag 0.XX-03-style-and-attribute HEAD~3
   git tag 0.XX-04-refactor-and-refresh HEAD~2
   git tag 0.XX-05-restore-panel-state HEAD~1
@@ -189,9 +186,9 @@ rm -rf jupyterlab_xkcd
   ```bash
   git push origin 0.XX --tags
   ```
-  Set the branch as the default branch (see `github.com/jupyterlab/jupyterlab_xkcd/settings/branches`).
+  Set the branch as the default branch (see `github.com/jupyterlab/jupyterlab_apod/settings/branches`).
 - If there were changes to the example in the documentation, submit a PR to JupyterLab
-- Publish the new `@jupyterlab/xkcd` npm package. Make sure to update the version
+- Publish the new `@jupyterlab/apod` npm package. Make sure to update the version
   number in the last commit of the branch.
   ```bash
   npm publish

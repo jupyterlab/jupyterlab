@@ -5,17 +5,17 @@ import { expect } from 'chai';
 
 import { toArray } from '@phosphor/algorithm';
 
-import { INotebookModel } from '@jupyterlab/notebook';
-
-import { NotebookPanel } from '@jupyterlab/notebook';
-
-import { NotebookWidgetFactory } from '@jupyterlab/notebook';
+import { ToolbarButton } from '@jupyterlab/apputils';
 
 import { DocumentRegistry, Context } from '@jupyterlab/docregistry';
 
-import { createNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
+import {
+  INotebookModel,
+  NotebookPanel,
+  NotebookWidgetFactory
+} from '@jupyterlab/notebook';
 
-import { ToolbarButton } from '@jupyterlab/apputils';
+import { initNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
 
 const contentFactory = NBTestUtils.createNotebookPanelFactory();
 const rendermime = NBTestUtils.defaultRenderMime();
@@ -39,11 +39,10 @@ describe('@jupyterlab/notebook', () => {
     let context: Context<INotebookModel>;
 
     beforeEach(async () => {
-      context = await createNotebookContext();
+      context = await initNotebookContext();
     });
 
-    afterEach(async () => {
-      await context.session.shutdown();
+    afterEach(() => {
       context.dispose();
     });
 

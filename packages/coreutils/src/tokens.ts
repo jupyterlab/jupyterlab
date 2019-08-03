@@ -137,7 +137,7 @@ export interface ISettingRegistry {
   transform(
     plugin: string,
     transforms: {
-      [phase in ISettingRegistry.IPlugin.Phase]?: ISettingRegistry.IPlugin.Transform
+      [phase in ISettingRegistry.IPlugin.Phase]?: ISettingRegistry.IPlugin.Transform;
     }
   ): IDisposable;
 

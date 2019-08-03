@@ -10,12 +10,9 @@ import {
   ServerConnection
 } from '@jupyterlab/services';
 
-import {
-  DEFAULT_FILE,
-  makeSettings,
-  expectFailure,
-  handleRequest
-} from '../utils';
+import { expectFailure } from '@jupyterlab/testutils';
+
+import { DEFAULT_FILE, makeSettings, handleRequest } from '../utils';
 
 const DEFAULT_DIR: Contents.IModel = {
   name: 'bar',

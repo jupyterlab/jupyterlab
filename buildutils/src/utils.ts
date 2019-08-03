@@ -8,14 +8,32 @@ import coreutils = require('@phosphor/coreutils');
 
 type Dict<T> = { [key: string]: T };
 
+const backSlash = /\\/g;
+
 /**
  * Get all of the lerna package paths.
  */
 export function getLernaPaths(basePath = '.'): string[] {
   basePath = path.resolve(basePath);
-  let baseConfig = require(path.join(basePath, 'package.json'));
+  let packages;
+  try {
+    let baseConfig = require(path.join(basePath, 'package.json'));
+    if (baseConfig.workspaces) {
+      packages = baseConfig.workspaces.packages || baseConfig.workspaces;
+    } else {
+      baseConfig = require(path.join(basePath, 'lerna.json'));
+      packages = baseConfig.packages;
+    }
+  } catch (e) {
+    if (e.code === 'MODULE_NOT_FOUND') {
+      throw new Error(
+        `No yarn workspace / lerna package list found in ${basePath}`
+      );
+    }
+    throw e;
+  }
   let paths: string[] = [];
-  for (let config of baseConfig.workspaces) {
+  for (let config of packages) {
     paths = paths.concat(glob.sync(path.join(basePath, config)));
   }
   return paths.filter(pkgPath => {
@@ -227,7 +245,7 @@ export function getPackageGraph(): DepGraph<Dict<any>> {
         if (depName in locals) {
           depData = locals[depName];
         } else {
-          depData = require(`${depName}/package.json`);
+          depData = requirePackage(name, depName);
         }
         graph.addNode(depName, depData);
       }
@@ -236,4 +254,35 @@ export function getPackageGraph(): DepGraph<Dict<any>> {
   });
 
   return graph;
+}
+
+/**
+ * Resolve a `package.json` in the `module` starting at resolution from the `parentModule`.
+ *
+ * We could just use "require(`${depName}/package.json`)", however this won't work for modules
+ * that are not hoisted to the top level.
+ */
+function requirePackage(parentModule: string, module: string) {
+  const packagePath = `${module}/package.json`;
+  let parentModulePath: string;
+  // This will fail when the parent module cannot be loaded, like `@jupyterlab/test-root`
+  try {
+    parentModulePath = require.resolve(parentModule);
+  } catch {
+    return require(packagePath);
+  }
+  const requirePath = require.resolve(packagePath, {
+    paths: [parentModulePath]
+  });
+  return require(requirePath);
+}
+
+/**
+ * Ensure the given path uses '/' as path separator.
+ */
+export function ensureUnixPathSep(source: string) {
+  if (path.sep === '/') {
+    return source;
+  }
+  return source.replace(backSlash, '/');
 }

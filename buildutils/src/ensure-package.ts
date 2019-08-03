@@ -38,9 +38,14 @@ export async function ensurePackage(
   let messages: string[] = [];
   let locals = options.locals || {};
   let cssImports = options.cssImports || [];
+  let differentVersions = options.differentVersions || [];
 
   // Verify dependencies are consistent.
   let promises = Object.keys(deps).map(async name => {
+    if (differentVersions.indexOf(name) !== -1) {
+      // Skip processing packages that can have different versions
+      return;
+    }
     if (!(name in seenDeps)) {
       seenDeps[name] = await getDependency(name);
     }
@@ -54,6 +59,10 @@ export async function ensurePackage(
 
   // Verify devDependencies are consistent.
   promises = Object.keys(devDeps).map(async name => {
+    if (differentVersions.indexOf(name) !== -1) {
+      // Skip processing packages that can have different versions
+      return;
+    }
     if (!(name in seenDeps)) {
       seenDeps[name] = await getDependency(name);
     }
@@ -324,6 +333,11 @@ export interface IEnsurePackageOptions {
    * The css import list for the package.
    */
   cssImports?: string[];
+
+  /**
+   * Packages which are allowed to have multiple versions pulled in
+   */
+  differentVersions?: string[];
 }
 
 /**

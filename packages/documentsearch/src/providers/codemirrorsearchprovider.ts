@@ -35,25 +35,29 @@ import { ISearchProvider, ISearchMatch } from '../interfaces';
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import { FileEditor } from '@jupyterlab/fileeditor';
+
+import * as CodeMirror from 'codemirror';
+
 import { ISignal, Signal } from '@phosphor/signaling';
 import { Widget } from '@phosphor/widgets';
 
-import * as CodeMirror from 'codemirror';
-import { FileEditor } from '@jupyterlab/fileeditor';
-
+// The type for which canSearchFor returns true
+export type CMMainAreaWidget = MainAreaWidget<FileEditor> & {
+  content: { editor: CodeMirrorEditor };
+};
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
-export class CodeMirrorSearchProvider implements ISearchProvider {
+export class CodeMirrorSearchProvider
+  implements ISearchProvider<CMMainAreaWidget> {
   /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
    *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: Widget): any {
-    const target = searchTarget as MainAreaWidget;
-    const content = target.content as FileEditor;
-    const cm = content.editor as CodeMirrorEditor;
+  getInitialQuery(searchTarget: CMMainAreaWidget): any {
+    const cm = searchTarget.content.editor;
     const selection = cm.doc.getSelection();
     // if there are newlines, just return empty string
     return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
@@ -76,12 +80,11 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       throw new Error('Cannot find Codemirror instance to search');
     }
 
-    // Extract the codemirror object from the editor widget. Each of these casts
-    // is justified by the canSearchOn call above.
-    const target = searchTarget as MainAreaWidget;
-    const content = target.content as FileEditor;
-    this._cm = content.editor as CodeMirrorEditor;
+    // canSearchOn is a type guard that guarantees the type of .editor
+    this._cm = searchTarget.content.editor;
     return this._startQuery(query);
+
+    throw new Error('Cannot find Codemirror instance to search');
   }
 
   /**
@@ -92,16 +95,26 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     searchTarget: CodeMirrorEditor
   ): Promise<ISearchMatch[]> {
     this._cm = searchTarget;
-    return this._startQuery(query);
+    return this._startQuery(query, false);
   }
 
-  private async _startQuery(query: RegExp): Promise<ISearchMatch[]> {
-    await this.endQuery();
+  refreshOverlay() {
+    this._refreshOverlay();
+  }
+
+  private async _startQuery(
+    query: RegExp,
+    refreshOverlay: boolean = true
+  ): Promise<ISearchMatch[]> {
+    // no point in removing overlay in the middle of the search
+    await this.endQuery(false);
 
     this._query = query;
 
     CodeMirror.on(this._cm.doc, 'change', this._onDocChanged.bind(this));
-    this._refreshOverlay();
+    if (refreshOverlay) {
+      this._refreshOverlay();
+    }
     this._setInitialMatches(query);
 
     const matches = this._parseMatchesFromState();
@@ -125,10 +138,13 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
    * @returns A promise that resolves when the search provider is ready to
    * begin a new search.
    */
-  async endQuery(): Promise<void> {
+  async endQuery(removeOverlay = true): Promise<void> {
     this._matchState = {};
     this._currentMatch = null;
-    this._cm.removeOverlay(this._overlay);
+
+    if (removeOverlay) {
+      this._cm.removeOverlay(this._overlay);
+    }
     const from = this._cm.getCursor('from');
     const to = this._cm.getCursor('to');
     // Setting a reverse selection to allow search-as-you-type to maintain the
@@ -237,7 +253,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   /**
    * Report whether or not this provider has the ability to search on the given object
    */
-  static canSearchOn(domain: Widget): boolean {
+  static canSearchOn(domain: Widget): domain is CMMainAreaWidget {
     return (
       domain instanceof MainAreaWidget &&
       domain.content instanceof FileEditor &&
@@ -246,7 +262,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
   }
 
   /**
-   * The same list of matches provided by the startQuery promise resoluton
+   * The same list of matches provided by the startQuery promise resolution
    */
   get matches(): ISearchMatch[] {
     return this._parseMatchesFromState();
@@ -355,7 +371,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
     return {
       /**
        * Token function is called when a line needs to be processed -
-       * when the overlay is intially created, it's called on all lines;
+       * when the overlay is initially created, it's called on all lines;
        * when a line is modified and needs to be re-evaluated, it's called
        * on just that line.
        *
@@ -441,7 +457,7 @@ export class CodeMirrorSearchProvider implements ISearchProvider {
       if (!cursor.find(reverse)) {
         // if we don't want to loop, no more matches found, reset the cursor and exit
         if (this.isSubProvider) {
-          this._cm.setCursorPosition(position);
+          this._cm.setCursorPosition(position, { scroll: false });
           this._currentMatch = null;
           return null;
         }

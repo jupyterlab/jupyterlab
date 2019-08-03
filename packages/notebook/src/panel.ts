@@ -60,6 +60,11 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     );
 
     void this.revealed.then(() => {
+      if (this.isDisposed) {
+        // this widget has already been disposed, bail
+        return;
+      }
+
       // Set the document edit mode on initial open if it looks like a new document.
       if (this.content.widgets.length === 1) {
         let cellModel = this.content.widgets[0].model;
@@ -189,9 +194,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       // they know why their kernel state is gone.
       void showDialog({
         title: 'Kernel Restarting',
-        body: `The kernel for ${
-          this.session.path
-        } appears to have died. It will restart automatically.`,
+        body: `The kernel for ${this.session.path} appears to have died. It will restart automatically.`,
         buttons: [Dialog.okButton()]
       });
       this._autorestarting = true;

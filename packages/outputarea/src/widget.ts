@@ -9,6 +9,8 @@ import {
 
 import { Message } from '@phosphor/messaging';
 
+import { AttachedProperty } from '@phosphor/properties';
+
 import { Signal } from '@phosphor/signaling';
 
 import { Panel, PanelLayout } from '@phosphor/widgets';
@@ -144,7 +146,7 @@ export class OutputArea extends Widget {
   /**
    * The kernel future associated with the output area.
    */
-  get future(): Kernel.IFuture<
+  get future(): Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
   > | null {
@@ -152,7 +154,7 @@ export class OutputArea extends Widget {
   }
 
   set future(
-    value: Kernel.IFuture<
+    value: Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
     > | null
@@ -284,7 +286,7 @@ export class OutputArea extends Widget {
    */
   protected onInputRequest(
     msg: KernelMessage.IInputRequestMsg,
-    future: Kernel.IFuture
+    future: Kernel.IShellFuture
   ): void {
     // Add an output widget to the end.
     let factory = this.contentFactory;
@@ -330,7 +332,19 @@ export class OutputArea extends Widget {
     let renderer = (panel.widgets
       ? panel.widgets[1]
       : panel) as IRenderMime.IRenderer;
-    if (renderer.renderModel) {
+    // Check whether it is safe to reuse renderer:
+    // - Preferred mime type has not changed
+    // - Isolation has not changed
+    let mimeType = this.rendermime.preferredMimeType(
+      model.data,
+      model.trusted ? 'any' : 'ensure'
+    );
+    if (
+      renderer.renderModel &&
+      Private.currentPreferredMimetype.get(renderer) === mimeType &&
+      OutputArea.isIsolated(mimeType, model.metadata) ===
+        renderer instanceof Private.IsolatedRenderer
+    ) {
       void renderer.renderModel(model);
     } else {
       layout.widgets[index].dispose();
@@ -388,21 +402,12 @@ export class OutputArea extends Widget {
     if (!mimeType) {
       return null;
     }
-    let metadata = model.metadata;
-    let mimeMd = metadata[mimeType] as ReadonlyJSONObject;
-    let isolated = false;
-    // mime-specific higher priority
-    if (mimeMd && mimeMd['isolated'] !== undefined) {
-      isolated = mimeMd['isolated'] as boolean;
-    } else {
-      // fallback on global
-      isolated = metadata['isolated'] as boolean;
-    }
-
     let output = this.rendermime.createRenderer(mimeType);
+    let isolated = OutputArea.isIsolated(mimeType, model.metadata);
     if (isolated === true) {
       output = new Private.IsolatedRenderer(output);
     }
+    Private.currentPreferredMimetype.set(output, mimeType);
     output.renderModel(model).catch(error => {
       // Manually append error message to output
       const pre = document.createElement('pre');
@@ -493,7 +498,7 @@ export class OutputArea extends Widget {
   };
 
   private _minHeightTimeout: number = null;
-  private _future: Kernel.IFuture<
+  private _future: Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
   > | null = null;
@@ -506,7 +511,7 @@ export class SimplifiedOutputArea extends OutputArea {
    */
   protected onInputRequest(
     msg: KernelMessage.IInputRequestMsg,
-    future: Kernel.IFuture
+    future: Kernel.IShellFuture
   ): void {
     return;
   }
@@ -576,6 +581,20 @@ export namespace OutputArea {
     let future = session.kernel.requestExecute(content, false, metadata);
     output.future = future;
     return future.done;
+  }
+
+  export function isIsolated(
+    mimeType: string,
+    metadata: ReadonlyJSONObject
+  ): boolean {
+    let mimeMd = metadata[mimeType] as ReadonlyJSONObject | undefined;
+    // mime-specific higher priority
+    if (mimeMd && mimeMd['isolated'] !== undefined) {
+      return !!mimeMd['isolated'];
+    } else {
+      // fallback on global
+      return !!metadata['isolated'];
+    }
   }
 
   /**
@@ -755,7 +774,7 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
-  private _future: Kernel.IFuture = null;
+  private _future: Kernel.IShellFuture = null;
   private _input: HTMLInputElement = null;
   private _value: string;
   private _promise = new PromiseDelegate<void>();
@@ -779,7 +798,7 @@ export namespace Stdin {
     /**
      * The kernel future associated with the request.
      */
-    future: Kernel.IFuture;
+    future: Kernel.IShellFuture;
   }
 }
 
@@ -874,4 +893,12 @@ namespace Private {
 
     private _wrapped: IRenderMime.IRenderer;
   }
+
+  export const currentPreferredMimetype = new AttachedProperty<
+    IRenderMime.IRenderer,
+    string
+  >({
+    name: 'preferredMimetype',
+    create: owner => ''
+  });
 }

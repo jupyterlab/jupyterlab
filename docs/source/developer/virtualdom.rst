@@ -41,6 +41,8 @@ The `running component <https://github.com/jupyterlab/jupyterlab/blob/master/pac
 and the ``createSearchOverlay`` function in the `search overlay <https://github.com/jupyterlab/jupyterlab/blob/master/packages/documentsearch/src/searchoverlay.tsx>`__
 use both of these features and serve as a good reference for best practices.
 
+We currently do not have a way of embedding Phosphor widgets inside of React components. If you find yourself trying to do this, we would recommend either converting the Phosphor widget to a React component or using a Phosphor widget for the outer layer component.
+
 We follow the `React documentation <https://reactjs.org/docs/thinking-in-react.html>`__ and
 `"React & Redux in TypeScript - Static Typing Guide" <https://github.com/piotrwitek/react-redux-typescript-guide#readme>`__
 for best practices on using React in TypeScript.

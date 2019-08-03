@@ -276,7 +276,7 @@ const tree: JupyterFrontEndPlugin<void> = {
         router.navigate(url);
 
         try {
-          await commands.execute('filebrowser:navigate', { path });
+          await commands.execute('filebrowser:open-path', { path });
         } catch (error) {
           console.warn('Tree routing failed.', error);
         }

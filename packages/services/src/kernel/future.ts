@@ -19,9 +19,9 @@ declare var setImmediate: any;
  * is considered done when the `idle` status is received.
  *
  */
-export class KernelFutureHandler<
-  REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
-  REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
+export abstract class KernelFutureHandler<
+  REQUEST extends KernelMessage.IShellControlMessage,
+  REPLY extends KernelMessage.IShellControlMessage
 > extends DisposableDelegate implements Kernel.IFuture<REQUEST, REPLY> {
   /**
    * Construct a new KernelFutureHandler.
@@ -194,8 +194,16 @@ export class KernelFutureHandler<
    */
   async handleMsg(msg: KernelMessage.IMessage): Promise<void> {
     switch (msg.channel) {
+      case 'control':
       case 'shell':
-        await this._handleReply(msg as REPLY);
+        if (
+          msg.channel === this.msg.channel &&
+          (msg.parent_header as KernelMessage.IHeader<
+            KernelMessage.MessageType
+          >).msg_id === this.msg.header.msg_id
+        ) {
+          await this._handleReply(msg as REPLY);
+        }
         break;
       case 'stdin':
         await this._handleStdin(msg as KernelMessage.IStdinMessage);
@@ -289,6 +297,18 @@ export class KernelFutureHandler<
   private _disposeOnDone = true;
   private _kernel: Kernel.IKernel;
 }
+
+export class KernelControlFutureHandler<
+  REQUEST extends KernelMessage.IControlMessage = KernelMessage.IControlMessage,
+  REPLY extends KernelMessage.IControlMessage = KernelMessage.IControlMessage
+> extends KernelFutureHandler<REQUEST, REPLY>
+  implements Kernel.IControlFuture<REQUEST, REPLY> {}
+
+export class KernelShellFutureHandler<
+  REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
+  REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
+> extends KernelFutureHandler<REQUEST, REPLY>
+  implements Kernel.IShellFuture<REQUEST, REPLY> {}
 
 namespace Private {
   /**

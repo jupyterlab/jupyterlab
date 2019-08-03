@@ -7,7 +7,11 @@ import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { Signal } from '@phosphor/signaling';
 
-import { expectFailure, isFulfilled, testEmission } from './utils';
+import {
+  expectFailure,
+  isFulfilled,
+  testEmission
+} from '@jupyterlab/testutils';
 
 describe('test/utils', () => {
   describe('testEmission', () => {

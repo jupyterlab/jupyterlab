@@ -45,9 +45,7 @@ export class SearchInstance implements IDisposable {
     // TODO: this does not update if the toolbar changes height.
     if (this._widget instanceof MainAreaWidget) {
       // Offset the position of the search widget to not cover the toolbar.
-      this._searchWidget.node.style.top = `${
-        this._widget.toolbar.node.clientHeight
-      }px`;
+      this._searchWidget.node.style.top = `${this._widget.toolbar.node.clientHeight}px`;
     }
     this._displaySearchWidget();
   }

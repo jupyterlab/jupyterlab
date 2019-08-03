@@ -26,16 +26,10 @@ export namespace IconItem {
  * A functional tsx component for an icon.
  */
 export function IconItem(
-  props: IconItem.IProps &
-    React.HTMLAttributes<HTMLDivElement> & {
-      offset: { x: number; y: number };
-    }
+  props: IconItem.IProps & React.HTMLAttributes<HTMLDivElement>
 ): React.ReactElement<IconItem.IProps> {
-  const { source, className, offset, ...rest } = props;
+  const { source, className, ...rest } = props;
   return (
-    <div
-      className={classes(className, source, style(icon(offset)))}
-      {...rest}
-    />
+    <div className={classes(className, source, style(icon()))} {...rest} />
   );
 }

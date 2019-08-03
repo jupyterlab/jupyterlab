@@ -233,7 +233,7 @@ async function activateConsole(
       contentFactory,
       mimeTypeService: editorServices.mimeTypeService,
       rendermime,
-      setBusy: status ? status.setBusy.bind(status) : undefined,
+      setBusy: status && (() => status.setBusy()),
       ...(options as Partial<ConsolePanel.IOptions>)
     });
 

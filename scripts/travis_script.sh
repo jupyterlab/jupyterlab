@@ -36,7 +36,7 @@ if [[ $GROUP == docs ]]; then
 
     # Verify tutorial docs build
     pushd docs
-    pip install sphinx sphinx_rtd_theme recommonmark
+    pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark
     make linkcheck
     make html
     popd
@@ -52,6 +52,10 @@ if [[ $GROUP == integrity ]]; then
 
     # Lint our files.
     jlpm run lint:check || (echo 'Please run `jlpm run lint` locally and push changes' && exit 1)
+
+
+    # Build the vega bundles
+    jlpm run build:vega
 
     # Build the packages individually.
     jlpm run build:src
@@ -153,11 +157,11 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension disable -h
 
     # Make sure we can add and remove a sibling package.
-    jlpm run add:sibling jupyterlab/tests/mock_packages/extension
-    jlpm run build
-    jlpm run remove:package extension
-    jlpm run build
-    jlpm run integrity --force  # Should have a clean tree now
+    # jlpm run add:sibling jupyterlab/tests/mock_packages/extension
+    # jlpm run build
+    # jlpm run remove:package extension
+    # jlpm run build
+    # jlpm run integrity --force  # Should have a clean tree now
 
     # Test cli tools
     jlpm run get:dependency mocha
@@ -176,7 +180,7 @@ if [[ $GROUP == usage ]]; then
     jlpm run build:packages
     jlpm run build:dev
     python -m jupyterlab.browser_check --dev-mode
-    rm -rf packages/foo
+    jlpm run remove:package foo
     jlpm run integrity
 
     ## Test app directory support being a symlink

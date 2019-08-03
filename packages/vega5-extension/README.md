@@ -35,7 +35,7 @@ display({
 }, raw=True)
 ```
 
-Using the [altair library](https://github.com/altair-viz/altair):
+Using the [Altair library](https://github.com/altair-viz/altair):
 
 ```python
 import altair as alt
@@ -51,7 +51,7 @@ chart = alt.Chart(cars).mark_point().encode(
 chart
 ```
 
-Provide vega-embed options via metadata:
+Provide Vega-Embed options via metadata:
 
 ```python
 from IPython.display import display
@@ -82,7 +82,7 @@ display({
 }, raw=True)
 ```
 
-Provide vega-embed options via altair:
+Provide Vega-Embed options via Altair:
 
 ```python
 import altair as alt

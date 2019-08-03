@@ -81,9 +81,11 @@
 }
 
 #setting-editor .jp-PluginList li {
+  display: flex;
+  flex-direction: row;
   border: 1px solid transparent;
   overflow: hidden;
-  padding: 2px 0 5px 5px;
+  padding: 4px 0 4px 4px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -112,7 +114,6 @@
   width: 20px;
   margin-right: 3px;
   position: relative;
-  top: 3px;
 }
 
 #setting-editor .jp-SettingsRawEditor .jp-Toolbar {

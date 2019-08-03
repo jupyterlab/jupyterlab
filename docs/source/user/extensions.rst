@@ -49,7 +49,15 @@ Using the Extension Manager
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To manage your extensions, you can use the extension manager. By default, the
-manager is disabled, but you can enable it with the following steps:
+manager is disabled. You can enable it by searching **Extension Manager** in the command palette.
+
+.. figure:: images/extension_manager_enable_manager.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** Enable extension manager by searching in the command palette
+
+You can also enable it with the following steps:
 
 
    - Go into advanced settings editor.
@@ -301,7 +309,20 @@ JupyterLab Application Directory
 
 The JupyterLab application directory contains the subdirectories
 ``extensions``, ``schemas``, ``settings``, ``staging``, ``static``, and
-``themes``.
+``themes``.  The default application directory mirrors the location where
+JupyterLab was installed.  For example, in a conda environment, it is in
+``<conda_root>/envs/<env_name>/share/jupyter/lab``.  The directory can be
+overridden by setting a ``JUPYTERLAB_DIR`` environment variable.
+
+It is not recommended to install JupyterLab in a root location (on Unix-like
+systems).  Instead, use a conda environment or ``pip install --user jupyterlab``
+so that the application directory ends up in a writable location.
+
+Note: this folder location and semantics do *not* follow the standard Jupyter
+config semantics because we need to build a single unified application, and the
+default config location for Jupyter is at the user level (user's home directory).
+By explicitly using a directory alongside the currently installed JupyterLab,
+we can ensure better isolation between conda or other virtual environments.
 
 .. _extensions-1:
 
@@ -330,7 +351,7 @@ JupyterLab Settings Editor.
 settings
 ''''''''
 
-The ``settings`` directory may contain the ``page_config.json`` and/or
+The ``settings`` directory may contain ``page_config.json``, ``overrides.json``, and/or
 ``build_config.json`` files, depending on which configurations are
 set on your system.
 
@@ -385,6 +406,26 @@ An example of a ``page_config.json`` file is:
         "terminalsAvailable": false
     }
 
+.. _overridesjson:
+
+overrides.json
+
+You can override default values of the extension settings by
+defining new default values in an ``overrides.json`` file.
+So for example, if you would like
+to set the dark theme by default instead of the light one, an
+``overrides.json`` file containing the following lines needs to be
+added in the application settings directory (by default this is the
+``share/jupyter/lab/settings`` folder).
+
+.. code:: json
+
+  {
+    "@jupyterlab/apputils-extension:themes": {
+      "theme": "JupyterLab Dark"
+    }
+  }
+
 .. _build_configjson:
 
 build_config.json
@@ -407,6 +448,7 @@ that have been explicitly uninstalled. An example of a
         }
     }
 
+
 staging and static
 ''''''''''''''''''
 
@@ -424,3 +466,28 @@ themes
 
 The ``themes`` directory contains assets (such as CSS and icons) for
 JupyterLab theme extensions.
+
+
+JupyterLab User Settings Directory
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The user settings directory contains the user-level settings for Jupyter extensions.
+By default, the location is ``~/.jupyter/lab/user-settings/``, where ``~`` is the user's home directory. This folder is not in the JupyterLab application directory,
+because these settings are typically shared across Python environments.
+The location can be modified using the ``JUPYTERLAB_SETTINGS_DIR`` environment variable. Files are automatically created in this folder as modifications are made
+to settings from the JupyterLab UI. They can also be manually created.  The files
+follow the pattern of ``<package_name>/<extension_name>.jupyterlab-settings``.
+They are JSON files with optional comments. These values take precedence over the
+default values given by the extensions, but can be overridden by an ``overrides.json``
+file in the application's settings directory.
+
+
+JupyterLab Workspaces Directory
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+JupyterLab sessions always reside in a workspace. Workspaces contain the state
+of JupyterLab: the files that are currently open, the layout of the application
+areas and tabs, etc. When the page is refreshed, the workspace is restored.
+By default, the location is ``~/.jupyter/lab/workspacess/``, where ``~`` is the user's home directory. This folder is not in the JupyterLab application directory,
+because these files are typically shared across Python environments.
+The location can be modified using the ``JUPYTERLAB_WORKSPACES_DIR`` environment variable. These files can be imported and exported to create default "profiles",
+using the :ref:`workspace command line tool <url-workspaces-cli>`.
+
