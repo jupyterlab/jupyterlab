@@ -20,26 +20,15 @@
     "overrides": {
       "title": "Theme CSS Overrides",
       "description": "The list of theme CSS overrides",
-      "items": { "$ref": "#/definitions/theme-override" },
-      "type": "array",
-      "default": []
+      "$ref": "#/definitions/theme-overrides"
     }
   },
   "definitions": {
-    "theme-override": {
-      "required": ["key", "value"],
+    "theme-overrides": {
       "type": "object",
       "properties": {
-        "key": {
-          "type": "string",
-          "title": "Theme CSS variable key",
-          "description": "The name of a theme CSS variable, minus the leading `--jp-`"
-        },
-        "value": {
-          "type": "string",
-          "title": "Theme CSS override value",
-          "description": "An empty string or a valid CSS value, in which case it is assigned to the CSS variable corresponding to `key`"
-        }
+        "code-font-size": { "type": "string", "default": "" },
+        "ui-font-size1": { "type": "string", "default": "" }
       }
     }
   }

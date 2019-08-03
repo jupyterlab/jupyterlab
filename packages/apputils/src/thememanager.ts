@@ -5,8 +5,6 @@ import { IChangedArgs, ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
 
 import { each } from '@phosphor/algorithm';
 
-import { ReadonlyJSONArray } from '@phosphor/coreutils';
-
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { Widget } from '@phosphor/widgets';
@@ -30,7 +28,7 @@ const REQUEST_INTERVAL = 75;
 const REQUEST_THRESHOLD = 20;
 
 type Dict<T> = { [key: string]: T };
-type Pair<T> = { key: string; value: T };
+// type Pair<T> = { key: string; value: T };
 
 /**
  * A class that provides theme management.
@@ -139,31 +137,31 @@ export class ThemeManager implements IThemeManager {
     return this._themes[name].isLight;
   }
 
-  setOverride(key: string) {
+  setCssOverride(key: string) {
+    const overrides = (this._settings.user['overrides'] as Dict<string>) || {};
+
     document.documentElement.style.setProperty(
       `--jp-${key}`,
-      this._overrides[key] || 'initial'
+      overrides[key] || 'initial'
     );
   }
 
-  setOverrides() {
-    let newOverrides: Dict<string> = {};
-    (this._settings.composite['overrides'] as ReadonlyJSONArray).forEach(
-      (x: Pair<string>) => {
-        newOverrides[x.key] = x.value;
-      }
-    );
+  setCssOverrides() {
+    const newOverrides =
+      (this._settings.user['overrides'] as Dict<string>) || {};
+
     Object.keys(this._overrides).forEach(key => {
       if (!(key in newOverrides)) {
         // unset the override
-        this.setOverride(key);
+        this.setCssOverride(key);
       }
     });
-    this._overrides = newOverrides;
-
-    Object.keys(this._overrides).forEach(key => {
-      this.setOverride(key);
+    Object.keys(newOverrides).forEach(key => {
+      // set the override
+      this.setCssOverride(key);
     });
+
+    this._overrides = newOverrides;
   }
 
   /**
