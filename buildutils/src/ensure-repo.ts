@@ -149,7 +149,7 @@ function ensureJupyterlab(): string[] {
   corePackage.resolutions = {};
 
   let singletonPackages = corePackage.jupyterlab.singletonPackages;
-  let vendorPackages = corePackage.jupyterlab.vendor;
+  const coreData = new Map<string, any>();
 
   utils.getCorePaths().forEach(pkgPath => {
     let dataPath = path.join(pkgPath, 'package.json');
@@ -159,59 +159,52 @@ function ensureJupyterlab(): string[] {
     } catch (e) {
       return;
     }
-    // Determine whether to include the package.
-    if (!data.jupyterlab) {
-      return;
-    }
-    // Skip if explicitly marked as not a core dep.
-    if (
-      'coreDependency' in data.jupyterlab &&
-      !data.jupyterlab.coreDependency
-    ) {
-      return;
-    }
-    // Skip if it is not marked as an extension or a core dep.
-    if (
-      !data.jupyterlab.coreDependency &&
-      !data.jupyterlab.extension &&
-      !data.jupyterlab.mimeExtension
-    ) {
+    coreData.set(data.name, data);
+  });
+
+  coreData.forEach((data, name) => {
+    // Insist on this version in the yarn resolution.
+    const version = `~${data.version}`;
+    corePackage.resolutions[name] = version;
+  });
+
+  coreData.forEach((data, name) => {
+    // Determine if the package wishes to be included in the top-level
+    // dependencies.
+    const meta = data.jupyterlab;
+    const keep = !!(
+      meta &&
+      (meta.coreDependency || meta.extension || meta.mimeExtension)
+    );
+    if (!keep) {
       return;
     }
 
     // Make sure it is included as a dependency.
-    corePackage.dependencies[data.name] = '~' + String(data.version);
-    corePackage.resolutions[data.name] = '~' + String(data.version);
-    // Add its dependencies to the core dependencies if they are in the
-    // singleton packages or vendor packages.
+    const version = `~${data.version}`;
+    corePackage.dependencies[data.name] = version;
+
+    // Add its dependencies to the resolutions if they are in the singleton
+    // packages packages. This lets yarn force the singleton status.
     let deps = data.dependencies || {};
     for (let dep in deps) {
       if (singletonPackages.indexOf(dep) !== -1) {
-        corePackage.dependencies[dep] = deps[dep];
         if (!(dep in corePackage.resolutions)) {
           corePackage.resolutions[dep] = deps[dep];
         }
       }
-      if (vendorPackages.indexOf(dep) !== -1) {
-        corePackage.dependencies[dep] = deps[dep];
-      }
-    }
-
-    let jlab = data.jupyterlab;
-    if (!jlab) {
-      return;
     }
 
     // Handle extensions.
     ['extension', 'mimeExtension'].forEach(item => {
-      let ext = jlab[item];
+      let ext = meta[item];
       if (ext === true) {
         ext = '';
       }
       if (typeof ext !== 'string') {
         return;
       }
-      corePackage.jupyterlab[item + 's'][data.name] = ext;
+      corePackage.jupyterlab[`${item}s`][name] = ext;
     });
   });
 
