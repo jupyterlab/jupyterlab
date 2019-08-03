@@ -4,6 +4,16 @@
   "description": "Theme manager settings.",
   "type": "object",
   "additionalProperties": false,
+  "definitions": {
+    "themeOverrides": {
+      "type": "object",
+      "properties": {
+        "code-font-size": { "type": "string", "default": "" },
+        "content-font-size1": { "type": "string", "default": "" },
+        "ui-font-size1": { "type": "string", "default": "" }
+      }
+    }
+  },
   "properties": {
     "theme": {
       "type": "string",
@@ -19,16 +29,12 @@
     },
     "overrides": {
       "title": "Theme CSS Overrides",
-      "description": "The list of theme CSS overrides",
-      "$ref": "#/definitions/theme-overrides"
-    }
-  },
-  "definitions": {
-    "theme-overrides": {
-      "type": "object",
-      "properties": {
-        "code-font-size": { "type": "string", "default": "" },
-        "ui-font-size1": { "type": "string", "default": "" }
+      "description": "Override theme CSS variables by setting key-value pairs here",
+      "$ref": "#/definitions/themeOverrides",
+      "default": {
+        "code-font-size": "",
+        "content-font-size1": "",
+        "ui-font-size1": ""
       }
     }
   }
