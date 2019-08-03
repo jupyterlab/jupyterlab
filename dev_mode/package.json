@@ -241,12 +241,6 @@
       "@jupyterlab/services",
       "@jupyterlab/terminal",
       "@jupyterlab/tooltip",
-      "@phosphor/coreutils",
-      "@phosphor/widgets",
-      "react",
-      "react-dom"
-    ],
-    "vendor": [
       "@phosphor/algorithm",
       "@phosphor/application",
       "@phosphor/commands",
@@ -260,20 +254,8 @@
       "@phosphor/signaling",
       "@phosphor/virtualdom",
       "@phosphor/widgets",
-      "ajv",
-      "codemirror",
-      "json5",
-      "es6-promise",
-      "marked",
-      "moment",
-      "path-posix",
       "react",
-      "react-dom",
-      "react-paginate",
-      "sanitize-html",
-      "semver",
-      "url-parse",
-      "xterm"
+      "react-dom"
     ],
     "linkedPackages": {
       "@jupyterlab/application-top": "../dev_mode",
