@@ -5,6 +5,8 @@ import { IChangedArgs, ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
 
 import { each } from '@phosphor/algorithm';
 
+import { ReadonlyJSONArray } from '@phosphor/coreutils';
+
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { Widget } from '@phosphor/widgets';
@@ -26,6 +28,9 @@ const REQUEST_INTERVAL = 75;
  * The number of times to attempt to load a theme before giving up.
  */
 const REQUEST_THRESHOLD = 20;
+
+type Dict<T> = { [key: string]: T };
+type Pair<T> = { key: string; value: T };
 
 /**
  * A class that provides theme management.
@@ -134,22 +139,31 @@ export class ThemeManager implements IThemeManager {
     return this._themes[name].isLight;
   }
 
-  /**
-   * Get a font size from the current theme, or the override
-   * setting if it exists
-   */
-  getFontSize(settingsKey: string, cssKey: string): string {
-    return (this._settings.composite[settingsKey] as string) || `initial`;
+  setOverride(key: string) {
+    document.documentElement.style.setProperty(
+      `--jp-${key}`,
+      this._overrides[key] || 'initial'
+    );
   }
 
-  /**
-   * Set a font size based on the return from getFontSize
-   */
-  setFontSize(settingsKey: string, cssKey: string): void {
-    document.documentElement.style.setProperty(
-      cssKey,
-      this.getFontSize(settingsKey, cssKey)
+  setOverrides() {
+    let newOverrides: Dict<string> = {};
+    (this._settings.composite['overrides'] as ReadonlyJSONArray).forEach(
+      (x: Pair<string>) => {
+        newOverrides[x.key] = x.value;
+      }
     );
+    Object.keys(this._overrides).forEach(key => {
+      if (!(key in newOverrides)) {
+        // unset the override
+        this.setOverride(key);
+      }
+    });
+    this._overrides = newOverrides;
+
+    Object.keys(this._overrides).forEach(key => {
+      this.setOverride(key);
+    });
   }
 
   /**
@@ -296,6 +310,7 @@ export class ThemeManager implements IThemeManager {
   private _current: string | null = null;
   private _host: Widget;
   private _links: HTMLLinkElement[] = [];
+  private _overrides: Dict<string> = {};
   private _outstanding: Promise<void> | null = null;
   private _pending = 0;
   private _requests: { [theme: string]: number } = {};

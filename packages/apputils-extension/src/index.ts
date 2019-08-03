@@ -146,10 +146,7 @@ const themes: JupyterFrontEndPlugin<IThemeManager> = {
       }
 
       // Set any CSS overrides
-      for (let key in ThemeManager.fontVars) {
-        // Set the font size overrides
-        manager.setFontSize(key, ThemeManager.fontVars[key]);
-      }
+      manager.setOverrides();
 
       commands.notifyCommandChanged(CommandIDs.changeTheme);
     });

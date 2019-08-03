@@ -2,6 +2,7 @@
   "title": "Theme",
   "jupyter.lab.setting-icon-label": "Theme Manager",
   "description": "Theme manager settings.",
+  "type": "object",
   "additionalProperties": false,
   "properties": {
     "theme": {
@@ -16,24 +17,30 @@
       "description": "Enable/disable styling of the application scrollbars",
       "default": false
     },
-    "code-font-size": {
-      "type": "string",
-      "title": "Code font size",
-      "description": "Set the code font size. Defaults to the `--jp-code-font-size` CSS variable from the theme.`",
-      "default": ""
-    },
-    "content-font-size": {
-      "type": "string",
-      "title": "Content font size",
-      "description": "Set the content font size. Defaults to the `--jp-content-font-size1` CSS variable from the theme.`",
-      "default": ""
-    },
-    "ui-font-size": {
-      "type": "string",
-      "title": "UI font size",
-      "description": "Set the UI font size. Defaults to the `--jp-ui-font-size1` CSS variable from the theme.`",
-      "default": ""
+    "overrides": {
+      "title": "Theme CSS Overrides",
+      "description": "The list of theme CSS overrides",
+      "items": { "$ref": "#/definitions/theme-override" },
+      "type": "array",
+      "default": []
     }
   },
-  "type": "object"
+  "definitions": {
+    "theme-override": {
+      "required": ["key", "value"],
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "title": "Theme CSS variable key",
+          "description": "The name of a theme CSS variable, minus the leading `--jp-`"
+        },
+        "value": {
+          "type": "string",
+          "title": "Theme CSS override value",
+          "description": "An empty string or a valid CSS value, in which case it is assigned to the CSS variable corresponding to `key`"
+        }
+      }
+    }
+  }
 }
