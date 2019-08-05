@@ -17,7 +17,7 @@ lockLabel: false
 lockComment: >
   This thread has been automatically locked since there has not been
   any recent activity after it was closed. Please open a [new issue](https://github.com/jupyterlab/jupyterlab/issues/new/choose)
-  for new discussion.
+  for related discussion.
 
 # Assign `resolved` as the reason for locking. Set to `false` to disable
 setLockReason: true
