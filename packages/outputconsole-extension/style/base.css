@@ -1,10 +1,8 @@
-.outputconsole-status-item.hilite {
-  transition: background-color 1s ease-out;
-  background-color: var(--jp-info-color0);
+.outputconsole-toolbar-status .jp-Icon {
+  color: var(--jp-ui-font-color0);
 }
 
-.jp-StatusItem-output-console {
-  line-height: 24px;
-  vertical-align: middle;
-  color: var(--jp-ui-font-color1);
+.outputconsole-toolbar-status.hilite button {
+  transition: background-color 1s ease-out;
+  background-color: var(--jp-info-color0);
 }

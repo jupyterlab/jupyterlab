@@ -8,7 +8,12 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+import {
+  VDomModel,
+  VDomRenderer,
+  ToolbarButtonComponent,
+  ICommandPalette
+} from '@jupyterlab/apputils';
 
 import React from 'react';
 
@@ -23,174 +28,132 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import {
-  IStatusBar,
-  GroupItem,
-  IconItem,
-  TextItem,
-  interactiveItem
-} from '@jupyterlab/statusbar';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
+import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
+
+import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
 
 import {
   IOutputConsole,
   IOutputLogPayload,
+  IOutputLogFilter,
   OutputConsoleWidget
 } from '@jupyterlab/outputconsole';
 
+/**
+ * The Output Console extension.
+ */
 const outputConsolePlugin: JupyterFrontEndPlugin<IOutputConsole> = {
   activate: activateOutputConsole,
   id: '@jupyterlab/outputconsole-extension:plugin',
   provides: IOutputConsole,
-  requires: [IMainMenu, IRenderMimeRegistry, IStatusBar],
+  requires: [IMainMenu, ICommandPalette, IRenderMimeRegistry],
   autoStart: true
 };
 
-/*
- * A namespace for OutputStatusComponent.
- */
-namespace OutputStatusComponent {
-  /**
-   * The props for the OutputStatusComponent.
-   */
-  export interface IProps {
-    /**
-     * A click handler for the item. By default
-     * Output Console panel is launched.
-     */
-    handleClick: () => void;
-
-    /**
-     * Number of logs.
-     */
-    logCount: number;
-  }
-}
-
 /**
- * A pure functional component for a Output Console status item.
- *
- * @param props - the props for the component.
- *
- * @returns a tsx component for rendering the Output Console logs.
+ * A VDomRenderer widget for displaying the status of Output Console logs on Notebook toolbar.
  */
-function OutputStatusComponent(
-  props: OutputStatusComponent.IProps
-): React.ReactElement<OutputStatusComponent.IProps> {
-  return (
-    <GroupItem
-      spacing={0}
-      onClick={props.handleClick}
-      title={`${props.logCount} messages in Output Console`}
-    >
-      <IconItem source={'jp-StatusItem-output-console fa fa-list'} />
-      <GroupItem spacing={2}>
-        <TextItem source={props.logCount} />
-        <TextItem source={'Messages'} />
-      </GroupItem>
-    </GroupItem>
-  );
-}
-
-/**
- * A VDomRenderer widget for displaying the status of Output Console logs.
- */
-export class OutputStatus extends VDomRenderer<OutputStatus.Model> {
+export class OutputStatusToolbarWidget extends VDomRenderer<VDomModel> {
   /**
-   * Construct the output console status widget.
+   * Construct the output console status toolbar widget.
    */
-  constructor(opts: OutputStatus.IOptions) {
+  constructor(opts: OutputStatusToolbarWidget.IOptions) {
     super();
-    this._handleClick = opts.handleClick;
-    this.model = new OutputStatus.Model(opts.outputConsoleWidget);
-    this.addClass(interactiveItem);
-    this.addClass('outputconsole-status-item');
 
-    opts.outputConsoleWidget.madeVisible.connect(() => {
-      this.removeClass('hilite');
-    });
+    this._toolbarButtonProps = opts.toolbarButtonProps;
+    this._outputConsoleWidget = opts.outputConsoleWidget;
+    this._filter = opts.filter;
+    this.model = new VDomModel();
+    this.addClass('outputconsole-toolbar-status');
 
-    let timer: number = null;
-
-    this.model.stateChanged.connect(() => {
-      if (opts.outputConsoleWidget.isAttached) {
-        return;
-      }
-
-      const wasHilited = this.hasClass('hilite');
-      if (wasHilited) {
-        this.removeClass('hilite');
-        // cancel previous request
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          this.addClass('hilite');
-        }, 100);
-      } else {
-        this.addClass('hilite');
-      }
-    });
+    this._outputConsoleWidget.madeVisible.connect(
+      this._onOutputConsoleMadeVisible,
+      this
+    );
+    this.model.stateChanged.connect(this._onModelStateChanged, this);
   }
 
   /**
-   * Render the output console status item.
+   * Render the output console status toolbar widget.
    */
   render() {
-    const onClick = (): void => {
-      this._handleClick();
-    };
+    return <ToolbarButtonComponent {...this._toolbarButtonProps} />;
+  }
 
-    if (this.model === null) {
-      return null;
-    } else {
-      return (
-        <OutputStatusComponent
-          handleClick={onClick}
-          logCount={this.model.logCount}
-        />
-      );
+  /**
+   * Dispose of the resources used by the toolbar widget.
+   */
+  dispose() {
+    clearTimeout(this._timerId);
+    this._outputConsoleWidget.madeVisible.disconnect(
+      this._onOutputConsoleMadeVisible,
+      this
+    );
+
+    super.dispose();
+  }
+
+  /**
+   * Handle Output Console's mode visibile event.
+   */
+  private _onOutputConsoleMadeVisible(
+    sender: OutputConsoleWidget,
+    args: void
+  ): void {
+    this.removeClass('hilite');
+  }
+
+  /**
+   * Handle changes to toolbar widget model state.
+   */
+  private _onModelStateChanged(sender: VDomModel, args: void): void {
+    const logCount = this._outputConsoleWidget.outputConsole.logCount(
+      this._filter
+    );
+    const flash = !this._outputConsoleWidget.isAttached && logCount > 0;
+
+    this._toolbarButtonProps.label = `${logCount} Messages`;
+    this._toolbarButtonProps.tooltip = `${logCount} Messages in Output Console`;
+
+    const wasHilited = this.hasClass('hilite');
+
+    if (wasHilited) {
+      this.removeClass('hilite');
+      // cancel previous request
+      clearTimeout(this._timerId);
+      this._timerId = null;
+      if (flash) {
+        this._timerId = setTimeout(() => {
+          this.addClass('hilite');
+        }, 100);
+      }
+    } else if (flash) {
+      this.addClass('hilite');
     }
   }
 
-  private _handleClick: () => void;
+  private _toolbarButtonProps: ToolbarButtonComponent.IProps;
+  private _outputConsoleWidget: OutputConsoleWidget;
+  private _filter?: IOutputLogFilter;
+  private _timerId: number = null;
 }
 
 /**
- * A namespace for Output Console log status.
+ * A namespace for Output Console log status toolbar widget.
  */
-export namespace OutputStatus {
+export namespace OutputStatusToolbarWidget {
   /**
-   * A VDomModel for the OutputStatus item.
-   */
-  export class Model extends VDomModel {
-    /**
-     * Create a new OutputStatus model.
-     */
-    constructor(outputConsoleWidget: OutputConsoleWidget) {
-      super();
-
-      this._outputConsoleWidget = outputConsoleWidget;
-
-      this._outputConsoleWidget.outputConsole.onLogMessage.connect(
-        (sender: IOutputConsole, payload: IOutputLogPayload) => {
-          this.stateChanged.emit(void 0);
-        }
-      );
-
-      this._outputConsoleWidget.logsCleared.connect(() => {
-        this.stateChanged.emit(void 0);
-      });
-    }
-
-    get logCount(): number {
-      return this._outputConsoleWidget.outputConsole.logCount;
-    }
-
-    private _outputConsoleWidget: OutputConsoleWidget;
-  }
-
-  /**
-   * Options for creating a new OutputStatus item
+   * Options for creating a new OutputStatusToolbarWidget
    */
   export interface IOptions {
+    /**
+     * Properties to use when creating underlying
+     * ToolbarButtonComponent widget
+     */
+    toolbarButtonProps: ToolbarButtonComponent.IProps;
+
     /**
      * Output Console widget which provides
      * Output Console interface and access to log info
@@ -198,21 +161,24 @@ export namespace OutputStatus {
     outputConsoleWidget: OutputConsoleWidget;
 
     /**
-     * A click handler for the item. By default
-     * Output Console panel is launched.
+     * Filter to apply to console logs
+     * when accessing the log count
      */
-    handleClick: () => void;
+    filter?: IOutputLogFilter;
   }
 }
 
 const NOTEBOOK_ICON_CLASS = 'jp-NotebookIcon';
 const CONSOLE_ICON_CLASS = 'jp-CodeConsoleIcon';
 
+/**
+ * Activate the Output Console extension.
+ */
 function activateOutputConsole(
   app: JupyterFrontEnd,
   mainMenu: IMainMenu,
-  rendermime: IRenderMimeRegistry,
-  statusBar: IStatusBar
+  palette: ICommandPalette,
+  rendermime: IRenderMimeRegistry
 ): IOutputConsole {
   const outputConsoleWidget = new OutputConsoleWidget(rendermime);
 
@@ -223,6 +189,10 @@ function activateOutputConsole(
     });
     outputConsoleWidget.update();
     app.shell.activateById(outputConsoleWidget.id);
+  };
+
+  const showMessagesByFilter = (filter?: IOutputLogFilter) => {
+    outputConsoleWidget.applyFilter(filter);
   };
 
   let lastKernelSession = '';
@@ -283,6 +253,7 @@ function activateOutputConsole(
     }
   );
 
+  const category: string = 'Main Area';
   const command: string = 'log:jlab-output-console';
 
   app.commands.addCommand(command, {
@@ -292,6 +263,7 @@ function activateOutputConsole(
         outputConsoleWidget.close();
       } else {
         addWidgetToMainArea();
+        showMessagesByFilter();
       }
     },
     isToggled: (): boolean => {
@@ -300,22 +272,107 @@ function activateOutputConsole(
   });
 
   mainMenu.viewMenu.addGroup([{ command }]);
+  palette.addItem({ command, category });
 
-  const status = new OutputStatus({
-    outputConsoleWidget: outputConsoleWidget,
-    handleClick: () => {
-      if (!outputConsoleWidget.isAttached) {
-        addWidgetToMainArea();
-      }
+  /**
+   * A Notebook Toolbar button extension to display the status of Output Console logs.
+   */
+  class NotebookToolbarButtonExtension
+    implements
+      DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+    /**
+     * Create a new extension for Notebook Panel.
+     */
+    createNew(
+      panel: NotebookPanel,
+      context: DocumentRegistry.IContext<INotebookModel>
+    ): IDisposable {
+      panel.session.ready.then(() => {
+        const logFilter = { session: panel.session.kernel.clientId };
+        this._logFilter = logFilter;
+        this._toolbarWidget = new OutputStatusToolbarWidget({
+          toolbarButtonProps: {
+            label: '',
+            tooltip: '',
+            iconClassName: 'fa fa-list',
+            onClick: () => {
+              if (!outputConsoleWidget.isAttached) {
+                addWidgetToMainArea();
+              }
+              showMessagesByFilter(logFilter);
+            }
+          },
+          outputConsoleWidget: outputConsoleWidget,
+          filter: this._logFilter
+        });
+
+        outputConsoleWidget.outputConsole
+          .onLogMessage(this._logFilter)
+          .connect(this._onLogMessage(), this);
+
+        outputConsoleWidget.logsCleared.connect(this._onLogsCleared(), this);
+
+        panel.toolbar.insertBefore(
+          'kernelName',
+          'outputConsole',
+          this._toolbarWidget
+        );
+
+        this._toolbarWidget.model.stateChanged.emit(void 0);
+
+        panel.activated.connect((sender: NotebookPanel) => {
+          if (outputConsoleWidget.isAttached) {
+            showMessagesByFilter(logFilter);
+          }
+        });
+      });
+
+      return new DisposableDelegate(() => {
+        if (this._toolbarWidget) {
+          outputConsoleWidget.outputConsole
+            .onLogMessage(this._logFilter)
+            .disconnect(this._onLogMessage(), this);
+          outputConsoleWidget.logsCleared.disconnect(this._onLogsCleared, this);
+
+          this._toolbarWidget.dispose();
+        }
+      });
     }
-  });
 
-  statusBar.registerStatusItem('@jupyterlab/outputconsole-extension:status', {
-    item: status,
-    align: 'left',
-    isActive: () => true,
-    activeStateChanged: status.model!.stateChanged
-  });
+    /**
+     * Handle Output Console log cleared event.
+     */
+    private _onLogsCleared() {
+      const toolbarWidget = this._toolbarWidget;
+
+      return (sender: OutputConsoleWidget, args: void): void => {
+        toolbarWidget.model.stateChanged.emit(void 0);
+      };
+    }
+
+    /**
+     * Handle Output Console new message log event.
+     */
+    private _onLogMessage() {
+      const toolbarWidget = this._toolbarWidget;
+      const logFilter = this._logFilter;
+
+      return (sender: IOutputConsole, args: IOutputLogPayload): void => {
+        toolbarWidget.model.stateChanged.emit(void 0);
+        if (outputConsoleWidget.isAttached) {
+          showMessagesByFilter(logFilter);
+        }
+      };
+    }
+
+    private _toolbarWidget: OutputStatusToolbarWidget = null;
+    private _logFilter: IOutputLogFilter;
+  }
+
+  app.docRegistry.addWidgetExtension(
+    'Notebook',
+    new NotebookToolbarButtonExtension()
+  );
 
   return outputConsoleWidget.outputConsole;
 }

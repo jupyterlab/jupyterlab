@@ -13,7 +13,13 @@
       "path": "../apputils"
     },
     {
+      "path": "../docregistry"
+    },
+    {
       "path": "../mainmenu"
+    },
+    {
+      "path": "../notebook"
     },
     {
       "path": "../outputconsole"
@@ -23,9 +29,6 @@
     },
     {
       "path": "../services"
-    },
-    {
-      "path": "../statusbar"
     }
   ]
 }
