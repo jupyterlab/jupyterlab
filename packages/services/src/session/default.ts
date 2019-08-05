@@ -604,9 +604,7 @@ namespace Private {
       return Promise.resolve(session.model);
     }
 
-    return getSessionModel(id, settings).catch(() => {
-      throw new Error(`No running session for id: ${id}`);
-    });
+    throw new Error(`No running session for kernel client id: ${id}`);
   }
 
   /**
