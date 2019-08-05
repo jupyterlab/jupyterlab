@@ -173,14 +173,17 @@ export class SessionManager implements Session.IManager {
     await this._pollModels.tick;
   }
 
+  /**
+   * A signal emitted when any kernel message received by any session.
+   */
   get anyMessage(): ISignal<this, Kernel.IAnyMessageArgs> {
     return this._anyMessage;
   }
 
-  protected onAnyMessage(
-    sender: Session.ISession,
-    msg: Kernel.IAnyMessageArgs
-  ) {
+  /**
+   * Handle kernel messages received by a session.
+   */
+  private _onAnyMessage(sender: Session.ISession, msg: Kernel.IAnyMessageArgs) {
     this._anyMessage.emit(msg);
   }
 
@@ -380,7 +383,7 @@ export class SessionManager implements Session.IManager {
     session.kernelChanged.connect(() => {
       this._onChanged(session.model);
     });
-    session.anyMessage.connect(this.onAnyMessage, this);
+    session.anyMessage.connect(this._onAnyMessage, this);
   }
 
   /**
