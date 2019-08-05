@@ -5,21 +5,18 @@ import {
   IChangedArgs,
   IStateDB,
   PathExt,
-  PageConfig,
   Poll
 } from '@jupyterlab/coreutils';
 
-import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { Contents, Kernel, Session } from '@jupyterlab/services';
 
 import {
   ArrayIterator,
   each,
-  find,
   IIterator,
-  IterableOrArrayLike,
-  ArrayExt
+  IterableOrArrayLike
 } from '@phosphor/algorithm';
 
 import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
@@ -27,8 +24,6 @@ import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
-
-import { showDialog, Dialog } from '@jupyterlab/apputils';
 
 /**
  * The default duration of the auto-refresh in ms
@@ -313,23 +308,10 @@ export class FileBrowserModel implements IDisposable {
    *   downloading.
    */
   download(path: string): Promise<void> {
-    return this.manager.services.contents.getDownloadUrl(path).then(url => {
-      // Check the browser is Chrome https://stackoverflow.com/a/9851769
-      const chrome = (window as any).chrome;
-      const isChrome = !!chrome && (!!chrome.webstore || !!chrome.runtime);
-      if (isChrome) {
-        // Workaround https://bugs.chromium.org/p/chromium/issues/detail?id=455987
-        window.open(url);
-      } else {
-        let element = document.createElement('a');
-        document.body.appendChild(element);
-        element.setAttribute('href', url);
-        element.setAttribute('download', '');
-        element.click();
-        document.body.removeChild(element);
-        return void 0;
-      }
-    });
+  	const msg = `Cannot download data files from protected environment. However, you can export notebook with Export Notebook widget.`;
+    console.log(msg);
+    alert(msg);
+    return this.manager.services.contents.getDownloadUrl(path).then(url => {});
   }
 
   /**
@@ -386,45 +368,9 @@ export class FileBrowserModel implements IDisposable {
    * big to be sent in one request to the server. On newer versions, it will
    * ask for confirmation then upload the file in 1 MB chunks.
    */
-  async upload(file: File): Promise<Contents.IModel> {
-    const supportsChunked = PageConfig.getNotebookVersion() >= [5, 1, 0];
-    const largeFile = file.size > LARGE_FILE_SIZE;
-
-    if (largeFile && !supportsChunked) {
-      let msg = `Cannot upload file (>${LARGE_FILE_SIZE / (1024 * 1024)} MB). ${
-        file.name
-      }`;
-      console.warn(msg);
-      throw msg;
-    }
-
-    const err = 'File not uploaded';
-    if (largeFile && !(await this._shouldUploadLarge(file))) {
-      throw 'Cancelled large file upload';
-    }
-    await this._uploadCheckDisposed();
-    await this.refresh();
-    await this._uploadCheckDisposed();
-    if (
-      find(this._items, i => i.name === file.name) &&
-      !(await shouldOverwrite(file.name))
-    ) {
-      throw err;
-    }
-    await this._uploadCheckDisposed();
-    const chunkedUpload = supportsChunked && file.size > CHUNK_SIZE;
+  async upload(file: File): Promise<void> {
+    const chunkedUpload = file.size > CHUNK_SIZE;
     return await this._upload(file, chunkedUpload);
-  }
-
-  private async _shouldUploadLarge(file: File): Promise<boolean> {
-    const { button } = await showDialog({
-      title: 'Large file size warning',
-      body: `The file size is ${Math.round(
-        file.size / (1024 * 1024)
-      )} MB. Do you still want to upload it?`,
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Upload' })]
-    });
-    return button.accept;
   }
 
   /**
@@ -433,113 +379,10 @@ export class FileBrowserModel implements IDisposable {
   private async _upload(
     file: File,
     chunked: boolean
-  ): Promise<Contents.IModel> {
-    // Gather the file model parameters.
-    let path = this._model.path;
-    path = path ? path + '/' + file.name : file.name;
-    let name = file.name;
-    let type: Contents.ContentType = 'file';
-    let format: Contents.FileFormat = 'base64';
-
-    const uploadInner = async (
-      blob: Blob,
-      chunk?: number
-    ): Promise<Contents.IModel> => {
-      await this._uploadCheckDisposed();
-      let reader = new FileReader();
-      reader.readAsDataURL(blob);
-      await new Promise((resolve, reject) => {
-        reader.onload = resolve;
-        reader.onerror = event =>
-          reject(`Failed to upload "${file.name}":` + event);
-      });
-      await this._uploadCheckDisposed();
-
-      // remove header https://stackoverflow.com/a/24289420/907060
-      const content = (reader.result as string).split(',')[1];
-
-      let model: Partial<Contents.IModel> = {
-        type,
-        format,
-        name,
-        chunk,
-        content
-      };
-      return await this.manager.services.contents.save(path, model);
-    };
-
-    if (!chunked) {
-      try {
-        return await uploadInner(file);
-      } catch (err) {
-        ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
-          return file.name === uploadIndex.path;
-        });
-        throw err;
-      }
-    }
-
-    let finalModel: Contents.IModel;
-
-    let upload = { path, progress: 0 };
-    this._uploadChanged.emit({
-      name: 'start',
-      newValue: upload,
-      oldValue: null
-    });
-
-    for (let start = 0; !finalModel; start += CHUNK_SIZE) {
-      const end = start + CHUNK_SIZE;
-      const lastChunk = end >= file.size;
-      const chunk = lastChunk ? -1 : end / CHUNK_SIZE;
-
-      const newUpload = { path, progress: start / file.size };
-      this._uploads.splice(this._uploads.indexOf(upload));
-      this._uploads.push(newUpload);
-      this._uploadChanged.emit({
-        name: 'update',
-        newValue: newUpload,
-        oldValue: upload
-      });
-      upload = newUpload;
-
-      let currentModel: Contents.IModel;
-      try {
-        currentModel = await uploadInner(file.slice(start, end), chunk);
-      } catch (err) {
-        ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
-          return file.name === uploadIndex.path;
-        });
-
-        this._uploadChanged.emit({
-          name: 'failure',
-          newValue: upload,
-          oldValue: null
-        });
-
-        throw err;
-      }
-
-      if (lastChunk) {
-        finalModel = currentModel;
-      }
-    }
-
-    this._uploads.splice(this._uploads.indexOf(upload));
-    this._uploadChanged.emit({
-      name: 'finish',
-      newValue: null,
-      oldValue: upload
-    });
-
-    return finalModel;
-  }
-
-  private _uploadCheckDisposed(): Promise<void> {
-    if (this.isDisposed) {
-      return Promise.reject('Filemanager disposed. File upload canceled');
-    }
-    return Promise.resolve();
+  ): Promise<void> {
+    const msg = `Cannot upload data files to protected environment without security scan.`;
+    console.log(msg);
+    alert(msg);
   }
 
   /**
