@@ -448,16 +448,6 @@ export namespace DefaultSession {
   }
 
   /**
-   * Find a session by id.
-   */
-  export function findByKernelClientId(
-    id: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
-    return Private.findByKernelClientId(id, settings);
-  }
-
-  /**
    * Find a session by path.
    */
   export function findByPath(
@@ -585,26 +575,6 @@ namespace Private {
     return getSessionModel(id, settings).catch(() => {
       throw new Error(`No running session for id: ${id}`);
     });
-  }
-
-  /**
-   * Find a session by kernel clientId.
-   */
-  export function findByKernelClientId(
-    id: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
-    settings = settings || ServerConnection.makeSettings();
-    let running = runningSessions.get(settings.baseUrl) || [];
-    let session = find(
-      running,
-      value => value.kernel && value.kernel.clientId === id
-    );
-    if (session) {
-      return Promise.resolve(session.model);
-    }
-
-    throw new Error(`No running session for kernel client id: ${id}`);
   }
 
   /**

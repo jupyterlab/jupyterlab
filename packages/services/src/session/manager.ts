@@ -174,20 +174,6 @@ export class SessionManager implements Session.IManager {
   }
 
   /**
-   * A signal emitted when any kernel message received by any session.
-   */
-  get anyMessage(): ISignal<this, Kernel.IAnyMessageArgs> {
-    return this._anyMessage;
-  }
-
-  /**
-   * Handle kernel messages received by a session.
-   */
-  private _onAnyMessage(sender: Session.ISession, msg: Kernel.IAnyMessageArgs) {
-    this._anyMessage.emit(msg);
-  }
-
-  /**
    * Start a new session.  See also [[startNewSession]].
    *
    * @param options - Overrides for the default options, must include a `path`.
@@ -227,13 +213,6 @@ export class SessionManager implements Session.IManager {
    */
   findById(id: string): Promise<Session.IModel> {
     return Session.findById(id, this.serverSettings);
-  }
-
-  /**
-   * Find a session by kernel clientId.
-   */
-  findByKernelClientId(id: string): Promise<Session.IModel> {
-    return Session.findByKernelClientId(id, this.serverSettings);
   }
 
   /**
@@ -383,7 +362,6 @@ export class SessionManager implements Session.IManager {
     session.kernelChanged.connect(() => {
       this._onChanged(session.model);
     });
-    session.anyMessage.connect(this._onAnyMessage, this);
   }
 
   /**
@@ -411,7 +389,6 @@ export class SessionManager implements Session.IManager {
   private _sessions = new Set<Session.ISession>();
   private _specs: Kernel.ISpecModels | null = null;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
-  private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
 }
 
 /**

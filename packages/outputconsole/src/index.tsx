@@ -213,6 +213,8 @@ class OutputConsoleView extends Widget {
     this.node.style.overflowY = 'auto'; // TODO: use CSS class
 
     this._outputConsole = new OutputConsole();
+
+    this._outputConsole.onLogMessage().connect(this._onLogMessage, this);
   }
 
   /**
@@ -249,10 +251,17 @@ class OutputConsoleView extends Widget {
     }
   }
 
+  private _onLogMessage(sender: IOutputConsole, args: IOutputLogPayload): void {
+    // if Output Console is visible, update the list
+    if (this.isAttached) {
+      this.updateListView(this._lastFilter);
+    }
+  }
+
   /**
-   * Apply filter parameter supplied to messages shown in the list
+   * Update message list by applying filter parameter supplied
    */
-  applyFilter(filter?: IOutputLogFilter) {
+  updateListView(filter?: IOutputLogFilter) {
     this._clearMessageList();
 
     const messages = this._outputConsole.messages;
@@ -305,10 +314,13 @@ class OutputConsoleView extends Widget {
       top: this.node.scrollHeight,
       behavior: 'smooth'
     });
+
+    this._lastFilter = filter;
   }
 
   private _outputConsole: OutputConsole = null;
   private _rendermime: IRenderMimeRegistry;
+  private _lastFilter: IOutputLogFilter;
 }
 
 /**
@@ -387,10 +399,10 @@ export class OutputConsoleWidget extends Widget {
   }
 
   /**
-   * Apply filter parameter supplied to messages shown in the list
+   * Update message list by applying filter parameter supplied
    */
-  applyFilter(filter?: IOutputLogFilter) {
-    this._consoleView.applyFilter(filter);
+  updateListView(filter?: IOutputLogFilter) {
+    this._consoleView.updateListView(filter);
   }
 
   private _consoleView: OutputConsoleView = null;

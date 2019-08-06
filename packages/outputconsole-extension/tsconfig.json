@@ -26,9 +26,6 @@
     },
     {
       "path": "../rendermime"
-    },
-    {
-      "path": "../services"
     }
   ]
 }

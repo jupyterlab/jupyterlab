@@ -112,10 +112,6 @@ export class ServiceManager implements ServiceManager.IManager {
     return this.sessions.specs;
   }
 
-  get anyMessage(): ISignal<SessionManager, Kernel.IAnyMessageArgs> {
-    return this.sessions.anyMessage;
-  }
-
   /**
    * The server settings of the manager.
    */
