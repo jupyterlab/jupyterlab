@@ -237,7 +237,7 @@ function activateOutputConsole(
       panel: NotebookPanel,
       context: DocumentRegistry.IContext<INotebookModel>
     ): IDisposable {
-      panel.session.ready.then(() => {
+      void panel.session.ready.then(() => {
         const logFilter: IOutputLogFilter = { sourceName: panel.session.name };
         this._logFilter = logFilter;
         const toolbarWidget = new OutputStatusToolbarWidget({
