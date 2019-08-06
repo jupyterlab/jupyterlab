@@ -249,6 +249,7 @@ function activateOutputConsole(
               if (!outputConsoleWidget.isAttached) {
                 addWidgetToMainArea();
               }
+              outputConsoleWidget.activate();
               showMessagesByFilter(logFilter);
               toolbarWidget.clearHighlight();
             }

@@ -3,15 +3,19 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Widget, BoxLayout } from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import { UUID, Token } from '@phosphor/coreutils';
+import { Token } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Message } from '@phosphor/messaging';
 
-import { Toolbar, ToolbarButton, ReactWidget } from '@jupyterlab/apputils';
+import {
+  ToolbarButton,
+  ReactWidget,
+  MainAreaWidget
+} from '@jupyterlab/apputils';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
@@ -219,6 +223,10 @@ class OutputConsoleView extends Widget {
    */
   constructor(rendermime: IRenderMimeRegistry) {
     super();
+
+    this.title.closable = true;
+    this.title.label = 'Output Console';
+    this.title.iconClass = 'fa fa-list lab-output-console-icon';
 
     this._rendermime = rendermime;
     this.node.style.overflowY = 'auto'; // TODO: use CSS class
@@ -478,48 +486,29 @@ export class FilterSelect extends ReactWidget {
  * A Tab Panel with a toolbar and a list that shows
  * Output Console logs.
  */
-export class OutputConsoleWidget extends Widget {
+export class OutputConsoleWidget extends MainAreaWidget<OutputConsoleView> {
   /**
    * Construct an OutputConsoleWidget instance.
    */
   constructor(rendermime: IRenderMimeRegistry) {
-    super();
+    super({ content: new OutputConsoleView(rendermime) });
 
-    this.id = UUID.uuid4();
-    this.title.closable = true;
-    this.title.label = 'Output Console';
-    this.title.iconClass = 'fa fa-list lab-output-console-icon';
     this.addClass('lab-output-console-widget');
 
-    this._consoleView = new OutputConsoleView(rendermime);
-    this._consoleView.update();
-    this._consoleView.activate();
-
-    const toolbar = new Toolbar();
+    this._filterSelect = new FilterSelect(this);
     const clearButton = new ToolbarButton({
       onClick: (): void => {
-        this._consoleView.clearMessages();
+        this.content.clearMessages();
         this._logsCleared.emit();
       },
       iconClassName: 'fa fa-ban clear-icon',
       tooltip: 'Clear Messages',
       label: 'Clear Messages'
     });
+    this.toolbar.addItem('lab-output-console-filter', this._filterSelect);
+    this.toolbar.addItem('lab-output-console-clear', clearButton);
 
-    this._filterSelect = new FilterSelect(this);
-    toolbar.addItem('lab-output-console-filter', this._filterSelect);
-    toolbar.addItem('lab-output-console-clear', clearButton);
-
-    const layout = new BoxLayout();
-    layout.addWidget(toolbar);
-    layout.addWidget(this._consoleView);
-
-    BoxLayout.setStretch(toolbar, 0);
-    BoxLayout.setStretch(this._consoleView, 1);
-
-    this.layout = layout;
-
-    this._consoleView.messageSourceClicked.connect(
+    this.content.messageSourceClicked.connect(
       (sender: OutputConsoleView, sourceName: string) => {
         this.updateListView({ sourceName: sourceName });
       }
@@ -538,7 +527,7 @@ export class OutputConsoleWidget extends Widget {
    * which handles log message management.
    */
   get outputConsole(): OutputConsole {
-    return this._consoleView.outputConsole;
+    return this.content.outputConsole;
   }
 
   /**
@@ -561,18 +550,17 @@ export class OutputConsoleWidget extends Widget {
    * Last filter applied to Output Console list view.
    */
   get lastFilter(): IOutputLogFilter {
-    return this._consoleView.lastFilter;
+    return this.content.lastFilter;
   }
 
   /**
    * Update message list by applying filter parameter supplied
    */
   updateListView(filter?: IOutputLogFilter) {
-    this._consoleView.updateListView(filter);
+    this.content.updateListView(filter);
     this._filterSelect.selectOptionForFilter(filter);
   }
 
-  private _consoleView: OutputConsoleView = null;
   private _logsCleared = new Signal<this, void>(this);
   private _madeVisible = new Signal<this, void>(this);
   private _filterSelect: FilterSelect;
