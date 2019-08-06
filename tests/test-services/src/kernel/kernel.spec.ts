@@ -9,13 +9,13 @@ import { toArray } from '@phosphor/algorithm';
 
 import { Kernel } from '@jupyterlab/services';
 
+import { expectFailure, testEmission } from '@jupyterlab/testutils';
+
 import {
-  expectFailure,
   KernelTester,
   makeSettings,
   PYTHON_SPEC,
-  getRequestHandler,
-  testEmission
+  getRequestHandler
 } from '../utils';
 
 const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
@@ -163,6 +163,24 @@ describe('kernel', () => {
       const kernel = Kernel.connectTo(defaultKernel.model, serverSettings);
       expect(kernel.id).to.equal(id);
       kernel.dispose();
+    });
+
+    it('should turn off comm handling in the new connection if it was enabled in first kernel', async () => {
+      const kernel = await Kernel.startNew();
+      expect(kernel.handleComms).to.be.true;
+      const kernel2 = Kernel.connectTo(kernel.model);
+      expect(kernel2.handleComms).to.be.false;
+      kernel.dispose();
+      kernel2.dispose();
+    });
+
+    it('should turn on comm handling in the new connection if it was disabled in all other connections', async () => {
+      const kernel = await Kernel.startNew({ handleComms: false });
+      expect(kernel.handleComms).to.be.false;
+      const kernel2 = Kernel.connectTo(defaultKernel.model);
+      expect(kernel2.handleComms).to.be.true;
+      kernel.dispose();
+      kernel2.dispose();
     });
   });
 

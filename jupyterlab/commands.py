@@ -1749,7 +1749,7 @@ def _get_static_data(app_dir):
 def _validate_compatibility(extension, deps, core_data):
     """Validate the compatibility of an extension.
     """
-    core_deps = core_data['dependencies']
+    core_deps = core_data['resolutions']
     singletons = core_data['jupyterlab']['singletonPackages']
 
     errors = []

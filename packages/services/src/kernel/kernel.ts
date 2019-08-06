@@ -91,6 +91,18 @@ export namespace Kernel {
     readonly ready: Promise<void>;
 
     /**
+     * Whether the kernel connection handles comm messages.
+     *
+     * #### Notes
+     * The comm message protocol currently has implicit assumptions that only
+     * one kernel connection is handling comm messages. This option allows a
+     * kernel connection to opt out of handling comms.
+     *
+     * See https://github.com/jupyter/jupyter_client/issues/263
+     */
+    handleComms: boolean;
+
+    /**
      * Get the kernel spec.
      *
      * @returns A promise that resolves with the kernel spec for this kernel.
@@ -636,6 +648,18 @@ export namespace Kernel {
      * The username of the kernel client.
      */
     username?: string;
+
+    /**
+     * Whether the kernel connection should handle comm messages
+     *
+     * #### Notes
+     * The comm message protocol currently has implicit assumptions that only
+     * one kernel connection is handling comm messages. This option allows a
+     * kernel connection to opt out of handling comms.
+     *
+     * See https://github.com/jupyter/jupyter_client/issues/263
+     */
+    handleComms?: boolean;
 
     /**
      * The unique identifier for the kernel client.
