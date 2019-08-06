@@ -108,9 +108,9 @@ function addKernelRunningSessionManager(
     open() {
       let { path, type } = this._model;
       if (type.toLowerCase() === 'console') {
-        app.commands.execute('console:open', { path });
+        void app.commands.execute('console:open', { path });
       } else {
-        app.commands.execute('docmanager:open', { path });
+        void app.commands.execute('docmanager:open', { path });
       }
     }
     shutdown() {

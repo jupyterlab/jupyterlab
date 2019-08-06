@@ -85,7 +85,7 @@ export interface IRunningSessionManagers {
    */
   add(manager: IRunningSessions.IManager): void;
   /**
-   * Return an iterator of managers.
+   * Return an array of managers.
    */
   items(): ReadonlyArray<IRunningSessions.IManager>;
 }
@@ -155,12 +155,12 @@ function List(props: { manager: IRunningSessions.IManager }) {
  * The Section component contains the shared look and feel for an interactive
  * list of kernels and sessions.
  *
- * It is specialized for each based on it's props.
+ * It is specialized for each based on its props.
  */
 function Section(props: { manager: IRunningSessions.IManager }) {
   function onShutdown() {
-    showDialog({
-      title: `Shutdown All ${props.manager.name} Sessions?`,
+    void showDialog({
+      title: `Shut Down All ${props.manager.name} Sessions?`,
       buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })]
     }).then(result => {
       if (result.button.accept) {
@@ -174,7 +174,7 @@ function Section(props: { manager: IRunningSessions.IManager }) {
         <header className={SECTION_HEADER_CLASS}>
           <h2>{props.manager.name} Sessions</h2>
           <ToolbarButtonComponent
-            tooltip={`Shutdown All ${props.manager.name} Sessions…`}
+            tooltip={`Shut Down All ${props.manager.name} Sessions…`}
             iconClassName="jp-CloseIcon jp-Icon jp-Icon-16"
             onClick={onShutdown}
           />
