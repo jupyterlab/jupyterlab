@@ -5,7 +5,7 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { Printing } from '@jupyterlab/apputils';
 
-import { Component } from '@jupyterlab/json';
+import { JSONComponent } from '@jupyterlab/json';
 
 import { Message } from '@phosphor/messaging';
 
@@ -53,7 +53,7 @@ export class RenderedJSON extends Widget
     const metadata = (model.metadata[this._mimeType] as any) || {};
     return new Promise<void>((resolve, reject) => {
       ReactDOM.render(
-        <Component data={data} metadata={metadata} />,
+        <JSONComponent data={data} metadata={metadata} />,
         this.node,
         () => {
           resolve();
