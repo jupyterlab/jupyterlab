@@ -28,6 +28,12 @@ import { IDebugger } from './tokens';
  */
 export namespace CommandIDs {
   export const create = 'debugger:create';
+
+  export const debugConsole = 'debugger:debug-console';
+
+  export const debugFile = 'debugger:debug-file';
+
+  export const debugNotebook = 'debugger:debug-notebook';
 }
 
 /**
@@ -53,14 +59,20 @@ const consoles: JupyterFrontEndPlugin<void> = {
 const files: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:files',
   autoStart: true,
-  requires: [IDebugger],
   optional: [IEditorTracker],
-  activate: (_, debug, tracker: IEditorTracker | null) => {
-    if (!tracker) {
-      console.log(`${files.id} load failed. There is no files tracker.`);
-      return;
-    }
-    console.log(`${files.id} has not been implemented.`, debug);
+  activate: (app: JupyterFrontEnd, tracker: IEditorTracker | null) => {
+    app.commands.addCommand(CommandIDs.debugFile, {
+      execute: async _ => {
+        if (!tracker || !tracker.currentWidget) {
+          return;
+        }
+        if (tracker.currentWidget) {
+          // TODO: Find if the file is backed by a kernel or attach it to one.
+          const widget = await app.commands.execute(CommandIDs.create);
+          app.shell.add(widget, 'main');
+        }
+      }
+    });
   }
 };
 
@@ -130,7 +142,11 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
           return;
         }
 
-        const widget = new Debugger({ connector: state, id });
+        const widget = new MainAreaWidget({
+          content: new Debugger({ connector: state, id })
+        });
+
+        void tracker.add(widget);
 
         return widget;
       }

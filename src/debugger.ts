@@ -3,22 +3,32 @@
 
 import { IDataConnector } from '@jupyterlab/coreutils';
 
-import { BoxPanel, Widget } from '@phosphor/widgets';
+import { BoxPanel, TabPanel } from '@phosphor/widgets';
 
 import { ReadonlyJSONValue, UUID } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
+import { DebuggerSidebar } from './sidebar';
+
 export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
-    super();
+    super({ direction: 'left-to-right' });
+
     this.model = new Debugger.Model(options);
+    this.sidebar = new DebuggerSidebar(this.model);
+    this.title.label = 'Debugger';
+
     this.addClass('jp-Debugger');
-    this.addWidget(new Widget()); // Add read-only file editor panel.
-    this.addWidget(new Widget()); // Add debugger condensed view side panel.
+    this.addWidget(this.tabs);
+    this.addWidget(this.sidebar);
   }
 
   readonly model: Debugger.Model;
+
+  readonly tabs = new TabPanel();
+
+  readonly sidebar: DebuggerSidebar;
 
   dispose(): void {
     if (this.isDisposed) {
