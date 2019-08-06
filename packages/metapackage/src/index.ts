@@ -32,6 +32,7 @@ import '@jupyterlab/imageviewer-extension';
 import '@jupyterlab/inspector';
 import '@jupyterlab/inspector-extension';
 import '@jupyterlab/javascript-extension';
+import '@jupyterlab/json';
 import '@jupyterlab/json-extension';
 import '@jupyterlab/launcher';
 import '@jupyterlab/launcher-extension';

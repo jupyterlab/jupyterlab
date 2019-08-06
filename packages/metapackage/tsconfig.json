@@ -115,6 +115,9 @@
       "path": "../javascript-extension"
     },
     {
+      "path": "../json"
+    },
+    {
       "path": "../json-extension"
     },
     {

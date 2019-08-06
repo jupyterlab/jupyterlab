@@ -7,13 +7,7 @@
   "include": ["src/*"],
   "references": [
     {
-      "path": "../apputils"
-    },
-    {
-      "path": "../json"
-    },
-    {
-      "path": "../rendermime-interfaces"
+      "path": "../ui-components"
     }
   ]
 }

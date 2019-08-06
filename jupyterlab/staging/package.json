@@ -121,6 +121,7 @@
     "@jupyterlab/inspector": "~1.1.0-alpha.2",
     "@jupyterlab/inspector-extension": "~1.1.0-alpha.2",
     "@jupyterlab/javascript-extension": "~1.1.0-alpha.2",
+    "@jupyterlab/json": "~1.1.0-alpha.2",
     "@jupyterlab/json-extension": "~1.1.0-alpha.2",
     "@jupyterlab/launcher": "~1.1.0-alpha.2",
     "@jupyterlab/launcher-extension": "~1.1.0-alpha.2",

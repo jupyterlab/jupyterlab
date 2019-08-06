@@ -5,6 +5,8 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { Printing } from '@jupyterlab/apputils';
 
+import { Component } from '@jupyterlab/json';
+
 import { Message } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
@@ -12,8 +14,6 @@ import { Widget } from '@phosphor/widgets';
 import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
-
-import { Component } from './component';
 
 /**
  * The CSS class to add to the JSON Widget.
