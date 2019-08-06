@@ -31,7 +31,8 @@ import {
   IOutputConsole,
   IOutputLogPayload,
   IOutputLogFilter,
-  OutputConsoleWidget
+  OutputConsoleWidget,
+  OutputConsole
 } from '@jupyterlab/outputconsole';
 
 /**
@@ -89,13 +90,20 @@ export class OutputStatusToolbarWidget extends VDomRenderer<VDomModel> {
   }
 
   /**
+   * Clear notification background highlight.
+   */
+  clearHighlight() {
+    this.removeClass('hilite');
+  }
+
+  /**
    * Handle Output Console's mode visibile event.
    */
   private _onOutputConsoleMadeVisible(
     sender: OutputConsoleWidget,
     args: void
   ): void {
-    this.removeClass('hilite');
+    this.clearHighlight();
   }
 
   /**
@@ -105,7 +113,16 @@ export class OutputStatusToolbarWidget extends VDomRenderer<VDomModel> {
     const logCount = this._outputConsoleWidget.outputConsole.logCount(
       this._filter
     );
-    const flash = !this._outputConsoleWidget.isAttached && logCount > 0;
+
+    // flash notification if Output Console is not visible,
+    // or not showing logs for current notebook
+    const flash =
+      logCount > 0 &&
+      (!this._outputConsoleWidget.isAttached ||
+        !OutputConsole.compareFilters(
+          this._filter,
+          this._outputConsoleWidget.lastFilter
+        ));
 
     this._toolbarButtonProps.label = `${logCount} Messages`;
     this._toolbarButtonProps.tooltip = `${logCount} Messages in Output Console`;
@@ -222,7 +239,7 @@ function activateOutputConsole(
       panel.session.ready.then(() => {
         const logFilter = { session: panel.session.kernel.clientId };
         this._logFilter = logFilter;
-        this._toolbarWidget = new OutputStatusToolbarWidget({
+        const toolbarWidget = new OutputStatusToolbarWidget({
           toolbarButtonProps: {
             label: '',
             tooltip: '',
@@ -232,11 +249,14 @@ function activateOutputConsole(
                 addWidgetToMainArea();
               }
               showMessagesByFilter(logFilter);
+              toolbarWidget.clearHighlight();
             }
           },
           outputConsoleWidget: outputConsoleWidget,
           filter: this._logFilter
         });
+
+        this._toolbarWidget = toolbarWidget;
 
         outputConsoleWidget.outputConsole
           .onLogMessage(this._logFilter)

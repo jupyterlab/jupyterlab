@@ -183,6 +183,14 @@ export class OutputConsole implements IOutputConsole {
   }
 
   /**
+   * Compares two filters.
+   * Returns true if filters are the same.
+   */
+  static compareFilters(lhs: IOutputLogFilter, rhs: IOutputLogFilter): boolean {
+    return lhs === rhs || (lhs && rhs && lhs.session === rhs.session);
+  }
+
+  /**
    * Convert a filter object to a unique string key.
    */
   private static _filterAsKey(filter?: IOutputLogFilter): string {
@@ -251,11 +259,21 @@ class OutputConsoleView extends Widget {
     }
   }
 
+  /**
+   * Handle Output Console new message log event.
+   */
   private _onLogMessage(sender: IOutputConsole, args: IOutputLogPayload): void {
     // if Output Console is visible, update the list
     if (this.isAttached) {
       this.updateListView(this._lastFilter);
     }
+  }
+
+  /**
+   * Last filter applied to Output Console list view.
+   */
+  get lastFilter(): IOutputLogFilter {
+    return this._lastFilter;
   }
 
   /**
@@ -396,6 +414,13 @@ export class OutputConsoleWidget extends Widget {
    */
   get madeVisible(): ISignal<this, void> {
     return this._madeVisible;
+  }
+
+  /**
+   * Last filter applied to Output Console list view.
+   */
+  get lastFilter(): IOutputLogFilter {
+    return this._consoleView.lastFilter;
   }
 
   /**
