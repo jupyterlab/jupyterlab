@@ -119,10 +119,11 @@ export class OutputStatusToolbarWidget extends VDomRenderer<VDomModel> {
     const flash =
       logCount > 0 &&
       (!this._outputConsoleWidget.isAttached ||
-        !OutputConsole.compareFilters(
-          this._filter,
-          this._outputConsoleWidget.lastFilter
-        ));
+        (this._outputConsoleWidget.lastFilter &&
+          !OutputConsole.compareFilters(
+            this._filter,
+            this._outputConsoleWidget.lastFilter
+          )));
 
     this._toolbarButtonProps.label = `${logCount} Messages`;
     this._toolbarButtonProps.tooltip = `${logCount} Messages in Output Console`;
@@ -237,7 +238,7 @@ function activateOutputConsole(
       context: DocumentRegistry.IContext<INotebookModel>
     ): IDisposable {
       panel.session.ready.then(() => {
-        const logFilter = { session: panel.session.kernel.clientId };
+        const logFilter: IOutputLogFilter = { sourceName: panel.session.name };
         this._logFilter = logFilter;
         const toolbarWidget = new OutputStatusToolbarWidget({
           toolbarButtonProps: {

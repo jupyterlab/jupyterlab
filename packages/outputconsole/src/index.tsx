@@ -11,7 +11,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Message } from '@phosphor/messaging';
 
-import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
+import { Toolbar, ToolbarButton, ReactWidget } from '@jupyterlab/apputils';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
@@ -20,6 +20,15 @@ import { OutputArea, OutputAreaModel } from '@jupyterlab/outputarea';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { KernelMessage } from '@jupyterlab/services';
+
+import { HTMLSelect } from '@jupyterlab/ui-components';
+
+import React from 'react';
+
+/**
+ * The class name added to toolbar filter option dropdown.
+ */
+const TOOLBAR_FILTER_DROPDOWN_CLASS = 'lab-output-console-dropdown';
 
 /* tslint:disable */
 /**
@@ -44,9 +53,9 @@ export interface IOutputLogPayload {
  */
 export interface IOutputLogFilter {
   /**
-   * Filter by request session id.
+   * Filter by request source name.
    */
-  session?: string;
+  sourceName?: string;
 }
 
 /**
@@ -132,13 +141,10 @@ export class OutputConsole implements IOutputConsole {
    * only the messages that pass the filter are counted.
    */
   logCount(filter?: IOutputLogFilter): number {
-    if (filter && filter.session) {
+    if (filter) {
       let count = 0;
-      const sessionFilter = filter.session;
       for (let message of this._messages) {
-        const session = (message.msg.parent_header as KernelMessage.IHeader)
-          .session;
-        if (session === sessionFilter) {
+        if (OutputConsole.applyFilter(message, filter)) {
           count++;
         }
       }
@@ -171,12 +177,9 @@ export class OutputConsole implements IOutputConsole {
     log: IOutputLogPayload,
     filter?: IOutputLogFilter
   ): boolean {
-    const sessionFilter = filter ? filter.session : undefined;
-
-    if (sessionFilter) {
-      const msgSession = (log.msg.parent_header as KernelMessage.IHeader)
-        .session;
-      return msgSession === sessionFilter;
+    const sourceName = filter ? filter.sourceName : undefined;
+    if (sourceName) {
+      return log.sourceName === sourceName;
     }
 
     return true;
@@ -187,15 +190,15 @@ export class OutputConsole implements IOutputConsole {
    * Returns true if filters are the same.
    */
   static compareFilters(lhs: IOutputLogFilter, rhs: IOutputLogFilter): boolean {
-    return lhs === rhs || (lhs && rhs && lhs.session === rhs.session);
+    return lhs === rhs || (lhs && rhs && lhs.sourceName === rhs.sourceName);
   }
 
   /**
    * Convert a filter object to a unique string key.
    */
   private static _filterAsKey(filter?: IOutputLogFilter): string {
-    if (filter && filter.session) {
-      return `filter:session:${filter.session}`;
+    if (filter && filter.sourceName) {
+      return `filter:source:${filter.sourceName}`;
     }
     return `filter:undefined`;
   }
@@ -223,13 +226,33 @@ class OutputConsoleView extends Widget {
     this._outputConsole = new OutputConsole();
 
     this._outputConsole.onLogMessage().connect(this._onLogMessage, this);
+
+    this.node.addEventListener('click', event => {
+      const el = event.srcElement as HTMLElement;
+      if (!el) {
+        return;
+      }
+
+      let sourceName = undefined;
+
+      if (el.classList.contains('log-sender')) {
+        sourceName = el.dataset['sourceName'];
+      } else if (el.classList.contains('log-sender-icon')) {
+        sourceName = el.parentElement.dataset['sourceName'];
+      }
+
+      if (sourceName) {
+        this._messageSourceClicked.emit(sourceName);
+        event.stopPropagation();
+      }
+    });
   }
 
   /**
    * Get Output Console instance
    * which handles log message management.
    */
-  get outputConsole(): IOutputConsole {
+  get outputConsole(): OutputConsole {
     return this._outputConsole;
   }
 
@@ -277,6 +300,14 @@ class OutputConsoleView extends Widget {
   }
 
   /**
+   * Message source clicked signal which is emitted
+   * when user clicks name or icon of the source in list view.
+   */
+  get messageSourceClicked(): Signal<this, string> {
+    return this._messageSourceClicked;
+  }
+
+  /**
    * Update message list by applying filter parameter supplied
    */
   updateListView(filter?: IOutputLogFilter) {
@@ -311,7 +342,9 @@ class OutputConsoleView extends Widget {
           <div class="log-count">${index})</div>
           <div class="log-time">${logTime}</div>
         </div>
-        <div class="log-sender" title="${log.sourceName}">
+        <div class="log-sender" data-source-name="${log.sourceName}" title="${
+        log.sourceName
+      }, click to filter">
           <div class="log-sender-icon ${
             log.sourceIconClassName ? log.sourceIconClassName : ''
           }"></div>
@@ -339,6 +372,106 @@ class OutputConsoleView extends Widget {
   private _outputConsole: OutputConsole = null;
   private _rendermime: IRenderMimeRegistry;
   private _lastFilter: IOutputLogFilter;
+  private _messageSourceClicked: Signal<this, string> = new Signal<
+    this,
+    string
+  >(this);
+}
+
+/**
+ * A toolbar widget that switches filter options.
+ */
+export class FilterSelect extends ReactWidget {
+  /**
+   * Construct a new filter switcher.
+   */
+  constructor(outputConsoleWidget: OutputConsoleWidget) {
+    super();
+    this._outputConsoleWidget = outputConsoleWidget;
+
+    const outputConsole = this._outputConsoleWidget.outputConsole;
+
+    outputConsole
+      .onLogMessage()
+      .connect((sender: IOutputConsole, args: IOutputLogPayload): void => {
+        this._updateFilterOptions();
+      });
+
+    this._outputConsoleWidget.logsCleared.connect(() => {
+      this._currentOption = FilterSelect._defaultOption;
+      this._updateFilterOptions();
+    });
+
+    this._updateFilterOptions();
+  }
+
+  private _updateFilterOptions() {
+    const outputConsole = this._outputConsoleWidget.outputConsole;
+    this._filterOptions.clear();
+    this._filterOptions.add('Show All');
+
+    outputConsole.messages.forEach((payload: IOutputLogPayload) => {
+      this._filterOptions.add(payload.sourceName);
+    });
+
+    this.update();
+  }
+
+  /**
+   * Handle `change` events for the HTMLSelect component.
+   */
+  handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+    this._currentOption = event.target.value;
+
+    const filter: IOutputLogFilter =
+      this._currentOption === FilterSelect._defaultOption
+        ? undefined
+        : { sourceName: this._currentOption };
+
+    this._outputConsoleWidget.updateListView(filter);
+  };
+
+  render() {
+    let filterList: any[] = [];
+    this._filterOptions.forEach((item: string) => {
+      filterList.push(<option value={item}>{item}</option>);
+    });
+
+    return [
+      <span className="jp-ToolbarButtonComponent-label">Filter </span>,
+      <HTMLSelect
+        className={TOOLBAR_FILTER_DROPDOWN_CLASS}
+        onChange={this.handleChange}
+        value={this._currentOption}
+        iconProps={{
+          icon: <span className="jp-MaterialIcon jp-DownCaretIcon bp3-icon" />
+        }}
+        minimal
+      >
+        {filterList}
+      </HTMLSelect>
+    ];
+  }
+
+  /**
+   * Select corresponding option for the given filter parameter.
+   */
+  selectOptionForFilter(filter?: IOutputLogFilter) {
+    if (filter) {
+      if (filter.sourceName && this._filterOptions.has(filter.sourceName)) {
+        this._currentOption = filter.sourceName;
+      }
+    } else {
+      this._currentOption = FilterSelect._defaultOption;
+    }
+
+    this.update();
+  }
+
+  private _outputConsoleWidget: OutputConsoleWidget = null;
+  private _filterOptions: Set<string> = new Set();
+  private static _defaultOption: string = 'Show All';
+  private _currentOption: string = FilterSelect._defaultOption;
 }
 
 /**
@@ -362,20 +495,22 @@ export class OutputConsoleWidget extends Widget {
     this._consoleView.update();
     this._consoleView.activate();
 
-    let toolbar = new Toolbar();
-    let button = new ToolbarButton({
+    const toolbar = new Toolbar();
+    const clearButton = new ToolbarButton({
       onClick: (): void => {
         this._consoleView.clearMessages();
         this._logsCleared.emit();
       },
       iconClassName: 'fa fa-ban clear-icon',
-      tooltip: 'Clear',
-      label: 'Clear'
+      tooltip: 'Clear Messages',
+      label: 'Clear Messages'
     });
-    toolbar.addItem(name, button);
-    toolbar.addItem('lab-output-console-clear', button);
 
-    let layout = new BoxLayout();
+    this._filterSelect = new FilterSelect(this);
+    toolbar.addItem('lab-output-console-filter', this._filterSelect);
+    toolbar.addItem('lab-output-console-clear', clearButton);
+
+    const layout = new BoxLayout();
     layout.addWidget(toolbar);
     layout.addWidget(this._consoleView);
 
@@ -383,6 +518,12 @@ export class OutputConsoleWidget extends Widget {
     BoxLayout.setStretch(this._consoleView, 1);
 
     this.layout = layout;
+
+    this._consoleView.messageSourceClicked.connect(
+      (sender: OutputConsoleView, sourceName: string) => {
+        this.updateListView({ sourceName: sourceName });
+      }
+    );
   }
 
   /**
@@ -396,7 +537,7 @@ export class OutputConsoleWidget extends Widget {
    * Get Output Console instance
    * which handles log message management.
    */
-  get outputConsole(): IOutputConsole {
+  get outputConsole(): OutputConsole {
     return this._consoleView.outputConsole;
   }
 
@@ -428,9 +569,11 @@ export class OutputConsoleWidget extends Widget {
    */
   updateListView(filter?: IOutputLogFilter) {
     this._consoleView.updateListView(filter);
+    this._filterSelect.selectOptionForFilter(filter);
   }
 
   private _consoleView: OutputConsoleView = null;
   private _logsCleared = new Signal<this, void>(this);
   private _madeVisible = new Signal<this, void>(this);
+  private _filterSelect: FilterSelect;
 }

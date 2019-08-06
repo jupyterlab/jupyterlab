@@ -11,6 +11,14 @@
   line-height: var(--jp-private-horizontal-tab-height);
 }
 
+.lab-output-console-dropdown select {
+  height: var(--jp-private-horizontal-tab-height);
+}
+
+.lab-output-console-widget .jp-ToolbarButtonComponent-label {
+  line-height: var(--jp-private-horizontal-tab-height);
+}
+
 .lab-output-console-widget .clear-icon {
   transform: rotate(90deg);
   margin-top: -1px;
@@ -60,6 +68,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.lab-output-console-line .log-sender:hover {
+  background-color: var(--jp-layout-color2);
+}
+
 .lab-output-console-line .log-content {
   display: inline-block;
   width: calc(100% - 135px);
