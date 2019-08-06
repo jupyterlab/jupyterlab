@@ -3,18 +3,30 @@
 
 import { IDataConnector } from '@jupyterlab/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { BoxPanel, Widget } from '@phosphor/widgets';
 
 import { ReadonlyJSONValue, UUID } from '@phosphor/coreutils';
 
-export class Debugger extends Widget {
+import { IDisposable } from '@phosphor/disposable';
+
+export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
     super();
     this.model = new Debugger.Model(options);
     this.addClass('jp-Debugger');
+    this.addWidget(new Widget()); // Add read-only file editor panel.
+    this.addWidget(new Widget()); // Add debugger condensed view side panel.
   }
 
   readonly model: Debugger.Model;
+
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this.model.dispose();
+    super.dispose();
+  }
 }
 
 /**
@@ -27,16 +39,34 @@ export namespace Debugger {
     id?: string;
   }
 
-  export class Model {
+  export class Model implements IDisposable {
     constructor(options: Debugger.Model.IOptions) {
       this.connector = options.connector || null;
       this.id = options.id || UUID.uuid4();
-      console.log('Create new Debugger.Model', this.id, this.connector);
+      void this._populate();
     }
 
     readonly connector: IDataConnector<ReadonlyJSONValue> | null;
 
     readonly id: string;
+
+    get isDisposed(): boolean {
+      return this._isDisposed;
+    }
+
+    dispose(): void {
+      this._isDisposed = true;
+    }
+
+    private async _populate(): Promise<void> {
+      const { connector } = this;
+
+      if (!connector) {
+        return;
+      }
+    }
+
+    private _isDisposed = false;
   }
 
   export namespace Model {

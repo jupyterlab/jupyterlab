@@ -18,7 +18,8 @@ import { Debugger } from './debugger';
 /**
  * An interface describing an application's visual debugger.
  */
-export interface IDebugger extends IWidgetTracker<MainAreaWidget<Debugger>> {}
+export interface IDebugger
+  extends IWidgetTracker<MainAreaWidget<Debugger>> {}
 
 /**
  * A namespace for visual debugger types.
