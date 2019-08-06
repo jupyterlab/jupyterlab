@@ -56,18 +56,18 @@ function activateHubExtension(
     hubPrefix: hubPrefix
   });
 
-  const { commands } = app;
+  const restartUrl = hubServerName
+	    ? hubHost +
+	      URLExt.join(
+	        hubPrefix,
+	        'spawn',
+	        hubUser,
+	        hubServerName,
+	        `?next=${hubPrefix}home`
+	      )
+      : hubHost + URLExt.join(hubPrefix, `spawn?next=${hubPrefix}home`);
 
-  // requires jupyterhub 1.0
-  const restartUrl =
-    hubHost +
-    URLExt.join(
-      hubPrefix,
-      `spawn`,
-      hubUser,
-      hubServerName,
-      `?next=${hubPrefix}home`
-    );
+  const { commands } = app;
 
   commands.addCommand(CommandIDs.restart, {
     label: 'Restart Server',
