@@ -1,25 +1,41 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IDataConnector } from '@jupyterlab/coreutils';
+
+import { BoxPanel, TabPanel } from '@phosphor/widgets';
+
+import { ReadonlyJSONValue, UUID } from '@phosphor/coreutils';
+
 import { IDisposable } from '@phosphor/disposable';
 
-import { Widget } from '@phosphor/widgets';
+import { DebuggerSidebar } from './sidebar';
 
-import { IDebugger } from './tokens';
+export class Debugger extends BoxPanel {
+  constructor(options: Debugger.IOptions) {
+    super({ direction: 'left-to-right' });
 
-export class Debugger extends Widget implements IDebugger {
-  constructor(options: Widget.IOptions = {}) {
-    super(options);
+    this.model = new Debugger.Model(options);
+    this.sidebar = new DebuggerSidebar(this.model);
+    this.title.label = 'Debugger';
+
     this.addClass('jp-Debugger');
+    this.addWidget(this.tabs);
+    this.addWidget(this.sidebar);
   }
 
-  readonly model = new Debugger.Model();
+  readonly model: Debugger.Model;
 
-  get session(): IDebugger.ISession | null {
-    return this.model.session;
-  }
-  set session(session: IDebugger.ISession | null) {
-    this.model.session = session;
+  readonly tabs = new TabPanel();
+
+  readonly sidebar: DebuggerSidebar;
+
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this.model.dispose();
+    super.dispose();
   }
 }
 
@@ -27,18 +43,43 @@ export class Debugger extends Widget implements IDebugger {
  * A namespace for `Debugger` statics.
  */
 export namespace Debugger {
+  export interface IOptions {
+    connector?: IDataConnector<ReadonlyJSONValue>;
+
+    id?: string;
+  }
+
   export class Model implements IDisposable {
-    isDisposed = false;
-
-    get session(): IDebugger.ISession | null {
-      return this._session;
-    }
-    set session(session: IDebugger.ISession | null) {
-      this._session = session;
+    constructor(options: Debugger.Model.IOptions) {
+      this.connector = options.connector || null;
+      this.id = options.id || UUID.uuid4();
+      void this._populate();
     }
 
-    dispose = (): void => undefined;
+    readonly connector: IDataConnector<ReadonlyJSONValue> | null;
 
-    private _session: IDebugger.ISession | null = null;
+    readonly id: string;
+
+    get isDisposed(): boolean {
+      return this._isDisposed;
+    }
+
+    dispose(): void {
+      this._isDisposed = true;
+    }
+
+    private async _populate(): Promise<void> {
+      const { connector } = this;
+
+      if (!connector) {
+        return;
+      }
+    }
+
+    private _isDisposed = false;
+  }
+
+  export namespace Model {
+    export interface IOptions extends Debugger.IOptions {}
   }
 }

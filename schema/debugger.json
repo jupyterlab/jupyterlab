@@ -3,9 +3,19 @@
   "description": "Debugger settings.",
   "jupyter.lab.shortcuts": [
     {
-      "command": "debugger:open",
+      "command": "debugger:debug-console",
       "keys": ["Accel Shift I"],
-      "selector": "body"
+      "selector": ".jp-CodeConsole"
+    },
+    {
+      "command": "debugger:debug-file",
+      "keys": ["Accel Shift I"],
+      "selector": ".jp-FileEditor"
+    },
+    {
+      "command": "debugger:debug-notebook",
+      "keys": ["Accel Shift I"],
+      "selector": ".jp-Notebook"
     }
   ],
   "properties": {},
