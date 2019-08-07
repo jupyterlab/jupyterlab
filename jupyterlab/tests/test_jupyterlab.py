@@ -227,6 +227,32 @@ class TestExtension(TestCase):
         assert '@jupyterlab/console-extension' in extensions
         assert check_extension('@jupyterlab/console-extension')
 
+    def test_install_and_uninstall_pinned(self):
+        """
+        You should be able to install different versions of the same extension with different
+        pinned names and uninstall them with those names.
+        """
+        NAMES = ['test-1', 'test-2']
+        assert install_extension('jupyterlab-test-extension@1.0', pin=NAMES[0])
+        assert install_extension('jupyterlab-test-extension@2.0', pin=NAMES[1])
+
+        extensions = get_app_info(self.app_dir)['extensions']
+        assert NAMES[0] in extensions
+        assert NAMES[1] in extensions
+        assert check_extension(NAMES[0])
+        assert check_extension(NAMES[1])
+
+        # Uninstall
+        assert uninstall_extension(NAMES[0])
+        assert uninstall_extension(NAMES[1])
+
+        extensions = get_app_info(self.app_dir)['extensions']
+        assert NAMES[0] not in extensions
+        assert NAMES[1] not in extensions
+        assert not check_extension(NAMES[0])
+        assert not check_extension(NAMES[1])
+
+
     def test_link_extension(self):
         path = self.mock_extension
         name = self.pkg_names['extension']

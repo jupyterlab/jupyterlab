@@ -142,13 +142,6 @@ if [[ $GROUP == usage ]]; then
     jupyter lab workspaces export newspace > newspace.json
     rm workspace.json newspace.json
 
-    # Test pinned alias packages
-    jupyter labextension install --no-build \
-        --pin-version-as test-1,test-2 \
-        jupyterlab-test-extension@1.0 \
-        jupyterlab-test-extension@2.0
-    jupyter labextension uninstall test-1 test-2
-
     # Make sure we can call help on all the cli apps.
     jupyter lab -h
     jupyter lab build -h
