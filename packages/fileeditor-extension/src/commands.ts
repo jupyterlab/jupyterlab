@@ -426,10 +426,34 @@ export default class Commands {
     menu: IMainMenu,
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
-    consoleTracker: IConsoleTracker,
-    createConsole: (widget: IDocumentWidget<FileEditor>) => Promise<void>
+    consoleTracker: IConsoleTracker
   ) {
     // Add the editing commands to the settings menu.
+    this.addEditingCommandsToSettingsMenu(menu, commands);
+
+    // Add new text file creation to the file menu.
+    this.addCreateNewFileToFileMenu(menu);
+
+    // Add new markdown file creation to the file menu.
+    this.addCreateNewMarkdownFileToFileMenu(menu);
+
+    // Add undo/redo hooks to the edit menu.
+    this.addUndoRedoToEditMenu(menu, tracker);
+
+    // Add editor view options.
+    this.addEditorViewerToViewMenu(menu, tracker);
+
+    // Add a console creator the the Kernel menu.
+    this.addConsoleCreatorToKernelMenu(menu, commands, tracker);
+
+    // Add a code runner to the Run menu.
+    this.addCodeRunnersToRunMenu(menu, commands, tracker, consoleTracker);
+  }
+
+  static addEditingCommandsToSettingsMenu(
+    menu: IMainMenu,
+    commands: CommandRegistry
+  ) {
     const tabMenu = new Menu({ commands });
     tabMenu.title.label = 'Text Editor Indentation';
     let args: JSONObject = {
@@ -464,17 +488,23 @@ export default class Commands {
       ],
       30
     );
+  }
 
-    // Add new text file creation to the file menu.
+  static addCreateNewFileToFileMenu(menu: IMainMenu) {
     menu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 30);
+  }
 
-    // Add new markdown file creation to the file menu.
+  static addCreateNewMarkdownFileToFileMenu(menu: IMainMenu) {
     menu.fileMenu.newMenu.addGroup(
       [{ command: CommandIDs.createNewMarkdown }],
       30
     );
+  }
 
-    // Add undo/redo hooks to the edit menu.
+  static addUndoRedoToEditMenu(
+    menu: IMainMenu,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>
+  ) {
     menu.editMenu.undoers.add({
       tracker,
       undo: widget => {
@@ -484,8 +514,12 @@ export default class Commands {
         widget.content.editor.redo();
       }
     } as IEditMenu.IUndoer<IDocumentWidget<FileEditor>>);
+  }
 
-    // Add editor view options.
+  static addEditorViewerToViewMenu(
+    menu: IMainMenu,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>
+  ) {
     menu.viewMenu.editorViewers.add({
       tracker,
       toggleLineNumbers: widget => {
@@ -508,15 +542,29 @@ export default class Commands {
       matchBracketsToggled: widget =>
         widget.content.editor.getOption('matchBrackets')
     } as IViewMenu.IEditorViewer<IDocumentWidget<FileEditor>>);
+  }
 
-    // Add a console creator the the Kernel menu.
+  static addConsoleCreatorToKernelMenu(
+    menu: IMainMenu,
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>
+  ) {
+    let createConsole: (
+      widget: IDocumentWidget<FileEditor>
+    ) => Promise<void> = this.getCreateConsoleFunction(commands);
     menu.fileMenu.consoleCreators.add({
       tracker,
       name: 'Editor',
       createConsole
     } as IFileMenu.IConsoleCreator<IDocumentWidget<FileEditor>>);
+  }
 
-    // Add a code runner to the Run menu.
+  static addCodeRunnersToRunMenu(
+    menu: IMainMenu,
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    consoleTracker: IConsoleTracker
+  ) {
     menu.runMenu.codeRunners.add({
       tracker,
       noun: 'Code',

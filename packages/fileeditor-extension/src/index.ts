@@ -290,13 +290,7 @@ function activate(
   }
 
   if (menu) {
-    Commands.addMenuItems(
-      menu,
-      commands,
-      tracker,
-      consoleTracker,
-      Commands.getCreateConsoleFunction(commands)
-    );
+    Commands.addMenuItems(menu, commands, tracker, consoleTracker);
   }
 
   Commands.addContextMenuItems(app);
