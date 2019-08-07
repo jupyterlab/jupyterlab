@@ -55,6 +55,12 @@ const SPLASH_RECOVER_TIMEOUT = 12000;
 namespace CommandIDs {
   export const changeTheme = 'apputils:change-theme';
 
+  export const themeScrollbars = 'apputils:theme-scrollbars';
+
+  export const incrFontSize = 'apputils:incr-font-size';
+
+  export const decrFontSize = 'apputils:decr-font-size';
+
   export const loadState = 'apputils:load-statedb';
 
   export const print = 'apputils:print';
@@ -146,7 +152,7 @@ const themes: JupyterFrontEndPlugin<IThemeManager> = {
       }
 
       // Set any CSS overrides
-      manager.setCssOverrides();
+      manager.loadCssOverrides();
 
       commands.notifyCommandChanged(CommandIDs.changeTheme);
     });
@@ -164,6 +170,22 @@ const themes: JupyterFrontEndPlugin<IThemeManager> = {
         }
         return manager.setTheme(theme);
       }
+    });
+
+    commands.addCommand(CommandIDs.themeScrollbars, {
+      label: 'Theme Scrollbars',
+      isToggled: () => manager.themeScrollbars(currentTheme),
+      execute: () => manager.toggleThemeScrollbars()
+    });
+
+    commands.addCommand(CommandIDs.incrFontSize, {
+      label: args => `Increase ${args['label']} Font Size`,
+      execute: args => manager.incrFontSize(args['key'] as string)
+    });
+
+    commands.addCommand(CommandIDs.decrFontSize, {
+      label: args => `Decrease ${args['label']} Font Size`,
+      execute: args => manager.decrFontSize(args['key'] as string)
     });
 
     return manager;
@@ -197,11 +219,51 @@ const themesPaletteMenu: JupyterFrontEndPlugin<void> = {
       const themeMenu = new Menu({ commands });
       themeMenu.title.label = 'JupyterLab Theme';
       void app.restored.then(() => {
-        const command = CommandIDs.changeTheme;
         const isPalette = false;
 
+        // choose a theme
         manager.themes.forEach(theme => {
-          themeMenu.addItem({ command, args: { isPalette, theme } });
+          themeMenu.addItem({
+            command: CommandIDs.changeTheme,
+            args: { isPalette, theme }
+          });
+        });
+        themeMenu.addItem({ type: 'separator' });
+
+        // theme scrollbars
+        themeMenu.addItem({ command: CommandIDs.themeScrollbars });
+        themeMenu.addItem({ type: 'separator' });
+
+        // increase/decrease code font size
+        themeMenu.addItem({
+          command: CommandIDs.incrFontSize,
+          args: { label: 'Code', key: 'code-font-size' }
+        });
+        themeMenu.addItem({
+          command: CommandIDs.decrFontSize,
+          args: { label: 'Code', key: 'code-font-size' }
+        });
+        themeMenu.addItem({ type: 'separator' });
+
+        // increase/decrease content font size
+        themeMenu.addItem({
+          command: CommandIDs.incrFontSize,
+          args: { label: 'Content', key: 'content-font-size1' }
+        });
+        themeMenu.addItem({
+          command: CommandIDs.decrFontSize,
+          args: { label: 'Content', key: 'content-font-size1' }
+        });
+        themeMenu.addItem({ type: 'separator' });
+
+        // increase/decrease ui font size
+        themeMenu.addItem({
+          command: CommandIDs.incrFontSize,
+          args: { label: 'UI', key: 'ui-font-size1' }
+        });
+        themeMenu.addItem({
+          command: CommandIDs.decrFontSize,
+          args: { label: 'UI', key: 'ui-font-size1' }
         });
       });
       mainMenu.settingsMenu.addGroup(

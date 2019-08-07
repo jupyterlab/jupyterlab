@@ -102,6 +102,43 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
+   * Load a CSS override from settings. If no corresponding override
+   * is found, this function unloads the override instead.
+   *
+   * @param key - A Jupyterlab CSS variable, without the leading '--jp-'.
+   */
+  loadCssOverride(key: string): void {
+    const overrides = (this._settings.user['overrides'] as Dict<string>) || {};
+
+    document.documentElement.style.setProperty(
+      `--jp-${key}`,
+      overrides[key] || 'initial'
+    );
+  }
+
+  /**
+   * Loads all current CSS overrides from settings. If an override has been
+   * removed, this function unloads it instead.
+   */
+  loadCssOverrides(): void {
+    const newOverrides =
+      (this._settings.user['overrides'] as Dict<string>) || {};
+
+    Object.keys(this._overrides).forEach(key => {
+      if (!(key in newOverrides)) {
+        // unset the override
+        this.loadCssOverride(key);
+      }
+    });
+    Object.keys(newOverrides).forEach(key => {
+      // set the override
+      this.loadCssOverride(key);
+    });
+
+    this._overrides = newOverrides;
+  }
+
+  /**
    * Register a theme with the theme manager.
    *
    * @param theme - The theme to register.
@@ -137,31 +174,32 @@ export class ThemeManager implements IThemeManager {
     return this._themes[name].isLight;
   }
 
-  setCssOverride(key: string) {
-    const overrides = (this._settings.user['overrides'] as Dict<string>) || {};
-
-    document.documentElement.style.setProperty(
-      `--jp-${key}`,
-      overrides[key] || 'initial'
-    );
+  /**
+   * Increase a font size w.r.t. its current setting or its value in the
+   * current theme.
+   *
+   * @param key - A Jupyterlab font size CSS variable,
+   * without the leading '--jp-'.
+   */
+  incrFontSize(key: string): Promise<void> {
+    const parts = (this._overrides[key] || '1em').split(/([a-zA-Z]+)/);
+    this._overrides[key] = `${Number(parts[0]) +
+      (parts[1] === 'em' ? 0.1 : 1)}${parts[1]}`;
+    return this._settings.set('overrides', this._overrides);
   }
 
-  setCssOverrides() {
-    const newOverrides =
-      (this._settings.user['overrides'] as Dict<string>) || {};
-
-    Object.keys(this._overrides).forEach(key => {
-      if (!(key in newOverrides)) {
-        // unset the override
-        this.setCssOverride(key);
-      }
-    });
-    Object.keys(newOverrides).forEach(key => {
-      // set the override
-      this.setCssOverride(key);
-    });
-
-    this._overrides = newOverrides;
+  /**
+   * Decrease a font size w.r.t. its current setting or its value in the
+   * current theme.
+   *
+   * @param key - A Jupyterlab font size CSS variable,
+   * without the leading '--jp-'.
+   */
+  decrFontSize(key: string): Promise<void> {
+    const parts = (this._overrides[key] || '1em').split(/([a-zA-Z]+)/);
+    this._overrides[key] = `${Number(parts[0]) -
+      (parts[1] === 'em' ? 0.1 : 1)}${parts[1]}`;
+    return this._settings.set('overrides', this._overrides);
   }
 
   /**
@@ -172,6 +210,16 @@ export class ThemeManager implements IThemeManager {
     return (
       !!this._settings.composite['theme-scrollbars'] &&
       !!this._themes[name].themeScrollbars
+    );
+  }
+
+  /**
+   * Toggle the `theme-scrollbbars` setting.
+   */
+  toggleThemeScrollbars(): void {
+    this._settings.set(
+      'theme-scrollbars',
+      !this._settings.composite['theme-scrollbars']
     );
   }
 

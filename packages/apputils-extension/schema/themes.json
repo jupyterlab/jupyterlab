@@ -8,9 +8,9 @@
     "themeOverrides": {
       "type": "object",
       "properties": {
-        "code-font-size": { "type": "string", "default": "" },
-        "content-font-size1": { "type": "string", "default": "" },
-        "ui-font-size1": { "type": "string", "default": "" }
+        "code-font-size": { "type": "string" },
+        "content-font-size1": { "type": "string" },
+        "ui-font-size1": { "type": "string" }
       }
     }
   },
