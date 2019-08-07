@@ -26,3 +26,5 @@ yarn-error.log
 junit.xml
 
 *.tsbuildinfo
+
+yarn.lock
