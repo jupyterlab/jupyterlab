@@ -11,6 +11,7 @@ import sys
 import subprocess
 import shutil
 import pathlib
+import platform
 from os.path import join as pjoin
 from tempfile import TemporaryDirectory
 from unittest import TestCase
@@ -233,7 +234,6 @@ class TestExtension(TestCase):
         assert '@jupyterlab/console-extension' in extensions
         assert check_extension('@jupyterlab/console-extension')
 
-    @pytest.mark.webtest
     def test_install_and_uninstall_pinned(self):
         """
         You should be able to install different versions of the same extension with different
@@ -259,8 +259,7 @@ class TestExtension(TestCase):
         assert not check_extension(NAMES[0])
         assert not check_extension(NAMES[1])
 
-
-    @pytest.mark.webtest
+    @pytest.mark.skipif(platform.system() == 'Windows', reason='running npm pack fails on windows CI')
     def test_install_and_uninstall_pinned_folder(self):
         """
         Same as above test, but installs from a local folder instead of from npm.
@@ -285,6 +284,7 @@ class TestExtension(TestCase):
         # Change pinned packages to be these directories now, so we install from these folders
         self.pinned_packages = [str(base_dir / '1' / 'package'), str(base_dir / '2' / 'package')]
         self.test_install_and_uninstall_pinned()
+
 
     def test_link_extension(self):
         path = self.mock_extension
