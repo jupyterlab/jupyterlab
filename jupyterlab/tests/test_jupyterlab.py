@@ -120,7 +120,7 @@ class TestExtension(TestCase):
         self.assertEqual(paths.ENV_CONFIG_PATH, [self.config_dir])
         self.assertEqual(paths.ENV_JUPYTER_PATH, [self.data_dir])
         self.assertEqual(
-            commands.get_app_dir(),
+            os.path.realpath(commands.get_app_dir()),
             os.path.realpath(pjoin(self.data_dir, 'lab'))
         )
 
