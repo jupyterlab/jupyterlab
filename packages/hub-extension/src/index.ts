@@ -56,16 +56,16 @@ function activateHubExtension(
     hubPrefix: hubPrefix
   });
 
+  // If hubServerName is set, use JupyterHub 1.0 URL.
   const restartUrl = hubServerName
-	    ? hubHost +
-	      URLExt.join(
-	        hubPrefix,
-	        'spawn',
-	        hubUser,
-	        hubServerName,
-	        `?next=${hubPrefix}home`
-	      )
-      : hubHost + URLExt.join(hubPrefix, `spawn?next=${hubPrefix}home`);
+    ? hubHost + URLExt.join(
+        hubPrefix,
+        'spawn',
+        hubUser,
+        hubServerName,
+        `?next=${hubPrefix}home`
+      )
+    : hubHost + URLExt.join(hubPrefix, `spawn?next=${hubPrefix}home`);
 
   const { commands } = app;
 
