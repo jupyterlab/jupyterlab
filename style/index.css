@@ -8,3 +8,36 @@
   top: 0;
   bottom: 0;
 }
+
+
+.jp-Debugger {
+  background: var(--jp-layout-color1);
+  top: 0;
+  bottom: 0;
+}
+
+.debugger-variables__header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
+  border-right: solid var(--jp-border-width) var(--jp-border-color1);
+  background-color: var(--jp-layout-color2);
+  height: 24px;
+}
+
+.debugger-variables__header-label {
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color1);
+  padding-left: 8px;
+  padding-right: 4px;
+}
+
+
+.debugger-variables__body {
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
+  min-height: 24px;
+}
+
