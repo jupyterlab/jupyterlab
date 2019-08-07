@@ -230,7 +230,7 @@ const themesPaletteMenu: JupyterFrontEndPlugin<void> = {
         });
         themeMenu.addItem({ type: 'separator' });
 
-        // theme scrollbars
+        // toggle scrollbar theming
         themeMenu.addItem({ command: CommandIDs.themeScrollbars });
         themeMenu.addItem({ type: 'separator' });
 
@@ -280,12 +280,50 @@ const themesPaletteMenu: JupyterFrontEndPlugin<void> = {
     // If we have a command palette, add theme switching options to it.
     if (palette) {
       void app.restored.then(() => {
-        const category = 'Settings';
+        const category = 'Theme';
         const command = CommandIDs.changeTheme;
         const isPalette = true;
 
+        // choose a theme
         manager.themes.forEach(theme => {
           palette.addItem({ command, args: { isPalette, theme }, category });
+        });
+
+        // toggle scrollbar theming
+        palette.addItem({ command: CommandIDs.themeScrollbars, category });
+
+        // increase/decrease code font size
+        palette.addItem({
+          command: CommandIDs.incrFontSize,
+          args: { label: 'Code', key: 'code-font-size' },
+          category
+        });
+        palette.addItem({
+          command: CommandIDs.decrFontSize,
+          args: { label: 'Code', key: 'code-font-size' },
+          category
+        });
+        // increase/decrease content font size
+        palette.addItem({
+          command: CommandIDs.incrFontSize,
+          args: { label: 'Content', key: 'content-font-size1' },
+          category
+        });
+        palette.addItem({
+          command: CommandIDs.decrFontSize,
+          args: { label: 'Content', key: 'content-font-size1' },
+          category
+        });
+        // increase/decrease ui font size
+        palette.addItem({
+          command: CommandIDs.incrFontSize,
+          args: { label: 'UI', key: 'ui-font-size1' },
+          category
+        });
+        palette.addItem({
+          command: CommandIDs.decrFontSize,
+          args: { label: 'UI', key: 'ui-font-size1' },
+          category
         });
       });
     }
