@@ -7,6 +7,8 @@ import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { KernelMessage, Kernel } from '@jupyterlab/services';
 
+import { isFulfilled } from '@jupyterlab/testutils';
+
 import { init } from '../utils';
 
 // Initialize fetch override.
@@ -82,6 +84,15 @@ describe('jupyter.services - Comm', () => {
         const comm2 = kernel.connectToComm('test', '1234');
         expect(comm).to.equal(comm2);
       });
+
+      it('should throw an error when the kernel does not handle comms', async () => {
+        const kernel2 = await Kernel.startNew({
+          name: 'ipython',
+          handleComms: false
+        });
+        expect(kernel2.handleComms).to.be.false;
+        expect(() => kernel2.connectToComm('test', '1234')).to.throw();
+      });
     });
 
     describe('#registerCommTarget()', () => {
@@ -104,6 +115,37 @@ describe('jupyter.services - Comm', () => {
         // Clean up
         kernel.removeCommTarget('test', hook);
         comm.dispose();
+      });
+
+      it('should do nothing if the kernel does not handle comms', async () => {
+        const promise = new PromiseDelegate<
+          [Kernel.IComm, KernelMessage.ICommOpenMsg]
+        >();
+        const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
+          promise.resolve([comm, msg]);
+        };
+        const kernel2 = await Kernel.startNew({
+          name: 'ipython',
+          handleComms: false
+        });
+        kernel2.registerCommTarget('test', hook);
+
+        // Request the comm creation.
+        await kernel2.requestExecute({ code: SEND }, true).done;
+
+        // The promise above should not be fulfilled, even after a short delay.
+        expect(await isFulfilled(promise.promise, 300)).to.be.false;
+
+        // The kernel comm has not been closed - we just completely ignored it.
+        let reply = await kernel2.requestExecute(
+          { code: `assert comm._closed is False` },
+          true
+        ).done;
+        // If the assert was false, we would get an 'error' status
+        expect(reply.content.status).to.equal('ok');
+
+        // Clean up
+        kernel2.removeCommTarget('test', hook);
       });
     });
 

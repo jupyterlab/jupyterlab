@@ -5,7 +5,7 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
 
-import { ArrayExt, each, find } from '@phosphor/algorithm';
+import { ArrayExt, each, find, some } from '@phosphor/algorithm';
 
 import { JSONExt, JSONObject, PromiseDelegate } from '@phosphor/coreutils';
 
@@ -61,6 +61,8 @@ export class DefaultKernel implements Kernel.IKernel {
       options.serverSettings || ServerConnection.makeSettings();
     this._clientId = options.clientId || UUID.uuid4();
     this._username = options.username || '';
+    this.handleComms =
+      options.handleComms === undefined ? true : options.handleComms;
 
     void this._readyPromise.promise.then(() => {
       this._sendPending();
@@ -81,6 +83,18 @@ export class DefaultKernel implements Kernel.IKernel {
    * The server settings for the kernel.
    */
   readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * Handle comm messages
+   *
+   * #### Notes
+   * The comm message protocol currently has implicit assumptions that only
+   * one kernel connection is handling comm messages. This option allows a
+   * kernel connection to opt out of handling comms.
+   *
+   * See https://github.com/jupyter/jupyter_client/issues/263
+   */
+  readonly handleComms: boolean;
 
   /**
    * A signal emitted when the kernel status changes.
@@ -215,12 +229,14 @@ export class DefaultKernel implements Kernel.IKernel {
   /**
    * Clone the current kernel with a new clientId.
    */
-  clone(): Kernel.IKernel {
+  clone(options: Kernel.IOptions = {}): Kernel.IKernel {
     return new DefaultKernel(
       {
         name: this._name,
         username: this._username,
-        serverSettings: this.serverSettings
+        serverSettings: this.serverSettings,
+        handleComms: this.handleComms,
+        ...options
       },
       this._id
     );
@@ -603,6 +619,40 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
+   * Send an experimental `debug_request` message.
+   *
+   * @hidden
+   *
+   * #### Notes
+   * Debug messages are experimental messages that are not in the official
+   * kernel message specification. As such, this function is *NOT* considered
+   * part of the public API, and may change without notice.
+   */
+  requestDebug(
+    content: KernelMessage.IDebugRequestMsg['content'],
+    disposeOnDone: boolean = true
+  ): Kernel.IControlFuture<
+    KernelMessage.IDebugRequestMsg,
+    KernelMessage.IDebugReplyMsg
+  > {
+    let msg = KernelMessage.createMessage({
+      msgType: 'debug_request',
+      channel: 'control',
+      username: this._username,
+      session: this._clientId,
+      content
+    });
+    return this.sendControlMessage(
+      msg,
+      true,
+      disposeOnDone
+    ) as Kernel.IControlFuture<
+      KernelMessage.IDebugRequestMsg,
+      KernelMessage.IDebugReplyMsg
+    >;
+  }
+
+  /**
    * Send an `is_complete_request` message.
    *
    * #### Notes
@@ -678,11 +728,16 @@ export class DefaultKernel implements Kernel.IKernel {
    *
    * #### Notes
    * If a client-side comm already exists with the given commId, it is returned.
+   * An error is thrown if the kernel does not handle comms.
    */
   connectToComm(
     targetName: string,
     commId: string = UUID.uuid4()
   ): Kernel.IComm {
+    if (!this.handleComms) {
+      throw new Error('Comms are disabled on this kernel connection');
+    }
+
     if (this._comms.has(commId)) {
       return this._comms.get(commId);
     }
@@ -718,6 +773,10 @@ export class DefaultKernel implements Kernel.IKernel {
       msg: KernelMessage.ICommOpenMsg
     ) => void | PromiseLike<void>
   ): void {
+    if (!this.handleComms) {
+      return;
+    }
+
     this._targetRegistry[targetName] = callback;
   }
 
@@ -729,7 +788,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * @param callback - The callback to remove.
    *
    * #### Notes
-   * The comm target is only removed the callback argument matches.
+   * The comm target is only removed if the callback argument matches.
    */
   removeCommTarget(
     targetName: string,
@@ -738,6 +797,10 @@ export class DefaultKernel implements Kernel.IKernel {
       msg: KernelMessage.ICommOpenMsg
     ) => void | PromiseLike<void>
   ): void {
+    if (!this.handleComms) {
+      return;
+    }
+
     if (!this.isDisposed && this._targetRegistry[targetName] === callback) {
       delete this._targetRegistry[targetName];
     }
@@ -1246,13 +1309,19 @@ export class DefaultKernel implements Kernel.IKernel {
           }
           break;
         case 'comm_open':
-          await this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);
+          if (this.handleComms) {
+            await this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);
+          }
           break;
         case 'comm_msg':
-          await this._handleCommMsg(msg as KernelMessage.ICommMsgMsg);
+          if (this.handleComms) {
+            await this._handleCommMsg(msg as KernelMessage.ICommMsgMsg);
+          }
           break;
         case 'comm_close':
-          await this._handleCommClose(msg as KernelMessage.ICommCloseMsg);
+          if (this.handleComms) {
+            await this._handleCommClose(msg as KernelMessage.ICommCloseMsg);
+          }
           break;
         default:
           break;
@@ -1629,7 +1698,16 @@ namespace Private {
       return value.id === model.id;
     });
     if (kernel) {
-      return kernel.clone();
+      // If there is already a kernel connection handling comms, don't handle
+      // them in our clone, since the comm message protocol has implicit
+      // assumptions that only one connection is handling comm messages.
+      // See https://github.com/jupyter/jupyter_client/issues/263
+      const handleComms = !some(
+        runningKernels,
+        k => k.id === model.id && k.handleComms
+      );
+      const newKernel = kernel.clone({ handleComms });
+      return newKernel;
     }
 
     return new DefaultKernel({ name: model.name, serverSettings }, model.id);

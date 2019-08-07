@@ -921,8 +921,9 @@ export class DirListing extends Widget {
   private _handleOpen(item: Contents.IModel): void {
     this._onItemOpened.emit(item);
     if (item.type === 'directory') {
+      const localPath = this._manager.services.contents.localPath(item.path);
       this._model
-        .cd(`/${item.path}`)
+        .cd(`/${localPath}`)
         .catch(error => showErrorMessage('Open directory', error));
     } else {
       let path = item.path;
