@@ -48,7 +48,7 @@ issues it solves before a pull request is opened.
 
 ### Issue Management
 Opening an issue lets community members participate in the design discussion, 
-makes others aware of work being done, andsets the stage for a fruitful community 
+makes others aware of work being done, and sets the stage for a fruitful community 
 interaction. A pull request should reference the issue it is addressing. Once the 
 pull request is merged, the issue related to it will also be closed. If there is 
 additional discussion around implemementation the issue may be re-opened. Once 30 days
