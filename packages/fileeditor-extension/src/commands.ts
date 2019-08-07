@@ -540,11 +540,20 @@ export default class Commands {
     } as IRunMenu.ICodeRunner<IDocumentWidget<FileEditor>>);
   }
 
+  // Functions for adding items to the context menu
   static addContextMenuItems(app: JupyterFrontEnd) {
+    this.addCreateConsoleToContextMenu(app);
+    this.addMarkdownPreviewToContextMenu(app);
+  }
+
+  static addCreateConsoleToContextMenu(app: JupyterFrontEnd) {
     app.contextMenu.addItem({
       command: CommandIDs.createConsole,
       selector: '.jp-FileEditor'
     });
+  }
+
+  static addMarkdownPreviewToContextMenu(app: JupyterFrontEnd) {
     app.contextMenu.addItem({
       command: CommandIDs.markdownPreview,
       selector: '.jp-FileEditor'
