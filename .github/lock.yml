@@ -14,6 +14,8 @@ exemptLabels: []
 lockLabel: status:resolved-locked
 
 # Comment to post before locking. Set to `false` to disable
+lockComment: false
+
 # lockComment: >
 #   This thread has been automatically locked since there has not been
 #   any recent activity after it was closed. Please open a [new issue](https://github.com/jupyterlab/jupyterlab/issues/new/choose)
