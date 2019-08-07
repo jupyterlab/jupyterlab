@@ -396,12 +396,6 @@ export namespace ThemeManager {
      */
     url: string;
   }
-
-  export const fontVars: { [key: string]: string } = {
-    'code-font-size': '--jp-code-font-size',
-    'content-font-size': '--jp-content-font-size1',
-    'ui-font-size': '--jp-ui-font-size1'
-  };
 }
 
 /**
