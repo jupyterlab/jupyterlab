@@ -44,12 +44,13 @@ export const IOutputConsole = new Token<IOutputConsole>(
 
 /**
  * The description of the log message.
+ *
+ * Really each source should have its own rendermime to render things local to that source.
  */
 export interface IOutputLogPayload {
   sourceName?: string;
   sourceIconClassName?: string;
   msg: KernelMessage.IIOPubMessage;
-  date?: Date;
 }
 
 /**
@@ -111,10 +112,6 @@ export class OutputConsole implements IOutputConsole {
    * Log a new output message and notify listeners.
    */
   logMessage(payload: IOutputLogPayload) {
-    if (!payload.date) {
-      payload.date = new Date();
-    }
-
     this._messages.push(payload);
 
     this._signals.forEach(signal => {
@@ -341,7 +338,7 @@ class OutputConsoleView extends Widget {
 
       outputView.update();
 
-      const logTime = log.date!.toLocaleTimeString();
+      const logTime = new Date(log.msg.header.date).toLocaleTimeString();
       const logLine = document.createElement('div');
       logLine.className = 'lab-output-console-line';
       logLine.innerHTML = `
