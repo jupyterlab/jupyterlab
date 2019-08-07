@@ -152,7 +152,7 @@ To be listed, please submit a pull request with your information.
 
 We encourage you to ask questions on the [Discourse forum](https://discourse.jupyter.org/c/jupyterlab). A question answered there can become a useful resource for others.
 
-Please use the [GitHub issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report.
+Please use the [GitHub issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report. In an effort to keep up with lots of feedback, '@lock[bot]' may lock an issue that isn't fully resolved. If this happened to an issue important to you please open a new issue referencing the locked issue to update the community.
 
 ### Weekly Dev Meeting
 
