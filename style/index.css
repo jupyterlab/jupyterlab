@@ -3,25 +3,31 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-DebuggerSidebar {
-  background: var(--jp-layout-color1);
-  top: 0;
-  bottom: 0;
-}
-
-
 .jp-Debugger {
   background: var(--jp-layout-color1);
   top: 0;
   bottom: 0;
 }
 
+
+.jp-DebuggerSidebar {
+  display: flex;
+  flex-direction: column;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+  min-width: 350px !important;
+}
+
+
+
+
 .debugger-variables__header {
   display: flex;
   flex-direction: row;
   align-items: center;
   border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
-  border-right: solid var(--jp-border-width) var(--jp-border-color1);
+  border-top: solid var(--jp-border-width) var(--jp-border-color1);
   background-color: var(--jp-layout-color2);
   height: 24px;
 }
@@ -39,5 +45,40 @@
 .debugger-variables__body {
   border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
   min-height: 24px;
+}
+
+
+.debugger-variable__table {
+  min-height: 50px;
+}
+
+.debugger-variable__table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.debugger-variable__table .debugger-variables_table-head {
+  margin-bottom: 4px;
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  min-height: 23px;
+  padding: 4px 12px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.debugger-variables_table-head:hover {
+  background: var(--jp-layout-color2);
+}
+
+.debugger-variables_table-head + .debugger-variables_table-head {
+  border-left: var(--jp-border-width) solid var(--jp-border-color2);
+}
+
+
+
+.debugger-variable__description {
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  min-height: 25px;
 }
 
