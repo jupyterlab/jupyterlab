@@ -51,12 +51,25 @@
     "@phosphor/widgets": "^1.8.0"
   },
   "devDependencies": {
+    "husky": "^3.0.2",
+    "lint-staged": "^9.2.1",
     "prettier": "^1.18.2",
     "rimraf": "~2.6.2",
     "tslint": "^5.18.0",
     "tslint-plugin-prettier": "^2.0.1",
     "typedoc": "^0.15.0",
     "typescript": "~3.5.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "publishConfig": {
     "access": "private"
