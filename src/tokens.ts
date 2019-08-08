@@ -15,11 +15,12 @@ import { IObservableDisposable } from '@phosphor/disposable';
 
 import { Debugger } from './debugger';
 
+import { DebuggerSidebar } from './sidebar';
+
 /**
  * An interface describing an application's visual debugger.
  */
-export interface IDebugger
-  extends IWidgetTracker<MainAreaWidget<Debugger>> {}
+export interface IDebugger extends IWidgetTracker<MainAreaWidget<Debugger>> {}
 
 /**
  * A namespace for visual debugger types.
@@ -45,3 +46,15 @@ export namespace IDebugger {
  * A token for a tracker for an application's visual debugger instances.
  */
 export const IDebugger = new Token<IDebugger>('@jupyterlab/debugger');
+
+/**
+ * An interface describing an application's visual debugger.
+ */
+export interface IDebuggerSidebar extends DebuggerSidebar {}
+
+/**
+ * A token for a tracker for an application's visual debugger condensed sidebar.
+ */
+export const IDebuggerSidebar = new Token<IDebuggerSidebar>(
+  '@jupyterlab/debugger-sidebar'
+);
