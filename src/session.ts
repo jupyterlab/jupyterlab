@@ -41,6 +41,10 @@ export class DebugSession implements IDebugger.ISession {
     return this._isDisposed;
   }
 
+  async start(): Promise<void> {
+    return void 0;
+  }
+
   client: IClientSession;
   editors: CodeEditor.IEditor[];
 
