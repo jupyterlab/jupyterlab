@@ -12,10 +12,7 @@ describe('DebugSession', () => {
   beforeEach(async () => {
     client = await createClientSession({
       kernelPreference: {
-        name: 'python3', // TODO: replace by xpython
-        language: 'python',
-        shouldStart: true,
-        canStart: true
+        name: 'xpython'
       }
     });
     await (client as ClientSession).initialize();
