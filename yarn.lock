@@ -1640,6 +1640,11 @@
   resolved "https://registry.yarnpkg.com/@phosphor/algorithm/-/algorithm-1.1.3.tgz#fb0e974f4e81aadc06f948770b3060c4ec8a1e27"
   integrity sha512-+dkdYTBglR+qGnLVQdCvYojNZMGxf+xSl1Jeksha3pm7niQktSFz2aR5gEPu/nI5LM8T8slTpqE4Pjvq8P+IVA==
 
+"@phosphor/algorithm@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@phosphor/algorithm/-/algorithm-1.2.0.tgz#4a19aa59261b7270be696672dc3f0663f7bef152"
+  integrity sha512-C9+dnjXyU2QAkWCW6QVDGExk4hhwxzAKf5/FIuYlHAI9X5vFv99PYm0EREDxX1PbMuvfFBZhPNu0PvuSDQ7sFA==
+
 "@phosphor/application@^1.6.3":
   version "1.6.3"
   resolved "https://registry.yarnpkg.com/@phosphor/application/-/application-1.6.3.tgz#69f5eab109b54ee06d39443fa2f0ded573c5a080"
@@ -1655,6 +1660,13 @@
   integrity sha512-J2U1xd2e5LtqoOJt4kynrjDNeHhVpJjuY2/zA0InS5kyOuWmvy79pt/KJ22n0LBNcU/fjkImqtQmbrC2Z4q2xQ==
   dependencies:
     "@phosphor/algorithm" "^1.1.3"
+
+"@phosphor/collections@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@phosphor/collections/-/collections-1.2.0.tgz#a8cdd0edc0257de7c33306a91caf47910036307f"
+  integrity sha512-T9/0EjSuY6+ga2LIFRZ0xupciOR3Qnyy8Q95lhGTC0FXZUFwC8fl9e8On6IcwasCszS+1n8dtZUWSIynfgdpzw==
+  dependencies:
+    "@phosphor/algorithm" "^1.2.0"
 
 "@phosphor/commands@^1.6.3":
   version "1.6.3"
@@ -1687,12 +1699,17 @@
     "@phosphor/signaling" "^1.2.3"
     "@phosphor/widgets" "^1.8.0"
 
-"@phosphor/datastore@0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@phosphor/datastore/-/datastore-0.7.0.tgz#3c7e8c27d43fd469ae4a98e1fd5cb6b0443ca58a"
-  integrity sha1-PH6MJ9Q/1GmuSpjh/Vy2sEQ8pYo=
+"@phosphor/datastore@0.7.2":
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/@phosphor/datastore/-/datastore-0.7.2.tgz#749fe4c5a85c0cf752fd869f32a7987b20c96ac9"
+  integrity sha512-jHQaktrwsoBjKXlMtc70sB9uQxD53A8ifVA/65Xwnze74NtEe8ni8FTWBdo7Xul6WbTJUFrCutLWLAn3H+tDTQ==
   dependencies:
-    "@phosphor/signaling" "^1.2.2"
+    "@phosphor/algorithm" "^1.2.0"
+    "@phosphor/collections" "^1.2.0"
+    "@phosphor/coreutils" "^1.3.1"
+    "@phosphor/disposable" "^1.3.0"
+    "@phosphor/messaging" "^1.3.0"
+    "@phosphor/signaling" "^1.3.0"
 
 "@phosphor/disposable@^1.2.0":
   version "1.2.0"
@@ -1701,6 +1718,14 @@
   dependencies:
     "@phosphor/algorithm" "^1.1.3"
     "@phosphor/signaling" "^1.2.3"
+
+"@phosphor/disposable@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@phosphor/disposable/-/disposable-1.3.0.tgz#3321a420e14acf0761a559f202bf98d4c46b8163"
+  integrity sha512-wHQov7HoS20mU6yuEz5ZMPhfxHdcxGovjPoid0QwccUEOm33UBkWlxaJGm9ONycezIX8je7ZuPOf/gf7JI6Dlg==
+  dependencies:
+    "@phosphor/algorithm" "^1.2.0"
+    "@phosphor/signaling" "^1.3.0"
 
 "@phosphor/domutils@^1.1.3":
   version "1.1.3"
@@ -1728,17 +1753,32 @@
     "@phosphor/algorithm" "^1.1.3"
     "@phosphor/collections" "^1.1.3"
 
+"@phosphor/messaging@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@phosphor/messaging/-/messaging-1.3.0.tgz#a140e6dd28a496260779acf74860f738c654c65e"
+  integrity sha512-k0JE+BTMKlkM335S2AmmJxoYYNRwOdW5jKBqLgjJdGRvUQkM0+2i60ahM45+J23atGJDv9esKUUBINiKHFhLew==
+  dependencies:
+    "@phosphor/algorithm" "^1.2.0"
+    "@phosphor/collections" "^1.2.0"
+
 "@phosphor/properties@^1.1.3":
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/@phosphor/properties/-/properties-1.1.3.tgz#63e4355be5e22a411c566fd1860207038f171598"
   integrity sha512-GiglqzU77s6+tFVt6zPq9uuyu/PLQPFcqZt914ZhJ4cN/7yNI/SLyMzpYZ56IRMXvzK9TUgbRna6URE3XAwFUg==
 
-"@phosphor/signaling@^1.2.2", "@phosphor/signaling@^1.2.3":
+"@phosphor/signaling@^1.2.3":
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/@phosphor/signaling/-/signaling-1.2.3.tgz#2fde0ee810b0fab5f3fc765f81ed08ae671e76f1"
   integrity sha512-DMwS0m9OgfY5ljpTsklRQPUQpTyg4obz85FyImRDacUVxUVbas95djIDEbU4s1TMzdHBBO+gfki3V4giXUvXzw==
   dependencies:
     "@phosphor/algorithm" "^1.1.3"
+
+"@phosphor/signaling@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@phosphor/signaling/-/signaling-1.3.0.tgz#9de9904e07aaf6eb82074de29017c7c2bf1fd3df"
+  integrity sha512-ZbG2Mof4LGSkaEuDicqA2o2TKu3i5zanjr2GkevI/82aKBD7cI1NGLGT55HZwtE87/gOF4FIM3d3DeyrFDMjMQ==
+  dependencies:
+    "@phosphor/algorithm" "^1.2.0"
 
 "@phosphor/virtualdom@^1.1.3":
   version "1.1.3"

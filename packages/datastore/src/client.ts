@@ -216,9 +216,7 @@ export class CollaborationClient extends WSConnection<
     if (msg.msgType === 'transaction-broadcast') {
       this._handleTransactions(msg.content.transactions);
     } else if (msg.msgType === 'state-stable') {
-      if (this.handler !== null && this._serverSerial === msg.content.serial) {
-        MessageLoop.sendMessage(this.handler, new Datastore.GCChanceMessage());
-      }
+      // TODO: Possibly signal a chance for garbage collection.
     } else {
       return false;
     }

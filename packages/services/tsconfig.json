@@ -10,9 +10,6 @@
   "references": [
     {
       "path": "../coreutils"
-    },
-    {
-      "path": "../observables"
     }
   ]
 }

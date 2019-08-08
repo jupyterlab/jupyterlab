@@ -30,8 +30,7 @@ function cloneDS(
     broadcastHandler: source.broadcastHandler || undefined,
     ...overrides,
     id: newId,
-    schemas: toArray(map(source.iter(), table => table.schema)),
-    restoreState: source.toString()
+    schemas: toArray(map(source.iter(), table => table.schema))
   });
   return dest;
 }
@@ -128,8 +127,7 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
         this._remoteDS = Datastore.create({
           id: this._storeId!,
           schemas: this._schemas,
-          broadcastHandler: this,
-          restoreState: state || undefined
+          broadcastHandler: this
         });
         if (state !== null) {
           this._prepopulated = true;

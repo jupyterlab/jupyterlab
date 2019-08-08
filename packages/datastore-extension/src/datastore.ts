@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
+
 import { DatastoreCreator, IDatastoreCreator } from '@jupyterlab/datastore';
 
 export default {

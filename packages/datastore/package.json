@@ -36,7 +36,7 @@
     "@jupyterlab/services": "^4.0.1",
     "@phosphor/algorithm": "^1.1.3",
     "@phosphor/coreutils": "^1.3.1",
-    "@phosphor/datastore": "0.7.0",
+    "@phosphor/datastore": "0.7.2",
     "@phosphor/disposable": "^1.2.0",
     "@phosphor/messaging": "^1.2.3",
     "@phosphor/signaling": "^1.2.3"

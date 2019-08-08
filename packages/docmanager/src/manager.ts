@@ -456,15 +456,12 @@ export class DocumentManager implements IDocumentManager {
       this._widgetManager.adoptWidget(context, widget);
       this._opener.open(widget, options);
     };
-    let modelDBFactory =
-      this.services.contents.getModelDBFactory(path) || undefined;
     let context = new Context({
       opener: adopter,
       manager: this.services,
       factory,
       path,
       kernelPreference,
-      modelDBFactory,
       setBusy: this._setBusy
     });
     let handler = new SaveHandler({
