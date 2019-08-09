@@ -1044,9 +1044,12 @@ export class Drive implements Contents.IDrive {
    */
   getDownloadUrl(localPath: string): Promise<string> {
     let baseUrl = this.serverSettings.baseUrl;
-    return Promise.resolve(
-      URLExt.join(baseUrl, FILES_URL, URLExt.encodeParts(localPath))
-    );
+    let url = URLExt.join(baseUrl, FILES_URL, URLExt.encodeParts(localPath));
+    const xsrfTokenMatch = document.cookie.match('\\b_xsrf=([^;]*)\\b');
+    if (xsrfTokenMatch) {
+      url = URLExt.join(url, `?_xsrf=${xsrfTokenMatch[1]}`);
+    }
+    return Promise.resolve(url);
   }
 
   /**
