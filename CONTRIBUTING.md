@@ -44,10 +44,17 @@ a keyboard shortcut or automatically on save.
 ## Submitting a Pull Request Contribution
 
 Generally, an issue should be opened describing a piece of proposed work and the
-issues it solves before a pull request is opened. This lets community members
-participate in the design discussion, makes others aware of work being done, and
-sets the stage for a fruitful community interaction. A pull request should
-reference the issue it is addressing.
+issues it solves before a pull request is opened. 
+
+### Issue Management
+Opening an issue lets community members participate in the design discussion, 
+makes others aware of work being done, and sets the stage for a fruitful community 
+interaction. A pull request should reference the issue it is addressing. Once the 
+pull request is merged, the issue related to it will also be closed. If there is 
+additional discussion around implemementation the issue may be re-opened. Once 30 days
+have passed with no additional discussion, the [lock bot](https://github.com/apps/lock) will lock the issue. If
+additional discussion is desired, or if the pull request doesn't fully address the
+locked issue, please open a new issue referencing the locked issue.
 
 ### Tag Issues with Labels
 
