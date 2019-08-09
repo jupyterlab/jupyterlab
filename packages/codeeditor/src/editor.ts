@@ -292,13 +292,17 @@ export namespace CodeEditor {
       this._mimeType = { ...record, field: 'mimeType' };
       this._text = { ...record, field: 'text' };
 
-      DatastoreExt.listenField(this._mimeType, (source, c) => {
-        this._mimeTypeChanged.emit({
-          name: 'mimeType',
-          oldValue: c.previous,
-          newValue: c.current
-        });
-      });
+      DatastoreExt.listenField(
+        this._mimeType,
+        (source, c) => {
+          this._mimeTypeChanged.emit({
+            name: 'mimeType',
+            oldValue: c.previous,
+            newValue: c.current
+          });
+        },
+        this
+      );
 
       this.modelDB.createMap('selections');
     }

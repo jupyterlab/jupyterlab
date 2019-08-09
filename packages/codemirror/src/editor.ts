@@ -17,6 +17,8 @@ import { showDialog } from '@jupyterlab/apputils';
 
 import { Poll } from '@jupyterlab/coreutils';
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { UUID } from '@phosphor/coreutils';
@@ -135,8 +137,21 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
 
     // Connect to changes.
-    model.datastore.changed.connect(this._onValueChanged, this);
-    model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
+    const record = {
+      datastore: model.datastore,
+      schema: CodeEditor.SCHEMA,
+      record: 'data'
+    };
+    DatastoreExt.listenField(
+      { ...record, field: 'text' },
+      this._onValueChanged,
+      this
+    );
+    DatastoreExt.listenField(
+      { ...record, field: 'mimeType' },
+      this._onMimeTypeChanged,
+      this
+    );
     model.selections.changed.connect(this._onSelectionsChanged, this);
 
     CodeMirror.on(editor, 'keydown', (editor: CodeMirror.Editor, event) => {
@@ -856,31 +871,24 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Handle model value changes.
    */
-  private _onValueChanged(
-    sender: Datastore,
-    args: Datastore.IChangedArgs
-  ): void {
+  private _onValueChanged(sender: Datastore, changes: TextField.Change): void {
     // Ignore changes that have already been applied locally.
     if (this._changeGuard) {
       return;
     }
     const doc = this.doc;
-    const c = args.change[CodeEditor.SCHEMA.id];
-    if (c && c['data'] && c['data'].text) {
-      const textChanges = c['data'].text as TextField.Change;
-      textChanges.forEach(tc => {
-        // Convert the change data to codemirror range and inserted text.
-        const from = doc.posFromIndex(tc.index);
-        const to = doc.posFromIndex(tc.index + tc.removed.length);
-        const replacement = tc.inserted;
+    changes.forEach(tc => {
+      // Convert the change data to codemirror range and inserted text.
+      const from = doc.posFromIndex(tc.index);
+      const to = doc.posFromIndex(tc.index + tc.removed.length);
+      const replacement = tc.inserted;
 
-        // Apply the operation, setting the change guard so we can ignore
-        // the change signals from codemirror.
-        this._changeGuard = true;
-        doc.replaceRange(replacement, from, to, '+input');
-        this._changeGuard = false;
-      });
-    }
+      // Apply the operation, setting the change guard so we can ignore
+      // the change signals from codemirror.
+      this._changeGuard = true;
+      doc.replaceRange(replacement, from, to, '+input');
+      this._changeGuard = false;
+    });
   }
 
   /**

@@ -5,6 +5,8 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IDataConnector, Text } from '@jupyterlab/coreutils';
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
 import { ReadonlyJSONObject, JSONObject, JSONArray } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
@@ -89,7 +91,10 @@ export class CompletionHandler implements IDisposable {
       editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
       editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
-      model.datastore.changed.disconnect(this.onTextChanged, this);
+      if (this._listener) {
+        this._listener.dispose();
+        this._listener = null;
+      }
     }
 
     // Reset completer state.
@@ -103,7 +108,16 @@ export class CompletionHandler implements IDisposable {
 
       this._enabled = false;
       model.selections.changed.connect(this.onSelectionsChanged, this);
-      model.datastore.changed.connect(this.onTextChanged, this);
+      DatastoreExt.listenField(
+        {
+          datastore: model.datastore,
+          schema: CodeEditor.SCHEMA,
+          record: 'data',
+          field: 'text'
+        },
+        this.onTextChanged,
+        this
+      );
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
     }
@@ -180,14 +194,17 @@ export class CompletionHandler implements IDisposable {
     }
 
     const { start, end, value } = patch;
-    const table = editor.model.datastore.get(CodeEditor.SCHEMA);
-    editor.model.datastore.beginTransaction();
-    table.update({
-      data: {
-        text: { index: start, remove: end - start, text: value }
-      }
+    DatastoreExt.withTransaction(editor.model.datastore, () => {
+      DatastoreExt.updateField(
+        {
+          datastore: editor.model.datastore,
+          schema: CodeEditor.SCHEMA,
+          record: 'data',
+          field: 'text'
+        },
+        { index: start, remove: end - start, text: value }
+      );
     });
-    editor.model.datastore.endTransaction();
   }
 
   /**
@@ -451,6 +468,7 @@ export class CompletionHandler implements IDisposable {
   private _enabled = false;
   private _pending = 0;
   private _isDisposed = false;
+  private _listener: IDisposable;
 }
 
 /**
