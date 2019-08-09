@@ -30,17 +30,17 @@ import { IModelDB, ModelDB, IObservableMap } from '@jupyterlab/observables';
  * - Common JLab services which are based on the code editor should belong to `IEditorServices`.
  */
 export namespace CodeEditor {
-  export interface ICodeEditorFields extends ISchemaFields {
+  export interface IFields extends ISchemaFields {
     readonly mimeType: RegisterField<string>;
     readonly text: TextField;
   }
 
-  export interface ICodeEditorSchema extends Schema {
+  export interface ISchema extends Schema {
     id: '@jupyterlab/codeeditor:v1';
-    fields: ICodeEditorFields;
+    fields: IFields;
   }
 
-  export const SCHEMA: ICodeEditorSchema = {
+  export const SCHEMA: ISchema = {
     id: '@jupyterlab/codeeditor:v1',
     fields: {
       mimeType: Fields.String(),
@@ -255,17 +255,15 @@ export namespace CodeEditor {
         }
       });
       datastore.endTransaction();
-      const record: DatastoreExt.IRecordLocation<ICodeEditorSchema> = {
+      const record: DatastoreExt.IRecordLocation<ISchema> = {
         datastore,
         schema: SCHEMA,
         record: 'data'
       };
-      const mimeType: DatastoreExt.IFieldLocation<
-        ICodeEditorSchema,
-        'mimeType'
-      > = { ...record, field: 'mimeType' };
+      this._mimeType = { ...record, field: 'mimeType' };
+      this._text = { ...record, field: 'text' };
 
-      DatastoreExt.listenField(mimeType, (_, c) => {
+      DatastoreExt.listenField(this._mimeType, (source, c) => {
         this._mimeTypeChanged.emit({
           name: 'mimeType',
           oldValue: c.previous,
@@ -298,16 +296,15 @@ export namespace CodeEditor {
      * Get the value of the model.
      */
     get value(): string {
-      return this.datastore.get(SCHEMA).get('data')!.text;
+      return DatastoreExt.getField(this._text);
     }
     set value(value: string) {
       const current = this.value;
       DatastoreExt.withTransaction(this.datastore, () => {
-        const table = this.datastore.get(SCHEMA);
-        table.update({
-          data: {
-            text: { index: 0, remove: current.length, text: value }
-          }
+        DatastoreExt.updateField(this._text, {
+          index: 0,
+          remove: current.length,
+          text: value
         });
       });
     }
@@ -323,21 +320,16 @@ export namespace CodeEditor {
      * A mime type of the model.
      */
     get mimeType(): string {
-      return this.datastore.get(SCHEMA).get('data')!.mimeType;
+      return DatastoreExt.getField(this._mimeType);
     }
     set mimeType(newValue: string) {
       const oldValue = this.mimeType;
       if (oldValue === newValue) {
         return;
       }
-      let table = this.datastore.get(SCHEMA);
-      this.datastore.beginTransaction();
-      table.update({
-        data: {
-          mimeType: newValue
-        }
+      DatastoreExt.withTransaction(this.datastore, () => {
+        DatastoreExt.updateField(this._mimeType, newValue);
       });
-      this.datastore.endTransaction();
     }
 
     /**
@@ -361,6 +353,8 @@ export namespace CodeEditor {
 
     private _isDisposed = false;
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
+    private _mimeType: DatastoreExt.IFieldLocation<ISchema, 'mimeType'>;
+    private _text: DatastoreExt.IFieldLocation<ISchema, 'text'>;
   }
 
   /**
