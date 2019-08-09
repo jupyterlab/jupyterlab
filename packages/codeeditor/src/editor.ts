@@ -167,7 +167,7 @@ export namespace CodeEditor {
   export const defaultSelectionStyle: ISelectionStyle = {
     className: '',
     displayName: '',
-    color: 'black'
+    color: '#2196F3'
   };
 
   /**

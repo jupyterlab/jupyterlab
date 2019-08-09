@@ -786,7 +786,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
           markerOptions = this._toTextMarkerOptions(selection.style);
         }
         markers.push(this.doc.markText(anchor, head, markerOptions));
-      } else if (collaborator) {
+      } else {
         let caret = this._getCaret(collaborator);
         markers.push(
           this.doc.setBookmark(this._toCodeMirrorPosition(selection.end), {
@@ -997,7 +997,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Construct a caret element representing the position
    * of a collaborator's cursor.
    */
-  private _getCaret(collaborator: ICollaborator): HTMLElement {
+  private _getCaret(collaborator?: ICollaborator): HTMLElement {
     let name = collaborator ? collaborator.displayName : 'Anonymous';
     let color = collaborator ? collaborator.color : this._selectionStyle.color;
     let caret: HTMLElement = document.createElement('span');
@@ -1005,7 +1005,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     caret.style.borderBottomColor = color;
     caret.onmouseenter = () => {
       this._clearHover();
-      this._hoverId = collaborator.sessionId;
+      this._hoverId = collaborator ? collaborator.sessionId : UUID.uuid4();
       let rect = caret.getBoundingClientRect();
       // Construct and place the hover box.
       let hover = document.createElement('div');
