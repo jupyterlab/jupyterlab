@@ -15,8 +15,7 @@
     "rootDir": "src",
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
-    "target": "es2017",
-    "types": []
+    "target": "es2017"
   },
   "include": ["src/**/*"]
 }

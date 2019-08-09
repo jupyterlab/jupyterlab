@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "build",
+    "rootDir": "src",
+    "target": "es2017",
+    "types": ["jest"]
+  },
+  "include": ["src/*"]
+}
