@@ -34,14 +34,15 @@ const FACTORY_NAME = 'VDOM';
 
 const plugin: JupyterFrontEndPlugin<IVDOMTracker> = {
   id: '@jupyterlab/vdom-extension:factory',
-  requires: [IRenderMimeRegistry, INotebookTracker, ILayoutRestorer],
+  requires: [IRenderMimeRegistry],
+  optional: [INotebookTracker, ILayoutRestorer],
   provides: IVDOMTracker,
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     rendermime: IRenderMimeRegistry,
-    notebooks: INotebookTracker,
-    restorer: ILayoutRestorer
+    notebooks: INotebookTracker | null,
+    restorer: ILayoutRestorer | null
   ) => {
     const tracker = new WidgetTracker<MimeDocument>({
       namespace: 'vdom-widget'
@@ -57,23 +58,25 @@ const plugin: JupyterFrontEndPlugin<IVDOMTracker> = {
       0
     );
 
-    notebooks.widgetAdded.connect((sender, panel) => {
-      // Get the notebook's context and rendermime;
-      const {
-        context,
-        content: { rendermime }
-      } = panel;
+    if (notebooks) {
+      notebooks.widgetAdded.connect((sender, panel) => {
+        // Get the notebook's context and rendermime;
+        const {
+          context,
+          content: { rendermime }
+        } = panel;
 
-      // Add the renderer factory to the notebook's rendermime registry;
-      rendermime.addFactory(
-        {
-          safe: false,
-          mimeTypes: [MIME_TYPE],
-          createRenderer: options => new RenderedVDOM(options, context)
-        },
-        0
-      );
-    });
+        // Add the renderer factory to the notebook's rendermime registry;
+        rendermime.addFactory(
+          {
+            safe: false,
+            mimeTypes: [MIME_TYPE],
+            createRenderer: options => new RenderedVDOM(options, context)
+          },
+          0
+        );
+      });
+    }
 
     app.docRegistry.addFileType({
       name: 'vdom',
@@ -102,15 +105,17 @@ const plugin: JupyterFrontEndPlugin<IVDOMTracker> = {
     // Add widget factory to document registry.
     app.docRegistry.addWidgetFactory(factory);
 
-    // Handle state restoration.
-    void restorer.restore(tracker, {
-      command: 'docmanager:open',
-      args: widget => ({
-        path: widget.context.path,
-        factory: FACTORY_NAME
-      }),
-      name: widget => widget.context.path
-    });
+    if (restorer) {
+      // Handle state restoration.
+      void restorer.restore(tracker, {
+        command: 'docmanager:open',
+        args: widget => ({
+          path: widget.context.path,
+          factory: FACTORY_NAME
+        }),
+        name: widget => widget.context.path
+      });
+    }
 
     return tracker;
   }
