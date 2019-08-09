@@ -15,8 +15,6 @@ import {
 
 import { Response } from 'node-fetch';
 
-import { ISignal, Signal } from '@phosphor/signaling';
-
 import {
   Contents,
   TerminalSession,
@@ -175,35 +173,6 @@ export function handleRequest(item: IService, status: number, body: any) {
 
   // Override the fetch function.
   (item.serverSettings as any).fetch = temp;
-}
-
-/**
- * Expect a failure on a promise with the given message.
- */
-export async function expectFailure(
-  promise: Promise<any>,
-  message?: string
-): Promise<void> {
-  let called = false;
-  try {
-    await promise;
-    called = true;
-  } catch (err) {
-    if (message && err.message.indexOf(message) === -1) {
-      throw Error(`Error "${message}" not in: "${err.message}"`);
-    }
-  }
-  if (called) {
-    throw Error(`Failure was not triggered, message was: ${message}`);
-  }
-}
-
-/**
- * Do something in the future ensuring total ordering wrt to Promises.
- */
-export async function doLater(cb: () => void): Promise<void> {
-  await Promise.resolve(void 0);
-  cb();
 }
 
 /**
@@ -715,70 +684,6 @@ export class TerminalTester extends SocketTester {
   }
 
   private _onMessage: (msg: TerminalSession.IMessage) => void = null;
-}
-
-/**
- * Test a single emission from a signal.
- *
- * @param signal - The signal we are listening to.
- * @param find - An optional function to determine which emission to test,
- * defaulting to the first emission.
- * @param test - An optional function which contains the tests for the emission.
- * @param value - An optional value that the promise resolves to if it is
- * successful.
- *
- * @returns a promise that rejects if the function throws an error (e.g., if an
- * expect test doesn't pass), and resolves otherwise.
- *
- * #### Notes
- * The first emission for which the find function returns true will be tested in
- * the test function. If the find function is not given, the first signal
- * emission will be tested.
- *
- * You can test to see if any signal comes which matches a criteria by just
- * giving a find function. You can test the very first signal by just giving a
- * test function. And you can test the first signal matching the find criteria
- * by giving both.
- *
- * The reason this function is asynchronous is so that the thing causing the
- * signal emission (such as a websocket message) can be asynchronous.
- */
-export async function testEmission<T, U, V>(
-  signal: ISignal<T, U>,
-  options: {
-    find?: (a: T, b: U) => boolean;
-    test?: (a: T, b: U) => void;
-    value?: V;
-  }
-): Promise<V> {
-  const done = new PromiseDelegate<V>();
-  const object = {};
-  signal.connect((sender: T, args: U) => {
-    if (!options.find || options.find(sender, args)) {
-      try {
-        Signal.disconnectReceiver(object);
-        if (options.test) {
-          options.test(sender, args);
-        }
-      } catch (e) {
-        done.reject(e);
-      }
-      done.resolve(options.value || undefined);
-    }
-  }, object);
-  return done.promise;
-}
-
-/**
- * Test to see if a promise is fulfilled.
- *
- * @returns true if the promise is fulfilled (either resolved or rejected), and
- * false if the promise is still pending.
- */
-export async function isFulfilled<T>(p: PromiseLike<T>): Promise<boolean> {
-  const x = Object.create(null);
-  const result = await Promise.race([p, x]).catch(() => false);
-  return result !== x;
 }
 
 /**
