@@ -75,9 +75,9 @@ export class JSONEditor extends Widget {
 
     let model = new CodeEditor.Model();
 
-    model.value.text = 'No data!';
+    model.value = 'No data!';
     model.mimeType = 'application/json';
-    model.value.changed.connect(this._onValueChanged, this);
+    model.datastore.changed.connect(this._onValueChanged, this);
     this.model = model;
     this.editor = options.editorFactory({ host: this.editorHostNode, model });
     this.editor.setOption('readOnly', true);
@@ -226,7 +226,7 @@ export class JSONEditor extends Widget {
   private _onValueChanged(): void {
     let valid = true;
     try {
-      let value = JSON.parse(this.editor.model.value.text);
+      let value = JSON.parse(this.editor.model.value);
       this.removeClass(ERROR_CLASS);
       this._inputDirty =
         !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue);
@@ -280,7 +280,7 @@ export class JSONEditor extends Widget {
   private _mergeContent(): void {
     let model = this.editor.model;
     let old = this._originalValue;
-    let user = JSON.parse(model.value.text) as JSONObject;
+    let user = JSON.parse(model.value) as JSONObject;
     let source = this.source;
     if (!source) {
       return;
@@ -314,11 +314,11 @@ export class JSONEditor extends Widget {
     let content = this._source ? this._source.toJSON() : {};
     this._changeGuard = true;
     if (content === void 0) {
-      model.value.text = 'No data!';
+      model.value = 'No data!';
       this._originalValue = JSONExt.emptyObject;
     } else {
       let value = JSON.stringify(content, null, 4);
-      model.value.text = value;
+      model.value = value;
       this._originalValue = content;
       // Move the cursor to within the brace.
       if (value.length > 1 && value[0] === '{') {

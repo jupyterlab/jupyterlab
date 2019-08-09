@@ -271,7 +271,14 @@ export class CodeEditorWrapper extends Widget {
     };
     const position = this.editor.getPositionForCoordinate(coordinate);
     const offset = this.editor.getOffsetAt(position);
-    this.model.value.insert(offset, data);
+    const table = this.model.datastore.get(CodeEditor.SCHEMA);
+    this.model.datastore.beginTransaction();
+    table.update({
+      data: {
+        text: { index: offset, remove: 0, text: data }
+      }
+    });
+    this.model.datastore.endTransaction();
   }
 
   private _updateOnShow: boolean;

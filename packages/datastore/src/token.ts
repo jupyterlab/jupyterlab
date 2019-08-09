@@ -1,7 +1,13 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { Token } from '@phosphor/coreutils';
-import { Schema, Table, Datastore } from '@phosphor/datastore';
-import { DatastoreManager } from './manager';
+
+import { AnyField, Schema, Table, Datastore } from '@phosphor/datastore';
+
 import { ISignal, Signal } from '@phosphor/signaling';
+
+import { DatastoreManager } from './manager';
 
 /**
  * The table manager is what is exposed to the user to access a table.
@@ -61,6 +67,10 @@ export class DatastoreCreator {
 }
 
 export interface IDatastoreCreator extends DatastoreCreator {}
+
+export interface ISchemaFields {
+  readonly [name: string]: AnyField;
+}
 
 export const IDatastoreCreator = new Token<IDatastoreCreator>(
   'IDatastoreCreator'

@@ -21,11 +21,9 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { UUID } from '@phosphor/coreutils';
 
-import {
-  IObservableMap,
-  IObservableString,
-  ICollaborator
-} from '@jupyterlab/observables';
+import { Datastore, TextField } from '@phosphor/datastore';
+
+import { IObservableMap, ICollaborator } from '@jupyterlab/observables';
 
 import { Mode } from './mode';
 
@@ -121,7 +119,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     let doc = editor.getDoc();
 
     // Handle initial values for text, mimetype, and selections.
-    doc.setValue(model.value.text);
+    doc.setValue(model.value);
     this.clearHistory();
     this._onMimeTypeChanged();
     this._onCursorActivity();
@@ -137,7 +135,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
 
     // Connect to changes.
-    model.value.changed.connect(this._onValueChanged, this);
+    model.datastore.changed.connect(this._onValueChanged, this);
     model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
     model.selections.changed.connect(this._onSelectionsChanged, this);
 
@@ -859,37 +857,30 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handle model value changes.
    */
   private _onValueChanged(
-    value: IObservableString,
-    args: IObservableString.IChangedArgs
+    sender: Datastore,
+    args: Datastore.IChangedArgs
   ): void {
+    // Ignore changes that have already been applied locally.
     if (this._changeGuard) {
       return;
     }
-    this._changeGuard = true;
-    let doc = this.doc;
-    switch (args.type) {
-      case 'insert':
-        let pos = doc.posFromIndex(args.start);
-        // Replace the range, including a '+input' orign,
-        // which indicates that CodeMirror may merge changes
-        // for undo/redo purposes.
-        doc.replaceRange(args.value, pos, pos, '+input');
-        break;
-      case 'remove':
-        let from = doc.posFromIndex(args.start);
-        let to = doc.posFromIndex(args.end);
-        // Replace the range, including a '+input' orign,
-        // which indicates that CodeMirror may merge changes
-        // for undo/redo purposes.
-        doc.replaceRange('', from, to, '+input');
-        break;
-      case 'set':
-        doc.setValue(args.value);
-        break;
-      default:
-        break;
+    const doc = this.doc;
+    const c = args.change[CodeEditor.SCHEMA.id];
+    if (c && c['data'] && c['data'].text) {
+      const textChanges = c['data'].text as TextField.Change;
+      textChanges.forEach(tc => {
+        // Convert the change data to codemirror range and inserted text.
+        const from = doc.posFromIndex(tc.index);
+        const to = doc.posFromIndex(tc.index + tc.removed.length);
+        const replacement = tc.inserted;
+
+        // Apply the operation, setting the change guard so we can ignore
+        // the change signals from codemirror.
+        this._changeGuard = true;
+        doc.replaceRange(replacement, from, to, '+input');
+        this._changeGuard = false;
+      });
     }
-    this._changeGuard = false;
   }
 
   /**
@@ -902,18 +893,23 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     if (this._changeGuard) {
       return;
     }
+    const table = this.model.datastore.get(CodeEditor.SCHEMA);
+    const start = doc.indexFromPos(change.from);
+    const end = doc.indexFromPos(change.to);
+    const text = change.text.join('\n');
+    // If this was a local change, update the table.
     this._changeGuard = true;
-    let value = this._model.value;
-    let start = doc.indexFromPos(change.from);
-    let end = doc.indexFromPos(change.to);
-    let inserted = change.text.join('\n');
-
-    if (end !== start) {
-      value.remove(start, end);
-    }
-    if (inserted) {
-      value.insert(start, inserted);
-    }
+    this.model.datastore.beginTransaction();
+    table.update({
+      data: {
+        text: {
+          index: start,
+          remove: end - start,
+          text: text
+        }
+      }
+    });
+    this.model.datastore.endTransaction();
     this._changeGuard = false;
   }
 
@@ -1039,7 +1035,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._lastChange = null;
     let editor = this._editor;
     let doc = editor.getDoc();
-    if (doc.getValue() === this._model.value.text) {
+    if (doc.getValue() === this._model.value) {
       return;
     }
 
@@ -1053,7 +1049,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     );
     console.log(
       JSON.stringify({
-        model: this._model.value.text,
+        model: this._model.value,
         view: doc.getValue(),
         selections: this.getSelections(),
         cursor: this.getCursorPosition(),

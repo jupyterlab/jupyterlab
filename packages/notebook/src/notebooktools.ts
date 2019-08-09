@@ -435,7 +435,10 @@ export namespace NotebookTools {
         layout.widgets[0].dispose();
       }
       if (this._cellModel && !this._cellModel.isDisposed) {
-        this._cellModel.value.changed.disconnect(this._onValueChanged, this);
+        this._cellModel.datastore.changed.disconnect(
+          this._onValueChanged,
+          this
+        );
         this._cellModel.mimeTypeChanged.disconnect(
           this._onMimeTypeChanged,
           this
@@ -456,9 +459,9 @@ export namespace NotebookTools {
       let factory = activeCell.contentFactory.editorFactory;
 
       let cellModel = (this._cellModel = activeCell.model);
-      cellModel.value.changed.connect(this._onValueChanged, this);
+      cellModel.datastore.changed.connect(this._onValueChanged, this);
       cellModel.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
-      this._model.value.text = cellModel.value.text.split('\n')[0];
+      this._model.value = cellModel.value.split('\n')[0];
       this._model.mimeType = cellModel.mimeType;
 
       let model = this._model;
@@ -474,7 +477,7 @@ export namespace NotebookTools {
      * Handle a change to the current editor value.
      */
     private _onValueChanged(): void {
-      this._model.value.text = this._cellModel.value.text.split('\n')[0];
+      this._model.value = this._cellModel.value.split('\n')[0];
     }
 
     /**

@@ -63,7 +63,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       // Set the document edit mode on initial open if it looks like a new document.
       if (this.content.widgets.length === 1) {
         let cellModel = this.content.widgets[0].model;
-        if (cellModel.type === 'code' && cellModel.value.text === '') {
+        if (cellModel.type === 'code' && cellModel.value === '') {
           this.content.mode = 'edit';
         }
       }

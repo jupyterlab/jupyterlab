@@ -51,7 +51,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     this.node.dataset[CODE_RUNNER] = 'true';
     this.node.dataset[UNDOER] = 'true';
 
-    editor.model.value.text = context.model.toString();
+    editor.model.value = context.model.toString();
     void context.ready.then(() => {
       this._onContextReady();
     });
@@ -106,7 +106,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     const editorModel = editor.model;
 
     // Set the editor model value.
-    editorModel.value.text = contextModel.toString();
+    editorModel.value = contextModel.toString();
 
     // Prevent the initial loading from disk from being in the editor history.
     editor.clearHistory();
@@ -123,11 +123,11 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
    */
   private _onContentChanged(): void {
     const editorModel = this.editor.model;
-    const oldValue = editorModel.value.text;
+    const oldValue = editorModel.value;
     const newValue = this._context.model.toString();
 
     if (oldValue !== newValue) {
-      editorModel.value.text = newValue;
+      editorModel.value = newValue;
     }
   }
 

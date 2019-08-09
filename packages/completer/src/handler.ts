@@ -89,7 +89,7 @@ export class CompletionHandler implements IDisposable {
       editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
       editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
-      model.value.changed.disconnect(this.onTextChanged, this);
+      model.datastore.changed.disconnect(this.onTextChanged, this);
     }
 
     // Reset completer state.
@@ -103,7 +103,7 @@ export class CompletionHandler implements IDisposable {
 
       this._enabled = false;
       model.selections.changed.connect(this.onSelectionsChanged, this);
-      model.value.changed.connect(this.onTextChanged, this);
+      model.datastore.changed.connect(this.onTextChanged, this);
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
     }
@@ -155,7 +155,7 @@ export class CompletionHandler implements IDisposable {
     position: CodeEditor.IPosition
   ): Completer.ITextState {
     return {
-      text: editor.model.value.text,
+      text: editor.model.value,
       lineHeight: editor.lineHeight,
       charWidth: editor.charWidth,
       line: position.line,
@@ -180,8 +180,14 @@ export class CompletionHandler implements IDisposable {
     }
 
     const { start, end, value } = patch;
-    editor.model.value.remove(start, end);
-    editor.model.value.insert(start, value);
+    const table = editor.model.datastore.get(CodeEditor.SCHEMA);
+    editor.model.datastore.beginTransaction();
+    table.update({
+      data: {
+        text: { index: start, remove: end - start, text: value }
+      }
+    });
+    editor.model.datastore.endTransaction();
   }
 
   /**
@@ -341,7 +347,7 @@ export class CompletionHandler implements IDisposable {
       return Promise.reject(new Error('No active editor'));
     }
 
-    const text = editor.model.value.text;
+    const text = editor.model.value;
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
     const pending = ++this._pending;
     const state = this.getState(editor, position);

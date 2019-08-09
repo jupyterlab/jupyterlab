@@ -463,7 +463,7 @@ export class StaticNotebook extends Widget {
         break;
       case 'markdown':
         widget = this._createMarkdownCell(cell as IMarkdownCellModel);
-        if (cell.value.text === '') {
+        if (cell.value === '') {
           (widget as MarkdownCell).rendered = false;
         }
         break;
@@ -2000,7 +2000,7 @@ export class Notebook extends StaticNotebook {
     dragImage = Private.createDragImage(
       selected.length,
       countString,
-      activeCell.model.value.text.split('\n')[0].slice(0, 26)
+      activeCell.model.value.split('\n')[0].slice(0, 26)
     );
 
     // Set up the drag event.
@@ -2018,7 +2018,7 @@ export class Notebook extends StaticNotebook {
     this._drag.mimeData.setData('internal:cells', toMove);
     // Add mimeData for the text content of the selected cells,
     // allowing for drag/drop into plain text fields.
-    const textContent = toMove.map(cell => cell.model.value.text).join('\n');
+    const textContent = toMove.map(cell => cell.model.value).join('\n');
     this._drag.mimeData.setData('text/plain', textContent);
 
     // Remove mousemove and mouseup listeners and start the drag.

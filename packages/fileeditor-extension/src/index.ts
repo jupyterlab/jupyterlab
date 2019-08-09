@@ -448,9 +448,9 @@ function activate(
         const start = editor.getOffsetAt(selection.start);
         const end = editor.getOffsetAt(selection.end);
 
-        code = editor.model.value.text.substring(start, end);
+        code = editor.model.value.substring(start, end);
       } else if (MarkdownCodeBlocks.isMarkdown(extension)) {
-        const { text } = editor.model.value;
+        const text = editor.model.value;
         const blocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(text);
 
         for (let block of blocks) {
@@ -467,8 +467,8 @@ function activate(
         code = editor.getLine(selection.start.line);
         const cursor = editor.getCursorPosition();
         if (cursor.line + 1 === editor.lineCount) {
-          let text = editor.model.value.text;
-          editor.model.value.text = text + '\n';
+          let text = editor.model.value;
+          editor.model.value = text + '\n';
         }
         editor.setCursorPosition({
           line: cursor.line + 1,
@@ -497,7 +497,7 @@ function activate(
 
       let code = '';
       let editor = widget.editor;
-      let text = editor.model.value.text;
+      let text = editor.model.value;
       let path = widget.context.path;
       let extension = PathExt.extname(path);
 

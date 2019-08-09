@@ -1,22 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IChangedArgs } from '@jupyterlab/coreutils';
+
+import { ISchemaFields } from '@jupyterlab/datastore';
+
 import { JSONObject } from '@phosphor/coreutils';
+
+import {
+  Datastore,
+  Fields,
+  RegisterField,
+  Schema,
+  TextField
+} from '@phosphor/datastore';
 
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { IChangedArgs } from '@jupyterlab/coreutils';
-
-import {
-  IModelDB,
-  ModelDB,
-  IObservableValue,
-  ObservableValue,
-  IObservableMap,
-  IObservableString
-} from '@jupyterlab/observables';
+import { IModelDB, ModelDB, IObservableMap } from '@jupyterlab/observables';
 
 /**
  * A namespace for code editors.
@@ -27,6 +30,24 @@ import {
  * - Common JLab services which are based on the code editor should belong to `IEditorServices`.
  */
 export namespace CodeEditor {
+  export interface ICodeEditorFields extends ISchemaFields {
+    readonly mimeType: RegisterField<string>;
+    readonly text: TextField;
+  }
+
+  export interface ICodeEditorSchema extends Schema {
+    id: '@jupyterlab/codeeditor:v1';
+    fields: ICodeEditorFields;
+  }
+
+  export const SCHEMA: ICodeEditorSchema = {
+    id: '@jupyterlab/codeeditor:v1',
+    fields: {
+      mimeType: Fields.String(),
+      text: Fields.Text()
+    }
+  };
+
   /**
    * A zero-based position in the editor.
    */
@@ -178,7 +199,7 @@ export namespace CodeEditor {
     /**
      * The text stored in the model.
      */
-    readonly value: IObservableString;
+    value: string;
 
     /**
      * A mime type of the model.
@@ -198,6 +219,11 @@ export namespace CodeEditor {
      * data is stored.
      */
     readonly modelDB: IModelDB;
+
+    /**
+     * The underlying datastore instance in which the model data is stored.
+     */
+    readonly datastore: Datastore;
   }
 
   /**
@@ -216,12 +242,27 @@ export namespace CodeEditor {
         this.modelDB = new ModelDB();
       }
 
-      let value = this.modelDB.createString('value');
-      value.text = value.text || options.value || '';
+      this.datastore = Datastore.create({ id: 1, schemas: [SCHEMA] });
+      this.datastore.beginTransaction();
+      let editorTable = this.datastore.get(SCHEMA);
+      editorTable.update({
+        data: {
+          text: { index: 0, remove: 0, text: options.value || '' },
+          mimeType: options.mimeType || 'text/plain'
+        }
+      });
+      this.datastore.endTransaction();
 
-      let mimeType = this.modelDB.createValue('mimeType');
-      mimeType.set(options.mimeType || 'text/plain');
-      mimeType.changed.connect(this._onMimeTypeChanged, this);
+      this.datastore.changed.connect((source, change) => {
+        const c = change.change[SCHEMA.id] && change.change[SCHEMA.id]['data'];
+        if (c && c.mimeType) {
+          this._mimeTypeChanged.emit({
+            name: 'mimeType',
+            oldValue: (c.mimeType as RegisterField.Change<string>).previous,
+            newValue: (c.mimeType as RegisterField.Change<string>).current
+          });
+        }
+      });
 
       this.modelDB.createMap('selections');
     }
@@ -233,6 +274,11 @@ export namespace CodeEditor {
     readonly modelDB: IModelDB;
 
     /**
+     * The underlying datastore in which the model data is stored.
+     */
+    readonly datastore: Datastore;
+
+    /**
      * A signal emitted when a mimetype changes.
      */
     get mimeTypeChanged(): ISignal<this, IChangedArgs<string>> {
@@ -242,8 +288,19 @@ export namespace CodeEditor {
     /**
      * Get the value of the model.
      */
-    get value(): IObservableString {
-      return this.modelDB.get('value') as IObservableString;
+    get value(): string {
+      return this.datastore.get(SCHEMA).get('data')!.text;
+    }
+    set value(value: string) {
+      let current = this.value;
+      let table = this.datastore.get(SCHEMA);
+      this.datastore.beginTransaction();
+      table.update({
+        data: {
+          text: { index: 0, remove: current.length, text: value }
+        }
+      });
+      this.datastore.endTransaction();
     }
 
     /**
@@ -257,14 +314,21 @@ export namespace CodeEditor {
      * A mime type of the model.
      */
     get mimeType(): string {
-      return this.modelDB.getValue('mimeType') as string;
+      return this.datastore.get(SCHEMA).get('data')!.mimeType;
     }
     set mimeType(newValue: string) {
       const oldValue = this.mimeType;
       if (oldValue === newValue) {
         return;
       }
-      this.modelDB.setValue('mimeType', newValue);
+      let table = this.datastore.get(SCHEMA);
+      this.datastore.beginTransaction();
+      table.update({
+        data: {
+          mimeType: newValue
+        }
+      });
+      this.datastore.endTransaction();
     }
 
     /**
@@ -282,19 +346,8 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
-      this.value.text = '';
+      this.datastore.dispose();
       Signal.clearData(this);
-    }
-
-    private _onMimeTypeChanged(
-      mimeType: IObservableValue,
-      args: ObservableValue.IChangedArgs
-    ): void {
-      this._mimeTypeChanged.emit({
-        name: 'mimeType',
-        oldValue: args.oldValue as string,
-        newValue: args.newValue as string
-      });
     }
 
     private _isDisposed = false;
