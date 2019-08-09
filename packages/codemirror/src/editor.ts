@@ -137,18 +137,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
 
     // Connect to changes.
-    const record = {
-      datastore: model.datastore,
-      schema: CodeEditor.SCHEMA,
-      record: 'data'
-    };
     DatastoreExt.listenField(
-      { ...record, field: 'text' },
+      { ...model.record, field: 'text' },
       this._onValueChanged,
       this
     );
     DatastoreExt.listenField(
-      { ...record, field: 'mimeType' },
+      { ...model.record, field: 'mimeType' },
       this._onMimeTypeChanged,
       this
     );

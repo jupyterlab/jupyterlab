@@ -109,12 +109,7 @@ export class CompletionHandler implements IDisposable {
       this._enabled = false;
       model.selections.changed.connect(this.onSelectionsChanged, this);
       DatastoreExt.listenField(
-        {
-          datastore: model.datastore,
-          schema: CodeEditor.SCHEMA,
-          record: 'data',
-          field: 'text'
-        },
+        { ...model.record, field: 'text' },
         this.onTextChanged,
         this
       );
@@ -196,12 +191,7 @@ export class CompletionHandler implements IDisposable {
     const { start, end, value } = patch;
     DatastoreExt.withTransaction(editor.model.datastore, () => {
       DatastoreExt.updateField(
-        {
-          datastore: editor.model.datastore,
-          schema: CodeEditor.SCHEMA,
-          record: 'data',
-          field: 'text'
-        },
+        { ...editor.model.record, field: 'text' },
         { index: start, remove: end - start, text: value }
       );
     });

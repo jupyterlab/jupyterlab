@@ -253,6 +253,11 @@ export namespace CodeEditor {
      * The underlying datastore instance in which the model data is stored.
      */
     readonly datastore: Datastore;
+
+    /**
+     * The record in the datastore in which this codeeditor keeps its data.
+     */
+    readonly record: DatastoreExt.RecordLocation<ISchema>;
   }
 
   /**
@@ -284,16 +289,14 @@ export namespace CodeEditor {
         }
       });
       datastore.endTransaction();
-      const record: DatastoreExt.RecordLocation<ISchema> = {
+      this.record = {
         datastore,
         schema: SCHEMA,
         record: 'data'
       };
-      this._mimeType = { ...record, field: 'mimeType' };
-      this._text = { ...record, field: 'text' };
 
       DatastoreExt.listenField(
-        this._mimeType,
+        { ...this.record, field: 'mimeType' },
         (source, c) => {
           this._mimeTypeChanged.emit({
             name: 'mimeType',
@@ -319,6 +322,11 @@ export namespace CodeEditor {
     readonly datastore: Datastore;
 
     /**
+     * The record in the datastore in which this codeeditor keeps its data.
+     */
+    readonly record: DatastoreExt.RecordLocation<ISchema>;
+
+    /**
      * A signal emitted when a mimetype changes.
      */
     get mimeTypeChanged(): ISignal<this, IChangedArgs<string>> {
@@ -329,16 +337,19 @@ export namespace CodeEditor {
      * Get the value of the model.
      */
     get value(): string {
-      return DatastoreExt.getField(this._text);
+      return DatastoreExt.getField({ ...this.record, field: 'text' });
     }
     set value(value: string) {
       const current = this.value;
       DatastoreExt.withTransaction(this.datastore, () => {
-        DatastoreExt.updateField(this._text, {
-          index: 0,
-          remove: current.length,
-          text: value
-        });
+        DatastoreExt.updateField(
+          { ...this.record, field: 'text' },
+          {
+            index: 0,
+            remove: current.length,
+            text: value
+          }
+        );
       });
     }
 
@@ -353,7 +364,7 @@ export namespace CodeEditor {
      * A mime type of the model.
      */
     get mimeType(): string {
-      return DatastoreExt.getField(this._mimeType);
+      return DatastoreExt.getField({ ...this.record, field: 'mimeType' });
     }
     set mimeType(newValue: string) {
       const oldValue = this.mimeType;
@@ -361,7 +372,10 @@ export namespace CodeEditor {
         return;
       }
       DatastoreExt.withTransaction(this.datastore, () => {
-        DatastoreExt.updateField(this._mimeType, newValue);
+        DatastoreExt.updateField(
+          { ...this.record, field: 'mimeType' },
+          newValue
+        );
       });
     }
 
@@ -386,8 +400,6 @@ export namespace CodeEditor {
 
     private _isDisposed = false;
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
-    private _mimeType: DatastoreExt.FieldLocation<ISchema, 'mimeType'>;
-    private _text: DatastoreExt.FieldLocation<ISchema, 'text'>;
   }
 
   /**
