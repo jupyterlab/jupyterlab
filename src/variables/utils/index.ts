@@ -1,2 +1,2 @@
-export * from './variableTableDescription'
+export * from './variableTableDescription';
 export * from './variableDescription';

@@ -1,46 +1,45 @@
-import { Panel } from "@phosphor/widgets";
+import { Panel } from '@phosphor/widgets';
 import { VariableTableDescription } from './variableTableDescription';
 import { IVariablesModel } from '../model';
-import { IVariable } from "../variable";
-
-
+import { IVariable } from '../variable';
 
 export class VariableDescription extends Panel {
-    
-    readonly table: Panel;
-    readonly descriptionBox: Panel; 
-    model: IVariablesModel;
-    currentVariable: any;
+  readonly table: Panel;
+  readonly descriptionBox: Panel;
+  model: IVariablesModel;
+  currentVariable: any;
 
-    constructor(model: IVariablesModel){
-        super();
-        this.model = model;
-        this.currentVariable = this.model.variable;
-        this.table = new VariableTableDescription(this.model);
-        this.table.addClass('debugger-variable__table');
-        this.addWidget(this.table);
+  constructor(model: IVariablesModel) {
+    super();
+    this.model = model;
+    this.currentVariable = this.model.variable;
+    this.table = new VariableTableDescription(this.model);
+    this.table.addClass('debugger-variable__table');
+    this.addWidget(this.table);
 
-        this.descriptionBox = new Panel();
-        this.descriptionBox.addClass('debugger-variable__description');
-        this.addWidget(this.descriptionBox);
-        this.descriptionBox.node.innerHTML = '<b> Select Variable </b>';
-        
-        //observable change current variable
-        this.model.changeCurrentVariable.connect( (model: IVariablesModel , variable: IVariable) => {
-            console.log(variable);
-            this.descriptionBox.node.innerHTML = this.renderDescription(this.model.variable);
-        }); 
-    }
+    this.descriptionBox = new Panel();
+    this.descriptionBox.addClass('debugger-variable__description');
+    this.addWidget(this.descriptionBox);
+    this.descriptionBox.node.innerHTML = '<b> Select Variable </b>';
 
+    //observable change current variable
+    this.model.changeCurrentVariable.connect(
+      (model: IVariablesModel, variable: IVariable) => {
+        console.log(variable);
+        this.descriptionBox.node.innerHTML = this.renderDescription(
+          this.model.variable
+        );
+      }
+    );
+  }
 
+  // consider
 
-    // consider 
-
-    protected renderDescription(variable : IVariable) {
-        const descriptionElementDOM = `<b>name: ${variable.name}</b>
+  protected renderDescription(variable: IVariable) {
+    const descriptionElementDOM = `<b>name: ${variable.name}</b>
                                        <p>type: ${variable.type} </p>
                                        Description:
-                                       <p>${variable.description}</p> `
-        return descriptionElementDOM;
-    }
+                                       <p>${variable.description}</p> `;
+    return descriptionElementDOM;
+  }
 }

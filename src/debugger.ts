@@ -12,7 +12,6 @@ import { IDisposable } from '@phosphor/disposable';
 import { DebuggerSidebar } from './sidebar';
 
 export class Debugger extends BoxPanel {
-
   readonly model: Debugger.Model;
 
   readonly tabs = new TabPanel();
@@ -30,8 +29,6 @@ export class Debugger extends BoxPanel {
     this.addWidget(this.tabs);
     this.addWidget(this.sidebar);
   }
-
-  
 
   dispose(): void {
     if (this.isDisposed) {
