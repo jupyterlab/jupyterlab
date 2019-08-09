@@ -102,7 +102,7 @@ export class DebugSession implements IDebugger.ISession {
    * Send a debug request message to the kernel.
    * @param msg debug request message to send to the kernel.
    */
-  public async _sendDebugMessage(
+  private async _sendDebugMessage(
     msg: KernelMessage.IDebugRequestMsg['content']
   ): Promise<KernelMessage.IDebugReplyMsg> {
     const reply = new PromiseDelegate<KernelMessage.IDebugReplyMsg>();
