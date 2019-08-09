@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
 import { IObservableJSON } from '@jupyterlab/observables';
 
 import { JSONExt, JSONObject } from '@phosphor/coreutils';
@@ -77,7 +79,11 @@ export class JSONEditor extends Widget {
 
     model.value = 'No data!';
     model.mimeType = 'application/json';
-    model.datastore.changed.connect(this._onValueChanged, this);
+    DatastoreExt.listenField(
+      { ...model.record, field: 'text' },
+      this._onValueChanged,
+      this
+    );
     this.model = model;
     this.editor = options.editorFactory({ host: this.editorHostNode, model });
     this.editor.setOption('readOnly', true);

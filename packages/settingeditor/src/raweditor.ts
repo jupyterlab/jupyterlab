@@ -7,6 +7,8 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { CommandRegistry } from '@phosphor/commands';
@@ -84,7 +86,11 @@ export class RawEditor extends SplitPanel {
 
     user.addClass(USER_CLASS);
     user.editor.model.mimeType = 'text/javascript';
-    user.editor.model.datastore.changed.connect(this._onTextChanged, this);
+    DatastoreExt.listenField(
+      { ...user.editor.model.record, field: 'text' },
+      this._onTextChanged,
+      this
+    );
 
     // Create and set up an inspector.
     this._inspector = createInspector(this, options.rendermime);

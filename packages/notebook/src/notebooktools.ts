@@ -1,16 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each, chain } from '@phosphor/algorithm';
-
-import { JSONObject, JSONValue } from '@phosphor/coreutils';
-
-import { ConflatableMessage, Message, MessageLoop } from '@phosphor/messaging';
-
-import { h, VirtualDOM, VirtualNode } from '@phosphor/virtualdom';
-
-import { PanelLayout, Widget } from '@phosphor/widgets';
-
 import { Collapse, Styling } from '@jupyterlab/apputils';
 
 import { Cell, ICellModel } from '@jupyterlab/cells';
@@ -23,7 +13,21 @@ import {
 
 import { nbformat } from '@jupyterlab/coreutils';
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
 import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
+
+import { ArrayExt, each, chain } from '@phosphor/algorithm';
+
+import { JSONObject, JSONValue } from '@phosphor/coreutils';
+
+import { IDisposable } from '@phosphor/disposable';
+
+import { ConflatableMessage, Message, MessageLoop } from '@phosphor/messaging';
+
+import { h, VirtualDOM, VirtualNode } from '@phosphor/virtualdom';
+
+import { PanelLayout, Widget } from '@phosphor/widgets';
 
 import { NotebookPanel } from './panel';
 import { INotebookModel } from './model';
@@ -434,15 +438,13 @@ export namespace NotebookTools {
       for (let i = 0; i < count; i++) {
         layout.widgets[0].dispose();
       }
-      if (this._cellModel && !this._cellModel.isDisposed) {
-        this._cellModel.datastore.changed.disconnect(
-          this._onValueChanged,
-          this
-        );
-        this._cellModel.mimeTypeChanged.disconnect(
-          this._onMimeTypeChanged,
-          this
-        );
+      if (this._mimeTypeListener) {
+        this._mimeTypeListener.dispose();
+        this._mimeTypeListener = null;
+      }
+      if (this._valueListener) {
+        this._valueListener.dispose();
+        this._valueListener = null;
       }
       if (!activeCell) {
         let cell = new Widget();
@@ -459,8 +461,16 @@ export namespace NotebookTools {
       let factory = activeCell.contentFactory.editorFactory;
 
       let cellModel = (this._cellModel = activeCell.model);
-      cellModel.datastore.changed.connect(this._onValueChanged, this);
-      cellModel.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
+      this._valueListener = DatastoreExt.listenField(
+        { ...cellModel.record, field: 'text' },
+        this._onValueChanged,
+        this
+      );
+      this._mimeTypeListener = DatastoreExt.listenField(
+        { ...cellModel.record, field: 'mimeType' },
+        this._onMimeTypeChanged,
+        this
+      );
       this._model.value = cellModel.value.split('\n')[0];
       this._model.mimeType = cellModel.mimeType;
 
@@ -489,6 +499,8 @@ export namespace NotebookTools {
 
     private _model = new CodeEditor.Model();
     private _cellModel: CodeEditor.IModel;
+    private _mimeTypeListener: IDisposable | null = null;
+    private _valueListener: IDisposable | null = null;
   }
 
   /**
