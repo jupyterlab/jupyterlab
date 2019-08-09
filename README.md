@@ -46,5 +46,8 @@ Make sure `xeus-python` is installed and `jupyter --paths` points to where the k
 To run the tests:
 
 ```bash
+# [Optional] to enable the logs for xeus-python
+export XEUS_LOG=1
+
 jlpm run test
 ```

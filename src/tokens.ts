@@ -37,6 +37,26 @@ export namespace IDebugger {
      * The code editors in a debugger session.
      */
     editors: CodeEditor.IEditor[];
+
+    /**
+     * Start a new debug session
+     */
+    start(): void;
+
+    /**
+     * Stop a running new debug session
+     */
+    stop(): void;
+  }
+
+  /**
+   * A visual debugger client.
+   */
+  export interface IClient extends IObservableDisposable {
+    /**
+     * The debug session.
+     */
+    session: ISession;
   }
 }
 

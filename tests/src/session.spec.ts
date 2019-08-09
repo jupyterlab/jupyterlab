@@ -32,10 +32,11 @@ describe('DebugSession', () => {
     });
   });
 
-  describe('#start()', () => {
-    it('should start a new debug session', async () => {
+  describe('#start() and #stop()', () => {
+    it('should start and stop new debug session', async () => {
       const debugSession = new DebugSession({ client });
       await debugSession.start();
+      await debugSession.stop();
     });
   });
 });
