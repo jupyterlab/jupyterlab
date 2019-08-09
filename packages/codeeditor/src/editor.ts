@@ -8,6 +8,7 @@ import { JSONObject } from '@phosphor/coreutils';
 import {
   Datastore,
   Fields,
+  MapField,
   RegisterField,
   Schema,
   TextField
@@ -17,7 +18,7 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { IModelDB, ModelDB, IObservableMap } from '@jupyterlab/observables';
+import { IModelDB, ModelDB } from '@jupyterlab/observables';
 
 /**
  * A namespace for code editors.
@@ -36,10 +37,16 @@ export namespace CodeEditor {
      * The mime type for the editor.
      */
     readonly mimeType: RegisterField<string>;
+
     /**
      * The text content of the editor.
      */
     readonly text: TextField;
+
+    /**
+     * The cursors for the editor.
+     */
+    readonly selections: MapField<ITextSelection[]>;
   }
 
   /**
@@ -71,7 +78,8 @@ export namespace CodeEditor {
      */
     fields: {
       mimeType: Fields.String(),
-      text: Fields.Text()
+      text: Fields.Text(),
+      selections: Fields.Map<ITextSelection[]>()
     }
   };
 
@@ -234,7 +242,7 @@ export namespace CodeEditor {
     /**
      * The currently selected code.
      */
-    readonly selections: IObservableMap<ITextSelection[]>;
+    readonly selections: { [id: string]: ITextSelection[] };
 
     /**
      * The underlying `IModelDB` instance in which model
@@ -281,11 +289,10 @@ export namespace CodeEditor {
       DatastoreExt.withTransaction(datastore, () => {
         DatastoreExt.updateRecord(this.record, {
           text: { index: 0, remove: 0, text: options.value || '' },
-          mimeType: options.mimeType || 'text/plain'
+          mimeType: options.mimeType || 'text/plain',
+          selections: {}
         });
       });
-
-      this.modelDB.createMap('selections');
     }
 
     /**
@@ -327,8 +334,8 @@ export namespace CodeEditor {
     /**
      * Get the selections for the model.
      */
-    get selections(): IObservableMap<ITextSelection[]> {
-      return this.modelDB.get('selections') as IObservableMap<ITextSelection[]>;
+    get selections(): { [id: string]: ITextSelection[] } {
+      return DatastoreExt.getField({ ...this.record, field: 'selections' });
     }
 
     /**

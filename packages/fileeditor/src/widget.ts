@@ -72,10 +72,6 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
           ...CodeEditor.defaultSelectionStyle,
           color: localCollaborator.color
         };
-
-        collaborators.changed.connect(this._onCollaboratorsChanged, this);
-        // Trigger an initial onCollaboratorsChanged event.
-        this._onCollaboratorsChanged();
       });
     }
   }
@@ -128,24 +124,6 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
 
     if (oldValue !== newValue) {
       editorModel.value = newValue;
-    }
-  }
-
-  /**
-   * Handle a change to the collaborators on the model
-   * by updating UI elements associated with them.
-   */
-  private _onCollaboratorsChanged(): void {
-    // If there are selections corresponding to non-collaborators,
-    // they are stale and should be removed.
-    let collaborators = this._context.model.modelDB.collaborators;
-    if (!collaborators) {
-      return;
-    }
-    for (let key of this.editor.model.selections.keys()) {
-      if (!collaborators.has(key)) {
-        this.editor.model.selections.delete(key);
-      }
     }
   }
 

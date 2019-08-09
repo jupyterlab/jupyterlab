@@ -50,7 +50,11 @@ export class CodeEditorWrapper extends Widget {
       config: options.config,
       selectionStyle: options.selectionStyle
     }));
-    editor.model.selections.changed.connect(this._onSelectionsChanged, this);
+    DatastoreExt.listenField(
+      { ...editor.model.record, field: 'selections' },
+      this._onSelectionsChanged,
+      this
+    );
     this._updateOnShow = options.updateOnShow !== false;
   }
 

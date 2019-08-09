@@ -34,6 +34,8 @@ import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
 import { IObservableMap, IObservableList } from '@jupyterlab/observables';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -214,23 +216,6 @@ export class StaticNotebook extends Widget {
     }
     let oldValue = this._model;
     this._model = newValue;
-
-    if (oldValue && oldValue.modelDB.isCollaborative) {
-      void oldValue.modelDB.connected.then(() => {
-        oldValue.modelDB.collaborators.changed.disconnect(
-          this._onCollaboratorsChanged,
-          this
-        );
-      });
-    }
-    if (newValue && newValue.modelDB.isCollaborative) {
-      void newValue.modelDB.connected.then(() => {
-        newValue.modelDB.collaborators.changed.connect(
-          this._onCollaboratorsChanged,
-          this
-        );
-      });
-    }
 
     // Trigger private, protected, and public changes.
     this._onModelChanged(oldValue, newValue);
@@ -571,22 +556,6 @@ export class StaticNotebook extends Widget {
         widget.model.mimeType = this._mimetype;
       }
     });
-  }
-
-  /**
-   * Handle an update to the collaborators.
-   */
-  private _onCollaboratorsChanged(): void {
-    // If there are selections corresponding to non-collaborators,
-    // they are stale and should be removed.
-    for (let i = 0; i < this.widgets.length; i++) {
-      let cell = this.widgets[i];
-      for (let key of cell.model.selections.keys()) {
-        if (!this._model.modelDB.collaborators.has(key)) {
-          cell.model.selections.delete(key);
-        }
-      }
-    }
   }
 
   /**
@@ -2144,7 +2113,12 @@ export class Notebook extends StaticNotebook {
     for (let i = 0; i < this.widgets.length; i++) {
       if (i !== this._activeCellIndex) {
         let cell = this.widgets[i];
-        cell.model.selections.delete(cell.editor.uuid);
+        DatastoreExt.withTransaction(cell.model.datastore, () => {
+          DatastoreExt.updateField(
+            { ...cell.model.record, field: 'selections' },
+            { [cell.editor.uuid]: null }
+          );
+        });
       }
     }
   }

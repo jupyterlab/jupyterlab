@@ -23,9 +23,9 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { UUID } from '@phosphor/coreutils';
 
-import { Datastore, TextField } from '@phosphor/datastore';
+import { Datastore, MapField, TextField } from '@phosphor/datastore';
 
-import { IObservableMap, ICollaborator } from '@jupyterlab/observables';
+import { ICollaborator } from '@jupyterlab/observables';
 
 import { Mode } from './mode';
 
@@ -147,7 +147,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       this._onMimeTypeChanged,
       this
     );
-    model.selections.changed.connect(this._onSelectionsChanged, this);
+    DatastoreExt.listenField(
+      { ...model.record, field: 'selections' },
+      this._onSelectionsChanged,
+      this
+    );
 
     CodeMirror.on(editor, 'keydown', (editor: CodeMirror.Editor, event) => {
       let index = ArrayExt.findFirstIndex(this._keydownHandlers, handler => {
@@ -540,7 +544,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // will get screened out in _onCursorsChanged(). Make an
     // exception for this method.
     if (!this.editor.hasFocus()) {
-      this.model.selections.set(this.uuid, this.getSelections());
+      DatastoreExt.withTransaction(this.model.datastore, () => {
+        DatastoreExt.updateField(
+          { ...this.model.record, field: 'selections' },
+          { [this.uuid]: this.getSelections() }
+        );
+      });
     }
   }
 
@@ -702,16 +711,17 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handles a selections change.
    */
   private _onSelectionsChanged(
-    selections: IObservableMap<CodeEditor.ITextSelection[]>,
-    args: IObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>
+    sender: Datastore,
+    args: MapField.Change<CodeEditor.ITextSelection[]>
   ): void {
-    const uuid = args.key;
-    if (uuid !== this.uuid) {
-      this._cleanSelections(uuid);
-      if (args.type !== 'remove' && args.newValue) {
-        this._markSelections(uuid, args.newValue);
+    Object.keys(args.current).forEach(uuid => {
+      if (uuid !== this.uuid) {
+        this._cleanSelections(uuid);
+        if (args.current[uuid] !== null && args.current[uuid]) {
+          this._markSelections(uuid, args.current[uuid]);
+        }
       }
-    }
+    });
   }
 
   /**
@@ -795,8 +805,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // Only add selections if the editor has focus. This avoids unwanted
     // triggering of cursor activity due to collaborator actions.
     if (this._editor.hasFocus()) {
-      const selections = this.getSelections();
-      this.model.selections.set(this.uuid, selections);
+      DatastoreExt.withTransaction(this.model.datastore, () => {
+        DatastoreExt.updateField(
+          { ...this.model.record, field: 'selections' },
+          { [this.uuid]: this.getSelections() }
+        );
+      });
     }
   }
 

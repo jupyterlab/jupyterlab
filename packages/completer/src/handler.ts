@@ -86,14 +86,15 @@ export class CompletionHandler implements IDisposable {
 
     // Clean up and disconnect from old editor.
     if (editor && !editor.isDisposed) {
-      const model = editor.model;
-
       editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
       editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
-      model.selections.changed.disconnect(this.onSelectionsChanged, this);
-      if (this._listener) {
-        this._listener.dispose();
-        this._listener = null;
+      if (this._selectionListener) {
+        this._selectionListener.dispose();
+        this._selectionListener = null;
+      }
+      if (this._textListener) {
+        this._textListener.dispose();
+        this._textListener = null;
       }
     }
 
@@ -107,10 +108,14 @@ export class CompletionHandler implements IDisposable {
       const model = editor.model;
 
       this._enabled = false;
-      model.selections.changed.connect(this.onSelectionsChanged, this);
-      DatastoreExt.listenField(
+      this._textListener = DatastoreExt.listenField(
         { ...model.record, field: 'text' },
         this.onTextChanged,
+        this
+      );
+      this._selectionListener = DatastoreExt.listenField(
+        { ...model.record, field: 'selections' },
+        this.onSelectionsChanged,
         this
       );
       // On initial load, manually check the cursor position.
@@ -458,7 +463,8 @@ export class CompletionHandler implements IDisposable {
   private _enabled = false;
   private _pending = 0;
   private _isDisposed = false;
-  private _listener: IDisposable;
+  private _textListener: IDisposable | null = null;
+  private _selectionListener: IDisposable | null = null;
 }
 
 /**
