@@ -942,6 +942,8 @@ export class Notebook extends StaticNotebook {
       return;
     }
     this._activeCell = null;
+    this._activeCellIndex = -1;
+    this._trimSelections();
     super.dispose();
   }
 

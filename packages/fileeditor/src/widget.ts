@@ -1,7 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { StackedLayout, Widget } from '@phosphor/widgets';
+import {
+  CodeEditor,
+  IEditorServices,
+  IEditorMimeTypeService,
+  CodeEditorWrapper
+} from '@jupyterlab/codeeditor';
+
+import { DatastoreExt } from '@jupyterlab/datastore';
 
 import {
   ABCWidgetFactory,
@@ -10,16 +17,11 @@ import {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 
-import {
-  CodeEditor,
-  IEditorServices,
-  IEditorMimeTypeService,
-  CodeEditorWrapper
-} from '@jupyterlab/codeeditor';
-
 import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { Message } from '@phosphor/messaging';
+
+import { StackedLayout, Widget } from '@phosphor/widgets';
 
 /**
  * The data attribute added to a widget that can run code.
@@ -88,6 +90,30 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
    */
   get ready(): Promise<void> {
     return this._ready.promise;
+  }
+
+  /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._trimSelections();
+    super.dispose();
+  }
+
+  /**
+   * Remove selections from inactive cells to avoid
+   * spurious cursors.
+   */
+  private _trimSelections(): void {
+    DatastoreExt.withTransaction(this.model.datastore, () => {
+      DatastoreExt.updateField(
+        { ...this.model.record, field: 'selections' },
+        { [this.editor.uuid]: null }
+      );
+    });
   }
 
   /**
