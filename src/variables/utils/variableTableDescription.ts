@@ -1,29 +1,19 @@
 import { h, VirtualDOM, VirtualElement } from "@phosphor/virtualdom";
 import { SplitPanel } from '@phosphor/widgets';
 
-const MOCK_DATA_ROW = {
-    variables: [
-        {
-            name: 'test 1',
-            value: 'function()',
-            desription:'def test1(): return 0'
-        },
-        {
-            name: 'test 2',
-            value: 'function()',
-            desription:'def test2(): return 0'
-        }
-    ]
-}
+
+
+const ROW_CLASS = 'debugger-variables_table-row';
+const SELECTED_CLASS = '-selected';
 
 
 export class VariableTableDescription extends SplitPanel {
 
-    private _modelRow: any;
+    private _model: any;
 
-    constructor() {
+    constructor(model: any) {
         super();
-        this._modelRow = MOCK_DATA_ROW;
+        this._model = model;
         this.renderHead();
         this.renderBody();
     }
@@ -53,13 +43,14 @@ export class VariableTableDescription extends SplitPanel {
         const body = h.div(
             h.table(
                 this.renderVariableNodes({
-                    variables: this._modelRow.variables,
+                    variables: this._model.variables,
                     nodes: [],
                     indent: 0
                 })
             )
         );
-        this.node.appendChild(VirtualDOM.realize(body));
+        // this.node.appendChild(VirtualDOM.realize(body));
+        VirtualDOM.render(body,this.node);
     }
 
 
@@ -79,8 +70,8 @@ export class VariableTableDescription extends SplitPanel {
 
     protected renderRow(variable: any, indent: number) {
         return h.tr({
-            className: '',
-            onmousedown: () => { },
+            className: this.createVariableNodeClass(variable)  ,
+            onmousedown: (scope) => this.setCurrentVariable(variable, scope),
             ondblclick: () => { }
         },
             h.td({
@@ -101,6 +92,23 @@ export class VariableTableDescription extends SplitPanel {
                 }
             }, variable.value)
         );
+    }
+
+
+    protected createVariableNodeClass(variable: any): string {
+        return (variable === this._model.variable)? `${ROW_CLASS}${SELECTED_CLASS}`:ROW_CLASS;
+    }
+
+    protected clearClassName(rowNodes: Array<any>) {
+        rowNodes.forEach( ele => {
+            ele.className = `${ROW_CLASS}`;
+        });
+    };
+
+    protected setCurrentVariable(variable: any, scope:any) {
+        this._model.variable = variable;
+        this.clearClassName(scope.path[2].childNodes);
+        scope.path[1].className = `${ROW_CLASS}${SELECTED_CLASS}`;
     }
 
 

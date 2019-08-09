@@ -22,12 +22,15 @@
 
 
 
+.jp-DebuggerSidebar  div:not(:first-child) .debugger-variables__header{
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
+  border-top: solid var(--jp-border-width) var(--jp-border-color1);
+}
+
 .debugger-variables__header {
   display: flex;
   flex-direction: row;
   align-items: center;
-  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
-  border-top: solid var(--jp-border-width) var(--jp-border-color1);
   background-color: var(--jp-layout-color2);
   height: 24px;
 }
@@ -45,11 +48,15 @@
 .debugger-variables__body {
   border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
   min-height: 24px;
+  height: 99%;
+  display: flex;
+  flex-direction: column;
 }
 
 
 .debugger-variable__table {
   min-height: 50px;
+  flex-basis: 30%;
 }
 
 .debugger-variable__table table {
@@ -67,8 +74,13 @@
   text-align: left;
 }
 
-.debugger-variables_table-head:hover {
+.debugger-variables_table-head:hover , .debugger-variables_table-row:hover {
   background: var(--jp-layout-color2);
+}
+
+.debugger-variables_table-row-selected {
+  color: white;
+  background: var(--jp-brand-color1);
 }
 
 .debugger-variables_table-head + .debugger-variables_table-head {
@@ -80,5 +92,10 @@
 .debugger-variable__description {
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   min-height: 25px;
+  padding: 10px;
 }
 
+.debugger-variable__description p {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
