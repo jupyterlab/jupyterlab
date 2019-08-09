@@ -38,10 +38,9 @@ If you find a problem in JupyterLab, please follow the steps below to diagnose a
 
    - I can reproduce the issue with the classic Jupyter Notebook: The problem is probably not from JupyterLab. It may be in the `Jupyter Notebook server <https://github.com/jupyter/notebook>`__, your kernel, etc. Use your best judgement to file an issue with the appropriate project.
    - I cannot reproduce the issue in classic Jupyter Notebook: Go to step 4.
-4. Try to reproduce the issue in your browser incognito or private browsing mode. Running in private browser mode ensures your browser state is clean. Also, in some rare cases, a browser extension may change JupyterLab in destructive ways, so also try disabling browser extensions.
+4. Try to reproduce the issue in your browser incognito or private browsing modeq. Running in private browser mode ensures your browser state is clean.
 
-   - I cannot reproduce the issue in private browsing mode: Perhaps resetting your browser state would help.
-   - I cannot reproduce the issue with browser extensions disabled: Perhaps the problem is a browser extension. Try enabling them one at a time and reproducing the issue.
+   - I cannot reproduce the issue in private browsing mode: Perhaps resetting your cookies or other browser state would help.
    - I can reproduce the issue in private browsing mode: Go to :ref:`create-issue`.
 
 
@@ -54,7 +53,12 @@ Before creating an issue, search in the issue tracker for relevant issues. If yo
 
 To create an issue, collect the following contextual information:
 
-- relevant package versions (including `jupyterlab` and `notebook` versions, as well as browser and operating system versions)
+- relevant package versions, including:
+
+  - ``jupyterlab`` and ``notebook`` versions
+  - browser versions affected (please try to reproduce in Chrome and Firefox at least)
+  - operating system and version
+
 - relevant server and JavaScript error messages
 - screenshots or short screencasts illustrating the issue
 
