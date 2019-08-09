@@ -48,16 +48,6 @@ export namespace IDebugger {
      */
     stop(): void;
   }
-
-  /**
-   * A visual debugger client.
-   */
-  export interface IClient extends IObservableDisposable {
-    /**
-     * The debug session.
-     */
-    session: ISession;
-  }
 }
 
 /**
