@@ -24,8 +24,10 @@ export namespace DatastoreExt {
     record: string;
   }
 
-  export interface IFieldLocation<S extends Schema, F extends string>
-    extends IRecordLocation<S> {
+  export interface IFieldLocation<
+    S extends Schema,
+    F extends keyof S['fields']
+  > extends IRecordLocation<S> {
     field: F;
   }
 
@@ -35,40 +37,51 @@ export namespace DatastoreExt {
     return loc.datastore.get(loc.schema).get(loc.record);
   }
 
-  export function getField<S extends Schema, F extends string>(
+  export function getField<S extends Schema, F extends keyof S['fields']>(
     loc: IFieldLocation<S, F>
   ): S['fields'][F]['ValueType'] {
-    return loc.datastore.get(loc.schema).get(loc.record)![loc.field];
+    const record = loc.datastore.get(loc.schema).get(loc.record);
+    if (!record) {
+      throw Error(`The record ${loc.record} could not be found`);
+    }
+    return record[loc.field];
   }
 
   export function updateRecord<S extends Schema>(
     loc: IRecordLocation<S>,
     update: Record.Update<S>
-  ): string {
+  ): void {
     let table = loc.datastore.get(loc.schema);
-    let transactionId = loc.datastore.beginTransaction();
     table.update({
       [loc.record]: update
     });
-    loc.datastore.endTransaction();
-    return transactionId;
+  }
+
+  export function updateField<S extends Schema, F extends keyof S['fields']>(
+    loc: IFieldLocation<S, F>,
+    update: S['fields'][F]['UpdateType']
+  ): void {
+    let table = loc.datastore.get(loc.schema);
+    table.update({
+      [loc.record]: {
+        [loc.field]: update
+      } as Record.Update<S>
+    });
   }
 
   export function listenRecord<S extends Schema>(
     loc: IRecordLocation<S>,
-    slot: (source: Datastore, change: Record.Change<S>) => void,
+    slot: (source: Datastore, args: Record.Change<S>) => void,
     thisArg?: any
   ): IDisposable {
-    const wrapper = (source: Datastore, change: Datastore.IChangedArgs) => {
+    const wrapper = (source: Datastore, args: Datastore.IChangedArgs) => {
       if (
-        !change.change[loc.schema.id] ||
-        !change.change[loc.schema.id][loc.record]
+        !args.change[loc.schema.id] ||
+        !args.change[loc.schema.id][loc.record]
       ) {
         return;
       }
-      slot(source, change.change[loc.schema.id][loc.record] as Record.Change<
-        S
-      >);
+      slot(source, args.change[loc.schema.id][loc.record] as Record.Change<S>);
     };
     loc.datastore.changed.connect(wrapper, thisArg);
     return new DisposableDelegate(() => {
@@ -76,20 +89,20 @@ export namespace DatastoreExt {
     });
   }
 
-  export function listenField<S extends Schema, F extends string>(
+  export function listenField<S extends Schema, F extends keyof S['fields']>(
     loc: IFieldLocation<S, F>,
-    slot: (source: Datastore, change: S['fields'][F]['ChangeType']) => void,
+    slot: (source: Datastore, args: S['fields'][F]['ChangeType']) => void,
     thisArg?: any
   ): IDisposable {
     const wrapper = (source: Datastore, args: Datastore.IChangedArgs) => {
       if (
         !args.change[loc.schema.id] ||
         !args.change[loc.schema.id][loc.record] ||
-        !args.change[loc.schema.id][loc.record][loc.field]
+        !args.change[loc.schema.id][loc.record][loc.field as string]
       ) {
         return;
       }
-      slot(source, args.change[loc.schema.id][loc.record][loc.field]);
+      slot(source, args.change[loc.schema.id][loc.record][loc.field as string]);
     };
     loc.datastore.changed.connect(wrapper, thisArg);
     return new DisposableDelegate(() => {
