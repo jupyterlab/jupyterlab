@@ -896,23 +896,17 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     if (this._changeGuard) {
       return;
     }
-    const table = this.model.datastore.get(CodeEditor.SCHEMA);
     const start = doc.indexFromPos(change.from);
     const end = doc.indexFromPos(change.to);
     const text = change.text.join('\n');
     // If this was a local change, update the table.
     this._changeGuard = true;
-    this.model.datastore.beginTransaction();
-    table.update({
-      data: {
-        text: {
-          index: start,
-          remove: end - start,
-          text: text
-        }
-      }
+    DatastoreExt.withTransaction(this.model.datastore, () => {
+      DatastoreExt.updateField(
+        { ...this.model.record, field: 'text' },
+        { index: start, remove: end - start, text }
+      );
     });
-    this.model.datastore.endTransaction();
     this._changeGuard = false;
   }
 

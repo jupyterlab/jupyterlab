@@ -273,20 +273,17 @@ export namespace CodeEditor {
         id: 1,
         schemas: [SCHEMA]
       }));
-      datastore.beginTransaction();
-      let editorTable = datastore.get(SCHEMA);
-      editorTable.update({
-        data: {
-          text: { index: 0, remove: 0, text: options.value || '' },
-          mimeType: options.mimeType || 'text/plain'
-        }
-      });
-      datastore.endTransaction();
       this.record = {
         datastore,
         schema: SCHEMA,
         record: 'data'
       };
+      DatastoreExt.withTransaction(datastore, () => {
+        DatastoreExt.updateRecord(this.record, {
+          text: { index: 0, remove: 0, text: options.value || '' },
+          mimeType: options.mimeType || 'text/plain'
+        });
+      });
 
       this.modelDB.createMap('selections');
     }

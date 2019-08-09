@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
 import { MimeData } from '@phosphor/coreutils';
 
 import { IDragEvent } from '@phosphor/dragdrop';
@@ -271,14 +273,12 @@ export class CodeEditorWrapper extends Widget {
     };
     const position = this.editor.getPositionForCoordinate(coordinate);
     const offset = this.editor.getOffsetAt(position);
-    const table = this.model.datastore.get(CodeEditor.SCHEMA);
-    this.model.datastore.beginTransaction();
-    table.update({
-      data: {
-        text: { index: offset, remove: 0, text: data }
-      }
+    DatastoreExt.withTransaction(this.model.datastore, () => {
+      DatastoreExt.updateField(
+        { ...this.model.record, field: 'text' },
+        { index: offset, remove: 0, text: data }
+      );
     });
-    this.model.datastore.endTransaction();
   }
 
   private _updateOnShow: boolean;
