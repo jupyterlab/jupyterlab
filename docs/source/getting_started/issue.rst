@@ -29,7 +29,7 @@ If you find a problem in JupyterLab, please follow the steps below to diagnose a
    If you are using pipenv: (someone please update this area with instructions for creating a new environment in pipenv)
 
    - I cannot reproduce this issue in a clean environment: The problem is probably not in JupyterLab itself. Go to step 2.
-   - I can reproducethis issue in a clean environment: Go to step 3.
+   - I can reproduce this issue in a clean environment: Go to step 3.
 2. Perhaps the issue is in one of the JupyterLab extensions you had installed. Install any JupyterLab extensions you had one at a time, checking for the issue after each one.
 
    - I can reproduce the issue after installing a particular extension: That extension may be causing the problem. File an issue with that extension's issue tracker. Be sure to mention what you have done here to narrow the problem down.
