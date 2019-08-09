@@ -3,7 +3,7 @@
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
-import { DatastoreExt, ISchemaFields } from '@jupyterlab/datastore';
+import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
 
 import { JSONObject } from '@phosphor/coreutils';
 
@@ -33,7 +33,7 @@ export namespace CodeEditor {
   /**
    * An interface for the fields stored in the CodeEditor schema.
    */
-  export interface IFields extends ISchemaFields {
+  export interface IFields extends SchemaFields {
     /**
      * The mime type for the editor.
      */
@@ -284,7 +284,7 @@ export namespace CodeEditor {
         }
       });
       datastore.endTransaction();
-      const record: DatastoreExt.IRecordLocation<ISchema> = {
+      const record: DatastoreExt.RecordLocation<ISchema> = {
         datastore,
         schema: SCHEMA,
         record: 'data'
@@ -382,8 +382,8 @@ export namespace CodeEditor {
 
     private _isDisposed = false;
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
-    private _mimeType: DatastoreExt.IFieldLocation<ISchema, 'mimeType'>;
-    private _text: DatastoreExt.IFieldLocation<ISchema, 'text'>;
+    private _mimeType: DatastoreExt.FieldLocation<ISchema, 'mimeType'>;
+    private _text: DatastoreExt.FieldLocation<ISchema, 'text'>;
   }
 
   /**

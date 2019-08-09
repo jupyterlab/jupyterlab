@@ -68,9 +68,12 @@ export class DatastoreCreator {
 
 export interface IDatastoreCreator extends DatastoreCreator {}
 
-export interface ISchemaFields {
+/*
+ * A type alias for the schema field type from the phosphor datastore package.
+ */
+export type SchemaFields = {
   readonly [name: string]: AnyField;
-}
+};
 
 export const IDatastoreCreator = new Token<IDatastoreCreator>(
   'IDatastoreCreator'

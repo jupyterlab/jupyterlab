@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Datastore, Record, Schema } from '@phosphor/datastore';
+import { Datastore, Record, Schema, Table } from '@phosphor/datastore';
 
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
@@ -37,7 +37,7 @@ export namespace DatastoreExt {
   /**
    * An interface for referring to a specific record in a datastore.
    */
-  export interface IRecordLocation<S extends Schema> {
+  export type RecordLocation<S extends Schema> = {
     /**
      * The datastore in question.
      */
@@ -53,7 +53,7 @@ export namespace DatastoreExt {
      * The record in question.
      */
     record: string;
-  }
+  };
 
   /**
    * An interface for referring to a specific field in a datastore.
@@ -61,15 +61,15 @@ export namespace DatastoreExt {
    * #### Notes
    * The field must exist in the schema.
    */
-  export interface IFieldLocation<
+  export type FieldLocation<
     S extends Schema,
     F extends keyof S['fields']
-  > extends IRecordLocation<S> {
+  > = RecordLocation<S> & {
     /**
      * The field in question.
      */
     field: F;
-  }
+  };
 
   /**
    * Get a given record by its location.
@@ -79,7 +79,7 @@ export namespace DatastoreExt {
    * @returns the record, or undefined if it does not exist.
    */
   export function getRecord<S extends Schema>(
-    loc: IRecordLocation<S>
+    loc: RecordLocation<S>
   ): Record.Value<S> | undefined {
     return loc.datastore.get(loc.schema).get(loc.record);
   }
@@ -95,7 +95,7 @@ export namespace DatastoreExt {
    * This will throw an error if the record does not exist in the given table.
    */
   export function getField<S extends Schema, F extends keyof S['fields']>(
-    loc: IFieldLocation<S, F>
+    loc: FieldLocation<S, F>
   ): S['fields'][F]['ValueType'] {
     const record = loc.datastore.get(loc.schema).get(loc.record);
     if (!record) {
@@ -116,7 +116,7 @@ export namespace DatastoreExt {
    * combined with `beginTransaction`/`endTransaction`, or `withTransaction`.
    */
   export function updateRecord<S extends Schema>(
-    loc: IRecordLocation<S>,
+    loc: RecordLocation<S>,
     update: Record.Update<S>
   ): void {
     let table = loc.datastore.get(loc.schema);
@@ -137,14 +137,16 @@ export namespace DatastoreExt {
    * combined with `beginTransaction`/`endTransaction`, or `withTransaction`.
    */
   export function updateField<S extends Schema, F extends keyof S['fields']>(
-    loc: IFieldLocation<S, F>,
+    loc: FieldLocation<S, F>,
     update: S['fields'][F]['UpdateType']
   ): void {
     let table = loc.datastore.get(loc.schema);
+    // TODO: this cast may be made unnecessary once microsoft/TypeScript#13573
+    // is fixed, possibly by microsoft/TypeScript#26797 lands.
     table.update({
       [loc.record]: {
         [loc.field]: update
-      } as Record.Update<S> // TODO: why is this cast necessary?
+      } as Record.Update<S>
     });
   }
 
@@ -159,7 +161,7 @@ export namespace DatastoreExt {
    * @returns an `IDisposable` that can be disposed to remove the listener.
    */
   export function listenRecord<S extends Schema>(
-    loc: IRecordLocation<S>,
+    loc: RecordLocation<S>,
     slot: (source: Datastore, args: Record.Change<S>) => void,
     thisArg?: any
   ): IDisposable {
@@ -173,8 +175,8 @@ export namespace DatastoreExt {
         return;
       }
       // Otherwise, call the slot.
-      // TODO: why is the cast necessary?
-      slot(source, args.change[loc.schema.id][loc.record] as Record.Change<S>);
+      const tc = args.change[loc.schema.id]! as Table.Change<S>;
+      slot(source, tc[loc.record]);
     };
     loc.datastore.changed.connect(wrapper, thisArg);
     return new DisposableDelegate(() => {
@@ -193,7 +195,7 @@ export namespace DatastoreExt {
    * @returns an `IDisposable` that can be disposed to remove the listener.
    */
   export function listenField<S extends Schema, F extends keyof S['fields']>(
-    loc: IFieldLocation<S, F>,
+    loc: FieldLocation<S, F>,
     slot: (source: Datastore, args: S['fields'][F]['ChangeType']) => void,
     thisArg?: any
   ): IDisposable {
@@ -207,8 +209,8 @@ export namespace DatastoreExt {
         return;
       }
       // Otherwise, call the slot.
-      // TODO: why is the cast necessary?
-      slot(source, args.change[loc.schema.id][loc.record][loc.field as string]);
+      const tc = args.change[loc.schema.id]! as Table.Change<S>;
+      slot(source, tc[loc.record][loc.field]);
     };
     loc.datastore.changed.connect(wrapper, thisArg);
     return new DisposableDelegate(() => {
