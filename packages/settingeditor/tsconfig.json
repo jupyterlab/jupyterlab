@@ -16,13 +16,13 @@
       "path": "../coreutils"
     },
     {
+      "path": "../datastore"
+    },
+    {
       "path": "../inspector"
     },
     {
       "path": "../rendermime"
-    },
-    {
-      "path": "../datastore"
     }
   ]
 }

@@ -10,10 +10,10 @@
       "path": "../coreutils"
     },
     {
-      "path": "../observables"
+      "path": "../datastore"
     },
     {
-      "path": "../datastore"
+      "path": "../observables"
     }
   ]
 }

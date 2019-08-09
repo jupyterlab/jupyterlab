@@ -16,13 +16,13 @@
       "path": "../coreutils"
     },
     {
+      "path": "../datastore"
+    },
+    {
       "path": "../observables"
     },
     {
       "path": "../statusbar"
-    },
-    {
-      "path": "../datastore"
     }
   ]
 }

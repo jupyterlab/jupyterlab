@@ -16,10 +16,10 @@
       "path": "../coreutils"
     },
     {
-      "path": "../services"
+      "path": "../datastore"
     },
     {
-      "path": "../datastore"
+      "path": "../services"
     }
   ]
 }

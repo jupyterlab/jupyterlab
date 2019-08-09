@@ -19,6 +19,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../datastore"
+    },
+    {
       "path": "../docregistry"
     },
     {
@@ -35,9 +38,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../datastore"
     }
   ]
 }
