@@ -3,7 +3,7 @@
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
-import { ISchemaFields } from '@jupyterlab/datastore';
+import { DatastoreExt, ISchemaFields } from '@jupyterlab/datastore';
 
 import { JSONObject } from '@phosphor/coreutils';
 
@@ -242,26 +242,35 @@ export namespace CodeEditor {
         this.modelDB = new ModelDB();
       }
 
-      this.datastore = Datastore.create({ id: 1, schemas: [SCHEMA] });
-      this.datastore.beginTransaction();
-      let editorTable = this.datastore.get(SCHEMA);
+      const datastore = (this.datastore = Datastore.create({
+        id: 1,
+        schemas: [SCHEMA]
+      }));
+      datastore.beginTransaction();
+      let editorTable = datastore.get(SCHEMA);
       editorTable.update({
         data: {
           text: { index: 0, remove: 0, text: options.value || '' },
           mimeType: options.mimeType || 'text/plain'
         }
       });
-      this.datastore.endTransaction();
+      datastore.endTransaction();
+      const record: DatastoreExt.IRecordLocation<ICodeEditorSchema> = {
+        datastore,
+        schema: SCHEMA,
+        record: 'data'
+      };
+      const mimeType: DatastoreExt.IFieldLocation<
+        ICodeEditorSchema,
+        'mimeType'
+      > = { ...record, field: 'mimeType' };
 
-      this.datastore.changed.connect((source, change) => {
-        const c = change.change[SCHEMA.id] && change.change[SCHEMA.id]['data'];
-        if (c && c.mimeType) {
-          this._mimeTypeChanged.emit({
-            name: 'mimeType',
-            oldValue: (c.mimeType as RegisterField.Change<string>).previous,
-            newValue: (c.mimeType as RegisterField.Change<string>).current
-          });
-        }
+      DatastoreExt.listenField(mimeType, (_, c) => {
+        this._mimeTypeChanged.emit({
+          name: 'mimeType',
+          oldValue: c.previous,
+          newValue: c.current
+        });
       });
 
       this.modelDB.createMap('selections');
@@ -292,15 +301,15 @@ export namespace CodeEditor {
       return this.datastore.get(SCHEMA).get('data')!.text;
     }
     set value(value: string) {
-      let current = this.value;
-      let table = this.datastore.get(SCHEMA);
-      this.datastore.beginTransaction();
-      table.update({
-        data: {
-          text: { index: 0, remove: current.length, text: value }
-        }
+      const current = this.value;
+      DatastoreExt.withTransaction(this.datastore, () => {
+        const table = this.datastore.get(SCHEMA);
+        table.update({
+          data: {
+            text: { index: 0, remove: current.length, text: value }
+          }
+        });
       });
-      this.datastore.endTransaction();
     }
 
     /**
