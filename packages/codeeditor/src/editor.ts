@@ -30,18 +30,47 @@ import { IModelDB, ModelDB, IObservableMap } from '@jupyterlab/observables';
  * - Common JLab services which are based on the code editor should belong to `IEditorServices`.
  */
 export namespace CodeEditor {
+  /**
+   * An interface for the fields stored in the CodeEditor schema.
+   */
   export interface IFields extends ISchemaFields {
+    /**
+     * The mime type for the editor.
+     */
     readonly mimeType: RegisterField<string>;
+    /**
+     * The text content of the editor.
+     */
     readonly text: TextField;
   }
 
+  /**
+   * An interface for a CodeEditor schema.
+   */
   export interface ISchema extends Schema {
+    /**
+     * The schema id.
+     */
     id: '@jupyterlab/codeeditor:v1';
+
+    /**
+     * The schema fields.
+     */
     fields: IFields;
   }
 
+  /**
+   * The concrete CodeEditor schema, available at runtime.
+   */
   export const SCHEMA: ISchema = {
+    /**
+     * The schema id.
+     */
     id: '@jupyterlab/codeeditor:v1',
+
+    /**
+     * Concrete realizations of the schema fields, available at runtime.
+     */
     fields: {
       mimeType: Fields.String(),
       text: Fields.Text()
