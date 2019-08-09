@@ -176,11 +176,11 @@ export namespace DatastoreExt {
       }
       // Otherwise, call the slot.
       const tc = args.change[loc.schema.id]! as Table.Change<S>;
-      slot(source, tc[loc.record]);
+      slot.bind(thisArg)(source, tc[loc.record]);
     };
-    loc.datastore.changed.connect(wrapper, thisArg);
+    loc.datastore.changed.connect(wrapper);
     return new DisposableDelegate(() => {
-      loc.datastore.changed.disconnect(wrapper, thisArg);
+      loc.datastore.changed.disconnect(wrapper);
     });
   }
 
@@ -210,11 +210,11 @@ export namespace DatastoreExt {
       }
       // Otherwise, call the slot.
       const tc = args.change[loc.schema.id]! as Table.Change<S>;
-      slot(source, tc[loc.record][loc.field]);
+      slot.bind(thisArg)(source, tc[loc.record][loc.field]);
     };
-    loc.datastore.changed.connect(wrapper, thisArg);
+    loc.datastore.changed.connect(wrapper);
     return new DisposableDelegate(() => {
-      loc.datastore.changed.disconnect(wrapper, thisArg);
+      loc.datastore.changed.disconnect(wrapper);
     });
   }
 }
