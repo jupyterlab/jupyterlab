@@ -90,7 +90,7 @@ const plugin: JupyterFrontEndPlugin<IVDOMTracker> = {
       dataType: 'json',
       rendermime,
       name: FACTORY_NAME,
-      primaryFileType: app.docRegistry.getFileType('vdom'),
+      primaryFileType: app.docRegistry.getFileType('vdom')!,
       fileTypes: ['vdom', 'json'],
       defaultFor: ['vdom']
     });
