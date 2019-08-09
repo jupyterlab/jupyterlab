@@ -3,6 +3,8 @@
 Reporting an issue
 ------------------
 
+Thank you for providing feedback about JupyterLab.
+
 Diagnosing an Issue
 ~~~~~~~~~~~~~~~~~~~
 
@@ -10,7 +12,7 @@ If you find a problem in JupyterLab, please follow the steps below to diagnose a
 
 1. Try to reproduce the issue in a new environment with the latest official JupyterLab installed and no extra packages. 
 
-   - If you are using conda:
+   If you are using conda:
 
      1. create a new environment::
 
@@ -24,15 +26,23 @@ If you find a problem in JupyterLab, please follow the steps below to diagnose a
 
          jupyter lab
 
-   - If you are using pipenv:
-     (someone please update this area with instructions for creating a new environment in pipenv)
+   If you are using pipenv: (someone please update this area with instructions for creating a new environment in pipenv)
 
-   If you cannot reproduce the issue, the problem is likely not in JupyterLab itself. Go to step 1A to further diagnose the issue. If you can reproduce the issue, go to step 2.
+   - I cannot reproduce this issue in a clean environment: The problem is probably not in JupyterLab itself. Go to step 2.
+   - I can reproducethis issue in a clean environment: Go to step 3.
+2. Perhaps the issue is in one of the JupyterLab extensions you had installed. Install any JupyterLab extensions you had one at a time, checking for the issue after each one.
 
-   A. Perhaps the issue is in one of the JupyterLab extensions you had installed. Install any JupyterLab extensions you had one at a time, checking for the issue after each one. If you can reproduce the issue, the extension you just installed may be causing the problem. File an issue with that extension's issue tracker. Be sure to mention what you have done here to narrow the problem down. If you cannot reproduce the issue after installing all of your JupyterLab extensions, go to step 1B.
-   B. Good news! Likely all you have to do is update your JupyterLab and extensions. If that fixes the issue, great! If it doesn't fix the issue, you may have a more complicated issue. Go directly to :ref:`create-issue`.
-2. Try to reproduce the issue in the classic Jupyter Notebook. Launch the classic notebook from the JupyterLab help menu to ensure you are getting exactly the same notebook server that JupyterLab is using. If you can reproduce the issue with the classic Jupyter Notebook, the problem is probably not from JupyterLab. It may be in the `Jupyter Notebook server <https://github.com/jupyter/notebook>`__, your kernel, etc. Use your best judgement to file an issue with the appropriate project. If you cannot reproduce the issue in classic Jupyter Notebook, go to step 3.
-3. Try to reproduce the issue after disabling Chrome or Firefox browser extensions and activating your browser incognito or private browsing mode. A browser extension may change JupyterLab in destructive ways, and running in private browser mode ensures we are resetting our browser state. If you cannot reproduce the issue, likely the problem is in your browser extensions---try enabling them one at a time to diagnose which is causing the issue. If you can still reproduce the issue, go to :ref:`create-issue`.
+   - I can reproduce the issue after installing a particular extension: That extension may be causing the problem. File an issue with that extension's issue tracker. Be sure to mention what you have done here to narrow the problem down.
+   - I cannot reproduce the issue after installing all my extensions: Good news! Likely all you have to do is update your JupyterLab and extensions. If that fixes the issue, great! If it doesn't fix the issue, you may have a more complicated issue. Go directly to :ref:`create-issue`.
+3. Try to reproduce the issue in the classic Jupyter Notebook. Launch the classic notebook from the JupyterLab help menu to ensure you are getting exactly the same notebook server that JupyterLab is using.
+
+   - I can reproduce the issue with the classic Jupyter Notebook: The problem is probably not from JupyterLab. It may be in the `Jupyter Notebook server <https://github.com/jupyter/notebook>`__, your kernel, etc. Use your best judgement to file an issue with the appropriate project.
+   - I cannot reproduce the issue in classic Jupyter Notebook: Go to step 4.
+4. Try to reproduce the issue in your browser incognito or private browsing mode. Running in private browser mode ensures your browser state is clean. Also, in some rare cases, a browser extension may change JupyterLab in destructive ways, so also try disabling browser extensions.
+
+   - I cannot reproduce the issue in private browsing mode: Perhaps resetting your browser state would help.
+   - I cannot reproduce the issue with browser extensions disabled: Perhaps the problem is a browser extension. Try enabling them one at a time and reproducing the issue.
+   - I can reproduce the issue in private browsing mode: Go to :ref:`create-issue`.
 
 
 .. _create-issue:
@@ -42,9 +52,12 @@ Creating an issue
 
 Before creating an issue, search in the issue tracker for relevant issues. If you find an issue describing your problem, comment there with the following information instead of creating a new issue. If you find a relevant resolved issue (closed and locked for discussion), create a new issue and reference the resolved issue.
 
-To create an issue, collect the following information:
+To create an issue, collect the following contextual information:
+
+- relevant package versions (including `jupyterlab` and `notebook` versions, as well as browser and operating system versions)
 - relevant server and JavaScript error messages
-- relevant package versions (including at least the versions of `jupyterlab` and `notebook`)
 - screenshots or short screencasts illustrating the issue
 
-`Create a new issue <https://github.com/jupyterlab/jupyterlab/issues/new>`__. Include the information from above. Be sure to mention the process you followed above to diagnose that this was a JupyterLab issue.
+`Create a new issue <https://github.com/jupyterlab/jupyterlab/issues/new>`__. Include the contextual information from above. Describe how you followed the diagnosis steps above to conclude this was a JupyterLab issue.
+
+Communication in JupyterLab follows the Jupyter `Community Guides <https://jupyter.readthedocs.io/en/latest/community/content-community.html>`__.
