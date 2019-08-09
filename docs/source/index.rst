@@ -21,6 +21,7 @@ JupyterLab is the next-generation web-based user interface for Project Jupyter. 
    getting_started/overview
    getting_started/installation
    getting_started/starting
+   getting_started/issue
    getting_started/faq
    getting_started/changelog
 
