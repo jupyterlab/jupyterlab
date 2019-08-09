@@ -43,6 +43,11 @@ If you find a problem in JupyterLab, please follow the steps below to diagnose a
    - I cannot reproduce the issue in private browsing mode: Perhaps resetting your cookies or other browser state would help.
    - I can reproduce the issue in private browsing mode: Go to :ref:`create-issue`.
 
+You might also check your system for:
+
+- Security software that might be preventing access to files or network interfaces
+- Network equipment, routers, or proxies that might be preventing communication between the browser and the server
+- Browser extensions that might be changing the JupyterLab code or application page
 
 .. _create-issue:
 
