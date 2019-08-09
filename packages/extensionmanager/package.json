@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/extensionmanager",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "JupyterLab - Extension Manager",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,8 +35,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^1.0.2",
-    "@jupyterlab/services": "^4.0.2",
+    "@jupyterlab/apputils": "^1.0.3",
+    "@jupyterlab/services": "^4.0.3",
     "@jupyterlab/ui-components": "^1.0.0",
     "@phosphor/messaging": "^1.2.3",
     "react": "~16.8.4",
