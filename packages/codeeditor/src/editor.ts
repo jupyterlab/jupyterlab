@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IChangedArgs } from '@jupyterlab/coreutils';
-
 import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
 
 import { JSONObject } from '@phosphor/coreutils';
@@ -221,11 +219,6 @@ export namespace CodeEditor {
    */
   export interface IModel extends IDisposable {
     /**
-     * A signal emitted when a property changes.
-     */
-    mimeTypeChanged: ISignal<IModel, IChangedArgs<string>>;
-
-    /**
      * The text stored in the model.
      */
     value: string;
@@ -295,18 +288,6 @@ export namespace CodeEditor {
         record: 'data'
       };
 
-      DatastoreExt.listenField(
-        { ...this.record, field: 'mimeType' },
-        (source, c) => {
-          this._mimeTypeChanged.emit({
-            name: 'mimeType',
-            oldValue: c.previous,
-            newValue: c.current
-          });
-        },
-        this
-      );
-
       this.modelDB.createMap('selections');
     }
 
@@ -325,13 +306,6 @@ export namespace CodeEditor {
      * The record in the datastore in which this codeeditor keeps its data.
      */
     readonly record: DatastoreExt.RecordLocation<ISchema>;
-
-    /**
-     * A signal emitted when a mimetype changes.
-     */
-    get mimeTypeChanged(): ISignal<this, IChangedArgs<string>> {
-      return this._mimeTypeChanged;
-    }
 
     /**
      * Get the value of the model.
@@ -399,7 +373,6 @@ export namespace CodeEditor {
     }
 
     private _isDisposed = false;
-    private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
   }
 
   /**
