@@ -159,7 +159,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
 
     this.id = options.id || UUID.uuid4();
 
-    this.value.changed.connect(this.onGenericChange, this);
+    this.datastore.changed.connect(this.onGenericChange, this);
 
     let cellType = this.modelDB.createValue('type');
     cellType.set(this.type);
@@ -179,9 +179,9 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     delete cell.metadata['trusted'];
 
     if (Array.isArray(cell.source)) {
-      this.value.text = (cell.source as string[]).join('');
+      this.value = (cell.source as string[]).join('');
     } else {
-      this.value.text = cell.source as string;
+      this.value = cell.source as string;
     }
     let metadata = JSONExt.deepCopy(cell.metadata);
     if (this.type !== 'raw') {
@@ -256,7 +256,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     }
     return {
       cell_type: this.type,
-      source: this.value.text,
+      source: this.value,
       metadata
     } as nbformat.ICell;
   }

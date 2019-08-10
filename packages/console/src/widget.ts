@@ -228,7 +228,7 @@ export class CodeConsole extends Widget {
     }
     // Create the banner.
     let model = this.modelFactory.createRawCell({});
-    model.value.text = '...';
+    model.value = '...';
     let banner = (this._banner = new RawCell({
       model,
       contentFactory: this.contentFactory
@@ -339,7 +339,7 @@ export class CodeConsole extends Widget {
    */
   inject(code: string, metadata: JSONObject = {}): Promise<void> {
     let cell = this.createCodeCell();
-    cell.model.value.text = code;
+    cell.model.value = code;
     for (let key of Object.keys(metadata)) {
       cell.model.metadata.set(key, metadata[key]);
     }
@@ -480,7 +480,7 @@ export class CodeConsole extends Widget {
     });
 
     this._drag.mimeData.setData(JUPYTER_CELL_MIME, selected);
-    const textContent = cellModel.value.text;
+    const textContent = cellModel.value;
     this._drag.mimeData.setData('text/plain', textContent);
 
     this._focusedCell = null;
@@ -632,7 +632,7 @@ export class CodeConsole extends Widget {
    * Execute the code in the current prompt cell.
    */
   private _execute(cell: CodeCell): Promise<void> {
-    let source = cell.model.value.text;
+    let source = cell.model.value;
     this._history.push(source);
     // If the source of the console is just "clear", clear the console as we
     // do in IPython or QtConsole.
@@ -655,7 +655,7 @@ export class CodeConsole extends Widget {
           if (setNextInput) {
             let text = (setNextInput as any).text;
             // Ignore the `replace` value and always set the next cell.
-            cell.model.value.text = text;
+            cell.model.value = text;
           }
         }
       } else if (value && value.content.status === 'error') {
@@ -684,10 +684,10 @@ export class CodeConsole extends Widget {
    */
   private _handleInfo(info: KernelMessage.IInfoReplyMsg['content']): void {
     if (info.status !== 'ok') {
-      this._banner.model.value.text = 'Error in getting kernel banner';
+      this._banner.model.value = 'Error in getting kernel banner';
       return;
     }
-    this._banner.model.value.text = info.banner;
+    this._banner.model.value = info.banner;
     let lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);
     if (this.promptCell) {
@@ -729,7 +729,7 @@ export class CodeConsole extends Widget {
       return Promise.resolve(false);
     }
     let model = promptCell.model;
-    let code = model.value.text;
+    let code = model.value;
     return new Promise<boolean>((resolve, reject) => {
       let timer = setTimeout(() => {
         resolve(true);

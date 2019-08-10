@@ -1012,7 +1012,7 @@ export namespace CodeCell {
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     let model = cell.model;
-    let code = model.value.text;
+    let code = model.value;
     if (!code.trim() || !session.kernel) {
       model.executionCount = null;
       model.outputs.clear();
@@ -1173,7 +1173,7 @@ export class MarkdownCell extends Cell {
    */
   private _updateRenderedInput(): Promise<void> {
     let model = this.model;
-    let text = (model && model.value.text) || DEFAULT_MARKDOWN_TEXT;
+    let text = (model && model.value) || DEFAULT_MARKDOWN_TEXT;
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
       let mimeModel = new MimeModel({ data: { 'text/markdown': text } });

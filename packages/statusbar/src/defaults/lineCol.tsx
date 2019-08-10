@@ -7,6 +7,10 @@ import { VDomRenderer, VDomModel, ReactWidget } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
+import { IDisposable } from '@phosphor/disposable';
+
 import { interactiveItem, showPopup, Popup, TextItem } from '..';
 
 import {
@@ -290,9 +294,9 @@ export namespace LineCol {
       return this._editor;
     }
     set editor(editor: CodeEditor.IEditor | null) {
-      const oldEditor = this._editor;
-      if (oldEditor) {
-        oldEditor.model.selections.changed.disconnect(this._onSelectionChanged);
+      if (this._selectionListener) {
+        this._selectionListener.dispose();
+        this._selectionListener = null;
       }
 
       const oldState = this._getAllState();
@@ -301,7 +305,10 @@ export namespace LineCol {
         this._column = 1;
         this._line = 1;
       } else {
-        this._editor.model.selections.changed.connect(this._onSelectionChanged);
+        DatastoreExt.listenField(
+          { ...editor.model.record, field: 'selections' },
+          this._onSelectionChanged
+        );
 
         const pos = this._editor.getCursorPosition();
         this._column = pos.column + 1;
@@ -353,5 +360,6 @@ export namespace LineCol {
     private _line: number = 1;
     private _column: number = 1;
     private _editor: CodeEditor.IEditor | null = null;
+    private _selectionListener: IDisposable | null = null;
   }
 }

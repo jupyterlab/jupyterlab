@@ -17,15 +17,15 @@ import { showDialog } from '@jupyterlab/apputils';
 
 import { Poll } from '@jupyterlab/coreutils';
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { UUID } from '@phosphor/coreutils';
 
-import {
-  IObservableMap,
-  IObservableString,
-  ICollaborator
-} from '@jupyterlab/observables';
+import { Datastore, MapField, TextField } from '@phosphor/datastore';
+
+import { ICollaborator } from '@jupyterlab/observables';
 
 import { Mode } from './mode';
 
@@ -121,7 +121,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     let doc = editor.getDoc();
 
     // Handle initial values for text, mimetype, and selections.
-    doc.setValue(model.value.text);
+    doc.setValue(model.value);
     this.clearHistory();
     this._onMimeTypeChanged();
     this._onCursorActivity();
@@ -137,9 +137,21 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
 
     // Connect to changes.
-    model.value.changed.connect(this._onValueChanged, this);
-    model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
-    model.selections.changed.connect(this._onSelectionsChanged, this);
+    DatastoreExt.listenField(
+      { ...model.record, field: 'text' },
+      this._onValueChanged,
+      this
+    );
+    DatastoreExt.listenField(
+      { ...model.record, field: 'mimeType' },
+      this._onMimeTypeChanged,
+      this
+    );
+    DatastoreExt.listenField(
+      { ...model.record, field: 'selections' },
+      this._onSelectionsChanged,
+      this
+    );
 
     CodeMirror.on(editor, 'keydown', (editor: CodeMirror.Editor, event) => {
       let index = ArrayExt.findFirstIndex(this._keydownHandlers, handler => {
@@ -532,7 +544,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // will get screened out in _onCursorsChanged(). Make an
     // exception for this method.
     if (!this.editor.hasFocus()) {
-      this.model.selections.set(this.uuid, this.getSelections());
+      DatastoreExt.withTransaction(this.model.datastore, () => {
+        DatastoreExt.updateField(
+          { ...this.model.record, field: 'selections' },
+          { [this.uuid]: this.getSelections() }
+        );
+      });
     }
   }
 
@@ -694,16 +711,17 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handles a selections change.
    */
   private _onSelectionsChanged(
-    selections: IObservableMap<CodeEditor.ITextSelection[]>,
-    args: IObservableMap.IChangedArgs<CodeEditor.ITextSelection[]>
+    sender: Datastore,
+    args: MapField.Change<CodeEditor.ITextSelection[]>
   ): void {
-    const uuid = args.key;
-    if (uuid !== this.uuid) {
-      this._cleanSelections(uuid);
-      if (args.type !== 'remove' && args.newValue) {
-        this._markSelections(uuid, args.newValue);
+    Object.keys(args.current).forEach(uuid => {
+      if (uuid !== this.uuid) {
+        this._cleanSelections(uuid);
+        if (args.current[uuid] !== null && args.current[uuid]) {
+          this._markSelections(uuid, args.current[uuid]);
+        }
       }
-    }
+    });
   }
 
   /**
@@ -768,7 +786,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
           markerOptions = this._toTextMarkerOptions(selection.style);
         }
         markers.push(this.doc.markText(anchor, head, markerOptions));
-      } else if (collaborator) {
+      } else {
         let caret = this._getCaret(collaborator);
         markers.push(
           this.doc.setBookmark(this._toCodeMirrorPosition(selection.end), {
@@ -787,8 +805,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // Only add selections if the editor has focus. This avoids unwanted
     // triggering of cursor activity due to collaborator actions.
     if (this._editor.hasFocus()) {
-      const selections = this.getSelections();
-      this.model.selections.set(this.uuid, selections);
+      DatastoreExt.withTransaction(this.model.datastore, () => {
+        DatastoreExt.updateField(
+          { ...this.model.record, field: 'selections' },
+          { [this.uuid]: this.getSelections() }
+        );
+      });
     }
   }
 
@@ -858,38 +880,24 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Handle model value changes.
    */
-  private _onValueChanged(
-    value: IObservableString,
-    args: IObservableString.IChangedArgs
-  ): void {
+  private _onValueChanged(sender: Datastore, changes: TextField.Change): void {
+    // Ignore changes that have already been applied locally.
     if (this._changeGuard) {
       return;
     }
-    this._changeGuard = true;
-    let doc = this.doc;
-    switch (args.type) {
-      case 'insert':
-        let pos = doc.posFromIndex(args.start);
-        // Replace the range, including a '+input' orign,
-        // which indicates that CodeMirror may merge changes
-        // for undo/redo purposes.
-        doc.replaceRange(args.value, pos, pos, '+input');
-        break;
-      case 'remove':
-        let from = doc.posFromIndex(args.start);
-        let to = doc.posFromIndex(args.end);
-        // Replace the range, including a '+input' orign,
-        // which indicates that CodeMirror may merge changes
-        // for undo/redo purposes.
-        doc.replaceRange('', from, to, '+input');
-        break;
-      case 'set':
-        doc.setValue(args.value);
-        break;
-      default:
-        break;
-    }
-    this._changeGuard = false;
+    const doc = this.doc;
+    changes.forEach(tc => {
+      // Convert the change data to codemirror range and inserted text.
+      const from = doc.posFromIndex(tc.index);
+      const to = doc.posFromIndex(tc.index + tc.removed.length);
+      const replacement = tc.inserted;
+
+      // Apply the operation, setting the change guard so we can ignore
+      // the change signals from codemirror.
+      this._changeGuard = true;
+      doc.replaceRange(replacement, from, to, '+input');
+      this._changeGuard = false;
+    });
   }
 
   /**
@@ -902,18 +910,17 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     if (this._changeGuard) {
       return;
     }
+    const start = doc.indexFromPos(change.from);
+    const end = doc.indexFromPos(change.to);
+    const text = change.text.join('\n');
+    // If this was a local change, update the table.
     this._changeGuard = true;
-    let value = this._model.value;
-    let start = doc.indexFromPos(change.from);
-    let end = doc.indexFromPos(change.to);
-    let inserted = change.text.join('\n');
-
-    if (end !== start) {
-      value.remove(start, end);
-    }
-    if (inserted) {
-      value.insert(start, inserted);
-    }
+    DatastoreExt.withTransaction(this.model.datastore, () => {
+      DatastoreExt.updateField(
+        { ...this.model.record, field: 'text' },
+        { index: start, remove: end - start, text }
+      );
+    });
     this._changeGuard = false;
   }
 
@@ -990,7 +997,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Construct a caret element representing the position
    * of a collaborator's cursor.
    */
-  private _getCaret(collaborator: ICollaborator): HTMLElement {
+  private _getCaret(collaborator?: ICollaborator): HTMLElement {
     let name = collaborator ? collaborator.displayName : 'Anonymous';
     let color = collaborator ? collaborator.color : this._selectionStyle.color;
     let caret: HTMLElement = document.createElement('span');
@@ -998,7 +1005,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     caret.style.borderBottomColor = color;
     caret.onmouseenter = () => {
       this._clearHover();
-      this._hoverId = collaborator.sessionId;
+      this._hoverId = collaborator ? collaborator.sessionId : UUID.uuid4();
       let rect = caret.getBoundingClientRect();
       // Construct and place the hover box.
       let hover = document.createElement('div');
@@ -1039,7 +1046,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._lastChange = null;
     let editor = this._editor;
     let doc = editor.getDoc();
-    if (doc.getValue() === this._model.value.text) {
+    if (doc.getValue() === this._model.value) {
       return;
     }
 
@@ -1053,7 +1060,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     );
     console.log(
       JSON.stringify({
-        model: this._model.value.text,
+        model: this._model.value,
         view: doc.getValue(),
         selections: this.getSelections(),
         cursor: this.getCursorPosition(),

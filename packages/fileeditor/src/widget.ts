@@ -1,7 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { StackedLayout, Widget } from '@phosphor/widgets';
+import {
+  CodeEditor,
+  IEditorServices,
+  IEditorMimeTypeService,
+  CodeEditorWrapper
+} from '@jupyterlab/codeeditor';
+
+import { DatastoreExt } from '@jupyterlab/datastore';
 
 import {
   ABCWidgetFactory,
@@ -10,16 +17,11 @@ import {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 
-import {
-  CodeEditor,
-  IEditorServices,
-  IEditorMimeTypeService,
-  CodeEditorWrapper
-} from '@jupyterlab/codeeditor';
-
 import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { Message } from '@phosphor/messaging';
+
+import { StackedLayout, Widget } from '@phosphor/widgets';
 
 /**
  * The data attribute added to a widget that can run code.
@@ -51,7 +53,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     this.node.dataset[CODE_RUNNER] = 'true';
     this.node.dataset[UNDOER] = 'true';
 
-    editor.model.value.text = context.model.toString();
+    editor.model.value = context.model.toString();
     void context.ready.then(() => {
       this._onContextReady();
     });
@@ -72,10 +74,6 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
           ...CodeEditor.defaultSelectionStyle,
           color: localCollaborator.color
         };
-
-        collaborators.changed.connect(this._onCollaboratorsChanged, this);
-        // Trigger an initial onCollaboratorsChanged event.
-        this._onCollaboratorsChanged();
       });
     }
   }
@@ -95,6 +93,30 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
   }
 
   /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._trimSelections();
+    super.dispose();
+  }
+
+  /**
+   * Remove selections from inactive cells to avoid
+   * spurious cursors.
+   */
+  private _trimSelections(): void {
+    DatastoreExt.withTransaction(this.model.datastore, () => {
+      DatastoreExt.updateField(
+        { ...this.model.record, field: 'selections' },
+        { [this.editor.uuid]: null }
+      );
+    });
+  }
+
+  /**
    * Handle actions that should be taken when the context is ready.
    */
   private _onContextReady(): void {
@@ -106,7 +128,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     const editorModel = editor.model;
 
     // Set the editor model value.
-    editorModel.value.text = contextModel.toString();
+    editorModel.value = contextModel.toString();
 
     // Prevent the initial loading from disk from being in the editor history.
     editor.clearHistory();
@@ -123,29 +145,11 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
    */
   private _onContentChanged(): void {
     const editorModel = this.editor.model;
-    const oldValue = editorModel.value.text;
+    const oldValue = editorModel.value;
     const newValue = this._context.model.toString();
 
     if (oldValue !== newValue) {
-      editorModel.value.text = newValue;
-    }
-  }
-
-  /**
-   * Handle a change to the collaborators on the model
-   * by updating UI elements associated with them.
-   */
-  private _onCollaboratorsChanged(): void {
-    // If there are selections corresponding to non-collaborators,
-    // they are stale and should be removed.
-    let collaborators = this._context.model.modelDB.collaborators;
-    if (!collaborators) {
-      return;
-    }
-    for (let key of this.editor.model.selections.keys()) {
-      if (!collaborators.has(key)) {
-        this.editor.model.selections.delete(key);
-      }
+      editorModel.value = newValue;
     }
   }
 

@@ -32,7 +32,7 @@ export class DocumentModel extends CodeEditor.Model
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     super({ modelDB });
     this._defaultLang = languagePreference || '';
-    this.value.changed.connect(this.triggerContentChange, this);
+    this.datastore.changed.connect(this.triggerContentChange, this);
   }
 
   /**
@@ -103,7 +103,7 @@ export class DocumentModel extends CodeEditor.Model
    * Serialize the model to a string.
    */
   toString(): string {
-    return this.value.text;
+    return this.value;
   }
 
   /**
@@ -113,14 +113,14 @@ export class DocumentModel extends CodeEditor.Model
    * Should emit a [contentChanged] signal.
    */
   fromString(value: string): void {
-    this.value.text = value;
+    this.value = value;
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): JSONValue {
-    return JSON.parse(this.value.text || 'null');
+    return JSON.parse(this.value || 'null');
   }
 
   /**

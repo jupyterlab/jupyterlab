@@ -4,7 +4,7 @@ import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IChangedArgs } from '@jupyterlab/coreutils';
+import { DatastoreExt } from '@jupyterlab/datastore';
 
 import {
   interactiveItem,
@@ -18,6 +18,10 @@ import { Mode } from '.';
 import { CommandRegistry } from '@phosphor/commands';
 
 import { JSONObject } from '@phosphor/coreutils';
+
+import { Datastore, RegisterField } from '@phosphor/datastore';
+
+import { IDisposable } from '@phosphor/disposable';
 
 import { Menu } from '@phosphor/widgets';
 
@@ -150,9 +154,9 @@ export namespace EditorSyntaxStatus {
       return this._editor;
     }
     set editor(editor: CodeEditor.IEditor | null) {
-      const oldEditor = this._editor;
-      if (oldEditor !== null) {
-        oldEditor.model.mimeTypeChanged.disconnect(this._onMIMETypeChange);
+      if (this._mimeTypeListener) {
+        this._mimeTypeListener.dispose();
+        this._mimeTypeListener = null;
       }
       const oldMode = this._mode;
       this._editor = editor;
@@ -162,7 +166,10 @@ export namespace EditorSyntaxStatus {
         const spec = Mode.findByMIME(this._editor.model.mimeType);
         this._mode = spec.name || spec.mode;
 
-        this._editor.model.mimeTypeChanged.connect(this._onMIMETypeChange);
+        DatastoreExt.listenField(
+          { ...editor.model.record, field: 'mimeType' },
+          this._onMIMETypeChange
+        );
       }
 
       this._triggerChange(oldMode, this._mode);
@@ -172,11 +179,11 @@ export namespace EditorSyntaxStatus {
      * If the editor mode changes, update the model.
      */
     private _onMIMETypeChange = (
-      mode: CodeEditor.IModel,
-      change: IChangedArgs<string>
+      sender: Datastore,
+      change: RegisterField.Change<string>
     ) => {
       const oldMode = this._mode;
-      const spec = Mode.findByMIME(change.newValue);
+      const spec = Mode.findByMIME(change.current);
       this._mode = spec.name || spec.mode;
 
       this._triggerChange(oldMode, this._mode);
@@ -193,6 +200,7 @@ export namespace EditorSyntaxStatus {
 
     private _mode: string = '';
     private _editor: CodeEditor.IEditor | null = null;
+    private _mimeTypeListener: IDisposable;
   }
 
   /**

@@ -5,6 +5,8 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IDataConnector, Text } from '@jupyterlab/coreutils';
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
 import { ReadonlyJSONObject, JSONObject, JSONArray } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
@@ -84,12 +86,16 @@ export class CompletionHandler implements IDisposable {
 
     // Clean up and disconnect from old editor.
     if (editor && !editor.isDisposed) {
-      const model = editor.model;
-
       editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
       editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
-      model.selections.changed.disconnect(this.onSelectionsChanged, this);
-      model.value.changed.disconnect(this.onTextChanged, this);
+      if (this._selectionListener) {
+        this._selectionListener.dispose();
+        this._selectionListener = null;
+      }
+      if (this._textListener) {
+        this._textListener.dispose();
+        this._textListener = null;
+      }
     }
 
     // Reset completer state.
@@ -102,8 +108,16 @@ export class CompletionHandler implements IDisposable {
       const model = editor.model;
 
       this._enabled = false;
-      model.selections.changed.connect(this.onSelectionsChanged, this);
-      model.value.changed.connect(this.onTextChanged, this);
+      this._textListener = DatastoreExt.listenField(
+        { ...model.record, field: 'text' },
+        this.onTextChanged,
+        this
+      );
+      this._selectionListener = DatastoreExt.listenField(
+        { ...model.record, field: 'selections' },
+        this.onSelectionsChanged,
+        this
+      );
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
     }
@@ -155,7 +169,7 @@ export class CompletionHandler implements IDisposable {
     position: CodeEditor.IPosition
   ): Completer.ITextState {
     return {
-      text: editor.model.value.text,
+      text: editor.model.value,
       lineHeight: editor.lineHeight,
       charWidth: editor.charWidth,
       line: position.line,
@@ -180,8 +194,12 @@ export class CompletionHandler implements IDisposable {
     }
 
     const { start, end, value } = patch;
-    editor.model.value.remove(start, end);
-    editor.model.value.insert(start, value);
+    DatastoreExt.withTransaction(editor.model.datastore, () => {
+      DatastoreExt.updateField(
+        { ...editor.model.record, field: 'text' },
+        { index: start, remove: end - start, text: value }
+      );
+    });
   }
 
   /**
@@ -341,7 +359,7 @@ export class CompletionHandler implements IDisposable {
       return Promise.reject(new Error('No active editor'));
     }
 
-    const text = editor.model.value.text;
+    const text = editor.model.value;
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
     const pending = ++this._pending;
     const state = this.getState(editor, position);
@@ -445,6 +463,8 @@ export class CompletionHandler implements IDisposable {
   private _enabled = false;
   private _pending = 0;
   private _isDisposed = false;
+  private _textListener: IDisposable | null = null;
+  private _selectionListener: IDisposable | null = null;
 }
 
 /**
