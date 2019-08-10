@@ -54,11 +54,6 @@ export namespace CodeEditor {
    */
   export interface ISchema extends Schema {
     /**
-     * The schema id.
-     */
-    id: '@jupyterlab/codeeditor:v1';
-
-    /**
      * The schema fields.
      */
     fields: IFields;
@@ -71,7 +66,7 @@ export namespace CodeEditor {
     /**
      * The schema id.
      */
-    id: '@jupyterlab/codeeditor:v1',
+    id: '@jupyterlab/codeeditor:codeeditor:v1',
 
     /**
      * Concrete realizations of the schema fields, available at runtime.
@@ -277,16 +272,21 @@ export namespace CodeEditor {
         this.modelDB = new ModelDB();
       }
 
-      const datastore = (this.datastore = Datastore.create({
-        id: 1,
-        schemas: [SCHEMA]
-      }));
-      this.record = {
-        datastore,
-        schema: SCHEMA,
-        record: 'data'
-      };
-      DatastoreExt.withTransaction(datastore, () => {
+      if (options.record) {
+        this.datastore = options.record.datastore;
+        this.record = options.record;
+      } else {
+        this.datastore = Datastore.create({
+          id: 1,
+          schemas: [SCHEMA]
+        });
+        this.record = {
+          datastore: this.datastore,
+          schema: SCHEMA,
+          record: 'data'
+        };
+      }
+      DatastoreExt.withTransaction(this.datastore, () => {
         DatastoreExt.updateRecord(this.record, {
           text: { index: 0, remove: 0, text: options.value || '' },
           mimeType: options.mimeType || 'text/plain',
@@ -790,6 +790,11 @@ export namespace CodeEditor {
        * An optional modelDB for storing model state.
        */
       modelDB?: IModelDB;
+
+      /**
+       * A record location in an existing datastore in which to store the model.
+       */
+      record?: DatastoreExt.RecordLocation<ISchema>;
     }
   }
 }

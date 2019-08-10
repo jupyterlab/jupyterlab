@@ -3,17 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONExt, JSONObject, JSONValue } from '@phosphor/coreutils';
-
-import { ISignal, Signal } from '@phosphor/signaling';
-
 import { IAttachmentsModel, AttachmentsModel } from '@jupyterlab/attachments';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { DatastoreExt } from '@jupyterlab/datastore';
 
 import {
   IObservableJSON,
@@ -24,6 +20,25 @@ import {
 } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
+
+import {
+  JSONExt,
+  JSONObject,
+  JSONValue,
+  ReadonlyJSONObject,
+  UUID
+} from '@phosphor/coreutils';
+
+import {
+  Datastore,
+  Fields,
+  ListField,
+  MapField,
+  RegisterField,
+  Schema
+} from '@phosphor/datastore';
+
+import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
  * The definition of a model object for a cell.
@@ -155,7 +170,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * Construct a cell model from optional cell content.
    */
   constructor(options: CellModel.IOptions) {
-    super({ modelDB: options.modelDB });
+    super(Private.createEditorOptions(options));
 
     this.id = options.id || UUID.uuid4();
 
@@ -286,6 +301,75 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
  */
 export namespace CellModel {
   /**
+   * A type for the common fields stored in the Cell schema.
+   */
+  export interface IBaseFields extends CodeEditor.IFields {
+    /**
+     * The type of the cell.
+     */
+    type: RegisterField<nbformat.CellType>;
+
+    /**
+     * Whether the cell is trusted.
+     */
+    trusted: RegisterField<boolean>;
+
+    /**
+     * The metadata for the cell.
+     */
+    metadata: MapField<ReadonlyJSONObject>;
+  }
+
+  /**
+   * A union interface for all the fields stored in cell schemas
+   * so that they may be stored in the same table.
+   */
+  export interface IFields
+    extends IBaseFields,
+      CodeCellModel.IFields,
+      AttachmentsCellModel.IFields {}
+
+  /**
+   * An interface for a cell schema.
+   */
+  export interface ISchema extends Schema {
+    /**
+     * The id for the schema.
+     */
+    id: '@jupyterlab/cells:cellmodel.v1';
+
+    /**
+     * The union of cell fields.
+     */
+    fields: IFields;
+  }
+
+  /**
+   * A concrete schema for a cell table, available at runtime.
+   */
+  export const SCHEMA: ISchema = {
+    /**
+     * The id for the schema.
+     */
+    id: '@jupyterlab/cells:cellmodel.v1',
+
+    /**
+     * The union of cell fields.
+     */
+    fields: {
+      attachments: Fields.Map<nbformat.IMimeBundle>(),
+      executionCount: Fields.Register<nbformat.ExecutionCount>({ value: null }),
+      metadata: Fields.Map<ReadonlyJSONObject>(),
+      mimeType: Fields.String(),
+      outputs: Fields.List<string>(),
+      selections: Fields.Map<CodeEditor.ITextSelection[]>(),
+      text: Fields.Text(),
+      trusted: Fields.Boolean(),
+      type: Fields.Register<nbformat.CellType>({ value: 'code' })
+    }
+  };
+
+  /**
    * The options used to initialize a `CellModel`.
    */
   export interface IOptions {
@@ -303,6 +387,11 @@ export namespace CellModel {
      * A unique identifier for this cell.
      */
     id?: string;
+
+    /**
+     * A record location in an existing datastore in which to store the model.
+     */
+    record?: DatastoreExt.RecordLocation<ISchema>;
   }
 }
 
@@ -356,6 +445,13 @@ export class AttachmentsCellModel extends CellModel {
  * The namespace for `AttachmentsCellModel` statics.
  */
 export namespace AttachmentsCellModel {
+  /**
+   * An interface for cell schema fields that can store attachments.
+   */
+  export interface IFields
+    extends CellModel.IBaseFields,
+      IAttachmentsModel.IFields {}
+
   /**
    * The options used to initialize a `AttachmentsCellModel`.
    */
@@ -590,6 +686,21 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
  */
 export namespace CodeCellModel {
   /**
+   * The schema type for code cell models.
+   */
+  export interface IFields extends CellModel.IBaseFields {
+    /**
+     * Execution count for the cell.
+     */
+    executionCount: RegisterField<nbformat.ExecutionCount>;
+
+    /**
+     * A list of output ids for the cell.
+     */
+    outputs: ListField<string>;
+  }
+
+  /**
    * The options used to initialize a `CodeCellModel`.
    */
   export interface IOptions extends CellModel.IOptions {
@@ -597,6 +708,17 @@ export namespace CodeCellModel {
      * The factory for output area model creation.
      */
     contentFactory?: IContentFactory;
+
+    /**
+     * The datastore for the cell model data. If not provided, the cell
+     * will create its own in-memory store.
+     */
+    datastore?: Datastore;
+
+    /**
+     * The record in the datastore in which to store cell data.
+     */
+    record: DatastoreExt.RecordLocation<CellModel.ISchema>;
   }
 
   /**
@@ -628,6 +750,30 @@ export namespace CodeCellModel {
 }
 
 namespace Private {
+  /**
+   * Given CellModel.IOptions, create a CodeEditor.IOptions.
+   */
+  export function createEditorOptions(
+    options: CellModel.IOptions
+  ): CodeEditor.Model.IOptions {
+    if (options.record) {
+      // Try to get the schema from the datastore to check if it exists.
+      options.record.datastore.get(options.record.schema);
+      return options;
+    } else {
+      const datastore = Datastore.create({
+        id: 1,
+        schemas: [CellModel.SCHEMA]
+      });
+      const record: DatastoreExt.RecordLocation<CellModel.ISchema> = {
+        datastore,
+        schema: CellModel.SCHEMA,
+        record: 'data'
+      };
+      return { ...options, record };
+    }
+  }
+
   export function collapseChanged(
     metadata: IObservableJSON,
     args: IObservableMap.IChangedArgs<JSONValue>

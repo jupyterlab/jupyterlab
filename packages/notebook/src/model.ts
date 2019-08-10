@@ -1,6 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { showDialog, Dialog } from '@jupyterlab/apputils';
+
+import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
+
 import { DocumentModel, DocumentRegistry } from '@jupyterlab/docregistry';
 
 import {
@@ -16,8 +20,6 @@ import {
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
-
 import {
   IObservableJSON,
   IObservableUndoableList,
@@ -25,8 +27,18 @@ import {
   IModelDB
 } from '@jupyterlab/observables';
 
+import { ReadonlyJSONValue, UUID } from '@phosphor/coreutils';
+
+import {
+  Datastore,
+  Fields,
+  ListField,
+  MapField,
+  RegisterField,
+  Schema
+} from '@phosphor/datastore';
+
 import { CellList } from './celllist';
-import { showDialog, Dialog } from '@jupyterlab/apputils';
 
 /**
  * The definition of a model object for a notebook widget.
@@ -337,6 +349,63 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
  * The namespace for the `NotebookModel` class statics.
  */
 export namespace NotebookModel {
+  export interface IFields extends SchemaFields {
+    /**
+     * The major nbformat version number.
+     */
+    readonly nbformat: RegisterField<number>;
+
+    /**
+     * The minor nbformat version number.
+     */
+    readonly nbformatMinor: RegisterField<number>;
+
+    /**
+     * The list of cell IDs in the notebook.
+     */
+    readonly cells: ListField<string>;
+
+    /**
+     * The metadata for the notebook.
+     */
+    readonly metadata: MapField<ReadonlyJSONValue>;
+  }
+
+  /**
+   * An interface for a notebook schema.
+   */
+  export interface ISchema extends Schema {
+    /**
+     * The schema id.
+     */
+    id: '@jupyterlab/codeeditor:v1';
+
+    /**
+     * The schema fields.
+     */
+    fields: IFields;
+  }
+
+  /**
+   * The concreate notebook schema, available at runtime.
+   */
+  export const SCHEMA: ISchema = {
+    /**
+     * The schema id.
+     */
+    id: '@jupyterlab/codeeditor:v1',
+
+    /**
+     * Concrete realizations of the schema fields, available at runtime.
+     */
+    fields: {
+      nbformat: Fields.Number(),
+      nbformatMinor: Fields.Number(),
+      cells: Fields.List<string>(),
+      metadata: Fields.Map<ReadonlyJSONValue>()
+    }
+  };
+
   /**
    * An options object for initializing a notebook model.
    */

@@ -3,6 +3,8 @@
 
 import { nbformat } from '@jupyterlab/coreutils';
 
+import { SchemaFields } from '@jupyterlab/datastore';
+
 import {
   IObservableMap,
   ObservableMap,
@@ -18,6 +20,8 @@ import {
 } from '@jupyterlab/rendermime';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
+import { MapField } from '@phosphor/datastore';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -90,6 +94,16 @@ export interface IAttachmentsModel extends IDisposable {
  * The namespace for IAttachmentsModel interfaces.
  */
 export namespace IAttachmentsModel {
+  /**
+   * An interface for schema fields for an attachments model.
+   */
+  export interface IFields extends SchemaFields {
+    /**
+     * A map storing attachments.
+     */
+    attachments: MapField<nbformat.IMimeBundle>;
+  }
+
   /**
    * The options used to create a attachments model.
    */
