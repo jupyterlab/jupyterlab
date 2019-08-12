@@ -92,6 +92,10 @@ class CoreConfig:
             Whether the package is a MIME extension
         """
         data = self._data
+        if not name:
+            raise ValueError('Missing package name')
+        if not semver:
+            raise ValueError('Missing package semver')
         if name in self._data['resolutions']:
             raise ValueError('Package already present: %r' % (name,))
         data['resolutions'][name] = semver
@@ -110,12 +114,16 @@ class CoreConfig:
     @property
     def extensions(self):
         """A dict mapping all extension names to their semver"""
-        return dict(self._data['jupyterlab']['extensions'])
+        return dict(
+            (k, self._data['resolutions'][k])
+            for k in self._data['jupyterlab']['extensions'].keys())
 
     @property
     def mime_extensions(self):
         """A dict mapping all MIME extension names to their semver"""
-        return dict(self._data['jupyterlab']['mimeExtensions'])
+        return dict(
+            (k, self._data['resolutions'][k])
+            for k in self._data['jupyterlab']['mimeExtensions'].keys())
 
     @property
     def singletons(self):
