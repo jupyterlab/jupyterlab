@@ -35,8 +35,13 @@ const FACTORY_TSV = 'TSVTable';
 const csv: JupyterFrontEndPlugin<void> = {
   activate: activateCsv,
   id: '@jupyterlab/csvviewer-extension:csv',
-  requires: [ILayoutRestorer, IThemeManager, IMainMenu],
-  optional: [ISearchProviderRegistry],
+  requires: [],
+  optional: [
+    ILayoutRestorer,
+    IThemeManager,
+    IMainMenu,
+    ISearchProviderRegistry
+  ],
   autoStart: true
 };
 
@@ -46,8 +51,13 @@ const csv: JupyterFrontEndPlugin<void> = {
 const tsv: JupyterFrontEndPlugin<void> = {
   activate: activateTsv,
   id: '@jupyterlab/csvviewer-extension:tsv',
-  requires: [ILayoutRestorer, IThemeManager, IMainMenu],
-  optional: [ISearchProviderRegistry],
+  requires: [],
+  optional: [
+    ILayoutRestorer,
+    IThemeManager,
+    IMainMenu,
+    ISearchProviderRegistry
+  ],
   autoStart: true
 };
 
@@ -66,7 +76,7 @@ function addMenuEntries(
         title: 'Go to Line',
         value: 0
       }).then(value => {
-        if (value.button.accept) {
+        if (value.button.accept && value.value !== null) {
           widget.content.goToLine(value.value);
         }
       });
@@ -79,10 +89,10 @@ function addMenuEntries(
  */
 function activateCsv(
   app: JupyterFrontEnd,
-  restorer: ILayoutRestorer,
-  themeManager: IThemeManager,
-  mainMenu: IMainMenu,
-  searchregistry: ISearchProviderRegistry = null
+  restorer: ILayoutRestorer | null,
+  themeManager: IThemeManager | null,
+  mainMenu: IMainMenu | null,
+  searchregistry: ISearchProviderRegistry | null
 ): void {
   const factory = new CSVViewerFactory({
     name: FACTORY_CSV,
@@ -98,12 +108,14 @@ function activateCsv(
   let style: DataGrid.IStyle = Private.LIGHT_STYLE;
   let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
 
-  // Handle state restoration.
-  void restorer.restore(tracker, {
-    command: 'docmanager:open',
-    args: widget => ({ path: widget.context.path, factory: FACTORY_CSV }),
-    name: widget => widget.context.path
-  });
+  if (restorer) {
+    // Handle state restoration.
+    void restorer.restore(tracker, {
+      command: 'docmanager:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY_CSV }),
+      name: widget => widget.context.path
+    });
+  }
 
   app.docRegistry.addWidgetFactory(factory);
   let ft = app.docRegistry.getFileType('csv');
@@ -116,8 +128,8 @@ function activateCsv(
     });
 
     if (ft) {
-      widget.title.iconClass = ft.iconClass;
-      widget.title.iconLabel = ft.iconLabel;
+      widget.title.iconClass = ft.iconClass!;
+      widget.title.iconLabel = ft.iconLabel!;
     }
     // Set the theme for the new widget.
     widget.content.style = style;
@@ -126,7 +138,10 @@ function activateCsv(
 
   // Keep the themes up-to-date.
   const updateThemes = () => {
-    const isLight = themeManager.isLight(themeManager.theme);
+    const isLight =
+      themeManager && themeManager.theme
+        ? themeManager.isLight(themeManager.theme)
+        : true;
     style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
     rendererConfig = isLight
       ? Private.LIGHT_TEXT_CONFIG
@@ -136,9 +151,13 @@ function activateCsv(
       grid.content.rendererConfig = rendererConfig;
     });
   };
-  themeManager.themeChanged.connect(updateThemes);
+  if (themeManager) {
+    themeManager.themeChanged.connect(updateThemes);
+  }
 
-  addMenuEntries(mainMenu, tracker);
+  if (mainMenu) {
+    addMenuEntries(mainMenu, tracker);
+  }
   if (searchregistry) {
     searchregistry.register('csv', CSVSearchProvider);
   }
@@ -149,10 +168,10 @@ function activateCsv(
  */
 function activateTsv(
   app: JupyterFrontEnd,
-  restorer: ILayoutRestorer,
-  themeManager: IThemeManager,
-  mainMenu: IMainMenu,
-  searchregistry: ISearchProviderRegistry = null
+  restorer: ILayoutRestorer | null,
+  themeManager: IThemeManager | null,
+  mainMenu: IMainMenu | null,
+  searchregistry: ISearchProviderRegistry | null
 ): void {
   const factory = new TSVViewerFactory({
     name: FACTORY_TSV,
@@ -168,12 +187,14 @@ function activateTsv(
   let style: DataGrid.IStyle = Private.LIGHT_STYLE;
   let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
 
-  // Handle state restoration.
-  void restorer.restore(tracker, {
-    command: 'docmanager:open',
-    args: widget => ({ path: widget.context.path, factory: FACTORY_TSV }),
-    name: widget => widget.context.path
-  });
+  if (restorer) {
+    // Handle state restoration.
+    void restorer.restore(tracker, {
+      command: 'docmanager:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY_TSV }),
+      name: widget => widget.context.path
+    });
+  }
 
   app.docRegistry.addWidgetFactory(factory);
   let ft = app.docRegistry.getFileType('tsv');
@@ -186,8 +207,8 @@ function activateTsv(
     });
 
     if (ft) {
-      widget.title.iconClass = ft.iconClass;
-      widget.title.iconLabel = ft.iconLabel;
+      widget.title.iconClass = ft.iconClass!;
+      widget.title.iconLabel = ft.iconLabel!;
     }
     // Set the theme for the new widget.
     widget.content.style = style;
@@ -196,7 +217,10 @@ function activateTsv(
 
   // Keep the themes up-to-date.
   const updateThemes = () => {
-    const isLight = themeManager.isLight(themeManager.theme);
+    const isLight =
+      themeManager && themeManager.theme
+        ? themeManager.isLight(themeManager.theme)
+        : true;
     style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
     rendererConfig = isLight
       ? Private.LIGHT_TEXT_CONFIG
@@ -206,9 +230,13 @@ function activateTsv(
       grid.content.rendererConfig = rendererConfig;
     });
   };
-  themeManager.themeChanged.connect(updateThemes);
+  if (themeManager) {
+    themeManager.themeChanged.connect(updateThemes);
+  }
 
-  addMenuEntries(mainMenu, tracker);
+  if (mainMenu) {
+    addMenuEntries(mainMenu, tracker);
+  }
   if (searchregistry) {
     searchregistry.register('tsv', CSVSearchProvider);
   }
