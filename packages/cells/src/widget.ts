@@ -11,7 +11,7 @@ import { IChangedArgs, ActivityMonitor } from '@jupyterlab/coreutils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import { IObservableMap } from '@jupyterlab/observables';
+import { DatastoreExt } from '@jupyterlab/datastore';
 
 import {
   OutputArea,
@@ -30,7 +30,13 @@ import {
 
 import { KernelMessage, Kernel } from '@jupyterlab/services';
 
-import { JSONValue, PromiseDelegate, JSONObject } from '@phosphor/coreutils';
+import {
+  JSONObject,
+  PromiseDelegate,
+  ReadonlyJSONObject
+} from '@phosphor/coreutils';
+
+import { Datastore, MapField } from '@phosphor/datastore';
 
 import { Message } from '@phosphor/messaging';
 
@@ -200,7 +206,11 @@ export class Cell extends Widget {
       );
     }
 
-    model.metadata.changed.connect(this.onMetadataChanged, this);
+    DatastoreExt.listenField(
+      { ...this.model.record, field: 'metadata' },
+      this.onMetadataChanged,
+      this
+    );
   }
 
   /**
@@ -283,7 +293,7 @@ export class Cell extends Widget {
    */
   saveEditableState() {
     const { metadata } = this.model;
-    const current = metadata.get('editable');
+    const current = metadata['editable'];
 
     if (
       (this.readOnly && current === false) ||
@@ -292,18 +302,26 @@ export class Cell extends Widget {
       return;
     }
 
-    if (this.readOnly) {
-      this.model.metadata.set('editable', false);
-    } else {
-      this.model.metadata.delete('editable');
-    }
+    DatastoreExt.withTransaction(this.model.record.datastore, () => {
+      if (this.readOnly) {
+        DatastoreExt.updateField(
+          { ...this.model.record, field: 'metadata' },
+          { editable: false }
+        );
+      } else {
+        DatastoreExt.updateField(
+          { ...this.model.record, field: 'metadata' },
+          { editable: null }
+        );
+      }
+    });
   }
 
   /**
    * Load view editable state from model.
    */
   loadEditableState() {
-    this.readOnly = this.model.metadata.get('editable') === false;
+    this.readOnly = this.model.metadata['editable'] === false;
   }
 
   /**
@@ -349,7 +367,9 @@ export class Cell extends Widget {
    * Save view collapse state to model
    */
   saveCollapseState() {
-    const jupyter = { ...(this.model.metadata.get('jupyter') as any) };
+    const jupyter = {
+      ...(this.model.metadata['jupyter'] as any)
+    };
 
     if (
       (this.inputHidden && jupyter.source_hidden === true) ||
@@ -363,18 +383,26 @@ export class Cell extends Widget {
     } else {
       delete jupyter.source_hidden;
     }
-    if (Object.keys(jupyter).length === 0) {
-      this.model.metadata.delete('jupyter');
-    } else {
-      this.model.metadata.set('jupyter', jupyter);
-    }
+    DatastoreExt.withTransaction(this.model.record.datastore, () => {
+      if (Object.keys(jupyter).length === 0) {
+        DatastoreExt.updateField(
+          { ...this.model.record, field: 'metadata' },
+          { jupyter: null }
+        );
+      } else {
+        DatastoreExt.updateField(
+          { ...this.model.record, field: 'metadata' },
+          { jupyter }
+        );
+      }
+    });
   }
 
   /**
    * Revert view collapse state from model.
    */
   loadCollapseState() {
-    const jupyter = (this.model.metadata.get('jupyter') as any) || {};
+    const jupyter = (this.model.metadata['jupyter'] as any) || {};
     this.inputHidden = !!jupyter.source_hidden;
   }
 
@@ -488,22 +516,18 @@ export class Cell extends Widget {
    * Handle changes in the metadata.
    */
   protected onMetadataChanged(
-    model: IObservableMap<JSONValue>,
-    args: IObservableMap.IChangedArgs<JSONValue>
+    sender: Datastore,
+    args: MapField.Change<ReadonlyJSONObject>
   ): void {
-    switch (args.key) {
-      case 'jupyter':
-        if (this.syncCollapse) {
-          this.loadCollapseState();
-        }
-        break;
-      case 'editable':
-        if (this.syncEditable) {
-          this.loadEditableState();
-        }
-        break;
-      default:
-        break;
+    if (args.current['jupyter']) {
+      if (this.syncCollapse) {
+        this.loadCollapseState();
+      }
+    }
+    if (args.current['editable']) {
+      if (this.syncEditable) {
+        this.loadEditableState();
+      }
     }
   }
 
@@ -771,8 +795,7 @@ export class CodeCell extends Cell {
     try {
       super.saveCollapseState();
 
-      const metadata = this.model.metadata;
-      const collapsed = this.model.metadata.get('collapsed');
+      const collapsed = this.model.metadata['collapsed'];
 
       if (
         (this.outputHidden && collapsed === true) ||
@@ -783,11 +806,19 @@ export class CodeCell extends Cell {
 
       // Do not set jupyter.outputs_hidden since it is redundant. See
       // and https://github.com/jupyter/nbformat/issues/137
-      if (this.outputHidden) {
-        metadata.set('collapsed', true);
-      } else {
-        metadata.delete('collapsed');
-      }
+      DatastoreExt.withTransaction(this.model.record.datastore, () => {
+        if (this.outputHidden) {
+          DatastoreExt.updateField(
+            { ...this.model.record, field: 'metadata' },
+            { collapsed: true }
+          );
+        } else {
+          DatastoreExt.updateField(
+            { ...this.model.record, field: 'metadata' },
+            { collapsed: null }
+          );
+        }
+      });
     } finally {
       this._savingMetadata = false;
     }
@@ -801,7 +832,7 @@ export class CodeCell extends Cell {
    */
   loadCollapseState() {
     super.loadCollapseState();
-    this.outputHidden = !!this.model.metadata.get('collapsed');
+    this.outputHidden = !!this.model.metadata['collapsed'];
   }
 
   /**
@@ -823,7 +854,7 @@ export class CodeCell extends Cell {
    */
   saveScrolledState() {
     const { metadata } = this.model;
-    const current = metadata.get('scrolled');
+    const current = metadata['scrolled'];
 
     if (
       (this.outputsScrolled && current === true) ||
@@ -831,11 +862,19 @@ export class CodeCell extends Cell {
     ) {
       return;
     }
-    if (this.outputsScrolled) {
-      metadata.set('scrolled', true);
-    } else {
-      metadata.delete('scrolled');
-    }
+    DatastoreExt.withTransaction(this.model.record.datastore, () => {
+      if (this.outputsScrolled) {
+        DatastoreExt.updateField(
+          { ...this.model.record, field: 'metadata' },
+          { scrolled: true }
+        );
+      } else {
+        DatastoreExt.updateField(
+          { ...this.model.record, field: 'metadata' },
+          { scrolled: null }
+        );
+      }
+    });
   }
 
   /**
@@ -845,10 +884,10 @@ export class CodeCell extends Cell {
     const metadata = this.model.metadata;
 
     // We don't have the notion of 'auto' scrolled, so we make it false.
-    if (metadata.get('scrolled') === 'auto') {
+    if (metadata['scrolled'] === 'auto') {
       this.outputsScrolled = false;
     } else {
-      this.outputsScrolled = !!metadata.get('scrolled');
+      this.outputsScrolled = !!metadata['scrolled'];
     }
   }
 
@@ -942,28 +981,24 @@ export class CodeCell extends Cell {
    * Handle changes in the metadata.
    */
   protected onMetadataChanged(
-    model: IObservableMap<JSONValue>,
-    args: IObservableMap.IChangedArgs<JSONValue>
+    sender: Datastore,
+    args: MapField.Change<ReadonlyJSONObject>
   ): void {
     if (this._savingMetadata) {
       // We are in middle of a metadata transaction, so don't react to it.
       return;
     }
-    switch (args.key) {
-      case 'scrolled':
-        if (this.syncScrolled) {
-          this.loadScrolledState();
-        }
-        break;
-      case 'collapsed':
-        if (this.syncCollapse) {
-          this.loadCollapseState();
-        }
-        break;
-      default:
-        break;
+    if (args.current['scrolled']) {
+      if (this.syncScrolled) {
+        this.loadScrolledState();
+      }
     }
-    super.onMetadataChanged(model, args);
+    if (args.current['collapsed']) {
+      if (this.syncCollapse) {
+        this.loadCollapseState();
+      }
+    }
+    super.onMetadataChanged(sender, args);
   }
 
   /**

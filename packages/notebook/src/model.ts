@@ -3,7 +3,7 @@
 
 import { showDialog, Dialog } from '@jupyterlab/apputils';
 
-import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
+import { SchemaFields } from '@jupyterlab/datastore';
 
 import { DocumentModel, DocumentRegistry } from '@jupyterlab/docregistry';
 
@@ -30,7 +30,6 @@ import {
 import { ReadonlyJSONValue, UUID } from '@phosphor/coreutils';
 
 import {
-  Datastore,
   Fields,
   ListField,
   MapField,

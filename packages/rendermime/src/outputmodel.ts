@@ -2,6 +2,12 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+import { nbformat } from '@jupyterlab/coreutils';
+
+import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
+
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
 import {
   JSONExt,
   JSONObject,
@@ -9,13 +15,13 @@ import {
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
-
-import { nbformat } from '@jupyterlab/coreutils';
-
-import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
-
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import {
+  Datastore,
+  Fields,
+  Record,
+  RegisterField,
+  Schema
+} from '@phosphor/datastore';
 
 import { MimeModel } from './mimemodel';
 
@@ -23,11 +29,6 @@ import { MimeModel } from './mimemodel';
  * The interface for an output model.
  */
 export interface IOutputModel extends IRenderMime.IMimeModel {
-  /**
-   * A signal emitted when the output model changes.
-   */
-  readonly changed: ISignal<this, void>;
-
   /**
    * The output type.
    */
@@ -37,6 +38,11 @@ export interface IOutputModel extends IRenderMime.IMimeModel {
    * The execution count of the model.
    */
   readonly executionCount: nbformat.ExecutionCount;
+
+  /**
+   * The record in which the output model is stored.
+   */
+  readonly record: DatastoreExt.RecordLocation<IOutputModel.ISchema>;
 
   /**
    * Whether the output is trusted.
@@ -59,18 +65,80 @@ export interface IOutputModel extends IRenderMime.IMimeModel {
  */
 export namespace IOutputModel {
   /**
+   * Fields for use in the output model schema.
+   */
+  export interface IFields extends SchemaFields {
+    /**
+     * Whether the output model is trusted.
+     */
+    trusted: RegisterField<boolean>;
+
+    /**
+     * The type of the output model.
+     */
+    type: RegisterField<string>;
+
+    /**
+     * The execution count of the model.
+     */
+    executionCount: RegisterField<nbformat.ExecutionCount>;
+
+    /**
+     * The data for the model.
+     */
+    data: RegisterField<ReadonlyJSONObject>;
+
+    /**
+     * The metadata for the model.
+     */
+    metadata: RegisterField<ReadonlyJSONObject>;
+
+    /**
+     * Raw data passed in that is in the data or metadata fields.
+     */
+    raw: RegisterField<ReadonlyJSONObject>;
+  }
+
+  /**
+   * An interface for the ouput model schema.
+   */
+  export interface ISchema extends Schema {
+    fields: IFields;
+  }
+
+  /**
+   * A concrete realization of the schema, available at runtime.
+   */
+  export const SCHEMA: ISchema = {
+    id: '@jupyterlab/rendermime:outputmodel.v1',
+    fields: {
+      trusted: Fields.Boolean(),
+      type: Fields.String(),
+      executionCount: Fields.Register<nbformat.ExecutionCount>({ value: null }),
+      data: Fields.Register<ReadonlyJSONObject>({ value: {} }),
+      metadata: Fields.Register<ReadonlyJSONObject>({ value: {} }),
+      raw: Fields.Register<ReadonlyJSONObject>({ value: {} })
+    }
+  };
+
+  /**
    * The options used to create a notebook output model.
    */
   export interface IOptions {
     /**
      * The raw output value.
      */
-    value: nbformat.IOutput;
+    value?: nbformat.IOutput;
 
     /**
      * Whether the output is trusted.  The default is false.
      */
     trusted?: boolean;
+
+    /**
+     * A record in which to store the data.
+     */
+    record?: DatastoreExt.RecordLocation<ISchema>;
   }
 }
 
@@ -82,75 +150,99 @@ export class OutputModel implements IOutputModel {
    * Construct a new output model.
    */
   constructor(options: IOutputModel.IOptions) {
-    let { data, metadata, trusted } = Private.getBundleOptions(options);
-    this._data = new ObservableJSON({ values: data as JSONObject });
-    this._rawData = data;
-    this._metadata = new ObservableJSON({ values: metadata as JSONObject });
-    this._rawMetadata = metadata;
-    this.trusted = trusted;
-    // Make a copy of the data.
-    let value = options.value;
-    for (let key in value) {
-      // Ignore data and metadata that were stripped.
-      switch (key) {
-        case 'data':
-        case 'metadata':
-          break;
-        default:
-          this._raw[key] = Private.extract(value, key);
-      }
-    }
-    this.type = value.output_type;
-    if (nbformat.isExecuteResult(value)) {
-      this.executionCount = value.execution_count;
+    if (options.record) {
+      this.record = options.record;
     } else {
-      this.executionCount = null;
+      const datastore = Datastore.create({
+        id: 1,
+        schemas: [IOutputModel.SCHEMA]
+      });
+      this.record = {
+        datastore,
+        schema: IOutputModel.SCHEMA,
+        record: 'data'
+      };
     }
-  }
 
-  /**
-   * A signal emitted when the output model changes.
-   */
-  get changed(): ISignal<this, void> {
-    return this._changed;
+    if (options.value) {
+      let { data, metadata, trusted } = Private.getBundleOptions(options);
+
+      // Make a copy of the raw data.
+      let value = options.value;
+      let raw: { [x: string]: JSONValue } = {};
+      for (let key in value) {
+        // Ignore data and metadata that were stripped.
+        switch (key) {
+          case 'data':
+          case 'metadata':
+            break;
+          default:
+            raw[key] = Private.extract(value, key);
+        }
+      }
+      const type = value.output_type;
+      const executionCount = nbformat.isExecuteResult(value)
+        ? value.execution_count
+        : null;
+
+      DatastoreExt.withTransaction(this.record.datastore, () => {
+        DatastoreExt.updateRecord(this.record, {
+          data,
+          executionCount,
+          metadata,
+          raw,
+          trusted,
+          type
+        });
+      });
+    }
   }
 
   /**
    * The output type.
    */
-  readonly type: string;
+  get type(): string {
+    return DatastoreExt.getField({ ...this.record, field: 'type' });
+  }
 
   /**
    * The execution count.
    */
-  readonly executionCount: nbformat.ExecutionCount;
+  get executionCount(): nbformat.ExecutionCount {
+    return DatastoreExt.getField({ ...this.record, field: 'executionCount' });
+  }
 
   /**
    * Whether the model is trusted.
    */
-  readonly trusted: boolean;
+  get trusted(): boolean {
+    return DatastoreExt.getField({ ...this.record, field: 'trusted' });
+  }
+
+  /**
+   * The record in which the output model is stored.
+   */
+  readonly record: DatastoreExt.RecordLocation<IOutputModel.ISchema>;
 
   /**
    * Dispose of the resources used by the output model.
    */
   dispose(): void {
-    this._data.dispose();
-    this._metadata.dispose();
-    Signal.clearData(this);
+    // TODO dispose of datastore if created here.
   }
 
   /**
    * The data associated with the model.
    */
   get data(): ReadonlyJSONObject {
-    return this._rawData;
+    return DatastoreExt.getField({ ...this.record, field: 'data' });
   }
 
   /**
    * The metadata associated with the model.
    */
   get metadata(): ReadonlyJSONObject {
-    return this._rawMetadata;
+    return DatastoreExt.getField({ ...this.record, field: 'metadata' });
   }
 
   /**
@@ -161,25 +253,30 @@ export class OutputModel implements IOutputModel {
    * this call may or may not have deferred effects,
    */
   setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
+    let metadataUpdate: Record.Update<IOutputModel.ISchema> = {};
+    let dataUpdate: Record.Update<IOutputModel.ISchema> = {};
     if (options.data) {
-      this._updateObservable(this._data, options.data);
-      this._rawData = options.data;
+      dataUpdate = { data: options.data };
     }
     if (options.metadata) {
-      this._updateObservable(this._metadata, options.metadata);
-      this._rawMetadata = options.metadata;
+      metadataUpdate = { metadata: options.metadata };
     }
-    this._changed.emit(void 0);
+    DatastoreExt.withTransaction(this.record.datastore, () => {
+      DatastoreExt.updateRecord(this.record, {
+        ...dataUpdate,
+        ...metadataUpdate
+      });
+    });
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput {
-    let output: JSONValue = {};
-    for (let key in this._raw) {
-      output[key] = Private.extract(this._raw, key);
-    }
+    let output: JSONObject = DatastoreExt.getField({
+      ...this.record,
+      field: 'raw'
+    }) as JSONObject;
     switch (this.type) {
       case 'display_data':
       case 'execute_result':
@@ -194,40 +291,6 @@ export class OutputModel implements IOutputModel {
     delete output['transient'];
     return output as nbformat.IOutput;
   }
-
-  /**
-   * Update an observable JSON object using a readonly JSON object.
-   */
-  private _updateObservable(
-    observable: IObservableJSON,
-    data: ReadonlyJSONObject
-  ) {
-    let oldKeys = observable.keys();
-    let newKeys = Object.keys(data);
-
-    // Handle removed keys.
-    for (let key of oldKeys) {
-      if (newKeys.indexOf(key) === -1) {
-        observable.delete(key);
-      }
-    }
-
-    // Handle changed data.
-    for (let key of newKeys) {
-      let oldValue = observable.get(key);
-      let newValue = data[key];
-      if (oldValue !== newValue) {
-        observable.set(key, newValue as JSONValue);
-      }
-    }
-  }
-
-  private _changed = new Signal<this, void>(this);
-  private _raw: JSONObject = {};
-  private _rawMetadata: ReadonlyJSONObject;
-  private _rawData: ReadonlyJSONObject;
-  private _data: IObservableJSON;
-  private _metadata: IObservableJSON;
 }
 
 /**

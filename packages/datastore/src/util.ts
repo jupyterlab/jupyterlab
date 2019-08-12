@@ -25,19 +25,24 @@ export namespace DatastoreExt {
     datastore: Datastore,
     update: (id: string) => void
   ): string {
-    const id = datastore.beginTransaction();
+    let id = '';
+    if (!datastore.inTransaction) {
+      id = datastore.beginTransaction();
+    }
     try {
       update(id);
     } finally {
-      datastore.endTransaction();
+      if (id) {
+        datastore.endTransaction();
+      }
     }
     return id;
   }
 
   /**
-   * An interface for referring to a specific record in a datastore.
+   * An interface for referring to a specific table in a datastore.
    */
-  export type RecordLocation<S extends Schema> = {
+  export type TableLocation<S extends Schema> = {
     /**
      * The datastore in question.
      */
@@ -48,7 +53,12 @@ export namespace DatastoreExt {
      * or an error may result in its usage.
      */
     schema: S;
+  };
 
+  /**
+   * An interface for referring to a specific record in a datastore.
+   */
+  export type RecordLocation<S extends Schema> = TableLocation<S> & {
     /**
      * The record in question.
      */
@@ -70,6 +80,17 @@ export namespace DatastoreExt {
      */
     field: F;
   };
+
+  /**
+   * Get a given table by its location.
+   *
+   * @param loc: The table location.
+   *
+   * @returns the table.
+   */
+  export function getTable<S extends Schema>(loc: TableLocation<S>): Table<S> {
+    return loc.datastore.get(loc.schema);
+  }
 
   /**
    * Get a given record by its location.
@@ -102,6 +123,25 @@ export namespace DatastoreExt {
       throw Error(`The record ${loc.record} could not be found`);
     }
     return record[loc.field];
+  }
+
+  /**
+   * Update a table.
+   *
+   * @param loc: the table location.
+   *
+   * @param update: the update to the table.
+   *
+   * #### Notes
+   * This does not begin a transaction, so usage of this function should be
+   * combined with `beginTransaction`/`endTransaction`, or `withTransaction`.
+   */
+  export function updateTable<S extends Schema>(
+    loc: TableLocation<S>,
+    update: Table.Update<S>
+  ): void {
+    let table = loc.datastore.get(loc.schema);
+    table.update(update);
   }
 
   /**
@@ -147,6 +187,36 @@ export namespace DatastoreExt {
       [loc.record]: {
         [loc.field]: update
       } as Record.Update<S>
+    });
+  }
+
+  /**
+   * Listen to changes in a table. Changes to other tables are ignored.
+   *
+   * @param loc: the table location.
+   *
+   * @param slot: a callback function to invoke when the table changes.
+   *
+   * @returns an `IDisposable` that can be disposed to remove the listener.
+   */
+  export function listenTable<S extends Schema>(
+    loc: TableLocation<S>,
+    slot: (source: Datastore, args: Table.Change<S>) => void,
+    thisArg?: any
+  ): IDisposable {
+    // A wrapper change signal connection function.
+    const wrapper = (source: Datastore, args: Datastore.IChangedArgs) => {
+      // Ignore changes that don't match the requested record.
+      if (!args.change[loc.schema.id]) {
+        return;
+      }
+      // Otherwise, call the slot.
+      const tc = args.change[loc.schema.id]! as Table.Change<S>;
+      slot.bind(thisArg)(source, tc);
+    };
+    loc.datastore.changed.connect(wrapper);
+    return new DisposableDelegate(() => {
+      loc.datastore.changed.disconnect(wrapper);
     });
   }
 

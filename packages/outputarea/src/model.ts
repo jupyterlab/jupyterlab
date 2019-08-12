@@ -1,17 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { each, map, toArray } from '@phosphor/algorithm';
+import { nbformat } from '@jupyterlab/coreutils';
+
+import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
+
+import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
+
+import { UUID } from '@phosphor/coreutils';
+
+import {
+  Datastore,
+  Fields,
+  ListField,
+  RegisterField,
+  Schema
+} from '@phosphor/datastore';
 
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
-
-import { nbformat } from '@jupyterlab/coreutils';
-
-import { IObservableList, ObservableList } from '@jupyterlab/observables';
-
-import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
 
 /**
  * The model for an output area.
@@ -23,19 +31,19 @@ export interface IOutputAreaModel extends IDisposable {
   readonly stateChanged: ISignal<IOutputAreaModel, void>;
 
   /**
-   * A signal emitted when the model changes.
+   * Whether the output area is trusted.
    */
-  readonly changed: ISignal<IOutputAreaModel, IOutputAreaModel.ChangedArgs>;
+  trusted: boolean;
 
   /**
-   * The length of the items in the model.
+   * Get the length of the items in the model.
    */
   readonly length: number;
 
   /**
-   * Whether the output area is trusted.
+   * The record location of the data.
    */
-  trusted: boolean;
+  readonly record: DatastoreExt.RecordLocation<IOutputAreaModel.ISchema>;
 
   /**
    * The output content factory used by the model.
@@ -54,7 +62,7 @@ export interface IOutputAreaModel extends IDisposable {
    * The output bundle is copied.
    * Contiguous stream outputs of the same `name` are combined.
    */
-  add(output: nbformat.IOutput): number;
+  add(output: nbformat.IOutput): void;
 
   /**
    * Set the value at the specified index.
@@ -87,6 +95,46 @@ export interface IOutputAreaModel extends IDisposable {
  */
 export namespace IOutputAreaModel {
   /**
+   * An interface for the fields stored in an Output area.
+   */
+  export interface IFields extends SchemaFields {
+    /**
+     * Whether the output area is trusted.
+     */
+    readonly trusted: RegisterField<boolean>;
+
+    /**
+     * The list of outputs in the output area.
+     */
+    readonly outputs: ListField<string>;
+  }
+
+  /**
+   * An interface for an output area model schema.
+   */
+  export interface ISchema extends Schema {
+    fields: IFields;
+  }
+
+  /**
+   * A concrete output area schema, available at runtime.
+   */
+  export const SCHEMA: ISchema = {
+    /**
+     * The schema id.
+     */
+    id: '@jupyterlab/outputarea:outputareamodel.v1',
+
+    /**
+     * The fields for the schema.
+     */
+    fields: {
+      trusted: Fields.Boolean(),
+      outputs: Fields.List<string>()
+    }
+  };
+
+  /**
    * The options used to create a output area model.
    */
   export interface IOptions {
@@ -109,11 +157,6 @@ export namespace IOutputAreaModel {
   }
 
   /**
-   * A type alias for changed args.
-   */
-  export type ChangedArgs = IObservableList.IChangedArgs<IOutputModel>;
-
-  /**
    * The interface for an output content factory.
    */
   export interface IContentFactory {
@@ -132,17 +175,29 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Construct a new observable outputs instance.
    */
   constructor(options: IOutputAreaModel.IOptions = {}) {
-    this._trusted = !!options.trusted;
+    const datastore = Datastore.create({
+      id: 1,
+      schemas: [IOutputAreaModel.SCHEMA, IOutputModel.SCHEMA]
+    });
+    this.record = {
+      datastore,
+      schema: IOutputAreaModel.SCHEMA,
+      record: 'data'
+    };
+    DatastoreExt.withTransaction(datastore, () => {
+      DatastoreExt.updateRecord(this.record, { trusted: !!options.trusted });
+    });
+
     this.contentFactory =
       options.contentFactory || OutputAreaModel.defaultContentFactory;
-    this.list = new ObservableList<IOutputModel>();
-    if (options.values) {
-      each(options.values, value => {
-        this._add(value);
-      });
-    }
-    this.list.changed.connect(this._onListChanged, this);
+
+    this._add(options.values);
   }
+
+  /**
+   * The record location of the data.
+   */
+  readonly record: DatastoreExt.RecordLocation<IOutputAreaModel.ISchema>;
 
   /**
    * A signal emitted when the model state changes.
@@ -152,24 +207,17 @@ export class OutputAreaModel implements IOutputAreaModel {
   }
 
   /**
-   * A signal emitted when the model changes.
-   */
-  get changed(): ISignal<this, IOutputAreaModel.ChangedArgs> {
-    return this._changed;
-  }
-
-  /**
    * Get the length of the items in the model.
    */
   get length(): number {
-    return this.list ? this.list.length : 0;
+    return DatastoreExt.getField({ ...this.record, field: 'outputs' }).length;
   }
 
   /**
    * Get whether the model is trusted.
    */
   get trusted(): boolean {
-    return this._trusted;
+    return DatastoreExt.getField({ ...this.record, field: 'trusted' });
   }
 
   /**
@@ -179,17 +227,22 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Changing the value will cause all of the models to re-set.
    */
   set trusted(value: boolean) {
-    if (value === this._trusted) {
+    if (value === DatastoreExt.getField({ ...this.record, field: 'trusted' })) {
       return;
     }
-    let trusted = (this._trusted = value);
-    for (let i = 0; i < this.list.length; i++) {
-      let item = this.list.get(i);
-      let value = item.toJSON();
-      item.dispose();
-      item = this._createItem({ value, trusted });
-      this.list.set(i, item);
-    }
+    DatastoreExt.withTransaction(this.record.datastore, () => {
+      const list = DatastoreExt.getField({ ...this.record, field: 'outputs' });
+      for (let i = 0; i < list.length; i++) {
+        const id = list[i];
+        const outputRecord = {
+          datastore: this.record.datastore,
+          schema: IOutputAreaModel.SCHEMA,
+          record: id
+        };
+        DatastoreExt.updateField({ ...this.record, field: 'trusted' }, true);
+        DatastoreExt.updateField({ ...outputRecord, field: 'trusted' }, true);
+      }
+    });
   }
 
   /**
@@ -212,7 +265,6 @@ export class OutputAreaModel implements IOutputAreaModel {
       return;
     }
     this._isDisposed = true;
-    this.list.dispose();
     Signal.clearData(this);
   }
 
@@ -220,17 +272,33 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Get an item at the specified index.
    */
   get(index: number): IOutputModel {
-    return this.list.get(index);
+    const list = DatastoreExt.getField({ ...this.record, field: 'outputs' });
+    return this._outputModels.get(list[index]);
   }
 
   /**
    * Set the value at the specified index.
    */
   set(index: number, value: nbformat.IOutput): void {
+    const list = DatastoreExt.getField({ ...this.record, field: 'outputs' });
     // Normalize stream data.
     Private.normalize(value);
-    let item = this._createItem({ value, trusted: this._trusted });
-    this.list.set(index, item);
+    let prev = this._outputModels.get(list[index]);
+    if (prev) {
+      prev.dispose();
+      this._outputModels.delete(list[index]);
+    }
+    const outputRecord = {
+      datastore: this.record.datastore,
+      schema: IOutputModel.SCHEMA,
+      record: list[index]
+    };
+    let item = this._createItem({
+      record: outputRecord,
+      value,
+      trusted: this.trusted
+    });
+    this._outputModels.set(list[index], item);
   }
 
   /**
@@ -240,14 +308,14 @@ export class OutputAreaModel implements IOutputAreaModel {
    * The output bundle is copied.
    * Contiguous stream outputs of the same `name` are combined.
    */
-  add(output: nbformat.IOutput): number {
+  add(output: nbformat.IOutput): void {
     // If we received a delayed clear message, then clear now.
     if (this.clearNext) {
       this.clear();
       this.clearNext = false;
     }
 
-    return this._add(output);
+    this._add([output]);
   }
 
   /**
@@ -261,10 +329,15 @@ export class OutputAreaModel implements IOutputAreaModel {
       this.clearNext = true;
       return;
     }
-    each(this.list, (item: IOutputModel) => {
-      item.dispose();
+    this._outputModels.forEach(model => model.dispose());
+    this._outputModels.clear();
+    DatastoreExt.withTransaction(this.record.datastore, () => {
+      DatastoreExt.updateField(
+        { ...this.record, field: 'outputs' },
+        { index: 0, remove: this.length, values: [] }
+      );
+      // TODO also clear items from output table.
     });
-    this.list.clear();
   }
 
   /**
@@ -275,64 +348,88 @@ export class OutputAreaModel implements IOutputAreaModel {
    */
   fromJSON(values: nbformat.IOutput[]) {
     this.clear();
-    each(values, value => {
-      this._add(value);
-    });
+    this._add(values);
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput[] {
-    return toArray(map(this.list, (output: IOutputModel) => output.toJSON()));
+    const list = DatastoreExt.getField({ ...this.record, field: 'outputs' });
+    return list.map(id => this._outputModels.get(id).toJSON());
   }
 
   /**
-   * Add an item to the list.
+   * Add an array of output items to the list.
+   *
+   * #### Notes
+   * This removes overwritten characters, and consolidates items if they should
+   * be combined with a previous entry rather than a new entry.
    */
-  private _add(value: nbformat.IOutput): number {
-    let trusted = this._trusted;
+  private _add(values: nbformat.IOutput[]): void {
+    let trusted = DatastoreExt.getField({ ...this.record, field: 'trusted' });
 
-    // Normalize the value.
-    Private.normalize(value);
+    DatastoreExt.withTransaction(this.record.datastore, () => {
+      values.forEach(value => {
+        // Normalize the value.
+        Private.normalize(value);
 
-    // Consolidate outputs if they are stream outputs of the same kind.
-    if (
-      nbformat.isStream(value) &&
-      this._lastStream &&
-      value.name === this._lastName
-    ) {
-      // In order to get a list change event, we add the previous
-      // text to the current item and replace the previous item.
-      // This also replaces the metadata of the last item.
-      this._lastStream += value.text as string;
-      this._lastStream = Private.removeOverwrittenChars(this._lastStream);
-      value.text = this._lastStream;
-      let item = this._createItem({ value, trusted });
-      let index = this.length - 1;
-      let prev = this.list.get(index);
-      prev.dispose();
-      this.list.set(index, item);
-      return index;
-    }
+        const list = DatastoreExt.getField({
+          ...this.record,
+          field: 'outputs'
+        });
 
-    if (nbformat.isStream(value)) {
-      value.text = Private.removeOverwrittenChars(value.text as string);
-    }
+        // Consolidate outputs if they are stream outputs of the same kind.
+        if (
+          nbformat.isStream(value) &&
+          this._lastStream &&
+          value.name === this._lastName
+        ) {
+          this._lastStream += value.text as string;
+          this._lastStream = Private.removeOverwrittenChars(this._lastStream);
+          value.text = this._lastStream;
+          let index = list.length - 1;
+          let outputRecord = {
+            datastore: this.record.datastore,
+            schema: IOutputModel.SCHEMA,
+            record: list[index]
+          };
+          let prev = this._outputModels.get(list[index]);
+          if (prev) {
+            prev.dispose();
+            this._outputModels.delete(list[index]);
+          }
+          this._createItem({ record: outputRecord, value, trusted });
+          return;
+        }
 
-    // Create the new item.
-    let item = this._createItem({ value, trusted });
+        if (nbformat.isStream(value)) {
+          value.text = Private.removeOverwrittenChars(value.text as string);
+        }
 
-    // Update the stream information.
-    if (nbformat.isStream(value)) {
-      this._lastStream = value.text as string;
-      this._lastName = value.name;
-    } else {
-      this._lastStream = '';
-    }
+        let id = UUID.uuid4();
+        let outputRecord = {
+          datastore: this.record.datastore,
+          schema: IOutputModel.SCHEMA,
+          record: id
+        };
+        // Create the new item.
+        this._createItem({ record: outputRecord, value, trusted });
 
-    // Add the item to our list and return the new length.
-    return this.list.push(item);
+        // Update the stream information.
+        if (nbformat.isStream(value)) {
+          this._lastStream = value.text as string;
+          this._lastName = value.name;
+        } else {
+          this._lastStream = '';
+        }
+
+        DatastoreExt.updateField(
+          { ...this.record, field: 'outputs' },
+          { index: list.length, remove: 0, values: [id] }
+        );
+      });
+    });
   }
 
   /**
@@ -342,29 +439,17 @@ export class OutputAreaModel implements IOutputAreaModel {
   protected clearNext = false;
 
   /**
-   * An observable list containing the output models
-   * for this output area.
-   */
-  protected list: IObservableList<IOutputModel> = null;
-
-  /**
    * Create an output item and hook up its signals.
+   *
+   * #### Notes
+   * If provided with
    */
   private _createItem(options: IOutputModel.IOptions): IOutputModel {
     let factory = this.contentFactory;
     let item = factory.createOutputModel(options);
-    item.changed.connect(this._onGenericChange, this);
+    DatastoreExt.listenRecord(this.record, this._onGenericChange, this);
+    this._outputModels.set(item.record.record, item);
     return item;
-  }
-
-  /**
-   * Handle a change to the list.
-   */
-  private _onListChanged(
-    sender: IObservableList<IOutputModel>,
-    args: IObservableList.IChangedArgs<IOutputModel>
-  ) {
-    this._changed.emit(args);
   }
 
   /**
@@ -374,12 +459,11 @@ export class OutputAreaModel implements IOutputAreaModel {
     this._stateChanged.emit(void 0);
   }
 
+  private _outputModels = new Map<string, IOutputModel>();
   private _lastStream: string;
   private _lastName: 'stdout' | 'stderr';
-  private _trusted = false;
   private _isDisposed = false;
   private _stateChanged = new Signal<IOutputAreaModel, void>(this);
-  private _changed = new Signal<this, IOutputAreaModel.ChangedArgs>(this);
 }
 
 /**

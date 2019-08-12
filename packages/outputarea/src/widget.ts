@@ -1,29 +1,35 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IClientSession } from '@jupyterlab/apputils';
+
+import { nbformat } from '@jupyterlab/coreutils';
+
+import { DatastoreExt } from '@jupyterlab/datastore';
+
+import {
+  IOutputModel,
+  IRenderMimeRegistry,
+  OutputModel
+} from '@jupyterlab/rendermime';
+
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
+import { Kernel, KernelMessage } from '@jupyterlab/services';
+
 import {
   JSONObject,
   PromiseDelegate,
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
+import { Datastore, ListField, Table } from '@phosphor/datastore';
+
 import { Message } from '@phosphor/messaging';
 
 import { Signal } from '@phosphor/signaling';
 
-import { Panel, PanelLayout } from '@phosphor/widgets';
-
-import { Widget } from '@phosphor/widgets';
-
-import { IClientSession } from '@jupyterlab/apputils';
-
-import { nbformat } from '@jupyterlab/coreutils';
-
-import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
-import { Kernel, KernelMessage } from '@jupyterlab/services';
+import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
 
 import { IOutputAreaModel } from './model';
 
@@ -83,12 +89,6 @@ const STDIN_INPUT_CLASS = 'jp-Stdin-input';
 
 /**
  * An output area widget.
- *
- * #### Notes
- * The widget model must be set separately and can be changed
- * at any time.  Consumers of the widget must account for a
- * `null` model, and may want to listen to the `modelChanged`
- * signal.
  */
 export class OutputArea extends Widget {
   /**
@@ -106,8 +106,21 @@ export class OutputArea extends Widget {
       let output = model.get(i);
       this._insertOutput(i, output);
     }
-    model.changed.connect(this.onModelChanged, this);
-    model.stateChanged.connect(this.onStateChanged, this);
+    // Listen for changes in the list of outputs.
+    DatastoreExt.listenField(
+      { ...model.record, field: 'outputs' },
+      this.onOutputListChanged,
+      this
+    );
+    // Listen for changes in the content of the existing outputs.
+    DatastoreExt.listenTable(
+      {
+        datastore: model.record.datastore,
+        schema: IOutputModel.SCHEMA
+      },
+      this.onOutputsChanged,
+      this
+    );
   }
 
   /**
@@ -200,45 +213,59 @@ export class OutputArea extends Widget {
     }
     this._future = null;
     this._displayIdMap.clear();
+    Signal.clearData(this);
     super.dispose();
   }
 
   /**
-   * Follow changes on the model state.
+   * Follow changes to the list of outputs.
    */
-  protected onModelChanged(
-    sender: IOutputAreaModel,
-    args: IOutputAreaModel.ChangedArgs
-  ): void {
-    switch (args.type) {
-      case 'add':
-        this._insertOutput(args.newIndex, args.newValues[0]);
-        this.outputLengthChanged.emit(this.model.length);
-        break;
-      case 'remove':
-        // Only clear is supported by the model.
-        if (this.widgets.length) {
-          this._clear();
-          this.outputLengthChanged.emit(this.model.length);
-        }
-        break;
-      case 'set':
-        this._setOutput(args.newIndex, args.newValues[0]);
-        this.outputLengthChanged.emit(this.model.length);
-        break;
-      default:
-        break;
-    }
+  protected onOutputListChanged(
+    sender: Datastore,
+    args: ListField.Change<string>
+  ) {
+    args.forEach(change => {
+      // First remove any disposed values
+      for (let i = 0; i < change.removed.length; i++) {
+        this.widgets[change.index].dispose();
+      }
+      for (let i = 0; i < change.removed.length; i++) {
+        const id = change.inserted[i];
+        const outputRecord = {
+          datastore: sender,
+          schema: IOutputModel.SCHEMA,
+          record: id
+        };
+        const model = new OutputModel({ record: outputRecord });
+        this._insertOutput(change.index + i, model);
+      }
+    });
+    this.outputLengthChanged.emit(this.widgets.length);
   }
 
   /**
-   * Follow changes on the output model state.
+   * Follow changes to the outputs table in case outputs have changed in-place.
    */
-  protected onStateChanged(sender: IOutputAreaModel): void {
-    for (let i = 0; i < this.model.length; i++) {
-      this._setOutput(i, this.model.get(i));
+  protected onOutputsChanged(
+    sender: Datastore,
+    args: Table.Change<IOutputModel.ISchema>
+  ) {
+    const list = DatastoreExt.getField({
+      ...this.model.record,
+      field: 'outputs'
+    });
+    for (let i = 0; i < list.length; ++i) {
+      const change = args[list[i]];
+      if (change) {
+        const outputRecord = {
+          datastore: sender,
+          schema: IOutputModel.SCHEMA,
+          record: list[i]
+        };
+        const model = new OutputModel({ record: outputRecord });
+        this._setOutput(i, model);
+      }
     }
-    this.outputLengthChanged.emit(this.model.length);
   }
 
   /**

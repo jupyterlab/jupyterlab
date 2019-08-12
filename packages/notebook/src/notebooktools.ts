@@ -21,6 +21,8 @@ import { ArrayExt, each, chain } from '@phosphor/algorithm';
 
 import { JSONObject, JSONValue } from '@phosphor/coreutils';
 
+import { Datastore, MapField } from '@phosphor/datastore';
+
 import { IDisposable } from '@phosphor/disposable';
 
 import { ConflatableMessage, Message, MessageLoop } from '@phosphor/messaging';
@@ -181,16 +183,15 @@ export class NotebookTools extends Widget implements INotebookTools {
    * Handle a change to the active cell.
    */
   private _onActiveCellChanged(): void {
-    if (this._prevActiveCell && !this._prevActiveCell.isDisposed) {
-      this._prevActiveCell.metadata.changed.disconnect(
-        this._onActiveCellMetadataChanged,
-        this
-      );
+    if (this._cellListener) {
+      this._cellListener.dispose();
+      this._cellListener = null;
     }
     const activeCell = this.activeCell ? this.activeCell.model : null;
     this._prevActiveCell = activeCell;
     if (activeCell) {
-      activeCell.metadata.changed.connect(
+      DatastoreExt.listenField(
+        { ...this._prevActiveCell.record, field: 'metadata' },
         this._onActiveCellMetadataChanged,
         this
       );
@@ -229,22 +230,23 @@ export class NotebookTools extends Widget implements INotebookTools {
    * Handle a change in the notebook model metadata.
    */
   private _onActiveCellMetadataChanged(
-    sender: IObservableMap<JSONValue>,
-    args: IObservableMap.IChangedArgs<JSONValue>
+    sender: Datastore,
+    args: MapField.Change<JSONValue>
   ): void {
-    let message = new ObservableJSON.ChangeMessage(
+    /*let message = new ObservableJSON.ChangeMessage(
       'activecell-metadata-changed',
       args
     );
     each(this._toolChildren(), widget => {
       MessageLoop.sendMessage(widget, message);
-    });
+    });*/
   }
 
   private _toolChildren() {
     return chain(this._commonTools.children(), this._advancedTools.children());
   }
 
+  private _cellListener: IDisposable;
   private _commonTools: RankedPanel<NotebookTools.Tool>;
   private _advancedTools: RankedPanel<NotebookTools.Tool>;
   private _tracker: INotebookTracker;
@@ -335,7 +337,7 @@ export namespace NotebookTools {
           this.onSelectionChanged(msg);
           break;
         case 'activecell-metadata-changed':
-          this.onActiveCellMetadataChanged(msg as ObservableJSON.ChangeMessage);
+          // this.onActiveCellMetadataChanged(msg as ObservableJSON.ChangeMessage);
           break;
         case 'activenotebookpanel-metadata-changed':
           this.onActiveNotebookPanelMetadataChanged(
@@ -384,7 +386,7 @@ export namespace NotebookTools {
      * The default implementation is a no-op.
      */
     protected onActiveCellMetadataChanged(
-      msg: ObservableJSON.ChangeMessage
+      msg: MapField.Change<JSONValue>
     ): void {
       /* no-op */
     }
@@ -606,13 +608,15 @@ export namespace NotebookTools {
     /**
      * Handle a change to the active cell metadata.
      */
-    protected onActiveCellMetadataChanged(msg: Message): void {
+    protected onActiveCellMetadataChanged(
+      msg: MapField.Change<JSONValue>
+    ): void {
       this._update();
     }
 
     private _update() {
-      let cell = this.notebookTools.activeCell;
-      this.editor.source = cell ? cell.model.metadata : null;
+      // let cell = this.notebookTools.activeCell;
+      // this.editor.source = cell ? cell.model.metadata : null;
     }
   }
 
@@ -630,7 +634,7 @@ export namespace NotebookTools {
       this.key = options.key;
       this._default = options.default;
       this._validCellTypes = options.validCellTypes || [];
-      this._getter = options.getter || this._getValue;
+      // this._getter = options.getter || this._getValue;
       this._setter = options.setter || this._setValue;
     }
 
@@ -704,15 +708,15 @@ export namespace NotebookTools {
       }
       select.disabled = false;
       this._changeGuard = true;
-      let getter = this._getter;
-      select.value = JSON.stringify(getter(activeCell));
+      // let getter = this._getter;
+      // select.value = JSON.stringify(getter(activeCell));
       this._changeGuard = false;
     }
 
     /**
      * Handle a change to the metadata of the active cell.
      */
-    protected onActiveCellMetadataChanged(msg: ObservableJSON.ChangeMessage) {
+    /*protected onActiveCellMetadataChanged(msg: ObservableJSON.ChangeMessage) {
       if (this._changeGuard) {
         return;
       }
@@ -724,7 +728,7 @@ export namespace NotebookTools {
         select.value = JSON.stringify(getter(cell));
         this._changeGuard = false;
       }
-    }
+    }*/
 
     /**
      * Handle a change to the value.
@@ -744,28 +748,36 @@ export namespace NotebookTools {
     /**
      * Get the value for the data.
      */
-    private _getValue = (cell: Cell) => {
-      let value = cell.model.metadata.get(this.key);
+    /*private _getValue = (cell: Cell) => {
+      let value = cell.model.metadata[this.key];
       if (value === undefined) {
         value = this._default;
       }
       return value;
-    };
+    };*/
 
     /**
      * Set the value for the data.
      */
     private _setValue = (cell: Cell, value: JSONValue) => {
-      if (value === this._default) {
-        cell.model.metadata.delete(this.key);
-      } else {
-        cell.model.metadata.set(this.key, value);
-      }
+      DatastoreExt.withTransaction(cell.model.record.datastore, () => {
+        if (value === this._default) {
+          DatastoreExt.updateField(
+            { ...cell.model.record, field: 'metadata' },
+            { [this.key]: null }
+          );
+        } else {
+          DatastoreExt.updateField(
+            { ...cell.model.record, field: 'metadata' },
+            { [this.key]: value }
+          );
+        }
+      });
     };
 
     private _changeGuard = false;
     private _validCellTypes: string[];
-    private _getter: (cell: Cell) => JSONValue;
+    // private _getter: (cell: Cell) => JSONValue;
     private _setter: (cell: Cell, value: JSONValue) => void;
     private _default: JSONValue;
   }
@@ -847,11 +859,11 @@ export namespace NotebookTools {
         Notes: 'notes'
       },
       getter: cell => {
-        let value = cell.model.metadata.get('slideshow');
+        let value = cell.model.metadata['slideshow'];
         return value && (value as JSONObject)['slide_type'];
       },
       setter: (cell, value) => {
-        let data = cell.model.metadata.get('slideshow') || Object.create(null);
+        let data = cell.model.metadata['slideshow'] || Object.create(null);
         if (value === null) {
           // Make a shallow copy so we aren't modifying the original metadata.
           data = { ...data };
@@ -859,11 +871,12 @@ export namespace NotebookTools {
         } else {
           data = { ...data, slide_type: value };
         }
-        if (Object.keys(data).length > 0) {
-          cell.model.metadata.set('slideshow', data);
-        } else {
-          cell.model.metadata.delete('slideshow');
-        }
+        DatastoreExt.withTransaction(cell.model.record.datastore, () => {
+          DatastoreExt.updateField(
+            { ...cell.model.record, field: 'metadata' },
+            { slideshow: Object.keys(data).length > 0 ? data : null }
+          );
+        });
       }
     };
     return new KeySelector(options);

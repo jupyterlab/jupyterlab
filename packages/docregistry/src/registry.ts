@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Contents, Kernel } from '@jupyterlab/services';
-
 import {
   ArrayExt,
   ArrayIterator,
@@ -14,6 +12,8 @@ import {
 } from '@phosphor/algorithm';
 
 import { JSONValue } from '@phosphor/coreutils';
+
+import { Datastore } from '@phosphor/datastore';
 
 import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
 
@@ -31,6 +31,8 @@ import {
 } from '@jupyterlab/coreutils';
 
 import { IModelDB } from '@jupyterlab/observables';
+
+import { Contents, Kernel } from '@jupyterlab/services';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
@@ -733,10 +735,24 @@ export namespace DocumentRegistry {
     initialize(): void;
   }
 
+  export interface ICollaborativeModel extends IModel {
+    /**
+     * The datastore for the collaborative data.
+     */
+    readonly datastore: Datastore;
+
+    /**
+     * Whether the collaborative model is ready for use.
+     * This typically means it has made a connection with the server
+     * and received any history or context that it needs.
+     */
+    readonly ready: Promise<void>;
+  }
+
   /**
    * The interface for a document model that represents code.
    */
-  export interface ICodeModel extends IModel, CodeEditor.IModel {}
+  export interface ICodeModel extends ICollaborativeModel, CodeEditor.IModel {}
 
   /**
    * The document context object.

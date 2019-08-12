@@ -21,10 +21,13 @@ import {
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
 
+import { IOutputModel } from '@jupyterlab/rendermime';
+
 import {
   JSONExt,
   JSONObject,
   JSONValue,
+  ReadonlyJSONValue,
   ReadonlyJSONObject,
   UUID
 } from '@phosphor/coreutils';
@@ -72,7 +75,12 @@ export interface ICellModel extends CodeEditor.IModel {
   /**
    * The metadata associated with the cell.
    */
-  readonly metadata: IObservableJSON;
+  readonly metadata: ReadonlyJSONObject;
+
+  /**
+   * The record in the datastore in which this cell keeps its data.
+   */
+  readonly record: DatastoreExt.RecordLocation<CellModel.ISchema>;
 
   /**
    * Serialize the model to JSON.
@@ -176,40 +184,39 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
 
     this.datastore.changed.connect(this.onGenericChange, this);
 
-    let cellType = this.modelDB.createValue('type');
-    cellType.set(this.type);
+    // Get the intitial data for the model.
+    const cell = options.cell;
+    let trusted = false;
+    let metadata: JSONObject = {};
+    let text = '';
+    if (cell) {
+      metadata = JSONExt.deepCopy(cell.metadata);
+      trusted = !!metadata['trusted'];
+      delete metadata['trusted'];
 
-    let observableMetadata = this.modelDB.createMap('metadata');
-    observableMetadata.changed.connect(this.onGenericChange, this);
+      if (this.type !== 'raw') {
+        delete metadata['format'];
+      }
+      if (this.type !== 'code') {
+        delete metadata['collapsed'];
+        delete metadata['scrolled'];
+      }
 
-    let cell = options.cell;
-    let trusted = this.modelDB.createValue('trusted');
-    trusted.changed.connect(this.onTrustedChanged, this);
-
-    if (!cell) {
-      trusted.set(false);
-      return;
+      if (Array.isArray(cell.source)) {
+        text = (cell.source as string[]).join('');
+      } else {
+        text = cell.source as string;
+      }
     }
-    trusted.set(!!cell.metadata['trusted']);
-    delete cell.metadata['trusted'];
-
-    if (Array.isArray(cell.source)) {
-      this.value = (cell.source as string[]).join('');
-    } else {
-      this.value = cell.source as string;
-    }
-    let metadata = JSONExt.deepCopy(cell.metadata);
-    if (this.type !== 'raw') {
-      delete metadata['format'];
-    }
-    if (this.type !== 'code') {
-      delete metadata['collapsed'];
-      delete metadata['scrolled'];
-    }
-
-    for (let key in metadata) {
-      observableMetadata.set(key, metadata[key]);
-    }
+    // Set the intitial data for the model.
+    DatastoreExt.withTransaction(this.record.datastore, () => {
+      DatastoreExt.updateRecord(this.record, {
+        type: this.type,
+        metadata,
+        trusted,
+        text: { index: 0, remove: 0, text }
+      });
+    });
   }
 
   /**
@@ -233,39 +240,41 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   readonly id: string;
 
   /**
+   * The record in the datastore in which this cell keeps its data.
+   */
+  readonly record: DatastoreExt.RecordLocation<CellModel.ISchema>;
+
+  /**
    * The metadata associated with the cell.
    */
-  get metadata(): IObservableJSON {
-    return this.modelDB.get('metadata') as IObservableJSON;
+  get metadata(): ReadonlyJSONObject {
+    return DatastoreExt.getField({ ...this.record, field: 'metadata' });
   }
 
   /**
-   * Get the trusted state of the model.
+   * The trusted state of the model.
    */
   get trusted(): boolean {
-    return this.modelDB.getValue('trusted') as boolean;
+    return DatastoreExt.getField({ ...this.record, field: 'trusted' });
   }
-
-  /**
-   * Set the trusted state of the model.
-   */
   set trusted(newValue: boolean) {
     let oldValue = this.trusted;
     if (oldValue === newValue) {
       return;
     }
-    this.modelDB.setValue('trusted', newValue);
+    DatastoreExt.withTransaction(this.record.datastore, () => {
+      DatastoreExt.updateField({ ...this.record, field: 'trusted' }, newValue);
+    });
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.ICell {
-    let metadata: nbformat.IBaseCellMetadata = Object.create(null);
-    for (let key of this.metadata.keys()) {
-      let value = JSON.parse(JSON.stringify(this.metadata.get(key)));
-      metadata[key] = value as JSONValue;
-    }
+    let metadata = DatastoreExt.getField({
+      ...this.record,
+      field: 'metadata'
+    }) as nbformat.IBaseCellMetadata;
     if (this.trusted) {
       metadata['trusted'] = true;
     }
@@ -317,7 +326,7 @@ export namespace CellModel {
     /**
      * The metadata for the cell.
      */
-    metadata: MapField<ReadonlyJSONObject>;
+    metadata: MapField<ReadonlyJSONValue>;
   }
 
   /**
@@ -359,7 +368,7 @@ export namespace CellModel {
     fields: {
       attachments: Fields.Map<nbformat.IMimeBundle>(),
       executionCount: Fields.Register<nbformat.ExecutionCount>({ value: null }),
-      metadata: Fields.Map<ReadonlyJSONObject>(),
+      metadata: Fields.Map<ReadonlyJSONValue>(),
       mimeType: Fields.String(),
       outputs: Fields.List<string>(),
       selections: Fields.Map<CodeEditor.ITextSelection[]>(),
@@ -554,29 +563,43 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     let trusted = this.trusted;
     let cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
-    let executionCount = this.modelDB.createValue('executionCount');
-    if (!executionCount.get()) {
-      if (cell && cell.cell_type === 'code') {
-        executionCount.set(cell.execution_count || null);
-        outputs = cell.outputs;
-      } else {
-        executionCount.set(null);
-      }
+
+    DatastoreExt.withTransaction(this.record.datastore, () => {
+      DatastoreExt.updateField(
+        { ...this.record, field: 'executionCount' },
+        cell.execution_count || null
+      );
+    });
+
+    if (cell && cell.cell_type === 'code') {
+      outputs = cell.outputs;
     }
-    executionCount.changed.connect(this._onExecutionCountChanged, this);
+    DatastoreExt.listenField(
+      { ...this.record, field: 'executionCount' },
+      this._onExecutionCountChanged,
+      this
+    );
 
     this._outputs = factory.createOutputArea({ trusted, values: outputs });
-    this._outputs.changed.connect(this.onGenericChange, this);
+    DatastoreExt.listenRecord(this._outputs.record, this.onGenericChange, this);
 
     // We keep `collapsed` and `jupyter.outputs_hidden` metadata in sync, since
     // they are redundant in nbformat 4.4. See
     // https://github.com/jupyter/nbformat/issues/137
-    this.metadata.changed.connect(Private.collapseChanged, this);
+    /* DatastoreExt.listenField(
+      { ...this.record, field: 'metadata' },
+      Private.collapseChanged,
+      this
+    );
 
     // Sync `collapsed` and `jupyter.outputs_hidden` for the first time, giving
     // preference to `collapsed`.
-    if (this.metadata.has('collapsed')) {
-      let collapsed = this.metadata.get('collapsed');
+    const metadata = DatastoreExt.getField({
+      ...this.record,
+      field: 'metadata'
+    });
+    if (metadata['collapsed']) {
+      let collapsed = metadata['collapsed'];
       Private.collapseChanged(this.metadata, {
         type: 'change',
         key: 'collapsed',
@@ -593,7 +616,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           newValue: jupyter
         });
       }
-    }
+    }*/
   }
 
   /**
@@ -607,14 +630,19 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    * The execution count of the cell.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return this.modelDB.getValue('executionCount') as nbformat.ExecutionCount;
+    return DatastoreExt.getField({ ...this.record, field: 'executionCount' });
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
     let oldValue = this.executionCount;
     if (newValue === oldValue) {
       return;
     }
-    this.modelDB.setValue('executionCount', newValue || null);
+    DatastoreExt.withTransaction(this.record.datastore, () => {
+      DatastoreExt.updateField(
+        { ...this.record, field: 'executionCount' },
+        newValue || null
+      );
+    });
   }
 
   /**
@@ -667,14 +695,14 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    * Handle a change to the execution count.
    */
   private _onExecutionCountChanged(
-    count: IObservableValue,
-    args: ObservableValue.IChangedArgs
+    sender: Datastore,
+    args: RegisterField.Change<nbformat.ExecutionCount>
   ): void {
     this.contentChanged.emit(void 0);
     this.stateChanged.emit({
       name: 'executionCount',
-      oldValue: args.oldValue,
-      newValue: args.newValue
+      oldValue: args.previous,
+      newValue: args.current
     });
   }
 
@@ -718,7 +746,7 @@ export namespace CodeCellModel {
     /**
      * The record in the datastore in which to store cell data.
      */
-    record: DatastoreExt.RecordLocation<CellModel.ISchema>;
+    record?: DatastoreExt.RecordLocation<CellModel.ISchema>;
   }
 
   /**
@@ -763,7 +791,7 @@ namespace Private {
     } else {
       const datastore = Datastore.create({
         id: 1,
-        schemas: [CellModel.SCHEMA]
+        schemas: [CellModel.SCHEMA, IOutputModel.SCHEMA]
       });
       const record: DatastoreExt.RecordLocation<CellModel.ISchema> = {
         datastore,

@@ -877,7 +877,7 @@ export namespace NotebookActions {
         const toDelete: number[] = [];
 
         notebook.widgets.forEach((child, index) => {
-          const deletable = child.model.metadata.get('deletable') !== false;
+          const deletable = child.model.metadata['deletable'] !== false;
 
           if (notebook.isSelectedOrActive(child) && deletable) {
             toDelete.push(index);
@@ -1679,7 +1679,7 @@ namespace Private {
 
     // Find the cells to delete.
     notebook.widgets.forEach((child, index) => {
-      const deletable = child.model.metadata.get('deletable') !== false;
+      const deletable = child.model.metadata['deletable'] !== false;
 
       if (notebook.isSelectedOrActive(child) && deletable) {
         toDelete.push(index);

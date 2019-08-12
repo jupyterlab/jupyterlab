@@ -33,7 +33,13 @@ export class DocumentModel extends CodeEditor.Model
     super({ modelDB });
     this._defaultLang = languagePreference || '';
     this.datastore.changed.connect(this.triggerContentChange, this);
+    this.ready = Promise.resolve(undefined);
   }
+
+  /**
+   * Whether the model is ready for collaboration.
+   */
+  readonly ready: Promise<void>;
 
   /**
    * A signal emitted when the document content changes.
