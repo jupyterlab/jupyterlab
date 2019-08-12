@@ -1,63 +1,55 @@
-import { Panel } from "@phosphor/widgets";
+import { Panel } from '@phosphor/widgets';
 import { IVariablesModel } from './model';
 import { VariableDescription } from './utils';
 
-
 const MOCK_DATA_ROW = {
-    variables: [
-        {
-            name: 'test 1',
-            value: 'function()',
-            type:'function',
-            description:'def test1(): return 0'
-        },
-        {
-            name: 'test 2',
-            value: 'function()',
-            type:'function',
-            description:'def test2(): return 0'
-        }
-    ]
-}
-
+  variables: [
+    {
+      name: 'test 1',
+      value: 'function()',
+      type: 'function',
+      description: 'def test1(): return 0'
+    },
+    {
+      name: 'test 2',
+      value: 'function()',
+      type: 'function',
+      description: 'def test2(): return 0'
+    }
+  ]
+};
 
 export class VariablesWidget extends Panel {
-    
-    readonly model: IVariablesModel;
+  readonly model: IVariablesModel;
 
-    readonly header: Panel;
-    readonly label: Panel;
-    readonly body: Panel;
-    readonly variableDescription: Panel;
+  readonly header: Panel;
+  readonly label: Panel;
+  readonly body: Panel;
+  readonly variableDescription: Panel;
 
+  readonly model_header = {
+    label: 'Variables',
+    class: 'jp-DebuggerSidebarVariables-header'
+  };
 
-    readonly model_header = {
-        label:'Variables',
-        class:'debugger-variables__header'
-    };
+  constructor() {
+    super();
 
-    constructor(){
-        super();
+    this.model = IVariablesModel.create(MOCK_DATA_ROW.variables);
 
-        this.model = IVariablesModel.create(MOCK_DATA_ROW.variables);
+    // header
+    this.header = new Panel();
+    this.header.addClass(this.model_header.class);
+    this.addWidget(this.header);
 
+    this.label = new Panel();
+    this.label.node.textContent = this.model_header.label;
+    this.label.addClass(this.model_header.class + '-label');
+    this.header.addWidget(this.label);
 
-        // header
-        this.header = new Panel();
-        this.header.addClass(this.model_header.class);
-        this.addWidget(this.header);
-
-        this.label = new Panel();
-        this.label.node.textContent = this.model_header.label;
-        this.label.addClass(this.model_header.class+'-label');
-        this.header.addWidget(this.label);
-
-        //body
-        this.variableDescription = new VariableDescription(this.model);
-        this.variableDescription.addClass('debugger-variables__body')
-        this.addWidget(this.variableDescription);
-
-    }
-
-
+    //body
+    this.variableDescription = new VariableDescription(this.model);
+    this.variableDescription.addClass('jp-DebuggerSidebarVariables-body');
+    this.addWidget(this.variableDescription);
+  }
 }

@@ -14,11 +14,11 @@ export class VariableDescription extends Panel {
     this.model = model;
     this.currentVariable = this.model.variable;
     this.table = new VariableTableDescription(this.model);
-    this.table.addClass('debugger-variable__table');
+    this.table.addClass('jp-DebuggerSidebarVariable-table');
     this.addWidget(this.table);
 
     this.descriptionBox = new Panel();
-    this.descriptionBox.addClass('debugger-variable__description');
+    this.descriptionBox.addClass('jp-DebuggerSidebarVariable-description');
     this.addWidget(this.descriptionBox);
     this.descriptionBox.node.innerHTML = '<b> Select Variable </b>';
 

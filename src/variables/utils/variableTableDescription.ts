@@ -2,7 +2,7 @@ import { h, VirtualDOM, VirtualElement } from '@phosphor/virtualdom';
 import { SplitPanel } from '@phosphor/widgets';
 import { IVariablesModel } from '../model';
 
-const ROW_CLASS = 'debugger-variables_table-row';
+const ROW_CLASS = 'jp-DebuggerSidebarVariables-table-row';
 const SELECTED_CLASS = '-selected';
 
 export class VariableTableDescription extends SplitPanel {
@@ -21,7 +21,7 @@ export class VariableTableDescription extends SplitPanel {
       h.tr(
         h.td(
           {
-            className: 'debugger-variables_table-head',
+            className: 'jp-DebuggerSidebarVariables-header',
             style: {
               width: '25%'
             }
@@ -30,7 +30,7 @@ export class VariableTableDescription extends SplitPanel {
         ),
         h.td(
           {
-            className: 'debugger-variables_table-head',
+            className: 'jp-DebuggerSidebarVariables-header',
             style: {
               width: '75%'
             }
