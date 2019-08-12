@@ -5,8 +5,6 @@ import { IClientSession } from '@jupyterlab/apputils';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { DatastoreExt } from '@jupyterlab/datastore';
-
 import {
   IOutputModel,
   IRenderMimeRegistry,
@@ -23,7 +21,7 @@ import {
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
-import { Datastore, ListField, Table } from '@phosphor/datastore';
+import { Datastore, ListField } from '@phosphor/datastore';
 
 import { Message } from '@phosphor/messaging';
 
@@ -106,21 +104,8 @@ export class OutputArea extends Widget {
       let output = model.get(i);
       this._insertOutput(i, output);
     }
-    // Listen for changes in the list of outputs.
-    DatastoreExt.listenField(
-      { ...model.record, field: 'outputs' },
-      this.onOutputListChanged,
-      this
-    );
-    // Listen for changes in the content of the existing outputs.
-    DatastoreExt.listenTable(
-      {
-        datastore: model.record.datastore,
-        schema: IOutputModel.SCHEMA
-      },
-      this.onOutputsChanged,
-      this
-    );
+
+    model.record.datastore.changed.connect(this.onChange, this);
   }
 
   /**
@@ -216,56 +201,40 @@ export class OutputArea extends Widget {
     Signal.clearData(this);
     super.dispose();
   }
-
   /**
-   * Follow changes to the list of outputs.
+   * Follow changes to the datastore.
    */
-  protected onOutputListChanged(
-    sender: Datastore,
-    args: ListField.Change<string>
-  ) {
-    args.forEach(change => {
-      // First remove any disposed values
-      for (let i = 0; i < change.removed.length; i++) {
-        this.widgets[change.index].dispose();
-      }
-      for (let i = 0; i < change.removed.length; i++) {
-        const id = change.inserted[i];
-        const outputRecord = {
-          datastore: sender,
-          schema: IOutputModel.SCHEMA,
-          record: id
-        };
-        const model = new OutputModel({ record: outputRecord });
-        this._insertOutput(change.index + i, model);
-      }
-    });
-    this.outputLengthChanged.emit(this.widgets.length);
-  }
+  protected onChange(sender: Datastore, args: Datastore.IChangedArgs) {
+    // Keep track of the items that have been rendered.
+    const handled = new Set<string>();
 
-  /**
-   * Follow changes to the outputs table in case outputs have changed in-place.
-   */
-  protected onOutputsChanged(
-    sender: Datastore,
-    args: Table.Change<IOutputModel.ISchema>
-  ) {
-    const list = DatastoreExt.getField({
-      ...this.model.record,
-      field: 'outputs'
-    });
-    for (let i = 0; i < list.length; ++i) {
-      const change = args[list[i]];
-      if (change) {
-        const outputRecord = {
-          datastore: sender,
-          schema: IOutputModel.SCHEMA,
-          record: list[i]
-        };
-        const model = new OutputModel({ record: outputRecord });
-        this._setOutput(i, model);
-      }
+    // First, handle list removals and inserts.
+    const { schema, record } = this.model.record;
+    const listChange =
+      args.change[schema.id] &&
+      args.change[schema.id][record] &&
+      (args.change[schema.id][record]['outputs'] as ListField.Change<string>);
+    if (listChange) {
+      listChange.forEach(change => {
+        // First remove any disposed values
+        for (let i = 0; i < change.removed.length; i++) {
+          this.widgets[change.index].dispose();
+        }
+        for (let i = 0; i < change.inserted.length; i++) {
+          const id = change.inserted[i];
+          const outputRecord = {
+            datastore: sender,
+            schema: IOutputModel.SCHEMA,
+            record: id
+          };
+          const model = new OutputModel({ record: outputRecord });
+          this._insertOutput(change.index + i, model);
+          handled.add(id);
+        }
+      });
     }
+    // TODO also rerender any in-place changes,
+    // skipping those in `handled`.
   }
 
   /**
@@ -351,7 +320,7 @@ export class OutputArea extends Widget {
   /**
    * Update an output in the layout in place.
    */
-  private _setOutput(index: number, model: IOutputModel): void {
+  /* private _setOutput(index: number, model: IOutputModel): void {
     let layout = this.layout as PanelLayout;
     let panel = layout.widgets[index] as Panel;
     let renderer = (panel.widgets
@@ -363,7 +332,7 @@ export class OutputArea extends Widget {
       layout.widgets[index].dispose();
       this._insertOutput(index, model);
     }
-  }
+  }*/
 
   /**
    * Render and insert a single output into the layout.
