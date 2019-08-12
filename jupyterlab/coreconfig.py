@@ -77,7 +77,10 @@ class CoreConfig:
             data['jupyterlab']['singletonPackages'] = []
 
     def add(self, name, semver, extension=False, mimeExtension=False):
-        """Remove a package/extension.
+        """Remove an extension/singleton.
+
+        If neither extension or mimeExtension is True (the default)
+        the package is added as a singleton dependency.
 
         name: string
             The npm package name
@@ -103,6 +106,24 @@ class CoreConfig:
             data['dependencies'][name] = semver
         else:
             data['singletonPackages'].append(name)
+
+    @property
+    def extensions(self):
+        """A dict mapping all extension names to their semver"""
+        return dict(self._data['jupyterlab']['extensions'])
+
+    @property
+    def mimeExtensions(self):
+        """A dict mapping all MIME extension names to their semver"""
+        return dict(self._data['jupyterlab']['mimeExtensions'])
+
+    @property
+    def singletons(self):
+        """A dict mapping all singleton names to their semver"""
+        return dict(
+            (k, self._data['resolutions'][k])
+            for k in self._data['singletonPackages']
+        )
 
     def remove(self, name):
         """Remove a package/extension.
