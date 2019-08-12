@@ -42,7 +42,9 @@ def _only_nonlab(collection):
 class CoreConfig:
     """An object representing a core-mode package/extension configuration.
 
-    This enables custom lab application to change
+    This enables custom lab application to change the core configuration
+    of the various build system commands. See e.g. commands.py and
+    any apps that use these functions.
     """
 
     def __init__(self):
@@ -51,7 +53,7 @@ class CoreConfig:
     def clear_defaults(self, lab_only=True):
         """Clear the default packages/extensions.
 
-        lab_only: string
+        lab_only: bool
             Whether to remove all packages, or only those from
             JupyterLab. Defaults to True (only lab packages).
             This will leave dependencies like phosphor, react
