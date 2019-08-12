@@ -173,10 +173,7 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
 
     if (sidebar) {
       tracker.currentChanged.connect((_, current) => {
-        if (!current) {
-          return;
-        }
-        sidebar.model = current.content.model;
+        sidebar.model = current ? current.content.model : null;
       });
     }
 

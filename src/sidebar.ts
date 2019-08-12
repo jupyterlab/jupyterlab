@@ -12,5 +12,16 @@ export class DebuggerSidebar extends Widget {
     this.addClass('jp-DebuggerSidebar');
   }
 
-  public model: Debugger.Model | null = null;
+  get model(): Debugger.Model | null {
+    return this._model;
+  }
+  set model(model: Debugger.Model | null) {
+    if (this._model === model) {
+      return;
+    }
+    this._model = model;
+    this.update();
+  }
+
+  private _model: Debugger.Model | null = null;
 }
