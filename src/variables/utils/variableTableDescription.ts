@@ -21,7 +21,7 @@ export class VariableTableDescription extends SplitPanel {
       h.tr(
         h.td(
           {
-            className: 'jp-DebuggerSidebarVariables-header',
+            className: 'jp-DebuggerSidebarVariables-table-head',
             style: {
               width: '25%'
             }
@@ -30,7 +30,7 @@ export class VariableTableDescription extends SplitPanel {
         ),
         h.td(
           {
-            className: 'jp-DebuggerSidebarVariables-header',
+            className: 'jp-DebuggerSidebarVariables-table-head',
             style: {
               width: '75%'
             }
