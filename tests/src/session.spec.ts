@@ -35,8 +35,8 @@ describe('DebugSession', () => {
     });
   });
 
-  describe('#start() and #stop()', () => {
-    it('should start and stop new debug session', async () => {
+  describe('#eventMessage', () => {
+    it('should be emitted when sending debug messages', async () => {
       const debugSession = new DebugSession({ client });
       let events: string[] = [];
       debugSession.eventMessage.connect((sender, event) => {
