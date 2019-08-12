@@ -23,6 +23,7 @@ export class DebugSession implements IDebugger.ISession {
    */
   constructor(options: DebugSession.IOptions) {
     this.client = options.client;
+    this.client.iopubMessage.connect(this._handleEvent, this);
   }
 
   /**
@@ -32,6 +33,7 @@ export class DebugSession implements IDebugger.ISession {
     if (this.isDisposed) {
       return;
     }
+    this.client.iopubMessage.disconnect(this._handleEvent, this);
     this._isDisposed = true;
     this._disposed.emit();
   }
@@ -99,6 +101,28 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   /**
+   * Signal emitted for debug event messages.
+   */
+  get eventMessage(): ISignal<DebugSession, DebugProtocol.Event> {
+    return this._eventMessage;
+  }
+
+  /**
+   * Handle debug events sent on the 'iopub' channel.
+   */
+  private _handleEvent(
+    sender: IClientSession,
+    message: KernelMessage.IIOPubMessage
+  ): void {
+    const msgType = message.header.msg_type;
+    if (msgType !== 'debug_event') {
+      return;
+    }
+    const event = message.content as DebugProtocol.Event;
+    this._eventMessage.emit(event);
+  }
+
+  /**
    * Send a debug request message to the kernel.
    * @param msg debug request message to send to the kernel.
    */
@@ -123,6 +147,8 @@ export class DebugSession implements IDebugger.ISession {
 
   private _disposed = new Signal<this, void>(this);
   private _isDisposed: boolean = false;
+
+  private _eventMessage = new Signal<DebugSession, DebugProtocol.Event>(this);
 
   /**
    * Debug protocol sequence number.

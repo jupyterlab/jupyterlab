@@ -38,8 +38,13 @@ describe('DebugSession', () => {
   describe('#start() and #stop()', () => {
     it('should start and stop new debug session', async () => {
       const debugSession = new DebugSession({ client });
+      let events: string[] = [];
+      debugSession.eventMessage.connect((sender, event) => {
+        events.push(event.event);
+      });
       await debugSession.start();
       await debugSession.stop();
+      expect(events).to.deep.equal(['output', 'initialized', 'process']);
     });
   });
 });
