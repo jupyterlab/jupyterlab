@@ -105,7 +105,7 @@ class CoreConfig:
             data['jupyterlab']['extensions'][name] = ""
             data['dependencies'][name] = semver
         else:
-            data['singletonPackages'].append(name)
+            data['jupyterlab']['singletonPackages'].append(name)
 
     @property
     def extensions(self):
@@ -122,7 +122,7 @@ class CoreConfig:
         """A dict mapping all singleton names to their semver"""
         return dict(
             (k, self._data['resolutions'][k])
-            for k in self._data['singletonPackages']
+            for k in self._data['jupyterlab']['singletonPackages']
         )
 
     def remove(self, name):
