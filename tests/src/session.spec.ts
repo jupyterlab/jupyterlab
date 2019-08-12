@@ -47,4 +47,37 @@ describe('DebugSession', () => {
       expect(events).to.deep.equal(['output', 'initialized', 'process']);
     });
   });
+
+  describe('#sendRequest', () => {
+    let debugSession: DebugSession;
+
+    beforeEach(async () => {
+      debugSession = new DebugSession({ client });
+      await debugSession.start();
+    });
+
+    afterEach(async () => {
+      await debugSession.stop();
+      debugSession.dispose();
+    });
+
+    it('should send debug messages to the kernel', async () => {
+      const code = 'i=0\ni+=1\ni+=1';
+      const reply = await debugSession.sendRequest('updateCell', {
+        cellId: 0,
+        nextId: 1,
+        code
+      });
+      expect(reply.body.sourcePath).to.contain('.py');
+    });
+
+    it('should handle replies with success false', async () => {
+      const reply = await debugSession.sendRequest('evaluate', {
+        expression: 'a'
+      });
+      const { success, message } = reply;
+      expect(success).to.be.false;
+      expect(message).to.contain('Unable to find thread for evaluation');
+    });
+  });
 });

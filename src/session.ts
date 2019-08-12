@@ -133,9 +133,6 @@ export class DebugSession implements IDebugger.ISession {
     const kernel = this.client.kernel;
     const future = kernel.requestDebug(msg);
     future.onReply = (msg: KernelMessage.IDebugReplyMsg) => {
-      if (!msg.content.success) {
-        return reply.reject(msg);
-      }
       return reply.resolve(msg);
     };
     await future.done;
