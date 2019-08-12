@@ -76,7 +76,7 @@ class CoreConfig:
             data['jupyterlab']['mimeExtensions'] = {}
             data['jupyterlab']['singletonPackages'] = []
 
-    def add(self, name, semver, extension=False, mimeExtension=False):
+    def add(self, name, semver, extension=False, mime_extension=False):
         """Remove an extension/singleton.
 
         If neither extension or mimeExtension is True (the default)
@@ -88,7 +88,7 @@ class CoreConfig:
             The semver range for the package
         extension: bool
             Whether the package is an extension
-        mimeExtension: bool
+        mime_extension: bool
             Whether the package is a MIME extension
         """
         data = self._data
@@ -98,7 +98,7 @@ class CoreConfig:
 
         # If both mimeExtension and extensions are True, treat
         # as mime extension
-        if mimeExtension:
+        if mime_extension:
             data['jupyterlab']['mimeExtensions'][name] = ""
             data['dependencies'][name] = semver
         elif extension:
@@ -113,7 +113,7 @@ class CoreConfig:
         return dict(self._data['jupyterlab']['extensions'])
 
     @property
-    def mimeExtensions(self):
+    def mime_extensions(self):
         """A dict mapping all MIME extension names to their semver"""
         return dict(self._data['jupyterlab']['mimeExtensions'])
 
