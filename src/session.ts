@@ -173,8 +173,10 @@ export namespace DebugSession {
     code: string;
   }
 
-  export interface IUpdateCellResponse {
-    sourcePath: string;
+  export interface IUpdateCellResponse extends DebugProtocol.Response {
+    body: {
+      sourcePath: string;
+    };
   }
 
   /**
