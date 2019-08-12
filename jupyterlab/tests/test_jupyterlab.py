@@ -23,9 +23,9 @@ from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
     build, link_package, unlink_package, build_check,
     disable_extension, enable_extension, get_app_info,
-    check_extension, _test_overlap, _get_core_data,
-    update_extension
+    check_extension, _test_overlap, update_extension
 )
+from jupyterlab.coreconfig import CoreConfig
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -477,7 +477,7 @@ class TestExtension(TestCase):
         assert _test_overlap('<0.6', '0.1') is None
 
     def test_install_compatible(self):
-        core_data = _get_core_data()
+        core_data = CoreConfig().data
         current_app_dep = core_data['dependencies']['@jupyterlab/application']
         def _gen_dep(ver):
             return { "dependencies": {

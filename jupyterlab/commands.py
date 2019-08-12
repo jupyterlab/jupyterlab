@@ -29,6 +29,7 @@ from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 
 from .semver import Range, gte, lt, lte, gt, make_semver
 from .jlpmapp import YARN_PATH, HERE
+from .coreconfig import CoreConfig
 
 
 # The regex for expecting the webpack output.
@@ -283,7 +284,7 @@ def watch_dev(logger=None):
     return package_procs + [wp_proc]
 
 
-def watch(app_dir=None, logger=None):
+def watch(app_dir=None, logger=None, core_config=None):
     """Watch the application.
 
     Parameters
@@ -299,11 +300,11 @@ def watch(app_dir=None, logger=None):
     """
     logger = _ensure_logger(logger)
     _node_check(logger)
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, core_config=core_config)
     return handler.watch()
 
 
-def install_extension(extension, app_dir=None, logger=None):
+def install_extension(extension, app_dir=None, logger=None, core_config=None):
     """Install an extension package into JupyterLab.
 
     The extension is first validated.
@@ -312,24 +313,24 @@ def install_extension(extension, app_dir=None, logger=None):
     """
     logger = _ensure_logger(logger)
     _node_check(logger)
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, core_config=core_config)
     return handler.install_extension(extension)
 
 
-def uninstall_extension(name=None, app_dir=None, logger=None, all_=False):
+def uninstall_extension(name=None, app_dir=None, logger=None, all_=False, core_config=None):
     """Uninstall an extension by name or path.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     logger = _ensure_logger(logger)
     _node_check(logger)
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, core_config=core_config)
     if all_ is True:
         return handler.uninstall_all_extensions()
     return handler.uninstall_extension(name)
 
 
-def update_extension(name=None, all_=False, app_dir=None, logger=None):
+def update_extension(name=None, all_=False, app_dir=None, logger=None, core_config=None):
     """Update an extension by name, or all extensions.
 
     Either `name` must be given as a string, or `all_` must be `True`.
@@ -339,7 +340,7 @@ def update_extension(name=None, all_=False, app_dir=None, logger=None):
     """
     logger = _ensure_logger(logger)
     _node_check(logger)
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, core_config=core_config)
     if all_ is True:
         return handler.update_all_extensions()
     return handler.update_extension(name)
@@ -363,96 +364,96 @@ def clean(app_dir=None, logger=None):
 
 def build(app_dir=None, name=None, version=None, static_url=None,
           logger=None, command='build:prod', kill_event=None,
-          clean_staging=False):
+          clean_staging=False, core_config=None):
     """Build the JupyterLab application.
     """
     logger = _ensure_logger(logger)
     _node_check(logger)
-    handler = _AppHandler(app_dir, logger, kill_event=kill_event)
+    handler = _AppHandler(app_dir, logger, kill_event=kill_event, core_config=core_config)
     return handler.build(name=name, version=version, static_url=static_url,
                          command=command, clean_staging=clean_staging)
 
 
-def get_app_info(app_dir=None, logger=None):
+def get_app_info(app_dir=None, logger=None, core_config=None):
     """Get a dictionary of information about the app.
     """
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, core_config=core_config)
     return handler.info
 
 
-def enable_extension(extension, app_dir=None, logger=None):
+def enable_extension(extension, app_dir=None, logger=None, core_config=None):
     """Enable a JupyterLab extension.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, core_config=core_config)
     return handler.toggle_extension(extension, False)
 
 
-def disable_extension(extension, app_dir=None, logger=None):
+def disable_extension(extension, app_dir=None, logger=None, core_config=None):
     """Disable a JupyterLab package.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, core_config=core_config)
     return handler.toggle_extension(extension, True)
 
 
-def check_extension(extension, app_dir=None, installed=False, logger=None):
+def check_extension(extension, app_dir=None, installed=False, logger=None, core_config=None):
     """Check if a JupyterLab extension is enabled or disabled.
     """
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, core_config=core_config)
     return handler.check_extension(extension, installed)
 
 
-def build_check(app_dir=None, logger=None):
+def build_check(app_dir=None, logger=None, core_config=None):
     """Determine whether JupyterLab should be built.
 
     Returns a list of messages.
     """
     logger = _ensure_logger(logger)
     _node_check(logger)
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, core_config=core_config)
     return handler.build_check()
 
 
-def list_extensions(app_dir=None, logger=None):
+def list_extensions(app_dir=None, logger=None, core_config=None):
     """List the extensions.
     """
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, core_config=core_config)
     return handler.list_extensions()
 
 
-def link_package(path, app_dir=None, logger=None):
+def link_package(path, app_dir=None, logger=None, core_config=None):
     """Link a package against the JupyterLab build.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, core_config=core_config)
     return handler.link_package(path)
 
 
-def unlink_package(package, app_dir=None, logger=None):
+def unlink_package(package, app_dir=None, logger=None, core_config=None):
     """Unlink a package from JupyterLab by path or name.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, core_config=core_config)
     return handler.unlink_package(package)
 
 
-def get_app_version(app_dir=None):
+def get_app_version(app_dir=None, core_config=None):
     """Get the application version."""
     app_dir = app_dir or get_app_dir()
-    handler = _AppHandler(app_dir)
+    handler = _AppHandler(app_dir, core_config=core_config)
     return handler.info['version']
 
 
-def get_latest_compatible_package_versions(names, app_dir=None, logger=None):
+def get_latest_compatible_package_versions(names, app_dir=None, logger=None, core_config=None):
     """Get the latest compatible version of a list of packages.
     """
     app_dir = app_dir or get_app_dir()
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_dir, logger, core_config=core_config)
     return handler.latest_compatible_package_versions(names)
 
 
@@ -476,12 +477,13 @@ def read_package(target):
 
 class _AppHandler(object):
 
-    def __init__(self, app_dir, logger=None, kill_event=None):
+    def __init__(self, app_dir, logger=None, kill_event=None, core_config=None):
         """Create a new _AppHandler object
         """
         self.app_dir = app_dir or get_app_dir()
         self.sys_dir = get_app_dir()
         self.logger = _ensure_logger(logger)
+        self.core_data = (core_config or CoreConfig()).data
         self.info = self._get_app_info()
         self.kill_event = kill_event or Event()
         # TODO: Make this configurable
@@ -713,7 +715,6 @@ class _AppHandler(object):
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         # Allow for uninstalled core extensions.
-        data = self.info['core_data']
         if name in self.info['core_extensions']:
             config = self._read_build_config()
             uninstalled = config.get('uninstalled_core_extensions', [])
@@ -938,7 +939,7 @@ class _AppHandler(object):
         """
 
         info = dict()
-        info['core_data'] = core_data = _get_core_data()
+        info['core_data'] = core_data = self.core_data
         info['extensions'] = extensions = self._get_extensions(core_data)
         page_config = self._read_page_config()
         info['disabled'] = page_config.get('disabledExtensions', [])
@@ -963,7 +964,8 @@ class _AppHandler(object):
         info['sys_dir'] = self.sys_dir
         info['app_dir'] = self.app_dir
 
-        info['core_extensions'] = core_extensions = _get_core_extensions()
+        info['core_extensions'] = core_extensions = _get_core_extensions(
+            self.core_data)
 
         disabled_core = []
         for key in core_extensions:
@@ -1390,9 +1392,8 @@ class _AppHandler(object):
             raise ValueError(msg % (extension, '\n'.join(messages)))
 
         # Verify package compatibility.
-        core_data = _get_core_data()
         deps = data.get('dependencies', dict())
-        errors = _validate_compatibility(extension, deps, core_data)
+        errors = _validate_compatibility(extension, deps, self.core_data)
         if errors:
             msg = _format_compatibility_errors(
                 data['name'], data['version'], errors
@@ -1628,7 +1629,7 @@ def _node_check(logger):
         output = subprocess.check_output([node, 'node-version-check.js'], cwd=HERE)
         logger.debug(output.decode('utf-8'))
     except Exception:
-        data = _get_core_data()
+        data = CoreConfig().data
         ver = data['engines']['node']
         msg = 'Please install nodejs %s before continuing. nodejs may be installed using conda or directly from the nodejs website.' % ver
         raise ValueError(msg)
@@ -1726,13 +1727,6 @@ def _tarsum(input_file):
             h.update(data)
             data = f.read(chunk_size)
     return h.hexdigest()
-
-
-def _get_core_data():
-    """Get the data for the app template.
-    """
-    with open(pjoin(HERE, 'staging', 'package.json')) as fid:
-        return json.load(fid)
 
 
 def _get_static_data(app_dir):
@@ -1931,10 +1925,10 @@ def _compat_error_age(errors):
     return 0
 
 
-def _get_core_extensions():
+def _get_core_extensions(core_data):
     """Get the core extensions.
     """
-    data = _get_core_data()['jupyterlab']
+    data = core_data['jupyterlab']
     return list(data['extensions']) + list(data['mimeExtensions'])
 
 
