@@ -167,6 +167,16 @@ export namespace DebugSession {
     client: IClientSession;
   }
 
+  export interface IUpdateCellArguments {
+    cellId: number;
+    nextId: number;
+    code: string;
+  }
+
+  export interface IUpdateCellResponse {
+    sourcePath: string;
+  }
+
   /**
    * Interface for all the debug requests types.
    */
@@ -204,6 +214,7 @@ export namespace DebugSession {
     terminate: DebugProtocol.TerminateArguments;
     terminateThreads: DebugProtocol.TerminateThreadsArguments;
     threads: {};
+    updateCell: IUpdateCellArguments;
   }
 
   /**
@@ -243,6 +254,7 @@ export namespace DebugSession {
     terminate: DebugProtocol.TerminateResponse;
     terminateThreads: DebugProtocol.TerminateThreadsResponse;
     threads: DebugProtocol.ThreadsResponse;
+    updateCell: IUpdateCellResponse;
     variables: DebugProtocol.VariablesResponse;
   }
 }
