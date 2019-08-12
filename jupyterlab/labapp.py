@@ -411,7 +411,7 @@ class LabApp(NotebookApp):
         super(LabApp, self).init_server_extensions()
         msg = 'JupyterLab server extension not enabled, manually loading...'
         if not self.nbserver_extensions.get('jupyterlab', False):
-            self.log.warn(msg)
+            self.log.warning(msg)
             load_jupyter_server_extension(self)
 
 

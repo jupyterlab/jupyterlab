@@ -775,7 +775,7 @@ class _AppHandler(object):
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         if name not in self.info['extensions']:
-            self.logger.warn('No labextension named "%s" installed' % name)
+            self.logger.warning('No labextension named "%s" installed' % name)
             return False
         return self._update_extension(name)
 
@@ -815,8 +815,8 @@ class _AppHandler(object):
             return self.install_extension(path)
 
         # Warn that it is a linked package.
-        self.logger.warn('Installing %s as a linked package:', path)
-        [self.logger.warn(m) for m in messages]
+        self.logger.warning('Installing %s as a linked package:', path)
+        [self.logger.warning(m) for m in messages]
 
         # Add to metadata.
         config = self._read_build_config()
