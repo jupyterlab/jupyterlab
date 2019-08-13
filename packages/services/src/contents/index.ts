@@ -1,11 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { URLExt, PathExt } from '@jupyterlab/coreutils';
+import { PartialJSONObject, PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { ModelDB } from '@jupyterlab/observables';
-
-import { JSONObject } from '@phosphor/coreutils';
 
 import { each } from '@phosphor/algorithm';
 
@@ -898,7 +896,8 @@ export class ContentsManager implements Contents.IManager {
     const driveName = this.driveName(path);
     const localPath = this.localPath(path);
     if (driveName) {
-      return [this._additionalDrives.get(driveName), localPath];
+      // A valid driveName assures its presence in `_additionalDrives`
+      return [this._additionalDrives.get(driveName)!, localPath];
     } else {
       return [this._defaultDrive, localPath];
     }
@@ -1016,7 +1015,7 @@ export class Drive implements Contents.IDrive {
         delete options['format'];
       }
       let content = options.content ? '1' : '0';
-      let params: JSONObject = { ...options, content };
+      let params: PartialJSONObject = { ...options, content };
       url += URLExt.objectToQueryString(params);
     }
 

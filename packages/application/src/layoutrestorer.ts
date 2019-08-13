@@ -5,7 +5,13 @@
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 
-import { IDataConnector, IRestorer } from '@jupyterlab/coreutils';
+import {
+  IDataConnector,
+  IRestorer,
+  PartialJSONObject,
+  ReadonlyPartialJSONValue,
+  ReadonlyPartialJSONObject
+} from '@jupyterlab/coreutils';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -383,7 +389,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     this._widgets.delete(name);
   }
 
-  private _connector: IDataConnector<ReadonlyJSONValue>;
+  private _connector: IDataConnector<ReadonlyPartialJSONValue>;
   private _first: Promise<any>;
   private _firstDone = false;
   private _promisesDone = false;
@@ -434,7 +440,7 @@ namespace Private {
    * It is meant to be a data structure can translate into a `LabShell.ILayout`
    * data structure for consumption by the application shell.
    */
-  export interface ILayout extends JSONObject {
+  export interface ILayout extends PartialJSONObject {
     /**
      * The main area of the user interface.
      */
@@ -454,7 +460,7 @@ namespace Private {
   /**
    * The restorable description of the main application area.
    */
-  export interface IMainArea extends JSONObject {
+  export interface IMainArea extends PartialJSONObject {
     /**
      * The current widget that has application focus.
      */
@@ -474,7 +480,7 @@ namespace Private {
   /**
    * The restorable description of a sidebar in the user interface.
    */
-  export interface ISideArea extends JSONObject {
+  export interface ISideArea extends PartialJSONObject {
     /**
      * A flag denoting whether the sidebar has been collapsed.
      */
@@ -664,7 +670,7 @@ namespace Private {
    * For fault tolerance, types are manually checked in deserialization.
    */
   export function deserializeMain(
-    area: JSONObject,
+    area: ReadonlyPartialJSONObject,
     names: Map<string, Widget>
   ): ILabShell.IMainArea | null {
     if (!area) {

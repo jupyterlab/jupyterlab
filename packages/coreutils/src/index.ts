@@ -4,6 +4,7 @@
 export * from './activitymonitor';
 export * from './dataconnector';
 export * from './interfaces';
+export * from './partialjson';
 export * from './markdowncodeblocks';
 export * from './nbformat';
 export * from './pageconfig';

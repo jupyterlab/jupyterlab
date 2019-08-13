@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONObject } from '@phosphor/coreutils';
+import { PartialJSONObject } from './partialjson';
 
 import urlparse from 'url-parse';
 
@@ -28,7 +28,7 @@ export namespace URLExt {
   /**
    * Normalize a url.
    */
-  export function normalize(url: string): string {
+  export function normalize(url: string | undefined): string {
     return url && parse(url).toString();
   }
 
@@ -97,7 +97,7 @@ export namespace URLExt {
    * #### Notes
    * Modified version of [stackoverflow](http://stackoverflow.com/a/30707423).
    */
-  export function objectToQueryString(value: JSONObject): string {
+  export function objectToQueryString(value: PartialJSONObject): string {
     const keys = Object.keys(value).filter(key => key.length > 0);
 
     if (!keys.length) {

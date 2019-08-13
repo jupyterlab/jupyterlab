@@ -1,11 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Poll } from '@jupyterlab/coreutils';
+import { Poll, PartialJSONExt } from '@jupyterlab/coreutils';
 
 import { ArrayExt, IIterator, iter } from '@phosphor/algorithm';
-
-import { JSONExt } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -294,7 +292,7 @@ export class KernelManager implements Kernel.IManager {
     if (this._isDisposed) {
       return;
     }
-    if (!JSONExt.deepEqual(models, this._models)) {
+    if (!PartialJSONExt.deepEqual(models, this._models)) {
       const ids = models.map(({ id }) => id);
       const kernels = this._kernels;
       kernels.forEach(kernel => {
@@ -316,7 +314,7 @@ export class KernelManager implements Kernel.IManager {
     if (this._isDisposed) {
       return;
     }
-    if (!JSONExt.deepEqual(specs, this._specs)) {
+    if (!PartialJSONExt.deepEqual(specs, this._specs)) {
       this._specs = specs;
       this._specsChanged.emit(specs);
     }

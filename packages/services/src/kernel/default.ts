@@ -739,7 +739,7 @@ export class DefaultKernel implements Kernel.IKernel {
     }
 
     if (this._comms.has(commId)) {
-      return this._comms.get(commId);
+      return this._comms.get(commId)!;
     }
     let comm = new CommHandler(targetName, commId, this, () => {
       this._unregisterComm(commId);
@@ -1236,17 +1236,15 @@ export class DefaultKernel implements Kernel.IKernel {
     this._kernelSession = msg.header.session;
 
     // Handle the message asynchronously, in the order received.
-    this._msgChain = this._msgChain
-      .then(() => {
-        // Return so that any promises from handling a message are fulfilled
-        // before proceeding to the next message.
-        return this._handleMessage(msg);
-      })
-      .catch(error => {
-        // Log any errors in handling the message, thus resetting the _msgChain
-        // promise so we can process more messages.
-        console.error(error);
-      });
+    this._msgChain = this._msgChain!.then(() => {
+      // Return so that any promises from handling a message are fulfilled
+      // before proceeding to the next message.
+      return this._handleMessage(msg);
+    }).catch(error => {
+      // Log any errors in handling the message, thus resetting the _msgChain
+      // promise so we can process more messages.
+      console.error(error);
+    });
 
     // Emit the message receive signal
     this._anyMessage.emit({ msg, direction: 'recv' });
@@ -1359,7 +1357,7 @@ export class DefaultKernel implements Kernel.IKernel {
   };
 
   private _id = '';
-  private _name = '';
+  private _name: string | undefined = '';
   private _status: Kernel.Status = 'unknown';
   private _kernelSession = '';
   private _clientId = '';
@@ -1862,7 +1860,7 @@ namespace Private {
   export async function handleShellMessage(
     kernel: Kernel.IKernel,
     msg: KernelMessage.IShellMessage
-  ): Promise<KernelMessage.IShellMessage> {
+  ): Promise<KernelMessage.IShellMessage | undefined> {
     let future = kernel.sendShellMessage(msg, true);
     return future.done;
   }

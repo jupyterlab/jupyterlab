@@ -5,11 +5,13 @@ import { CommandRegistry } from '@phosphor/commands';
 
 import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 
-import { ReadonlyJSONObject, Token } from '@phosphor/coreutils';
+import { Token } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal } from '@phosphor/signaling';
+
+import { ReadonlyPartialJSONObject } from '@jupyterlab/coreutils';
 
 /**
  * A token for which a plugin can provide to respond to connection failures
@@ -109,7 +111,7 @@ export namespace IRouter {
   /**
    * The parsed location currently being routed.
    */
-  export interface ILocation extends ReadonlyJSONObject {
+  export interface ILocation extends ReadonlyPartialJSONObject {
     /**
      * The location hash.
      */

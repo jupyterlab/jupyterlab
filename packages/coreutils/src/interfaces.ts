@@ -3,11 +3,14 @@
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { ReadonlyJSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
-
 import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
 
 import { ISignal } from '@phosphor/signaling';
+
+import {
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue
+} from './partialjson';
 
 /**
  * A generic interface for change emitter payloads.
@@ -392,7 +395,7 @@ export namespace IRestorer {
     /**
      * A function that returns the args needed to restore an instance.
      */
-    args?: (obj: T) => ReadonlyJSONObject;
+    args?: (obj: T) => ReadonlyPartialJSONObject;
 
     /**
      * A function that returns a unique persistent name for this instance.
@@ -444,7 +447,7 @@ export namespace IRestorable {
     /**
      * The data connector to fetch restore data.
      */
-    connector: IDataConnector<ReadonlyJSONValue>;
+    connector: IDataConnector<ReadonlyPartialJSONValue>;
 
     /**
      * The command registry which holds the restore command.
