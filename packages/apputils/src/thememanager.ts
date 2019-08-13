@@ -217,8 +217,8 @@ export class ThemeManager implements IThemeManager {
   /**
    * Toggle the `theme-scrollbbars` setting.
    */
-  toggleThemeScrollbars(): void {
-    this._settings.set(
+  toggleThemeScrollbars(): Promise<void> {
+    return this._settings.set(
       'theme-scrollbars',
       !this._settings.composite['theme-scrollbars']
     );
