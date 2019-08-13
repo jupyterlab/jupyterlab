@@ -25,15 +25,25 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   /**
+   * The client session to connect to a debugger.
+   */
+  client: IClientSession;
+
+  /**
+   * The code editors in a debugger session.
+   */
+  editors: CodeEditor.IEditor[];
+
+  /**
    * Dispose the debug session.
    */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
-    this.client.iopubMessage.disconnect(this._handleEvent, this);
     this._isDisposed = true;
     this._disposed.emit();
+    Signal.clearData(this);
   }
 
   /**
@@ -53,7 +63,7 @@ export class DebugSession implements IDebugger.ISession {
   /**
    * Start a new debug session
    */
-  public async start(): Promise<void> {
+  async start(): Promise<void> {
     await this.sendRequest('initialize', {
       clientID: 'jupyterlab',
       clientName: 'JupyterLab',
@@ -73,7 +83,7 @@ export class DebugSession implements IDebugger.ISession {
   /**
    * Stop the running debug session.
    */
-  public async stop(): Promise<void> {
+  async stop(): Promise<void> {
     await this.sendRequest('disconnect', {
       restart: false,
       terminateDebuggee: true
@@ -137,19 +147,11 @@ export class DebugSession implements IDebugger.ISession {
     return reply.promise;
   }
 
-  client: IClientSession;
-  editors: CodeEditor.IEditor[];
-
   private _disposed = new Signal<this, void>(this);
   private _isDisposed: boolean = false;
-
   private _eventMessage = new Signal<DebugSession, IDebugger.ISession.Event>(
     this
   );
-
-  /**
-   * Debug protocol sequence number.
-   */
   private _seq: number = 0;
 }
 
