@@ -110,10 +110,11 @@ export class ThemeManager implements IThemeManager {
   loadCssOverride(key: string): void {
     const overrides = (this._settings.user['overrides'] as Dict<string>) || {};
 
-    document.documentElement.style.setProperty(
-      `--jp-${key}`,
-      overrides[key] || 'initial'
-    );
+    if (overrides[key]) {
+      document.documentElement.style.setProperty(`--jp-${key}`, overrides[key]);
+    } else {
+      document.documentElement.style.removeProperty(`--jp-${key}`);
+    }
   }
 
   /**
