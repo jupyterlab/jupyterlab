@@ -32,18 +32,21 @@ export abstract class RateLimiter<T, U> implements IRateLimiter<T, U> {
     });
     this.payload = new PromiseDelegate();
     this.poll.ticked.connect((_, state) => {
+      if (this.isDisposed) {
+        return;
+      }
       const { payload } = this;
 
       if (state.phase === 'resolved') {
         this.payload = new PromiseDelegate();
-        payload.resolve((state.payload as T) || undefined);
+        payload!.resolve((state.payload as T) || undefined);
         return;
       }
 
       if (state.phase === 'rejected' || state.phase === 'stopped') {
         this.payload = new PromiseDelegate();
-        payload.promise.catch(_ => undefined);
-        payload.reject(state.payload as U);
+        payload!.promise.catch(_ => undefined);
+        payload!.reject(state.payload as U);
         return;
       }
     }, this);
@@ -75,7 +78,7 @@ export abstract class RateLimiter<T, U> implements IRateLimiter<T, U> {
   /**
    * Invoke the rate limited function.
    */
-  abstract async invoke(): Promise<T>;
+  abstract async invoke(): Promise<T | undefined>;
 
   /**
    * Stop the function if it is mid-flight.
@@ -87,7 +90,7 @@ export abstract class RateLimiter<T, U> implements IRateLimiter<T, U> {
   /**
    * A promise that resolves on each successful invocation.
    */
-  protected payload: PromiseDelegate<T> | null = null;
+  protected payload: PromiseDelegate<T | undefined> | null = null;
 
   /**
    * The underlying poll instance used by the rate limiter.
@@ -108,9 +111,9 @@ export class Debouncer<T = any, U = any> extends RateLimiter<T, U> {
    * Invokes the function and only executes after rate limit has elapsed.
    * Each invocation resets the timer.
    */
-  async invoke(): Promise<T> {
+  async invoke(): Promise<T | undefined> {
     void this.poll.schedule({ interval: this.limit, phase: 'invoked' });
-    return this.payload.promise;
+    return this.payload!.promise;
   }
 }
 
@@ -126,10 +129,10 @@ export class Throttler<T = any, U = any> extends RateLimiter<T, U> {
   /**
    * Throttles function invocations if one is currently in flight.
    */
-  async invoke(): Promise<T> {
+  async invoke(): Promise<T | undefined> {
     if (this.poll.state.phase !== 'invoked') {
       void this.poll.schedule({ interval: this.limit, phase: 'invoked' });
     }
-    return this.payload.promise;
+    return this.payload!.promise;
   }
 }

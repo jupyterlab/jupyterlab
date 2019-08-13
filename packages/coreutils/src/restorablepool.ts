@@ -56,9 +56,12 @@ export class RestorablePool<
   get current(): T | null {
     return this._current;
   }
-  set current(obj: T) {
+  set current(obj: T | null) {
     if (this._current === obj) {
       return;
+    }
+    if (obj === null) {
+      throw new TypeError('Cannot set current object to null');
     }
     if (this._objects.has(obj)) {
       this._current = obj;
@@ -138,7 +141,7 @@ export class RestorablePool<
 
       if (objName) {
         const name = `${this.namespace}:${objName}`;
-        const data = this._restore.args(obj);
+        const data = this._restore.args && this._restore.args(obj);
 
         Private.nameProperty.set(obj, name);
         await connector.save(name, { data });
@@ -298,7 +301,7 @@ export class RestorablePool<
     Private.nameProperty.set(obj, newName);
 
     if (newName) {
-      const data = this._restore.args(obj);
+      const data = this._restore.args && this._restore.args(obj);
       await connector.save(newName, { data });
     }
 

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReadonlyJSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
+import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -19,11 +19,14 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
    *
    * @param options - The instantiation options for a state database.
    */
-  constructor(options: StateDB.IOptions = {}) {
+  constructor(options: StateDB.IOptions<T> = {}) {
     const { connector, transform } = options;
 
     this._connector = connector || new StateDB.Connector();
-    this._ready = (transform || Promise.resolve(null)).then(transformation => {
+    if (!transform) {
+      return;
+    }
+    this._ready = transform.then(transformation => {
       if (!transformation) {
         return;
       }
@@ -78,7 +81,7 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
    * retrieving the data. Non-existence of an `id` will succeed with the `value`
    * `undefined`.
    */
-  async fetch(id: string): Promise<T> {
+  async fetch(id: string): Promise<T | undefined> {
     await this._ready;
     return this._fetch(id);
   }
@@ -191,7 +194,7 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
   /**
    * Merge data into the state database.
    */
-  private async _merge(contents: { [id: string]: T }): Promise<void> {
+  private async _merge(contents: StateDB.Content<T>): Promise<void> {
     await Promise.all(
       Object.keys(contents).map(key => this._save(key, contents[key]))
     );
@@ -200,7 +203,7 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
   /**
    * Overwrite the entire database with new contents.
    */
-  private async _overwrite(contents: { [id: string]: T }): Promise<void> {
+  private async _overwrite(contents: StateDB.Content<T>): Promise<void> {
     await this._clear();
     await this._merge(contents);
   }
@@ -249,7 +252,7 @@ export namespace StateDB {
   /**
    * A data transformation that can be applied to a state database.
    */
-  export type DataTransform = {
+  export type DataTransform<T extends ReadonlyJSONValue> = {
     /*
      * The change operation being applied.
      */
@@ -258,13 +261,18 @@ export namespace StateDB {
     /**
      * The contents of the change operation.
      */
-    contents: ReadonlyJSONObject | null;
+    contents: Content<T> | null;
   };
+
+  /**
+   * Database content map
+   */
+  export type Content<T> = { [id: string]: T };
 
   /**
    * The instantiation options for a state database.
    */
-  export interface IOptions {
+  export interface IOptions<T extends ReadonlyJSONValue> {
     /**
      * Optional string key/value connector. Defaults to in-memory connector.
      */
@@ -275,7 +283,7 @@ export namespace StateDB {
      * applied to the database contents before the database begins resolving
      * client requests.
      */
-    transform?: Promise<DataTransform>;
+    transform?: Promise<DataTransform<T>>;
   }
 
   /**
@@ -301,7 +309,7 @@ export namespace StateDB {
           }
           return acc;
         },
-        { ids: [], values: [] }
+        { ids: [] as string[], values: [] as string[] }
       );
     }
 

@@ -337,7 +337,7 @@ export interface IRateLimiter<T = any, U = any> extends IDisposable {
   /**
    * Invoke the rate limited function.
    */
-  invoke(): Promise<T>;
+  invoke(): Promise<T | undefined>;
 
   /**
    * Stop the function if it is mid-flight.

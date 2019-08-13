@@ -5,9 +5,7 @@
 // https://nbformat.readthedocs.io/en/latest/format_description.html
 // https://github.com/jupyter/nbformat/blob/master/nbformat/v4/nbformat.v4.schema.json
 
-import { JSONExt } from '@phosphor/coreutils';
-
-import { PartialJSONObject } from './partialjson';
+import { PartialJSONObject, PartialJSONExt } from './partialjson';
 
 /**
  * A namespace for nbformat interfaces.
@@ -137,7 +135,7 @@ export namespace nbformat {
     }
 
     // It is a JSON type, make sure it is a valid JSON object.
-    return JSONExt.isObject(value);
+    return PartialJSONExt.isObject(value);
   }
 
   /**
