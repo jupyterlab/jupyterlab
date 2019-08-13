@@ -306,12 +306,17 @@ const tools: JupyterFrontEndPlugin<INotebookTools> = {
 export const commandEditItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:mode-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker],
+  requires: [INotebookTracker],
+  optional: [IStatusBar],
   activate: (
     app: JupyterFrontEnd,
-    statusBar: IStatusBar,
-    tracker: INotebookTracker
+    tracker: INotebookTracker,
+    statusBar: IStatusBar | null
   ) => {
+    if (!statusBar) {
+      // Automatically disable if statusbar missing
+      return;
+    }
     const { shell } = app;
     const item = new CommandEditStatus();
 
@@ -340,11 +345,16 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:trust-status',
   autoStart: true,
   requires: [IStatusBar, INotebookTracker, ILabShell],
+  optional: [IStatusBar],
   activate: (
     app: JupyterFrontEnd,
-    statusBar: IStatusBar,
-    tracker: INotebookTracker
+    tracker: INotebookTracker,
+    statusBar: IStatusBar | null
   ) => {
+    if (!statusBar) {
+      // Automatically disable if statusbar missing
+      return;
+    }
     const { shell } = app;
     const item = new NotebookTrustStatus();
 
