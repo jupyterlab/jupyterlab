@@ -25,7 +25,8 @@ export class VariablesWidget extends Panel {
   readonly header: Panel;
   readonly label: Panel;
   readonly body: Panel;
-  readonly variableDescription: Panel;
+  readonly variable: Panel;
+  readonly searcher: Panel;
 
   readonly model_header = {
     label: 'Variables',
@@ -48,8 +49,8 @@ export class VariablesWidget extends Panel {
     this.header.addWidget(this.label);
 
     //body
-    this.variableDescription = new VariableDescription(this.model);
-    this.variableDescription.addClass('jp-DebuggerSidebarVariables-body');
-    this.addWidget(this.variableDescription);
+    this.variable = new VariableDescription(this.model);
+    this.variable.addClass('jp-DebuggerSidebarVariables-body');
+    this.addWidget(this.variable);
   }
 }

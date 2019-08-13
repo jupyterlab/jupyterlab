@@ -18,7 +18,7 @@
   min-width: 350px !important;
 }
 
-.jp-DebuggerSidebar div:not(:first-child) .jp-DebuggerSidebarVariables-header {
+.jp-DebuggerSidebar div .jp-DebuggerSidebarVariables-header {
   border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
   border-top: solid var(--jp-border-width) var(--jp-border-color1);
 }
@@ -73,7 +73,7 @@
   background: var(--jp-layout-color2);
 }
 
-.jp-DebuggerSidebarVariables-table-row-selected {
+.jp-DebuggerSidebarVariables-table-row.selected {
   color: white;
   background: var(--jp-brand-color1);
 }
@@ -92,4 +92,42 @@
 .jp-DebuggerSidebarVariable-description p {
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+
+.jp-DebuggerSidebarVariable-Search {
+  color: var(--jp-ui-font-color1);
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  height: 24px;
+  /* height: calc(var(--jp-private-toolbar-height) + var(--jp-border-width)); */
+}
+
+.jp-DebuggerSidebarVariable-Search > .jp-Search-item {
+  flex: 0 0 auto;
+  padding-left: 8px;
+  padding-right: 8px;
+  vertical-align: middle;
+  font-size: 14px;
+  line-height: 23px;
+}
+
+.jp-DebuggerSidebarVariable-Search-input {
+  min-height: 22px;
+  vertical-align: top;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.fa {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+.fa-caret-down:before {
+  content: '\F0D7';
 }

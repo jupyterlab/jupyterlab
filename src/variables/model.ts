@@ -20,7 +20,7 @@ export class Model implements IVariablesModel {
   }
 
   get changeCurrentVariable(): ISignal<this, IVariable> {
-    return this._chenageCurrentVariable;
+    return this._changeCurrentVariable;
   }
 
   get variables(): IVariable[] {
@@ -40,7 +40,7 @@ export class Model implements IVariablesModel {
       return;
     }
     this._currentVariabile = variable;
-    this._chenageCurrentVariable.emit(variable);
+    this._changeCurrentVariable.emit(variable);
   }
 
   getCurrentVariables(): IVariable[] {
@@ -53,5 +53,5 @@ export class Model implements IVariablesModel {
 
   private _currentVariabile: IVariable;
   private _state: IVariable[];
-  private _chenageCurrentVariable = new Signal<this, IVariable>(this);
+  private _changeCurrentVariable = new Signal<this, IVariable>(this);
 }
