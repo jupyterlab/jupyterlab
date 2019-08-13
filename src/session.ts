@@ -85,23 +85,23 @@ export class DebugSession implements IDebugger.ISession {
    * @param command debug command.
    * @param args arguments for the debug command.
    */
-  async sendRequest<K extends keyof IDebugger.ISession.IRequest>(
+  async sendRequest<K extends keyof IDebugger.ISession.Request>(
     command: K,
-    args: IDebugger.ISession.IRequest[K]
-  ): Promise<IDebugger.ISession.IResponse[K]> {
+    args: IDebugger.ISession.Request[K]
+  ): Promise<IDebugger.ISession.Response[K]> {
     const message = await this._sendDebugMessage({
       type: 'request',
       seq: this._seq++,
       command,
       arguments: args
     });
-    return message.content as IDebugger.ISession.IResponse[K];
+    return message.content as IDebugger.ISession.Response[K];
   }
 
   /**
    * Signal emitted for debug event messages.
    */
-  get eventMessage(): ISignal<DebugSession, IDebugger.ISession.IEvent> {
+  get eventMessage(): ISignal<DebugSession, IDebugger.ISession.Event> {
     return this._eventMessage;
   }
 
@@ -116,7 +116,7 @@ export class DebugSession implements IDebugger.ISession {
     if (msgType !== 'debug_event') {
       return;
     }
-    const event = message.content as IDebugger.ISession.IEvent;
+    const event = message.content as IDebugger.ISession.Event;
     this._eventMessage.emit(event);
   }
 
@@ -143,7 +143,7 @@ export class DebugSession implements IDebugger.ISession {
   private _disposed = new Signal<this, void>(this);
   private _isDisposed: boolean = false;
 
-  private _eventMessage = new Signal<DebugSession, IDebugger.ISession.IEvent>(
+  private _eventMessage = new Signal<DebugSession, IDebugger.ISession.Event>(
     this
   );
 

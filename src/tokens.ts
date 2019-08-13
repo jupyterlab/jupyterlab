@@ -75,9 +75,9 @@ export namespace IDebugger {
     }
 
     /**
-     * Interface for all the debug requests types.
+     * Expose all the debug requests types.
      */
-    export interface IRequest {
+    export type Request = {
       attach: DebugProtocol.AttachRequestArguments;
       completions: DebugProtocol.CompletionsArguments;
       configurationDone: DebugProtocol.ConfigurationDoneArguments;
@@ -112,12 +112,12 @@ export namespace IDebugger {
       terminateThreads: DebugProtocol.TerminateThreadsArguments;
       threads: {};
       updateCell: IUpdateCellArguments;
-    }
+    };
 
     /**
-     * Interface for all the debug response types.
+     * Expose all the debug response types.
      */
-    export interface IResponse {
+    export type Response = {
       attach: DebugProtocol.AttachResponse;
       completions: DebugProtocol.CompletionsResponse;
       configurationDone: DebugProtocol.ConfigurationDoneResponse;
@@ -153,12 +153,12 @@ export namespace IDebugger {
       threads: DebugProtocol.ThreadsResponse;
       updateCell: IUpdateCellResponse;
       variables: DebugProtocol.VariablesResponse;
-    }
+    };
 
     /**
      * A generic debug event.
      */
-    export type IEvent = DebugProtocol.Event;
+    export type Event = DebugProtocol.Event;
   }
 }
 
