@@ -15,7 +15,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import { DatastoreExt } from '@jupyterlab/datastore';
 
-import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
+import { ObservableJSON } from '@jupyterlab/observables';
 
 import { ArrayExt, each, chain } from '@phosphor/algorithm';
 
@@ -158,10 +158,10 @@ export class NotebookTools extends Widget implements INotebookTools {
       this._prevActiveNotebookModel &&
       !this._prevActiveNotebookModel.isDisposed
     ) {
-      this._prevActiveNotebookModel.metadata.changed.disconnect(
+      /*this._prevActiveNotebookModel.metadata.changed.disconnect(
         this._onActiveNotebookPanelMetadataChanged,
         this
-      );
+      );*/
     }
     const activeNBModel =
       this.activeNotebookPanel && this.activeNotebookPanel.content
@@ -169,10 +169,10 @@ export class NotebookTools extends Widget implements INotebookTools {
         : null;
     this._prevActiveNotebookModel = activeNBModel;
     if (activeNBModel) {
-      activeNBModel.metadata.changed.connect(
+      /*activeNBModel.metadata.changed.connect(
         this._onActiveNotebookPanelMetadataChanged,
         this
-      );
+      );*/
     }
     each(this._toolChildren(), widget => {
       MessageLoop.sendMessage(widget, NotebookTools.ActiveNotebookPanelMessage);
@@ -213,7 +213,7 @@ export class NotebookTools extends Widget implements INotebookTools {
   /**
    * Handle a change in the active cell metadata.
    */
-  private _onActiveNotebookPanelMetadataChanged(
+  /*private _onActiveNotebookPanelMetadataChanged(
     sender: IObservableMap<JSONValue>,
     args: IObservableMap.IChangedArgs<JSONValue>
   ): void {
@@ -224,7 +224,7 @@ export class NotebookTools extends Widget implements INotebookTools {
     each(this._toolChildren(), widget => {
       MessageLoop.sendMessage(widget, message);
     });
-  }
+  }*/
 
   /**
    * Handle a change in the notebook model metadata.
@@ -571,22 +571,22 @@ export namespace NotebookTools {
      * Handle a change to the notebook.
      */
     protected onActiveNotebookPanelChanged(msg: Message): void {
-      this._update();
+      // this._update();
     }
 
     /**
      * Handle a change to the notebook metadata.
      */
     protected onActiveNotebookPanelMetadataChanged(msg: Message): void {
-      this._update();
+      // this._update();
     }
 
-    private _update() {
+    /*private _update() {
       const nb =
         this.notebookTools.activeNotebookPanel &&
         this.notebookTools.activeNotebookPanel.content;
       this.editor.source = nb ? nb.model.metadata : null;
-    }
+    }*/
   }
 
   /**

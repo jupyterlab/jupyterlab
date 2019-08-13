@@ -16,6 +16,8 @@ import {
   Dialog
 } from '@jupyterlab/apputils';
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
 import { INotebookModel } from './model';
@@ -207,7 +209,12 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Update the kernel language.
    */
   private _updateLanguage(language: KernelMessage.ILanguageInfo): void {
-    this.model.metadata.set('language_info', language);
+    DatastoreExt.withTransaction(this.model.nbrecord.datastore, () => {
+      DatastoreExt.updateField(
+        { ...this.model.nbrecord, field: 'metadata' },
+        { language_info: language }
+      );
+    });
   }
 
   /**
@@ -218,10 +225,17 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       if (this.isDisposed) {
         return;
       }
-      this.model.metadata.set('kernelspec', {
-        name: kernel.name,
-        display_name: spec.display_name,
-        language: spec.language
+      DatastoreExt.withTransaction(this.model.nbrecord.datastore, () => {
+        DatastoreExt.updateField(
+          { ...this.model.nbrecord, field: 'metadata' },
+          {
+            kernelspec: {
+              name: kernel.name,
+              display_name: spec.display_name,
+              language: spec.language
+            }
+          }
+        );
       });
     });
   }

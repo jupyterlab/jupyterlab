@@ -3,7 +3,7 @@
 
 import { showDialog, Dialog } from '@jupyterlab/apputils';
 
-import { SchemaFields } from '@jupyterlab/datastore';
+import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
 
 import { DocumentModel, DocumentRegistry } from '@jupyterlab/docregistry';
 
@@ -21,15 +21,21 @@ import {
 import { nbformat } from '@jupyterlab/coreutils';
 
 import {
-  IObservableJSON,
   IObservableUndoableList,
   IObservableList,
   IModelDB
 } from '@jupyterlab/observables';
 
-import { ReadonlyJSONValue, UUID } from '@phosphor/coreutils';
+import { IOutputModel } from '@jupyterlab/rendermime';
 
 import {
+  ReadonlyJSONObject,
+  ReadonlyJSONValue,
+  UUID
+} from '@phosphor/coreutils';
+
+import {
+  Datastore,
   Fields,
   ListField,
   MapField,
@@ -66,7 +72,12 @@ export interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * The metadata associated with the notebook.
    */
-  readonly metadata: IObservableJSON;
+  readonly metadata: ReadonlyJSONObject;
+
+  /**
+   * The location of the notebook data in a datastore.
+   */
+  readonly nbrecord: DatastoreExt.RecordLocation<NotebookModel.ISchema>;
 
   /**
    * The array of deleted cells since the notebook was last run.
@@ -88,14 +99,20 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     this._cells = new CellList(this.modelDB, this.contentFactory);
     this._cells.changed.connect(this._onCellsChanged, this);
 
+    const datastore = Datastore.create({
+      id: 1,
+      schemas: [NotebookModel.SCHEMA, IOutputModel.SCHEMA, CellModel.SCHEMA]
+    });
+    this.nbrecord = {
+      datastore,
+      schema: NotebookModel.SCHEMA,
+      record: 'data'
+    };
+
     // Handle initial metadata.
-    let metadata = this.modelDB.createMap('metadata');
-    if (!metadata.has('language_info')) {
-      let name = options.languagePreference || '';
-      metadata.set('language_info', { name });
-    }
     this._ensureMetadata();
-    metadata.changed.connect(this.triggerContentChange, this);
+
+    DatastoreExt.listenRecord(this.record, this.triggerContentChange, this);
     this._deletedCells = [];
   }
 
@@ -107,8 +124,8 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * The metadata associated with the notebook.
    */
-  get metadata(): IObservableJSON {
-    return this.modelDB.get('metadata') as IObservableJSON;
+  get metadata(): ReadonlyJSONObject {
+    return DatastoreExt.getField({ ...this.nbrecord, field: 'metadata' });
   }
 
   /**
@@ -122,21 +139,26 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * The major version number of the nbformat.
    */
   get nbformat(): number {
-    return this._nbformat;
+    return DatastoreExt.getField({ ...this.nbrecord, field: 'nbformat' });
   }
 
   /**
    * The minor version number of the nbformat.
    */
   get nbformatMinor(): number {
-    return this._nbformatMinor;
+    return DatastoreExt.getField({ ...this.nbrecord, field: 'nbformatMinor' });
   }
+
+  /**
+   * The location of the notebook data in a datastore.
+   */
+  readonly nbrecord: DatastoreExt.RecordLocation<NotebookModel.ISchema>;
 
   /**
    * The default kernel name of the document.
    */
   get defaultKernelName(): string {
-    let spec = this.metadata.get('kernelspec') as nbformat.IKernelspecMetadata;
+    let spec = this.metadata['kernelspec'] as nbformat.IKernelspecMetadata;
     return spec ? spec.name : '';
   }
 
@@ -151,9 +173,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * The default kernel language of the document.
    */
   get defaultKernelLanguage(): string {
-    let info = this.metadata.get(
-      'language_info'
-    ) as nbformat.ILanguageInfoMetadata;
+    let info = this.metadata['language_info'] as nbformat.ILanguageInfoMetadata;
     return info ? info.name : '';
   }
 
@@ -199,8 +219,8 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     }
     this._ensureMetadata();
     let metadata = Object.create(null) as nbformat.INotebookMetadata;
-    for (let key of this.metadata.keys()) {
-      metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
+    for (let key of Object.keys(this.metadata)) {
+      metadata[key] = JSON.parse(JSON.stringify(this.metadata[key]));
     }
     return {
       metadata,
@@ -219,76 +239,78 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   fromJSON(value: nbformat.INotebookContent): void {
     let cells: ICellModel[] = [];
     let factory = this.contentFactory;
-    for (let cell of value.cells) {
-      switch (cell.cell_type) {
-        case 'code':
-          cells.push(factory.createCodeCell({ cell }));
-          break;
-        case 'markdown':
-          cells.push(factory.createMarkdownCell({ cell }));
-          break;
-        case 'raw':
-          cells.push(factory.createRawCell({ cell }));
-          break;
-        default:
-          continue;
+    DatastoreExt.withTransaction(this.nbrecord.datastore, () => {
+      for (let cell of value.cells) {
+        switch (cell.cell_type) {
+          case 'code':
+            cells.push(factory.createCodeCell({ cell }));
+            break;
+          case 'markdown':
+            cells.push(factory.createMarkdownCell({ cell }));
+            break;
+          case 'raw':
+            cells.push(factory.createRawCell({ cell }));
+            break;
+          default:
+            continue;
+        }
       }
-    }
-    this.cells.beginCompoundOperation();
-    this.cells.clear();
-    this.cells.pushAll(cells);
-    this.cells.endCompoundOperation();
+      this.cells.beginCompoundOperation();
+      this.cells.clear();
+      this.cells.pushAll(cells);
+      this.cells.endCompoundOperation();
 
-    let oldValue = 0;
-    let newValue = 0;
-    this._nbformatMinor = nbformat.MINOR_VERSION;
-    this._nbformat = nbformat.MAJOR_VERSION;
-    const origNbformat = value.metadata.orig_nbformat;
+      let oldValue = 0;
+      let newValue = 0;
+      this._nbformatMinor = nbformat.MINOR_VERSION;
+      this._nbformat = nbformat.MAJOR_VERSION;
+      const origNbformat = value.metadata.orig_nbformat;
 
-    if (value.nbformat !== this._nbformat) {
-      oldValue = this._nbformat;
-      this._nbformat = newValue = value.nbformat;
-      this.triggerStateChange({ name: 'nbformat', oldValue, newValue });
-    }
-    if (value.nbformat_minor > this._nbformatMinor) {
-      oldValue = this._nbformatMinor;
-      this._nbformatMinor = newValue = value.nbformat_minor;
-      this.triggerStateChange({ name: 'nbformatMinor', oldValue, newValue });
-    }
+      if (value.nbformat !== this._nbformat) {
+        oldValue = this._nbformat;
+        this._nbformat = newValue = value.nbformat;
+        this.triggerStateChange({ name: 'nbformat', oldValue, newValue });
+      }
+      if (value.nbformat_minor > this._nbformatMinor) {
+        oldValue = this._nbformatMinor;
+        this._nbformatMinor = newValue = value.nbformat_minor;
+        this.triggerStateChange({ name: 'nbformatMinor', oldValue, newValue });
+      }
 
-    // Alert the user if the format changes.
-    if (origNbformat !== undefined && this._nbformat !== origNbformat) {
-      const newer = this._nbformat > origNbformat;
-      const msg = `This notebook has been converted from ${
-        newer ? 'an older' : 'a newer'
-      } notebook format (v${origNbformat}) to the current notebook format (v${
-        this._nbformat
-      }). The next time you save this notebook, the current notebook format (v${
-        this._nbformat
-      }) will be used. ${
-        newer
-          ? 'Older versions of Jupyter may not be able to read the new format.'
-          : 'Some features of the original notebook may not be available.'
-      }  To preserve the original format version, close the notebook without saving it.`;
-      void showDialog({
-        title: 'Notebook converted',
-        body: msg,
-        buttons: [Dialog.okButton()]
-      });
-    }
+      // Alert the user if the format changes.
+      if (origNbformat !== undefined && this._nbformat !== origNbformat) {
+        const newer = this._nbformat > origNbformat;
+        const msg = `This notebook has been converted from ${
+          newer ? 'an older' : 'a newer'
+        } notebook format (v${origNbformat}) to the current notebook format (v${
+          this._nbformat
+        }). The next time you save this notebook, the current notebook format (v${
+          this._nbformat
+        }) will be used. ${
+          newer
+            ? 'Older versions of Jupyter may not be able to read the new format.'
+            : 'Some features of the original notebook may not be available.'
+        }  To preserve the original format version, close the notebook without saving it.`;
+        void showDialog({
+          title: 'Notebook converted',
+          body: msg,
+          buttons: [Dialog.okButton()]
+        });
+      }
 
-    // Update the metadata.
-    this.metadata.clear();
-    let metadata = value.metadata;
-    for (let key in metadata) {
+      // Update the metadata.
+      let metadata = { ...value.metadata };
       // orig_nbformat is not intended to be stored per spec.
-      if (key === 'orig_nbformat') {
-        continue;
+      delete metadata['orig_nbformat'];
+      let oldMetadata = { ...this.metadata };
+      for (let key in oldMetadata) {
+        oldMetadata[key] = null;
       }
-      this.metadata.set(key, metadata[key]);
-    }
-    this._ensureMetadata();
-    this.dirty = true;
+      let update = { ...oldMetadata, ...metadata };
+      DatastoreExt.updateField({ ...this.nbrecord, field: 'metadata' }, update);
+      this._ensureMetadata();
+      this.dirty = true;
+    });
   }
 
   /**
@@ -329,13 +351,18 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Make sure we have the required metadata fields.
    */
   private _ensureMetadata(): void {
-    let metadata = this.metadata;
-    if (!metadata.has('language_info')) {
-      metadata.set('language_info', { name: '' });
-    }
-    if (!metadata.has('kernelspec')) {
-      metadata.set('kernelspec', { name: '', display_name: '' });
-    }
+    DatastoreExt.withTransaction(this.nbrecord.datastore, () => {
+      let metadata = { ...this.metadata };
+      metadata['language_info'] = metadata['language_info'] || { name: '' };
+      metadata['kernelspec'] = metadata['kernelspec'] || {
+        name: '',
+        display_name: ''
+      };
+      DatastoreExt.updateField(
+        { ...this.nbrecord, field: 'metadata' },
+        metadata
+      );
+    });
   }
 
   private _cells: CellList;
@@ -375,11 +402,6 @@ export namespace NotebookModel {
    */
   export interface ISchema extends Schema {
     /**
-     * The schema id.
-     */
-    id: '@jupyterlab/codeeditor:v1';
-
-    /**
      * The schema fields.
      */
     fields: IFields;
@@ -392,7 +414,7 @@ export namespace NotebookModel {
     /**
      * The schema id.
      */
-    id: '@jupyterlab/codeeditor:v1',
+    id: '@jupyterlab/notebook:notebookmodel.v1',
 
     /**
      * Concrete realizations of the schema fields, available at runtime.

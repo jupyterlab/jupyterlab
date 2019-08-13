@@ -3,17 +3,19 @@
 
 import { ArrayExt, each } from '@phosphor/algorithm';
 
-import { JSONValue } from '@phosphor/coreutils';
+import { JSONValue, MimeData } from '@phosphor/coreutils';
+
+import { Datastore, MapField } from '@phosphor/datastore';
+
+import { IDisposable } from '@phosphor/disposable';
+
+import { Drag, IDragEvent } from '@phosphor/dragdrop';
 
 import { Message } from '@phosphor/messaging';
-
-import { MimeData } from '@phosphor/coreutils';
 
 import { AttachedProperty } from '@phosphor/properties';
 
 import { ISignal, Signal } from '@phosphor/signaling';
-
-import { Drag, IDragEvent } from '@phosphor/dragdrop';
 
 import { PanelLayout, Widget } from '@phosphor/widgets';
 
@@ -36,7 +38,7 @@ import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
 
 import { DatastoreExt } from '@jupyterlab/datastore';
 
-import { IObservableMap, IObservableList } from '@jupyterlab/observables';
+import { IObservableList } from '@jupyterlab/observables';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -304,15 +306,11 @@ export class StaticNotebook extends Widget {
    * when the `language_info` metadata changes.
    */
   protected onMetadataChanged(
-    sender: IObservableMap<JSONValue>,
-    args: IObservableMap.IChangedArgs<JSONValue>
+    sender: Datastore,
+    args: MapField.Change<JSONValue>
   ): void {
-    switch (args.key) {
-      case 'language_info':
-        this._updateMimetype();
-        break;
-      default:
-        break;
+    if (args.current['language_info']) {
+      this._updateMimetype();
     }
   }
 
@@ -353,7 +351,10 @@ export class StaticNotebook extends Widget {
     let layout = this.layout as PanelLayout;
     if (oldValue) {
       oldValue.cells.changed.disconnect(this._onCellsChanged, this);
-      oldValue.metadata.changed.disconnect(this.onMetadataChanged, this);
+      if (this._metadataListener) {
+        this._metadataListener.dispose();
+        this._metadataListener = null;
+      }
       oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
       // TODO: reuse existing cell widgets if possible. Remember to initially
       // clear the history of each cell if we do this.
@@ -377,7 +378,11 @@ export class StaticNotebook extends Widget {
     });
     cells.changed.connect(this._onCellsChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
-    newValue.metadata.changed.connect(this.onMetadataChanged, this);
+    this._metadataListener = DatastoreExt.listenField(
+      { ...newValue.nbrecord, field: 'metadata' },
+      this.onMetadataChanged,
+      this
+    );
   }
 
   /**
@@ -544,9 +549,9 @@ export class StaticNotebook extends Widget {
    * Update the mimetype of the notebook.
    */
   private _updateMimetype(): void {
-    let info = this._model.metadata.get(
+    let info = this._model.metadata[
       'language_info'
-    ) as nbformat.ILanguageInfoMetadata;
+    ] as nbformat.ILanguageInfoMetadata;
     if (!info) {
       return;
     }
@@ -596,6 +601,7 @@ export class StaticNotebook extends Widget {
 
   private _editorConfig = StaticNotebook.defaultEditorConfig;
   private _notebookConfig = StaticNotebook.defaultNotebookConfig;
+  private _metadataListener: IDisposable | null = null;
   private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
   private _mimetypeService: IEditorMimeTypeService;
