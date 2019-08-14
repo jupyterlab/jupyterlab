@@ -8,6 +8,9 @@
   "references": [
     {
       "path": "../apputils"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

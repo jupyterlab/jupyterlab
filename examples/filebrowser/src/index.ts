@@ -21,18 +21,20 @@ import { ServiceManager } from '@jupyterlab/services';
 
 import { Dialog, ToolbarButton, showDialog } from '@jupyterlab/apputils';
 
-import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
-
-import { DocumentManager } from '@jupyterlab/docmanager';
-
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService
 } from '@jupyterlab/codemirror';
 
+import { DocumentManager } from '@jupyterlab/docmanager';
+
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
+import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
+
 import { FileEditorFactory } from '@jupyterlab/fileeditor';
+
+import { defaultIconRegistry } from '@jupyterlab/ui-components';
 
 function main(): void {
   let manager = new ServiceManager();
@@ -85,7 +87,10 @@ function createApp(manager: ServiceManager.IManager): void {
 
   let commands = new CommandRegistry();
 
-  let fbModel = new FileBrowserModel({ manager: docManager });
+  let fbModel = new FileBrowserModel({
+    manager: docManager,
+    iconRegistry: defaultIconRegistry
+  });
   let fbWidget = new FileBrowser({
     id: 'filebrowser',
     model: fbModel

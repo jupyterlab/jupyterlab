@@ -101,6 +101,7 @@
     "@jupyterlab/tooltip": "^1.1.0-alpha.1",
     "@jupyterlab/tooltip-extension": "^1.1.0-alpha.1",
     "@jupyterlab/ui-components": "^1.1.0-alpha.1",
+    "@jupyterlab/ui-components-extension": "^1.1.0-alpha.1",
     "@jupyterlab/vdom": "^1.1.0-alpha.1",
     "@jupyterlab/vdom-extension": "^1.1.0-alpha.1",
     "@jupyterlab/vega4-extension": "^1.1.0-alpha.1",

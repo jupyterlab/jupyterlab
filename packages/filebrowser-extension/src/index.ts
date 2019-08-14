@@ -43,6 +43,8 @@ import { Contents } from '@jupyterlab/services';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
+import { IIconRegistry } from '@jupyterlab/ui-components';
+
 import { IIterator, map, reduce, toArray } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
@@ -128,7 +130,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
-  requires: [IDocumentManager, IStateDB]
+  requires: [IIconRegistry, IDocumentManager, IStateDB]
 };
 
 /**
@@ -205,6 +207,7 @@ export default plugins;
  */
 function activateFactory(
   app: JupyterFrontEnd,
+  icoReg: IIconRegistry,
   docManager: IDocumentManager,
   state: IStateDB
 ): IFileBrowserFactory {
@@ -215,6 +218,7 @@ function activateFactory(
     options: IFileBrowserFactory.IOptions = {}
   ) => {
     const model = new FileBrowserModel({
+      iconRegistry: icoReg,
       manager: docManager,
       driveName: options.driveName || '',
       refreshInterval: options.refreshInterval,

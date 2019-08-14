@@ -18,9 +18,9 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { RenderedVDOM, IVDOMTracker } from '@jupyterlab/vdom';
 
 /**
- * The CSS class for a VDOM icon.
+ * The name for a VDOM icon.
  */
-const CSS_ICON_CLASS = 'jp-MaterialIcon jp-VDOMIcon';
+const ICON_NAME = 'react';
 
 /**
  * The MIME type for VDOM.
@@ -82,7 +82,7 @@ const plugin: JupyterFrontEndPlugin<IVDOMTracker> = {
       name: 'vdom',
       mimeTypes: [MIME_TYPE],
       extensions: ['.vdom', '.vdom.json'],
-      iconClass: CSS_ICON_CLASS
+      iconClass: ICON_NAME
     });
 
     const factory = new MimeDocumentFactory({
