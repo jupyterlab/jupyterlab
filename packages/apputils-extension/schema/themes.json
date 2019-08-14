@@ -10,6 +10,19 @@
       "additionalProperties": false,
       "description": "The description field of each item is the CSS property that will be used to validate an override's value",
       "properties": {
+        "code-font-family": {
+          "type": ["string", "null"],
+          "description": "font-size"
+        },
+        "content-font-family": {
+          "type": ["string", "null"],
+          "description": "font-size"
+        },
+        "ui-font-family": {
+          "type": ["string", "null"],
+          "description": "font-size"
+        },
+
         "code-font-size": {
           "type": ["string", "null"],
           "description": "font-size"
@@ -43,6 +56,10 @@
       "description": "Override theme CSS variables by setting key-value pairs here",
       "$ref": "#/definitions/cssOverrides",
       "default": {
+        "code-font-family": null,
+        "content-font-family": null,
+        "ui-font-family": null,
+
         "code-font-size": null,
         "content-font-size1": null,
         "ui-font-size1": null

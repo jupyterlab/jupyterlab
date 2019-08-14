@@ -119,7 +119,8 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
       label: args =>
         args['enabled'] ? `${args['font']}` : `waiting for fonts`,
       isEnabled: args => args['enabled'] as boolean,
-      execute: () => {}
+      execute: args =>
+        manager.setCSSOverride(args['key'] as string, args['font'] as string)
     });
 
     commands.addCommand(CommandIDs.incrFontSize, {
@@ -186,7 +187,7 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
         validFonts.forEach(font => {
           codeFontMenu.addItem({
             command: CommandIDs.changeFont,
-            args: { enabled: true, font }
+            args: { enabled: true, key: 'code-font-family', font }
           });
         });
         themeMenu.addItem({ type: 'submenu', submenu: codeFontMenu });

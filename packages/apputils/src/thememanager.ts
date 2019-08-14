@@ -91,8 +91,9 @@ export class ThemeManager implements IThemeManager {
    * @return value - The current value of the Jupyterlab CSS variable
    */
   getCSS(key: string): string {
-    return getComputedStyle(document.documentElement).getPropertyValue(
-      `--jp-${key}`
+    return (
+      this._overrides[key] ||
+      getComputedStyle(document.documentElement).getPropertyValue(`--jp-${key}`)
     );
   }
 
