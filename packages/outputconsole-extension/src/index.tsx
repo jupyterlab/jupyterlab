@@ -27,13 +27,7 @@ import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
 
 import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
 
-import {
-  IOutputConsole,
-  IOutputLogPayload,
-  IOutputLogFilter,
-  OutputConsoleWidget,
-  OutputConsole
-} from '@jupyterlab/outputconsole';
+import { IOutputLogRegistry } from '@jupyterlab/outputconsole';
 
 /**
  * The Output Console extension.
@@ -42,7 +36,7 @@ const outputConsolePlugin: JupyterFrontEndPlugin<IOutputConsole> = {
   activate: activateOutputConsole,
   id: '@jupyterlab/outputconsole-extension:plugin',
   provides: IOutputConsole,
-  requires: [IMainMenu, ICommandPalette, IRenderMimeRegistry],
+  requires: [IMainMenu, ICommandPalette, IOutputLogRegistry],
   autoStart: true
 };
 
@@ -224,6 +218,9 @@ function activateOutputConsole(
   mainMenu.viewMenu.addGroup([{ command }]);
   palette.addItem({ command, category });
 
+  // TODO: use the tracker. See if we can make this easier with convenience
+  // functions to use a tracker to replicate createNew (which would iterate over
+  // all existing things, and also add a listener to new things).
   /**
    * A Notebook Toolbar button extension to display the status of Output Console logs.
    */
