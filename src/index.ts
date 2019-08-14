@@ -21,7 +21,7 @@ import { Debugger } from './debugger';
 
 import { DebuggerSidebar } from './sidebar';
 
-import { IDebugger } from './tokens';
+import { IDebugger, IDebuggerSidebar } from './tokens';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -96,11 +96,14 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 /**
  * A plugin providing a condensed sidebar UI for debugging.
  */
-const sidebar: JupyterFrontEndPlugin<void> = {
+const sidebar: JupyterFrontEndPlugin<IDebuggerSidebar> = {
   id: '@jupyterlab/debugger:sidebar',
   optional: [ILayoutRestorer],
   autoStart: true,
-  activate: (app: JupyterFrontEnd, restorer: ILayoutRestorer | null) => {
+  activate: (
+    app: JupyterFrontEnd,
+    restorer: ILayoutRestorer | null
+  ): DebuggerSidebar => {
     const { shell } = app;
     const label = 'Environment';
     const namespace = 'jp-debugger-sidebar';
@@ -113,6 +116,8 @@ const sidebar: JupyterFrontEndPlugin<void> = {
     if (restorer) {
       restorer.add(sidebar, sidebar.id);
     }
+
+    return sidebar;
   }
 };
 
@@ -121,14 +126,15 @@ const sidebar: JupyterFrontEndPlugin<void> = {
  */
 const tracker: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:tracker',
-  optional: [ILayoutRestorer],
+  optional: [ILayoutRestorer, IDebuggerSidebar],
   requires: [IStateDB],
   provides: IDebugger,
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     state: IStateDB,
-    restorer: ILayoutRestorer | null
+    restorer: ILayoutRestorer | null,
+    sidebar: IDebuggerSidebar | null
   ): IDebugger => {
     const tracker = new WidgetTracker<MainAreaWidget<Debugger>>({
       namespace: 'debugger'
@@ -137,6 +143,10 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
     app.commands.addCommand(CommandIDs.create, {
       execute: args => {
         const id = (args.id as string) || '';
+
+        if (id) {
+          console.log('Debugger ID: ', id);
+        }
 
         if (tracker.find(widget => id === widget.content.model.id)) {
           return;
@@ -158,6 +168,12 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
         command: CommandIDs.create,
         args: widget => ({ id: widget.content.model.id }),
         name: widget => widget.content.model.id
+      });
+    }
+
+    if (sidebar) {
+      tracker.currentChanged.connect((_, current) => {
+        sidebar.model = current ? current.content.model : null;
       });
     }
 
