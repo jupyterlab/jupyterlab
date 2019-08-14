@@ -155,12 +155,17 @@ const shareFile: JupyterFrontEndPlugin<void> = {
 export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:file-upload-status',
   autoStart: true,
-  requires: [IStatusBar, IFileBrowserFactory],
+  requires: [IFileBrowserFactory],
+  optional: [IStatusBar],
   activate: (
     app: JupyterFrontEnd,
-    statusBar: IStatusBar,
-    browser: IFileBrowserFactory
+    browser: IFileBrowserFactory,
+    statusBar: IStatusBar | null
   ) => {
+    if (!statusBar) {
+      // Automatically disable if statusbar missing
+      return;
+    }
     const item = new FileUploadStatus({
       tracker: browser.tracker
     });

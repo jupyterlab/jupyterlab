@@ -167,13 +167,18 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
 export const savingStatusPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:saving-status',
   autoStart: true,
-  requires: [IStatusBar, IDocumentManager, ILabShell],
+  requires: [IDocumentManager, ILabShell],
+  optional: [IStatusBar],
   activate: (
     _: JupyterFrontEnd,
-    statusBar: IStatusBar,
     docManager: IDocumentManager,
-    labShell: ILabShell
+    labShell: ILabShell,
+    statusBar: IStatusBar | null
   ) => {
+    if (!statusBar) {
+      // Automatically disable if statusbar missing
+      return;
+    }
     const saving = new SavingStatus({ docManager });
 
     // Keep the currently active widget synchronized.
@@ -197,13 +202,18 @@ export const savingStatusPlugin: JupyterFrontEndPlugin<void> = {
 export const pathStatusPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:path-status',
   autoStart: true,
-  requires: [IStatusBar, IDocumentManager, ILabShell],
+  requires: [IDocumentManager, ILabShell],
+  optional: [IStatusBar],
   activate: (
     _: JupyterFrontEnd,
-    statusBar: IStatusBar,
     docManager: IDocumentManager,
-    labShell: ILabShell
+    labShell: ILabShell,
+    statusBar: IStatusBar | null
   ) => {
+    if (!statusBar) {
+      // Automatically disable if statusbar missing
+      return;
+    }
     const path = new PathStatus({ docManager });
 
     // Keep the file path widget up-to-date with the application active widget.
