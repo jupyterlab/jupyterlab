@@ -51,6 +51,7 @@
     "@jupyterlab/theme-dark-extension": "~1.1.0-alpha.1",
     "@jupyterlab/theme-light-extension": "~1.1.0-alpha.1",
     "@jupyterlab/tooltip-extension": "~1.1.0-alpha.1",
+    "@jupyterlab/ui-components-extension": "~1.1.0-alpha.1",
     "@jupyterlab/vdom-extension": "~1.1.0-alpha.1",
     "@jupyterlab/vega4-extension": "~1.1.0-alpha.1",
     "@jupyterlab/vega5-extension": "~1.1.0-alpha.1"
@@ -155,6 +156,7 @@
     "@jupyterlab/tooltip": "~1.1.0-alpha.1",
     "@jupyterlab/tooltip-extension": "~1.1.0-alpha.1",
     "@jupyterlab/ui-components": "~1.1.0-alpha.1",
+    "@jupyterlab/ui-components-extension": "~1.1.0-alpha.1",
     "@jupyterlab/vdom": "~1.1.0-alpha.1",
     "@jupyterlab/vdom-extension": "~1.1.0-alpha.1",
     "@jupyterlab/vega4-extension": "~1.1.0-alpha.1",
@@ -210,6 +212,7 @@
       "@jupyterlab/theme-dark-extension": "",
       "@jupyterlab/theme-light-extension": "",
       "@jupyterlab/tooltip-extension": "",
+      "@jupyterlab/ui-components-extension": "",
       "@jupyterlab/vdom-extension": ""
     },
     "mimeExtensions": {
@@ -333,6 +336,7 @@
       "@jupyterlab/tooltip": "../packages/tooltip",
       "@jupyterlab/tooltip-extension": "../packages/tooltip-extension",
       "@jupyterlab/ui-components": "../packages/ui-components",
+      "@jupyterlab/ui-components-extension": "../packages/ui-components-extension",
       "@jupyterlab/vdom": "../packages/vdom",
       "@jupyterlab/vdom-extension": "../packages/vdom-extension",
       "@jupyterlab/vega4-extension": "../packages/vega4-extension",
