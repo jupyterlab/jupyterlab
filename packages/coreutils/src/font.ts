@@ -1,3 +1,7 @@
+import { VirtualElement, h } from '@phosphor/virtualdom';
+
+import { Menu } from '@phosphor/widgets';
+
 const fontCandidates = [
   'Adobe Arabic',
   'Adobe Caslon Pro',
@@ -348,14 +352,14 @@ export class FontChecker {
 
 export namespace FontChecker {
   // a font will be compared against all the three default fonts.
-  // and if it doesn't match all 3 then that font is not available.
+  // And if it doesn't match all 3 then that font is not available
   export const baseFonts = ['monospace', 'sans-serif', 'serif'];
 
-  //we use m or w because these two characters take up the maximum width.
+  // we use m or w because these two characters take up the maximum width.
   // And we use a LLi so that the same matching fonts can get separated
   export const testString = 'mmmmmmmmmmlli';
 
-  //we test using 72px font size, we may use any size. I guess larger the better.
+  // we test using 72px font size, we may use any size. I guess larger the better
   export const testSize = '72px';
 }
 
@@ -371,3 +375,35 @@ export const getFonts = (): string[] => {
 };
 
 export const validFonts = getFonts();
+
+export class FontMenu extends Menu {
+  constructor(options: Menu.IOptions) {
+    if (!options.renderer) {
+      options.renderer = new FontMenu.Renderer();
+    }
+
+    super(options);
+  }
+}
+
+export namespace FontMenu {
+  export class Renderer extends Menu.Renderer {
+    /**
+     * Render the label element for a menu item.
+     *
+     * @param data - The data to use for rendering the label.
+     *
+     * @returns A virtual element representing the item label.
+     */
+    renderLabel(data: Menu.IRenderData): VirtualElement {
+      let content = this.formatLabel(data);
+      return h.div(
+        {
+          className: 'p-Menu-itemLabel',
+          style: { fontFamily: data.item.args['font'] as string }
+        },
+        content
+      );
+    }
+  }
+}

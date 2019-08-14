@@ -15,7 +15,7 @@ import {
   ThemeManager
 } from '@jupyterlab/apputils';
 
-import { PageConfig, URLExt, validFonts } from '@jupyterlab/coreutils';
+import { FontMenu, PageConfig, URLExt, validFonts } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
@@ -119,6 +119,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
       label: args =>
         args['enabled'] ? `${args['font']}` : `waiting for fonts`,
       isEnabled: args => args['enabled'] as boolean,
+      isToggled: args => manager.getCSS(args['key'] as string) === args['font'],
       execute: args =>
         manager.setCSSOverride(args['key'] as string, args['font'] as string)
     });
@@ -182,7 +183,7 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
         themeMenu.addItem({ type: 'separator' });
 
         // make modifications to code font
-        const codeFontMenu = new Menu({ commands });
+        const codeFontMenu = new FontMenu({ commands });
         codeFontMenu.title.label = 'Code Font';
         validFonts.forEach(font => {
           codeFontMenu.addItem({
