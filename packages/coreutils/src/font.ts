@@ -1,5 +1,3 @@
-import FontFaceObserver from 'fontfaceobserver';
-
 const fontCandidates = [
   'Adobe Arabic',
   'Adobe Caslon Pro',
@@ -299,108 +297,77 @@ const fontCandidates = [
   'Zapfino'
 ];
 
-export const getFontObservers = (): { [key: string]: FontFaceObserver } => {
-  return fontCandidates.reduce(
-    (obj: { [key: string]: FontFaceObserver }, fc: string) => {
-      obj[fc] = new FontFaceObserver(fc);
-      return obj;
-    },
-    {}
-  );
+/**
+ * adapted from https://stackoverflow.com/a/3368855/425458
+ */
+export class FontChecker {
+  constructor() {
+    this.h = document.getElementsByTagName('body')[0];
+
+    // create a SPAN in the document to get the width of the text we use to test
+    this.s = document.createElement('span');
+    this.s.style.fontSize = FontChecker.testSize;
+    this.s.innerHTML = FontChecker.testString;
+
+    for (const index in FontChecker.baseFonts) {
+      // get the default width for the three base fonts
+      this.s.style.fontFamily = FontChecker.baseFonts[index];
+      this.h.appendChild(this.s);
+
+      // height and width for the default font
+      this.defaultHeight[FontChecker.baseFonts[index]] = this.s.offsetHeight;
+      this.defaultWidth[FontChecker.baseFonts[index]] = this.s.offsetWidth;
+
+      this.h.removeChild(this.s);
+    }
+  }
+
+  check(font: string): boolean {
+    let detected = false;
+    for (const index in FontChecker.baseFonts) {
+      // name of the font along with the base font for fallback
+      this.s.style.fontFamily = font + ',' + FontChecker.baseFonts[index];
+
+      this.h.appendChild(this.s);
+      const matched =
+        this.s.offsetWidth !==
+          this.defaultWidth[FontChecker.baseFonts[index]] ||
+        this.s.offsetHeight !==
+          this.defaultHeight[FontChecker.baseFonts[index]];
+      this.h.removeChild(this.s);
+      detected = detected || matched;
+    }
+    return detected;
+  }
+
+  h: HTMLElement;
+  s: HTMLElement;
+  defaultWidth: { [key: string]: number } = {};
+  defaultHeight: { [key: string]: number } = {};
+}
+
+export namespace FontChecker {
+  // a font will be compared against all the three default fonts.
+  // and if it doesn't match all 3 then that font is not available.
+  export const baseFonts = ['monospace', 'sans-serif', 'serif'];
+
+  //we use m or w because these two characters take up the maximum width.
+  // And we use a LLi so that the same matching fonts can get separated
+  export const testString = 'mmmmmmmmmmlli';
+
+  //we test using 72px font size, we may use any size. I guess larger the better.
+  export const testSize = '72px';
+}
+
+export const getFonts = (): string[] => {
+  const fontChecker = new FontChecker();
+
+  return fontCandidates.reduce((arr, font) => {
+    if (fontChecker.check(font)) {
+      arr.push(font);
+    }
+    return arr;
+  }, []);
 };
 
-export const getFonts = (): Promise<string[]> => {
-  // let observers = Object.values(getFontObservers()).map(function(obs) {obs.load()});
-  //
-  // Promise.all(observers)
-  //   .then(function(fonts) {
-  //     fonts.forEach(function(font) {
-  //       console.log(font.family + ' ' + font.weight + ' ' + 'loaded');
-  //
-  //       // Map the result of the Promise back to our existing data,
-  //       // to get the other properties we need.
-  //       console.log(exampleFontData[font.family].color);
-  //     });
-  //   })
-  //   .catch(function(err) {
-  //     console.warn('Some critical font are not available:', err);
-  //   });
-  const obs = getFontObservers();
-  let proms = Object.keys(obs).map(k => {
-    return obs[k].load(null, 15000).then(
-      () => {
-        return k;
-      },
-      err => {
-        console.error(err);
-        return '';
-      }
-    );
-  });
-
-  return Promise.all(proms).then(fonts => {
-    return fonts.reduce((arr, font) => {
-      if (font) {
-        arr.push(font);
-      }
-      return arr;
-    }, []);
-  });
-};
-
-// /**
-//  * adapted from https://stackoverflow.com/a/3368855/425458
-//  */
-// export class FontChecker {
-//   constructor() {
-//     this.h = document.getElementsByTagName("body")[0];
-//
-//     // create a SPAN in the document to get the width of the text we use to test
-//     this.s = document.createElement("span");
-//     this.s.style.fontSize = FontChecker.testSize;
-//     this.s.innerHTML = FontChecker.testString;
-//
-//     for (const index in FontChecker.baseFonts) {
-//       //get the default width for the three base fonts
-//       this.s.style.fontFamily = FontChecker.baseFonts[index];
-//       this.h.appendChild(this.s);
-//       this.defaultWidth[FontChecker.baseFonts[index]] = this.s.offsetWidth; //width for the default font
-//       this.defaultHeight[FontChecker.baseFonts[index]] = this.s.offsetHeight; //height for the defualt font
-//       this.h.removeChild(this.s);
-//     }
-//   }
-//
-//   check(font: string): boolean {
-//     let detected = false;
-//     for (const index in FontChecker.baseFonts) {
-//       this.s.style.fontFamily = font + ',' + FontChecker.baseFonts[index]; // name of the font along with the base font for fallback.
-//       this.h.appendChild(this.s);
-//       var matched = (this.s.offsetWidth != this.defaultWidth[FontChecker.baseFonts[index]] || this.s.offsetHeight != this.defaultHeight[FontChecker.baseFonts[index]]);
-//       this.h.removeChild(this.s);
-//       detected = detected || matched;
-//     }
-//     return detected;
-//   }
-//
-//   h: HTMLElement;
-//   s: HTMLElement;
-//   defaultWidth: {[key: string]: number} = {};
-//   defaultHeight: {[key: string]: number} = {};
-// }
-//
-// export namespace FontChecker {
-//   // a font will be compared against all the three default fonts.
-//   // and if it doesn't match all 3 then that font is not available.
-//   export const baseFonts = ['monospace', 'sans-serif', 'serif'];
-//
-//   //we use m or w because these two characters take up the maximum width.
-//   // And we use a LLi so that the same matching fonts can get separated
-//   export const testString = "mmmmmmmmmmlli";
-//
-//   //we test using 72px font size, we may use any size. I guess larger the better.
-//   export const testSize = '72px';
-// }
-//
-// const fontChecker = new FontChecker();
-//
-// export const validFonts
+export const validFonts = getFonts();

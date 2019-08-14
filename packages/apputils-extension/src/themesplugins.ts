@@ -15,7 +15,7 @@ import {
   ThemeManager
 } from '@jupyterlab/apputils';
 
-import { getFonts, PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt, validFonts } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
@@ -117,7 +117,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
     commands.addCommand(CommandIDs.changeFont, {
       label: args =>
-        args['enabled'] ? `waiting for fonts` : `${args['family']}`,
+        args['enabled'] ? `${args['font']}` : `waiting for fonts`,
       isEnabled: args => args['enabled'] as boolean,
       execute: () => {}
     });
@@ -180,20 +180,13 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
         themeMenu.addItem({ command: CommandIDs.themeScrollbars });
         themeMenu.addItem({ type: 'separator' });
 
-        // modify code font
+        // make modifications to code font
         const codeFontMenu = new Menu({ commands });
         codeFontMenu.title.label = 'Code Font';
-        codeFontMenu.addItem({
-          command: CommandIDs.changeFont,
-          args: { enabled: false }
-        });
-        getFonts().then(fams => {
-          codeFontMenu.clearItems();
-          fams.forEach(fam => {
-            codeFontMenu.addItem({
-              command: CommandIDs.changeFont,
-              args: { enabled: true, family: fam }
-            });
+        validFonts.forEach(font => {
+          codeFontMenu.addItem({
+            command: CommandIDs.changeFont,
+            args: { enabled: true, font }
           });
         });
         themeMenu.addItem({ type: 'submenu', submenu: codeFontMenu });
