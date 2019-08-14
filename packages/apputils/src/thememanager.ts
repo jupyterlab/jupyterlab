@@ -102,22 +102,6 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
-   * Load a CSS override from settings. If no corresponding override
-   * is found, this function unloads the override instead.
-   *
-   * @param key - A Jupyterlab CSS variable, without the leading '--jp-'.
-   */
-  loadCssOverride(key: string): void {
-    const overrides = (this._settings.user['overrides'] as Dict<string>) || {};
-
-    if (overrides[key]) {
-      document.documentElement.style.setProperty(`--jp-${key}`, overrides[key]);
-    } else {
-      document.documentElement.style.removeProperty(`--jp-${key}`);
-    }
-  }
-
-  /**
    * Loads all current CSS overrides from settings. If an override has been
    * removed, this function unloads it instead.
    */
@@ -125,17 +109,21 @@ export class ThemeManager implements IThemeManager {
     const newOverrides =
       (this._settings.user['overrides'] as Dict<string>) || {};
 
-    Object.keys(this._overrides).forEach(key => {
-      if (!(key in newOverrides)) {
-        // unset the override
-        this.loadCssOverride(key);
+    // iterate over the union of current and new CSS override keys
+    Object.keys({ ...this._overrides, ...newOverrides }).forEach(key => {
+      if (newOverrides[key]) {
+        // if the key is present in newOverrides, the override will be set
+        document.documentElement.style.setProperty(
+          `--jp-${key}`,
+          newOverrides[key]
+        );
+      } else {
+        // otherwise, the override will be removed
+        document.documentElement.style.removeProperty(`--jp-${key}`);
       }
     });
-    Object.keys(newOverrides).forEach(key => {
-      // set the override
-      this.loadCssOverride(key);
-    });
 
+    // replace the current overrides with the new ones
     this._overrides = newOverrides;
   }
 
