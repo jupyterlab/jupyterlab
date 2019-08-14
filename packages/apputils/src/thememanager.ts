@@ -28,7 +28,6 @@ const REQUEST_INTERVAL = 75;
 const REQUEST_THRESHOLD = 20;
 
 type Dict<T> = { [key: string]: T };
-// type Pair<T> = { key: string; value: T };
 
 /**
  * A class that provides theme management.
@@ -114,7 +113,7 @@ export class ThemeManager implements IThemeManager {
 
   /**
    * Loads all current CSS overrides from settings. If an override has been
-   * removed, this function unloads it instead.
+   * removed or is invalid, this function unloads it instead.
    */
   loadCSSOverrides(): void {
     const newOverrides =
@@ -123,13 +122,18 @@ export class ThemeManager implements IThemeManager {
     // iterate over the union of current and new CSS override keys
     Object.keys({ ...this._overrides, ...newOverrides }).forEach(key => {
       if (newOverrides[key]) {
-        // if the key is present in newOverrides, the override will be set
-        document.documentElement.style.setProperty(
-          `--jp-${key}`,
-          newOverrides[key]
-        );
+        // if key is present in newOverrides, validate then set the override
+        if (ThemeManager.validateCSS(key, newOverrides[key])) {
+          document.documentElement.style.setProperty(
+            `--jp-${key}`,
+            newOverrides[key]
+          );
+        } else {
+          // if validation failed, the override will be removed
+          document.documentElement.style.removeProperty(`--jp-${key}`);
+        }
       } else {
-        // otherwise, the override will be removed
+        // if key is not present, the override will be removed
         document.documentElement.style.removeProperty(`--jp-${key}`);
       }
     });
@@ -161,6 +165,14 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
+   * Add a CSS override to the settings.
+   */
+  setCSSOverride(key: string, value: string): Promise<void> {
+    this._overrides[key] = value;
+    return this._settings.set('overrides', this._overrides);
+  }
+
+  /**
    * Set the current theme.
    */
   setTheme(name: string): Promise<void> {
@@ -178,8 +190,7 @@ export class ThemeManager implements IThemeManager {
    * Increase a font size w.r.t. its current setting or its value in the
    * current theme.
    *
-   * @param key - A Jupyterlab font size CSS variable,
-   * without the leading '--jp-'.
+   * @param key - A Jupyterlab font size CSS variable, without the leading '--jp-'.
    */
   incrFontSize(key: string): Promise<void> {
     return this._incrFontSize(key, true);
@@ -189,8 +200,7 @@ export class ThemeManager implements IThemeManager {
    * Decrease a font size w.r.t. its current setting or its value in the
    * current theme.
    *
-   * @param key - A Jupyterlab font size CSS variable,
-   * without the leading '--jp-'.
+   * @param key - A Jupyterlab font size CSS variable, without the leading '--jp-'.
    */
   decrFontSize(key: string): Promise<void> {
     return this._incrFontSize(key, false);
@@ -222,16 +232,13 @@ export class ThemeManager implements IThemeManager {
    */
   private _incrFontSize(key: string, add: boolean = true): Promise<void> {
     // get the numeric and unit parts of the current font size
-    const parts = (this._overrides[key] || this.getCSS(key) || '13px').split(
-      /([a-zA-Z]+)/
-    );
+    const parts = (this.getCSS(key) || '13px').split(/([a-zA-Z]+)/);
 
     // determine the increment
     const incr = (add ? 1 : -1) * (parts[1] === 'em' ? 0.1 : 1);
 
     // increment the font size and set it as an override
-    this._overrides[key] = `${Number(parts[0]) + incr}${parts[1]}`;
-    return this._settings.set('overrides', this._overrides);
+    return this.setCSSOverride(key, `${Number(parts[0]) + incr}${parts[1]}`);
   }
 
   /**
@@ -407,6 +414,49 @@ export namespace ThemeManager {
      */
     url: string;
   }
+
+  /**
+   * Some basic CSS properties, corresponding to the naming
+   * conventions of theme CSS variables
+   */
+  const cssProps = ['color', 'font-family', 'size'];
+
+  /**
+   * Validate a CSS value w.r.t. a key
+   *
+   * @param key - A Jupyterlab CSS variable, without the leading '--jp-'.
+   *
+   * @param val - A candidate CSS value
+   */
+  export const validateCSS = (key: string, val: string): boolean => {
+    // determine the css property corresponding to the key
+    let prop: string;
+    for (const p of cssProps) {
+      if (key.includes(p)) {
+        prop = p;
+        break;
+      }
+    }
+
+    if (!prop) {
+      console.warn(
+        'CSS validation failed: could not find property corresponding to key.\n' +
+          `key: '${key}', val: '${val}'`
+      );
+      return false;
+    }
+
+    // use built-in validation once we have the corresponding property
+    if (CSS.supports(prop, val)) {
+      return true;
+    } else {
+      console.warn(
+        'CSS validation failed: invalid value.\n' +
+          `key: '${key}', val: '${val}', prop: '${prop}'`
+      );
+      return false;
+    }
+  };
 }
 
 /**
