@@ -43,6 +43,7 @@
     "@lumino/coreutils": "^1.5.3",
     "@lumino/disposable": "^1.4.3",
     "@lumino/signaling": "^1.4.3",
+    "fontfaceobserver": "^2.1.0",
     "minimist": "~1.2.0",
     "moment": "^2.24.0",
     "path-browserify": "^1.0.0",
@@ -50,6 +51,7 @@
     "url-parse": "~1.4.7"
   },
   "devDependencies": {
+    "@types/fontfaceobserver": "^0.0.6",
     "@jupyterlab/testutils": "^3.0.0-rc.13",
     "@types/jest": "^26.0.10",
     "@types/minimist": "^1.2.0",

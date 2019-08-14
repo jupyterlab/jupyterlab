@@ -15,7 +15,7 @@ import {
   ThemeManager
 } from '@jupyterlab/apputils';
 
-import { getFontFamilies, PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { getFonts, PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
@@ -182,11 +182,12 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
 
         // modify code font
         const codeFontMenu = new Menu({ commands });
+        codeFontMenu.title.label = 'Code Font';
         codeFontMenu.addItem({
           command: CommandIDs.changeFont,
           args: { enabled: false }
         });
-        getFontFamilies().then(fams => {
+        getFonts().then(fams => {
           codeFontMenu.clearItems();
           fams.forEach(fam => {
             codeFontMenu.addItem({
@@ -195,6 +196,8 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
             });
           });
         });
+        themeMenu.addItem({ type: 'submenu', submenu: codeFontMenu });
+
         themeMenu.addItem({
           command: CommandIDs.incrFontSize,
           args: {
@@ -209,6 +212,7 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
             key: 'code-font-size'
           }
         });
+
         themeMenu.addItem({ type: 'separator' });
 
         // increase/decrease content font size
