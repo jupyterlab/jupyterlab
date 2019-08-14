@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 export * from './activitymonitor';
+export * from './font';
 export * from './interfaces';
 export * from './markdowncodeblocks';
 export * from './pageconfig';

@@ -15,7 +15,7 @@ import {
   ThemeManager
 } from '@jupyterlab/apputils';
 
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { getFontFamilies, PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
@@ -29,6 +29,8 @@ namespace CommandIDs {
   export const changeTheme = 'apputils:change-theme';
 
   export const themeScrollbars = 'apputils:theme-scrollbars';
+
+  export const changeFont = 'apputils:change-font';
 
   export const incrFontSize = 'apputils:incr-font-size';
 
@@ -113,6 +115,13 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
       execute: () => manager.toggleThemeScrollbars()
     });
 
+    commands.addCommand(CommandIDs.changeFont, {
+      label: args =>
+        args['enabled'] ? `waiting for fonts` : `${args['family']}`,
+      isEnabled: args => args['enabled'] as boolean,
+      execute: () => {}
+    });
+
     commands.addCommand(CommandIDs.incrFontSize, {
       label: args => `${args['label']}`, // args['label'] is localized
       execute: args => manager.incrFontSize(args['key'] as string)
@@ -171,7 +180,21 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
         themeMenu.addItem({ command: CommandIDs.themeScrollbars });
         themeMenu.addItem({ type: 'separator' });
 
-        // increase/decrease code font size
+        // modify code font
+        const codeFontMenu = new Menu({ commands });
+        codeFontMenu.addItem({
+          command: CommandIDs.changeFont,
+          args: { enabled: false }
+        });
+        getFontFamilies().then(fams => {
+          codeFontMenu.clearItems();
+          fams.forEach(fam => {
+            codeFontMenu.addItem({
+              command: CommandIDs.changeFont,
+              args: { enabled: true, family: fam }
+            });
+          });
+        });
         themeMenu.addItem({
           command: CommandIDs.incrFontSize,
           args: {
