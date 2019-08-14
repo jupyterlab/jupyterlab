@@ -2,6 +2,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+from collections import defaultdict
 from itertools import filterfalse
 import json
 import os.path as osp
@@ -15,7 +16,7 @@ def pjoin(*args):
     return osp.abspath(osp.join(*args))
 
 
-def _get_core_data():
+def _get_default_core_data():
     """Get the data for the app template.
     """
     with open(pjoin(HERE, 'staging', 'package.json')) as fid:
@@ -28,7 +29,12 @@ def _is_lab_package(name):
 
 
 def _only_nonlab(collection):
-    """Filter a dict/sequence to remove all lab packages"""
+    """Filter a dict/sequence to remove all lab packages
+
+    This is useful to take the default values of e.g. singletons and filter
+    away the '@jupyterlab/' namespace packages, but leave any others (e.g.
+    phosphor and react).
+    """
     if isinstance(collection, dict):
         return dict(
             (k, v) for (k, v) in collection.items()
@@ -40,43 +46,13 @@ def _only_nonlab(collection):
 
 
 class CoreConfig:
-    """An object representing a core-mode package/extension configuration.
+    """An object representing a core config.
 
-    This enables custom lab application to change the core configuration
-    of the various build system commands. See e.g. commands.py and
-    any apps that use these functions.
+    This enables custom lab application to override some parts of the core
+    configuration of the build system.
     """
-
     def __init__(self):
-        self._data = _get_core_data()
-
-    def clear_defaults(self, lab_only=True):
-        """Clear the default packages/extensions.
-
-        lab_only: bool
-            Whether to remove all packages, or only those from
-            JupyterLab. Defaults to True (only lab packages).
-            This will leave dependencies like phosphor, react
-            etc untouched.
-        """
-        data = self._data
-        if lab_only:
-            # Clear all "@jupyterlab/" dependencies
-            data['dependencies'] = _only_nonlab(data['dependencies'])
-            data['resolutions'] = _only_nonlab(data['resolutions'])
-            data['jupyterlab']['extensions'] = _only_nonlab(
-                data['jupyterlab']['extensions'])
-            data['jupyterlab']['mimeExtensions'] = _only_nonlab(
-                data['jupyterlab']['mimeExtensions'])
-            data['jupyterlab']['singletonPackages'] = _only_nonlab(
-                data['jupyterlab']['singletonPackages'])
-        else:
-            # Clear all dependencies
-            data['dependencies'] = {}
-            data['resolutions'] = {}
-            data['jupyterlab']['extensions'] = {}
-            data['jupyterlab']['mimeExtensions'] = {}
-            data['jupyterlab']['singletonPackages'] = []
+        self._data = _get_default_core_data()
 
     def add(self, name, semver, extension=False, mime_extension=False):
         """Remove an extension/singleton.
@@ -98,7 +74,7 @@ class CoreConfig:
             raise ValueError('Missing package name')
         if not semver:
             raise ValueError('Missing package semver')
-        if name in self._data['resolutions']:
+        if name in data['resolutions']:
             raise ValueError('Package already present: %r' % (name,))
         data['resolutions'][name] = semver
 
@@ -112,28 +88,6 @@ class CoreConfig:
             data['dependencies'][name] = semver
         else:
             data['jupyterlab']['singletonPackages'].append(name)
-
-    @property
-    def extensions(self):
-        """A dict mapping all extension names to their semver"""
-        return dict(
-            (k, self._data['resolutions'][k])
-            for k in self._data['jupyterlab']['extensions'].keys())
-
-    @property
-    def mime_extensions(self):
-        """A dict mapping all MIME extension names to their semver"""
-        return dict(
-            (k, self._data['resolutions'][k])
-            for k in self._data['jupyterlab']['mimeExtensions'].keys())
-
-    @property
-    def singletons(self):
-        """A dict mapping all singleton names to their semver"""
-        return dict(
-            (k, self._data['resolutions'][k])
-            for k in self._data['jupyterlab']['singletonPackages']
-        )
 
     def remove(self, name):
         """Remove a package/extension.
@@ -156,15 +110,56 @@ class CoreConfig:
 
         data['jupyterlab']['singletonPackages'].remove(name)
 
-
-    def set_static_dir(self, static_dir):
-        self._data['jupyterlab']['staticDir'] = static_dir
+    def clear_packages(self, lab_only=True):
+        """Clear the packages/extensions.
+        """
+        data = self._data
+        # Clear all dependencies
+        if lab_only:
+            # Clear all "@jupyterlab/" dependencies
+            data['dependencies'] = _only_nonlab(data['dependencies'])
+            data['resolutions'] = _only_nonlab(data['resolutions'])
+            data['jupyterlab']['extensions'] = _only_nonlab(
+                data['jupyterlab']['extensions'])
+            data['jupyterlab']['mimeExtensions'] = _only_nonlab(
+                data['jupyterlab']['mimeExtensions'])
+            data['jupyterlab']['singletonPackages'] = _only_nonlab(
+                data['jupyterlab']['singletonPackages'])
+        else:
+            data['dependencies'] = {}
+            data['resolutions'] = {}
+            data['jupyterlab']['extensions'] = {}
+            data['jupyterlab']['mimeExtensions'] = {}
+            data['jupyterlab']['singletonPackages'] = []
 
     @property
-    def data(self):
-        """Returns the raw core data.
+    def extensions(self):
+        """A dict mapping all extension names to their semver"""
+        data = self._data
+        return dict(
+            (k, data['resolutions'][k])
+            for k in data['jupyterlab']['extensions'].keys())
 
-        Its content should be considered an internal implementation
-        detail of lab, and should not be relied upon outide of lab.
-        """
-        return self._data
+    @property
+    def mime_extensions(self):
+        """A dict mapping all MIME extension names to their semver"""
+        data = self._data
+        return dict(
+            (k, data['resolutions'][k])
+            for k in data['jupyterlab']['mimeExtensions'].keys())
+
+    @property
+    def singletons(self):
+        """A dict mapping all singleton names to their semver"""
+        data = self._data
+        return dict(
+            (k, data['resolutions'].get(k, None))
+            for k in data['jupyterlab']['singletonPackages'])
+
+    @property
+    def static_dir(self):
+        return self._data['jupyterlab']['staticDir']
+
+    @static_dir.setter
+    def static_dir(self, static_dir):
+        self._data['jupyterlab']['staticDir'] = static_dir

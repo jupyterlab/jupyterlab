@@ -29,7 +29,7 @@ from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 
 from .semver import Range, gte, lt, lte, gt, make_semver
 from .jlpmapp import YARN_PATH, HERE
-from .coreconfig import CoreConfig
+from .coreconfig import _get_default_core_data
 
 
 # The regex for expecting the webpack output.
@@ -483,7 +483,9 @@ class _AppHandler(object):
         self.app_dir = app_dir or get_app_dir()
         self.sys_dir = get_app_dir()
         self.logger = _ensure_logger(logger)
-        self.core_data = (core_config or CoreConfig()).data
+        self.core_data = (
+            core_config._data if core_config else _get_default_core_data()
+        )
         self.info = self._get_app_info()
         self.kill_event = kill_event or Event()
         # TODO: Make this configurable
@@ -1629,7 +1631,7 @@ def _node_check(logger):
         output = subprocess.check_output([node, 'node-version-check.js'], cwd=HERE)
         logger.debug(output.decode('utf-8'))
     except Exception:
-        data = CoreConfig().data
+        data = CoreConfig()._data
         ver = data['engines']['node']
         msg = 'Please install nodejs %s before continuing. nodejs may be installed using conda or directly from the nodejs website.' % ver
         raise ValueError(msg)
