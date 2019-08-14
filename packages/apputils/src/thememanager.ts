@@ -121,19 +121,13 @@ export class ThemeManager implements IThemeManager {
 
     // iterate over the union of current and new CSS override keys
     Object.keys({ ...this._overrides, ...newOverrides }).forEach(key => {
-      if (newOverrides[key]) {
-        // if key is present in newOverrides, validate then set the override
-        if (ThemeManager.validateCSS(key, newOverrides[key])) {
-          document.documentElement.style.setProperty(
-            `--jp-${key}`,
-            newOverrides[key]
-          );
-        } else {
-          // if validation failed, the override will be removed
-          document.documentElement.style.removeProperty(`--jp-${key}`);
-        }
+      const val = newOverrides[key];
+
+      if (val && ThemeManager.validateCSS(key, val)) {
+        // validation succeeded, set the override
+        document.documentElement.style.setProperty(`--jp-${key}`, val);
       } else {
-        // if key is not present, the override will be removed
+        // if key is not present or validation failed, the override will be removed
         document.documentElement.style.removeProperty(`--jp-${key}`);
       }
     });
