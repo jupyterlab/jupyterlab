@@ -9,7 +9,6 @@ import { CallstackWidget } from './callstack';
 import { BreakPointsWidget } from './breakpoints';
 
 export class DebuggerSidebar extends SplitPanel {
-
   variables: VariablesWidget;
   callstack: CallstackWidget;
   breakPoints: BreakPointsWidget;
@@ -29,7 +28,16 @@ export class DebuggerSidebar extends SplitPanel {
     this.addWidget(this.breakPoints);
   }
 
+  get model(): Debugger.Model | null {
+    return this._model;
+  }
+  set model(model: Debugger.Model | null) {
+    if (this._model === model) {
+      return;
+    }
+    this._model = model;
+    this.update();
+  }
 
-
-  public model: Debugger.Model | null = null;
+  private _model: Debugger.Model | null = null;
 }
