@@ -227,12 +227,10 @@ export class ThemeManager implements IThemeManager {
     );
 
     // determine the increment
-    const incr = parts[1] === 'em' ? 0.1 : 1;
+    const incr = (add ? 1 : -1) * (parts[1] === 'em' ? 0.1 : 1);
 
     // increment the font size and set it as an override
-    this._overrides[key] = `${Number(parts[0]) + (add ? incr : -incr)}${
-      parts[1]
-    }`;
+    this._overrides[key] = `${Number(parts[0]) + incr}${parts[1]}`;
     return this._settings.set('overrides', this._overrides);
   }
 
