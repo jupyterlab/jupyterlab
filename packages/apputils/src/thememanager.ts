@@ -74,6 +74,17 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
+   * Get the value of a CSS variable from its key.
+   *
+   * @param key - A Jupyterlab CSS variable, without the leading '--jp-'.
+   */
+  getCSS(key: string): string {
+    return getComputedStyle(document.documentElement).getPropertyValue(
+      `--jp-${key}`
+    );
+  }
+
+  /**
    * Load a theme CSS file by path.
    *
    * @param path - The path of the file to load.
@@ -105,7 +116,7 @@ export class ThemeManager implements IThemeManager {
    * Loads all current CSS overrides from settings. If an override has been
    * removed, this function unloads it instead.
    */
-  loadCssOverrides(): void {
+  loadCSSOverrides(): void {
     const newOverrides =
       (this._settings.user['overrides'] as Dict<string>) || {};
 
@@ -171,10 +182,7 @@ export class ThemeManager implements IThemeManager {
    * without the leading '--jp-'.
    */
   incrFontSize(key: string): Promise<void> {
-    const parts = (this._overrides[key] || '1em').split(/([a-zA-Z]+)/);
-    this._overrides[key] = `${Number(parts[0]) +
-      (parts[1] === 'em' ? 0.1 : 1)}${parts[1]}`;
-    return this._settings.set('overrides', this._overrides);
+    return this._incrFontSize(key, true);
   }
 
   /**
@@ -185,10 +193,7 @@ export class ThemeManager implements IThemeManager {
    * without the leading '--jp-'.
    */
   decrFontSize(key: string): Promise<void> {
-    const parts = (this._overrides[key] || '1em').split(/([a-zA-Z]+)/);
-    this._overrides[key] = `${Number(parts[0]) -
-      (parts[1] === 'em' ? 0.1 : 1)}${parts[1]}`;
-    return this._settings.set('overrides', this._overrides);
+    return this._incrFontSize(key, false);
   }
 
   /**
@@ -210,6 +215,25 @@ export class ThemeManager implements IThemeManager {
       'theme-scrollbars',
       !this._settings.composite['theme-scrollbars']
     );
+  }
+
+  /**
+   * Change a font size by a positive or negative increment.
+   */
+  private _incrFontSize(key: string, add: boolean = true): Promise<void> {
+    // get the numeric and unit parts of the current font size
+    const parts = (this._overrides[key] || this.getCSS(key) || '13px').split(
+      /([a-zA-Z]+)/
+    );
+
+    // determine the increment
+    const incr = parts[1] === 'em' ? 0.1 : 1;
+
+    // increment the font size and set it as an override
+    this._overrides[key] = `${Number(parts[0]) + (add ? incr : -incr)}${
+      parts[1]
+    }`;
+    return this._settings.set('overrides', this._overrides);
   }
 
   /**

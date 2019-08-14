@@ -152,7 +152,7 @@ const themes: JupyterFrontEndPlugin<IThemeManager> = {
       }
 
       // Set any CSS overrides
-      manager.loadCssOverrides();
+      manager.loadCSSOverrides();
 
       commands.notifyCommandChanged(CommandIDs.changeTheme);
     });

@@ -9,9 +9,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "code-font-size": { "type": "string" },
-        "content-font-size1": { "type": "string" },
-        "ui-font-size1": { "type": "string" }
+        "code-font-size": { "type": ["string", "null"] },
+        "content-font-size1": { "type": ["string", "null"] },
+        "ui-font-size1": { "type": ["string", "null"] }
       }
     }
   },
@@ -33,9 +33,9 @@
       "description": "Override theme CSS variables by setting key-value pairs here",
       "$ref": "#/definitions/themeOverrides",
       "default": {
-        "code-font-size": "",
-        "content-font-size1": "",
-        "ui-font-size1": ""
+        "code-font-size": null,
+        "content-font-size1": null,
+        "ui-font-size1": null
       }
     }
   }
