@@ -344,7 +344,7 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
 export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:trust-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker, ILabShell],
+  requires: [INotebookTracker, ILabShell],
   optional: [IStatusBar],
   activate: (
     app: JupyterFrontEnd,
