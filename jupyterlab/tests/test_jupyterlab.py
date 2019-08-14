@@ -5,6 +5,7 @@
 # Distributed under the terms of the Modified BSD License.
 import glob
 import json
+import logging
 import os
 import shutil
 import sys
@@ -23,9 +24,9 @@ from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
     build, link_package, unlink_package, build_check,
     disable_extension, enable_extension, get_app_info,
-    check_extension, _test_overlap, _get_core_data,
-    update_extension
+    check_extension, _test_overlap, update_extension
 )
+from jupyterlab.coreconfig import CoreConfig, _get_default_core_data
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -379,6 +380,51 @@ class TestExtension(TestCase):
         assert data['jupyterlab']['version'] == '1.0'
         assert data['jupyterlab']['staticUrl'] == 'bar'
 
+    def test_build_custom_minimal_core_config(self):
+        default_config = CoreConfig()
+        core_config = CoreConfig()
+        core_config.clear_packages()
+        logger = logging.getLogger('jupyterlab_test_logger')
+        logger.setLevel('DEBUG')
+        extensions = (
+            '@jupyterlab/application-extension',
+            '@jupyterlab/apputils-extension',
+        )
+        singletons = (
+            "@jupyterlab/application",
+            "@jupyterlab/apputils",
+            "@jupyterlab/coreutils",
+            "@jupyterlab/services",
+        )
+        for name in extensions:
+            semver = default_config.extensions[name]
+            core_config.add(name, semver, extension=True)
+        for name in singletons:
+            semver = default_config.singletons[name]
+            core_config.add(name, semver)
+
+        assert install_extension(self.mock_extension) is True
+        build(core_config=core_config, logger=logger)
+
+        # check static directory.
+        entry = pjoin(self.app_dir, 'static', 'index.out.js')
+        with open(entry) as fid:
+            data = fid.read()
+        assert self.pkg_names['extension'] in data
+
+        pkg = pjoin(self.app_dir, 'static', 'package.json')
+        with open(pkg) as fid:
+            data = json.load(fid)
+        assert list(data['jupyterlab']['extensions'].keys()) == [
+            '@jupyterlab/application-extension',
+            '@jupyterlab/apputils-extension',
+            self.pkg_names['extension'],
+        ]
+        assert data['jupyterlab']['mimeExtensions'] == {}
+        for pkg in data['jupyterlab']['singletonPackages']:
+            if pkg.startswith('@jupyterlab/'):
+                assert pkg in singletons
+
     def test_load_extension(self):
         app = NotebookApp()
         stderr = sys.stderr
@@ -477,7 +523,7 @@ class TestExtension(TestCase):
         assert _test_overlap('<0.6', '0.1') is None
 
     def test_install_compatible(self):
-        core_data = _get_core_data()
+        core_data = _get_default_core_data()
         current_app_dep = core_data['dependencies']['@jupyterlab/application']
         def _gen_dep(ver):
             return { "dependencies": {
