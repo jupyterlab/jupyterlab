@@ -20,6 +20,8 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { Contents } from '@jupyterlab/services';
 
+import { IIconRegistry } from '@jupyterlab/ui-components';
+
 import {
   ArrayExt,
   ArrayIterator,
@@ -186,7 +188,9 @@ export class DirListing extends Widget {
    */
   constructor(options: DirListing.IOptions) {
     super({
-      node: (options.renderer || DirListing.defaultRenderer).createNode()
+      node: (options.renderer =
+        options.renderer ||
+        new DirListing.Renderer(options.model.iconRegistry)).createNode()
     });
     this.addClass(DIR_LISTING_CLASS);
     this._model = options.model;
@@ -196,7 +200,7 @@ export class DirListing extends Widget {
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
     this._manager = this._model.manager;
-    this._renderer = options.renderer || DirListing.defaultRenderer;
+    this._renderer = options.renderer;
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
@@ -736,11 +740,14 @@ export class DirListing extends Widget {
       content.appendChild(node);
     }
 
-    // Remove extra classes from the nodes.
+    // Remove extra classes/data from the nodes.
     nodes.forEach(item => {
       item.classList.remove(SELECTED_CLASS);
       item.classList.remove(RUNNING_CLASS);
       item.classList.remove(CUT_CLASS);
+      if (item.children[0]) {
+        delete (item.children[0] as HTMLElement).dataset.icon;
+      }
     });
 
     // Add extra classes to item nodes based on widget state.
@@ -1638,6 +1645,10 @@ export namespace DirListing {
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
+    constructor(icoReg: IIconRegistry) {
+      this._iconRegistry = icoReg;
+    }
+
     /**
      * Create the DOM node for a dir listing.
      */
@@ -1757,9 +1768,23 @@ export namespace DirListing {
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       if (fileType) {
-        icon.textContent = fileType.iconLabel || '';
-        icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
+        // add icon as svg node. Can be styled using CSS
+        if (
+          !this._iconRegistry.icon({
+            name: fileType.iconClass,
+            className: ITEM_ICON_CLASS,
+            title: fileType.iconLabel,
+            container: icon,
+            center: true,
+            kind: 'listing'
+          })
+        ) {
+          // add icon as CSS background image. Can't be styled using CSS
+          icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
+          icon.textContent = fileType.iconLabel || '';
+        }
       } else {
+        // use default icon as CSS background image
         icon.textContent = '';
         icon.className = ITEM_ICON_CLASS;
       }
@@ -1843,12 +1868,8 @@ export namespace DirListing {
       node.appendChild(icon);
       return node;
     }
+    _iconRegistry: IIconRegistry;
   }
-
-  /**
-   * The default `IRenderer` instance.
-   */
-  export const defaultRenderer = new Renderer();
 }
 
 /**

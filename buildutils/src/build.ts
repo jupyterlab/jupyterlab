@@ -183,10 +183,7 @@ export namespace Build {
             },
             {
               test: /\.svg/,
-              use: [
-                { loader: 'svg-url-loader', options: {} },
-                { loader: 'svgo-loader', options: { plugins: [] } }
-              ]
+              use: [{ loader: 'svg-url-loader', options: { encoding: 'none' } }]
             },
             {
               test: /\.(png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,

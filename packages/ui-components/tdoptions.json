@@ -7,7 +7,8 @@
     "lib.es2015.d.ts",
     "lib.es2015.collection.d.ts",
     "lib.es2015.promise.d.ts",
-    "lib.dom.d.ts"
+    "lib.dom.d.ts",
+    "lib.dom.iterable.d.ts"
   ],
   "out": "../../docs/api/ui-components",
   "baseUrl": ".",
@@ -16,5 +17,5 @@
   },
   "esModuleInterop": true,
   "jsx": "react",
-  "types": ["webpack-env"]
+  "types": ["webpack-env", "node"]
 }
