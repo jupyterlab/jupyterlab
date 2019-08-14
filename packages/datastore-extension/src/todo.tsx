@@ -6,7 +6,7 @@ import {
   ILayoutRestorer,
   JupyterFrontEnd
 } from '@jupyterlab/application';
-import { IDatastoreCreator, TableManager } from '@jupyterlab/datastore';
+import { IDatastoreCreator, DatastoreManager } from '@jupyterlab/datastore';
 import {
   ICommandPalette,
   MainAreaWidget,
@@ -14,7 +14,7 @@ import {
   WidgetTracker,
   UseSignal
 } from '@jupyterlab/apputils';
-import { Fields, TextField, RegisterField } from '@phosphor/datastore';
+import { Fields } from '@phosphor/datastore';
 import * as React from 'react';
 import { toArray } from '@phosphor/algorithm';
 import { UUID } from '@phosphor/coreutils';
@@ -22,67 +22,71 @@ import { UUID } from '@phosphor/coreutils';
 type TODOProps = {
   datastore: IDatastoreCreator;
 };
-type TODOSchema = {
-  id: string;
-  fields: { description: TextField; show: RegisterField<boolean> };
-};
+
 type TODOState = {
-  tableManager: TableManager<TODOSchema> | undefined;
+  manager: DatastoreManager | undefined;
 };
+
+const TODOSchema = {
+  id: 'todo',
+  fields: {
+    description: Fields.Text(),
+    show: Fields.Boolean({ value: true })
+  }
+};
+
 class TODO extends React.Component<TODOProps, TODOState> {
   readonly state: TODOState = {
-    tableManager: undefined
+    manager: undefined
   };
 
   input = React.createRef<HTMLInputElement>();
 
   async componentDidMount() {
-    const tableManager = await this.props.datastore.createTable('todo', {
-      id: 'todo',
-      fields: {
-        description: Fields.Text(),
-        show: Fields.Boolean({ value: true })
-      }
-    });
-    this.setState({ tableManager });
+    const manager = await this.props.datastore.createTable('todo', [
+      TODOSchema
+    ]);
+    this.setState({ manager });
   }
   render() {
-    if (!this.state.tableManager) {
+    if (!this.state.manager) {
       return <div>Loading...</div>;
     }
     return (
       <div>
         <h1>TODO</h1>
         <ol>
-          <UseSignal signal={this.state.tableManager.changed}>
+          <UseSignal signal={this.state.manager.changed}>
             {() =>
-              toArray(this.state.tableManager.table.iter()).map(row =>
-                row.show ? (
-                  <li id={row.$id}>
-                    {row.description}
-                    <button
-                      onClick={() => {
-                        this.state.tableManager.beginTransaction();
-                        this.state.tableManager.table.update({
-                          [row.$id]: { show: false }
-                        });
-                        this.state.tableManager.endTransaction();
-                      }}
-                    >
-                      Remove
-                    </button>
-                  </li>
-                ) : (
-                  <></>
-                )
+              toArray(this.state.manager.datastore.get(TODOSchema).iter()).map(
+                row =>
+                  row.show ? (
+                    <li id={row.$id}>
+                      {row.description}
+                      <button
+                        onClick={event => {
+                          this.state.manager.datastore.beginTransaction();
+                          this.state.manager.datastore.get(TODOSchema).update({
+                            [row.$id]: { show: false }
+                          });
+                          this.state.manager.datastore.endTransaction();
+                          event.preventDefault();
+                        }}
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ) : (
+                    <></>
+                  )
               )
             }
           </UseSignal>
         </ol>
         <form
           onSubmit={e => {
-            this.state.tableManager.beginTransaction();
-            this.state.tableManager.table.update({
+            this.state.manager.datastore.beginTransaction();
+            this.state.manager.datastore.get(TODOSchema).update({
               [UUID.uuid4()]: {
                 description: {
                   index: 0,
@@ -91,7 +95,7 @@ class TODO extends React.Component<TODOProps, TODOState> {
                 }
               }
             });
-            this.state.tableManager.endTransaction();
+            this.state.manager.datastore.endTransaction();
             e.preventDefault();
           }}
         >
@@ -106,7 +110,7 @@ class TODO extends React.Component<TODOProps, TODOState> {
   }
 
   componentWillUnmount() {
-    this.state.tableManager && this.state.tableManager.dispose();
+    this.state.manager && this.state.manager.dispose();
   }
 }
 

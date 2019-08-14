@@ -66,7 +66,14 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
         // never resolve
       });
     }
+
+    this.datastore.changed.connect(this._datastoreSlot, this);
   }
+
+  private _datastoreSlot(_: Datastore, changed: Datastore.IChangedArgs): void {
+    this._changed.emit(changed);
+  }
+
 
   get isDisposed(): boolean {
     return this._isDisposed;
@@ -77,6 +84,7 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
       return;
     }
     this._isDisposed = true;
+    this.datastore.changed.disconnect(this._datastoreSlot, this);
     if (this._localDS) {
       this._localDS.dispose();
       this._localDS = null;
@@ -145,7 +153,9 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
       }
 
       this._datastoreChanged.emit({ datastore: this._remoteDS });
+      this._remoteDS.changed.connect(this._datastoreSlot, this);
       if (this._localDS) {
+        this._localDS.changed.disconnect(this._datastoreSlot, this);
         this._localDS.dispose();
         this._localDS = null;
       }
@@ -162,6 +172,15 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
     return this._datastoreChanged;
   }
 
+  /**
+   * Signal that fires whenever the underlying datastore emits a changed signal.
+   *
+   * Listen to this instead of the `this.datastore.changed`, because the underlying
+   * datastore can change.
+   */
+  get changed(): ISignal<this, Datastore.IChangedArgs> {
+    return this._changed;
+  }
   /**
    *
    */
@@ -202,6 +221,7 @@ export class DatastoreManager implements IMessageHandler, IDisposable {
   private _datastoreChanged = new Signal<this, DatastoreManager.IChangedArgs>(
     this
   );
+  private readonly _changed = new Signal<this, Datastore.IChangedArgs>(this);
 }
 
 export namespace DatastoreManager {
