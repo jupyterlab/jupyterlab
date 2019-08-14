@@ -120,6 +120,11 @@
   border: none;
 }
 
+.jp-DebuggerSidebarVariable-Scope-label {
+  padding-left: 10px;
+  padding-right: 5px;
+}
+
 .fa {
   display: inline-block;
   font: normal normal normal 14px/1 FontAwesome;

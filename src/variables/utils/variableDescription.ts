@@ -17,7 +17,7 @@ export class VariableDescription extends Panel {
     this.model = model;
     this.currentVariable = this.model.variable;
 
-    this.searchParams = new VariablesSearch();
+    this.searchParams = new VariablesSearch(this.model);
     this.addWidget(this.searchParams);
 
     this.table = new VariableTableDescription(this.model);

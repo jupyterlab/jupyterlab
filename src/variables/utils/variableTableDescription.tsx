@@ -1,6 +1,6 @@
 import { SplitPanel, Widget } from '@phosphor/widgets';
 import { IVariablesModel } from '../model';
-import * as React from 'react';
+import React, { useState } from 'react';
 import { ReactWidget } from '@jupyterlab/apputils';
 import useTbody from './useTbody';
 
@@ -31,8 +31,16 @@ const TableHead = () => {
 };
 
 const Table = ({ model }: any) => {
-  const variables = model.variables;
+  const [variables, setVariables] = useState(model.variables);
   const [variable, TableBody] = useTbody(variables, model.variable, ROW_CLASS);
+
+  model.changeVariables.connect((model: any, new_variables: any) => {
+    if (new_variables === variables) {
+      return;
+    }
+    setVariables(new_variables);
+  });
+
   model.variable = variable;
   return (
     <table>
