@@ -4,6 +4,20 @@
   "description": "Theme manager settings.",
   "type": "object",
   "additionalProperties": false,
+  "definitions": {
+    "cssOverrides": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "code-font-size": { "type": ["string", "null"], "description": "size" },
+        "content-font-size1": {
+          "type": ["string", "null"],
+          "description": "size"
+        },
+        "ui-font-size1": { "type": ["string", "null"], "description": "size" }
+      }
+    }
+  },
   "properties": {
     "theme": {
       "type": "string",
@@ -18,18 +32,9 @@
       "default": false
     },
     "overrides": {
-      "type": "object",
-      "additionalProperties": false,
       "title": "Theme CSS Overrides",
-      "description": "Override theme CSS variables by setting key-value pairs here. The description field of each item is the CSS property that will be used to validate an override's value.",
-      "properties": {
-        "code-font-size": { "type": ["string", "null"], "description": "size" },
-        "content-font-size1": {
-          "type": ["string", "null"],
-          "description": "size"
-        },
-        "ui-font-size1": { "type": ["string", "null"], "description": "size" }
-      },
+      "description": "Override theme CSS variables by setting key-value pairs here",
+      "$ref": "#/definitions/cssOverrides",
       "default": {
         "code-font-size": null,
         "content-font-size1": null,

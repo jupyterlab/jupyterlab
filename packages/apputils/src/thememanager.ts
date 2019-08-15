@@ -273,7 +273,11 @@ export class ThemeManager implements IThemeManager {
    * Initialize the key -> property dict for the overrides
    */
   private _initOverrideProps(): void {
-    const oSchema: any = this._settings.schema.properties.overrides.properties;
+    const oSchema = (this._settings.schema.definitions as any).cssOverrides
+      .properties;
+
+    // the description field of each item in the overrides schema stores a
+    // CSS property that will be used to validate that override's values
     Object.keys(oSchema).forEach(key => {
       this._overrideProps[key] = oSchema[key].description;
     });
