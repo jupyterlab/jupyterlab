@@ -349,7 +349,10 @@ export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
     const name = utils.stem(svg);
     const nameCamel = utils.camelCase(name) + 'Svg';
     _iconImportStatements.push(
-      `import ${nameCamel} from '${path.relative(iconSrcDir, svg)}';`
+      `import ${nameCamel} from '${path
+        .relative(iconSrcDir, svg)
+        .split(path.sep)
+        .join('/')}';`
     );
     _iconModelDeclarations.push(`{ name: '${name}', svg: ${nameCamel} }`);
   });
@@ -376,7 +379,10 @@ export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
     const className = 'jp-' + utils.camelCase(name, true) + 'Icon';
 
     _iconCSSUrls.push(
-      `--${urlName}: url('${path.relative(iconCSSDir, svg)}');`
+      `--${urlName}: url('${path
+        .relative(iconCSSDir, svg)
+        .split(path.sep)
+        .join('/')}');`
     );
     _iconCSSDeclarations.push(
       `.${className} {background-image: var(--${urlName})}`
@@ -485,6 +491,10 @@ function ensureFile(
   const prev = fs.readFileSync(path, {
     encoding: 'utf8'
   });
+  // Normalize line endings to match current content
+  if (prev.indexOf('\r') !== -1) {
+    contents = contents.replace(/\n/g, '\r\n');
+  }
   if (prev !== contents) {
     fs.writeFileSync(path, contents);
     messages.push(`Updated ./${path}`);
