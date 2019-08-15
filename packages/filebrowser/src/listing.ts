@@ -1056,17 +1056,6 @@ export class DirListing extends Widget {
         event.stopPropagation();
         event.preventDefault();
         break;
-      case 8: // Backspace
-        if (this._model.path === this._model.rootPath) {
-          return;
-        }
-        this._model
-          .cd('..')
-          .catch(error => showErrorMessage('Open directory', error));
-
-        event.preventDefault();
-        event.stopPropagation();
-        break;
       default:
         break;
     }

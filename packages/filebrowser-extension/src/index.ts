@@ -98,6 +98,8 @@ namespace CommandIDs {
 
   export const goToPath = 'filebrowser:go-to-path';
 
+  export const goUp = 'filebrowser:go-up';
+
   export const openPath = 'filebrowser:open-path';
 
   export const open = 'filebrowser:open';
@@ -789,6 +791,26 @@ function addCommands(
       }
       if (showBrowser) {
         return commands.execute(CommandIDs.showBrowser, { path });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.goUp, {
+    label: 'go up',
+    execute: async () => {
+      const browserForPath = Private.getBrowserForPath('', factory);
+      const { model } = browserForPath;
+      await model.restored;
+      if (model.path === model.rootPath) {
+        return;
+      }
+      try {
+        await model.cd('..');
+      } catch (reason) {
+        console.warn(
+          `${CommandIDs.goUp} failed to go to parent directory of ${model.path}`,
+          reason
+        );
       }
     }
   });
