@@ -57,6 +57,8 @@ aliases['dev-build'] = 'BaseExtensionApp.dev_build'
 aliases['minimize'] = 'BaseExtensionApp.minimize'
 aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 
+install_aliases = copy(aliases)
+install_aliases['pin-version-as'] = 'InstallLabExtensionApp.pin'
 
 VERSION = get_app_version()
 
@@ -111,15 +113,38 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
 
 
 class InstallLabExtensionApp(BaseExtensionApp):
-    description = "Install labextension(s)"
+    description = """Install labextension(s)
+    
+     Usage
+    
+        jupyter labextension install [--pin-version-as <alias,...>] <package...>
+    
+    This installs JupyterLab extensions similar to yarn add or npm install.
+    
+    Pass a list of comma seperate names to the --pin-version-as flag
+    to use as alises for the packages providers. This is useful to
+    install multiple versions of the same extension.
+    These can be uninstalled with the alias you provided
+    to the flag, similar to the "alias" feature of yarn add.
+    """
+    aliases = install_aliases
+
+    pin = Unicode('', config=True,
+        help="Pin this version with a certain alias")
 
     def run_task(self):
+        pinned_versions = self.pin.split(',')
         self.extra_args = self.extra_args or [os.getcwd()]
         return any([
             install_extension(
-                arg, self.app_dir, logger=self.log,
-                core_config=self.core_config)
-            for arg in self.extra_args
+                arg,
+                self.app_dir,
+                logger=self.log,
+                core_config=self.core_config,
+                # Pass in pinned alias if we have it
+                pin=pinned_versions[i] if i < len(pinned_versions) else None
+            )
+            for i, arg in enumerate(self.extra_args)
         ])
 
 

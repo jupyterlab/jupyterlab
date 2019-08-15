@@ -9,6 +9,10 @@ import logging
 import os
 import shutil
 import sys
+import subprocess
+import shutil
+import pathlib
+import platform
 from os.path import join as pjoin
 from tempfile import TemporaryDirectory
 from unittest import TestCase
@@ -121,11 +125,14 @@ class TestExtension(TestCase):
         self.assertEqual(paths.ENV_CONFIG_PATH, [self.config_dir])
         self.assertEqual(paths.ENV_JUPYTER_PATH, [self.data_dir])
         self.assertEqual(
-            commands.get_app_dir(),
+            os.path.realpath(commands.get_app_dir()),
             os.path.realpath(pjoin(self.data_dir, 'lab'))
         )
 
         self.app_dir = commands.get_app_dir()
+
+        # Set pinned extension names
+        self.pinned_packages = ['jupyterlab-test-extension@1.0', 'jupyterlab-test-extension@2.0']
 
     def test_install_extension(self):
         assert install_extension(self.mock_extension) is True
@@ -227,6 +234,58 @@ class TestExtension(TestCase):
         extensions = data['jupyterlab']['extensions']
         assert '@jupyterlab/console-extension' in extensions
         assert check_extension('@jupyterlab/console-extension')
+
+    def test_install_and_uninstall_pinned(self):
+        """
+        You should be able to install different versions of the same extension with different
+        pinned names and uninstall them with those names.
+        """
+        NAMES = ['test-1', 'test-2']
+        assert install_extension(self.pinned_packages[0], pin=NAMES[0])
+        assert install_extension(self.pinned_packages[1], pin=NAMES[1])
+
+        extensions = get_app_info(self.app_dir)['extensions']
+        assert NAMES[0] in extensions
+        assert NAMES[1] in extensions
+        assert check_extension(NAMES[0])
+        assert check_extension(NAMES[1])
+
+        # Uninstall
+        assert uninstall_extension(NAMES[0])
+        assert uninstall_extension(NAMES[1])
+
+        extensions = get_app_info(self.app_dir)['extensions']
+        assert NAMES[0] not in extensions
+        assert NAMES[1] not in extensions
+        assert not check_extension(NAMES[0])
+        assert not check_extension(NAMES[1])
+
+    @pytest.mark.skipif(platform.system() == 'Windows', reason='running npm pack fails on windows CI')
+    def test_install_and_uninstall_pinned_folder(self):
+        """
+        Same as above test, but installs from a local folder instead of from npm.
+        """
+        # Download each version of the package from NPM:
+        base_dir = pathlib.Path(self.tempdir())
+
+        # The archive file names are printed to stdout when run `npm pack`
+        packages = [
+            subprocess.run(
+                ['npm', 'pack', name],
+                stdout=subprocess.PIPE,
+                universal_newlines=True,
+                check=True,
+                cwd=base_dir
+            ).stdout.strip()
+            for name in self.pinned_packages
+        ]
+
+        shutil.unpack_archive(str(base_dir / packages[0]), str(base_dir / '1'))
+        shutil.unpack_archive(str(base_dir / packages[1]), str(base_dir / '2'))
+        # Change pinned packages to be these directories now, so we install from these folders
+        self.pinned_packages = [str(base_dir / '1' / 'package'), str(base_dir / '2' / 'package')]
+        self.test_install_and_uninstall_pinned()
+
 
     def test_link_extension(self):
         path = self.mock_extension

@@ -142,7 +142,6 @@ if [[ $GROUP == usage ]]; then
     jupyter lab workspaces export newspace > newspace.json
     rm workspace.json newspace.json
 
-
     # Make sure we can call help on all the cli apps.
     jupyter lab -h
     jupyter lab build -h
