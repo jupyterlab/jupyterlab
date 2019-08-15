@@ -48,6 +48,7 @@ export class ThemeManager implements IThemeManager {
       this._settings = settings;
       this._settings.changed.connect(this._loadSettings, this);
       this._loadSettings();
+      this._initOverrideProps();
     });
   }
 
@@ -76,6 +77,8 @@ export class ThemeManager implements IThemeManager {
    * Get the value of a CSS variable from its key.
    *
    * @param key - A Jupyterlab CSS variable, without the leading '--jp-'.
+   *
+   * @return value - The current value of the Jupyterlab CSS variable
    */
   getCSS(key: string): string {
     return getComputedStyle(document.documentElement).getPropertyValue(
@@ -123,7 +126,7 @@ export class ThemeManager implements IThemeManager {
     Object.keys({ ...this._overrides, ...newOverrides }).forEach(key => {
       const val = newOverrides[key];
 
-      if (val && ThemeManager.validateCSS(key, val)) {
+      if (val && this.validateCSS(key, val)) {
         // validation succeeded, set the override
         document.documentElement.style.setProperty(`--jp-${key}`, val);
       } else {
@@ -134,6 +137,37 @@ export class ThemeManager implements IThemeManager {
 
     // replace the current overrides with the new ones
     this._overrides = newOverrides;
+  }
+
+  /**
+   * Validate a CSS value w.r.t. a key
+   *
+   * @param key - A Jupyterlab CSS variable, without the leading '--jp-'.
+   *
+   * @param val - A candidate CSS value
+   */
+  validateCSS(key: string, val: string): boolean {
+    // determine the css property corresponding to the key
+    const prop = this._overrideProps[key];
+
+    if (!prop) {
+      console.warn(
+        'CSS validation failed: could not find property corresponding to key.\n' +
+          `key: '${key}', val: '${val}'`
+      );
+      return false;
+    }
+
+    // use built-in validation once we have the corresponding property
+    if (CSS.supports(prop, val)) {
+      return true;
+    } else {
+      console.warn(
+        'CSS validation failed: invalid value.\n' +
+          `key: '${key}', val: '${val}', prop: '${prop}'`
+      );
+      return false;
+    }
   }
 
   /**
@@ -233,6 +267,16 @@ export class ThemeManager implements IThemeManager {
 
     // increment the font size and set it as an override
     return this.setCSSOverride(key, `${Number(parts[0]) + incr}${parts[1]}`);
+  }
+
+  /**
+   * Initialize the key -> property dict for the overrides
+   */
+  private _initOverrideProps(): void {
+    const oSchema: any = this._settings.schema.properties.overrides.properties;
+    Object.keys(oSchema).forEach(key => {
+      this._overrideProps[key] = oSchema[key].description;
+    });
   }
 
   /**
@@ -369,6 +413,7 @@ export class ThemeManager implements IThemeManager {
   private _host: Widget;
   private _links: HTMLLinkElement[] = [];
   private _overrides: Dict<string> = {};
+  private _overrideProps: Dict<string> = {};
   private _outstanding: Promise<void> | null = null;
   private _pending = 0;
   private _requests: { [theme: string]: number } = {};
@@ -408,49 +453,6 @@ export namespace ThemeManager {
      */
     url: string;
   }
-
-  /**
-   * Some basic CSS properties, corresponding to the naming
-   * conventions of theme CSS variables
-   */
-  const cssProps = ['color', 'font-family', 'size'];
-
-  /**
-   * Validate a CSS value w.r.t. a key
-   *
-   * @param key - A Jupyterlab CSS variable, without the leading '--jp-'.
-   *
-   * @param val - A candidate CSS value
-   */
-  export const validateCSS = (key: string, val: string): boolean => {
-    // determine the css property corresponding to the key
-    let prop: string;
-    for (const p of cssProps) {
-      if (key.includes(p)) {
-        prop = p;
-        break;
-      }
-    }
-
-    if (!prop) {
-      console.warn(
-        'CSS validation failed: could not find property corresponding to key.\n' +
-          `key: '${key}', val: '${val}'`
-      );
-      return false;
-    }
-
-    // use built-in validation once we have the corresponding property
-    if (CSS.supports(prop, val)) {
-      return true;
-    } else {
-      console.warn(
-        'CSS validation failed: invalid value.\n' +
-          `key: '${key}', val: '${val}', prop: '${prop}'`
-      );
-      return false;
-    }
-  };
 }
 
 /**
