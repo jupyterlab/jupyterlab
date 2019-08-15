@@ -10,7 +10,8 @@ import {
   TerminalSession,
   TerminalManager
 } from '@jupyterlab/services';
-import { testEmission } from '../utils';
+
+import { testEmission } from '@jupyterlab/testutils';
 
 describe('terminal', () => {
   let manager: TerminalSession.IManager;

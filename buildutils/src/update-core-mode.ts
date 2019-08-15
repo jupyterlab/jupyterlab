@@ -7,6 +7,9 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
 
+// Run integrity to update the dev_mode package.json
+utils.run('jlpm integrity');
+
 // Get the dev mode package.json file.
 let data = utils.readJSONFile('./dev_mode/package.json');
 

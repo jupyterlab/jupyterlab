@@ -48,7 +48,7 @@ export { defaultRenderMime } from './rendermime';
  * The reason this function is asynchronous is so that the thing causing the
  * signal emission (such as a websocket message) can be asynchronous.
  */
-export function testEmission<T, U, V>(
+export async function testEmission<T, U, V>(
   signal: ISignal<T, U>,
   options: {
     find?: (a: T, b: U) => boolean;
@@ -72,6 +72,35 @@ export function testEmission<T, U, V>(
     }
   }, object);
   return done.promise;
+}
+
+/**
+ * Expect a failure on a promise with the given message.
+ */
+export async function expectFailure(
+  promise: Promise<any>,
+  message?: string
+): Promise<void> {
+  let called = false;
+  try {
+    await promise;
+    called = true;
+  } catch (err) {
+    if (message && err.message.indexOf(message) === -1) {
+      throw Error(`Error "${message}" not in: "${err.message}"`);
+    }
+  }
+  if (called) {
+    throw Error(`Failure was not triggered, message was: ${message}`);
+  }
+}
+
+/**
+ * Do something in the future ensuring total ordering with respect to promises.
+ */
+export async function doLater(cb: () => void): Promise<void> {
+  await Promise.resolve(void 0);
+  cb();
 }
 
 /**
@@ -124,12 +153,22 @@ export function signalToPromise<T, U>(signal: ISignal<T, U>): Promise<[T, U]> {
 /**
  * Test to see if a promise is fulfilled.
  *
+ * @param delay - optional delay in milliseconds before checking
  * @returns true if the promise is fulfilled (either resolved or rejected), and
  * false if the promise is still pending.
  */
-export async function isFulfilled<T>(p: PromiseLike<T>): Promise<boolean> {
+export async function isFulfilled<T>(
+  p: PromiseLike<T>,
+  delay = 0
+): Promise<boolean> {
   let x = Object.create(null);
-  let result = await Promise.race([p, x]).catch(() => false);
+  let race: any;
+  if (delay > 0) {
+    race = sleep(delay, x);
+  } else {
+    race = x;
+  }
+  let result = await Promise.race([p, race]).catch(() => false);
   return result !== x;
 }
 

@@ -168,4 +168,33 @@ describe('kernel/messages', () => {
       expect(KernelMessage.isInputRequestMsg(msg2)).to.equal(false);
     });
   });
+
+  describe('KernelMessage.createMessage()', () => {
+    // Tests deprecated option workaround. Should be deleted in services 5.0.
+    // See https://github.com/jupyterlab/jupyterlab/pull/6949
+    it('contains a backwards-compatibility workaround for services 4.0 for a deprecated comm_info_request content', () => {
+      let commRequest = KernelMessage.createMessage({
+        msgType: 'comm_info_request',
+        channel: 'shell',
+        session: 'baz',
+        content: {
+          target: 'example'
+        }
+      });
+      expect(commRequest.content.target_name).to.equal('example');
+      expect(commRequest.content.target).to.be.undefined;
+
+      commRequest = KernelMessage.createMessage({
+        msgType: 'comm_info_request',
+        channel: 'shell',
+        session: 'baz',
+        content: {
+          target_name: 'real_target',
+          target: 'example'
+        }
+      });
+      expect(commRequest.content.target_name).to.equal('real_target');
+      expect(commRequest.content.target).to.be.undefined;
+    });
+  });
 });

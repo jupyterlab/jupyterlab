@@ -3,40 +3,40 @@ name: Bug report
 about: Create a report to help us improve
 ---
 
-Hi! Thanks for using JupyterLab.
+<!--
+Welcome! Before creating a new issue:
+* Search for relevant issues
+* Follow the issue reporting guidelines:
+https://jupyterlab.readthedocs.io/en/latest/getting_started/issue.html
+-->
 
-If you are reporting an issue with JupyterLab, please use the [GitHub issue](https://github.com/jupyterlab/jupyterlab/issues) search feature to check if your issue has been asked already. If it has, please add your comments to the existing issue.
+## Description
 
-The JupyterLab team and Project Jupyter value our community, and JupyterLab
-follows the Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
+<!--Describe the bug clearly and concisely. Include screenshots if possible-->
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## Reproduce
 
-**To Reproduce**
-Steps to reproduce the behavior:
+<!--Describe step-by-step instructions to reproduce the behavior-->
 
 1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+2. Click on '...'
+3. Scroll down to '...'
+4. See error '...'
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+<!--Describe how you diagnosed the issue. See the guidelines at
+ https://jupyterlab.readthedocs.io/en/latest/getting_started/issue.html -->
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+## Expected behavior
 
-**Desktop (please complete the following information):**
+<!--Describe what you expected to happen-->
 
-- OS: [e.g. Windows 10]
-- Browser [e.g. chrome 69.0, firefox 62.0]
-- JupyterLab [e.g. 0.34.2]
+## Context
 
-**Additional context**
-Add any other context about the problem here.
+<!--Complete the following for context, and add any other relevant context-->
 
-If available, please include the following details:
+- Operating System and version:
+- Browser and version:
+- JupyterLab version:
 
 <details><summary>Troubleshoot Output</summary>
 <pre>
@@ -53,6 +53,6 @@ Paste the output from your command line running `jupyter lab` here, use `--debug
 
 <details><summary>Browser Output</summary>
 <pre>
-Paste the output from your browser console here.
+Paste the output from your browser Javascript console here.
 </pre>
 </details>
