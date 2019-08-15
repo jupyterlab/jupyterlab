@@ -246,11 +246,6 @@ export namespace CodeEditor {
     readonly modelDB: IModelDB;
 
     /**
-     * The underlying datastore instance in which the model data is stored.
-     */
-    readonly datastore: Datastore;
-
-    /**
      * The record in the datastore in which this codeeditor keeps its data.
      */
     readonly record: DatastoreExt.RecordLocation<ISchema>;
@@ -273,20 +268,19 @@ export namespace CodeEditor {
       }
 
       if (options.record) {
-        this.datastore = options.record.datastore;
         this.record = options.record;
       } else {
-        this.datastore = Datastore.create({
+        const datastore = Datastore.create({
           id: 1,
           schemas: [SCHEMA]
         });
         this.record = {
-          datastore: this.datastore,
+          datastore: datastore,
           schema: SCHEMA,
           record: 'data'
         };
       }
-      DatastoreExt.withTransaction(this.datastore, () => {
+      DatastoreExt.withTransaction(this.record.datastore, () => {
         DatastoreExt.updateRecord(this.record, {
           text: { index: 0, remove: 0, text: options.value || '' },
           mimeType: options.mimeType || 'text/plain',
@@ -302,11 +296,6 @@ export namespace CodeEditor {
     readonly modelDB: IModelDB;
 
     /**
-     * The underlying datastore in which the model data is stored.
-     */
-    readonly datastore: Datastore;
-
-    /**
      * The record in the datastore in which this codeeditor keeps its data.
      */
     readonly record: DatastoreExt.RecordLocation<ISchema>;
@@ -319,7 +308,7 @@ export namespace CodeEditor {
     }
     set value(value: string) {
       const current = this.value;
-      DatastoreExt.withTransaction(this.datastore, () => {
+      DatastoreExt.withTransaction(this.record.datastore, () => {
         DatastoreExt.updateField(
           { ...this.record, field: 'text' },
           {
@@ -349,7 +338,7 @@ export namespace CodeEditor {
       if (oldValue === newValue) {
         return;
       }
-      DatastoreExt.withTransaction(this.datastore, () => {
+      DatastoreExt.withTransaction(this.record.datastore, () => {
         DatastoreExt.updateField(
           { ...this.record, field: 'mimeType' },
           newValue
@@ -372,7 +361,7 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
-      this.datastore.dispose();
+      this.record.datastore.dispose();
       Signal.clearData(this);
     }
 

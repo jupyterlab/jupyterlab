@@ -956,7 +956,7 @@ function addCommands(
       const { context, content } = current;
 
       let cell = content.activeCell;
-      let metadata = cell.model.metadata.toJSON();
+      let metadata = cell.model.metadata;
       let path = context.path;
       // ignore action in non-code cell
       if (!cell || cell.model.type !== 'code') {

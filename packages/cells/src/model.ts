@@ -182,7 +182,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
 
     this.id = options.id || UUID.uuid4();
 
-    this.datastore.changed.connect(this.onGenericChange, this);
+    this.record.datastore.changed.connect(this.onGenericChange, this);
 
     // Get the intitial data for the model.
     const cell = options.cell;

@@ -1,23 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { MainAreaWidget } from '@jupyterlab/apputils';
+
+import { CodeEditor } from '@jupyterlab/codeeditor';
+
 import { Mode } from '@jupyterlab/codemirror';
+
+import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
+
+import { IModelDB } from '@jupyterlab/observables';
 
 import { Contents } from '@jupyterlab/services';
 
 import { JSONValue } from '@phosphor/coreutils';
 
+import { Datastore } from '@phosphor/datastore';
+
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
-
-import { MainAreaWidget } from '@jupyterlab/apputils';
-
-import { CodeEditor } from '@jupyterlab/codeeditor';
-
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-
-import { IModelDB } from '@jupyterlab/observables';
 
 import { DocumentRegistry, IDocumentWidget } from './index';
 
@@ -31,10 +33,16 @@ export class DocumentModel extends CodeEditor.Model
    */
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     super({ modelDB });
+    this.datastore = Datastore.create({ id: 1, schemas: [CodeEditor.SCHEMA] });
     this._defaultLang = languagePreference || '';
     this.datastore.changed.connect(this.triggerContentChange, this);
     this.ready = Promise.resolve(undefined);
   }
+
+  /**
+   * The datastore for the document model.
+   */
+  readonly datastore: Datastore;
 
   /**
    * Whether the model is ready for collaboration.

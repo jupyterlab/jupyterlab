@@ -154,6 +154,22 @@ export namespace IOutputAreaModel {
      * If not given, a default factory will be used.
      */
     contentFactory?: IContentFactory;
+
+    /**
+     * Optional places to put the data for the model.
+     * If not providid, it will create its own.
+     */
+    storeOptions?: {
+      /**
+       * A record in a datastore to hold the output area model.
+       */
+      record: DatastoreExt.RecordLocation<ISchema>;
+
+      /**
+       * A table in a datastore for individual outputs.
+       */
+      outputs: DatastoreExt.TableLocation<ISchema>;
+    };
   }
 
   /**
@@ -232,6 +248,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     }
     DatastoreExt.withTransaction(this.record.datastore, () => {
       const list = DatastoreExt.getField({ ...this.record, field: 'outputs' });
+      DatastoreExt.updateField({ ...this.record, field: 'trusted' }, true);
       for (let i = 0; i < list.length; i++) {
         const id = list[i];
         const outputRecord = {
@@ -239,7 +256,6 @@ export class OutputAreaModel implements IOutputAreaModel {
           schema: IOutputAreaModel.SCHEMA,
           record: id
         };
-        DatastoreExt.updateField({ ...this.record, field: 'trusted' }, true);
         DatastoreExt.updateField({ ...outputRecord, field: 'trusted' }, true);
       }
     });

@@ -108,7 +108,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
    * spurious cursors.
    */
   private _trimSelections(): void {
-    DatastoreExt.withTransaction(this.model.datastore, () => {
+    DatastoreExt.withTransaction(this.model.record.datastore, () => {
       DatastoreExt.updateField(
         { ...this.model.record, field: 'selections' },
         { [this.editor.uuid]: null }
