@@ -317,8 +317,8 @@ def install_extension(extension, app_dir=None, logger=None, core_config=None, pi
     """
     logger = _ensure_logger(logger)
     _node_check(logger)
-    handler = _AppHandler(app_dir, logger)
-    return handler.install_extension(extension, core_config=core_config, pin=pin)
+    handler = _AppHandler(app_dir, logger, core_config=core_config)
+    return handler.install_extension(extension, pin=pin)
 
 
 def uninstall_extension(name=None, app_dir=None, logger=None, all_=False, core_config=None):
