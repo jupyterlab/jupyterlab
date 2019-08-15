@@ -38,6 +38,9 @@ WEBPACK_EXPECT = re.compile(r'.*/index.out.js')
 DEV_DIR = osp.abspath(os.path.join(HERE, '..', 'dev_mode'))
 
 
+# If we are pinning the package, rename it `pin@<alias>`
+PIN_PREFIX = 'pin@'
+
 class ProgressProcess(Process):
 
     def __init__(self, cmd, logger=None, cwd=None, kill_event=None,
@@ -1214,8 +1217,8 @@ class _AppHandler(object):
             path = osp.abspath(target)
 
             filename = osp.basename(target)
-            if filename.startswith("pin:"):
-                alias = filename[len("pin:"):-len(".tgz")]
+            if filename.startswith(PIN_PREFIX):
+                alias = filename[len(PIN_PREFIX):-len(".tgz")]
             else:
                 alias = None
             # homepage, repository  are optional
@@ -1479,10 +1482,9 @@ class _AppHandler(object):
             info['path'] = target
         else:
             info['path'] = path
-        # If we are pinning the package, rename it `pin:<name>``
         if pin:
             old_path = info['path']
-            new_path = pjoin(osp.dirname(old_path), 'pin:{}.tgz'.format(pin))
+            new_path = pjoin(osp.dirname(old_path), '{}{}.tgz'.format(PIN_PREFIX, pin))
             shutil.move(old_path, new_path)
             info['path'] = new_path
 
