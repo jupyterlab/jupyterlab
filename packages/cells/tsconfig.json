@@ -22,7 +22,7 @@
       "path": "../coreutils"
     },
     {
-      "path": "../observables"
+      "path": "../datastore"
     },
     {
       "path": "../outputarea"
