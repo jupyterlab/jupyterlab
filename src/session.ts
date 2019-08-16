@@ -5,7 +5,7 @@ import { IClientSession } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { KernelMessage } from '@jupyterlab/services';
+import { KernelMessage, Kernel } from '@jupyterlab/services';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
@@ -40,6 +40,9 @@ export class DebugSession implements IDebugger.ISession {
   dispose(): void {
     if (this.isDisposed) {
       return;
+    }
+    if (this._executeFuture) {
+      this._executeFuture.dispose();
     }
     this._isDisposed = true;
     this._disposed.emit();
@@ -88,6 +91,13 @@ export class DebugSession implements IDebugger.ISession {
       restart: false,
       terminateDebuggee: true
     });
+  }
+
+  /**
+   * Request code execution.
+   */
+  async execute(code: string): Promise<void> {
+    void this._sendExecuteMessage({ code });
   }
 
   /**
@@ -147,8 +157,27 @@ export class DebugSession implements IDebugger.ISession {
     return reply.promise;
   }
 
+  /**
+   * Send an execute request message to the kernel.
+   * @param msg execute request message to send to the kernel.
+   */
+  private async _sendExecuteMessage(
+    msg: KernelMessage.IExecuteRequestMsg['content']
+  ): Promise<void> {
+    const kernel = this.client.kernel;
+    if (this._executeFuture) {
+      this._executeFuture.dispose();
+    }
+    this._executeFuture = kernel.requestExecute(msg);
+    this._executeFuture.onReply = (msg: KernelMessage.IExecuteReplyMsg) => {};
+  }
+
   private _disposed = new Signal<this, void>(this);
   private _isDisposed: boolean = false;
+  private _executeFuture: Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  > | null = null;
   private _eventMessage = new Signal<DebugSession, IDebugger.ISession.Event>(
     this
   );

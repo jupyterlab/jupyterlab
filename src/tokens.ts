@@ -51,6 +51,11 @@ export namespace IDebugger {
      * Stop a running debug session.
      */
     stop(): void;
+
+    /**
+     * Send a request to execute code.
+     */
+    execute(code: string): Promise<void>;
   }
 
   export namespace ISession {
@@ -114,6 +119,7 @@ export namespace IDebugger {
       terminateThreads: DebugProtocol.TerminateThreadsArguments;
       threads: {};
       updateCell: IUpdateCellArguments;
+      variables: DebugProtocol.VariablesArguments;
     };
 
     /**
