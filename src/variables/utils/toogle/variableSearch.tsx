@@ -52,6 +52,17 @@ class VariableSearchInput extends ReactWidget {
   }
 }
 
+const MenuReact = ({ config }: any) => {
+  // const [state, setState] = useState(defaultState);
+
+  return (
+    <div onClick={e => e}>
+      <span className="jp-DebuggerSidebarVariable-Scope-label">local</span>
+      <span className="fa fa-caret-down"></span>
+    </div>
+  );
+};
+
 class VariableScopeSearch extends ReactWidget {
   constructor() {
     super();
@@ -68,12 +79,7 @@ class VariableScopeSearch extends ReactWidget {
   };
 
   render() {
-    return (
-      <div onClick={() => this.showMenu()}>
-        <span className="jp-DebuggerSidebarVariable-Scope-label">local</span>
-        <span className="fa fa-caret-down"></span>
-      </div>
-    );
+    return <MenuReact />;
   }
 }
 

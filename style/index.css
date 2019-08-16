@@ -125,6 +125,62 @@
   padding-right: 5px;
 }
 
+/* callstack */
+
+.jp-DebuggerToolbar {
+  color: var(--jp-ui-font-color1);
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+}
+
+.jp-DebuggerToolbar-item {
+  flex: 0 0 auto;
+  padding-left: 10px;
+  padding-right: 10px;
+  vertical-align: middle;
+  font-size: 14px;
+  line-height: 23px;
+  font-family: FontAwesome;
+  text-align: center;
+  display: inline-block;
+}
+
+/* font awsome */
+
+.fa-active::before {
+  content: '\f04b';
+}
+
+.fa-stop::before {
+  content: '\f04d';
+}
+
+.fa-stepOver::before {
+  content: '\f050';
+}
+
+.fa-stepIn::before {
+  content: '\f150';
+}
+
+.fa-stepOut::before {
+  content: '\f151';
+}
+
+.fa-breakpoints.disactive::before {
+  content: '\f192';
+}
+
+.fa-breakpoints.active::before {
+  content: '\f111';
+}
+
+.fa-remove {
+  content: '\f057';
+}
+
 .fa {
   display: inline-block;
   font: normal normal normal 14px/1 FontAwesome;

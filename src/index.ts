@@ -191,4 +191,5 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   sidebar,
   tracker
 ];
-export default plugins;
+const plugin: JupyterFrontEndPlugin<any> = plugins[3];
+export default plugin;
