@@ -328,6 +328,9 @@ export namespace RenderMimeRegistry {
 
     /**
      * Get the download url of a given absolute url path.
+     *
+     * #### Notes
+     * This URL may include a query parameter.
      */
     getDownloadUrl(url: string): Promise<string> {
       if (this.isLocal(url)) {
