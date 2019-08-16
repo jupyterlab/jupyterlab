@@ -1020,7 +1020,11 @@ export namespace CodeCell {
     }
 
     let cellId = { cellId: model.id };
-    metadata = { ...metadata, ...cellId };
+    metadata = {
+      ...model.metadata.toJSON(),
+      ...metadata,
+      ...cellId
+    };
     model.executionCount = null;
     cell.outputHidden = false;
     cell.setPrompt('*');
