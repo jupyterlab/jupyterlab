@@ -5,9 +5,11 @@ import { IClientSession } from '@jupyterlab/apputils';
 
 import { CodeCell } from '@jupyterlab/cells';
 
-import { OutputAreaModel } from '@jupyterlab/outputarea';
-
 import { nbformat } from '@jupyterlab/coreutils';
+
+import { DatastoreExt } from '@jupyterlab/datastore';
+
+import { OutputAreaModel } from '@jupyterlab/outputarea';
 
 import { KernelMessage } from '@jupyterlab/services';
 
@@ -104,10 +106,18 @@ export class ForeignHandler implements IDisposable {
       case 'execute_input':
         let inputMsg = msg as KernelMessage.IExecuteInputMsg;
         cell = this._newCell(parentMsgId);
-        let model = cell.model;
-        model.executionCount = inputMsg.content.execution_count;
-        model.value = inputMsg.content.code;
-        model.trusted = true;
+        let data = cell.data;
+        DatastoreExt.withTransaction(data.record.datastore, () => {
+          DatastoreExt.updateRecord(data.record, {
+            executionCount: inputMsg.content.execution_count,
+            text: {
+              index: 0,
+              remove: cell.editor.model.value.length,
+              text: inputMsg.content.code
+            },
+            trusted: true
+          });
+        });
         parent.update();
         return true;
       case 'execute_result':
@@ -120,7 +130,7 @@ export class ForeignHandler implements IDisposable {
         }
         let output = msg.content as nbformat.IOutput;
         output.output_type = msgType as nbformat.OutputType;
-        OutputAreaModel.appendItem(cell.model.data, output);
+        OutputAreaModel.appendItem(cell.data, output);
         parent.update();
         return true;
       case 'clear_output':
@@ -128,7 +138,7 @@ export class ForeignHandler implements IDisposable {
         cell = this._parent.getCell(parentMsgId);
         if (cell) {
           // TODO handle wait
-          OutputAreaModel.clear(cell.model.data);
+          OutputAreaModel.clear(cell.data);
         }
         return true;
       default:

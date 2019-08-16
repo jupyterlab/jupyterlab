@@ -22,9 +22,10 @@ import {
 } from '@jupyterlab/outputarea';
 
 import {
+  IOutputModel,
   IRenderMime,
-  MimeModel,
-  IRenderMimeRegistry
+  IRenderMimeRegistry,
+  MimeModel
 } from '@jupyterlab/rendermime';
 
 import { KernelMessage, Kernel } from '@jupyterlab/services';
@@ -159,7 +160,26 @@ export class Cell extends Widget {
   constructor(options: Cell.IOptions) {
     super();
     this.addClass(CELL_CLASS);
-    let data = (this._data = options.data);
+    let data: CellModel.DataLocation;
+    if (options.data) {
+      data = this._data = options.data;
+    } else {
+      const datastore = Datastore.create({
+        id: 1,
+        schemas: [IOutputModel.SCHEMA, CellModel.SCHEMA]
+      });
+      data = this._data = {
+        record: {
+          datastore,
+          schema: CellModel.SCHEMA,
+          record: 'data'
+        },
+        outputs: {
+          datastore,
+          schema: IOutputModel.SCHEMA
+        }
+      };
+    }
     let contentFactory = (this.contentFactory =
       options.contentFactory || Cell.defaultContentFactory);
     this.layout = new PanelLayout();
@@ -560,7 +580,7 @@ export namespace Cell {
     /**
      * The model used by the cell.
      */
-    data: CellModel.DataLocation;
+    data?: CellModel.DataLocation;
 
     /**
      * The factory object for customizable cell children.
@@ -1034,11 +1054,6 @@ export namespace CodeCell {
    */
   export interface IOptions extends Cell.IOptions {
     /**
-     * The model used by the cell.
-     */
-    data: CellModel.DataLocation;
-
-    /**
      * The mime renderer for the cell widget.
      */
     rendermime: IRenderMimeRegistry;
@@ -1288,11 +1303,6 @@ export namespace MarkdownCell {
    */
   export interface IOptions extends Cell.IOptions {
     /**
-     * The model used by the cell.
-     */
-    data: CellModel.DataLocation;
-
-    /**
      * The mime renderer for the cell widget.
      */
     rendermime: IRenderMimeRegistry;
@@ -1344,10 +1354,5 @@ export namespace RawCell {
   /**
    * An options object for initializing a base cell widget.
    */
-  export interface IOptions extends Cell.IOptions {
-    /**
-     * The model used by the cell.
-     */
-    data: CellModel.DataLocation;
-  }
+  export interface IOptions extends Cell.IOptions {}
 }
