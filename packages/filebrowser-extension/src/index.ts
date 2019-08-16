@@ -800,6 +800,7 @@ function addCommands(
     execute: async () => {
       const browserForPath = Private.getBrowserForPath('', factory);
       const { model } = browserForPath;
+
       await model.restored;
       if (model.path === model.rootPath) {
         return;
@@ -812,6 +813,16 @@ function addCommands(
           reason
         );
       }
+    },
+    isEnabled: args => {
+      const browserForPath = Private.getBrowserForPath('', factory);
+      // @ts-ignore
+      const { _listing } = browserForPath;
+
+      if (_listing._inRename) {
+        return false;
+      }
+      return true;
     }
   });
 
