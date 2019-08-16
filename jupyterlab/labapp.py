@@ -41,6 +41,40 @@ app_version = get_app_version()
 if version != app_version:
     version = '%s (dev), %s (app)' % (__version__, app_version)
 
+buildFailureMsg = """Build failed.
+Troubleshooting: If the build failure due to an out-of-memory error, you
+may be able to fix it by disabling the `dev_build` and/or `minimize` options.
+
+If you are building via the `build jupyter lab` command, you can disable
+these options like so:
+
+build jupyter lab --dev-mode=False --minimize=False
+
+You can also disable these options for all JupyterLab builds by adding these
+lines to your Jupyter config file:
+
+c.LabBuildApp.minimize = False
+c.LabBuildApp.dev_build = False
+
+If you haven't done so previously, you can generate a Jupyter config file by
+running:
+
+jupyter lab --generate-config
+
+Explanation:
+
+- `dev-build`: This option controls whether a `dev` or a more streamlined
+`production` build is used. This option will default to `False` (ie the
+`production` build) for most users. However, if you have any labextensions
+installed from local files, this option will instead default to `True`.
+Explicitly setting `dev-build` to `False` will ensure that the `production`
+build is used in all circumstances.
+
+- `minimize`: This options controls whether your JS bundle is minified
+during the Webpack build, which helps to improve JupyterLab's overall
+performance. However, the minifier Webpack plugin is very memory
+intensive, so turning it off may help in low-memory environments.
+"""
 
 class LabBuildApp(JupyterApp, DebugLogFileMixin):
     version = version
@@ -94,8 +128,12 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
                 self.log.info('Cleaning %s' % app_dir)
                 clean(app_options=app_options)
             self.log.info('Building in %s', app_dir)
-            build(name=self.name, version=self.version,
+            try:
+                build(name=self.name, version=self.version,
                   command=command, app_options=app_options)
+            except Exception as e:
+                print(buildFailureMsg)
+                raise e
 
 
 clean_aliases = dict(base_aliases)
