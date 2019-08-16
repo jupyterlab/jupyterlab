@@ -12,9 +12,12 @@ export class VariablesSearch extends Panel {
   constructor(model: any) {
     super();
     this.addClass('jp-DebuggerSidebarVariable-Search');
+    this.node.style.overflow = 'visible';
     this.scope = new VariableScopeSearch();
     this.search = new VariableSearchInput(model);
     this.scope.addClass(SEARCH_ITEM);
+    this.scope.node.style.overflow = 'visible';
+    this.scope.node.style.width = '100px';
     this.search.addClass(SEARCH_ITEM);
     this.addWidget(this.scope);
     this.addWidget(this.search);
@@ -53,12 +56,48 @@ class VariableSearchInput extends ReactWidget {
 }
 
 const MenuReact = ({ config }: any) => {
-  // const [state, setState] = useState(defaultState);
+  const [toggleState, setToggle] = useState(false);
+  const [scope, setScope] = useState('local');
+
+  const toogle = (e: any) => {
+    setToggle(!toggleState);
+  };
+  const changeScope = (newScope: string) => {
+    if (newScope === scope) return;
+    setScope(newScope);
+    setToggle(false);
+  };
+
+  const List = (
+    <ul className="jp-MenuComponent">
+      <li onClick={e => changeScope('local')} className="jp-menu-item">
+        local
+      </li>
+      <li
+        className="jp-MenuComponent-item"
+        onClick={e => changeScope('global')}
+      >
+        global
+      </li>
+      <li
+        className="jp-MenuComponent-item"
+        onClick={e => changeScope('builin')}
+      >
+        builin
+      </li>
+    </ul>
+  );
 
   return (
-    <div onClick={e => e}>
-      <span className="jp-DebuggerSidebarVariable-Scope-label">local</span>
+    <div>
+      <span
+        onClick={e => toogle(e)}
+        className="jp-DebuggerSidebarVariable-Scope-label"
+      >
+        {scope}
+      </span>
       <span className="fa fa-caret-down"></span>
+      {toggleState ? List : null}
     </div>
   );
 };
