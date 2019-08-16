@@ -897,7 +897,7 @@ export namespace KernelMessage {
   }
 
   /**
-   * An `execute_request` message on the `
+   * An `execute_request` message on the `'shell'` channel.
    */
   export interface IExecuteRequestMsg extends IShellMessage<'execute_request'> {
     content: {
