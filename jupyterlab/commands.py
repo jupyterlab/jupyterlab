@@ -163,7 +163,7 @@ def dedupe_yarn(path, logger=None):
         pins above, for example, known-bad versions
     """
     had_dupes = ProgressProcess(
-        ['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
+        ['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer'],
         cwd=path, logger=logger
     ).wait() != 0
 
