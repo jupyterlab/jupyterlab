@@ -36,7 +36,7 @@ utils.writePackageData(path.join(staging, 'package.json'), data);
 fs.removeSync(path.join(staging, 'yarn.lock'));
 utils.run('jlpm', { cwd: staging });
 try {
-  utils.run('jlpm yarn-deduplicate -s fewer --fail', { cwd: staging });
+  utils.run('jlpm yarn-deduplicate -s fewer', { cwd: staging });
 } catch {
   // re-run install if we deduped packages!
   utils.run('jlpm', { cwd: staging });
