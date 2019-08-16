@@ -374,6 +374,9 @@ export class AttachmentsResolver implements IRenderMime.IResolver {
 
   /**
    * Get the download url of a given absolute server path.
+   *
+   * #### Notes
+   * The returned URL may include a query parameter.
    */
   getDownloadUrl(path: string): Promise<string> {
     if (this._parent && !path.startsWith('attachment:')) {
