@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-codeeditor",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@jupyterlab/codeeditor": "^1.0.0",
-    "@jupyterlab/codemirror": "^1.0.3",
+    "@jupyterlab/codemirror": "^1.0.4",
     "@jupyterlab/observables": "^2.2.0",
-    "@jupyterlab/testutils": "^1.0.3",
+    "@jupyterlab/testutils": "^1.0.4",
     "@phosphor/messaging": "^1.2.3",
     "@phosphor/widgets": "^1.8.0",
     "chai": "^4.2.0",

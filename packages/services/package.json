@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
