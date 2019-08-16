@@ -36,7 +36,7 @@ import {
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
-import { Datastore, MapField } from '@phosphor/datastore';
+import { Datastore, MapField, RegisterField } from '@phosphor/datastore';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -222,7 +222,7 @@ export class Cell extends Widget {
       );
     }
 
-    DatastoreExt.listenField(
+    this._metadataListener = DatastoreExt.listenField(
       { ...this.data.record, field: 'metadata' },
       this.onMetadataChanged,
       this
@@ -497,6 +497,8 @@ export class Cell extends Widget {
     if (this.isDisposed) {
       return;
     }
+    this._metadataListener.dispose();
+
     this._input = null;
     this._data = null;
     this._inputWrapper = null;
@@ -559,6 +561,7 @@ export class Cell extends Widget {
     }
   }
 
+  private _metadataListener: IDisposable;
   private _readOnly = false;
   private _data: CellModel.DataLocation = null;
   private _inputHidden = false;
@@ -749,6 +752,11 @@ export class CodeCell extends Cell {
     this._outputPlaceholder = new OutputPlaceholder(() => {
       this.outputHidden = !this.outputHidden;
     });
+    this._executionCountListener = DatastoreExt.listenField(
+      { ...this.data.record, field: 'executionCount' },
+      this.onExecutionCountChanged,
+      this
+    );
   }
 
   /**
@@ -989,6 +997,7 @@ export class CodeCell extends Cell {
       this._outputLengthHandler,
       this
     );
+    this._executionCountListener.dispose();
     this._rendermime = null;
     this._output = null;
     this._outputWrapper = null;
@@ -999,8 +1008,13 @@ export class CodeCell extends Cell {
   /**
    * Handle changes in the model.
    */
-  protected onStateChanged(): void {
-    // TODO: update execution count.
+  protected onExecutionCountChanged(
+    sender: Datastore,
+    args: RegisterField.Change<nbformat.ExecutionCount>
+  ): void {
+    if (args.current !== null) {
+      this.setPrompt(`${args.current}`);
+    }
   }
 
   /**
@@ -1035,6 +1049,7 @@ export class CodeCell extends Cell {
     this.toggleClass(NO_OUTPUTS_CLASS, force);
   }
 
+  private _executionCountListener: IDisposable;
   private _rendermime: IRenderMimeRegistry = null;
   private _outputHidden = false;
   private _outputsScrolled: boolean;
@@ -1109,7 +1124,6 @@ export namespace CodeCell {
           { ...cell.data.record, field: 'executionCount' },
           msg.content.execution_count
         );
-        OutputAreaModel.clear(cell.data);
       });
       return msg;
     } catch (e) {
