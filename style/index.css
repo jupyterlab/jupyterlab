@@ -3,8 +3,213 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-DebuggerSidebar {
+.jp-Debugger {
   background: var(--jp-layout-color1);
   top: 0;
   bottom: 0;
+}
+
+.jp-DebuggerSidebar {
+  display: flex;
+  flex-direction: column;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+  min-width: 350px !important;
+}
+
+.jp-DebuggerSidebar div:not(:first-child) .jp-DebuggerSidebarVariables-header {
+  border-top: solid var(--jp-border-width) var(--jp-border-color1);
+}
+
+.jp-DebuggerSidebar div .jp-DebuggerSidebarVariables-header {
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
+}
+
+.jp-DebuggerSidebarVariables-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: var(--jp-layout-color2);
+  height: 24px;
+}
+
+.jp-DebuggerSidebarVariables-header-label {
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color1);
+  padding-left: 8px;
+  padding-right: 4px;
+}
+
+.jp-DebuggerSidebarVariables-body {
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
+  min-height: 24px;
+  height: 99%;
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-DebuggerSidebarVariable-table {
+  min-height: 50px;
+  flex-basis: 30%;
+}
+
+.jp-DebuggerSidebarVariable-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.jp-DebuggerSidebarVariable-table .jp-DebuggerSidebarVariables-table-head {
+  margin-bottom: 4px;
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  min-height: 23px;
+  padding: 4px 12px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.jp-DebuggerSidebarVariables-table-head:hover,
+.jp-DebuggerSidebarVariables-table-row:hover {
+  background: var(--jp-layout-color2);
+}
+
+.jp-DebuggerSidebarVariables-table-row.selected {
+  color: white;
+  background: var(--jp-brand-color1);
+}
+
+.jp-DebuggerSidebarVariables-table-head
+  + .jp-DebuggerSidebarVariables-table-head {
+  border-left: var(--jp-border-width) solid var(--jp-border-color2);
+}
+
+.jp-DebuggerSidebarVariable-description {
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  min-height: 25px;
+  padding: 10px;
+}
+
+.jp-DebuggerSidebarVariable-description p {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.jp-DebuggerSidebarVariable-Search {
+  color: var(--jp-ui-font-color1);
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  height: 24px;
+  /* height: calc(var(--jp-private-toolbar-height) + var(--jp-border-width)); */
+}
+
+.jp-DebuggerSidebarVariable-Search > .jp-Search-item {
+  flex: 0 0 auto;
+  padding-left: 8px;
+  padding-right: 8px;
+  vertical-align: middle;
+  font-size: 14px;
+  line-height: 23px;
+}
+
+.jp-DebuggerSidebarVariable-Search-input {
+  min-height: 22px;
+  vertical-align: top;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.jp-DebuggerSidebarVariable-Scope-label {
+  padding-left: 10px;
+  padding-right: 5px;
+}
+
+/* callstack */
+
+.jp-DebuggerToolbar {
+  color: var(--jp-ui-font-color1);
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+}
+
+.jp-DebuggerToolbar-item {
+  flex: 0 0 auto;
+  padding-left: 10px;
+  padding-right: 10px;
+  vertical-align: middle;
+  font-size: 14px;
+  line-height: 23px;
+  font-family: FontAwesome;
+  text-align: center;
+  display: inline-block;
+}
+
+/*  menu */
+
+.jp-MenuComponent {
+  position: absolute;
+  list-style: none;
+  left: 0;
+  right: 0;
+  margin: 0;
+  top: 25px;
+  z-index: 10000;
+  padding: 10px 10px;
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  font-size: var(--jp-ui-font-size1);
+  box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* font awsome */
+
+.fa-active::before {
+  content: '\f04b';
+}
+
+.fa-stop::before {
+  content: '\f04d';
+}
+
+.fa-stepOver::before {
+  content: '\f050';
+}
+
+.fa-stepIn::before {
+  content: '\f150';
+}
+
+.fa-stepOut::before {
+  content: '\f151';
+}
+
+.fa-breakpoints.disactive::before {
+  content: '\f192';
+}
+
+.fa-breakpoints.active::before {
+  content: '\f111';
+}
+
+.fa-remove {
+  content: '\f057';
+}
+
+.fa {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+.fa-caret-down:before {
+  content: '\F0D7';
 }
