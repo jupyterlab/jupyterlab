@@ -8,7 +8,7 @@ Distributed under the terms of the Modified BSD License.
 <head>
   <meta charset="utf-8">
 
-  <title>{% block title %}{{page_title}}{% endblock %}</title>
+  <title>{% block title %}{{page_title | escape}}{% endblock %}</title>
 
   {% block favicon %}<link rel="shortcut icon" type="image/x-icon" href="/static/base/images/favicon.ico">{% endblock %}
 
@@ -30,7 +30,7 @@ div#header, div#site {
     {% block h1_error %}
     <h2>JupyterLab assets not detected, please rebuild</h2>
     <script>
-    console.error('Missing assets in "{{static_dir}}"');
+    console.error('Missing assets in "{{static_dir | escape}}"');
     </script>
     {% endblock h1_error %}
 </header>
