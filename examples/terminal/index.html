@@ -4,12 +4,13 @@
     <title>Terminal Demo</title>
   </head>
   <body>
-    <script id='jupyter-config-data' type="application/json">{
-      "baseUrl": "{{base_url}}",
-      "terminalsAvailable": "{{terminals_available}}",
-      "token": "{{token}}"
-    }</script>
-    <script src="{{base_url}}example/bundle.js"></script>
+    {% set page_config_full = {'baseUrl': base_url, 'token': token, 'terminalsAvailable': terminals_available} %}
+    
+    <script id="jupyter-config-data" type="application/json">
+      {{ page_config_full | tojson }}
+    </script>
+  
+    <script src="{{base_url | e}}example/bundle.js"></script>
 
     <script type="text/javascript">
       /* Remove token from URL. */
