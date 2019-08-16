@@ -214,24 +214,45 @@ export class OutputArea extends Widget {
       (args.change[schema.id][record]['outputs'] as ListField.Change<string>);
     if (listChange) {
       listChange.forEach(change => {
-        // First remove any disposed values
+        // Remove any disposed values
         for (let i = 0; i < change.removed.length; i++) {
           this.widgets[change.index].dispose();
         }
+        // Insert new values
         for (let i = 0; i < change.inserted.length; i++) {
           const id = change.inserted[i];
-          const outputRecord = {
-            datastore: sender,
-            schema: IOutputModel.SCHEMA,
+          const record = {
+            ...this.data.outputs,
             record: id
           };
-          this._insertOutput(change.index + i, outputRecord);
+          this._insertOutput(change.index + i, record);
+          // Mark this item as having been rendered.
           handled.add(id);
         }
       });
     }
-    // TODO also rerender any in-place changes,
-    // skipping those in `handled`.
+    // Check for changes to individual outputs.
+    const outputChanges = args.change[this.data.outputs.schema.id];
+    if (!outputChanges) {
+      return;
+    }
+    const outputs = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'outputs'
+    });
+    Object.keys(outputChanges).forEach(output => {
+      const index = outputs.indexOf(output);
+      // If this output belongs to us, and we have not rerendered it already,
+      // then rerender it in-place. This can happen when an output is updated
+      // or a stream is consolidated.
+      if (index !== -1 && !handled.has(output)) {
+        const record = {
+          ...this.data.outputs,
+          record: output
+        };
+        this._setOutput(index, record);
+      }
+    });
   }
 
   /**
@@ -317,19 +338,24 @@ export class OutputArea extends Widget {
   /**
    * Update an output in the layout in place.
    */
-  /* private _setOutput(index: number, model: IOutputModel): void {
+  private _setOutput(
+    index: number,
+    loc: DatastoreExt.RecordLocation<IOutputModel.ISchema>
+  ): void {
     let layout = this.layout as PanelLayout;
     let panel = layout.widgets[index] as Panel;
     let renderer = (panel.widgets
       ? panel.widgets[1]
       : panel) as IRenderMime.IRenderer;
     if (renderer.renderModel) {
+      // Create a temporary output model view to pass of to the renderer.
+      let model = new OutputModel({ record: loc });
       void renderer.renderModel(model);
     } else {
       layout.widgets[index].dispose();
-      this._insertOutput(index, model);
+      this._insertOutput(index, loc);
     }
-  }*/
+  }
 
   /**
    * Render and insert a single output into the layout.
@@ -389,6 +415,7 @@ export class OutputArea extends Widget {
   protected createRenderedMimetype(
     loc: DatastoreExt.RecordLocation<IOutputModel.ISchema>
   ): Widget | null {
+    // Create a temporary output model view to pass of to the renderer.
     let model = new OutputModel({ record: loc });
     let mimeType = this.rendermime.preferredMimeType(
       model.data,
