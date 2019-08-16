@@ -3,7 +3,7 @@
 
 import { Collapse, Styling } from '@jupyterlab/apputils';
 
-import { Cell, ICellModel } from '@jupyterlab/cells';
+import { Cell, CellModel } from '@jupyterlab/cells';
 
 import {
   CodeEditor,
@@ -187,7 +187,7 @@ export class NotebookTools extends Widget implements INotebookTools {
       this._cellListener.dispose();
       this._cellListener = null;
     }
-    const activeCell = this.activeCell ? this.activeCell.model : null;
+    const activeCell = this.activeCell ? this.activeCell.data : null;
     this._prevActiveCell = activeCell;
     if (activeCell) {
       DatastoreExt.listenField(
@@ -250,7 +250,7 @@ export class NotebookTools extends Widget implements INotebookTools {
   private _commonTools: RankedPanel<NotebookTools.Tool>;
   private _advancedTools: RankedPanel<NotebookTools.Tool>;
   private _tracker: INotebookTracker;
-  private _prevActiveCell: ICellModel | null;
+  private _prevActiveCell: CellModel.DataLocation | null;
   private _prevActiveNotebookModel: INotebookModel | null;
 }
 
@@ -462,19 +462,19 @@ export namespace NotebookTools {
       let prompt = new Widget({ node: promptNode });
       let factory = activeCell.contentFactory.editorFactory;
 
-      let cellModel = (this._cellModel = activeCell.model);
+      let cellLoc = (this._cellModel = activeCell.editor.model);
       this._valueListener = DatastoreExt.listenField(
-        { ...cellModel.record, field: 'text' },
+        { ...cellLoc.record, field: 'text' },
         this._onValueChanged,
         this
       );
       this._mimeTypeListener = DatastoreExt.listenField(
-        { ...cellModel.record, field: 'mimeType' },
+        { ...cellLoc.record, field: 'mimeType' },
         this._onMimeTypeChanged,
         this
       );
-      this._model.value = cellModel.value.split('\n')[0];
-      this._model.mimeType = cellModel.mimeType;
+      this._model.value = activeCell.editor.model.value.split('\n')[0];
+      this._model.mimeType = activeCell.editor.model.mimeType;
 
       let model = this._model;
       let editorWidget = new CodeEditorWrapper({ model, factory });
@@ -697,7 +697,7 @@ export namespace NotebookTools {
         select.value = '';
         return;
       }
-      let cellType = activeCell.model.type;
+      let cellType = activeCell.type;
       if (
         this._validCellTypes.length &&
         this._validCellTypes.indexOf(cellType) === -1
@@ -760,15 +760,15 @@ export namespace NotebookTools {
      * Set the value for the data.
      */
     private _setValue = (cell: Cell, value: JSONValue) => {
-      DatastoreExt.withTransaction(cell.model.record.datastore, () => {
+      DatastoreExt.withTransaction(cell.data.record.datastore, () => {
         if (value === this._default) {
           DatastoreExt.updateField(
-            { ...cell.model.record, field: 'metadata' },
+            { ...cell.data.record, field: 'metadata' },
             { [this.key]: null }
           );
         } else {
           DatastoreExt.updateField(
-            { ...cell.model.record, field: 'metadata' },
+            { ...cell.data.record, field: 'metadata' },
             { [this.key]: value }
           );
         }
@@ -859,11 +859,19 @@ export namespace NotebookTools {
         Notes: 'notes'
       },
       getter: cell => {
-        let value = cell.model.metadata['slideshow'];
+        let metadata = DatastoreExt.getField({
+          ...cell.data.record,
+          field: 'metadata'
+        });
+        let value = metadata['slideshow'];
         return value && (value as JSONObject)['slide_type'];
       },
       setter: (cell, value) => {
-        let data = cell.model.metadata['slideshow'] || Object.create(null);
+        let metadata = DatastoreExt.getField({
+          ...cell.data.record,
+          field: 'metadata'
+        });
+        let data = metadata['slideshow'] || Object.create(null);
         if (value === null) {
           // Make a shallow copy so we aren't modifying the original metadata.
           data = { ...data };
@@ -871,9 +879,9 @@ export namespace NotebookTools {
         } else {
           data = { ...data, slide_type: value };
         }
-        DatastoreExt.withTransaction(cell.model.record.datastore, () => {
+        DatastoreExt.withTransaction(cell.data.record.datastore, () => {
           DatastoreExt.updateField(
-            { ...cell.model.record, field: 'metadata' },
+            { ...cell.data.record, field: 'metadata' },
             { slideshow: Object.keys(data).length > 0 ? data : null }
           );
         });

@@ -64,8 +64,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     void this.revealed.then(() => {
       // Set the document edit mode on initial open if it looks like a new document.
       if (this.content.widgets.length === 1) {
-        let cellModel = this.content.widgets[0].model;
-        if (cellModel.type === 'code' && cellModel.value === '') {
+        let cell = this.content.widgets[0];
+        if (cell.type === 'code' && cell.editor.model.value === '') {
           this.content.mode = 'edit';
         }
       }
@@ -209,9 +209,9 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Update the kernel language.
    */
   private _updateLanguage(language: KernelMessage.ILanguageInfo): void {
-    DatastoreExt.withTransaction(this.model.nbrecord.datastore, () => {
+    DatastoreExt.withTransaction(this.model.data.record.datastore, () => {
       DatastoreExt.updateField(
-        { ...this.model.nbrecord, field: 'metadata' },
+        { ...this.model.data.record, field: 'metadata' },
         { language_info: language }
       );
     });
@@ -225,9 +225,9 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       if (this.isDisposed) {
         return;
       }
-      DatastoreExt.withTransaction(this.model.nbrecord.datastore, () => {
+      DatastoreExt.withTransaction(this.model.data.record.datastore, () => {
         DatastoreExt.updateField(
-          { ...this.model.nbrecord, field: 'metadata' },
+          { ...this.model.data.record, field: 'metadata' },
           {
             kernelspec: {
               name: kernel.name,

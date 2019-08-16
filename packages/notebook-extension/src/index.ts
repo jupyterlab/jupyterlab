@@ -942,7 +942,7 @@ function addCommands(
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.runInConsole, {
+  /*commands.addCommand(CommandIDs.runInConsole, {
     label: 'Run Selected Text or Current Line in Console',
     execute: async args => {
       // Default to not activating the notebook (thereby putting the notebook
@@ -1058,7 +1058,7 @@ function addCommands(
       });
     },
     isEnabled
-  });
+  });*/
   commands.addCommand(CommandIDs.runAll, {
     label: 'Run All Cells',
     execute: args => {
@@ -1160,7 +1160,7 @@ function addCommands(
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.trust, {
+  /*commands.addCommand(CommandIDs.trust, {
     label: () => 'Trust Notebook',
     execute: args => {
       const current = getCurrent(args);
@@ -1170,7 +1170,7 @@ function addCommands(
       }
     },
     isEnabled
-  });
+  });*/
   commands.addCommand(CommandIDs.exportToFormat, {
     label: args => {
       const formatLabel = args['label'] as string;
@@ -1284,7 +1284,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.changeCellType(current.content, 'code');
+        // return NotebookActions.changeCellType(current.content, 'code');
       }
     },
     isEnabled
@@ -1295,7 +1295,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.changeCellType(current.content, 'markdown');
+        // return NotebookActions.changeCellType(current.content, 'markdown');
       }
     },
     isEnabled
@@ -1306,7 +1306,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.changeCellType(current.content, 'raw');
+        // return NotebookActions.changeCellType(current.content, 'raw');
       }
     },
     isEnabled
@@ -1339,7 +1339,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.paste(current.content, 'below');
+        // return NotebookActions.paste(current.content, 'below');
       }
     },
     isEnabled
@@ -1350,7 +1350,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.paste(current.content, 'above');
+        // return NotebookActions.paste(current.content, 'above');
       }
     },
     isEnabled
@@ -1361,7 +1361,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.paste(current.content, 'replace');
+        // return NotebookActions.paste(current.content, 'replace');
       }
     },
     isEnabled
@@ -1372,7 +1372,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.deleteCells(current.content);
+        // return NotebookActions.deleteCells(current.content);
       }
     },
     isEnabled
@@ -1383,7 +1383,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.splitCell(current.content);
+        // return NotebookActions.splitCell(current.content);
       }
     },
     isEnabled
@@ -1394,7 +1394,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.mergeCells(current.content);
+        // return NotebookActions.mergeCells(current.content);
       }
     },
     isEnabled
@@ -1493,7 +1493,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.moveUp(current.content);
+        // return NotebookActions.moveUp(current.content);
       }
     },
     isEnabled
@@ -1504,7 +1504,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.moveDown(current.content);
+        // return NotebookActions.moveDown(current.content);
       }
     },
     isEnabled
@@ -1630,7 +1630,7 @@ function addCommands(
         void clonedOutputs.save(widget);
       };
       current.context.pathChanged.connect(updateCloned);
-      current.content.model.cells.changed.connect(updateCloned);
+      // current.content.model.cells.changed.connect(updateCloned);
 
       // Add the cloned output to the output widget tracker.
       void clonedOutputs.add(widget);
@@ -1638,7 +1638,7 @@ function addCommands(
       // Remove the output view if the parent notebook is closed.
       current.content.disposed.connect(() => {
         current.context.pathChanged.disconnect(updateCloned);
-        current.content.model.cells.changed.disconnect(updateCloned);
+        // current.content.model.cells.changed.disconnect(updateCloned);
         widget.dispose();
       });
     },
@@ -1659,7 +1659,7 @@ function addCommands(
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.markdown1, {
+  /*commands.addCommand(CommandIDs.markdown1, {
     label: 'Change to Heading 1',
     execute: args => {
       const current = getCurrent(args);
@@ -1724,7 +1724,7 @@ function addCommands(
       }
     },
     isEnabled
-  });
+  });*/
   commands.addCommand(CommandIDs.hideCode, {
     label: 'Collapse Selected Code',
     execute: args => {
@@ -2238,7 +2238,7 @@ namespace Private {
         if (!this._cell) {
           this._cell = this._notebook.content.widgets[this._index] as CodeCell;
         }
-        if (!this._cell || this._cell.model.type !== 'code') {
+        if (!this._cell || this._cell.type !== 'code') {
           this.dispose();
           return;
         }

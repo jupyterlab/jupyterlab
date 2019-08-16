@@ -20,7 +20,7 @@ import {
   ToolbarButton
 } from '@jupyterlab/apputils';
 
-import { nbformat } from '@jupyterlab/coreutils';
+// import { nbformat } from '@jupyterlab/coreutils';
 
 import { HTMLSelect } from '@jupyterlab/ui-components';
 
@@ -159,7 +159,7 @@ export namespace ToolbarItems {
     return new ToolbarButton({
       iconClassName: TOOLBAR_PASTE_CLASS,
       onClick: () => {
-        NotebookActions.paste(panel.content);
+        // NotebookActions.paste(panel.content);
       },
       tooltip: 'Paste cells from the clipboard'
     });
@@ -252,9 +252,9 @@ export class CellTypeSwitcher extends ReactWidget {
    */
   handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
     if (event.target.value !== '-') {
-      NotebookActions.changeCellType(this._notebook, event.target
-        .value as nbformat.CellType);
-      this._notebook.activate();
+      // NotebookActions.changeCellType(this._notebook, event.target
+      //   .value as nbformat.CellType);
+      // this._notebook.activate();
     }
   };
 
@@ -270,11 +270,11 @@ export class CellTypeSwitcher extends ReactWidget {
   render() {
     let value = '-';
     if (this._notebook.activeCell) {
-      value = this._notebook.activeCell.model.type;
+      value = this._notebook.activeCell.type;
     }
     for (let widget of this._notebook.widgets) {
       if (this._notebook.isSelectedOrActive(widget)) {
-        if (widget.model.type !== value) {
+        if (widget.type !== value) {
           value = '-';
           break;
         }
