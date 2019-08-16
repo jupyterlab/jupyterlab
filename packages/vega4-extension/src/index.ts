@@ -43,6 +43,11 @@ export const VEGA_MIME_TYPE = 'application/vnd.vega.v4+json';
 export const VEGALITE_MIME_TYPE = 'application/vnd.vegalite.v2+json';
 
 /**
+ * A regex to test for a protocol in a URI.
+ */
+const protocolRegex = /^[A-Za-z]:/;
+
+/**
  * A widget for rendering Vega or Vega-Lite data, for usage with rendermime.
  */
 export class RenderedVega extends Widget implements IRenderMime.IRenderer {
@@ -76,8 +81,6 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
 
     const vega =
       Private.vega != null ? Private.vega : await Private.ensureVega();
-    const path = await this._resolver.resolveUrl('');
-    const baseURL = await this._resolver.getDownloadUrl(path);
 
     const el = document.createElement('div');
 
@@ -89,15 +92,24 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
       this._result.view.finalize();
     }
 
+    const loader = vega.vega.loader({
+      http: { credentials: 'same-origin' }
+    });
+
+    const sanitize = async (uri: string, options: any) => {
+      // If the uri is a path, get the download URI
+      if (!protocolRegex.test(uri)) {
+        uri = await this._resolver.getDownloadUrl(uri);
+      }
+      return loader.sanitize(uri, options);
+    };
+
     this._result = await vega.default(el, spec, {
       actions: true,
       defaultStyle: true,
       ...embedOptions,
       mode,
-      loader: {
-        baseURL,
-        http: { credentials: 'same-origin' }
-      }
+      loader: { ...loader, sanitize }
     });
 
     if (model.data['image/png']) {

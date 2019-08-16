@@ -276,6 +276,9 @@ export namespace Contents {
      *
      * @param A promise which resolves with the absolute POSIX
      *   file path on the server.
+     *
+     * #### Notes
+     * The returned URL may include a query parameter.
      */
     getDownloadUrl(path: string): Promise<string>;
 
@@ -420,6 +423,9 @@ export namespace Contents {
      *
      * @param A promise which resolves with the absolute POSIX
      *   file path on the server.
+     *
+     * #### Notes
+     * The returned URL may include a query parameter.
      */
     getDownloadUrl(localPath: string): Promise<string>;
 
@@ -690,6 +696,8 @@ export class ContentsManager implements Contents.IManager {
    *
    * #### Notes
    * It is expected that the path contains no relative paths.
+   *
+   * The returned URL may include a query parameter.
    */
   getDownloadUrl(path: string): Promise<string> {
     let [drive, localPath] = this._driveForPath(path);
@@ -1041,13 +1049,17 @@ export class Drive implements Contents.IDrive {
    *
    * #### Notes
    * It is expected that the path contains no relative paths.
+   *
+   * The returned URL may include a query parameter.
    */
   getDownloadUrl(localPath: string): Promise<string> {
     let baseUrl = this.serverSettings.baseUrl;
     let url = URLExt.join(baseUrl, FILES_URL, URLExt.encodeParts(localPath));
     const xsrfTokenMatch = document.cookie.match('\\b_xsrf=([^;]*)\\b');
     if (xsrfTokenMatch) {
-      url = URLExt.join(url, `?_xsrf=${xsrfTokenMatch[1]}`);
+      const fullurl = new URL(url);
+      fullurl.searchParams.append('_xsrf', xsrfTokenMatch[1]);
+      url = fullurl.toString();
     }
     return Promise.resolve(url);
   }

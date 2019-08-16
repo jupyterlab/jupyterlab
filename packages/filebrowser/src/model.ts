@@ -315,12 +315,9 @@ export class FileBrowserModel implements IDisposable {
   async download(path: string): Promise<void> {
     const url = await this.manager.services.contents.getDownloadUrl(path);
     let element = document.createElement('a');
+    element.href = url;
+    element.download = '';
     document.body.appendChild(element);
-    element.setAttribute('href', url);
-    // Chrome doesn't get the right name automatically
-    const parts = path.split('/');
-    const name = parts[parts.length - 1];
-    element.setAttribute('download', name);
     element.click();
     document.body.removeChild(element);
     return void 0;
