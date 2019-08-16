@@ -5,7 +5,7 @@
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
+import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
@@ -15,6 +15,8 @@ import {
   JSONValue,
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
+
+import { Datastore, Fields, RegisterField, Schema } from '@phosphor/datastore';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -45,13 +47,54 @@ export interface IAttachmentModel extends IRenderMime.IMimeModel {
  */
 export namespace IAttachmentModel {
   /**
+   * Fields for use in the attachment model schema.
+   */
+  export interface IFields extends SchemaFields {
+    /**
+     * Data stored in the attachment.
+     */
+    data: RegisterField<ReadonlyJSONObject>;
+
+    /**
+     * Raw data which is not in the data field.
+     */
+    raw: RegisterField<ReadonlyJSONObject>;
+  }
+
+  /**
+   * An interface for an attachment model schema.
+   */
+  export interface ISchema extends Schema {
+    /**
+     * Attachment model schema fields.
+     */
+    fields: IFields;
+  }
+
+  /**
+   * A concrete realization of the schema, available at runtime.
+   */
+  export const SCHEMA: ISchema = {
+    id: '@jupyterlab/rendermime:attachmentmodel.v1',
+    fields: {
+      data: Fields.Register<ReadonlyJSONObject>({ value: {} }),
+      raw: Fields.Register<ReadonlyJSONObject>({ value: {} })
+    }
+  };
+
+  /**
    * The options used to create a notebook attachment model.
    */
   export interface IOptions {
     /**
      * The raw attachment value.
      */
-    value: nbformat.IMimeBundle;
+    value?: nbformat.IMimeBundle;
+
+    /**
+     * A record in which to store the data.
+     */
+    record?: DatastoreExt.RecordLocation<ISchema>;
   }
 }
 
@@ -63,18 +106,20 @@ export class AttachmentModel implements IAttachmentModel {
    * Construct a new attachment model.
    */
   constructor(options: IAttachmentModel.IOptions) {
-    let { data } = Private.getBundleOptions(options);
-    this._data = new ObservableJSON({ values: data as JSONObject });
-    this._rawData = data;
-    // Make a copy of the data.
-    let value = options.value;
-    for (let key in value) {
-      // Ignore data and metadata that were stripped.
-      switch (key) {
-        case 'data':
-          break;
-        default:
-          this._raw[key] = Private.extract(value, key);
+    if (options.record) {
+      this._record = options.record;
+    } else {
+      const datastore = Datastore.create({
+        id: 1,
+        schemas: [IAttachmentModel.SCHEMA]
+      });
+      this._record = {
+        datastore,
+        schema: IAttachmentModel.SCHEMA,
+        record: 'data'
+      };
+      if (options.value) {
+        AttachmentModel.fromJSON(this._record, options.value);
       }
     }
   }
@@ -90,7 +135,7 @@ export class AttachmentModel implements IAttachmentModel {
    * Dispose of the resources used by the attachment model.
    */
   dispose(): void {
-    this._data.dispose();
+    // TODO dispose of datastore if created here.
     Signal.clearData(this);
   }
 
@@ -98,7 +143,7 @@ export class AttachmentModel implements IAttachmentModel {
    * The data associated with the model.
    */
   get data(): ReadonlyJSONObject {
-    return this._rawData;
+    return DatastoreExt.getField({ ...this._record, field: 'data' });
   }
 
   /**
@@ -117,8 +162,9 @@ export class AttachmentModel implements IAttachmentModel {
    */
   setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
     if (options.data) {
-      this._updateObservable(this._data, options.data);
-      this._rawData = options.data;
+      DatastoreExt.withTransaction(this._record.datastore, () => {
+        DatastoreExt.updateRecord(this._record, { data: options.data });
+      });
     }
     this._changed.emit(void 0);
   }
@@ -127,47 +173,16 @@ export class AttachmentModel implements IAttachmentModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IMimeBundle {
-    let attachment: JSONValue = {};
-    for (let key in this._raw) {
-      attachment[key] = Private.extract(this._raw, key);
-    }
-    return attachment as nbformat.IMimeBundle;
+    return AttachmentModel.toJSON(this._record);
   }
-
-  // All attachments are untrusted
-  readonly trusted: boolean = false;
 
   /**
-   * Update an observable JSON object using a readonly JSON object.
+   * Whether the attachment is trusted. All attachments are untrusted.
    */
-  private _updateObservable(
-    observable: IObservableJSON,
-    data: ReadonlyJSONObject
-  ) {
-    let oldKeys = observable.keys();
-    let newKeys = Object.keys(data);
-
-    // Handle removed keys.
-    for (let key of oldKeys) {
-      if (newKeys.indexOf(key) === -1) {
-        observable.delete(key);
-      }
-    }
-
-    // Handle changed data.
-    for (let key of newKeys) {
-      let oldValue = observable.get(key);
-      let newValue = data[key];
-      if (oldValue !== newValue) {
-        observable.set(key, newValue as JSONValue);
-      }
-    }
-  }
+  readonly trusted: boolean = false;
 
   private _changed = new Signal<this, void>(this);
-  private _raw: JSONObject = {};
-  private _rawData: ReadonlyJSONObject;
-  private _data: IObservableJSON;
+  private _record: DatastoreExt.RecordLocation<IAttachmentModel.ISchema>;
 }
 
 /**
@@ -183,6 +198,46 @@ export namespace AttachmentModel {
    */
   export function getData(bundle: nbformat.IMimeBundle): JSONObject {
     return Private.getData(bundle);
+  }
+
+  /**
+   * Serialize the attachment model to JSON.
+   */
+  export function toJSON(
+    loc: DatastoreExt.RecordLocation<IAttachmentModel.ISchema>
+  ): nbformat.IMimeBundle {
+    let attachment: JSONValue = {};
+    let raw = DatastoreExt.getField({ ...loc, field: 'raw' });
+    for (let key in raw) {
+      attachment[key] = Private.extract(raw, key);
+    }
+    return attachment as nbformat.IMimeBundle;
+  }
+
+  /**
+   * Deserialize an attachment model from JSON, inserting it into a record.
+   */
+  export function fromJSON(
+    loc: DatastoreExt.RecordLocation<IAttachmentModel.ISchema>,
+    value: nbformat.IMimeBundle
+  ): void {
+    const data = Private.getData(value);
+    let raw: JSONObject = {};
+
+    // Make a copy of the data.
+    for (let key in value) {
+      // Ignore data and metadata that were stripped.
+      switch (key) {
+        case 'data':
+          break;
+        default:
+          raw[key] = Private.extract(value, key);
+      }
+
+      DatastoreExt.withTransaction(loc.datastore, () => {
+        DatastoreExt.updateRecord(loc, { data, raw });
+      });
+    }
   }
 }
 
@@ -210,12 +265,12 @@ namespace Private {
   /**
    * Extract a value from a JSONObject.
    */
-  export function extract(value: JSONObject, key: string): JSONValue {
+  export function extract(value: ReadonlyJSONObject, key: string): JSONValue {
     let item = value[key];
     if (JSONExt.isPrimitive(item)) {
       return item;
     }
-    return JSONExt.deepCopy(item);
+    return JSONExt.deepCopy(item as JSONValue);
   }
 
   /**

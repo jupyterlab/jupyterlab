@@ -89,7 +89,7 @@ export namespace IOutputModel {
     metadata: RegisterField<ReadonlyJSONObject>;
 
     /**
-     * Raw data passed in that is in the data or metadata fields.
+     * Raw data passed in that is not in the data or metadata fields.
      */
     raw: RegisterField<ReadonlyJSONObject>;
   }
