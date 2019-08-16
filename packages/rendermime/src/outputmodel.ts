@@ -40,11 +40,6 @@ export interface IOutputModel extends IRenderMime.IMimeModel {
   readonly executionCount: nbformat.ExecutionCount;
 
   /**
-   * The record in which the output model is stored.
-   */
-  readonly record: DatastoreExt.RecordLocation<IOutputModel.ISchema>;
-
-  /**
    * Whether the output is trusted.
    */
   trusted: boolean;
@@ -151,50 +146,20 @@ export class OutputModel implements IOutputModel {
    */
   constructor(options: IOutputModel.IOptions) {
     if (options.record) {
-      this.record = options.record;
+      this._record = options.record;
     } else {
       const datastore = Datastore.create({
         id: 1,
         schemas: [IOutputModel.SCHEMA]
       });
-      this.record = {
+      this._record = {
         datastore,
         schema: IOutputModel.SCHEMA,
         record: 'data'
       };
-    }
-
-    if (options.value) {
-      let { data, metadata, trusted } = Private.getBundleOptions(options);
-
-      // Make a copy of the raw data.
-      let value = options.value;
-      let raw: { [x: string]: JSONValue } = {};
-      for (let key in value) {
-        // Ignore data and metadata that were stripped.
-        switch (key) {
-          case 'data':
-          case 'metadata':
-            break;
-          default:
-            raw[key] = Private.extract(value, key);
-        }
+      if (options.value) {
+        OutputModel.fromJSON(this._record, options.value, options.trusted);
       }
-      const type = value.output_type;
-      const executionCount = nbformat.isExecuteResult(value)
-        ? value.execution_count
-        : null;
-
-      DatastoreExt.withTransaction(this.record.datastore, () => {
-        DatastoreExt.updateRecord(this.record, {
-          data,
-          executionCount,
-          metadata,
-          raw,
-          trusted,
-          type
-        });
-      });
     }
   }
 
@@ -202,27 +167,22 @@ export class OutputModel implements IOutputModel {
    * The output type.
    */
   get type(): string {
-    return DatastoreExt.getField({ ...this.record, field: 'type' });
+    return DatastoreExt.getField({ ...this._record, field: 'type' });
   }
 
   /**
    * The execution count.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return DatastoreExt.getField({ ...this.record, field: 'executionCount' });
+    return DatastoreExt.getField({ ...this._record, field: 'executionCount' });
   }
 
   /**
    * Whether the model is trusted.
    */
   get trusted(): boolean {
-    return DatastoreExt.getField({ ...this.record, field: 'trusted' });
+    return DatastoreExt.getField({ ...this._record, field: 'trusted' });
   }
-
-  /**
-   * The record in which the output model is stored.
-   */
-  readonly record: DatastoreExt.RecordLocation<IOutputModel.ISchema>;
 
   /**
    * Dispose of the resources used by the output model.
@@ -235,14 +195,14 @@ export class OutputModel implements IOutputModel {
    * The data associated with the model.
    */
   get data(): ReadonlyJSONObject {
-    return DatastoreExt.getField({ ...this.record, field: 'data' });
+    return DatastoreExt.getField({ ...this._record, field: 'data' });
   }
 
   /**
    * The metadata associated with the model.
    */
   get metadata(): ReadonlyJSONObject {
-    return DatastoreExt.getField({ ...this.record, field: 'metadata' });
+    return DatastoreExt.getField({ ...this._record, field: 'metadata' });
   }
 
   /**
@@ -261,8 +221,8 @@ export class OutputModel implements IOutputModel {
     if (options.metadata) {
       metadataUpdate = { metadata: options.metadata };
     }
-    DatastoreExt.withTransaction(this.record.datastore, () => {
-      DatastoreExt.updateRecord(this.record, {
+    DatastoreExt.withTransaction(this._record.datastore, () => {
+      DatastoreExt.updateRecord(this._record, {
         ...dataUpdate,
         ...metadataUpdate
       });
@@ -273,24 +233,13 @@ export class OutputModel implements IOutputModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput {
-    let output: JSONObject = DatastoreExt.getField({
-      ...this.record,
-      field: 'raw'
-    }) as JSONObject;
-    switch (this.type) {
-      case 'display_data':
-      case 'execute_result':
-      case 'update_display_data':
-        output['data'] = this.data as JSONObject;
-        output['metadata'] = this.metadata as JSONObject;
-        break;
-      default:
-        break;
-    }
-    // Remove transient data.
-    delete output['transient'];
-    return output as nbformat.IOutput;
+    return OutputModel.toJSON(this._record);
   }
+
+  /**
+   * The record in which the output model is stored.
+   */
+  private readonly _record: DatastoreExt.RecordLocation<IOutputModel.ISchema>;
 }
 
 /**
@@ -317,6 +266,71 @@ export namespace OutputModel {
    */
   export function getMetadata(output: nbformat.IOutput): JSONObject {
     return Private.getMetadata(output);
+  }
+
+  /**
+   * Serialize an output record to JSON.
+   */
+  export function toJSON(
+    loc: DatastoreExt.RecordLocation<IOutputModel.ISchema>
+  ): nbformat.IOutput {
+    let output: JSONObject = DatastoreExt.getField({
+      ...loc,
+      field: 'raw'
+    }) as JSONObject;
+    const type = DatastoreExt.getField({ ...loc, field: 'type' });
+    const data = DatastoreExt.getField({ ...loc, field: 'data' });
+    const metadata = DatastoreExt.getField({ ...loc, field: 'metadata' });
+    switch (type) {
+      case 'display_data':
+      case 'execute_result':
+      case 'update_display_data':
+        output['data'] = data as JSONValue;
+        output['metadata'] = metadata as JSONValue;
+        break;
+      default:
+        break;
+    }
+    // Remove transient data.
+    delete output['transient'];
+    return output as nbformat.IOutput;
+  }
+
+  export function fromJSON(
+    loc: DatastoreExt.RecordLocation<IOutputModel.ISchema>,
+    value: nbformat.IOutput,
+    trusted: boolean = false
+  ): void {
+    let data = Private.getData(value);
+    let metadata = Private.getData(value);
+    trusted = !!trusted;
+
+    let raw: { [x: string]: JSONValue } = {};
+    for (let key in value) {
+      // Ignore data and metadata that were stripped.
+      switch (key) {
+        case 'data':
+        case 'metadata':
+          break;
+        default:
+          raw[key] = Private.extract(value, key);
+      }
+    }
+    const type = value.output_type;
+    const executionCount = nbformat.isExecuteResult(value)
+      ? value.execution_count
+      : null;
+
+    DatastoreExt.withTransaction(loc.datastore, () => {
+      DatastoreExt.updateRecord(loc, {
+        data,
+        executionCount,
+        metadata,
+        raw,
+        trusted,
+        type
+      });
+    });
   }
 }
 

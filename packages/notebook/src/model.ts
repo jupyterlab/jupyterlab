@@ -22,8 +22,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import {
   IObservableUndoableList,
-  IObservableList,
-  IModelDB
+  IObservableList
 } from '@jupyterlab/observables';
 
 import { IOutputModel } from '@jupyterlab/rendermime';
@@ -93,9 +92,8 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    super(options.languagePreference, options.modelDB);
+    super(options.languagePreference);
     let factory = options.contentFactory || NotebookModel.defaultContentFactory;
-    this.contentFactory = factory.clone(this.modelDB.view('cells'));
     this._cells = new CellList(this.modelDB, this.contentFactory);
     this._cells.changed.connect(this._onCellsChanged, this);
 
@@ -108,7 +106,22 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
       schema: NotebookModel.SCHEMA,
       record: 'data'
     };
+    DatastoreExt.withTransaction(this.nbrecord.datastore, () => {
+      DatastoreExt.updateRecord(this.nbrecord, {});
+    });
 
+    const data = {
+      cells: {
+        datastore,
+        schema: CellModel.SCHEMA
+      },
+      outputs: {
+        datastore,
+        schema: IOutputModel.SCHEMA
+      }
+    };
+
+    this.contentFactory = factory.clone(data);
     // Handle initial metadata.
     this._ensureMetadata();
 
@@ -239,17 +252,29 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   fromJSON(value: nbformat.INotebookContent): void {
     let cells: ICellModel[] = [];
     let factory = this.contentFactory;
+    let datastore = this.nbrecord.datastore;
     DatastoreExt.withTransaction(this.nbrecord.datastore, () => {
       for (let cell of value.cells) {
+        const loc = {
+          record: {
+            datastore,
+            schema: CellModel.SCHEMA,
+            record: UUID.uuid4()
+          },
+          outputs: {
+            datastore,
+            schema: IOutputModel.SCHEMA
+          }
+        };
         switch (cell.cell_type) {
           case 'code':
-            cells.push(factory.createCodeCell({ cell }));
+            cells.push(factory.createCodeCell({ cell, data: loc }));
             break;
           case 'markdown':
-            cells.push(factory.createMarkdownCell({ cell }));
+            cells.push(factory.createMarkdownCell({ cell, data: loc }));
             break;
           case 'raw':
-            cells.push(factory.createRawCell({ cell }));
+            cells.push(factory.createRawCell({ cell, data: loc }));
             break;
           default:
             continue;
@@ -442,27 +467,12 @@ export namespace NotebookModel {
      * The default is a shared factory instance.
      */
     contentFactory?: IContentFactory;
-
-    /**
-     * A modelDB for storing notebook data.
-     */
-    modelDB?: IModelDB;
   }
 
   /**
    * A factory for creating notebook model content.
    */
   export interface IContentFactory {
-    /**
-     * The factory for output area models.
-     */
-    readonly codeCellContentFactory: CodeCellModel.IContentFactory;
-
-    /**
-     * The IModelDB in which to put data for the notebook model.
-     */
-    modelDB: IModelDB;
-
     /**
      * Create a new cell by cell type.
      *
@@ -507,9 +517,9 @@ export namespace NotebookModel {
     createRawCell(options: CellModel.IOptions): IRawCellModel;
 
     /**
-     * Clone the content factory with a new IModelDB.
+     * Clone the content factory with a data location.
      */
-    clone(modelDB: IModelDB): IContentFactory;
+    clone(data: ContentFactory.DataLocation): IContentFactory;
   }
 
   /**
@@ -520,20 +530,8 @@ export namespace NotebookModel {
      * Create a new cell model factory.
      */
     constructor(options: ContentFactory.IOptions) {
-      this.codeCellContentFactory =
-        options.codeCellContentFactory || CodeCellModel.defaultContentFactory;
-      this.modelDB = options.modelDB;
+      this._data = options.data;
     }
-
-    /**
-     * The factory for code cell content.
-     */
-    readonly codeCellContentFactory: CodeCellModel.IContentFactory;
-
-    /**
-     * The IModelDB in which to put the notebook data.
-     */
-    readonly modelDB: IModelDB | undefined;
 
     /**
      * Create a new cell by cell type.
@@ -570,16 +568,16 @@ export namespace NotebookModel {
      *   If the contentFactory is not provided, the instance
      *   `codeCellContentFactory` will be used.
      */
-    createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel {
-      if (options.contentFactory) {
-        options.contentFactory = this.codeCellContentFactory;
-      }
-      if (this.modelDB) {
-        if (!options.id) {
-          options.id = UUID.uuid4();
-        }
-        options.modelDB = this.modelDB.view(options.id);
-      }
+    createCodeCell(opts: CodeCellModel.IOptions): ICodeCellModel {
+      const loc = {
+        record: {
+          datastore: this._data.cells.datastore,
+          schema: this._data.cells.schema,
+          record: UUID.uuid4()
+        },
+        outputs: this._data.outputs
+      };
+      const options = { data: loc, ...opts };
       return new CodeCellModel(options);
     }
 
@@ -591,13 +589,16 @@ export namespace NotebookModel {
      * @returns A new markdown cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
      */
-    createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
-      if (this.modelDB) {
-        if (!options.id) {
-          options.id = UUID.uuid4();
-        }
-        options.modelDB = this.modelDB.view(options.id);
-      }
+    createMarkdownCell(opts: CellModel.IOptions): IMarkdownCellModel {
+      const loc = {
+        record: {
+          datastore: this._data.cells.datastore,
+          schema: this._data.cells.schema,
+          record: UUID.uuid4()
+        },
+        outputs: this._data.outputs
+      };
+      const options = { data: loc, ...opts };
       return new MarkdownCellModel(options);
     }
 
@@ -609,25 +610,29 @@ export namespace NotebookModel {
      * @returns A new raw cell. If a source cell is provided, the
      *   new cell will be initialized with the data from the source.
      */
-    createRawCell(options: CellModel.IOptions): IRawCellModel {
-      if (this.modelDB) {
-        if (!options.id) {
-          options.id = UUID.uuid4();
-        }
-        options.modelDB = this.modelDB.view(options.id);
-      }
+    createRawCell(opts: CellModel.IOptions): IRawCellModel {
+      const loc = {
+        record: {
+          datastore: this._data.cells.datastore,
+          schema: this._data.cells.schema,
+          record: UUID.uuid4()
+        },
+        outputs: this._data.outputs
+      };
+      const options = { data: loc, ...opts };
       return new RawCellModel(options);
     }
 
     /**
      * Clone the content factory with a new IModelDB.
      */
-    clone(modelDB: IModelDB): ContentFactory {
+    clone(data: ContentFactory.DataLocation): ContentFactory {
       return new ContentFactory({
-        modelDB: modelDB,
-        codeCellContentFactory: this.codeCellContentFactory
+        data
       });
     }
+
+    private _data: ContentFactory.DataLocation;
   }
 
   /**
@@ -639,15 +644,25 @@ export namespace NotebookModel {
      */
     export interface IOptions {
       /**
-       * The factory for code cell model content.
+       * The data in which to place new content.
        */
-      codeCellContentFactory?: CodeCellModel.IContentFactory;
+      data?: DataLocation;
+    }
+
+    /**
+     * Data location for a cell content factory.
+     */
+    export type DataLocation = {
+      /**
+       * A cell table.
+       */
+      cells: DatastoreExt.TableLocation<CellModel.ISchema>;
 
       /**
-       * The modelDB in which to place new content.
+       * An outputs table.
        */
-      modelDB?: IModelDB;
-    }
+      outputs: DatastoreExt.TableLocation<IOutputModel.ISchema>;
+    };
   }
 
   /**

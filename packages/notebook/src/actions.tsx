@@ -20,6 +20,8 @@ import {
   MarkdownCell
 } from '@jupyterlab/cells';
 
+import { OutputAreaModel } from '@jupyterlab/outputarea';
+
 import { ArrayExt, each, toArray } from '@phosphor/algorithm';
 
 import { JSONObject } from '@phosphor/coreutils';
@@ -123,7 +125,7 @@ export namespace NotebookActions {
     const clone1 = Private.cloneCell(nbModel, child.model);
 
     if (clone0.type === 'code') {
-      (clone0 as ICodeCellModel).outputs.clear();
+      OutputAreaModel.clear(clone0.data);
     }
     clone0.value = orig
       .slice(0, offset)
@@ -203,7 +205,7 @@ export namespace NotebookActions {
 
     newModel.value = toMerge.join('\n\n');
     if (newModel.type === 'code') {
-      (newModel as ICodeCellModel).outputs.clear();
+      OutputAreaModel.clear(newModel.data);
     }
 
     // Make the changes while preserving history.
@@ -999,7 +1001,7 @@ export namespace NotebookActions {
       const child = notebook.widgets[index];
 
       if (notebook.isSelectedOrActive(child) && cell.type === 'code') {
-        cell.outputs.clear();
+        OutputAreaModel.clear(cell.data);
         (child as CodeCell).outputHidden = false;
         cell.executionCount = null;
       }
@@ -1026,7 +1028,7 @@ export namespace NotebookActions {
       const child = notebook.widgets[index];
 
       if (cell.type === 'code') {
-        cell.outputs.clear();
+        OutputAreaModel.clear(cell.data);
         cell.executionCount = null;
         (child as CodeCell).outputHidden = false;
       }

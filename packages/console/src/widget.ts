@@ -340,9 +340,10 @@ export class CodeConsole extends Widget {
   inject(code: string, metadata: JSONObject = {}): Promise<void> {
     let cell = this.createCodeCell();
     cell.model.value = code;
-    for (let key of Object.keys(metadata)) {
-      cell.model.metadata.set(key, metadata[key]);
-    }
+    // TODO: set the metadata.
+    // for (let key of Object.keys(metadata)) {
+    //   cell.model.metadata.set(key, metadata[key]);
+    // }
     this.addCell(cell);
     return this._execute(cell);
   }
@@ -923,11 +924,6 @@ export namespace CodeConsole {
    */
   export interface IModelFactory {
     /**
-     * The factory for code cell content.
-     */
-    readonly codeCellContentFactory: CodeCellModel.IContentFactory;
-
-    /**
      * Create a new code cell.
      *
      * @param options - The options used to create the cell.
@@ -956,14 +952,8 @@ export namespace CodeConsole {
      * Create a new cell model factory.
      */
     constructor(options: IModelFactoryOptions = {}) {
-      this.codeCellContentFactory =
-        options.codeCellContentFactory || CodeCellModel.defaultContentFactory;
+      /* TODO: remove this? */
     }
-
-    /**
-     * The factory for output area models.
-     */
-    readonly codeCellContentFactory: CodeCellModel.IContentFactory;
 
     /**
      * Create a new code cell.
@@ -976,9 +966,6 @@ export namespace CodeConsole {
      *   `codeCellContentFactory` will be used.
      */
     createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel {
-      if (!options.contentFactory) {
-        options.contentFactory = this.codeCellContentFactory;
-      }
       return new CodeCellModel(options);
     }
 
@@ -998,12 +985,7 @@ export namespace CodeConsole {
   /**
    * The options used to initialize a `ModelFactory`.
    */
-  export interface IModelFactoryOptions {
-    /**
-     * The factory for output area models.
-     */
-    codeCellContentFactory?: CodeCellModel.IContentFactory;
-  }
+  export interface IModelFactoryOptions {}
 
   /**
    * The default `ModelFactory` instance.

@@ -15,6 +15,7 @@ import { DatastoreExt } from '@jupyterlab/datastore';
 
 import {
   OutputArea,
+  OutputAreaModel,
   SimplifiedOutputArea,
   IOutputPrompt,
   OutputPrompt,
@@ -702,7 +703,7 @@ export class CodeCell extends Cell {
     let outputCollapser = new OutputCollapser();
     outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
     let output = (this._output = new OutputArea({
-      model: model.outputs,
+      data: model.data,
       rendermime,
       contentFactory: contentFactory
     }));
@@ -710,7 +711,7 @@ export class CodeCell extends Cell {
     // Set a CSS if there are no outputs, and connect a signal for future
     // changes to the number of outputs. This is for conditional styling
     // if there are no outputs.
-    if (model.outputs.length === 0) {
+    if (output.widgets.length === 0) {
       this.addClass(NO_OUTPUTS_CLASS);
     }
     output.outputLengthChanged.connect(this._outputLengthHandler, this);
@@ -940,7 +941,7 @@ export class CodeCell extends Cell {
    */
   cloneOutputArea(): OutputArea {
     return new SimplifiedOutputArea({
-      model: this.model.outputs,
+      data: this.model.data,
       contentFactory: this.contentFactory,
       rendermime: this._rendermime
     });
@@ -1050,7 +1051,7 @@ export namespace CodeCell {
     let code = model.value;
     if (!code.trim() || !session.kernel) {
       model.executionCount = null;
-      model.outputs.clear();
+      OutputAreaModel.clear(cell.model.data);
       return;
     }
 

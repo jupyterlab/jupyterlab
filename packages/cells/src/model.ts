@@ -78,9 +78,9 @@ export interface ICellModel extends CodeEditor.IModel {
   readonly metadata: ReadonlyJSONObject;
 
   /**
-   * The record in the datastore in which this cell keeps its data.
+   * The location the datastore in which this cell keeps its data.
    */
-  readonly record: DatastoreExt.RecordLocation<CellModel.ISchema>;
+  readonly data: CellModel.DataLocation;
 
   /**
    * Serialize the model to JSON.
@@ -123,7 +123,7 @@ export interface ICodeCellModel extends ICellModel {
   /**
    * The cell outputs.
    */
-  readonly outputs: IOutputAreaModel;
+  readonly outputs: IOutputAreaModel.DataLocation;
 }
 
 /**
@@ -181,8 +181,9 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     super(Private.createEditorOptions(options));
 
     this.id = options.id || UUID.uuid4();
+    this.data = options.data;
 
-    this.record.datastore.changed.connect(this.onGenericChange, this);
+    this.data.record.datastore.changed.connect(this.onGenericChange, this);
 
     // Get the intitial data for the model.
     const cell = options.cell;
@@ -240,22 +241,22 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   readonly id: string;
 
   /**
-   * The record in the datastore in which this cell keeps its data.
+   * The data in the datastore in which this cell keeps its data.
    */
-  readonly record: DatastoreExt.RecordLocation<CellModel.ISchema>;
+  readonly data: CellModel.DataLocation;
 
   /**
    * The metadata associated with the cell.
    */
   get metadata(): ReadonlyJSONObject {
-    return DatastoreExt.getField({ ...this.record, field: 'metadata' });
+    return DatastoreExt.getField({ ...this.data.record, field: 'metadata' });
   }
 
   /**
    * The trusted state of the model.
    */
   get trusted(): boolean {
-    return DatastoreExt.getField({ ...this.record, field: 'trusted' });
+    return DatastoreExt.getField({ ...this.data.record, field: 'trusted' });
   }
   set trusted(newValue: boolean) {
     let oldValue = this.trusted;
@@ -400,8 +401,23 @@ export namespace CellModel {
     /**
      * A record location in an existing datastore in which to store the model.
      */
-    record?: DatastoreExt.RecordLocation<ISchema>;
+    data?: DataLocation;
   }
+
+  /**
+   * The location of cell data in a datastore.
+   */
+  export type DataLocation = {
+    /**
+     * The record for the cell data.
+     */
+    record: DatastoreExt.RecordLocation<ISchema>;
+
+    /**
+     * A table in which outputs are stored.
+     */
+    outputs: DatastoreExt.TableLocation<IOutputModel.ISchema>;
+  };
 }
 
 /**
@@ -559,8 +575,6 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   constructor(options: CodeCellModel.IOptions) {
     super(options);
-    let factory = options.contentFactory || CodeCellModel.defaultContentFactory;
-    let trusted = this.trusted;
     let cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
 
@@ -580,8 +594,8 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       this
     );
 
-    this._outputs = factory.createOutputArea({ trusted, values: outputs });
-    DatastoreExt.listenRecord(this._outputs.record, this.onGenericChange, this);
+    OutputAreaModel.fromJSON(this.data, outputs);
+    DatastoreExt.listenRecord(this.data.record, this.onGenericChange, this);
 
     // We keep `collapsed` and `jupyter.outputs_hidden` metadata in sync, since
     // they are redundant in nbformat 4.4. See
@@ -630,7 +644,10 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    * The execution count of the cell.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return DatastoreExt.getField({ ...this.record, field: 'executionCount' });
+    return DatastoreExt.getField({
+      ...this.data.record,
+      field: 'executionCount'
+    });
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
     let oldValue = this.executionCount;
@@ -648,8 +665,8 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * The cell outputs.
    */
-  get outputs(): IOutputAreaModel {
-    return this._outputs;
+  get outputs(): IOutputAreaModel.DataLocation {
+    return this.data;
   }
 
   /**
@@ -659,8 +676,6 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     if (this.isDisposed) {
       return;
     }
-    this._outputs.dispose();
-    this._outputs = null;
     super.dispose();
   }
 
@@ -670,7 +685,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   toJSON(): nbformat.ICodeCell {
     let cell = super.toJSON() as nbformat.ICodeCell;
     cell.execution_count = this.executionCount || null;
-    cell.outputs = this.outputs.toJSON();
+    cell.outputs = OutputAreaModel.toJSON(this.data);
     return cell;
   }
 
@@ -681,9 +696,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     trusted: IObservableValue,
     args: ObservableValue.IChangedArgs
   ): void {
-    if (this._outputs) {
-      this._outputs.trusted = args.newValue as boolean;
-    }
+    OutputAreaModel.setTrusted(this.data, args.newValue as boolean);
     this.stateChanged.emit({
       name: 'trusted',
       oldValue: args.oldValue,
@@ -705,8 +718,6 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       newValue: args.current
     });
   }
-
-  private _outputs: IOutputAreaModel = null;
 }
 
 /**
@@ -733,11 +744,6 @@ export namespace CodeCellModel {
    */
   export interface IOptions extends CellModel.IOptions {
     /**
-     * The factory for output area model creation.
-     */
-    contentFactory?: IContentFactory;
-
-    /**
      * The datastore for the cell model data. If not provided, the cell
      * will create its own in-memory store.
      */
@@ -748,33 +754,6 @@ export namespace CodeCellModel {
      */
     record?: DatastoreExt.RecordLocation<CellModel.ISchema>;
   }
-
-  /**
-   * A factory for creating code cell model content.
-   */
-  export interface IContentFactory {
-    /**
-     * Create an output area.
-     */
-    createOutputArea(options: IOutputAreaModel.IOptions): IOutputAreaModel;
-  }
-
-  /**
-   * The default implementation of an `IContentFactory`.
-   */
-  export class ContentFactory implements IContentFactory {
-    /**
-     * Create an output area.
-     */
-    createOutputArea(options: IOutputAreaModel.IOptions): IOutputAreaModel {
-      return new OutputAreaModel(options);
-    }
-  }
-
-  /**
-   * The shared `ContentFactory` instance.
-   */
-  export const defaultContentFactory = new ContentFactory();
 }
 
 namespace Private {
@@ -784,10 +763,10 @@ namespace Private {
   export function createEditorOptions(
     options: CellModel.IOptions
   ): CodeEditor.Model.IOptions {
-    if (options.record) {
+    if (options.data) {
       // Try to get the schema from the datastore to check if it exists.
-      options.record.datastore.get(options.record.schema);
-      return options;
+      options.data.record.datastore.get(options.data.record.schema);
+      return { record: options.data.record };
     } else {
       const datastore = Datastore.create({
         id: 1,

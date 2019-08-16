@@ -32,7 +32,6 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * Construct the cell list.
    */
   constructor(modelDB: IModelDB, factory: NotebookModel.IContentFactory) {
-    this._factory = factory;
     this._cellOrder = modelDB.createList<string>('cellOrder');
     this._cellMap = new ObservableMap<ICellModel>();
 
@@ -468,27 +467,6 @@ export class CellList implements IObservableUndoableList<ICellModel> {
     order: IObservableUndoableList<string>,
     change: IObservableList.IChangedArgs<string>
   ): void {
-    if (change.type === 'add' || change.type === 'set') {
-      each(change.newValues, id => {
-        if (!this._cellMap.has(id)) {
-          let cellDB = this._factory.modelDB;
-          let cellType = cellDB.createValue(id + '.type');
-          let cell: ICellModel;
-          switch (cellType.get()) {
-            case 'code':
-              cell = this._factory.createCodeCell({ id: id });
-              break;
-            case 'markdown':
-              cell = this._factory.createMarkdownCell({ id: id });
-              break;
-            default:
-              cell = this._factory.createRawCell({ id: id });
-              break;
-          }
-          this._cellMap.set(id, cell);
-        }
-      });
-    }
     let newValues: ICellModel[] = [];
     let oldValues: ICellModel[] = [];
     each(change.newValues, id => {
@@ -512,5 +490,4 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   private _changed = new Signal<this, IObservableList.IChangedArgs<ICellModel>>(
     this
   );
-  private _factory: NotebookModel.IContentFactory = null;
 }

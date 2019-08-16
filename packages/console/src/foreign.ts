@@ -5,6 +5,8 @@ import { IClientSession } from '@jupyterlab/apputils';
 
 import { CodeCell } from '@jupyterlab/cells';
 
+import { OutputAreaModel } from '@jupyterlab/outputarea';
+
 import { nbformat } from '@jupyterlab/coreutils';
 
 import { KernelMessage } from '@jupyterlab/services';
@@ -118,14 +120,15 @@ export class ForeignHandler implements IDisposable {
         }
         let output = msg.content as nbformat.IOutput;
         output.output_type = msgType as nbformat.OutputType;
-        cell.model.outputs.add(output);
+        OutputAreaModel.appendItem(cell.model.data, output);
         parent.update();
         return true;
       case 'clear_output':
-        let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
+        // let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
         cell = this._parent.getCell(parentMsgId);
         if (cell) {
-          cell.model.outputs.clear(wait);
+          // TODO handle wait
+          OutputAreaModel.clear(cell.model.data);
         }
         return true;
       default:

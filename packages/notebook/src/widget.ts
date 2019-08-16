@@ -2121,7 +2121,7 @@ export class Notebook extends StaticNotebook {
     for (let i = 0; i < this.widgets.length; i++) {
       if (i !== this._activeCellIndex) {
         let cell = this.widgets[i];
-        DatastoreExt.withTransaction(cell.model.datastore, () => {
+        DatastoreExt.withTransaction(cell.model.data.record.datastore, () => {
           DatastoreExt.updateField(
             { ...cell.model.record, field: 'selections' },
             { [cell.editor.uuid]: null }
