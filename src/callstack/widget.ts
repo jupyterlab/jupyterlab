@@ -1,30 +1,29 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { Widget, Panel } from '@phosphor/widgets';
+
 import { ToolbarWidget } from '../utils';
 
 export class CallstackWidget extends Panel {
   readonly header: Panel;
-  readonly label: Widget;
-  readonly toolbar: ToolbarWidget;
 
-  readonly model_header = {
-    label: 'CallStack',
-    class: 'jp-DebuggerSidebarVariables-header'
-  };
+  readonly label: Widget;
+
+  readonly toolbar: ToolbarWidget;
 
   constructor() {
     super();
-    // header
+
     this.header = new Panel();
-    this.header.addClass(this.model_header.class);
+    this.header.addClass('jp-DebuggerSidebarVariables-header');
     this.addWidget(this.header);
 
     this.label = new Widget();
-    this.label.node.textContent = this.model_header.label;
-    this.label.addClass(this.model_header.class + '-label');
+    this.label.node.textContent = 'Call stack';
+    this.label.addClass('jp-DebuggerSidebarVariables-header-label');
     this.header.addWidget(this.label);
 
-    console.log('adding toolbar');
-    //toolbar
     this.toolbar = new ToolbarWidget();
     this.toolbar.createSpanElement(`fa fa-active`, 'Continue');
     this.toolbar.createSpanElement(`fa fa-stop`, 'Stop');

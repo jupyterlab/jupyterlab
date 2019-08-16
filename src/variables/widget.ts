@@ -1,5 +1,10 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { Panel } from '@phosphor/widgets';
+
 import { IVariablesModel } from './model';
+
 import { VariableDescription } from './utils';
 
 const MOCK_DATA_ROW = {
@@ -20,37 +25,34 @@ const MOCK_DATA_ROW = {
 };
 
 export class VariablesWidget extends Panel {
-  readonly model: IVariablesModel;
-
-  readonly header: Panel;
-  readonly label: Panel;
-  readonly body: Panel;
-  readonly variable: Panel;
-  readonly searcher: Panel;
-
-  readonly model_header = {
-    label: 'Variables',
-    class: 'jp-DebuggerSidebarVariables-header'
-  };
-
   constructor() {
     super();
 
     this.model = IVariablesModel.create(MOCK_DATA_ROW.variables);
 
-    // header
     this.header = new Panel();
-    this.header.addClass(this.model_header.class);
+    this.header.addClass('jp-DebuggerSidebarVariables-header');
     this.addWidget(this.header);
 
     this.label = new Panel();
-    this.label.node.textContent = this.model_header.label;
-    this.label.addClass(this.model_header.class + '-label');
+    this.label.node.textContent = 'Variables';
+    this.label.addClass('jp-DebuggerSidebarVariables-header-label');
     this.header.addWidget(this.label);
 
-    //body
-    this.variable = new VariableDescription(this.model);
-    this.variable.addClass('jp-DebuggerSidebarVariables-body');
-    this.addWidget(this.variable);
+    this.variables = new VariableDescription(this.model);
+    this.variables.addClass('jp-DebuggerSidebarVariables-body');
+    this.addWidget(this.variables);
   }
+
+  readonly body: Panel;
+
+  readonly header: Panel;
+
+  readonly label: Panel;
+
+  readonly model: IVariablesModel;
+
+  readonly searcher: Panel;
+
+  readonly variables: Panel;
 }

@@ -1,5 +1,9 @@
-import { IVariable } from './variable';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { Signal, ISignal } from '@phosphor/signaling';
+
+import { IVariable } from './variable';
 
 export interface IVariablesModel {
   filter: string;
@@ -30,11 +34,10 @@ export class Model implements IVariablesModel {
 
   get variables(): IVariable[] {
     if (this._filterState) {
-      return this._filterVariabiles();
+      return this._filterVariables();
     }
     return this._state;
   }
-
   set variables(variables: IVariable[]) {
     this._state = variables;
   }
@@ -42,7 +45,6 @@ export class Model implements IVariablesModel {
   get variable(): IVariable {
     return this._currentVariabile;
   }
-
   set variable(variable: IVariable) {
     if (this._currentVariabile === variable) {
       return;
@@ -54,35 +56,34 @@ export class Model implements IVariablesModel {
   get filter() {
     return this._filterState;
   }
-
   set filter(value) {
     if (this._filterState === value) {
       return;
     }
     this._filterState = value;
-    this._changeVariables.emit(this._filterVariabiles());
+    this._changeVariables.emit(this._filterVariables());
   }
 
   getCurrentVariables(): IVariable[] {
     return this.variables;
   }
 
-  fstFil = function(item_name: string) {
+  fstFil(name: string): boolean {
     return (
       this._filterState
         .split('')
-        .filter((ele: string, index: number) => item_name[index] === ele)
+        .filter((ele: string, index: number) => name[index] === ele)
         .join('') === this._filterState
     );
-  };
+  }
 
-  private _filterVariabiles(): IVariable[] {
+  private _filterVariables(): IVariable[] {
     return this._state.filter(ele => this.fstFil(ele.name));
   }
 
-  private _currentVariabile: IVariable;
-  private _state: IVariable[];
-  private _filterState: string = '';
   private _changeCurrentVariable = new Signal<this, IVariable>(this);
   private _changeVariables = new Signal<this, IVariable[]>(this);
+  private _currentVariabile: IVariable;
+  private _filterState: string = '';
+  private _state: IVariable[];
 }

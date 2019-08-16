@@ -1,6 +1,10 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { Widget } from '@phosphor/widgets';
 
 const TOOLBAR_CLASS = 'jp-DebuggerToolbar';
+
 const TOOLBAR_ITEM_CLASS = TOOLBAR_CLASS + '-item';
 
 export class ToolbarWidget extends Widget {
