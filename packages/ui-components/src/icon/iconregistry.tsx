@@ -125,12 +125,16 @@ export class IconRegistry implements IIconRegistry {
 
   resolveName(name: string): string {
     if (!(name in this._svg)) {
-      // assume name is really a className, split the className into parts and check each part
-      for (let className of name.split(/\s+/)) {
-        if (className in this._classNameToName) {
-          return this._classNameToName[className];
+      // skip resolution if name is not defined
+      if (name) {
+        // assume name is really a className, split the className into parts and check each part
+        for (let className of name.split(/\s+/)) {
+          if (className in this._classNameToName) {
+            return this._classNameToName[className];
+          }
         }
       }
+
       if (this._debug) {
         // couldn't resolve name, mark as bad and warn
         console.error(`Invalid icon name: ${name}`);
