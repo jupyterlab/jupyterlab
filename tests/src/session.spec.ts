@@ -11,6 +11,7 @@ import { find } from '@phosphor/algorithm';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
+import { IDebugger } from '../../lib/tokens';
 import { DebugSession } from '../../lib/session';
 
 describe('DebugSession', () => {
@@ -115,6 +116,16 @@ describe('protocol', () => {
     await client.kernel.ready;
     debugSession = new DebugSession({ client });
     await debugSession.start();
+
+    debugSession.eventMessage.connect(
+      (sender: DebugSession, event: IDebugger.ISession.Event) => {
+        const eventName = event.event;
+        if (eventName === 'thread') {
+          const msg = event as DebugProtocol.ThreadEvent;
+          threadId = msg.body.threadId;
+        }
+      }
+    );
 
     const reply = await debugSession.sendRequest('updateCell', {
       cellId: 0,
