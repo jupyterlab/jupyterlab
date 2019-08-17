@@ -26,7 +26,7 @@ import { DatastoreExt } from '@jupyterlab/datastore';
 
 import { OutputAreaModel } from '@jupyterlab/outputarea';
 
-import { each } from '@phosphor/algorithm';
+import { ArrayExt, each } from '@phosphor/algorithm';
 
 // import { JSONObject } from '@phosphor/coreutils';
 
@@ -105,9 +105,10 @@ export namespace NotebookActions {
    * The leading whitespace in the second cell will be removed.
    * If there is no content, two empty cells will be created.
    * Both cells will have the same type as the original cell.
+   * If the cells is are markdown cells, they will be unrendered.
    * This action can be undone.
    */
-  /*export function splitCell(notebook: Notebook): void {
+  export function splitCell(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -125,32 +126,46 @@ export namespace NotebookActions {
     const orig = child.editor.model.value;
 
     // Create new models to preserve history.
-    const clone0 = Private.cloneCell(nbModel, child.type, child.data);
-    const clone1 = Private.cloneCell(nbModel, child.type, child.data);
+    const clone0 = Private.cloneCell(nbModel, child);
+    const clone1 = Private.cloneCell(nbModel, child);
 
-    if (clone0.type === 'code') {
-      OutputAreaModel.clear(clone0.data);
+    if (child.type === 'code') {
+      OutputAreaModel.clear(clone0);
     }
-    clone0.value = orig
-      .slice(0, offset)
-      .replace(/^\n+/, '')
-      .replace(/\n+$/, '');
-    clone1.value = orig
-      .slice(offset)
-      .replace(/^\n+/, '')
-      .replace(/\n+$/, '');
+    DatastoreExt.withTransaction(clone0.record.datastore, () => {
+      const text0 = orig
+        .slice(0, offset)
+        .replace(/^\n+/, '')
+        .replace(/\n+$/, '');
+      const text1 = orig
+        .slice(offset)
+        .replace(/^\n+/, '')
+        .replace(/\n+$/, '');
+      DatastoreExt.updateField(
+        { ...clone0.record, field: 'text' },
+        { index: 0, remove: orig.length, text: text0 }
+      );
+      DatastoreExt.updateField(
+        { ...clone1.record, field: 'text' },
+        { index: 0, remove: orig.length, text: text1 }
+      );
+      DatastoreExt.updateField(
+        { ...nbModel.data.record, field: 'cells' },
+        {
+          index,
+          remove: 1,
+          values: [clone0.record.record, clone1.record.record]
+        }
+      );
+    });
 
-    // Make the changes while preserving history.
-    const cells = nbModel.cells;
-
-    cells.beginCompoundOperation();
-    cells.set(index, clone0);
-    cells.insert(index + 1, clone1);
-    cells.endCompoundOperation();
-
-    notebook.activeCellIndex++;
+    if (child.type === 'markdown') {
+      (notebook.widgets[index] as MarkdownCell).rendered = false;
+      (notebook.widgets[index + 1] as MarkdownCell).rendered = false;
+    }
+    notebook.activeCellIndex = index + 1;
     Private.handleState(notebook, state);
-  }*/
+  }
 
   /**
    * Merge the selected cells.
@@ -165,69 +180,77 @@ export namespace NotebookActions {
    * The final cell will have the same type as the active cell.
    * If the active cell is a markdown cell, it will be unrendered.
    */
-  /*export function mergeCells(notebook: Notebook): void {
+  export function mergeCells(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
 
     const state = Private.getState(notebook);
     const toMerge: string[] = [];
-    const toDelete: ICellModel[] = [];
+    const toDelete: string[] = [];
     const model = notebook.model;
-    const cells = model.cells;
     const primary = notebook.activeCell;
     const active = notebook.activeCellIndex;
+    // The first active cell in the selection range.
+    const first = ArrayExt.findFirstIndex(notebook.widgets, w =>
+      notebook.isSelectedOrActive(w)
+    );
 
     // Get the cells to merge.
     notebook.widgets.forEach((child, index) => {
       if (notebook.isSelectedOrActive(child)) {
-        toMerge.push(child.model.value);
-        if (index !== active) {
-          toDelete.push(child.model);
-        }
+        toMerge.push(child.editor.model.value);
+        toDelete.push(child.data.record.record);
       }
     });
 
     // Check for only a single cell selected.
     if (toMerge.length === 1) {
       // Bail if it is the last cell.
-      if (active === cells.length - 1) {
+      if (active === notebook.widgets.length - 1) {
         return;
       }
 
       // Otherwise merge with the next cell.
-      const cellModel = cells.get(active + 1);
+      const next = notebook.widgets[active + 1];
 
-      toMerge.push(cellModel.value);
-      toDelete.push(cellModel);
+      toMerge.push(next.editor.model.value);
+      toDelete.push(next.data.record.record);
     }
 
     notebook.deselectAll();
 
     // Create a new cell for the source to preserve history.
-    const newModel = Private.cloneCell(model, primary.model);
+    const clone = Private.cloneCell(model, primary);
 
-    newModel.value = toMerge.join('\n\n');
-    if (newModel.type === 'code') {
-      OutputAreaModel.clear(newModel.data);
-    }
-
-    // Make the changes while preserving history.
-    cells.beginCompoundOperation();
-    cells.set(active, newModel);
-    toDelete.forEach(cell => {
-      cells.removeValue(cell);
+    DatastoreExt.withTransaction(clone.record.datastore, () => {
+      const text = toMerge.join('\n\n');
+      if (primary.type === 'code') {
+        OutputAreaModel.clear(clone);
+      }
+      DatastoreExt.updateField(
+        { ...clone.record, field: 'text' },
+        { index: 0, remove: primary.editor.model.value.length, text }
+      );
+      DatastoreExt.updateField(
+        { ...model.data.record, field: 'cells' },
+        {
+          index: first,
+          remove: toDelete.length,
+          values: [clone.record.record]
+        }
+      );
     });
-    cells.endCompoundOperation();
 
     // If the original cell is a markdown cell, make sure
     // the new cell is unrendered.
-    if (primary instanceof MarkdownCell) {
+    notebook.activeCellIndex = first;
+    if (primary.type === 'markdown') {
       (notebook.activeCell as MarkdownCell).rendered = false;
     }
 
     Private.handleState(notebook, state);
-  }*/
+  }
 
   /**
    * Delete the selected cells.
@@ -239,7 +262,7 @@ export namespace NotebookActions {
    * It will add a code cell if all cells are deleted.
    * This action can be undone.
    */
-  /*export function deleteCells(notebook: Notebook): void {
+  export function deleteCells(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -248,7 +271,7 @@ export namespace NotebookActions {
 
     Private.deleteCells(notebook);
     Private.handleState(notebook, state);
-  }*/
+  }
 
   /**
    * Insert a new code cell above the active cell.
@@ -397,7 +420,7 @@ export namespace NotebookActions {
    * The existing selection will be cleared.
    * Any cells converted to markdown will be unrendered.
    */
-  /*export function changeCellType(
+  export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType
   ): void {
@@ -409,7 +432,7 @@ export namespace NotebookActions {
 
     Private.changeCellType(notebook, value);
     Private.handleState(notebook, state);
-  }*/
+  }
 
   /**
    * Run the selected cell(s).
@@ -1267,7 +1290,7 @@ export namespace NotebookActions {
    * There will always be one blank space after the header.
    * The cells will be unrendered.
    */
-  /*export function setMarkdownHeader(notebook: Notebook, level: number) {
+  export function setMarkdownHeader(notebook: Notebook, level: number) {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -1282,7 +1305,7 @@ export namespace NotebookActions {
     });
     Private.changeCellType(notebook, 'markdown');
     Private.handleState(notebook, state);
-  }*/
+  }
 
   /**
    * Trust the notebook after prompting the user.
@@ -1403,19 +1426,24 @@ namespace Private {
    */
   export function cloneCell(
     model: INotebookModel,
-    type: nbformat.CellType,
-    data: CellModel.DataLocation
-  ): string {
+    cell: Cell
+  ): CellModel.DataLocation {
+    let id = '';
+    const { type, data } = cell;
     switch (type) {
       case 'code':
-        return model.contentFactory.createCodeCell(CodeCellModel.toJSON(data));
+        id = model.contentFactory.createCodeCell(CodeCellModel.toJSON(data));
+        break;
       case 'markdown':
-        return model.contentFactory.createMarkdownCell(
+        id = model.contentFactory.createMarkdownCell(
           MarkdownCellModel.toJSON(data)
         );
+        break;
       default:
-        return model.contentFactory.createRawCell(RawCellModel.toJSON(data));
+        id = model.contentFactory.createRawCell(RawCellModel.toJSON(data));
+        break;
     }
+    return { record: { ...data.record, record: id }, outputs: data.outputs };
   }
 
   /**
@@ -1634,49 +1662,52 @@ namespace Private {
    * The existing selection will be cleared.
    * Any cells converted to markdown will be unrendered.
    */
-  /*export function changeCellType(
+  export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType
   ): void {
     const model = notebook.model;
-    const cells = model.cells;
 
-    cells.beginCompoundOperation();
-    notebook.widgets.forEach((child, index) => {
-      if (!notebook.isSelectedOrActive(child)) {
-        return;
-      }
-      if (child.type !== value) {
-        const cell = child.model.toJSON();
-        let newCell: ICellModel;
-
-        switch (value) {
-          case 'code':
-            newCell = model.contentFactory.createCodeCell({ cell });
-            break;
-          case 'markdown':
-            newCell = model.contentFactory.createMarkdownCell({ cell });
-            if (child.type === 'code') {
-              newCell.trusted = false;
-            }
-            break;
-          default:
-            newCell = model.contentFactory.createRawCell({ cell });
-            if (child.type === 'code') {
-              newCell.trusted = false;
-            }
+    DatastoreExt.withTransaction(model.data.record.datastore, () => {
+      notebook.widgets.forEach((child, index) => {
+        if (!notebook.isSelectedOrActive(child)) {
+          return;
         }
-        cells.set(index, newCell);
-      }
-      if (value === 'markdown') {
-        // Fetch the new widget and unrender it.
-        child = notebook.widgets[index];
-        (child as MarkdownCell).rendered = false;
-      }
+        if (child.type !== value) {
+          let cellId = '';
+          let cell = CellModel.toJSON(child.data);
+          if (cell.type === 'code') {
+            // When we convert to another cell type,
+            // make sure it is flagged as untrusted.
+            cell['metadata']['trusted'] = false;
+          }
+          switch (value) {
+            case 'code':
+              cellId = model.contentFactory.createCodeCell(
+                cell as nbformat.ICodeCell
+              );
+              break;
+            case 'markdown':
+              cellId = model.contentFactory.createMarkdownCell(
+                cell as nbformat.IMarkdownCell
+              );
+              break;
+            default:
+              cellId = model.contentFactory.createRawCell(
+                cell as nbformat.IRawCell
+              );
+              break;
+          }
+          DatastoreExt.updateField(
+            { ...model.data.record, field: 'cells' },
+            { index, remove: 1, values: [cellId] }
+          );
+        }
+      });
     });
-    cells.endCompoundOperation();
+    // TODO: unrender the new markdown cells.
     notebook.deselectAll();
-  }*/
+  }
 
   /**
    * Delete the selected cells.
@@ -1689,7 +1720,7 @@ namespace Private {
    * It will add a code cell if all cells are deleted.
    * This action can be undone.
    */
-  /*export function deleteCells(notebook: Notebook): void {
+  export function deleteCells(notebook: Notebook): void {
     const model = notebook.model;
     const toDelete: number[] = [];
 
@@ -1697,31 +1728,41 @@ namespace Private {
 
     // Find the cells to delete.
     notebook.widgets.forEach((child, index) => {
-      const deletable = child.model.metadata['deletable'] !== false;
+      const metadata = DatastoreExt.getField({
+        ...child.data.record,
+        field: 'metadata'
+      });
+      const deletable = metadata['deletable'] !== false;
 
       if (notebook.isSelectedOrActive(child) && deletable) {
         toDelete.push(index);
-        notebook.model.deletedCells.push(child.model.id);
+        notebook.model.deletedCells.push(child.data.record.record);
       }
     });
 
     // If cells are not deletable, we may not have anything to delete.
     if (toDelete.length > 0) {
-      // Delete the cells as one undo event.
-      cells.beginCompoundOperation();
-      // Delete cells in reverse order to maintain the correct indices.
-      toDelete.reverse().forEach(index => {
-        cells.remove(index);
+      DatastoreExt.withTransaction(model.data.record.datastore, () => {
+        // Delete cells in reverse order to maintain the correct indices.
+        toDelete.reverse().forEach(index => {
+          DatastoreExt.updateField(
+            { ...model.data.record, field: 'cells' },
+            { index, remove: 1, values: [] }
+          );
+        });
+        // Add a new cell if the notebook is empty. This is done
+        // within the compound operation to make the deletion of
+        // a notebook's last cell undoable.
+        if (toDelete.length === notebook.widgets.length) {
+          const cellId = model.contentFactory.createCell(
+            notebook.notebookConfig.defaultCell
+          );
+          DatastoreExt.updateField(
+            { ...model.data.record, field: 'cells' },
+            { index: 0, remove: 0, values: [cellId] }
+          );
+        }
       });
-      // Add a new cell if the notebook is empty. This is done
-      // within the compound operation to make the deletion of
-      // a notebook's last cell undoable.
-      if (!cells.length) {
-        cells.push(
-          model.contentFactory.createCell(notebook.notebookConfig.defaultCell)
-        );
-      }
-      cells.endCompoundOperation();
 
       // Select the *first* interior cell not deleted or the cell
       // *after* the last selected cell.
@@ -1735,7 +1776,7 @@ namespace Private {
     // Deselect any remaining, undeletable cells. Do this even if we don't
     // delete anything so that users are aware *something* happened.
     notebook.deselectAll();
-  }*/
+  }
 
   /**
    * Set the markdown header level of a cell.

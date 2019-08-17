@@ -1284,7 +1284,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        // return NotebookActions.changeCellType(current.content, 'code');
+        return NotebookActions.changeCellType(current.content, 'code');
       }
     },
     isEnabled
@@ -1295,7 +1295,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        // return NotebookActions.changeCellType(current.content, 'markdown');
+        return NotebookActions.changeCellType(current.content, 'markdown');
       }
     },
     isEnabled
@@ -1306,7 +1306,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        // return NotebookActions.changeCellType(current.content, 'raw');
+        return NotebookActions.changeCellType(current.content, 'raw');
       }
     },
     isEnabled
@@ -1372,7 +1372,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        // return NotebookActions.deleteCells(current.content);
+        return NotebookActions.deleteCells(current.content);
       }
     },
     isEnabled
@@ -1383,7 +1383,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        // return NotebookActions.splitCell(current.content);
+        return NotebookActions.splitCell(current.content);
       }
     },
     isEnabled
@@ -1394,7 +1394,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        // return NotebookActions.mergeCells(current.content);
+        return NotebookActions.mergeCells(current.content);
       }
     },
     isEnabled

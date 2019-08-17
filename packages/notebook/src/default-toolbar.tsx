@@ -20,7 +20,7 @@ import {
   ToolbarButton
 } from '@jupyterlab/apputils';
 
-// import { nbformat } from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
 
 import { HTMLSelect } from '@jupyterlab/ui-components';
 
@@ -252,9 +252,9 @@ export class CellTypeSwitcher extends ReactWidget {
    */
   handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
     if (event.target.value !== '-') {
-      // NotebookActions.changeCellType(this._notebook, event.target
-      //   .value as nbformat.CellType);
-      // this._notebook.activate();
+      NotebookActions.changeCellType(this._notebook, event.target
+        .value as nbformat.CellType);
+      this._notebook.activate();
     }
   };
 

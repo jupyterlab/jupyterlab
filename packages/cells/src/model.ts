@@ -57,7 +57,7 @@ export namespace CellModel {
       if (Array.isArray(cell.source)) {
         text = (cell.source as string[]).join('');
       } else {
-        text = cell.source as string;
+        text = (cell.source as string) || '';
       }
 
       type = cell.cell_type as nbformat.CellType;
@@ -223,6 +223,7 @@ export namespace RawCellModel {
     cell?: nbformat.IRawCell
   ): void {
     // TODO: resurrect cell attachments.
+    cell.cell_type = 'raw';
     AttachmentsCellModel.fromJSON(loc, cell);
   }
 
@@ -247,6 +248,7 @@ export namespace MarkdownCellModel {
   ): void {
     // TODO: resurrect cell attachments.
     DatastoreExt.withTransaction(loc.record.datastore, () => {
+      cell.cell_type = 'markdown';
       AttachmentsCellModel.fromJSON(loc, cell);
       DatastoreExt.updateField(
         { ...loc.record, field: 'mimeType' },
@@ -277,6 +279,7 @@ export namespace CodeCellModel {
     let outputs: nbformat.IOutput[] = [];
 
     DatastoreExt.withTransaction(loc.record.datastore, () => {
+      cell.cell_type = 'code';
       CellModel.fromJSON(loc, cell);
       DatastoreExt.updateField(
         { ...loc.record, field: 'executionCount' },

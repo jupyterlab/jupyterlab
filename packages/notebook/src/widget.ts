@@ -407,7 +407,7 @@ export class StaticNotebook extends Widget {
   private _onCellsChanged(sender: Datastore, args: ListField.Change<string>) {
     args.forEach(change => {
       for (let i = 0; i < change.removed.length; i++) {
-        this._removeCell(i);
+        this._removeCell(change.index);
       }
       for (let i = 0; i < change.inserted.length; i++) {
         const loc = {
