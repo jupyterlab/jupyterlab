@@ -63,7 +63,7 @@ new environment named ``jupyterlab-ext``.
 
 .. code:: bash
 
-    conda create -n jupyterlab-ext -c conda-forge --override-channels jupyterlab cookiecutter nodejs git
+    conda create -n jupyterlab-ext -c conda-forge -c defaults --override-channels jupyterlab cookiecutter nodejs git
 
 Now activate the new environment so that all further commands you run
 work out of that environment.
