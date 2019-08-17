@@ -42,7 +42,7 @@ if version != app_version:
     version = '%s (dev), %s (app)' % (__version__, app_version)
 
 buildFailureMsg = """Build failed.
-Troubleshooting: If the build failure due to an out-of-memory error, you
+Troubleshooting: If the build failed due to an out-of-memory error, you
 may be able to fix it by disabling the `dev_build` and/or `minimize` options.
 
 If you are building via the `build jupyter lab` command, you can disable
@@ -51,7 +51,7 @@ these options like so:
 build jupyter lab --dev-mode=False --minimize=False
 
 You can also disable these options for all JupyterLab builds by adding these
-lines to your Jupyter config file:
+lines to your Jupyter config file (`jupyter_notebook_config.py`):
 
 c.LabBuildApp.minimize = False
 c.LabBuildApp.dev_build = False
@@ -70,10 +70,18 @@ installed from local files, this option will instead default to `True`.
 Explicitly setting `dev-build` to `False` will ensure that the `production`
 build is used in all circumstances.
 
+<<<<<<< HEAD
 - `minimize`: This options controls whether your JS bundle is minified
 during the Webpack build, which helps to improve JupyterLab's overall
 performance. However, the minifier Webpack plugin is very memory
 intensive, so turning it off may help in low-memory environments.
+=======
+- `minimize`: This option controls whether your JS bundle is minified
+during the Webpack build, which helps to improve JupyterLab's overall
+performance. However, the minifier plugin used by Webpack is very memory
+intensive, so turning it off may help the build finish successfully in
+low-memory environments.
+>>>>>>> 4335b0558... fixes to `buildFailureMsg`
 """
 
 class LabBuildApp(JupyterApp, DebugLogFileMixin):
