@@ -1113,6 +1113,8 @@ export class AttachmentsCell extends Cell {
       return;
     }
     event.preventDefault();
+    event.stopPropagation();
+    event.dropAction = event.proposedAction;
   }
 
   /**
