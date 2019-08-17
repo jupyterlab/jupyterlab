@@ -223,8 +223,12 @@ export namespace RawCellModel {
     cell?: nbformat.IRawCell
   ): void {
     // TODO: resurrect cell attachments.
-    cell.cell_type = 'raw';
-    AttachmentsCellModel.fromJSON(loc, cell);
+    DatastoreExt.withTransaction(loc.record.datastore, () => {
+      AttachmentsCellModel.fromJSON(loc, cell);
+      DatastoreExt.updateRecord(loc.record, {
+        type: 'raw'
+      });
+    });
   }
 
   /**
@@ -248,12 +252,11 @@ export namespace MarkdownCellModel {
   ): void {
     // TODO: resurrect cell attachments.
     DatastoreExt.withTransaction(loc.record.datastore, () => {
-      cell.cell_type = 'markdown';
       AttachmentsCellModel.fromJSON(loc, cell);
-      DatastoreExt.updateField(
-        { ...loc.record, field: 'mimeType' },
-        'text/x-ipythongfm'
-      );
+      DatastoreExt.updateRecord(loc.record, {
+        mimeType: 'text/x-ipythongfm',
+        type: 'markdown'
+      });
     });
   }
 
@@ -281,12 +284,12 @@ export namespace CodeCellModel {
     DatastoreExt.withTransaction(loc.record.datastore, () => {
       cell.cell_type = 'code';
       CellModel.fromJSON(loc, cell);
-      DatastoreExt.updateField(
-        { ...loc.record, field: 'executionCount' },
-        cell ? cell.execution_count || null : null
-      );
-      if (cell && cell.cell_type === 'code') {
-        outputs = cell.outputs;
+      DatastoreExt.updateRecord(loc.record, {
+        executionCount: cell ? cell.execution_count || null : null,
+        type: 'code'
+      });
+      if (cell) {
+        outputs = cell.outputs || [];
       }
       OutputAreaModel.fromJSON(loc, outputs);
     });

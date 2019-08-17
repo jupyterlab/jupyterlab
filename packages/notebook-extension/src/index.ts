@@ -1160,7 +1160,7 @@ function addCommands(
     },
     isEnabled
   });
-  /*commands.addCommand(CommandIDs.trust, {
+  commands.addCommand(CommandIDs.trust, {
     label: () => 'Trust Notebook',
     execute: args => {
       const current = getCurrent(args);
@@ -1170,7 +1170,7 @@ function addCommands(
       }
     },
     isEnabled
-  });*/
+  });
   commands.addCommand(CommandIDs.exportToFormat, {
     label: args => {
       const formatLabel = args['label'] as string;
@@ -1493,7 +1493,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        // return NotebookActions.moveUp(current.content);
+        return NotebookActions.moveUp(current.content);
       }
     },
     isEnabled
@@ -1504,7 +1504,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        // return NotebookActions.moveDown(current.content);
+        return NotebookActions.moveDown(current.content);
       }
     },
     isEnabled

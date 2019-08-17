@@ -4,10 +4,10 @@
 // import { KernelMessage } from '@jupyterlab/services';
 
 import {
-  IClientSession
+  IClientSession,
   // Clipboard,
-  // Dialog,
-  // showDialog
+  Dialog,
+  showDialog
 } from '@jupyterlab/apputils';
 
 import { nbformat } from '@jupyterlab/coreutils';
@@ -34,14 +34,14 @@ import { ElementExt } from '@phosphor/domutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-// import * as React from 'react';
+import * as React from 'react';
 
 import { INotebookModel } from './model';
 
 import { Notebook } from './widget';
 
 // The message to display to the user when prompting to trust the notebook.
-/*const TRUST_MESSAGE = (
+const TRUST_MESSAGE = (
   <p>
     A trusted Jupyter notebook may execute hidden malicious code when you open
     it.
@@ -53,7 +53,7 @@ import { Notebook } from './widget';
       Jupyter security documentation
     </a>
   </p>
-);*/
+);
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -348,64 +348,103 @@ export namespace NotebookActions {
   /**
    * Move the selected cell(s) down.
    *
-   * @param notebook = The target notebook widget.
+   * @param widget - The target notebook widget.
    */
-  /*export function moveDown(notebook: Notebook): void {
+  export function moveDown(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
 
     const state = Private.getState(notebook);
-    const cells = notebook.model.cells;
     const widgets = notebook.widgets;
 
-    cells.beginCompoundOperation();
-    for (let i = cells.length - 2; i > -1; i--) {
-      if (notebook.isSelectedOrActive(widgets[i])) {
-        if (!notebook.isSelectedOrActive(widgets[i + 1])) {
-          cells.move(i, i + 1);
-          if (notebook.activeCellIndex === i) {
-            notebook.activeCellIndex++;
-          }
-          notebook.select(widgets[i + 1]);
-          notebook.deselect(widgets[i]);
-        }
+    const toMove: string[] = [];
+    const indices: number[] = [];
+    const active = notebook.activeCellIndex;
+    widgets.forEach((cell, index) => {
+      if (notebook.isSelectedOrActive(cell)) {
+        toMove.push(cell.data.record.record);
+        indices.push(index);
       }
+    });
+    if (indices.length && indices[indices.length - 1] === widgets.length) {
+      return;
     }
-    cells.endCompoundOperation();
+    DatastoreExt.withTransaction(notebook.model.data.record.datastore, () => {
+      // Proceed through the toMove list in the reverse direction
+      // so we get the final ordering right.
+      toMove.reverse();
+      indices.reverse();
+      toMove.forEach((id, idx) => {
+        DatastoreExt.updateField(
+          { ...notebook.model.data.record, field: 'cells' },
+          { index: indices[idx], remove: 1, values: [] }
+        );
+        DatastoreExt.updateField(
+          { ...notebook.model.data.record, field: 'cells' },
+          { index: indices[idx] + 1, remove: 0, values: [id] }
+        );
+      });
+    });
+
+    // Reselect the original cells.
+    widgets.forEach((cell, index) => {
+      if (toMove.indexOf(cell.data.record.record) !== -1) {
+        notebook.select(cell);
+      }
+    });
+    notebook.activeCellIndex = active + 1;
     Private.handleState(notebook, state, true);
-  }*/
+  }
 
   /**
    * Move the selected cell(s) up.
    *
    * @param widget - The target notebook widget.
    */
-  /*export function moveUp(notebook: Notebook): void {
+  export function moveUp(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
 
     const state = Private.getState(notebook);
-    const cells = notebook.model.cells;
     const widgets = notebook.widgets;
 
-    cells.beginCompoundOperation();
-    for (let i = 1; i < cells.length; i++) {
-      if (notebook.isSelectedOrActive(widgets[i])) {
-        if (!notebook.isSelectedOrActive(widgets[i - 1])) {
-          cells.move(i, i - 1);
-          if (notebook.activeCellIndex === i) {
-            notebook.activeCellIndex--;
-          }
-          notebook.select(widgets[i - 1]);
-          notebook.deselect(widgets[i]);
-        }
+    const toMove: string[] = [];
+    const indices: number[] = [];
+    const active = notebook.activeCellIndex;
+    widgets.forEach((cell, index) => {
+      if (notebook.isSelectedOrActive(cell)) {
+        toMove.push(cell.data.record.record);
+        indices.push(index);
       }
+    });
+    if (indices.length && indices[0] === 0) {
+      return;
     }
-    cells.endCompoundOperation();
+    DatastoreExt.withTransaction(notebook.model.data.record.datastore, () => {
+      // Proceed through the toMove list in the forward direction
+      // so we get the final ordering right.
+      toMove.forEach((id, idx) => {
+        DatastoreExt.updateField(
+          { ...notebook.model.data.record, field: 'cells' },
+          { index: indices[idx], remove: 1, values: [] }
+        );
+        DatastoreExt.updateField(
+          { ...notebook.model.data.record, field: 'cells' },
+          { index: indices[idx] - 1, remove: 0, values: [id] }
+        );
+      });
+    });
+    // Reselect the original cells.
+    widgets.forEach((cell, index) => {
+      if (toMove.indexOf(cell.data.record.record) !== -1) {
+        notebook.select(cell);
+      }
+    });
+    notebook.activeCellIndex = active - 1;
     Private.handleState(notebook, state, true);
-  }*/
+  }
 
   /**
    * Change the selected cell type(s).
@@ -429,7 +468,6 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-
     Private.changeCellType(notebook, value);
     Private.handleState(notebook, state);
   }
@@ -1317,15 +1355,15 @@ export namespace NotebookActions {
    * #### Notes
    * No dialog will be presented if the notebook is already trusted.
    */
-  /*export function trust(notebook: Notebook): Promise<void> {
-    if (!notebook.model) {
+  export function trust(notebook: Notebook): Promise<void> {
+    const model = notebook.model;
+    if (!model) {
       return Promise.resolve();
     }
     // Do nothing if already trusted.
-
-    const cells = toArray(notebook.model.cells);
-    const trusted = cells.every(cell => cell.trusted);
-
+    const trusted = notebook.widgets.every(cell =>
+      DatastoreExt.getField({ ...cell.data.record, field: 'trusted' })
+    );
     if (trusted) {
       return showDialog({
         body: 'Notebook is already trusted',
@@ -1339,12 +1377,17 @@ export namespace NotebookActions {
       buttons: [Dialog.cancelButton(), Dialog.warnButton()]
     }).then(result => {
       if (result.button.accept) {
-        cells.forEach(cell => {
-          cell.trusted = true;
+        DatastoreExt.withTransaction(model.data.record.datastore, () => {
+          notebook.widgets.forEach(cell => {
+            DatastoreExt.updateField(
+              { ...cell.data.record, field: 'trusted' },
+              true
+            );
+          });
         });
       }
     });
-  }*/
+  }
 }
 
 /**
@@ -1667,6 +1710,7 @@ namespace Private {
     value: nbformat.CellType
   ): void {
     const model = notebook.model;
+    const index = notebook.activeCellIndex;
 
     DatastoreExt.withTransaction(model.data.record.datastore, () => {
       notebook.widgets.forEach((child, index) => {
@@ -1707,6 +1751,7 @@ namespace Private {
     });
     // TODO: unrender the new markdown cells.
     notebook.deselectAll();
+    notebook.activeCellIndex = index;
   }
 
   /**
