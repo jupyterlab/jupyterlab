@@ -1154,6 +1154,9 @@ export class AttachmentsCell extends Cell {
     Promise.all(promises).then(models => {
       models.forEach(model => {
         if (model.type === 'file' && model.format === 'base64') {
+          if (!this.model.attachments.has(model.name)) {
+            this._updateCellSourceWithAttachment(model.name);
+          }
           this.model.attachments.set(model.name, {
             [model.mimetype]: model.content
           });

@@ -46,7 +46,7 @@
     "@jupyterlab/mainmenu": "^1.2.0-alpha.0",
     "@jupyterlab/notebook": "^1.2.0-alpha.0",
     "@jupyterlab/statusbar": "^1.2.0-alpha.0",
-    "@phosphor/widgets": "^1.8.0"
+    "@phosphor/widgets": "^1.9.0"
   },
   "devDependencies": {
     "@types/react": "~16.8.18",
