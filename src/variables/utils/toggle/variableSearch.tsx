@@ -1,6 +1,12 @@
-import { Panel, Widget } from '@phosphor/widgets';
-import React, { useState } from 'react';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { ReactWidget } from '@jupyterlab/apputils';
+
+import { Panel, Widget } from '@phosphor/widgets';
+
+import React, { useState } from 'react';
+
 import { IVariablesModel } from '../../model';
 
 const SEARCH_ITEM = 'jp-Search-item';

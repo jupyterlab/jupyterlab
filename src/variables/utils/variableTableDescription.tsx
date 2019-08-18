@@ -1,26 +1,29 @@
-import { SplitPanel, Widget } from '@phosphor/widgets';
-import { IVariablesModel } from '../model';
-import React, { useState } from 'react';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { ReactWidget } from '@jupyterlab/apputils';
+
+import { SplitPanel, Widget } from '@phosphor/widgets';
+
+import React, { useState } from 'react';
+
+import { IVariablesModel } from '../model';
+
 import useTbody from './useTbody';
 
 const ROW_CLASS = 'jp-DebuggerSidebarVariables-table-row';
 const HEAD_CLASS = 'jp-DebuggerSidebarVariables-table-head';
 
 const TableHead = () => {
-  var styleElement_1 = {
-    width: '25%'
-  };
-  var styleElement_2 = {
-    width: '75%'
-  };
+  const leftStyle = { width: '25%' };
+  const rightStyle = { width: '75%' };
   const element = (
     <thead>
       <tr>
-        <th style={styleElement_1} className={HEAD_CLASS}>
+        <th style={leftStyle} className={HEAD_CLASS}>
           Name
         </th>
-        <th style={styleElement_2} className={HEAD_CLASS}>
+        <th style={rightStyle} className={HEAD_CLASS}>
           Value
         </th>
       </tr>

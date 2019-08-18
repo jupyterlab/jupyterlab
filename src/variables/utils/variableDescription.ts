@@ -1,8 +1,15 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { Panel, SplitPanel, Widget } from '@phosphor/widgets';
-import { VariableTableDescription } from './variableTableDescription';
+
 import { IVariablesModel } from '../model';
+
 import { IVariable } from '../variable';
+
 import { VariablesSearch } from './toggle';
+
+import { VariableTableDescription } from './variableTableDescription';
 
 export class VariableDescription extends Panel {
   readonly searchParams: Widget;
@@ -29,7 +36,6 @@ export class VariableDescription extends Panel {
     this.addWidget(this.descriptionBox);
     this.descriptionBox.node.innerHTML = '<b> Select Variable </b>';
 
-    //observable change current variable
     this.model.changeCurrentVariable.connect(
       (model: IVariablesModel, variable: IVariable) => {
         this.descriptionBox.node.innerHTML = this.renderDescription(
