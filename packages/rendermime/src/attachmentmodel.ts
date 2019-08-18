@@ -5,7 +5,7 @@
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
+import { DatastoreExt } from '@jupyterlab/datastore';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
@@ -16,11 +16,67 @@ import {
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
-import { Datastore, Fields, RegisterField, Schema } from '@phosphor/datastore';
+import { Datastore, Fields, RegisterField } from '@phosphor/datastore';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { MimeModel } from './mimemodel';
+
+/**
+ * The namespace for describing how an attachment stores its data.
+ */
+export namespace IAttachmentData {
+  /**
+   * A type alias for an attachment schema.
+   */
+  export type Schema = {
+    /**
+     * The schema ID.
+     */
+    id: string;
+
+    /**
+     * Attachment model schema fields.
+     */
+    fields: {
+      /**
+       * Data stored in the attachment.
+       */
+      data: RegisterField<ReadonlyJSONObject>;
+
+      /**
+       * Raw data which is not in the data field.
+       */
+      raw: RegisterField<ReadonlyJSONObject>;
+    };
+  };
+}
+
+/**
+ * Utilities for working with attachment data.
+ */
+export namespace AttachmentData {
+  /**
+   * A concrete realization of the schema, available at runtime.
+   */
+  export const SCHEMA: IAttachmentData.Schema = {
+    id: '@jupyterlab/rendermime:attachmentmodel.v1',
+    fields: {
+      data: Fields.Register<ReadonlyJSONObject>({ value: {} }),
+      raw: Fields.Register<ReadonlyJSONObject>({ value: {} })
+    }
+  };
+
+  /**
+   * Create an in-memory datastore capable of holding the data for an output.
+   */
+  export function createStore(id: number = 1): Datastore {
+    return Datastore.create({
+      id,
+      schemas: [SCHEMA]
+    });
+  }
+}
 
 /**
  * The interface for an attachment model.
@@ -47,42 +103,6 @@ export interface IAttachmentModel extends IRenderMime.IMimeModel {
  */
 export namespace IAttachmentModel {
   /**
-   * Fields for use in the attachment model schema.
-   */
-  export interface IFields extends SchemaFields {
-    /**
-     * Data stored in the attachment.
-     */
-    data: RegisterField<ReadonlyJSONObject>;
-
-    /**
-     * Raw data which is not in the data field.
-     */
-    raw: RegisterField<ReadonlyJSONObject>;
-  }
-
-  /**
-   * An interface for an attachment model schema.
-   */
-  export interface ISchema extends Schema {
-    /**
-     * Attachment model schema fields.
-     */
-    fields: IFields;
-  }
-
-  /**
-   * A concrete realization of the schema, available at runtime.
-   */
-  export const SCHEMA: ISchema = {
-    id: '@jupyterlab/rendermime:attachmentmodel.v1',
-    fields: {
-      data: Fields.Register<ReadonlyJSONObject>({ value: {} }),
-      raw: Fields.Register<ReadonlyJSONObject>({ value: {} })
-    }
-  };
-
-  /**
    * The options used to create a notebook attachment model.
    */
   export interface IOptions {
@@ -94,7 +114,7 @@ export namespace IAttachmentModel {
     /**
      * A record in which to store the data.
      */
-    record?: DatastoreExt.RecordLocation<ISchema>;
+    record?: DatastoreExt.RecordLocation<IAttachmentData.Schema>;
   }
 }
 
@@ -109,13 +129,10 @@ export class AttachmentModel implements IAttachmentModel {
     if (options.record) {
       this._record = options.record;
     } else {
-      const datastore = Datastore.create({
-        id: 1,
-        schemas: [IAttachmentModel.SCHEMA]
-      });
+      const datastore = AttachmentData.createStore();
       this._record = {
         datastore,
-        schema: IAttachmentModel.SCHEMA,
+        schema: AttachmentData.SCHEMA,
         record: 'data'
       };
       if (options.value) {
@@ -182,7 +199,7 @@ export class AttachmentModel implements IAttachmentModel {
   readonly trusted: boolean = false;
 
   private _changed = new Signal<this, void>(this);
-  private _record: DatastoreExt.RecordLocation<IAttachmentModel.ISchema>;
+  private _record: DatastoreExt.RecordLocation<IAttachmentData.Schema>;
 }
 
 /**
@@ -204,7 +221,7 @@ export namespace AttachmentModel {
    * Serialize the attachment model to JSON.
    */
   export function toJSON(
-    loc: DatastoreExt.RecordLocation<IAttachmentModel.ISchema>
+    loc: DatastoreExt.RecordLocation<IAttachmentData.Schema>
   ): nbformat.IMimeBundle {
     let attachment: JSONValue = {};
     let raw = DatastoreExt.getField({ ...loc, field: 'raw' });
@@ -218,7 +235,7 @@ export namespace AttachmentModel {
    * Deserialize an attachment model from JSON, inserting it into a record.
    */
   export function fromJSON(
-    loc: DatastoreExt.RecordLocation<IAttachmentModel.ISchema>,
+    loc: DatastoreExt.RecordLocation<IAttachmentData.Schema>,
     value: nbformat.IMimeBundle
   ): void {
     const data = Private.getData(value);

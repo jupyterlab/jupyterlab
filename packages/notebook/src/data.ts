@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
+import { DatastoreExt } from '@jupyterlab/datastore';
 
 import { ICellData, CellData } from '@jupyterlab/cells';
 
@@ -14,8 +14,7 @@ import {
   Fields,
   ListField,
   MapField,
-  RegisterField,
-  Schema
+  RegisterField
 } from '@phosphor/datastore';
 
 /**
@@ -29,53 +28,53 @@ export namespace INotebookData {
     /**
      * The top-level record for the notebook data.
      */
-    record: DatastoreExt.RecordLocation<ISchema>;
+    record: DatastoreExt.RecordLocation<Schema>;
 
     /**
      * The table holding cell data.
      */
-    cells: DatastoreExt.TableLocation<ICellData.ISchema>;
+    cells: DatastoreExt.TableLocation<ICellData.Schema>;
 
     /**
      * The table holding output data.
      */
-    outputs: DatastoreExt.TableLocation<IOutputData.ISchema>;
+    outputs: DatastoreExt.TableLocation<IOutputData.Schema>;
   };
 
   /**
-   * Fields in a notebook schema.
+   * An type alias for a notebook data schema.
    */
-  export interface IFields extends SchemaFields {
+  export type Schema = {
     /**
-     * The major nbformat version number.
+     * The schema id.
      */
-    readonly nbformat: RegisterField<number>;
+    id: string;
 
-    /**
-     * The minor nbformat version number.
-     */
-    readonly nbformatMinor: RegisterField<number>;
-
-    /**
-     * The list of cell IDs in the notebook.
-     */
-    readonly cells: ListField<string>;
-
-    /**
-     * The metadata for the notebook.
-     */
-    readonly metadata: MapField<ReadonlyJSONValue>;
-  }
-
-  /**
-   * An interface for a notebook schema.
-   */
-  export interface ISchema extends Schema {
     /**
      * The schema fields.
      */
-    fields: IFields;
-  }
+    fields: {
+      /**
+       * The major nbformat version number.
+       */
+      readonly nbformat: RegisterField<number>;
+
+      /**
+       * The minor nbformat version number.
+       */
+      readonly nbformatMinor: RegisterField<number>;
+
+      /**
+       * The list of cell IDs in the notebook.
+       */
+      readonly cells: ListField<string>;
+
+      /**
+       * The metadata for the notebook.
+       */
+      readonly metadata: MapField<ReadonlyJSONValue>;
+    };
+  };
 }
 
 /**
@@ -95,7 +94,7 @@ export namespace NotebookData {
   /**
    * A concrete notebook schema, available at runtime.
    */
-  export const SCHEMA: INotebookData.ISchema = {
+  export const SCHEMA: INotebookData.Schema = {
     /**
      * The schema id.
      */

@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
+import { DatastoreExt } from '@jupyterlab/datastore';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
@@ -15,13 +15,7 @@ import {
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
-import {
-  Datastore,
-  Fields,
-  Record,
-  RegisterField,
-  Schema
-} from '@phosphor/datastore';
+import { Datastore, Fields, Record, RegisterField } from '@phosphor/datastore';
 
 import { MimeModel } from './mimemodel';
 
@@ -31,46 +25,49 @@ import { MimeModel } from './mimemodel';
  */
 export namespace IOutputData {
   /**
-   * Fields for use in the output model schema.
+   * A type alias for the ouput model schema.
    */
-  export interface IFields extends SchemaFields {
+  export type Schema = {
     /**
-     * Whether the output model is trusted.
+     * The id for the schema.
      */
-    trusted: RegisterField<boolean>;
+    id: string;
 
     /**
-     * The type of the output model.
+     * The fields for a single output.
      */
-    type: RegisterField<string>;
+    fields: {
+      /**
+       * Whether the output model is trusted.
+       */
+      trusted: RegisterField<boolean>;
 
-    /**
-     * The execution count of the model.
-     */
-    executionCount: RegisterField<nbformat.ExecutionCount>;
+      /**
+       * The type of the output model.
+       */
+      type: RegisterField<string>;
 
-    /**
-     * The data for the model.
-     */
-    data: RegisterField<ReadonlyJSONObject>;
+      /**
+       * The execution count of the model.
+       */
+      executionCount: RegisterField<nbformat.ExecutionCount>;
 
-    /**
-     * The metadata for the model.
-     */
-    metadata: RegisterField<ReadonlyJSONObject>;
+      /**
+       * The data for the model.
+       */
+      data: RegisterField<ReadonlyJSONObject>;
 
-    /**
-     * Raw data passed in that is not in the data or metadata fields.
-     */
-    raw: RegisterField<ReadonlyJSONObject>;
-  }
+      /**
+       * The metadata for the model.
+       */
+      metadata: RegisterField<ReadonlyJSONObject>;
 
-  /**
-   * An interface for the ouput model schema.
-   */
-  export interface ISchema extends Schema {
-    fields: IFields;
-  }
+      /**
+       * Raw data passed in that is not in the data or metadata fields.
+       */
+      raw: RegisterField<ReadonlyJSONObject>;
+    };
+  };
 }
 
 /**
@@ -80,7 +77,7 @@ export namespace OutputData {
   /**
    * A concrete realization of the schema, available at runtime.
    */
-  export const SCHEMA: IOutputData.ISchema = {
+  export const SCHEMA: IOutputData.Schema = {
     id: '@jupyterlab/rendermime:outputmodel.v1',
     fields: {
       trusted: Fields.Boolean(),
@@ -154,7 +151,7 @@ export namespace IOutputModel {
     /**
      * A record in which to store the data.
      */
-    record?: DatastoreExt.RecordLocation<IOutputData.ISchema>;
+    record?: DatastoreExt.RecordLocation<IOutputData.Schema>;
   }
 }
 
@@ -231,8 +228,8 @@ export class OutputModel implements IOutputModel {
    * this call may or may not have deferred effects,
    */
   setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
-    let metadataUpdate: Record.Update<IOutputData.ISchema> = {};
-    let dataUpdate: Record.Update<IOutputData.ISchema> = {};
+    let metadataUpdate: Record.Update<IOutputData.Schema> = {};
+    let dataUpdate: Record.Update<IOutputData.Schema> = {};
     if (options.data) {
       dataUpdate = { data: options.data };
     }
@@ -257,7 +254,7 @@ export class OutputModel implements IOutputModel {
   /**
    * The record in which the output model is stored.
    */
-  private readonly _record: DatastoreExt.RecordLocation<IOutputData.ISchema>;
+  private readonly _record: DatastoreExt.RecordLocation<IOutputData.Schema>;
 }
 
 /**
@@ -290,7 +287,7 @@ export namespace OutputModel {
    * Serialize an output record to JSON.
    */
   export function toJSON(
-    loc: DatastoreExt.RecordLocation<IOutputData.ISchema>
+    loc: DatastoreExt.RecordLocation<IOutputData.Schema>
   ): nbformat.IOutput {
     let output: JSONObject = DatastoreExt.getField({
       ...loc,
@@ -315,7 +312,7 @@ export namespace OutputModel {
   }
 
   export function fromJSON(
-    loc: DatastoreExt.RecordLocation<IOutputData.ISchema>,
+    loc: DatastoreExt.RecordLocation<IOutputData.Schema>,
     value: nbformat.IOutput,
     trusted: boolean = false
   ): void {

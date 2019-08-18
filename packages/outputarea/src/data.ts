@@ -3,7 +3,7 @@
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
+import { DatastoreExt } from '@jupyterlab/datastore';
 
 import { IOutputData, OutputData, OutputModel } from '@jupyterlab/rendermime';
 
@@ -13,8 +13,7 @@ import {
   Datastore,
   Fields,
   ListField,
-  RegisterField,
-  Schema
+  RegisterField
 } from '@phosphor/datastore';
 
 /**
@@ -22,26 +21,29 @@ import {
  */
 export namespace IOutputAreaData {
   /**
-   * An interface for the fields stored in an Output area.
+   * An type alias for an output area data schema.
    */
-  export interface IFields extends SchemaFields {
+  export type Schema = {
     /**
-     * Whether the output area is trusted.
+     * The id for the schema.
      */
-    readonly trusted: RegisterField<boolean>;
+    id: string;
 
     /**
-     * The list of outputs in the output area.
+     * The data fields in the schema.
      */
-    readonly outputs: ListField<string>;
-  }
+    fields: {
+      /**
+       * Whether the output area is trusted.
+       */
+      readonly trusted: RegisterField<boolean>;
 
-  /**
-   * An interface for an output area model schema.
-   */
-  export interface ISchema extends Schema {
-    fields: IFields;
-  }
+      /**
+       * The list of outputs in the output area.
+       */
+      readonly outputs: ListField<string>;
+    };
+  };
 
   /**
    * A set of locations in a datastore in which an output area
@@ -51,12 +53,12 @@ export namespace IOutputAreaData {
     /**
      * A record in a datastore to hold the output area model.
      */
-    record: DatastoreExt.RecordLocation<ISchema>;
+    record: DatastoreExt.RecordLocation<Schema>;
 
     /**
      * A table in a datastore for individual outputs.
      */
-    outputs: DatastoreExt.TableLocation<IOutputData.ISchema>;
+    outputs: DatastoreExt.TableLocation<IOutputData.Schema>;
   };
 }
 
@@ -67,7 +69,7 @@ export namespace OutputAreaData {
   /**
    * A concrete output area schema, available at runtime.
    */
-  export const SCHEMA: IOutputAreaData.ISchema = {
+  export const SCHEMA: IOutputAreaData.Schema = {
     /**
      * The schema id.
      */

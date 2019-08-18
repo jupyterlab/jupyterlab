@@ -3,8 +3,6 @@
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { SchemaFields } from '@jupyterlab/datastore';
-
 import {
   IObservableMap,
   ObservableMap,
@@ -97,12 +95,12 @@ export namespace IAttachmentsModel {
   /**
    * An interface for schema fields for an attachments model.
    */
-  export interface IFields extends SchemaFields {
+  export type Fields = {
     /**
      * A map storing attachments.
      */
     attachments: MapField<nbformat.IMimeBundle>;
-  }
+  };
 
   /**
    * The options used to create a attachments model.

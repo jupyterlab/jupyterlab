@@ -192,7 +192,7 @@ export namespace CodeEditor {
     /**
      * The record in the datastore in which this codeeditor keeps its data.
      */
-    readonly record: DatastoreExt.RecordLocation<ICodeEditorData.ISchema>;
+    readonly record: DatastoreExt.RecordLocation<ICodeEditorData.Schema>;
   }
 
   /**
@@ -253,7 +253,7 @@ export namespace CodeEditor {
     /**
      * The record in the datastore in which this codeeditor keeps its data.
      */
-    readonly record: DatastoreExt.RecordLocation<ICodeEditorData.ISchema>;
+    readonly record: DatastoreExt.RecordLocation<ICodeEditorData.Schema>;
 
     /**
      * Get the value of the model.
@@ -738,7 +738,7 @@ export namespace CodeEditor {
       /**
        * A record location in an existing datastore in which to store the model.
        */
-      record?: DatastoreExt.RecordLocation<ICodeEditorData.ISchema>;
+      record?: DatastoreExt.RecordLocation<ICodeEditorData.Schema>;
     }
   }
 }

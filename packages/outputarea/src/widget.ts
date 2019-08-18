@@ -340,7 +340,7 @@ export class OutputArea extends Widget {
    */
   private _setOutput(
     index: number,
-    loc: DatastoreExt.RecordLocation<IOutputData.ISchema>
+    loc: DatastoreExt.RecordLocation<IOutputData.Schema>
   ): void {
     let layout = this.layout as PanelLayout;
     let panel = layout.widgets[index] as Panel;
@@ -362,7 +362,7 @@ export class OutputArea extends Widget {
    */
   private _insertOutput(
     index: number,
-    loc: DatastoreExt.RecordLocation<IOutputData.ISchema>
+    loc: DatastoreExt.RecordLocation<IOutputData.Schema>
   ): void {
     let output = this.createOutputItem(loc);
     let executionCount = DatastoreExt.getField({
@@ -382,7 +382,7 @@ export class OutputArea extends Widget {
    * Create an output item with a prompt and actual output
    */
   protected createOutputItem(
-    loc: DatastoreExt.RecordLocation<IOutputData.ISchema>
+    loc: DatastoreExt.RecordLocation<IOutputData.Schema>
   ): Widget | null {
     let output = this.createRenderedMimetype(loc);
 
@@ -413,7 +413,7 @@ export class OutputArea extends Widget {
    * Render a mimetype
    */
   protected createRenderedMimetype(
-    loc: DatastoreExt.RecordLocation<IOutputData.ISchema>
+    loc: DatastoreExt.RecordLocation<IOutputData.Schema>
   ): Widget | null {
     // Create a temporary output model view to pass of to the renderer.
     let model = new OutputModel({ record: loc });
@@ -556,7 +556,7 @@ export class SimplifiedOutputArea extends OutputArea {
    * Create an output item without a prompt, just the output widgets
    */
   protected createOutputItem(
-    loc: DatastoreExt.RecordLocation<IOutputData.ISchema>
+    loc: DatastoreExt.RecordLocation<IOutputData.Schema>
   ): Widget | null {
     let output = this.createRenderedMimetype(loc);
     if (output) {

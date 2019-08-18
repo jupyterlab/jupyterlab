@@ -22,8 +22,7 @@ import {
   Fields,
   ListField,
   MapField,
-  RegisterField,
-  Schema
+  RegisterField
 } from '@phosphor/datastore';
 
 /**
@@ -32,48 +31,48 @@ import {
  */
 export namespace ICellData {
   /**
-   * A type for the common fields stored in the Cell schema.
+   * An interface for a cell schema.
    */
-  export interface IBaseFields extends ICodeEditorData.IFields {
+  export type BaseSchema = {
     /**
-     * The type of the cell.
+     * The id for the schema.
      */
-    type: RegisterField<nbformat.CellType>;
+    id: string;
 
-    /**
-     * Whether the cell is trusted.
-     */
-    trusted: RegisterField<boolean>;
+    fields: ICodeEditorData.Schema['fields'] & {
+      /**
+       * The type of the cell.
+       */
+      type: RegisterField<nbformat.CellType>;
 
-    /**
-     * The metadata for the cell.
-     */
-    metadata: MapField<ReadonlyJSONValue>;
-  }
+      /**
+       * Whether the cell is trusted.
+       */
+      trusted: RegisterField<boolean>;
 
-  /**
-   * A union interface for all the fields stored in cell schemas
-   * so that they may be stored in the same table.
-   */
-  export interface IFields
-    extends IBaseFields,
-      ICodeCellData.IFields,
-      IAttachmentsCellData.IFields {}
+      /**
+       * The metadata for the cell.
+       */
+      metadata: MapField<ReadonlyJSONValue>;
+    };
+  };
 
   /**
    * An interface for a cell schema.
    */
-  export interface ISchema extends Schema {
+  export type Schema = {
     /**
      * The id for the schema.
      */
-    id: '@jupyterlab/cells:cellmodel.v1';
+    id: string;
 
     /**
      * The union of cell fields.
      */
-    fields: IFields;
-  }
+    fields: BaseSchema['fields'] &
+      ICodeCellData.Schema['fields'] &
+      IAttachmentsCellData.Schema['fields'];
+  };
 
   /**
    * The location of cell data in a datastore.
@@ -82,12 +81,12 @@ export namespace ICellData {
     /**
      * The record for the cell data.
      */
-    record: DatastoreExt.RecordLocation<ISchema>;
+    record: DatastoreExt.RecordLocation<Schema>;
 
     /**
      * A table in which outputs are stored.
      */
-    outputs: DatastoreExt.TableLocation<IOutputData.ISchema>;
+    outputs: DatastoreExt.TableLocation<IOutputData.Schema>;
   };
 }
 
@@ -96,11 +95,20 @@ export namespace ICellData {
  */
 export namespace IAttachmentsCellData {
   /**
-   * An interface for cell schema fields that can store attachments.
+   * A type alias for an attachment cell schema, which includes the fields for
+   * a base cell, plus possible attachment data.
    */
-  export interface IFields
-    extends ICellData.IBaseFields,
-      IAttachmentsModel.IFields {}
+  export type Schema = {
+    /**
+     * The id for the schema.
+     */
+    id: string;
+
+    /**
+     * The union of cell fields.
+     */
+    fields: ICellData.BaseSchema['fields'] & IAttachmentsModel.Fields;
+  };
 }
 
 /**
@@ -108,19 +116,30 @@ export namespace IAttachmentsCellData {
  */
 export namespace ICodeCellData {
   /**
-   * The schema type for code cell models.
+   * A type alias for a code cell data schema, which includes the fields of a base
+   * cell, plus data for execution count and outputs.
    */
-  export interface IFields extends ICellData.IBaseFields {
+  export type Schema = {
     /**
-     * Execution count for the cell.
+     * The id for the schema.
      */
-    executionCount: RegisterField<nbformat.ExecutionCount>;
+    id: string;
 
     /**
-     * A list of output ids for the cell.
+     * The union of cell fields.
      */
-    outputs: ListField<string>;
-  }
+    fields: ICellData.BaseSchema['fields'] & {
+      /**
+       * Execution count for the cell.
+       */
+      executionCount: RegisterField<nbformat.ExecutionCount>;
+
+      /**
+       * A list of output ids for the cell.
+       */
+      outputs: ListField<string>;
+    };
+  };
 }
 
 /**
@@ -130,7 +149,7 @@ export namespace CellData {
   /**
    * A concrete schema for a cell table, available at runtime.
    */
-  export const SCHEMA: ICellData.ISchema = {
+  export const SCHEMA: ICellData.Schema = {
     /**
      * The id for the schema.
      */

@@ -1,14 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SchemaFields } from '@jupyterlab/datastore';
-
 import {
   Datastore,
   Fields,
   MapField,
   RegisterField,
-  Schema,
   TextField
 } from '@phosphor/datastore';
 
@@ -19,34 +16,34 @@ import { CodeEditor } from './editor';
  */
 export namespace ICodeEditorData {
   /**
-   * An interface for the fields stored in the CodeEditor schema.
-   */
-  export interface IFields extends SchemaFields {
-    /**
-     * The mime type for the editor.
-     */
-    readonly mimeType: RegisterField<string>;
-
-    /**
-     * The text content of the editor.
-     */
-    readonly text: TextField;
-
-    /**
-     * The cursors for the editor.
-     */
-    readonly selections: MapField<CodeEditor.ITextSelection[]>;
-  }
-
-  /**
    * An interface for a CodeEditor schema.
    */
-  export interface ISchema extends Schema {
+  export type Schema = {
+    /**
+     * The schema id.
+     */
+    id: string;
+
     /**
      * The schema fields.
      */
-    fields: IFields;
-  }
+    fields: {
+      /**
+       * The mime type for the editor.
+       */
+      readonly mimeType: RegisterField<string>;
+
+      /**
+       * The text content of the editor.
+       */
+      readonly text: TextField;
+
+      /**
+       * The cursors for the editor.
+       */
+      readonly selections: MapField<CodeEditor.ITextSelection[]>;
+    };
+  };
 }
 
 /**
@@ -66,7 +63,7 @@ export namespace CodeEditorData {
   /**
    * A concrete CodeEditor schema, available at runtime.
    */
-  export const SCHEMA: ICodeEditorData.ISchema = {
+  export const SCHEMA: ICodeEditorData.Schema = {
     /**
      * The schema id.
      */

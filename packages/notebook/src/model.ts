@@ -240,7 +240,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
         }
       }
       const cellLoc: DatastoreExt.FieldLocation<
-        INotebookData.ISchema,
+        INotebookData.Schema,
         'cells'
       > = { ...this.data.record, field: 'cells' };
       const oldCells = DatastoreExt.getField(cellLoc);
@@ -540,12 +540,12 @@ export namespace NotebookModel {
       /**
        * A cell table.
        */
-      cells: DatastoreExt.TableLocation<ICellData.ISchema>;
+      cells: DatastoreExt.TableLocation<ICellData.Schema>;
 
       /**
        * An outputs table.
        */
-      outputs: DatastoreExt.TableLocation<IOutputData.ISchema>;
+      outputs: DatastoreExt.TableLocation<IOutputData.Schema>;
     };
   }
 
