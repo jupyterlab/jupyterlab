@@ -73,20 +73,18 @@ export namespace CellModel {
     });
   }
 
-  /**
-   * Serialize the model to JSON.
-   */
   export function toJSON(loc: CellModel.DataLocation): nbformat.ICell {
     let data = DatastoreExt.getRecord(loc.record);
-    let metadata = data.metadata as JSONObject;
-    if (data.trusted) {
-      metadata['trusted'] = true;
+    switch (data.type) {
+      case 'code':
+        return CodeCellModel.toJSON(loc);
+        break;
+      case 'markdown':
+        return MarkdownCellModel.toJSON(loc);
+        break;
+      default:
+        return RawCellModel.toJSON(loc);
     }
-    return {
-      cell_type: data.type,
-      source: data.text,
-      metadata
-    } as nbformat.ICell;
   }
 }
 
@@ -200,7 +198,9 @@ export namespace AttachmentsCellModel {
   export function toJSON(
     loc: CellModel.DataLocation
   ): nbformat.IRawCell | nbformat.IMarkdownCell {
-    return CellModel.toJSON(loc) as nbformat.IRawCell | nbformat.IMarkdownCell;
+    return Private.baseToJSON(loc) as
+      | nbformat.IRawCell
+      | nbformat.IMarkdownCell;
   }
 
   /**
@@ -331,7 +331,7 @@ export namespace CodeCellModel {
    * Serialize the model to JSON.
    */
   export function toJSON(loc: CellModel.DataLocation): nbformat.ICodeCell {
-    let cell = CellModel.toJSON(loc) as nbformat.ICodeCell;
+    let cell = Private.baseToJSON(loc) as nbformat.ICodeCell;
     cell.execution_count = DatastoreExt.getField({
       ...loc.record,
       field: 'executionCount'
@@ -356,8 +356,8 @@ export namespace CodeCellModel {
   }
 }
 
-/* namespace Private {
-  export function collapseChanged(
+namespace Private {
+  /*export function collapseChanged(
     metadata: IObservableJSON,
     args: IObservableMap.IChangedArgs<JSONValue>
   ) {
@@ -383,5 +383,27 @@ export namespace CodeCellModel {
         metadata.delete('collapsed');
       }
     }
+  }*
+
+  /**
+   * Serialize the model to JSON.
+   *
+   * ### Notes
+   * This is the common serialization logic for the three cell types,
+   * and is called by the specializations of the cell types.
+   * The `toJSON` function in this namespace correctly delegates
+   * to the different subtypes.
+   */
+  export function baseToJSON(loc: CellModel.DataLocation): nbformat.ICell {
+    let data = DatastoreExt.getRecord(loc.record);
+    let metadata = data.metadata as JSONObject;
+    if (data.trusted) {
+      metadata['trusted'] = true;
+    }
+    return {
+      cell_type: data.type,
+      source: data.text,
+      metadata
+    } as nbformat.ICell;
   }
- } */
+}

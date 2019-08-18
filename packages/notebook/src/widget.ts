@@ -1981,7 +1981,6 @@ export class Notebook extends StaticNotebook {
     each(this.widgets, (widget, i) => {
       if (this.isSelectedOrActive(widget)) {
         widget.addClass(DROP_SOURCE_CLASS);
-        // TODO: use the right versions of toJSON
         selected.push(CellModel.toJSON(widget.data));
         toMove.push(widget);
       }
