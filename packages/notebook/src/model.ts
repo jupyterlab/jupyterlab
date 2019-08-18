@@ -223,6 +223,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     let cells: nbformat.ICell[] = [];
     let data = DatastoreExt.getRecord(this.data.record);
     for (let i = 0; i < data.cells.length; i++) {
+      // TODO use the rigt version of toJSON
       let cell = CellModel.toJSON({
         record: { ...this.data.cells, record: data.cells[i] },
         outputs: this.data.outputs

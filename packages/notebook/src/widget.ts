@@ -3,13 +3,13 @@
 
 import { ArrayExt, each } from '@phosphor/algorithm';
 
-import { JSONValue } from '@phosphor/coreutils';
+import { JSONValue, MimeData } from '@phosphor/coreutils';
 
 import { Datastore, ListField, MapField } from '@phosphor/datastore';
 
 import { IDisposable } from '@phosphor/disposable';
 
-import { IDragEvent } from '@phosphor/dragdrop';
+import { IDragEvent, Drag } from '@phosphor/dragdrop';
 
 import { Message } from '@phosphor/messaging';
 
@@ -102,7 +102,7 @@ const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
 /**
  * The class name added to a drop source.
  */
-// const DROP_SOURCE_CLASS = 'jp-mod-dropSource';
+const DROP_SOURCE_CLASS = 'jp-mod-dropSource';
 
 /**
  * The class name added to drag images.
@@ -1257,7 +1257,7 @@ export class Notebook extends StaticNotebook {
         this._evtDragOver(event as IDragEvent);
         break;
       case 'p-drop':
-        // this._evtDrop(event as IDragEvent);
+        this._evtDrop(event as IDragEvent);
         break;
       default:
         break;
@@ -1780,7 +1780,7 @@ export class Notebook extends StaticNotebook {
         let dy = Math.abs(event.clientY - data.pressY);
         if (dx >= DRAG_THRESHOLD || dy >= DRAG_THRESHOLD) {
           this._mouseMode = null;
-          // this._startDrag(data.index, event.clientX, event.clientY);
+          this._startDrag(data.index, event.clientX, event.clientY);
         }
         break;
       default:
@@ -1848,7 +1848,7 @@ export class Notebook extends StaticNotebook {
   /**
    * Handle the `'p-drop'` event for the widget.
    */
-  /*private _evtDrop(event: IDragEvent): void {
+  private _evtDrop(event: IDragEvent): void {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
@@ -1892,18 +1892,41 @@ export class Notebook extends StaticNotebook {
         return;
       }
 
+      let model = this.model;
       // Move the cells one by one
-      this.model.cells.beginCompoundOperation();
-      if (fromIndex < toIndex) {
-        each(toMove, cellWidget => {
-          this.model.cells.move(fromIndex, toIndex);
-        });
-      } else if (fromIndex > toIndex) {
-        each(toMove, cellWidget => {
-          this.model.cells.move(fromIndex++, toIndex++);
-        });
-      }
-      this.model.cells.endCompoundOperation();
+      DatastoreExt.withTransaction(this.model.data.record.datastore, () => {
+        if (fromIndex < toIndex) {
+          each(toMove, cellWidget => {
+            DatastoreExt.updateField(
+              { ...model.data.record, field: 'cells' },
+              { index: fromIndex, remove: 1, values: [] }
+            );
+            DatastoreExt.updateField(
+              { ...model.data.record, field: 'cells' },
+              {
+                index: toIndex,
+                remove: 0,
+                values: [cellWidget.data.record.record]
+              }
+            );
+          });
+        } else if (fromIndex > toIndex) {
+          each(toMove, cellWidget => {
+            DatastoreExt.updateField(
+              { ...model.data.record, field: 'cells' },
+              { index: fromIndex++, remove: 1, values: [] }
+            );
+            DatastoreExt.updateField(
+              { ...model.data.record, field: 'cells' },
+              {
+                index: toIndex++,
+                remove: 0,
+                values: [cellWidget.data.record.record]
+              }
+            );
+          });
+        }
+      });
     } else {
       // Handle the case where we are copying cells between
       // notebooks.
@@ -1919,51 +1942,58 @@ export class Notebook extends StaticNotebook {
       let factory = model.contentFactory;
 
       // Insert the copies of the original cells.
-      model.cells.beginCompoundOperation();
-      each(values, (cell: nbformat.ICell) => {
-        let value: CellModel.DataLocation;
-        switch (cell.cell_type) {
-          case 'code':
-            value = factory.createCodeCell({ cell });
-            break;
-          case 'markdown':
-            value = factory.createMarkdownCell({ cell });
-            break;
-          default:
-            value = factory.createRawCell({ cell });
-            break;
-        }
-        model.cells.insert(index++, value);
+      DatastoreExt.withTransaction(model.data.record.datastore, () => {
+        each(values, (cell: nbformat.ICell) => {
+          let value: string;
+          switch (cell.cell_type) {
+            case 'code':
+              value = factory.createCodeCell(cell as nbformat.ICodeCell);
+              break;
+            case 'markdown':
+              value = factory.createMarkdownCell(
+                cell as nbformat.IMarkdownCell
+              );
+              break;
+            default:
+              value = factory.createRawCell(cell as nbformat.IRawCell);
+              break;
+          }
+          DatastoreExt.updateField(
+            { ...model.data.record, field: 'cells' },
+            { index: index++, remove: 0, values: [value] }
+          );
+        });
       });
-      model.cells.endCompoundOperation();
       // Select the inserted cells.
       this.deselectAll();
       this.activeCellIndex = start;
       this.extendContiguousSelectionTo(index - 1);
     }
-  }*/
+  }
 
   /**
    * Start a drag event.
    */
-  /*private _startDrag(index: number, clientX: number, clientY: number): void {
-    let cells = this.model.cells;
+  private _startDrag(index: number, clientX: number, clientY: number): void {
     let selected: nbformat.ICell[] = [];
     let toMove: Cell[] = [];
 
     each(this.widgets, (widget, i) => {
-      let cell = cells.get(i);
       if (this.isSelectedOrActive(widget)) {
         widget.addClass(DROP_SOURCE_CLASS);
-        selected.push(cell.toJSON());
+        // TODO: use the right versions of toJSON
+        selected.push(CellModel.toJSON(widget.data));
         toMove.push(widget);
       }
     });
     let activeCell = this.activeCell;
     let dragImage: HTMLElement = null;
     let countString: string;
-    if (activeCell.model.type === 'code') {
-      let executionCount = (activeCell.model as ICodeCellModel).executionCount;
+    if (activeCell.type === 'code') {
+      let executionCount = DatastoreExt.getField({
+        ...activeCell.data.record,
+        field: 'executionCount'
+      });
       countString = ' ';
       if (executionCount) {
         countString = executionCount.toString();
@@ -1976,7 +2006,7 @@ export class Notebook extends StaticNotebook {
     dragImage = Private.createDragImage(
       selected.length,
       countString,
-      activeCell.model.value.split('\n')[0].slice(0, 26)
+      activeCell.editor.model.value.split('\n')[0].slice(0, 26)
     );
 
     // Set up the drag event.
@@ -1994,7 +2024,7 @@ export class Notebook extends StaticNotebook {
     this._drag.mimeData.setData('internal:cells', toMove);
     // Add mimeData for the text content of the selected cells,
     // allowing for drag/drop into plain text fields.
-    const textContent = toMove.map(cell => cell.model.value).join('\n');
+    const textContent = toMove.map(cell => cell.editor.model.value).join('\n');
     this._drag.mimeData.setData('text/plain', textContent);
 
     // Remove mousemove and mouseup listeners and start the drag.
@@ -2010,7 +2040,7 @@ export class Notebook extends StaticNotebook {
         widget.removeClass(DROP_SOURCE_CLASS);
       });
     });
-  } */
+  }
 
   /**
    * Handle `focus` events for the widget.
@@ -2142,7 +2172,7 @@ export class Notebook extends StaticNotebook {
   private _activeCellIndex = -1;
   private _activeCell: Cell | null = null;
   private _mode: NotebookMode = 'command';
-  // private _drag: Drag = null;
+  private _drag: Drag = null;
   private _fragment = '';
   private _dragData: { pressX: number; pressY: number; index: number } = null;
   private _mouseMode: 'select' | 'couldDrag' | null = null;

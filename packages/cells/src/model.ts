@@ -282,15 +282,12 @@ export namespace CodeCellModel {
     let outputs: nbformat.IOutput[] = [];
 
     DatastoreExt.withTransaction(loc.record.datastore, () => {
-      cell.cell_type = 'code';
       CellModel.fromJSON(loc, cell);
       DatastoreExt.updateRecord(loc.record, {
         executionCount: cell ? cell.execution_count || null : null,
         type: 'code'
       });
-      if (cell) {
-        outputs = cell.outputs || [];
-      }
+      outputs = (cell && cell.outputs) || [];
       OutputAreaModel.fromJSON(loc, outputs);
     });
 
