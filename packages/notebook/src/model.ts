@@ -118,13 +118,17 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
         schema: IOutputModel.SCHEMA
       }
     };
+    // Handle initialization of data.
     DatastoreExt.withTransaction(datastore, () => {
-      DatastoreExt.updateRecord(this.data.record, {});
+      DatastoreExt.updateRecord(this.data.record, {
+        nbformat: nbformat.MAJOR_VERSION,
+        nbformatMinor: nbformat.MINOR_VERSION
+      });
+      this._ensureMetadata();
     });
 
     this.contentFactory = factory.clone(this.data);
     // Handle initial metadata.
-    this._ensureMetadata();
 
     DatastoreExt.listenRecord(this.record, this.triggerContentChange, this);
     this._deletedCells = [];
