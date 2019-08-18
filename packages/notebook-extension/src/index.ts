@@ -1339,7 +1339,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        // return NotebookActions.paste(current.content, 'below');
+        return NotebookActions.paste(current.content, 'below');
       }
     },
     isEnabled
@@ -1350,7 +1350,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        // return NotebookActions.paste(current.content, 'above');
+        return NotebookActions.paste(current.content, 'above');
       }
     },
     isEnabled
@@ -1361,7 +1361,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        // return NotebookActions.paste(current.content, 'replace');
+        return NotebookActions.paste(current.content, 'replace');
       }
     },
     isEnabled
@@ -1659,7 +1659,7 @@ function addCommands(
     },
     isEnabled
   });
-  /*commands.addCommand(CommandIDs.markdown1, {
+  commands.addCommand(CommandIDs.markdown1, {
     label: 'Change to Heading 1',
     execute: args => {
       const current = getCurrent(args);
@@ -1724,7 +1724,7 @@ function addCommands(
       }
     },
     isEnabled
-  });*/
+  });
   commands.addCommand(CommandIDs.hideCode, {
     label: 'Collapse Selected Code',
     execute: args => {

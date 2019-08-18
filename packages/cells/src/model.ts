@@ -84,7 +84,7 @@ export namespace CellModel {
     }
     return {
       cell_type: data.type,
-      source: data.value,
+      source: data.text,
       metadata
     } as nbformat.ICell;
   }

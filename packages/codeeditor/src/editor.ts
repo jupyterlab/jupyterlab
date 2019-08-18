@@ -280,13 +280,27 @@ export namespace CodeEditor {
           record: 'data'
         };
       }
-      DatastoreExt.withTransaction(this.record.datastore, () => {
-        DatastoreExt.updateRecord(this.record, {
-          text: { index: 0, remove: 0, text: options.value || '' },
-          mimeType: options.mimeType || 'text/plain',
-          selections: {}
+      if (!DatastoreExt.getRecord(this.record)) {
+        // Initialize the record if it hasn't been.
+        DatastoreExt.withTransaction(this.record.datastore, () => {
+          DatastoreExt.updateRecord(this.record, {
+            mimeType: options.mimeType || 'text/plain',
+            text: { index: 0, remove: 0, text: options.value || '' }
+          });
         });
-      });
+      } else {
+        // Possibly override any data existing in the record with options
+        // provided by the user.
+        if (options.value) {
+          this.value = options.value;
+        }
+        if (options.mimeType) {
+          this.mimeType = options.mimeType;
+        }
+        if (!this.mimeType) {
+          this.mimeType = 'text/plain';
+        }
+      }
     }
 
     /**

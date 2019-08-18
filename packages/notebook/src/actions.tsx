@@ -5,7 +5,7 @@
 
 import {
   IClientSession,
-  // Clipboard,
+  Clipboard,
   Dialog,
   showDialog
 } from '@jupyterlab/apputils';
@@ -28,7 +28,7 @@ import { OutputAreaModel } from '@jupyterlab/outputarea';
 
 import { ArrayExt, each } from '@phosphor/algorithm';
 
-// import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@phosphor/coreutils';
 
 import { ElementExt } from '@phosphor/domutils';
 
@@ -58,7 +58,7 @@ const TRUST_MESSAGE = (
 /**
  * The mimetype used for Jupyter cell data.
  */
-// const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
+const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 /**
  * A collection of actions that run against notebooks.
@@ -881,7 +881,7 @@ export namespace NotebookActions {
    * @param notebook - The target notebook widget.
    */
   export function copy(notebook: Notebook): void {
-    // Private.copyOrCut(notebook, false);
+    Private.copyOrCut(notebook, false);
   }
 
   /**
@@ -894,7 +894,7 @@ export namespace NotebookActions {
    * A new code cell is added if all cells are cut.
    */
   export function cut(notebook: Notebook): void {
-    // Private.copyOrCut(notebook, true);
+    Private.copyOrCut(notebook, true);
   }
 
   /**
@@ -912,7 +912,7 @@ export namespace NotebookActions {
    * This is a no-op if there is no cell data on the clipboard.
    * This action can be undone.
    */
-  /*export function paste(
+  export function paste(
     notebook: Notebook,
     mode: 'below' | 'above' | 'replace' = 'below'
   ): void {
@@ -935,61 +935,73 @@ export namespace NotebookActions {
     const newCells = values.map(cell => {
       switch (cell.cell_type) {
         case 'code':
-          return model.contentFactory.createCodeCell({ cell });
+          return model.contentFactory.createCodeCell(
+            cell as nbformat.ICodeCell
+          );
         case 'markdown':
-          return model.contentFactory.createMarkdownCell({ cell });
+          return model.contentFactory.createMarkdownCell(
+            cell as nbformat.IMarkdownCell
+          );
         default:
-          return model.contentFactory.createRawCell({ cell });
+          return model.contentFactory.createRawCell(cell as nbformat.IRawCell);
       }
     });
 
-    const cells = notebook.model.cells;
     let index: number;
 
-    cells.beginCompoundOperation();
+    DatastoreExt.withTransaction(model.data.record.datastore, () => {
+      // Set the starting index of the paste operation depending upon the mode.
+      switch (mode) {
+        case 'below':
+          index = notebook.activeCellIndex;
+          break;
+        case 'above':
+          index = notebook.activeCellIndex - 1;
+          break;
+        case 'replace':
+          // Find the cells to delete.
+          const toDelete: number[] = [];
 
-    // Set the starting index of the paste operation depending upon the mode.
-    switch (mode) {
-      case 'below':
-        index = notebook.activeCellIndex;
-        break;
-      case 'above':
-        index = notebook.activeCellIndex - 1;
-        break;
-      case 'replace':
-        // Find the cells to delete.
-        const toDelete: number[] = [];
+          notebook.widgets.forEach((child, index) => {
+            const metadata = DatastoreExt.getField({
+              ...child.data.record,
+              field: 'metadata'
+            });
+            const deletable = metadata['deletable'] !== false;
 
-        notebook.widgets.forEach((child, index) => {
-          const deletable = child.model.metadata['deletable'] !== false;
-
-          if (notebook.isSelectedOrActive(child) && deletable) {
-            toDelete.push(index);
-          }
-        });
-
-        // If cells are not deletable, we may not have anything to delete.
-        if (toDelete.length > 0) {
-          // Delete the cells as one undo event.
-          toDelete.reverse().forEach(i => {
-            cells.remove(i);
+            if (notebook.isSelectedOrActive(child) && deletable) {
+              toDelete.push(index);
+            }
           });
-        }
-        index = toDelete[0];
-        break;
-      default:
-        break;
-    }
 
-    newCells.forEach(cell => {
-      cells.insert(++index, cell);
+          // If cells are not deletable, we may not have anything to delete.
+          if (toDelete.length > 0) {
+            // Delete the cells as one undo event.
+            toDelete.reverse().forEach(i => {
+              DatastoreExt.updateField(
+                { ...model.data.record, field: 'cells' },
+                { index: i, remove: 1, values: [] }
+              );
+            });
+          }
+          index = toDelete[0]; // Now the last cell.
+          break;
+        default:
+          break;
+      }
+
+      newCells.forEach(cellId => {
+        DatastoreExt.updateField(
+          { ...model.data.record, field: 'cells' },
+          { index: ++index, remove: 0, values: [cellId] }
+        );
+      });
     });
-    cells.endCompoundOperation();
 
     notebook.activeCellIndex += newCells.length;
     notebook.deselectAll();
     Private.handleState(notebook, state);
-  }*/
+  }
 
   /**
    * Undo a cell action.
@@ -1662,7 +1674,7 @@ namespace Private {
    *
    * @param cut - Whether to copy or cut.
    */
-  /*export function copyOrCut(notebook: Notebook, cut: boolean): void {
+  export function copyOrCut(notebook: Notebook, cut: boolean): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -1690,7 +1702,7 @@ namespace Private {
       notebook.deselectAll();
     }
     handleState(notebook, state);
-  }*/
+  }
 
   /**
    * Change the selected cell type(s).
