@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-// import { KernelMessage } from '@jupyterlab/services';
-
 import {
   IClientSession,
   Clipboard,
@@ -25,6 +23,8 @@ import {
 import { DatastoreExt } from '@jupyterlab/datastore';
 
 import { OutputAreaModel } from '@jupyterlab/outputarea';
+
+import { KernelMessage } from '@jupyterlab/services';
 
 import { ArrayExt, each } from '@phosphor/algorithm';
 
@@ -1590,11 +1590,11 @@ namespace Private {
               }
 
               if (reply.content.status === 'ok') {
-                // const content = reply.content;
+                const content = reply.content;
 
-                // if (content.payload && content.payload.length) {
-                //  handlePayload(content, notebook, cell);
-                // }
+                if (content.payload && content.payload.length) {
+                  handlePayload(content, notebook, cell);
+                }
 
                 return true;
               } else {
@@ -1633,7 +1633,7 @@ namespace Private {
    * the kernel type definitions.
    * See [Payloads (DEPRECATED)](https://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
    */
-  /*function handlePayload(
+  function handlePayload(
     content: KernelMessage.IExecuteReply,
     notebook: Notebook,
     cell: Cell
@@ -1650,22 +1650,25 @@ namespace Private {
     const replace = (setNextInput as any).replace;
 
     if (replace) {
-      cell.model.value = text;
+      cell.editor.model.value = text;
       return;
     }
 
     // Create a new code cell and add as the next cell.
-    const newCell = notebook.model.contentFactory.createCodeCell({});
-    const cells = notebook.model.cells;
-    const index = ArrayExt.firstIndexOf(toArray(cells), cell.model);
-
-    newCell.value = text;
-    if (index === -1) {
-      cells.push(newCell);
-    } else {
-      cells.insert(index + 1, newCell);
-    }
-  }*/
+    const newCell = notebook.model.contentFactory.createCodeCell();
+    let index = ArrayExt.firstIndexOf(notebook.widgets, cell);
+    index = index === -1 ? notebook.widgets.length : index;
+    DatastoreExt.withTransaction(notebook.model.data.record.datastore, () => {
+      DatastoreExt.updateField(
+        { ...notebook.model.data.record, field: 'cells' },
+        { index, remove: 0, values: [newCell] }
+      );
+      DatastoreExt.updateField(
+        { ...notebook.model.data.cells, record: newCell, field: 'text' },
+        { index: 0, remove: 0, text }
+      );
+    });
+  }
 
   /**
    * Copy or cut the selected cell data to the application clipboard.

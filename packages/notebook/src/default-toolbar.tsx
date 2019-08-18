@@ -159,7 +159,7 @@ export namespace ToolbarItems {
     return new ToolbarButton({
       iconClassName: TOOLBAR_PASTE_CLASS,
       onClick: () => {
-        // NotebookActions.paste(panel.content);
+        NotebookActions.paste(panel.content);
       },
       tooltip: 'Paste cells from the clipboard'
     });

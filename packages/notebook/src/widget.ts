@@ -405,6 +405,7 @@ export class StaticNotebook extends Widget {
    * Handle a change cells event.
    */
   private _onCellsChanged(sender: Datastore, args: ListField.Change<string>) {
+    const data = this.model.data;
     args.forEach(change => {
       for (let i = 0; i < change.removed.length; i++) {
         this._removeCell(change.index);
@@ -412,14 +413,29 @@ export class StaticNotebook extends Widget {
       for (let i = 0; i < change.inserted.length; i++) {
         const loc = {
           record: {
-            ...this.model.data.cells,
+            ...data.cells,
             record: change.inserted[i]
           },
-          outputs: this.model.data.outputs
+          outputs: data.outputs
         };
         this._insertCell(change.index + i, loc);
       }
-      // TODO add a new cell when the list is empty.
+      const cells = DatastoreExt.getField({ ...data.record, field: 'cells' });
+      if (!cells.length) {
+        requestAnimationFrame(() => {
+          // Add a new cell in a new frame so we don't trigger the
+          // same change listener in this one.
+          DatastoreExt.withTransaction(data.record.datastore, () => {
+            const cellId = this.model.contentFactory.createCell(
+              this.notebookConfig.defaultCell
+            );
+            DatastoreExt.updateField(
+              { ...data.record, field: 'cells' },
+              { index: 0, remove: 0, values: [cellId] }
+            );
+          });
+        });
+      }
     });
   }
 
