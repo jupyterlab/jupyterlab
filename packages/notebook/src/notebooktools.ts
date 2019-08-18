@@ -3,7 +3,7 @@
 
 import { Collapse, Styling } from '@jupyterlab/apputils';
 
-import { Cell, CellModel } from '@jupyterlab/cells';
+import { Cell, ICellData } from '@jupyterlab/cells';
 
 import {
   CodeEditor,
@@ -250,7 +250,7 @@ export class NotebookTools extends Widget implements INotebookTools {
   private _commonTools: RankedPanel<NotebookTools.Tool>;
   private _advancedTools: RankedPanel<NotebookTools.Tool>;
   private _tracker: INotebookTracker;
-  private _prevActiveCell: CellModel.DataLocation | null;
+  private _prevActiveCell: ICellData.DataLocation | null;
   private _prevActiveNotebookModel: INotebookModel | null;
 }
 

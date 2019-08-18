@@ -26,39 +26,10 @@ import {
 import { MimeModel } from './mimemodel';
 
 /**
- * The interface for an output model.
+ * A namespace for interfaces describing where an IOutputModel
+ * holds its data.
  */
-export interface IOutputModel extends IRenderMime.IMimeModel {
-  /**
-   * The output type.
-   */
-  readonly type: string;
-
-  /**
-   * The execution count of the model.
-   */
-  readonly executionCount: nbformat.ExecutionCount;
-
-  /**
-   * Whether the output is trusted.
-   */
-  trusted: boolean;
-
-  /**
-   * Dispose of the resources used by the output model.
-   */
-  dispose(): void;
-
-  /**
-   * Serialize the model to JSON.
-   */
-  toJSON(): nbformat.IOutput;
-}
-
-/**
- * The namespace for IOutputModel sub-interfaces.
- */
-export namespace IOutputModel {
+export namespace IOutputData {
   /**
    * Fields for use in the output model schema.
    */
@@ -100,11 +71,16 @@ export namespace IOutputModel {
   export interface ISchema extends Schema {
     fields: IFields;
   }
+}
 
+/**
+ * A namespace for default implementation of the IOutputData functionality.
+ */
+export namespace OutputData {
   /**
    * A concrete realization of the schema, available at runtime.
    */
-  export const SCHEMA: ISchema = {
+  export const SCHEMA: IOutputData.ISchema = {
     id: '@jupyterlab/rendermime:outputmodel.v1',
     fields: {
       trusted: Fields.Boolean(),
@@ -115,7 +91,42 @@ export namespace IOutputModel {
       raw: Fields.Register<ReadonlyJSONObject>({ value: {} })
     }
   };
+}
 
+/**
+ * The interface for an output model.
+ */
+export interface IOutputModel extends IRenderMime.IMimeModel {
+  /**
+   * The output type.
+   */
+  readonly type: string;
+
+  /**
+   * The execution count of the model.
+   */
+  readonly executionCount: nbformat.ExecutionCount;
+
+  /**
+   * Whether the output is trusted.
+   */
+  trusted: boolean;
+
+  /**
+   * Dispose of the resources used by the output model.
+   */
+  dispose(): void;
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): nbformat.IOutput;
+}
+
+/**
+ * A namespace for IOutputModel statics.
+ */
+export namespace IOutputModel {
   /**
    * The options used to create a notebook output model.
    */
@@ -133,7 +144,7 @@ export namespace IOutputModel {
     /**
      * A record in which to store the data.
      */
-    record?: DatastoreExt.RecordLocation<ISchema>;
+    record?: DatastoreExt.RecordLocation<IOutputData.ISchema>;
   }
 }
 
@@ -150,11 +161,11 @@ export class OutputModel implements IOutputModel {
     } else {
       const datastore = Datastore.create({
         id: 1,
-        schemas: [IOutputModel.SCHEMA]
+        schemas: [OutputData.SCHEMA]
       });
       this._record = {
         datastore,
-        schema: IOutputModel.SCHEMA,
+        schema: OutputData.SCHEMA,
         record: 'data'
       };
       if (options.value) {
@@ -213,8 +224,8 @@ export class OutputModel implements IOutputModel {
    * this call may or may not have deferred effects,
    */
   setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
-    let metadataUpdate: Record.Update<IOutputModel.ISchema> = {};
-    let dataUpdate: Record.Update<IOutputModel.ISchema> = {};
+    let metadataUpdate: Record.Update<IOutputData.ISchema> = {};
+    let dataUpdate: Record.Update<IOutputData.ISchema> = {};
     if (options.data) {
       dataUpdate = { data: options.data };
     }
@@ -239,7 +250,7 @@ export class OutputModel implements IOutputModel {
   /**
    * The record in which the output model is stored.
    */
-  private readonly _record: DatastoreExt.RecordLocation<IOutputModel.ISchema>;
+  private readonly _record: DatastoreExt.RecordLocation<IOutputData.ISchema>;
 }
 
 /**
@@ -272,7 +283,7 @@ export namespace OutputModel {
    * Serialize an output record to JSON.
    */
   export function toJSON(
-    loc: DatastoreExt.RecordLocation<IOutputModel.ISchema>
+    loc: DatastoreExt.RecordLocation<IOutputData.ISchema>
   ): nbformat.IOutput {
     let output: JSONObject = DatastoreExt.getField({
       ...loc,
@@ -297,7 +308,7 @@ export namespace OutputModel {
   }
 
   export function fromJSON(
-    loc: DatastoreExt.RecordLocation<IOutputModel.ISchema>,
+    loc: DatastoreExt.RecordLocation<IOutputData.ISchema>,
     value: nbformat.IOutput,
     trusted: boolean = false
   ): void {

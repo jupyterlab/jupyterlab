@@ -3,35 +3,27 @@
 
 import { showDialog, Dialog } from '@jupyterlab/apputils';
 
-import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
+import { DatastoreExt } from '@jupyterlab/datastore';
 
 import { DocumentModel, DocumentRegistry } from '@jupyterlab/docregistry';
 
 import {
-  CodeCellModel,
-  RawCellModel,
-  MarkdownCellModel,
-  CellModel
+  CellData,
+  CodeCellData,
+  ICellData,
+  RawCellData,
+  MarkdownCellData
 } from '@jupyterlab/cells';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { IOutputModel } from '@jupyterlab/rendermime';
+import { IOutputData, OutputData } from '@jupyterlab/rendermime';
 
-import {
-  ReadonlyJSONObject,
-  ReadonlyJSONValue,
-  UUID
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject, UUID } from '@phosphor/coreutils';
 
-import {
-  Datastore,
-  Fields,
-  ListField,
-  MapField,
-  RegisterField,
-  Schema
-} from '@phosphor/datastore';
+import { Datastore } from '@phosphor/datastore';
+
+import { INotebookData, NotebookData } from './data';
 
 /**
  * The definition of a model object for a notebook widget.
@@ -60,31 +52,12 @@ export interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * The location of the notebook data in a datastore.
    */
-  readonly data: INotebookModel.DataLocation;
+  readonly data: INotebookData.DataLocation;
 
   /**
    * The array of deleted cells since the notebook was last run.
    */
   readonly deletedCells: string[];
-}
-
-export namespace INotebookModel {
-  export type DataLocation = {
-    /**
-     * The top-level record for the notebook data.
-     */
-    record: DatastoreExt.RecordLocation<NotebookModel.ISchema>;
-
-    /**
-     * The table holding cell data.
-     */
-    cells: DatastoreExt.TableLocation<CellModel.ISchema>;
-
-    /**
-     * The table holding output data.
-     */
-    outputs: DatastoreExt.TableLocation<IOutputModel.ISchema>;
-  };
 }
 
 /**
@@ -100,22 +73,22 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
 
     const datastore = Datastore.create({
       id: 1,
-      schemas: [NotebookModel.SCHEMA, IOutputModel.SCHEMA, CellModel.SCHEMA]
+      schemas: [NotebookData.SCHEMA, OutputData.SCHEMA, CellData.SCHEMA]
     });
 
     this.data = {
       record: {
         datastore,
-        schema: NotebookModel.SCHEMA,
+        schema: NotebookData.SCHEMA,
         record: 'data'
       },
       cells: {
         datastore,
-        schema: CellModel.SCHEMA
+        schema: CellData.SCHEMA
       },
       outputs: {
         datastore,
-        schema: IOutputModel.SCHEMA
+        schema: OutputData.SCHEMA
       }
     };
     // Handle initialization of data.
@@ -142,7 +115,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   /**
    * The location of the data in the notebook.
    */
-  readonly data: INotebookModel.DataLocation;
+  readonly data: INotebookData.DataLocation;
 
   /**
    * The metadata associated with the notebook.
@@ -223,8 +196,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     let cells: nbformat.ICell[] = [];
     let data = DatastoreExt.getRecord(this.data.record);
     for (let i = 0; i < data.cells.length; i++) {
-      // TODO use the rigt version of toJSON
-      let cell = CellModel.toJSON({
+      let cell = CellData.toJSON({
         record: { ...this.data.cells, record: data.cells[i] },
         outputs: this.data.outputs
       });
@@ -261,20 +233,20 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
         };
         switch (cell.cell_type) {
           case 'code':
-            CodeCellModel.fromJSON(loc, cell as nbformat.ICodeCell);
+            CodeCellData.fromJSON(loc, cell as nbformat.ICodeCell);
             break;
           case 'markdown':
-            MarkdownCellModel.fromJSON(loc, cell as nbformat.IMarkdownCell);
+            MarkdownCellData.fromJSON(loc, cell as nbformat.IMarkdownCell);
             break;
           case 'raw':
-            RawCellModel.fromJSON(loc, cell as nbformat.IRawCell);
+            RawCellData.fromJSON(loc, cell as nbformat.IRawCell);
             break;
           default:
             continue;
         }
       }
       const cellLoc: DatastoreExt.FieldLocation<
-        NotebookModel.ISchema,
+        INotebookData.ISchema,
         'cells'
       > = { ...this.data.record, field: 'cells' };
       const oldCells = DatastoreExt.getField(cellLoc);
@@ -370,58 +342,6 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
  * The namespace for the `NotebookModel` class statics.
  */
 export namespace NotebookModel {
-  export interface IFields extends SchemaFields {
-    /**
-     * The major nbformat version number.
-     */
-    readonly nbformat: RegisterField<number>;
-
-    /**
-     * The minor nbformat version number.
-     */
-    readonly nbformatMinor: RegisterField<number>;
-
-    /**
-     * The list of cell IDs in the notebook.
-     */
-    readonly cells: ListField<string>;
-
-    /**
-     * The metadata for the notebook.
-     */
-    readonly metadata: MapField<ReadonlyJSONValue>;
-  }
-
-  /**
-   * An interface for a notebook schema.
-   */
-  export interface ISchema extends Schema {
-    /**
-     * The schema fields.
-     */
-    fields: IFields;
-  }
-
-  /**
-   * The concreate notebook schema, available at runtime.
-   */
-  export const SCHEMA: ISchema = {
-    /**
-     * The schema id.
-     */
-    id: '@jupyterlab/notebook:notebookmodel.v1',
-
-    /**
-     * Concrete realizations of the schema fields, available at runtime.
-     */
-    fields: {
-      nbformat: Fields.Number(),
-      nbformatMinor: Fields.Number(),
-      cells: Fields.List<string>(),
-      metadata: Fields.Map<ReadonlyJSONValue>()
-    }
-  };
-
   /**
    * An options object for initializing a notebook model.
    */
@@ -545,7 +465,7 @@ export namespace NotebookModel {
         },
         outputs: this._data.outputs
       };
-      CodeCellModel.fromJSON(loc, value);
+      CodeCellData.fromJSON(loc, value);
       return id;
     }
 
@@ -567,7 +487,7 @@ export namespace NotebookModel {
         },
         outputs: this._data.outputs
       };
-      MarkdownCellModel.fromJSON(loc, value);
+      MarkdownCellData.fromJSON(loc, value);
       return id;
     }
 
@@ -589,7 +509,7 @@ export namespace NotebookModel {
         },
         outputs: this._data.outputs
       };
-      RawCellModel.fromJSON(loc, value);
+      RawCellData.fromJSON(loc, value);
       return id;
     }
 
@@ -626,12 +546,12 @@ export namespace NotebookModel {
       /**
        * A cell table.
        */
-      cells: DatastoreExt.TableLocation<CellModel.ISchema>;
+      cells: DatastoreExt.TableLocation<ICellData.ISchema>;
 
       /**
        * An outputs table.
        */
-      outputs: DatastoreExt.TableLocation<IOutputModel.ISchema>;
+      outputs: DatastoreExt.TableLocation<IOutputData.ISchema>;
     };
   }
 

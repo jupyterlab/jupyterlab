@@ -13,7 +13,7 @@ import { DatastoreExt } from '@jupyterlab/datastore';
 
 import {
   OutputArea,
-  OutputAreaModel,
+  OutputAreaData,
   SimplifiedOutputArea,
   IOutputPrompt,
   OutputPrompt,
@@ -22,10 +22,10 @@ import {
 } from '@jupyterlab/outputarea';
 
 import {
-  IOutputModel,
   IRenderMime,
   IRenderMimeRegistry,
-  MimeModel
+  MimeModel,
+  OutputData
 } from '@jupyterlab/rendermime';
 
 import { KernelMessage, Kernel } from '@jupyterlab/services';
@@ -55,7 +55,7 @@ import {
 
 import { InputArea, IInputPrompt, InputPrompt } from './inputarea';
 
-import { CellModel } from './model';
+import { ICellData, CellData } from './data';
 
 import { InputPlaceholder, OutputPlaceholder } from './placeholder';
 
@@ -160,23 +160,23 @@ export class Cell extends Widget {
   constructor(options: Cell.IOptions) {
     super();
     this.addClass(CELL_CLASS);
-    let data: CellModel.DataLocation;
+    let data: ICellData.DataLocation;
     if (options.data) {
       data = this._data = options.data;
     } else {
       const datastore = Datastore.create({
         id: 1,
-        schemas: [IOutputModel.SCHEMA, CellModel.SCHEMA]
+        schemas: [OutputData.SCHEMA, CellData.SCHEMA]
       });
       data = this._data = {
         record: {
           datastore,
-          schema: CellModel.SCHEMA,
+          schema: CellData.SCHEMA,
           record: 'data'
         },
         outputs: {
           datastore,
-          schema: IOutputModel.SCHEMA
+          schema: OutputData.SCHEMA
         }
       };
     }
@@ -281,7 +281,7 @@ export class Cell extends Widget {
   /**
    * Get the model used by the cell.
    */
-  get data(): CellModel.DataLocation {
+  get data(): ICellData.DataLocation {
     return this._data;
   }
 
@@ -563,7 +563,7 @@ export class Cell extends Widget {
 
   private _metadataListener: IDisposable;
   private _readOnly = false;
-  private _data: CellModel.DataLocation = null;
+  private _data: ICellData.DataLocation = null;
   private _inputHidden = false;
   private _input: InputArea = null;
   private _inputWrapper: Widget = null;
@@ -583,7 +583,7 @@ export namespace Cell {
     /**
      * The model used by the cell.
      */
-    data?: CellModel.DataLocation;
+    data?: ICellData.DataLocation;
 
     /**
      * The factory object for customizable cell children.
@@ -758,11 +758,6 @@ export class CodeCell extends Cell {
       this
     );
   }
-
-  /**
-   * The model used by the widget.
-   */
-  readonly data: CellModel.DataLocation;
 
   /**
    * The type of the cell widget.
@@ -1089,7 +1084,7 @@ export namespace CodeCell {
           { ...cell.data.record, field: 'executionCount' },
           null
         );
-        OutputAreaModel.clear(cell.data);
+        OutputAreaData.clear(cell.data);
       });
       return;
     }
@@ -1183,11 +1178,6 @@ export class MarkdownCell extends Cell {
     });
     this.renderInput(this._renderer);
   }
-
-  /**
-   * The model used by the widget.
-   */
-  readonly data: CellModel.DataLocation;
 
   /**
    * The type of the cell widget.
@@ -1349,11 +1339,6 @@ export class RawCell extends Cell {
       contentFactory: this.contentFactory
     });
   }
-
-  /**
-   * The model used by the widget.
-   */
-  readonly data: CellModel.DataLocation;
 
   /**
    * The type of the cell widget.

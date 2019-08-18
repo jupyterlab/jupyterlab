@@ -5,15 +5,15 @@
 
 import { IAttachmentsModel } from '@jupyterlab/attachments';
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import { CodeEditor, ICodeEditorData } from '@jupyterlab/codeeditor';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
 import { DatastoreExt } from '@jupyterlab/datastore';
 
-import { OutputAreaModel } from '@jupyterlab/outputarea';
+import { OutputAreaData } from '@jupyterlab/outputarea';
 
-import { IOutputModel } from '@jupyterlab/rendermime';
+import { IOutputData } from '@jupyterlab/rendermime';
 
 import { JSONExt, JSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
 
@@ -26,14 +26,136 @@ import {
 } from '@phosphor/datastore';
 
 /**
- * Utility functions for cell models.
+ * The namespace for `ICellData` interfaces, describing
+ * where cells store their data in a datastore.
  */
-export namespace CellModel {
+export namespace ICellData {
+  /**
+   * A type for the common fields stored in the Cell schema.
+   */
+  export interface IBaseFields extends ICodeEditorData.IFields {
+    /**
+     * The type of the cell.
+     */
+    type: RegisterField<nbformat.CellType>;
+
+    /**
+     * Whether the cell is trusted.
+     */
+    trusted: RegisterField<boolean>;
+
+    /**
+     * The metadata for the cell.
+     */
+    metadata: MapField<ReadonlyJSONValue>;
+  }
+
+  /**
+   * A union interface for all the fields stored in cell schemas
+   * so that they may be stored in the same table.
+   */
+  export interface IFields
+    extends IBaseFields,
+      ICodeCellData.IFields,
+      IAttachmentsCellData.IFields {}
+
+  /**
+   * An interface for a cell schema.
+   */
+  export interface ISchema extends Schema {
+    /**
+     * The id for the schema.
+     */
+    id: '@jupyterlab/cells:cellmodel.v1';
+
+    /**
+     * The union of cell fields.
+     */
+    fields: IFields;
+  }
+
+  /**
+   * The location of cell data in a datastore.
+   */
+  export type DataLocation = {
+    /**
+     * The record for the cell data.
+     */
+    record: DatastoreExt.RecordLocation<ISchema>;
+
+    /**
+     * A table in which outputs are stored.
+     */
+    outputs: DatastoreExt.TableLocation<IOutputData.ISchema>;
+  };
+}
+
+/**
+ * The namespace for `IAttachmentsCellData` interfaces.
+ */
+export namespace IAttachmentsCellData {
+  /**
+   * An interface for cell schema fields that can store attachments.
+   */
+  export interface IFields
+    extends ICellData.IBaseFields,
+      IAttachmentsModel.IFields {}
+}
+
+/**
+ * The namespace for `ICodeCellData` statics.
+ */
+export namespace ICodeCellData {
+  /**
+   * The schema type for code cell models.
+   */
+  export interface IFields extends ICellData.IBaseFields {
+    /**
+     * Execution count for the cell.
+     */
+    executionCount: RegisterField<nbformat.ExecutionCount>;
+
+    /**
+     * A list of output ids for the cell.
+     */
+    outputs: ListField<string>;
+  }
+}
+
+/**
+ * Utility functions for operating on cell data.
+ */
+export namespace CellData {
+  /**
+   * A concrete schema for a cell table, available at runtime.
+   */
+  export const SCHEMA: ICellData.ISchema = {
+    /**
+     * The id for the schema.
+     */
+    id: '@jupyterlab/cells:cellmodel.v1',
+
+    /**
+     * The union of cell fields.
+     */
+    fields: {
+      attachments: Fields.Map<nbformat.IMimeBundle>(),
+      executionCount: Fields.Register<nbformat.ExecutionCount>({ value: null }),
+      metadata: Fields.Map<ReadonlyJSONValue>(),
+      mimeType: Fields.String(),
+      outputs: Fields.List<string>(),
+      selections: Fields.Map<CodeEditor.ITextSelection[]>(),
+      text: Fields.Text(),
+      trusted: Fields.Boolean(),
+      type: Fields.Register<nbformat.CellType>({ value: 'code' })
+    }
+  };
+
   /**
    * Construct a cell model from optional cell content.
    */
   export function fromJSON(
-    loc: CellModel.DataLocation,
+    loc: ICellData.DataLocation,
     cell?: nbformat.IBaseCell
   ) {
     // Get the intitial data for the model.
@@ -73,158 +195,67 @@ export namespace CellModel {
     });
   }
 
-  export function toJSON(loc: CellModel.DataLocation): nbformat.ICell {
+  /**
+   * Convert a cell at a given data location to JSON.
+   * This delegates to specific versions of `toJSON` based
+   * on the cell type.
+   */
+  export function toJSON(loc: ICellData.DataLocation): nbformat.ICell {
     let data = DatastoreExt.getRecord(loc.record);
     switch (data.type) {
       case 'code':
-        return CodeCellModel.toJSON(loc);
+        return CodeCellData.toJSON(loc);
         break;
       case 'markdown':
-        return MarkdownCellModel.toJSON(loc);
+        return MarkdownCellData.toJSON(loc);
         break;
       default:
-        return RawCellModel.toJSON(loc);
+        return RawCellData.toJSON(loc);
     }
   }
 }
 
 /**
- * The namespace for `CellModel` statics.
+ * The namespace for `AttachmentsCellData` statics.
  */
-export namespace CellModel {
-  /**
-   * A type for the common fields stored in the Cell schema.
-   */
-  export interface IBaseFields extends CodeEditor.IFields {
-    /**
-     * The type of the cell.
-     */
-    type: RegisterField<nbformat.CellType>;
-
-    /**
-     * Whether the cell is trusted.
-     */
-    trusted: RegisterField<boolean>;
-
-    /**
-     * The metadata for the cell.
-     */
-    metadata: MapField<ReadonlyJSONValue>;
-  }
-
-  /**
-   * A union interface for all the fields stored in cell schemas
-   * so that they may be stored in the same table.
-   */
-  export interface IFields
-    extends IBaseFields,
-      CodeCellModel.IFields,
-      AttachmentsCellModel.IFields {}
-
-  /**
-   * An interface for a cell schema.
-   */
-  export interface ISchema extends Schema {
-    /**
-     * The id for the schema.
-     */
-    id: '@jupyterlab/cells:cellmodel.v1';
-
-    /**
-     * The union of cell fields.
-     */
-    fields: IFields;
-  }
-
-  /**
-   * A concrete schema for a cell table, available at runtime.
-   */
-  export const SCHEMA: ISchema = {
-    /**
-     * The id for the schema.
-     */
-    id: '@jupyterlab/cells:cellmodel.v1',
-
-    /**
-     * The union of cell fields.
-     */
-    fields: {
-      attachments: Fields.Map<nbformat.IMimeBundle>(),
-      executionCount: Fields.Register<nbformat.ExecutionCount>({ value: null }),
-      metadata: Fields.Map<ReadonlyJSONValue>(),
-      mimeType: Fields.String(),
-      outputs: Fields.List<string>(),
-      selections: Fields.Map<CodeEditor.ITextSelection[]>(),
-      text: Fields.Text(),
-      trusted: Fields.Boolean(),
-      type: Fields.Register<nbformat.CellType>({ value: 'code' })
-    }
-  };
-
-  /**
-   * The location of cell data in a datastore.
-   */
-  export type DataLocation = {
-    /**
-     * The record for the cell data.
-     */
-    record: DatastoreExt.RecordLocation<ISchema>;
-
-    /**
-     * A table in which outputs are stored.
-     */
-    outputs: DatastoreExt.TableLocation<IOutputModel.ISchema>;
-  };
-}
-
-/**
- * The namespace for `AttachmentsCellModel` statics.
- */
-export namespace AttachmentsCellModel {
+export namespace AttachmentsCellData {
   /**
    * Construct a new cell with optional attachments.
    */
   export function fromJSON(
-    loc: CellModel.DataLocation,
+    loc: ICellData.DataLocation,
     cell?: nbformat.IBaseCell
   ): void {
     // TODO: resurrect cell attachments.
-    CellModel.fromJSON(loc, cell);
+    CellData.fromJSON(loc, cell);
   }
 
   /**
    * Serialize the model to JSON.
    */
   export function toJSON(
-    loc: CellModel.DataLocation
+    loc: ICellData.DataLocation
   ): nbformat.IRawCell | nbformat.IMarkdownCell {
     return Private.baseToJSON(loc) as
       | nbformat.IRawCell
       | nbformat.IMarkdownCell;
   }
-
-  /**
-   * An interface for cell schema fields that can store attachments.
-   */
-  export interface IFields
-    extends CellModel.IBaseFields,
-      IAttachmentsModel.IFields {}
 }
 
 /**
- * An implementation of a raw cell model.
+ * Utility functions for working with RawCellData.
  */
-export namespace RawCellModel {
+export namespace RawCellData {
   /**
    * Construct a new cell with optional attachments.
    */
   export function fromJSON(
-    loc: CellModel.DataLocation,
+    loc: ICellData.DataLocation,
     cell?: nbformat.IRawCell
   ): void {
     // TODO: resurrect cell attachments.
     DatastoreExt.withTransaction(loc.record.datastore, () => {
-      AttachmentsCellModel.fromJSON(loc, cell);
+      AttachmentsCellData.fromJSON(loc, cell);
       DatastoreExt.updateRecord(loc.record, {
         type: 'raw'
       });
@@ -234,25 +265,25 @@ export namespace RawCellModel {
   /**
    * Serialize the model to JSON.
    */
-  export function toJSON(loc: CellModel.DataLocation): nbformat.IRawCell {
-    return AttachmentsCellModel.toJSON(loc) as nbformat.IRawCell;
+  export function toJSON(loc: ICellData.DataLocation): nbformat.IRawCell {
+    return AttachmentsCellData.toJSON(loc) as nbformat.IRawCell;
   }
 }
 
 /**
- * An implementation of a markdown cell model.
+ * Utility functions for working with MarkdownCellData.
  */
-export namespace MarkdownCellModel {
+export namespace MarkdownCellData {
   /**
    * Construct a new cell with optional attachments.
    */
   export function fromJSON(
-    loc: CellModel.DataLocation,
+    loc: ICellData.DataLocation,
     cell?: nbformat.IMarkdownCell
   ): void {
     // TODO: resurrect cell attachments.
     DatastoreExt.withTransaction(loc.record.datastore, () => {
-      AttachmentsCellModel.fromJSON(loc, cell);
+      AttachmentsCellData.fromJSON(loc, cell);
       DatastoreExt.updateRecord(loc.record, {
         mimeType: 'text/x-ipythongfm',
         type: 'markdown'
@@ -263,32 +294,32 @@ export namespace MarkdownCellModel {
   /**
    * Serialize the model to JSON.
    */
-  export function toJSON(loc: CellModel.DataLocation): nbformat.IMarkdownCell {
-    return AttachmentsCellModel.toJSON(loc) as nbformat.IMarkdownCell;
+  export function toJSON(loc: ICellData.DataLocation): nbformat.IMarkdownCell {
+    return AttachmentsCellData.toJSON(loc) as nbformat.IMarkdownCell;
   }
 }
 
 /**
- * The namespace for `CodeCellModel` statics.
+ * The namespace for `CodeCellData` statics.
  */
-export namespace CodeCellModel {
+export namespace CodeCellData {
   /**
    * Construct a new code cell with optional original cell content.
    */
   export function fromJSON(
-    loc: CellModel.DataLocation,
+    loc: ICellData.DataLocation,
     cell?: nbformat.ICodeCell
   ) {
     let outputs: nbformat.IOutput[] = [];
 
     DatastoreExt.withTransaction(loc.record.datastore, () => {
-      CellModel.fromJSON(loc, cell);
+      CellData.fromJSON(loc, cell);
       DatastoreExt.updateRecord(loc.record, {
         executionCount: cell ? cell.execution_count || null : null,
         type: 'code'
       });
       outputs = (cell && cell.outputs) || [];
-      OutputAreaModel.fromJSON(loc, outputs);
+      OutputAreaData.fromJSON(loc, outputs);
     });
 
     // We keep `collapsed` and `jupyter.outputs_hidden` metadata in sync, since
@@ -330,29 +361,14 @@ export namespace CodeCellModel {
   /**
    * Serialize the model to JSON.
    */
-  export function toJSON(loc: CellModel.DataLocation): nbformat.ICodeCell {
+  export function toJSON(loc: ICellData.DataLocation): nbformat.ICodeCell {
     let cell = Private.baseToJSON(loc) as nbformat.ICodeCell;
     cell.execution_count = DatastoreExt.getField({
       ...loc.record,
       field: 'executionCount'
     });
-    cell.outputs = OutputAreaModel.toJSON(loc);
+    cell.outputs = OutputAreaData.toJSON(loc);
     return cell;
-  }
-
-  /**
-   * The schema type for code cell models.
-   */
-  export interface IFields extends CellModel.IBaseFields {
-    /**
-     * Execution count for the cell.
-     */
-    executionCount: RegisterField<nbformat.ExecutionCount>;
-
-    /**
-     * A list of output ids for the cell.
-     */
-    outputs: ListField<string>;
   }
 }
 
@@ -394,7 +410,7 @@ namespace Private {
    * The `toJSON` function in this namespace correctly delegates
    * to the different subtypes.
    */
-  export function baseToJSON(loc: CellModel.DataLocation): nbformat.ICell {
+  export function baseToJSON(loc: ICellData.DataLocation): nbformat.ICell {
     let data = DatastoreExt.getRecord(loc.record);
     let metadata = data.metadata as JSONObject;
     if (data.trusted) {

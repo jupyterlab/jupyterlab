@@ -1,24 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
+import { DatastoreExt } from '@jupyterlab/datastore';
 
 import { JSONObject } from '@phosphor/coreutils';
 
-import {
-  Datastore,
-  Fields,
-  MapField,
-  RegisterField,
-  Schema,
-  TextField
-} from '@phosphor/datastore';
+import { Datastore } from '@phosphor/datastore';
 
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { IModelDB, ModelDB } from '@jupyterlab/observables';
+
+import { CodeEditorData, ICodeEditorData } from './data';
 
 /**
  * A namespace for code editors.
@@ -29,55 +24,6 @@ import { IModelDB, ModelDB } from '@jupyterlab/observables';
  * - Common JLab services which are based on the code editor should belong to `IEditorServices`.
  */
 export namespace CodeEditor {
-  /**
-   * An interface for the fields stored in the CodeEditor schema.
-   */
-  export interface IFields extends SchemaFields {
-    /**
-     * The mime type for the editor.
-     */
-    readonly mimeType: RegisterField<string>;
-
-    /**
-     * The text content of the editor.
-     */
-    readonly text: TextField;
-
-    /**
-     * The cursors for the editor.
-     */
-    readonly selections: MapField<ITextSelection[]>;
-  }
-
-  /**
-   * An interface for a CodeEditor schema.
-   */
-  export interface ISchema extends Schema {
-    /**
-     * The schema fields.
-     */
-    fields: IFields;
-  }
-
-  /**
-   * The concrete CodeEditor schema, available at runtime.
-   */
-  export const SCHEMA: ISchema = {
-    /**
-     * The schema id.
-     */
-    id: '@jupyterlab/codeeditor:codeeditor:v1',
-
-    /**
-     * Concrete realizations of the schema fields, available at runtime.
-     */
-    fields: {
-      mimeType: Fields.String(),
-      text: Fields.Text(),
-      selections: Fields.Map<ITextSelection[]>()
-    }
-  };
-
   /**
    * A zero-based position in the editor.
    */
@@ -248,7 +194,7 @@ export namespace CodeEditor {
     /**
      * The record in the datastore in which this codeeditor keeps its data.
      */
-    readonly record: DatastoreExt.RecordLocation<ISchema>;
+    readonly record: DatastoreExt.RecordLocation<ICodeEditorData.ISchema>;
   }
 
   /**
@@ -272,11 +218,11 @@ export namespace CodeEditor {
       } else {
         const datastore = Datastore.create({
           id: 1,
-          schemas: [SCHEMA]
+          schemas: [CodeEditorData.SCHEMA]
         });
         this.record = {
           datastore: datastore,
-          schema: SCHEMA,
+          schema: CodeEditorData.SCHEMA,
           record: 'data'
         };
       }
@@ -312,7 +258,7 @@ export namespace CodeEditor {
     /**
      * The record in the datastore in which this codeeditor keeps its data.
      */
-    readonly record: DatastoreExt.RecordLocation<ISchema>;
+    readonly record: DatastoreExt.RecordLocation<ICodeEditorData.ISchema>;
 
     /**
      * Get the value of the model.
@@ -797,7 +743,7 @@ export namespace CodeEditor {
       /**
        * A record location in an existing datastore in which to store the model.
        */
-      record?: DatastoreExt.RecordLocation<ISchema>;
+      record?: DatastoreExt.RecordLocation<ICodeEditorData.ISchema>;
     }
   }
 }

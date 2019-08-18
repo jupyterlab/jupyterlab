@@ -3,7 +3,7 @@
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import { CodeEditor, CodeEditorData } from '@jupyterlab/codeeditor';
 
 import { Mode } from '@jupyterlab/codemirror';
 
@@ -33,7 +33,10 @@ export class DocumentModel extends CodeEditor.Model
    */
   constructor(languagePreference?: string, modelDB?: IModelDB) {
     super({ modelDB });
-    this.datastore = Datastore.create({ id: 1, schemas: [CodeEditor.SCHEMA] });
+    this.datastore = Datastore.create({
+      id: 1,
+      schemas: [CodeEditorData.SCHEMA]
+    });
     this._defaultLang = languagePreference || '';
     this.datastore.changed.connect(this.triggerContentChange, this);
     this.ready = Promise.resolve(undefined);

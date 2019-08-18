@@ -9,7 +9,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import { DatastoreExt } from '@jupyterlab/datastore';
 
-import { OutputAreaModel } from '@jupyterlab/outputarea';
+import { OutputAreaData } from '@jupyterlab/outputarea';
 
 import { KernelMessage } from '@jupyterlab/services';
 
@@ -130,7 +130,7 @@ export class ForeignHandler implements IDisposable {
         }
         let output = msg.content as nbformat.IOutput;
         output.output_type = msgType as nbformat.OutputType;
-        OutputAreaModel.appendItem(cell.data, output);
+        OutputAreaData.appendItem(cell.data, output);
         parent.update();
         return true;
       case 'clear_output':
@@ -138,7 +138,7 @@ export class ForeignHandler implements IDisposable {
         cell = this._parent.getCell(parentMsgId);
         if (cell) {
           // TODO handle wait
-          OutputAreaModel.clear(cell.data);
+          OutputAreaData.clear(cell.data);
         }
         return true;
       default:

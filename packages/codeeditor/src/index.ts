@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+export * from './data';
 export * from './editor';
 export * from './jsoneditor';
 export * from './widget';

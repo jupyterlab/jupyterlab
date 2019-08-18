@@ -11,7 +11,7 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 
-import { CellModel } from './model';
+import { ICellData } from './data';
 
 /**
  * The class name added to input area widgets.
@@ -73,7 +73,7 @@ export class InputArea extends Widget {
   /**
    * The model used by the widget.
    */
-  readonly data: CellModel.DataLocation;
+  readonly data: ICellData.DataLocation;
 
   /**
    * The content factory used by the widget.
@@ -161,7 +161,7 @@ export namespace InputArea {
     /**
      * The model used by the widget.
      */
-    data: CellModel.DataLocation;
+    data: ICellData.DataLocation;
 
     /**
      * The content factory used by the widget to create children.

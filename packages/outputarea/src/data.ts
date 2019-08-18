@@ -5,7 +5,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
 
-import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
+import { IOutputData, OutputData, OutputModel } from '@jupyterlab/rendermime';
 
 import { UUID } from '@phosphor/coreutils';
 
@@ -18,9 +18,9 @@ import {
 } from '@phosphor/datastore';
 
 /**
- * The namespace for IOutputAreaModel interfaces.
+ * The namespace for IOutputAreaData interfaces.
  */
-export namespace IOutputAreaModel {
+export namespace IOutputAreaData {
   /**
    * An interface for the fields stored in an Output area.
    */
@@ -44,9 +44,30 @@ export namespace IOutputAreaModel {
   }
 
   /**
+   * A set of locations in a datastore in which an output area
+   * stores its data.
+   */
+  export type DataLocation = {
+    /**
+     * A record in a datastore to hold the output area model.
+     */
+    record: DatastoreExt.RecordLocation<ISchema>;
+
+    /**
+     * A table in a datastore for individual outputs.
+     */
+    outputs: DatastoreExt.TableLocation<IOutputData.ISchema>;
+  };
+}
+
+/**
+ * Functions for performing operations on IOutputAreaData.
+ */
+export namespace OutputAreaData {
+  /**
    * A concrete output area schema, available at runtime.
    */
-  export const SCHEMA: ISchema = {
+  export const SCHEMA: IOutputAreaData.ISchema = {
     /**
      * The schema id.
      */
@@ -61,68 +82,13 @@ export namespace IOutputAreaModel {
     }
   };
 
-  export type DataLocation = {
-    /**
-     * A record in a datastore to hold the output area model.
-     */
-    record: DatastoreExt.RecordLocation<ISchema>;
-
-    /**
-     * A table in a datastore for individual outputs.
-     */
-    outputs: DatastoreExt.TableLocation<IOutputModel.ISchema>;
-  };
-
-  /**
-   * The options used to create a output area model.
-   */
-  export interface IOptions {
-    /**
-     * The initial values for the model.
-     */
-    values?: nbformat.IOutput[];
-
-    /**
-     * Whether the output is trusted.  The default is false.
-     */
-    trusted?: boolean;
-
-    /**
-     * The output content factory used by the model.
-     *
-     * If not given, a default factory will be used.
-     */
-    contentFactory?: IContentFactory;
-
-    /**
-     * Optional places to put the data for the model.
-     * If not providid, it will create its own.
-     */
-    loc?: DataLocation;
-  }
-
-  /**
-   * The interface for an output content factory.
-   */
-  export interface IContentFactory {
-    /**
-     * Create an output model.
-     */
-    createOutputModel(options: IOutputModel.IOptions): IOutputModel;
-  }
-}
-
-/**
- * The default implementation of the IOutputAreaModel.
- */
-export namespace OutputAreaModel {
   /**
    * Create an in-memory datastore capable of holding the data for an output area.
    */
-  export function createStore(): Datastore {
+  export function createStore(id: number = 1): Datastore {
     return Datastore.create({
-      id: 1,
-      schemas: [IOutputAreaModel.SCHEMA, IOutputModel.SCHEMA]
+      id,
+      schemas: [SCHEMA, OutputData.SCHEMA]
     });
   }
 
@@ -130,7 +96,7 @@ export namespace OutputAreaModel {
    * Deserialize an output area model from JSON to a datastore location.
    */
   export function fromJSON(
-    loc: IOutputAreaModel.DataLocation,
+    loc: IOutputAreaData.DataLocation,
     values: nbformat.IOutput[]
   ): void {
     DatastoreExt.withTransaction(loc.record.datastore, () => {
@@ -143,7 +109,7 @@ export namespace OutputAreaModel {
    * Set whether the model is trusted.
    */
   export function setTrusted(
-    loc: IOutputAreaModel.DataLocation,
+    loc: IOutputAreaData.DataLocation,
     value: boolean
   ) {
     if (value === DatastoreExt.getField({ ...loc.record, field: 'trusted' })) {
@@ -167,7 +133,7 @@ export namespace OutputAreaModel {
    * Set the value at the specified index.
    */
   export function setItem(
-    loc: IOutputAreaModel.DataLocation,
+    loc: IOutputAreaData.DataLocation,
     index: number,
     value: nbformat.IOutput
   ): void {
@@ -188,7 +154,7 @@ export namespace OutputAreaModel {
   /**
    * Clear all of the output.
    */
-  export function clear(loc: IOutputAreaModel.DataLocation): void {
+  export function clear(loc: IOutputAreaData.DataLocation): void {
     const list = DatastoreExt.getField({
       ...loc.record,
       field: 'outputs'
@@ -206,7 +172,7 @@ export namespace OutputAreaModel {
    * Serialize the model to JSON.
    */
   export function toJSON(
-    loc: IOutputAreaModel.DataLocation
+    loc: IOutputAreaData.DataLocation
   ): nbformat.IOutput[] {
     const list = DatastoreExt.getField({
       ...loc.record,
@@ -223,7 +189,7 @@ export namespace OutputAreaModel {
    * be combined with a previous entry rather than a new entry.
    */
   export function appendItem(
-    loc: IOutputAreaModel.DataLocation,
+    loc: IOutputAreaData.DataLocation,
     value: nbformat.IOutput
   ): void {
     let trusted = DatastoreExt.getField({

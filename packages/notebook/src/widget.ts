@@ -23,8 +23,9 @@ import { h, VirtualDOM } from '@phosphor/virtualdom';
 
 import {
   Cell,
-  CellModel,
+  CellData,
   CodeCell,
+  ICellData,
   MarkdownCell,
   RawCell
 } from '@jupyterlab/cells';
@@ -442,7 +443,7 @@ export class StaticNotebook extends Widget {
   /**
    * Create a cell widget and insert into the notebook.
    */
-  private _insertCell(index: number, cell: CellModel.DataLocation): void {
+  private _insertCell(index: number, cell: ICellData.DataLocation): void {
     let widget: Cell;
     const cellData = DatastoreExt.getRecord(cell.record);
     switch (cellData.type) {
@@ -468,7 +469,7 @@ export class StaticNotebook extends Widget {
   /**
    * Create a code cell widget from a code cell model.
    */
-  private _createCodeCell(data: CellModel.DataLocation): CodeCell {
+  private _createCodeCell(data: ICellData.DataLocation): CodeCell {
     let rendermime = this.rendermime;
     let contentFactory = this.contentFactory;
     const editorConfig = this.editorConfig.code;
@@ -489,7 +490,7 @@ export class StaticNotebook extends Widget {
   /**
    * Create a markdown cell widget from a markdown cell model.
    */
-  private _createMarkdownCell(data: CellModel.DataLocation): MarkdownCell {
+  private _createMarkdownCell(data: ICellData.DataLocation): MarkdownCell {
     let rendermime = this.rendermime;
     let contentFactory = this.contentFactory;
     const editorConfig = this.editorConfig.markdown;
@@ -509,7 +510,7 @@ export class StaticNotebook extends Widget {
   /**
    * Create a raw cell widget from a raw cell model.
    */
-  private _createRawCell(data: CellModel.DataLocation): RawCell {
+  private _createRawCell(data: ICellData.DataLocation): RawCell {
     let contentFactory = this.contentFactory;
     const editorConfig = this.editorConfig.raw;
     let options = {
@@ -1981,7 +1982,7 @@ export class Notebook extends StaticNotebook {
     each(this.widgets, (widget, i) => {
       if (this.isSelectedOrActive(widget)) {
         widget.addClass(DROP_SOURCE_CLASS);
-        selected.push(CellModel.toJSON(widget.data));
+        selected.push(CellData.toJSON(widget.data));
         toMove.push(widget);
       }
     });

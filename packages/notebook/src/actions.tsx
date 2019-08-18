@@ -12,17 +12,18 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import {
   Cell,
-  CellModel,
+  CellData,
   CodeCell,
-  CodeCellModel,
+  CodeCellData,
+  ICellData,
   MarkdownCell,
-  MarkdownCellModel,
-  RawCellModel
+  MarkdownCellData,
+  RawCellData
 } from '@jupyterlab/cells';
 
 import { DatastoreExt } from '@jupyterlab/datastore';
 
-import { OutputAreaModel } from '@jupyterlab/outputarea';
+import { OutputAreaData } from '@jupyterlab/outputarea';
 
 import { KernelMessage } from '@jupyterlab/services';
 
@@ -130,7 +131,7 @@ export namespace NotebookActions {
     const clone1 = Private.cloneCell(nbModel, child);
 
     if (child.type === 'code') {
-      OutputAreaModel.clear(clone0);
+      OutputAreaData.clear(clone0);
     }
     DatastoreExt.withTransaction(clone0.record.datastore, () => {
       const text0 = orig
@@ -226,7 +227,7 @@ export namespace NotebookActions {
     DatastoreExt.withTransaction(clone.record.datastore, () => {
       const text = toMerge.join('\n\n');
       if (primary.type === 'code') {
-        OutputAreaModel.clear(clone);
+        OutputAreaData.clear(clone);
       }
       DatastoreExt.updateField(
         { ...clone.record, field: 'text' },
@@ -1085,7 +1086,7 @@ export namespace NotebookActions {
       if (notebook.isSelectedOrActive(child) && cell.type === 'code') {
         (child as CodeCell).outputHidden = false;
         DatastoreExt.withTransaction(cell.data.record.datastore, () => {
-          OutputAreaModel.clear(cell.data);
+          OutputAreaData.clear(cell.data);
           DatastoreExt.updateField(
             { ...cell.data.record, field: 'executionCount' },
             null
@@ -1113,9 +1114,9 @@ export namespace NotebookActions {
 
     each(notebook.widgets, (cell: Cell, index) => {
       if (cell.type === 'code') {
-        OutputAreaModel.clear(cell.data);
+        OutputAreaData.clear(cell.data);
         DatastoreExt.withTransaction(cell.data.record.datastore, () => {
-          OutputAreaModel.clear(cell.data);
+          OutputAreaData.clear(cell.data);
           DatastoreExt.updateField(
             { ...cell.data.record, field: 'executionCount' },
             null
@@ -1395,6 +1396,7 @@ export namespace NotebookActions {
               { ...cell.data.record, field: 'trusted' },
               true
             );
+            OutputAreaData.setTrusted(cell.data, true);
           });
         });
       }
@@ -1482,20 +1484,20 @@ namespace Private {
   export function cloneCell(
     model: INotebookModel,
     cell: Cell
-  ): CellModel.DataLocation {
+  ): ICellData.DataLocation {
     let id = '';
     const { type, data } = cell;
     switch (type) {
       case 'code':
-        id = model.contentFactory.createCodeCell(CodeCellModel.toJSON(data));
+        id = model.contentFactory.createCodeCell(CodeCellData.toJSON(data));
         break;
       case 'markdown':
         id = model.contentFactory.createMarkdownCell(
-          MarkdownCellModel.toJSON(data)
+          MarkdownCellData.toJSON(data)
         );
         break;
       default:
-        id = model.contentFactory.createRawCell(RawCellModel.toJSON(data));
+        id = model.contentFactory.createRawCell(RawCellData.toJSON(data));
         break;
     }
     return { record: { ...data.record, record: id }, outputs: data.outputs };
@@ -1616,7 +1618,7 @@ namespace Private {
               return ran;
             });
         }
-        // (cell.model as ICodeCellModel).executionCount = null;
+        // (cell.model as ICodeCellData).executionCount = null;
         break;
       default:
         break;
@@ -1690,7 +1692,7 @@ namespace Private {
 
     let data = notebook.widgets
       .filter(cell => notebook.isSelectedOrActive(cell))
-      .map(cell => CellModel.toJSON(cell.data))
+      .map(cell => CellData.toJSON(cell.data))
       .map(cellJSON => {
         if ((cellJSON.metadata as JSONObject).deletable !== undefined) {
           delete (cellJSON.metadata as JSONObject).deletable;
@@ -1734,7 +1736,7 @@ namespace Private {
         }
         if (child.type !== value) {
           let cellId = '';
-          let cell = CellModel.toJSON(child.data);
+          let cell = CellData.toJSON(child.data);
           if (cell.type === 'code') {
             // When we convert to another cell type,
             // make sure it is flagged as untrusted.

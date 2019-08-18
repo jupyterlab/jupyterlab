@@ -8,7 +8,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 import { DatastoreExt } from '@jupyterlab/datastore';
 
 import {
-  IOutputModel,
+  IOutputData,
   IRenderMimeRegistry,
   OutputModel
 } from '@jupyterlab/rendermime';
@@ -31,7 +31,7 @@ import { Signal } from '@phosphor/signaling';
 
 import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
 
-import { IOutputAreaModel, OutputAreaModel } from './model';
+import { IOutputAreaData, OutputAreaData } from './data';
 
 /**
  * The class name added to an output area widget.
@@ -113,7 +113,7 @@ export class OutputArea extends Widget {
   /**
    * The data rendered by the widget.
    */
-  readonly data: IOutputAreaModel.DataLocation;
+  readonly data: IOutputAreaData.DataLocation;
 
   /**
    * The content factory used by the widget.
@@ -165,7 +165,7 @@ export class OutputArea extends Widget {
     }
     this._future = value;
 
-    OutputAreaModel.clear(this.data);
+    OutputAreaData.clear(this.data);
 
     // Make sure there were no input widgets.
     if (this.widgets.length) {
@@ -326,7 +326,7 @@ export class OutputArea extends Widget {
      */
     void input.value.then(value => {
       // Use stdin as the stream so it does not get combined with stdout.
-      OutputAreaModel.appendItem(this.data, {
+      OutputAreaData.appendItem(this.data, {
         output_type: 'stream',
         name: 'stdin',
         text: value + '\n'
@@ -340,7 +340,7 @@ export class OutputArea extends Widget {
    */
   private _setOutput(
     index: number,
-    loc: DatastoreExt.RecordLocation<IOutputModel.ISchema>
+    loc: DatastoreExt.RecordLocation<IOutputData.ISchema>
   ): void {
     let layout = this.layout as PanelLayout;
     let panel = layout.widgets[index] as Panel;
@@ -362,7 +362,7 @@ export class OutputArea extends Widget {
    */
   private _insertOutput(
     index: number,
-    loc: DatastoreExt.RecordLocation<IOutputModel.ISchema>
+    loc: DatastoreExt.RecordLocation<IOutputData.ISchema>
   ): void {
     let output = this.createOutputItem(loc);
     let executionCount = DatastoreExt.getField({
@@ -382,7 +382,7 @@ export class OutputArea extends Widget {
    * Create an output item with a prompt and actual output
    */
   protected createOutputItem(
-    loc: DatastoreExt.RecordLocation<IOutputModel.ISchema>
+    loc: DatastoreExt.RecordLocation<IOutputData.ISchema>
   ): Widget | null {
     let output = this.createRenderedMimetype(loc);
 
@@ -413,7 +413,7 @@ export class OutputArea extends Widget {
    * Render a mimetype
    */
   protected createRenderedMimetype(
-    loc: DatastoreExt.RecordLocation<IOutputModel.ISchema>
+    loc: DatastoreExt.RecordLocation<IOutputData.ISchema>
   ): Widget | null {
     // Create a temporary output model view to pass of to the renderer.
     let model = new OutputModel({ record: loc });
@@ -473,13 +473,13 @@ export class OutputArea extends Widget {
       case 'error':
         output = msg.content as nbformat.IOutput;
         output.output_type = msgType as nbformat.OutputType;
-        OutputAreaModel.appendItem(this.data, output);
+        OutputAreaData.appendItem(this.data, output);
         break;
       case 'clear_output':
         // TODO: handle clearNext in the widget now that it is no
         // longer in the model.
         // let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
-        OutputAreaModel.clear(this.data);
+        OutputAreaData.clear(this.data);
         break;
       case 'update_display_data':
         output = msg.content as nbformat.IOutput;
@@ -487,7 +487,7 @@ export class OutputArea extends Widget {
         targets = this._displayIdMap.get(displayId);
         if (targets) {
           for (let index of targets) {
-            OutputAreaModel.setItem(this.data, index, output);
+            OutputAreaData.setItem(this.data, index, output);
           }
         }
         break;
@@ -530,7 +530,7 @@ export class OutputArea extends Widget {
       data: (page as any).data as nbformat.IMimeBundle,
       metadata: {}
     };
-    OutputAreaModel.appendItem(this.data, output);
+    OutputAreaData.appendItem(this.data, output);
   };
 
   private _minHeightTimeout: number = null;
@@ -556,7 +556,7 @@ export class SimplifiedOutputArea extends OutputArea {
    * Create an output item without a prompt, just the output widgets
    */
   protected createOutputItem(
-    loc: DatastoreExt.RecordLocation<IOutputModel.ISchema>
+    loc: DatastoreExt.RecordLocation<IOutputData.ISchema>
   ): Widget | null {
     let output = this.createRenderedMimetype(loc);
     if (output) {
@@ -577,7 +577,7 @@ export namespace OutputArea {
     /**
      * The model used by the widget.
      */
-    data: IOutputAreaModel.DataLocation;
+    data: IOutputAreaData.DataLocation;
 
     /**
      * The content factory used by the widget to create children.

@@ -7,7 +7,7 @@ import {
   Cell,
   CellDragUtils,
   CodeCell,
-  CodeCellModel,
+  CodeCellData,
   RawCell
 } from '@jupyterlab/cells';
 
@@ -364,12 +364,12 @@ export class CodeConsole extends Widget {
     const cells: nbformat.ICodeCell[] = [];
     each(this._cells, cell => {
       if (cell.type === 'code') {
-        CodeCellModel.toJSON(cell.data);
+        CodeCellData.toJSON(cell.data);
       }
     });
 
     if (this.promptCell) {
-      cells.push(CodeCellModel.toJSON(this.promptCell.data));
+      cells.push(CodeCellData.toJSON(this.promptCell.data));
     }
     return cells;
   }
@@ -458,7 +458,7 @@ export class CodeConsole extends Widget {
     clientY: number
   ): Promise<void> {
     let selected: nbformat.ICell[] = [
-      CodeCellModel.toJSON(this._focusedCell.data)
+      CodeCellData.toJSON(this._focusedCell.data)
     ];
 
     const dragImage = CellDragUtils.createCellDragImage(
