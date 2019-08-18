@@ -91,6 +91,16 @@ export namespace OutputData {
       raw: Fields.Register<ReadonlyJSONObject>({ value: {} })
     }
   };
+
+  /**
+   * Create an in-memory datastore capable of holding the data for an output.
+   */
+  export function createStore(id: number = 1): Datastore {
+    return Datastore.create({
+      id,
+      schemas: [SCHEMA]
+    });
+  }
 }
 
 /**
@@ -159,10 +169,7 @@ export class OutputModel implements IOutputModel {
     if (options.record) {
       this._record = options.record;
     } else {
-      const datastore = Datastore.create({
-        id: 1,
-        schemas: [OutputData.SCHEMA]
-      });
+      const datastore = OutputData.createStore();
       this._record = {
         datastore,
         schema: OutputData.SCHEMA,

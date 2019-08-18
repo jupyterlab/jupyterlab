@@ -5,8 +5,6 @@ import { DatastoreExt } from '@jupyterlab/datastore';
 
 import { JSONObject } from '@phosphor/coreutils';
 
-import { Datastore } from '@phosphor/datastore';
-
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -216,12 +214,9 @@ export namespace CodeEditor {
       if (options.record) {
         this.record = options.record;
       } else {
-        const datastore = Datastore.create({
-          id: 1,
-          schemas: [CodeEditorData.SCHEMA]
-        });
+        const datastore = CodeEditorData.createStore();
         this.record = {
-          datastore: datastore,
+          datastore,
           schema: CodeEditorData.SCHEMA,
           record: 'data'
         };

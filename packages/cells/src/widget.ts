@@ -164,10 +164,7 @@ export class Cell extends Widget {
     if (options.data) {
       data = this._data = options.data;
     } else {
-      const datastore = Datastore.create({
-        id: 1,
-        schemas: [OutputData.SCHEMA, CellData.SCHEMA]
-      });
+      const datastore = CellData.createStore();
       data = this._data = {
         record: {
           datastore,

@@ -21,8 +21,6 @@ import { IOutputData, OutputData } from '@jupyterlab/rendermime';
 
 import { ReadonlyJSONObject, UUID } from '@phosphor/coreutils';
 
-import { Datastore } from '@phosphor/datastore';
-
 import { INotebookData, NotebookData } from './data';
 
 /**
@@ -71,11 +69,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     super(options.languagePreference);
     let factory = options.contentFactory || NotebookModel.defaultContentFactory;
 
-    const datastore = Datastore.create({
-      id: 1,
-      schemas: [NotebookData.SCHEMA, OutputData.SCHEMA, CellData.SCHEMA]
-    });
-
+    const datastore = NotebookData.createStore();
     this.data = {
       record: {
         datastore,

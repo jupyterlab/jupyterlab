@@ -13,11 +13,12 @@ import { DatastoreExt } from '@jupyterlab/datastore';
 
 import { OutputAreaData } from '@jupyterlab/outputarea';
 
-import { IOutputData } from '@jupyterlab/rendermime';
+import { IOutputData, OutputData } from '@jupyterlab/rendermime';
 
 import { JSONExt, JSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
 
 import {
+  Datastore,
   Fields,
   ListField,
   MapField,
@@ -150,6 +151,16 @@ export namespace CellData {
       type: Fields.Register<nbformat.CellType>({ value: 'code' })
     }
   };
+
+  /**
+   * Create an in-memory datastore capable of holding the data for an output area.
+   */
+  export function createStore(id: number = 1): Datastore {
+    return Datastore.create({
+      id,
+      schemas: [SCHEMA, OutputData.SCHEMA]
+    });
+  }
 
   /**
    * Construct a cell model from optional cell content.

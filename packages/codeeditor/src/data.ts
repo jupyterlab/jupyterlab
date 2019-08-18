@@ -4,6 +4,7 @@
 import { SchemaFields } from '@jupyterlab/datastore';
 
 import {
+  Datastore,
   Fields,
   MapField,
   RegisterField,
@@ -52,6 +53,16 @@ export namespace ICodeEditorData {
  * Concrete utitlites for working with code editor data.
  */
 export namespace CodeEditorData {
+  /**
+   * Create an in-memory datastore capable of holding the data for an editor.
+   */
+  export function createStore(id: number = 1): Datastore {
+    return Datastore.create({
+      id,
+      schemas: [SCHEMA]
+    });
+  }
+
   /**
    * A concrete CodeEditor schema, available at runtime.
    */

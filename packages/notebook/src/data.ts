@@ -3,13 +3,14 @@
 
 import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
 
-import { ICellData } from '@jupyterlab/cells';
+import { ICellData, CellData } from '@jupyterlab/cells';
 
-import { IOutputData } from '@jupyterlab/rendermime';
+import { IOutputData, OutputData } from '@jupyterlab/rendermime';
 
 import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
 import {
+  Datastore,
   Fields,
   ListField,
   MapField,
@@ -81,6 +82,16 @@ export namespace INotebookData {
  * Utilities for working with notebook data.
  */
 export namespace NotebookData {
+  /**
+   * Create an in-memory datastore capable of holding the data for an output area.
+   */
+  export function createStore(id: number = 1): Datastore {
+    return Datastore.create({
+      id,
+      schemas: [SCHEMA, CellData.SCHEMA, OutputData.SCHEMA]
+    });
+  }
+
   /**
    * A concrete notebook schema, available at runtime.
    */
