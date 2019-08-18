@@ -2,7 +2,7 @@ import { Panel, SplitPanel, Widget } from '@phosphor/widgets';
 import { VariableTableDescription } from './variableTableDescription';
 import { IVariablesModel } from '../model';
 import { IVariable } from '../variable';
-import { VariablesSearch } from './toogle';
+import { VariablesSearch } from './toggle';
 
 export class VariableDescription extends Panel {
   readonly searchParams: Widget;

@@ -59,11 +59,13 @@ const MenuReact = ({ config }: any) => {
   const [toggleState, setToggle] = useState(false);
   const [scope, setScope] = useState('local');
 
-  const toogle = (e: any) => {
+  const toggle = (e: any) => {
     setToggle(!toggleState);
   };
   const changeScope = (newScope: string) => {
-    if (newScope === scope) return;
+    if (newScope === scope) {
+      return;
+    }
     setScope(newScope);
     setToggle(false);
   };
@@ -91,7 +93,7 @@ const MenuReact = ({ config }: any) => {
   return (
     <div>
       <span
-        onClick={e => toogle(e)}
+        onClick={e => toggle(e)}
         className="jp-DebuggerSidebarVariable-Scope-label"
       >
         {scope}
