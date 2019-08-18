@@ -55,7 +55,7 @@ class VariableSearchInput extends ReactWidget {
   }
 }
 
-const MenuReact = ({ config }: any) => {
+const VariablesMenu = ({ config }: any) => {
   const [toggleState, setToggle] = useState(false);
   const [scope, setScope] = useState('local');
 
@@ -83,9 +83,9 @@ const MenuReact = ({ config }: any) => {
       </li>
       <li
         className="jp-MenuComponent-item"
-        onClick={e => changeScope('builin')}
+        onClick={e => changeScope('built-in')}
       >
-        builin
+        built-in
       </li>
     </ul>
   );
@@ -105,23 +105,20 @@ const MenuReact = ({ config }: any) => {
 };
 
 class VariableScopeSearch extends ReactWidget {
-  constructor() {
-    super();
-  }
-  open: boolean = false;
-  menu: ReactWidget;
-  widget: Widget;
-
-  showMenu = function() {
-    this.open = !this.open;
-    if (this.open) {
+  showMenu() {
+    this._isOpen = !this._isOpen;
+    if (this._isOpen) {
+      // TODO
     } else {
+      // no-op
     }
-  };
+  }
 
   render() {
-    return <MenuReact />;
+    return <VariablesMenu />;
   }
+
+  private _isOpen = false;
 }
 
 // namespace Internal {
