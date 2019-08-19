@@ -14,25 +14,6 @@ import useTbody from './useTbody';
 const ROW_CLASS = 'jp-DebuggerSidebarVariables-table-row';
 const HEAD_CLASS = 'jp-DebuggerSidebarVariables-table-head';
 
-const TableHead = () => {
-  const leftStyle = { width: '25%' };
-  const rightStyle = { width: '75%' };
-  const element = (
-    <thead>
-      <tr>
-        <th style={leftStyle} className={HEAD_CLASS}>
-          Name
-        </th>
-        <th style={rightStyle} className={HEAD_CLASS}>
-          Value
-        </th>
-      </tr>
-    </thead>
-  );
-
-  return element;
-};
-
 const Table = ({ model }: any) => {
   const [variables, setVariables] = useState(model.variables);
   const [variable, TableBody] = useTbody(variables, model.variable, ROW_CLASS);
@@ -46,7 +27,16 @@ const Table = ({ model }: any) => {
   model.variable = variable;
   return (
     <table>
-      <TableHead />
+      <thead>
+        <tr>
+          <th style={{ width: '25%' }} className={HEAD_CLASS}>
+            Name
+          </th>
+          <th style={{ width: '75%' }} className={HEAD_CLASS}>
+            Value
+          </th>
+        </tr>
+      </thead>
       <TableBody />
     </table>
   );

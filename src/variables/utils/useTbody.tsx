@@ -6,15 +6,6 @@ import React, { useState } from 'react';
 const useTbody = (items: Array<any>, defaultState: any, id: string) => {
   const [state, setState] = useState(defaultState);
 
-  const leftStyle = {
-    paddingLeft: `${12}px`,
-    width: `${25}%`
-  };
-  const rightStyle = {
-    paddingLeft: `${12}px`,
-    width: `${75}%`
-  };
-
   const List = () => (
     <tbody>
       {items.map(item => (
@@ -23,8 +14,12 @@ const useTbody = (items: Array<any>, defaultState: any, id: string) => {
           onClick={e => setState(item)}
           className={id + (state === item ? ' selected' : '')}
         >
-          <td style={leftStyle}> {item.name} </td>
-          <td style={rightStyle}> {item.value} </td>
+          <td style={{ paddingLeft: `${12}px`, width: `${25}%` }}>
+            {item.name}
+          </td>
+          <td style={{ paddingLeft: `${12}px`, width: `${75}%` }}>
+            {item.value}
+          </td>
         </tr>
       ))}
     </tbody>
