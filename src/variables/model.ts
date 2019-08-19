@@ -6,11 +6,11 @@ import { Signal, ISignal } from '@phosphor/signaling';
 import { IVariable } from './variable';
 
 export interface IVariablesModel {
+  current: IVariable;
   filter: string;
   variables: IVariable[];
-  changeCurrentVariable: ISignal<Model, IVariable>;
-  changeVariables: ISignal<Model, IVariable[]>;
-  variable: IVariable;
+  currentChanged: ISignal<Model, IVariable>;
+  variablesChanged: ISignal<Model, IVariable[]>;
 }
 
 export namespace IVariablesModel {
@@ -24,12 +24,30 @@ export class Model implements IVariablesModel {
     this._state = model;
   }
 
-  get changeCurrentVariable(): ISignal<this, IVariable> {
-    return this._changeCurrentVariable;
+  get currentChanged(): ISignal<this, IVariable> {
+    return this._currentChanged;
   }
 
-  get changeVariables(): ISignal<this, IVariable[]> {
-    return this._changeVariables;
+  get current(): IVariable {
+    return this._current;
+  }
+  set current(variable: IVariable) {
+    if (this._current === variable) {
+      return;
+    }
+    this._current = variable;
+    this._currentChanged.emit(variable);
+  }
+
+  get filter() {
+    return this._filterState;
+  }
+  set filter(value) {
+    if (this._filterState === value) {
+      return;
+    }
+    this._filterState = value;
+    this._variablesChanged.emit(this._filterVariables());
   }
 
   get variables(): IVariable[] {
@@ -42,26 +60,8 @@ export class Model implements IVariablesModel {
     this._state = variables;
   }
 
-  get variable(): IVariable {
-    return this._currentVariabile;
-  }
-  set variable(variable: IVariable) {
-    if (this._currentVariabile === variable) {
-      return;
-    }
-    this._currentVariabile = variable;
-    this._changeCurrentVariable.emit(variable);
-  }
-
-  get filter() {
-    return this._filterState;
-  }
-  set filter(value) {
-    if (this._filterState === value) {
-      return;
-    }
-    this._filterState = value;
-    this._changeVariables.emit(this._filterVariables());
+  get variablesChanged(): ISignal<this, IVariable[]> {
+    return this._variablesChanged;
   }
 
   getCurrentVariables(): IVariable[] {
@@ -81,9 +81,9 @@ export class Model implements IVariablesModel {
     return this._state.filter(ele => this.fstFil(ele.name));
   }
 
-  private _changeCurrentVariable = new Signal<this, IVariable>(this);
-  private _changeVariables = new Signal<this, IVariable[]>(this);
-  private _currentVariabile: IVariable;
+  private _current: IVariable;
+  private _currentChanged = new Signal<this, IVariable>(this);
+  private _variablesChanged = new Signal<this, IVariable[]>(this);
   private _filterState: string = '';
   private _state: IVariable[];
 }
