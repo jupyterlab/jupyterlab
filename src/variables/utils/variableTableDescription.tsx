@@ -37,11 +37,10 @@ const Table = ({ model }: any) => {
   const [variables, setVariables] = useState(model.variables);
   const [variable, TableBody] = useTbody(variables, model.variable, ROW_CLASS);
 
-  model.changeVariables.connect((model: any, new_variables: any) => {
-    if (new_variables === variables) {
-      return;
+  model.changeVariables.connect((model: any, updates: any) => {
+    if (updates !== variables) {
+      setVariables(updates);
     }
-    setVariables(new_variables);
   });
 
   model.variable = variable;
