@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
 import {
   Datastore,
   Fields,
@@ -78,4 +80,34 @@ export namespace CodeEditorData {
       selections: Fields.Map<CodeEditor.ITextSelection[]>()
     }
   };
+
+  /*
+   * Clear editor data. The record is not actually removed, but its data
+   * is emptied as much as possible to allow it to garbage collect.
+   */
+  export function clear(
+    loc: DatastoreExt.RecordLocation<ICodeEditorData.Schema>
+  ): void {
+    let editorData = DatastoreExt.getRecord(loc);
+
+    let selections: { [x: string]: CodeEditor.ITextSelection[] | null } = {};
+    Object.keys(editorData.selections).forEach(key => (selections[key] = null));
+
+    DatastoreExt.withTransaction(loc.datastore, () => {
+      DatastoreExt.updateRecord(loc, {
+        selections,
+        text: { index: 0, remove: editorData.text.length, text: '' },
+        mimeType: 'text/plain'
+      });
+    });
+  }
+}
+
+/**
+ * The namespace for `AttachmentsCellData` statics.
+ */
+export namespace AttachmentsCellData {
+  /**
+   * Construct a new cell with optional attachments.
+   */
 }

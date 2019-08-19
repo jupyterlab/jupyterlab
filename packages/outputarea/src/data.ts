@@ -166,7 +166,9 @@ export namespace OutputAreaData {
         { ...loc.record, field: 'outputs' },
         { index: 0, remove: list.length, values: [] }
       );
-      // TODO also clear items from output table.
+      list.forEach(output => {
+        OutputModel.clear({ ...loc.outputs, record: output });
+      });
     });
   }
 

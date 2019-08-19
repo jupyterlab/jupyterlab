@@ -21,6 +21,8 @@ import { IOutputData, OutputData } from '@jupyterlab/rendermime';
 
 import { ReadonlyJSONObject, UUID } from '@phosphor/coreutils';
 
+import { Datastore } from '@phosphor/datastore';
+
 import { INotebookData, NotebookData } from './data';
 
 /**
@@ -69,7 +71,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     super(options.languagePreference);
     let factory = options.contentFactory || NotebookModel.defaultContentFactory;
 
-    const datastore = NotebookData.createStore();
+    const datastore = (this._datastore = NotebookData.createStore());
     this.data = {
       record: {
         datastore,
@@ -163,6 +165,13 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    */
   dispose(): void {
     // Do nothing if already disposed.
+    if (this.isDisposed) {
+      return;
+    }
+    if (this._datastore) {
+      this._datastore.dispose();
+      this._datastore = null;
+    }
     super.dispose();
   }
 
@@ -249,7 +258,12 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
         remove: oldCells.length,
         values: cellIds
       });
-      // TODO: also clear cell content.
+      oldCells.forEach(cell =>
+        CellData.clear({
+          outputs: this.data.outputs,
+          record: { ...this.data.cells, record: cell }
+        })
+      );
 
       let newValue = 0;
       const origNbformat = value.metadata.orig_nbformat;
@@ -330,6 +344,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   private _deletedCells: string[];
+  private _datastore: Datastore | null = null;
 }
 
 /**

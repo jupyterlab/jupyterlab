@@ -3,13 +3,15 @@
 
 import { DatastoreExt } from '@jupyterlab/datastore';
 
+import { IModelDB, ModelDB } from '@jupyterlab/observables';
+
 import { JSONObject } from '@phosphor/coreutils';
+
+import { Datastore } from '@phosphor/datastore';
 
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
-
-import { IModelDB, ModelDB } from '@jupyterlab/observables';
 
 import { CodeEditorData, ICodeEditorData } from './data';
 
@@ -214,7 +216,7 @@ export namespace CodeEditor {
       if (options.record) {
         this.record = options.record;
       } else {
-        const datastore = CodeEditorData.createStore();
+        const datastore = (this._datastore = CodeEditorData.createStore());
         this.record = {
           datastore,
           schema: CodeEditorData.SCHEMA,
@@ -315,12 +317,17 @@ export namespace CodeEditor {
       if (this._isDisposed) {
         return;
       }
+      if (this._datastore) {
+        this._datastore.dispose();
+        this._datastore = null;
+      }
       this._isDisposed = true;
       this.record.datastore.dispose();
       Signal.clearData(this);
     }
 
     private _isDisposed = false;
+    private _datastore: Datastore | null = null;
   }
 
   /**

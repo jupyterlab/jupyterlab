@@ -166,7 +166,7 @@ export class Cell extends Widget {
     if (options.data) {
       data = this._data = options.data;
     } else {
-      const datastore = CellData.createStore();
+      const datastore = (this._datastore = CellData.createStore());
       data = this._data = {
         record: {
           datastore,
@@ -496,6 +496,10 @@ export class Cell extends Widget {
     if (this.isDisposed) {
       return;
     }
+    if (this._datastore) {
+      this._datastore.dispose();
+      this._datastore = null;
+    }
     this._metadataListener.dispose();
 
     this._input = null;
@@ -569,6 +573,7 @@ export class Cell extends Widget {
   private _inputPlaceholder: InputPlaceholder = null;
   private _syncCollapse = false;
   private _syncEditable = false;
+  private _datastore: Datastore | null = null;
 }
 
 /**

@@ -10,6 +10,7 @@ import { DatastoreExt } from '@jupyterlab/datastore';
 import {
   IOutputData,
   IRenderMimeRegistry,
+  OutputData,
   OutputModel
 } from '@jupyterlab/rendermime';
 
@@ -96,7 +97,23 @@ export class OutputArea extends Widget {
    */
   constructor(options: OutputArea.IOptions) {
     super();
-    let data = (this.data = options.data);
+    let data: IOutputAreaData.DataLocation;
+    if (options.data) {
+      data = this.data = options.data;
+    } else {
+      const datastore = (this._datastore = OutputAreaData.createStore());
+      data = this.data = {
+        record: {
+          datastore,
+          schema: OutputAreaData.SCHEMA,
+          record: 'data'
+        },
+        outputs: {
+          datastore,
+          schema: OutputData.SCHEMA
+        }
+      };
+    }
     this.addClass(OUTPUT_AREA_CLASS);
     this.rendermime = options.rendermime;
     this.contentFactory =
@@ -191,6 +208,14 @@ export class OutputArea extends Widget {
    * Dispose of the resources used by the output area.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    if (this._datastore) {
+      this._datastore.dispose();
+      this._datastore = null;
+    }
+
     if (this._future) {
       this._future.dispose();
     }
@@ -539,6 +564,7 @@ export class OutputArea extends Widget {
     KernelMessage.IExecuteReplyMsg
   > | null = null;
   private _displayIdMap = new Map<string, number[]>();
+  private _datastore: Datastore | null = null;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -577,7 +603,7 @@ export namespace OutputArea {
     /**
      * The model used by the widget.
      */
-    data: IOutputAreaData.DataLocation;
+    data?: IOutputAreaData.DataLocation;
 
     /**
      * The content factory used by the widget to create children.

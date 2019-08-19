@@ -5,7 +5,11 @@
 
 import { AttachmentsData, IAttachmentsData } from '@jupyterlab/attachments';
 
-import { CodeEditor, ICodeEditorData } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  CodeEditorData,
+  ICodeEditorData
+} from '@jupyterlab/codeeditor';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
@@ -242,6 +246,32 @@ export namespace CellData {
       default:
         return RawCellData.toJSON(loc);
     }
+  }
+
+  /*
+   * Clear a cell data. The record is not actually removed, but its data
+   * is emptied as much as possible to allow it to garbage collect.
+   */
+  export function clear(loc: ICellData.DataLocation): void {
+    let cellData = DatastoreExt.getRecord(loc.record);
+
+    let attachments: { [x: string]: nbformat.IMimeBundle | null } = {};
+    Object.keys(cellData.attachments).forEach(key => (attachments[key] = null));
+    let metadata: { [x: string]: ReadonlyJSONValue | null } = {};
+    Object.keys(cellData.metadata).forEach(key => (metadata[key] = null));
+
+    DatastoreExt.withTransaction(loc.record.datastore, () => {
+      DatastoreExt.updateRecord(loc.record, {
+        attachments,
+        metadata,
+        executionCount: null,
+        type: 'code',
+        trusted: false,
+        outputs: { index: 0, remove: cellData.outputs.length, values: [] }
+      });
+      OutputAreaData.clear(loc);
+      CodeEditorData.clear(loc.record);
+    });
   }
 }
 

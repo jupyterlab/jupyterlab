@@ -166,9 +166,9 @@ export class OutputModel implements IOutputModel {
     if (options.record) {
       this._record = options.record;
     } else {
-      const datastore = OutputData.createStore();
+      this._datastore = OutputData.createStore();
       this._record = {
-        datastore,
+        datastore: this._datastore,
         schema: OutputData.SCHEMA,
         record: 'data'
       };
@@ -203,7 +203,14 @@ export class OutputModel implements IOutputModel {
    * Dispose of the resources used by the output model.
    */
   dispose(): void {
-    // TODO dispose of datastore if created here.
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    if (this._datastore) {
+      this._datastore.dispose();
+      this._datastore = null;
+    }
   }
 
   /**
@@ -255,6 +262,8 @@ export class OutputModel implements IOutputModel {
    * The record in which the output model is stored.
    */
   private readonly _record: DatastoreExt.RecordLocation<IOutputData.Schema>;
+  private _datastore: Datastore | null = null;
+  private _isDisposed = false;
 }
 
 /**
@@ -344,6 +353,24 @@ export namespace OutputModel {
         raw,
         trusted,
         type
+      });
+    });
+  }
+
+  /**
+   * Clear an output record from a table.
+   */
+  export function clear(
+    loc: DatastoreExt.RecordLocation<IOutputData.Schema>
+  ): void {
+    DatastoreExt.withTransaction(loc.datastore, () => {
+      DatastoreExt.updateRecord(loc, {
+        data: {},
+        executionCount: null,
+        metadata: {},
+        raw: {},
+        trusted: false,
+        type: ''
       });
     });
   }
