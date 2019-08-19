@@ -1,7 +1,8 @@
 import { Panel, Widget } from '@phosphor/widgets';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ReactWidget } from '@jupyterlab/apputils';
 import { IVariablesModel } from '../../model';
+import useOutsideClick from '../../../utils/useOutsideClick';
 
 const SEARCH_ITEM = 'jp-Search-item';
 
@@ -58,8 +59,15 @@ class VariableSearchInput extends ReactWidget {
 const MenuReact = ({ config }: any) => {
   const [toggleState, setToggle] = useState(false);
   const [scope, setScope] = useState('local');
+  const wrapperRef = useRef(null);
 
-  const toogle = (e: any) => {
+  const callback = () => {
+    setToggle(false);
+  };
+
+  useOutsideClick(wrapperRef, callback);
+
+  const toogle = (e: React.MouseEvent) => {
     setToggle(!toggleState);
   };
   const changeScope = (newScope: string) => {
@@ -69,7 +77,7 @@ const MenuReact = ({ config }: any) => {
   };
 
   const List = (
-    <ul className="jp-MenuComponent">
+    <ul ref={wrapperRef} className="jp-MenuComponent">
       <li onClick={e => changeScope('local')} className="jp-menu-item">
         local
       </li>
@@ -91,7 +99,9 @@ const MenuReact = ({ config }: any) => {
   return (
     <div>
       <span
-        onClick={e => toogle(e)}
+        onClick={(e: React.MouseEvent) => {
+          toogle(e);
+        }}
         className="jp-DebuggerSidebarVariable-Scope-label"
       >
         {scope}
@@ -121,19 +131,3 @@ class VariableScopeSearch extends ReactWidget {
     return <MenuReact />;
   }
 }
-
-// namespace Internal {
-//   export function createOptionsNode(): HTMLElement {
-//     const optionsIcon = document.createElement('span');
-//     optionsIcon.className = 'fa fa-caret-down';
-//     const optionLabel = document.createElement('span');
-
-//     const options = document.createElement('div');
-//     options.title = 'Options';
-//     optionLabel.innerText = 'local';
-//     optionLabel.className = 'jp-DebuggerSidebarVariable-Scope-label';
-//     options.appendChild(optionLabel);
-//     options.appendChild(optionsIcon);
-//     return options;
-//   }
-// }

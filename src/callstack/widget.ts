@@ -23,7 +23,6 @@ export class CallstackWidget extends Panel {
     this.label.addClass(this.model_header.class + '-label');
     this.header.addWidget(this.label);
 
-    console.log('adding toolbar');
     //toolbar
     this.toolbar = new ToolbarWidget();
     this.toolbar.createSpanElement(`fa fa-active`, 'Continue');
