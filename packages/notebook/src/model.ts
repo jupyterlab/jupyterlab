@@ -71,7 +71,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     super(options.languagePreference);
     let factory = options.contentFactory || NotebookModel.defaultContentFactory;
 
-    const datastore = (this._datastore = NotebookData.createStore());
+    const datastore = (this._store = NotebookData.createStore());
     this.data = {
       record: {
         datastore,
@@ -168,9 +168,9 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     if (this.isDisposed) {
       return;
     }
-    if (this._datastore) {
-      this._datastore.dispose();
-      this._datastore = null;
+    if (this._store) {
+      this._store.dispose();
+      this._store = null;
     }
     super.dispose();
   }
@@ -344,7 +344,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   private _deletedCells: string[];
-  private _datastore: Datastore | null = null;
+  private _store: Datastore | null = null;
 }
 
 /**
