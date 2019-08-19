@@ -6,7 +6,7 @@ set -ex
 set -o pipefail
 
 # Building should work without yarn installed globally, so uninstall the
-# global yarn that Travis installs automatically.
+# global yarn installed by default.
 sudo rm -rf $(which yarn)
 ! yarn
 
