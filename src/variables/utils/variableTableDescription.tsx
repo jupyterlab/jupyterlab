@@ -3,6 +3,8 @@
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
+import { ArrayExt } from '@phosphor/algorithm';
+
 import { SplitPanel, Widget } from '@phosphor/widgets';
 
 import React, { useState } from 'react';
@@ -12,19 +14,21 @@ import { IVariablesModel } from '../model';
 import useTbody from './useTbody';
 
 const ROW_CLASS = 'jp-DebuggerSidebarVariables-table-row';
+
 const HEAD_CLASS = 'jp-DebuggerSidebarVariables-table-head';
 
-const Table = ({ model }: any) => {
+const Table = ({ model }: { model: IVariablesModel }) => {
   const [variables, setVariables] = useState(model.variables);
-  const [variable, TableBody] = useTbody(variables, model.variable, ROW_CLASS);
+  const [variable, TableBody] = useTbody(variables, model.current, ROW_CLASS);
 
-  model.changeVariables.connect((model: any, updates: any) => {
-    if (updates !== variables) {
-      setVariables(updates);
+  model.variablesChanged.connect((_: any, updates) => {
+    if (ArrayExt.shallowEqual(variables, updates)) {
+      return;
     }
+    setVariables(updates);
   });
 
-  model.variable = variable;
+  model.current = variable;
   return (
     <table>
       <thead>

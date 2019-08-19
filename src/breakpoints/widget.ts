@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget, Panel } from '@phosphor/widgets';
+import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
-import { ToolbarWidget } from '../utils';
+import { Widget, Panel } from '@phosphor/widgets';
 
 export class BreakPointsWidget extends Panel {
   readonly body: Panel;
@@ -12,7 +12,7 @@ export class BreakPointsWidget extends Panel {
 
   readonly label: Widget;
 
-  readonly toolbar: ToolbarWidget;
+  readonly toolbar: Toolbar;
 
   constructor() {
     super();
@@ -26,12 +26,18 @@ export class BreakPointsWidget extends Panel {
     this.label.addClass('jp-DebuggerSidebarVariables-header-label');
     this.header.addWidget(this.label);
 
-    this.toolbar = new ToolbarWidget();
-    this.toolbar.createSpanElement(
-      'fa fa-breakpoints disactive',
-      'Deactive All Breakpoints'
+    const toolbar = new Toolbar();
+    toolbar.addItem(
+      'deactivate',
+      new ToolbarButton({
+        iconClassName: 'jp-DebuggerDeactivateIcon',
+        onClick: () => {
+          console.log('`deactivate` was clicked');
+        },
+        tooltip: 'Deactivate Breakpoints'
+      })
     );
-    this.toolbar.createSpanElement('fa fa-remove', 'Remove All Breakpoints');
+    this.toolbar = toolbar;
     this.header.addWidget(this.toolbar);
   }
 }
