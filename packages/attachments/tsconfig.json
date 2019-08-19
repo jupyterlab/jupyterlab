@@ -13,9 +13,6 @@
       "path": "../datastore"
     },
     {
-      "path": "../observables"
-    },
-    {
       "path": "../rendermime"
     },
     {
