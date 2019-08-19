@@ -141,13 +141,9 @@ def load_jupyter_server_extension(nbapp):
     page_config['devMode'] = dev_mode
     page_config['token'] = nbapp.token
 
-    # Export the version info tuple to a JSON array. This gets printed
-    # inside double quote marks, so we render it to a JSON string of the
-    # JSON data (so that we can call JSON.parse on the frontend on it).
-    # We also have to wrap it in `Markup` so that it isn't escaped
-    # by Jinja. Otherwise, if the version has string parts these will be
-    # escaped and then will have to be unescaped on the frontend.
-    page_config['notebookVersion'] = Markup(dumps(dumps(version_info))[1:-1])
+    # Client-side code assumes notebookVersion is a JSON-encoded string
+    # TODO: fix this when we can make such a change
+    page_config['notebookVersion'] = dumps(version_info)
 
     if nbapp.file_to_run and type(nbapp).__name__ == "LabApp":
         relpath = os.path.relpath(nbapp.file_to_run, nbapp.notebook_dir)
@@ -211,6 +207,9 @@ def load_jupyter_server_extension(nbapp):
         page_config['hubPrefix'] = nbapp.hub_prefix
         page_config['hubHost'] = nbapp.hub_host
         page_config['hubUser'] = nbapp.user
+        # Assume the server_name property indicates running JupyterHub 1.0.
+        if hasattr(nbapp, 'server_name'):
+            page_config['hubServerName'] = nbapp.server_name
         api_token = os.getenv('JUPYTERHUB_API_TOKEN', '')
         page_config['token'] = api_token
 

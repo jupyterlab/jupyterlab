@@ -33,18 +33,6 @@
   height: 100%;
 }
 
-#main-logo {
-  background-image: url('./images/jupyter-favicon.svg');
-  background-repeat: no-repeat;
-  background-size: 100px;
-  position: absolute;
-  background-position: center;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  animation: 0.3s fade-in linear forwards;
-}
-
 .planet {
   background-repeat: no-repeat;
   background-size: cover;

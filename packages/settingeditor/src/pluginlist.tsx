@@ -5,6 +5,12 @@
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
+import {
+  combineClasses,
+  DefaultIconReact,
+  defaultIconRegistry
+} from '@jupyterlab/ui-components';
+
 import { Message } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -253,9 +259,11 @@ namespace Private {
       const { id, schema, version } = plugin;
       const itemTitle = `${schema.description}\n${id}\n${version}`;
       const image = getHint(ICON_CLASS_KEY, registry, plugin);
-      const iconClass = `jp-MaterialIcon jp-PluginList-icon${
-        image ? ' ' + image : ''
-      }`;
+      const iconClass = combineClasses(
+        image,
+        'jp-PluginList-icon',
+        'jp-MaterialIcon'
+      );
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
 
       return (
@@ -265,7 +273,17 @@ namespace Private {
           key={id}
           title={itemTitle}
         >
-          <span className={iconClass} title={iconTitle} />
+          {defaultIconRegistry.contains(image) ? (
+            <DefaultIconReact
+              name={image}
+              title={iconTitle}
+              className={''}
+              tag={'span'}
+              kind={'settingsEditor'}
+            />
+          ) : (
+            <span className={iconClass} title={iconTitle} />
+          )}
           <span>{schema.title || id}</span>
         </li>
       );

@@ -72,6 +72,29 @@ export namespace Text {
   }
 
   /**
+   * Given a 'snake-case', 'snake_case', or 'snake case' string,
+   * will return the camel case version: 'snakeCase'.
+   *
+   * @param str: the snake-case input string.
+   *
+   * @param upper: default = false. If true, the first letter of the
+   * returned string will be capitalized.
+   *
+   * @returns the camel case version of the input string.
+   */
+  export function camelCase(str: string, upper: boolean = false): string {
+    return str.replace(/(?:^\w|[A-Z]|\b\w|\s+|-+|_+)/g, function(match, index) {
+      if (+match === 0 || match[0] === '-') {
+        return '';
+      } else if (index === 0 && !upper) {
+        return match.toLowerCase();
+      } else {
+        return match.toUpperCase();
+      }
+    });
+  }
+
+  /**
    * Given a string, title case the words in the string.
    *
    * @param str: the string to title case.

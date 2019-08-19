@@ -51,7 +51,7 @@ export const EDITOR_ICON_CLASS = 'jp-MaterialIcon jp-TextEditorIcon';
 /**
  * The class name for the text editor icon from the default theme.
  */
-export const MARKDOWN_ICON_CLASS = 'jp-MaterialIcon jp-MarkdownIcon';
+export const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
 
 export default class Commands {
   static getCreateConsoleFunction(

@@ -13,7 +13,11 @@
  */
 import * as path from 'path';
 import * as utils from './utils';
-import { ensurePackage, IEnsurePackageOptions } from './ensure-package';
+import {
+  ensurePackage,
+  ensureUiComponents,
+  IEnsurePackageOptions
+} from './ensure-package';
 
 type Dict<T> = { [key: string]: T };
 
@@ -339,6 +343,16 @@ export async function ensureIntegrity(): Promise<boolean> {
     if (pkgMessages.length > 0) {
       messages[name] = pkgMessages;
     }
+  }
+
+  // ensure the icon svg imports
+  pkgMessages = await ensureUiComponents(pkgPaths['@jupyterlab/ui-components']);
+  if (pkgMessages.length > 0) {
+    let pkgName = '@jupyterlab/ui-components';
+    if (!messages[pkgName]) {
+      messages[pkgName] = [];
+    }
+    messages[pkgName] = messages[pkgName].concat(pkgMessages);
   }
 
   // Handle the top level package.

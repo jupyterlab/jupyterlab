@@ -10,7 +10,12 @@
     </style>
   </head>
   <body>
-    <script id='jupyter-config-data' type="application/json">{ "baseUrl": "{{base_url}}" }</script>
+    {% set page_config_full = {'baseUrl': base_url} %}
+  
+    <script id="jupyter-config-data" type="application/json">
+      {{ page_config_full | tojson }}
+    </script>
+  
     <h1>Run code!</h1>
     <p>
       Type code in the text area and click run to execute it.
@@ -33,6 +38,6 @@
         }
     });
     </script>
-    <script src="{{base_url}}example/index.js"></script>
+    <script src="{{base_url | e}}example/index.js"></script>
   </body>
 </html>
