@@ -4,7 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 export * from '@jupyterlab/rendermime-interfaces';
-export * from './attachmentmodel';
 export * from './factories';
 export * from './latex';
 export * from './mimemodel';

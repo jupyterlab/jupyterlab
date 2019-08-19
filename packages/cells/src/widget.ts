@@ -5,6 +5,8 @@
 
 import { IClientSession } from '@jupyterlab/apputils';
 
+import { AttachmentsResolver } from '@jupyterlab/attachments';
+
 import { Debouncer, nbformat } from '@jupyterlab/coreutils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
@@ -1149,14 +1151,12 @@ export class MarkdownCell extends Cell {
     super(options);
     this.addClass(MARKDOWN_CELL_CLASS);
     // Ensure we can resolve attachments:
-    // TODO revive attachments
-    this._rendermime = options.rendermime.clone();
-    /*{
+    this._rendermime = options.rendermime.clone({
       resolver: new AttachmentsResolver({
         parent: options.rendermime.resolver,
-        model: this.model.attachments
+        record: this.data.record
       })
-    });*/
+    });
 
     // Throttle the rendering rate of the widget.
     this._debouncer = new Debouncer(() => {

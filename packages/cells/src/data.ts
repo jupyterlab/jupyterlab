@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { IAttachmentsModel } from '@jupyterlab/attachments';
+import { AttachmentsData, IAttachmentsData } from '@jupyterlab/attachments';
 
 import { CodeEditor, ICodeEditorData } from '@jupyterlab/codeeditor';
 
@@ -107,7 +107,7 @@ export namespace IAttachmentsCellData {
     /**
      * The union of cell fields.
      */
-    fields: ICellData.BaseSchema['fields'] & IAttachmentsModel.Fields;
+    fields: ICellData.BaseSchema['fields'] & IAttachmentsData.Schema['fields'];
   };
 }
 
@@ -254,10 +254,11 @@ export namespace AttachmentsCellData {
    */
   export function fromJSON(
     loc: ICellData.DataLocation,
-    cell?: nbformat.IBaseCell
+    cell?: nbformat.IMarkdownCell | nbformat.IRawCell
   ): void {
-    // TODO: resurrect cell attachments.
     CellData.fromJSON(loc, cell);
+    const attachments = (cell && cell.attachments) || {};
+    AttachmentsData.fromJSON(loc.record, attachments);
   }
 
   /**
@@ -266,9 +267,14 @@ export namespace AttachmentsCellData {
   export function toJSON(
     loc: ICellData.DataLocation
   ): nbformat.IRawCell | nbformat.IMarkdownCell {
-    return Private.baseToJSON(loc) as
+    const cell = Private.baseToJSON(loc) as
       | nbformat.IRawCell
       | nbformat.IMarkdownCell;
+    const attachments = AttachmentsData.toJSON(loc.record);
+    if (Object.keys(attachments).length) {
+      cell.attachments = attachments;
+    }
+    return cell;
   }
 }
 
@@ -311,7 +317,6 @@ export namespace MarkdownCellData {
     loc: ICellData.DataLocation,
     cell?: nbformat.IMarkdownCell
   ): void {
-    // TODO: resurrect cell attachments.
     DatastoreExt.withTransaction(loc.record.datastore, () => {
       AttachmentsCellData.fromJSON(loc, cell);
       DatastoreExt.updateRecord(loc.record, {
