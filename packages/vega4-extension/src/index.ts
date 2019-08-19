@@ -92,7 +92,10 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
       this._result.view.finalize();
     }
 
+    const path = await this._resolver.resolveUrl('');
+    const baseURL = await this._resolver.getDownloadUrl(path);
     const loader = vega.vega.loader({
+      baseURL,
       http: { credentials: 'same-origin' }
     });
 
