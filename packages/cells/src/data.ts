@@ -289,7 +289,6 @@ export namespace RawCellData {
     loc: ICellData.DataLocation,
     cell?: nbformat.IRawCell
   ): void {
-    // TODO: resurrect cell attachments.
     DatastoreExt.withTransaction(loc.record.datastore, () => {
       AttachmentsCellData.fromJSON(loc, cell);
       DatastoreExt.updateRecord(loc.record, {

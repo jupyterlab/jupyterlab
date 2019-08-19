@@ -15,11 +15,9 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import { DatastoreExt } from '@jupyterlab/datastore';
 
-import { ObservableJSON } from '@jupyterlab/observables';
-
 import { ArrayExt, each, chain } from '@phosphor/algorithm';
 
-import { JSONObject, JSONValue } from '@phosphor/coreutils';
+import { JSONObject, JSONValue, ReadonlyJSONValue } from '@phosphor/coreutils';
 
 import { Datastore, MapField } from '@phosphor/datastore';
 
@@ -31,8 +29,10 @@ import { h, VirtualDOM, VirtualNode } from '@phosphor/virtualdom';
 
 import { PanelLayout, Widget } from '@phosphor/widgets';
 
+import { INotebookData } from './data';
+
 import { NotebookPanel } from './panel';
-import { INotebookModel } from './model';
+
 import { INotebookTools, INotebookTracker } from './tokens';
 
 class RankedPanel<T extends Widget = Widget> extends Widget {
@@ -154,25 +154,20 @@ export class NotebookTools extends Widget implements INotebookTools {
    * Handle a change to the notebook panel.
    */
   private _onActiveNotebookPanelChanged(): void {
-    if (
-      this._prevActiveNotebookModel &&
-      !this._prevActiveNotebookModel.isDisposed
-    ) {
-      /*this._prevActiveNotebookModel.metadata.changed.disconnect(
-        this._onActiveNotebookPanelMetadataChanged,
-        this
-      );*/
+    if (this._nbMetadataListener) {
+      this._nbMetadataListener.dispose();
+      this._nbMetadataListener = null;
     }
     const activeNBModel =
       this.activeNotebookPanel && this.activeNotebookPanel.content
         ? this.activeNotebookPanel.content.model
         : null;
-    this._prevActiveNotebookModel = activeNBModel;
     if (activeNBModel) {
-      /*activeNBModel.metadata.changed.connect(
+      this._nbMetadataListener = DatastoreExt.listenField(
+        { ...activeNBModel.data.record, field: 'metadata' },
         this._onActiveNotebookPanelMetadataChanged,
         this
-      );*/
+      );
     }
     each(this._toolChildren(), widget => {
       MessageLoop.sendMessage(widget, NotebookTools.ActiveNotebookPanelMessage);
@@ -213,18 +208,18 @@ export class NotebookTools extends Widget implements INotebookTools {
   /**
    * Handle a change in the active cell metadata.
    */
-  /*private _onActiveNotebookPanelMetadataChanged(
-    sender: IObservableMap<JSONValue>,
-    args: IObservableMap.IChangedArgs<JSONValue>
+  private _onActiveNotebookPanelMetadataChanged(
+    sender: Datastore,
+    args: MapField.Change<JSONValue>
   ): void {
-    let message = new ObservableJSON.ChangeMessage(
+    let message = new NotebookTools.MetadataChangeMessage(
       'activenotebookpanel-metadata-changed',
       args
     );
     each(this._toolChildren(), widget => {
       MessageLoop.sendMessage(widget, message);
     });
-  }*/
+  }
 
   /**
    * Handle a change in the notebook model metadata.
@@ -233,13 +228,13 @@ export class NotebookTools extends Widget implements INotebookTools {
     sender: Datastore,
     args: MapField.Change<JSONValue>
   ): void {
-    /*let message = new ObservableJSON.ChangeMessage(
+    let message = new NotebookTools.MetadataChangeMessage(
       'activecell-metadata-changed',
       args
     );
     each(this._toolChildren(), widget => {
       MessageLoop.sendMessage(widget, message);
-    });*/
+    });
   }
 
   private _toolChildren() {
@@ -251,7 +246,7 @@ export class NotebookTools extends Widget implements INotebookTools {
   private _advancedTools: RankedPanel<NotebookTools.Tool>;
   private _tracker: INotebookTracker;
   private _prevActiveCell: ICellData.DataLocation | null;
-  private _prevActiveNotebookModel: INotebookModel | null;
+  private _nbMetadataListener: IDisposable | null = null;
 }
 
 /**
@@ -266,6 +261,24 @@ export namespace NotebookTools {
      * The notebook tracker used by the notebook tools.
      */
     tracker: INotebookTracker;
+  }
+
+  /**
+   * An JSON field change message.
+   */
+  export class MetadataChangeMessage extends Message {
+    /**
+     * Create a new metadata changed message.
+     */
+    constructor(type: string, args: MapField.Change<JSONValue>) {
+      super(type);
+      this.args = args;
+    }
+
+    /**
+     * The arguments of the change.
+     */
+    readonly args: MapField.Change<JSONValue>;
   }
 
   /**
@@ -337,11 +350,13 @@ export namespace NotebookTools {
           this.onSelectionChanged(msg);
           break;
         case 'activecell-metadata-changed':
-          // this.onActiveCellMetadataChanged(msg as ObservableJSON.ChangeMessage);
+          this.onActiveCellMetadataChanged(
+            msg as NotebookTools.MetadataChangeMessage
+          );
           break;
         case 'activenotebookpanel-metadata-changed':
           this.onActiveNotebookPanelMetadataChanged(
-            msg as ObservableJSON.ChangeMessage
+            msg as NotebookTools.MetadataChangeMessage
           );
           break;
         default:
@@ -386,7 +401,7 @@ export namespace NotebookTools {
      * The default implementation is a no-op.
      */
     protected onActiveCellMetadataChanged(
-      msg: MapField.Change<JSONValue>
+      msg: NotebookTools.MetadataChangeMessage
     ): void {
       /* no-op */
     }
@@ -398,7 +413,7 @@ export namespace NotebookTools {
      * The default implementation is a no-op.
      */
     protected onActiveNotebookPanelMetadataChanged(
-      msg: ObservableJSON.ChangeMessage
+      msg: NotebookTools.MetadataChangeMessage
     ): void {
       /* no-op */
     }
@@ -517,7 +532,10 @@ export namespace NotebookTools {
       const { editorFactory } = options;
       this.addClass('jp-MetadataEditorTool');
       let layout = (this.layout = new PanelLayout());
-      this.editor = new JSONEditor({
+      this.editor = new JSONEditor<
+        INotebookData.Schema | ICellData.Schema,
+        'metadata'
+      >({
         editorFactory
       });
       this.editor.title.label = options.label || 'Edit Metadata';
@@ -530,7 +548,10 @@ export namespace NotebookTools {
     /**
      * The editor used by the tool.
      */
-    readonly editor: JSONEditor;
+    readonly editor: JSONEditor<
+      ICellData.Schema | INotebookData.Schema,
+      'metadata'
+    >;
   }
 
   /**
@@ -571,22 +592,24 @@ export namespace NotebookTools {
      * Handle a change to the notebook.
      */
     protected onActiveNotebookPanelChanged(msg: Message): void {
-      // this._update();
+      this._update();
     }
 
     /**
      * Handle a change to the notebook metadata.
      */
     protected onActiveNotebookPanelMetadataChanged(msg: Message): void {
-      // this._update();
+      this._update();
     }
 
-    /*private _update() {
+    private _update() {
       const nb =
         this.notebookTools.activeNotebookPanel &&
         this.notebookTools.activeNotebookPanel.content;
-      this.editor.source = nb ? nb.model.metadata : null;
-    }*/
+      this.editor.source = nb
+        ? { ...nb.model.data.record, field: 'metadata' }
+        : null;
+    }
   }
 
   /**
@@ -609,14 +632,16 @@ export namespace NotebookTools {
      * Handle a change to the active cell metadata.
      */
     protected onActiveCellMetadataChanged(
-      msg: MapField.Change<JSONValue>
+      msg: NotebookTools.MetadataChangeMessage
     ): void {
       this._update();
     }
 
     private _update() {
-      // let cell = this.notebookTools.activeCell;
-      // this.editor.source = cell ? cell.model.metadata : null;
+      let cell = this.notebookTools.activeCell;
+      this.editor.source = cell
+        ? { ...cell.data.record, field: 'metadata' }
+        : null;
     }
   }
 
@@ -634,7 +659,7 @@ export namespace NotebookTools {
       this.key = options.key;
       this._default = options.default;
       this._validCellTypes = options.validCellTypes || [];
-      // this._getter = options.getter || this._getValue;
+      this._getter = options.getter || this._getValue;
       this._setter = options.setter || this._setValue;
     }
 
@@ -708,27 +733,29 @@ export namespace NotebookTools {
       }
       select.disabled = false;
       this._changeGuard = true;
-      // let getter = this._getter;
-      // select.value = JSON.stringify(getter(activeCell));
+      let getter = this._getter;
+      select.value = JSON.stringify(getter(activeCell));
       this._changeGuard = false;
     }
 
     /**
      * Handle a change to the metadata of the active cell.
      */
-    /*protected onActiveCellMetadataChanged(msg: ObservableJSON.ChangeMessage) {
+    protected onActiveCellMetadataChanged(
+      msg: NotebookTools.MetadataChangeMessage
+    ) {
       if (this._changeGuard) {
         return;
       }
       let select = this.selectNode;
       let cell = this.notebookTools.activeCell;
-      if (msg.args.key === this.key && cell) {
+      if (cell && msg.args.current[this.key]) {
         this._changeGuard = true;
         let getter = this._getter;
         select.value = JSON.stringify(getter(cell));
         this._changeGuard = false;
       }
-    }*/
+    }
 
     /**
      * Handle a change to the value.
@@ -748,13 +775,17 @@ export namespace NotebookTools {
     /**
      * Get the value for the data.
      */
-    /*private _getValue = (cell: Cell) => {
-      let value = cell.model.metadata[this.key];
+    private _getValue = (cell: Cell) => {
+      const metadata = DatastoreExt.getField({
+        ...cell.data.record,
+        field: 'metadata'
+      });
+      let value = metadata[this.key];
       if (value === undefined) {
         value = this._default;
       }
       return value;
-    };*/
+    };
 
     /**
      * Set the value for the data.
@@ -777,8 +808,8 @@ export namespace NotebookTools {
 
     private _changeGuard = false;
     private _validCellTypes: string[];
-    // private _getter: (cell: Cell) => JSONValue;
-    private _setter: (cell: Cell, value: JSONValue) => void;
+    private _getter: (cell: Cell) => ReadonlyJSONValue;
+    private _setter: (cell: Cell, value: ReadonlyJSONValue) => void;
     private _default: JSONValue;
   }
 

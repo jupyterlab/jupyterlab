@@ -3,9 +3,16 @@
 
 import { DatastoreExt } from '@jupyterlab/datastore';
 
-import { IObservableJSON } from '@jupyterlab/observables';
+import {
+  JSONExt,
+  JSONObject,
+  JSONValue,
+  ReadonlyJSONObject
+} from '@phosphor/coreutils';
 
-import { JSONExt, JSONObject } from '@phosphor/coreutils';
+import { Datastore, MapField, Schema } from '@phosphor/datastore';
+
+import { IDisposable } from '@phosphor/disposable';
 
 import { Message } from '@phosphor/messaging';
 
@@ -46,7 +53,10 @@ const COMMIT_CLASS = 'jp-JSONEditor-commitButton';
 /**
  * A widget for editing observable JSON.
  */
-export class JSONEditor extends Widget {
+export class JSONEditor<
+  S extends Schema,
+  F extends keyof JSONEditor.MapFields<S>
+> extends Widget {
   /**
    * Construct a new JSON editor.
    */
@@ -122,20 +132,25 @@ export class JSONEditor extends Widget {
   /**
    * The observable source.
    */
-  get source(): IObservableJSON | null {
+  get source(): JSONEditor.DataLocation<S, F> | null {
     return this._source;
   }
-  set source(value: IObservableJSON | null) {
+  set source(value: JSONEditor.DataLocation<S, F> | null) {
     if (this._source === value) {
       return;
     }
-    if (this._source) {
-      this._source.changed.disconnect(this._onSourceChanged, this);
+    if (this._listener) {
+      this._listener.dispose();
+      this._listener = null;
     }
     this._source = value;
     this.editor.setOption('readOnly', value === null);
     if (value) {
-      value.changed.connect(this._onSourceChanged, this);
+      this._listener = DatastoreExt.listenField(
+        this._source,
+        this._onSourceChanged,
+        this
+      );
     }
     this._setValue();
   }
@@ -210,11 +225,11 @@ export class JSONEditor extends Widget {
   }
 
   /**
-   * Handle a change to the metadata of the source.
+   * Handle a change to the JSON of the source.
    */
   private _onSourceChanged(
-    sender: IObservableJSON,
-    args: IObservableJSON.IChangedArgs
+    sender: Datastore,
+    args: MapField.Change<JSONValue>
   ) {
     if (this._changeGuard) {
       return;
@@ -292,19 +307,22 @@ export class JSONEditor extends Widget {
       return;
     }
 
-    // If it is in user and has changed from old, set in new.
-    for (let key in user) {
-      if (!JSONExt.deepEqual(user[key], old[key] || null)) {
-        source.set(key, user[key]);
-      }
-    }
-
-    // If it was in old and is not in user, remove from source.
-    for (let key in old) {
+    let update: JSONObject = {};
+    Object.keys(old).forEach(key => {
+      // If it was in old and not in user, remove from the source.
       if (!(key in user)) {
-        source.delete(key);
+        update[key] = null;
       }
-    }
+    });
+    Object.keys(user).forEach(key => {
+      // If it is in user and has changed from old, set in new
+      if (!JSONExt.deepEqual(user[key], old[key] || null)) {
+        update[key] = user[key];
+      }
+    });
+    DatastoreExt.withTransaction(this._source.datastore, () => {
+      DatastoreExt.updateField(this._source, update);
+    });
   }
 
   /**
@@ -317,7 +335,9 @@ export class JSONEditor extends Widget {
     this.commitButtonNode.hidden = true;
     this.removeClass(ERROR_CLASS);
     let model = this.editor.model;
-    let content = this._source ? this._source.toJSON() : {};
+    let content = this._source
+      ? (DatastoreExt.getField(this._source) as ReadonlyJSONObject)
+      : {};
     this._changeGuard = true;
     if (content === void 0) {
       model.value = 'No data!';
@@ -339,9 +359,10 @@ export class JSONEditor extends Widget {
 
   private _dataDirty = false;
   private _inputDirty = false;
-  private _source: IObservableJSON | null = null;
-  private _originalValue = JSONExt.emptyObject;
+  private _source: JSONEditor.DataLocation<S, F> | null = null;
+  private _originalValue: ReadonlyJSONObject = JSONExt.emptyObject;
   private _changeGuard = false;
+  private _listener: IDisposable | null = null;
 }
 
 /**
@@ -357,4 +378,22 @@ export namespace JSONEditor {
      */
     editorFactory: CodeEditor.Factory;
   }
+
+  // TODO: this fancy typing isn't quite working as intended.
+  /**
+   * The subset of fields in a schema that represent a JSON Object.
+   */
+  export type MapFields<S extends Schema> = {
+    [F in keyof S['fields']]: S['fields'][F] extends MapField<JSONValue>
+      ? F
+      : never;
+  };
+
+  /**
+   * A field location referencing a JSON-able object.
+   */
+  export type DataLocation<
+    S extends Schema,
+    F extends keyof MapFields<S>
+  > = DatastoreExt.FieldLocation<S, F>;
 }
