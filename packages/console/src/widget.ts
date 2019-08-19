@@ -333,11 +333,12 @@ export class CodeConsole extends Widget {
    */
   inject(code: string, metadata: JSONObject = {}): Promise<void> {
     let cell = this.createCodeCell();
-    cell.editor.model.value = code;
-    // TODO: set the metadata.
-    // for (let key of Object.keys(metadata)) {
-    //   cell.model.metadata.set(key, metadata[key]);
-    // }
+    DatastoreExt.withTransaction(cell.data.record.datastore, () => {
+      DatastoreExt.updateRecord(cell.data.record, {
+        text: { index: 0, remove: 0, text: code },
+        metadata
+      });
+    });
     this.addCell(cell);
     return this._execute(cell);
   }

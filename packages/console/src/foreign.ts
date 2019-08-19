@@ -130,15 +130,23 @@ export class ForeignHandler implements IDisposable {
         }
         let output = msg.content as nbformat.IOutput;
         output.output_type = msgType as nbformat.OutputType;
-        OutputAreaData.appendItem(cell.data, output);
+        if (this._clearNext) {
+          OutputAreaData.clear(cell.data);
+          this._clearNext = false;
+        } else {
+          OutputAreaData.appendItem(cell.data, output);
+        }
         parent.update();
         return true;
       case 'clear_output':
-        // let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
-        cell = this._parent.getCell(parentMsgId);
-        if (cell) {
-          // TODO handle wait
-          OutputAreaData.clear(cell.data);
+        let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
+        if (wait) {
+          this._clearNext = true;
+        } else {
+          cell = this._parent.getCell(parentMsgId);
+          if (cell) {
+            OutputAreaData.clear(cell.data);
+          }
         }
         return true;
       default:
@@ -159,6 +167,7 @@ export class ForeignHandler implements IDisposable {
   private _enabled = false;
   private _parent: ForeignHandler.IReceiver;
   private _isDisposed = false;
+  private _clearNext = false;
 }
 
 /**
