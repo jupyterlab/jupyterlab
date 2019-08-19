@@ -3,8 +3,6 @@
 
 import { DatastoreExt } from '@jupyterlab/datastore';
 
-import { IModelDB, ModelDB } from '@jupyterlab/observables';
-
 import { JSONObject } from '@phosphor/coreutils';
 
 import { Datastore } from '@phosphor/datastore';
@@ -186,12 +184,6 @@ export namespace CodeEditor {
     readonly selections: { [id: string]: ITextSelection[] };
 
     /**
-     * The underlying `IModelDB` instance in which model
-     * data is stored.
-     */
-    readonly modelDB: IModelDB;
-
-    /**
      * The record in the datastore in which this codeeditor keeps its data.
      */
     readonly record: DatastoreExt.RecordLocation<ICodeEditorData.Schema>;
@@ -206,12 +198,6 @@ export namespace CodeEditor {
      */
     constructor(options?: Model.IOptions) {
       options = options || {};
-
-      if (options.modelDB) {
-        this.modelDB = options.modelDB;
-      } else {
-        this.modelDB = new ModelDB();
-      }
 
       if (options.record) {
         this.record = options.record;
@@ -245,12 +231,6 @@ export namespace CodeEditor {
         }
       }
     }
-
-    /**
-     * The underlying `IModelDB` instance in which model
-     * data is stored.
-     */
-    readonly modelDB: IModelDB;
 
     /**
      * The record in the datastore in which this codeeditor keeps its data.
@@ -736,11 +716,6 @@ export namespace CodeEditor {
        * The mimetype of the model.
        */
       mimeType?: string;
-
-      /**
-       * An optional modelDB for storing model state.
-       */
-      modelDB?: IModelDB;
 
       /**
        * A record location in an existing datastore in which to store the model.

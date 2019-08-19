@@ -11,9 +11,6 @@
     },
     {
       "path": "../datastore"
-    },
-    {
-      "path": "../observables"
     }
   ]
 }

@@ -30,8 +30,6 @@ import {
   PathExt
 } from '@jupyterlab/coreutils';
 
-import { IModelDB } from '@jupyterlab/observables';
-
 import { Contents, Kernel } from '@jupyterlab/services';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
@@ -690,16 +688,6 @@ export namespace DocumentRegistry {
     readonly defaultKernelLanguage: string;
 
     /**
-     * The underlying `IModelDB` instance in which model
-     * data is stored.
-     *
-     * ### Notes
-     * Making direct edits to the values stored in the`IModelDB`
-     * is not recommended, and may produce unpredictable results.
-     */
-    readonly modelDB: IModelDB;
-
-    /**
      * Serialize the model to a string.
      */
     toString(): string;
@@ -1060,7 +1048,7 @@ export namespace DocumentRegistry {
      *
      * @returns A new document model.
      */
-    createNew(languagePreference?: string, modelDB?: IModelDB): T;
+    createNew(languagePreference?: string): T;
 
     /**
      * Get the preferred kernel language given a file path.

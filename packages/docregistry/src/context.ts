@@ -25,8 +25,6 @@ import {
 
 import { PathExt } from '@jupyterlab/coreutils';
 
-import { IModelDB, ModelDB } from '@jupyterlab/observables';
-
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
@@ -51,14 +49,7 @@ export class Context<T extends DocumentRegistry.IModel>
     const localPath = this._manager.contents.localPath(this._path);
     let lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
-    let dbFactory = options.modelDBFactory;
-    if (dbFactory) {
-      const localPath = manager.contents.localPath(this._path);
-      this._modelDB = dbFactory.createNew(localPath);
-      this._model = this._factory.createNew(lang, this._modelDB);
-    } else {
-      this._model = this._factory.createNew(lang);
-    }
+    this._model = this._factory.createNew(lang);
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -175,9 +166,6 @@ export class Context<T extends DocumentRegistry.IModel>
     }
     this._isDisposed = true;
     this.session.dispose();
-    if (this._modelDB) {
-      this._modelDB.dispose();
-    }
     this._model.dispose();
     this._disposed.emit(void 0);
     Signal.clearData(this);
@@ -214,19 +202,8 @@ export class Context<T extends DocumentRegistry.IModel>
       this._model.initialize();
       return this._save();
     }
-    if (this._modelDB) {
-      return this._modelDB.connected.then(() => {
-        if (this._modelDB.isPrepopulated) {
-          this._model.initialize();
-          void this._save();
-          return void 0;
-        } else {
-          return this._revert(true);
-        }
-      });
-    } else {
-      return this._revert(true);
-    }
+    // TODO how to handle prepopulated collaborative sessions?
+    return this._revert(true);
   }
 
   /**
@@ -482,10 +459,8 @@ export class Context<T extends DocumentRegistry.IModel>
 
     return this._manager.ready
       .then(() => {
-        if (!model.modelDB.isCollaborative) {
-          return this._maybeSave(options);
-        }
-        return this._manager.contents.save(this._path, options);
+        // TODO think about how saving works in collaborative environments.
+        return this._maybeSave(options);
       })
       .then(value => {
         if (this.isDisposed) {
@@ -764,7 +739,6 @@ export class Context<T extends DocumentRegistry.IModel>
     options?: DocumentRegistry.IOpenOptions
   ) => void;
   private _model: T;
-  private _modelDB: IModelDB;
   private _path = '';
   private _useCRLF = false;
   private _factory: DocumentRegistry.IModelFactory<T>;
@@ -807,11 +781,6 @@ export namespace Context {
      * The kernel preference associated with the context.
      */
     kernelPreference?: IClientSession.IKernelPreference;
-
-    /**
-     * An IModelDB factory method which may be used for the document.
-     */
-    modelDBFactory?: ModelDB.IFactory;
 
     /**
      * An optional callback for opening sibling widgets.

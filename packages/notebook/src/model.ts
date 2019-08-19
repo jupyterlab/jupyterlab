@@ -5,7 +5,7 @@ import { showDialog, Dialog } from '@jupyterlab/apputils';
 
 import { DatastoreExt } from '@jupyterlab/datastore';
 
-import { DocumentModel, DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import {
   CellData,
@@ -15,13 +15,15 @@ import {
   MarkdownCellData
 } from '@jupyterlab/cells';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
 
 import { IOutputData, OutputData } from '@jupyterlab/rendermime';
 
 import { ReadonlyJSONObject, UUID } from '@phosphor/coreutils';
 
 import { Datastore } from '@phosphor/datastore';
+
+import { ISignal, Signal } from '@phosphor/signaling';
 
 import { INotebookData, NotebookData } from './data';
 
@@ -63,12 +65,11 @@ export interface INotebookModel extends DocumentRegistry.IModel {
 /**
  * An implementation of a notebook Model.
  */
-export class NotebookModel extends DocumentModel implements INotebookModel {
+export class NotebookModel implements INotebookModel {
   /**
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    super(options.languagePreference);
     let factory = options.contentFactory || NotebookModel.defaultContentFactory;
 
     const datastore = (this._store = NotebookData.createStore());
@@ -99,7 +100,6 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     this.contentFactory = factory.clone(this.data);
     // Handle initial metadata.
 
-    DatastoreExt.listenRecord(this.record, this.triggerContentChange, this);
     this._deletedCells = [];
   }
 
@@ -153,6 +153,57 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
+   * A signal emitted when the document content changes.
+   */
+  get contentChanged(): ISignal<this, void> {
+    return this._contentChanged;
+  }
+
+  /**
+   * A signal emitted when the document state changes.
+   */
+  get stateChanged(): ISignal<this, IChangedArgs<any>> {
+    return this._stateChanged;
+  }
+
+  /**
+   * The dirty state of the document.
+   */
+  get dirty(): boolean {
+    return this._dirty;
+  }
+  set dirty(newValue: boolean) {
+    if (newValue === this._dirty) {
+      return;
+    }
+    let oldValue = this._dirty;
+    this._dirty = newValue;
+    this._stateChanged.emit({ name: 'dirty', oldValue, newValue });
+  }
+
+  /**
+   * The read only state of the document.
+   */
+  get readOnly(): boolean {
+    return this._readOnly;
+  }
+  set readOnly(newValue: boolean) {
+    if (newValue === this._readOnly) {
+      return;
+    }
+    let oldValue = this._readOnly;
+    this._readOnly = newValue;
+    this._stateChanged.emit({ name: 'readOnly', oldValue, newValue });
+  }
+
+  /**
+   * The default kernel name of the document.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+
+  /**
    * The default kernel language of the document.
    */
   get defaultKernelLanguage(): string {
@@ -161,18 +212,24 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   }
 
   /**
+   * Whether the model has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
    * Dispose of the resources held by the model.
    */
   dispose(): void {
     // Do nothing if already disposed.
-    if (this.isDisposed) {
+    if (this._isDisposed) {
       return;
     }
     if (this._store) {
       this._store.dispose();
       this._store = null;
     }
-    super.dispose();
   }
 
   /**
@@ -322,7 +379,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Initialize the model with its current state.
    */
   initialize(): void {
-    super.initialize();
+    /* No-op */
   }
 
   /**
@@ -345,6 +402,11 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
 
   private _deletedCells: string[];
   private _store: Datastore | null = null;
+  private _isDisposed = false;
+  private _dirty = false;
+  private _readOnly = false;
+  private _contentChanged = new Signal<this, void>(this);
+  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
 }
 
 /**
@@ -523,7 +585,7 @@ export namespace NotebookModel {
     }
 
     /**
-     * Clone the content factory with a new IModelDB.
+     * Clone the content factory with a new data location.
      */
     clone(data: ContentFactory.DataLocation): ContentFactory {
       return new ContentFactory({

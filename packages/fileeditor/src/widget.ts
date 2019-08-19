@@ -58,24 +58,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
       this._onContextReady();
     });
 
-    if (context.model.modelDB.isCollaborative) {
-      let modelDB = context.model.modelDB;
-      void modelDB.connected.then(() => {
-        let collaborators = modelDB.collaborators;
-        if (!collaborators) {
-          return;
-        }
-
-        // Setup the selection style for collaborators
-        let localCollaborator = collaborators.localCollaborator;
-        this.editor.uuid = localCollaborator.sessionId;
-
-        this.editor.selectionStyle = {
-          ...CodeEditor.defaultSelectionStyle,
-          color: localCollaborator.color
-        };
-      });
-    }
+    // TODO Let collaborators know who we are via a cursor.
   }
 
   /**

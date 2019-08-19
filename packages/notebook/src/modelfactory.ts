@@ -3,8 +3,6 @@
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { IModelDB } from '@jupyterlab/observables';
-
 import { Contents } from '@jupyterlab/services';
 
 import { INotebookModel, NotebookModel } from './model';
@@ -69,7 +67,7 @@ export class NotebookModelFactory
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string, modelDB?: IModelDB): INotebookModel {
+  createNew(languagePreference?: string): INotebookModel {
     let contentFactory = this.contentFactory;
     return new NotebookModel({ languagePreference, contentFactory });
   }

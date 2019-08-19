@@ -1409,20 +1409,7 @@ export class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: Cell): void {
-    if (this.model && this.model.modelDB.isCollaborative) {
-      let modelDB = this.model.modelDB;
-      void modelDB.connected.then(() => {
-        if (!cell.isDisposed) {
-          // Setup the selection style for collaborators.
-          let localCollaborator = modelDB.collaborators.localCollaborator;
-          cell.editor.uuid = localCollaborator.sessionId;
-          cell.editor.selectionStyle = {
-            ...CodeEditor.defaultSelectionStyle,
-            color: localCollaborator.color
-          };
-        }
-      });
-    }
+    // TODO: let collaborators know who you are based on cursor!
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.

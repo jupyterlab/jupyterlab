@@ -754,9 +754,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // If we can id the selection to a specific collaborator,
     // use that information.
     let collaborator: ICollaborator | undefined;
-    if (this._model.modelDB.collaborators) {
-      collaborator = this._model.modelDB.collaborators.get(uuid);
-    }
+    // TODO: figure out who our collaborators are so we can show it.
 
     // Style each selection for the uuid.
     selections.forEach(selection => {

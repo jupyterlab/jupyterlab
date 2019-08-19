@@ -9,8 +9,6 @@ import { Mode } from '@jupyterlab/codemirror';
 
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 
-import { IModelDB } from '@jupyterlab/observables';
-
 import { Contents } from '@jupyterlab/services';
 
 import { JSONValue } from '@phosphor/coreutils';
@@ -31,8 +29,8 @@ export class DocumentModel extends CodeEditor.Model
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string, modelDB?: IModelDB) {
-    super({ modelDB });
+  constructor(languagePreference?: string) {
+    super();
     this.datastore = Datastore.create({
       id: 1,
       schemas: [CodeEditorData.SCHEMA]
@@ -233,11 +231,8 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    *
    * @returns A new document model.
    */
-  createNew(
-    languagePreference?: string,
-    modelDB?: IModelDB
-  ): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference, modelDB);
+  createNew(languagePreference?: string): DocumentRegistry.ICodeModel {
+    return new DocumentModel(languagePreference);
   }
 
   /**
