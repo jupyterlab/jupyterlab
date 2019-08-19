@@ -62,6 +62,7 @@
     "chai": "^4.2.0",
     "husky": "^3.0.2",
     "jest": "^24.8.0",
+    "jest-junit": "^6.3.0",
     "lint-staged": "^9.2.1",
     "prettier": "^1.18.2",
     "rimraf": "~2.6.2",
