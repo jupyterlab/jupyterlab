@@ -351,7 +351,7 @@ export class OutputArea extends Widget {
      */
     void input.value.then(value => {
       // Use stdin as the stream so it does not get combined with stdout.
-      OutputAreaData.appendItem(this.data, {
+      this._appendItem({
         output_type: 'stream',
         name: 'stdin',
         text: value + '\n'
@@ -498,13 +498,17 @@ export class OutputArea extends Widget {
       case 'error':
         output = msg.content as nbformat.IOutput;
         output.output_type = msgType as nbformat.OutputType;
-        OutputAreaData.appendItem(this.data, output);
+        this._appendItem(output);
         break;
       case 'clear_output':
-        // TODO: handle clearNext in the widget now that it is no
-        // longer in the model.
-        // let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
-        OutputAreaData.clear(this.data);
+        // If a wait signal is recieved, mark the `_clearNext` flag so
+        // we can clear the output area after the next output.
+        let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
+        if (wait) {
+          this._clearNext = true;
+        } else {
+          OutputAreaData.clear(this.data);
+        }
         break;
       case 'update_display_data':
         output = msg.content as nbformat.IOutput;
@@ -555,8 +559,17 @@ export class OutputArea extends Widget {
       data: (page as any).data as nbformat.IMimeBundle,
       metadata: {}
     };
-    OutputAreaData.appendItem(this.data, output);
+    this._appendItem(output);
   };
+
+  private _appendItem(output: nbformat.IOutput): void {
+    if (this._clearNext) {
+      OutputAreaData.clear(this.data);
+      this._clearNext = false;
+      return;
+    }
+    OutputAreaData.appendItem(this.data, output);
+  }
 
   private _minHeightTimeout: number = null;
   private _future: Kernel.IShellFuture<
@@ -565,6 +578,7 @@ export class OutputArea extends Widget {
   > | null = null;
   private _displayIdMap = new Map<string, number[]>();
   private _datastore: Datastore | null = null;
+  private _clearNext = false;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
