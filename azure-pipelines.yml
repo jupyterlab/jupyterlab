@@ -1,0 +1,43 @@
+pool:
+  vmImage: 'ubuntu-16.04'
+
+strategy:
+  matrix:
+    Tests:
+      python.version: '3.7'
+      testResultsFiles: 'tests/**/junit.xml'
+
+steps:
+- bash: echo "##vso[task.prependpath]$CONDA/bin"
+  displayName: Add conda to PATH
+
+- bash: conda create --yes --quiet --name jupyterlab-debugger
+  displayName: Create a new conda environment
+
+- bash: |
+    source activate jupyterlab-debugger
+    conda install --yes --quiet -c conda-forge nodejs xeus-python ptvsd python=$PYTHON_VERSION
+    python -m pip install -U --pre jupyterlab
+  displayName: Install dependencies
+
+- bash: |
+    source activate jupyterlab-debugger
+    jlpm
+    jlpm run build
+  displayName: Build jupyterlab-debugger
+
+- bash: |
+    source activate jupyterlab-debugger
+    export JUPYTER_PATH=${CONDA_PREFIX}/share/jupyter
+    export XEUS_LOG=1
+    jlpm run test
+  displayName: Run the tests
+
+- task: PublishTestResults@2
+  displayName: 'Publish test results'
+  condition: variables['testResultsFiles']
+  inputs:
+    testResultsFiles: '$(testResultsFiles)'
+    testRunTitle: '$(group)'
+    mergeTestResults: true
+
