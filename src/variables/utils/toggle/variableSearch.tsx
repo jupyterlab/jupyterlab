@@ -1,6 +1,12 @@
-import { Panel, Widget } from '@phosphor/widgets';
-import React, { useState, useRef } from 'react';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { ReactWidget } from '@jupyterlab/apputils';
+
+import { Panel, Widget } from '@phosphor/widgets';
+
+import React, { useState, useRef } from 'react';
+
 import { IVariablesModel } from '../../model';
 import useOutsideClick from '../../../utils/useOutsideClick';
 
@@ -56,7 +62,7 @@ class VariableSearchInput extends ReactWidget {
   }
 }
 
-const MenuReact = ({ config }: any) => {
+const VariablesMenu = ({ config }: any) => {
   const [toggleState, setToggle] = useState(false);
   const [scope, setScope] = useState('local');
   const wrapperRef = useRef(null);
@@ -65,14 +71,16 @@ const MenuReact = ({ config }: any) => {
     setToggle(false);
   };
 
-  const toogle = (e: React.MouseEvent) => {
+  const toggle = (e: any) => {
     setToggle(!toggleState);
   };
 
   useOutsideClick(wrapperRef, onClickOutSide);
 
   const changeScope = (newScope: string) => {
-    if (newScope === scope) return;
+    if (newScope === scope) {
+      return;
+    }
     setScope(newScope);
     setToggle(false);
   };
@@ -90,9 +98,9 @@ const MenuReact = ({ config }: any) => {
       </li>
       <li
         className="jp-MenuComponent-item"
-        onClick={e => changeScope('builin')}
+        onClick={e => changeScope('built-in')}
       >
-        builin
+        built-in
       </li>
     </ul>
   );
@@ -100,9 +108,7 @@ const MenuReact = ({ config }: any) => {
   return (
     <div ref={wrapperRef}>
       <span
-        onClick={(e: React.MouseEvent) => {
-          toogle(e);
-        }}
+        onClick={e => toggle(e)}
         className="jp-DebuggerSidebarVariable-Scope-label"
       >
         {scope}
@@ -114,13 +120,7 @@ const MenuReact = ({ config }: any) => {
 };
 
 class VariableScopeSearch extends ReactWidget {
-  constructor() {
-    super();
-  }
-  menu: ReactWidget;
-  widget: Widget;
-
   render() {
-    return <MenuReact />;
+    return <VariablesMenu />;
   }
 }

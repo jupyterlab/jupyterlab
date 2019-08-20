@@ -1,7 +1,13 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { Panel, SplitPanel, Widget } from '@phosphor/widgets';
-import { VariableTableDescription } from './variableTableDescription';
+
 import { IVariablesModel } from '../model';
+
 import { IVariable } from '../variable';
+
+import { VariableTableDescription } from './variableTableDescription';
 
 export class VariableDescription extends SplitPanel {
   readonly searchParams: Widget;
@@ -15,7 +21,7 @@ export class VariableDescription extends SplitPanel {
     super();
     this.orientation = 'vertical';
     this.model = model;
-    this.currentVariable = this.model.variable;
+    this.currentVariable = this.model.current;
 
     this.table = new VariableTableDescription(this.model);
     this.table.addClass('jp-DebuggerSidebarVariable-table');
@@ -27,11 +33,10 @@ export class VariableDescription extends SplitPanel {
     this.addWidget(this.descriptionBox);
     this.descriptionBox.node.innerHTML = '<b> Select Variable </b>';
 
-    //observable change current variable
-    this.model.changeCurrentVariable.connect(
+    this.model.currentChanged.connect(
       (model: IVariablesModel, variable: IVariable) => {
         this.descriptionBox.node.innerHTML = this.renderDescription(
-          this.model.variable
+          this.model.current
         );
       }
     );
