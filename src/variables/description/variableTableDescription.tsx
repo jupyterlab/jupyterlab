@@ -9,9 +9,9 @@ import { Widget, Panel } from '@phosphor/widgets';
 
 import React, { useState } from 'react';
 
-import { IVariablesModel } from '../model';
+import { Variables } from '../variables';
 
-import { VariablesSearch } from './toggle';
+import { VariablesSearch } from './../toggle';
 
 import useTbody from './useTbody';
 
@@ -19,7 +19,7 @@ const ROW_CLASS = 'jp-DebuggerSidebarVariables-table-row';
 
 const HEAD_CLASS = 'jp-DebuggerSidebarVariables-table-head';
 
-const Table = ({ model }: { model: IVariablesModel }) => {
+const Table = ({ model }: { model: Variables.IVariablesModel }) => {
   const [variables, setVariables] = useState(model.variables);
   const [variable, TableBody] = useTbody(variables, model.current, ROW_CLASS);
 
@@ -49,7 +49,7 @@ const Table = ({ model }: { model: IVariablesModel }) => {
 };
 
 class TableVariableWidget extends ReactWidget {
-  state: IVariablesModel;
+  state: Variables.IVariablesModel;
 
   constructor(props: any) {
     super(props);
@@ -62,10 +62,10 @@ class TableVariableWidget extends ReactWidget {
 }
 
 export class VariableTableDescription extends Panel {
-  private _model: IVariablesModel;
+  private _model: Variables.IVariablesModel;
   private searchParams: Widget;
   private myWidget: Widget;
-  constructor(model: IVariablesModel) {
+  constructor(model: Variables.IVariablesModel) {
     super();
     this._model = model;
     this.searchParams = new VariablesSearch(this._model);

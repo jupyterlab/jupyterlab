@@ -5,7 +5,7 @@ import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
 import { Widget, Panel } from '@phosphor/widgets';
 
-export class BreakPointsWidget extends Panel {
+export class BreakPoints extends Panel {
   readonly body: Panel;
 
   readonly header: Panel;
@@ -41,3 +41,5 @@ export class BreakPointsWidget extends Panel {
     this.header.addWidget(this.toolbar);
   }
 }
+
+export namespace BreakPoints {}

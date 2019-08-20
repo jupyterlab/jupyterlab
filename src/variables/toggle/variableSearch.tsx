@@ -3,12 +3,12 @@
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
-import { Panel, Widget } from '@phosphor/widgets';
+import { Widget, Panel } from '@phosphor/widgets';
 
 import React, { useState, useRef } from 'react';
 
-import { IVariablesModel } from '../../model';
-import useOutsideClick from '../../../utils/useOutsideClick';
+import { Variables } from './../variables';
+import useOutsideClick from './useOutsideClick';
 
 const SEARCH_ITEM = 'jp-Search-item';
 
@@ -50,8 +50,8 @@ const SearchComponent = ({ model }: any) => {
 
 class VariableSearchInput extends ReactWidget {
   search: string;
-  model: IVariablesModel;
-  constructor(model: IVariablesModel) {
+  model: Variables.IVariablesModel;
+  constructor(model: Variables.IVariablesModel) {
     super();
     this.model = model;
     this.search = model.filter;

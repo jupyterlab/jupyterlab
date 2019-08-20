@@ -3,9 +3,7 @@
 
 import { Panel, SplitPanel, Widget } from '@phosphor/widgets';
 
-import { IVariablesModel } from '../model';
-
-import { IVariable } from '../variable';
+import { Variables } from '../variables';
 
 import { VariableTableDescription } from './variableTableDescription';
 
@@ -14,10 +12,10 @@ export class VariableDescription extends SplitPanel {
   readonly table: Widget;
   readonly descriptionBox: Panel;
 
-  model: IVariablesModel;
+  model: Variables.IVariablesModel;
   currentVariable: any;
 
-  constructor(model: IVariablesModel) {
+  constructor(model: Variables.IVariablesModel) {
     super();
     this.orientation = 'vertical';
     this.model = model;
@@ -34,7 +32,7 @@ export class VariableDescription extends SplitPanel {
     this.descriptionBox.node.innerHTML = '<b> Select Variable </b>';
 
     this.model.currentChanged.connect(
-      (model: IVariablesModel, variable: IVariable) => {
+      (model: Variables.IVariablesModel, variable: Variables.IVariable) => {
         this.descriptionBox.node.innerHTML = this.renderDescription(
           this.model.current
         );
@@ -44,7 +42,7 @@ export class VariableDescription extends SplitPanel {
 
   // Still in progres: rendering description
 
-  protected renderDescription(variable: IVariable) {
+  protected renderDescription(variable: Variables.IVariable) {
     const descriptionElementDOM = `<b>name: ${variable.name}</b>
                                        <p>type: ${variable.type} </p>
                                        Description:

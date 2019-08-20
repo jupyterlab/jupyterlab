@@ -5,7 +5,7 @@ import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
 import { Widget, Panel } from '@phosphor/widgets';
 
-export class CallstackWidget extends Panel {
+export class Callstack extends Panel {
   readonly header: Panel;
 
   readonly label: Widget;
@@ -53,3 +53,5 @@ export class CallstackWidget extends Panel {
     this.header.addWidget(this.toolbar);
   }
 }
+
+export namespace Callstack {}
