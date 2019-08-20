@@ -276,8 +276,8 @@ const tree: JupyterFrontEndPlugin<void> = {
         router.navigate(url);
 
         const query = URLExt.queryStringToObject(args.search);
-        if (query.filebrowserPath) {
-          path = query.filebrowserPath;
+        if (query['file-browser-path']) {
+          path = query['file-browser-path'];
         }
 
         try {
