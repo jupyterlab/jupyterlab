@@ -3,7 +3,7 @@
 
 import { SplitPanel } from '@phosphor/widgets';
 
-import { BreakPointsWidget } from './breakpoints';
+import { Breakpoints } from './breakpoints';
 
 import { Debugger } from './debugger';
 
@@ -20,18 +20,18 @@ export class DebuggerSidebar extends SplitPanel {
 
     this.variables = new VariablesWidget();
     this.callstack = new CallstackWidget();
-    this.breakPoints = new BreakPointsWidget();
+    this.breakpoints = new Breakpoints();
 
     this.addWidget(this.variables);
     this.addWidget(this.callstack);
-    this.addWidget(this.breakPoints);
+    this.addWidget(this.breakpoints);
   }
 
   readonly variables: VariablesWidget;
 
   readonly callstack: CallstackWidget;
 
-  readonly breakPoints: BreakPointsWidget;
+  readonly breakpoints: Breakpoints;
 
   get model(): Debugger.Model | null {
     return this._model;
