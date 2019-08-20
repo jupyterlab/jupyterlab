@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-@import './toolbar.css';
+@import './sidebar.css';
 
 .jp-Debugger {
   background: var(--jp-layout-color1);
