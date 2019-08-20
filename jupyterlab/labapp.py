@@ -45,21 +45,22 @@ buildFailureMsg = """Build failed.
 Troubleshooting: If the build failed due to an out-of-memory error, you
 may be able to fix it by disabling the `dev_build` and/or `minimize` options.
 
-If you are building via the `build jupyter lab` command, you can disable
+If you are building via the `jupyter lab build` command, you can disable
 these options like so:
 
-build jupyter lab --dev-mode=False --minimize=False
+jupyter lab build --dev-mode=False --minimize=False
 
 You can also disable these options for all JupyterLab builds by adding these
-lines to your Jupyter config file (`jupyter_notebook_config.py`):
+lines to a Jupyter config file named `jupyter_config.py`:
 
 c.LabBuildApp.minimize = False
 c.LabBuildApp.dev_build = False
 
-If you haven't done so previously, you can generate a Jupyter config file by
-running:
+If you don't already have a `jupyter_config.py` file, you can create one by
+adding a blank file of that name to any of the Jupyter config directories.
+The config directories can be listed by running:
 
-jupyter lab --generate-config
+jupyter --paths
 
 Explanation:
 
