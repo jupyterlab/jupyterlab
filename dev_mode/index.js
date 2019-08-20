@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+require('whatwg-fetch'); // polyfill the fetch api
 require('es6-promise/auto');  // polyfill Promise on IE
 
 import {
