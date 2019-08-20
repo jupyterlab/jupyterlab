@@ -1,16 +1,10 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import React, { useState } from 'react';
 
 const useTbody = (items: Array<any>, defaultState: any, id: string) => {
   const [state, setState] = useState(defaultState);
-
-  const style = {
-    paddingLeft: `${12}px`,
-    width: `${25}%`
-  };
-  const style_2 = {
-    paddingLeft: `${12}px`,
-    width: `${75}%`
-  };
 
   const List = () => (
     <tbody>
@@ -20,8 +14,12 @@ const useTbody = (items: Array<any>, defaultState: any, id: string) => {
           onClick={e => setState(item)}
           className={id + (state === item ? ' selected' : '')}
         >
-          <td style={style}> {item.name} </td>
-          <td style={style_2}> {item.value} </td>
+          <td style={{ paddingLeft: `${12}px`, width: `${25}%` }}>
+            {item.name}
+          </td>
+          <td style={{ paddingLeft: `${12}px`, width: `${75}%` }}>
+            {item.value}
+          </td>
         </tr>
       ))}
     </tbody>

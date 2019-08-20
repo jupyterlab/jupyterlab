@@ -1,35 +1,43 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
+
 import { Widget, Panel } from '@phosphor/widgets';
-import { ToolbarWidget } from '../utils';
 
 export class BreakPointsWidget extends Panel {
-  readonly header: Panel;
-  readonly label: Widget;
   readonly body: Panel;
-  readonly toolbar: ToolbarWidget;
 
-  readonly model_header = {
-    label: 'BreakPoints',
-    class: 'jp-DebuggerSidebarVariables-header'
-  };
+  readonly header: Panel;
+
+  readonly label: Widget;
+
+  readonly toolbar: Toolbar;
 
   constructor() {
     super();
 
     this.header = new Panel();
-    this.header.addClass(this.model_header.class);
+    this.header.addClass('jp-DebuggerSidebarVariables-header');
     this.addWidget(this.header);
 
     this.label = new Widget();
-    this.label.node.textContent = this.model_header.label;
-    this.label.addClass(this.model_header.class + '-label');
+    this.label.node.textContent = 'BreakPoints';
+    this.label.addClass('jp-DebuggerSidebarVariables-header-label');
     this.header.addWidget(this.label);
 
-    this.toolbar = new ToolbarWidget();
-    this.toolbar.createSpanElement(
-      'fa fa-breakpoints disactive',
-      'Deactive All Breakpoints'
+    const toolbar = new Toolbar();
+    toolbar.addItem(
+      'deactivate',
+      new ToolbarButton({
+        iconClassName: 'jp-DebuggerDeactivateIcon',
+        onClick: () => {
+          console.log('`deactivate` was clicked');
+        },
+        tooltip: 'Deactivate Breakpoints'
+      })
     );
-    this.toolbar.createSpanElement('fa fa-remove', 'Remove All Breakpoints');
+    this.toolbar = toolbar;
     this.header.addWidget(this.toolbar);
   }
 }
