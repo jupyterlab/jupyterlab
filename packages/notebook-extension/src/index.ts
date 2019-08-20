@@ -1193,7 +1193,7 @@ function addCommands(
       const { context } = current;
 
       child.opener = null;
-      if (context.model.dirty && !context.model.readOnly) {
+      if (context.dirty && !context.readOnly) {
         return context.save().then(() => {
           child.location.assign(url);
         });

@@ -23,7 +23,7 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
-import { PathExt } from '@jupyterlab/coreutils';
+import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -87,6 +87,42 @@ export class Context<T extends DocumentRegistry.IModel>
     return this._fileChanged;
   }
 
+  /**
+   * A signal emitted when the document state changes.
+   */
+  get stateChanged(): ISignal<this, IChangedArgs<any>> {
+    return this._stateChanged;
+  }
+
+  /**
+   * The dirty state of the document.
+   */
+  get dirty(): boolean {
+    return this._dirty;
+  }
+  set dirty(newValue: boolean) {
+    if (newValue === this._dirty) {
+      return;
+    }
+    let oldValue = this._dirty;
+    this._dirty = newValue;
+    this._stateChanged.emit({ name: 'dirty', oldValue, newValue });
+  }
+
+  /**
+   * The read only state of the document.
+   */
+  get readOnly(): boolean {
+    return this._readOnly;
+  }
+  set readOnly(newValue: boolean) {
+    if (newValue === this._readOnly) {
+      return;
+    }
+    let oldValue = this._readOnly;
+    this._readOnly = newValue;
+    this._stateChanged.emit({ name: 'readOnly', oldValue, newValue });
+  }
   /**
    * A signal emitted on the start and end of a saving operation.
    */
@@ -199,7 +235,6 @@ export class Context<T extends DocumentRegistry.IModel>
    */
   initialize(isNew: boolean): Promise<void> {
     if (isNew) {
-      this._model.initialize();
       return this._save();
     }
     // TODO how to handle prepopulated collaborative sessions?
@@ -467,7 +502,7 @@ export class Context<T extends DocumentRegistry.IModel>
           return;
         }
 
-        model.dirty = false;
+        this.dirty = false;
         this._updateContentsModel(value);
 
         if (!this._isPopulated) {
@@ -528,9 +563,7 @@ export class Context<T extends DocumentRegistry.IModel>
         let dirty = false;
         if (contents.format === 'json') {
           model.fromJSON(contents.content);
-          if (initializeModel) {
-            model.initialize();
-          }
+          // TODO figure out model initialization
         } else {
           let content = contents.content;
           // Convert line endings if necessary, marking the file
@@ -542,12 +575,9 @@ export class Context<T extends DocumentRegistry.IModel>
             this._useCRLF = false;
           }
           model.fromString(content);
-          if (initializeModel) {
-            model.initialize();
-          }
         }
         this._updateContentsModel(contents);
-        model.dirty = dirty;
+        this.dirty = dirty;
         if (!this._isPopulated) {
           return this._populate();
         }
@@ -750,8 +780,11 @@ export class Context<T extends DocumentRegistry.IModel>
   private _isDisposed = false;
   private _pathChanged = new Signal<this, string>(this);
   private _fileChanged = new Signal<this, Contents.IModel>(this);
+  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
   private _disposed = new Signal<this, void>(this);
+  private _dirty = false;
+  private _readOnly = false;
 }
 
 /**

@@ -147,7 +147,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   [Printing.symbol]() {
     return async () => {
       // Save before generating HTML
-      if (this.context.model.dirty && !this.context.model.readOnly) {
+      if (this.context.dirty && !this.context.readOnly) {
         await this.context.save();
       }
 

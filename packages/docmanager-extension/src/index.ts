@@ -420,7 +420,7 @@ function addCommands(
             return;
           }
           if (result.button.accept) {
-            if (context.model.readOnly) {
+            if (context.readOnly) {
               return context.revert();
             }
             return context.restoreCheckpoint().then(() => context.revert());
@@ -437,7 +437,7 @@ function addCommands(
     execute: () => {
       if (isEnabled()) {
         let context = docManager.contextForWidget(shell.currentWidget);
-        if (context.model.readOnly) {
+        if (context.readOnly) {
           return showDialog({
             title: 'Cannot Save',
             body: 'Document is read-only',
@@ -472,7 +472,7 @@ function addCommands(
       const paths = new Set<string>(); // Cache so we don't double save files.
       each(shell.widgets('main'), widget => {
         const context = docManager.contextForWidget(widget);
-        if (context && !context.model.readOnly && !paths.has(context.path)) {
+        if (context && !context.readOnly && !paths.has(context.path)) {
           paths.add(context.path);
           promises.push(context.save());
         }
@@ -646,8 +646,8 @@ function handleContext(
     }
   };
   void context.ready.then(() => {
-    context.model.stateChanged.connect(onStateChanged);
-    if (context.model.dirty) {
+    context.stateChanged.connect(onStateChanged);
+    if (context.dirty) {
       disposable = status.setDirty();
     }
   });

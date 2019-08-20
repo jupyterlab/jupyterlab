@@ -58,43 +58,6 @@ export class DocumentModel extends CodeEditor.Model
   }
 
   /**
-   * A signal emitted when the document state changes.
-   */
-  get stateChanged(): ISignal<this, IChangedArgs<any>> {
-    return this._stateChanged;
-  }
-
-  /**
-   * The dirty state of the document.
-   */
-  get dirty(): boolean {
-    return this._dirty;
-  }
-  set dirty(newValue: boolean) {
-    if (newValue === this._dirty) {
-      return;
-    }
-    let oldValue = this._dirty;
-    this._dirty = newValue;
-    this.triggerStateChange({ name: 'dirty', oldValue, newValue });
-  }
-
-  /**
-   * The read only state of the document.
-   */
-  get readOnly(): boolean {
-    return this._readOnly;
-  }
-  set readOnly(newValue: boolean) {
-    if (newValue === this._readOnly) {
-      return;
-    }
-    let oldValue = this._readOnly;
-    this._readOnly = newValue;
-    this.triggerStateChange({ name: 'readOnly', oldValue, newValue });
-  }
-
-  /**
    * The default kernel name of the document.
    *
    * #### Notes
@@ -149,32 +112,14 @@ export class DocumentModel extends CodeEditor.Model
   }
 
   /**
-   * Initialize the model with its current state.
-   */
-  initialize(): void {
-    return;
-  }
-
-  /**
-   * Trigger a state change signal.
-   */
-  protected triggerStateChange(args: IChangedArgs<any>): void {
-    this._stateChanged.emit(args);
-  }
-
-  /**
    * Trigger a content changed signal.
    */
   protected triggerContentChange(): void {
     this._contentChanged.emit(void 0);
-    this.dirty = true;
   }
 
-  private _defaultLang = '';
-  private _dirty = false;
-  private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
-  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
+  private _defaultLang = '';
 }
 
 /**
@@ -475,7 +420,7 @@ export class DocumentWidget<
     this._onPathChanged(this.context, this.context.path);
 
     // Listen for changes in the dirty state.
-    this.context.model.stateChanged.connect(this._onModelStateChanged, this);
+    this.context.stateChanged.connect(this._onContextStateChanged, this);
     void this.context.ready.then(() => {
       this._handleDirtyState();
     });
@@ -499,10 +444,10 @@ export class DocumentWidget<
   }
 
   /**
-   * Handle a change to the context model state.
+   * Handle a change to the context state.
    */
-  private _onModelStateChanged(
-    sender: DocumentRegistry.IModel,
+  private _onContextStateChanged(
+    sender: DocumentRegistry.IContext<DocumentRegistry.IModel>,
     args: IChangedArgs<any>
   ): void {
     if (args.name === 'dirty') {
@@ -514,7 +459,7 @@ export class DocumentWidget<
    * Handle the dirty state of the context model.
    */
   private _handleDirtyState(): void {
-    if (this.context.model.dirty) {
+    if (this.context.dirty) {
       this.title.className += ` ${DIRTY_CLASS}`;
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');

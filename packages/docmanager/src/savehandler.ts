@@ -111,7 +111,7 @@ export class SaveHandler implements IDisposable {
     // Bail if the model is not dirty or the file is not writable, or the dialog
     // is already showing.
     let writable = context.contentsModel && context.contentsModel.writable;
-    if (!writable || !context.model.dirty || this._inDialog) {
+    if (!writable || !context.dirty || this._inDialog) {
       return;
     }
 

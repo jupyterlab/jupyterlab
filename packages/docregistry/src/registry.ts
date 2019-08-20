@@ -659,25 +659,6 @@ export namespace DocumentRegistry {
     contentChanged: ISignal<this, void>;
 
     /**
-     * A signal emitted when the model state changes.
-     */
-    stateChanged: ISignal<this, IChangedArgsGeneric<any>>;
-
-    /**
-     * The dirty state of the model.
-     *
-     * #### Notes
-     * This should be cleared when the document is loaded from
-     * or saved to disk.
-     */
-    dirty: boolean;
-
-    /**
-     * The read-only state of the model.
-     */
-    readOnly: boolean;
-
-    /**
      * The default kernel name of the document.
      */
     readonly defaultKernelName: string;
@@ -712,15 +693,6 @@ export namespace DocumentRegistry {
      * Should emit a [contentChanged] signal.
      */
     fromJSON(value: any): void;
-
-    /**
-     * Initialize model state after initial data load.
-     *
-     * #### Notes
-     * This function must be called after the initial data is loaded to set up
-     * initial model state, such as an initial undo stack, etc.
-     */
-    initialize(): void;
   }
 
   export interface ICollaborativeModel extends IModel {
@@ -755,6 +727,25 @@ export namespace DocumentRegistry {
      * A signal emitted when the contentsModel changes.
      */
     fileChanged: ISignal<this, Contents.IModel>;
+
+    /**
+     * A signal emitted when the model state changes.
+     */
+    stateChanged: ISignal<this, IChangedArgsGeneric<any>>;
+
+    /**
+     * The dirty state of the model.
+     *
+     * #### Notes
+     * This should be cleared when the document is loaded from
+     * or saved to disk.
+     */
+    dirty: boolean;
+
+    /**
+     * The read-only state of the model.
+     */
+    readOnly: boolean;
 
     /**
      * A signal emitted on the start and end of a saving operation.

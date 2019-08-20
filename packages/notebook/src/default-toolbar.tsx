@@ -77,7 +77,7 @@ export namespace ToolbarItems {
    */
   export function createSaveButton(panel: NotebookPanel): Widget {
     function onClick() {
-      if (panel.context.model.readOnly) {
+      if (panel.context.readOnly) {
         return showDialog({
           title: 'Cannot Save',
           body: 'Document is read-only',

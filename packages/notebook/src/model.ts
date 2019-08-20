@@ -15,7 +15,7 @@ import {
   MarkdownCellData
 } from '@jupyterlab/cells';
 
-import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
+import { nbformat } from '@jupyterlab/coreutils';
 
 import { IOutputData, OutputData } from '@jupyterlab/rendermime';
 
@@ -157,43 +157,6 @@ export class NotebookModel implements INotebookModel {
    */
   get contentChanged(): ISignal<this, void> {
     return this._contentChanged;
-  }
-
-  /**
-   * A signal emitted when the document state changes.
-   */
-  get stateChanged(): ISignal<this, IChangedArgs<any>> {
-    return this._stateChanged;
-  }
-
-  /**
-   * The dirty state of the document.
-   */
-  get dirty(): boolean {
-    return this._dirty;
-  }
-  set dirty(newValue: boolean) {
-    if (newValue === this._dirty) {
-      return;
-    }
-    let oldValue = this._dirty;
-    this._dirty = newValue;
-    this._stateChanged.emit({ name: 'dirty', oldValue, newValue });
-  }
-
-  /**
-   * The read only state of the document.
-   */
-  get readOnly(): boolean {
-    return this._readOnly;
-  }
-  set readOnly(newValue: boolean) {
-    if (newValue === this._readOnly) {
-      return;
-    }
-    let oldValue = this._readOnly;
-    this._readOnly = newValue;
-    this._stateChanged.emit({ name: 'readOnly', oldValue, newValue });
   }
 
   /**
@@ -371,7 +334,6 @@ export class NotebookModel implements INotebookModel {
         update
       );
       this._ensureMetadata();
-      this.dirty = true;
     });
   }
 
@@ -403,10 +365,7 @@ export class NotebookModel implements INotebookModel {
   private _deletedCells: string[];
   private _store: Datastore | null = null;
   private _isDisposed = false;
-  private _dirty = false;
-  private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
-  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
 }
 
 /**
