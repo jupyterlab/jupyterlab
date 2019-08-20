@@ -767,13 +767,13 @@ describe('cells/widget', () => {
       it('should not save timing info by default', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
         await CodeCell.execute(widget, session);
-        expect(widget.model.metadata.get('timing')).toBeUndefined();
+        expect(widget.model.metadata.get('execution')).toBeUndefined();
       });
       it('should save timing info if requested', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
         await CodeCell.execute(widget, session, { recordTiming: true });
-        expect(widget.model.metadata.get('timing')).toBeDefined();
-        const timingInfo = widget.model.metadata.get('timing') as any;
+        expect(widget.model.metadata.get('execution')).toBeDefined();
+        const timingInfo = widget.model.metadata.get('execution') as any;
         for (const key of TIMING_KEYS) {
           expect(timingInfo[key]).toBeDefined();
         }

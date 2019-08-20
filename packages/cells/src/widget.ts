@@ -1055,9 +1055,9 @@ export namespace CodeCell {
           if (!value) {
             return;
           }
-          const timingInfo: any = model.metadata.get('timing') || {};
+          const timingInfo: any = model.metadata.get('execution') || {};
           timingInfo[`iopub.${label}`] = value;
-          model.metadata.set('timing', timingInfo);
+          model.metadata.set('execution', timingInfo);
           return true;
         };
         cell.outputArea.future.registerMessageHook(recordTimingHook);
@@ -1068,7 +1068,7 @@ export namespace CodeCell {
       model.executionCount = msg.content.execution_count;
       const started = msg.metadata.started as string;
       if (recordTiming && started) {
-        const timingInfo = (model.metadata.get('timing') as any) || {};
+        const timingInfo = (model.metadata.get('execution') as any) || {};
         if (started) {
           timingInfo['shell.execute_reply.started'] = started;
         }
@@ -1076,7 +1076,7 @@ export namespace CodeCell {
         if (date) {
           timingInfo['shell.execute_reply'] = date;
         }
-        model.metadata.set('timing', timingInfo);
+        model.metadata.set('execution', timingInfo);
       }
       return msg;
     } catch (e) {
