@@ -41,7 +41,34 @@ import { JSONObject, ReadonlyJSONObject } from '@phosphor/coreutils';
 
 import { Menu } from '@phosphor/widgets';
 
-import { CommandIDs } from './index';
+/**
+ * The command IDs used by the fileeditor plugin.
+ */
+export namespace CommandIDs {
+  export const createNew = 'fileeditor:create-new';
+
+  export const createNewMarkdown = 'fileeditor:create-new-markdown-file';
+
+  export const changeFontSize = 'fileeditor:change-font-size';
+
+  export const lineNumbers = 'fileeditor:toggle-line-numbers';
+
+  export const lineWrap = 'fileeditor:toggle-line-wrap';
+
+  export const changeTabs = 'fileeditor:change-tabs';
+
+  export const matchBrackets = 'fileeditor:toggle-match-brackets';
+
+  export const autoClosingBrackets = 'fileeditor:toggle-autoclosing-brackets';
+
+  export const createConsole = 'fileeditor:create-console';
+
+  export const runCode = 'fileeditor:run-code';
+
+  export const runAllCode = 'fileeditor:run-all';
+
+  export const markdownPreview = 'fileeditor:markdown-preview';
+}
 
 /**
  * The class name for the text editor icon from the default theme.
@@ -373,12 +400,20 @@ export default class Commands {
   }
 
   static addLauncherItems(launcher: ILauncher) {
+    this.addCreateNewToLauncher(launcher);
+
+    this.addCreateNewMarkdownToLauncher(launcher);
+  }
+
+  static addCreateNewToLauncher(launcher: ILauncher) {
     launcher.add({
       command: CommandIDs.createNew,
       category: 'Other',
       rank: 1
     });
+  }
 
+  static addCreateNewMarkdownToLauncher(launcher: ILauncher) {
     launcher.add({
       command: CommandIDs.createNewMarkdown,
       category: 'Other',
@@ -387,14 +422,25 @@ export default class Commands {
   }
 
   static addPaletteItems(palette: ICommandPalette) {
-    const category = 'Text Editor';
+    this.addChangeTabsCommandsToPalette(palette);
+
+    this.addCreateNewCommandToPalette(palette);
+
+    this.addCreateNewMarkdownCommandToPalette(palette);
+
+    this.addChangeFontSizeCommandsToPalette(palette);
+  }
+
+  private static paletteCategory = 'Text Editor';
+
+  static addChangeTabsCommandsToPalette(palette: ICommandPalette) {
     let args: JSONObject = {
       insertSpaces: false,
       size: 4,
       name: 'Indent with Tab'
     };
     let command = 'fileeditor:change-tabs';
-    palette.addItem({ command, args, category });
+    palette.addItem({ command, args, category: this.paletteCategory });
 
     for (let size of [1, 2, 4, 8]) {
       let args: JSONObject = {
@@ -402,24 +448,34 @@ export default class Commands {
         size,
         name: `Spaces: ${size} `
       };
-      palette.addItem({ command, args, category });
+      palette.addItem({ command, args, category: this.paletteCategory });
     }
+  }
 
-    args = { isPalette: true };
-    command = CommandIDs.createNew;
-    palette.addItem({ command, args, category });
+  static addCreateNewCommandToPalette(palette: ICommandPalette) {
+    palette.addItem({
+      command: CommandIDs.createNew,
+      args: { isPalette: true },
+      category: this.paletteCategory
+    });
+  }
 
-    args = { isPalette: true };
-    command = CommandIDs.createNewMarkdown;
-    palette.addItem({ command, args, category });
+  static addCreateNewMarkdownCommandToPalette(palette: ICommandPalette) {
+    palette.addItem({
+      command: CommandIDs.createNewMarkdown,
+      args: { isPalette: true },
+      category: this.paletteCategory
+    });
+  }
 
-    args = { name: 'Increase Font Size', delta: 1 };
-    command = CommandIDs.changeFontSize;
-    palette.addItem({ command, args, category });
+  static addChangeFontSizeCommandsToPalette(palette: ICommandPalette) {
+    let command = CommandIDs.changeFontSize;
+
+    let args = { name: 'Increase Font Size', delta: 1 };
+    palette.addItem({ command, args, category: this.paletteCategory });
 
     args = { name: 'Decrease Font Size', delta: -1 };
-    command = CommandIDs.changeFontSize;
-    palette.addItem({ command, args, category });
+    palette.addItem({ command, args, category: this.paletteCategory });
   }
 
   static addMenuItems(

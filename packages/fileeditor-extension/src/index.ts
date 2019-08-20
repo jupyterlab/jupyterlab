@@ -44,35 +44,6 @@ import Commands, { EDITOR_ICON_CLASS } from './commands';
 const FACTORY = 'Editor';
 
 /**
- * The command IDs used by the fileeditor plugin.
- */
-export namespace CommandIDs {
-  export const createNew = 'fileeditor:create-new';
-
-  export const createNewMarkdown = 'fileeditor:create-new-markdown-file';
-
-  export const changeFontSize = 'fileeditor:change-font-size';
-
-  export const lineNumbers = 'fileeditor:toggle-line-numbers';
-
-  export const lineWrap = 'fileeditor:toggle-line-wrap';
-
-  export const changeTabs = 'fileeditor:change-tabs';
-
-  export const matchBrackets = 'fileeditor:toggle-match-brackets';
-
-  export const autoClosingBrackets = 'fileeditor:toggle-autoclosing-brackets';
-
-  export const createConsole = 'fileeditor:create-console';
-
-  export const runCode = 'fileeditor:run-code';
-
-  export const runAllCode = 'fileeditor:run-all';
-
-  export const markdownPreview = 'fileeditor:markdown-preview';
-}
-
-/**
  * The editor tracker extension.
  */
 const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
