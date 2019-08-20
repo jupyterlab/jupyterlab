@@ -44,11 +44,6 @@ jobs:
           testResultsFiles: '$(testResultsFiles)'
           testRunTitle: 'Linux - $(group)'
           mergeTestResults: true
-      - task: Bash@3
-        displayName: 'after_success'
-        inputs:
-          targetType: 'filePath'
-          filePath: ./scripts/ci_after_success.sh
 
   - job: 'Windows'
     pool:
