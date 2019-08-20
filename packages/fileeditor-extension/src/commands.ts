@@ -80,8 +80,15 @@ export const EDITOR_ICON_CLASS = 'jp-MaterialIcon jp-TextEditorIcon';
  */
 export const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
 
+/**
+ * A utility class for adding commands and menu items,
+ * for use by the File Editor extension or other Editor extensions.
+ */
 export default class Commands {
-  static getCreateConsoleFunction(
+  /**
+   * Accessor function that returns the createConsole function for use by various commands
+   */
+  private static getCreateConsoleFunction(
     commands: CommandRegistry
   ): (
     widget: IDocumentWidget<FileEditor>,
@@ -108,6 +115,9 @@ export default class Commands {
     };
   }
 
+  /**
+   * Wrapper function for adding the default File Editor commands
+   */
   static addCommands(
     commands: CommandRegistry,
     config: CodeEditor.IConfig,
@@ -399,12 +409,18 @@ export default class Commands {
     });
   }
 
+  /**
+   * Wrapper function for adding the default launcher items for File Editor
+   */
   static addLauncherItems(launcher: ILauncher) {
     this.addCreateNewToLauncher(launcher);
 
     this.addCreateNewMarkdownToLauncher(launcher);
   }
 
+  /**
+   * Add Create New Text File to the Launcher
+   */
   static addCreateNewToLauncher(launcher: ILauncher) {
     launcher.add({
       command: CommandIDs.createNew,
@@ -413,6 +429,9 @@ export default class Commands {
     });
   }
 
+  /**
+   * Add Create New Markdown to the Launcher
+   */
   static addCreateNewMarkdownToLauncher(launcher: ILauncher) {
     launcher.add({
       command: CommandIDs.createNewMarkdown,
@@ -421,6 +440,9 @@ export default class Commands {
     });
   }
 
+  /**
+   * Wrapper function for adding the default items to the File Editor palette
+   */
   static addPaletteItems(palette: ICommandPalette) {
     this.addChangeTabsCommandsToPalette(palette);
 
@@ -431,8 +453,14 @@ export default class Commands {
     this.addChangeFontSizeCommandsToPalette(palette);
   }
 
+  /**
+   * The category for File Editor palette commands for use in addToPalette functions
+   */
   private static paletteCategory = 'Text Editor';
 
+  /**
+   * Add commands to change the tab indentation to the File Editor palette
+   */
   static addChangeTabsCommandsToPalette(palette: ICommandPalette) {
     let args: JSONObject = {
       insertSpaces: false,
@@ -452,6 +480,9 @@ export default class Commands {
     }
   }
 
+  /**
+   * Add a Create New File command to the File Editor palette
+   */
   static addCreateNewCommandToPalette(palette: ICommandPalette) {
     palette.addItem({
       command: CommandIDs.createNew,
@@ -460,6 +491,9 @@ export default class Commands {
     });
   }
 
+  /**
+   * Add a Create New Markdown command to the File Editor palette
+   */
   static addCreateNewMarkdownCommandToPalette(palette: ICommandPalette) {
     palette.addItem({
       command: CommandIDs.createNewMarkdown,
@@ -468,6 +502,9 @@ export default class Commands {
     });
   }
 
+  /**
+   * Add commands to change the font size to the File Editor palette
+   */
   static addChangeFontSizeCommandsToPalette(palette: ICommandPalette) {
     let command = CommandIDs.changeFontSize;
 
@@ -478,6 +515,9 @@ export default class Commands {
     palette.addItem({ command, args, category: this.paletteCategory });
   }
 
+  /**
+   * Wrapper function for adding the default menu items for File Editor
+   */
   static addMenuItems(
     menu: IMainMenu,
     commands: CommandRegistry,
@@ -499,13 +539,17 @@ export default class Commands {
     // Add editor view options.
     this.addEditorViewerToViewMenu(menu, tracker);
 
-    // Add a console creator the the Kernel menu.
-    this.addConsoleCreatorToKernelMenu(menu, commands, tracker);
+    // Add a console creator the the file menu.
+    this.addConsoleCreatorToFileMenu(menu, commands, tracker);
 
-    // Add a code runner to the Run menu.
+    // Add a code runner to the run menu.
     this.addCodeRunnersToRunMenu(menu, commands, tracker, consoleTracker);
   }
 
+  /**
+   * Add File Editor editing commands to the Settings menu, including:
+   * Indent with Tab, Tab Spaces, Change Font Size, and auto closing brackets
+   */
   static addEditingCommandsToSettingsMenu(
     menu: IMainMenu,
     commands: CommandRegistry
@@ -546,10 +590,16 @@ export default class Commands {
     );
   }
 
+  /**
+   * Add a Create New File command to the File menu
+   */
   static addCreateNewFileToFileMenu(menu: IMainMenu) {
     menu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 30);
   }
 
+  /**
+   * Add a Create New Markdown File command to the File menu
+   */
   static addCreateNewMarkdownFileToFileMenu(menu: IMainMenu) {
     menu.fileMenu.newMenu.addGroup(
       [{ command: CommandIDs.createNewMarkdown }],
@@ -557,6 +607,9 @@ export default class Commands {
     );
   }
 
+  /**
+   * Add File Editor undo and redo widgets to the Edit menu
+   */
   static addUndoRedoToEditMenu(
     menu: IMainMenu,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>
@@ -572,6 +625,9 @@ export default class Commands {
     } as IEditMenu.IUndoer<IDocumentWidget<FileEditor>>);
   }
 
+  /**
+   * Add a File Editor editor viewer to the View Menu
+   */
   static addEditorViewerToViewMenu(
     menu: IMainMenu,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>
@@ -600,7 +656,10 @@ export default class Commands {
     } as IViewMenu.IEditorViewer<IDocumentWidget<FileEditor>>);
   }
 
-  static addConsoleCreatorToKernelMenu(
+  /**
+   * Add a File Editor console creator to the File menu
+   */
+  static addConsoleCreatorToFileMenu(
     menu: IMainMenu,
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>
@@ -615,6 +674,9 @@ export default class Commands {
     } as IFileMenu.IConsoleCreator<IDocumentWidget<FileEditor>>);
   }
 
+  /**
+   * Add a File Editor code runner to the Run menu
+   */
   static addCodeRunnersToRunMenu(
     menu: IMainMenu,
     commands: CommandRegistry,
@@ -644,12 +706,17 @@ export default class Commands {
     } as IRunMenu.ICodeRunner<IDocumentWidget<FileEditor>>);
   }
 
-  // Functions for adding items to the context menu
+  /**
+   * Wrapper function for adding the default items to the File Editor context menu
+   */
   static addContextMenuItems(app: JupyterFrontEnd) {
     this.addCreateConsoleToContextMenu(app);
     this.addMarkdownPreviewToContextMenu(app);
   }
 
+  /**
+   * Add a Create Console item to the File Editor context menu
+   */
   static addCreateConsoleToContextMenu(app: JupyterFrontEnd) {
     app.contextMenu.addItem({
       command: CommandIDs.createConsole,
@@ -657,6 +724,9 @@ export default class Commands {
     });
   }
 
+  /**
+   * Add a Markdown Preview item to the File Editor context menu
+   */
   static addMarkdownPreviewToContextMenu(app: JupyterFrontEnd) {
     app.contextMenu.addItem({
       command: CommandIDs.markdownPreview,
