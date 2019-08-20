@@ -180,26 +180,47 @@ describe('protocol', () => {
     });
   });
 
-  describe('#variablesReference', () => {
+  const getVariables = async () => {
+    const stackFramesReply = await debugSession.sendRequest('stackTrace', {
+      threadId
+    });
+    const frameId = stackFramesReply.body.stackFrames[0].id;
+    const scopesReply = await debugSession.sendRequest('scopes', {
+      frameId
+    });
+    const scopes = scopesReply.body.scopes;
+    const variablesReference = scopes[0].variablesReference;
+    const variablesReply = await debugSession.sendRequest('variables', {
+      variablesReference
+    });
+    return variablesReply.body.variables;
+  };
+
+  describe('#variables', () => {
     it('should return the variables and their values', async () => {
-      const stackFramesReply = await debugSession.sendRequest('stackTrace', {
-        threadId
-      });
-      const frameId = stackFramesReply.body.stackFrames[0].id;
-      const scopesReply = await debugSession.sendRequest('scopes', {
-        frameId
-      });
-      const scopes = scopesReply.body.scopes;
-      const variablesReference = scopes[0].variablesReference;
-      const variablesReply = await debugSession.sendRequest('variables', {
-        variablesReference
-      });
-      const variables = variablesReply.body.variables;
+      const variables = await getVariables();
       expect(variables.length).to.be.greaterThan(0);
       const i = find(variables, variable => variable.name === 'i');
       expect(i).to.exist;
       expect(i.type).to.equal('int');
       expect(i.value).to.equal('1');
+    });
+  });
+
+  describe('#continue', () => {
+    it('should proceed to the next breakpoint', async () => {
+      await debugSession.sendRequest('continue', { threadId });
+
+      const variables = await getVariables();
+      const i = find(variables, variable => variable.name === 'i');
+      expect(i).to.exist;
+      expect(i.type).to.equal('int');
+      expect(i.value).to.equal('2');
+
+      const j = find(variables, variable => variable.name === 'j');
+      expect(j).to.exist;
+      expect(j.type).to.equal('int');
+      expect(j.value).to.equal('4');
     });
   });
 });
