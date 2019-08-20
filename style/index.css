@@ -12,15 +12,6 @@
   bottom: 0;
 }
 
-.jp-DebuggerSidebar {
-  display: flex;
-  flex-direction: column;
-  color: var(--jp-ui-font-color1);
-  background: var(--jp-layout-color1);
-  font-size: var(--jp-ui-font-size1);
-  min-width: 350px !important;
-}
-
 .jp-DebuggerSidebar div:not(:first-child) .jp-DebuggerSidebarVariables-header {
   border-top: solid var(--jp-border-width) var(--jp-border-color1);
 }
