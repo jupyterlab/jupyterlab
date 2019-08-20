@@ -61,23 +61,25 @@ const MenuReact = ({ config }: any) => {
   const [scope, setScope] = useState('local');
   const wrapperRef = useRef(null);
 
-  const callback = () => {
+  const onClickOutSide = () => {
     setToggle(false);
   };
-
-  useOutsideClick(wrapperRef, callback);
 
   const toogle = (e: React.MouseEvent) => {
     setToggle(!toggleState);
   };
+
+  useOutsideClick(wrapperRef, onClickOutSide);
+
   const changeScope = (newScope: string) => {
+    console.log(newScope);
     if (newScope === scope) return;
     setScope(newScope);
     setToggle(false);
   };
 
   const List = (
-    <ul ref={wrapperRef} className="jp-MenuComponent">
+    <ul className="jp-MenuComponent">
       <li onClick={e => changeScope('local')} className="jp-menu-item">
         local
       </li>
@@ -97,7 +99,7 @@ const MenuReact = ({ config }: any) => {
   );
 
   return (
-    <div>
+    <div ref={wrapperRef}>
       <span
         onClick={(e: React.MouseEvent) => {
           toogle(e);

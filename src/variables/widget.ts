@@ -15,6 +15,30 @@ const MOCK_DATA_ROW = {
       value: 'function()',
       type: 'function',
       description: 'def test2(): return 0'
+    },
+    {
+      name: 'test 3',
+      value: 'function()',
+      type: 'function',
+      description: 'def test1(): return 0'
+    },
+    {
+      name: 'test 4',
+      value: 'function()',
+      type: 'function',
+      description: 'def test2(): return 0'
+    },
+    {
+      name: 'test 5',
+      value: 'function()',
+      type: 'function',
+      description: 'def test1(): return 0'
+    },
+    {
+      name: 'test 6',
+      value: 'function()',
+      type: 'function',
+      description: 'def test2(): return 0'
     }
   ]
 };

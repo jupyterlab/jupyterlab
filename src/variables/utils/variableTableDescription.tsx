@@ -1,8 +1,9 @@
-import { SplitPanel, Widget } from '@phosphor/widgets';
+import { Widget, Panel } from '@phosphor/widgets';
 import { IVariablesModel } from '../model';
 import React, { useState } from 'react';
 import { ReactWidget } from '@jupyterlab/apputils';
 import useTbody from './useTbody';
+import { VariablesSearch } from './toogle';
 
 const ROW_CLASS = 'jp-DebuggerSidebarVariables-table-row';
 const HEAD_CLASS = 'jp-DebuggerSidebarVariables-table-head';
@@ -15,16 +16,18 @@ const TableHead = () => {
     width: '75%'
   };
   const element = (
-    <thead>
-      <tr>
-        <th style={styleElement_1} className={HEAD_CLASS}>
-          Name
-        </th>
-        <th style={styleElement_2} className={HEAD_CLASS}>
-          Value
-        </th>
-      </tr>
-    </thead>
+    <table>
+      <thead>
+        <tr>
+          <th style={styleElement_1} className={HEAD_CLASS}>
+            Name
+          </th>
+          <th style={styleElement_2} className={HEAD_CLASS}>
+            Value
+          </th>
+        </tr>
+      </thead>
+    </table>
   );
 
   return element;
@@ -43,10 +46,10 @@ const Table = ({ model }: any) => {
 
   model.variable = variable;
   return (
-    <table>
+    <div>
       <TableHead />
       <TableBody />
-    </table>
+    </div>
   );
 };
 
@@ -63,13 +66,48 @@ class TableVariableWidget extends ReactWidget {
   }
 }
 
-export class VariableTableDescription extends SplitPanel {
+export class VariableTableDescription extends Panel {
   private _model: IVariablesModel;
-
+  private searchParams: Widget;
+  private myWidget: Widget;
   constructor(model: IVariablesModel) {
     super();
     this._model = model;
-    const myWidget: Widget = new TableVariableWidget(this._model);
-    this.addWidget(myWidget);
+    this.searchParams = new VariablesSearch(this._model);
+    this.addWidget(this.searchParams);
+    this.myWidget = new TableVariableWidget(this._model);
+    this.addWidget(this.myWidget);
+  }
+
+  protected onResize(msg: Widget.ResizeMessage): void {
+    super.onResize(msg);
+    this.resizeBody(msg);
+  }
+
+  protected getBody() {
+    if (this.myWidget && this.myWidget.node && this.myWidget.node.childNodes) {
+      return (
+        (this.myWidget.node.children[0].children[1] as HTMLElement) || null
+      );
+    }
+  }
+
+  protected getHead() {
+    if (this.myWidget && this.myWidget.node && this.myWidget.node.childNodes) {
+      return (
+        (this.myWidget.node.children[0].children[0] as HTMLElement) || null
+      );
+    }
+  }
+
+  protected resizeBody(msg: Widget.ResizeMessage): void {
+    const head = this.getHead();
+    const body = this.getBody();
+    if (body && head) {
+      const totalHeight = msg.height;
+      const headHeight = head.offsetHeight;
+      const bodyHeight = totalHeight - headHeight - 20;
+      body.style.height = `${bodyHeight}px`;
+    }
   }
 }

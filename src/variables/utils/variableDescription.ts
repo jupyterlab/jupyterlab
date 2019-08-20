@@ -2,11 +2,10 @@ import { Panel, SplitPanel, Widget } from '@phosphor/widgets';
 import { VariableTableDescription } from './variableTableDescription';
 import { IVariablesModel } from '../model';
 import { IVariable } from '../variable';
-import { VariablesSearch } from './toogle';
 
-export class VariableDescription extends Panel {
+export class VariableDescription extends SplitPanel {
   readonly searchParams: Widget;
-  readonly table: Panel;
+  readonly table: Widget;
   readonly descriptionBox: Panel;
 
   model: IVariablesModel;
@@ -14,18 +13,17 @@ export class VariableDescription extends Panel {
 
   constructor(model: IVariablesModel) {
     super();
+    this.orientation = 'vertical';
     this.model = model;
     this.currentVariable = this.model.variable;
-
-    this.searchParams = new VariablesSearch(this.model);
-    this.addWidget(this.searchParams);
 
     this.table = new VariableTableDescription(this.model);
     this.table.addClass('jp-DebuggerSidebarVariable-table');
     this.addWidget(this.table);
 
-    this.descriptionBox = new SplitPanel();
+    this.descriptionBox = new Panel();
     this.descriptionBox.addClass('jp-DebuggerSidebarVariable-description');
+
     this.addWidget(this.descriptionBox);
     this.descriptionBox.node.innerHTML = '<b> Select Variable </b>';
 

@@ -13,18 +13,22 @@ const useTbody = (items: Array<any>, defaultState: any, id: string) => {
   };
 
   const List = () => (
-    <tbody>
-      {items.map(item => (
-        <tr
-          key={item.name}
-          onClick={e => setState(item)}
-          className={id + (state === item ? ' selected' : '')}
-        >
-          <td style={style}> {item.name} </td>
-          <td style={style_2}> {item.value} </td>
-        </tr>
-      ))}
-    </tbody>
+    <div style={{ overflowY: 'auto' }}>
+      <table>
+        <tbody>
+          {items.map(item => (
+            <tr
+              key={item.name}
+              onClick={e => setState(item)}
+              className={id + (state === item ? ' selected' : '')}
+            >
+              <td style={style}> {item.name} </td>
+              <td style={style_2}> {item.value} </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 
   return [state, List, setState];
