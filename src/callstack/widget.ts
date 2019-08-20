@@ -1,16 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget, Panel } from '@phosphor/widgets';
+import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
-import { ToolbarWidget } from '../utils';
+import { Widget, Panel } from '@phosphor/widgets';
 
 export class CallstackWidget extends Panel {
   readonly header: Panel;
 
   readonly label: Widget;
 
-  readonly toolbar: ToolbarWidget;
+  readonly toolbar: Toolbar;
 
   constructor() {
     super();
@@ -24,12 +24,32 @@ export class CallstackWidget extends Panel {
     this.label.addClass('jp-DebuggerSidebarVariables-header-label');
     this.header.addWidget(this.label);
 
-    this.toolbar = new ToolbarWidget();
-    this.toolbar.createSpanElement(`fa fa-active`, 'Continue');
-    this.toolbar.createSpanElement(`fa fa-stop`, 'Stop');
-    this.toolbar.createSpanElement(`fa fa-stepOver`, 'Step Over');
-    this.toolbar.createSpanElement(`fa fa-stepIn`, 'Step In');
-    this.toolbar.createSpanElement(`fa fa-stepOut`, 'Step Out');
+    const toolbar = new Toolbar();
+    toolbar.addItem(
+      'continue',
+      new ToolbarButton({
+        iconClassName: 'jp-RunIcon',
+        onClick: () => {
+          console.log('`run` was clicked');
+        },
+        tooltip: 'Continue'
+      })
+    );
+    toolbar.addItem(
+      'stop',
+      new ToolbarButton({
+        iconClassName: 'jp-StopIcon',
+        onClick: () => {
+          console.log('`stop` was clicked');
+        },
+        tooltip: 'Stop'
+      })
+    );
+    toolbar.addItem('step-over', new ToolbarButton({ label: 'Step Over' }));
+    toolbar.addItem('step-in', new ToolbarButton({ label: 'Step In' }));
+    toolbar.addItem('step-out', new ToolbarButton({ label: 'Step Out' }));
+
+    this.toolbar = toolbar;
     this.header.addWidget(this.toolbar);
   }
 }
