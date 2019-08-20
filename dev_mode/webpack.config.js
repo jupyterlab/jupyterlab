@@ -146,7 +146,7 @@ module.exports = [
   {
     mode: 'development',
     entry: {
-      main: [plib.resolve(buildDir, 'index.out.js')]
+      main: ['whatwg-fetch', plib.resolve(buildDir, 'index.out.js')]
     },
     output: {
       path: plib.resolve(buildDir),
