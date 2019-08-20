@@ -6,20 +6,21 @@ import { Panel } from '@phosphor/widgets';
 import { VariableDescription } from './description';
 
 import { Signal, ISignal } from '@phosphor/signaling';
+import { DebugProtocol } from 'vscode-debugprotocol';
 
 export class Variables extends Panel {
   constructor() {
     super();
 
-    this.model = Variables.IVariablesModel.create(MOCK_DATA_ROW.variables);
+    this.model = new Variables.Model(MOCK_DATA_ROW.variables);
 
     this.header = new Panel();
-    this.header.addClass('jp-DebuggerSidebarVariables-header');
+    this.header.addClass('jp-DebuggerSidebar-item-header');
     this.addWidget(this.header);
 
     this.label = new Panel();
     this.label.node.textContent = 'Variables';
-    this.label.addClass('jp-DebuggerSidebarVariables-header-label');
+    this.label.addClass('jp-DebuggerSidebar-item-header-label');
     this.header.addWidget(this.label);
     this.variablesDescription = new VariableDescription(this.model);
     this.variablesDescription.addClass('jp-DebuggerSidebarVariables-body');
@@ -32,7 +33,7 @@ export class Variables extends Panel {
 
   readonly label: Panel;
 
-  readonly model: Variables.IVariablesModel;
+  readonly model: Variables.Model;
 
   readonly searcher: Panel;
 
@@ -41,31 +42,8 @@ export class Variables extends Panel {
 
 export namespace Variables {
   // will be change for DebugProtoclVariable
-  export interface IVariable {
-    /**
-     * The name of this variable.
-     */
-    readonly name: string;
-    /**
-     * The value of this variable.
-     */
-    readonly value: string;
-    /**
-     * The type of this variable.
-     */
-    readonly type: string | undefined;
-    /**
-     * The description of the variable.
-     */
-    readonly description: string | undefined;
-    /**
-     * a data URI or null.
-     */
-    readonly dataUri?: string;
-    /**
-     * a data URI or null.
-     */
-    readonly sourceUri?: string;
+  export interface IVariable extends DebugProtocol.Variable {
+    description: string;
   }
 
   export interface IVariablesModel {
@@ -74,12 +52,6 @@ export namespace Variables {
     variables: IVariable[];
     currentChanged: ISignal<Model, IVariable>;
     variablesChanged: ISignal<Model, IVariable[]>;
-  }
-
-  export namespace IVariablesModel {
-    export function create(model: IVariable[]) {
-      return new Model(model);
-    }
   }
 
   export class Model implements IVariablesModel {
@@ -131,17 +103,10 @@ export namespace Variables {
       return this.variables;
     }
 
-    fstFil(name: string): boolean {
-      return (
-        this._filterState
-          .split('')
-          .filter((ele: string, index: number) => name[index] === ele)
-          .join('') === this._filterState
-      );
-    }
-
     private _filterVariables(): IVariable[] {
-      return this._state.filter(ele => this.fstFil(ele.name));
+      return this._state.filter(
+        ele => ele.name.indexOf(this._filterState) !== -1
+      );
     }
 
     private _current: IVariable;
@@ -158,36 +123,42 @@ const MOCK_DATA_ROW = {
       name: 'test 1',
       value: 'function()',
       type: 'function',
+      variablesReference: 0,
       description: 'def test1(): return 0'
     },
     {
       name: 'Classtest',
       value: 'class',
       type: 'class',
+      variablesReference: 1,
       description: 'def test2(): return 0'
     },
     {
       name: 'test 3',
       value: 'function()',
       type: 'function',
+      variablesReference: 0,
       description: 'def test1(): return 0'
     },
     {
       name: 'test 4',
       value: 'function()',
       type: 'function',
+      variablesReference: 0,
       description: 'def test2(): return 0'
     },
     {
       name: 'test 5',
       value: 'function()',
       type: 'function',
+      variablesReference: 0,
       description: 'def test1(): return 0'
     },
     {
       name: 'test 6',
       value: 'function()',
       type: 'function',
+      variablesReference: 0,
       description: 'def test2(): return 0'
     }
   ]

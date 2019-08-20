@@ -19,53 +19,8 @@ const ROW_CLASS = 'jp-DebuggerSidebarVariables-table-row';
 
 const HEAD_CLASS = 'jp-DebuggerSidebarVariables-table-head';
 
-const Table = ({ model }: { model: Variables.IVariablesModel }) => {
-  const [variables, setVariables] = useState(model.variables);
-  const [variable, TableBody] = useTbody(variables, model.current, ROW_CLASS);
-
-  model.variablesChanged.connect((_: any, updates) => {
-    if (ArrayExt.shallowEqual(variables, updates)) {
-      return;
-    }
-    setVariables(updates);
-  });
-
-  model.current = variable;
-  return (
-    <table>
-      <thead>
-        <tr>
-          <th style={{ width: '25%' }} className={HEAD_CLASS}>
-            Name
-          </th>
-          <th style={{ width: '75%' }} className={HEAD_CLASS}>
-            Value
-          </th>
-        </tr>
-      </thead>
-      <TableBody />
-    </table>
-  );
-};
-
-class TableVariableWidget extends ReactWidget {
-  state: Variables.IVariablesModel;
-
-  constructor(props: any) {
-    super(props);
-    this.state = props;
-  }
-
-  render() {
-    return <Table model={this.state} />;
-  }
-}
-
 export class VariableTableDescription extends Panel {
-  private _model: Variables.IVariablesModel;
-  private searchParams: Widget;
-  private myWidget: Widget;
-  constructor(model: Variables.IVariablesModel) {
+  constructor(model: Variables.Model) {
     super();
     this._model = model;
     this.searchParams = new VariablesSearch(this._model);
@@ -73,6 +28,10 @@ export class VariableTableDescription extends Panel {
     this.myWidget = new TableVariableWidget(this._model);
     this.addWidget(this.myWidget);
   }
+
+  private _model: Variables.Model;
+  private searchParams: Widget;
+  private myWidget: Widget;
 
   protected onResize(msg: Widget.ResizeMessage): void {
     super.onResize(msg);
@@ -104,5 +63,49 @@ export class VariableTableDescription extends Panel {
       const bodyHeight = totalHeight - headHeight - 20;
       body.style.height = `${bodyHeight}px`;
     }
+  }
+}
+
+const Table = ({ model }: { model: Variables.Model }) => {
+  const [variables, setVariables] = useState(model.variables);
+  const [variable, TableBody] = useTbody(variables, model.current, ROW_CLASS);
+
+  model.variablesChanged.connect((_: any, updates) => {
+    if (ArrayExt.shallowEqual(variables, updates)) {
+      return;
+    }
+    setVariables(updates);
+  });
+
+  model.current = variable;
+  return (
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th style={{ width: '25%' }} className={HEAD_CLASS}>
+              Name
+            </th>
+            <th style={{ width: '75%' }} className={HEAD_CLASS}>
+              Value
+            </th>
+          </tr>
+        </thead>
+      </table>
+      <TableBody />
+    </div>
+  );
+};
+
+class TableVariableWidget extends ReactWidget {
+  state: Variables.Model;
+
+  constructor(props: any) {
+    super(props);
+    this.state = props;
+  }
+
+  render() {
+    return <Table model={this.state} />;
   }
 }

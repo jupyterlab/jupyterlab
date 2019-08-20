@@ -14,3 +14,19 @@
 .jp-DebuggerDeactivateIcon {
   background-image: var(--jp-debugger-deactivate);
 }
+
+.expand-toggle-collapsed {
+  display: inline-block;
+  vertical-align: middle;
+  height: 16px;
+  width: 16px;
+  background: url('icons/arrow-collapse.svg') center center no-repeat;
+}
+
+.expand-toggle-expanded {
+  display: inline-block;
+  vertical-align: middle;
+  height: 16px;
+  width: 16px;
+  background: url('icons/arrow-expand.svg') center center no-repeat;
+}

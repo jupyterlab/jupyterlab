@@ -16,12 +16,12 @@ export class Callstack extends Panel {
     super();
 
     this.header = new Panel();
-    this.header.addClass('jp-DebuggerSidebarVariables-header');
+    this.header.addClass('jp-DebuggerSidebar-item-header');
     this.addWidget(this.header);
 
     this.label = new Widget();
     this.label.node.textContent = 'Call stack';
-    this.label.addClass('jp-DebuggerSidebarVariables-header-label');
+    this.label.addClass('jp-DebuggerSidebar-item-header-label');
     this.header.addWidget(this.label);
 
     const toolbar = new Toolbar();

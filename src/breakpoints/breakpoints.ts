@@ -18,12 +18,12 @@ export class BreakPoints extends Panel {
     super();
 
     this.header = new Panel();
-    this.header.addClass('jp-DebuggerSidebarVariables-header');
+    this.header.addClass('jp-DebuggerSidebar-item-header');
     this.addWidget(this.header);
 
     this.label = new Widget();
     this.label.node.textContent = 'BreakPoints';
-    this.label.addClass('jp-DebuggerSidebarVariables-header-label');
+    this.label.addClass('jp-DebuggerSidebar-item-header-label');
     this.header.addWidget(this.label);
 
     const toolbar = new Toolbar();

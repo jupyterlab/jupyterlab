@@ -12,10 +12,10 @@ export class VariableDescription extends SplitPanel {
   readonly table: Widget;
   readonly descriptionBox: Panel;
 
-  model: Variables.IVariablesModel;
+  model: Variables.Model;
   currentVariable: any;
 
-  constructor(model: Variables.IVariablesModel) {
+  constructor(model: Variables.Model) {
     super();
     this.orientation = 'vertical';
     this.model = model;
@@ -32,7 +32,7 @@ export class VariableDescription extends SplitPanel {
     this.descriptionBox.node.innerHTML = '<b> Select Variable </b>';
 
     this.model.currentChanged.connect(
-      (model: Variables.IVariablesModel, variable: Variables.IVariable) => {
+      (model: Variables.Model, variable: Variables.IVariable) => {
         this.descriptionBox.node.innerHTML = this.renderDescription(
           this.model.current
         );
