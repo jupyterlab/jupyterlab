@@ -72,16 +72,6 @@ export class JSONComponent extends React.Component<IProps, IState> {
           invertTheme={false}
           keyPath={[root]}
           labelRenderer={([label, type]) => {
-            // let className = 'cm-variable';
-            // if (type === 'root') {
-            //   className = 'cm-variable-2';
-            // }
-            // if (type === 'array') {
-            //   className = 'cm-variable-2';
-            // }
-            // if (type === 'Object') {
-            //   className = 'cm-variable-3';
-            // }
             return (
               <span className="cm-keyword">
                 <Highlight
