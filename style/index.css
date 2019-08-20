@@ -90,6 +90,7 @@
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   min-height: 25px;
   padding: 10px;
+  overflow: auto;
 }
 
 .jp-DebuggerSidebarVariable-description p {
@@ -212,4 +213,24 @@
 
 .fa-caret-down:before {
   content: '\F0D7';
+}
+
+/* svg icons */
+.expand-toggle-disabled {
+}
+
+.expand-toggle-collapsed {
+  display: inline-block;
+  vertical-align: middle;
+  height: 16px;
+  width: 16px;
+  background: url('icons/arrow-collapse.svg') center center no-repeat;
+}
+
+.expand-toggle-expanded {
+  display: inline-block;
+  vertical-align: middle;
+  height: 16px;
+  width: 16px;
+  background: url('icons/arrow-expand.svg') center center no-repeat;
 }

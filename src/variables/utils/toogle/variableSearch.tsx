@@ -72,7 +72,6 @@ const MenuReact = ({ config }: any) => {
   useOutsideClick(wrapperRef, onClickOutSide);
 
   const changeScope = (newScope: string) => {
-    console.log(newScope);
     if (newScope === scope) return;
     setScope(newScope);
     setToggle(false);
@@ -118,16 +117,8 @@ class VariableScopeSearch extends ReactWidget {
   constructor() {
     super();
   }
-  open: boolean = false;
   menu: ReactWidget;
   widget: Widget;
-
-  showMenu = function() {
-    this.open = !this.open;
-    if (this.open) {
-    } else {
-    }
-  };
 
   render() {
     return <MenuReact />;

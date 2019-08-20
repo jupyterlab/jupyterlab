@@ -4,12 +4,16 @@ const useTbody = (items: Array<any>, defaultState: any, id: string) => {
   const [state, setState] = useState(defaultState);
 
   const style = {
-    paddingLeft: `${12}px`,
-    width: `${25}%`
+    paddingLeft: `${10}px`,
+    width: `${30}%`
   };
   const style_2 = {
-    paddingLeft: `${12}px`,
-    width: `${75}%`
+    paddingLeft: `${10}px`,
+    width: `${70}%`
+  };
+
+  const expandToggle = (e: React.MouseEvent) => {
+    console.log(e);
   };
 
   const List = () => (
@@ -22,7 +26,16 @@ const useTbody = (items: Array<any>, defaultState: any, id: string) => {
               onClick={e => setState(item)}
               className={id + (state === item ? ' selected' : '')}
             >
-              <td style={style}> {item.name} </td>
+              <td style={style}>
+                {item.value === 'class' ? (
+                  <span
+                    className={`expand-toggle-collapsed`}
+                    onClick={e => expandToggle(e)}
+                  ></span>
+                ) : null}
+                <span></span>
+                {item.name}
+              </td>
               <td style={style_2}> {item.value} </td>
             </tr>
           ))}
