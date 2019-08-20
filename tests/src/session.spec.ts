@@ -9,9 +9,12 @@ import { createClientSession, sleep } from '@jupyterlab/testutils';
 
 import { find } from '@phosphor/algorithm';
 
+import { PromiseDelegate } from '@phosphor/coreutils';
+
 import { DebugProtocol } from 'vscode-debugprotocol';
 
 import { IDebugger } from '../../lib/tokens';
+
 import { DebugSession } from '../../lib/session';
 
 describe('DebugSession', () => {
@@ -209,7 +212,21 @@ describe('protocol', () => {
 
   describe('#continue', () => {
     it('should proceed to the next breakpoint', async () => {
+      let events: string[] = [];
+      const eventsFuture = new PromiseDelegate<string[]>();
+      debugSession.eventMessage.connect((sender, event) => {
+        events.push(event.event);
+        // aggregate the next 2 debug events
+        if (events.length === 2) {
+          eventsFuture.resolve(events);
+        }
+      });
+
       await debugSession.sendRequest('continue', { threadId });
+
+      // wait for debug events
+      const debugEvents = await eventsFuture.promise;
+      expect(debugEvents).to.deep.equal(['continued', 'stopped']);
 
       const variables = await getVariables();
       const i = find(variables, variable => variable.name === 'i');
