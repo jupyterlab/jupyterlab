@@ -12,6 +12,12 @@ import { IDisposable } from '@phosphor/disposable';
 import { DebuggerSidebar } from './sidebar';
 
 export class Debugger extends BoxPanel {
+  readonly model: Debugger.Model;
+
+  readonly tabs = new TabPanel();
+
+  readonly sidebar: DebuggerSidebar;
+
   constructor(options: Debugger.IOptions) {
     super({ direction: 'left-to-right' });
 
@@ -23,12 +29,6 @@ export class Debugger extends BoxPanel {
     this.addWidget(this.tabs);
     this.addWidget(this.sidebar);
   }
-
-  readonly model: Debugger.Model;
-
-  readonly tabs = new TabPanel();
-
-  readonly sidebar: DebuggerSidebar;
 
   dispose(): void {
     if (this.isDisposed) {
