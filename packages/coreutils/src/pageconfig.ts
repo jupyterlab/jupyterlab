@@ -133,6 +133,13 @@ export namespace PageConfig {
   }
 
   /**
+   * Get the unique store ID.
+   */
+  export function getStoreID(): number {
+    return Number(getOption('store_id'));
+  }
+
+  /**
    * Returns the URL converting this notebook to a certain
    * format with nbconvert.
    */

@@ -4,7 +4,9 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../apputils"
@@ -13,13 +15,13 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../datastore"
+    },
+    {
       "path": "../docregistry"
     },
     {
       "path": "../statusbar"
-    },
-    {
-      "path": "../datastore"
     }
   ]
 }

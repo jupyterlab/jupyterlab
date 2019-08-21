@@ -20,7 +20,7 @@ import sys
 import tarfile
 from tempfile import TemporaryDirectory
 from threading import Event
-from urllib.request import Request, urlopen, urljoin, quote
+from urllib.request import Request, urlopen, urljoin, quote  # type: ignore
 from urllib.error import URLError
 
 from jupyter_core.paths import jupyter_config_path

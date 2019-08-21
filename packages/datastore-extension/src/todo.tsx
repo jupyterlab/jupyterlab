@@ -6,7 +6,7 @@ import {
   ILayoutRestorer,
   JupyterFrontEnd
 } from '@jupyterlab/application';
-import { IDatastoreCreator, DatastoreManager } from '@jupyterlab/datastore';
+import { createDatastore } from '@jupyterlab/datastore';
 import {
   ICommandPalette,
   MainAreaWidget,
@@ -14,17 +14,13 @@ import {
   WidgetTracker,
   UseSignal
 } from '@jupyterlab/apputils';
-import { Fields } from '@phosphor/datastore';
+import { Fields, Datastore } from '@phosphor/datastore';
 import * as React from 'react';
 import { toArray } from '@phosphor/algorithm';
 import { UUID } from '@phosphor/coreutils';
 
-type TODOProps = {
-  datastore: IDatastoreCreator;
-};
-
 type TODOState = {
-  manager: DatastoreManager | undefined;
+  datastore: Datastore | undefined;
 };
 
 const TODOSchema = {
@@ -35,58 +31,57 @@ const TODOSchema = {
   }
 };
 
-class TODO extends React.Component<TODOProps, TODOState> {
+class TODO extends React.Component<{}, TODOState> {
   readonly state: TODOState = {
-    manager: undefined
+    datastore: undefined
   };
 
   input = React.createRef<HTMLInputElement>();
 
   async componentDidMount() {
-    const manager = await this.props.datastore.createTable('todo', [
-      TODOSchema
-    ]);
-    this.setState({ manager });
+    const datastore = await createDatastore('todo', [TODOSchema]);
+    this.setState({ datastore });
   }
   render() {
-    if (!this.state.manager) {
+    const { datastore } = this.state;
+    if (!datastore) {
       return <div>Loading...</div>;
     }
+    const table = datastore.get(TODOSchema);
     return (
       <div>
         <h1>TODO</h1>
         <ol>
-          <UseSignal signal={this.state.manager.changed}>
+          <UseSignal signal={datastore.changed}>
             {() =>
-              toArray(this.state.manager.datastore.get(TODOSchema).iter()).map(
-                row =>
-                  row.show ? (
-                    <li id={row.$id}>
-                      {row.description}
-                      <button
-                        onClick={event => {
-                          this.state.manager.datastore.beginTransaction();
-                          this.state.manager.datastore.get(TODOSchema).update({
-                            [row.$id]: { show: false }
-                          });
-                          this.state.manager.datastore.endTransaction();
-                          event.preventDefault();
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </li>
-                  ) : (
-                    <></>
-                  )
+              toArray(table.iter()).map(row =>
+                row.show ? (
+                  <li id={row.$id}>
+                    {row.description}
+                    <button
+                      onClick={event => {
+                        datastore.beginTransaction();
+                        table.update({
+                          [row.$id]: { show: false }
+                        });
+                        datastore.endTransaction();
+                        event.preventDefault();
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ) : (
+                  <></>
+                )
               )
             }
           </UseSignal>
         </ol>
         <form
           onSubmit={e => {
-            this.state.manager.datastore.beginTransaction();
-            this.state.manager.datastore.get(TODOSchema).update({
+            datastore.beginTransaction();
+            table.update({
               [UUID.uuid4()]: {
                 description: {
                   index: 0,
@@ -95,7 +90,7 @@ class TODO extends React.Component<TODOProps, TODOState> {
                 }
               }
             });
-            this.state.manager.datastore.endTransaction();
+            datastore.endTransaction();
             e.preventDefault();
           }}
         >
@@ -110,17 +105,16 @@ class TODO extends React.Component<TODOProps, TODOState> {
   }
 
   componentWillUnmount() {
-    this.state.manager && this.state.manager.dispose();
+    this.state.datastore && this.state.datastore.dispose();
   }
 }
 
 export default {
   id: '@jupyterlab/datastore-extension:todo-plugin',
-  requires: [IDatastoreCreator, ILayoutRestorer, ICommandPalette],
+  requires: [ILayoutRestorer, ICommandPalette],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
-    datastore: IDatastoreCreator,
     restorer: ILayoutRestorer,
     palette: ICommandPalette
   ) => {
@@ -134,7 +128,7 @@ export default {
       execute: async () => {
         if (!widget) {
           // Create a new widget if one does not exist
-          const content = ReactWidget.create(<TODO datastore={datastore} />);
+          const content = ReactWidget.create(<TODO />);
           widget = new MainAreaWidget({ content });
           widget.id = 'todo';
           widget.title.label = 'TODO';

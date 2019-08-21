@@ -36,27 +36,10 @@ export class CollaborationClient extends WSConnection<
   constructor(options: CollaborationClient.IOptions = {}) {
     super();
     this.collaborationId = options.collaborationId;
-    this.handler = options.handler || null;
     this._idleTreshold = 1000 * (options.idleTreshold || DEFAULT_IDLE_TIME);
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
     this._createSocket();
-  }
-
-  /**
-   * Create a new, unique store id.
-   *
-   * @returns {Promise<number>} A promise to the new store id.
-   */
-  get storeId(): Promise<number> {
-    if (this._storeId !== null) {
-      return Promise.resolve(this._storeId);
-    }
-    return this.ready.then(async () => {
-      const msg = Collaboration.createMessage('storeid-request', {});
-      const reply = await this._requestMessageReply(msg);
-      return (this._storeId = reply.content.storeId);
-    });
   }
 
   /**
@@ -71,6 +54,17 @@ export class CollaborationClient extends WSConnection<
     });
   }
 
+  processMessage(msg: Message) {
+    if (msg.type === 'datastore-transaction') {
+      this.broadcastTransactions([
+        (msg as Datastore.TransactionMessage).transaction
+      ]);
+      return;
+    }
+    throw new Error(
+      `CollaborationClient cannot process message type ${msg.type}`
+    );
+  }
   /**
    * Broadcast transactions to all datastores.
    *
@@ -123,16 +117,8 @@ export class CollaborationClient extends WSConnection<
     const msg = Collaboration.createMessage('history-request', {
       checkpointId: checkpointId === undefined ? null : checkpointId
     });
-    const reply = await this._requestMessageReply(msg);
-    const content = reply.content;
-    // TODO: Set initial state
-    if (this.handler !== null) {
-      const message = new CollaborationClient.InitialStateMessage(
-        content.state
-      );
-      MessageLoop.postMessage(this.handler, message);
-    }
-    this._handleTransactions(content.transactions);
+    const response = await this._requestMessageReply(msg);
+    this._handleTransactions(response.content.transactions);
   }
 
   /**
@@ -148,7 +134,7 @@ export class CollaborationClient extends WSConnection<
   /**
    * The message handler of any data messages.
    */
-  handler: IMessageHandler | null;
+  public handler: IMessageHandler | null;
 
   /**
    * Factory method for creating the web socket object.
@@ -172,11 +158,9 @@ export class CollaborationClient extends WSConnection<
     if (token) {
       queryParams.push(`token=${encodeURIComponent(token)}`);
     }
-    if (this._storeId !== null) {
-      queryParams.push(
-        `storeId=${encodeURIComponent(this._storeId.toString(10))}`
-      );
-    }
+    // queryParams.push(
+    //   `storeId=${encodeURIComponent(this._storeId.toString(10))}`
+    // );
     if (queryParams) {
       wsUrl = wsUrl + `?${queryParams.join('&')}`;
     }
@@ -229,18 +213,21 @@ export class CollaborationClient extends WSConnection<
   private _handleTransactions(
     transactions: ReadonlyArray<Collaboration.SerialTransaction>
   ) {
-    if (this.handler !== null) {
-      for (let t of transactions) {
-        if (t.serial !== this._serverSerial + 1) {
-          // Out of order serials!
-          // Something has gone wrong somewhere.
-          // TODO: Trigger recovery?
-          throw new Error('Critical! Out of order transactions in datastore.');
-        }
-        this._serverSerial = t.serial;
-        const message = new CollaborationClient.RemoteTransactionMessage(t);
-        MessageLoop.postMessage(this.handler, message);
+    if (!this.handler) {
+      return;
+    }
+    for (let t of transactions) {
+      if (t.serial !== this._serverSerial + 1) {
+        // Out of order serials!
+        // Something has gone wrong somewhere.
+        // TODO: Trigger recovery?
+        throw new Error('Critical! Out of order transactions in datastore.');
       }
+      this._serverSerial = t.serial;
+      MessageLoop.postMessage(
+        this.handler,
+        new Datastore.TransactionMessage(t)
+      );
     }
     this._resetIdleTimer();
   }
@@ -309,8 +296,6 @@ export class CollaborationClient extends WSConnection<
 
   private _idleTreshold: number;
   private _idleTimer: number | null = null;
-
-  private _storeId: number | null = null;
 }
 
 /**
@@ -327,11 +312,6 @@ export namespace CollaborationClient {
      * The server settings for the session.
      */
     serverSettings?: ServerConnection.ISettings;
-
-    /**
-     * The handler for any incoming data.
-     */
-    handler?: IMessageHandler;
 
     /**
      * How long to wait before the session is considered idle, in seconds.

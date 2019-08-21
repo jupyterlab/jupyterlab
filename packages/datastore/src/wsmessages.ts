@@ -38,8 +38,6 @@ export namespace Collaboration {
    * Maps a msgType to the corresponding type.
    */
   export interface ITypeMap {
-    'storeid-request': StoreIdRequest;
-    'storeid-reply': StoreIdReply;
     'transaction-broadcast': TransactionBroadcast;
     'transaction-ack': TransactionAck;
     'history-request': HistoryRequest;
@@ -59,7 +57,6 @@ export namespace Collaboration {
    * Maps a request msgType to the corresponding reply type.
    */
   export interface IReplyMap {
-    'storeid-request': StoreIdReply;
     'transaction-broadcast': TransactionAck;
     'history-request': HistoryReply;
     'transaction-request': TransactionReply;
@@ -72,27 +69,6 @@ export namespace Collaboration {
      * The msgId of the corresponding request message.
      */
     readonly parentId: string;
-  };
-
-  /**
-   * A message requesting the store id of the client.
-   */
-  export type StoreIdRequest = Base & {
-    readonly msgType: 'storeid-request';
-    readonly content: {};
-  };
-
-  /**
-   * A reply to a 'storeid-request' message.
-   */
-  export type StoreIdReply = BaseReply & {
-    readonly msgType: 'storeid-reply';
-    readonly content: {
-      /**
-       * The unique store id for this client.
-       */
-      readonly storeId: number;
-    };
   };
 
   /**
@@ -281,7 +257,6 @@ export namespace Collaboration {
    * A union type for all request messages.
    */
   export type Request =
-    | StoreIdRequest
     | TransactionBroadcast
     | TransactionRequest
     | HistoryRequest
@@ -292,7 +267,6 @@ export namespace Collaboration {
    * A union type for all reply messages.
    */
   export type RawReply =
-    | StoreIdReply
     | TransactionAck
     | TransactionReply
     | HistoryReply
@@ -304,7 +278,6 @@ export namespace Collaboration {
    * A union type for all successful reply messages.
    */
   export type Reply =
-    | StoreIdReply
     | TransactionAck
     | TransactionReply
     | HistoryReply
