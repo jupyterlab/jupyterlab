@@ -79,10 +79,10 @@ export namespace PageConfig {
       configData = Object.create(null);
     } else {
       for (let key in configData) {
-        // Quote characters are escaped, unescape them.
-        configData[key] = String(configData[key])
-          .split('&#39;')
-          .join('"');
+        // PageConfig expects strings
+        if (typeof configData[key] !== 'string') {
+          configData[key] = JSON.stringify(configData[key]);
+        }
       }
     }
     return configData![name] || Private.getBodyData(name);
