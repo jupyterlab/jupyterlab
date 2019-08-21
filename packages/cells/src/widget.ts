@@ -1214,7 +1214,6 @@ export class AttachmentsCell extends Cell {
    */
   private _attachFile(blob: File) {
     const reader = new FileReader();
-    reader.readAsDataURL(blob);
     reader.onload = evt => {
       const { href, protocol } = URLExt.parse(reader.result as string);
       if (protocol !== 'data:') {
@@ -1234,6 +1233,7 @@ export class AttachmentsCell extends Cell {
     reader.onerror = evt => {
       console.error(`Failed to attach ${blob.name}` + evt);
     };
+    reader.readAsDataURL(blob);
   }
 
   /**

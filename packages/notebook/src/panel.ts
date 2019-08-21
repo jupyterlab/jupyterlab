@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ICellModel, MarkdownCellModel } from '@jupyterlab/cells';
+import { isMarkdownCellModel } from '@jupyterlab/cells';
 
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 
@@ -80,18 +80,15 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     });
   }
 
-  _onSave(sender: DocumentRegistry.Context, state: string) {
-    if (state === 'completed') {
+  _onSave(sender: DocumentRegistry.Context, state: DocumentRegistry.SaveState) {
+    if (state === 'started') {
       // Find markdown cells
       const { cells } = this.model;
-      each(cells, (cell: ICellModel) => {
-        if (cell.type === 'markdown') {
-          const markdowncell: MarkdownCellModel = cell as MarkdownCellModel;
-          const attachments: ReadonlyArray<string> =
-            markdowncell.attachments.keys;
-          for (let i = 0; i < attachments.length; i++) {
-            if (!markdowncell.value.text.includes(attachments[i])) {
-              markdowncell.attachments.remove(attachments[i]);
+      each(cells, cell => {
+        if (isMarkdownCellModel(cell)) {
+          for (let key of cell.attachments.keys) {
+            if (!cell.value.text.includes(key)) {
+              cell.attachments.remove(key);
             }
           }
         }
