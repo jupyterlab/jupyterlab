@@ -50,6 +50,7 @@ export class Context<T extends DocumentRegistry.IModel>
     let lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
     this._model = this._factory.createNew(lang);
+    this._model.contentChanged.connect(this._onModelContentChanged, this);
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -418,6 +419,13 @@ export class Context<T extends DocumentRegistry.IModel>
       this._path = path;
       this._pathChanged.emit(path);
     }
+  }
+
+  /**
+   * Handle a change in the model content.
+   */
+  private _onModelContentChanged(): void {
+    this.dirty = true;
   }
 
   /**

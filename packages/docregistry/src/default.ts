@@ -9,11 +9,15 @@ import { Mode } from '@jupyterlab/codemirror';
 
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
 import { Contents } from '@jupyterlab/services';
 
 import { JSONValue } from '@phosphor/coreutils';
 
 import { Datastore } from '@phosphor/datastore';
+
+import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -36,7 +40,13 @@ export class DocumentModel extends CodeEditor.Model
       schemas: [CodeEditorData.SCHEMA]
     });
     this._defaultLang = languagePreference || '';
-    this.datastore.changed.connect(this.triggerContentChange, this);
+    // We don't want to trigger a content change for text selection changes,
+    // only actual content changes to the data owned by the document
+    this._listener = DatastoreExt.listenField(
+      { ...this.record, field: 'text' },
+      this.triggerContentChange,
+      this
+    );
     this.ready = Promise.resolve(undefined);
   }
 
@@ -112,6 +122,19 @@ export class DocumentModel extends CodeEditor.Model
   }
 
   /**
+   * Dispose of resources held by the document model.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    if (this._listener) {
+      this._listener.dispose();
+    }
+    super.dispose();
+  }
+
+  /**
    * Trigger a content changed signal.
    */
   protected triggerContentChange(): void {
@@ -119,6 +142,7 @@ export class DocumentModel extends CodeEditor.Model
   }
 
   private _contentChanged = new Signal<this, void>(this);
+  private _listener: IDisposable | null = null;
   private _defaultLang = '';
 }
 

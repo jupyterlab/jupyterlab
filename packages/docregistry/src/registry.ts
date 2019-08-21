@@ -13,8 +13,6 @@ import {
 
 import { JSONValue } from '@phosphor/coreutils';
 
-import { Datastore } from '@phosphor/datastore';
-
 import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -696,11 +694,6 @@ export namespace DocumentRegistry {
   }
 
   export interface ICollaborativeModel extends IModel {
-    /**
-     * The datastore for the collaborative data.
-     */
-    readonly datastore: Datastore;
-
     /**
      * Whether the collaborative model is ready for use.
      * This typically means it has made a connection with the server
