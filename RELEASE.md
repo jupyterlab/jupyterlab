@@ -30,6 +30,13 @@ conda create -c conda-forge -y -n jlabrelease notebook nodejs twine
 conda activate jlabrelease
 git clone git@github.com:jupyterlab/jupyterlab.git
 cd jupyterlab
+```
+
+Check out the branch you are doing the release from, if different from master.
+
+Then build and install jlpm:
+
+```bash
 pip install -ve .
 ```
 
