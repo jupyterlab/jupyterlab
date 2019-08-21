@@ -82,6 +82,7 @@
     "webpack-cli": "^3.3.0",
     "webpack-merge": "^4.2.1",
     "webpack-visualizer-plugin": "^0.1.11",
+    "whatwg-fetch": "^3.0.0",
     "yarn-deduplicate": "^1.1.1"
   },
   "resolutions": {

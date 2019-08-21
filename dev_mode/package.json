@@ -79,9 +79,10 @@
     "terser-webpack-plugin": "^1.3.0",
     "url-loader": "~1.1.2",
     "webpack": "^4.32.2",
+    "webpack-bundle-analyzer": "^3.4.1",
     "webpack-cli": "^3.3.0",
     "webpack-merge": "^4.2.1",
-    "webpack-visualizer-plugin": "^0.1.11",
+    "whatwg-fetch": "^3.0.0",
     "yarn-deduplicate": "^1.1.1"
   },
   "resolutions": {
