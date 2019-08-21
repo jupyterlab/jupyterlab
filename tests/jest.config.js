@@ -17,6 +17,7 @@ let local = {
 
 [
   'moduleNameMapper',
+  'reporters',
   'setupFilesAfterEnv',
   'setupFiles',
   'moduleFileExtensions'
