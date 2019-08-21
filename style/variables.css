@@ -1,4 +1,4 @@
-.jp-DebuggerSidebarVariables-body {
+.jp-DebuggerVariables-body {
   border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
   min-height: 24px;
   height: 99%;
@@ -6,17 +6,17 @@
   flex-direction: column;
 }
 
-.jp-DebuggerSidebarVariable-table {
+.jp-DebuggerVariables-table {
   min-height: 50px;
   flex-basis: 30%;
 }
 
-.jp-DebuggerSidebarVariable-table table {
+.jp-DebuggerVariables-table table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.jp-DebuggerSidebarVariable-table .jp-DebuggerSidebarVariables-table-head {
+.jp-DebuggerVariables-table .jp-DebuggerVariables-table-head {
   margin-bottom: 4px;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
@@ -26,34 +26,33 @@
   text-align: left;
 }
 
-.jp-DebuggerSidebarVariables-table-head:hover,
-.jp-DebuggerSidebarVariables-table-row:hover {
+.jp-DebuggerVariables-table-head:hover,
+.jp-DebuggerVariables-table-row:hover {
   background: var(--jp-layout-color2);
 }
 
-.jp-DebuggerSidebarVariables-table-row.selected {
+.jp-DebuggerVariables-table-row.selected {
   color: white;
   background: var(--jp-brand-color1);
 }
 
-.jp-DebuggerSidebarVariables-table-head
-  + .jp-DebuggerSidebarVariables-table-head {
+.jp-DebuggerVariables-table-head + .jp-DebuggerVariables-table-head {
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
-.jp-DebuggerSidebarVariable-description {
+.jp-DebuggerVariables-description {
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   min-height: 25px;
   padding: 10px;
   overflow: auto;
 }
 
-.jp-DebuggerSidebarVariable-description p {
+.jp-DebuggerVariables-description p {
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
 
-.jp-DebuggerSidebarVariable-Search {
+.jp-DebuggerVariables-Search {
   color: var(--jp-ui-font-color1);
   flex: 0 0 auto;
   display: flex;
@@ -61,7 +60,7 @@
   height: 24px;
 }
 
-.jp-DebuggerSidebarVariable-Search > .jp-Search-item {
+.jp-DebuggerVariables-Search > .jp-Search-item {
   flex: 0 0 auto;
   padding-left: 8px;
   padding-right: 8px;
@@ -70,7 +69,7 @@
   line-height: 23px;
 }
 
-.jp-DebuggerSidebarVariable-Search-input {
+.jp-DebuggerVariables-Search-input {
   min-height: 22px;
   vertical-align: top;
   width: 100%;
@@ -78,7 +77,7 @@
   border: none;
 }
 
-.jp-DebuggerSidebarVariable-Scope-label {
+.jp-DebuggerVariables-Scope-label {
   padding-left: 10px;
   padding-right: 5px;
 }

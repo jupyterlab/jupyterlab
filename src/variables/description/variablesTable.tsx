@@ -9,18 +9,18 @@ import { Widget, Panel } from '@phosphor/widgets';
 
 import React, { useState } from 'react';
 
-import { Variables } from '../variables';
+import { Variables } from '../index';
 
-import { VariablesSearch } from './../toggle';
+import { VariablesSearch } from '../toggle';
 
 import useTbody from './useTbody';
 
-const ROW_CLASS = 'jp-DebuggerSidebarVariables-table-row';
+const ROW_CLASS = 'jp-DebuggerVariables-table-row';
 
-const HEAD_CLASS = 'jp-DebuggerSidebarVariables-table-head';
+const HEAD_CLASS = 'jp-DebuggerVariables-table-head';
 
-export class VariableTableDescription extends Panel {
-  constructor(model: Variables.Model) {
+export class VariablesTable extends Panel {
+  constructor(model: Variables.IModel) {
     super();
     this._model = model;
     this.searchParams = new VariablesSearch(this._model);
@@ -29,7 +29,7 @@ export class VariableTableDescription extends Panel {
     this.addWidget(this.myWidget);
   }
 
-  private _model: Variables.Model;
+  private _model: Variables.IModel;
   private searchParams: Widget;
   private myWidget: Widget;
 
@@ -66,7 +66,7 @@ export class VariableTableDescription extends Panel {
   }
 }
 
-const Table = ({ model }: { model: Variables.Model }) => {
+const TableComponent = ({ model }: { model: Variables.IModel }) => {
   const [variables, setVariables] = useState(model.variables);
   const [variable, TableBody] = useTbody(variables, model.current, ROW_CLASS);
 
@@ -98,7 +98,7 @@ const Table = ({ model }: { model: Variables.Model }) => {
 };
 
 class TableVariableWidget extends ReactWidget {
-  state: Variables.Model;
+  state: Variables.IModel;
 
   constructor(props: any) {
     super(props);
@@ -106,6 +106,6 @@ class TableVariableWidget extends ReactWidget {
   }
 
   render() {
-    return <Table model={this.state} />;
+    return <TableComponent model={this.state} />;
   }
 }

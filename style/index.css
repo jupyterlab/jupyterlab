@@ -2,7 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-
+@import './sidebar.css';
 @import './toolbar.css';
 @import './variables.css';
 @import './callstack.css';
@@ -13,42 +13,6 @@
   top: 0;
   bottom: 0;
 }
-
-.jp-DebuggerSidebar {
-  display: flex;
-  flex-direction: column;
-  color: var(--jp-ui-font-color1);
-  background: var(--jp-layout-color1);
-  font-size: var(--jp-ui-font-size1);
-  min-width: 350px !important;
-}
-
-.jp-DebuggerSidebar div:not(:first-child) .jp-DebuggerSidebar-item-header {
-  border-top: solid var(--jp-border-width) var(--jp-border-color1);
-}
-
-.jp-DebuggerSidebar div .jp-DebuggerSidebar-item-header {
-  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
-}
-
-.jp-DebuggerSidebar-item-header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  background-color: var(--jp-layout-color2);
-  height: 24px;
-}
-
-.jp-DebuggerSidebar-item-header-label {
-  text-transform: uppercase;
-  font-weight: 600;
-  font-size: var(--jp-ui-font-size0);
-  color: var(--jp-ui-font-color1);
-  padding-left: 8px;
-  padding-right: 4px;
-}
-
-/*  menu */
 
 .jp-MenuComponent {
   position: absolute;

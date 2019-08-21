@@ -7,7 +7,7 @@ import { Widget, Panel } from '@phosphor/widgets';
 
 import React, { useState, useRef } from 'react';
 
-import { Variables } from './../variables';
+import { Variables } from '../index';
 import useOutsideClick from './useOutsideClick';
 
 const SEARCH_ITEM = 'jp-Search-item';
@@ -18,7 +18,7 @@ export class VariablesSearch extends Panel {
 
   constructor(model: any) {
     super();
-    this.addClass('jp-DebuggerSidebarVariable-Search');
+    this.addClass('jp-DebuggerVariables-Search');
     this.node.style.overflow = 'visible';
     this.scope = new VariableScopeSearch();
     this.search = new VariableSearchInput(model);
@@ -35,23 +35,21 @@ const SearchComponent = ({ model }: any) => {
   const [state, setState] = useState('');
   model.filter = state;
   return (
-    <div>
-      <input
-        placeholder="Search..."
-        className="jp-DebuggerSidebarVariable-Search-input"
-        value={state}
-        onChange={e => {
-          setState(e.target.value);
-        }}
-      />
-    </div>
+    <input
+      placeholder="Search..."
+      className="jp-DebuggerVariables-Search-input"
+      value={state}
+      onChange={e => {
+        setState(e.target.value);
+      }}
+    />
   );
 };
 
 class VariableSearchInput extends ReactWidget {
   search: string;
-  model: Variables.IVariablesModel;
-  constructor(model: Variables.IVariablesModel) {
+  model: Variables.IModel;
+  constructor(model: Variables.IModel) {
     super();
     this.model = model;
     this.search = model.filter;

@@ -3,42 +3,43 @@
 
 import { Panel, SplitPanel, Widget } from '@phosphor/widgets';
 
-import { Variables } from '../variables';
+import { Variables } from '../index';
 
-import { VariableTableDescription } from './variableTableDescription';
+import { VariablesTable } from './variablesTable';
 
-export class VariableDescription extends SplitPanel {
-  readonly searchParams: Widget;
-  readonly table: Widget;
-  readonly descriptionBox: Panel;
-
-  model: Variables.Model;
-  currentVariable: any;
-
-  constructor(model: Variables.Model) {
+export class VariablesBody extends SplitPanel {
+  constructor(model: Variables.IModel) {
     super();
     this.orientation = 'vertical';
     this.model = model;
     this.currentVariable = this.model.current;
+    this.addClass('jp-DebuggerVariables-body');
 
-    this.table = new VariableTableDescription(this.model);
-    this.table.addClass('jp-DebuggerSidebarVariable-table');
+    this.table = new VariablesTable(this.model);
+    this.table.addClass('jp-DebuggerVariables-table');
     this.addWidget(this.table);
 
     this.descriptionBox = new Panel();
-    this.descriptionBox.addClass('jp-DebuggerSidebarVariable-description');
+    this.descriptionBox.addClass('jp-DebuggerVariables-description');
 
     this.addWidget(this.descriptionBox);
     this.descriptionBox.node.innerHTML = '<b> Select Variable </b>';
 
     this.model.currentChanged.connect(
-      (model: Variables.Model, variable: Variables.IVariable) => {
+      (model: Variables.IModel, variable: Variables.IVariable) => {
         this.descriptionBox.node.innerHTML = this.renderDescription(
           this.model.current
         );
       }
     );
   }
+
+  readonly searchParams: Widget;
+  readonly table: Widget;
+  readonly descriptionBox: Panel;
+
+  model: Variables.IModel;
+  currentVariable: any;
 
   // Still in progres: rendering description
 
