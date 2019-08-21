@@ -12,7 +12,7 @@
 }
 
 .jp-DebuggerDeactivateIcon {
-  background-image: var(--jp-debugger-deactivate);
+  background-image: url('icons/activate-breakpoints.svg');
 }
 
 .expand-toggle-collapsed {
@@ -29,4 +29,28 @@
   height: 16px;
   width: 16px;
   background: url('icons/arrow-expand.svg') center center no-repeat;
+}
+
+.jp-StepOverIcon {
+  background-image: url('icons/step-over.svg');
+}
+
+.jp-StepInIcon {
+  background-image: url('icons/step-into.svg');
+}
+
+.jp-StepOutIcon {
+  background-image: url('icons/step-out.svg');
+}
+
+.jp-ClassIcon {
+  background-image: url('icons/class.svg');
+}
+
+.jp-ClassMemberIcon {
+  background-image: url('icons/enumerator.svg');
+}
+
+.jp-VariableIcon {
+  background-image: url('icons/variable.svg');
 }

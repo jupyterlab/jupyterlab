@@ -3,8 +3,12 @@
 
 import React, { useState } from 'react';
 
-const useTbody = (items: Array<any>, defaultState: any, id: string) => {
+const useTbody = (items: Array<any>, defaultState: any, id: string = '') => {
   const [state, setState] = useState(defaultState);
+
+  const setClassIcon = (typeOf: string) => {
+    return typeOf === 'class' ? 'jp-ClassIcon' : 'jp-VariableIcon';
+  };
 
   const List = () => (
     <div style={{ overflow: 'auto' }}>
@@ -17,6 +21,9 @@ const useTbody = (items: Array<any>, defaultState: any, id: string) => {
               className={id + (state === item ? ' selected' : '')}
             >
               <td style={{ paddingLeft: `${12}px`, width: `${25}%` }}>
+                <span
+                  className={`jp-Icon jp-Icon-16 ${setClassIcon(item.value)}`}
+                ></span>
                 {item.name}
               </td>
               <td style={{ paddingLeft: `${12}px`, width: `${75}%` }}>

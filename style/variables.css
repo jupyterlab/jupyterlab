@@ -16,7 +16,7 @@
   border-collapse: collapse;
 }
 
-.jp-DebuggerVariables-table .jp-DebuggerVariables-table-head {
+.jp-DebuggerVariables-table table thead th {
   margin-bottom: 4px;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
@@ -26,18 +26,31 @@
   text-align: left;
 }
 
-.jp-DebuggerVariables-table-head:hover,
-.jp-DebuggerVariables-table-row:hover {
+.jp-DebuggerVariables-table table thead th:not(:first-child) {
+  border-left: var(--jp-border-width) solid var(--jp-border-color2);
+}
+
+.jp-DebuggerVariables-table table tbody tr td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.jp-DebuggerVariables-table table tbody tr span {
+  padding-right: 3px;
+}
+
+.jp-DebuggerVariables-table table th:hover,
+.jp-DebuggerVariables-table table tbody tr:not(.selected):hover {
   background: var(--jp-layout-color2);
 }
 
-.jp-DebuggerVariables-table-row.selected {
+.jp-DebuggerVariables-table table tr.selected {
   color: white;
   background: var(--jp-brand-color1);
-}
-
-.jp-DebuggerVariables-table-head + .jp-DebuggerVariables-table-head {
-  border-left: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 .jp-DebuggerVariables-description {
@@ -58,10 +71,10 @@
   display: flex;
   flex-direction: row;
   height: 24px;
+  align-items: center;
 }
 
-.jp-DebuggerVariables-Search > .jp-Search-item {
-  flex: 0 0 auto;
+.jp-DebuggerVariables-Search > div {
   padding-left: 8px;
   padding-right: 8px;
   vertical-align: middle;
@@ -69,7 +82,15 @@
   line-height: 23px;
 }
 
-.jp-DebuggerVariables-Search-input {
+.jp-DebuggerVariables-Search > .jp-SearchInput {
+  flex: 1 0 auto;
+}
+
+.jp-DebuggerVariables-Search > .jp-SearchScope {
+  flex: 0 0 auto;
+}
+
+.jp-DebuggerVariables-Search input {
   min-height: 22px;
   vertical-align: top;
   width: 100%;
@@ -77,7 +98,7 @@
   border: none;
 }
 
-.jp-DebuggerVariables-Scope-label {
+.jp-DebuggerVariables-Search .jp-SearchScope span.label {
   padding-left: 10px;
   padding-right: 5px;
 }

@@ -3,32 +3,31 @@
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
-import { Widget, Panel } from '@phosphor/widgets';
+import { Widget, PanelLayout } from '@phosphor/widgets';
 
 import React, { useState, useRef } from 'react';
 
-import { Variables } from '../index';
 import useOutsideClick from './useOutsideClick';
 
-const SEARCH_ITEM = 'jp-Search-item';
+import { Variables } from '../index';
 
-export class VariablesSearch extends Panel {
-  scope: Widget;
-  search: Widget;
-
+export class VariablesSearch extends Widget {
   constructor(model: any) {
     super();
     this.addClass('jp-DebuggerVariables-Search');
+
+    const layout = new PanelLayout();
+    this.layout = layout;
     this.node.style.overflow = 'visible';
     this.scope = new VariableScopeSearch();
     this.search = new VariableSearchInput(model);
-    this.scope.addClass(SEARCH_ITEM);
-    this.scope.node.style.overflow = 'visible';
-    this.scope.node.style.width = '100px';
-    this.search.addClass(SEARCH_ITEM);
-    this.addWidget(this.scope);
-    this.addWidget(this.search);
+
+    layout.addWidget(this.scope);
+    layout.addWidget(this.search);
   }
+
+  readonly scope: Widget;
+  readonly search: Widget;
 }
 
 const SearchComponent = ({ model }: any) => {
@@ -37,7 +36,6 @@ const SearchComponent = ({ model }: any) => {
   return (
     <input
       placeholder="Search..."
-      className="jp-DebuggerVariables-Search-input"
       value={state}
       onChange={e => {
         setState(e.target.value);
@@ -53,6 +51,8 @@ class VariableSearchInput extends ReactWidget {
     super();
     this.model = model;
     this.search = model.filter;
+    this.node.style;
+    this.addClass('jp-SearchInput');
   }
 
   render() {
@@ -104,13 +104,8 @@ const VariablesMenu = ({ config }: any) => {
   );
 
   return (
-    <div ref={wrapperRef}>
-      <span
-        onClick={e => toggle(e)}
-        className="jp-DebuggerSidebarVariable-Scope-label"
-      >
-        {scope}
-      </span>
+    <div onClick={e => toggle(e)} ref={wrapperRef}>
+      <span className="label">{scope}</span>
       <span className="fa fa-caret-down"></span>
       {toggleState ? List : null}
     </div>
@@ -118,6 +113,13 @@ const VariablesMenu = ({ config }: any) => {
 };
 
 class VariableScopeSearch extends ReactWidget {
+  constructor() {
+    super();
+    this.node.style.overflow = 'visible';
+    this.node.style.width = '100px';
+    this.addClass('jp-SearchScope');
+  }
+
   render() {
     return <VariablesMenu />;
   }

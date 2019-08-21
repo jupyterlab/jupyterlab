@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Panel, Widget, PanelLayout, SplitPanel } from '@phosphor/widgets';
+import { Panel, Widget, PanelLayout } from '@phosphor/widgets';
 
-import { VariablesBody } from './description';
+import { VariablesBody } from './body';
 
 import { Signal, ISignal } from '@phosphor/signaling';
 
@@ -26,7 +26,7 @@ export class Variables extends Panel {
 
   readonly model: Variables.IModel;
 
-  readonly body: SplitPanel;
+  readonly body: Widget;
 }
 
 class VariablesHeader extends Widget {

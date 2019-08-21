@@ -40,12 +40,33 @@ export class Callstack extends Panel {
     );
     header.toolbar.addItem(
       'step-over',
-      new ToolbarButton({ label: 'Step Over' })
+      new ToolbarButton({
+        iconClassName: 'jp-StepOverIcon',
+        onClick: () => {
+          console.log('`step over` was clicked');
+        },
+        tooltip: 'Step Over'
+      })
     );
-    header.toolbar.addItem('step-in', new ToolbarButton({ label: 'Step In' }));
+    header.toolbar.addItem(
+      'step-in',
+      new ToolbarButton({
+        iconClassName: 'jp-StepInIcon',
+        onClick: () => {
+          console.log('`step in` was clicked');
+        },
+        tooltip: 'Step In'
+      })
+    );
     header.toolbar.addItem(
       'step-out',
-      new ToolbarButton({ label: 'Step Out' })
+      new ToolbarButton({
+        iconClassName: 'jp-StepOutIcon',
+        onClick: () => {
+          console.log('`step out` was clicked');
+        },
+        tooltip: 'Step Out'
+      })
     );
   }
 
