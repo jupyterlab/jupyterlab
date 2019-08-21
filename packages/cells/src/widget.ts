@@ -156,6 +156,11 @@ const RENDER_TIMEOUT = 1000;
  */
 const ATTACHMENTS_MIME = 'application/vnd.jupyter.attachments;closure=true';
 
+/**
+ * Type for attachment thunks.
+ */
+type AttachmentThunk = () => Promise<Contents.IModel>;
+
 /******************************************************************************
  * Cell
  ******************************************************************************/
@@ -1146,11 +1151,8 @@ export class AttachmentsCell extends Cell {
       return;
     }
 
-    const thunks = event.mimeData.getData(ATTACHMENTS_MIME);
-    const promises: Promise<Contents.IModel>[] = [];
-    thunks.forEach((fn: Function) => {
-      promises.push(fn());
-    });
+    const thunks: AttachmentThunk[] = event.mimeData.getData(ATTACHMENTS_MIME);
+    const promises = thunks.map(thunk => thunk());
     Promise.all(promises).then(models => {
       models.forEach(model => {
         if (model.type === 'file' && model.format === 'base64') {
