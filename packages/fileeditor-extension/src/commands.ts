@@ -15,11 +15,7 @@ import {
   PathExt
 } from '@jupyterlab/coreutils';
 
-import {
-  ABCWidgetFactory,
-  DocumentRegistry,
-  IDocumentWidget
-} from '@jupyterlab/docregistry';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -81,12 +77,17 @@ export const EDITOR_ICON_CLASS = 'jp-MaterialIcon jp-TextEditorIcon';
 export const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
 
 /**
+ * The name of the factory that creates editor widgets.
+ */
+export const FACTORY = 'Editor';
+
+/**
  * A utility class for adding commands and menu items,
  * for use by the File Editor extension or other Editor extensions.
  */
 export default class Commands {
   /**
-   * Accessor function that returns the createConsole function for use by various commands
+   * Accessor function that returns the createConsole function for use by Create Console commands
    */
   private static getCreateConsoleFunction(
     commands: CommandRegistry
@@ -125,13 +126,57 @@ export default class Commands {
     id: string,
     isEnabled: () => boolean,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
-    browserFactory: IFileBrowserFactory,
-    factory: ABCWidgetFactory<
-      IDocumentWidget<FileEditor>,
-      DocumentRegistry.ICodeModel
-    >
+    browserFactory: IFileBrowserFactory
   ) {
     // Add a command to change font size.
+    this.addChangeFontSizeCommand(commands, config, settingRegistry, id);
+
+    this.addLineNumbersCommand(
+      commands,
+      config,
+      settingRegistry,
+      id,
+      isEnabled
+    );
+
+    this.addWordWrapCommand(commands, config, settingRegistry, id, isEnabled);
+
+    this.addChangeTabsCommand(commands, config, settingRegistry, id);
+
+    this.addMatchBracketsCommand(
+      commands,
+      config,
+      settingRegistry,
+      id,
+      isEnabled
+    );
+
+    this.addAutoClosingBracketsCommand(commands, config, settingRegistry, id);
+
+    this.addCreateConsoleCommand(commands, tracker, isEnabled);
+
+    this.addRunCodeCommand(commands, tracker, isEnabled);
+
+    this.addRunAllCodeCommand(commands, tracker, isEnabled);
+
+    this.addMarkdownPreviewCommand(commands, tracker);
+
+    // Add a command for creating a new text file.
+    this.addCreateNewCommand(commands, browserFactory);
+
+    // Add a command for creating a new Markdown file.
+    this.addCreateNewMarkdownCommand(commands, browserFactory);
+  }
+
+  /**
+   * Add a command to change font size for File Editor
+   */
+  static addChangeFontSizeCommand(
+    commands: CommandRegistry,
+    config: CodeEditor.IConfig,
+    settingRegistry: ISettingRegistry,
+    id: string
+  ) {
     commands.addCommand(CommandIDs.changeFontSize, {
       execute: args => {
         const delta = Number(args['delta']);
@@ -156,7 +201,18 @@ export default class Commands {
       },
       label: args => args['name'] as string
     });
+  }
 
+  /**
+   * Add the Line Numbers command
+   */
+  static addLineNumbersCommand(
+    commands: CommandRegistry,
+    config: CodeEditor.IConfig,
+    settingRegistry: ISettingRegistry,
+    id: string,
+    isEnabled: () => boolean
+  ) {
     commands.addCommand(CommandIDs.lineNumbers, {
       execute: () => {
         config.lineNumbers = !config.lineNumbers;
@@ -170,7 +226,18 @@ export default class Commands {
       isToggled: () => config.lineNumbers,
       label: 'Line Numbers'
     });
+  }
 
+  /**
+   * Add the Word Wrap command
+   */
+  static addWordWrapCommand(
+    commands: CommandRegistry,
+    config: CodeEditor.IConfig,
+    settingRegistry: ISettingRegistry,
+    id: string,
+    isEnabled: () => boolean
+  ) {
     type wrappingMode = 'on' | 'off' | 'wordWrapColumn' | 'bounded';
 
     commands.addCommand(CommandIDs.lineWrap, {
@@ -189,7 +256,17 @@ export default class Commands {
       },
       label: 'Word Wrap'
     });
+  }
 
+  /**
+   * Add command for changing tabs size or type in File Editor
+   */
+  static addChangeTabsCommand(
+    commands: CommandRegistry,
+    config: CodeEditor.IConfig,
+    settingRegistry: ISettingRegistry,
+    id: string
+  ) {
     commands.addCommand(CommandIDs.changeTabs, {
       label: args => args['name'] as string,
       execute: args => {
@@ -207,7 +284,18 @@ export default class Commands {
         return config.insertSpaces === insertSpaces && config.tabSize === size;
       }
     });
+  }
 
+  /**
+   * Add the Match Brackets command
+   */
+  static addMatchBracketsCommand(
+    commands: CommandRegistry,
+    config: CodeEditor.IConfig,
+    settingRegistry: ISettingRegistry,
+    id: string,
+    isEnabled: () => boolean
+  ) {
     commands.addCommand(CommandIDs.matchBrackets, {
       execute: () => {
         config.matchBrackets = !config.matchBrackets;
@@ -221,7 +309,17 @@ export default class Commands {
       isEnabled,
       isToggled: () => config.matchBrackets
     });
+  }
 
+  /**
+   * Add the Auto Close Brackets for Text Editor command
+   */
+  static addAutoClosingBracketsCommand(
+    commands: CommandRegistry,
+    config: CodeEditor.IConfig,
+    settingRegistry: ISettingRegistry,
+    id: string
+  ) {
     commands.addCommand(CommandIDs.autoClosingBrackets, {
       execute: () => {
         config.autoClosingBrackets = !config.autoClosingBrackets;
@@ -234,7 +332,16 @@ export default class Commands {
       label: 'Auto Close Brackets for Text Editor',
       isToggled: () => config.autoClosingBrackets
     });
+  }
 
+  /**
+   * Add the Create Console for Editor command
+   */
+  static addCreateConsoleCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
     commands.addCommand(CommandIDs.createConsole, {
       execute: args => {
         const widget = tracker.currentWidget;
@@ -248,7 +355,16 @@ export default class Commands {
       isEnabled,
       label: 'Create Console for Editor'
     });
+  }
 
+  /**
+   * Add the Run Code command
+   */
+  static addRunCodeCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
     commands.addCommand(CommandIDs.runCode, {
       execute: () => {
         // Run the appropriate code, taking into account a ```fenced``` code block.
@@ -309,7 +425,16 @@ export default class Commands {
       isEnabled,
       label: 'Run Code'
     });
+  }
 
+  /**
+   * Add the Run All Code command
+   */
+  static addRunAllCodeCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
     commands.addCommand(CommandIDs.runAllCode, {
       execute: () => {
         let widget = tracker.currentWidget.content;
@@ -344,7 +469,15 @@ export default class Commands {
       isEnabled,
       label: 'Run All Code'
     });
+  }
 
+  /**
+   * Add the command
+   */
+  static addMarkdownPreviewCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>
+  ) {
     commands.addCommand(CommandIDs.markdownPreview, {
       execute: () => {
         let widget = tracker.currentWidget;
@@ -367,36 +500,55 @@ export default class Commands {
       },
       label: 'Show Markdown Preview'
     });
+  }
 
-    // Function to create a new untitled text file, given
-    // the current working directory.
-    const createNew = (cwd: string, ext: string = 'txt') => {
-      return commands
-        .execute('docmanager:new-untitled', {
-          path: cwd,
-          type: 'file',
-          ext
-        })
-        .then(model => {
-          return commands.execute('docmanager:open', {
-            path: model.path,
-            factory: factory.name
-          });
+  /**
+   * Function to create a new untitled text file, given the current working directory.
+   */
+  private static createNew = (
+    commands: CommandRegistry,
+    cwd: string,
+    ext: string = 'txt'
+  ) => {
+    return commands
+      .execute('docmanager:new-untitled', {
+        path: cwd,
+        type: 'file',
+        ext
+      })
+      .then(model => {
+        return commands.execute('docmanager:open', {
+          path: model.path,
+          factory: FACTORY
         });
-    };
+      });
+  };
 
-    // Add a command for creating a new text file.
+  /**
+   * Add the New File command
+   */
+  static addCreateNewCommand(
+    commands: CommandRegistry,
+    browserFactory: IFileBrowserFactory
+  ) {
     commands.addCommand(CommandIDs.createNew, {
       label: args => (args['isPalette'] ? 'New Text File' : 'Text File'),
       caption: 'Create a new text file',
       iconClass: args => (args['isPalette'] ? '' : EDITOR_ICON_CLASS),
       execute: args => {
         let cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
-        return createNew(cwd as string);
+        return this.createNew(commands, cwd as string);
       }
     });
+  }
 
-    // Add a command for creating a new Markdown file.
+  /**
+   * Add the New Markdown File command
+   */
+  static addCreateNewMarkdownCommand(
+    commands: CommandRegistry,
+    browserFactory: IFileBrowserFactory
+  ) {
     commands.addCommand(CommandIDs.createNewMarkdown, {
       label: args =>
         args['isPalette'] ? 'New Markdown File' : 'Markdown File',
@@ -404,7 +556,7 @@ export default class Commands {
       iconClass: args => (args['isPalette'] ? '' : MARKDOWN_ICON_CLASS),
       execute: args => {
         let cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
-        return createNew(cwd as string, 'md');
+        return this.createNew(commands, cwd as string, 'md');
       }
     });
   }

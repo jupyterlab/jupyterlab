@@ -36,12 +36,7 @@ import { JSONObject } from '@phosphor/coreutils';
 
 import { Menu } from '@phosphor/widgets';
 
-import Commands, { EDITOR_ICON_CLASS } from './commands';
-
-/**
- * The name of the factory that creates editor widgets.
- */
-const FACTORY = 'Editor';
+import Commands, { EDITOR_ICON_CLASS, FACTORY } from './commands';
 
 /**
  * The editor tracker extension.
@@ -252,8 +247,7 @@ function activate(
     id,
     isEnabled,
     tracker,
-    browserFactory,
-    factory
+    browserFactory
   );
 
   // Add a launcher item if the launcher is available.
