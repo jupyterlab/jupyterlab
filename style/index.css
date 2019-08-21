@@ -3,21 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-@import './toolbar.css';
+@import './icons.css';
+@import './sidebar.css';
 
 .jp-Debugger {
   background: var(--jp-layout-color1);
   top: 0;
   bottom: 0;
-}
-
-.jp-DebuggerSidebar {
-  display: flex;
-  flex-direction: column;
-  color: var(--jp-ui-font-color1);
-  background: var(--jp-layout-color1);
-  font-size: var(--jp-ui-font-size1);
-  min-width: 350px !important;
 }
 
 .jp-DebuggerSidebar div:not(:first-child) .jp-DebuggerSidebarVariables-header {
