@@ -1108,6 +1108,7 @@ export class AttachmentsCell extends Cell {
         break;
       case 'p-drop':
         this._evtDrop(event as IDragEvent);
+        break;
       default:
         break;
     }
@@ -1153,7 +1154,7 @@ export class AttachmentsCell extends Cell {
 
     const thunks: AttachmentThunk[] = event.mimeData.getData(ATTACHMENTS_MIME);
     const promises = thunks.map(thunk => thunk());
-    Promise.all(promises).then(models => {
+    void Promise.all(promises).then(models => {
       models.forEach(model => {
         if (model.type === 'file' && model.format === 'base64') {
           this.model.attachments.set(model.name, {
