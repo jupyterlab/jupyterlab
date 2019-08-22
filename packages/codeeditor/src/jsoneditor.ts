@@ -379,7 +379,6 @@ export namespace JSONEditor {
     editorFactory: CodeEditor.Factory;
   }
 
-  // TODO: this fancy typing isn't quite working as intended.
   /**
    * The subset of fields in a schema that represent a JSON Object.
    */
