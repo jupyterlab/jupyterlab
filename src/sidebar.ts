@@ -7,9 +7,9 @@ import { Breakpoints } from './breakpoints';
 
 import { Debugger } from './debugger';
 
-import { CallstackWidget } from './callstack';
+import { Callstack } from './callstack';
 
-import { VariablesWidget } from './variables';
+import { Variables } from './variables';
 
 export class DebuggerSidebar extends SplitPanel {
   constructor(model: Debugger.Model | null) {
@@ -18,8 +18,8 @@ export class DebuggerSidebar extends SplitPanel {
     this.orientation = 'vertical';
     this.addClass('jp-DebuggerSidebar');
 
-    this.variables = new VariablesWidget();
-    this.callstack = new CallstackWidget();
+    this.variables = new Variables();
+    this.callstack = new Callstack();
     this.breakpoints = new Breakpoints();
 
     this.addWidget(this.variables);
@@ -27,9 +27,9 @@ export class DebuggerSidebar extends SplitPanel {
     this.addWidget(this.breakpoints);
   }
 
-  readonly variables: VariablesWidget;
+  readonly variables: Variables;
 
-  readonly callstack: CallstackWidget;
+  readonly callstack: Callstack;
 
   readonly breakpoints: Breakpoints;
 

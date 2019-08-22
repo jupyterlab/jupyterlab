@@ -9,16 +9,24 @@
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
   font-size: var(--jp-ui-font-size1);
-  width: 350px;
+  min-width: 350px !important;
 }
 
-.jp-DebuggerSidebar header {
+.jp-DebuggerSidebar > div > header {
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
+  border-top: solid var(--jp-border-width) var(--jp-border-color1);
   display: flex;
   flex-direction: row;
   align-items: center;
   background-color: var(--jp-layout-color2);
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   height: 24px;
+}
+
+.jp-DebuggerSidebar > div.jp-DebuggerVariables > header {
+  border-top: none;
+}
+
+.jp-DebuggerSidebar > div > header > span {
   text-transform: uppercase;
   font-weight: 600;
   font-size: var(--jp-ui-font-size0);
