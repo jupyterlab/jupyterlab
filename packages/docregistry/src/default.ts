@@ -3,7 +3,11 @@
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
 
-import { CodeEditor, CodeEditorData } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  CodeEditorData,
+  ICodeEditorData
+} from '@jupyterlab/codeeditor';
 
 import { Mode } from '@jupyterlab/codemirror';
 
@@ -15,8 +19,6 @@ import { Contents } from '@jupyterlab/services';
 
 import { JSONValue } from '@phosphor/coreutils';
 
-import { Datastore } from '@phosphor/datastore';
-
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -26,20 +28,22 @@ import { Widget } from '@phosphor/widgets';
 import { DocumentRegistry, IDocumentWidget } from './index';
 
 /**
- * The default implementation of a document model.
+ * The default implementation of a text document model.
  */
-export class DocumentModel extends CodeEditor.Model
+export class TextDocumentModel extends CodeEditor.Model
   implements DocumentRegistry.ICodeModel {
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string) {
-    super();
-    this.datastore = Datastore.create({
-      id: 1,
-      schemas: [CodeEditorData.SCHEMA]
+  constructor(options: TextDocumentModel.IOptions = {}) {
+    super({
+      record: {
+        datastore: CodeEditorData.createStore(),
+        schema: CodeEditorData.SCHEMA,
+        record: 'data'
+      }
     });
-    this._defaultLang = languagePreference || '';
+    this._defaultLang = options.languagePreference || '';
     // We don't want to trigger a content change for text selection changes,
     // only actual content changes to the data owned by the document
     this._listener = DatastoreExt.listenField(
@@ -49,11 +53,6 @@ export class DocumentModel extends CodeEditor.Model
     );
     this.ready = Promise.resolve(undefined);
   }
-
-  /**
-   * The datastore for the document model.
-   */
-  readonly datastore: Datastore;
 
   /**
    * Whether the model is ready for collaboration.
@@ -147,6 +146,118 @@ export class DocumentModel extends CodeEditor.Model
 }
 
 /**
+ * A namespace for TextDocumentModel statics.
+ */
+export namespace TextDocumentModel {
+  /**
+   * Options for creating a new TextDocumentModel.
+   */
+  export interface IOptions {
+    /**
+     * A record in a datastore in which to hold the data.
+     */
+    record?: DatastoreExt.RecordLocation<ICodeEditorData.Schema>;
+
+    /**
+     * The preferred kernel language for the document.
+     */
+    languagePreference?: string;
+  }
+}
+
+/**
+ * The default implementation of a base64-encoded document model.
+ */
+export class Base64DocumentModel implements DocumentRegistry.IModel {
+  /**
+   * Construct a new document model.
+   */
+  constructor(languagePreference?: string) {
+    /* no-op */
+  }
+
+  /**
+   * A signal emitted when the document content changes.
+   */
+  get contentChanged(): ISignal<this, void> {
+    return this._contentChanged;
+  }
+
+  /**
+   * The default kernel name of the document.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  readonly defaultKernelName = '';
+
+  /**
+   * The default kernel language of the document.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  readonly defaultKernelLanguage = '';
+
+  /**
+   * Serialize the model to a string.
+   */
+  toString(): string {
+    return this._value;
+  }
+
+  /**
+   * Deserialize the model from a string.
+   *
+   * #### Notes
+   * Should emit a [contentChanged] signal.
+   */
+  fromString(value: string): void {
+    this._value = value;
+    this._contentChanged.emit();
+  }
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): JSONValue {
+    return JSON.parse(this._value || 'null');
+  }
+
+  /**
+   * Deserialize the model from JSON.
+   *
+   * #### Notes
+   * Should emit a [contentChanged] signal.
+   */
+  fromJSON(value: JSONValue): void {
+    this.fromString(JSON.stringify(value));
+  }
+
+  /**
+   * Whether the model has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of resources held by the document model.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._value = '';
+  }
+
+  private _contentChanged = new Signal<this, void>(this);
+  private _isDisposed = false;
+  private _value = '';
+}
+
+/**
  * An implementation of a model factory for text files.
  */
 export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
@@ -201,7 +312,7 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    * @returns A new document model.
    */
   createNew(languagePreference?: string): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference);
+    return new TextDocumentModel({ languagePreference });
   }
 
   /**
@@ -218,7 +329,8 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
 /**
  * An implementation of a model factory for base64 files.
  */
-export class Base64ModelFactory extends TextModelFactory {
+export class Base64ModelFactory
+  implements DocumentRegistry.IModelFactory<Base64DocumentModel> {
   /**
    * The name of the model type.
    *
@@ -247,6 +359,40 @@ export class Base64ModelFactory extends TextModelFactory {
   get fileFormat(): Contents.FileFormat {
     return 'base64';
   }
+  /**
+   * Get whether the model factory has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the model factory.
+   */
+  dispose(): void {
+    this._isDisposed = true;
+  }
+
+  /**
+   * Create a new model.
+   *
+   * @param languagePreference - An optional kernel language preference.
+   *
+   * @returns A new document model.
+   */
+  createNew(languagePreference?: string): Base64DocumentModel {
+    return new Base64DocumentModel(languagePreference);
+  }
+
+  /**
+   * Get the preferred kernel language given the path.
+   * Returns an empty string.
+   */
+  preferredLanguage(path: string): string {
+    return '';
+  }
+
+  private _isDisposed = false;
 }
 
 /**
