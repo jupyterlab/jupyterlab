@@ -37,9 +37,9 @@ def _make_extension_entry(name, description, url, enabled, core, latest_version,
     return ret
 
 
-def _ensure_compat_errors(info, app_dir, logger):
+def _ensure_compat_errors(info, options):
     """Ensure that the app info has compat_errors field"""
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(options)
     info['compat_errors'] = handler._get_extension_compat()
 
 
@@ -49,9 +49,9 @@ _message_map = {
     'update': re.compile(r'(?P<name>.*) changed from (?P<oldver>.*) to (?P<newver>.*)'),
 }
 
-def _build_check_info(app_dir, logger):
+def _build_check_info(options):
     """Get info about packages scheduled for (un)install/update"""
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(options)
     messages = handler.build_check(fast=True)
     # Decode the messages into a dict:
     status = {'install': [], 'uninstall': [], 'update': []}
@@ -77,9 +77,10 @@ class ExtensionManager(object):
     @gen.coroutine
     def list_extensions(self):
         """Handle a request for all installed extensions"""
-        info = get_app_info(app_dir=self.app_dir, logger=self.log)
-        build_check_info = _build_check_info(self.app_dir, self.log)
-        _ensure_compat_errors(info, self.app_dir, self.log)
+        options = dict(app_dir=self.app_dir, logger=self.log)
+        info = get_app_info(options=options)
+        build_check_info = _build_check_info(options)
+        _ensure_compat_errors(info, options)
         extensions = []
         # TODO: Ensure loops can run in parallel
         for name, data in info['extensions'].items():
@@ -124,8 +125,9 @@ class ExtensionManager(object):
         """Handle an install/update request"""
         try:
             install_extension(
-                extension, app_dir=self.app_dir, logger=self.log,
-                core_config=self.core_config)
+                extension, options=dict(
+                    app_dir=self.app_dir, logger=self.log,
+                    core_config=self.core_config))
         except ValueError as e:
             raise gen.Return(dict(status='error', message=str(e)))
         raise gen.Return(dict(status='ok',))
@@ -134,24 +136,27 @@ class ExtensionManager(object):
     def uninstall(self, extension):
         """Handle an uninstall request"""
         did_uninstall = uninstall_extension(
-            extension, app_dir=self.app_dir, logger=self.log,
-            core_config=self.core_config)
+            extension, options=dict(
+                app_dir=self.app_dir, logger=self.log,
+                core_config=self.core_config))
         raise gen.Return(dict(status='ok' if did_uninstall else 'error',))
 
     @gen.coroutine
     def enable(self, extension):
         """Handle an enable request"""
         enable_extension(
-            extension, app_dir=self.app_dir, logger=self.log,
-            core_config=self.core_config)
+            extension, options=dict(
+                app_dir=self.app_dir, logger=self.log,
+                core_config=self.core_config))
         raise gen.Return(dict(status='ok',))
 
     @gen.coroutine
     def disable(self, extension):
         """Handle a disable request"""
         disable_extension(
-            extension, app_dir=self.app_dir, logger=self.log,
-            core_config=self.core_config)
+            extension, options=dict(
+                app_dir=self.app_dir, logger=self.log,
+                core_config=self.core_config))
         raise gen.Return(dict(status='ok',))
 
     @gen.coroutine
@@ -189,14 +194,17 @@ class ExtensionManager(object):
     @gen.coroutine
     def _load_outdated(self):
         """Get the latest compatible version"""
-        info = get_app_info(app_dir=self.app_dir, logger=self.log)
+        options = dict(
+            app_dir=self.app_dir,
+            logger=self.log,
+            core_config=self.core_config
+        )
+        info = get_app_info(options=options)
         names = tuple(info['extensions'].keys())
         data = yield self.executor.submit(
             get_latest_compatible_package_versions,
             names,
-            app_dir=self.app_dir,
-            logger=self.log,
-            core_config=self.core_config,
+            options=options
         )
         raise gen.Return(data)
 

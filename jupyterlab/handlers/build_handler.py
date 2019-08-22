@@ -88,22 +88,22 @@ class Builder(object):
 
     @run_on_executor
     def _run_build_check(self, app_dir, logger, core_config):
-        return build_check(
-            app_dir=app_dir, logger=logger, core_config=core_config)
+        return build_check(options=dict(
+            app_dir=app_dir, logger=logger, core_config=core_config))
 
     @run_on_executor
     def _run_build(self, app_dir, logger, kill_event, core_config):
-        kwargs = dict(
+        options = dict(
             app_dir=app_dir, logger=logger, kill_event=kill_event,
-            core_config=core_config, command='build')
+            core_config=core_config)
         try:
-            return build(**kwargs)
+            return build(command='build', options=options)
         except Exception as e:
             if self._kill_event.is_set():
                 return
             self.log.warn('Build failed, running a clean and rebuild')
-            clean(app_dir)
-            return build(**kwargs)
+            clean(options=options)
+            return build(command='build', options=options)
 
 
 class BuildHandler(APIHandler):

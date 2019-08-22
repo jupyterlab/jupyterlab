@@ -99,10 +99,10 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
                 if self.minimize:
                     parts.append('minimize')
                 command = ':'.join(parts)
-
-                build(app_dir=self.app_dir, clean_staging=self.should_clean,
-                      logger=self.log, command=command,
+                options = dict(app_dir=self.app_dir, logger=self.log,
                       core_config=self.core_config)
+                build(clean_staging=self.should_clean,
+                      command=command, options=options)
 
     def run_task(self):
         pass
@@ -114,13 +114,13 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
 
 class InstallLabExtensionApp(BaseExtensionApp):
     description = """Install labextension(s)
-    
+
      Usage
-    
+
         jupyter labextension install [--pin-version-as <alias,...>] <package...>
-    
+
     This installs JupyterLab extensions similar to yarn add or npm install.
-    
+
     Pass a list of comma seperate names to the --pin-version-as flag
     to use as alises for the packages providers. This is useful to
     install multiple versions of the same extension.
@@ -138,11 +138,13 @@ class InstallLabExtensionApp(BaseExtensionApp):
         return any([
             install_extension(
                 arg,
-                self.app_dir,
-                logger=self.log,
-                core_config=self.core_config,
                 # Pass in pinned alias if we have it
-                pin=pinned_versions[i] if i < len(pinned_versions) else None
+                pin=pinned_versions[i] if i < len(pinned_versions) else None,
+                options=dict(
+                    app_dir=self.app_dir,
+                    logger=self.log,
+                    core_config=self.core_config,
+                )
             )
             for i, arg in enumerate(self.extra_args)
         ])
@@ -159,14 +161,12 @@ class UpdateLabExtensionApp(BaseExtensionApp):
         if not self.all and not self.extra_args:
             self.log.warn('Specify an extension to update, or use --all to update all extensions')
             return False
+        options = dict(app_dir=self.app_dir, logger=self.log,
+            core_config=self.core_config)
         if self.all:
-            return update_extension(
-                all_=True, app_dir=self.app_dir, logger=self.log,
-                core_config=self.core_config)
+            return update_extension(all_=True, options=options)
         return any([
-            update_extension(
-                name=arg, app_dir=self.app_dir, logger=self.log,
-                core_config=self.core_config)
+            update_extension(name=arg, options=options)
             for arg in self.extra_args
         ])
 
@@ -186,8 +186,10 @@ class LinkLabExtensionApp(BaseExtensionApp):
         self.extra_args = self.extra_args or [os.getcwd()]
         return any([
             link_package(
-                arg, self.app_dir, logger=self.log,
-                core_config=self.core_config)
+                arg,
+                options=dict(
+                    self.app_dir, logger=self.log,
+                    core_config=self.core_config))
             for arg in self.extra_args
         ])
 
@@ -199,8 +201,10 @@ class UnlinkLabExtensionApp(BaseExtensionApp):
         self.extra_args = self.extra_args or [os.getcwd()]
         return any([
             unlink_package(
-                arg, self.app_dir, logger=self.log,
-                core_config=self.core_config)
+                arg,
+                options=dict(
+                    self.app_dir, logger=self.log,
+                    core_config=self.core_config))
             for arg in self.extra_args
         ])
 
@@ -216,8 +220,10 @@ class UninstallLabExtensionApp(BaseExtensionApp):
         self.extra_args = self.extra_args or [os.getcwd()]
         return any([
             uninstall_extension(
-                arg, all_=self.all, app_dir=self.app_dir, logger=self.log,
-                core_config=self.core_config)
+                arg, all_=self.all,
+                options=dict(
+                    app_dir=self.app_dir, logger=self.log,
+                    core_config=self.core_config))
             for arg in self.extra_args
         ])
 
@@ -226,26 +232,26 @@ class ListLabExtensionsApp(BaseExtensionApp):
     description = "List the installed labextensions"
 
     def run_task(self):
-        list_extensions(
-            self.app_dir, logger=self.log, core_config=self.core_config)
+        list_extensions(options=dict(
+            self.app_dir, logger=self.log, core_config=self.core_config))
 
 
 class EnableLabExtensionsApp(BaseExtensionApp):
     description = "Enable labextension(s) by name"
 
     def run_task(self):
-        [enable_extension(
-            arg, self.app_dir, logger=self.log, core_config=self.core_config)
-         for arg in self.extra_args]
+        options = dict(
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config)
+        [enable_extension(arg, options=options) for arg in self.extra_args]
 
 
 class DisableLabExtensionsApp(BaseExtensionApp):
     description = "Disable labextension(s) by name"
 
     def run_task(self):
-        [disable_extension(
-            arg, self.app_dir, logger=self.log, core_config=self.core_config)
-         for arg in self.extra_args]
+        options = dict(
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config)
+        [disable_extension(arg, options=options) for arg in self.extra_args]
 
 
 class CheckLabExtensionsApp(BaseExtensionApp):
@@ -256,12 +262,13 @@ class CheckLabExtensionsApp(BaseExtensionApp):
         help="Whether it should check only if the extensions is installed")
 
     def run_task(self):
+        options = dict(
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config)
         all_enabled = all(
             check_extension(
-                arg, self.app_dir,
-                self.should_check_installed_only,
-                logger=self.log,
-                core_config=self.core_config)
+                arg,
+                installed=self.should_check_installed_only,
+                options=options)
             for arg in self.extra_args)
         if not all_enabled:
             self.exit(1)

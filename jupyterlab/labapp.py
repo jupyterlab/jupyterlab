@@ -85,15 +85,17 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
         command = ':'.join(parts)
 
         app_dir = self.app_dir or get_app_dir()
+        options = dict(
+            app_dir=app_dir, logger=self.log, core_config=self.core_config
+        )
         self.log.info('JupyterLab %s', version)
         with self.debug_logging():
             if self.pre_clean:
                 self.log.info('Cleaning %s' % app_dir)
-                clean(self.app_dir)
+                clean(options=options)
             self.log.info('Building in %s', app_dir)
-            build(app_dir=app_dir, name=self.name, version=self.version,
-                  command=command, logger=self.log,
-                  core_config=self.core_config)
+            build(name=self.name, version=self.version,
+                  command=command, options=options)
 
 
 clean_aliases = dict(base_aliases)
@@ -116,7 +118,7 @@ class LabCleanApp(JupyterApp):
     app_dir = Unicode('', config=True, help='The app directory to clean')
 
     def start(self):
-        clean(self.app_dir, logger=self.log)
+        clean(options=dict(self.app_dir, logger=self.log))
 
 
 class LabPathApp(JupyterApp):

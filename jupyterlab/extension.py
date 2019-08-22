@@ -38,7 +38,7 @@ def load_config(nbapp):
     )
 
     app_dir = getattr(nbapp, 'app_dir', get_app_dir())
-    info = get_app_info(app_dir)
+    info = get_app_info(options=dict(app_dir=app_dir))
     static_url = info['staticUrl']
     user_settings_dir = getattr(
         nbapp, 'user_settings_dir', get_user_settings_dir()
@@ -188,7 +188,7 @@ def load_jupyter_server_extension(nbapp):
         if dev_mode:
             watch_dev(logger)
         else:
-            watch(app_dir, logger)
+            watch(options=dict(app_dir=app_dir, logger=logger))
             page_config['buildAvailable'] = False
 
         config.cache_files = False
