@@ -10,7 +10,10 @@ import {
   FilterFileBrowserModel,
   FileBrowserModel
 } from '@jupyterlab/filebrowser';
-import { ServiceManager } from '@jupyterlab/services';
+import { ServiceManager, Contents } from '@jupyterlab/services';
+
+import { defaultIconRegistry, IIconRegistry } from '@jupyterlab/ui-components';
+
 import { expect } from 'chai';
 import {
   acceptDialog,
@@ -22,6 +25,7 @@ import {
 import { simulate } from 'simulate-event';
 
 describe('@jupyterlab/filebrowser', () => {
+  let iconRegistry: IIconRegistry;
   let manager: IDocumentManager;
   let serviceManager: ServiceManager.IManager;
   let registry: DocumentRegistry;
@@ -37,6 +41,7 @@ describe('@jupyterlab/filebrowser', () => {
       textModelFactory: new TextModelFactory()
     });
     serviceManager = new ServiceManager({ standby: 'never' });
+    iconRegistry = defaultIconRegistry;
     manager = new DocumentManager({
       registry,
       opener,
@@ -52,14 +57,15 @@ describe('@jupyterlab/filebrowser', () => {
   describe('FilterFileBrowserModel', () => {
     describe('#constructor()', () => {
       it('should construct a new filtered file browser model', () => {
-        let model = new FilterFileBrowserModel({ manager });
+        let model = new FilterFileBrowserModel({ iconRegistry, manager });
         expect(model).to.be.an.instanceof(FilterFileBrowserModel);
       });
 
       it('should accept filter option', () => {
         let model = new FilterFileBrowserModel({
+          iconRegistry,
           manager,
-          filter: model => false
+          filter: (model: Contents.IModel) => false
         });
         expect(model).to.be.an.instanceof(FilterFileBrowserModel);
       });
@@ -67,9 +73,12 @@ describe('@jupyterlab/filebrowser', () => {
 
     describe('#items()', () => {
       it('should list all elements if no filter is defined', async () => {
-        let filteredModel = new FilterFileBrowserModel({ manager });
+        let filteredModel = new FilterFileBrowserModel({
+          iconRegistry,
+          manager
+        });
         await filteredModel.cd();
-        let model = new FileBrowserModel({ manager });
+        let model = new FileBrowserModel({ iconRegistry, manager });
         await model.cd();
 
         const filteredItems = toArray(filteredModel.items());
@@ -79,11 +88,12 @@ describe('@jupyterlab/filebrowser', () => {
 
       it('should list all directories whatever the filter', async () => {
         let filteredModel = new FilterFileBrowserModel({
+          iconRegistry,
           manager,
-          filter: model => false
+          filter: (model: Contents.IModel) => false
         });
         await filteredModel.cd();
-        let model = new FileBrowserModel({ manager });
+        let model = new FileBrowserModel({ iconRegistry, manager });
         await model.cd();
 
         const filteredItems = toArray(filteredModel.items());
@@ -94,14 +104,17 @@ describe('@jupyterlab/filebrowser', () => {
 
       it('should respect the filter', async () => {
         let filteredModel = new FilterFileBrowserModel({
+          iconRegistry,
           manager,
-          filter: model => model.type === 'notebook'
+          filter: (model: Contents.IModel) => model.type === 'notebook'
         });
         await filteredModel.cd();
-        let model = new FileBrowserModel({ manager });
+        let model = new FileBrowserModel({ iconRegistry, manager });
         await model.cd();
 
-        const filteredItems = toArray(filteredModel.items());
+        const filteredItems = toArray(
+          filteredModel.items()
+        ) as Contents.IModel[];
         const items = toArray(model.items());
         const shownItems = items.filter(
           item => item.type === 'directory' || item.type === 'notebook'
@@ -118,6 +131,7 @@ describe('@jupyterlab/filebrowser', () => {
   describe('FileDialog.getOpenFiles()', () => {
     it('should create a dialog', async () => {
       let dialog = FileDialog.getOpenFiles({
+        iconRegistry,
         manager
       });
 
@@ -135,10 +149,11 @@ describe('@jupyterlab/filebrowser', () => {
       document.body.appendChild(node);
 
       let dialog = FileDialog.getOpenFiles({
+        iconRegistry,
         manager,
         title: 'Select a notebook',
         host: node,
-        filter: value => value.type === 'notebook'
+        filter: (value: Contents.IModel) => value.type === 'notebook'
       });
 
       await acceptDialog();
@@ -158,10 +173,11 @@ describe('@jupyterlab/filebrowser', () => {
       document.body.appendChild(node);
 
       let dialog = FileDialog.getOpenFiles({
+        iconRegistry,
         manager,
         title: 'Select a notebook',
         host: node,
-        filter: value => value.type === 'notebook'
+        filter: (value: Contents.IModel) => value.type === 'notebook'
       });
 
       await waitForDialog();
@@ -204,6 +220,7 @@ describe('@jupyterlab/filebrowser', () => {
 
     it('should return current path if nothing is selected', async () => {
       let dialog = FileDialog.getOpenFiles({
+        iconRegistry,
         manager
       });
 
@@ -221,6 +238,7 @@ describe('@jupyterlab/filebrowser', () => {
   describe('FileDialog.getExistingDirectory()', () => {
     it('should create a dialog', async () => {
       let dialog = FileDialog.getExistingDirectory({
+        iconRegistry,
         manager
       });
 
@@ -238,6 +256,7 @@ describe('@jupyterlab/filebrowser', () => {
       document.body.appendChild(node);
 
       let dialog = FileDialog.getExistingDirectory({
+        iconRegistry,
         manager,
         title: 'Select a folder',
         host: node
@@ -259,6 +278,7 @@ describe('@jupyterlab/filebrowser', () => {
       document.body.appendChild(node);
 
       let dialog = FileDialog.getExistingDirectory({
+        iconRegistry,
         manager,
         title: 'Select a folder',
         host: node
@@ -303,6 +323,7 @@ describe('@jupyterlab/filebrowser', () => {
 
     it('should return current path if nothing is selected', async () => {
       let dialog = FileDialog.getExistingDirectory({
+        iconRegistry,
         manager
       });
 

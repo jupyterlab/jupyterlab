@@ -77,6 +77,7 @@ Here is an example to request a file.
 .. code:: typescript
 
     const dialog = FileDialog.getExistingDirectory({
+      iconRegistry, // IIconRegistry
       manager, // IDocumentManager
       filter: model => model.type == 'notebook' // optional (model: Contents.IModel) => boolean
     });
@@ -92,6 +93,7 @@ And for a folder.
 .. code:: typescript
 
     const dialog = FileDialog.getExistingDirectory({
+      iconRegistry, // IIconRegistry
       manager // IDocumentManager
     });
 
@@ -101,6 +103,7 @@ And for a folder.
       let folders = result.value;
     }
 
-.. note:: The document manager can be obtained in a plugin by requesting 
-    ``IFileBrowserFactory`` service. The manager will be accessed through
-    ``factory.defaultBrowser.model.manager``.
+.. note:: The document manager and the icon registry can be obtained in a plugin by
+    requesting ``IFileBrowserFactory`` token. The ``manager`` will be accessed through 
+    ``factory.defaultBrowser.model.manager`` and the ``iconRegistry`` through
+    ``factory.defaultBrowser.model.iconRegistry``.

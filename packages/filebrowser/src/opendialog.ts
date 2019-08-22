@@ -8,6 +8,7 @@ import { PathExt } from '@jupyterlab/coreutils';
 import { Dialog } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents } from '@jupyterlab/services';
+import { IIconRegistry } from '@jupyterlab/ui-components';
 
 import { FileBrowser } from './browser';
 import { FilterFileBrowserModel } from './model';
@@ -35,6 +36,11 @@ export namespace FileDialog {
         >
       >
     > {
+    /**
+     * An icon registry instance.
+     */
+    iconRegistry: IIconRegistry;
+
     /**
      * Document manager
      */
@@ -75,7 +81,11 @@ export namespace FileDialog {
       focusNodeSelector: options.focusNodeSelector,
       host: options.host,
       renderer: options.renderer,
-      body: new OpenDialog(options.manager, options.filter)
+      body: new OpenDialog(
+        options.iconRegistry,
+        options.manager,
+        options.filter
+      )
     };
     let dialog = new Dialog(dialogOptions);
     return dialog.launch();
@@ -107,6 +117,7 @@ export namespace FileDialog {
 class OpenDialog extends Widget
   implements Dialog.IBodyWidget<Contents.IModel[]> {
   constructor(
+    iconRegistry: IIconRegistry,
     manager: IDocumentManager,
     filter?: (value: Contents.IModel) => boolean
   ) {
@@ -115,6 +126,7 @@ class OpenDialog extends Widget
 
     this._browser = Private.createFilteredFileBrowser(
       'filtered-file-browser-dialog',
+      iconRegistry,
       manager,
       filter
     );
@@ -161,6 +173,8 @@ namespace Private {
    *
    * @param id - The widget/DOM id of the file browser.
    *
+   * @param iconRegistry - An icon registry instance.
+   *
    * @param manager - A document manager instance.
    *
    * @param filter - function to filter file browser item.
@@ -180,11 +194,13 @@ namespace Private {
    */
   export const createFilteredFileBrowser = (
     id: string,
+    iconRegistry: IIconRegistry,
     manager: IDocumentManager,
     filter?: (value: Contents.IModel) => boolean,
     options: IFileBrowserFactory.IOptions = {}
   ) => {
     const model = new FilterFileBrowserModel({
+      iconRegistry,
       manager,
       filter,
       driveName: options.driveName,
