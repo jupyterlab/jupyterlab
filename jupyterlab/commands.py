@@ -518,8 +518,11 @@ class _AppHandler(object):
     def __init__(self, options):
         """Create a new _AppHandler object
         """
-        self.sys_dir = get_app_dir()
         self.app_dir = options.get('app_dir', None) or get_app_dir()
+        use_sys_dir = options.get('use_sys_dir', None) 
+        self.sys_dir = (
+            get_app_dir() if options.get('use_sys_dir', None) is not False
+            else self.app_dir)
         self.logger = _ensure_logger(options.get('logger'))
         core_config = options.get('core_config', None)
         self.core_data = (

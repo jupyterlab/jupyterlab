@@ -372,6 +372,20 @@ class TestExtension(TestCase):
         assert ext_name in extensions
         assert check_extension(ext_name, options=options)
 
+    def test_app_dir_disable_sys_prefix(self):
+        app_dir = self.tempdir()
+        options = dict(app_dir=app_dir, use_sys_dir=False)
+        if os.path.exists(self.app_dir):
+            os.removedirs(self.app_dir)
+
+        assert install_extension(self.mock_extension) is True
+        path = pjoin(app_dir, 'extensions', '*.tgz')
+        assert not glob.glob(path)
+        extensions = get_app_info(options=options)['extensions']
+        ext_name = self.pkg_names['extension']
+        assert ext_name not in extensions
+        assert not check_extension(ext_name, options=options)
+
     def test_app_dir_shadowing(self):
         app_dir = self.tempdir()
         sys_dir = self.app_dir
@@ -455,6 +469,7 @@ class TestExtension(TestCase):
             app_dir=app_dir,
             core_config=core_config,
             logger=logger,
+            use_sys_dir=False,
         )
 
         extensions = (
@@ -489,7 +504,6 @@ class TestExtension(TestCase):
         assert list(data['jupyterlab']['extensions'].keys()) == [
             '@jupyterlab/application-extension',
             '@jupyterlab/apputils-extension',
-            self.pkg_names['extension'],
         ]
         assert data['jupyterlab']['mimeExtensions'] == {}
         for pkg in data['jupyterlab']['singletonPackages']:
