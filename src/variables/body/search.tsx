@@ -32,13 +32,16 @@ const SearchComponent = ({ model }: any) => {
   const [state, setState] = useState('');
   model.filter = state;
   return (
-    <input
-      placeholder="Search..."
-      value={state}
-      onChange={e => {
-        setState(e.target.value);
-      }}
-    />
+    <div>
+      <span className="fa fa-search"></span>
+      <input
+        placeholder="Search..."
+        value={state}
+        onChange={e => {
+          setState(e.target.value);
+        }}
+      />
+    </div>
   );
 };
 
@@ -62,7 +65,7 @@ class ScopeSearch extends ReactWidget {
   constructor() {
     super();
     this.node.style.overflow = 'visible';
-    this.node.style.width = '100px';
+    this.node.style.width = '85px';
     this.addClass('jp-DebuggerVariables-scope');
   }
 

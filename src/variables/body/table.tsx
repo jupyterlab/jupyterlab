@@ -68,6 +68,7 @@ const TableComponent = ({ model }: { model: Variables.IModel }) => {
   });
 
   model.current = variable;
+
   return (
     <div>
       <table>
@@ -83,7 +84,7 @@ const TableComponent = ({ model }: { model: Variables.IModel }) => {
   );
 };
 
-const useTbody = (items: Array<any>, defaultState: any, id: string = '') => {
+const useTbody = (items: Array<any>, defaultState: any) => {
   const [state, setState] = useState(defaultState);
 
   const setClassIcon = (typeOf: string) => {
@@ -98,7 +99,7 @@ const useTbody = (items: Array<any>, defaultState: any, id: string = '') => {
             <tr
               key={item.name}
               onClick={e => setState(item)}
-              className={id + (state === item ? ' selected' : '')}
+              className={state === item ? ' selected' : ''}
             >
               <td style={{ paddingLeft: `${12}px`, width: `${25}%` }}>
                 <span

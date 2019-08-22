@@ -79,12 +79,14 @@
   align-items: center;
 }
 
-.jp-DebuggerVariables-search > div {
+.jp-DebuggerVariables-search .jp-DebuggerVariables-input > div {
+  display: flex;
   padding-left: 8px;
   padding-right: 8px;
   vertical-align: middle;
   font-size: 14px;
   line-height: 23px;
+  align-items: baseline;
 }
 
 .jp-DebuggerVariables-search > .jp-DebuggerVariables-input {
@@ -101,6 +103,7 @@
   width: 100%;
   height: 100%;
   border: none;
+  padding-left: 10px;
 }
 
 .jp-DebuggerVariables-search .jp-DebuggerVariables-scope span.label {
@@ -114,7 +117,7 @@
   left: 0;
   right: 0;
   margin: 0;
-  top: 25px;
+  top: 20px;
   z-index: 10000;
   padding: 10px 10px;
   background: var(--jp-layout-color1);
