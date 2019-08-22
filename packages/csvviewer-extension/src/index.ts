@@ -86,6 +86,7 @@ function activateCsv(
 ): void {
   const factory = new CSVViewerFactory({
     name: FACTORY_CSV,
+    modelName: 'string',
     fileTypes: ['csv'],
     defaultFor: ['csv'],
     readOnly: true

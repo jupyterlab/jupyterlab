@@ -166,16 +166,11 @@ export namespace TextDocumentModel {
 }
 
 /**
- * The default implementation of a base64-encoded document model.
+ * An implementation of a string document model. Unlike the text document model,
+ * it is not intended to be collaborative, so it has a lighter memory footprint.
+ * It is intended to be used for large, static text data, such as CSVs.
  */
-export class Base64DocumentModel implements DocumentRegistry.IModel {
-  /**
-   * Construct a new document model.
-   */
-  constructor(languagePreference?: string) {
-    /* no-op */
-  }
-
+export class StringDocumentModel implements DocumentRegistry.IModel {
   /**
    * A signal emitted when the document content changes.
    */
@@ -327,10 +322,10 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
 }
 
 /**
- * An implementation of a model factory for base64 files.
+ * An implementation of a model factory for string documents.
  */
-export class Base64ModelFactory
-  implements DocumentRegistry.IModelFactory<Base64DocumentModel> {
+export class StringModelFactory
+  implements DocumentRegistry.IModelFactory<StringDocumentModel> {
   /**
    * The name of the model type.
    *
@@ -338,7 +333,7 @@ export class Base64ModelFactory
    * This is a read-only property.
    */
   get name(): string {
-    return 'base64';
+    return 'string';
   }
 
   /**
@@ -357,7 +352,7 @@ export class Base64ModelFactory
    * This is a read-only property.
    */
   get fileFormat(): Contents.FileFormat {
-    return 'base64';
+    return 'text';
   }
   /**
    * Get whether the model factory has been disposed.
@@ -380,8 +375,8 @@ export class Base64ModelFactory
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string): Base64DocumentModel {
-    return new Base64DocumentModel(languagePreference);
+  createNew(languagePreference?: string): StringDocumentModel {
+    return new StringDocumentModel();
   }
 
   /**
@@ -393,6 +388,30 @@ export class Base64ModelFactory
   }
 
   private _isDisposed = false;
+}
+
+/**
+ * An implementation of a model factory for base64-encoded documents.
+ */
+export class Base64ModelFactory extends StringModelFactory {
+  /**
+   * The name of the model type.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get name(): string {
+    return 'base64';
+  }
+
+  /**
+   * The format of the file.
+   *
+   * This is a read-only property.
+   */
+  get fileFormat(): Contents.FileFormat {
+    return 'base64';
+  }
 }
 
 /**
