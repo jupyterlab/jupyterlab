@@ -246,6 +246,13 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
+   * Test if the user has scrollbar styling enabled.
+   */
+  isToggledThemeScrollbars(): boolean {
+    return !!this._settings.composite['theme-scrollbars'];
+  }
+
+  /**
    * Toggle the `theme-scrollbbars` setting.
    */
   toggleThemeScrollbars(): Promise<void> {
