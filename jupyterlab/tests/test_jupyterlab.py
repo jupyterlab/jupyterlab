@@ -217,6 +217,7 @@ class TestExtension(TestCase):
         assert mime_ext_name not in extensions
 
 
+    @pytest.mark.slow
     def test_uninstall_core_extension(self):
         assert uninstall_extension('@jupyterlab/console-extension') is True
         app_dir = self.app_dir
@@ -407,6 +408,7 @@ class TestExtension(TestCase):
         assert ext_name not in extensions
         assert not check_extension(ext_name, app_dir)
 
+    @pytest.mark.slow
     def test_build(self):
         assert install_extension(self.mock_extension) is True
         build()
@@ -422,6 +424,7 @@ class TestExtension(TestCase):
             data = fid.read()
         assert self.pkg_names['extension'] in data
 
+    @pytest.mark.slow
     def test_build_custom(self):
         assert install_extension(self.mock_extension) is True
         build(name='foo', version='1.0', static_url='bar')
@@ -439,6 +442,7 @@ class TestExtension(TestCase):
         assert data['jupyterlab']['version'] == '1.0'
         assert data['jupyterlab']['staticUrl'] == 'bar'
 
+    @pytest.mark.slow
     def test_build_custom_minimal_core_config(self):
         default_config = CoreConfig()
         core_config = CoreConfig()
@@ -525,6 +529,7 @@ class TestExtension(TestCase):
         assert '@jupyterlab/notebook-extension' not in info['disabled']
         assert not check_extension('@jupyterlab/notebook-extension', app_dir)
 
+    @pytest.mark.slow
     def test_build_check(self):
         # Do the initial build.
         assert build_check()

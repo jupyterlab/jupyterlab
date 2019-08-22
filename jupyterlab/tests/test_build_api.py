@@ -2,6 +2,8 @@
 from tempfile import TemporaryDirectory
 import threading
 
+import pytest
+
 from jupyterlab.labapp import LabApp
 from jupyterlab_server.tests.utils import APITester, LabTestBase
 from notebook.tests.launchnotebook import assert_http_error
@@ -21,6 +23,7 @@ class BuildAPITester(APITester):
         return self._req('DELETE', '')
 
 
+@pytest.mark.slow
 class BuildAPITest(LabTestBase):
     """Test the build web service API"""
     Application = LabApp
