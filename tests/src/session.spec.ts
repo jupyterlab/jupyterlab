@@ -141,7 +141,9 @@ describe('protocol', () => {
       sourceModified: false
     });
     await debugSession.sendRequest('configurationDone', {});
-    void debugSession.execute(code);
+
+    // trigger an execute_request
+    client.kernel.requestExecute({ code });
 
     // TODO: handle events instead
     await sleep(2000);
