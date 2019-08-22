@@ -46,7 +46,7 @@ export interface ILogger {
   clear(): void;
   readonly length: number;
   /**
-   * A signal emitted when the model of the notebook changes.
+   * A signal emitted when the log changes.
    */
   readonly logChanged: ISignal<this, ILoggerChange>;
 }
