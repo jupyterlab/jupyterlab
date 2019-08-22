@@ -63,6 +63,7 @@ import {
 } from './model';
 
 import { InputPlaceholder, OutputPlaceholder } from './placeholder';
+import { toArray, filter, map, IIterator } from '@phosphor/algorithm';
 
 /**
  * The CSS class added to cell widgets.
@@ -150,11 +151,6 @@ const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
  * The timeout to wait for change activity to have ceased before rendering.
  */
 const RENDER_TIMEOUT = 1000;
-
-/**
- * The mime type for attachments
- */
-const ATTACHMENTS_MIME = 'application/vnd.jupyter.attachments;closure=true';
 
 /**
  * Type for attachment thunks.
@@ -1115,7 +1111,12 @@ export class AttachmentsCell extends Cell {
   }
 
   private _evtDragOver(event: IDragEvent) {
-    if (!event.mimeData.getData(ATTACHMENTS_MIME)) {
+    const supportedMimeTypes = toArray(
+      filter(event.mimeData.types(), mimeType =>
+        mimeType.endsWith(';closure=true')
+      )
+    );
+    if (supportedMimeTypes.length === 0) {
       return;
     }
     event.preventDefault();
@@ -1142,7 +1143,12 @@ export class AttachmentsCell extends Cell {
    * Handle the `'p-drop'` event for the widget.
    */
   private _evtDrop(event: IDragEvent): void {
-    if (!event.mimeData.hasData(ATTACHMENTS_MIME)) {
+    const supportedMimeTypes = toArray(
+      filter(event.mimeData.types(), mimeType =>
+        mimeType.endsWith(';closure=true')
+      )
+    );
+    if (supportedMimeTypes.length === 0) {
       return;
     }
     event.preventDefault();
@@ -1152,8 +1158,11 @@ export class AttachmentsCell extends Cell {
       return;
     }
 
-    const thunks: AttachmentThunk[] = event.mimeData.getData(ATTACHMENTS_MIME);
-    const promises = thunks.map(thunk => thunk());
+    const thunks: IIterator<AttachmentThunk> = map(
+      supportedMimeTypes,
+      mimeType => event.mimeData.getData(mimeType)
+    );
+    const promises = toArray(map(thunks, thunk => thunk()));
     void Promise.all(promises).then(models => {
       models.forEach(model => {
         if (model.type === 'file' && model.format === 'base64') {

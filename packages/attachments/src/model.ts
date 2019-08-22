@@ -70,7 +70,7 @@ export interface IAttachmentsModel extends IDisposable {
   /**
    * Remove the attachment whose name is the specified key
    */
-  remove(key: string): void;
+  remove?: (key: string) => void;
 
   /**
    * Clear all of the attachments.

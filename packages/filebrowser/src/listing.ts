@@ -120,11 +120,6 @@ const MODIFIED_ID_CLASS = 'jp-id-modified';
 const CONTENTS_MIME = 'application/x-jupyter-icontents';
 
 /**
- * The mime type for attachments
- */
-const ATTACHMENTS_MIME = 'application/vnd.jupyter.attachments;closure=true';
-
-/**
  * The class name added to drop targets.
  */
 const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
@@ -1221,10 +1216,15 @@ export class DirListing extends Widget {
     // when it's not needed. E.g. just moving files around
     // in a filebrowser
     if (selectedItems.length > 0) {
-      let attachmentThunks = paths.map(path => {
-        return () => services.contents.get(path);
-      });
-      this._drag.mimeData.setData(ATTACHMENTS_MIME, attachmentThunks);
+      for (let i = 0; i < selectedItems.length; i++) {
+        const path = PathExt.join(basePath, selectedItems[i].name);
+        if (selectedItems[i].mimetype) {
+          this._drag.mimeData.setData(
+            `${selectedItems[i].mimetype};closure=true`,
+            () => services.contents.get(path)
+          );
+        }
+      }
     }
 
     if (item && item.type !== 'directory') {
