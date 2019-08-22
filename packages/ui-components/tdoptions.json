@@ -3,10 +3,7 @@
   "mode": "file",
   "target": "es2017",
   "module": "es5",
-  "lib": [
-    "lib.dom.d.ts",
-    "lib.es2017.d.ts"
-  ],
+  "lib": ["lib.dom.d.ts", "lib.es2017.d.ts"],
   "out": "../../docs/api/ui-components",
   "baseUrl": ".",
   "paths": {
