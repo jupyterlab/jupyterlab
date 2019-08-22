@@ -70,7 +70,7 @@
   margin-bottom: 1rem;
 }
 
-.jp-DebuggerVariables-Search {
+.jp-DebuggerVariables-search {
   color: var(--jp-ui-font-color1);
   flex: 0 0 auto;
   display: flex;
@@ -79,7 +79,7 @@
   align-items: center;
 }
 
-.jp-DebuggerVariables-Search > div {
+.jp-DebuggerVariables-search > div {
   padding-left: 8px;
   padding-right: 8px;
   vertical-align: middle;
@@ -87,15 +87,15 @@
   line-height: 23px;
 }
 
-.jp-DebuggerVariables-Search > .jp-SearchInput {
+.jp-DebuggerVariables-search > .jp-DebuggerVariables-input {
   flex: 1 0 auto;
 }
 
-.jp-DebuggerVariables-Search > .jp-SearchScope {
+.jp-DebuggerVariables-search > .jp-DebuggerVariables-scope {
   flex: 0 0 auto;
 }
 
-.jp-DebuggerVariables-Search input {
+.jp-DebuggerVariables-search input {
   min-height: 22px;
   vertical-align: top;
   width: 100%;
@@ -103,7 +103,23 @@
   border: none;
 }
 
-.jp-DebuggerVariables-Search .jp-SearchScope span.label {
+.jp-DebuggerVariables-search .jp-DebuggerVariables-scope span.label {
   padding-left: 10px;
   padding-right: 5px;
+}
+
+.jp-DebuggerVariables ul {
+  position: absolute;
+  list-style: none;
+  left: 0;
+  right: 0;
+  margin: 0;
+  top: 25px;
+  z-index: 10000;
+  padding: 10px 10px;
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  font-size: var(--jp-ui-font-size1);
+  box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
 }

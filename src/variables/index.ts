@@ -3,7 +3,7 @@
 
 import { Panel, Widget, PanelLayout } from '@phosphor/widgets';
 
-import { VariablesBody } from './body';
+import { Body } from './body';
 
 import { Signal, ISignal } from '@phosphor/signaling';
 
@@ -18,7 +18,7 @@ export class Variables extends Panel {
     this.title.label = 'Variables';
 
     const header = new VariablesHeader(this.title.label);
-    this.body = new VariablesBody(this.model);
+    this.body = new Body(this.model);
 
     this.addWidget(header);
     this.addWidget(this.body);
@@ -99,7 +99,10 @@ export namespace Variables {
 
     private _filterVariables(): IVariable[] {
       return this._state.filter(
-        ele => ele.name.indexOf(this._filterState) !== -1
+        ele =>
+          ele.name
+            .toLocaleLowerCase()
+            .indexOf(this._filterState.toLocaleLowerCase()) !== -1
       );
     }
 

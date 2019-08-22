@@ -5,22 +5,20 @@ import { ReactWidget } from '@jupyterlab/apputils';
 
 import { Widget, PanelLayout } from '@phosphor/widgets';
 
-import React, { useState, useRef } from 'react';
-
-import useOutsideClick from './useOutsideClick';
+import React, { useState, useRef, useEffect } from 'react';
 
 import { Variables } from '../index';
 
-export class VariablesSearch extends Widget {
+export class Search extends Widget {
   constructor(model: any) {
     super();
-    this.addClass('jp-DebuggerVariables-Search');
+    this.addClass('jp-DebuggerVariables-search');
 
     const layout = new PanelLayout();
     this.layout = layout;
     this.node.style.overflow = 'visible';
-    this.scope = new VariableScopeSearch();
-    this.search = new VariableSearchInput(model);
+    this.scope = new ScopeSearch();
+    this.search = new SearchInput(model);
 
     layout.addWidget(this.scope);
     layout.addWidget(this.search);
@@ -44,7 +42,7 @@ const SearchComponent = ({ model }: any) => {
   );
 };
 
-class VariableSearchInput extends ReactWidget {
+class SearchInput extends ReactWidget {
   search: string;
   model: Variables.IModel;
   constructor(model: Variables.IModel) {
@@ -52,7 +50,7 @@ class VariableSearchInput extends ReactWidget {
     this.model = model;
     this.search = model.filter;
     this.node.style;
-    this.addClass('jp-SearchInput');
+    this.addClass('jp-DebuggerVariables-input');
   }
 
   render() {
@@ -60,7 +58,36 @@ class VariableSearchInput extends ReactWidget {
   }
 }
 
-const VariablesMenu = ({ config }: any) => {
+class ScopeSearch extends ReactWidget {
+  constructor() {
+    super();
+    this.node.style.overflow = 'visible';
+    this.node.style.width = '100px';
+    this.addClass('jp-DebuggerVariables-scope');
+  }
+
+  render() {
+    return <ScopeMenuComponent />;
+  }
+}
+
+const useOutsideClick = (ref: any, callback: any) => {
+  const handleClickOutside = (e: Event) => {
+    if (ref.current && !ref.current.contains(e.target)) {
+      callback();
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      //unbind
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  });
+};
+
+const ScopeMenuComponent = ({ config }: any) => {
   const [toggleState, setToggle] = useState(false);
   const [scope, setScope] = useState('local');
   const wrapperRef = useRef(null);
@@ -84,22 +111,10 @@ const VariablesMenu = ({ config }: any) => {
   };
 
   const List = (
-    <ul className="jp-MenuComponent">
-      <li onClick={e => changeScope('local')} className="jp-menu-item">
-        local
-      </li>
-      <li
-        className="jp-MenuComponent-item"
-        onClick={e => changeScope('global')}
-      >
-        global
-      </li>
-      <li
-        className="jp-MenuComponent-item"
-        onClick={e => changeScope('built-in')}
-      >
-        built-in
-      </li>
+    <ul>
+      <li onClick={e => changeScope('local')}>local</li>
+      <li onClick={e => changeScope('global')}>global</li>
+      <li onClick={e => changeScope('built-in')}>built-in</li>
     </ul>
   );
 
@@ -111,16 +126,3 @@ const VariablesMenu = ({ config }: any) => {
     </div>
   );
 };
-
-class VariableScopeSearch extends ReactWidget {
-  constructor() {
-    super();
-    this.node.style.overflow = 'visible';
-    this.node.style.width = '100px';
-    this.addClass('jp-SearchScope');
-  }
-
-  render() {
-    return <VariablesMenu />;
-  }
-}
