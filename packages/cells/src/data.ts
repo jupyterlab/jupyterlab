@@ -374,52 +374,15 @@ export namespace CodeCellData {
     loc: ICellData.DataLocation,
     cell?: nbformat.ICodeCell
   ) {
-    let outputs: nbformat.IOutput[] = [];
-
     DatastoreExt.withTransaction(loc.record.datastore, () => {
       CellData.fromJSON(loc, cell);
       DatastoreExt.updateRecord(loc.record, {
         executionCount: cell ? cell.execution_count || null : null,
         type: 'code'
       });
-      outputs = (cell && cell.outputs) || [];
+      let outputs: nbformat.IOutput[] = (cell && cell.outputs) || [];
       OutputAreaData.fromJSON(loc, outputs);
     });
-
-    // We keep `collapsed` and `jupyter.outputs_hidden` metadata in sync, since
-    // they are redundant in nbformat 4.4. See
-    // https://github.com/jupyter/nbformat/issues/137
-    /* DatastoreExt.listenField(
-      { ...this.record, field: 'metadata' },
-      Private.collapseChanged,
-      this
-    );
-
-    // Sync `collapsed` and `jupyter.outputs_hidden` for the first time, giving
-    // preference to `collapsed`.
-    const metadata = DatastoreExt.getField({
-      ...this.record,
-      field: 'metadata'
-    });
-    if (metadata['collapsed']) {
-      let collapsed = metadata['collapsed'];
-      Private.collapseChanged(this.metadata, {
-        type: 'change',
-        key: 'collapsed',
-        oldValue: collapsed,
-        newValue: collapsed
-      });
-    } else if (this.metadata.has('jupyter')) {
-      let jupyter = this.metadata.get('jupyter') as JSONObject;
-      if (jupyter.hasOwnProperty('outputs_hidden')) {
-        Private.collapseChanged(this.metadata, {
-          type: 'change',
-          key: 'jupyter',
-          oldValue: jupyter,
-          newValue: jupyter
-        });
-      }
-    }*/
   }
 
   /**
@@ -436,35 +399,10 @@ export namespace CodeCellData {
   }
 }
 
+/**
+ * A namespace for module-private functionality.
+ */
 namespace Private {
-  /*export function collapseChanged(
-    metadata: IObservableJSON,
-    args: IObservableMap.IChangedArgs<JSONValue>
-  ) {
-    if (args.key === 'collapsed') {
-      const jupyter = (metadata.get('jupyter') || {}) as JSONObject;
-      const { outputs_hidden, ...newJupyter } = jupyter;
-
-      if (outputs_hidden !== args.newValue) {
-        if (args.newValue !== undefined) {
-          newJupyter['outputs_hidden'] = args.newValue;
-        }
-        if (Object.keys(newJupyter).length === 0) {
-          metadata.delete('jupyter');
-        } else {
-          metadata.set('jupyter', newJupyter);
-        }
-      }
-    } else if (args.key === 'jupyter') {
-      const jupyter = (args.newValue || {}) as JSONObject;
-      if (jupyter.hasOwnProperty('outputs_hidden')) {
-        metadata.set('collapsed', jupyter.outputs_hidden);
-      } else {
-        metadata.delete('collapsed');
-      }
-    }
-  }*
-
   /**
    * Serialize the model to JSON.
    *

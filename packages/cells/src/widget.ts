@@ -35,7 +35,8 @@ import { KernelMessage, Kernel } from '@jupyterlab/services';
 import {
   JSONObject,
   PromiseDelegate,
-  ReadonlyJSONObject
+  ReadonlyJSONObject,
+  ReadonlyJSONValue
 } from '@phosphor/coreutils';
 
 import { Datastore, MapField, RegisterField } from '@phosphor/datastore';
@@ -394,8 +395,12 @@ export class Cell extends Widget {
    * Save view collapse state to model
    */
   saveCollapseState() {
-    /*const jupyter = {
-      ...(this.model.metadata['jupyter'] as any)
+    const metadata = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'metadata'
+    });
+    const jupyter = {
+      ...(metadata['jupyter'] as any)
     };
 
     if (
@@ -410,27 +415,31 @@ export class Cell extends Widget {
     } else {
       delete jupyter.source_hidden;
     }
-    DatastoreExt.withTransaction(this.model.record.datastore, () => {
+    DatastoreExt.withTransaction(this.data.record.datastore, () => {
       if (Object.keys(jupyter).length === 0) {
         DatastoreExt.updateField(
-          { ...this.model.record, field: 'metadata' },
+          { ...this.data.record, field: 'metadata' },
           { jupyter: null }
         );
       } else {
         DatastoreExt.updateField(
-          { ...this.model.record, field: 'metadata' },
+          { ...this.data.record, field: 'metadata' },
           { jupyter }
         );
       }
-    });*/
+    });
   }
 
   /**
    * Revert view collapse state from model.
    */
   loadCollapseState() {
-    // const jupyter = (this.model.metadata['jupyter'] as any) || {};
-    // this.inputHidden = !!jupyter.source_hidden;
+    const metadata = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'metadata'
+    });
+    const jupyter = (metadata['jupyter'] as any) || {};
+    this.inputHidden = !!jupyter.source_hidden;
   }
 
   /**
@@ -761,6 +770,9 @@ export class CodeCell extends Cell {
       this.onExecutionCountChanged,
       this
     );
+    // Sync `collapsed` and `jupyter.outputs_hidden` for the first time, giving
+    // preference to `collapsed`.
+    this._syncCollapsed('collapsed');
   }
 
   /**
@@ -833,34 +845,31 @@ export class CodeCell extends Cell {
     // to changes in metadata until we have fully committed our changes.
     // Otherwise setting one key can trigger a write to the other key to
     // maintain the synced consistency.
-    /* this._savingMetadata = true;
+    super.saveCollapseState();
+    const loc: DatastoreExt.FieldLocation<ICellData.Schema, 'metadata'> = {
+      ...this.data.record,
+      field: 'metadata'
+    };
+    const metadata = DatastoreExt.getField(loc);
 
-    try {
-      super.saveCollapseState();
-      const metadataLoc = { ...this.data.record, field: 'metadata' };
-      const metadata = DatastoreExt.getField(metadataLoc);
+    const collapsed = metadata['collapsed'] as boolean | undefined;
 
-      const collapsed: boolean | undefined = metadata['collapsed'];
+    if (
+      (this.outputHidden && collapsed === true) ||
+      (!this.outputHidden && collapsed === undefined)
+    ) {
+      return;
+    }
 
-      if (
-        (this.outputHidden && collapsed === true) ||
-        (!this.outputHidden && collapsed === undefined)
-      ) {
-        return;
+    // Do not set jupyter.outputs_hidden since it is redundant. See
+    // and https://github.com/jupyter/nbformat/issues/137
+    DatastoreExt.withTransaction(this.data.record.datastore, () => {
+      if (this.outputHidden) {
+        DatastoreExt.updateField(loc, { collapsed: true });
+      } else {
+        DatastoreExt.updateField(loc, { collapsed: null });
       }
-
-      // Do not set jupyter.outputs_hidden since it is redundant. See
-      // and https://github.com/jupyter/nbformat/issues/137
-      DatastoreExt.withTransaction(this.data.record.datastore, () => {
-        if (this.outputHidden) {
-          DatastoreExt.updateField(metadataLoc, { collapsed: true });
-        } else {
-          DatastoreExt.updateField(metadataLoc, { collapsed: null });
-        }
-      });
-    } finally {
-      this._savingMetadata = false;
-    } */
+    });
   }
 
   /**
@@ -870,8 +879,12 @@ export class CodeCell extends Cell {
    * being hidden.
    */
   loadCollapseState() {
-    // super.loadCollapseState();
-    // this.outputHidden = !!this.model.metadata['collapsed'];
+    super.loadCollapseState();
+    const metadata = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'metadata'
+    });
+    this.outputHidden = !!metadata['collapsed'];
   }
 
   /**
@@ -892,7 +905,10 @@ export class CodeCell extends Cell {
    * Save view collapse state to model
    */
   saveScrolledState() {
-    /* const { metadata } = this.model;
+    const metadata = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'metadata'
+    });
     const current = metadata['scrolled'];
 
     if (
@@ -901,33 +917,36 @@ export class CodeCell extends Cell {
     ) {
       return;
     }
-    DatastoreExt.withTransaction(this.model.record.datastore, () => {
+    DatastoreExt.withTransaction(this.data.record.datastore, () => {
       if (this.outputsScrolled) {
         DatastoreExt.updateField(
-          { ...this.model.record, field: 'metadata' },
+          { ...this.data.record, field: 'metadata' },
           { scrolled: true }
         );
       } else {
         DatastoreExt.updateField(
-          { ...this.model.record, field: 'metadata' },
+          { ...this.data.record, field: 'metadata' },
           { scrolled: null }
         );
       }
-    }); */
+    });
   }
 
   /**
    * Revert view collapse state from model.
    */
   loadScrolledState() {
-    /* const metadata = this.model.metadata;
+    const metadata = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'metadata'
+    });
 
     // We don't have the notion of 'auto' scrolled, so we make it false.
     if (metadata['scrolled'] === 'auto') {
       this.outputsScrolled = false;
     } else {
       this.outputsScrolled = !!metadata['scrolled'];
-    } */
+    }
   }
 
   /**
@@ -1037,6 +1056,11 @@ export class CodeCell extends Cell {
         this.loadCollapseState();
       }
     }
+    if (args.current['collapsed'] !== undefined) {
+      this._syncCollapsed('collapsed');
+    } else if (args.current['jupyter'] !== undefined) {
+      this._syncCollapsed('outputs_hidden');
+    }
     super.onMetadataChanged(sender, args);
   }
 
@@ -1046,6 +1070,48 @@ export class CodeCell extends Cell {
   private _outputLengthHandler(sender: OutputArea, args: number) {
     let force = args === 0 ? true : false;
     this.toggleClass(NO_OUTPUTS_CLASS, force);
+  }
+
+  /**
+   * Ensure that the `outputs_hidden` and `collapsed` state of a code cell
+   * remain consistent, since they are redundant in nbformat 4.4. See
+   * https://github.com/jupyter/nbformat/issues/137
+   */
+  private _syncCollapsed(preference: 'collapsed' | 'outputs_hidden') {
+    const metadata = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'metadata'
+    });
+    const collapsed = metadata['collapsed'] as boolean | undefined;
+    const jupyter = (metadata['jupyter'] || {}) as JSONObject;
+    const { outputs_hidden, ...newJupyter } = jupyter;
+
+    if (outputs_hidden === collapsed) {
+      return;
+    }
+    let update: MapField.Update<ReadonlyJSONValue>;
+    if (preference === 'collapsed') {
+      if (collapsed !== undefined) {
+        newJupyter['outputs_hidden'] = collapsed;
+      }
+      if (Object.keys(newJupyter).length === 0) {
+        update = { jupyter: null };
+      } else {
+        update = { jupyter: newJupyter };
+      }
+    } else {
+      if (jupyter.hasOwnProperty('outputs_hidden')) {
+        update = { collapsed: jupyter.outputs_hidden };
+      } else {
+        update = { collapsed: null };
+      }
+    }
+    DatastoreExt.withTransaction(this.data.record.datastore, () => {
+      DatastoreExt.updateField(
+        { ...this.data.record, field: 'metadata' },
+        update
+      );
+    });
   }
 
   private _executionCountListener: IDisposable;
