@@ -97,9 +97,12 @@ export class NotebookModel implements INotebookModel {
       this._ensureMetadata();
     });
 
+    // Get a content factory that will create new content in the notebook
+    // data location.
     this.contentFactory = factory.clone(this.data);
-    // Handle initial metadata.
 
+    // Trigger a content change when appropriate.
+    this._store.changed.connect(this._onGenericChange, this);
     this._deletedCells = [];
   }
 
@@ -210,6 +213,7 @@ export class NotebookModel implements INotebookModel {
    */
   fromString(value: string): void {
     this.fromJSON(JSON.parse(value));
+    this._contentChanged.emit();
   }
 
   /**
@@ -360,6 +364,51 @@ export class NotebookModel implements INotebookModel {
         metadata
       );
     });
+  }
+
+  private _onGenericChange(
+    sender: Datastore,
+    args: Datastore.IChangedArgs
+  ): void {
+    const change = args.change;
+    // Grab the changes for the schemas we are interested in.
+    const recordChange = change[this.data.record.schema.id];
+    const cellChange = change[this.data.cells.schema.id];
+    const outputChange = change[this.data.outputs.schema.id];
+    // If there was a change to any of the top-level items, emit a
+    // contentChanged signal.
+    if (recordChange) {
+      this._contentChanged.emit();
+      return;
+    }
+    // If there were any changes to the outputs, emit a contentChanged signal.
+    // TODO: maybe filter for outputs that are definitely in a current cell.
+    if (outputChange) {
+      this._contentChanged.emit();
+      return;
+    }
+
+    // Check the cells for changes, ignoring cursors and mimetype.
+    const cells = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'cells'
+    });
+    // Check the cell changes to see if some should be considered content.
+    if (
+      Object.keys(cellChange).some(cell => {
+        return (
+          // Only count cells that are currently in the notebook.
+          cells.indexOf(cell) !== -1 &&
+          Object.keys(cellChange[cell]).some(field => {
+            // Only count fields that are content fields.
+            return Private.CELL_CONTENT_FIELDS.indexOf(field) !== -1;
+          })
+        );
+      })
+    ) {
+      this._contentChanged.emit();
+      return;
+    }
   }
 
   private _deletedCells: string[];
@@ -589,4 +638,17 @@ export namespace NotebookModel {
    * The default `ContentFactory` instance.
    */
   export const defaultContentFactory = new ContentFactory({});
+}
+
+/**
+ * A namespace for module private functionality.
+ */
+namespace Private {
+  /**
+   * Cell fields for which changes should be considered changes
+   * to the notebook content.
+   */
+  export const CELL_CONTENT_FIELDS = Object.keys(CellData.SCHEMA).filter(
+    key => key !== 'mimeType' && key !== 'selections'
+  );
 }

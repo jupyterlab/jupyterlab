@@ -19,6 +19,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../datastore"
+    },
+    {
       "path": "../rendermime"
     },
     {
@@ -26,9 +29,6 @@
     },
     {
       "path": "../services"
-    },
-    {
-      "path": "../datastore"
     }
   ]
 }
