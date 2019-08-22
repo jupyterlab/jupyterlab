@@ -648,7 +648,7 @@ namespace Private {
    * Cell fields for which changes should be considered changes
    * to the notebook content.
    */
-  export const CELL_CONTENT_FIELDS = Object.keys(CellData.SCHEMA).filter(
+  export const CELL_CONTENT_FIELDS = Object.keys(CellData.SCHEMA.fields).filter(
     key => key !== 'mimeType' && key !== 'selections'
   );
 }
