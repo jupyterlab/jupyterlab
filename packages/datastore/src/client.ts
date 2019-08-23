@@ -158,9 +158,6 @@ export class CollaborationClient extends WSConnection<
     if (token) {
       queryParams.push(`token=${encodeURIComponent(token)}`);
     }
-    // queryParams.push(
-    //   `storeId=${encodeURIComponent(this._storeId.toString(10))}`
-    // );
     if (queryParams) {
       wsUrl = wsUrl + `?${queryParams.join('&')}`;
     }
