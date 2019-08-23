@@ -118,7 +118,7 @@ class LabCleanApp(JupyterApp):
     app_dir = Unicode('', config=True, help='The app directory to clean')
 
     def start(self):
-        clean(options=dict(self.app_dir, logger=self.log))
+        clean(options=dict(app_dir=self.app_dir, logger=self.log))
 
 
 class LabPathApp(JupyterApp):
