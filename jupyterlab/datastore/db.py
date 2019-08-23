@@ -1,6 +1,5 @@
 
 import collections
-from itertools import chain
 import json
 import sqlite3
 import re
@@ -48,7 +47,6 @@ class DatastoreDB:
         # first, validate table name
         validate_table_name(table_name)
         self._table_name = table_name
-        self._transactions = []
         self._conn = sqlite3.connect(
             db_file or ':memory:',
             detect_types=sqlite3.PARSE_DECLTYPES

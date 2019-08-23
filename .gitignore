@@ -35,6 +35,7 @@ __pycache__
 *.swp
 *.map
 .idea/
+.mypy_cache
 
 coverage/
 tests/**/coverage

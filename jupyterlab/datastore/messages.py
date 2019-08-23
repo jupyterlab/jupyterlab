@@ -1,15 +1,6 @@
 
 import uuid
 
-def create_storeid_reply(parent_id, store_id):
-    return dict(
-        msgId=str(uuid.uuid4()),
-        msgType='storeid-reply',
-        parentId=parent_id,
-        content=dict(
-            storeId=store_id
-        )
-    )
 
 def create_transactions_ack(parent_id, transactions, serials):
     return dict(

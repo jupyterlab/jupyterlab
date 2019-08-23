@@ -34,7 +34,7 @@ SEMVER_SPEC_VERSION = '2.0.0'
 
 # Python 2/3 compatibility
 try:
-  string_type = basestring
+  string_type = basestring # type: ignore
 except NameError:
   string_type = str
 
