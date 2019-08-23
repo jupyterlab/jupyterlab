@@ -1631,6 +1631,8 @@ function addCommands(
         mode: 'split-bottom'
       });
 
+      // TODO: this needs some fixing as the model for how cells move
+      // has changed.
       const updateCloned = () => {
         void clonedOutputs.save(widget);
       };
