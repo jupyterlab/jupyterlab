@@ -264,10 +264,9 @@ export class RestorablePool<
         }
 
         // Execute the command and if it fails, delete the state restore data.
-        return registry.execute(command, args).catch(err => {
-          connector.remove(id);
-          console.log(err);
-        });
+        return registry
+          .execute(command, args)
+          .catch(() => connector.remove(id));
       })
     );
     this._restored.resolve();

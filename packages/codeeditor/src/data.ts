@@ -102,12 +102,3 @@ export namespace CodeEditorData {
     });
   }
 }
-
-/**
- * The namespace for `AttachmentsCellData` statics.
- */
-export namespace AttachmentsCellData {
-  /**
-   * Construct a new cell with optional attachments.
-   */
-}

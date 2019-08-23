@@ -157,6 +157,7 @@ function activateTsv(
 ): void {
   const factory = new TSVViewerFactory({
     name: FACTORY_TSV,
+    modelName: 'string',
     fileTypes: ['tsv'],
     defaultFor: ['tsv'],
     readOnly: true
