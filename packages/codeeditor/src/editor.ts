@@ -302,7 +302,6 @@ export namespace CodeEditor {
         this._datastore = null;
       }
       this._isDisposed = true;
-      this.record.datastore.dispose();
       Signal.clearData(this);
     }
 
