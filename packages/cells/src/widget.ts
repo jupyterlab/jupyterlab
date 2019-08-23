@@ -30,7 +30,8 @@ import {
 import {
   IRenderMime,
   MimeModel,
-  IRenderMimeRegistry
+  IRenderMimeRegistry,
+  imageRendererFactory
 } from '@jupyterlab/rendermime';
 
 import { KernelMessage, Kernel, Contents } from '@jupyterlab/services';
@@ -63,7 +64,7 @@ import {
 } from './model';
 
 import { InputPlaceholder, OutputPlaceholder } from './placeholder';
-import { toArray, filter, map, IIterator } from '@phosphor/algorithm';
+import { toArray, filter, map, IIterator, find } from '@phosphor/algorithm';
 
 /**
  * The CSS class added to cell widgets.
@@ -1111,12 +1112,10 @@ export class AttachmentsCell extends Cell {
   }
 
   private _evtDragOver(event: IDragEvent) {
-    const supportedMimeTypes = toArray(
-      filter(event.mimeData.types(), mimeType =>
-        mimeType.endsWith(';closure=true')
-      )
+    const supportedMimeType = find(imageRendererFactory.mimeTypes, mimeType =>
+      event.mimeData.hasData(`${mimeType};closure=true`)
     );
-    if (supportedMimeTypes.length === 0) {
+    if (!supportedMimeType) {
       return;
     }
     event.preventDefault();
@@ -1144,9 +1143,13 @@ export class AttachmentsCell extends Cell {
    */
   private _evtDrop(event: IDragEvent): void {
     const supportedMimeTypes = toArray(
-      filter(event.mimeData.types(), mimeType =>
-        mimeType.endsWith(';closure=true')
-      )
+      filter(event.mimeData.types(), mimeType => {
+        const parsedMimeType = /(.*);closure=true/.exec(mimeType);
+        return (
+          parsedMimeType !== null &&
+          imageRendererFactory.mimeTypes.indexOf(parsedMimeType[1]) !== -1
+        );
+      })
     );
     if (supportedMimeTypes.length === 0) {
       return;

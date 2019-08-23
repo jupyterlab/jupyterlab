@@ -18,8 +18,6 @@ import {
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { imageRendererFactory } from '@jupyterlab/rendermime';
-
 import { Contents } from '@jupyterlab/services';
 
 import { IIconRegistry } from '@jupyterlab/ui-components';
@@ -1204,10 +1202,7 @@ export class DirListing extends Widget {
     Object.keys(this._selection).forEach(itemname => {
       if (this._selection[itemname]) {
         const item = find(items, item => item.name === itemname);
-        if (
-          item.type === 'file' &&
-          imageRendererFactory.mimeTypes.indexOf(item.mimetype) !== -1
-        ) {
+        if (item.mimetype !== null) {
           selectedItems.push(item);
         }
       }
@@ -1216,14 +1211,11 @@ export class DirListing extends Widget {
     // when it's not needed. E.g. just moving files around
     // in a filebrowser
     if (selectedItems.length > 0) {
-      for (let i = 0; i < selectedItems.length; i++) {
-        const path = PathExt.join(basePath, selectedItems[i].name);
-        if (selectedItems[i].mimetype) {
-          this._drag.mimeData.setData(
-            `${selectedItems[i].mimetype};closure=true`,
-            () => services.contents.get(path)
-          );
-        }
+      for (let item of selectedItems) {
+        const path = PathExt.join(basePath, item.name);
+        this._drag.mimeData.setData(`${item.mimetype};closure=true`, () =>
+          services.contents.get(path)
+        );
       }
     }
 
