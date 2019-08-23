@@ -41,6 +41,7 @@
     "@jupyterlab/cells": "^1.0.1",
     "@jupyterlab/codeeditor": "^1.0.0",
     "@jupyterlab/coreutils": "^3.0.0",
+    "@jupyterlab/datastore": "^1.0.0",
     "@jupyterlab/docmanager": "^1.0.1",
     "@jupyterlab/filebrowser": "^1.0.1",
     "@jupyterlab/launcher": "^1.0.1",
