@@ -28,6 +28,8 @@ import {
   URLExt
 } from '@jupyterlab/coreutils';
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { ArrayExt } from '@phosphor/algorithm';
@@ -942,7 +944,7 @@ function addCommands(
     },
     isEnabled
   });
-  /*commands.addCommand(CommandIDs.runInConsole, {
+  commands.addCommand(CommandIDs.runInConsole, {
     label: 'Run Selected Text or Current Line in Console',
     execute: async args => {
       // Default to not activating the notebook (thereby putting the notebook
@@ -956,10 +958,13 @@ function addCommands(
       const { context, content } = current;
 
       let cell = content.activeCell;
-      let metadata = cell.model.metadata;
+      let metadata = DatastoreExt.getField({
+        ...cell.data.record,
+        field: 'metadata'
+      });
       let path = context.path;
       // ignore action in non-code cell
-      if (!cell || cell.model.type !== 'code') {
+      if (!cell || cell.type !== 'code') {
         return;
       }
 
@@ -1058,7 +1063,7 @@ function addCommands(
       });
     },
     isEnabled
-  });*/
+  });
   commands.addCommand(CommandIDs.runAll, {
     label: 'Run All Cells',
     execute: args => {
@@ -1630,7 +1635,10 @@ function addCommands(
         void clonedOutputs.save(widget);
       };
       current.context.pathChanged.connect(updateCloned);
-      // current.content.model.cells.changed.connect(updateCloned);
+      const cloneListener = DatastoreExt.listenField(
+        { ...current.content.model.data.record, field: 'cells' },
+        updateCloned
+      );
 
       // Add the cloned output to the output widget tracker.
       void clonedOutputs.add(widget);
@@ -1638,7 +1646,7 @@ function addCommands(
       // Remove the output view if the parent notebook is closed.
       current.content.disposed.connect(() => {
         current.context.pathChanged.disconnect(updateCloned);
-        // current.content.model.cells.changed.disconnect(updateCloned);
+        cloneListener.dispose();
         widget.dispose();
       });
     },
