@@ -28,6 +28,8 @@ import {
   URLExt
 } from '@jupyterlab/coreutils';
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { ArrayExt } from '@phosphor/algorithm';
@@ -956,10 +958,13 @@ function addCommands(
       const { context, content } = current;
 
       let cell = content.activeCell;
-      let metadata = cell.model.metadata.toJSON();
+      let metadata = DatastoreExt.getField({
+        ...cell.data.record,
+        field: 'metadata'
+      });
       let path = context.path;
       // ignore action in non-code cell
-      if (!cell || cell.model.type !== 'code') {
+      if (!cell || cell.type !== 'code') {
         return;
       }
 
@@ -1193,7 +1198,7 @@ function addCommands(
       const { context } = current;
 
       child.opener = null;
-      if (context.model.dirty && !context.model.readOnly) {
+      if (context.dirty && !context.readOnly) {
         return context.save().then(() => {
           child.location.assign(url);
         });
@@ -1626,11 +1631,16 @@ function addCommands(
         mode: 'split-bottom'
       });
 
+      // TODO: this needs some fixing as the model for how cells move
+      // has changed.
       const updateCloned = () => {
         void clonedOutputs.save(widget);
       };
       current.context.pathChanged.connect(updateCloned);
-      current.content.model.cells.changed.connect(updateCloned);
+      const cloneListener = DatastoreExt.listenField(
+        { ...current.content.model.data.record, field: 'cells' },
+        updateCloned
+      );
 
       // Add the cloned output to the output widget tracker.
       void clonedOutputs.add(widget);
@@ -1638,7 +1648,7 @@ function addCommands(
       // Remove the output view if the parent notebook is closed.
       current.content.disposed.connect(() => {
         current.context.pathChanged.disconnect(updateCloned);
-        current.content.model.cells.changed.disconnect(updateCloned);
+        cloneListener.dispose();
         widget.dispose();
       });
     },
@@ -2238,7 +2248,7 @@ namespace Private {
         if (!this._cell) {
           this._cell = this._notebook.content.widgets[this._index] as CodeCell;
         }
-        if (!this._cell || this._cell.model.type !== 'code') {
+        if (!this._cell || this._cell.type !== 'code') {
           this.dispose();
           return;
         }

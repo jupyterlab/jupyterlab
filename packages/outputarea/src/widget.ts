@@ -1,31 +1,38 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IClientSession } from '@jupyterlab/apputils';
+
+import { nbformat } from '@jupyterlab/coreutils';
+
+import { DatastoreExt } from '@jupyterlab/datastore';
+
+import {
+  IOutputData,
+  IRenderMimeRegistry,
+  OutputData,
+  OutputModel
+} from '@jupyterlab/rendermime';
+
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
+import { Kernel, KernelMessage } from '@jupyterlab/services';
+
 import {
   JSONObject,
   PromiseDelegate,
   ReadonlyJSONObject
 } from '@phosphor/coreutils';
 
+import { Datastore, ListField } from '@phosphor/datastore';
+
 import { Message } from '@phosphor/messaging';
 
 import { Signal } from '@phosphor/signaling';
 
-import { Panel, PanelLayout } from '@phosphor/widgets';
+import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
 
-import { Widget } from '@phosphor/widgets';
-
-import { IClientSession } from '@jupyterlab/apputils';
-
-import { nbformat } from '@jupyterlab/coreutils';
-
-import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
-import { Kernel, KernelMessage } from '@jupyterlab/services';
-
-import { IOutputAreaModel } from './model';
+import { IOutputAreaData, OutputAreaData } from './data';
 
 /**
  * The class name added to an output area widget.
@@ -83,12 +90,6 @@ const STDIN_INPUT_CLASS = 'jp-Stdin-input';
 
 /**
  * An output area widget.
- *
- * #### Notes
- * The widget model must be set separately and can be changed
- * at any time.  Consumers of the widget must account for a
- * `null` model, and may want to listen to the `modelChanged`
- * signal.
  */
 export class OutputArea extends Widget {
   /**
@@ -96,24 +97,40 @@ export class OutputArea extends Widget {
    */
   constructor(options: OutputArea.IOptions) {
     super();
-    let model = (this.model = options.model);
+    let data: IOutputAreaData.DataLocation;
+    if (options.data) {
+      data = this.data = options.data;
+    } else {
+      const datastore = (this._datastore = OutputAreaData.createStore());
+      data = this.data = {
+        record: {
+          datastore,
+          schema: OutputAreaData.SCHEMA,
+          record: 'data'
+        },
+        outputs: {
+          datastore,
+          schema: OutputData.SCHEMA
+        }
+      };
+    }
     this.addClass(OUTPUT_AREA_CLASS);
     this.rendermime = options.rendermime;
     this.contentFactory =
       options.contentFactory || OutputArea.defaultContentFactory;
     this.layout = new PanelLayout();
-    for (let i = 0; i < model.length; i++) {
-      let output = model.get(i);
-      this._insertOutput(i, output);
+    const list = DatastoreExt.getField({ ...data.record, field: 'outputs' });
+    for (let i = 0; i < list.length; i++) {
+      this._insertOutput(i, { ...data.outputs, record: list[i] });
     }
-    model.changed.connect(this.onModelChanged, this);
-    model.stateChanged.connect(this.onStateChanged, this);
+
+    data.record.datastore.changed.connect(this.onChange, this);
   }
 
   /**
-   * The model used by the widget.
+   * The data rendered by the widget.
    */
-  readonly model: IOutputAreaModel;
+  readonly data: IOutputAreaData.DataLocation;
 
   /**
    * The content factory used by the widget.
@@ -157,10 +174,6 @@ export class OutputArea extends Widget {
       KernelMessage.IExecuteReplyMsg
     > | null
   ) {
-    // Bail if the model is disposed.
-    if (this.model.isDisposed) {
-      throw Error('Model is disposed');
-    }
     if (this._future === value) {
       return;
     }
@@ -169,12 +182,12 @@ export class OutputArea extends Widget {
     }
     this._future = value;
 
-    this.model.clear();
+    OutputAreaData.clear(this.data);
 
     // Make sure there were no input widgets.
     if (this.widgets.length) {
       this._clear();
-      this.outputLengthChanged.emit(this.model.length);
+      this.outputLengthChanged.emit(0);
     }
 
     // Handle published messages.
@@ -195,50 +208,76 @@ export class OutputArea extends Widget {
    * Dispose of the resources used by the output area.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    if (this._datastore) {
+      this._datastore.dispose();
+      this._datastore = null;
+    }
+
     if (this._future) {
       this._future.dispose();
     }
     this._future = null;
     this._displayIdMap.clear();
+    Signal.clearData(this);
     super.dispose();
   }
-
   /**
-   * Follow changes on the model state.
+   * Follow changes to the datastore.
    */
-  protected onModelChanged(
-    sender: IOutputAreaModel,
-    args: IOutputAreaModel.ChangedArgs
-  ): void {
-    switch (args.type) {
-      case 'add':
-        this._insertOutput(args.newIndex, args.newValues[0]);
-        this.outputLengthChanged.emit(this.model.length);
-        break;
-      case 'remove':
-        // Only clear is supported by the model.
-        if (this.widgets.length) {
-          this._clear();
-          this.outputLengthChanged.emit(this.model.length);
+  protected onChange(sender: Datastore, args: Datastore.IChangedArgs) {
+    // Keep track of the items that have been rendered.
+    const handled = new Set<string>();
+
+    // First, handle list removals and inserts.
+    const { schema, record } = this.data.record;
+    const listChange =
+      args.change[schema.id] &&
+      args.change[schema.id][record] &&
+      (args.change[schema.id][record]['outputs'] as ListField.Change<string>);
+    if (listChange) {
+      listChange.forEach(change => {
+        // Remove any disposed values
+        for (let i = 0; i < change.removed.length; i++) {
+          this.widgets[change.index].dispose();
         }
-        break;
-      case 'set':
-        this._setOutput(args.newIndex, args.newValues[0]);
-        this.outputLengthChanged.emit(this.model.length);
-        break;
-      default:
-        break;
+        // Insert new values
+        for (let i = 0; i < change.inserted.length; i++) {
+          const id = change.inserted[i];
+          const record = {
+            ...this.data.outputs,
+            record: id
+          };
+          this._insertOutput(change.index + i, record);
+          // Mark this item as having been rendered.
+          handled.add(id);
+        }
+      });
     }
-  }
-
-  /**
-   * Follow changes on the output model state.
-   */
-  protected onStateChanged(sender: IOutputAreaModel): void {
-    for (let i = 0; i < this.model.length; i++) {
-      this._setOutput(i, this.model.get(i));
+    // Check for changes to individual outputs.
+    const outputChanges = args.change[this.data.outputs.schema.id];
+    if (!outputChanges) {
+      return;
     }
-    this.outputLengthChanged.emit(this.model.length);
+    const outputs = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'outputs'
+    });
+    Object.keys(outputChanges).forEach(output => {
+      const index = outputs.indexOf(output);
+      // If this output belongs to us, and we have not rerendered it already,
+      // then rerender it in-place. This can happen when an output is updated
+      // or a stream is consolidated.
+      if (index !== -1 && !handled.has(output)) {
+        const record = {
+          ...this.data.outputs,
+          record: output
+        };
+        this._setOutput(index, record);
+      }
+    });
   }
 
   /**
@@ -312,7 +351,7 @@ export class OutputArea extends Widget {
      */
     void input.value.then(value => {
       // Use stdin as the stream so it does not get combined with stdout.
-      this.model.add({
+      this._appendItem({
         output_type: 'stream',
         name: 'stdin',
         text: value + '\n'
@@ -324,27 +363,39 @@ export class OutputArea extends Widget {
   /**
    * Update an output in the layout in place.
    */
-  private _setOutput(index: number, model: IOutputModel): void {
+  private _setOutput(
+    index: number,
+    loc: DatastoreExt.RecordLocation<IOutputData.Schema>
+  ): void {
     let layout = this.layout as PanelLayout;
     let panel = layout.widgets[index] as Panel;
     let renderer = (panel.widgets
       ? panel.widgets[1]
       : panel) as IRenderMime.IRenderer;
     if (renderer.renderModel) {
+      // Create a temporary output model view to pass of to the renderer.
+      let model = new OutputModel({ record: loc });
       void renderer.renderModel(model);
     } else {
       layout.widgets[index].dispose();
-      this._insertOutput(index, model);
+      this._insertOutput(index, loc);
     }
   }
 
   /**
    * Render and insert a single output into the layout.
    */
-  private _insertOutput(index: number, model: IOutputModel): void {
-    let output = this.createOutputItem(model);
+  private _insertOutput(
+    index: number,
+    loc: DatastoreExt.RecordLocation<IOutputData.Schema>
+  ): void {
+    let output = this.createOutputItem(loc);
+    let executionCount = DatastoreExt.getField({
+      ...loc,
+      field: 'executionCount'
+    });
     if (output) {
-      output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
+      output.toggleClass(EXECUTE_CLASS, executionCount !== null);
     } else {
       output = new Widget();
     }
@@ -355,19 +406,26 @@ export class OutputArea extends Widget {
   /**
    * Create an output item with a prompt and actual output
    */
-  protected createOutputItem(model: IOutputModel): Widget | null {
-    let output = this.createRenderedMimetype(model);
+  protected createOutputItem(
+    loc: DatastoreExt.RecordLocation<IOutputData.Schema>
+  ): Widget | null {
+    let output = this.createRenderedMimetype(loc);
 
     if (!output) {
       return null;
     }
+
+    let executionCount = DatastoreExt.getField({
+      ...loc,
+      field: 'executionCount'
+    });
 
     let panel = new Panel();
 
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
     let prompt = this.contentFactory.createOutputPrompt();
-    prompt.executionCount = model.executionCount;
+    prompt.executionCount = executionCount;
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
@@ -379,7 +437,11 @@ export class OutputArea extends Widget {
   /**
    * Render a mimetype
    */
-  protected createRenderedMimetype(model: IOutputModel): Widget | null {
+  protected createRenderedMimetype(
+    loc: DatastoreExt.RecordLocation<IOutputData.Schema>
+  ): Widget | null {
+    // Create a temporary output model view to pass of to the renderer.
+    let model = new OutputModel({ record: loc });
     let mimeType = this.rendermime.preferredMimeType(
       model.data,
       model.trusted ? 'any' : 'ensure'
@@ -423,7 +485,6 @@ export class OutputArea extends Widget {
    * Handle an iopub message.
    */
   private _onIOPub = (msg: KernelMessage.IIOPubMessage) => {
-    let model = this.model;
     let msgType = msg.header.msg_type;
     let output: nbformat.IOutput;
     let transient = ((msg.content as any).transient || {}) as JSONObject;
@@ -437,11 +498,17 @@ export class OutputArea extends Widget {
       case 'error':
         output = msg.content as nbformat.IOutput;
         output.output_type = msgType as nbformat.OutputType;
-        model.add(output);
+        this._appendItem(output);
         break;
       case 'clear_output':
+        // If a wait signal is recieved, mark the `_clearNext` flag so
+        // we can clear the output area after the next output.
         let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
-        model.clear(wait);
+        if (wait) {
+          this._clearNext = true;
+        } else {
+          OutputAreaData.clear(this.data);
+        }
         break;
       case 'update_display_data':
         output = msg.content as nbformat.IOutput;
@@ -449,7 +516,7 @@ export class OutputArea extends Widget {
         targets = this._displayIdMap.get(displayId);
         if (targets) {
           for (let index of targets) {
-            model.set(index, output);
+            OutputAreaData.setItem(this.data, index, output);
           }
         }
         break;
@@ -457,8 +524,12 @@ export class OutputArea extends Widget {
         break;
     }
     if (displayId && msgType === 'display_data') {
+      let list = DatastoreExt.getField({
+        ...this.data.record,
+        field: 'outputs'
+      });
       targets = this._displayIdMap.get(displayId) || [];
-      targets.push(model.length - 1);
+      targets.push(list.length - 1);
       this._displayIdMap.set(displayId, targets);
     }
   };
@@ -470,7 +541,6 @@ export class OutputArea extends Widget {
     // API responses that contain a pager are special cased and their type
     // is overridden from 'execute_reply' to 'display_data' in order to
     // render output.
-    let model = this.model;
     let content = msg.content;
     if (content.status !== 'ok') {
       return;
@@ -489,8 +559,17 @@ export class OutputArea extends Widget {
       data: (page as any).data as nbformat.IMimeBundle,
       metadata: {}
     };
-    model.add(output);
+    this._appendItem(output);
   };
+
+  private _appendItem(output: nbformat.IOutput): void {
+    if (this._clearNext) {
+      OutputAreaData.clear(this.data);
+      this._clearNext = false;
+      return;
+    }
+    OutputAreaData.appendItem(this.data, output);
+  }
 
   private _minHeightTimeout: number = null;
   private _future: Kernel.IShellFuture<
@@ -498,6 +577,8 @@ export class OutputArea extends Widget {
     KernelMessage.IExecuteReplyMsg
   > | null = null;
   private _displayIdMap = new Map<string, number[]>();
+  private _datastore: Datastore | null = null;
+  private _clearNext = false;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -514,8 +595,10 @@ export class SimplifiedOutputArea extends OutputArea {
   /**
    * Create an output item without a prompt, just the output widgets
    */
-  protected createOutputItem(model: IOutputModel): Widget | null {
-    let output = this.createRenderedMimetype(model);
+  protected createOutputItem(
+    loc: DatastoreExt.RecordLocation<IOutputData.Schema>
+  ): Widget | null {
+    let output = this.createRenderedMimetype(loc);
     if (output) {
       output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     }
@@ -534,7 +617,7 @@ export namespace OutputArea {
     /**
      * The model used by the widget.
      */
-    model: IOutputAreaModel;
+    data?: IOutputAreaData.DataLocation;
 
     /**
      * The content factory used by the widget to create children.

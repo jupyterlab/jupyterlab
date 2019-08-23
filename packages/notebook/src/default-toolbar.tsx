@@ -77,7 +77,7 @@ export namespace ToolbarItems {
    */
   export function createSaveButton(panel: NotebookPanel): Widget {
     function onClick() {
-      if (panel.context.model.readOnly) {
+      if (panel.context.readOnly) {
         return showDialog({
           title: 'Cannot Save',
           body: 'Document is read-only',
@@ -270,11 +270,11 @@ export class CellTypeSwitcher extends ReactWidget {
   render() {
     let value = '-';
     if (this._notebook.activeCell) {
-      value = this._notebook.activeCell.model.type;
+      value = this._notebook.activeCell.type;
     }
     for (let widget of this._notebook.widgets) {
       if (this._notebook.isSelectedOrActive(widget)) {
-        if (widget.model.type !== value) {
+        if (widget.type !== value) {
           value = '-';
           break;
         }

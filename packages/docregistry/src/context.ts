@@ -23,9 +23,7 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
-import { PathExt } from '@jupyterlab/coreutils';
-
-import { IModelDB, ModelDB } from '@jupyterlab/observables';
+import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -51,14 +49,8 @@ export class Context<T extends DocumentRegistry.IModel>
     const localPath = this._manager.contents.localPath(this._path);
     let lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
-    let dbFactory = options.modelDBFactory;
-    if (dbFactory) {
-      const localPath = manager.contents.localPath(this._path);
-      this._modelDB = dbFactory.createNew(localPath);
-      this._model = this._factory.createNew(lang, this._modelDB);
-    } else {
-      this._model = this._factory.createNew(lang);
-    }
+    this._model = this._factory.createNew(lang);
+    this._model.contentChanged.connect(this._onModelContentChanged, this);
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -96,6 +88,42 @@ export class Context<T extends DocumentRegistry.IModel>
     return this._fileChanged;
   }
 
+  /**
+   * A signal emitted when the document state changes.
+   */
+  get stateChanged(): ISignal<this, IChangedArgs<any>> {
+    return this._stateChanged;
+  }
+
+  /**
+   * The dirty state of the document.
+   */
+  get dirty(): boolean {
+    return this._dirty;
+  }
+  set dirty(newValue: boolean) {
+    if (newValue === this._dirty) {
+      return;
+    }
+    let oldValue = this._dirty;
+    this._dirty = newValue;
+    this._stateChanged.emit({ name: 'dirty', oldValue, newValue });
+  }
+
+  /**
+   * The read only state of the document.
+   */
+  get readOnly(): boolean {
+    return this._readOnly;
+  }
+  set readOnly(newValue: boolean) {
+    if (newValue === this._readOnly) {
+      return;
+    }
+    let oldValue = this._readOnly;
+    this._readOnly = newValue;
+    this._stateChanged.emit({ name: 'readOnly', oldValue, newValue });
+  }
   /**
    * A signal emitted on the start and end of a saving operation.
    */
@@ -175,9 +203,6 @@ export class Context<T extends DocumentRegistry.IModel>
     }
     this._isDisposed = true;
     this.session.dispose();
-    if (this._modelDB) {
-      this._modelDB.dispose();
-    }
     this._model.dispose();
     this._disposed.emit(void 0);
     Signal.clearData(this);
@@ -211,22 +236,10 @@ export class Context<T extends DocumentRegistry.IModel>
    */
   initialize(isNew: boolean): Promise<void> {
     if (isNew) {
-      this._model.initialize();
       return this._save();
     }
-    if (this._modelDB) {
-      return this._modelDB.connected.then(() => {
-        if (this._modelDB.isPrepopulated) {
-          this._model.initialize();
-          void this._save();
-          return void 0;
-        } else {
-          return this._revert(true);
-        }
-      });
-    } else {
-      return this._revert(true);
-    }
+    // TODO how to handle prepopulated collaborative sessions?
+    return this._revert(true);
   }
 
   /**
@@ -409,6 +422,13 @@ export class Context<T extends DocumentRegistry.IModel>
   }
 
   /**
+   * Handle a change in the model content.
+   */
+  private _onModelContentChanged(): void {
+    this.dirty = true;
+  }
+
+  /**
    * Update our contents model, without the content.
    */
   private _updateContentsModel(model: Contents.IModel): void {
@@ -482,17 +502,15 @@ export class Context<T extends DocumentRegistry.IModel>
 
     return this._manager.ready
       .then(() => {
-        if (!model.modelDB.isCollaborative) {
-          return this._maybeSave(options);
-        }
-        return this._manager.contents.save(this._path, options);
+        // TODO think about how saving works in collaborative environments.
+        return this._maybeSave(options);
       })
       .then(value => {
         if (this.isDisposed) {
           return;
         }
 
-        model.dirty = false;
+        this.dirty = false;
         this._updateContentsModel(value);
 
         if (!this._isPopulated) {
@@ -553,9 +571,7 @@ export class Context<T extends DocumentRegistry.IModel>
         let dirty = false;
         if (contents.format === 'json') {
           model.fromJSON(contents.content);
-          if (initializeModel) {
-            model.initialize();
-          }
+          // TODO figure out model initialization
         } else {
           let content = contents.content;
           // Convert line endings if necessary, marking the file
@@ -567,12 +583,9 @@ export class Context<T extends DocumentRegistry.IModel>
             this._useCRLF = false;
           }
           model.fromString(content);
-          if (initializeModel) {
-            model.initialize();
-          }
         }
         this._updateContentsModel(contents);
-        model.dirty = dirty;
+        this.dirty = dirty;
         if (!this._isPopulated) {
           return this._populate();
         }
@@ -764,7 +777,6 @@ export class Context<T extends DocumentRegistry.IModel>
     options?: DocumentRegistry.IOpenOptions
   ) => void;
   private _model: T;
-  private _modelDB: IModelDB;
   private _path = '';
   private _useCRLF = false;
   private _factory: DocumentRegistry.IModelFactory<T>;
@@ -776,8 +788,11 @@ export class Context<T extends DocumentRegistry.IModel>
   private _isDisposed = false;
   private _pathChanged = new Signal<this, string>(this);
   private _fileChanged = new Signal<this, Contents.IModel>(this);
+  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
   private _disposed = new Signal<this, void>(this);
+  private _dirty = false;
+  private _readOnly = false;
 }
 
 /**
@@ -807,11 +822,6 @@ export namespace Context {
      * The kernel preference associated with the context.
      */
     kernelPreference?: IClientSession.IKernelPreference;
-
-    /**
-     * An IModelDB factory method which may be used for the document.
-     */
-    modelDBFactory?: ModelDB.IFactory;
 
     /**
      * An optional callback for opening sibling widgets.

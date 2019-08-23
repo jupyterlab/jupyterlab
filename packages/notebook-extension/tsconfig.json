@@ -22,6 +22,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../datastore"
+    },
+    {
       "path": "../docmanager"
     },
     {

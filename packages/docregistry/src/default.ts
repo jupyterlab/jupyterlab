@@ -1,82 +1,69 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { MainAreaWidget } from '@jupyterlab/apputils';
+
+import {
+  CodeEditor,
+  CodeEditorData,
+  ICodeEditorData
+} from '@jupyterlab/codeeditor';
+
 import { Mode } from '@jupyterlab/codemirror';
+
+import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
+
+import { DatastoreExt } from '@jupyterlab/datastore';
 
 import { Contents } from '@jupyterlab/services';
 
 import { JSONValue } from '@phosphor/coreutils';
 
+import { IDisposable } from '@phosphor/disposable';
+
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
 
-import { MainAreaWidget } from '@jupyterlab/apputils';
-
-import { CodeEditor } from '@jupyterlab/codeeditor';
-
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-
-import { IModelDB } from '@jupyterlab/observables';
-
 import { DocumentRegistry, IDocumentWidget } from './index';
 
 /**
- * The default implementation of a document model.
+ * The default implementation of a text document model.
  */
-export class DocumentModel extends CodeEditor.Model
+export class TextDocumentModel extends CodeEditor.Model
   implements DocumentRegistry.ICodeModel {
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string, modelDB?: IModelDB) {
-    super({ modelDB });
-    this._defaultLang = languagePreference || '';
-    this.datastore.changed.connect(this.triggerContentChange, this);
+  constructor(options: TextDocumentModel.IOptions = {}) {
+    super({
+      record: {
+        datastore: CodeEditorData.createStore(),
+        schema: CodeEditorData.SCHEMA,
+        record: 'data'
+      }
+    });
+    this._defaultLang = options.languagePreference || '';
+    // We don't want to trigger a content change for text selection changes,
+    // only actual content changes to the data owned by the document
+    this._listener = DatastoreExt.listenField(
+      { ...this.record, field: 'text' },
+      this.triggerContentChange,
+      this
+    );
+    this.ready = Promise.resolve(undefined);
   }
+
+  /**
+   * Whether the model is ready for collaboration.
+   */
+  readonly ready: Promise<void>;
 
   /**
    * A signal emitted when the document content changes.
    */
   get contentChanged(): ISignal<this, void> {
     return this._contentChanged;
-  }
-
-  /**
-   * A signal emitted when the document state changes.
-   */
-  get stateChanged(): ISignal<this, IChangedArgs<any>> {
-    return this._stateChanged;
-  }
-
-  /**
-   * The dirty state of the document.
-   */
-  get dirty(): boolean {
-    return this._dirty;
-  }
-  set dirty(newValue: boolean) {
-    if (newValue === this._dirty) {
-      return;
-    }
-    let oldValue = this._dirty;
-    this._dirty = newValue;
-    this.triggerStateChange({ name: 'dirty', oldValue, newValue });
-  }
-
-  /**
-   * The read only state of the document.
-   */
-  get readOnly(): boolean {
-    return this._readOnly;
-  }
-  set readOnly(newValue: boolean) {
-    if (newValue === this._readOnly) {
-      return;
-    }
-    let oldValue = this._readOnly;
-    this._readOnly = newValue;
-    this.triggerStateChange({ name: 'readOnly', oldValue, newValue });
   }
 
   /**
@@ -134,17 +121,16 @@ export class DocumentModel extends CodeEditor.Model
   }
 
   /**
-   * Initialize the model with its current state.
+   * Dispose of resources held by the document model.
    */
-  initialize(): void {
-    return;
-  }
-
-  /**
-   * Trigger a state change signal.
-   */
-  protected triggerStateChange(args: IChangedArgs<any>): void {
-    this._stateChanged.emit(args);
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    if (this._listener) {
+      this._listener.dispose();
+    }
+    super.dispose();
   }
 
   /**
@@ -152,14 +138,118 @@ export class DocumentModel extends CodeEditor.Model
    */
   protected triggerContentChange(): void {
     this._contentChanged.emit(void 0);
-    this.dirty = true;
   }
 
-  private _defaultLang = '';
-  private _dirty = false;
-  private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
-  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
+  private _listener: IDisposable | null = null;
+  private _defaultLang = '';
+}
+
+/**
+ * A namespace for TextDocumentModel statics.
+ */
+export namespace TextDocumentModel {
+  /**
+   * Options for creating a new TextDocumentModel.
+   */
+  export interface IOptions {
+    /**
+     * A record in a datastore in which to hold the data.
+     */
+    record?: DatastoreExt.RecordLocation<ICodeEditorData.Schema>;
+
+    /**
+     * The preferred kernel language for the document.
+     */
+    languagePreference?: string;
+  }
+}
+
+/**
+ * An implementation of a string document model. Unlike the text document model,
+ * it is not intended to be collaborative, so it has a lighter memory footprint.
+ * It is intended to be used for large, static text data, such as CSVs.
+ */
+export class StringDocumentModel implements DocumentRegistry.IModel {
+  /**
+   * A signal emitted when the document content changes.
+   */
+  get contentChanged(): ISignal<this, void> {
+    return this._contentChanged;
+  }
+
+  /**
+   * The default kernel name of the document.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  readonly defaultKernelName = '';
+
+  /**
+   * The default kernel language of the document.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  readonly defaultKernelLanguage = '';
+
+  /**
+   * Serialize the model to a string.
+   */
+  toString(): string {
+    return this._value;
+  }
+
+  /**
+   * Deserialize the model from a string.
+   *
+   * #### Notes
+   * Should emit a [contentChanged] signal.
+   */
+  fromString(value: string): void {
+    this._value = value;
+    this._contentChanged.emit();
+  }
+
+  /**
+   * Serialize the model to JSON.
+   */
+  toJSON(): JSONValue {
+    return JSON.parse(this._value || 'null');
+  }
+
+  /**
+   * Deserialize the model from JSON.
+   *
+   * #### Notes
+   * Should emit a [contentChanged] signal.
+   */
+  fromJSON(value: JSONValue): void {
+    this.fromString(JSON.stringify(value));
+  }
+
+  /**
+   * Whether the model has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of resources held by the document model.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._value = '';
+  }
+
+  private _contentChanged = new Signal<this, void>(this);
+  private _isDisposed = false;
+  private _value = '';
 }
 
 /**
@@ -216,11 +306,8 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    *
    * @returns A new document model.
    */
-  createNew(
-    languagePreference?: string,
-    modelDB?: IModelDB
-  ): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference, modelDB);
+  createNew(languagePreference?: string): DocumentRegistry.ICodeModel {
+    return new TextDocumentModel({ languagePreference });
   }
 
   /**
@@ -235,9 +322,10 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
 }
 
 /**
- * An implementation of a model factory for base64 files.
+ * An implementation of a model factory for string documents.
  */
-export class Base64ModelFactory extends TextModelFactory {
+export class StringModelFactory
+  implements DocumentRegistry.IModelFactory<StringDocumentModel> {
   /**
    * The name of the model type.
    *
@@ -245,7 +333,7 @@ export class Base64ModelFactory extends TextModelFactory {
    * This is a read-only property.
    */
   get name(): string {
-    return 'base64';
+    return 'string';
   }
 
   /**
@@ -256,6 +344,64 @@ export class Base64ModelFactory extends TextModelFactory {
    */
   get contentType(): Contents.ContentType {
     return 'file';
+  }
+
+  /**
+   * The format of the file.
+   *
+   * This is a read-only property.
+   */
+  get fileFormat(): Contents.FileFormat {
+    return 'text';
+  }
+  /**
+   * Get whether the model factory has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the model factory.
+   */
+  dispose(): void {
+    this._isDisposed = true;
+  }
+
+  /**
+   * Create a new model.
+   *
+   * @param languagePreference - An optional kernel language preference.
+   *
+   * @returns A new document model.
+   */
+  createNew(languagePreference?: string): StringDocumentModel {
+    return new StringDocumentModel();
+  }
+
+  /**
+   * Get the preferred kernel language given the path.
+   * Returns an empty string.
+   */
+  preferredLanguage(path: string): string {
+    return '';
+  }
+
+  private _isDisposed = false;
+}
+
+/**
+ * An implementation of a model factory for base64-encoded documents.
+ */
+export class Base64ModelFactory extends StringModelFactory {
+  /**
+   * The name of the model type.
+   *
+   * #### Notes
+   * This is a read-only property.
+   */
+  get name(): string {
+    return 'base64';
   }
 
   /**
@@ -463,7 +609,7 @@ export class DocumentWidget<
     this._onPathChanged(this.context, this.context.path);
 
     // Listen for changes in the dirty state.
-    this.context.model.stateChanged.connect(this._onModelStateChanged, this);
+    this.context.stateChanged.connect(this._onContextStateChanged, this);
     void this.context.ready.then(() => {
       this._handleDirtyState();
     });
@@ -487,10 +633,10 @@ export class DocumentWidget<
   }
 
   /**
-   * Handle a change to the context model state.
+   * Handle a change to the context state.
    */
-  private _onModelStateChanged(
-    sender: DocumentRegistry.IModel,
+  private _onContextStateChanged(
+    sender: DocumentRegistry.IContext<DocumentRegistry.IModel>,
     args: IChangedArgs<any>
   ): void {
     if (args.name === 'dirty') {
@@ -502,7 +648,7 @@ export class DocumentWidget<
    * Handle the dirty state of the context model.
    */
   private _handleDirtyState(): void {
-    if (this.context.model.dirty) {
+    if (this.context.dirty) {
       this.title.className += ` ${DIRTY_CLASS}`;
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');

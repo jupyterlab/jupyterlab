@@ -86,6 +86,7 @@ function activateCsv(
 ): void {
   const factory = new CSVViewerFactory({
     name: FACTORY_CSV,
+    modelName: 'string',
     fileTypes: ['csv'],
     defaultFor: ['csv'],
     readOnly: true
@@ -156,6 +157,7 @@ function activateTsv(
 ): void {
   const factory = new TSVViewerFactory({
     name: FACTORY_TSV,
+    modelName: 'string',
     fileTypes: ['tsv'],
     defaultFor: ['tsv'],
     readOnly: true

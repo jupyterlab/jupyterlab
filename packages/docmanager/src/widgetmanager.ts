@@ -278,7 +278,7 @@ export class DocumentWidgetManager implements IDisposable {
         let last = checkpoints[checkpoints.length - 1];
         let checkpoint = last ? Time.format(last.last_modified) : 'None';
         let caption = `Name: ${model.name}\nPath: ${model.path}\n`;
-        if (context.model.readOnly) {
+        if (context.readOnly) {
           caption += 'Read-only';
         } else {
           caption +=
@@ -351,8 +351,7 @@ export class DocumentWidgetManager implements IDisposable {
     if (!factory) {
       return Promise.resolve(true);
     }
-    let model = context.model;
-    if (!model.dirty || widgets.length > 1 || factory.readOnly) {
+    if (!context.dirty || widgets.length > 1 || factory.readOnly) {
       return Promise.resolve(true);
     }
     let fileName = widget.title.label;

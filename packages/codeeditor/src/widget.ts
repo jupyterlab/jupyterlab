@@ -277,7 +277,7 @@ export class CodeEditorWrapper extends Widget {
     };
     const position = this.editor.getPositionForCoordinate(coordinate);
     const offset = this.editor.getOffsetAt(position);
-    DatastoreExt.withTransaction(this.model.datastore, () => {
+    DatastoreExt.withTransaction(this.model.record.datastore, () => {
       DatastoreExt.updateField(
         { ...this.model.record, field: 'text' },
         { index: offset, remove: 0, text: data }

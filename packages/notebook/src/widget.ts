@@ -3,31 +3,31 @@
 
 import { ArrayExt, each } from '@phosphor/algorithm';
 
-import { JSONValue } from '@phosphor/coreutils';
+import { JSONValue, MimeData } from '@phosphor/coreutils';
+
+import { Datastore, ListField, MapField } from '@phosphor/datastore';
+
+import { IDisposable } from '@phosphor/disposable';
+
+import { IDragEvent, Drag } from '@phosphor/dragdrop';
 
 import { Message } from '@phosphor/messaging';
-
-import { MimeData } from '@phosphor/coreutils';
 
 import { AttachedProperty } from '@phosphor/properties';
 
 import { ISignal, Signal } from '@phosphor/signaling';
-
-import { Drag, IDragEvent } from '@phosphor/dragdrop';
 
 import { PanelLayout, Widget } from '@phosphor/widgets';
 
 import { h, VirtualDOM } from '@phosphor/virtualdom';
 
 import {
-  ICellModel,
   Cell,
-  IMarkdownCellModel,
+  CellData,
   CodeCell,
+  ICellData,
   MarkdownCell,
-  ICodeCellModel,
-  RawCell,
-  IRawCellModel
+  RawCell
 } from '@jupyterlab/cells';
 
 import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
@@ -35,8 +35,6 @@ import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
 import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
 
 import { DatastoreExt } from '@jupyterlab/datastore';
-
-import { IObservableMap, IObservableList } from '@jupyterlab/observables';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -304,15 +302,11 @@ export class StaticNotebook extends Widget {
    * when the `language_info` metadata changes.
    */
   protected onMetadataChanged(
-    sender: IObservableMap<JSONValue>,
-    args: IObservableMap.IChangedArgs<JSONValue>
+    sender: Datastore,
+    args: MapField.Change<JSONValue>
   ): void {
-    switch (args.key) {
-      case 'language_info':
-        this._updateMimetype();
-        break;
-      default:
-        break;
+    if (args.current['language_info']) {
+      this._updateMimetype();
     }
   }
 
@@ -352,8 +346,14 @@ export class StaticNotebook extends Widget {
   ): void {
     let layout = this.layout as PanelLayout;
     if (oldValue) {
-      oldValue.cells.changed.disconnect(this._onCellsChanged, this);
-      oldValue.metadata.changed.disconnect(this.onMetadataChanged, this);
+      if (this._cellListener) {
+        this._cellListener.dispose();
+        this._cellListener = null;
+      }
+      if (this._metadataListener) {
+        this._metadataListener.dispose();
+        this._metadataListener = null;
+      }
       oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
       // TODO: reuse existing cell widgets if possible. Remember to initially
       // clear the history of each cell if we do this.
@@ -366,94 +366,99 @@ export class StaticNotebook extends Widget {
       return;
     }
     this._updateMimetype();
-    let cells = newValue.cells;
-    if (!cells.length) {
-      cells.push(
-        newValue.contentFactory.createCell(this.notebookConfig.defaultCell, {})
-      );
-    }
-    each(cells, (cell: ICellModel, i: number) => {
-      this._insertCell(i, cell);
+    let cells = DatastoreExt.getField({
+      ...newValue.data.record,
+      field: 'cells'
     });
-    cells.changed.connect(this._onCellsChanged, this);
-    newValue.contentChanged.connect(this.onModelContentChanged, this);
-    newValue.metadata.changed.connect(this.onMetadataChanged, this);
+    cells.forEach((id: string, i: number) => {
+      this._insertCell(i, {
+        record: { ...newValue.data.cells, record: id },
+        outputs: newValue.data.outputs
+      });
+    });
+    this._cellListener = DatastoreExt.listenField(
+      {
+        ...newValue.data.record,
+        field: 'cells'
+      },
+      this._onCellsChanged,
+      this
+    );
+    this._metadataListener = DatastoreExt.listenField(
+      { ...newValue.data.record, field: 'metadata' },
+      this.onMetadataChanged,
+      this
+    );
+    if (!cells.length) {
+      DatastoreExt.withTransaction(newValue.data.record.datastore, () => {
+        const cellId = newValue.contentFactory.createCell(
+          this.notebookConfig.defaultCell
+        );
+        DatastoreExt.updateField(
+          { ...newValue.data.record, field: 'cells' },
+          { index: 0, remove: 0, values: [cellId] }
+        );
+      });
+    }
   }
 
   /**
    * Handle a change cells event.
    */
-  private _onCellsChanged(
-    sender: IObservableList<ICellModel>,
-    args: IObservableList.IChangedArgs<ICellModel>
-  ) {
-    let index = 0;
-    switch (args.type) {
-      case 'add':
-        index = args.newIndex;
-        each(args.newValues, value => {
-          this._insertCell(index++, value);
-        });
-        break;
-      case 'move':
-        this._moveCell(args.oldIndex, args.newIndex);
-        break;
-      case 'remove':
-        each(args.oldValues, value => {
-          this._removeCell(args.oldIndex);
-        });
-        // Add default cell if there are no cells remaining.
-        if (!sender.length) {
-          const model = this.model;
-          // Add the cell in a new context to avoid triggering another
-          // cell changed event during the handling of this signal.
-          requestAnimationFrame(() => {
-            if (!model.isDisposed && !model.cells.length) {
-              model.cells.push(
-                model.contentFactory.createCell(
-                  this.notebookConfig.defaultCell,
-                  {}
-                )
-              );
-            }
+  private _onCellsChanged(sender: Datastore, args: ListField.Change<string>) {
+    const data = this.model.data;
+    args.forEach(change => {
+      for (let i = 0; i < change.removed.length; i++) {
+        this._removeCell(change.index);
+      }
+      for (let i = 0; i < change.inserted.length; i++) {
+        const loc = {
+          record: {
+            ...data.cells,
+            record: change.inserted[i]
+          },
+          outputs: data.outputs
+        };
+        this._insertCell(change.index + i, loc);
+      }
+      const cells = DatastoreExt.getField({ ...data.record, field: 'cells' });
+      if (!cells.length) {
+        requestAnimationFrame(() => {
+          // Add a new cell in a new frame so we don't trigger the
+          // same change listener in this one.
+          DatastoreExt.withTransaction(data.record.datastore, () => {
+            const cellId = this.model.contentFactory.createCell(
+              this.notebookConfig.defaultCell
+            );
+            DatastoreExt.updateField(
+              { ...data.record, field: 'cells' },
+              { index: 0, remove: 0, values: [cellId] }
+            );
           });
-        }
-        break;
-      case 'set':
-        // TODO: reuse existing widgets if possible.
-        index = args.newIndex;
-        each(args.newValues, value => {
-          // Note: this ordering (insert then remove)
-          // is important for getting the active cell
-          // index for the editable notebook correct.
-          this._insertCell(index, value);
-          this._removeCell(index + 1);
-          index++;
         });
-        break;
-      default:
-        return;
-    }
+      }
+    });
   }
 
   /**
    * Create a cell widget and insert into the notebook.
    */
-  private _insertCell(index: number, cell: ICellModel): void {
+  private _insertCell(index: number, cell: ICellData.DataLocation): void {
     let widget: Cell;
-    switch (cell.type) {
+    const cellData = DatastoreExt.getRecord(cell.record);
+    switch (cellData.type) {
       case 'code':
-        widget = this._createCodeCell(cell as ICodeCellModel);
-        widget.model.mimeType = this._mimetype;
+        widget = this._createCodeCell(cell);
+        widget.editor.model.mimeType = this._mimetype;
         break;
       case 'markdown':
-        widget = this._createMarkdownCell(cell as IMarkdownCellModel);
-        if (cell.value === '') {
+        widget = this._createMarkdownCell(cell);
+        if (widget.editor.model.value === '') {
           (widget as MarkdownCell).rendered = false;
         }
         break;
       default:
-        widget = this._createRawCell(cell as IRawCellModel);
+        widget = this._createRawCell(cell);
     }
     widget.addClass(NB_CELL_CLASS);
     let layout = this.layout as PanelLayout;
@@ -464,13 +469,13 @@ export class StaticNotebook extends Widget {
   /**
    * Create a code cell widget from a code cell model.
    */
-  private _createCodeCell(model: ICodeCellModel): CodeCell {
+  private _createCodeCell(data: ICellData.DataLocation): CodeCell {
     let rendermime = this.rendermime;
     let contentFactory = this.contentFactory;
     const editorConfig = this.editorConfig.code;
     let options = {
       editorConfig,
-      model,
+      data,
       rendermime,
       contentFactory,
       updateEditorOnShow: false
@@ -485,13 +490,13 @@ export class StaticNotebook extends Widget {
   /**
    * Create a markdown cell widget from a markdown cell model.
    */
-  private _createMarkdownCell(model: IMarkdownCellModel): MarkdownCell {
+  private _createMarkdownCell(data: ICellData.DataLocation): MarkdownCell {
     let rendermime = this.rendermime;
     let contentFactory = this.contentFactory;
     const editorConfig = this.editorConfig.markdown;
     let options = {
       editorConfig,
-      model,
+      data,
       rendermime,
       contentFactory,
       updateEditorOnShow: false
@@ -505,12 +510,12 @@ export class StaticNotebook extends Widget {
   /**
    * Create a raw cell widget from a raw cell model.
    */
-  private _createRawCell(model: IRawCellModel): RawCell {
+  private _createRawCell(data: ICellData.DataLocation): RawCell {
     let contentFactory = this.contentFactory;
     const editorConfig = this.editorConfig.raw;
     let options = {
       editorConfig,
-      model,
+      data,
       contentFactory,
       updateEditorOnShow: false
     };
@@ -518,15 +523,6 @@ export class StaticNotebook extends Widget {
     cell.syncCollapse = true;
     cell.syncEditable = true;
     return cell;
-  }
-
-  /**
-   * Move a cell widget.
-   */
-  private _moveCell(fromIndex: number, toIndex: number): void {
-    let layout = this.layout as PanelLayout;
-    layout.insertWidget(toIndex, layout.widgets[fromIndex]);
-    this.onCellMoved(fromIndex, toIndex);
   }
 
   /**
@@ -544,16 +540,20 @@ export class StaticNotebook extends Widget {
    * Update the mimetype of the notebook.
    */
   private _updateMimetype(): void {
-    let info = this._model.metadata.get(
+    let info = this._model.metadata[
       'language_info'
-    ) as nbformat.ILanguageInfoMetadata;
+    ] as nbformat.ILanguageInfoMetadata;
     if (!info) {
       return;
     }
     this._mimetype = this._mimetypeService.getMimeTypeByLanguage(info);
     each(this.widgets, widget => {
-      if (widget.model.type === 'code') {
-        widget.model.mimeType = this._mimetype;
+      const cellType = DatastoreExt.getField({
+        ...widget.data.record,
+        field: 'type'
+      });
+      if (cellType === 'code') {
+        widget.editor.model.mimeType = this._mimetype;
       }
     });
   }
@@ -565,7 +565,11 @@ export class StaticNotebook extends Widget {
     for (let i = 0; i < this.widgets.length; i++) {
       const cell = this.widgets[i];
       let config: Partial<CodeEditor.IConfig>;
-      switch (cell.model.type) {
+      const cellType = DatastoreExt.getField({
+        ...cell.data.record,
+        field: 'type'
+      });
+      switch (cellType) {
         case 'code':
           config = this._editorConfig.code;
           break;
@@ -596,6 +600,8 @@ export class StaticNotebook extends Widget {
 
   private _editorConfig = StaticNotebook.defaultEditorConfig;
   private _notebookConfig = StaticNotebook.defaultNotebookConfig;
+  private _metadataListener: IDisposable | null = null;
+  private _cellListener: IDisposable | null = null;
   private _mimetype = 'text/plain';
   private _model: INotebookModel = null;
   private _mimetypeService: IEditorMimeTypeService;
@@ -894,15 +900,15 @@ export class Notebook extends StaticNotebook {
     if (!this.model) {
       return -1;
     }
-    return this.model.cells.length ? this._activeCellIndex : -1;
+    return this.widgets.length ? this._activeCellIndex : -1;
   }
   set activeCellIndex(newValue: number) {
     let oldValue = this._activeCellIndex;
-    if (!this.model || !this.model.cells.length) {
+    if (!this.model || !this.widgets.length) {
       newValue = -1;
     } else {
       newValue = Math.max(newValue, 0);
-      newValue = Math.min(newValue, this.model.cells.length - 1);
+      newValue = Math.min(newValue, this.widgets.length - 1);
     }
 
     this._activeCellIndex = newValue;
@@ -1403,20 +1409,7 @@ export class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: Cell): void {
-    if (this.model && this.model.modelDB.isCollaborative) {
-      let modelDB = this.model.modelDB;
-      void modelDB.connected.then(() => {
-        if (!cell.isDisposed) {
-          // Setup the selection style for collaborators.
-          let localCollaborator = modelDB.collaborators.localCollaborator;
-          cell.editor.uuid = localCollaborator.sessionId;
-          cell.editor.selectionStyle = {
-            ...CodeEditor.defaultSelectionStyle,
-            color: localCollaborator.color
-          };
-        }
-      });
-    }
+    // TODO: let collaborators know who you are based on cursor!
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
@@ -1887,18 +1880,41 @@ export class Notebook extends StaticNotebook {
         return;
       }
 
+      let model = this.model;
       // Move the cells one by one
-      this.model.cells.beginCompoundOperation();
-      if (fromIndex < toIndex) {
-        each(toMove, cellWidget => {
-          this.model.cells.move(fromIndex, toIndex);
-        });
-      } else if (fromIndex > toIndex) {
-        each(toMove, cellWidget => {
-          this.model.cells.move(fromIndex++, toIndex++);
-        });
-      }
-      this.model.cells.endCompoundOperation();
+      DatastoreExt.withTransaction(this.model.data.record.datastore, () => {
+        if (fromIndex < toIndex) {
+          each(toMove, cellWidget => {
+            DatastoreExt.updateField(
+              { ...model.data.record, field: 'cells' },
+              { index: fromIndex, remove: 1, values: [] }
+            );
+            DatastoreExt.updateField(
+              { ...model.data.record, field: 'cells' },
+              {
+                index: toIndex,
+                remove: 0,
+                values: [cellWidget.data.record.record]
+              }
+            );
+          });
+        } else if (fromIndex > toIndex) {
+          each(toMove, cellWidget => {
+            DatastoreExt.updateField(
+              { ...model.data.record, field: 'cells' },
+              { index: fromIndex++, remove: 1, values: [] }
+            );
+            DatastoreExt.updateField(
+              { ...model.data.record, field: 'cells' },
+              {
+                index: toIndex++,
+                remove: 0,
+                values: [cellWidget.data.record.record]
+              }
+            );
+          });
+        }
+      });
     } else {
       // Handle the case where we are copying cells between
       // notebooks.
@@ -1914,23 +1930,28 @@ export class Notebook extends StaticNotebook {
       let factory = model.contentFactory;
 
       // Insert the copies of the original cells.
-      model.cells.beginCompoundOperation();
-      each(values, (cell: nbformat.ICell) => {
-        let value: ICellModel;
-        switch (cell.cell_type) {
-          case 'code':
-            value = factory.createCodeCell({ cell });
-            break;
-          case 'markdown':
-            value = factory.createMarkdownCell({ cell });
-            break;
-          default:
-            value = factory.createRawCell({ cell });
-            break;
-        }
-        model.cells.insert(index++, value);
+      DatastoreExt.withTransaction(model.data.record.datastore, () => {
+        each(values, (cell: nbformat.ICell) => {
+          let value: string;
+          switch (cell.cell_type) {
+            case 'code':
+              value = factory.createCodeCell(cell as nbformat.ICodeCell);
+              break;
+            case 'markdown':
+              value = factory.createMarkdownCell(
+                cell as nbformat.IMarkdownCell
+              );
+              break;
+            default:
+              value = factory.createRawCell(cell as nbformat.IRawCell);
+              break;
+          }
+          DatastoreExt.updateField(
+            { ...model.data.record, field: 'cells' },
+            { index: index++, remove: 0, values: [value] }
+          );
+        });
       });
-      model.cells.endCompoundOperation();
       // Select the inserted cells.
       this.deselectAll();
       this.activeCellIndex = start;
@@ -1942,23 +1963,24 @@ export class Notebook extends StaticNotebook {
    * Start a drag event.
    */
   private _startDrag(index: number, clientX: number, clientY: number): void {
-    let cells = this.model.cells;
     let selected: nbformat.ICell[] = [];
     let toMove: Cell[] = [];
 
     each(this.widgets, (widget, i) => {
-      let cell = cells.get(i);
       if (this.isSelectedOrActive(widget)) {
         widget.addClass(DROP_SOURCE_CLASS);
-        selected.push(cell.toJSON());
+        selected.push(CellData.toJSON(widget.data));
         toMove.push(widget);
       }
     });
     let activeCell = this.activeCell;
     let dragImage: HTMLElement = null;
     let countString: string;
-    if (activeCell.model.type === 'code') {
-      let executionCount = (activeCell.model as ICodeCellModel).executionCount;
+    if (activeCell.type === 'code') {
+      let executionCount = DatastoreExt.getField({
+        ...activeCell.data.record,
+        field: 'executionCount'
+      });
       countString = ' ';
       if (executionCount) {
         countString = executionCount.toString();
@@ -1971,7 +1993,7 @@ export class Notebook extends StaticNotebook {
     dragImage = Private.createDragImage(
       selected.length,
       countString,
-      activeCell.model.value.split('\n')[0].slice(0, 26)
+      activeCell.editor.model.value.split('\n')[0].slice(0, 26)
     );
 
     // Set up the drag event.
@@ -1989,7 +2011,7 @@ export class Notebook extends StaticNotebook {
     this._drag.mimeData.setData('internal:cells', toMove);
     // Add mimeData for the text content of the selected cells,
     // allowing for drag/drop into plain text fields.
-    const textContent = toMove.map(cell => cell.model.value).join('\n');
+    const textContent = toMove.map(cell => cell.editor.model.value).join('\n');
     this._drag.mimeData.setData('text/plain', textContent);
 
     // Remove mousemove and mouseup listeners and start the drag.
@@ -2099,7 +2121,16 @@ export class Notebook extends StaticNotebook {
       return;
     }
     this.activeCellIndex = i;
-    if (model.cells.get(i).type === 'markdown') {
+    const cells = DatastoreExt.getField({
+      ...model.data.record,
+      field: 'cells'
+    });
+    const cellType = DatastoreExt.getField({
+      ...model.data.cells,
+      record: cells[i],
+      field: 'type'
+    });
+    if (cellType === 'markdown') {
       let widget = this.widgets[i] as MarkdownCell;
       widget.rendered = false;
     } else if (target.localName === 'img') {
@@ -2115,9 +2146,9 @@ export class Notebook extends StaticNotebook {
     for (let i = 0; i < this.widgets.length; i++) {
       if (i !== this._activeCellIndex) {
         let cell = this.widgets[i];
-        DatastoreExt.withTransaction(cell.model.datastore, () => {
+        DatastoreExt.withTransaction(cell.data.record.datastore, () => {
           DatastoreExt.updateField(
-            { ...cell.model.record, field: 'selections' },
+            { ...cell.editor.model.record, field: 'selections' },
             { [cell.editor.uuid]: null }
           );
         });

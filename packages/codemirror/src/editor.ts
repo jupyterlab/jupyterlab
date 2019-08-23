@@ -544,7 +544,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // will get screened out in _onCursorsChanged(). Make an
     // exception for this method.
     if (!this.editor.hasFocus()) {
-      DatastoreExt.withTransaction(this.model.datastore, () => {
+      DatastoreExt.withTransaction(this.model.record.datastore, () => {
         DatastoreExt.updateField(
           { ...this.model.record, field: 'selections' },
           { [this.uuid]: this.getSelections() }
@@ -754,9 +754,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // If we can id the selection to a specific collaborator,
     // use that information.
     let collaborator: ICollaborator | undefined;
-    if (this._model.modelDB.collaborators) {
-      collaborator = this._model.modelDB.collaborators.get(uuid);
-    }
+    // TODO: figure out who our collaborators are so we can show it.
 
     // Style each selection for the uuid.
     selections.forEach(selection => {
@@ -805,7 +803,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // Only add selections if the editor has focus. This avoids unwanted
     // triggering of cursor activity due to collaborator actions.
     if (this._editor.hasFocus()) {
-      DatastoreExt.withTransaction(this.model.datastore, () => {
+      DatastoreExt.withTransaction(this.model.record.datastore, () => {
         DatastoreExt.updateField(
           { ...this.model.record, field: 'selections' },
           { [this.uuid]: this.getSelections() }
@@ -915,7 +913,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     const text = change.text.join('\n');
     // If this was a local change, update the table.
     this._changeGuard = true;
-    DatastoreExt.withTransaction(this.model.datastore, () => {
+    DatastoreExt.withTransaction(this.model.record.datastore, () => {
       DatastoreExt.updateField(
         { ...this.model.record, field: 'text' },
         { index: start, remove: end - start, text }

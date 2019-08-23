@@ -7,6 +7,10 @@ import { CodeCell } from '@jupyterlab/cells';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
+import { DatastoreExt } from '@jupyterlab/datastore';
+
+import { OutputAreaData } from '@jupyterlab/outputarea';
+
 import { KernelMessage } from '@jupyterlab/services';
 
 import { IDisposable } from '@phosphor/disposable';
@@ -102,10 +106,18 @@ export class ForeignHandler implements IDisposable {
       case 'execute_input':
         let inputMsg = msg as KernelMessage.IExecuteInputMsg;
         cell = this._newCell(parentMsgId);
-        let model = cell.model;
-        model.executionCount = inputMsg.content.execution_count;
-        model.value = inputMsg.content.code;
-        model.trusted = true;
+        let data = cell.data;
+        DatastoreExt.withTransaction(data.record.datastore, () => {
+          DatastoreExt.updateRecord(data.record, {
+            executionCount: inputMsg.content.execution_count,
+            text: {
+              index: 0,
+              remove: cell.editor.model.value.length,
+              text: inputMsg.content.code
+            },
+            trusted: true
+          });
+        });
         parent.update();
         return true;
       case 'execute_result':
@@ -118,14 +130,23 @@ export class ForeignHandler implements IDisposable {
         }
         let output = msg.content as nbformat.IOutput;
         output.output_type = msgType as nbformat.OutputType;
-        cell.model.outputs.add(output);
+        if (this._clearNext) {
+          OutputAreaData.clear(cell.data);
+          this._clearNext = false;
+        } else {
+          OutputAreaData.appendItem(cell.data, output);
+        }
         parent.update();
         return true;
       case 'clear_output':
         let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
-        cell = this._parent.getCell(parentMsgId);
-        if (cell) {
-          cell.model.outputs.clear(wait);
+        if (wait) {
+          this._clearNext = true;
+        } else {
+          cell = this._parent.getCell(parentMsgId);
+          if (cell) {
+            OutputAreaData.clear(cell.data);
+          }
         }
         return true;
       default:
@@ -146,6 +167,7 @@ export class ForeignHandler implements IDisposable {
   private _enabled = false;
   private _parent: ForeignHandler.IReceiver;
   private _isDisposed = false;
+  private _clearNext = false;
 }
 
 /**
