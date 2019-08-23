@@ -19,7 +19,7 @@
       "path": "../coreutils"
     },
     {
-      "path": "../observables"
+      "path": "../datastore"
     },
     {
       "path": "../rendermime"

@@ -3,7 +3,7 @@
 
 import { Token } from '@phosphor/coreutils';
 
-import { AnyField, Schema, Table, Datastore } from '@phosphor/datastore';
+import { Schema, Table, Datastore } from '@phosphor/datastore';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -67,13 +67,6 @@ export class DatastoreCreator {
 }
 
 export interface IDatastoreCreator extends DatastoreCreator {}
-
-/*
- * A type alias for the schema field type from the phosphor datastore package.
- */
-export type SchemaFields = {
-  readonly [name: string]: AnyField;
-};
 
 export const IDatastoreCreator = new Token<IDatastoreCreator>(
   'IDatastoreCreator'

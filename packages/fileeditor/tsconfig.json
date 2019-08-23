@@ -13,13 +13,13 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../datastore"
+    },
+    {
       "path": "../docregistry"
     },
     {
       "path": "../statusbar"
-    },
-    {
-      "path": "../datastore"
     }
   ]
 }

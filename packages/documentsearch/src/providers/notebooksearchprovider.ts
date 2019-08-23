@@ -3,10 +3,12 @@
 import { ISearchProvider, ISearchMatch } from '../index';
 import { CodeMirrorSearchProvider } from './codemirrorsearchprovider';
 
-import { NotebookPanel } from '@jupyterlab/notebook';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { Cell, MarkdownCell } from '@jupyterlab/cells';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { DatastoreExt } from '@jupyterlab/datastore';
+import { NotebookPanel } from '@jupyterlab/notebook';
 
+import { IDisposable } from '@phosphor/disposable';
 import { Signal, ISignal } from '@phosphor/signaling';
 import { Widget } from '@phosphor/widgets';
 
@@ -50,8 +52,11 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     this._query = query;
     // Listen for cell model change to redo the search in case of
     // new/pasted/deleted cells
-    const cellList = this._searchTarget.model.cells;
-    cellList.changed.connect(this._restartQuery.bind(this), this);
+    this._cellListener = DatastoreExt.listenField(
+      { ...this._searchTarget.content.model.data.record, field: 'cells' },
+      this._restartQuery,
+      this
+    );
 
     let indexTotal = 0;
     const allMatches: ISearchMatch[] = [];
@@ -129,7 +134,10 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       queriesEnded.push(provider.endQuery());
       provider.changed.disconnect(this._onCmSearchProviderChanged, this);
     });
-    Signal.disconnectBetween(this._searchTarget.model.cells, this);
+    if (this._cellListener) {
+      this._cellListener.dispose();
+      this._cellListener = null;
+    }
 
     this._cmSearchProviders = [];
     this._unRenderedMarkdownCells.forEach((cell: MarkdownCell) => {
@@ -148,7 +156,10 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    * @returns A promise that resolves when all state has been cleaned up.
    */
   async endSearch(): Promise<void> {
-    Signal.disconnectBetween(this._searchTarget.model.cells, this);
+    if (this._cellListener) {
+      this._cellListener.dispose();
+      this._cellListener = null;
+    }
 
     const index = this._searchTarget.content.activeCellIndex;
     const searchEnded: Promise<void>[] = [];
@@ -368,4 +379,5 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   private _currentMatch: ISearchMatch;
   private _unRenderedMarkdownCells: MarkdownCell[] = [];
   private _changed = new Signal<this, void>(this);
+  private _cellListener: IDisposable;
 }

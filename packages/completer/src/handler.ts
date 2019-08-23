@@ -194,7 +194,7 @@ export class CompletionHandler implements IDisposable {
     }
 
     const { start, end, value } = patch;
-    DatastoreExt.withTransaction(editor.model.datastore, () => {
+    DatastoreExt.withTransaction(editor.model.record.datastore, () => {
       DatastoreExt.updateField(
         { ...editor.model.record, field: 'text' },
         { index: start, remove: end - start, text: value }

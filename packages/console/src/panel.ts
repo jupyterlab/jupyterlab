@@ -48,8 +48,7 @@ export class ConsolePanel extends Panel {
       path,
       basePath,
       name,
-      manager,
-      modelFactory
+      manager
     } = options;
     let contentFactory = (this.contentFactory =
       options.contentFactory || ConsolePanel.defaultContentFactory);
@@ -77,8 +76,7 @@ export class ConsolePanel extends Panel {
       rendermime,
       session,
       mimeTypeService,
-      contentFactory,
-      modelFactory
+      contentFactory
     });
     this.addWidget(this.console);
 
@@ -203,11 +201,6 @@ export namespace ConsolePanel {
      * A kernel preference.
      */
     kernelPreference?: IClientSession.IKernelPreference;
-
-    /**
-     * The model factory for the console widget.
-     */
-    modelFactory?: CodeConsole.IModelFactory;
 
     /**
      * The service used to look up mime types.

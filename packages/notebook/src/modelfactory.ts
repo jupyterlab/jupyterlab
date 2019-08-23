@@ -1,11 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeCellModel } from '@jupyterlab/cells';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-
-import { IModelDB } from '@jupyterlab/observables';
 
 import { Contents } from '@jupyterlab/services';
 
@@ -20,10 +16,8 @@ export class NotebookModelFactory
    * Construct a new notebook model factory.
    */
   constructor(options: NotebookModelFactory.IOptions) {
-    let codeCellContentFactory = options.codeCellContentFactory;
     this.contentFactory =
-      options.contentFactory ||
-      new NotebookModel.ContentFactory({ codeCellContentFactory });
+      options.contentFactory || new NotebookModel.ContentFactory({});
   }
 
   /**
@@ -73,9 +67,9 @@ export class NotebookModelFactory
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string, modelDB?: IModelDB): INotebookModel {
+  createNew(languagePreference?: string): INotebookModel {
     let contentFactory = this.contentFactory;
-    return new NotebookModel({ languagePreference, contentFactory, modelDB });
+    return new NotebookModel({ languagePreference, contentFactory });
   }
 
   /**
@@ -96,11 +90,6 @@ export namespace NotebookModelFactory {
    * The options used to initialize a NotebookModelFactory.
    */
   export interface IOptions {
-    /**
-     * The factory for code cell content.
-     */
-    codeCellContentFactory?: CodeCellModel.IContentFactory;
-
     /**
      * The content factory used by the NotebookModelFactory.  If
      * given, it will supersede the `codeCellContentFactory`.

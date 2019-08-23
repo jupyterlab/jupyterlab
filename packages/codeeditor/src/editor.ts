@@ -1,24 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DatastoreExt, SchemaFields } from '@jupyterlab/datastore';
+import { DatastoreExt } from '@jupyterlab/datastore';
 
 import { JSONObject } from '@phosphor/coreutils';
 
-import {
-  Datastore,
-  Fields,
-  MapField,
-  RegisterField,
-  Schema,
-  TextField
-} from '@phosphor/datastore';
+import { Datastore } from '@phosphor/datastore';
 
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { IModelDB, ModelDB } from '@jupyterlab/observables';
+import { CodeEditorData, ICodeEditorData } from './data';
 
 /**
  * A namespace for code editors.
@@ -29,60 +22,6 @@ import { IModelDB, ModelDB } from '@jupyterlab/observables';
  * - Common JLab services which are based on the code editor should belong to `IEditorServices`.
  */
 export namespace CodeEditor {
-  /**
-   * An interface for the fields stored in the CodeEditor schema.
-   */
-  export interface IFields extends SchemaFields {
-    /**
-     * The mime type for the editor.
-     */
-    readonly mimeType: RegisterField<string>;
-
-    /**
-     * The text content of the editor.
-     */
-    readonly text: TextField;
-
-    /**
-     * The cursors for the editor.
-     */
-    readonly selections: MapField<ITextSelection[]>;
-  }
-
-  /**
-   * An interface for a CodeEditor schema.
-   */
-  export interface ISchema extends Schema {
-    /**
-     * The schema id.
-     */
-    id: '@jupyterlab/codeeditor:v1';
-
-    /**
-     * The schema fields.
-     */
-    fields: IFields;
-  }
-
-  /**
-   * The concrete CodeEditor schema, available at runtime.
-   */
-  export const SCHEMA: ISchema = {
-    /**
-     * The schema id.
-     */
-    id: '@jupyterlab/codeeditor:v1',
-
-    /**
-     * Concrete realizations of the schema fields, available at runtime.
-     */
-    fields: {
-      mimeType: Fields.String(),
-      text: Fields.Text(),
-      selections: Fields.Map<ITextSelection[]>()
-    }
-  };
-
   /**
    * A zero-based position in the editor.
    */
@@ -245,20 +184,9 @@ export namespace CodeEditor {
     readonly selections: { [id: string]: ITextSelection[] };
 
     /**
-     * The underlying `IModelDB` instance in which model
-     * data is stored.
-     */
-    readonly modelDB: IModelDB;
-
-    /**
-     * The underlying datastore instance in which the model data is stored.
-     */
-    readonly datastore: Datastore;
-
-    /**
      * The record in the datastore in which this codeeditor keeps its data.
      */
-    readonly record: DatastoreExt.RecordLocation<ISchema>;
+    readonly record: DatastoreExt.RecordLocation<ICodeEditorData.Schema>;
   }
 
   /**
@@ -271,45 +199,43 @@ export namespace CodeEditor {
     constructor(options?: Model.IOptions) {
       options = options || {};
 
-      if (options.modelDB) {
-        this.modelDB = options.modelDB;
+      if (options.record) {
+        this.record = options.record;
       } else {
-        this.modelDB = new ModelDB();
+        const datastore = (this._datastore = CodeEditorData.createStore());
+        this.record = {
+          datastore,
+          schema: CodeEditorData.SCHEMA,
+          record: 'data'
+        };
       }
-
-      const datastore = (this.datastore = Datastore.create({
-        id: 1,
-        schemas: [SCHEMA]
-      }));
-      this.record = {
-        datastore,
-        schema: SCHEMA,
-        record: 'data'
-      };
-      DatastoreExt.withTransaction(datastore, () => {
-        DatastoreExt.updateRecord(this.record, {
-          text: { index: 0, remove: 0, text: options.value || '' },
-          mimeType: options.mimeType || 'text/plain',
-          selections: {}
+      if (!DatastoreExt.getRecord(this.record)) {
+        // Initialize the record if it hasn't been.
+        DatastoreExt.withTransaction(this.record.datastore, () => {
+          DatastoreExt.updateRecord(this.record, {
+            mimeType: options.mimeType || 'text/plain',
+            text: { index: 0, remove: 0, text: options.value || '' }
+          });
         });
-      });
+      } else {
+        // Possibly override any data existing in the record with options
+        // provided by the user.
+        if (options.value) {
+          this.value = options.value;
+        }
+        if (options.mimeType) {
+          this.mimeType = options.mimeType;
+        }
+        if (!this.mimeType) {
+          this.mimeType = 'text/plain';
+        }
+      }
     }
-
-    /**
-     * The underlying `IModelDB` instance in which model
-     * data is stored.
-     */
-    readonly modelDB: IModelDB;
-
-    /**
-     * The underlying datastore in which the model data is stored.
-     */
-    readonly datastore: Datastore;
 
     /**
      * The record in the datastore in which this codeeditor keeps its data.
      */
-    readonly record: DatastoreExt.RecordLocation<ISchema>;
+    readonly record: DatastoreExt.RecordLocation<ICodeEditorData.Schema>;
 
     /**
      * Get the value of the model.
@@ -319,7 +245,7 @@ export namespace CodeEditor {
     }
     set value(value: string) {
       const current = this.value;
-      DatastoreExt.withTransaction(this.datastore, () => {
+      DatastoreExt.withTransaction(this.record.datastore, () => {
         DatastoreExt.updateField(
           { ...this.record, field: 'text' },
           {
@@ -349,7 +275,7 @@ export namespace CodeEditor {
       if (oldValue === newValue) {
         return;
       }
-      DatastoreExt.withTransaction(this.datastore, () => {
+      DatastoreExt.withTransaction(this.record.datastore, () => {
         DatastoreExt.updateField(
           { ...this.record, field: 'mimeType' },
           newValue
@@ -371,12 +297,17 @@ export namespace CodeEditor {
       if (this._isDisposed) {
         return;
       }
+      if (this._datastore) {
+        this._datastore.dispose();
+        this._datastore = null;
+      }
       this._isDisposed = true;
-      this.datastore.dispose();
+      this.record.datastore.dispose();
       Signal.clearData(this);
     }
 
     private _isDisposed = false;
+    private _datastore: Datastore | null = null;
   }
 
   /**
@@ -787,9 +718,9 @@ export namespace CodeEditor {
       mimeType?: string;
 
       /**
-       * An optional modelDB for storing model state.
+       * A record location in an existing datastore in which to store the model.
        */
-      modelDB?: IModelDB;
+      record?: DatastoreExt.RecordLocation<ICodeEditorData.Schema>;
     }
   }
 }

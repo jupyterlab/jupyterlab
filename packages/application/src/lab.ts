@@ -3,7 +3,10 @@
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
-import { Base64ModelFactory } from '@jupyterlab/docregistry';
+import {
+  Base64ModelFactory,
+  StringModelFactory
+} from '@jupyterlab/docregistry';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
@@ -78,8 +81,9 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
       this.shell.addClass('jp-mod-devMode');
     }
 
-    // Add initial model factory.
+    // Add model factories for opaque string and base64-encoded data..
     this.docRegistry.addModelFactory(new Base64ModelFactory());
+    this.docRegistry.addModelFactory(new StringModelFactory());
 
     if (options.mimeExtensions) {
       for (let plugin of createRendermimePlugins(options.mimeExtensions)) {

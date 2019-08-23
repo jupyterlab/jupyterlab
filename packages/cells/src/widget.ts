@@ -3,18 +3,19 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { AttachmentsResolver } from '@jupyterlab/attachments';
-
 import { IClientSession } from '@jupyterlab/apputils';
 
-import { IChangedArgs, ActivityMonitor } from '@jupyterlab/coreutils';
+import { AttachmentsResolver } from '@jupyterlab/attachments';
+
+import { Debouncer, nbformat } from '@jupyterlab/coreutils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import { IObservableMap } from '@jupyterlab/observables';
+import { DatastoreExt } from '@jupyterlab/datastore';
 
 import {
   OutputArea,
+  OutputAreaData,
   SimplifiedOutputArea,
   IOutputPrompt,
   OutputPrompt,
@@ -24,13 +25,23 @@ import {
 
 import {
   IRenderMime,
+  IRenderMimeRegistry,
   MimeModel,
-  IRenderMimeRegistry
+  OutputData
 } from '@jupyterlab/rendermime';
 
 import { KernelMessage, Kernel } from '@jupyterlab/services';
 
-import { JSONValue, PromiseDelegate, JSONObject } from '@phosphor/coreutils';
+import {
+  JSONObject,
+  PromiseDelegate,
+  ReadonlyJSONObject,
+  ReadonlyJSONValue
+} from '@phosphor/coreutils';
+
+import { Datastore, MapField, RegisterField } from '@phosphor/datastore';
+
+import { IDisposable } from '@phosphor/disposable';
 
 import { Message } from '@phosphor/messaging';
 
@@ -47,12 +58,7 @@ import {
 
 import { InputArea, IInputPrompt, InputPrompt } from './inputarea';
 
-import {
-  ICellModel,
-  ICodeCellModel,
-  IMarkdownCellModel,
-  IRawCellModel
-} from './model';
+import { ICellData, CellData } from './data';
 
 import { InputPlaceholder, OutputPlaceholder } from './placeholder';
 
@@ -157,7 +163,23 @@ export class Cell extends Widget {
   constructor(options: Cell.IOptions) {
     super();
     this.addClass(CELL_CLASS);
-    let model = (this._model = options.model);
+    let data: ICellData.DataLocation;
+    if (options.data) {
+      data = this._data = options.data;
+    } else {
+      const datastore = (this._datastore = CellData.createStore());
+      data = this._data = {
+        record: {
+          datastore,
+          schema: CellData.SCHEMA,
+          record: 'data'
+        },
+        outputs: {
+          datastore,
+          schema: OutputData.SCHEMA
+        }
+      };
+    }
     let contentFactory = (this.contentFactory =
       options.contentFactory || Cell.defaultContentFactory);
     this.layout = new PanelLayout();
@@ -173,7 +195,7 @@ export class Cell extends Widget {
     let inputCollapser = new InputCollapser();
     inputCollapser.addClass(CELL_INPUT_COLLAPSER_CLASS);
     let input = (this._input = new InputArea({
-      model,
+      data,
       contentFactory,
       updateOnShow: options.updateEditorOnShow
     }));
@@ -200,7 +222,11 @@ export class Cell extends Widget {
       );
     }
 
-    model.metadata.changed.connect(this.onMetadataChanged, this);
+    this._metadataListener = DatastoreExt.listenField(
+      { ...this.data.record, field: 'metadata' },
+      this.onMetadataChanged,
+      this
+    );
   }
 
   /**
@@ -220,6 +246,11 @@ export class Cell extends Widget {
    * The content factory used by the widget.
    */
   readonly contentFactory: Cell.IContentFactory;
+
+  /**
+   * The type of the cell widget.
+   */
+  type: nbformat.CellType;
 
   /**
    * Get the prompt node used by the cell.
@@ -250,8 +281,8 @@ export class Cell extends Widget {
   /**
    * Get the model used by the cell.
    */
-  get model(): ICellModel {
-    return this._model;
+  get data(): ICellData.DataLocation {
+    return this._data;
   }
 
   /**
@@ -282,8 +313,11 @@ export class Cell extends Widget {
    * Save view editable state to model
    */
   saveEditableState() {
-    const { metadata } = this.model;
-    const current = metadata.get('editable');
+    let metadata = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'metadata'
+    }) as JSONObject;
+    const current = metadata['editable'];
 
     if (
       (this.readOnly && current === false) ||
@@ -292,18 +326,30 @@ export class Cell extends Widget {
       return;
     }
 
-    if (this.readOnly) {
-      this.model.metadata.set('editable', false);
-    } else {
-      this.model.metadata.delete('editable');
-    }
+    DatastoreExt.withTransaction(this.data.record.datastore, () => {
+      if (this.readOnly) {
+        DatastoreExt.updateField(
+          { ...this.data.record, field: 'metadata' },
+          { editable: false }
+        );
+      } else {
+        DatastoreExt.updateField(
+          { ...this.data.record, field: 'metadata' },
+          { editable: null }
+        );
+      }
+    });
   }
 
   /**
    * Load view editable state from model.
    */
   loadEditableState() {
-    this.readOnly = this.model.metadata.get('editable') === false;
+    const metadata = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'metadata'
+    });
+    this.readOnly = metadata['editable'] === false;
   }
 
   /**
@@ -349,7 +395,13 @@ export class Cell extends Widget {
    * Save view collapse state to model
    */
   saveCollapseState() {
-    const jupyter = { ...(this.model.metadata.get('jupyter') as any) };
+    const metadata = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'metadata'
+    });
+    const jupyter = {
+      ...(metadata['jupyter'] as any)
+    };
 
     if (
       (this.inputHidden && jupyter.source_hidden === true) ||
@@ -363,18 +415,30 @@ export class Cell extends Widget {
     } else {
       delete jupyter.source_hidden;
     }
-    if (Object.keys(jupyter).length === 0) {
-      this.model.metadata.delete('jupyter');
-    } else {
-      this.model.metadata.set('jupyter', jupyter);
-    }
+    DatastoreExt.withTransaction(this.data.record.datastore, () => {
+      if (Object.keys(jupyter).length === 0) {
+        DatastoreExt.updateField(
+          { ...this.data.record, field: 'metadata' },
+          { jupyter: null }
+        );
+      } else {
+        DatastoreExt.updateField(
+          { ...this.data.record, field: 'metadata' },
+          { jupyter }
+        );
+      }
+    });
   }
 
   /**
    * Revert view collapse state from model.
    */
   loadCollapseState() {
-    const jupyter = (this.model.metadata.get('jupyter') as any) || {};
+    const metadata = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'metadata'
+    });
+    const jupyter = (metadata['jupyter'] as any) || {};
     this.inputHidden = !!jupyter.source_hidden;
   }
 
@@ -428,7 +492,7 @@ export class Cell extends Widget {
   clone(): Cell {
     let constructor = this.constructor as typeof Cell;
     return new constructor({
-      model: this.model,
+      data: this._data,
       contentFactory: this.contentFactory
     });
   }
@@ -441,8 +505,14 @@ export class Cell extends Widget {
     if (this.isDisposed) {
       return;
     }
+    if (this._datastore) {
+      this._datastore.dispose();
+      this._datastore = null;
+    }
+    this._metadataListener.dispose();
+
     this._input = null;
-    this._model = null;
+    this._data = null;
     this._inputWrapper = null;
     this._inputPlaceholder = null;
     super.dispose();
@@ -474,7 +544,7 @@ export class Cell extends Widget {
    * Handle `update-request` messages.
    */
   protected onUpdateRequest(msg: Message): void {
-    if (!this._model) {
+    if (!this._data) {
       return;
     }
     // Handle read only state.
@@ -488,33 +558,31 @@ export class Cell extends Widget {
    * Handle changes in the metadata.
    */
   protected onMetadataChanged(
-    model: IObservableMap<JSONValue>,
-    args: IObservableMap.IChangedArgs<JSONValue>
+    sender: Datastore,
+    args: MapField.Change<ReadonlyJSONObject>
   ): void {
-    switch (args.key) {
-      case 'jupyter':
-        if (this.syncCollapse) {
-          this.loadCollapseState();
-        }
-        break;
-      case 'editable':
-        if (this.syncEditable) {
-          this.loadEditableState();
-        }
-        break;
-      default:
-        break;
+    if (args.current['jupyter']) {
+      if (this.syncCollapse) {
+        this.loadCollapseState();
+      }
+    }
+    if (args.current['editable']) {
+      if (this.syncEditable) {
+        this.loadEditableState();
+      }
     }
   }
 
+  private _metadataListener: IDisposable;
   private _readOnly = false;
-  private _model: ICellModel = null;
+  private _data: ICellData.DataLocation = null;
   private _inputHidden = false;
   private _input: InputArea = null;
   private _inputWrapper: Widget = null;
   private _inputPlaceholder: InputPlaceholder = null;
   private _syncCollapse = false;
   private _syncEditable = false;
+  private _datastore: Datastore | null = null;
 }
 
 /**
@@ -528,7 +596,7 @@ export namespace Cell {
     /**
      * The model used by the cell.
      */
-    model: ICellModel;
+    data?: ICellData.DataLocation;
 
     /**
      * The factory object for customizable cell children.
@@ -670,7 +738,7 @@ export class CodeCell extends Cell {
     // Only save options not handled by parent constructor.
     let rendermime = (this._rendermime = options.rendermime);
     let contentFactory = this.contentFactory;
-    let model = this.model;
+    let data = this.data;
 
     // Insert the output before the cell footer.
     let outputWrapper = (this._outputWrapper = new Panel());
@@ -678,7 +746,7 @@ export class CodeCell extends Cell {
     let outputCollapser = new OutputCollapser();
     outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
     let output = (this._output = new OutputArea({
-      model: model.outputs,
+      data,
       rendermime,
       contentFactory: contentFactory
     }));
@@ -686,7 +754,7 @@ export class CodeCell extends Cell {
     // Set a CSS if there are no outputs, and connect a signal for future
     // changes to the number of outputs. This is for conditional styling
     // if there are no outputs.
-    if (model.outputs.length === 0) {
+    if (output.widgets.length === 0) {
       this.addClass(NO_OUTPUTS_CLASS);
     }
     output.outputLengthChanged.connect(this._outputLengthHandler, this);
@@ -697,13 +765,20 @@ export class CodeCell extends Cell {
     this._outputPlaceholder = new OutputPlaceholder(() => {
       this.outputHidden = !this.outputHidden;
     });
-    model.stateChanged.connect(this.onStateChanged, this);
+    this._executionCountListener = DatastoreExt.listenField(
+      { ...this.data.record, field: 'executionCount' },
+      this.onExecutionCountChanged,
+      this
+    );
+    // Sync `collapsed` and `jupyter.outputs_hidden` for the first time, giving
+    // preference to `collapsed`.
+    this._syncCollapsed('collapsed');
   }
 
   /**
-   * The model used by the widget.
+   * The type of the cell widget.
    */
-  readonly model: ICodeCellModel;
+  type: nbformat.CellType = 'code';
 
   /**
    * Initialize view state from model.
@@ -715,8 +790,12 @@ export class CodeCell extends Cell {
   initializeState(): this {
     super.initializeState();
     this.loadScrolledState();
+    const executionCount = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'executionCount'
+    });
 
-    this.setPrompt(`${this.model.executionCount || ''}`);
+    this.setPrompt(`${executionCount || ''}`);
     return this;
   }
 
@@ -766,31 +845,31 @@ export class CodeCell extends Cell {
     // to changes in metadata until we have fully committed our changes.
     // Otherwise setting one key can trigger a write to the other key to
     // maintain the synced consistency.
-    this._savingMetadata = true;
+    super.saveCollapseState();
+    const loc: DatastoreExt.FieldLocation<ICellData.Schema, 'metadata'> = {
+      ...this.data.record,
+      field: 'metadata'
+    };
+    const metadata = DatastoreExt.getField(loc);
 
-    try {
-      super.saveCollapseState();
+    const collapsed = metadata['collapsed'] as boolean | undefined;
 
-      const metadata = this.model.metadata;
-      const collapsed = this.model.metadata.get('collapsed');
-
-      if (
-        (this.outputHidden && collapsed === true) ||
-        (!this.outputHidden && collapsed === undefined)
-      ) {
-        return;
-      }
-
-      // Do not set jupyter.outputs_hidden since it is redundant. See
-      // and https://github.com/jupyter/nbformat/issues/137
-      if (this.outputHidden) {
-        metadata.set('collapsed', true);
-      } else {
-        metadata.delete('collapsed');
-      }
-    } finally {
-      this._savingMetadata = false;
+    if (
+      (this.outputHidden && collapsed === true) ||
+      (!this.outputHidden && collapsed === undefined)
+    ) {
+      return;
     }
+
+    // Do not set jupyter.outputs_hidden since it is redundant. See
+    // and https://github.com/jupyter/nbformat/issues/137
+    DatastoreExt.withTransaction(this.data.record.datastore, () => {
+      if (this.outputHidden) {
+        DatastoreExt.updateField(loc, { collapsed: true });
+      } else {
+        DatastoreExt.updateField(loc, { collapsed: null });
+      }
+    });
   }
 
   /**
@@ -801,7 +880,11 @@ export class CodeCell extends Cell {
    */
   loadCollapseState() {
     super.loadCollapseState();
-    this.outputHidden = !!this.model.metadata.get('collapsed');
+    const metadata = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'metadata'
+    });
+    this.outputHidden = !!metadata['collapsed'];
   }
 
   /**
@@ -822,8 +905,11 @@ export class CodeCell extends Cell {
    * Save view collapse state to model
    */
   saveScrolledState() {
-    const { metadata } = this.model;
-    const current = metadata.get('scrolled');
+    const metadata = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'metadata'
+    });
+    const current = metadata['scrolled'];
 
     if (
       (this.outputsScrolled && current === true) ||
@@ -831,24 +917,35 @@ export class CodeCell extends Cell {
     ) {
       return;
     }
-    if (this.outputsScrolled) {
-      metadata.set('scrolled', true);
-    } else {
-      metadata.delete('scrolled');
-    }
+    DatastoreExt.withTransaction(this.data.record.datastore, () => {
+      if (this.outputsScrolled) {
+        DatastoreExt.updateField(
+          { ...this.data.record, field: 'metadata' },
+          { scrolled: true }
+        );
+      } else {
+        DatastoreExt.updateField(
+          { ...this.data.record, field: 'metadata' },
+          { scrolled: null }
+        );
+      }
+    });
   }
 
   /**
    * Revert view collapse state from model.
    */
   loadScrolledState() {
-    const metadata = this.model.metadata;
+    const metadata = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'metadata'
+    });
 
     // We don't have the notion of 'auto' scrolled, so we make it false.
-    if (metadata.get('scrolled') === 'auto') {
+    if (metadata['scrolled'] === 'auto') {
       this.outputsScrolled = false;
     } else {
-      this.outputsScrolled = !!metadata.get('scrolled');
+      this.outputsScrolled = !!metadata['scrolled'];
     }
   }
 
@@ -890,7 +987,7 @@ export class CodeCell extends Cell {
   clone(): CodeCell {
     let constructor = this.constructor as typeof CodeCell;
     return new constructor({
-      model: this.model,
+      data: this.data,
       contentFactory: this.contentFactory,
       rendermime: this._rendermime
     });
@@ -901,7 +998,7 @@ export class CodeCell extends Cell {
    */
   cloneOutputArea(): OutputArea {
     return new SimplifiedOutputArea({
-      model: this.model.outputs,
+      data: this.data,
       contentFactory: this.contentFactory,
       rendermime: this._rendermime
     });
@@ -918,6 +1015,7 @@ export class CodeCell extends Cell {
       this._outputLengthHandler,
       this
     );
+    this._executionCountListener.dispose();
     this._rendermime = null;
     this._output = null;
     this._outputWrapper = null;
@@ -928,13 +1026,12 @@ export class CodeCell extends Cell {
   /**
    * Handle changes in the model.
    */
-  protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
-    switch (args.name) {
-      case 'executionCount':
-        this.setPrompt(`${(model as ICodeCellModel).executionCount || ''}`);
-        break;
-      default:
-        break;
+  protected onExecutionCountChanged(
+    sender: Datastore,
+    args: RegisterField.Change<nbformat.ExecutionCount>
+  ): void {
+    if (args.current !== null) {
+      this.setPrompt(`${args.current}`);
     }
   }
 
@@ -942,28 +1039,29 @@ export class CodeCell extends Cell {
    * Handle changes in the metadata.
    */
   protected onMetadataChanged(
-    model: IObservableMap<JSONValue>,
-    args: IObservableMap.IChangedArgs<JSONValue>
+    sender: Datastore,
+    args: MapField.Change<ReadonlyJSONObject>
   ): void {
     if (this._savingMetadata) {
       // We are in middle of a metadata transaction, so don't react to it.
       return;
     }
-    switch (args.key) {
-      case 'scrolled':
-        if (this.syncScrolled) {
-          this.loadScrolledState();
-        }
-        break;
-      case 'collapsed':
-        if (this.syncCollapse) {
-          this.loadCollapseState();
-        }
-        break;
-      default:
-        break;
+    if (args.current['scrolled']) {
+      if (this.syncScrolled) {
+        this.loadScrolledState();
+      }
     }
-    super.onMetadataChanged(model, args);
+    if (args.current['collapsed']) {
+      if (this.syncCollapse) {
+        this.loadCollapseState();
+      }
+    }
+    if (args.current['collapsed'] !== undefined) {
+      this._syncCollapsed('collapsed');
+    } else if (args.current['jupyter'] !== undefined) {
+      this._syncCollapsed('outputs_hidden');
+    }
+    super.onMetadataChanged(sender, args);
   }
 
   /**
@@ -974,6 +1072,49 @@ export class CodeCell extends Cell {
     this.toggleClass(NO_OUTPUTS_CLASS, force);
   }
 
+  /**
+   * Ensure that the `outputs_hidden` and `collapsed` state of a code cell
+   * remain consistent, since they are redundant in nbformat 4.4. See
+   * https://github.com/jupyter/nbformat/issues/137
+   */
+  private _syncCollapsed(preference: 'collapsed' | 'outputs_hidden') {
+    const metadata = DatastoreExt.getField({
+      ...this.data.record,
+      field: 'metadata'
+    });
+    const collapsed = metadata['collapsed'] as boolean | undefined;
+    const jupyter = (metadata['jupyter'] || {}) as JSONObject;
+    const { outputs_hidden, ...newJupyter } = jupyter;
+
+    if (outputs_hidden === collapsed) {
+      return;
+    }
+    let update: MapField.Update<ReadonlyJSONValue>;
+    if (preference === 'collapsed') {
+      if (collapsed !== undefined) {
+        newJupyter['outputs_hidden'] = collapsed;
+      }
+      if (Object.keys(newJupyter).length === 0) {
+        update = { jupyter: null };
+      } else {
+        update = { jupyter: newJupyter };
+      }
+    } else {
+      if (jupyter.hasOwnProperty('outputs_hidden')) {
+        update = { collapsed: jupyter.outputs_hidden };
+      } else {
+        update = { collapsed: null };
+      }
+    }
+    DatastoreExt.withTransaction(this.data.record.datastore, () => {
+      DatastoreExt.updateField(
+        { ...this.data.record, field: 'metadata' },
+        update
+      );
+    });
+  }
+
+  private _executionCountListener: IDisposable;
   private _rendermime: IRenderMimeRegistry = null;
   private _outputHidden = false;
   private _outputsScrolled: boolean;
@@ -993,11 +1134,6 @@ export namespace CodeCell {
    */
   export interface IOptions extends Cell.IOptions {
     /**
-     * The model used by the cell.
-     */
-    model: ICodeCellModel;
-
-    /**
      * The mime renderer for the cell widget.
      */
     rendermime: IRenderMimeRegistry;
@@ -1011,20 +1147,28 @@ export namespace CodeCell {
     session: IClientSession,
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
-    let model = cell.model;
-    let code = model.value;
+    let code = cell.editor.model.value;
     if (!code.trim() || !session.kernel) {
-      model.executionCount = null;
-      model.outputs.clear();
+      DatastoreExt.withTransaction(cell.data.record.datastore, () => {
+        DatastoreExt.updateField(
+          { ...cell.data.record, field: 'executionCount' },
+          null
+        );
+        OutputAreaData.clear(cell.data);
+      });
       return;
     }
 
-    let cellId = { cellId: model.id };
+    let cellId = { cellId: cell.data.record.record };
     metadata = { ...metadata, ...cellId };
-    model.executionCount = null;
     cell.outputHidden = false;
     cell.setPrompt('*');
-    model.trusted = true;
+    DatastoreExt.withTransaction(cell.data.record.datastore, () => {
+      DatastoreExt.updateRecord(cell.data.record, {
+        executionCount: null,
+        trusted: true
+      });
+    });
 
     let future: Kernel.IFuture<
       KernelMessage.IExecuteRequestMsg,
@@ -1040,7 +1184,12 @@ export namespace CodeCell {
       // Save this execution's future so we can compare in the catch below.
       future = cell.outputArea.future;
       const msg = await msgPromise;
-      model.executionCount = msg.content.execution_count;
+      DatastoreExt.withTransaction(cell.data.record.datastore, () => {
+        DatastoreExt.updateField(
+          { ...cell.data.record, field: 'executionCount' },
+          msg.content.execution_count
+        );
+      });
       return msg;
     } catch (e) {
       // If this is still the current execution, clear the prompt.
@@ -1076,20 +1225,21 @@ export class MarkdownCell extends Cell {
     this._rendermime = options.rendermime.clone({
       resolver: new AttachmentsResolver({
         parent: options.rendermime.resolver,
-        model: this.model.attachments
+        record: this.data.record
       })
     });
 
     // Throttle the rendering rate of the widget.
-    this._monitor = new ActivityMonitor({
-      signal: this.model.contentChanged,
-      timeout: RENDER_TIMEOUT
-    });
-    this._monitor.activityStopped.connect(() => {
+    this._debouncer = new Debouncer(() => {
       if (this._rendered) {
         this.update();
       }
-    }, this);
+    }, RENDER_TIMEOUT);
+
+    this._listener = DatastoreExt.listenField(
+      { ...this.editor.model.record, field: 'text' },
+      () => this._debouncer.invoke()
+    );
 
     void this._updateRenderedInput().then(() => {
       this._ready.resolve(void 0);
@@ -1098,9 +1248,9 @@ export class MarkdownCell extends Cell {
   }
 
   /**
-   * The model used by the widget.
+   * The type of the cell widget.
    */
-  readonly model: IMarkdownCellModel;
+  readonly type: nbformat.CellType = 'markdown';
 
   /**
    * A promise that resolves when the widget renders for the first time.
@@ -1127,6 +1277,15 @@ export class MarkdownCell extends Cell {
     if (!this._rendered) {
       this.editor.refresh();
     }
+  }
+
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._listener.dispose();
+    this._debouncer.dispose();
+    super.dispose();
   }
 
   /**
@@ -1172,8 +1331,7 @@ export class MarkdownCell extends Cell {
    * Update the rendered input.
    */
   private _updateRenderedInput(): Promise<void> {
-    let model = this.model;
-    let text = (model && model.value) || DEFAULT_MARKDOWN_TEXT;
+    let text = this.editor.model.value || DEFAULT_MARKDOWN_TEXT;
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
       let mimeModel = new MimeModel({ data: { 'text/markdown': text } });
@@ -1193,13 +1351,14 @@ export class MarkdownCell extends Cell {
   clone(): MarkdownCell {
     let constructor = this.constructor as typeof MarkdownCell;
     return new constructor({
-      model: this.model,
+      data: this.data,
       contentFactory: this.contentFactory,
       rendermime: this._rendermime
     });
   }
 
-  private _monitor: ActivityMonitor<any, any> = null;
+  private _listener: IDisposable;
+  private _debouncer: Debouncer;
   private _renderer: IRenderMime.IRenderer = null;
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
@@ -1215,11 +1374,6 @@ export namespace MarkdownCell {
    * An options object for initializing a base cell widget.
    */
   export interface IOptions extends Cell.IOptions {
-    /**
-     * The model used by the cell.
-     */
-    model: IMarkdownCellModel;
-
     /**
      * The mime renderer for the cell widget.
      */
@@ -1249,15 +1403,15 @@ export class RawCell extends Cell {
   clone(): RawCell {
     let constructor = this.constructor as typeof RawCell;
     return new constructor({
-      model: this.model,
+      data: this.data,
       contentFactory: this.contentFactory
     });
   }
 
   /**
-   * The model used by the widget.
+   * The type of the cell widget.
    */
-  readonly model: IRawCellModel;
+  readonly type: nbformat.CellType = 'raw';
 }
 
 /**
@@ -1267,10 +1421,5 @@ export namespace RawCell {
   /**
    * An options object for initializing a base cell widget.
    */
-  export interface IOptions extends Cell.IOptions {
-    /**
-     * The model used by the cell.
-     */
-    model: IRawCellModel;
-  }
+  export interface IOptions extends Cell.IOptions {}
 }

@@ -216,7 +216,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.invokeNotebook, {
       execute: () => {
         const panel = notebooks.currentWidget;
-        if (panel && panel.content.activeCell.model.type === 'code') {
+        if (panel && panel.content.activeCell.type === 'code') {
           return app.commands.execute(CommandIDs.invoke, { id: panel.id });
         }
       }

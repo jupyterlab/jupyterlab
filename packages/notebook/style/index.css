@@ -11,6 +11,7 @@
 @import url('~@jupyterlab/codeeditor/style/index.css');
 @import url('~@jupyterlab/statusbar/style/index.css');
 @import url('~@jupyterlab/rendermime/style/index.css');
+@import url('~@jupyterlab/outputarea/style/index.css');
 @import url('~@jupyterlab/cells/style/index.css');
 @import url('~@jupyterlab/docregistry/style/index.css');
 

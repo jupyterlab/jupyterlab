@@ -58,24 +58,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
       this._onContextReady();
     });
 
-    if (context.model.modelDB.isCollaborative) {
-      let modelDB = context.model.modelDB;
-      void modelDB.connected.then(() => {
-        let collaborators = modelDB.collaborators;
-        if (!collaborators) {
-          return;
-        }
-
-        // Setup the selection style for collaborators
-        let localCollaborator = collaborators.localCollaborator;
-        this.editor.uuid = localCollaborator.sessionId;
-
-        this.editor.selectionStyle = {
-          ...CodeEditor.defaultSelectionStyle,
-          color: localCollaborator.color
-        };
-      });
-    }
+    // TODO Let collaborators know who we are via a cursor.
   }
 
   /**
@@ -108,7 +91,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
    * spurious cursors.
    */
   private _trimSelections(): void {
-    DatastoreExt.withTransaction(this.model.datastore, () => {
+    DatastoreExt.withTransaction(this.model.record.datastore, () => {
       DatastoreExt.updateField(
         { ...this.model.record, field: 'selections' },
         { [this.editor.uuid]: null }
@@ -123,34 +106,11 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     if (this.isDisposed) {
       return;
     }
-    const contextModel = this._context.model;
-    const editor = this.editor;
-    const editorModel = editor.model;
-
-    // Set the editor model value.
-    editorModel.value = contextModel.toString();
-
     // Prevent the initial loading from disk from being in the editor history.
-    editor.clearHistory();
-
-    // Wire signal connections.
-    contextModel.contentChanged.connect(this._onContentChanged, this);
+    this.editor.clearHistory();
 
     // Resolve the ready promise.
     this._ready.resolve(undefined);
-  }
-
-  /**
-   * Handle a change in context model content.
-   */
-  private _onContentChanged(): void {
-    const editorModel = this.editor.model;
-    const oldValue = editorModel.value;
-    const newValue = this._context.model.toString();
-
-    if (oldValue !== newValue) {
-      editorModel.value = newValue;
-    }
   }
 
   protected _context: DocumentRegistry.Context;
