@@ -45,10 +45,13 @@ export interface ILogger {
   log(output: nbformat.IOutput): void;
   clear(): void;
   readonly length: number;
+
   /**
    * A signal emitted when the log changes.
    */
   readonly logChanged: ISignal<this, ILoggerChange>;
+  readonly rendermime: IRenderMimeRegistry;
+  readonly outputAreaModel: OutputAreaModel;
 }
 
 export class Logger implements ILogger {
@@ -117,7 +120,7 @@ export class OutputLoggerView extends Panel {
   /**
    * Construct an OutputConsoleView instance.
    */
-  constructor(logger: Logger) {
+  constructor(logger: ILogger) {
     super();
 
     this.title.closable = true;
@@ -140,6 +143,6 @@ export class OutputLoggerView extends Panel {
     return this._logger;
   }
 
-  private _logger: Logger;
+  private _logger: ILogger;
   private _outputView: OutputArea;
 }

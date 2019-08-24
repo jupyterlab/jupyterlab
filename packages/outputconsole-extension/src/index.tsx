@@ -184,7 +184,6 @@ const outputLogPlugin: JupyterFrontEndPlugin<IOutputLogRegistry> = {
  */
 function activateOutputLog(
   app: JupyterFrontEnd,
-
   mainMenu: IMainMenu | null,
   palette: ICommandPalette | null
 ): IOutputLogRegistry {
