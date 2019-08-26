@@ -136,7 +136,7 @@ class ProcessTestApp(ProcessApp):
         pass
 
     def start(self):
-        self._install_kernels()
+        self._install_default_kernels()
         self.kernel_manager.default_kernel_name = 'echo'
         self.lab_config.schemas_dir = self.schemas_dir
         self.lab_config.user_settings_dir = self.user_settings_dir
@@ -159,7 +159,7 @@ class ProcessTestApp(ProcessApp):
         with open(pjoin(kernel_dir, 'kernel.json'), 'w') as f:
             f.write(json.dumps(kernel_spec))
 
-    def _install_kernels(self):
+    def _install_default_kernels(self):
         # Install echo and ipython kernels - should be done after env patch
         self.install_kernel(
             kernel_name="echo",
