@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Breakpoints } from '..';
-import { ReactWidget } from '@jupyterlab/apputils';
-
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+
+import React, { useState } from 'react';
+import { Breakpoints } from '.';
+import { ReactWidget } from '@jupyterlab/apputils';
 
 export class Body extends ReactWidget {
   constructor(model: Breakpoints.IModel) {
