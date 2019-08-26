@@ -623,7 +623,11 @@ export class ClientSession implements IClientSession {
           });
         }
         if (model) {
-          return this._changeKernel(model).then(() => undefined);
+          return this._changeKernel(model).then(() => undefined)
+          .catch( err => { 
+            this._handleSessionError(err);
+            return Promise.reject(err);
+          });
         }
       })
       .then(() => {
