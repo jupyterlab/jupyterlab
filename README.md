@@ -7,18 +7,16 @@ This extension is under active development and is not yet available.
 ## Prerequisites
 
 - JupyterLab 1.1+
+- xeus-python 0.5+
 
 ## Development
 
 ```bash
 # Create a new conda environment
-conda create -n jupyterlab-debugger -c conda-forge jupyterlab nodejs xeus-python ptvsd
+conda create -n jupyterlab-debugger -c conda-forge jupyterlab nodejs xeus-python=0.5 ptvsd
 
 # Activate the conda environment
 conda activate jupyterlab-debugger
-
-# Create a directory for the kernel debug logs in the folder where JupyterLab is started
-mkdir xpython_debug_logs
 
 # Install dependencies
 jlpm
