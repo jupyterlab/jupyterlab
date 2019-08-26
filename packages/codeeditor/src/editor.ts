@@ -210,6 +210,7 @@ export namespace CodeEditor {
         };
       }
       if (!DatastoreExt.getRecord(this.record)) {
+        this.isPrepopulated = false;
         // Initialize the record if it hasn't been.
         DatastoreExt.withTransaction(this.record.datastore, () => {
           DatastoreExt.updateRecord(this.record, {
@@ -218,6 +219,7 @@ export namespace CodeEditor {
           });
         });
       } else {
+        this.isPrepopulated = true;
         // Possibly override any data existing in the record with options
         // provided by the user.
         if (options.value) {
@@ -236,6 +238,8 @@ export namespace CodeEditor {
      * The record in the datastore in which this codeeditor keeps its data.
      */
     readonly record: DatastoreExt.RecordLocation<ICodeEditorData.Schema>;
+
+    readonly isPrepopulated: boolean;
 
     /**
      * Get the value of the model.

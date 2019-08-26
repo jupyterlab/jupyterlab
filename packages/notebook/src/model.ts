@@ -116,6 +116,9 @@ export class NotebookModel implements INotebookModel {
    */
   readonly data: INotebookData.DataLocation;
 
+  readonly isCollaborative = true;
+  readonly isPrepopulated = false;
+
   /**
    * The metadata associated with the notebook.
    */

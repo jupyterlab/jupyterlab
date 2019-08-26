@@ -47,13 +47,11 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     });
 
     const context = (this._context = options.context);
-    const editor = this.editor;
 
     this.addClass('jp-FileEditorCodeWrapper');
     this.node.dataset[CODE_RUNNER] = 'true';
     this.node.dataset[UNDOER] = 'true';
 
-    editor.model.value = context.model.toString();
     void context.ready.then(() => {
       this._onContextReady();
     });
@@ -106,6 +104,7 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     if (this.isDisposed) {
       return;
     }
+    this.editor.model.value = this._context.model.toString();
     // Prevent the initial loading from disk from being in the editor history.
     this.editor.clearHistory();
 
@@ -131,30 +130,46 @@ export class FileEditor extends Widget {
     const context = (this._context = options.context);
     this._mimeTypeService = options.mimeTypeService;
 
-    let editorWidget = (this.editorWidget = new FileEditorCodeWrapper(options));
-    this.editor = editorWidget.editor;
-    this.model = editorWidget.model;
+    let layout = (this.layout = new StackedLayout());
+
+    context.ready.then(() => {
+      let editorWidget = (this._editorWidget = new FileEditorCodeWrapper(
+        options
+      ));
+      layout.addWidget(editorWidget);
+      this._onPathChanged();
+    });
 
     // Listen for changes to the path.
     context.pathChanged.connect(this._onPathChanged, this);
-    this._onPathChanged();
-
-    let layout = (this.layout = new StackedLayout());
-    layout.addWidget(editorWidget);
   }
 
   /**
    * Get the context for the editor widget.
    */
   get context(): DocumentRegistry.Context {
-    return this.editorWidget.context;
+    return this._editorWidget.context;
+  }
+
+  /**
+   * The code editor model associated with the file.
+   */
+  get model(): CodeEditor.IModel | null {
+    return this._editorWidget.model;
+  }
+
+  /**
+   * The code editor widget associated with the file.
+   */
+  get editor(): CodeEditor.IEditor {
+    return this._editorWidget.editor;
   }
 
   /**
    * A promise that resolves when the file editor is ready.
    */
   get ready(): Promise<void> {
-    return this.editorWidget.ready;
+    return this._editorWidget.ready;
   }
 
   /**
@@ -208,8 +223,8 @@ export class FileEditor extends Widget {
    * Ensure that the widget has focus.
    */
   private _ensureFocus(): void {
-    if (!this.editor.hasFocus()) {
-      this.editor.focus();
+    if (!this._editorWidget.editor.hasFocus()) {
+      this._editorWidget.editor.focus();
     }
   }
 
@@ -217,18 +232,14 @@ export class FileEditor extends Widget {
    * Handle a change to the path.
    */
   private _onPathChanged(): void {
-    const editor = this.editor;
     const localPath = this._context.localPath;
-
-    editor.model.mimeType = this._mimeTypeService.getMimeTypeByFilePath(
+    this.model.mimeType = this._mimeTypeService.getMimeTypeByFilePath(
       localPath
     );
   }
 
-  private editorWidget: FileEditorCodeWrapper;
-  public model: CodeEditor.IModel;
-  public editor: CodeEditor.IEditor;
-  protected _context: DocumentRegistry.Context;
+  private _context: DocumentRegistry.Context;
+  private _editorWidget: FileEditorCodeWrapper | null;
   private _mimeTypeService: IEditorMimeTypeService;
 }
 

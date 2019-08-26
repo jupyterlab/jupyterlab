@@ -52,6 +52,7 @@ class CollaborationsManagerHandler(DatastoreHandler):
             for key, c in self.collaborations.items()
             if self.auth.check_permissions(self.current_user, key, "r")
         }
+        self.log.info(collaborations)
         self.finish(json.dumps(dict(collaborations=collaborations)))
 
 
@@ -285,5 +286,5 @@ class CollaborationHandler(WSBaseHandler):
 
 # The path for lab build.
 # TODO: Is this a reasonable path?
-collaboration_path = r"/lab/api/datastore/(?P<collaboration_id>[a-zA-Z0-9\-]+)"
+collaboration_path = r"/lab/api/datastore/(?P<collaboration_id>(?:(?:[^/]+)+|/?))"
 datastore_rest_path = r"/lab/api/datastore/?"

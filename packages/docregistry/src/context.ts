@@ -49,8 +49,14 @@ export class Context<T extends DocumentRegistry.IModel>
     const localPath = this._manager.contents.localPath(this._path);
     let lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
-    this._model = this._factory.createNew(lang);
-    this._model.contentChanged.connect(this._onModelContentChanged, this);
+    this._modelPromise = this._factory.createNew({
+      path: this._path,
+      languagePreference: lang
+    });
+    this._modelPromise.then(model => {
+      this._model = model;
+      this._model.contentChanged.connect(this._onModelContentChanged, this);
+    });
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -141,7 +147,7 @@ export class Context<T extends DocumentRegistry.IModel>
   /**
    * Get the model associated with the document.
    */
-  get model(): T {
+  get model(): T | null {
     return this._model;
   }
 
@@ -234,9 +240,16 @@ export class Context<T extends DocumentRegistry.IModel>
    *
    * @returns a promise that resolves upon initialization.
    */
-  initialize(isNew: boolean): Promise<void> {
+  async initialize(isNew: boolean): Promise<void> {
     if (isNew) {
       return this._save();
+    }
+    const model = await this._modelPromise;
+    if (
+      model.isCollaborative &&
+      ((model as any) as DocumentRegistry.ICollaborativeModel).isPrepopulated
+    ) {
+      return;
     }
     // TODO how to handle prepopulated collaborative sessions?
     return this._revert(true);
@@ -559,15 +572,15 @@ export class Context<T extends DocumentRegistry.IModel>
       content: true
     };
     let path = this._path;
-    let model = this._model;
     return this._manager.ready
       .then(() => {
         return this._manager.contents.get(path, opts);
       })
-      .then(contents => {
+      .then(async contents => {
         if (this.isDisposed) {
           return;
         }
+        let model = await this._modelPromise;
         let dirty = false;
         if (contents.format === 'json') {
           model.fromJSON(contents.content);
@@ -776,7 +789,8 @@ export class Context<T extends DocumentRegistry.IModel>
     widget: Widget,
     options?: DocumentRegistry.IOpenOptions
   ) => void;
-  private _model: T;
+  private _model: T | null;
+  private _modelPromise: Promise<T>;
   private _path = '';
   private _useCRLF = false;
   private _factory: DocumentRegistry.IModelFactory<T>;

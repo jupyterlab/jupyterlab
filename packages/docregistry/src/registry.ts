@@ -657,6 +657,11 @@ export namespace DocumentRegistry {
     contentChanged: ISignal<this, void>;
 
     /**
+     * Whether the model is collaborative.
+     */
+    readonly isCollaborative: boolean;
+
+    /**
      * The default kernel name of the document.
      */
     readonly defaultKernelName: string;
@@ -700,6 +705,17 @@ export namespace DocumentRegistry {
      * and received any history or context that it needs.
      */
     readonly ready: Promise<void>;
+
+    /**
+     * Whether the model is collaborative.
+     */
+    readonly isCollaborative: true;
+
+    /**
+     * Whether the datastore for the model is prepopulated upon
+     * model construction time.
+     */
+    readonly isPrepopulated: boolean;
   }
 
   /**
@@ -1032,12 +1048,32 @@ export namespace DocumentRegistry {
      *
      * @returns A new document model.
      */
-    createNew(languagePreference?: string): T;
+    createNew(options: IModelFactory.IOptions): Promise<T>;
 
     /**
      * Get the preferred kernel language given a file path.
      */
     preferredLanguage(path: string): string;
+  }
+
+  /**
+   * A namespace for IModelFactory statics.
+   */
+  export namespace IModelFactory {
+    /**
+     * Options for creating a new document model.
+     */
+    export interface IOptions {
+      /**
+       * An optional path which can be used to set up a collaboration context.
+       */
+      path?: string;
+
+      /**
+       * A kernel language preference.
+       */
+      languagePreference?: string;
+    }
   }
 
   /**

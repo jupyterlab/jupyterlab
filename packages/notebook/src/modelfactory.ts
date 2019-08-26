@@ -67,8 +67,11 @@ export class NotebookModelFactory
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string): INotebookModel {
+  async createNew(
+    options: DocumentRegistry.IModelFactory.IOptions = {}
+  ): Promise<INotebookModel> {
     let contentFactory = this.contentFactory;
+    let { languagePreference } = options;
     return new NotebookModel({ languagePreference, contentFactory });
   }
 

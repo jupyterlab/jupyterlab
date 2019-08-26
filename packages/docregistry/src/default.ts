@@ -13,7 +13,7 @@ import { Mode } from '@jupyterlab/codemirror';
 
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 
-import { DatastoreExt } from '@jupyterlab/datastore';
+import { createDatastore, DatastoreExt } from '@jupyterlab/datastore';
 
 import { Contents } from '@jupyterlab/services';
 
@@ -37,12 +37,13 @@ export class TextDocumentModel extends CodeEditor.Model
    */
   constructor(options: TextDocumentModel.IOptions = {}) {
     super({
-      record: {
+      record: options.record || {
         datastore: CodeEditorData.createStore(),
         schema: CodeEditorData.SCHEMA,
         record: 'data'
       }
     });
+
     this._defaultLang = options.languagePreference || '';
     // We don't want to trigger a content change for text selection changes,
     // only actual content changes to the data owned by the document
@@ -58,6 +59,11 @@ export class TextDocumentModel extends CodeEditor.Model
    * Whether the model is ready for collaboration.
    */
   readonly ready: Promise<void>;
+
+  /**
+   * Whether the model is collaborative.
+   */
+  readonly isCollaborative = true;
 
   /**
    * A signal emitted when the document content changes.
@@ -177,6 +183,11 @@ export class StringDocumentModel implements DocumentRegistry.IModel {
   get contentChanged(): ISignal<this, void> {
     return this._contentChanged;
   }
+
+  /**
+   * Whether the model is collaborative.
+   */
+  readonly isCollaborative = false;
 
   /**
    * The default kernel name of the document.
@@ -306,7 +317,19 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string): DocumentRegistry.ICodeModel {
+  async createNew(
+    options: DocumentRegistry.IModelFactory.IOptions = {}
+  ): Promise<DocumentRegistry.ICodeModel> {
+    const { languagePreference, path } = options;
+    if (path) {
+      const datastore = await createDatastore(path, [CodeEditorData.SCHEMA]);
+      const record = {
+        datastore,
+        schema: CodeEditorData.SCHEMA,
+        record: 'data'
+      };
+      return new TextDocumentModel({ record, languagePreference });
+    }
     return new TextDocumentModel({ languagePreference });
   }
 
@@ -375,7 +398,9 @@ export class StringModelFactory
    *
    * @returns A new document model.
    */
-  createNew(languagePreference?: string): StringDocumentModel {
+  async createNew(
+    options: DocumentRegistry.IModelFactory.IOptions = {}
+  ): Promise<StringDocumentModel> {
     return new StringDocumentModel();
   }
 
