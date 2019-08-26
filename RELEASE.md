@@ -34,7 +34,7 @@ conda activate jlabrelease
 
 ### Clean environment with Docker
 
-Alternatively to the conda instructions above, you can use Docker to create a new container with a fresh clone of JupyterLab.
+Instead of following the conda instructions above, you can use Docker to create a new container with a fresh clone of JupyterLab.
 
 First, build a Docker base image. This container is customized with your git commit information. The build is cached so rebuilding it is fast and easy.
 
