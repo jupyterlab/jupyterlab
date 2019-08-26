@@ -35,6 +35,18 @@ export namespace DOMUtils {
   }
 
   /**
+   * Find the first element matching a class name.
+   */
+  export function findElements(
+    parent: HTMLElement,
+    className: string
+  ): HTMLCollectionOf<HTMLElement> {
+    return parent.getElementsByClassName(className) as HTMLCollectionOf<
+      HTMLElement
+    >;
+  }
+
+  /**
    * Create a DOM id with prefix "id-" to solve bug for UUIDs beginning with numbers.
    */
   export function createDomID(): string {

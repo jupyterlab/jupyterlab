@@ -108,7 +108,7 @@ export function presentCompanions(
   let entries = [];
   if (serverCompanion) {
     entries.push(
-      <p>
+      <p key="server-companion">
         This package has indicated that it needs a corresponding server
         extension:
         <code> {serverCompanion.base.name!}</code>
@@ -117,28 +117,28 @@ export function presentCompanions(
   }
   if (kernelCompanions.length > 0) {
     entries.push(
-      <p>
+      <p key={'kernel-companion'}>
         This package has indicated that it needs a corresponding package for the
         kernel.
       </p>
     );
-    for (let entry of kernelCompanions) {
+    for (let [index, entry] of kernelCompanions.entries()) {
       entries.push(
-        <p>
+        <p key={`companion-${index}`}>
           The package
           <code>{entry.kernelInfo.base.name!}</code>, is required by the
           following kernels:
         </p>
       );
       let kernelEntries = [];
-      for (let kernel of entry.kernels) {
+      for (let [index, kernel] of entry.kernels.entries()) {
         kernelEntries.push(
-          <li>
+          <li key={`kernels-${index}`}>
             <code>{kernel.display_name}</code>
           </li>
         );
       }
-      entries.push(<ul>{kernelEntries}</ul>);
+      entries.push(<ul key={'kernel-companion-end'}>{kernelEntries}</ul>);
     }
   }
   let body = (

@@ -54,7 +54,7 @@ const EDITOR_ICON_CLASS = 'jp-MaterialIcon jp-TextEditorIcon';
 /**
  * The class name for the text editor icon from the default theme.
  */
-const MARKDOWN_ICON_CLASS = 'jp-MaterialIcon jp-MarkdownIcon';
+const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
 
 /**
  * The name of the factory that creates editor widgets.
@@ -114,13 +114,18 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
 export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:tab-space-status',
   autoStart: true,
-  requires: [IStatusBar, IEditorTracker, ISettingRegistry],
+  requires: [IEditorTracker, ISettingRegistry],
+  optional: [IStatusBar],
   activate: (
     app: JupyterFrontEnd,
-    statusBar: IStatusBar,
     editorTracker: IEditorTracker,
-    settingRegistry: ISettingRegistry
+    settingRegistry: ISettingRegistry,
+    statusBar: IStatusBar | null
   ) => {
+    if (!statusBar) {
+      // Automatically disable if statusbar missing
+      return;
+    }
     // Create a menu for switching tabs vs spaces.
     const menu = new Menu({ commands: app.commands });
     const command = 'fileeditor:change-tabs';

@@ -43,6 +43,8 @@ import { Contents } from '@jupyterlab/services';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
+import { IIconRegistry } from '@jupyterlab/ui-components';
+
 import { IIterator, map, reduce, toArray } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
@@ -128,7 +130,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
-  requires: [IDocumentManager, IStateDB]
+  requires: [IIconRegistry, IDocumentManager, IStateDB]
 };
 
 /**
@@ -155,12 +157,17 @@ const shareFile: JupyterFrontEndPlugin<void> = {
 export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:file-upload-status',
   autoStart: true,
-  requires: [IStatusBar, IFileBrowserFactory],
+  requires: [IFileBrowserFactory],
+  optional: [IStatusBar],
   activate: (
     app: JupyterFrontEnd,
-    statusBar: IStatusBar,
-    browser: IFileBrowserFactory
+    browser: IFileBrowserFactory,
+    statusBar: IStatusBar | null
   ) => {
+    if (!statusBar) {
+      // Automatically disable if statusbar missing
+      return;
+    }
     const item = new FileUploadStatus({
       tracker: browser.tracker
     });
@@ -200,6 +207,7 @@ export default plugins;
  */
 function activateFactory(
   app: JupyterFrontEnd,
+  icoReg: IIconRegistry,
   docManager: IDocumentManager,
   state: IStateDB
 ): IFileBrowserFactory {
@@ -210,6 +218,7 @@ function activateFactory(
     options: IFileBrowserFactory.IOptions = {}
   ) => {
     const model = new FileBrowserModel({
+      iconRegistry: icoReg,
       manager: docManager,
       driveName: options.driveName || '',
       refreshInterval: options.refreshInterval,
@@ -528,11 +537,13 @@ function addCommands(
         return;
       }
 
+      const { contents } = widget.model.manager.services;
       return Promise.all(
         toArray(
           map(widget.selectedItems(), item => {
             if (item.type === 'directory') {
-              return widget.model.cd(item.name);
+              const localPath = contents.localPath(item.path);
+              return widget.model.cd(`/${localPath}`);
             }
 
             return commands.execute('docmanager:open', {

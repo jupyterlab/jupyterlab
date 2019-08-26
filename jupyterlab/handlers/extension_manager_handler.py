@@ -66,9 +66,10 @@ def _build_check_info(app_dir, logger):
 class ExtensionManager(object):
     executor = ThreadPoolExecutor(max_workers=1)
 
-    def __init__(self, log, app_dir):
+    def __init__(self, log, app_dir, core_config=None):
         self.log = log
         self.app_dir = app_dir
+        self.core_config = core_config
         self._outdated = None
         # To start fetching data on outdated extensions immediately, uncomment:
         # IOLoop.current().spawn_callback(self._get_outdated)
@@ -122,7 +123,9 @@ class ExtensionManager(object):
     def install(self, extension):
         """Handle an install/update request"""
         try:
-            install_extension(extension, app_dir=self.app_dir, logger=self.log)
+            install_extension(
+                extension, app_dir=self.app_dir, logger=self.log,
+                core_config=self.core_config)
         except ValueError as e:
             raise gen.Return(dict(status='error', message=str(e)))
         raise gen.Return(dict(status='ok',))
@@ -130,19 +133,25 @@ class ExtensionManager(object):
     @gen.coroutine
     def uninstall(self, extension):
         """Handle an uninstall request"""
-        did_uninstall = uninstall_extension(extension, app_dir=self.app_dir, logger=self.log)
+        did_uninstall = uninstall_extension(
+            extension, app_dir=self.app_dir, logger=self.log,
+            core_config=self.core_config)
         raise gen.Return(dict(status='ok' if did_uninstall else 'error',))
 
     @gen.coroutine
     def enable(self, extension):
         """Handle an enable request"""
-        enable_extension(extension, app_dir=self.app_dir, logger=self.log)
+        enable_extension(
+            extension, app_dir=self.app_dir, logger=self.log,
+            core_config=self.core_config)
         raise gen.Return(dict(status='ok',))
 
     @gen.coroutine
     def disable(self, extension):
         """Handle a disable request"""
-        disable_extension(extension, app_dir=self.app_dir, logger=self.log)
+        disable_extension(
+            extension, app_dir=self.app_dir, logger=self.log,
+            core_config=self.core_config)
         raise gen.Return(dict(status='ok',))
 
     @gen.coroutine
@@ -187,6 +196,7 @@ class ExtensionManager(object):
             names,
             app_dir=self.app_dir,
             logger=self.log,
+            core_config=self.core_config,
         )
         raise gen.Return(data)
 

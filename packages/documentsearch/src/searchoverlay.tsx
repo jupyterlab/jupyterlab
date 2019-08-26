@@ -417,7 +417,7 @@ class SearchOverlay extends React.Component<
 
   private _debouncedStartSearch = new Debouncer(() => {
     this._executeSearch(true, this.state.searchText);
-  }, 100);
+  }, 500);
 }
 
 export function createSearchOverlay(

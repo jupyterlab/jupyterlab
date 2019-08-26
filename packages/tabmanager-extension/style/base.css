@@ -145,7 +145,7 @@
   background-image: var(--jp-icon-python-selected);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-JSONIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-JsonIcon {
   background-image: var(--jp-icon-json-selected);
 }
 
@@ -157,7 +157,7 @@
   background-image: var(--jp-icon-r-selected);
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-YAMLIcon {
+#tab-manager .p-TabBar-tab.jp-mod-active .p-TabBar-tabIcon.jp-YamlIcon {
   background-image: var(--jp-icon-yaml-selected);
 }
 

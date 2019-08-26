@@ -39,7 +39,8 @@ window.addEventListener('load', async function() {
     require('@jupyterlab/terminal-extension'),
     require('@jupyterlab/theme-dark-extension'),
     require('@jupyterlab/theme-light-extension'),
-    require('@jupyterlab/tooltip-extension')
+    require('@jupyterlab/tooltip-extension'),
+    require('@jupyterlab/ui-components-extension')
   ];
   var lab = new JupyterLab();
   lab.registerPluginModules(mods);

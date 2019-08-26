@@ -137,6 +137,7 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 - Saul Shanabrook, Quansight (general development, extensions)
 - Steven Silvester, JPMorgan Chase (co-creator, release management, packaging,
   prolific contributions throughout the code base).
+- Vidar T. Fauske, JPMorgan Chase (general development, extensions).
 
 Maintainer emeritus:
 
@@ -151,7 +152,7 @@ To be listed, please submit a pull request with your information.
 
 We encourage you to ask questions on the [Discourse forum](https://discourse.jupyter.org/c/jupyterlab). A question answered there can become a useful resource for others.
 
-Please use the [GitHub issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report.
+Please use the [GitHub issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report. To keep resolved issues self-contained, the [lock bot](https://github.com/apps/lock) will lock closed issues as resolved after a period of inactivity. If related discussion is still needed after an issue is locked, please open a new issue and reference the old issue.
 
 ### Weekly Dev Meeting
 

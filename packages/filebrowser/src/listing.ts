@@ -10,39 +10,42 @@ import {
 
 import { PathExt, Time } from '@jupyterlab/coreutils';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import {
   IDocumentManager,
   isValidFileName,
   renameFile
 } from '@jupyterlab/docmanager';
 
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
 import { Contents } from '@jupyterlab/services';
+
+import { IIconRegistry } from '@jupyterlab/ui-components';
 
 import {
   ArrayExt,
   ArrayIterator,
-  IIterator,
   each,
   filter,
   find,
+  IIterator,
   map,
   toArray
 } from '@phosphor/algorithm';
 
 import { MimeData, PromiseDelegate } from '@phosphor/coreutils';
 
-import { Drag, IDragEvent } from '@phosphor/dragdrop';
-
 import { ElementExt } from '@phosphor/domutils';
 
+import { Drag, IDragEvent } from '@phosphor/dragdrop';
+
 import { Message, MessageLoop } from '@phosphor/messaging';
+
+import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
 
 import { FileBrowserModel } from './model';
-import { ISignal, Signal } from '@phosphor/signaling';
 
 /**
  * The class name added to DirListing widget.
@@ -185,7 +188,9 @@ export class DirListing extends Widget {
    */
   constructor(options: DirListing.IOptions) {
     super({
-      node: (options.renderer || DirListing.defaultRenderer).createNode()
+      node: (options.renderer =
+        options.renderer ||
+        new DirListing.Renderer(options.model.iconRegistry)).createNode()
     });
     this.addClass(DIR_LISTING_CLASS);
     this._model = options.model;
@@ -195,7 +200,7 @@ export class DirListing extends Widget {
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
     this._manager = this._model.manager;
-    this._renderer = options.renderer || DirListing.defaultRenderer;
+    this._renderer = options.renderer;
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
@@ -364,29 +369,27 @@ export class DirListing extends Widget {
    *
    * @returns A promise that resolves when the operation is complete.
    */
-  delete(): Promise<void> {
-    let names: string[] = [];
-    each(this._sortedItems, item => {
-      if (this._selection[item.name]) {
-        names.push(item.name);
-      }
+  async delete(): Promise<void> {
+    const items = this._sortedItems.filter(item => this._selection[item.name]);
+
+    if (!items.length) {
+      return;
+    }
+
+    const message =
+      items.length === 1
+        ? `Are you sure you want to permanently delete: ${items[0].name}?`
+        : `Are you sure you want to permanently delete the ${items.length} ` +
+          `files/folders selected?`;
+    const result = await showDialog({
+      title: 'Delete',
+      body: message,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
     });
-    let message = `Are you sure you want to permanently delete the ${names.length} files/folders selected?`;
-    if (names.length === 1) {
-      message = `Are you sure you want to permanently delete: ${names[0]}?`;
+
+    if (!this.isDisposed && result.button.accept) {
+      await this._delete(items.map(item => item.path));
     }
-    if (names.length) {
-      return showDialog({
-        title: 'Delete',
-        body: message,
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
-      }).then(result => {
-        if (!this.isDisposed && result.button.accept) {
-          return this._delete(names);
-        }
-      });
-    }
-    return Promise.resolve(void 0);
   }
 
   /**
@@ -737,11 +740,14 @@ export class DirListing extends Widget {
       content.appendChild(node);
     }
 
-    // Remove extra classes from the nodes.
+    // Remove extra classes/data from the nodes.
     nodes.forEach(item => {
       item.classList.remove(SELECTED_CLASS);
       item.classList.remove(RUNNING_CLASS);
       item.classList.remove(CUT_CLASS);
+      if (item.children[0]) {
+        delete (item.children[0] as HTMLElement).dataset.icon;
+      }
     });
 
     // Add extra classes to item nodes based on widget state.
@@ -922,8 +928,9 @@ export class DirListing extends Widget {
   private _handleOpen(item: Contents.IModel): void {
     this._onItemOpened.emit(item);
     if (item.type === 'directory') {
+      const localPath = this._manager.services.contents.localPath(item.path);
       this._model
-        .cd(item.name)
+        .cd(`/${localPath}`)
         .catch(error => showErrorMessage('Open directory', error));
     } else {
       let path = item.path;
@@ -1328,19 +1335,16 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Delete the files with the given names.
+   * Delete the files with the given paths.
    */
-  private _delete(names: string[]): Promise<void> {
-    const promises: Promise<void>[] = [];
-    const basePath = this._model.path;
-    for (let name of names) {
-      let newPath = PathExt.join(basePath, name);
-      let promise = this._model.manager.deleteFile(newPath).catch(err => {
-        void showErrorMessage('Delete Failed', err);
-      });
-      promises.push(promise);
-    }
-    return Promise.all(promises).then(() => undefined);
+  private async _delete(paths: string[]): Promise<void> {
+    await Promise.all(
+      paths.map(path =>
+        this._model.manager.deleteFile(path).catch(err => {
+          void showErrorMessage('Delete Failed', err);
+        })
+      )
+    );
   }
 
   /**
@@ -1641,6 +1645,10 @@ export namespace DirListing {
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
+    constructor(icoReg: IIconRegistry) {
+      this._iconRegistry = icoReg;
+    }
+
     /**
      * Create the DOM node for a dir listing.
      */
@@ -1760,9 +1768,23 @@ export namespace DirListing {
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       if (fileType) {
-        icon.textContent = fileType.iconLabel || '';
-        icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
+        // add icon as svg node. Can be styled using CSS
+        if (
+          !this._iconRegistry.icon({
+            name: fileType.iconClass,
+            className: ITEM_ICON_CLASS,
+            title: fileType.iconLabel,
+            container: icon,
+            center: true,
+            kind: 'listing'
+          })
+        ) {
+          // add icon as CSS background image. Can't be styled using CSS
+          icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
+          icon.textContent = fileType.iconLabel || '';
+        }
       } else {
+        // use default icon as CSS background image
         icon.textContent = '';
         icon.className = ITEM_ICON_CLASS;
       }
@@ -1846,12 +1868,8 @@ export namespace DirListing {
       node.appendChild(icon);
       return node;
     }
+    _iconRegistry: IIconRegistry;
   }
-
-  /**
-   * The default `IRenderer` instance.
-   */
-  export const defaultRenderer = new Renderer();
 }
 
 /**

@@ -16,7 +16,9 @@ import {
   Session
 } from '@jupyterlab/services';
 
-import { KERNELSPECS, handleRequest, testEmission } from '../utils';
+import { testEmission } from '@jupyterlab/testutils';
+
+import { KERNELSPECS, handleRequest } from '../utils';
 
 class TestManager extends SessionManager {
   intercept: Kernel.ISpecModels | null = null;

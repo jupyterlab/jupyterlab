@@ -60,6 +60,11 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     );
 
     void this.revealed.then(() => {
+      if (this.isDisposed) {
+        // this widget has already been disposed, bail
+        return;
+      }
+
       // Set the document edit mode on initial open if it looks like a new document.
       if (this.content.widgets.length === 1) {
         let cellModel = this.content.widgets[0].model;

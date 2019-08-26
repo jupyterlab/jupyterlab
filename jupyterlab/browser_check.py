@@ -14,6 +14,7 @@ import subprocess
 
 from tornado.ioloop import IOLoop
 from notebook.notebookapp import flags, aliases
+from notebook.utils import urljoin, pathname2url
 from traitlets import Bool
 
 from .labapp import LabApp, get_app_dir
@@ -89,9 +90,16 @@ def run_test(app, func):
             self.log.error(str(e))
             os._exit(1)
 
+    # The entry URL for browser tests is different in notebook >= 6.0,
+    # since that uses a local HTML file to point the user at the app.
+    if hasattr(app, 'browser_open_file'):
+        url = urljoin('file:', pathname2url(app.browser_open_file))
+    else:
+        url = app.display_url
+
     app.log.addHandler(handler)
     pool = ThreadPoolExecutor()
-    future = pool.submit(func, app.display_url)
+    future = pool.submit(func, url)
     IOLoop.current().add_future(future, finished)
 
 

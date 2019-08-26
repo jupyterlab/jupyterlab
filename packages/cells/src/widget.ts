@@ -1018,7 +1018,12 @@ export namespace CodeCell {
       model.outputs.clear();
       return;
     }
-    metadata = { ...metadata, cellId: model.id };
+    let cellId = { cellId: model.id };
+    metadata = {
+      ...model.metadata.toJSON(),
+      ...metadata,
+      ...cellId
+    };
     const { recordTiming } = metadata;
     model.executionCount = null;
     cell.outputHidden = false;

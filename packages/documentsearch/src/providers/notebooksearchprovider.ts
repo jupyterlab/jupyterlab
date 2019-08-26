@@ -32,7 +32,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   }
 
   /**
-   * Initialize the search using the provided options.  Should update the UI
+   * Initialize the search using the provided options. Should update the UI
    * to highlight all matches and "select" whatever the first match should be.
    *
    * @param query A RegExp to be use to perform the search
@@ -52,6 +52,9 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     // new/pasted/deleted cells
     const cellList = this._searchTarget.model.cells;
     cellList.changed.connect(this._restartQuery.bind(this), this);
+
+    // hide the current notebook widget to prevent expensive layout re-calculation operations
+    this._searchTarget.hide();
 
     let indexTotal = 0;
     const allMatches: ISearchMatch[] = [];
@@ -88,8 +91,13 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
           // un-render markdown cells with matches
           this._unRenderedMarkdownCells.push(cell);
         } else if (cellShouldReRender) {
+          // was rendered previously, no need to refresh
           cell.rendered = true;
         }
+      }
+      if (matchesFromCell.length !== 0) {
+        cmSearchProvider.refreshOverlay();
+        this._cellsWithMatches.push(cell);
       }
 
       // update the match indices to reflect the whole document index values
@@ -109,11 +117,44 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       });
     }
 
+    // show the widget again, recalculation of layout will matter again
+    // and so that the next step will scroll correctly to the first match
+    this._searchTarget.show();
+
     this._currentMatch = await this._stepNext(
       this._searchTarget.content.activeCell
     );
+    this._refreshCurrentCellEditor();
+
+    this._refreshCellsEditorsInBackground(this._cellsWithMatches);
 
     return allMatches;
+  }
+
+  /**
+   * Gradually refresh cells in the background so that the user will not
+   * experience frozen interface, `n` cells at a time.
+   */
+  private _refreshCellsEditorsInBackground(cells: Cell[], n: number = 5) {
+    let i = 0;
+
+    let refreshNextNCells = () => {
+      for (let stop = i + n; i < stop && i < cells.length; i++) {
+        cells[i].editor.refresh();
+      }
+      if (i < cells.length) {
+        window.setTimeout(refreshNextNCells, 0);
+      }
+    };
+    window.setTimeout(refreshNextNCells, 0);
+  }
+
+  /**
+   * Refresh the editor in the cell for the current match.
+   */
+  private _refreshCurrentCellEditor() {
+    const notebook = this._searchTarget.content;
+    notebook.activeCell.editor.refresh();
   }
 
   /**
@@ -124,6 +165,8 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    * begin a new search.
    */
   async endQuery(): Promise<void> {
+    this._searchTarget.hide();
+
     const queriesEnded: Promise<void>[] = [];
     this._cmSearchProviders.forEach(({ provider }) => {
       queriesEnded.push(provider.endQuery());
@@ -140,6 +183,16 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     });
     this._unRenderedMarkdownCells = [];
     await Promise.all(queriesEnded);
+    this._searchTarget.show();
+
+    this._refreshCurrentCellEditor();
+    // re-render all non-markdown cells with matches (which were rendered, thus do not need refreshing)
+    this._refreshCellsEditorsInBackground(
+      this._cellsWithMatches.filter(
+        (cell: Cell) => !(cell instanceof MarkdownCell)
+      )
+    );
+    this._cellsWithMatches = [];
   }
 
   /**
@@ -148,6 +201,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    * @returns A promise that resolves when all state has been cleaned up.
    */
   async endSearch(): Promise<void> {
+    this._searchTarget.hide();
     Signal.disconnectBetween(this._searchTarget.model.cells, this);
 
     const index = this._searchTarget.content.activeCellIndex;
@@ -165,9 +219,19 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
 
     this._searchTarget.content.activeCellIndex = index;
     this._searchTarget.content.mode = 'edit';
-    this._searchTarget = null;
     this._currentMatch = null;
     await Promise.all(searchEnded);
+    this._searchTarget.show();
+    this._refreshCurrentCellEditor();
+    this._searchTarget = null;
+
+    // re-render all non-markdown cells with matches (which were rendered, thus do not need refreshing)
+    this._refreshCellsEditorsInBackground(
+      this._cellsWithMatches.filter(
+        (cell: Cell) => !(cell instanceof MarkdownCell)
+      )
+    );
+    this._cellsWithMatches = [];
   }
 
   /**
@@ -367,5 +431,6 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   private _cmSearchProviders: ICellSearchPair[] = [];
   private _currentMatch: ISearchMatch;
   private _unRenderedMarkdownCells: MarkdownCell[] = [];
+  private _cellsWithMatches: Cell[] = [];
   private _changed = new Signal<this, void>(this);
 }

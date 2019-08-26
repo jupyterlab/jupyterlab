@@ -21,10 +21,11 @@ class Builder(object):
     _kill_event = None
     _future = None
 
-    def __init__(self, log, core_mode, app_dir):
+    def __init__(self, log, core_mode, app_dir, core_config=None):
         self.log = log
         self.core_mode = core_mode
         self.app_dir = app_dir
+        self.core_config = core_config
 
     @gen.coroutine
     def get_status(self):
@@ -34,7 +35,8 @@ class Builder(object):
             raise gen.Return(dict(status='building', message=''))
 
         try:
-            messages = yield self._run_build_check(self.app_dir, self.log)
+            messages = yield self._run_build_check(
+                self.app_dir, self.log, self.core_config)
             status = 'needed' if messages else 'stable'
             if messages:
                 self.log.warn('Build recommended')
@@ -60,7 +62,8 @@ class Builder(object):
             self.building = True
             self._kill_event = evt = Event()
             try:
-                yield self._run_build(self.app_dir, self.log, evt)
+                yield self._run_build(
+                    self.app_dir, self.log, evt, self.core_config)
                 future.set_result(True)
             except Exception as e:
                 if str(e) == 'Aborted':
@@ -84,12 +87,15 @@ class Builder(object):
         self.canceled = True
 
     @run_on_executor
-    def _run_build_check(self, app_dir, logger):
-        return build_check(app_dir=app_dir, logger=logger)
+    def _run_build_check(self, app_dir, logger, core_config):
+        return build_check(
+            app_dir=app_dir, logger=logger, core_config=core_config)
 
     @run_on_executor
-    def _run_build(self, app_dir, logger, kill_event):
-        kwargs = dict(app_dir=app_dir, logger=logger, kill_event=kill_event, command='build')
+    def _run_build(self, app_dir, logger, kill_event, core_config):
+        kwargs = dict(
+            app_dir=app_dir, logger=logger, kill_event=kill_event,
+            core_config=core_config, command='build')
         try:
             return build(**kwargs)
         except Exception as e:
@@ -114,7 +120,7 @@ class BuildHandler(APIHandler):
     @web.authenticated
     @gen.coroutine
     def delete(self):
-        self.log.warn('Canceling build')
+        self.log.warning('Canceling build')
         try:
             yield self.builder.cancel()
         except Exception as e:
