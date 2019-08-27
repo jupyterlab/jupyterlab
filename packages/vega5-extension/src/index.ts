@@ -43,11 +43,6 @@ export const VEGA_MIME_TYPE = 'application/vnd.vega.v5+json';
 export const VEGALITE_MIME_TYPE = 'application/vnd.vegalite.v3+json';
 
 /**
- * A regex to test for a protocol in a URI.
- */
-const protocolRegex = /^[A-Za-z]:/;
-
-/**
  * A widget for rendering Vega or Vega-Lite data, for usage with rendermime.
  */
 export class RenderedVega extends Widget implements IRenderMime.IRenderer {
@@ -96,9 +91,11 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
       http: { credentials: 'same-origin' }
     });
     const sanitize = async (uri: string, options: any) => {
-      // If the uri is a path, get the download URI
-      if (!protocolRegex.test(uri)) {
-        uri = await this._resolver.getDownloadUrl(uri);
+      // Use the resolver for any URIs it wants to handle
+      const resolver = this._resolver;
+      if (resolver.isLocal(uri)) {
+        const absPath = await resolver.resolveUrl(uri);
+        uri = await resolver.getDownloadUrl(absPath);
       }
       return loader.sanitize(uri, options);
     };
