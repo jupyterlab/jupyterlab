@@ -24,7 +24,7 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.IModel }) => {
   const [breakpoints, setBreakpoints] = useState(model.breakpoints);
   const [active, setActive] = useState(model.isActive);
 
-  model.activesChange.connect((_: Breakpoints.IModel, update: boolean) => {
+  model.activeChanged.connect((_: Breakpoints.IModel, update: boolean) => {
     console.log(update);
     setActive(update);
   });
