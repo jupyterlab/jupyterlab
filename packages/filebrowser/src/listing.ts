@@ -1219,6 +1219,7 @@ export class DirListing extends Widget {
                 path,
                 void 0,
                 void 0,
+                void 0,
                 options
               );
               this._manager.openOrReveal(item.path);

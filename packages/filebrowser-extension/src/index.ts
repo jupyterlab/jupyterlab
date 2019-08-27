@@ -548,7 +548,8 @@ function addCommands(
 
             return commands.execute('docmanager:open', {
               factory: factory,
-              path: item.path
+              path: item.path,
+              mimetype: item.mimetype
             });
           })
         )
@@ -790,7 +791,7 @@ function addCommands(
 
     static _getFactories(item: Contents.IModel): Array<string> {
       let factories = registry
-        .preferredWidgetFactories(item.path)
+        .preferredWidgetFactories(item.path, item.mimetype)
         .map(f => f.name);
       const notebookFactory = registry.getWidgetFactory('notebook').name;
       if (

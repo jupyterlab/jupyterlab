@@ -328,6 +328,7 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
+    mimetype?: string,
     options?: DocumentRegistry.IOpenOptions
   ): IDocumentWidget | undefined {
     return this._createOrOpenDocument(
@@ -335,6 +336,7 @@ export class DocumentManager implements IDocumentManager {
       path,
       widgetName,
       kernel,
+      mimetype,
       options
     );
   }
@@ -359,6 +361,7 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
+    mimetype?: string,
     options?: DocumentRegistry.IOpenOptions
   ): IDocumentWidget | undefined {
     let widget = this.findWidget(path, widgetName);
@@ -366,7 +369,7 @@ export class DocumentManager implements IDocumentManager {
       this._opener.open(widget, options || {});
       return widget;
     }
-    return this.open(path, widgetName, kernel, options || {});
+    return this.open(path, widgetName, kernel, mimetype, options || {});
   }
 
   /**
@@ -494,11 +497,12 @@ export class DocumentManager implements IDocumentManager {
    */
   private _widgetFactoryFor(
     path: string,
-    widgetName: string
+    widgetName: string,
+    mimetype?: string
   ): DocumentRegistry.WidgetFactory | undefined {
     let { registry } = this;
     if (widgetName === 'default') {
-      let factory = registry.defaultWidgetFactory(path);
+      let factory = registry.defaultWidgetFactory(path, mimetype);
       if (!factory) {
         return undefined;
       }
@@ -520,9 +524,10 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
+    mimetype?: string,
     options?: DocumentRegistry.IOpenOptions
   ): IDocumentWidget | undefined {
-    let widgetFactory = this._widgetFactoryFor(path, widgetName);
+    let widgetFactory = this._widgetFactoryFor(path, widgetName, mimetype);
     if (!widgetFactory) {
       return undefined;
     }

@@ -150,7 +150,8 @@ export interface IDocumentManager extends IDisposable {
    */
   findWidget(
     path: string,
-    widgetName?: string | null
+    widgetName?: string | null,
+    mimetype?: string
   ): IDocumentWidget | undefined;
 
   /**
@@ -179,6 +180,7 @@ export interface IDocumentManager extends IDisposable {
     path: string,
     widgetName?: string,
     kernel?: Partial<Kernel.IModel>,
+    mimetype?: string,
     options?: DocumentRegistry.IOpenOptions
   ): IDocumentWidget | undefined;
 
@@ -202,6 +204,7 @@ export interface IDocumentManager extends IDisposable {
     path: string,
     widgetName?: string,
     kernel?: Partial<Kernel.IModel>,
+    mimetype?: string,
     options?: DocumentRegistry.IOpenOptions
   ): IDocumentWidget | undefined;
 

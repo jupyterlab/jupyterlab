@@ -298,6 +298,8 @@ export class DocumentRegistry implements IDisposable {
    *
    * @param path - The file path to filter the results.
    *
+   * @param mimetype - The mimetype of the file.
+   *
    * @returns A new array of widget factories.
    *
    * #### Notes
@@ -311,11 +313,14 @@ export class DocumentRegistry implements IDisposable {
    * - all other path-specific factories
    * - all other global factories
    */
-  preferredWidgetFactories(path: string): DocumentRegistry.WidgetFactory[] {
+  preferredWidgetFactories(
+    path: string,
+    mimetype?: string
+  ): DocumentRegistry.WidgetFactory[] {
     let factories = new Set<string>();
 
     // Get the ordered matching file types.
-    let fts = this.getFileTypesForPath(PathExt.basename(path));
+    let fts = this.getFileTypesForPath(PathExt.basename(path), mimetype);
 
     // Start with any user overrides for the defaults.
     fts.forEach(ft => {
@@ -416,11 +421,14 @@ export class DocumentRegistry implements IDisposable {
    * #### Notes
    * This is equivalent to the first value in [[preferredWidgetFactories]].
    */
-  defaultWidgetFactory(path?: string): DocumentRegistry.WidgetFactory {
-    if (!path) {
+  defaultWidgetFactory(
+    path?: string,
+    mimetype?: string
+  ): DocumentRegistry.WidgetFactory {
+    if (!path && !mimetype) {
       return this._widgetFactories[this._defaultWidgetFactory];
     }
-    return this.preferredWidgetFactories(path)[0];
+    return this.preferredWidgetFactories(path, mimetype)[0];
   }
 
   /**
@@ -613,7 +621,7 @@ export class DocumentRegistry implements IDisposable {
         // Find the best matching extension.
         if (model.name || model.path) {
           let name = model.name || PathExt.basename(model.path);
-          let fts = this.getFileTypesForPath(name);
+          let fts = this.getFileTypesForPath(name, model.mimetype);
           if (fts.length > 0) {
             return fts[0];
           }
@@ -629,12 +637,23 @@ export class DocumentRegistry implements IDisposable {
    *
    * @returns An ordered list of matching file types.
    */
-  getFileTypesForPath(path: string): DocumentRegistry.IFileType[] {
+  getFileTypesForPath(
+    path: string,
+    mimetype?: string
+  ): DocumentRegistry.IFileType[] {
     let fts: DocumentRegistry.IFileType[] = [];
     let name = PathExt.basename(path);
 
-    // Look for a pattern match first.
+    // Look for a mimetype match first, if supplied
     let ft = find(this._fileTypes, ft => {
+      return ft.mimeTypes.includes(mimetype);
+    });
+    if (ft) {
+      fts.push(ft);
+    }
+
+    // Next, look for a pattern match
+    ft = find(this._fileTypes, ft => {
       return ft.pattern && ft.pattern.match(name) !== null;
     });
     if (ft) {
@@ -963,6 +982,11 @@ export namespace DocumentRegistry {
      * The file types the widget can view.
      */
     readonly fileTypes: ReadonlyArray<string>;
+
+    /**
+     * The mime types the widget can view.
+     */
+    readonly mimeTypes?: ReadonlyArray<string>;
 
     /**
      * The file types for which the factory should be the default.

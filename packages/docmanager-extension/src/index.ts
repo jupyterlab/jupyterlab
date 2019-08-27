@@ -416,13 +416,16 @@ function addCommands(
     execute: args => {
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
+      const mimetype = (args['mimetype'] as string) || void 0;
       const factory = (args['factory'] as string) || void 0;
       const kernel = (args['kernel'] as Kernel.IModel) || void 0;
       const options =
         (args['options'] as DocumentRegistry.IOpenOptions) || void 0;
       return docManager.services.contents
         .get(path, { content: false })
-        .then(() => docManager.openOrReveal(path, factory, kernel, options));
+        .then(() =>
+          docManager.openOrReveal(path, factory, kernel, mimetype, options)
+        );
     },
     icon: args => (args['icon'] as string) || '',
     label: args => (args['label'] || args['factory']) as string,
