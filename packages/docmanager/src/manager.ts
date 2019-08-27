@@ -270,19 +270,20 @@ export class DocumentManager implements IDocumentManager {
    */
   findWidget(
     path: string,
-    widgetName: string | null = 'default'
+    widgetName: string | null = 'default',
+    mimetype?: string
   ): IDocumentWidget | undefined {
     let newPath = PathExt.normalize(path);
     let widgetNames = [widgetName];
     if (widgetName === 'default') {
-      let factory = this.registry.defaultWidgetFactory(newPath);
+      let factory = this.registry.defaultWidgetFactory(newPath, mimetype);
       if (!factory) {
         return undefined;
       }
       widgetNames = [factory.name];
     } else if (widgetName === null) {
       widgetNames = this.registry
-        .preferredWidgetFactories(newPath)
+        .preferredWidgetFactories(newPath, mimetype)
         .map(f => f.name);
     }
 
@@ -364,7 +365,7 @@ export class DocumentManager implements IDocumentManager {
     mimetype?: string,
     options?: DocumentRegistry.IOpenOptions
   ): IDocumentWidget | undefined {
-    let widget = this.findWidget(path, widgetName);
+    let widget = this.findWidget(path, widgetName, mimetype);
     if (widget) {
       this._opener.open(widget, options || {});
       return widget;

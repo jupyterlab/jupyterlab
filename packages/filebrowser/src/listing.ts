@@ -1202,9 +1202,9 @@ export class DirListing extends Widget {
           return;
         }
         let path = item.path;
-        let widget = this._manager.findWidget(path);
+        let widget = this._manager.findWidget(path, undefined, item.mimetype);
         if (!widget) {
-          widget = this._manager.open(item.path);
+          widget = this._manager.open(item.path, void 0, void 0, item.mimetype);
         }
         if (otherPaths.length) {
           const firstWidgetPlaced = new PromiseDelegate<void>();
@@ -1222,7 +1222,12 @@ export class DirListing extends Widget {
                 void 0,
                 options
               );
-              this._manager.openOrReveal(item.path);
+              this._manager.openOrReveal(
+                item.path,
+                void 0,
+                void 0,
+                item.mimetype
+              );
             });
           });
           firstWidgetPlaced.resolve(void 0);

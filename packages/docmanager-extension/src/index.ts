@@ -39,7 +39,7 @@ import { JSONExt } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
-import { Widget } from '@phosphor/widgets';
+import { Title, Widget } from '@phosphor/widgets';
 
 /**
  * The command IDs used by the document manager plugin.
@@ -110,7 +110,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
         // Handle dirty state for open documents.
         let context = docManager.contextForWidget(widget);
         if (!contexts.has(context)) {
-          handleContext(status, context);
+          handleContext(status, context, widget.title);
           contexts.add(context);
         }
       }
@@ -632,7 +632,7 @@ function addLabCommands(
   const contextMenuWidget = (): Widget => {
     const pathRe = /[Pp]ath:\s?(.*)\n?/;
     const test = (node: HTMLElement) =>
-      node['title'] && !!node['title'].match(pathRe);
+      node.dataset.type && node.dataset.type === 'document-title';
     const node = app.contextMenuHitTest(test);
 
     if (!node) {
@@ -640,7 +640,7 @@ function addLabCommands(
       return labShell.currentWidget;
     }
     const pathMatch = node['title'].match(pathRe);
-    return docManager.findWidget(pathMatch[1], null);
+    return docManager.findWidget(pathMatch[1], null, node.dataset.mimetype);
   };
 
   // Returns `true` if the current widget has a document context.
@@ -716,7 +716,8 @@ function addLabCommands(
  */
 function handleContext(
   status: ILabStatus,
-  context: DocumentRegistry.Context
+  context: DocumentRegistry.Context,
+  title: Title<Widget>
 ): void {
   let disposable: IDisposable | null = null;
   let onStateChanged = (sender: any, args: IChangedArgs<any>) => {
@@ -735,6 +736,28 @@ function handleContext(
     context.model.stateChanged.connect(onStateChanged);
     if (context.model.dirty) {
       disposable = status.setDirty();
+    }
+
+    // add the mimetype to the title dataset, if present
+    if (context.contentsModel) {
+      if (
+        title.dataset.mimetype &&
+        title.dataset.mimetype !== context.contentsModel.mimetype
+      ) {
+        console.warn(
+          `mimetype of file did not match in all contexts.\n` +
+            `context.path: ${context.path},\n` +
+            `title.dataset.mimetype: ${title.dataset.mimetype},\n` +
+            `context.contentsModel.mimetype: ${context.contentsModel.mimetype}`
+        );
+
+        return;
+      }
+
+      title.dataset = {
+        mimetype: context.contentsModel.mimetype,
+        ...title.dataset
+      };
     }
   });
   context.disposed.connect(() => {
