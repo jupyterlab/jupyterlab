@@ -585,7 +585,7 @@ export class ClientSession implements IClientSession {
     }
     let session = this._session;
     if (session && session.status !== 'dead') {
-      return session.changeKernel(options);
+      return session.changeKernel(options).catch(err => { this._handleSessionError(err); return Promise.reject(err);});
     } else {
       return this._startSession(options);
     }
@@ -623,11 +623,7 @@ export class ClientSession implements IClientSession {
           });
         }
         if (model) {
-          return this._changeKernel(model).then(() => undefined)
-          .catch( err => { 
-            this._handleSessionError(err);
-            return Promise.reject(err);
-          });
+          return this._changeKernel(model).then(() => undefined);
         }
       })
       .then(() => {
