@@ -765,28 +765,6 @@ function handleContext(
   });
 }
 
-// function handleTitle(title: Title<Widget>, mimetype: string) {
-//   if (
-//     title.dataset.mimetype &&
-//     title.dataset.mimetype !== mimetype
-//   ) {
-//     console.warn(
-//       `mimetype of document title did not match in all contexts.\n` +
-//       `title.label: ${title.label},\n` +
-//       `title.dataset.mimetype: ${title.dataset.mimetype},\n` +
-//       `mimetype: ${mimetype}`
-//     );
-//
-//     return;
-//   }
-//
-//   title.dataset = {
-//     ...title.dataset,
-//     mimetype,
-//     type: 'document-title'
-//   };
-// }
-
 /**
  * A namespace for private module data.
  */
