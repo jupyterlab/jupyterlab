@@ -32,6 +32,17 @@ export class Breakpoints extends Panel {
         tooltip: 'Deactivate Breakpoints'
       })
     );
+
+    header.toolbar.addItem(
+      'closeAll',
+      new ToolbarButton({
+        iconClassName: 'jp-CloseAllIcon',
+        onClick: () => {
+          this.model.breakpoints = [];
+        },
+        tooltip: 'Remove All Breakpoints'
+      })
+    );
   }
 
   readonly body: Widget;

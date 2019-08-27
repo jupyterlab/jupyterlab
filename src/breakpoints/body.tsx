@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { Breakpoints } from '.';
 import { ReactWidget } from '@jupyterlab/apputils';
+import { ArrayExt } from '@phosphor/algorithm';
 
 export class Body extends ReactWidget {
   constructor(model: Breakpoints.IModel) {
@@ -20,13 +21,22 @@ export class Body extends ReactWidget {
 }
 
 const BreakpointsComponent = ({ model }: { model: Breakpoints.IModel }) => {
-  const [breakpoints] = useState(model.breakpoints);
+  const [breakpoints, setBreakpoints] = useState(model.breakpoints);
   const [active, setActive] = useState(model.isActive);
 
   model.activesChange.connect((_: Breakpoints.IModel, update: boolean) => {
     console.log(update);
     setActive(update);
   });
+
+  model.breakpointsChanged.connect(
+    (_: Breakpoints.IModel, updates: Breakpoints.IBreakpoint[]) => {
+      if (ArrayExt.shallowEqual(breakpoints, updates)) {
+        return;
+      }
+      setBreakpoints(updates);
+    }
+  );
 
   return (
     <div>
