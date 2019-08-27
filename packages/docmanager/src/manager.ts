@@ -271,19 +271,22 @@ export class DocumentManager implements IDocumentManager {
   findWidget(
     path: string,
     widgetName: string | null = 'default',
-    mimetype?: string
+    options: DocumentRegistry.IFindOptions = {}
   ): IDocumentWidget | undefined {
     let newPath = PathExt.normalize(path);
     let widgetNames = [widgetName];
     if (widgetName === 'default') {
-      let factory = this.registry.defaultWidgetFactory(newPath, mimetype);
+      let factory = this.registry.defaultWidgetFactory(
+        newPath,
+        options.mimetype
+      );
       if (!factory) {
         return undefined;
       }
       widgetNames = [factory.name];
     } else if (widgetName === null) {
       widgetNames = this.registry
-        .preferredWidgetFactories(newPath, mimetype)
+        .preferredWidgetFactories(newPath, options.mimetype)
         .map(f => f.name);
     }
 
@@ -329,7 +332,6 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
-    mimetype?: string,
     options?: DocumentRegistry.IOpenOptions
   ): IDocumentWidget | undefined {
     return this._createOrOpenDocument(
@@ -337,7 +339,6 @@ export class DocumentManager implements IDocumentManager {
       path,
       widgetName,
       kernel,
-      mimetype,
       options
     );
   }
@@ -362,15 +363,15 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
-    mimetype?: string,
-    options?: DocumentRegistry.IOpenOptions
+    options: DocumentRegistry.IOpenOptions = {}
   ): IDocumentWidget | undefined {
-    let widget = this.findWidget(path, widgetName, mimetype);
+    const mimetype = options.mimetype;
+    let widget = this.findWidget(path, widgetName, { mimetype });
     if (widget) {
-      this._opener.open(widget, options || {});
+      this._opener.open(widget, options);
       return widget;
     }
-    return this.open(path, widgetName, kernel, mimetype, options || {});
+    return this.open(path, widgetName, kernel, options);
   }
 
   /**
@@ -525,10 +526,13 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
-    mimetype?: string,
-    options?: DocumentRegistry.IOpenOptions
+    options: DocumentRegistry.IOpenOptions = {}
   ): IDocumentWidget | undefined {
-    let widgetFactory = this._widgetFactoryFor(path, widgetName, mimetype);
+    let widgetFactory = this._widgetFactoryFor(
+      path,
+      widgetName,
+      options.mimetype
+    );
     if (!widgetFactory) {
       return undefined;
     }

@@ -549,7 +549,7 @@ function addCommands(
             return commands.execute('docmanager:open', {
               factory: factory,
               path: item.path,
-              mimetype: item.mimetype
+              options: { mimetype: item.mimetype }
             });
           })
         )

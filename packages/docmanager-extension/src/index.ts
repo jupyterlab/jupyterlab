@@ -416,16 +416,13 @@ function addCommands(
     execute: args => {
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
-      const mimetype = (args['mimetype'] as string) || void 0;
       const factory = (args['factory'] as string) || void 0;
       const kernel = (args['kernel'] as Kernel.IModel) || void 0;
       const options =
         (args['options'] as DocumentRegistry.IOpenOptions) || void 0;
       return docManager.services.contents
         .get(path, { content: false })
-        .then(() =>
-          docManager.openOrReveal(path, factory, kernel, mimetype, options)
-        );
+        .then(() => docManager.openOrReveal(path, factory, kernel, options));
     },
     icon: args => (args['icon'] as string) || '',
     label: args => (args['label'] || args['factory']) as string,
@@ -640,7 +637,8 @@ function addLabCommands(
       return labShell.currentWidget;
     }
     const pathMatch = node['title'].match(pathRe);
-    return docManager.findWidget(pathMatch[1], null, node.dataset.mimetype);
+    const options = { mimetype: node.dataset.mimetype };
+    return docManager.findWidget(pathMatch[1], null, options);
   };
 
   // Returns `true` if the current widget has a document context.
@@ -766,6 +764,28 @@ function handleContext(
     }
   });
 }
+
+// function handleTitle(title: Title<Widget>, mimetype: string) {
+//   if (
+//     title.dataset.mimetype &&
+//     title.dataset.mimetype !== mimetype
+//   ) {
+//     console.warn(
+//       `mimetype of document title did not match in all contexts.\n` +
+//       `title.label: ${title.label},\n` +
+//       `title.dataset.mimetype: ${title.dataset.mimetype},\n` +
+//       `mimetype: ${mimetype}`
+//     );
+//
+//     return;
+//   }
+//
+//   title.dataset = {
+//     ...title.dataset,
+//     mimetype,
+//     type: 'document-title'
+//   };
+// }
 
 /**
  * A namespace for private module data.

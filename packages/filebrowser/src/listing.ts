@@ -934,7 +934,9 @@ export class DirListing extends Widget {
         .catch(error => showErrorMessage('Open directory', error));
     } else {
       let path = item.path;
-      this._manager.openOrReveal(path);
+      this._manager.openOrReveal(path, void 0, void 0, {
+        mimetype: item.mimetype
+      });
     }
   }
   /**
@@ -1202,9 +1204,10 @@ export class DirListing extends Widget {
           return;
         }
         let path = item.path;
-        let widget = this._manager.findWidget(path, undefined, item.mimetype);
+        const options = { mimetype: item.mimetype };
+        let widget = this._manager.findWidget(path, undefined, options);
         if (!widget) {
-          widget = this._manager.open(item.path, void 0, void 0, item.mimetype);
+          widget = this._manager.open(item.path, void 0, void 0, options);
         }
         if (otherPaths.length) {
           const firstWidgetPlaced = new PromiseDelegate<void>();
@@ -1213,21 +1216,18 @@ export class DirListing extends Widget {
             otherPaths.forEach(path => {
               const options: DocumentRegistry.IOpenOptions = {
                 ref: prevWidget.id,
-                mode: 'tab-after'
+                mode: 'tab-after',
+                mimetype: item.mimetype
               };
               prevWidget = this._manager.openOrReveal(
                 path,
                 void 0,
                 void 0,
-                void 0,
                 options
               );
-              this._manager.openOrReveal(
-                item.path,
-                void 0,
-                void 0,
-                item.mimetype
-              );
+              this._manager.openOrReveal(item.path, void 0, void 0, {
+                mimetype: item.mimetype
+              });
             });
           });
           firstWidgetPlaced.resolve(void 0);

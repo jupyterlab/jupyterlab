@@ -1032,6 +1032,16 @@ export namespace DocumentRegistry {
   }
 
   /**
+   * The options used to find a widget.
+   */
+  export interface IFindOptions {
+    /**
+     * The mimetype of the file associated with the widget, if known
+     */
+    mimetype?: string;
+  }
+
+  /**
    * The options used to open a widget.
    */
   export interface IOpenOptions {
@@ -1062,6 +1072,11 @@ export namespace DocumentRegistry {
      * This field may be used or ignored depending on shell implementation.
      */
     rank?: number;
+
+    /**
+     * The mimetype of the file associated with the widget, if known
+     */
+    mimetype?: string;
   }
 
   /**
