@@ -83,7 +83,7 @@ export namespace Breakpoints {
       return this._breakpointsChanged;
     }
 
-    get activesChange(): ISignal<this, boolean> {
+    get activeChanged(): ISignal<this, boolean> {
       return this._activeChange;
     }
 
