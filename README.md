@@ -39,8 +39,6 @@ XEUS_LOG=1 jupyter lab --no-browser --watch
 
 ### Tests
 
-Make sure `xeus-python` is installed and `jupyter --paths` points to where the kernel is installed.
-
 To run the tests:
 
 ```bash
