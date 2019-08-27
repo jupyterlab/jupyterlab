@@ -541,6 +541,17 @@ function addCommands(
       return Promise.all(
         toArray(
           map(widget.selectedItems(), item => {
+            // check for nonstandard content type
+            const ft = widget.model.manager.registry.getFileTypeForModel(item);
+            if (ft && ft.contentType === 'dirlike') {
+              // if needed, fix the drive prefix of the path
+              const path =
+                ft.driveName && !item.path.startsWith(ft.driveName)
+                  ? `${ft.driveName}:${item.path}`
+                  : item.path;
+              return commands.execute(CommandIDs.goToPath, { path });
+            }
+
             if (item.type === 'directory') {
               const localPath = contents.localPath(item.path);
               return widget.model.cd(`/${localPath}`);

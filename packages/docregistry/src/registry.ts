@@ -1167,6 +1167,11 @@ export namespace DocumentRegistry {
     readonly iconLabel?: string;
 
     /**
+     * The name of the drive associated with this file type, if any
+     */
+    readonly driveName?: string;
+
+    /**
      * The content type of the new file.
      */
     readonly contentType: Contents.ContentType;
