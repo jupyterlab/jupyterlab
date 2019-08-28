@@ -26,11 +26,11 @@ export class Breakpoints extends Panel {
       'deactivate',
       new ToolbarButton({
         iconClassName: 'jp-DebuggerDeactivateIcon',
-        tooltip: `${this.isAllAcitve ? 'Deactivate' : 'Activate'} Breakpoints`,
+        tooltip: `${this.isAllActive ? 'Deactivate' : 'Activate'} Breakpoints`,
         onClick: () => {
-          this.isAllAcitve = !this.isAllAcitve;
+          this.isAllActive = !this.isAllActive;
           this.model.breakpoints.map((breakpoint: Breakpoints.IBreakpoint) => {
-            breakpoint.active = this.isAllAcitve;
+            breakpoint.active = this.isAllActive;
             this.model.breakpoint = breakpoint;
           });
         }
@@ -49,7 +49,7 @@ export class Breakpoints extends Panel {
     );
   }
 
-  private isAllAcitve = true;
+  private isAllActive = true;
   readonly body: Widget;
   readonly model: Breakpoints.IModel;
 }
