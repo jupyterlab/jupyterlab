@@ -50,12 +50,14 @@ export interface ILogger {
    * A signal emitted when the log changes.
    */
   readonly logChanged: ISignal<this, ILoggerChange>;
+  readonly source: string;
   readonly rendermime: IRenderMimeRegistry;
   readonly outputAreaModel: OutputAreaModel;
 }
 
 export class Logger implements ILogger {
-  constructor(rendermime: IRenderMimeRegistry) {
+  constructor(source: string, rendermime: IRenderMimeRegistry) {
+    this.source = source;
     this.rendermime = rendermime;
   }
 
@@ -84,6 +86,7 @@ export class Logger implements ILogger {
 
   private _count = 0;
   private _logChanged = new Signal<this, ILoggerChange>(this);
+  readonly source: string;
   readonly outputAreaModel = new OutputAreaModel();
   readonly rendermime: IRenderMimeRegistry;
 }
@@ -100,7 +103,7 @@ export class OutputLogRegistry implements IOutputLogRegistry {
         `Output log registry already has a logger for source name ${name}`
       );
     }
-    this._logs.set(name, new Logger(rendermime));
+    this._logs.set(name, new Logger(name, rendermime));
     return new DisposableDelegate(() => {
       this._logs.delete(name);
     });
