@@ -287,7 +287,7 @@ export abstract class ABCWidgetFactory<
     this._defaultRenderedMimeTypes = (
       options.defaultRenderedMimeTypes || []
     ).slice();
-    this._fileTypes = options.fileTypes.slice();
+    this._fileTypes = (options.fileTypes || []).slice();
     this._mimeTypes = (options.mimeTypes || []).slice();
     this._modelName = options.modelName || 'text';
     this._preferKernel = !!options.preferKernel;
