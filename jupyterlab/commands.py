@@ -45,8 +45,8 @@ DEV_DIR = osp.abspath(os.path.join(HERE, '..', 'dev_mode'))
 PIN_PREFIX = 'pin@'
 
 
-# Regex for default Yarn registry used in default yarn.lock
-YARN_DEFAULT_REGISTRY = r'https://registry\.yarnpkg\.com'
+# Default Yarn registry used in default yarn.lock
+YARN_DEFAULT_REGISTRY = 'https://registry.yarnpkg.com'
 
 
 class ProgressProcess(Process):
@@ -359,8 +359,6 @@ def watch(app_dir=None, logger=None, core_config=None, app_options=None):
         The application directory.
     logger: :class:`~logger.Logger`, optional
         The logger instance.
-    yarn_registry: string, optional
-        The Yarn registry to use for build JupyterLab.
 
     Returns
     -------
@@ -442,19 +440,13 @@ def build(app_dir=None, name=None, version=None, static_url=None,
           logger=None, command='build:prod', kill_event=None,
           clean_staging=False, core_config=None, app_options=None):
     """Build the JupyterLab application.
-
-    Parameters
-    ----------
-    yarn_registry: string, optional
-        The Yarn registry to use for build JupyterLab.
     """
     app_options = _ensure_options(
         app_options, app_dir=app_dir, logger=logger, core_config=core_config)
     _node_check(app_options.logger)
     handler = _AppHandler(app_options)
     return handler.build(name=name, version=version, static_url=static_url,
-                         command=command, clean_staging=clean_staging, 
-                         yarn_registry=yarn_registry)
+                         command=command, clean_staging=clean_staging)
 
 
 def get_app_info(app_dir=None, logger=None, core_config=None, app_options=None):
@@ -573,12 +565,8 @@ class _AppHandler(object):
         """
         self.app_dir = options.app_dir
         self.sys_dir = get_app_dir() if options.use_sys_dir else self.app_dir
-        self.logger = options.logger
         self.core_data = options.core_config._data
-        self.info = self._get_app_info()
-        self.kill_event = options.kill_event
-        # TODO: Make this configurable
-        self.registry = 'https://registry.npmjs.org'
+        self.registry = registry or 'https://registry.npmjs.org'
 
     def install_extension(self, extension, existing=None, pin=None):
         """Install an extension package into JupyterLab.
@@ -627,14 +615,8 @@ class _AppHandler(object):
         return True
 
     def build(self, name=None, version=None, static_url=None,
-              command='build:prod:minimize', clean_staging=False,
-              yarn_registry=None):
+              command='build:prod:minimize', clean_staging=False):
         """Build the application.
-
-        Parameters
-        ----------
-        yarn_registry: string, optional
-            The Yarn registry to use for build JupyterLab.
         """
         # resolve the build type
         parts = command.split(':')
@@ -652,8 +634,7 @@ class _AppHandler(object):
 
         self._populate_staging(
             name=name, version=version, static_url=static_url,
-            clean=clean_staging, yarn_registry=yarn_registry
-        )
+            clean=clean_staging)
 
         staging = pjoin(app_dir, 'staging')
 
@@ -673,18 +654,13 @@ class _AppHandler(object):
             self.logger.debug(msg)
             raise RuntimeError(msg)
 
-    def watch(self, yarn_registry=None):
+    def watch(self):
         """Start the application watcher and then run the watch in
         the background.
-
-        Parameters
-        ----------
-        yarn_registry: string, optional
-            The Yarn registry to use for build JupyterLab.
         """
         staging = pjoin(self.app_dir, 'staging')
 
-        self._populate_staging(yarn_registry=yarn_registry)
+        self._populate_staging()
 
         # Make sure packages are installed.
         self._run(['node', YARN_PATH, 'install'], cwd=staging)
@@ -1082,7 +1058,7 @@ class _AppHandler(object):
         return info
 
     def _populate_staging(self, name=None, version=None, static_url=None,
-                          clean=False, yarn_registry=None):
+                          clean=False):
         """Set up the assets in the staging directory.
         """
         app_dir = self.app_dir
@@ -1182,10 +1158,10 @@ class _AppHandler(object):
         lock_path = pjoin(staging, 'yarn.lock')
         if not osp.exists(lock_path):
             lock_template = pjoin(HERE, 'staging', 'yarn.lock')
-            if yarn_registry is not None:  # Replace on the fly the yarn repository see #3658
+            if self.registry != YARN_DEFAULT_REGISTRY:  # Replace on the fly the yarn repository see #3658
                 with open(lock_template) as f:
                     template = f.read()
-                template = re.sub(YARN_DEFAULT_REGISTRY, yarn_registry.strip("/"), template)
+                template = template.replace(YARN_DEFAULT_REGISTRY, self.registry.strip("/"))
                 with open(lock_path, 'w+') as f:
                     f.write(template)
             else:
@@ -1765,6 +1741,35 @@ def _node_check(logger):
         ver = data['engines']['node']
         msg = 'Please install nodejs %s before continuing. nodejs may be installed using conda or directly from the nodejs website.' % ver
         raise ValueError(msg)
+
+def _yarn_config(logger):
+    """Get the yarn configuration.
+    
+    Returns
+    -------
+    {"yarn config": dict, "npm config": dict} if unsuccessfull the subdictionary are empty
+    """
+    node = which('node')
+    try:
+        output_binary = subprocess.check_output([node, YARN_PATH, 'config', 'list', '--json'], cwd=HERE)
+        output = output_binary.decode('utf-8')
+        configuration = {}
+        lines = iter(output.splitlines())
+        try:
+            for line in lines:
+                info = json.loads(line)
+                if info["type"] == "info":
+                    key = info["data"]
+                    inspect = json.loads(next(lines))
+                    if inspect["type"] == "inspect":
+                        configuration[key] = inspect["data"]
+        except StopIteration:
+            pass
+        logger.debug("Yarn configuration loaded.")
+        return configuration
+    except Exception as e:
+        logger.error("Fail to get yarn configuration. {!s}".format(e))
+        return {"yarn config": {}, "npm config": {}}
 
 
 def _ensure_logger(logger=None):

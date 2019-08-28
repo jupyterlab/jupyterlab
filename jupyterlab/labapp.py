@@ -32,7 +32,6 @@ build_aliases['name'] = 'LabBuildApp.name'
 build_aliases['version'] = 'LabBuildApp.version'
 build_aliases['dev-build'] = 'LabBuildApp.dev_build'
 build_aliases['minimize'] = 'LabBuildApp.minimize'
-build_aliases['yarn-registry'] = 'LabBuildApp.yarn_registry'
 build_aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 
 build_flags = dict(flags)
@@ -75,9 +74,6 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
 
     pre_clean = Bool(False, config=True,
         help="Whether to clean before building (defaults to False)")
-
-    yarn_registry = Unicode(None, allow_none=True, config=True,
-        help="Yarn registry URL to use (defaults to the standard registry)")
 
     def start(self):
         parts = ['build']
@@ -310,7 +306,6 @@ class LabWorkspaceApp(JupyterApp):
 
 lab_aliases = dict(aliases)
 lab_aliases['app-dir'] = 'LabApp.app_dir'
-lab_aliases['yarn-registry'] = 'LabApp.yarn_registry'
 
 lab_flags = dict(flags)
 lab_flags['core-mode'] = (
@@ -386,9 +381,6 @@ class LabApp(NotebookApp):
 
     workspaces_dir = Unicode(get_workspaces_dir(), config=True,
         help="The directory for workspaces")
-
-    yarn_registry = Unicode(None, allow_none=True, config=True,
-        help="Yarn registry URL to use (defaults to the standard registry)")
 
     core_mode = Bool(False, config=True,
         help="""Whether to start the app in core mode. In this mode, JupyterLab
