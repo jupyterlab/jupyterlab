@@ -67,7 +67,7 @@ class Builder(object):
             self._kill_event = evt = Event()
             try:
                 yield self._run_build(
-                    self.app_dir, self.log, evt, self.core_config)
+                    self.app_dir, self.log, evt, self.core_config, self.yarn_registry)
                 future.set_result(True)
             except Exception as e:
                 if str(e) == 'Aborted':

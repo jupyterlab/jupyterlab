@@ -44,6 +44,11 @@ DEV_DIR = osp.abspath(os.path.join(HERE, '..', 'dev_mode'))
 # If we are pinning the package, rename it `pin@<alias>`
 PIN_PREFIX = 'pin@'
 
+
+# Regex for default Yarn registry used in default yarn.lock
+YARN_DEFAULT_REGISTRY = r'https://registry\.yarnpkg\.com'
+
+
 class ProgressProcess(Process):
 
     def __init__(self, cmd, logger=None, cwd=None, kill_event=None,
@@ -354,6 +359,8 @@ def watch(app_dir=None, logger=None, core_config=None, app_options=None):
         The application directory.
     logger: :class:`~logger.Logger`, optional
         The logger instance.
+    yarn_registry: string, optional
+        The Yarn registry to use for build JupyterLab.
 
     Returns
     -------
@@ -435,13 +442,19 @@ def build(app_dir=None, name=None, version=None, static_url=None,
           logger=None, command='build:prod', kill_event=None,
           clean_staging=False, core_config=None, app_options=None):
     """Build the JupyterLab application.
+
+    Parameters
+    ----------
+    yarn_registry: string, optional
+        The Yarn registry to use for build JupyterLab.
     """
     app_options = _ensure_options(
         app_options, app_dir=app_dir, logger=logger, core_config=core_config)
     _node_check(app_options.logger)
     handler = _AppHandler(app_options)
     return handler.build(name=name, version=version, static_url=static_url,
-                         command=command, clean_staging=clean_staging)
+                         command=command, clean_staging=clean_staging, 
+                         yarn_registry=yarn_registry)
 
 
 def get_app_info(app_dir=None, logger=None, core_config=None, app_options=None):
@@ -614,8 +627,14 @@ class _AppHandler(object):
         return True
 
     def build(self, name=None, version=None, static_url=None,
-              command='build:prod:minimize', clean_staging=False):
+              command='build:prod:minimize', clean_staging=False,
+              yarn_registry=None):
         """Build the application.
+
+        Parameters
+        ----------
+        yarn_registry: string, optional
+            The Yarn registry to use for build JupyterLab.
         """
         # resolve the build type
         parts = command.split(':')
@@ -633,7 +652,7 @@ class _AppHandler(object):
 
         self._populate_staging(
             name=name, version=version, static_url=static_url,
-            clean=clean_staging
+            clean=clean_staging, yarn_registry=yarn_registry
         )
 
         staging = pjoin(app_dir, 'staging')
@@ -654,13 +673,18 @@ class _AppHandler(object):
             self.logger.debug(msg)
             raise RuntimeError(msg)
 
-    def watch(self):
+    def watch(self, yarn_registry=None):
         """Start the application watcher and then run the watch in
         the background.
+
+        Parameters
+        ----------
+        yarn_registry: string, optional
+            The Yarn registry to use for build JupyterLab.
         """
         staging = pjoin(self.app_dir, 'staging')
 
-        self._populate_staging()
+        self._populate_staging(yarn_registry=yarn_registry)
 
         # Make sure packages are installed.
         self._run(['node', YARN_PATH, 'install'], cwd=staging)
@@ -1058,7 +1082,7 @@ class _AppHandler(object):
         return info
 
     def _populate_staging(self, name=None, version=None, static_url=None,
-                          clean=False):
+                          clean=False, yarn_registry=None):
         """Set up the assets in the staging directory.
         """
         app_dir = self.app_dir
@@ -1157,7 +1181,15 @@ class _AppHandler(object):
         # copy known-good yarn.lock if missing
         lock_path = pjoin(staging, 'yarn.lock')
         if not osp.exists(lock_path):
-            shutil.copy(pjoin(HERE, 'staging', 'yarn.lock'), lock_path)
+            lock_template = pjoin(HERE, 'staging', 'yarn.lock')
+            if yarn_registry is not None:  # Replace on the fly the yarn repository see #3658
+                with open(lock_template) as f:
+                    template = f.read()
+                template = re.sub(YARN_DEFAULT_REGISTRY, yarn_registry.strip("/"), template)
+                with open(lock_path, 'w+') as f:
+                    f.write(template)
+            else:
+                shutil.copy(lock_template, lock_path)
 
     def _get_package_template(self, silent=False):
         """Get the template the for staging package.json file.

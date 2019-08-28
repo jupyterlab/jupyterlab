@@ -55,6 +55,7 @@ aliases = dict(base_aliases)
 aliases['app-dir'] = 'BaseExtensionApp.app_dir'
 aliases['dev-build'] = 'BaseExtensionApp.dev_build'
 aliases['minimize'] = 'BaseExtensionApp.minimize'
+aliases['yarn-registry'] = 'BaseExtensionApp.yarn_registry'
 aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 
 install_aliases = copy(aliases)
@@ -85,6 +86,9 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
 
     should_clean = Bool(False, config=True,
         help="Whether temporary files should be cleaned up after building jupyterlab")
+
+    yarn_registry = Unicode(None, allow_none=True, config=True,
+        help="Yarn registry URL to use (defaults to the standard registry)")
 
     def start(self):
         if self.app_dir and self.app_dir.startswith(HERE):
