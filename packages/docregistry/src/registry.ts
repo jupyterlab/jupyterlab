@@ -114,13 +114,7 @@ export class DocumentRegistry implements IDisposable {
    */
   addWidgetFactory(factory: DocumentRegistry.WidgetFactory): IDisposable {
     // initialize the factory's mimeTypes
-    let mimeTypes = new Set(factory.mimeTypes);
-    factory.mimeTypes = [
-      ...factory.fileTypes.reduce((mts, ft) => {
-        this.getFileType(ft).mimeTypes.forEach(mt => mts.add(mt));
-        return mts;
-      }, mimeTypes)
-    ];
+    factory.initMimeTypes(this);
 
     let name = factory.name.toLowerCase();
     if (!name || name === 'default') {
@@ -131,21 +125,21 @@ export class DocumentRegistry implements IDisposable {
       return new DisposableDelegate(Private.noOp);
     }
     this._widgetFactories[name] = factory;
-    for (let ft of factory.defaultFor || []) {
-      if (factory.fileTypes.indexOf(ft) === -1) {
+    for (let mt of factory.defaultForMimeTypes || []) {
+      if (factory.mimeTypes.indexOf(mt) === -1) {
         continue;
       }
-      if (ft === '*') {
+      if (mt === '*') {
         this._defaultWidgetFactory = name;
       } else {
-        this._defaultWidgetFactories[ft] = name;
+        this._defaultWidgetFactories[mt] = name;
       }
     }
-    for (let ft of factory.defaultRendered || []) {
-      if (factory.fileTypes.indexOf(ft) === -1) {
+    for (let mt of factory.defaultRenderedMimeTypes || []) {
+      if (factory.fileTypes.indexOf(mt) === -1) {
         continue;
       }
-      this._defaultRenderedWidgetFactories[ft] = name;
+      this._defaultRenderedWidgetFactories[mt] = name;
     }
     // For convenience, store a mapping of file type name -> name
     for (let mt of factory.mimeTypes) {
@@ -324,26 +318,26 @@ export class DocumentRegistry implements IDisposable {
     let factories = new Set<string>();
 
     // Get the ordered matching file types.
-    let fts = this.getFileTypesForPath(PathExt.basename(path));
+    let mts = this.getMimeTypesForPath(PathExt.basename(path));
 
     // Start with any user overrides for the defaults.
-    fts.forEach(ft => {
-      if (ft.name in this._defaultWidgetFactoryOverrides) {
-        factories.add(this._defaultWidgetFactoryOverrides[ft.name]);
+    mts.forEach(mt => {
+      if (mt in this._defaultWidgetFactoryOverrides) {
+        factories.add(this._defaultWidgetFactoryOverrides[mt]);
       }
     });
 
     // Next add the file type default factories.
-    fts.forEach(ft => {
-      if (ft.name in this._defaultWidgetFactories) {
-        factories.add(this._defaultWidgetFactories[ft.name]);
+    mts.forEach(mt => {
+      if (mt in this._defaultWidgetFactories) {
+        factories.add(this._defaultWidgetFactories[mt]);
       }
     });
 
     // Add the file type default rendered factories.
-    fts.forEach(ft => {
-      if (ft.name in this._defaultRenderedWidgetFactories) {
-        factories.add(this._defaultRenderedWidgetFactories[ft.name]);
+    mts.forEach(mt => {
+      if (mt in this._defaultRenderedWidgetFactories) {
+        factories.add(this._defaultRenderedWidgetFactories[mt]);
       }
     });
 
@@ -353,9 +347,9 @@ export class DocumentRegistry implements IDisposable {
     }
 
     // Add the file type factories in registration order.
-    fts.forEach(ft => {
-      if (ft.name in this._widgetFactoriesForMimeType) {
-        each(this._widgetFactoriesForMimeType[ft.name], n => {
+    mts.forEach(mt => {
+      if (mt in this._widgetFactoriesForMimeType) {
+        each(this._widgetFactoriesForMimeType[mt], n => {
           factories.add(n);
         });
       }
@@ -667,6 +661,15 @@ export class DocumentRegistry implements IDisposable {
     return fts;
   }
 
+  getMimeTypesForPath(path: string): string[] {
+    return [
+      ...this.getFileTypesForPath(path).reduce((mts, ft) => {
+        ft.mimeTypes.forEach(mt => mts.add(mt));
+        return mts;
+      }, new Set<string>())
+    ];
+  }
+
   private _modelFactories: {
     [key: string]: DocumentRegistry.ModelFactory;
   } = Object.create(null);
@@ -971,12 +974,12 @@ export namespace DocumentRegistry {
     /**
      * (DEPRECATED) The file types the widget can view.
      */
-    readonly fileTypes: ReadonlyArray<string>;
+    readonly fileTypes?: ReadonlyArray<string>;
 
     /**
      * The mime types the widget can view.
      */
-    mimeTypes?: ReadonlyArray<string>;
+    readonly mimeTypes?: ReadonlyArray<string>;
 
     /**
      * (DEPRECATED) The file types for which the factory should be the default.
@@ -986,7 +989,7 @@ export namespace DocumentRegistry {
     /**
      * The mime types for which the factory should be the default.
      */
-    defaultForMimeTypes?: ReadonlyArray<string>;
+    readonly defaultForMimeTypes?: ReadonlyArray<string>;
 
     /**
      * (DEPRECATED) The file types for which the factory should be the default for rendering,
@@ -999,7 +1002,7 @@ export namespace DocumentRegistry {
      * The mime types for which the factory should be the default for rendering,
      * if that is different than the default factory (which may be for editing).
      */
-    defaultRenderedMimeTypes?: ReadonlyArray<string>;
+    readonly defaultRenderedMimeTypes?: ReadonlyArray<string>;
 
     /**
      * Whether the widget factory is read only.

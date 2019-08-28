@@ -280,16 +280,40 @@ export abstract class ABCWidgetFactory<
    */
   constructor(options: DocumentRegistry.IWidgetFactoryOptions<T>) {
     this._name = options.name;
-    this._readOnly = options.readOnly === undefined ? false : options.readOnly;
-    this._defaultFor = options.defaultFor ? options.defaultFor.slice() : [];
+    this._readOnly = !!options.readOnly;
+    this._defaultFor = (options.defaultFor || []).slice();
+    this._defaultForMimeTypes = (options.defaultForMimeTypes || []).slice();
     this._defaultRendered = (options.defaultRendered || []).slice();
+    this._defaultRenderedMimeTypes = (
+      options.defaultRenderedMimeTypes || []
+    ).slice();
     this._fileTypes = options.fileTypes.slice();
-    this._mimeTypes = options.mimeTypes.slice();
+    this._mimeTypes = (options.mimeTypes || []).slice();
     this._modelName = options.modelName || 'text';
     this._preferKernel = !!options.preferKernel;
     this._canStartKernel = !!options.canStartKernel;
     this._shutdownOnClose = !!options.shutdownOnClose;
     this._toolbarFactory = options.toolbarFactory;
+  }
+
+  initMimeTypes(reg: DocumentRegistry): void {
+    const varmap: { [key: string]: string } = {
+      _defaultFor: '_defaultForMimeTypes',
+      _defaultRendered: '_defaultRenderedMimeTypes',
+      _fileTypes: '_mimeTypes'
+    };
+    Object.keys(varmap).forEach(oldvar => {
+      // initialize each of the factory's mimetype properties
+      const newvar = varmap[oldvar];
+      let mimeTypes = new Set((this as any)[newvar]);
+
+      (this as any)[newvar] = [
+        ...((this as any)[oldvar] as string[]).reduce((mts, ft) => {
+          reg.getFileType(ft).mimeTypes.forEach(mt => mts.add(mt));
+          return mts;
+        }, mimeTypes)
+      ];
+    });
   }
 
   /**
@@ -340,9 +364,6 @@ export abstract class ABCWidgetFactory<
   get mimeTypes(): string[] {
     return this._mimeTypes.slice();
   }
-  set mimeTypes(mts: string[]) {
-    this._mimeTypes = mts.slice();
-  }
 
   /**
    * The registered name of the model type used to create the widgets.
@@ -364,9 +385,6 @@ export abstract class ABCWidgetFactory<
   get defaultForMimeTypes(): string[] {
     return this._defaultForMimeTypes.slice();
   }
-  set defaultForMimeTypes(mts: string[]) {
-    this._defaultForMimeTypes = mts.slice();
-  }
 
   /**
    * (DEPRECATED) The file types for which the factory should be the default for
@@ -382,9 +400,6 @@ export abstract class ABCWidgetFactory<
    */
   get defaultRenderedMimeTypes(): string[] {
     return this._defaultRenderedMimeTypes.slice();
-  }
-  set defaultRenderedMimeTypes(mts: string[]) {
-    this._defaultRenderedMimeTypes = mts.slice();
   }
 
   /**
