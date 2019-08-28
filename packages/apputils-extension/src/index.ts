@@ -316,6 +316,9 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
       await workspaces.save(id, { data, metadata });
     });
 
+    // Any time the local state database changes, save the workspace.
+    db.changed.connect(() => void save.invoke(), db);
+
     commands.addCommand(CommandIDs.loadState, {
       execute: async (args: IRouter.ILocation) => {
         // Since the command can be executed an arbitrary number of times, make
@@ -339,9 +342,6 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
           console.error(`${CommandIDs.loadState} cannot load null workspace.`);
           return;
         }
-
-        // Any time the local state database changes, save the workspace.
-        db.changed.connect(() => void save.invoke(), db);
 
         try {
           const saved = await workspaces.fetch(source);
@@ -422,7 +422,10 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         delete query['reset'];
 
         const url = path + URLExt.objectToQueryString(query) + hash;
-        const cleared = db.clear().then(() => router.stop);
+        const cleared = db
+          .clear()
+          .then(() => save.invoke())
+          .then(() => router.stop);
 
         // After the state has been reset, navigate to the URL.
         if (clone) {
