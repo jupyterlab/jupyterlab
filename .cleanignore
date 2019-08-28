@@ -1,0 +1,7 @@
+# jetbrains IDE stuff
+*.iml
+!**/node_modules/**/*.iml
+.idea/
+
+# ms IDE stuff
+.vscode

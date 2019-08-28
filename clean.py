@@ -15,9 +15,12 @@ if os.name == 'nt':
 
 subprocess.check_call('python -m pip uninstall -y jupyterlab'.split(), cwd=here)
 
-git_clean_exclude = [
-    '-e',
-    '/.vscode',
-]
+# get the exclude patterns listed in .cleanignore
+with open(os.path.join(here, '.cleanignore')) as f:
+    git_clean_exclude = [f'--exclude={stripped}'
+                         for stripped in
+                         (line.strip() for line in f)
+                         if stripped and not stripped.startswith('#')]
+
 git_clean_command = ['git', 'clean', '-dfx'] + git_clean_exclude
 subprocess.check_call(git_clean_command, cwd=here)
