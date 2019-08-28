@@ -1,11 +1,11 @@
-`v0.xx.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v0.xx.0>`__
+`v{{ version }} <https://github.com/jupyterlab/jupyterlab/releases/tag/v{{ version }}>`__
 ---------------------------------------------------------------------------
 
 {{ close_date }}
 ^^^^^^^^^^^^^^^
 
 See the `JupyterLab
-0.xx.0 <https://github.com/jupyterlab/jupyterlab/milestone/xx?closed=1>`__
+{{ version }} <https://github.com/jupyterlab/jupyterlab/milestone/{{ version }}?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
 {%   for pr in pull_requests -%}
