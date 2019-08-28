@@ -26,10 +26,14 @@ export class Breakpoints extends Panel {
       'deactivate',
       new ToolbarButton({
         iconClassName: 'jp-DebuggerDeactivateIcon',
+        tooltip: `${this.isAllAcitve ? 'Deactivate' : 'Activate'} Breakpoints`,
         onClick: () => {
-          this.model.onActive = !this.model.isActive;
-        },
-        tooltip: 'Deactivate Breakpoints'
+          this.isAllAcitve = !this.isAllAcitve;
+          this.model.breakpoints.map((breakpoint: Breakpoints.IBreakpoint) => {
+            breakpoint.active = this.isAllAcitve;
+            this.model.breakpoint = breakpoint;
+          });
+        }
       })
     );
 
@@ -45,8 +49,8 @@ export class Breakpoints extends Panel {
     );
   }
 
+  private isAllAcitve = true;
   readonly body: Widget;
-
   readonly model: Breakpoints.IModel;
 }
 
@@ -67,7 +71,9 @@ class BreakpointsHeader extends Widget {
 }
 
 export namespace Breakpoints {
-  export interface IBreakpoint extends DebugProtocol.Breakpoint {}
+  export interface IBreakpoint extends DebugProtocol.Breakpoint {
+    active: boolean;
+  }
 
   /**
    * The breakpoints UI model.
@@ -83,21 +89,12 @@ export namespace Breakpoints {
       return this._breakpointsChanged;
     }
 
-    get activeChanged(): ISignal<this, boolean> {
-      return this._activeChange;
-    }
-
     get breakpoints(): IBreakpoint[] {
       return this._state;
     }
 
-    get isActive(): boolean {
-      return this._activeBreakpoints;
-    }
-
-    set onActive(value: boolean) {
-      this._activeBreakpoints = value;
-      this._activeChange.emit(value);
+    get breakpointChanged(): ISignal<this, IBreakpoint> {
+      return this._breakpointChanged;
     }
 
     set breakpoints(breakpoints: IBreakpoint[]) {
@@ -107,13 +104,15 @@ export namespace Breakpoints {
 
     set breakpoint(breakpoint: IBreakpoint) {
       const index = this._state.findIndex(ele => ele.id === breakpoint.id);
-      if (index !== -1) this._state[index] = breakpoint;
+      if (index !== -1) {
+        this._state[index] = breakpoint;
+        this._breakpointChanged.emit(breakpoint);
+      }
     }
 
     private _state: IBreakpoint[];
-    private _activeBreakpoints: boolean = true;
     private _breakpointsChanged = new Signal<this, IBreakpoint[]>(this);
-    private _activeChange = new Signal<this, boolean>(this);
+    private _breakpointChanged = new Signal<this, IBreakpoint>(this);
   }
 
   /**
@@ -125,6 +124,7 @@ export namespace Breakpoints {
 const MOCK_BREAKPOINTS = [
   {
     id: 0,
+    active: true,
     verified: true,
     source: {
       name: 'untitled.py'
@@ -134,6 +134,7 @@ const MOCK_BREAKPOINTS = [
   {
     id: 1,
     verified: true,
+    active: false,
     source: {
       name: 'untitled.py'
     },

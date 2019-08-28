@@ -6,7 +6,3 @@
 .jp-DebuggerBreakpoints-body {
   padding: 10px;
 }
-
-.jp-DebuggerBreakpoints .breakpoint.disabled {
-  opacity: 0.4;
-}
