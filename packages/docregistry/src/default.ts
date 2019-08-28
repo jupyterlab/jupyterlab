@@ -296,49 +296,38 @@ export abstract class ABCWidgetFactory<
     this._toolbarFactory = options.toolbarFactory;
   }
 
-  // protected _initMimeTypes(reg: DocumentRegistry, mtArr: string[], ftArr: string[]) {
-  //   let mimeTypes = new Set(mtArr);
-  //
-  //   return [
-  //     ...ftArr.reduce((mts, ft) => {
-  //       reg.getFileType(ft).mimeTypes.forEach(mt => mts.add(mt));
-  //       return mts;
-  //     }, mimeTypes)
-  //   ];
-  // }
+  protected _initMimeTypes(
+    reg: DocumentRegistry,
+    ftArr: string[],
+    mtArr: string[]
+  ): string[] {
+    let mimeTypes = new Set(mtArr);
+
+    return [
+      ...ftArr.reduce((mts, ft) => {
+        reg.getFileType(ft).mimeTypes.forEach(mt => mts.add(mt));
+        return mts;
+      }, mimeTypes)
+    ];
+  }
 
   initMimeTypes(reg: DocumentRegistry): void {
     // initialize each of the factory's mimetype properties
-    {
-      let mimeTypes = new Set(this._defaultForMimeTypes);
-
-      this._defaultForMimeTypes = [
-        ...this._defaultFor.reduce((mts, ft) => {
-          reg.getFileType(ft).mimeTypes.forEach(mt => mts.add(mt));
-          return mts;
-        }, mimeTypes)
-      ];
-    }
-    {
-      let mimeTypes = new Set(this._defaultRenderedMimeTypes);
-
-      this._defaultRenderedMimeTypes = [
-        ...this._defaultRendered.reduce((mts, ft) => {
-          reg.getFileType(ft).mimeTypes.forEach(mt => mts.add(mt));
-          return mts;
-        }, mimeTypes)
-      ];
-    }
-    {
-      let mimeTypes = new Set(this._mimeTypes);
-
-      this._mimeTypes = [
-        ...this._fileTypes.reduce((mts, ft) => {
-          reg.getFileType(ft).mimeTypes.forEach(mt => mts.add(mt));
-          return mts;
-        }, mimeTypes)
-      ];
-    }
+    this._defaultForMimeTypes = this._initMimeTypes(
+      reg,
+      this._defaultFor,
+      this._defaultForMimeTypes
+    );
+    this._defaultRenderedMimeTypes = this._initMimeTypes(
+      reg,
+      this._defaultRendered,
+      this._defaultRenderedMimeTypes
+    );
+    this._mimeTypes = this._initMimeTypes(
+      reg,
+      this._fileTypes,
+      this._mimeTypes
+    );
   }
 
   /**
