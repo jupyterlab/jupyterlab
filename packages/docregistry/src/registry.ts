@@ -34,7 +34,7 @@ import { IModelDB } from '@jupyterlab/observables';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { ABCWidgetFactory, TextModelFactory } from './default';
+import { TextModelFactory } from './default';
 
 /**
  * The document registry.
@@ -113,8 +113,9 @@ export class DocumentRegistry implements IDisposable {
    * The factory cannot be named an empty string or the string `'default'`.
    */
   addWidgetFactory(factory: DocumentRegistry.WidgetFactory): IDisposable {
+    // initialize the factory's mimeTypes
     let mimeTypes = new Set(factory.mimeTypes);
-    (factory as any)._mimeTypes = [
+    factory.mimeTypes = [
       ...factory.fileTypes.reduce((mts, ft) => {
         this.getFileType(ft).mimeTypes.forEach(mt => mts.add(mt));
         return mts;
@@ -147,11 +148,11 @@ export class DocumentRegistry implements IDisposable {
       this._defaultRenderedWidgetFactories[ft] = name;
     }
     // For convenience, store a mapping of file type name -> name
-    for (let ft of factory.fileTypes) {
-      if (!this._widgetFactoriesForFileType[ft]) {
-        this._widgetFactoriesForFileType[ft] = [];
+    for (let mt of factory.mimeTypes) {
+      if (!this._widgetFactoriesForMimeType[mt]) {
+        this._widgetFactoriesForMimeType[mt] = [];
       }
-      this._widgetFactoriesForFileType[ft].push(name);
+      this._widgetFactoriesForMimeType[mt].push(name);
     }
     this._changed.emit({
       type: 'widgetFactory',
@@ -173,10 +174,10 @@ export class DocumentRegistry implements IDisposable {
           delete this._defaultRenderedWidgetFactories[ext];
         }
       }
-      for (let ext of Object.keys(this._widgetFactoriesForFileType)) {
-        ArrayExt.removeFirstOf(this._widgetFactoriesForFileType[ext], name);
-        if (this._widgetFactoriesForFileType[ext].length === 0) {
-          delete this._widgetFactoriesForFileType[ext];
+      for (let ext of Object.keys(this._widgetFactoriesForMimeType)) {
+        ArrayExt.removeFirstOf(this._widgetFactoriesForMimeType[ext], name);
+        if (this._widgetFactoriesForMimeType[ext].length === 0) {
+          delete this._widgetFactoriesForMimeType[ext];
         }
       }
       for (let ext of Object.keys(this._defaultWidgetFactoryOverrides)) {
@@ -353,16 +354,16 @@ export class DocumentRegistry implements IDisposable {
 
     // Add the file type factories in registration order.
     fts.forEach(ft => {
-      if (ft.name in this._widgetFactoriesForFileType) {
-        each(this._widgetFactoriesForFileType[ft.name], n => {
+      if (ft.name in this._widgetFactoriesForMimeType) {
+        each(this._widgetFactoriesForMimeType[ft.name], n => {
           factories.add(n);
         });
       }
     });
 
     // Add the rest of the global factories, in registration order.
-    if ('*' in this._widgetFactoriesForFileType) {
-      each(this._widgetFactoriesForFileType['*'], n => {
+    if ('*' in this._widgetFactoriesForMimeType) {
+      each(this._widgetFactoriesForMimeType['*'], n => {
         factories.add(n);
       });
     }
@@ -466,7 +467,7 @@ export class DocumentRegistry implements IDisposable {
       throw Error(`Cannot find widget factory ${factory}`);
     }
     factory = factory.toLowerCase();
-    const factories = this._widgetFactoriesForFileType[fileType];
+    const factories = this._widgetFactoriesForMimeType[fileType];
     if (
       factory !== this._defaultWidgetFactory &&
       !(factories && factories.includes(factory))
@@ -682,7 +683,7 @@ export class DocumentRegistry implements IDisposable {
   private _defaultRenderedWidgetFactories: {
     [key: string]: string;
   } = Object.create(null);
-  private _widgetFactoriesForFileType: {
+  private _widgetFactoriesForMimeType: {
     [key: string]: string[];
   } = Object.create(null);
   private _fileTypes: DocumentRegistry.IFileType[] = [];
@@ -975,19 +976,30 @@ export namespace DocumentRegistry {
     /**
      * The mime types the widget can view.
      */
-    readonly mimeTypes?: ReadonlyArray<string>;
+    mimeTypes?: ReadonlyArray<string>;
 
     /**
-     * The file types for which the factory should be the default.
+     * (DEPRECATED) The file types for which the factory should be the default.
      */
     readonly defaultFor?: ReadonlyArray<string>;
 
     /**
-     * The file types for which the factory should be the default for rendering,
+     * The mime types for which the factory should be the default.
+     */
+    defaultForMimeTypes?: ReadonlyArray<string>;
+
+    /**
+     * (DEPRECATED) The file types for which the factory should be the default for rendering,
      * if that is different than the default factory (which may be for editing).
      * If undefined, then it will fall back on the default file type.
      */
     readonly defaultRendered?: ReadonlyArray<string>;
+
+    /**
+     * The mime types for which the factory should be the default for rendering,
+     * if that is different than the default factory (which may be for editing).
+     */
+    defaultRenderedMimeTypes?: ReadonlyArray<string>;
 
     /**
      * Whether the widget factory is read only.
@@ -1073,6 +1085,8 @@ export namespace DocumentRegistry {
      * It should emit the [widgetCreated] signal with the new widget.
      */
     createNew(context: IContext<U>, source?: T): T;
+
+    initMimeTypes?(reg: DocumentRegistry): void;
   }
 
   /**

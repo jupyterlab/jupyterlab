@@ -292,15 +292,6 @@ export abstract class ABCWidgetFactory<
     this._toolbarFactory = options.toolbarFactory;
   }
 
-  // initMimeTypes(reg: DocumentRegistry) {
-  //   let mimeTypes = new Set(this._mimeTypes);
-  //
-  //   this._mimeTypes = [...this._fileTypes.reduce((mts, ft) => {
-  //     reg.getFileType(ft).mimeTypes.forEach(mt => mts.add(mt));
-  //     return mts;
-  //   }, mimeTypes)];
-  // }
-
   /**
    * A signal emitted when a widget is created.
    */
@@ -344,10 +335,13 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * The file types the widget can view.
+   * The mime types the widget can view.
    */
   get mimeTypes(): string[] {
     return this._mimeTypes.slice();
+  }
+  set mimeTypes(mts: string[]) {
+    this._mimeTypes = mts.slice();
   }
 
   /**
@@ -358,18 +352,39 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * The file types for which the factory should be the default.
+   * (DEPRECATED) The file types for which the factory should be the default.
    */
   get defaultFor(): string[] {
     return this._defaultFor.slice();
   }
 
   /**
-   * The file types for which the factory should be the default for
+   * The mime types for which the factory should be the default.
+   */
+  get defaultForMimeTypes(): string[] {
+    return this._defaultForMimeTypes.slice();
+  }
+  set defaultForMimeTypes(mts: string[]) {
+    this._defaultForMimeTypes = mts.slice();
+  }
+
+  /**
+   * (DEPRECATED) The file types for which the factory should be the default for
    * rendering a document model, if different from editing.
    */
   get defaultRendered(): string[] {
     return this._defaultRendered.slice();
+  }
+
+  /**
+   * The mime types for which the factory should be the default for
+   * rendering a document model, if different from editing.
+   */
+  get defaultRenderedMimeTypes(): string[] {
+    return this._defaultRenderedMimeTypes.slice();
+  }
+  set defaultRenderedMimeTypes(mts: string[]) {
+    this._defaultRenderedMimeTypes = mts.slice();
   }
 
   /**
@@ -451,7 +466,9 @@ export abstract class ABCWidgetFactory<
   private _fileTypes: string[];
   private _mimeTypes: string[];
   private _defaultFor: string[];
+  private _defaultForMimeTypes: string[];
   private _defaultRendered: string[];
+  private _defaultRenderedMimeTypes: string[];
   private _widgetCreated = new Signal<DocumentRegistry.IWidgetFactory<T, U>, T>(
     this
   );
