@@ -3,9 +3,71 @@
 JupyterLab Changelog
 ====================
 
-v1.0.0
-------
+`v1.1.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v1.1.0>`__
+-------------------------------------------------------------------------
 
+August 28, 2019
+^^^^^^^^^^^^^^^
+
+See the `JupyterLab
+1.1.0 <https://github.com/jupyterlab/jupyterlab/milestone/1.1.0?closed=1>`__
+milestone on GitHub for the full list of pull requests and issues closed.
+
+* Added ``.cleanignore``, For Ignoring Files During ``jlpm Run Clean:slate`` (`#7102 <https://github.com/jupyterlab/jupyterlab/pull/7102>`__)
+* Use The Url Resolver To Its Full Capabilities For Vega. (`#7098 <https://github.com/jupyterlab/jupyterlab/pull/7098>`__, `#7047 <https://github.com/jupyterlab/jupyterlab/issues/7047>`__)
+* Handling Error During Selecting A Kernel (`#7094 <https://github.com/jupyterlab/jupyterlab/pull/7094>`__)
+* Expose Install_kernel For Tests (`#7089 <https://github.com/jupyterlab/jupyterlab/pull/7089>`__)
+* Docker Release Instructions (`#7084 <https://github.com/jupyterlab/jupyterlab/pull/7084>`__)
+* For Windows Defaults Conda Channels Are Needed (`#7078 <https://github.com/jupyterlab/jupyterlab/pull/7078>`__, `#6972 <https://github.com/jupyterlab/jupyterlab/issues/6972>`__)
+* Correct ``quit_button`` Test (`#7071 <https://github.com/jupyterlab/jupyterlab/pull/7071>`__, `#7070 <https://github.com/jupyterlab/jupyterlab/issues/7070>`__)
+* Add A Note To Check Out A Branch Before Doing A Release. (`#7066 <https://github.com/jupyterlab/jupyterlab/pull/7066>`__)
+* Fix Handling Of Page Config For Non-Strings (`#7061 <https://github.com/jupyterlab/jupyterlab/pull/7061>`__, `#7058 <https://github.com/jupyterlab/jupyterlab/issues/7058>`__, `#6858 <https://github.com/jupyterlab/jupyterlab/issues/6858>`__)
+* Require Jinja2 2.10+ To Fix Extra Escaping (`#7055 <https://github.com/jupyterlab/jupyterlab/pull/7055>`__, `#7053 <https://github.com/jupyterlab/jupyterlab/issues/7053>`__)
+* Remove Reference To Travis Ci (`#7051 <https://github.com/jupyterlab/jupyterlab/pull/7051>`__)
+* Increase The Search Debounce From 100ms To 500ms (`#7034 <https://github.com/jupyterlab/jupyterlab/pull/7034>`__)
+* Complete Docstring For Iexecuterequestmsg (`#7028 <https://github.com/jupyterlab/jupyterlab/pull/7028>`__)
+* Restores Silent Failure Behavior When A Filetype Has No Iconclass (`#7027 <https://github.com/jupyterlab/jupyterlab/pull/7027>`__)
+* Fix Vega Downloads And Download Urls In General (`#7022 <https://github.com/jupyterlab/jupyterlab/pull/7022>`__, `#7017 <https://github.com/jupyterlab/jupyterlab/issues/7017>`__)
+* Restore Behavior Of The "raises-Exception" Cell Tag (`#7020 <https://github.com/jupyterlab/jupyterlab/pull/7020>`__, `#7015 <https://github.com/jupyterlab/jupyterlab/issues/7015>`__)
+* Fix Build Util Paths For Windows (`#7019 <https://github.com/jupyterlab/jupyterlab/pull/7019>`__)
+* Properly Escape Template Variables (`#7016 <https://github.com/jupyterlab/jupyterlab/pull/7016>`__, `#7024 <https://github.com/jupyterlab/jupyterlab/issues/7024>`__)
+* Do Not Fail On Deduplicate And Ignore Optional (`#7013 <https://github.com/jupyterlab/jupyterlab/pull/7013>`__)
+* Auto-Disable Statusbar Leaf Components (`#7001 <https://github.com/jupyterlab/jupyterlab/pull/7001>`__, `#6981 <https://github.com/jupyterlab/jupyterlab/issues/6981>`__)
+* Make Dependencies Of Rendermime Extension Optional (`#6996 <https://github.com/jupyterlab/jupyterlab/pull/6996>`__)
+* Fix A Typo In The Issues Reporting Documentation (Issue.rst) (`#6993 <https://github.com/jupyterlab/jupyterlab/pull/6993>`__)
+* Add Server Side Coreconfig Object (`#6991 <https://github.com/jupyterlab/jupyterlab/pull/6991>`__)
+* Make Dependencies Of Vdom Extension Optional  (`#6980 <https://github.com/jupyterlab/jupyterlab/pull/6980>`__)
+* Make Dependencies Of Csv Viewer Extension Optional (`#6978 <https://github.com/jupyterlab/jupyterlab/pull/6978>`__)
+* Add Docs To Help Users Diagnose Issues Before Creating Them (`#6971 <https://github.com/jupyterlab/jupyterlab/pull/6971>`__)
+* Updated Contributing.md (`#6967 <https://github.com/jupyterlab/jupyterlab/pull/6967>`__, `#6965 <https://github.com/jupyterlab/jupyterlab/issues/6965>`__)
+* Remove Lockbot Message, Re-Engage Lockbot (`#6963 <https://github.com/jupyterlab/jupyterlab/pull/6963>`__)
+* Add @types/jest To Extension Testing Doc (`#6961 <https://github.com/jupyterlab/jupyterlab/pull/6961>`__)
+* Pause Lockbot (`#6953 <https://github.com/jupyterlab/jupyterlab/pull/6953>`__)
+* Fix Comm_info_request Content To Conform To Spec In A Backwards-Compatible Way (`#6949 <https://github.com/jupyterlab/jupyterlab/pull/6949>`__, `#6947 <https://github.com/jupyterlab/jupyterlab/issues/6947>`__)
+* Add Lockbot Configuration To Lock Inactive Closed Issues/prs After 30 Days (`#6943 <https://github.com/jupyterlab/jupyterlab/pull/6943>`__)
+* Adds Yarn Package Resolution To Build (`#6938 <https://github.com/jupyterlab/jupyterlab/pull/6938>`__)
+* Add Display:flex To .jp-Inspector-Default-Content (`#6935 <https://github.com/jupyterlab/jupyterlab/pull/6935>`__)
+* Fix For Contextual Help Layout (`#6933 <https://github.com/jupyterlab/jupyterlab/pull/6933>`__)
+* Attempted Fix For Minor Jupyterhub Compatibility Issue. (`#6931 <https://github.com/jupyterlab/jupyterlab/pull/6931>`__)
+* Make Handling Comm Messages Optional In A Kernel Connection. (`#6929 <https://github.com/jupyterlab/jupyterlab/pull/6929>`__)
+* Add Settings To Override Theme Font Sizes (`#6926 <https://github.com/jupyterlab/jupyterlab/pull/6926>`__)
+* Fix Lab Build Prod (`#6907 <https://github.com/jupyterlab/jupyterlab/pull/6907>`__)
+* Accept Query Parameter To Optionally Change File Browser Location (`#6875 <https://github.com/jupyterlab/jupyterlab/pull/6875>`__)
+* Install Multiple Versions Of Same Extension (`#6857 <https://github.com/jupyterlab/jupyterlab/pull/6857>`__)
+* Remove Focus On Esc In Console (`#6822 <https://github.com/jupyterlab/jupyterlab/pull/6822>`__)
+* Factory Overrides (`#6813 <https://github.com/jupyterlab/jupyterlab/pull/6813>`__, `#4048 <https://github.com/jupyterlab/jupyterlab/issues/4048>`__)
+* Added Debug Messages (`#6704 <https://github.com/jupyterlab/jupyterlab/pull/6704>`__)
+* Fix Downloads In Chrome With Xsrf Token (`#6686 <https://github.com/jupyterlab/jupyterlab/pull/6686>`__)
+* Open Dialogs (`#6366 <https://github.com/jupyterlab/jupyterlab/pull/6366>`__, `#6365 <https://github.com/jupyterlab/jupyterlab/issues/6365>`__)
+* Expose Icon Svg To Theme Css (`#6034 <https://github.com/jupyterlab/jupyterlab/pull/6034>`__)
+
+
+
+`v1.0.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v1.0.0>`__
+---------------------------------------------------------------------------
+
+June 28, 2019
+^^^^^^^^^^^^^^^
 
 See the `JupyterLab
 1.0.0 <https://github.com/jupyterlab/jupyterlab/milestone/2?closed=1>`__
