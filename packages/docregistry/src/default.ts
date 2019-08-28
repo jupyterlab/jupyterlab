@@ -284,12 +284,22 @@ export abstract class ABCWidgetFactory<
     this._defaultFor = options.defaultFor ? options.defaultFor.slice() : [];
     this._defaultRendered = (options.defaultRendered || []).slice();
     this._fileTypes = options.fileTypes.slice();
+    this._mimeTypes = options.mimeTypes.slice();
     this._modelName = options.modelName || 'text';
     this._preferKernel = !!options.preferKernel;
     this._canStartKernel = !!options.canStartKernel;
     this._shutdownOnClose = !!options.shutdownOnClose;
     this._toolbarFactory = options.toolbarFactory;
   }
+
+  // initMimeTypes(reg: DocumentRegistry) {
+  //   let mimeTypes = new Set(this._mimeTypes);
+  //
+  //   this._mimeTypes = [...this._fileTypes.reduce((mts, ft) => {
+  //     reg.getFileType(ft).mimeTypes.forEach(mt => mts.add(mt));
+  //     return mts;
+  //   }, mimeTypes)];
+  // }
 
   /**
    * A signal emitted when a widget is created.
@@ -327,10 +337,17 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * The file types the widget can view.
+   * (DEPRECATED) The file types the widget can view.
    */
   get fileTypes(): string[] {
     return this._fileTypes.slice();
+  }
+
+  /**
+   * The file types the widget can view.
+   */
+  get mimeTypes(): string[] {
+    return this._mimeTypes.slice();
   }
 
   /**
@@ -432,6 +449,7 @@ export abstract class ABCWidgetFactory<
   private _preferKernel: boolean;
   private _modelName: string;
   private _fileTypes: string[];
+  private _mimeTypes: string[];
   private _defaultFor: string[];
   private _defaultRendered: string[];
   private _widgetCreated = new Signal<DocumentRegistry.IWidgetFactory<T, U>, T>(

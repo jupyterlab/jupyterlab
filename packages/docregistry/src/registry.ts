@@ -34,7 +34,7 @@ import { IModelDB } from '@jupyterlab/observables';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { TextModelFactory } from './default';
+import { ABCWidgetFactory, TextModelFactory } from './default';
 
 /**
  * The document registry.
@@ -113,6 +113,14 @@ export class DocumentRegistry implements IDisposable {
    * The factory cannot be named an empty string or the string `'default'`.
    */
   addWidgetFactory(factory: DocumentRegistry.WidgetFactory): IDisposable {
+    let mimeTypes = new Set(factory.mimeTypes);
+    (factory as any)._mimeTypes = [
+      ...factory.fileTypes.reduce((mts, ft) => {
+        this.getFileType(ft).mimeTypes.forEach(mt => mts.add(mt));
+        return mts;
+      }, mimeTypes)
+    ];
+
     let name = factory.name.toLowerCase();
     if (!name || name === 'default') {
       throw Error('Invalid factory name');
@@ -960,9 +968,14 @@ export namespace DocumentRegistry {
     readonly name: string;
 
     /**
-     * The file types the widget can view.
+     * (DEPRECATED) The file types the widget can view.
      */
     readonly fileTypes: ReadonlyArray<string>;
+
+    /**
+     * The mime types the widget can view.
+     */
+    readonly mimeTypes?: ReadonlyArray<string>;
 
     /**
      * The file types for which the factory should be the default.
