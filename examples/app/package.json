@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-app",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "private": true,
   "scripts": {
     "build": "webpack",
@@ -23,7 +23,7 @@
     "@jupyterlab/imageviewer-extension": "^1.0.5",
     "@jupyterlab/inspector-extension": "^1.0.5",
     "@jupyterlab/launcher-extension": "^1.0.5",
-    "@jupyterlab/mainmenu-extension": "^1.0.5",
+    "@jupyterlab/mainmenu-extension": "^1.0.6",
     "@jupyterlab/markdownviewer-extension": "^1.0.5",
     "@jupyterlab/mathjax2-extension": "^1.0.5",
     "@jupyterlab/notebook-extension": "^1.0.6",
