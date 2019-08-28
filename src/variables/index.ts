@@ -68,6 +68,7 @@ export namespace Variables {
         return;
       }
       this._currentScope = value;
+      this._variablesChanged.emit(value.variables);
     }
 
     get currentChanged(): ISignal<this, IVariable> {
@@ -94,6 +95,10 @@ export namespace Variables {
       }
       this._filterState = value;
       this._variablesChanged.emit(this._filterVariables());
+    }
+
+    get scopes(): IScope[] {
+      return this._state;
     }
 
     get variables(): IVariable[] {
