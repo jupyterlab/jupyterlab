@@ -304,13 +304,28 @@ export abstract class ABCWidgetFactory<
     let mimeTypes = new Set(mtArr);
 
     return [
-      ...ftArr.reduce((mts, ft) => {
-        reg.getFileType(ft).mimeTypes.forEach(mt => mts.add(mt));
+      ...ftArr.reduce((mts, ftname) => {
+        if (ftname === '*') {
+          mts.add('*');
+          return mts;
+        }
+
+        const ft = reg.getFileType(ftname);
+        if (!ft) {
+          // bail if filetype name not registered
+          return mts;
+        }
+
+        ft.mimeTypes.forEach(mt => mts.add(mt));
         return mts;
       }, mimeTypes)
     ];
   }
 
+  /**
+   * Merges deprecated properties that deal with filetype into
+   * the properties that deal with mimetype
+   */
   initMimeTypes(reg: DocumentRegistry): void {
     // initialize each of the factory's mimetype properties
     this._defaultForMimeTypes = this._initMimeTypes(
