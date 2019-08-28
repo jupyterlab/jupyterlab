@@ -19,8 +19,6 @@ import {
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
-
 /* tslint:disable */
 /**
  * The Output Logger token.
@@ -30,35 +28,25 @@ export const IOutputLogRegistry = new Token<IOutputLogRegistry>(
 );
 
 export interface IOutputLogRegistry {
-  createLogger(options: IOutputLogRegistry.IRegisterOptions): IDisposable;
   getLogger(name: string): ILogger;
-}
-
-export namespace IOutputLogRegistry {
-  export interface IRegisterOptions {
-    name: string;
-    rendermime: IRenderMimeRegistry;
-  }
 }
 
 export interface ILogger {
   log(output: nbformat.IOutput): void;
   clear(): void;
   readonly length: number;
-
+  rendermime: IRenderMimeRegistry;
   /**
    * A signal emitted when the log changes.
    */
   readonly logChanged: ISignal<this, ILoggerChange>;
   readonly source: string;
-  readonly rendermime: IRenderMimeRegistry;
   readonly outputAreaModel: OutputAreaModel;
 }
 
 export class Logger implements ILogger {
-  constructor(source: string, rendermime: IRenderMimeRegistry) {
+  constructor(source: string) {
     this.source = source;
-    this.rendermime = rendermime;
   }
 
   get length(): number {
@@ -66,7 +54,7 @@ export class Logger implements ILogger {
   }
 
   /**
-   * A signal emitted when the model of the notebook changes.
+   * A signal emitted when the log model changes.
    */
   get logChanged(): ISignal<this, ILoggerChange> {
     return this._logChanged;
@@ -88,29 +76,20 @@ export class Logger implements ILogger {
   private _logChanged = new Signal<this, ILoggerChange>(this);
   readonly source: string;
   readonly outputAreaModel = new OutputAreaModel();
-  readonly rendermime: IRenderMimeRegistry;
+  rendermime: IRenderMimeRegistry | null = null;
 }
 
 export type ILoggerChange = 'append' | 'clear';
 
 export class OutputLogRegistry implements IOutputLogRegistry {
-  createLogger({
-    name,
-    rendermime
-  }: IOutputLogRegistry.IRegisterOptions): IDisposable {
-    if (this._logs.has(name)) {
-      throw new Error(
-        `Output log registry already has a logger for source name ${name}`
-      );
-    }
-    this._logs.set(name, new Logger(name, rendermime));
-    return new DisposableDelegate(() => {
-      this._logs.delete(name);
-    });
-  }
-
   getLogger(name: string): ILogger {
-    return this._logs.get(name);
+    const logs = this._logs;
+    if (logs.has(name)) {
+      return logs.get(name);
+    }
+    const logger = new Logger(name);
+    logs.set(name, logger);
+    return logger;
   }
 
   _logs = new Map<string, Logger>();
@@ -124,6 +103,11 @@ export class OutputLoggerView extends Panel {
    * Construct an OutputConsoleView instance.
    */
   constructor(logger: ILogger) {
+    if (logger.rendermime === null) {
+      throw new Error(
+        `Attempted to display log for ${logger.source}, but it is missing a rendermime.`
+      );
+    }
     super();
 
     this.title.closable = true;

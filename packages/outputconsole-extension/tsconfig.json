@@ -26,6 +26,12 @@
     },
     {
       "path": "../rendermime"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "../coreutils"
     }
   ]
 }

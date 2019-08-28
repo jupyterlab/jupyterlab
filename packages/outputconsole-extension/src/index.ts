@@ -9,15 +9,23 @@ import {
   ILayoutRestorer
 } from '@jupyterlab/application';
 
-import { MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
+import {
+  MainAreaWidget,
+  WidgetTracker,
+  ICommandPalette
+} from '@jupyterlab/apputils';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
+
+import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import {
   IOutputLogRegistry,
   OutputLoggerView,
   OutputLogRegistry
 } from '@jupyterlab/outputconsole';
+import { KernelMessage } from '@jupyterlab/services';
+import { nbformat } from '@jupyterlab/coreutils';
 
 /**
  * The Output Log extension.
@@ -80,4 +88,43 @@ function activateOutputLog(
   // When is the output model disposed?
 }
 
-export default outputLogPlugin;
+/**
+ * The Output Log extension.
+ */
+const nblogger: JupyterFrontEndPlugin<void> = {
+  activate: (
+    app: JupyterFrontEnd,
+    logger: IOutputLogRegistry,
+    nbtracker: INotebookTracker,
+    palette: ICommandPalette
+  ) => {
+    nbtracker.widgetAdded.connect(
+      (sender: INotebookTracker, nb: NotebookPanel) => {
+        let disposer = palette.addItem({
+          command: 'outputconsole:open',
+          args: { source: nb.context.path },
+          category: 'Output Log'
+        });
+        nb.context.disposed.connect(() => disposer.dispose());
+        nb.context.session.iopubMessage.connect(
+          (_, msg: KernelMessage.IIOPubMessage) => {
+            if (
+              KernelMessage.isDisplayDataMsg(msg) ||
+              KernelMessage.isStreamMsg(msg) ||
+              KernelMessage.isErrorMsg(msg)
+            ) {
+              const log = logger.getLogger(nb.context.path);
+              log.log((msg as unknown) as nbformat.IOutput);
+              log.rendermime = nb.content.rendermime;
+            }
+          }
+        );
+      }
+    );
+  },
+  id: '@jupyterlab/outputconsole-extension:nblogger',
+  requires: [IOutputLogRegistry, INotebookTracker, ICommandPalette],
+  autoStart: true
+};
+
+export default [outputLogPlugin, nblogger];
