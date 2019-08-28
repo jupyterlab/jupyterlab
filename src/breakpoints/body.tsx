@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { Breakpoints } from '.';
 import { ReactWidget } from '@jupyterlab/apputils';
 import { ArrayExt } from '@phosphor/algorithm';
+import { ISignal } from '@phosphor/signaling';
 
 export class Body extends ReactWidget {
   constructor(model: Breakpoints.IModel) {
@@ -22,12 +23,6 @@ export class Body extends ReactWidget {
 
 const BreakpointsComponent = ({ model }: { model: Breakpoints.IModel }) => {
   const [breakpoints, setBreakpoints] = useState(model.breakpoints);
-  const [active, setActive] = useState(model.isActive);
-
-  model.activeChanged.connect((_: Breakpoints.IModel, update: boolean) => {
-    console.log(update);
-    setActive(update);
-  });
 
   model.breakpointsChanged.connect(
     (_: Breakpoints.IModel, updates: Breakpoints.IBreakpoint[]) => {
@@ -44,7 +39,7 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.IModel }) => {
         <BreakpointComponent
           key={breakpoint.id}
           breakpoint={breakpoint}
-          active={active}
+          breakpointChanged={model.breakpointChanged}
         />
       ))}
     </div>
@@ -53,25 +48,32 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.IModel }) => {
 
 const BreakpointComponent = ({
   breakpoint,
-  active
+  breakpointChanged
 }: {
-  breakpoint: any;
-  active: any;
+  breakpoint: Breakpoints.IBreakpoint;
+  breakpointChanged: ISignal<Breakpoints.IModel, Breakpoints.IBreakpoint>;
 }) => {
-  const [checkState, setCheck] = useState(breakpoint.verified);
-  breakpoint.verified = checkState;
-  const setBreakpointEnabled = (breakpoint: any, state: boolean) => {
-    setCheck(state);
+  const [active, setActive] = useState(breakpoint.active);
+  breakpoint.active = active;
+
+  breakpointChanged.connect(
+    (_: Breakpoints.IModel, updates: Breakpoints.IBreakpoint) => {
+      setActive(updates.active);
+    }
+  );
+
+  const setBreakpointEnabled = (state: boolean) => {
+    setActive(state);
   };
 
   return (
-    <div className={`breakpoint ${active ? '' : 'disabled'}`}>
+    <div className={`breakpoint`}>
       <input
         onChange={() => {
-          setBreakpointEnabled(breakpoint, !checkState);
+          setBreakpointEnabled(!active);
         }}
         type="checkbox"
-        checked={checkState}
+        checked={active}
       />
       <span>
         {breakpoint.source.name} : {breakpoint.line}
