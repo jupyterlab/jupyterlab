@@ -1,16 +1,23 @@
-# jetbrains IDE stuff
-*.iml
-.idea/
+# files that match any pattern from .cleanignore are NOT removed by
+# the `jlpm clean:slate` command. Same syntax as .gitignore (plus the @).
+#
+# @: if a pattern starts with "@", some includes are automatically added,
+# in addition to the base exclude pattern. For example:
+#
+# @*.foo
+#
+# will add:
+#
+# *.foo
+# !packages/**/*.foo
+# !**/node_modules/**/*.foo
+#
+# These help ensure that all node_modules dirs are cleaned and that
+# sibling installs of labextensions are not cleaned.
 
-# avoid matching to sibling installs or node_modules
-!packages/**/*.iml
-!packages/**/.idea/
-!**/node_modules/**/*.iml
-!**/node_modules/**/.idea/
+# jetbrains IDE stuff
+@*.iml
+@.idea/
 
 # ms IDE stuff
-.vscode
-
-# avoid matching to sibling installs or node_modules
-!packages/**/.vscode
-!**/node_modules/**/.vscode
+@.vscode
