@@ -1,7 +1,16 @@
 # jetbrains IDE stuff
 *.iml
-!**/node_modules/**/*.iml
 .idea/
+
+# avoid matching to sibling installs or node_modules
+!packages/**/*.iml
+!packages/**/.idea/
+!**/node_modules/**/*.iml
+!**/node_modules/**/.idea/
 
 # ms IDE stuff
 .vscode
+
+# avoid matching to sibling installs or node_modules
+!packages/**/.vscode
+!**/node_modules/**/.vscode
