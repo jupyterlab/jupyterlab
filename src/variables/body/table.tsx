@@ -58,7 +58,7 @@ export class Table extends ReactWidget {
 
 const TableComponent = ({ model }: { model: Variables.IModel }) => {
   const [variables, setVariables] = useState(model.variables);
-  const [variable, TableBody] = useTbody(variables, model.current);
+  const [variable, TableBody] = useTbody(variables, model.currentVariable);
 
   model.variablesChanged.connect((_: any, updates) => {
     if (ArrayExt.shallowEqual(variables, updates)) {
@@ -67,7 +67,7 @@ const TableComponent = ({ model }: { model: Variables.IModel }) => {
     setVariables(updates);
   });
 
-  model.current = variable;
+  model.currentVariable = variable;
 
   return (
     <div>

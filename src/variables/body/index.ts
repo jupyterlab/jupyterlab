@@ -40,7 +40,9 @@ class Description extends Widget {
 
     this.model.currentChanged.connect(
       (model: Variables.IModel, variable: Variables.IVariable) => {
-        this.node.innerHTML = this.renderDescription(this.model.current);
+        this.node.innerHTML = this.renderDescription(
+          this.model.currentVariable
+        );
       }
     );
   }
