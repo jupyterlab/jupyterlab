@@ -69,9 +69,14 @@ Then build and install jupyterlab:
 pip install -ve .
 ```
 
-## How Python and NPM versions increment
+## Bump version
+
+The next step is to bump the appropriate version numbers. We use
+[bump2version](https://github.com/c4urself/bump2version) to manage the Python
+version, and we keep the JS versions and tags in sync with the release cycle.
 
 Here is an example of how version numbers progress through a release process.
+Choose and run an appropriate command to bump version numbers for this release.
 
 | Command                            | Python Version Change | NPM Version change                 |
 | ---------------------------------- | --------------------- | ---------------------------------- |
@@ -83,7 +88,11 @@ Here is an example of how version numbers progress through a release process.
 
 ### JS major release(s)
 
-Command:
+In a major Python release, we can have one or more JavaScript packages also have
+a major bump. During the prerelease stage of a major release, if there is a
+backwards-incompatible change to a JS package, bump the major version number for
+that JS package:
+
 `jlpm bump:js:major [...packages]`
 
 Results:
@@ -93,26 +102,35 @@ Results:
 - Packages that have already had a major bump in this prerelease cycle are not affected.
 - All affected packages changed to match the current release type of the Python package (`alpha` or `rc`).
 
-### Publishing Packages
+## Publishing Packages
 
-We use [bump2version](https://github.com/c4urself/bump2version) to manage the Python
-version, and we keep the JS versions and tags in sync with the release cycle.
-For a backwards-incompatible changes to JS packages, bump the major version number(s)
-using `jlpm run bump:js:major` with the package name(s). For a major release of
-JupyterLab itself, run `jlpm run bumpversion major`.
+Currently we end up with some uncommitted changes at this step. We'll need to commit them before running the publish.
 
-- Run `jlpm run bumpversion build` to create a new `alpha` version.
-- Push the commits and tags as prompted.
-- Run `npm run publish:all` to publish the JS and Python packages.
-  Note that the use of `npm` instead of `jlpm` is
-  [significant on Windows](https://github.com/jupyterlab/jupyterlab/issues/6733).
-  Execute the suggested commands after doing a quick sanity check.
-  If there is a network error during JS publish, run `npm run publish:all --skip-build` to resume publish without requiring another
-  clean and build phase of the JS packages.
-- Run `jlpm run bumpversion release` to switch to an `rc` version.
-  (running `jlpm run bumpversion build` will then increment `rc` versions).
+```bash
+git commit -a "bump version"
+```
 
-### Post release candidate checklist
+Now publish the JS packages and build the python packages
+
+```bash
+npm run publish:all
+```
+
+If there is a network error during JS publish, run `npm run publish:all --skip-build` to resume publish without requiring another clean and build phase of the JS packages.
+
+Note that the use of `npm` instead of `jlpm` is [significant on Windows](https://github.com/jupyterlab/jupyterlab/issues/6733).
+
+This is a good time to sanity-check the built packages. In another terminal, create a
+new environment, pip install the wheel from the `dist/` directory, and run both
+`jupyter lab` and `jupyter lab build`.
+
+## Finish
+
+- Follow instructions printed at the end of the publish step above, including
+  committing changes, tagging the release, and uploading to pypi.
+- Double-check what branch you are on, and push changes to the correct upstream branch with the `--tags` option.
+
+## Post release candidate checklist
 
 - [ ] Modify and run `python scripts/milestone_check.py` to check the issues assigned to this milestone
 - [ ] Write [release highlights](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/getting_started/changelog.rst), starting with:
