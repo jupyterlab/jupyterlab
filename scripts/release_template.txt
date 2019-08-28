@@ -9,7 +9,7 @@ See the `JupyterLab
 milestone on GitHub for the full list of pull requests and issues closed.
 
 {%   for pr in pull_requests -%}
-* {{ pr['title']|title }} (`#{{ pr['number'] }} <{{pr['html_url']}}>`__
+* {{ pr['title'] | capitalize }} (`#{{ pr['number'] }} <{{pr['html_url']}}>`__
 {%-      if pr['loghub_related_issues']|length %}
 {%-          for pri in pr['loghub_related_issues'] -%}
                  , `#{{ pri['text'] }} <{{ pri['url'] }}>`__
