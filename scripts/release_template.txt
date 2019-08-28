@@ -5,7 +5,7 @@
 ^^^^^^^^^^^^^^^
 
 See the `JupyterLab
-{{ version }} <https://github.com/jupyterlab/jupyterlab/milestone/{{ version }}?closed=1>`__
+{{ version }} <https://github.com/jupyterlab/jupyterlab/milestone/XXXX?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
 {%   for pr in pull_requests -%}

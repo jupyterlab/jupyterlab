@@ -10,7 +10,7 @@ August 28, 2019
 ^^^^^^^^^^^^^^^
 
 Here are some highlights of what is in this release. See the `JupyterLab
-1.1 <https://github.com/jupyterlab/jupyterlab/milestone/1.1?closed=1>`__
+1.1.0 <https://github.com/jupyterlab/jupyterlab/milestone/31?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
 
