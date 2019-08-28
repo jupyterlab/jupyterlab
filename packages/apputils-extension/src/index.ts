@@ -422,7 +422,10 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         delete query['reset'];
 
         const url = path + URLExt.objectToQueryString(query) + hash;
-        const cleared = db.clear().then(() => router.stop);
+        const cleared = db
+          .clear()
+          .then(() => save.invoke())
+          .then(() => router.stop);
 
         // After the state has been reset, navigate to the URL.
         if (clone) {
