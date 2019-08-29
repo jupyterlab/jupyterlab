@@ -59,9 +59,10 @@ commander
     console.log('*'.repeat(40));
     console.log('Ready to publish!');
     console.log('Run these command when ready:');
-    console.log(`git tag v${curr}`);
     console.log(`git commit -am "Publish ${curr}"`);
+    console.log(`git tag v${curr}`);
     console.log('twine upload dist/*');
+    console.log('git push origin <BRANCH> --tags');
   });
 
 commander.parse(process.argv);
