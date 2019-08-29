@@ -634,7 +634,8 @@ class _AppHandler(object):
 
         self._populate_staging(
             name=name, version=version, static_url=static_url,
-            clean=clean_staging)
+            clean=clean_staging
+        )
 
         staging = pjoin(app_dir, 'staging')
 
