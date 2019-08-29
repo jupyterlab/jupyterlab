@@ -13,7 +13,7 @@ export class Variables extends Panel {
   constructor(options: Variables.IOptions = {}) {
     super();
 
-    this.model = new Variables.IModel(MOCK_DATA_ROW.variables);
+    this.model = new Variables.IModel(MOCK_DATA_ROW.scope);
     this.addClass('jp-DebuggerVariables');
     this.title.label = 'Variables';
 
@@ -46,25 +46,43 @@ export namespace Variables {
     description: string;
   }
 
+  export interface IScope {
+    name: string;
+    variables: IVariable[];
+  }
+
   export interface IModel {}
 
   export class IModel implements IModel {
-    constructor(model: IVariable[]) {
+    constructor(model: IScope[]) {
       this._state = model;
+      this._currentScope = this._state[0];
+    }
+
+    get currentScope(): IScope {
+      return this._currentScope;
+    }
+
+    set currentScope(value: IScope) {
+      if (this._currentScope === value) {
+        return;
+      }
+      this._currentScope = value;
+      this._variablesChanged.emit(value.variables);
     }
 
     get currentChanged(): ISignal<this, IVariable> {
       return this._currentChanged;
     }
 
-    get current(): IVariable {
-      return this._current;
+    get currentVariable(): IVariable {
+      return this._currentVariable;
     }
-    set current(variable: IVariable) {
-      if (this._current === variable) {
+    set currentVariable(variable: IVariable) {
+      if (this._currentVariable === variable) {
         return;
       }
-      this._current = variable;
+      this._currentVariable = variable;
       this._currentChanged.emit(variable);
     }
 
@@ -79,14 +97,18 @@ export namespace Variables {
       this._variablesChanged.emit(this._filterVariables());
     }
 
+    get scopes(): IScope[] {
+      return this._state;
+    }
+
     get variables(): IVariable[] {
       if (this._filterState) {
         return this._filterVariables();
       }
-      return this._state;
+      return this._currentScope.variables;
     }
     set variables(variables: IVariable[]) {
-      this._state = variables;
+      this._currentScope.variables = variables;
     }
 
     get variablesChanged(): ISignal<this, IVariable[]> {
@@ -98,7 +120,7 @@ export namespace Variables {
     }
 
     private _filterVariables(): IVariable[] {
-      return this._state.filter(
+      return this._currentScope.variables.filter(
         ele =>
           ele.name
             .toLocaleLowerCase()
@@ -106,59 +128,73 @@ export namespace Variables {
       );
     }
 
-    private _current: IVariable;
+    private _currentVariable: IVariable;
     private _currentChanged = new Signal<this, IVariable>(this);
     private _variablesChanged = new Signal<this, IVariable[]>(this);
     private _filterState: string = '';
-    private _state: IVariable[];
+    protected _state: IScope[];
+    private _currentScope: IScope;
   }
 
   export interface IOptions extends Panel.IOptions {}
 }
 
 const MOCK_DATA_ROW = {
-  variables: [
+  scope: [
     {
-      name: 'test 1',
-      value: 'function()',
-      type: 'function',
-      variablesReference: 0,
-      description: 'def test1(): return 0'
+      name: 'local',
+      variables: [
+        {
+          name: 'test 1',
+          value: 'function()',
+          type: 'function',
+          variablesReference: 0,
+          description: 'def test1(): return 0'
+        },
+        {
+          name: 'Classtest',
+          value: 'class',
+          type: 'class',
+          variablesReference: 1,
+          description: 'def test2(): return 0'
+        },
+        {
+          name: 'test 3',
+          value: 'function()',
+          type: 'function',
+          variablesReference: 0,
+          description: 'def test1(): return 0'
+        },
+        {
+          name: 'test 4',
+          value: 'function()',
+          type: 'function',
+          variablesReference: 0,
+          description: 'def test2(): return 0'
+        },
+        {
+          name: 'test 5',
+          value: 'function()',
+          type: 'function',
+          variablesReference: 0,
+          description: 'def test1(): return 0'
+        },
+        {
+          name: 'test 6',
+          value: 'function()',
+          type: 'function',
+          variablesReference: 0,
+          description: 'def test2(): return 0'
+        }
+      ]
     },
     {
-      name: 'Classtest',
-      value: 'class',
-      type: 'class',
-      variablesReference: 1,
-      description: 'def test2(): return 0'
+      name: 'global',
+      variables: [] as Variables.IVariable[]
     },
     {
-      name: 'test 3',
-      value: 'function()',
-      type: 'function',
-      variablesReference: 0,
-      description: 'def test1(): return 0'
-    },
-    {
-      name: 'test 4',
-      value: 'function()',
-      type: 'function',
-      variablesReference: 0,
-      description: 'def test2(): return 0'
-    },
-    {
-      name: 'test 5',
-      value: 'function()',
-      type: 'function',
-      variablesReference: 0,
-      description: 'def test1(): return 0'
-    },
-    {
-      name: 'test 6',
-      value: 'function()',
-      type: 'function',
-      variablesReference: 0,
-      description: 'def test2(): return 0'
+      name: 'built-in',
+      variables: [] as Variables.IVariable[]
     }
   ]
 };
