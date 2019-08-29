@@ -13,7 +13,7 @@ export class Variables extends Panel {
   constructor(options: Variables.IOptions = {}) {
     super();
 
-    this.model = new Variables.IModel(MOCK_DATA_ROW.scope);
+    this.model = new Variables.IModel(MOCK_DATA_ROW.scopes);
     this.addClass('jp-DebuggerVariables');
     this.title.label = 'Variables';
 
@@ -140,7 +140,7 @@ export namespace Variables {
 }
 
 const MOCK_DATA_ROW = {
-  scope: [
+  scopes: [
     {
       name: 'local',
       variables: [
@@ -190,11 +190,27 @@ const MOCK_DATA_ROW = {
     },
     {
       name: 'global',
-      variables: [] as Variables.IVariable[]
+      variables: [
+        {
+          name: 'exmapleGlobal',
+          value: 'function()',
+          type: 'function',
+          variablesReference: 0,
+          description: 'def exmapleGlobal(): return 0'
+        }
+      ] as Variables.IVariable[]
     },
     {
       name: 'built-in',
-      variables: [] as Variables.IVariable[]
+      variables: [
+        {
+          name: 'exmapleBuiltIn',
+          value: 'function()',
+          type: 'function',
+          variablesReference: 0,
+          description: 'def texmapleBuiltIn(): return 0'
+        }
+      ] as Variables.IVariable[]
     }
   ]
 };
