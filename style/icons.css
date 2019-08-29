@@ -54,3 +54,7 @@
 .jp-VariableIcon {
   background-image: url('icons/variable.svg');
 }
+
+.jp-CloseAllIcon {
+  background-image: url('icons/close-all.svg');
+}
