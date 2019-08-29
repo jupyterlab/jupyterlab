@@ -19,7 +19,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { Debugger } from './debugger';
 
-import { DebuggerSidebar } from './sidebar';
+// import { DebuggerSidebar } from './sidebar';
 
 import { IDebugger, IDebuggerSidebar } from './tokens';
 
@@ -96,18 +96,19 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 /**
  * A plugin providing a condensed sidebar UI for debugging.
  */
-const sidebar: JupyterFrontEndPlugin<IDebuggerSidebar> = {
+const sidebar: JupyterFrontEndPlugin<Debugger> = {
   id: '@jupyterlab/debugger:sidebar',
-  optional: [ILayoutRestorer],
+  optional: [ILayoutRestorer, INotebookTracker],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
-    restorer: ILayoutRestorer | null
-  ): DebuggerSidebar => {
+    restorer: ILayoutRestorer | null,
+    tracker: INotebookTracker
+  ): Debugger => {
     const { shell } = app;
     const label = 'Environment';
     const namespace = 'jp-debugger-sidebar';
-    const sidebar = new DebuggerSidebar(null);
+    const sidebar = new Debugger({ tracker: tracker });
 
     sidebar.id = namespace;
     sidebar.title.label = label;
@@ -126,7 +127,7 @@ const sidebar: JupyterFrontEndPlugin<IDebuggerSidebar> = {
  */
 const tracker: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:tracker',
-  optional: [ILayoutRestorer, IDebuggerSidebar],
+  optional: [ILayoutRestorer, IDebuggerSidebar, INotebookTracker],
   requires: [IStateDB],
   provides: IDebugger,
   autoStart: true,
@@ -143,7 +144,7 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
     app.commands.addCommand(CommandIDs.create, {
       execute: args => {
         const id = (args.id as string) || '';
-
+        console.log(id, 'hi');
         if (id) {
           console.log('Debugger ID: ', id);
         }
@@ -153,7 +154,10 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
         }
 
         const widget = new MainAreaWidget({
-          content: new Debugger({ connector: state, id })
+          content: new Debugger({
+            connector: state,
+            id: id
+          })
         });
 
         void tracker.add(widget);

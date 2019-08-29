@@ -10,16 +10,12 @@ import { ReadonlyJSONValue, UUID } from '@phosphor/coreutils';
 import { IDisposable } from '@phosphor/disposable';
 
 import { DebuggerSidebar } from './sidebar';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 export class Debugger extends BoxPanel {
-  readonly model: Debugger.Model;
-
-  readonly tabs = new TabPanel();
-
-  readonly sidebar: DebuggerSidebar;
-
   constructor(options: Debugger.IOptions) {
     super({ direction: 'left-to-right' });
+    this.tracker = options.tracker;
 
     this.model = new Debugger.Model(options);
     this.sidebar = new DebuggerSidebar(this.model);
@@ -28,6 +24,20 @@ export class Debugger extends BoxPanel {
     this.addClass('jp-Debugger');
     this.addWidget(this.tabs);
     this.addWidget(this.sidebar);
+
+    this.tracker.activeCellChanged.connect(this.onActiveCellChanged, this);
+  }
+
+  readonly model: Debugger.Model;
+
+  readonly tabs = new TabPanel();
+
+  readonly sidebar: DebuggerSidebar;
+
+  tracker: INotebookTracker;
+
+  protected onActiveCellChanged() {
+    console.log('changed cell');
   }
 
   dispose(): void {
@@ -45,7 +55,7 @@ export class Debugger extends BoxPanel {
 export namespace Debugger {
   export interface IOptions {
     connector?: IDataConnector<ReadonlyJSONValue>;
-
+    tracker?: INotebookTracker;
     id?: string;
   }
 
