@@ -28,7 +28,7 @@ User-facing changes
 * Support installing multiple versions of the same extension (`#6857 <https://github.com/jupyterlab/jupyterlab/pull/6857>`__)
 * Support JupyterHub server name for JupyterHub 1.0 (`#6931 <https://github.com/jupyterlab/jupyterlab/pull/6931>`__)
 * Add docs to help users diagnose issues before creating them (`#6971 <https://github.com/jupyterlab/jupyterlab/pull/6971>`__)
-
+* The JupyterLab conda-forge package is now a `noarch` package. If you are using JupyterLab with `notebook` version 5.2 or earlier, you may need to manually enable the JupyterLab server extension. See the issue for more details (`#7042 <https://github.com/jupyterlab/jupyterlab/issues/7042>`__)
 
 For developers
 ^^^^^^^^^^^^^^
