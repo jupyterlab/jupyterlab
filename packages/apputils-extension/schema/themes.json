@@ -12,15 +12,15 @@
       "properties": {
         "code-font-family": {
           "type": ["string", "null"],
-          "description": "font-size"
+          "description": "font-family"
         },
         "content-font-family": {
           "type": ["string", "null"],
-          "description": "font-size"
+          "description": "font-family"
         },
         "ui-font-family": {
           "type": ["string", "null"],
-          "description": "font-size"
+          "description": "font-family"
         },
 
         "code-font-size": {
