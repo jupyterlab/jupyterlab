@@ -100,6 +100,9 @@ const nblogger: JupyterFrontEndPlugin<void> = {
   ) => {
     nbtracker.widgetAdded.connect(
       (sender: INotebookTracker, nb: NotebookPanel) => {
+        const log = logger.getLogger(nb.context.path);
+        log.rendermime = nb.content.rendermime;
+
         let disposer = palette.addItem({
           command: 'outputconsole:open',
           args: { source: nb.context.path },
@@ -113,9 +116,7 @@ const nblogger: JupyterFrontEndPlugin<void> = {
               KernelMessage.isStreamMsg(msg) ||
               KernelMessage.isErrorMsg(msg)
             ) {
-              const log = logger.getLogger(nb.context.path);
-              log.log((msg as unknown) as nbformat.IOutput);
-              log.rendermime = nb.content.rendermime;
+              log.log((msg.content as unknown) as nbformat.IOutput);
             }
           }
         );
