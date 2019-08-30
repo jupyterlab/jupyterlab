@@ -6,3 +6,10 @@
 .jp-DebuggerBreakpoints-body {
   padding: 10px;
 }
+
+.jp-breakpoint-marker {
+  position: absolute;
+  left: -30px;
+  top: -1px;
+  color: #f22;
+}

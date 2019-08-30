@@ -11,6 +11,9 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { DebuggerSidebar } from './sidebar';
 import { INotebookTracker } from '@jupyterlab/notebook';
+import { CodeCell } from '@jupyterlab/cells';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { Editor } from 'codemirror';
 
 export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
@@ -37,7 +40,54 @@ export class Debugger extends BoxPanel {
   tracker: INotebookTracker;
 
   protected onActiveCellChanged() {
-    console.log('changed cell');
+    const activeCell = this.getCell();
+    this.setEditor(activeCell);
+  }
+
+  protected getCell(): CodeCell {
+    return this.tracker.activeCell as CodeCell;
+  }
+
+  setEditor(cell: CodeCell) {
+    if (!cell || !cell.editor) {
+      return;
+    }
+
+    const editor = cell.editor as CodeMirrorEditor;
+    editor.setOption('lineNumbers', true);
+    editor.editor.setOption('gutters', [
+      'CodeMirror-linenumbers',
+      'breakpoints'
+    ]);
+
+    editor.editor.on('gutterClick', this.addBreakpoint);
+  }
+
+  protected addBreakpoint = (editor: Editor, lineNumber: number) => {
+    const info = editor.lineInfo(lineNumber);
+    if (!info) {
+      return;
+    }
+
+    console.log(info);
+
+    const breakpoint = {
+      line: lineNumber,
+      text: info.text,
+      remove: !!info.gutterMarkers
+    };
+    editor.setGutterMarker(
+      lineNumber,
+      'breakpoints',
+      breakpoint.remove ? null : this.createMarkerNode()
+    );
+  };
+
+  createMarkerNode() {
+    var marker = document.createElement('div');
+    marker.className = 'jp-breakpoint-marker';
+    marker.innerHTML = '●';
+    return marker;
   }
 
   dispose(): void {
