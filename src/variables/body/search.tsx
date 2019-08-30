@@ -10,14 +10,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Variables } from '../index';
 
 export class Search extends Widget {
-  constructor(model: any) {
+  constructor(model: Variables.IModel) {
     super();
     this.addClass('jp-DebuggerVariables-search');
 
     const layout = new PanelLayout();
     this.layout = layout;
-    this.node.style.overflow = 'visible';
-    this.scope = new ScopeSearch();
+    this.scope = new ScopeSearch(model);
     this.search = new SearchInput(model);
 
     layout.addWidget(this.scope);
@@ -62,15 +61,18 @@ class SearchInput extends ReactWidget {
 }
 
 class ScopeSearch extends ReactWidget {
-  constructor() {
+  constructor(model: Variables.IModel) {
     super();
+    this.model = model;
     this.node.style.overflow = 'visible';
     this.node.style.width = '85px';
     this.addClass('jp-DebuggerVariables-scope');
   }
 
+  model: Variables.IModel;
+
   render() {
-    return <ScopeMenuComponent />;
+    return <ScopeMenuComponent model={this.model} />;
   }
 }
 
@@ -90,10 +92,11 @@ const useOutsideClick = (ref: any, callback: any) => {
   });
 };
 
-const ScopeMenuComponent = ({ config }: any) => {
+const ScopeMenuComponent = ({ model }: { model: Variables.IModel }) => {
   const [toggleState, setToggle] = useState(false);
-  const [scope, setScope] = useState('local');
+  const [scope, setScope] = useState(model.currentScope);
   const wrapperRef = useRef(null);
+  const scopes = model.scopes;
 
   const onClickOutSide = () => {
     setToggle(false);
@@ -105,25 +108,28 @@ const ScopeMenuComponent = ({ config }: any) => {
 
   useOutsideClick(wrapperRef, onClickOutSide);
 
-  const changeScope = (newScope: string) => {
+  const changeScope = (newScope: Variables.IScope) => {
     if (newScope === scope) {
       return;
     }
     setScope(newScope);
+    model.currentScope = newScope;
     setToggle(false);
   };
 
   const List = (
     <ul>
-      <li onClick={e => changeScope('local')}>local</li>
-      <li onClick={e => changeScope('global')}>global</li>
-      <li onClick={e => changeScope('built-in')}>built-in</li>
+      {scopes.map(scope => (
+        <li key={scope.name} onClick={e => changeScope(scope)}>
+          {scope.name}
+        </li>
+      ))}
     </ul>
   );
 
   return (
     <div onClick={e => toggle(e)} ref={wrapperRef}>
-      <span className="label">{scope}</span>
+      <span className="label">{scope.name}</span>
       <span className="fa fa-caret-down"></span>
       {toggleState ? List : null}
     </div>
