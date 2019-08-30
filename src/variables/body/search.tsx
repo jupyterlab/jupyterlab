@@ -16,7 +16,6 @@ export class Search extends Widget {
 
     const layout = new PanelLayout();
     this.layout = layout;
-    this.node.style.overflow = 'visible';
     this.scope = new ScopeSearch(model);
     this.search = new SearchInput(model);
 

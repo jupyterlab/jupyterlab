@@ -192,11 +192,11 @@ const MOCK_DATA_ROW = {
       name: 'global',
       variables: [
         {
-          name: 'exmapleGlobal',
+          name: 'exampleGlobal',
           value: 'function()',
           type: 'function',
           variablesReference: 0,
-          description: 'def exmapleGlobal(): return 0'
+          description: 'def exampleGlobal(): return 0'
         }
       ] as Variables.IVariable[]
     },

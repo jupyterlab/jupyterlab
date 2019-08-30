@@ -8,6 +8,7 @@ import { Variables } from '../index';
 import { Table } from './table';
 
 import { Search } from './search';
+import { Message } from '@phosphor/messaging';
 
 export class Body extends Panel {
   constructor(model: Variables.IModel) {
@@ -40,22 +41,22 @@ class Description extends Widget {
 
     this.model.currentChanged.connect(
       (model: Variables.IModel, variable: Variables.IVariable) => {
-        this.node.innerHTML = this.renderDescription(
-          this.model.currentVariable
-        );
+        this.currentVariable = variable;
+        this.update();
       }
     );
   }
 
-  model: Variables.IModel;
-
-  // Still in progres: rendering description
-
-  protected renderDescription(variable: Variables.IVariable) {
-    const descriptionElementDOM = `<b>name: ${variable.name}</b>
-                                       <p>type: ${variable.type} </p>
+  protected onUpdateRequest(msg: Message) {
+    if (!this.currentVariable) {
+      return;
+    }
+    this.node.innerHTML = `<b>name: ${this.currentVariable.name}</b>
+                                       <p>type: ${this.currentVariable.type} </p>
                                        Description:
-                                       <p>${variable.description}</p> `;
-    return descriptionElementDOM;
+                                       <p>${this.currentVariable.description}</p> `;
   }
+
+  model: Variables.IModel;
+  currentVariable: Variables.IVariable;
 }
