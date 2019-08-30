@@ -554,7 +554,7 @@ class _AppHandler(object):
                         'prod')
         command = ':'.join(parts)
 
-        self.logger.info('Building jupyterlab assets (%s)'%command)
+        self.logger.info('Building jupyterlab assets (%s)' % command)
 
         # Set up the build directory.
         app_dir = self.app_dir
