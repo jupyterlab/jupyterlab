@@ -1174,7 +1174,7 @@ export namespace DocumentRegistry {
     /**
      * The content type of the new file.
      */
-    readonly contentType: Contents.ContentType;
+    readonly contentType: Contents.ContentType | 'dirlike';
 
     /**
      * The format of the new file.

@@ -108,7 +108,7 @@ export namespace Contents {
   /**
    * A contents file type.
    */
-  export type ContentType = 'notebook' | 'file' | 'directory' | 'dirlike';
+  export type ContentType = 'notebook' | 'file' | 'directory';
 
   /**
    * A contents file format.
