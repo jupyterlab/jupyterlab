@@ -86,6 +86,8 @@ Choose and run an appropriate command to bump version numbers for this release.
 | `jlpm bumpversion release`         | x.y.z.rc0-> x.y.z     | All a.b.c-rc0 -> a.b.c             |
 | `jlpm patch:release [...packages]` | x.y.z -> x.y.(z+1)    | Selected a.b.c -> a.b.(c+1)        |
 
+Note: if you are making a patch release, and want to update whatever JS packages changed, just do `jlpm patch:release js` (in fact, _any_ argument, not just `js`, forces all JS packages to be examined).
+
 ### JS major release(s)
 
 In a major Python release, we can have one or more JavaScript packages also have
@@ -107,7 +109,7 @@ Results:
 Currently we end up with some uncommitted changes at this step. We'll need to commit them before running the publish.
 
 ```bash
-git commit -a "bump version"
+git commit -am "bump version"
 ```
 
 Now publish the JS packages and build the python packages
@@ -126,9 +128,12 @@ new environment, pip install the wheel from the `dist/` directory, and run both
 
 ## Finish
 
-- Follow instructions printed at the end of the publish step above, including
-  committing changes, tagging the release, and uploading to pypi.
-- Double-check what branch you are on, and push changes to the correct upstream branch with the `--tags` option.
+Follow instructions printed at the end of the publish step above, including:
+
+- committing changes
+- tagging the release
+- and uploading to pypi with twine
+- double-check what branch you are on, then push changes to the correct upstream branch with the `--tags` option.
 
 ## Post release candidate checklist
 
