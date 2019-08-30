@@ -122,7 +122,7 @@ setup_args = dict(
     platforms='Linux, Mac OS X, Windows',
     keywords=['ipython', 'jupyter', 'Web'],
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Intended Audience :: Science/Research',
@@ -131,6 +131,7 @@ setup_args = dict(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
 )
 
