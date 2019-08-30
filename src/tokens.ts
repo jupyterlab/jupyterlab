@@ -114,6 +114,7 @@ export namespace IDebugger {
       terminateThreads: DebugProtocol.TerminateThreadsArguments;
       threads: {};
       updateCell: IUpdateCellArguments;
+      variables: DebugProtocol.VariablesArguments;
     };
 
     /**
