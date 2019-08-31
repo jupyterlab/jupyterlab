@@ -1799,7 +1799,10 @@ export namespace DirListing {
       let modTitle = '';
       if (model.last_modified) {
         modText = Time.formatHuman(new Date(model.last_modified));
-        modTitle = Time.format(new Date(model.last_modified), 'lll');
+        modTitle = Time.format(
+          new Date(model.last_modified),
+          'MMM dd, yyyy hh:mm a'
+        );
       }
       modified.textContent = modText;
       modified.title = modTitle;
