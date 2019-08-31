@@ -12,7 +12,7 @@ describe('@jupyterlab/coreutils', () => {
         const date = new Date();
         date.setSeconds(date.getSeconds() - 10);
         const value = Time.formatHuman(date);
-        expect(value).to.equal('seconds ago');
+        expect(value).to.equal('less than a minute ago');
         date.setMinutes(date.getMinutes() - 3);
         expect(Time.formatHuman(date.toISOString())).to.equal('3 minutes ago');
       });
@@ -22,7 +22,7 @@ describe('@jupyterlab/coreutils', () => {
       it('should convert a timestring to a date format', () => {
         expect(Time.format(new Date()).length).to.equal(16);
         const date = new Date();
-        const value = Time.format(date.toISOString(), 'MM-DD');
+        const value = Time.format(date.toISOString(), 'MM-dd');
         expect(value.length).to.equal(5);
       });
     });

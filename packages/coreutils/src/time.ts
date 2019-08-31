@@ -31,7 +31,7 @@ export namespace Time {
     value = convertToDateObject(value);
 
     return formatDistanceToNow(value, {
-      includeSeconds: false,
+      includeSeconds: true,
       addSuffix: true
     });
   }
