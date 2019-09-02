@@ -98,17 +98,21 @@ const notebooks: JupyterFrontEndPlugin<void> = {
  */
 const sidebar: JupyterFrontEndPlugin<Debugger> = {
   id: '@jupyterlab/debugger:sidebar',
-  optional: [ILayoutRestorer, INotebookTracker],
+  optional: [ILayoutRestorer, INotebookTracker, IEditorTracker],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     restorer: ILayoutRestorer | null,
-    tracker: INotebookTracker
+    notebookTracker: INotebookTracker,
+    editorTracker: IEditorTracker
   ): Debugger => {
     const { shell } = app;
     const label = 'Environment';
     const namespace = 'jp-debugger-sidebar';
-    const sidebar = new Debugger({ tracker: tracker });
+    const sidebar = new Debugger({
+      notebook: notebookTracker,
+      editor: editorTracker
+    });
 
     sidebar.id = namespace;
     sidebar.title.label = label;
