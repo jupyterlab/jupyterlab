@@ -3,32 +3,36 @@
 
 import { IDataConnector } from '@jupyterlab/coreutils';
 
-import { BoxPanel, TabPanel } from '@phosphor/widgets';
+import { BoxPanel } from '@phosphor/widgets';
 
 import { ReadonlyJSONValue, UUID } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
 import { DebuggerSidebar } from './sidebar';
+import { INotebookTracker } from '@jupyterlab/notebook';
+import { CodeCell } from '@jupyterlab/cells';
+import { IEditorTracker } from '@jupyterlab/fileeditor';
 
 export class Debugger extends BoxPanel {
-  readonly model: Debugger.Model;
-
-  readonly tabs = new TabPanel();
-
-  readonly sidebar: DebuggerSidebar;
-
   constructor(options: Debugger.IOptions) {
     super({ direction: 'left-to-right' });
-
+    this.notebook = options.notebook;
     this.model = new Debugger.Model(options);
     this.sidebar = new DebuggerSidebar(this.model);
     this.title.label = 'Debugger';
 
     this.addClass('jp-Debugger');
-    this.addWidget(this.tabs);
     this.addWidget(this.sidebar);
   }
+
+  readonly model: Debugger.Model;
+
+  readonly sidebar: DebuggerSidebar;
+
+  editor: IEditorTracker;
+  notebook: INotebookTracker;
+  previousCell: CodeCell;
 
   dispose(): void {
     if (this.isDisposed) {
@@ -45,7 +49,8 @@ export class Debugger extends BoxPanel {
 export namespace Debugger {
   export interface IOptions {
     connector?: IDataConnector<ReadonlyJSONValue>;
-
+    notebook?: INotebookTracker;
+    editor?: IEditorTracker;
     id?: string;
   }
 
@@ -53,6 +58,7 @@ export namespace Debugger {
     constructor(options: Debugger.Model.IOptions) {
       this.connector = options.connector || null;
       this.id = options.id || UUID.uuid4();
+      this._notebook = options.notebook;
       void this._populate();
     }
 
@@ -62,6 +68,10 @@ export namespace Debugger {
 
     get isDisposed(): boolean {
       return this._isDisposed;
+    }
+
+    get notebook() {
+      return this._notebook;
     }
 
     dispose(): void {
@@ -77,6 +87,7 @@ export namespace Debugger {
     }
 
     private _isDisposed = false;
+    private _notebook: INotebookTracker;
   }
 
   export namespace Model {

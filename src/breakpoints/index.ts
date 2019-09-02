@@ -7,12 +7,16 @@ import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { Body } from './body';
 import { Signal, ISignal } from '@phosphor/signaling';
+import { INotebookTracker } from '@jupyterlab/notebook';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { Editor } from 'codemirror';
+import { CodeCell, Cell } from '@jupyterlab/cells';
 
 export class Breakpoints extends Panel {
-  constructor(options: Breakpoints.IOptions = {}) {
+  constructor(options: Breakpoints.IOptions) {
     super();
 
-    this.model = new Breakpoints.IModel(MOCK_BREAKPOINTS);
+    this.model = new Breakpoints.IModel([] as Breakpoints.IBreakpoint[]);
     this.addClass('jp-DebuggerBreakpoints');
     this.title.label = 'Breakpoints';
 
@@ -47,11 +51,119 @@ export class Breakpoints extends Panel {
         tooltip: 'Remove All Breakpoints'
       })
     );
+
+    this.notebook = options.notebook;
+
+    this.notebook.activeCellChanged.connect(this.onActiveCellChanged, this);
   }
 
   private isAllActive = true;
   readonly body: Widget;
   readonly model: Breakpoints.IModel;
+  notebook: INotebookTracker;
+  previousCell: CodeCell;
+
+  protected onActiveCellChanged() {
+    const activeCell = this.getCell();
+    if (this.previousCell && !this.previousCell.isDisposed) {
+      this.removeListner(this.previousCell);
+    }
+    this.previousCell = activeCell;
+    this.setEditor(activeCell);
+  }
+
+  protected getCell(): CodeCell {
+    return this.notebook.activeCell as CodeCell;
+  }
+
+  removeListner(cell: CodeCell) {
+    const editor = cell.editor as CodeMirrorEditor;
+    editor.setOption('lineNumbers', false);
+    editor.editor.off('gutterClick', this.addBreakpoint);
+    this.model.breakpoints = [];
+  }
+
+  setEditor(cell: CodeCell) {
+    if (!cell || !cell.editor) {
+      return;
+    }
+
+    const editor = cell.editor as CodeMirrorEditor;
+    editor.setOption('lineNumbers', true);
+    editor.editor.setOption('gutters', [
+      'CodeMirror-linenumbers',
+      'breakpoints'
+    ]);
+
+    editor.editor.on('gutterClick', this.addBreakpoint);
+  }
+
+  protected addBreakpoint = (editor: Editor, lineNumber: number) => {
+    const info = editor.lineInfo(lineNumber);
+    if (!info) {
+      return;
+    }
+
+    const breakpointMarker = {
+      line: lineNumber,
+      text: info.text,
+      remove: !!info.gutterMarkers
+    };
+
+    var breakpoint: Breakpoints.IBreakpoint = this.model.getBreakpointByLineNumber(
+      lineNumber
+    );
+
+    if (!breakpoint) {
+      breakpoint = {
+        id: this.model.breakpoints.length + 1,
+        active: true,
+        verified: true,
+        source: {
+          name: 'untitled.py'
+        },
+        line: lineNumber
+      };
+    }
+
+    editor.setGutterMarker(
+      lineNumber,
+      'breakpoints',
+      breakpointMarker.remove ? null : this.createMarkerNode()
+    );
+
+    this.model.breakpoint = breakpoint;
+    this.getExistingBreakpoints(this.getCell());
+  };
+
+  createMarkerNode() {
+    var marker = document.createElement('div');
+    marker.className = 'jp-breakpoint-marker';
+    marker.innerHTML = '●';
+    return marker;
+  }
+
+  protected getExistingBreakpoints(cell: Cell) {
+    const editor = cell.editor as CodeMirrorEditor;
+
+    // let lines = [];
+    editor.doc.eachLine(line => {
+      console.log(line);
+    });
+    //   for (let i = 0; i < editor.doc.lineCount(); i++) {
+    //     const info = editor.editor.lineInfo(i);
+    //     if (info.gutterMarkers) {
+    //       const breakpoint = {
+    //         line: info.line + 1, // lines start at 1
+    //         text: info.text,
+    //         remove: false
+    //       };
+    //       lines.push(breakpoint);
+    //     }
+    //   }
+    //   return lines;
+    // }
+  }
 }
 
 class BreakpointsHeader extends Widget {
@@ -107,7 +219,16 @@ export namespace Breakpoints {
       if (index !== -1) {
         this._state[index] = breakpoint;
         this._breakpointChanged.emit(breakpoint);
+      } else {
+        const breakpoints = this.breakpoints;
+        breakpoints.push(breakpoint);
+        this.breakpoints = [];
+        this.breakpoints = breakpoints;
       }
+    }
+
+    getBreakpointByLineNumber(lineNumber: number) {
+      return this.breakpoints.find(ele => ele.line === lineNumber);
     }
 
     private _state: IBreakpoint[];
@@ -118,26 +239,28 @@ export namespace Breakpoints {
   /**
    * Instantiation options for `Breakpoints`;
    */
-  export interface IOptions extends Panel.IOptions {}
+  export interface IOptions extends Panel.IOptions {
+    notebook?: INotebookTracker;
+  }
 }
 
-const MOCK_BREAKPOINTS = [
-  {
-    id: 0,
-    active: true,
-    verified: true,
-    source: {
-      name: 'untitled.py'
-    },
-    line: 6
-  },
-  {
-    id: 1,
-    verified: true,
-    active: false,
-    source: {
-      name: 'untitled.py'
-    },
-    line: 7
-  }
-];
+// const MOCK_BREAKPOINTS = [
+//   {
+//     id: 0,
+//     active: true,
+//     verified: true,
+//     source: {
+//       name: 'untitled.py'
+//     },
+//     line: 6
+//   },
+//   {
+//     id: 1,
+//     verified: true,
+//     active: false,
+//     source: {
+//       name: 'untitled.py'
+//     },
+//     line: 7
+//   }
+// ];

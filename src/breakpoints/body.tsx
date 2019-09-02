@@ -29,13 +29,14 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.IModel }) => {
       if (ArrayExt.shallowEqual(breakpoints, updates)) {
         return;
       }
+      console.log(updates);
       setBreakpoints(updates);
     }
   );
 
   return (
     <div>
-      {breakpoints.map((breakpoint: any) => (
+      {breakpoints.map((breakpoint: Breakpoints.IBreakpoint) => (
         <BreakpointComponent
           key={breakpoint.id}
           breakpoint={breakpoint}
