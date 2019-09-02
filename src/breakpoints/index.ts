@@ -53,8 +53,9 @@ export class Breakpoints extends Panel {
     );
 
     this.notebook = options.notebook;
-
-    this.notebook.activeCellChanged.connect(this.onActiveCellChanged, this);
+    if (this.notebook) {
+      this.notebook.activeCellChanged.connect(this.onActiveCellChanged, this);
+    }
   }
 
   private isAllActive = true;
