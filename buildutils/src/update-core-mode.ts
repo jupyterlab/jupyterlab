@@ -46,7 +46,7 @@ try {
 }
 
 // Build the core assets.
-utils.run('jlpm run build:prod:minimize', { cwd: staging });
+utils.run('jlpm run build:prod:release', { cwd: staging });
 
 // Run integrity
 utils.run('jlpm integrity');
