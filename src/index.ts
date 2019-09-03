@@ -103,15 +103,13 @@ const sidebar: JupyterFrontEndPlugin<Debugger> = {
   activate: (
     app: JupyterFrontEnd,
     restorer: ILayoutRestorer | null,
-    notebookTracker: INotebookTracker,
-    editorTracker: IEditorTracker
+    notebookTracker: INotebookTracker
   ): Debugger => {
     const { shell } = app;
     const label = 'Environment';
     const namespace = 'jp-debugger-sidebar';
     const sidebar = new Debugger({
-      notebook: notebookTracker,
-      editor: editorTracker
+      notebook: notebookTracker
     });
 
     sidebar.id = namespace;

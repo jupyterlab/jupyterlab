@@ -29,7 +29,6 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.IModel }) => {
       if (ArrayExt.shallowEqual(breakpoints, updates)) {
         return;
       }
-      console.log(updates);
       setBreakpoints(updates);
     }
   );
