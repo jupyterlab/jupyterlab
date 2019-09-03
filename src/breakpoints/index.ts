@@ -9,8 +9,8 @@ import { Body } from './body';
 import { Signal, ISignal } from '@phosphor/signaling';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { Editor } from 'codemirror';
-import { CodeCell, Cell } from '@jupyterlab/cells';
+import { Editor, Doc } from 'codemirror';
+import { CodeCell } from '@jupyterlab/cells';
 
 export class Breakpoints extends Panel {
   constructor(options: Breakpoints.IOptions) {
@@ -62,6 +62,7 @@ export class Breakpoints extends Panel {
   readonly model: Breakpoints.IModel;
   notebook: INotebookTracker;
   previousCell: CodeCell;
+  previousLineCount: number;
 
   protected onActiveCellChanged() {
     const activeCell = this.getCell();
@@ -80,6 +81,7 @@ export class Breakpoints extends Panel {
     const editor = cell.editor as CodeMirrorEditor;
     editor.setOption('lineNumbers', false);
     editor.editor.off('gutterClick', this.addBreakpoint);
+    editor.editor.off('renderLine', this.onNewRenderLine);
     this.model.breakpoints = [];
   }
 
@@ -96,44 +98,58 @@ export class Breakpoints extends Panel {
     ]);
 
     editor.editor.on('gutterClick', this.addBreakpoint);
+    editor.editor.on('renderLine', this.onNewRenderLine);
   }
+
+  protected onNewRenderLine = (editor: Editor, line: any) => {
+    const lineInfo = editor.lineInfo(line);
+    if (lineInfo.handle && lineInfo.handle.order === false) {
+      return;
+    }
+    const doc: Doc = editor.getDoc();
+    const linesNumber = doc.lineCount();
+    if (this.previousLineCount !== linesNumber) {
+      if (this.previousLineCount > linesNumber) {
+        this.model.changeLines(lineInfo.line, -1);
+      }
+      if (this.previousLineCount < linesNumber) {
+        this.model.changeLines(lineInfo.line, +1);
+      }
+      this.previousLineCount = linesNumber;
+    }
+  };
 
   protected addBreakpoint = (editor: Editor, lineNumber: number) => {
     const info = editor.lineInfo(lineNumber);
     if (!info) {
       return;
     }
+    const removeGutter = !!info.gutterMarkers;
 
-    const breakpointMarker = {
-      line: lineNumber,
-      text: info.text,
-      remove: !!info.gutterMarkers
-    };
-
-    var breakpoint: Breakpoints.IBreakpoint = this.model.getBreakpointByLineNumber(
+    const breakpoint: Breakpoints.IBreakpoint = this.model.getBreakpointByLineNumber(
       lineNumber
     );
 
-    if (!breakpoint) {
-      breakpoint = {
+    if (!breakpoint && !removeGutter) {
+      this.model.breakpoint = {
         id: this.model.breakpoints.length + 1,
         active: true,
         verified: true,
         source: {
+          // TODO: need get filename
           name: 'untitled.py'
         },
         line: lineNumber
       };
+    } else if (removeGutter) {
+      this.model.removeBreakpoint(breakpoint);
     }
 
     editor.setGutterMarker(
       lineNumber,
       'breakpoints',
-      breakpointMarker.remove ? null : this.createMarkerNode()
+      removeGutter ? null : this.createMarkerNode()
     );
-
-    this.model.breakpoint = breakpoint;
-    this.getExistingBreakpoints(this.getCell());
   };
 
   createMarkerNode() {
@@ -142,30 +158,7 @@ export class Breakpoints extends Panel {
     marker.innerHTML = '●';
     return marker;
   }
-
-  protected getExistingBreakpoints(cell: Cell) {
-    const editor = cell.editor as CodeMirrorEditor;
-
-    // let lines = [];
-    editor.doc.eachLine(line => {
-      console.log(line);
-    });
-    //   for (let i = 0; i < editor.doc.lineCount(); i++) {
-    //     const info = editor.editor.lineInfo(i);
-    //     if (info.gutterMarkers) {
-    //       const breakpoint = {
-    //         line: info.line + 1, // lines start at 1
-    //         text: info.text,
-    //         remove: false
-    //       };
-    //       lines.push(breakpoint);
-    //     }
-    //   }
-    //   return lines;
-    // }
-  }
 }
-
 class BreakpointsHeader extends Widget {
   constructor(title: string) {
     super({ node: document.createElement('header') });
@@ -227,6 +220,21 @@ export namespace Breakpoints {
       }
     }
 
+    removeBreakpoint(breakpoint: IBreakpoint) {
+      this.breakpoints = this.breakpoints.filter(
+        ele => ele.line !== breakpoint.line
+      );
+    }
+
+    changeLines(lineEnter: number, howMany: number) {
+      const breakpoints = this.breakpoints.map(ele => {
+        ele.line = lineEnter <= ele.line ? ele.line + howMany : ele.line;
+        return ele;
+      });
+      this.breakpoints = [];
+      this.breakpoints = breakpoints;
+    }
+
     getBreakpointByLineNumber(lineNumber: number) {
       return this.breakpoints.find(ele => ele.line === lineNumber);
     }
@@ -243,24 +251,3 @@ export namespace Breakpoints {
     notebook?: INotebookTracker;
   }
 }
-
-// const MOCK_BREAKPOINTS = [
-//   {
-//     id: 0,
-//     active: true,
-//     verified: true,
-//     source: {
-//       name: 'untitled.py'
-//     },
-//     line: 6
-//   },
-//   {
-//     id: 1,
-//     verified: true,
-//     active: false,
-//     source: {
-//       name: 'untitled.py'
-//     },
-//     line: 7
-//   }
-// ];
