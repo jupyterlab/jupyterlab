@@ -40,6 +40,7 @@
     "@jupyterlab/codeeditor": "^1.2.0-alpha.0",
     "@jupyterlab/codemirror": "^1.2.0-alpha.0",
     "@jupyterlab/coreutils": "^3.2.0-alpha.0",
+    "@jupyterlab/filebrowser": "^1.2.0-alpha.0",
     "@jupyterlab/observables": "^2.4.0-alpha.0",
     "@jupyterlab/outputarea": "^1.2.0-alpha.0",
     "@jupyterlab/rendermime": "^1.2.0-alpha.0",
