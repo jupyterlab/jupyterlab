@@ -47,14 +47,17 @@ export class Breakpoints extends Panel {
         iconClassName: 'jp-CloseAllIcon',
         onClick: () => {
           this.model.breakpoints = [];
+          this.cellsBreakpoints[this.getCell().id] = {};
+          this.removeAllGutterBreakpoints(this.getCell());
         },
         tooltip: 'Remove All Breakpoints'
       })
     );
 
     this.notebook = options.notebook;
-
-    this.notebook.activeCellChanged.connect(this.onActiveCellChanged, this);
+    if (this.notebook) {
+      this.notebook.activeCellChanged.connect(this.onActiveCellChanged, this);
+    }
   }
 
   private isAllActive = true;
@@ -63,26 +66,42 @@ export class Breakpoints extends Panel {
   notebook: INotebookTracker;
   previousCell: CodeCell;
   previousLineCount: number;
+  cellsBreakpoints: any = {};
 
   protected onActiveCellChanged() {
     const activeCell = this.getCell();
-    if (this.previousCell && !this.previousCell.isDisposed) {
-      this.removeListner(this.previousCell);
+    if (this.model && activeCell) {
+      if (this.previousCell && !this.previousCell.isDisposed) {
+        this.removeListner(this.previousCell);
+      }
+      this.previousCell = activeCell;
+      const id: string = activeCell.model.id;
+      if (id && !this.cellsBreakpoints[id]) {
+        this.cellsBreakpoints[id] = [];
+      }
+      this.model.breakpoints = this.cellsBreakpoints[id];
+      this.setEditor(activeCell);
     }
-    this.previousCell = activeCell;
-    this.setEditor(activeCell);
   }
 
   protected getCell(): CodeCell {
     return this.notebook.activeCell as CodeCell;
   }
 
+  protected removeAllGutterBreakpoints(cell: CodeCell) {
+    const editor = cell.editor as CodeMirrorEditor;
+    editor.editor.getDoc().eachLine(line => {
+      editor.editor.setGutterMarker(line, 'breakpoints', null);
+    });
+  }
+
   removeListner(cell: CodeCell) {
     const editor = cell.editor as CodeMirrorEditor;
+    this.cellsBreakpoints[cell.model.id] = this.model.breakpoints;
+    this.model.breakpoints = [];
     editor.setOption('lineNumbers', false);
     editor.editor.off('gutterClick', this.addBreakpoint);
     editor.editor.off('renderLine', this.onNewRenderLine);
-    this.model.breakpoints = [];
   }
 
   setEditor(cell: CodeCell) {
@@ -103,11 +122,18 @@ export class Breakpoints extends Panel {
 
   protected onNewRenderLine = (editor: Editor, line: any) => {
     const lineInfo = editor.lineInfo(line);
-    if (lineInfo.handle && lineInfo.handle.order === false) {
+    if (
+      !this.model.breakpoints &&
+      this.model.breakpoints.length < 1 &&
+      lineInfo.handle &&
+      lineInfo.handle.order === false
+    ) {
       return;
     }
+
     const doc: Doc = editor.getDoc();
     const linesNumber = doc.lineCount();
+
     if (this.previousLineCount !== linesNumber) {
       if (this.previousLineCount > linesNumber) {
         this.model.changeLines(lineInfo.line, -1);
@@ -116,6 +142,15 @@ export class Breakpoints extends Panel {
         this.model.changeLines(lineInfo.line, +1);
       }
       this.previousLineCount = linesNumber;
+    }
+    // eage case for backspace line 2
+    if (lineInfo.line === 0) {
+      const breakpoint: Breakpoints.IBreakpoint = this.model.getBreakpointByLineNumber(
+        -1
+      );
+      if (breakpoint) {
+        this.model.removeBreakpoint(breakpoint);
+      }
     }
   };
 
@@ -221,9 +256,11 @@ export namespace Breakpoints {
     }
 
     removeBreakpoint(breakpoint: IBreakpoint) {
-      this.breakpoints = this.breakpoints.filter(
+      const breakpoints = this.breakpoints.filter(
         ele => ele.line !== breakpoint.line
       );
+      this.breakpoints = [];
+      this.breakpoints = breakpoints;
     }
 
     changeLines(lineEnter: number, howMany: number) {
