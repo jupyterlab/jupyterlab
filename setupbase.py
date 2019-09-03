@@ -11,6 +11,7 @@ within a Python package.
 """
 from collections import defaultdict
 from os.path import join as pjoin
+from shutil import which
 import io
 import os
 import functools
@@ -137,7 +138,7 @@ class bdist_egg_disabled(bdist_egg):
 
 
 def create_cmdclass(prerelease_cmd=None, package_data_spec=None,
-                    data_files_spec=None):
+                    data_files_spec=None, exclude=None):
     """Create a command class with the given optional prerelease class.
 
     Parameters
@@ -151,6 +152,9 @@ def create_cmdclass(prerelease_cmd=None, package_data_spec=None,
         A list of (path, dname, pattern) tuples where the path is the
         `data_files` install path, dname is the source directory, and the
         pattern is a glob pattern.
+    exclude: function
+        A function which takes a string filename and returns True if the
+        file should be excluded from package data and data files, False otherwise.
 
     Notes
     -----
@@ -173,7 +177,7 @@ def create_cmdclass(prerelease_cmd=None, package_data_spec=None,
     if package_data_spec or data_files_spec:
         wrapped.append('handle_files')
     wrapper = functools.partial(_wrap_command, wrapped)
-    handle_files = _get_file_handler(package_data_spec, data_files_spec)
+    handle_files = _get_file_handler(package_data_spec, data_files_spec, exclude)
 
     if 'bdist_egg' in sys.argv:
         egg = wrapper(bdist_egg, strict=True)
@@ -396,60 +400,6 @@ def ensure_targets(targets):
     return TargetsCheck
 
 
-# `shutils.which` function copied verbatim from the Python-3.3 source.
-def which(cmd, mode=os.F_OK | os.X_OK, path=None):
-    """Given a command, mode, and a PATH string, return the path which
-    conforms to the given mode on the PATH, or None if there is no such
-    file.
-    `mode` defaults to os.F_OK | os.X_OK. `path` defaults to the result
-    of os.environ.get("PATH"), or can be overridden with a custom search
-    path.
-    """
-
-    # Check that a given file can be accessed with the correct mode.
-    # Additionally check that `file` is not a directory, as on Windows
-    # directories pass the os.access check.
-    def _access_check(fn, mode):
-        return (os.path.exists(fn) and os.access(fn, mode) and
-                not os.path.isdir(fn))
-
-    # Short circuit. If we're given a full path which matches the mode
-    # and it exists, we're done here.
-    if _access_check(cmd, mode):
-        return cmd
-
-    path = (path or os.environ.get("PATH", os.defpath)).split(os.pathsep)
-
-    if sys.platform == "win32":
-        # The current directory takes precedence on Windows.
-        if os.curdir not in path:
-            path.insert(0, os.curdir)
-
-        # PATHEXT is necessary to check on Windows.
-        pathext = os.environ.get("PATHEXT", "").split(os.pathsep)
-        # See if the given file matches any of the expected path extensions.
-        # This will allow us to short circuit when given "python.exe".
-        matches = [cmd for ext in pathext if cmd.lower().endswith(ext.lower())]
-        # If it does match, only test that one, otherwise we have to try
-        # others.
-        files = [cmd] if matches else [cmd + ext.lower() for ext in pathext]
-    else:
-        # On other platforms you don't have things like PATHEXT to tell you
-        # what file suffixes are executable, so just pass on cmd as-is.
-        files = [cmd]
-
-    seen = set()
-    for dir in path:
-        dir = os.path.normcase(dir)
-        if dir not in seen:
-            seen.add(dir)
-            for thefile in files:
-                name = os.path.join(dir, thefile)
-                if _access_check(name, mode):
-                    return name
-    return None
-
-
 # ---------------------------------------------------------------------------
 # Private Functions
 # ---------------------------------------------------------------------------
@@ -484,7 +434,7 @@ def _wrap_command(cmds, cls, strict=True):
     return WrappedCommand
 
 
-def _get_file_handler(package_data_spec, data_files_spec):
+def _get_file_handler(package_data_spec, data_files_spec, exclude=None):
     """Get a package_data and data_files handler command.
     """
     class FileHandler(BaseCommand):
@@ -494,16 +444,19 @@ def _get_file_handler(package_data_spec, data_files_spec):
             package_spec = package_data_spec or dict()
 
             for (key, patterns) in package_spec.items():
-                package_data[key] = _get_package_data(key, patterns)
+                files = _get_package_data(key, patterns)
+                if exclude is not None:
+                    files = [f for f in files if not exclude(f)]
+                package_data[key] = files
 
             self.distribution.data_files = _get_data_files(
-                data_files_spec, self.distribution.data_files
+                data_files_spec, self.distribution.data_files, exclude
             )
 
     return FileHandler
 
 
-def _get_data_files(data_specs, existing):
+def _get_data_files(data_specs, existing, exclude=None):
     """Expand data file specs into valid data files metadata.
 
     Parameters
@@ -535,6 +488,8 @@ def _get_data_files(data_specs, existing):
             full_path = '/'.join([path, root[offset:]])
             if full_path.endswith('/'):
                 full_path = full_path[:-1]
+            if exclude is not None and exclude(fname):
+                continue
             file_data[full_path].append(fname)
 
     # Construct the data files spec.
