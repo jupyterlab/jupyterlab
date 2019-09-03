@@ -290,10 +290,19 @@ def watch_dev(logger=None):
 
 
 class AppOptions(HasTraits):
+    def __init__(self, core_config=None, **kwargs):
+        if core_config is not None:
+            kwargs['core_config'] = core_config
+        super(AppOptions, self).__init__(**kwargs)
+
     app_dir = Unicode()
+
     use_sys_dir = Bool(True)
+
     logger = Instance(logging.Logger, allow_none=True)
+
     core_config = Instance(CoreConfig)
+
     kill_event = Instance(Event, args=())
 
     # These defaults need to be dynamic to pick up

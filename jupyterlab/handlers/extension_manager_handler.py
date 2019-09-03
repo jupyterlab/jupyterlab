@@ -137,13 +137,13 @@ class ExtensionManager(object):
     def uninstall(self, extension):
         """Handle an uninstall request"""
         did_uninstall = uninstall_extension(
-            extension, app_options=AppOptions(self.app_options))
+            extension, app_options=self.app_options)
         raise gen.Return(dict(status='ok' if did_uninstall else 'error',))
 
     @gen.coroutine
     def enable(self, extension):
         """Handle an enable request"""
-        enable_extension(extension, app_options=AppOptions(self.app_options))
+        enable_extension(extension, app_options=self.app_options)
         raise gen.Return(dict(status='ok',))
 
     @gen.coroutine
