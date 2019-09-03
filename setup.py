@@ -41,6 +41,11 @@ package_data_spec[NAME] = [
     'themes/**', 'schemas/**', '*.js'
 ]
 
+
+def exclude(filename):
+    """Exclude JavaScript map files"""
+    return filename.endswith('.js.map')
+
 staging = pjoin(HERE, NAME, 'staging')
 npm = ['node', pjoin(staging, 'yarn.js')]
 VERSION = get_version('%s/_version.py' % NAME)
@@ -74,7 +79,7 @@ def check_assets():
 
 
 cmdclass = create_cmdclass('jsdeps', data_files_spec=data_files_spec,
-                           package_data_spec=package_data_spec)
+                           package_data_spec=package_data_spec, exclude=exclude)
 cmdclass['jsdeps'] = combine_commands(
     install_npm(build_cmd='build:prod', path=staging, source_dir=staging,
                 build_dir=pjoin(HERE, NAME, 'static'), npm=npm),
@@ -117,7 +122,7 @@ setup_args = dict(
     platforms='Linux, Mac OS X, Windows',
     keywords=['ipython', 'jupyter', 'Web'],
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Intended Audience :: Science/Research',
@@ -126,6 +131,7 @@ setup_args = dict(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
 )
 
