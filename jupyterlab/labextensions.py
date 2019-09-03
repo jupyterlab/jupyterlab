@@ -17,7 +17,7 @@ from .commands import (
     install_extension, uninstall_extension, list_extensions,
     enable_extension, disable_extension, check_extension,
     link_package, unlink_package, build, get_app_version, HERE,
-    update_extension,
+    update_extension, AppOptions,
 )
 from .coreconfig import CoreConfig
 from .debuglog import DebugLogFileMixin
@@ -99,10 +99,10 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
                 if self.minimize:
                     parts.append('minimize')
                 command = ':'.join(parts)
-                options = dict(app_dir=self.app_dir, logger=self.log,
+                app_options = AppOptions(app_dir=self.app_dir, logger=self.log,
                       core_config=self.core_config)
                 build(clean_staging=self.should_clean,
-                      command=command, options=options)
+                      command=command, app_options=app_options)
 
     def run_task(self):
         pass
@@ -140,7 +140,7 @@ class InstallLabExtensionApp(BaseExtensionApp):
                 arg,
                 # Pass in pinned alias if we have it
                 pin=pinned_versions[i] if i < len(pinned_versions) else None,
-                options=dict(
+                app_options=AppOptions(
                     app_dir=self.app_dir,
                     logger=self.log,
                     core_config=self.core_config,
@@ -161,12 +161,12 @@ class UpdateLabExtensionApp(BaseExtensionApp):
         if not self.all and not self.extra_args:
             self.log.warn('Specify an extension to update, or use --all to update all extensions')
             return False
-        options = dict(app_dir=self.app_dir, logger=self.log,
+        app_options = AppOptions(app_dir=self.app_dir, logger=self.log,
             core_config=self.core_config)
         if self.all:
-            return update_extension(all_=True, options=options)
+            return update_extension(all_=True, app_options=app_options)
         return any([
-            update_extension(name=arg, options=options)
+            update_extension(name=arg, app_options=app_options)
             for arg in self.extra_args
         ])
 
@@ -187,7 +187,7 @@ class LinkLabExtensionApp(BaseExtensionApp):
         return any([
             link_package(
                 arg,
-                options=dict(
+                app_options=AppOptions(
                     self.app_dir, logger=self.log,
                     core_config=self.core_config))
             for arg in self.extra_args
@@ -202,7 +202,7 @@ class UnlinkLabExtensionApp(BaseExtensionApp):
         return any([
             unlink_package(
                 arg,
-                options=dict(
+                app_options=AppOptions(
                     self.app_dir, logger=self.log,
                     core_config=self.core_config))
             for arg in self.extra_args
@@ -221,7 +221,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
         return any([
             uninstall_extension(
                 arg, all_=self.all,
-                options=dict(
+                app_options=AppOptions(
                     app_dir=self.app_dir, logger=self.log,
                     core_config=self.core_config))
             for arg in self.extra_args
@@ -232,7 +232,7 @@ class ListLabExtensionsApp(BaseExtensionApp):
     description = "List the installed labextensions"
 
     def run_task(self):
-        list_extensions(options=dict(
+        list_extensions(app_options=AppOptions(
             self.app_dir, logger=self.log, core_config=self.core_config))
 
 
@@ -240,18 +240,18 @@ class EnableLabExtensionsApp(BaseExtensionApp):
     description = "Enable labextension(s) by name"
 
     def run_task(self):
-        options = dict(
+        app_options = AppOptions(
             app_dir=self.app_dir, logger=self.log, core_config=self.core_config)
-        [enable_extension(arg, options=options) for arg in self.extra_args]
+        [enable_extension(arg, app_options=app_options) for arg in self.extra_args]
 
 
 class DisableLabExtensionsApp(BaseExtensionApp):
     description = "Disable labextension(s) by name"
 
     def run_task(self):
-        options = dict(
+        app_options = AppOptions(
             app_dir=self.app_dir, logger=self.log, core_config=self.core_config)
-        [disable_extension(arg, options=options) for arg in self.extra_args]
+        [disable_extension(arg, app_options=app_options) for arg in self.extra_args]
 
 
 class CheckLabExtensionsApp(BaseExtensionApp):
@@ -262,13 +262,13 @@ class CheckLabExtensionsApp(BaseExtensionApp):
         help="Whether it should check only if the extensions is installed")
 
     def run_task(self):
-        options = dict(
+        app_options = AppOptions(
             app_dir=self.app_dir, logger=self.log, core_config=self.core_config)
         all_enabled = all(
             check_extension(
                 arg,
                 installed=self.should_check_installed_only,
-                options=options)
+                app_options=app_options)
             for arg in self.extra_args)
         if not all_enabled:
             self.exit(1)

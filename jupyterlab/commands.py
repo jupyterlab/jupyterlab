@@ -27,10 +27,11 @@ import warnings
 from jupyter_core.paths import jupyter_config_path
 from jupyterlab_server.process import which, Process, WatchHelper, list2cmdline
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
+from traitlets import HasTraits, Bool, Unicode, Instance, default
 
 from .semver import Range, gte, lt, lte, gt, make_semver
 from .jlpmapp import YARN_PATH, HERE
-from .coreconfig import _get_default_core_data
+from .coreconfig import _get_default_core_data, CoreConfig
 
 
 # The regex for expecting the webpack output.
@@ -288,24 +289,45 @@ def watch_dev(logger=None):
     return package_procs + [wp_proc]
 
 
+class AppOptions(HasTraits):
+    app_dir = Unicode()
+    use_sys_dir = Bool(True)
+    logger = Instance(logging.Logger, allow_none=True)
+    core_config = Instance(CoreConfig)
+    kill_event = Instance(Event, args=())
+
+    # These defaults need to be dynamic to pick up
+    # any changes to env vars:
+    @default('app_dir')
+    def _default_app_dir(self):
+        return get_app_dir()
+
+    @default('core_config')
+    def _default_core_config(self):
+        return CoreConfig()
+
+
 def _ensure_options(options, **kwargs):
     if kwargs and any(v is not None for v in kwargs.values()):
         warnings.warn(
             "Direct keyword args to jupyterlab.commands functions are "
-            "deprecated, use the options dict instead: %r" % (kwargs,),
+            "deprecated, use the options argument instead: %r" % (kwargs,),
             DeprecationWarning)
+    kwargs = dict(filter(lambda item: item[1] is not None, kwargs.items()))
     logger = kwargs.pop('logger', None)
-    if options:
-        logger = options.pop('logger', logger)
+    if options and options.logger is not None:
+        logger = options.logger
     logger = _ensure_logger(logger)
     if options is None:
-        return dict(logger=logger, **kwargs)
+        return AppOptions(logger=logger, **kwargs)
     ret = dict(logger=logger, **kwargs)
-    ret.update(**options)
-    return ret
+    opt_args = {name: getattr(options, name) for name in options.trait_names()}
+    opt_args.pop('logger', None)
+    ret.update(**opt_args)
+    return AppOptions(**ret)
 
 
-def watch(app_dir=None, logger=None, core_config=None, options=None):
+def watch(app_dir=None, logger=None, core_config=None, app_options=None):
     """Watch the application.
 
     Parameters
@@ -319,43 +341,43 @@ def watch(app_dir=None, logger=None, core_config=None, options=None):
     -------
     A list of processes to run asynchronously.
     """
-    options = _ensure_options(
-        options, app_dir=app_dir, logger=logger, core_config=core_config)
-    _node_check(options['logger'])
-    handler = _AppHandler(options)
+    app_options = _ensure_options(
+        app_options, app_dir=app_dir, logger=logger, core_config=core_config)
+    _node_check(app_options.logger)
+    handler = _AppHandler(app_options)
     return handler.watch()
 
 
 
-def install_extension(extension, app_dir=None, logger=None, core_config=None, pin=None, options=None):
+def install_extension(extension, app_dir=None, logger=None, core_config=None, pin=None, app_options=None):
     """Install an extension package into JupyterLab.
 
     The extension is first validated.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    options = _ensure_options(
-        options, app_dir=app_dir, logger=logger, core_config=core_config)
-    _node_check(options['logger'])
-    handler = _AppHandler(options)
+    app_options = _ensure_options(
+        app_options, app_dir=app_dir, logger=logger, core_config=core_config)
+    _node_check(app_options.logger)
+    handler = _AppHandler(app_options)
     return handler.install_extension(extension, pin=pin)
 
 
-def uninstall_extension(name=None, app_dir=None, logger=None, all_=False, core_config=None, options=None):
+def uninstall_extension(name=None, app_dir=None, logger=None, all_=False, core_config=None, app_options=None):
     """Uninstall an extension by name or path.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    options = _ensure_options(
-        options, app_dir=app_dir, logger=logger, core_config=core_config)
-    _node_check(options['logger'])
-    handler = _AppHandler(options)
+    app_options = _ensure_options(
+        app_options, app_dir=app_dir, logger=logger, core_config=core_config)
+    _node_check(app_options.logger)
+    handler = _AppHandler(app_options)
     if all_ is True:
         return handler.uninstall_all_extensions()
     return handler.uninstall_extension(name)
 
 
-def update_extension(name=None, all_=False, app_dir=None, logger=None, core_config=None, options=None):
+def update_extension(name=None, all_=False, app_dir=None, logger=None, core_config=None, app_options=None):
     """Update an extension by name, or all extensions.
 
     Either `name` must be given as a string, or `all_` must be `True`.
@@ -363,22 +385,22 @@ def update_extension(name=None, all_=False, app_dir=None, logger=None, core_conf
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    options = _ensure_options(
-        options, app_dir=app_dir, logger=logger, core_config=core_config)
-    _node_check(options['logger'])
-    handler = _AppHandler(options)
+    app_options = _ensure_options(
+        app_options, app_dir=app_dir, logger=logger, core_config=core_config)
+    _node_check(app_options.logger)
+    handler = _AppHandler(app_options)
     if all_ is True:
         return handler.update_all_extensions()
     return handler.update_extension(name)
 
 
-def clean(app_dir=None, logger=None, options=None):
+def clean(app_dir=None, logger=None, app_options=None):
     """Clean the JupyterLab application directory."""
-    options = _ensure_options(
-        options, app_dir=app_dir, logger=logger)
-    handler = _AppHandler(options)
-    logger = options['logger']
-    app_dir = options.get('app_dir', None) or get_app_dir()
+    app_options = _ensure_options(
+        app_options, app_dir=app_dir, logger=logger)
+    handler = _AppHandler(app_options)
+    logger = app_options.logger
+    app_dir = app_options.app_dir
     logger.info('Cleaning %s...', app_dir)
     if app_dir == pjoin(HERE, 'dev'):
         raise ValueError('Cannot clean the dev app')
@@ -393,105 +415,105 @@ def clean(app_dir=None, logger=None, options=None):
 
 def build(app_dir=None, name=None, version=None, static_url=None,
           logger=None, command='build:prod', kill_event=None,
-          clean_staging=False, core_config=None, options=None):
+          clean_staging=False, core_config=None, app_options=None):
     """Build the JupyterLab application.
     """
-    options = _ensure_options(
-        options, app_dir=app_dir, logger=logger, core_config=core_config)
-    _node_check(options['logger'])
-    handler = _AppHandler(options)
+    app_options = _ensure_options(
+        app_options, app_dir=app_dir, logger=logger, core_config=core_config)
+    _node_check(app_options.logger)
+    handler = _AppHandler(app_options)
     return handler.build(name=name, version=version, static_url=static_url,
                          command=command, clean_staging=clean_staging)
 
 
-def get_app_info(app_dir=None, logger=None, core_config=None, options=None):
+def get_app_info(app_dir=None, logger=None, core_config=None, app_options=None):
     """Get a dictionary of information about the app.
     """
     handler = _AppHandler(_ensure_options(
-        options, app_dir=app_dir, logger=logger, core_config=core_config))
+        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
     return handler.info
 
 
-def enable_extension(extension, app_dir=None, logger=None, core_config=None, options=None):
+def enable_extension(extension, app_dir=None, logger=None, core_config=None, app_options=None):
     """Enable a JupyterLab extension.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     handler = _AppHandler(_ensure_options(
-        options, app_dir=app_dir, logger=logger, core_config=core_config))
+        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
     return handler.toggle_extension(extension, False)
 
 
-def disable_extension(extension, app_dir=None, logger=None, core_config=None, options=None):
+def disable_extension(extension, app_dir=None, logger=None, core_config=None, app_options=None):
     """Disable a JupyterLab package.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     handler = _AppHandler(_ensure_options(
-        options, app_dir=app_dir, logger=logger, core_config=core_config))
+        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
     return handler.toggle_extension(extension, True)
 
 
-def check_extension(extension, app_dir=None, installed=False, logger=None, core_config=None, options=None):
+def check_extension(extension, app_dir=None, installed=False, logger=None, core_config=None, app_options=None):
     """Check if a JupyterLab extension is enabled or disabled.
     """
     handler = _AppHandler(_ensure_options(
-        options, app_dir=app_dir, logger=logger, core_config=core_config))
+        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
     return handler.check_extension(extension, installed)
 
 
-def build_check(app_dir=None, logger=None, core_config=None, options=None):
+def build_check(app_dir=None, logger=None, core_config=None, app_options=None):
     """Determine whether JupyterLab should be built.
 
     Returns a list of messages.
     """
-    options = _ensure_options(
-        options, app_dir=app_dir, logger=logger, core_config=core_config)
-    _node_check(options['logger'])
-    handler = _AppHandler(options)
+    app_options = _ensure_options(
+        app_options, app_dir=app_dir, logger=logger, core_config=core_config)
+    _node_check(app_options.logger)
+    handler = _AppHandler(app_options)
     return handler.build_check()
 
 
-def list_extensions(app_dir=None, logger=None, core_config=None, options=None):
+def list_extensions(app_dir=None, logger=None, core_config=None, app_options=None):
     """List the extensions.
     """
     handler = _AppHandler(_ensure_options(
-        options, app_dir=app_dir, logger=logger, core_config=core_config))
+        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
     return handler.list_extensions()
 
 
-def link_package(path, app_dir=None, logger=None, core_config=None, options=None):
+def link_package(path, app_dir=None, logger=None, core_config=None, app_options=None):
     """Link a package against the JupyterLab build.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     handler = _AppHandler(_ensure_options(
-        options, app_dir=app_dir, logger=logger, core_config=core_config))
+        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
     return handler.link_package(path)
 
 
-def unlink_package(package, app_dir=None, logger=None, core_config=None, options=None):
+def unlink_package(package, app_dir=None, logger=None, core_config=None, app_options=None):
     """Unlink a package from JupyterLab by path or name.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     handler = _AppHandler(_ensure_options(
-        options, app_dir=app_dir, logger=logger, core_config=core_config))
+        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
     return handler.unlink_package(package)
 
 
-def get_app_version(app_dir=None, core_config=None, options=None):
+def get_app_version(app_dir=None, core_config=None, app_options=None):
     """Get the application version."""
     handler = _AppHandler(_ensure_options(
-        options, app_dir=app_dir, core_config=core_config))
+        app_options, app_dir=app_dir, core_config=core_config))
     return handler.info['version']
 
 
-def get_latest_compatible_package_versions(names, app_dir=None, logger=None, core_config=None, options=None):
+def get_latest_compatible_package_versions(names, app_dir=None, logger=None, core_config=None, app_options=None):
     """Get the latest compatible version of a list of packages.
     """
     handler = _AppHandler(_ensure_options(
-        options, app_dir=app_dir, logger=logger, core_config=core_config))
+        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
     return handler.latest_compatible_package_versions(names)
 
 
@@ -518,18 +540,12 @@ class _AppHandler(object):
     def __init__(self, options):
         """Create a new _AppHandler object
         """
-        self.app_dir = options.get('app_dir', None) or get_app_dir()
-        use_sys_dir = options.get('use_sys_dir', None) 
-        self.sys_dir = (
-            get_app_dir() if options.get('use_sys_dir', None) is not False
-            else self.app_dir)
-        self.logger = _ensure_logger(options.get('logger'))
-        core_config = options.get('core_config', None)
-        self.core_data = (
-            core_config._data if core_config else _get_default_core_data()
-        )
+        self.app_dir = options.app_dir
+        self.sys_dir = get_app_dir() if options.use_sys_dir else self.app_dir
+        self.logger = _ensure_logger(options.logger)
+        self.core_data = options.core_config._data
         self.info = self._get_app_info()
-        self.kill_event = options.get('kill_event', None) or Event()
+        self.kill_event = options.kill_event
         # TODO: Make this configurable
         self.registry = 'https://registry.npmjs.org'
 

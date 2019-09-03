@@ -10,7 +10,8 @@ from notebook.base.handlers import APIHandler
 from tornado import gen, web
 from tornado.concurrent import run_on_executor
 
-from ..commands import build, clean, build_check
+from ..commands import build, clean, build_check, AppOptions, _ensure_options
+from ..coreconfig import CoreConfig
 
 
 class Builder(object):
@@ -21,11 +22,14 @@ class Builder(object):
     _kill_event = None
     _future = None
 
-    def __init__(self, log, core_mode, app_dir, core_config=None):
-        self.log = log
+    # TODO 2.0: Clean up signature to (self, core_mode, app_options=None)
+    def __init__(self, log, core_mode, app_dir, core_config=None, app_options=None):
+        app_options = _ensure_options(
+            app_options, logger=log, app_dir=app_dir, core_config=core_config)
+        self.log = app_options.logger
         self.core_mode = core_mode
-        self.app_dir = app_dir
-        self.core_config = core_config
+        self.app_dir = app_options.app_dir
+        self.core_config = app_options.core_config
 
     @gen.coroutine
     def get_status(self):
@@ -88,22 +92,22 @@ class Builder(object):
 
     @run_on_executor
     def _run_build_check(self, app_dir, logger, core_config):
-        return build_check(options=dict(
+        return build_check(app_options=AppOptions(
             app_dir=app_dir, logger=logger, core_config=core_config))
 
     @run_on_executor
     def _run_build(self, app_dir, logger, kill_event, core_config):
-        options = dict(
+        app_options = AppOptions(
             app_dir=app_dir, logger=logger, kill_event=kill_event,
             core_config=core_config)
         try:
-            return build(command='build', options=options)
+            return build(command='build', app_options=app_options)
         except Exception as e:
             if self._kill_event.is_set():
                 return
             self.log.warn('Build failed, running a clean and rebuild')
-            clean(options=options)
-            return build(command='build', options=options)
+            clean(app_options=app_options)
+            return build(command='build', app_options=app_options)
 
 
 class BuildHandler(APIHandler):

@@ -45,6 +45,7 @@ class BuildAPITest(LabTestBase):
 
         self.build_api = BuildAPITester(self.request)
 
+    @pytest.mark.timeout(timeout=30)
     def test_get_status(self):
         """Make sure there are no kernels running at the start"""
         resp = self.build_api.getStatus().json()
