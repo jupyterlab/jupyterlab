@@ -560,7 +560,7 @@ class _AppHandler(object):
         """
         self.app_dir = options.app_dir
         self.sys_dir = get_app_dir() if options.use_sys_dir else self.app_dir
-        self.logger = _ensure_logger(options.logger)
+        self.logger = options.logger
         self.core_data = options.core_config._data
         self.info = self._get_app_info()
         self.kill_event = options.kill_event
