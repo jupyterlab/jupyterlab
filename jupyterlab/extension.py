@@ -159,7 +159,7 @@ def load_jupyter_server_extension(nbapp):
     logger.info('JupyterLab application directory is %s' % app_dir)
 
     build_url = ujoin(base_url, build_path)
-    builder = Builder(None, core_mode, app_options=build_handler_options)
+    builder = Builder(None, core_mode, None, app_options=build_handler_options)
     build_handler = (build_url, BuildHandler, {'builder': builder})
     handlers = [build_handler]
 

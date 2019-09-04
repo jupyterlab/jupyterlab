@@ -69,7 +69,7 @@ class ProgressProcess(Process):
         if kill_event and kill_event.is_set():
             raise ValueError('Process aborted')
 
-        self.logger = logger = logger or logging.getLogger('jupyterlab')
+        self.logger = _ensure_logger(logger)
         self._last_line = ''
         self.cmd = cmd
         self.logger.debug('> ' + list2cmdline(cmd))
@@ -290,20 +290,31 @@ def watch_dev(logger=None):
 
 
 class AppOptions(HasTraits):
-    def __init__(self, core_config=None, **kwargs):
+    """Options object for build system"""
+
+    def __init__(self, logger=None, core_config=None, **kwargs):
         if core_config is not None:
             kwargs['core_config'] = core_config
+        if logger is not None:
+            kwargs['logger'] = logger
         super(AppOptions, self).__init__(**kwargs)
 
-    app_dir = Unicode()
+    app_dir = Unicode(help='The application directory')
 
-    use_sys_dir = Bool(True)
+    use_sys_dir = Bool(
+        True,
+        help=('Whether to shadow the default app_dir if that is set to a '
+             'non-default value'))
 
-    logger = Instance(logging.Logger, allow_none=True)
+    logger = Instance(logging.Logger, help='The logger to use')
 
-    core_config = Instance(CoreConfig)
+    core_config = Instance(CoreConfig, help='Configuration for core data')
 
-    kill_event = Instance(Event, args=())
+    kill_event = Instance(Event, args=(), help='Event for aborting call')
+
+    @default('logger')
+    def _default_logger(self):
+        return logging.getLogger('jupyterlab')
 
     # These defaults need to be dynamic to pick up
     # any changes to env vars:
@@ -317,23 +328,21 @@ class AppOptions(HasTraits):
 
 
 def _ensure_options(options, **kwargs):
-    if kwargs and any(v is not None for v in kwargs.values()):
+    """Helper to use deprecated kwargs for AppOption"""
+    # Filter out default-value kwargs
+    kwargs = dict(filter(lambda item: item[1] is not None, kwargs.items()))
+    # Warn for deprecated kwargs usage
+    if kwargs:
         warnings.warn(
             "Direct keyword args to jupyterlab.commands functions are "
             "deprecated, use the options argument instead: %r" % (kwargs,),
             DeprecationWarning)
-    kwargs = dict(filter(lambda item: item[1] is not None, kwargs.items()))
-    logger = kwargs.pop('logger', None)
-    if options and options.logger is not None:
-        logger = options.logger
-    logger = _ensure_logger(logger)
     if options is None:
-        return AppOptions(logger=logger, **kwargs)
-    ret = dict(logger=logger, **kwargs)
+        return AppOptions(**kwargs)
+    # Also support mixed use of options and kwargs:
     opt_args = {name: getattr(options, name) for name in options.trait_names()}
-    opt_args.pop('logger', None)
-    ret.update(**opt_args)
-    return AppOptions(**ret)
+    kwargs.update(**opt_args)
+    return AppOptions(**kwargs)
 
 
 def watch(app_dir=None, logger=None, core_config=None, app_options=None):
