@@ -185,7 +185,8 @@ class LinkLabExtensionApp(BaseExtensionApp):
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
         options = AppOptions(
-            self.app_dir, logger=self.log, core_config=self.core_config)
+            app_dir=self.app_dir, logger=self.log,
+            core_config=self.core_config)
         return any([
             link_package(
                 arg,
@@ -200,7 +201,8 @@ class UnlinkLabExtensionApp(BaseExtensionApp):
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
         options = AppOptions(
-            self.app_dir, logger=self.log, core_config=self.core_config)
+            app_dir=self.app_dir, logger=self.log,
+            core_config=self.core_config)
         return any([
             unlink_package(
                 arg,
@@ -234,7 +236,7 @@ class ListLabExtensionsApp(BaseExtensionApp):
 
     def run_task(self):
         list_extensions(app_options=AppOptions(
-            self.app_dir, logger=self.log, core_config=self.core_config))
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config))
 
 
 class EnableLabExtensionsApp(BaseExtensionApp):
