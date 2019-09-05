@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { isMarkdownCellModel } from '@jupyterlab/cells';
+
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
+
+import { each } from '@phosphor/algorithm';
 
 import { Token } from '@phosphor/coreutils';
 
@@ -16,7 +20,7 @@ import {
   Dialog
 } from '@jupyterlab/apputils';
 
-import { DocumentWidget } from '@jupyterlab/docregistry';
+import { DocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { INotebookModel } from './model';
 
@@ -58,6 +62,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       this._onSessionStatusChanged,
       this
     );
+    this.context.saveState.connect(this._onSave, this);
 
     void this.revealed.then(() => {
       if (this.isDisposed) {
@@ -73,6 +78,22 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
         }
       }
     });
+  }
+
+  _onSave(sender: DocumentRegistry.Context, state: DocumentRegistry.SaveState) {
+    if (state === 'started') {
+      // Find markdown cells
+      const { cells } = this.model;
+      each(cells, cell => {
+        if (isMarkdownCellModel(cell)) {
+          for (let key of cell.attachments.keys) {
+            if (!cell.value.text.includes(key)) {
+              cell.attachments.remove(key);
+            }
+          }
+        }
+      });
+    }
   }
 
   /**

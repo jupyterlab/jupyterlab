@@ -7,9 +7,16 @@ import { AttachmentsResolver } from '@jupyterlab/attachments';
 
 import { IClientSession } from '@jupyterlab/apputils';
 
-import { IChangedArgs, ActivityMonitor } from '@jupyterlab/coreutils';
+import {
+  IChangedArgs,
+  ActivityMonitor,
+  nbformat,
+  URLExt
+} from '@jupyterlab/coreutils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+
+import { DirListing } from '@jupyterlab/filebrowser';
 
 import { IObservableMap } from '@jupyterlab/observables';
 
@@ -25,12 +32,22 @@ import {
 import {
   IRenderMime,
   MimeModel,
-  IRenderMimeRegistry
+  IRenderMimeRegistry,
+  imageRendererFactory
 } from '@jupyterlab/rendermime';
 
 import { KernelMessage, Kernel } from '@jupyterlab/services';
 
-import { JSONValue, PromiseDelegate, JSONObject } from '@phosphor/coreutils';
+import {
+  JSONValue,
+  PromiseDelegate,
+  JSONObject,
+  UUID
+} from '@phosphor/coreutils';
+
+import { some, filter, toArray } from '@phosphor/algorithm';
+
+import { IDragEvent } from '@phosphor/dragdrop';
 
 import { Message } from '@phosphor/messaging';
 
@@ -48,6 +65,7 @@ import {
 import { InputArea, IInputPrompt, InputPrompt } from './inputarea';
 
 import {
+  IAttachmentsCellModel,
   ICellModel,
   ICodeCellModel,
   IMarkdownCellModel,
@@ -142,6 +160,11 @@ const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
  * The timeout to wait for change activity to have ceased before rendering.
  */
 const RENDER_TIMEOUT = 1000;
+
+/**
+ * The mime type for a rich contents drag object.
+ */
+const CONTENTS_MIME_RICH = 'application/x-jupyter-icontentsrich';
 
 /******************************************************************************
  * Cell
@@ -1056,6 +1079,215 @@ export namespace CodeCell {
   }
 }
 
+/**
+ * `AttachmentsCell` - A base class for a cell widget that allows
+ *  attachments to be drag/drop'd or pasted onto it
+ */
+export abstract class AttachmentsCell extends Cell {
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the notebook panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+      case 'paste':
+        this._evtPaste(event as ClipboardEvent);
+        break;
+      case 'dragenter':
+        event.preventDefault();
+        break;
+      case 'dragover':
+        event.preventDefault();
+        break;
+      case 'drop':
+        this._evtNativeDrop(event as DragEvent);
+        break;
+      case 'p-dragover':
+        this._evtDragOver(event as IDragEvent);
+        break;
+      case 'p-drop':
+        this._evtDrop(event as IDragEvent);
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Modify the cell source to include a reference to the attachment.
+   */
+  protected abstract updateCellSourceWithAttachment(
+    attachmentName: string
+  ): void;
+
+  /**
+   * Handle `after-attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    let node = this.node;
+    node.addEventListener('p-dragover', this);
+    node.addEventListener('p-drop', this);
+    node.addEventListener('dragenter', this);
+    node.addEventListener('dragover', this);
+    node.addEventListener('drop', this);
+    node.addEventListener('paste', this);
+  }
+
+  /**
+   * A message handler invoked on a `'before-detach'`
+   * message
+   */
+  protected onBeforeDetach(msg: Message): void {
+    let node = this.node;
+    node.removeEventListener('drop', this);
+    node.removeEventListener('dragover', this);
+    node.removeEventListener('dragenter', this);
+    node.removeEventListener('paste', this);
+    node.removeEventListener('p-dragover', this);
+    node.removeEventListener('p-drop', this);
+  }
+
+  private _evtDragOver(event: IDragEvent) {
+    const supportedMimeType = some(imageRendererFactory.mimeTypes, mimeType => {
+      if (!event.mimeData.hasData(CONTENTS_MIME_RICH)) {
+        return false;
+      }
+      const data = event.mimeData.getData(
+        CONTENTS_MIME_RICH
+      ) as DirListing.IContentsThunk;
+      return data.model.mimetype === mimeType;
+    });
+    if (!supportedMimeType) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    event.dropAction = event.proposedAction;
+  }
+
+  /**
+   * Handle the `paste` event for the widget
+   */
+  private _evtPaste(event: ClipboardEvent): void {
+    this._attachFiles(event.clipboardData.items);
+    event.preventDefault();
+  }
+
+  /**
+   * Handle the `drop` event for the widget
+   */
+  private _evtNativeDrop(event: DragEvent): void {
+    this._attachFiles(event.dataTransfer.items);
+    event.preventDefault();
+  }
+
+  /**
+   * Handle the `'p-drop'` event for the widget.
+   */
+  private _evtDrop(event: IDragEvent): void {
+    const supportedMimeTypes = toArray(
+      filter(event.mimeData.types(), mimeType => {
+        if (mimeType === CONTENTS_MIME_RICH) {
+          const data = event.mimeData.getData(
+            CONTENTS_MIME_RICH
+          ) as DirListing.IContentsThunk;
+          return (
+            imageRendererFactory.mimeTypes.indexOf(data.model.mimetype) !== -1
+          );
+        }
+        return imageRendererFactory.mimeTypes.indexOf(mimeType) !== -1;
+      })
+    );
+    if (supportedMimeTypes.length === 0) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.proposedAction === 'none') {
+      event.dropAction = 'none';
+      return;
+    }
+    event.dropAction = 'copy';
+
+    for (const mimeType of supportedMimeTypes) {
+      if (mimeType === CONTENTS_MIME_RICH) {
+        const { model, withContent } = event.mimeData.getData(
+          CONTENTS_MIME_RICH
+        ) as DirListing.IContentsThunk;
+        if (model.type === 'file') {
+          this.updateCellSourceWithAttachment(model.name);
+          void withContent().then(fullModel => {
+            this.model.attachments.set(fullModel.name, {
+              [fullModel.mimetype]: fullModel.content
+            });
+          });
+        }
+      } else {
+        // Pure mimetype, no useful name to infer
+        const name = UUID.uuid4();
+        this.model.attachments.set(name, {
+          [mimeType]: event.mimeData.getData(mimeType)
+        });
+        this.updateCellSourceWithAttachment(name);
+      }
+    }
+  }
+
+  /**
+   * Attaches all DataTransferItems (obtained from
+   * clipboard or native drop events) to the cell
+   */
+  private _attachFiles(items: DataTransferItemList) {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind === 'file') {
+        const blob = item.getAsFile();
+        this._attachFile(blob);
+      }
+    }
+  }
+
+  /**
+   * Takes in a file object and adds it to
+   * the cell attachments
+   */
+  private _attachFile(blob: File) {
+    const reader = new FileReader();
+    reader.onload = evt => {
+      const { href, protocol } = URLExt.parse(reader.result as string);
+      if (protocol !== 'data:') {
+        return;
+      }
+      const dataURIRegex = /([\w+\/\+]+)?(?:;(charset=[\w\d-]*|base64))?,(.*)/;
+      const matches = dataURIRegex.exec(href);
+      if (matches.length !== 4) {
+        return;
+      }
+      const mimeType = matches[1];
+      const encodedData = matches[3];
+      const bundle: nbformat.IMimeBundle = { [mimeType]: encodedData };
+      this.model.attachments.set(blob.name, bundle);
+      this.updateCellSourceWithAttachment(blob.name);
+    };
+    reader.onerror = evt => {
+      console.error(`Failed to attach ${blob.name}` + evt);
+    };
+    reader.readAsDataURL(blob);
+  }
+
+  /**
+   * The model used by the widget.
+   */
+  readonly model: IAttachmentsCellModel;
+}
+
 /******************************************************************************
  * MarkdownCell
  ******************************************************************************/
@@ -1069,7 +1301,7 @@ export namespace CodeCell {
  * or the input area model changes.  We don't support automatically
  * updating the rendered text in all of these cases.
  */
-export class MarkdownCell extends Cell {
+export class MarkdownCell extends AttachmentsCell {
   /**
    * Construct a Markdown cell widget.
    */
@@ -1156,6 +1388,14 @@ export class MarkdownCell extends Cell {
     // Make sure we are properly rendered.
     this._handleRendered();
     super.onUpdateRequest(msg);
+  }
+
+  /**
+   * Modify the cell source to include a reference to the attachment.
+   */
+  protected updateCellSourceWithAttachment(attachmentName: string) {
+    const textToBeAppended = `![${attachmentName}](attachment:${attachmentName})`;
+    this.model.value.insert(this.model.value.text.length, textToBeAppended);
   }
 
   /**
