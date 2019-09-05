@@ -32,6 +32,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../statusbar"
     }
   ]
 }

@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Panel } from '@phosphor/widgets';
+import { StackedPanel } from '@phosphor/widgets';
 
 import { Token } from '@phosphor/coreutils';
 
@@ -18,6 +18,7 @@ import {
 } from '@jupyterlab/outputarea';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { Message } from '@phosphor/messaging';
 
 /* tslint:disable */
 /**
@@ -29,6 +30,12 @@ export const IOutputLogRegistry = new Token<IOutputLogRegistry>(
 
 export interface IOutputLogRegistry {
   getLogger(name: string): ILogger;
+  getLoggers(): ILogger[];
+
+  /**
+   * A signal emitted when the log registry changes.
+   */
+  readonly registryChanged: ISignal<this, ILogRegistryChange>;
 }
 
 export interface ILogger {
@@ -79,57 +86,134 @@ export class Logger implements ILogger {
   rendermime: IRenderMimeRegistry | null = null;
 }
 
+export type ILogRegistryChange = 'append' | 'remove';
 export type ILoggerChange = 'append' | 'clear';
 
 export class OutputLogRegistry implements IOutputLogRegistry {
   getLogger(name: string): ILogger {
-    const logs = this._logs;
-    if (logs.has(name)) {
-      return logs.get(name);
+    const loggers = this._loggers;
+    let logger = loggers.get(name);
+    if (logger) {
+      return logger;
     }
-    const logger = new Logger(name);
-    logs.set(name, logger);
+
+    logger = new Logger(name);
+    loggers.set(name, logger);
+
+    this._registryChanged.emit('append');
+
     return logger;
   }
 
-  _logs = new Map<string, Logger>();
+  getLoggers(): ILogger[] {
+    return Array.from(this._loggers.values());
+  }
+
+  /**
+   * A signal emitted when the log registry changes.
+   */
+  get registryChanged(): ISignal<this, ILogRegistryChange> {
+    return this._registryChanged;
+  }
+
+  private _loggers = new Map<string, Logger>();
+  private _registryChanged = new Signal<this, ILogRegistryChange>(this);
 }
 
 /**
  * A List View widget that shows Output Console logs.
  */
-export class OutputLoggerView extends Panel {
+export class OutputLoggerView extends StackedPanel {
   /**
    * Construct an OutputConsoleView instance.
    */
-  constructor(logger: ILogger) {
-    if (logger.rendermime === null) {
-      throw new Error(
-        `Attempted to display log for ${logger.source}, but it is missing a rendermime.`
-      );
-    }
+  constructor(outputLogRegistry: IOutputLogRegistry) {
     super();
 
-    this.title.closable = true;
-    this.title.label = 'Output Console';
-    this.title.iconClass = 'fa fa-list lab-output-console-icon';
-
-    this._logger = logger;
+    this._outputLogRegistry = outputLogRegistry;
     this.node.style.overflowY = 'auto'; // TODO: use CSS class
 
-    this._outputView = new SimplifiedOutputArea({
-      rendermime: this._logger.rendermime,
-      contentFactory: OutputArea.defaultContentFactory,
-      model: logger.outputAreaModel
-    });
-
-    this.addWidget(this._outputView);
+    outputLogRegistry.registryChanged.connect(
+      (sender: IOutputLogRegistry, args: ILogRegistryChange) => {
+        const loggers = this._outputLogRegistry.getLoggers();
+        for (let logger of loggers) {
+          logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
+            this._updateOutputViews();
+          });
+        }
+      }
+    );
   }
 
-  get logger(): ILogger {
-    return this._logger;
+  protected onAfterAttach(msg: Message): void {
+    this._updateOutputViews();
   }
 
-  private _logger: ILogger;
-  private _outputView: OutputArea;
+  get outputLogRegistry(): IOutputLogRegistry {
+    return this._outputLogRegistry;
+  }
+
+  public showOutputFromSource(source: string) {
+    const viewId = `source:${source}`;
+
+    this._outputViews.forEach(
+      (outputView: SimplifiedOutputArea, name: string) => {
+        if (outputView.id === viewId) {
+          outputView.show();
+        } else {
+          outputView.hide();
+        }
+      }
+    );
+
+    const title = `Log: ${source}`;
+    this.title.label = title;
+    this.title.caption = title;
+  }
+
+  private _updateOutputViews() {
+    const loggerIds = new Set<string>();
+    const loggers = this._outputLogRegistry.getLoggers();
+
+    for (let logger of loggers) {
+      const viewId = `source:${logger.source}`;
+      loggerIds.add(viewId);
+
+      // add view for logger if not exist
+      // TODO: or rendermime changed
+      if (!this._outputViews.has(viewId)) {
+        const outputView = new SimplifiedOutputArea({
+          rendermime: logger.rendermime,
+          contentFactory: OutputArea.defaultContentFactory,
+          model: logger.outputAreaModel
+        });
+        outputView.id = viewId;
+
+        logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
+          outputView.node.scrollTo({
+            left: 0,
+            top: outputView.node.scrollHeight,
+            behavior: 'smooth'
+          });
+        });
+
+        this.addWidget(outputView);
+        this._outputViews.set(viewId, outputView);
+      }
+    }
+
+    // remove views that do not have corresponding loggers anymore
+    const viewIds = this._outputViews.keys();
+
+    for (let viewId of viewIds) {
+      if (!loggerIds.has(viewId)) {
+        const outputView = this._outputViews.get(viewId);
+        outputView.dispose();
+        this._outputViews.delete(viewId);
+      }
+    }
+  }
+
+  private _outputLogRegistry: IOutputLogRegistry;
+  private _outputViews = new Map<string, SimplifiedOutputArea>();
 }

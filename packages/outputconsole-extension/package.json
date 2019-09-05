@@ -41,6 +41,8 @@
     "@jupyterlab/outputconsole": "^0.1.0-alpha.1",
     "@jupyterlab/rendermime": "^1.1.0-alpha.1",
     "@jupyterlab/services": "^4.1.0-alpha.1",
+    "@jupyterlab/statusbar": "^1.1.0-alpha.1",
+    "@phosphor/algorithm": "^1.1.3",
     "@phosphor/coreutils": "^1.3.1",
     "@phosphor/disposable": "^1.2.0",
     "react": "~16.8.4"
