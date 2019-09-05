@@ -262,26 +262,32 @@ const tree: JupyterFrontEndPlugin<void> = {
         const treeMatch = args.path.match(treePattern);
         const workspaceMatch = args.path.match(workspacePattern);
         const match = treeMatch || workspaceMatch;
-        let path = decodeURI(match[1]);
+        const path = decodeURI(match[1]);
         // const { page, workspaces } = info.urls;
         const workspace = PathExt.basename(resolver.name);
+        let query = URLExt.queryStringToObject(args.search);
+
+        const fileBrowserPath = query['file-browser-path'];
+        delete query['file-browser-path'];
+
         const url =
           (workspaceMatch
             ? URLExt.join(paths.urls.workspaces, workspace)
             : paths.urls.app) +
-          args.search +
+          URLExt.objectToQueryString(query) +
           args.hash;
 
         // Remove the tree portion of the URL leaving the rest intact.
         router.navigate(url);
 
-        const query = URLExt.queryStringToObject(args.search);
-        if (query['file-browser-path']) {
-          path = query['file-browser-path'];
-        }
-
         try {
           await commands.execute('filebrowser:open-path', { path });
+
+          if (fileBrowserPath) {
+            await commands.execute('filebrowser:open-path', {
+              path: fileBrowserPath
+            });
+          }
         } catch (error) {
           console.warn('Tree routing failed.', error);
         }
