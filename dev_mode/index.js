@@ -30,36 +30,29 @@ function main() {
   var mimeExtensions = [];
   var extension;
   var extMod;
+  var plugins = [];
   {{#each jupyterlab_mime_extensions}}
   try {
-    if (PageConfig.Extension.isDeferred('{{key}}')) {
-      deferred.push('{{key}}');
-      ignorePlugins.push('{{key}}');
-    }
-    if (PageConfig.Extension.isDisabled('{{@key}}')) {
-      disabled.push('{{@key}}');
-    } else {
-      extMod = require('{{@key}}/{{this}}');
-      extension = extMod.default;
+    extMod = require('{{@key}}/{{this}}');
+    extension = extMod.default;
 
-      // Handle CommonJS exports.
-      if (!extMod.hasOwnProperty('__esModule')) {
-        extension = extMod;
+    // Handle CommonJS exports.
+    if (!extMod.hasOwnProperty('__esModule')) {
+      extension = extMod;
+    }
+
+    plugins = Array.isArray(extension) ? extension : [extension];
+    plugins.forEach(function(plugin) {
+      if (PageConfig.Extension.isDeferred(plugin.id)) {
+        deferred.push(plugin.id);
+        ignorePlugins.push(plugin.id);
       }
-
-      var list = Array.isArray(extension) ? extension : [extension];
-      list.forEach(function(plugin) {
-        if (PageConfig.Extension.isDeferred(plugin.id)) {
-          deferred.push(plugin.id);
-          ignorePlugins.push(plugin.id);
-        }
-        if (PageConfig.Extension.isDisabled(plugin.id)) {
-          disabled.push(plugin.id);
-          return;
-        }
-        mimeExtensions.push(plugin);
-      });
-    }
+      if (PageConfig.Extension.isDisabled(plugin.id)) {
+        disabled.push(plugin.id);
+        return;
+      }
+      mimeExtensions.push(plugin);
+    });
   } catch (e) {
     console.error(e);
   }
@@ -68,34 +61,26 @@ function main() {
   // Handled the registered standard extensions.
   {{#each jupyterlab_extensions}}
   try {
-    if (PageConfig.Extension.isDeferred('{{key}}')) {
-      deferred.push('{{key}}');
-      ignorePlugins.push('{{key}}');
-    }
-    if (PageConfig.Extension.isDisabled('{{@key}}')) {
-      disabled.push('{{@key}}');
-    } else {
-      extMod = require('{{@key}}/{{this}}');
-      extension = extMod.default;
+    extMod = require('{{@key}}/{{this}}');
+    extension = extMod.default;
 
-      // Handle CommonJS exports.
-      if (!extMod.hasOwnProperty('__esModule')) {
-        extension = extMod;
+    // Handle CommonJS exports.
+    if (!extMod.hasOwnProperty('__esModule')) {
+      extension = extMod;
+    }
+
+    plugins = Array.isArray(extension) ? extension : [extension];
+    plugins.forEach(function(plugin) {
+      if (PageConfig.Extension.isDeferred(plugin.id)) {
+        deferred.push(plugin.id);
+        ignorePlugins.push(plugin.id);
       }
-
-      var list = Array.isArray(extension) ? extension : [extension];
-      list.forEach(function(plugin) {
-        if (PageConfig.Extension.isDeferred(plugin.id)) {
-          deferred.push(plugin.id);
-          ignorePlugins.push(plugin.id);
-        }
-        if (PageConfig.Extension.isDisabled(plugin.id)) {
-          disabled.push(plugin.id);
-          return;
-        }
-        register.push(plugin);
-      });
-    }
+      if (PageConfig.Extension.isDisabled(plugin.id)) {
+        disabled.push(plugin.id);
+        return;
+      }
+      register.push(plugin);
+    });
   } catch (e) {
     console.error(e);
   }
