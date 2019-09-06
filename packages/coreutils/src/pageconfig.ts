@@ -196,14 +196,6 @@ export namespace PageConfig {
    * The namespace for page config `Extension` functions.
    */
   export namespace Extension {
-    /**
-     * Populate an array from page config.
-     *
-     * @param key - The page config key (e.g., `deferredExtensions`).
-     *
-     * #### Notes
-     * This is intended for `deferredExtensions` and `disabledExtensions`.
-     */
     function populate(key: string): { raw: string; rule: RegExp }[] {
       try {
         const raw = getOption(key);
@@ -218,30 +210,14 @@ export namespace PageConfig {
       return [];
     }
 
-    /**
-     * The collection of deferred extensions in page config.
-     */
     export const deferred = populate('deferredExtensions');
 
-    /**
-     * The collection of disabled extensions in page config.
-     */
     export const disabled = populate('disabledExtensions');
 
-    /**
-     * Returns whether a plugin is deferred.
-     *
-     * @param id - The plugin ID.
-     */
     export function isDeferred(id: string): boolean {
       return deferred.some(val => val.raw === id || val.rule.test(id));
     }
 
-    /**
-     * Returns whether a plugin is disabled.
-     *
-     * @param id - The plugin ID.
-     */
     export function isDisabled(id: string): boolean {
       return disabled.some(val => val.raw === id || val.rule.test(id));
     }
