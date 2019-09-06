@@ -1,12 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  DataConnector,
-  ISettingRegistry,
-  PageConfig,
-  URLExt
-} from '@jupyterlab/coreutils';
+import { DataConnector, ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '../serverconnection';
 
@@ -48,10 +43,6 @@ export class SettingManager extends DataConnector<
       throw new Error('Plugin `id` parameter is required for settings fetch.');
     }
 
-    if (Private.isDisabled(id)) {
-      throw new Error(`Plugin ${id} is disabled.`);
-    }
-
     const { serverSettings } = this;
     const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
@@ -85,14 +76,12 @@ export class SettingManager extends DataConnector<
     }
 
     const json = await response.json();
-    const values = (((json || {})['settings'] || []).map(
+    const values = ((json || {})['settings'] || []).map(
       (plugin: ISettingRegistry.IPlugin) => {
         plugin.data = { composite: {}, user: {} };
         return plugin;
       }
-    ) as ISettingRegistry.IPlugin[]).filter(
-      plugin => !Private.isDisabled(plugin.id)
-    );
+    ) as ISettingRegistry.IPlugin[];
     const ids = values.map(plugin => plugin.id);
 
     return { ids, values };
@@ -151,27 +140,6 @@ export namespace Setting {
  * A namespace for private data.
  */
 namespace Private {
-  let disabled: { raw: string; rule: RegExp }[] = [];
-  try {
-    let tempDisabled = PageConfig.getOption('disabledExtensions');
-    if (tempDisabled) {
-      disabled = JSON.parse(tempDisabled).map((pattern: string) => {
-        return { raw: pattern, rule: new RegExp(pattern) };
-      });
-    }
-  } catch (error) {
-    console.warn('Unable to parse disabled extensions.', error);
-  }
-
-  /**
-   * Return `true` if a plugin has been disabled.
-   */
-  export function isDisabled(plugin: string): boolean {
-    return disabled.some(
-      pattern => pattern.raw === plugin || pattern.rule.test(plugin)
-    );
-  }
-
   /**
    * Get the url for a plugin's settings.
    */
