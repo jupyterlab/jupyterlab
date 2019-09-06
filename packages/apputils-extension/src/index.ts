@@ -20,10 +20,12 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  DataConnector,
   Debouncer,
   IRateLimiter,
   ISettingRegistry,
   IStateDB,
+  PageConfig,
   SettingRegistry,
   StateDB,
   Throttler,
@@ -90,7 +92,28 @@ const paletteRestorer: JupyterFrontEndPlugin<void> = {
 const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
   activate: async (app: JupyterFrontEnd): Promise<ISettingRegistry> => {
-    const connector = app.serviceManager.settings;
+    const connector = new (class SettingConnector extends DataConnector<
+      ISettingRegistry.IPlugin,
+      string
+    > {
+      fetch(id: string): Promise<ISettingRegistry.IPlugin> {
+        return app.serviceManager.settings.fetch(id);
+      }
+
+      async list(): Promise<{
+        ids: string[];
+        values: ISettingRegistry.IPlugin[];
+      }> {
+        const { ids, values } = await app.serviceManager.settings.list();
+        const filtered = {
+          ids: ids.filter(id => !PageConfig.Extension.isDisabled(id)),
+          values: values.filter(
+            ({ id }) => !PageConfig.Extension.isDisabled(id)
+          )
+        };
+        return filtered;
+      }
+    })();
     const plugins = (await connector.list()).values;
 
     return new SettingRegistry({ connector, plugins });
