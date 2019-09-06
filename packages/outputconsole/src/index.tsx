@@ -137,6 +137,7 @@ export class OutputLoggerView extends StackedPanel {
       (sender: IOutputLogRegistry, args: ILogRegistryChange) => {
         const loggers = this._outputLogRegistry.getLoggers();
         for (let logger of loggers) {
+          // TODO: optimize
           logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
             this._updateOutputViews();
           });
@@ -153,13 +154,14 @@ export class OutputLoggerView extends StackedPanel {
     return this._outputLogRegistry;
   }
 
-  public showOutputFromSource(source: string) {
+  private _showOutputFromSource(source: string) {
     const viewId = `source:${source}`;
 
     this._outputViews.forEach(
       (outputView: SimplifiedOutputArea, name: string) => {
         if (outputView.id === viewId) {
           outputView.show();
+          this._scrollOuputViewToBottom(outputView);
         } else {
           outputView.hide();
         }
@@ -169,6 +171,19 @@ export class OutputLoggerView extends StackedPanel {
     const title = `Log: ${source}`;
     this.title.label = title;
     this.title.caption = title;
+  }
+
+  set activeSource(name: string) {
+    this._activeSource = name;
+    this._showOutputFromSource(this._activeSource);
+  }
+
+  private _scrollOuputViewToBottom(outputView: SimplifiedOutputArea) {
+    outputView.node.scrollTo({
+      left: 0,
+      top: outputView.node.scrollHeight,
+      behavior: 'smooth'
+    });
   }
 
   private _updateOutputViews() {
@@ -190,11 +205,7 @@ export class OutputLoggerView extends StackedPanel {
         outputView.id = viewId;
 
         logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
-          outputView.node.scrollTo({
-            left: 0,
-            top: outputView.node.scrollHeight,
-            behavior: 'smooth'
-          });
+          this._scrollOuputViewToBottom(outputView);
         });
 
         this.addWidget(outputView);
@@ -216,4 +227,5 @@ export class OutputLoggerView extends StackedPanel {
 
   private _outputLogRegistry: IOutputLogRegistry;
   private _outputViews = new Map<string, SimplifiedOutputArea>();
+  private _activeSource: string = null;
 }

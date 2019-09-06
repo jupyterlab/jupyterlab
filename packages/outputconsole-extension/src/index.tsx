@@ -16,7 +16,10 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import {
   IOutputLogRegistry,
   OutputLoggerView,
-  OutputLogRegistry
+  OutputLogRegistry,
+  ILogger,
+  ILoggerChange,
+  ILogRegistryChange
 } from '@jupyterlab/outputconsole';
 
 import { KernelMessage } from '@jupyterlab/services';
@@ -104,27 +107,39 @@ export class OutputStatus extends VDomRenderer<OutputStatus.Model> {
     this.addClass(interactiveItem);
     this.addClass('outputconsole-status-item');
 
-    // opts.outputLoggerView.madeVisible.connect(() => {
-    //   this.removeClass('hilite');
-    // });
-
     let timer: number = null;
 
     this.model.stateChanged.connect(() => {
-      // if (opts.outputLoggerView.isAttached) {
-      //   return;
-      // }
+      if (!this.model.highlightingEnabled) {
+        this._clearHighlight();
+        return;
+      }
 
-      const wasHilited = this.hasClass('hilite');
+      if (this.model.activeSourceChanged) {
+        if (
+          !this.model.activeSource ||
+          this.model.isSourceOutputRead(this.model.activeSource)
+        ) {
+          this._clearHighlight();
+        } else {
+          this._showHighlighted();
+        }
+
+        this.model.activeSourceChanged = false;
+        return;
+      }
+
+      // new message arrived
+      const wasHilited = this.hasClass('hilite') || this.hasClass('hilited');
       if (wasHilited) {
-        this.removeClass('hilite');
+        this._clearHighlight();
         // cancel previous request
         clearTimeout(timer);
         timer = setTimeout(() => {
-          this.addClass('hilite');
+          this._flashHighlight();
         }, 100);
       } else {
-        this.addClass('hilite');
+        this._flashHighlight();
       }
     });
   }
@@ -133,20 +148,29 @@ export class OutputStatus extends VDomRenderer<OutputStatus.Model> {
    * Render the output console status item.
    */
   render() {
-    const onClick = (): void => {
-      this._handleClick();
-    };
-
     if (this.model === null) {
       return null;
     } else {
       return (
         <OutputStatusComponent
-          handleClick={onClick}
+          handleClick={this._handleClick}
           logCount={this.model.logCount}
         />
       );
     }
+  }
+
+  private _flashHighlight() {
+    this.addClass('hilite');
+  }
+
+  private _showHighlighted() {
+    this.addClass('hilited');
+  }
+
+  private _clearHighlight() {
+    this.removeClass('hilite');
+    this.removeClass('hilited');
   }
 
   private _handleClick: () => void;
@@ -168,25 +192,69 @@ export namespace OutputStatus {
 
       this._outputLogRegistry = outputLogRegistry;
 
-      console.log(this._outputLogRegistry);
+      this._outputLogRegistry.registryChanged.connect(
+        (sender: IOutputLogRegistry, args: ILogRegistryChange) => {
+          const loggers = this._outputLogRegistry.getLoggers();
+          for (let logger of loggers) {
+            if (this._loggersWatched.has(logger.source)) {
+              continue;
+            }
 
-      // this._outputLogRegistry.logger.logChanged.connect(
-      //   (sender: Logger, change: ILoggerChange) => {
-      //     this.stateChanged.emit(void 0);
-      //   }
-      // );
+            logger.logChanged.connect(
+              (sender: ILogger, args: ILoggerChange) => {
+                if (sender.source === this._activeSource) {
+                  this.stateChanged.emit(void 0);
+                }
 
-      // this._outputLoggerView.logsCleared.connect(() => {
-      //   this.stateChanged.emit(void 0);
-      // });
+                // mark logger as dirty
+                this._loggersWatched.set(sender.source, false);
+              }
+            );
+
+            // mark logger as viewed
+            this._loggersWatched.set(logger.source, true);
+          }
+        }
+      );
     }
 
     get logCount(): number {
+      if (this._activeSource) {
+        const logger = this._outputLogRegistry.getLogger(this._activeSource);
+        return logger.length;
+      }
+
       return 0;
-      //return this._outputLoggerView.logger.length;
     }
 
+    get activeSource(): string {
+      return this._activeSource;
+    }
+
+    set activeSource(name: string) {
+      this._activeSource = name;
+      this.activeSourceChanged = true;
+
+      // refresh rendering
+      this.stateChanged.emit(void 0);
+    }
+
+    markSourceOutputRead(name: string) {
+      this._loggersWatched.set(name, true);
+    }
+
+    isSourceOutputRead(name: string): boolean {
+      return (
+        !this._loggersWatched.has(name) ||
+        this._loggersWatched.get(name) === true
+      );
+    }
+
+    public highlightingEnabled: boolean = true;
+    public activeSourceChanged: boolean = false;
     private _outputLogRegistry: IOutputLogRegistry;
+    private _activeSource: string = null;
+    private _loggersWatched: Map<string, boolean> = new Map();
   }
 
   /**
@@ -231,6 +299,21 @@ function activateOutputLog(
   //   });
   // }
 
+  const status = new OutputStatus({
+    outputLogRegistry: logRegistry,
+    handleClick: () => {
+      if (!loggerWidget) {
+        createLoggerWidget();
+      } else {
+        loggerWidget.activate();
+      }
+
+      status.model.markSourceOutputRead(status.model.activeSource);
+      status.model.highlightingEnabled = false;
+      status.model.stateChanged.emit(void 0);
+    }
+  });
+
   let loggerWidget: MainAreaWidget<OutputLoggerView> = null;
 
   const createLoggerWidget = () => {
@@ -252,26 +335,17 @@ function activateOutputLog(
     loggerWidget.update();
 
     app.shell.activateById(loggerWidget.id);
+    status.model.highlightingEnabled = false;
 
     if (activeSource) {
-      loggerView.showOutputFromSource(activeSource);
+      loggerView.activeSource = activeSource;
     }
 
     loggerWidget.disposed.connect(() => {
       loggerWidget = null;
+      status.model.highlightingEnabled = true;
     });
   };
-
-  const status = new OutputStatus({
-    outputLogRegistry: logRegistry,
-    handleClick: () => {
-      if (!loggerWidget) {
-        createLoggerWidget();
-      } else {
-        loggerWidget.activate();
-      }
-    }
-  });
 
   statusBar.registerStatusItem('@jupyterlab/outputconsole-extension:status', {
     item: status,
@@ -280,11 +354,9 @@ function activateOutputLog(
     activeStateChanged: status.model!.stateChanged
   });
 
-  //// TEST ///////
   nbtracker.widgetAdded.connect(
     (sender: INotebookTracker, nb: NotebookPanel) => {
-      //const logger = logRegistry.getLogger(nb.context.path);
-
+      //// TEST ////
       nb.context.session.iopubMessage.connect(
         (_, msg: KernelMessage.IIOPubMessage) => {
           if (
@@ -298,15 +370,17 @@ function activateOutputLog(
           }
         }
       );
+      //// TEST ////
 
       nb.activated.connect((nb: NotebookPanel, args: void) => {
+        const sourceName = nb.context.path;
         if (loggerWidget) {
-          loggerWidget.content.showOutputFromSource(nb.context.path);
+          loggerWidget.content.activeSource = sourceName;
         }
+        status.model.activeSource = sourceName;
       });
     }
   );
-  /////////////
 
   return logRegistry;
   // The notebook can call this command.
