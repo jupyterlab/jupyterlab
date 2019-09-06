@@ -581,7 +581,9 @@ export class Context<T extends DocumentRegistry.IModel>
         const localPath = this._manager.contents.localPath(this._path);
         const name = PathExt.basename(localPath);
         if (err.message === 'Invalid response: 400 bad format') {
-          err = new Error('JupyterLab is unable to open this file type.');
+          err = new Error(
+            'If your file is text, check if it is using utf-8 encoding.'
+          );
         }
         void this._handleError(err, `File Load Error for ${name}`);
         throw err;
