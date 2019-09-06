@@ -335,11 +335,11 @@ export class SessionManager implements Session.IManager {
    * Handle a session terminating.
    */
   private _onTerminated(id: string): void {
-    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
-    if (index !== -1) {
-      this._models.splice(index, 1);
-      this._runningChanged.emit(this._models.slice());
-    }
+    // A session termination emission could mean the server session is deleted,
+    // or that the session JS object is disposed and the session still exists on
+    // the server, so we refresh from the server to make sure we reflect the
+    // server state.
+    void this.refreshRunning();
   }
 
   /**
