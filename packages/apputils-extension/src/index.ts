@@ -22,7 +22,6 @@ import {
 import {
   DataConnector,
   Debouncer,
-  IRateLimiter,
   ISettingRegistry,
   IStateDB,
   PageConfig,
@@ -213,7 +212,7 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
 
     // Create debounced recovery dialog function.
     let dialog: Dialog<any>;
-    const recovery: IRateLimiter = new Throttler(async () => {
+    const recovery = new Throttler(async () => {
       if (dialog) {
         return;
       }
