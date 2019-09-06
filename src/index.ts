@@ -7,6 +7,8 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
+import { ICommandPalette } from '@jupyterlab/apputils';
+
 import { WidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 
 import { IConsoleTracker } from '@jupyterlab/console';
@@ -22,6 +24,12 @@ import { Debugger } from './debugger';
 // import { DebuggerSidebar } from './sidebar';
 
 import { IDebugger, IDebuggerSidebar } from './tokens';
+
+// import { ClientSession, IClientSession } from '@jupyterlab/apputils';
+
+import { Session } from '@jupyterlab/services';
+
+// import { DebugSession } from './session';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -83,13 +91,51 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:notebooks',
   autoStart: true,
   requires: [IDebugger],
-  optional: [INotebookTracker],
-  activate: (_, debug, tracker: INotebookTracker | null) => {
-    if (!tracker) {
-      console.log(`${notebooks.id} load failed. There is no notebook tracker.`);
-      return;
-    }
-    console.log(`${notebooks.id} has not been implemented.`, debug);
+  optional: [INotebookTracker, ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    debug,
+    tracker: INotebookTracker,
+    palette: ICommandPalette
+  ) => {
+    Session.listRunning().then(sessionModels => {
+      console.log(sessionModels);
+      // const session = Session.connectTo(sessionModels[0]);
+
+      // session.shutdown();
+    });
+    // console.log(client);
+    // if (false) {
+    // const test = async () => {
+
+    //   await (client as ClientSession).initialize();
+    //   await client.kernel.ready;
+    // };
+    // const debugSession = new DebugSession({ client });
+    // console.log(debugSession, test);
+    // }
+
+    const command: string = CommandIDs.debugNotebook;
+    app.commands.addCommand(command, {
+      label: 'A',
+      execute: () => {
+        let options = {
+          kernelName: 'python',
+          path: '/tmp/foo.ipynb',
+          name: 'foo.ipynb'
+        };
+        Session.startNew(options).then(session => {
+          // Execute and handle replies on the kernel.
+          let future = session.kernel.requestExecute({ code: 'a = 1' });
+          future.done.then(res => {
+            console.log('Future is fulfilled', res);
+          });
+        });
+      }
+    });
+
+    // Add the command to the palette.
+    palette.addItem({ command, category: 'A' });
   }
 };
 
@@ -197,5 +243,5 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   sidebar,
   tracker
 ];
-const plugin: JupyterFrontEndPlugin<any> = plugins[3];
-export default plugin;
+
+export default plugins;

@@ -68,6 +68,7 @@ describe('DebugSession', () => {
         nextId: 1,
         code
       });
+      console.log(reply);
       expect(reply.body.sourcePath).to.contain('.py');
     });
 
@@ -76,6 +77,7 @@ describe('DebugSession', () => {
         expression: 'a'
       });
       const { success, message } = reply;
+      console.log(reply);
       expect(success).to.be.false;
       expect(message).to.contain('Unable to find thread for evaluation');
     });
