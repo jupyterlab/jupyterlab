@@ -932,6 +932,23 @@ export class DirListing extends Widget {
    */
   private _handleOpen(item: Contents.IModel): void {
     this._onItemOpened.emit(item);
+
+    // check for nonstandard content type
+    const ft = this._model.manager.registry.getFileTypeForModel(item);
+    if (ft && ft.contentType === 'dirlike') {
+      const model = ft.browser.model as FileBrowserModel;
+      const localPath = this._manager.services.contents.localPath(item.path);
+      ft.browser.activateInSidebar();
+      model.cd(`/${localPath}`);
+
+      // if needed, fix the drive prefix of the path
+      // const path =
+      //   ft.driveName && !item.path.startsWith(ft.driveName)
+      //     ? `${ft.driveName}:${item.path}`
+      //     : item.path;
+      // return commands.execute(CommandIDs.goToPath, { path });
+    }
+
     if (item.type === 'directory') {
       const localPath = this._manager.services.contents.localPath(item.path);
       this._model
@@ -942,6 +959,7 @@ export class DirListing extends Widget {
       this._manager.openOrReveal(path);
     }
   }
+
   /**
    * Handle the `'keydown'` event for the widget.
    */

@@ -417,12 +417,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   activateById(id: string): void {
     if (this._leftHandler.has(id)) {
-      this._leftHandler.activate(id);
+      this._leftHandler.activateById(id);
       return;
     }
 
     if (this._rightHandler.has(id)) {
-      this._rightHandler.activate(id);
+      this._rightHandler.activateById(id);
       return;
     }
 
@@ -1075,7 +1075,7 @@ namespace Private {
       const previous =
         this._lastCurrent || (this._items.length > 0 && this._items[0].widget);
       if (previous) {
-        this.activate(previous.id);
+        this.activateById(previous.id);
       }
     }
 
@@ -1084,7 +1084,7 @@ namespace Private {
      *
      * @param id - The widget's unique ID.
      */
-    activate(id: string): void {
+    activateById(id: string): void {
       let widget = this._findWidgetByID(id);
       if (widget) {
         this._sideBar.currentTitle = widget.title;
@@ -1140,7 +1140,7 @@ namespace Private {
      */
     rehydrate(data: ILabShell.ISideArea): void {
       if (data.currentWidget) {
-        this.activate(data.currentWidget.id);
+        this.activateById(data.currentWidget.id);
       } else if (data.collapsed) {
         this.collapse();
       }

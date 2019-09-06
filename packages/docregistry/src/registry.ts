@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Contents, Kernel } from '@jupyterlab/services';
-
 import {
   ArrayExt,
   ArrayIterator,
@@ -21,7 +19,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { DockLayout, Widget } from '@phosphor/widgets';
 
-import { IClientSession, Toolbar } from '@jupyterlab/apputils';
+import { IClientSession, SideBarWidget, Toolbar } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -33,6 +31,8 @@ import {
 import { IModelDB } from '@jupyterlab/observables';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
+import { Contents, Kernel } from '@jupyterlab/services';
 
 import { TextModelFactory } from './default';
 
@@ -1167,9 +1167,9 @@ export namespace DocumentRegistry {
     readonly iconLabel?: string;
 
     /**
-     * The name of the drive associated with this file type, if any
+     * The browser widget associated with this file type
      */
-    readonly driveName?: string;
+    readonly browser?: SideBarWidget;
 
     /**
      * The content type of the new file.
