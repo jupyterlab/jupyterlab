@@ -15,7 +15,8 @@ import {
   WidgetTracker,
   ICommandPalette,
   InputDialog,
-  showErrorMessage
+  showErrorMessage,
+  SideBarWidget
 } from '@jupyterlab/apputils';
 
 import {
@@ -544,12 +545,15 @@ function addCommands(
             // check for nonstandard content type
             const ft = widget.model.manager.registry.getFileTypeForModel(item);
             if (ft && ft.contentType === 'dirlike') {
-              const model = (ft.browser as any).model as FileBrowserModel;
-              const localPath = model.manager.services.contents.localPath(
+              // cast to FileBrowser-like
+              const browserlike = (ft.browser || widget) as SideBarWidget & {
+                model: FileBrowserModel;
+              };
+              const localPath = browserlike.model.manager.services.contents.localPath(
                 item.path
               );
-              ft.browser.activateInSidebar();
-              return model.cd(`/${localPath}`);
+              browserlike.activateInSidebar();
+              return browserlike.model.cd(`/${localPath}`);
             }
 
             if (item.type === 'directory') {

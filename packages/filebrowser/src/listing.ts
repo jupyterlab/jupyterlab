@@ -5,7 +5,8 @@ import {
   Dialog,
   DOMUtils,
   showDialog,
-  showErrorMessage
+  showErrorMessage,
+  SideBarWidget
 } from '@jupyterlab/apputils';
 
 import { PathExt, Time } from '@jupyterlab/coreutils';
@@ -185,7 +186,7 @@ const FACTORY_MIME = 'application/vnd.phosphor.widget-factory';
 /**
  * A widget which hosts a file list area.
  */
-export class DirListing extends Widget {
+export class DirListing extends SideBarWidget {
   /**
    * Construct a new file browser directory listing widget.
    *
@@ -936,10 +937,15 @@ export class DirListing extends Widget {
     // check for nonstandard content type
     const ft = this._model.manager.registry.getFileTypeForModel(item);
     if (ft && ft.contentType === 'dirlike') {
-      const model = (ft.browser as any).model as FileBrowserModel;
-      const localPath = model.manager.services.contents.localPath(item.path);
-      ft.browser.activateInSidebar();
-      model
+      // cast to FileBrowser-like
+      const browserlike = (ft.browser || this) as SideBarWidget & {
+        model: FileBrowserModel;
+      };
+      const localPath = browserlike.model.manager.services.contents.localPath(
+        item.path
+      );
+      browserlike.activateInSidebar();
+      browserlike.model
         .cd(`/${localPath}`)
         .catch(error => showErrorMessage('Open directory', error));
     } else if (item.type === 'directory') {

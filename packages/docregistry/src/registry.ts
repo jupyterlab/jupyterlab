@@ -1168,7 +1168,7 @@ export namespace DocumentRegistry {
 
     /**
      * If content type is 'dirlike', this is the browser associated with this
-     * file type.
+     * file type.  If undefined, the default browser is assumed.
      */
     readonly browser?: SideBarWidget;
 
