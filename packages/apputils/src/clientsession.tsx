@@ -373,6 +373,7 @@ export class ClientSession implements IClientSession {
           console.error(`Kernel not shut down ${reason}`);
         });
       }
+      this._session.dispose();
       this._session = null;
     }
     if (this._dialog) {
