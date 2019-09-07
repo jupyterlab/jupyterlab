@@ -339,7 +339,14 @@ export class SessionManager implements Session.IManager {
     // or that the session JS object is disposed and the session still exists on
     // the server, so we refresh from the server to make sure we reflect the
     // server state.
-    void this.refreshRunning();
+    this.refreshRunning().catch(e => {
+      // Ignore poll rejection that arises if we are disposed
+      // during this call.
+      if (this.isDisposed) {
+        return;
+      }
+      throw e;
+    });
   }
 
   /**

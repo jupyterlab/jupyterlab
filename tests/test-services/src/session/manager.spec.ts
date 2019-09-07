@@ -144,6 +144,7 @@ describe('session/manager', () => {
           called = true;
         });
         await s.shutdown();
+        await manager.refreshRunning();
         expect(called).to.equal(true);
       });
 
