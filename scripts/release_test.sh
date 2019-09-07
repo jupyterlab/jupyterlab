@@ -26,11 +26,9 @@ jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
 jupyter labextension install bqplot --no-build
 jupyter labextension install jupyter-leaflet --no-build
 jupyter lab clean
-jupyter lab build
 
 conda install -c conda-forge -y ipywidgets altair matplotlib vega_datasets
-python -m jupyterlab.browser_check
+jupyter lab build && python -m jupyterlab.browser_check && jupyter lab
 
-jupyter lab
 
 cd /tmp/$old
