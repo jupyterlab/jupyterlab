@@ -28,7 +28,7 @@ jupyter labextension install jupyter-leaflet --no-build
 jupyter lab clean
 jupyter lab build
 
-conda install -c conda-forge -y ipywidgets altair matplotlib
+conda install -c conda-forge -y ipywidgets altair matplotlib vega_datasets
 python -m jupyterlab.browser_check
 
 jupyter lab
