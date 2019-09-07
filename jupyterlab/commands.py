@@ -826,8 +826,8 @@ class _AppHandler(object):
             return self.install_extension(path)
 
         # Warn that it is a linked package.
-        self.logger.warning('Installing %s as a linked package:', path)
-        [self.logger.warning(m) for m in messages]
+        self.logger.warning('Installing %s as a linked package because it does not have extension metadata:', path)
+        [self.logger.warning('   %s' % m) for m in messages]
 
         # Add to metadata.
         config = self._read_build_config()
@@ -1611,7 +1611,7 @@ class _AppHandler(object):
 
             store = tuple(sorted(versions.items(), key=sort_key, reverse=True))
             latest_deps = store[0][1].get('dependencies', {})
-            core_deps = core_data['dependencies']
+            core_deps = core_data['resolutions']
             singletons = core_data['jupyterlab']['singletonPackages']
 
             for (key, value) in latest_deps.items():
