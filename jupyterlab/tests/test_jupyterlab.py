@@ -52,7 +52,7 @@ def touch(file, mtime=None):
     return os.stat(file).st_mtime
 
 
-class TestExtension(TestCase):
+class AppHandlerTest(TestCase):
 
     def tempdir(self):
         td = TemporaryDirectory()
@@ -134,6 +134,9 @@ class TestExtension(TestCase):
 
         # Set pinned extension names
         self.pinned_packages = ['jupyterlab-test-extension@1.0', 'jupyterlab-test-extension@2.0']
+
+
+class TestExtension(AppHandlerTest):
 
     def test_install_extension(self):
         assert install_extension(self.mock_extension) is True

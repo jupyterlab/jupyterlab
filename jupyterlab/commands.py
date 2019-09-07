@@ -413,11 +413,6 @@ def update_extension(name=None, all_=False, app_dir=None, logger=None, core_conf
     _node_check(app_options.logger)
     handler = _AppHandler(app_options)
     if all_ is True:
-        return handler.update_all_extensions()
-    return handler.update_extension(name)
-
-
-def clean(app_dir=None, logger=None, app_options=None):
     """Clean the JupyterLab application directory."""
     app_options = _ensure_options(
         app_options, app_dir=app_dir, logger=logger)
@@ -566,7 +561,14 @@ class _AppHandler(object):
         self.app_dir = options.app_dir
         self.sys_dir = get_app_dir() if options.use_sys_dir else self.app_dir
         self.core_data = options.core_config._data
-        self.registry = registry or 'https://registry.npmjs.org'
+        self._registry = None
+
+    @property
+    def registry(self):
+        if self._registry is None:
+            config = _yarn_config(self.logger)["yarn config"]
+            self._registry = config.get("registry", YARN_DEFAULT_REGISTRY)
+        return self._registry or 'https://registry.npmjs.org'
 
     def install_extension(self, extension, existing=None, pin=None):
         """Install an extension package into JupyterLab.
@@ -1751,10 +1753,10 @@ def _yarn_config(logger):
     {"yarn config": dict, "npm config": dict} if unsuccessfull the subdictionary are empty
     """
     node = which('node')
+    configuration = {"yarn config": {}, "npm config": {}}
     try:
-        output_binary = subprocess.check_output([node, YARN_PATH, 'config', 'list', '--json'], cwd=HERE)
+        output_binary = subprocess.check_output([node, YARN_PATH, 'config', 'list', '--json'], stderr=subprocess.PIPE, cwd=HERE)
         output = output_binary.decode('utf-8')
-        configuration = {}
         lines = iter(output.splitlines())
         try:
             for line in lines:
@@ -1767,10 +1769,12 @@ def _yarn_config(logger):
         except StopIteration:
             pass
         logger.debug("Yarn configuration loaded.")
-        return configuration
+    except subprocess.CalledProcessError as e:
+        logger.error("Fail to get yarn configuration. {!s}{!s}".format(e.stderr.decode('utf-8'), e.output.decode('utf-8')))
     except Exception as e:
         logger.error("Fail to get yarn configuration. {!s}".format(e))
-        return {"yarn config": {}, "npm config": {}}
+    finally:
+        return configuration
 
 
 def _ensure_logger(logger=None):
