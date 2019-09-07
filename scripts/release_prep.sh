@@ -5,8 +5,11 @@ else
     branch=$1
     env=jlabrelease_$branch
 
-    WORK_DIR=`mktemp -d`
+    WORK_DIR='/tmp/$env'
+    rm -rf $WORK_DIR
+    mkdir -p $WORK_DIR
     cd $WORK_DIR
+
     conda deactivate
     conda remove --all -y -n jlabrelease_$branch
 

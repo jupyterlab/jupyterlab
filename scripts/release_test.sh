@@ -1,7 +1,7 @@
 # Test a release wheel in a fresh conda environment with and without installed
 # extensions
-set -e
-env=${CONDA_DEFAULT_ENV}_test
+old=${CONDA_DEFAULT_ENV}
+env=${old}_test
 
 conda deactivate
 conda remove --all -y -n $env
@@ -11,7 +11,9 @@ conda activate $env
 
 pip install dist/*.whl
 
-WORK_DIR=`mktemp -d`
+WORK_DIR='/tmp/$env'
+rm -rf $WORK_DIR
+mkdir -p $WORK_DIR
 cp examples/notebooks/*.ipynb $WORK_DIR
 cd $WORK_DIR
 
@@ -30,3 +32,5 @@ conda install -c conda-forge -y ipywidgets
 python -m jupyterlab.browser_check
 
 jupyter lab
+
+echo "If successful, return to /tmp/$old and publish to PyPI"
