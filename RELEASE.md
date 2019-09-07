@@ -15,26 +15,9 @@ setup instructions and for why twine is the recommended method.
 
 ## Getting a clean environment
 
-### Clean environment with Conda
+### Using Docker
 
-For convenience, here are commands for getting a completely clean repo. This
-makes sure that we don't have any extra tags or commits in our repo (especially
-since we will push our tags later in the process), and that we are on the master
-branch.
-
-```bash
-cd release
-conda deactivate
-conda remove --all -y -n jlabrelease
-rm -rf jupyterlab
-
-conda create -c conda-forge -y -n jlabrelease notebook nodejs twine
-conda activate jlabrelease
-```
-
-### Clean environment with Docker
-
-Instead of following the conda instructions above, you can use Docker to create a new container with a fresh clone of JupyterLab.
+If desired, you can use Docker to create a new container with a fresh clone of JupyterLab.
 
 First, build a Docker base image. This container is customized with your git commit information. The build is cached so rebuilding it is fast and easy.
 
@@ -53,21 +36,14 @@ docker run -it --name jlabrelease -w /usr/src/app jlabreleaseimage bash
 
 Now you should be at a shell prompt as root inside the docker container (the prompt should be something like `root@20dcc0cdc0b4:/usr/src/app`).
 
-## Set up JupyterLab
+### Clean environment
 
-Now clone the repo and build it
+For convenience, here is a script for getting a completely clean repo. This
+makes sure that we don't have any extra tags or commits in our repo (especially
+since we will push our tags later in the process), and that we are on the correct branch. The script creates a conda env, pulls down a git checkout with the
+appropriate branch, and installs JupyterLab with `pip install -e .`.
 
-```bash
-git clone https://github.com/jupyterlab/jupyterlab.git
-cd jupyterlab
-```
-
-Check out the branch you are doing the release from, if different from master.
-Then build and install jupyterlab:
-
-```bash
-pip install -ve .
-```
+`source scripts/release_prep.sh <branch_name>`
 
 ## Bump version
 
@@ -120,9 +96,8 @@ If there is a network error during JS publish, run `npm run publish:all --skip-b
 
 Note that the use of `npm` instead of `jlpm` is [significant on Windows](https://github.com/jupyterlab/jupyterlab/issues/6733).
 
-This is a good time to sanity-check the built packages. In another terminal, create a
-new environment, pip install the wheel from the `dist/` directory, and run both
-`jupyter lab` and `jupyter lab build`.
+At this point, run the `source scripts/release_test.sh` to test the wheel in
+a fresh conda environment with and without extensions installed.
 
 ## Finish
 
