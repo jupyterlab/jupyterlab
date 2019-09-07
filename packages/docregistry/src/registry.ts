@@ -1167,7 +1167,8 @@ export namespace DocumentRegistry {
     readonly iconLabel?: string;
 
     /**
-     * The browser widget associated with this file type
+     * If content type is 'dirlike', this is the browser associated with this
+     * file type.
      */
     readonly browser?: SideBarWidget;
 

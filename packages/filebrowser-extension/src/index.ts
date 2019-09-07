@@ -550,13 +550,6 @@ function addCommands(
               );
               ft.browser.activateInSidebar();
               return model.cd(`/${localPath}`);
-
-              // // if needed, fix the drive prefix of the path
-              // const path =
-              //   ft.driveName && !item.path.startsWith(ft.driveName)
-              //     ? `${ft.driveName}:${item.path}`
-              //     : item.path;
-              // return commands.execute(CommandIDs.goToPath, { path });
             }
 
             if (item.type === 'directory') {
