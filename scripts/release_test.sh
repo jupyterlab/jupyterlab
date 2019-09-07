@@ -1,7 +1,7 @@
 # Test a release wheel in a fresh conda environment with and without installed
 # extensions
 old=${CONDA_DEFAULT_ENV}
-env=${old}_test
+env=${CONDA_DEFAULT_ENV}_test
 
 conda deactivate
 conda remove --all -y -n $env
@@ -33,4 +33,4 @@ python -m jupyterlab.browser_check
 
 jupyter lab
 
-echo "If successful, return to /tmp/$old and publish to PyPI"
+cd /tmp/$old
