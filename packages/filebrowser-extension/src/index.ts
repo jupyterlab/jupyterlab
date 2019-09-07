@@ -544,7 +544,7 @@ function addCommands(
             // check for nonstandard content type
             const ft = widget.model.manager.registry.getFileTypeForModel(item);
             if (ft && ft.contentType === 'dirlike') {
-              const model = ft.browser.model as FileBrowserModel;
+              const model = (ft.browser as any).model as FileBrowserModel;
               const localPath = this._manager.services.contents.localPath(
                 item.path
               );
