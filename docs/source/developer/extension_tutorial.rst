@@ -612,7 +612,7 @@ file.
       constructor() {
         super();
 
-        this.addClass('my-apodWidget'); // new line
+        this.addClass('my-apodWidget');
 
         // Add an image element to the panel
         this.img = document.createElement('img');
@@ -664,6 +664,17 @@ file.
           this.summary.innerText = 'Random APOD fetched was not an image.';
         }
       }
+
+      /**
+      * Get a random date string in YYYY-MM-DD format.
+      */
+      randomDate(): string {
+        const start = new Date(2010, 1, 1);
+        const end = new Date();
+        const randomDate = new Date(start.getTime() + Math.random()*(end.getTime() - start.getTime()));
+        return randomDate.toISOString().slice(0, 10);
+      }
+    }
 
 You've written all of the code before. All you've done is restructure it
 to use instance variables and move the image request to its own
