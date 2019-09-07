@@ -545,11 +545,11 @@ function addCommands(
             const ft = widget.model.manager.registry.getFileTypeForModel(item);
             if (ft && ft.contentType === 'dirlike') {
               const model = (ft.browser as any).model as FileBrowserModel;
-              const localPath = this._manager.services.contents.localPath(
+              const localPath = model.manager.services.contents.localPath(
                 item.path
               );
               ft.browser.activateInSidebar();
-              model.cd(`/${localPath}`);
+              return model.cd(`/${localPath}`);
 
               // // if needed, fix the drive prefix of the path
               // const path =
