@@ -88,7 +88,7 @@ class ProgressProcess(Process):
         proc = self.proc
         kill_event = self._kill_event
         import itertools
-        spinner = itertools.cycle(['-', '/', '|', '\\'])
+        spinner = itertools.cycle(['-', '\\', '|', '/'])
         while proc.poll() is None:
             sys.stdout.write(next(spinner))   # write the next character
             sys.stdout.flush()                # flush stdout buffer (actual character display)
