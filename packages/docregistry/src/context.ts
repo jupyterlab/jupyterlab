@@ -370,11 +370,23 @@ export class Context<T extends DocumentRegistry.IModel>
 
     if (newPath && this._path.indexOf(oldPath) === 0) {
       let changeModel = change.newValue;
+
+      console.log('_path dirname', PathExt.dirname(this._path));
+      console.log('_path basename', PathExt.basename(this._path));
+
+      console.log('oldPath dirname', PathExt.dirname(oldPath));
+      console.log('oldPath basename', PathExt.basename(oldPath));
+
+      console.log('newPath', newPath);
+      console.log('oldPath', oldPath);
+      console.log('_path', this._path);
       // When folder name changed, `oldPath` is `foo`, `newPath` is `bar` and `this._path` is `foo/test`,
       // we should update `foo/test` to `bar/test` as well
+
       if (oldPath !== this._path) {
-        newPath = this._path.replace(new RegExp(`^${oldPath}`), newPath);
+        newPath = this._path.replace(new RegExp(`^${oldPath}/`), newPath + '/');
         oldPath = this._path;
+
         // Update client file model from folder change
         changeModel = {
           last_modified: change.newValue.created,
