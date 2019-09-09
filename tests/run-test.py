@@ -2,13 +2,29 @@
 # Distributed under the terms of the Modified BSD License.
 
 import os
-from jupyterlab.tests.test_app import run_jest, JestApp
+
+from jupyterlab.tests.test_app import JestApp
 
 HERE = os.path.realpath(os.path.dirname(__file__))
 
-if __name__ == '__main__':
-    # xeus-python requires the xpython_debug_logs folder
-    jest_app = JestApp.instance()
-    os.mkdir(os.path.join(jest_app.notebook_dir, 'xpython_debug_logs'))
 
-    run_jest(HERE)
+def run(jest_dir):
+    jest_app = JestApp.instance()
+    jest_app.jest_dir = jest_dir
+    jest_app.initialize()
+    jest_app.install_kernel(
+        kernel_name='xpython',
+        kernel_spec={
+            'argv': [
+                'xpython',
+                '-f', '{connection_file}'
+            ],
+            'display_name': 'xpython',
+            'language': 'python'
+        }
+    )
+    jest_app.start()
+
+
+if __name__ == '__main__':
+    run(HERE)

@@ -4,19 +4,22 @@
 import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
 import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
+import { Body } from './body';
+import { DebugProtocol } from 'vscode-debugprotocol';
 
 export class Callstack extends Panel {
   constructor(options: Callstack.IOptions = {}) {
     super();
 
-    this.model = {};
+    this.model = new Callstack.IModel(MOCK_FRAMES);
     this.addClass('jp-DebuggerCallstack');
     this.title.label = 'Callstack';
 
     const header = new CallstackHeader(this.title.label);
+    const body = new Body(this.model);
 
     this.addWidget(header);
-    this.addWidget(this.body);
+    this.addWidget(body);
 
     header.toolbar.addItem(
       'continue',
@@ -70,8 +73,6 @@ export class Callstack extends Panel {
     );
   }
 
-  readonly body = new Panel();
-
   readonly model: Callstack.IModel;
 }
 
@@ -92,7 +93,46 @@ class CallstackHeader extends Widget {
 }
 
 export namespace Callstack {
+  export interface IFrame extends DebugProtocol.StackFrame {}
+
   export interface IModel {}
+
+  export class IModel implements IModel {
+    constructor(model: IFrame[]) {
+      this.state = model;
+    }
+
+    set frames(newFrames: IFrame[]) {
+      this.state = newFrames;
+    }
+
+    get frames(): IFrame[] {
+      return this.state;
+    }
+
+    private state: IFrame[];
+  }
 
   export interface IOptions extends Panel.IOptions {}
 }
+
+const MOCK_FRAMES: Callstack.IFrame[] = [
+  {
+    id: 0,
+    name: 'test',
+    source: {
+      name: 'untitled.py'
+    },
+    line: 6,
+    column: 1
+  },
+  {
+    id: 1,
+    name: '<module>',
+    source: {
+      name: 'untitled.py'
+    },
+    line: 7,
+    column: 1
+  }
+];
