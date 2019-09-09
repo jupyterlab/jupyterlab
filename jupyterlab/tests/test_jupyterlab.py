@@ -28,7 +28,8 @@ from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
     build, link_package, unlink_package, build_check,
     disable_extension, enable_extension, get_app_info,
-    check_extension, _test_overlap, update_extension
+    check_extension, _test_overlap, update_extension,
+    AppOptions
 )
 from jupyterlab.coreconfig import CoreConfig, _get_default_core_data
 
@@ -138,17 +139,17 @@ class TestExtension(TestCase):
         assert install_extension(self.mock_extension) is True
         path = pjoin(self.app_dir, 'extensions', '*.tgz')
         assert glob.glob(path)
-        extensions = get_app_info(self.app_dir)['extensions']
+        extensions = get_app_info()['extensions']
         name = self.pkg_names['extension']
         assert name in extensions
         assert check_extension(name)
 
     def test_install_twice(self):
         assert install_extension(self.mock_extension) is True
-        path = pjoin(commands.get_app_dir(), 'extensions', '*.tgz')
+        path = pjoin(self.app_dir, 'extensions', '*.tgz')
         assert install_extension(self.mock_extension) is True
         assert glob.glob(path)
-        extensions = get_app_info(self.app_dir)['extensions']
+        extensions = get_app_info()['extensions']
         name = self.pkg_names['extension']
         assert name in extensions
         assert check_extension(name)
@@ -156,11 +157,11 @@ class TestExtension(TestCase):
     def test_install_mime_renderer(self):
         install_extension(self.mock_mimeextension)
         name = self.pkg_names['mimeextension']
-        assert name in get_app_info(self.app_dir)['extensions']
+        assert name in get_app_info()['extensions']
         assert check_extension(name)
 
         assert uninstall_extension(name) is True
-        assert name not in get_app_info(self.app_dir)['extensions']
+        assert name not in get_app_info()['extensions']
         assert not check_extension(name)
 
     def test_install_incompatible(self):
@@ -175,7 +176,7 @@ class TestExtension(TestCase):
             install_extension(path)
         with open(pjoin(path, 'package.json')) as fid:
             data = json.load(fid)
-        extensions = get_app_info(self.app_dir)['extensions']
+        extensions = get_app_info()['extensions']
         name = data['name']
         assert name not in extensions
         assert not check_extension(name)
@@ -200,7 +201,7 @@ class TestExtension(TestCase):
         assert uninstall_extension(self.pkg_names['extension']) is True
         path = pjoin(self.app_dir, 'extensions', '*.tgz')
         assert not glob.glob(path)
-        extensions = get_app_info(self.app_dir)['extensions']
+        extensions = get_app_info()['extensions']
         assert name not in extensions
         assert not check_extension(name)
 
@@ -212,15 +213,16 @@ class TestExtension(TestCase):
         assert check_extension(ext_name) is True
         assert check_extension(mime_ext_name) is True
         assert uninstall_extension(all_=True) is True
-        extensions = get_app_info(self.app_dir)['extensions']
+        extensions = get_app_info()['extensions']
         assert ext_name not in extensions
         assert mime_ext_name not in extensions
 
 
+    @pytest.mark.slow
     def test_uninstall_core_extension(self):
         assert uninstall_extension('@jupyterlab/console-extension') is True
         app_dir = self.app_dir
-        build(app_dir)
+        build()
         with open(pjoin(app_dir, 'staging', 'package.json')) as fid:
             data = json.load(fid)
         extensions = data['jupyterlab']['extensions']
@@ -228,7 +230,7 @@ class TestExtension(TestCase):
         assert not check_extension('@jupyterlab/console-extension')
 
         assert install_extension('@jupyterlab/console-extension') is True
-        build(app_dir)
+        build()
         with open(pjoin(app_dir, 'staging', 'package.json')) as fid:
             data = json.load(fid)
         extensions = data['jupyterlab']['extensions']
@@ -244,7 +246,7 @@ class TestExtension(TestCase):
         assert install_extension(self.pinned_packages[0], pin=NAMES[0])
         assert install_extension(self.pinned_packages[1], pin=NAMES[1])
 
-        extensions = get_app_info(self.app_dir)['extensions']
+        extensions = get_app_info()['extensions']
         assert NAMES[0] in extensions
         assert NAMES[1] in extensions
         assert check_extension(NAMES[0])
@@ -254,7 +256,7 @@ class TestExtension(TestCase):
         assert uninstall_extension(NAMES[0])
         assert uninstall_extension(NAMES[1])
 
-        extensions = get_app_info(self.app_dir)['extensions']
+        extensions = get_app_info()['extensions']
         assert NAMES[0] not in extensions
         assert NAMES[1] not in extensions
         assert not check_extension(NAMES[0])
@@ -291,28 +293,26 @@ class TestExtension(TestCase):
         path = self.mock_extension
         name = self.pkg_names['extension']
         link_package(path)
-        app_dir = self.app_dir
-        linked = get_app_info(app_dir)['linked_packages']
+        linked = get_app_info()['linked_packages']
         assert name not in linked
-        assert name in get_app_info(app_dir)['extensions']
+        assert name in get_app_info()['extensions']
         assert check_extension(name)
         assert unlink_package(path) is True
-        linked = get_app_info(app_dir)['linked_packages']
+        linked = get_app_info()['linked_packages']
         assert name not in linked
-        assert name not in get_app_info(app_dir)['extensions']
+        assert name not in get_app_info()['extensions']
         assert not check_extension(name)
 
     def test_link_package(self):
         path = self.mock_package
         name = self.pkg_names['package']
         assert link_package(path) is True
-        app_dir = self.app_dir
-        linked = get_app_info(app_dir)['linked_packages']
+        linked = get_app_info()['linked_packages']
         assert name in linked
-        assert name not in get_app_info(app_dir)['extensions']
+        assert name not in get_app_info()['extensions']
         assert check_extension(name)
         assert unlink_package(path)
-        linked = get_app_info(app_dir)['linked_packages']
+        linked = get_app_info()['linked_packages']
         assert name not in linked
         assert not check_extension(name)
 
@@ -320,7 +320,7 @@ class TestExtension(TestCase):
         target = self.mock_package
         assert link_package(target) is True
         assert unlink_package(target) is True
-        linked = get_app_info(self.app_dir)['linked_packages']
+        linked = get_app_info()['linked_packages']
         name = self.pkg_names['package']
         assert name not in linked
         assert not check_extension(name)
@@ -331,49 +331,66 @@ class TestExtension(TestCase):
 
     def test_app_dir(self):
         app_dir = self.tempdir()
+        options = AppOptions(app_dir=app_dir)
 
-        assert install_extension(self.mock_extension, app_dir) is True
+        assert install_extension(self.mock_extension, app_options=options) is True
         path = pjoin(app_dir, 'extensions', '*.tgz')
         assert glob.glob(path)
-        extensions = get_app_info(app_dir)['extensions']
+        extensions = get_app_info(app_options=options)['extensions']
         ext_name = self.pkg_names['extension']
         assert ext_name in extensions
-        assert check_extension(ext_name, app_dir)
+        assert check_extension(ext_name, app_options=options)
 
-        assert uninstall_extension(self.pkg_names['extension'], app_dir) is True
+        assert uninstall_extension(self.pkg_names['extension'], app_options=options) is True
         path = pjoin(app_dir, 'extensions', '*.tgz')
         assert not glob.glob(path)
-        extensions = get_app_info(app_dir)['extensions']
+        extensions = get_app_info(app_options=options)['extensions']
         assert ext_name not in extensions
-        assert not check_extension(ext_name, app_dir)
+        assert not check_extension(ext_name, app_options=options)
 
-        assert link_package(self.mock_package, app_dir) is True
-        linked = get_app_info(app_dir)['linked_packages']
+        assert link_package(self.mock_package, app_options=options) is True
+        linked = get_app_info(app_options=options)['linked_packages']
         pkg_name = self.pkg_names['package']
         assert pkg_name in linked
-        assert check_extension(pkg_name, app_dir)
+        assert check_extension(pkg_name, app_options=options)
 
-        assert unlink_package(self.mock_package, app_dir) is True
-        linked = get_app_info(app_dir)['linked_packages']
+        assert unlink_package(self.mock_package, app_options=options) is True
+        linked = get_app_info(app_options=options)['linked_packages']
         assert pkg_name not in linked
-        assert not check_extension(pkg_name, app_dir)
+        assert not check_extension(pkg_name, app_options=options)
 
     def test_app_dir_use_sys_prefix(self):
         app_dir = self.tempdir()
+        options = AppOptions(app_dir=app_dir)
         if os.path.exists(self.app_dir):
             os.removedirs(self.app_dir)
 
         assert install_extension(self.mock_extension) is True
         path = pjoin(app_dir, 'extensions', '*.tgz')
         assert not glob.glob(path)
-        extensions = get_app_info(app_dir)['extensions']
+        extensions = get_app_info(app_options=options)['extensions']
         ext_name = self.pkg_names['extension']
         assert ext_name in extensions
-        assert check_extension(ext_name, app_dir)
+        assert check_extension(ext_name, app_options=options)
+
+    def test_app_dir_disable_sys_prefix(self):
+        app_dir = self.tempdir()
+        options = AppOptions(app_dir=app_dir, use_sys_dir=False)
+        if os.path.exists(self.app_dir):
+            os.removedirs(self.app_dir)
+
+        assert install_extension(self.mock_extension) is True
+        path = pjoin(app_dir, 'extensions', '*.tgz')
+        assert not glob.glob(path)
+        extensions = get_app_info(app_options=options)['extensions']
+        ext_name = self.pkg_names['extension']
+        assert ext_name not in extensions
+        assert not check_extension(ext_name, app_options=options)
 
     def test_app_dir_shadowing(self):
         app_dir = self.tempdir()
         sys_dir = self.app_dir
+        app_options = AppOptions(app_dir=app_dir)
         if os.path.exists(sys_dir):
             os.removedirs(sys_dir)
 
@@ -382,31 +399,32 @@ class TestExtension(TestCase):
         assert glob.glob(sys_path)
         app_path = pjoin(app_dir, 'extensions', '*.tgz')
         assert not glob.glob(app_path)
-        extensions = get_app_info(app_dir)['extensions']
+        extensions = get_app_info(app_options=app_options)['extensions']
         ext_name = self.pkg_names['extension']
         assert ext_name in extensions
-        assert check_extension(ext_name, app_dir)
+        assert check_extension(ext_name, app_options=app_options)
 
-        assert install_extension(self.mock_extension, app_dir) is True
+        assert install_extension(self.mock_extension, app_options=app_options) is True
         assert glob.glob(app_path)
-        extensions = get_app_info(app_dir)['extensions']
+        extensions = get_app_info(app_options=app_options)['extensions']
         assert ext_name in extensions
-        assert check_extension(ext_name, app_dir)
+        assert check_extension(ext_name, app_options=app_options)
 
-        assert uninstall_extension(self.pkg_names['extension'], app_dir) is True
+        assert uninstall_extension(self.pkg_names['extension'], app_options=app_options) is True
         assert not glob.glob(app_path)
         assert glob.glob(sys_path)
-        extensions = get_app_info(app_dir)['extensions']
+        extensions = get_app_info(app_options=app_options)['extensions']
         assert ext_name in extensions
-        assert check_extension(ext_name, app_dir)
+        assert check_extension(ext_name, app_options=app_options)
 
-        assert uninstall_extension(self.pkg_names['extension'], app_dir) is True
+        assert uninstall_extension(self.pkg_names['extension'], app_options=app_options) is True
         assert not glob.glob(app_path)
         assert not glob.glob(sys_path)
-        extensions = get_app_info(app_dir)['extensions']
+        extensions = get_app_info(app_options=app_options)['extensions']
         assert ext_name not in extensions
-        assert not check_extension(ext_name, app_dir)
+        assert not check_extension(ext_name, app_options=app_options)
 
+    @pytest.mark.slow
     def test_build(self):
         assert install_extension(self.mock_extension) is True
         build()
@@ -422,6 +440,7 @@ class TestExtension(TestCase):
             data = fid.read()
         assert self.pkg_names['extension'] in data
 
+    @pytest.mark.slow
     def test_build_custom(self):
         assert install_extension(self.mock_extension) is True
         build(name='foo', version='1.0', static_url='bar')
@@ -439,12 +458,21 @@ class TestExtension(TestCase):
         assert data['jupyterlab']['version'] == '1.0'
         assert data['jupyterlab']['staticUrl'] == 'bar'
 
+    @pytest.mark.slow
     def test_build_custom_minimal_core_config(self):
         default_config = CoreConfig()
         core_config = CoreConfig()
         core_config.clear_packages()
         logger = logging.getLogger('jupyterlab_test_logger')
         logger.setLevel('DEBUG')
+        app_dir = self.tempdir()
+        options = AppOptions(
+            app_dir=app_dir,
+            core_config=core_config,
+            logger=logger,
+            use_sys_dir=False,
+        )
+
         extensions = (
             '@jupyterlab/application-extension',
             '@jupyterlab/apputils-extension',
@@ -462,22 +490,22 @@ class TestExtension(TestCase):
             semver = default_config.singletons[name]
             core_config.add(name, semver)
 
-        assert install_extension(self.mock_extension) is True
-        build(core_config=core_config, logger=logger)
+        assert install_extension(self.mock_extension, app_options=options) is True
+        build(app_options=options)
 
         # check static directory.
-        entry = pjoin(self.app_dir, 'static', 'index.out.js')
+        entry = pjoin(app_dir, 'static', 'index.out.js')
         with open(entry) as fid:
             data = fid.read()
         assert self.pkg_names['extension'] in data
 
-        pkg = pjoin(self.app_dir, 'static', 'package.json')
+        pkg = pjoin(app_dir, 'static', 'package.json')
         with open(pkg) as fid:
             data = json.load(fid)
         assert list(data['jupyterlab']['extensions'].keys()) == [
             '@jupyterlab/application-extension',
             '@jupyterlab/apputils-extension',
-            self.pkg_names['extension'],
+            '@jupyterlab/mock-extension',
         ]
         assert data['jupyterlab']['mimeExtensions'] == {}
         for pkg in data['jupyterlab']['singletonPackages']:
@@ -493,38 +521,39 @@ class TestExtension(TestCase):
         load_jupyter_server_extension(app)
 
     def test_disable_extension(self):
-        app_dir = self.tempdir()
-        assert install_extension(self.mock_extension, app_dir) is True
-        assert disable_extension(self.pkg_names['extension'], app_dir) is True
-        info = get_app_info(app_dir)
+        options = AppOptions(app_dir=self.tempdir())
+        assert install_extension(self.mock_extension, app_options=options) is True
+        assert disable_extension(self.pkg_names['extension'], app_options=options) is True
+        info = get_app_info(app_options=options)
         name = self.pkg_names['extension']
         assert name in info['disabled']
-        assert not check_extension(name, app_dir)
-        assert check_extension(name, app_dir, True)
-        assert disable_extension('@jupyterlab/notebook-extension', app_dir) is True
-        info = get_app_info(app_dir)
+        assert not check_extension(name, app_options=options)
+        assert check_extension(name, installed=True, app_options=options)
+        assert disable_extension('@jupyterlab/notebook-extension', app_options=options) is True
+        info = get_app_info(app_options=options)
         assert '@jupyterlab/notebook-extension' in info['disabled']
-        assert not check_extension('@jupyterlab/notebook-extension', app_dir)
-        assert check_extension('@jupyterlab/notebook-extension', app_dir, True)
+        assert not check_extension('@jupyterlab/notebook-extension', app_options=options)
+        assert check_extension('@jupyterlab/notebook-extension', installed=True, app_options=options)
         assert name in info['disabled']
-        assert not check_extension(name, app_dir)
-        assert check_extension(name, app_dir, True)
+        assert not check_extension(name, app_options=options)
+        assert check_extension(name, installed=True, app_options=options)
 
     def test_enable_extension(self):
-        app_dir = self.tempdir()
-        assert install_extension(self.mock_extension, app_dir) is True
-        assert disable_extension(self.pkg_names['extension'], app_dir) is True
-        assert enable_extension(self.pkg_names['extension'], app_dir) is True
-        info = get_app_info(app_dir)
+        options = AppOptions(app_dir=self.tempdir())
+        assert install_extension(self.mock_extension, app_options=options) is True
+        assert disable_extension(self.pkg_names['extension'], app_options=options) is True
+        assert enable_extension(self.pkg_names['extension'], app_options=options) is True
+        info = get_app_info(app_options=options)
         name = self.pkg_names['extension']
         assert name not in info['disabled']
-        assert check_extension(name, app_dir)
-        assert disable_extension('@jupyterlab/notebook-extension', app_dir) is True
+        assert check_extension(name, app_options=options)
+        assert disable_extension('@jupyterlab/notebook-extension', app_options=options) is True
         assert name not in info['disabled']
-        assert check_extension(name, app_dir)
+        assert check_extension(name, app_options=options)
         assert '@jupyterlab/notebook-extension' not in info['disabled']
-        assert not check_extension('@jupyterlab/notebook-extension', app_dir)
+        assert not check_extension('@jupyterlab/notebook-extension', app_options=options)
 
+    @pytest.mark.slow
     def test_build_check(self):
         # Do the initial build.
         assert build_check()
