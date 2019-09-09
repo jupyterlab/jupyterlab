@@ -11,6 +11,37 @@ type Dict<T> = { [key: string]: T };
 const backSlash = /\\/g;
 
 /**
+ * To help with handling nested sibling installs
+ */
+const _resolveCandidates = (candidates: string[]) => {
+  const resolveCandidate = (paths: string[], candidate: string) => {
+    const dataPath = path.join(candidate, 'package.json');
+    let data: any;
+    try {
+      data = readJSONFile(dataPath);
+    } catch (e) {
+      return;
+    }
+
+    if (data.name) {
+      paths.push(candidate);
+    }
+
+    if (data && data.workspaces) {
+      data.workspaces.forEach((wspace: string) => {
+        const wcandidate = path.join(candidate, wspace);
+        resolveCandidate(paths, wcandidate);
+      });
+    }
+
+    return paths;
+  };
+
+  // remove any duplicates and return
+  return [...new Set(candidates.reduce(resolveCandidate, []))];
+};
+
+/**
  * Get all of the lerna package paths.
  */
 export function getLernaPaths(basePath = '.'): string[] {
@@ -32,21 +63,34 @@ export function getLernaPaths(basePath = '.'): string[] {
     }
     throw e;
   }
-  let paths: string[] = [];
+  let candidates: string[] = [];
   for (let config of packages) {
-    paths = paths.concat(glob.sync(path.join(basePath, config)));
+    candidates = candidates.concat(glob.sync(path.join(basePath, config)));
   }
-  return paths.filter(pkgPath => {
-    return fs.existsSync(path.join(pkgPath, 'package.json'));
-  });
+  return _resolveCandidates(
+    candidates.filter(pkgPath => {
+      return fs.existsSync(path.join(pkgPath, 'package.json'));
+    })
+  );
+  // const paths = candidates.filter(pkgPath => {
+  //   return fs.existsSync(path.join(pkgPath, 'package.json'));
+  // });
+  //
+  // console.log(paths);
+  //
+  // return paths;
 }
 
 /**
  * Get all of the core package paths.
  */
 export function getCorePaths(): string[] {
-  let spec = path.resolve(path.join('.', 'packages', '*'));
-  return glob.sync(spec);
+  const spec = path.resolve(path.join('.', 'packages', '*'));
+  const candidates = glob.sync(spec);
+  // const specNested = path.resolve(path.join('.', 'packages', '*', '*'));
+  // const candidates = [...glob.sync(spec), ...glob.sync(specNested)];
+
+  return _resolveCandidates(candidates);
 }
 
 /**
