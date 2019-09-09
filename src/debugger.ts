@@ -68,7 +68,7 @@ export namespace Debugger {
       return this._isDisposed;
     }
 
-    get notebook() {
+    get notebookTracker() {
       return this._notebook;
     }
 
