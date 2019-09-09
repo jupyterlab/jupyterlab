@@ -254,7 +254,7 @@ const tree: JupyterFrontEndPlugin<void> = {
     const { commands } = app;
     const treePattern = new RegExp(`^${paths.urls.tree}([^?]+)`);
     const workspacePattern = new RegExp(
-      `^${paths.urls.workspaces}[^?\/]+/tree/([^?]+)`
+      `^${paths.urls.workspaces}/[^?/]+/tree/([^?]+)`
     );
 
     commands.addCommand(CommandIDs.tree, {
