@@ -16,7 +16,7 @@ steps:
 
 - bash: |
     source activate jupyterlab-debugger
-    conda install --yes --quiet -c conda-forge nodejs xeus-python ptvsd python=$PYTHON_VERSION
+    conda install --yes --quiet -c conda-forge nodejs xeus-python=0.5 ptvsd python=$PYTHON_VERSION
     python -m pip install -U --pre jupyterlab
   displayName: Install dependencies
 
@@ -28,7 +28,6 @@ steps:
 
 - bash: |
     source activate jupyterlab-debugger
-    export JUPYTER_PATH=${CONDA_PREFIX}/share/jupyter
     export XEUS_LOG=1
     jlpm run test
   displayName: Run the tests
