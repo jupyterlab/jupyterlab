@@ -104,13 +104,13 @@ const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
         values: ISettingRegistry.IPlugin[];
       }> {
         const { ids, values } = await app.serviceManager.settings.list();
-        const filtered = {
+
+        return {
           ids: ids.filter(id => !PageConfig.Extension.isDisabled(id)),
           values: values.filter(
             ({ id }) => !PageConfig.Extension.isDisabled(id)
           )
         };
-        return filtered;
       }
     })();
     const plugins = (await connector.list()).values;
