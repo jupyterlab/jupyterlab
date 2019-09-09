@@ -22,7 +22,7 @@ export class DebuggerSidebar extends SplitPanel {
 
     this.variables = new Variables();
     this.callstack = new Callstack();
-    this.breakpoints = new Breakpoints({ notebook: notebook });
+    this.breakpoints = new Breakpoints({ noteTracker: notebook });
 
     this.addWidget(this.variables);
     this.addWidget(this.callstack);

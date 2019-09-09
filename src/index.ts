@@ -17,7 +17,7 @@ import { IStateDB } from '@jupyterlab/coreutils';
 
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 
-import { INotebookTracker } from '@jupyterlab/notebook';
+import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { Debugger } from './debugger';
 
@@ -26,8 +26,6 @@ import { Debugger } from './debugger';
 import { IDebugger, IDebuggerSidebar } from './tokens';
 
 // import { ClientSession, IClientSession } from '@jupyterlab/apputils';
-
-import { Session } from '@jupyterlab/services';
 
 // import { DebugSession } from './session';
 
@@ -95,47 +93,19 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     debug,
-    tracker: INotebookTracker,
+    notebook: INotebookTracker,
     palette: ICommandPalette
   ) => {
-    Session.listRunning().then(sessionModels => {
-      console.log(sessionModels);
-      // const session = Session.connectTo(sessionModels[0]);
+    notebook.widgetAdded.connect((sender, notePanel: NotebookPanel) => {});
 
-      // session.shutdown();
-    });
-    // console.log(client);
-    // if (false) {
-    // const test = async () => {
-
-    //   await (client as ClientSession).initialize();
-    //   await client.kernel.ready;
-    // };
-    // const debugSession = new DebugSession({ client });
-    // console.log(debugSession, test);
-    // }
-
+    // this exist only for my test in futre will be removed
     const command: string = CommandIDs.debugNotebook;
     app.commands.addCommand(command, {
-      label: 'A',
-      execute: () => {
-        let options = {
-          kernelName: 'python',
-          path: '/tmp/foo.ipynb',
-          name: 'foo.ipynb'
-        };
-        Session.startNew(options).then(session => {
-          // Execute and handle replies on the kernel.
-          let future = session.kernel.requestExecute({ code: 'a = 1' });
-          future.done.then(res => {
-            console.log('Future is fulfilled', res);
-          });
-        });
-      }
+      label: 'test',
+      execute: () => {}
     });
 
-    // Add the command to the palette.
-    palette.addItem({ command, category: 'A' });
+    palette.addItem({ command, category: 'dev test' });
   }
 };
 
@@ -155,7 +125,7 @@ const sidebar: JupyterFrontEndPlugin<Debugger> = {
     const label = 'Environment';
     const namespace = 'jp-debugger-sidebar';
     const sidebar = new Debugger({
-      notebook: notebookTracker
+      noteTracker: notebookTracker
     });
 
     sidebar.id = namespace;

@@ -16,7 +16,7 @@ export class Breakpoints extends Panel {
   constructor(options: Breakpoints.IOptions) {
     super();
 
-    this.model = new Breakpoints.IModel([] as Breakpoints.IBreakpoint[]);
+    this.model = new Breakpoints.IModel([]);
     this.addClass('jp-DebuggerBreakpoints');
     this.title.label = 'Breakpoints';
 
@@ -47,26 +47,29 @@ export class Breakpoints extends Panel {
         iconClassName: 'jp-CloseAllIcon',
         onClick: () => {
           this.model.breakpoints = [];
-          this.cellsBreakpoints[this.getCell().id] = {};
+          this.cellsBreakpoints[this.getCell().id] = [];
           this.removeAllGutterBreakpoints(this.getCell());
         },
         tooltip: 'Remove All Breakpoints'
       })
     );
 
-    this.notebook = options.notebook;
-    if (this.notebook) {
-      this.notebook.activeCellChanged.connect(this.onActiveCellChanged, this);
+    this.noteTracker = options.noteTracker;
+    if (this.noteTracker) {
+      this.noteTracker.activeCellChanged.connect(
+        this.onActiveCellChanged,
+        this
+      );
     }
   }
 
   private isAllActive = true;
   readonly body: Widget;
   readonly model: Breakpoints.IModel;
-  notebook: INotebookTracker;
+  noteTracker: INotebookTracker;
   previousCell: CodeCell;
   previousLineCount: number;
-  cellsBreakpoints: any = {};
+  cellsBreakpoints: { [id: string]: Breakpoints.IBreakpoint[] } = {};
 
   protected onActiveCellChanged() {
     const activeCell = this.getCell();
@@ -85,7 +88,7 @@ export class Breakpoints extends Panel {
   }
 
   protected getCell(): CodeCell {
-    return this.notebook.activeCell as CodeCell;
+    return this.noteTracker.activeCell as CodeCell;
   }
 
   protected removeAllGutterBreakpoints(cell: CodeCell) {
@@ -100,7 +103,7 @@ export class Breakpoints extends Panel {
     this.cellsBreakpoints[cell.model.id] = this.model.breakpoints;
     this.model.breakpoints = [];
     editor.setOption('lineNumbers', false);
-    editor.editor.off('gutterClick', this.addBreakpoint);
+    editor.editor.off('gutterClick', this.onGutterClick);
     editor.editor.off('renderLine', this.onNewRenderLine);
   }
 
@@ -116,7 +119,7 @@ export class Breakpoints extends Panel {
       'breakpoints'
     ]);
 
-    editor.editor.on('gutterClick', this.addBreakpoint);
+    editor.editor.on('gutterClick', this.onGutterClick);
     editor.editor.on('renderLine', this.onNewRenderLine);
   }
 
@@ -154,36 +157,40 @@ export class Breakpoints extends Panel {
     }
   };
 
-  protected addBreakpoint = (editor: Editor, lineNumber: number) => {
+  private addBreakpoint(line: number) {
+    this.model.breakpoint = {
+      id: this.model.breakpoints.length + 1,
+      active: true,
+      verified: true,
+      source: {
+        // TODO: need get filename
+        name: 'untitled.py'
+      },
+      line: line
+    };
+  }
+
+  protected onGutterClick = (editor: Editor, lineNumber: number) => {
     const info = editor.lineInfo(lineNumber);
     if (!info) {
       return;
     }
-    const removeGutter = !!info.gutterMarkers;
+    const isRemoveGutter = !!info.gutterMarkers;
 
     const breakpoint: Breakpoints.IBreakpoint = this.model.getBreakpointByLineNumber(
       lineNumber
     );
 
-    if (!breakpoint && !removeGutter) {
-      this.model.breakpoint = {
-        id: this.model.breakpoints.length + 1,
-        active: true,
-        verified: true,
-        source: {
-          // TODO: need get filename
-          name: 'untitled.py'
-        },
-        line: lineNumber
-      };
-    } else if (removeGutter) {
+    if (!breakpoint && !isRemoveGutter) {
+      this.addBreakpoint(lineNumber);
+    } else if (isRemoveGutter) {
       this.model.removeBreakpoint(breakpoint);
     }
 
     editor.setGutterMarker(
       lineNumber,
       'breakpoints',
-      removeGutter ? null : this.createMarkerNode()
+      isRemoveGutter ? null : this.createMarkerNode()
     );
   };
 
@@ -243,15 +250,12 @@ export namespace Breakpoints {
     }
 
     set breakpoint(breakpoint: IBreakpoint) {
-      const index = this._state.findIndex(ele => ele.id === breakpoint.id);
+      const index = this._state.findIndex(ele => ele.line === breakpoint.line);
       if (index !== -1) {
         this._state[index] = breakpoint;
         this._breakpointChanged.emit(breakpoint);
       } else {
-        const breakpoints = this.breakpoints;
-        breakpoints.push(breakpoint);
-        this.breakpoints = [];
-        this.breakpoints = breakpoints;
+        this.breakpoints = [...this.breakpoints, breakpoint];
       }
     }
 
@@ -259,7 +263,6 @@ export namespace Breakpoints {
       const breakpoints = this.breakpoints.filter(
         ele => ele.line !== breakpoint.line
       );
-      this.breakpoints = [];
       this.breakpoints = breakpoints;
     }
 
@@ -268,7 +271,6 @@ export namespace Breakpoints {
         ele.line = lineEnter <= ele.line ? ele.line + howMany : ele.line;
         return ele;
       });
-      this.breakpoints = [];
       this.breakpoints = breakpoints;
     }
 
@@ -285,6 +287,6 @@ export namespace Breakpoints {
    * Instantiation options for `Breakpoints`;
    */
   export interface IOptions extends Panel.IOptions {
-    notebook?: INotebookTracker;
+    noteTracker?: INotebookTracker;
   }
 }

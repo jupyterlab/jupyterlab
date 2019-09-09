@@ -17,7 +17,7 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
     super({ direction: 'left-to-right' });
-    this.notebook = options.notebook;
+
     this.model = new Debugger.Model(options);
     this.sidebar = new DebuggerSidebar(this.model);
     this.title.label = 'Debugger';
@@ -30,8 +30,6 @@ export class Debugger extends BoxPanel {
 
   readonly sidebar: DebuggerSidebar;
 
-  editor: IEditorTracker;
-  notebook: INotebookTracker;
   previousCell: CodeCell;
 
   dispose(): void {
@@ -49,8 +47,8 @@ export class Debugger extends BoxPanel {
 export namespace Debugger {
   export interface IOptions {
     connector?: IDataConnector<ReadonlyJSONValue>;
-    notebook?: INotebookTracker;
-    editor?: IEditorTracker;
+    noteTracker?: INotebookTracker;
+    editorTracker?: IEditorTracker;
     id?: string;
   }
 
@@ -58,7 +56,7 @@ export namespace Debugger {
     constructor(options: Debugger.Model.IOptions) {
       this.connector = options.connector || null;
       this.id = options.id || UUID.uuid4();
-      this._notebook = options.notebook;
+      this._notebook = options.noteTracker;
       void this._populate();
     }
 

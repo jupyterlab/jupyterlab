@@ -37,7 +37,7 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.IModel }) => {
     <div>
       {breakpoints.map((breakpoint: Breakpoints.IBreakpoint) => (
         <BreakpointComponent
-          key={breakpoint.id}
+          key={breakpoint.line}
           breakpoint={breakpoint}
           breakpointChanged={model.breakpointChanged}
         />
