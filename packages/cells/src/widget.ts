@@ -1041,18 +1041,17 @@ export namespace CodeCell {
       model.outputs.clear();
       return;
     }
-
     let cellId = { cellId: model.id };
     metadata = {
       ...model.metadata.toJSON(),
       ...metadata,
       ...cellId
     };
+    const { recordTiming } = metadata;
     model.executionCount = null;
     cell.outputHidden = false;
     cell.setPrompt('*');
     model.trusted = true;
-
     let future: Kernel.IFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
@@ -1064,10 +1063,49 @@ export namespace CodeCell {
         session,
         metadata
       );
+      // cell.outputArea.future assigned synchronously in `execute`
+      if (recordTiming) {
+        const recordTimingHook = (msg: KernelMessage.IIOPubMessage) => {
+          let label: string;
+          switch (msg.header.msg_type) {
+            case 'status':
+              label = `status.${
+                (msg as KernelMessage.IStatusMsg).content.execution_state
+              }`;
+              break;
+            case 'execute_input':
+              label = 'execute_input';
+              break;
+            default:
+              return;
+          }
+          const value = msg.header.date;
+          if (!value) {
+            return;
+          }
+          const timingInfo: any = model.metadata.get('execution') || {};
+          timingInfo[`iopub.${label}`] = value;
+          model.metadata.set('execution', timingInfo);
+          return true;
+        };
+        cell.outputArea.future.registerMessageHook(recordTimingHook);
+      }
       // Save this execution's future so we can compare in the catch below.
       future = cell.outputArea.future;
       const msg = await msgPromise;
       model.executionCount = msg.content.execution_count;
+      const started = msg.metadata.started as string;
+      if (recordTiming && started) {
+        const timingInfo = (model.metadata.get('execution') as any) || {};
+        if (started) {
+          timingInfo['shell.execute_reply.started'] = started;
+        }
+        const date = msg.header.date as string;
+        if (date) {
+          timingInfo['shell.execute_reply'] = date;
+        }
+        model.metadata.set('execution', timingInfo);
+      }
       return msg;
     } catch (e) {
       // If this is still the current execution, clear the prompt.
