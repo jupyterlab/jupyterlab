@@ -719,14 +719,14 @@ export namespace NotebookActions {
    * Extend the selection to the cell above.
    *
    * @param notebook - The target notebook widget.
-   *
+   * @param toTop - If true, denotes selection to extend till the top.
    * #### Notes
    * This is a no-op if the first cell is the active cell.
    * The new cell will be activated.
    */
   export function extendSelectionAbove(
     notebook: Notebook,
-    toTop: boolean
+    toTop: boolean = false
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -752,14 +752,14 @@ export namespace NotebookActions {
    * Extend the selection to the cell below.
    *
    * @param notebook - The target notebook widget.
-   *
+   * @param toBottom - If true, denotes selection to extend till the bottom.
    * #### Notes
    * This is a no-op if the last cell is the active cell.
    * The new cell will be activated.
    */
   export function extendSelectionBelow(
     notebook: Notebook,
-    toBottom: boolean
+    toBottom: boolean = false
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
