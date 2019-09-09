@@ -724,7 +724,10 @@ export namespace NotebookActions {
    * This is a no-op if the first cell is the active cell.
    * The new cell will be activated.
    */
-  export function extendSelectionAbove(notebook: Notebook): void {
+  export function extendSelectionAbove(
+    notebook: Notebook,
+    toTop: boolean
+  ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -736,7 +739,12 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    notebook.extendContiguousSelectionTo(notebook.activeCellIndex - 1);
+    //Check if toTop is true, if yes, selection is made till top.
+    if (toTop) {
+      notebook.extendContiguousSelectionTo(0);
+    } else {
+      notebook.extendContiguousSelectionTo(notebook.activeCellIndex - 1);
+    }
     Private.handleState(notebook, state, true);
   }
 
@@ -749,7 +757,10 @@ export namespace NotebookActions {
    * This is a no-op if the last cell is the active cell.
    * The new cell will be activated.
    */
-  export function extendSelectionBelow(notebook: Notebook): void {
+  export function extendSelectionBelow(
+    notebook: Notebook,
+    toBottom: boolean
+  ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -761,7 +772,12 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    notebook.extendContiguousSelectionTo(notebook.activeCellIndex + 1);
+    //Check if toBottom is true, if yes selection is made till bottom.
+    if (toBottom) {
+      notebook.extendContiguousSelectionTo(notebook.widgets.length - 1);
+    } else {
+      notebook.extendContiguousSelectionTo(notebook.activeCellIndex + 1);
+    }
     Private.handleState(notebook, state, true);
   }
 

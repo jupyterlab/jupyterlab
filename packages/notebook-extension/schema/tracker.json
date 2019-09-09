@@ -88,8 +88,18 @@
       "selector": ".jp-Notebook:focus"
     },
     {
+      "command": "notebook:extend-marked-cells-top",
+      "keys": ["Shift PageUp"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
       "command": "notebook:extend-marked-cells-below",
       "keys": ["Shift ArrowDown"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:extend-marked-cells-bottom",
+      "keys": ["Shift PageDown"],
       "selector": ".jp-Notebook:focus"
     },
     {
