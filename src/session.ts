@@ -21,13 +21,33 @@ export class DebugSession implements IDebugger.ISession {
    */
   constructor(options: DebugSession.IOptions) {
     this.client = options.client;
-    this.client.iopubMessage.connect(this._handleEvent, this);
+    this.path = this.client.path || '';
+    this.type = this.client.type;
   }
 
   /**
    * The client session to connect to a debugger.
    */
-  client: IClientSession;
+  private _client: IClientSession;
+  type: string;
+  path?: string;
+
+  get client(): IClientSession {
+    return this._client;
+  }
+
+  set client(client: IClientSession | null) {
+    if (this._client === client) {
+      return;
+    }
+
+    if (this._client) {
+      Signal.clearData(this._client);
+    }
+
+    this._client = client;
+    this._client.iopubMessage.connect(this._handleEvent, this);
+  }
 
   /**
    * The code editors in a debugger session.
