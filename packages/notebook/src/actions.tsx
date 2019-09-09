@@ -739,7 +739,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    //Check if toTop is true, if yes, selection is made till top.
+    // Check if toTop is true, if yes, selection is made till top.
     if (toTop) {
       notebook.extendContiguousSelectionTo(0);
     } else {
@@ -772,7 +772,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    //Check if toBottom is true, if yes selection is made till bottom.
+    // Check if toBottom is true, if yes selection is made till bottom.
     if (toBottom) {
       notebook.extendContiguousSelectionTo(notebook.widgets.length - 1);
     } else {
