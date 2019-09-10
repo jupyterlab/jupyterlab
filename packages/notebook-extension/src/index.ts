@@ -1463,7 +1463,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.extendSelectionAbove(current.content, false);
+        return NotebookActions.extendSelectionAbove(current.content);
       }
     },
     isEnabled
@@ -1485,7 +1485,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return NotebookActions.extendSelectionBelow(current.content, false);
+        return NotebookActions.extendSelectionBelow(current.content);
       }
     },
     isEnabled

@@ -719,7 +719,8 @@ export namespace NotebookActions {
    * Extend the selection to the cell above.
    *
    * @param notebook - The target notebook widget.
-   * @param toTop - If true, denotes selection to extend till the top.
+   * @param toTop - If true, denotes selection to extend to the top.
+   *
    * #### Notes
    * This is a no-op if the first cell is the active cell.
    * The new cell will be activated.
@@ -739,7 +740,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    // Check if toTop is true, if yes, selection is made till top.
+    // Check if toTop is true, if yes, selection is made to the top.
     if (toTop) {
       notebook.extendContiguousSelectionTo(0);
     } else {
@@ -752,7 +753,8 @@ export namespace NotebookActions {
    * Extend the selection to the cell below.
    *
    * @param notebook - The target notebook widget.
-   * @param toBottom - If true, denotes selection to extend till the bottom.
+   * @param toBottom - If true, denotes selection to extend to the bottom.
+   *
    * #### Notes
    * This is a no-op if the last cell is the active cell.
    * The new cell will be activated.
@@ -772,7 +774,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     notebook.mode = 'command';
-    // Check if toBottom is true, if yes selection is made till bottom.
+    // Check if toBottom is true, if yes selection is made to the bottom.
     if (toBottom) {
       notebook.extendContiguousSelectionTo(notebook.widgets.length - 1);
     } else {
