@@ -181,13 +181,15 @@ export class IconRegistry implements IIconRegistry {
       .documentElement;
 
     if (svgElement.getElementsByTagName('parsererror').length > 0) {
+      const errmsg = `SVG HTML was malformed for icon name: ${name}`;
       // parse failed, svgElement will be an error box
       if (this._debug) {
         // fail noisily, render the error box
-        console.error(`SVG HTML was malformed for icon name: ${name}`);
+        console.error(errmsg);
         return svgElement;
       } else {
-        // silently fail by returning null
+        // bad svg is always a real error, fail silently but warn
+        console.warn(errmsg);
         return null;
       }
     } else {
