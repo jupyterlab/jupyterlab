@@ -1276,7 +1276,7 @@ export namespace DocumentRegistry {
       displayName: 'JSON File',
       extensions: ['.json'],
       mimeTypes: ['application/json'],
-      iconClass: 'jp-MaterialIcon jp-JSONIcon'
+      iconClass: 'jp-MaterialIcon jp-JsonIcon'
     },
     {
       name: 'csv',
@@ -1304,7 +1304,7 @@ export namespace DocumentRegistry {
       displayName: 'YAML File',
       mimeTypes: ['text/x-yaml', 'text/yaml'],
       extensions: ['.yaml', '.yml'],
-      iconClass: 'jp-MaterialIcon jp-YAMLIcon'
+      iconClass: 'jp-MaterialIcon jp-YamlIcon'
     },
     {
       name: 'svg',
