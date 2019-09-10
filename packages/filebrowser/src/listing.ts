@@ -113,9 +113,14 @@ const NAME_ID_CLASS = 'jp-id-name';
 const MODIFIED_ID_CLASS = 'jp-id-modified';
 
 /**
- * The mime type for a con tents drag object.
+ * The mime type for a contents drag object.
  */
 const CONTENTS_MIME = 'application/x-jupyter-icontents';
+
+/**
+ * The mime type for a rich contents drag object.
+ */
+const CONTENTS_MIME_RICH = 'application/x-jupyter-icontentsrich';
 
 /**
  * The class name added to drop targets.
@@ -740,14 +745,11 @@ export class DirListing extends Widget {
       content.appendChild(node);
     }
 
-    // Remove extra classes/data from the nodes.
+    // Remove extra classes from the nodes.
     nodes.forEach(item => {
       item.classList.remove(SELECTED_CLASS);
       item.classList.remove(RUNNING_CLASS);
       item.classList.remove(CUT_CLASS);
-      if (item.children[0]) {
-        delete (item.children[0] as HTMLElement).dataset.icon;
-      }
     });
 
     // Add extra classes to item nodes based on widget state.
@@ -1158,15 +1160,18 @@ export class DirListing extends Widget {
     let selectedNames = Object.keys(this._selection);
     let source = this._items[index];
     let items = this._sortedItems;
+    let selectedItems: Contents.IModel[];
     let item: Contents.IModel | undefined;
 
     // If the source node is not selected, use just that node.
     if (!source.classList.contains(SELECTED_CLASS)) {
       item = items[index];
       selectedNames = [item.name];
+      selectedItems = [item];
     } else {
       let name = selectedNames[0];
       item = find(items, value => value.name === name);
+      selectedItems = toArray(this.selectedItems());
     }
 
     if (!item) {
@@ -1189,12 +1194,28 @@ export class DirListing extends Widget {
       proposedAction: 'move'
     });
     let basePath = this._model.path;
+
     let paths = toArray(
       map(selectedNames, name => {
         return PathExt.join(basePath, name);
       })
     );
     this._drag.mimeData.setData(CONTENTS_MIME, paths);
+
+    // Add thunks for getting mime data content.
+    // We thunk the content so we don't try to make a network call
+    // when it's not needed. E.g. just moving files around
+    // in a filebrowser
+    let services = this.model.manager.services;
+    for (const item of selectedItems) {
+      this._drag.mimeData.setData(CONTENTS_MIME_RICH, {
+        model: item,
+        withContent: async () => {
+          return await services.contents.get(item.path);
+        }
+      } as DirListing.IContentsThunk);
+    }
+
     if (item && item.type !== 'directory') {
       const otherPaths = paths.slice(1).reverse();
       this._drag.mimeData.setData(FACTORY_MIME, () => {
@@ -1566,6 +1587,25 @@ export namespace DirListing {
   }
 
   /**
+   * A file contents model thunk.
+   *
+   * Note: The content of the model will be empty.
+   * To get the contents, call and await the `withContent`
+   * method.
+   */
+  export interface IContentsThunk {
+    /**
+     * The contents model.
+     */
+    model: Contents.IModel;
+
+    /**
+     * Fetches the model with contents.
+     */
+    withContent: () => Promise<Contents.IModel>;
+  }
+
+  /**
    * The render interface for file browser listing options.
    */
   export interface IRenderer {
@@ -1782,11 +1822,15 @@ export namespace DirListing {
           // add icon as CSS background image. Can't be styled using CSS
           icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
           icon.textContent = fileType.iconLabel || '';
+          // clean up the svg icon annotation, if any
+          delete icon.dataset.icon;
         }
       } else {
         // use default icon as CSS background image
-        icon.textContent = '';
         icon.className = ITEM_ICON_CLASS;
+        icon.textContent = '';
+        // clean up the svg icon annotation, if any
+        delete icon.dataset.icon;
       }
 
       node.title = model.name;

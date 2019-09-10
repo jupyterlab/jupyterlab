@@ -138,6 +138,27 @@ describe('docregistry/registry', () => {
         disposable.dispose();
         expect(registry.getWidgetFactory('test')).to.be.undefined;
       });
+
+      it('should throw for an invalid factory name', () => {
+        expect(() => {
+          registry.addWidgetFactory(
+            new WidgetFactory({
+              name: 'default',
+              fileTypes: [],
+              defaultFor: []
+            })
+          );
+        }).to.throw(/Invalid/);
+        expect(() => {
+          registry.addWidgetFactory(
+            new WidgetFactory({
+              name: '',
+              fileTypes: [],
+              defaultFor: []
+            })
+          );
+        }).to.throw(/Invalid/);
+      });
     });
 
     describe('#addModelFactory()', () => {
@@ -350,6 +371,70 @@ describe('docregistry/registry', () => {
         expect(registry.defaultWidgetFactory('a.foo.bar')).to.equal(factory);
         expect(registry.defaultWidgetFactory('a.md')).to.equal(mdFactory);
         expect(registry.defaultWidgetFactory()).to.equal(gFactory);
+      });
+    });
+
+    describe('#setDefaultWidgetFactory()', () => {
+      it('should override the default widget factory for a file type', () => {
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown', 'foobar'],
+          defaultFor: []
+        });
+        registry.addWidgetFactory(mdFactory);
+        registry.setDefaultWidgetFactory('foobar', 'markdown');
+        expect(registry.defaultWidgetFactory('a.foo.bar')).to.equal(mdFactory);
+      });
+
+      it('should revert to the default widget factory when unset', () => {
+        const factory = createFactory();
+        registry.addWidgetFactory(factory);
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown', 'foobar'],
+          defaultFor: []
+        });
+        registry.addWidgetFactory(mdFactory);
+        registry.setDefaultWidgetFactory('foobar', 'markdown');
+        registry.setDefaultWidgetFactory('foobar', undefined);
+        expect(registry.defaultWidgetFactory('a.foo.bar')).to.equal(factory);
+      });
+
+      it('should throw if the factory or file type do not exist', () => {
+        const factory = createFactory();
+        registry.addWidgetFactory(factory);
+        expect(() => {
+          registry.setDefaultWidgetFactory('foobar', 'fake');
+        }).to.throw(/Cannot find/);
+        expect(() => {
+          registry.setDefaultWidgetFactory('fake', undefined);
+        }).to.throw(/Cannot find/);
+      });
+
+      it('should throw if the factory cannot render a file type', () => {
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown'],
+          defaultFor: []
+        });
+        registry.addWidgetFactory(mdFactory);
+        expect(() => {
+          registry.setDefaultWidgetFactory('foobar', 'markdown');
+        }).to.throw(/cannot view/);
+      });
+
+      it('should revert to the default widget factory if the override is removed', () => {
+        const factory = createFactory();
+        registry.addWidgetFactory(factory);
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown', 'foobar'],
+          defaultFor: []
+        });
+        const disposable = registry.addWidgetFactory(mdFactory);
+        registry.setDefaultWidgetFactory('foobar', 'markdown');
+        disposable.dispose();
+        expect(registry.defaultWidgetFactory('a.foo.bar')).to.equal(factory);
       });
     });
 

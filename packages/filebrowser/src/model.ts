@@ -23,7 +23,8 @@ import {
   find,
   IIterator,
   IterableOrArrayLike,
-  ArrayExt
+  ArrayExt,
+  filter
 } from '@phosphor/algorithm';
 
 import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
@@ -669,6 +670,49 @@ export namespace FileBrowserModel {
      * folder was last opened when it is restored.
      */
     state?: IStateDB;
+  }
+}
+
+/**
+ * File browser model with optional filter on element.
+ */
+export class FilterFileBrowserModel extends FileBrowserModel {
+  constructor(options: FilterFileBrowserModel.IOptions) {
+    super(options);
+
+    this._filter = options.filter ? options.filter : model => true;
+  }
+
+  /**
+   * Create an iterator over the filtered model's items.
+   *
+   * @returns A new iterator over the model's items.
+   */
+  items(): IIterator<Contents.IModel> {
+    return filter(super.items(), (value, index) => {
+      if (value.type === 'directory') {
+        return true;
+      } else {
+        return this._filter(value);
+      }
+    });
+  }
+
+  private _filter: (value: Contents.IModel) => boolean;
+}
+
+/**
+ * Namespace for the filtered file browser model
+ */
+export namespace FilterFileBrowserModel {
+  /**
+   * Constructor options
+   */
+  export interface IOptions extends FileBrowserModel.IOptions {
+    /**
+     * Filter function on file browser item model
+     */
+    filter?: (value: Contents.IModel) => boolean;
   }
 }
 

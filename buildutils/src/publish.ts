@@ -4,6 +4,8 @@
 |----------------------------------------------------------------------------*/
 
 import commander from 'commander';
+import * as crypto from 'crypto';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 import { handlePackage } from './update-dist-tag';
 import * as utils from './utils';
@@ -55,13 +57,29 @@ commander
     utils.run('python -m pip install -U twine');
     utils.run('twine check dist/*');
 
+    const files = fs.readdirSync('./dist/');
+    const hashes = new Map<string, string>();
+    files.forEach(file => {
+      const shasum = crypto.createHash('sha256');
+      const hash = shasum.update(fs.readFileSync('./dist/' + file));
+      hashes.set(file, hash.digest('hex'));
+    });
+
+    const hashString = Array.from(hashes.entries())
+      .map(entry => `${entry[0]}: ${entry[1]}`)
+      .join('" -m "');
+
     // Prompt the user to finalize.
+    console.log('*'.repeat(40));
     console.log('*'.repeat(40));
     console.log('Ready to publish!');
     console.log('Run these command when ready:');
+    console.log(
+      `git commit -am "Publish ${curr}" -m "SHA256 hashes:" -m "${hashString}"`
+    );
     console.log(`git tag v${curr}`);
-    console.log(`git commit -am "Publish ${curr}"`);
     console.log('twine upload dist/*');
+    console.log('git push origin <BRANCH> --tags');
   });
 
 commander.parse(process.argv);

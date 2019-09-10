@@ -3,6 +3,7 @@
   "description": "Document Manager settings.",
   "jupyter.lab.setting-icon-class": "jp-FileIcon",
   "jupyter.lab.setting-icon-label": "Document Manager",
+  "jupyter.lab.transform": true,
   "jupyter.lab.shortcuts": [
     {
       "command": "docmanager:save",
@@ -27,6 +28,16 @@
       "title": "Autosave Interval",
       "description": "Length of save interval in seconds",
       "default": 120
+    },
+    "defaultViewers": {
+      "type": "object",
+      "title": "Default Viewers",
+      "default": {},
+      "description": "Overrides for the default viewers for file types",
+      "properties": {},
+      "additionalProperties": {
+        "type": "string"
+      }
     }
   },
   "additionalProperties": false,

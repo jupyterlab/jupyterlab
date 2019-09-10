@@ -9,7 +9,8 @@ var Handlebars = require('handlebars');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
 var DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
-var Visualizer = require('webpack-visualizer-plugin');
+var BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
+  .BundleAnalyzerPlugin;
 
 var Build = require('@jupyterlab/buildutils').Build;
 var WPPlugin = require('@jupyterlab/buildutils').WPPlugin;
@@ -138,7 +139,7 @@ const plugins = [
 ];
 
 if (process.argv.includes('--analyze')) {
-  plugins.push(new Visualizer());
+  plugins.push(new BundleAnalyzerPlugin());
 }
 
 module.exports = [

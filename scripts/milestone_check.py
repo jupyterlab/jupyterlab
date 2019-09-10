@@ -15,12 +15,13 @@ except KeyError:
   print('Error: set the environment variable GITHUB_TOKEN to a GitHub authentication token (see https://github.com/settings/tokens)')
   exit(1)
 
-MILESTONE='1.0'
+MILESTONE='1.1'
 
 ranges = {
     18: 'origin/0.35.0 --not origin/0.34.x', #0.35.0
     20: 'origin/0.35.x --not v0.35.0', #0.35.x
-    '1.0': 'origin/master --not origin/0.35.x',
+    '1.0': 'origin/1.0.x --not origin/0.35.x',
+    '1.1': 'origin/master --not origin/1.0.x'
 }
 
 out = subprocess.run("git log {} --format='%H,%cE,%s'".format(ranges[MILESTONE]), shell=True, encoding='utf8', stdout=subprocess.PIPE)

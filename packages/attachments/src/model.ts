@@ -67,6 +67,14 @@ export interface IAttachmentsModel extends IDisposable {
    */
   set(key: string, attachment: nbformat.IMimeBundle): void;
 
+  // TODO: This is marked optional so as to be non-breaking for 1.x
+  // Make this property mandatory for 2.0
+  /**
+   * Remove the attachment whose name is the specified key.
+   * Note that this is optional only until Jupyterlab 2.0 release.
+   */
+  remove?: (key: string) => void;
+
   /**
    * Clear all of the attachments.
    */
@@ -232,6 +240,13 @@ export class AttachmentsModel implements IAttachmentsModel {
     // Normalize stream data.
     let item = this._createItem({ value });
     this._map.set(key, item);
+  }
+
+  /**
+   * Remove the attachment whose name is the specified key
+   */
+  remove(key: string): void {
+    this._map.delete(key);
   }
 
   /**

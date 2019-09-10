@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/nbconvert-css",
-  "version": "0.2.0-alpha.2",
+  "version": "0.3.0-alpha.0",
   "description": "CSS bundle for the JupyterLab nbconvert template",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,20 +34,20 @@
     "watch": "webpack --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^1.1.0-alpha.2",
-    "@jupyterlab/cells": "^1.1.0-alpha.2",
-    "@jupyterlab/codemirror": "^1.1.0-alpha.2",
-    "@jupyterlab/notebook": "^1.1.0-alpha.2",
-    "@jupyterlab/outputarea": "^1.1.0-alpha.2",
-    "@jupyterlab/rendermime": "^1.1.0-alpha.2"
+    "@jupyterlab/apputils": "^1.2.0-alpha.0",
+    "@jupyterlab/cells": "^1.2.0-alpha.0",
+    "@jupyterlab/codemirror": "^1.2.0-alpha.0",
+    "@jupyterlab/notebook": "^1.2.0-alpha.0",
+    "@jupyterlab/outputarea": "^1.2.0-alpha.0",
+    "@jupyterlab/rendermime": "^1.2.0-alpha.0"
   },
   "devDependencies": {
-    "@jupyterlab/apputils": "^1.1.0-alpha.2",
-    "@jupyterlab/cells": "^1.1.0-alpha.2",
-    "@jupyterlab/codemirror": "^1.1.0-alpha.2",
-    "@jupyterlab/notebook": "^1.1.0-alpha.2",
-    "@jupyterlab/outputarea": "^1.1.0-alpha.2",
-    "@jupyterlab/rendermime": "^1.1.0-alpha.2",
+    "@jupyterlab/apputils": "^1.2.0-alpha.0",
+    "@jupyterlab/cells": "^1.2.0-alpha.0",
+    "@jupyterlab/codemirror": "^1.2.0-alpha.0",
+    "@jupyterlab/notebook": "^1.2.0-alpha.0",
+    "@jupyterlab/outputarea": "^1.2.0-alpha.0",
+    "@jupyterlab/rendermime": "^1.2.0-alpha.0",
     "css-loader": "~2.1.1",
     "file-loader": "~3.0.1",
     "mini-css-extract-plugin": "~0.6.0",

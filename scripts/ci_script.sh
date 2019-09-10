@@ -121,25 +121,25 @@ if [[ $GROUP == usage ]]; then
     jlpm run test:examples
 
     # Test the cli apps.
-    jupyter lab clean
-    jupyter lab build
-    jupyter lab path
+    jupyter lab clean --debug
+    jupyter lab build --debug
+    jupyter lab path --debug
     pushd jupyterlab/tests/mock_packages
-    jupyter labextension link extension --no-build
-    jupyter labextension unlink extension --no-build
-    jupyter labextension link extension --no-build
-    jupyter labextension unlink  @jupyterlab/mock-extension --no-build
-    jupyter labextension install extension  --no-build
-    jupyter labextension list
-    jupyter labextension disable @jupyterlab/mock-extension
-    jupyter labextension enable @jupyterlab/mock-extension
-    jupyter labextension disable @jupyterlab/notebook-extension
-    jupyter labextension uninstall @jupyterlab/mock-extension --no-build
-    jupyter labextension uninstall @jupyterlab/notebook-extension --no-build
+    jupyter labextension link extension --no-build --debug
+    jupyter labextension unlink extension --no-build --debug
+    jupyter labextension link extension --no-build --debug
+    jupyter labextension unlink  @jupyterlab/mock-extension --no-build --debug
+    jupyter labextension install extension  --no-build --debug
+    jupyter labextension list --debug
+    jupyter labextension disable @jupyterlab/mock-extension --debug
+    jupyter labextension enable @jupyterlab/mock-extension --debug
+    jupyter labextension disable @jupyterlab/notebook-extension --debug
+    jupyter labextension uninstall @jupyterlab/mock-extension --no-build --debug
+    jupyter labextension uninstall @jupyterlab/notebook-extension --no-build --debug
     popd
-    jupyter lab workspaces export > workspace.json
-    jupyter lab workspaces import --name newspace workspace.json
-    jupyter lab workspaces export newspace > newspace.json
+    jupyter lab workspaces export > workspace.json --debug
+    jupyter lab workspaces import --name newspace workspace.json --debug
+    jupyter lab workspaces export newspace > newspace.json --debug
     rm workspace.json newspace.json
 
     # Make sure we can call help on all the cli apps.
@@ -206,9 +206,9 @@ if [[ $GROUP == usage ]]; then
     python -m jupyterlab.browser_check --core-mode
 
     # Make sure we can run the built app.
-    jupyter labextension install ./jupyterlab/tests/mock_packages/extension
+    jupyter labextension install ./jupyterlab/tests/mock_packages/extension --debug
     python -m jupyterlab.browser_check
-    jupyter labextension list
+    jupyter labextension list --debug
 
     # Make sure the deprecated `selenium_check` command still works
     python -m jupyterlab.selenium_check

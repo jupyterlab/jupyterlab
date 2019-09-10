@@ -15,7 +15,8 @@ from tornado import gen, web
 from ..commands import (
     get_app_info, install_extension, uninstall_extension,
     enable_extension, disable_extension, read_package,
-    _AppHandler, get_latest_compatible_package_versions
+    _AppHandler, get_latest_compatible_package_versions,
+    AppOptions, _ensure_options
 )
 
 
@@ -37,9 +38,9 @@ def _make_extension_entry(name, description, url, enabled, core, latest_version,
     return ret
 
 
-def _ensure_compat_errors(info, app_dir, logger):
+def _ensure_compat_errors(info, app_options):
     """Ensure that the app info has compat_errors field"""
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_options)
     info['compat_errors'] = handler._get_extension_compat()
 
 
@@ -49,9 +50,9 @@ _message_map = {
     'update': re.compile(r'(?P<name>.*) changed from (?P<oldver>.*) to (?P<newver>.*)'),
 }
 
-def _build_check_info(app_dir, logger):
+def _build_check_info(app_options):
     """Get info about packages scheduled for (un)install/update"""
-    handler = _AppHandler(app_dir, logger)
+    handler = _AppHandler(app_options)
     messages = handler.build_check(fast=True)
     # Decode the messages into a dict:
     status = {'install': [], 'uninstall': [], 'update': []}
@@ -66,10 +67,13 @@ def _build_check_info(app_dir, logger):
 class ExtensionManager(object):
     executor = ThreadPoolExecutor(max_workers=1)
 
-    def __init__(self, log, app_dir, core_config=None):
-        self.log = log
-        self.app_dir = app_dir
-        self.core_config = core_config
+    # TODO 2.0: Clean up signature to (self, app_options=None)
+    def __init__(self, log=None, app_dir=None, core_config=None, app_options=None):
+        app_options = _ensure_options(app_options, logger=log, app_dir=app_dir, core_config=core_config)
+        self.log = app_options.logger
+        self.app_dir = app_options.app_dir
+        self.core_config = app_options.core_config
+        self.app_options = app_options
         self._outdated = None
         # To start fetching data on outdated extensions immediately, uncomment:
         # IOLoop.current().spawn_callback(self._get_outdated)
@@ -77,9 +81,10 @@ class ExtensionManager(object):
     @gen.coroutine
     def list_extensions(self):
         """Handle a request for all installed extensions"""
-        info = get_app_info(app_dir=self.app_dir, logger=self.log)
-        build_check_info = _build_check_info(self.app_dir, self.log)
-        _ensure_compat_errors(info, self.app_dir, self.log)
+        app_options = self.app_options
+        info = get_app_info(app_options=app_options)
+        build_check_info = _build_check_info(app_options)
+        _ensure_compat_errors(info, app_options)
         extensions = []
         # TODO: Ensure loops can run in parallel
         for name, data in info['extensions'].items():
@@ -123,9 +128,7 @@ class ExtensionManager(object):
     def install(self, extension):
         """Handle an install/update request"""
         try:
-            install_extension(
-                extension, app_dir=self.app_dir, logger=self.log,
-                core_config=self.core_config)
+            install_extension(extension, app_options=self.app_options)
         except ValueError as e:
             raise gen.Return(dict(status='error', message=str(e)))
         raise gen.Return(dict(status='ok',))
@@ -134,24 +137,19 @@ class ExtensionManager(object):
     def uninstall(self, extension):
         """Handle an uninstall request"""
         did_uninstall = uninstall_extension(
-            extension, app_dir=self.app_dir, logger=self.log,
-            core_config=self.core_config)
+            extension, app_options=self.app_options)
         raise gen.Return(dict(status='ok' if did_uninstall else 'error',))
 
     @gen.coroutine
     def enable(self, extension):
         """Handle an enable request"""
-        enable_extension(
-            extension, app_dir=self.app_dir, logger=self.log,
-            core_config=self.core_config)
+        enable_extension(extension, app_options=self.app_options)
         raise gen.Return(dict(status='ok',))
 
     @gen.coroutine
     def disable(self, extension):
         """Handle a disable request"""
-        disable_extension(
-            extension, app_dir=self.app_dir, logger=self.log,
-            core_config=self.core_config)
+        disable_extension(extension, app_options=self.app_options)
         raise gen.Return(dict(status='ok',))
 
     @gen.coroutine
@@ -189,14 +187,12 @@ class ExtensionManager(object):
     @gen.coroutine
     def _load_outdated(self):
         """Get the latest compatible version"""
-        info = get_app_info(app_dir=self.app_dir, logger=self.log)
+        info = get_app_info(app_options=self.app_options)
         names = tuple(info['extensions'].keys())
         data = yield self.executor.submit(
             get_latest_compatible_package_versions,
             names,
-            app_dir=self.app_dir,
-            logger=self.log,
-            core_config=self.core_config,
+            app_options=self.app_options
         )
         raise gen.Return(data)
 

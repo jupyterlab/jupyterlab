@@ -30,13 +30,13 @@ jobs:
         displayName: 'install'
         inputs:
           targetType: 'filePath'
-          filePath: ./scripts/travis_install.sh
+          filePath: ./scripts/ci_install.sh
       - script: python -m pip install virtualenv
       - task: Bash@3
         displayName: 'script'
         inputs:
           targetType: 'filePath'
-          filePath: ./scripts/travis_script.sh
+          filePath: ./scripts/ci_script.sh
       - task: PublishTestResults@2
         displayName: 'publish test results'
         condition: variables['testResultsFiles']
@@ -44,11 +44,6 @@ jobs:
           testResultsFiles: '$(testResultsFiles)'
           testRunTitle: 'Linux - $(group)'
           mergeTestResults: true
-      - task: Bash@3
-        displayName: 'after_success'
-        inputs:
-          targetType: 'filePath'
-          filePath: ./scripts/travis_after_success.sh
 
   - job: 'Windows'
     pool:
