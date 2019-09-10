@@ -55,14 +55,18 @@ export class IconRegistry implements IIconRegistry {
 
     // we may have been handed a className in place of name
     let resolvedName = this.resolveName(name);
-    if (
-      !resolvedName ||
-      (container &&
-        container.dataset.icon &&
-        container.dataset.icon === resolvedName)
-    ) {
+    if (!resolvedName) {
       // bail if failing silently or icon node is already set
       return null;
+    }
+    if (
+      container &&
+      container.dataset.icon &&
+      container.dataset.icon === resolvedName &&
+      container.children[0]
+    ) {
+      // return the existing icon node
+      return container.children[0] as HTMLElement;
     }
 
     // ensure that svg html is valid
@@ -128,6 +132,7 @@ export class IconRegistry implements IIconRegistry {
     return (
       <Tag
         className={classes(className, propsStyle ? iconStyle(propsStyle) : '')}
+        data-icon={resolvedName}
         dangerouslySetInnerHTML={{
           __html: svgElement.outerHTML
         }}
