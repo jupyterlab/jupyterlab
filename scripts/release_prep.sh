@@ -13,7 +13,7 @@ else
     conda deactivate
     conda remove --all -y -n jlabrelease_$branch
 
-    conda create -c conda-forge -y -n $env notebook nodejs twine
+    conda create --override-channels --strict-channel-priority -c conda-forge -c anaconda -y -n $env notebook nodejs twine
     conda activate $env
 
     git clone https://github.com/jupyterlab/jupyterlab.git

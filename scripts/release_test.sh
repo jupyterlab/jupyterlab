@@ -6,7 +6,7 @@ env=${CONDA_DEFAULT_ENV}_test
 conda deactivate
 conda remove --all -y -n $env
 
-conda create -c conda-forge -y -n $env notebook nodejs twine
+conda create --override-channels --strict-channel-priority -c conda-forge -c anaconda -y -n $env notebook nodejs twine
 conda activate $env
 
 pip install dist/*.whl
@@ -27,7 +27,7 @@ jupyter labextension install bqplot --no-build
 jupyter labextension install jupyter-leaflet --no-build
 jupyter lab clean
 
-conda install -c conda-forge -y ipywidgets altair matplotlib vega_datasets
+conda install --override-channels --strict-channel-priority -c conda-forge -c anaconda -y ipywidgets altair matplotlib vega_datasets
 jupyter lab build && python -m jupyterlab.browser_check && jupyter lab
 
 
