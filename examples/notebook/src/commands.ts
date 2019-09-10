@@ -166,7 +166,7 @@ export const SetupCommands = (
   });
   commands.addCommand(cmdIds.extendAbove, {
     label: 'Extend Above',
-    execute: () => NotebookActions.extendSelectionAbove(nbWidget.content, false)
+    execute: () => NotebookActions.extendSelectionAbove(nbWidget.content)
   });
   commands.addCommand(cmdIds.extendTop, {
     label: 'Extend to Top',
@@ -174,7 +174,7 @@ export const SetupCommands = (
   });
   commands.addCommand(cmdIds.extendBelow, {
     label: 'Extend Below',
-    execute: () => NotebookActions.extendSelectionBelow(nbWidget.content, false)
+    execute: () => NotebookActions.extendSelectionBelow(nbWidget.content)
   });
   commands.addCommand(cmdIds.extendBottom, {
     label: 'Extend to Bottom',
