@@ -99,21 +99,23 @@ const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
         return app.serviceManager.settings.fetch(id);
       }
 
-      async list(): Promise<{
-        ids: string[];
-        values: ISettingRegistry.IPlugin[];
-      }> {
-        const { ids, values } = await app.serviceManager.settings.list();
+      async list(
+        query: 'active' | 'all' = 'all'
+      ): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }> {
+        const { isDeferred, isDisabled } = PageConfig.Extension;
+        let { ids, values } = await app.serviceManager.settings.list();
+
+        if (query === 'all') {
+          return { ids, values };
+        }
 
         return {
-          ids: ids.filter(id => !PageConfig.Extension.isDisabled(id)),
-          values: values.filter(
-            ({ id }) => !PageConfig.Extension.isDisabled(id)
-          )
+          ids: ids.filter(id => !isDeferred(id) && !isDisabled(id)),
+          values: values.filter(({ id }) => !isDeferred(id) && !isDisabled(id))
         };
       }
     })();
-    const plugins = (await connector.list()).values;
+    const plugins = (await connector.list('active')).values;
 
     return new SettingRegistry({ connector, plugins });
   },
