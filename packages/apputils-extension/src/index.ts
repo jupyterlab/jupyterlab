@@ -91,6 +91,7 @@ const paletteRestorer: JupyterFrontEndPlugin<void> = {
 const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
   activate: async (app: JupyterFrontEnd): Promise<ISettingRegistry> => {
+    const { isDeferred, isDisabled } = PageConfig.Extension;
     const connector = new (class SettingConnector extends DataConnector<
       ISettingRegistry.IPlugin,
       string
@@ -102,7 +103,6 @@ const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
       async list(
         query: 'active' | 'all' = 'all'
       ): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }> {
-        const { isDeferred, isDisabled } = PageConfig.Extension;
         let { ids, values } = await app.serviceManager.settings.list();
 
         if (query === 'all') {
@@ -115,9 +115,24 @@ const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
         };
       }
     })();
-    const plugins = (await connector.list('active')).values;
 
-    return new SettingRegistry({ connector, plugins });
+    // If there are deferred plugins that have settings schemas, do not stall
+    // returning the setting registry for them; load them manually after the
+    // application has restored in order to make sure their settings exist in
+    // the setting registry, even if nothing else has activated them.
+    void app.restored.then(async () => {
+      const plugins = await connector.list('all');
+      plugins.ids.forEach(id => {
+        if (isDeferred(id) && !isDisabled(id)) {
+          void app.activatePlugin(id);
+        }
+      });
+    });
+
+    return new SettingRegistry({
+      connector,
+      plugins: (await connector.list('active')).values
+    });
   },
   autoStart: true,
   provides: ISettingRegistry
