@@ -912,26 +912,32 @@ describe('@jupyterlab/notebook', () => {
     describe('#extendSelectionAbove()', () => {
       it('should extend the selection to the cell above', () => {
         widget.activeCellIndex = 1;
-        NotebookActions.extendSelectionAbove(widget, false);
+        NotebookActions.extendSelectionAbove(widget);
+        expect(widget.isSelected(widget.widgets[0])).to.equal(true);
+      });
+
+      it('should extend the selection to the topmost cell', () => {
+        widget.activeCellIndex = 1;
+        NotebookActions.extendSelectionAbove(widget, true);
         expect(widget.isSelected(widget.widgets[0])).to.equal(true);
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
-        NotebookActions.extendSelectionAbove(widget, false);
+        NotebookActions.extendSelectionAbove(widget);
         expect(widget.activeCellIndex).to.equal(-1);
       });
 
       it('should change to command mode if there is a selection', () => {
         widget.mode = 'edit';
         widget.activeCellIndex = 1;
-        NotebookActions.extendSelectionAbove(widget, false);
+        NotebookActions.extendSelectionAbove(widget);
         expect(widget.mode).to.equal('command');
       });
 
       it('should not wrap around to the bottom', () => {
         widget.mode = 'edit';
-        NotebookActions.extendSelectionAbove(widget, false);
+        NotebookActions.extendSelectionAbove(widget);
         expect(widget.activeCellIndex).to.equal(0);
         const last = widget.widgets[widget.widgets.length - 1];
         expect(widget.isSelected(last)).to.equal(false);
@@ -939,44 +945,49 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should deselect the current cell if the cell above is selected', () => {
-        NotebookActions.extendSelectionBelow(widget, false);
-        NotebookActions.extendSelectionBelow(widget, false);
+        NotebookActions.extendSelectionBelow(widget);
+        NotebookActions.extendSelectionBelow(widget);
         const cell = widget.activeCell;
-        NotebookActions.extendSelectionAbove(widget, false);
+        NotebookActions.extendSelectionAbove(widget);
         expect(widget.isSelected(cell)).to.equal(false);
       });
 
       it('should select only the first cell if we move from the second to first', () => {
-        NotebookActions.extendSelectionBelow(widget, false);
+        NotebookActions.extendSelectionBelow(widget);
         const cell = widget.activeCell;
-        NotebookActions.extendSelectionAbove(widget, false);
+        NotebookActions.extendSelectionAbove(widget);
         expect(widget.isSelected(cell)).to.equal(false);
         expect(widget.activeCellIndex).to.equal(0);
       });
 
       it('should activate the cell', () => {
         widget.activeCellIndex = 1;
-        NotebookActions.extendSelectionAbove(widget, false);
+        NotebookActions.extendSelectionAbove(widget);
         expect(widget.activeCellIndex).to.equal(0);
       });
     });
 
     describe('#extendSelectionBelow()', () => {
       it('should extend the selection to the cell below', () => {
-        NotebookActions.extendSelectionBelow(widget, false);
+        NotebookActions.extendSelectionBelow(widget);
         expect(widget.isSelected(widget.widgets[0])).to.equal(true);
         expect(widget.isSelected(widget.widgets[1])).to.equal(true);
       });
 
+      it('should extend the selection the bottomost cell', () => {
+        NotebookActions.extendSelectionBelow(widget, true);
+        expect(widget.isSelected(widget.widgets[0])).to.equal(true);
+        expect(widget.isSelected(widget.widgets[1])).to.equal(true);
+      });
       it('should be a no-op if there is no model', () => {
         widget.model = null;
-        NotebookActions.extendSelectionBelow(widget, false);
+        NotebookActions.extendSelectionBelow(widget);
         expect(widget.activeCellIndex).to.equal(-1);
       });
 
       it('should change to command mode if there is a selection', () => {
         widget.mode = 'edit';
-        NotebookActions.extendSelectionBelow(widget, false);
+        NotebookActions.extendSelectionBelow(widget);
         expect(widget.mode).to.equal('command');
       });
 
@@ -984,7 +995,7 @@ describe('@jupyterlab/notebook', () => {
         const last = widget.widgets.length - 1;
         widget.activeCellIndex = last;
         widget.mode = 'edit';
-        NotebookActions.extendSelectionBelow(widget, false);
+        NotebookActions.extendSelectionBelow(widget);
         expect(widget.activeCellIndex).to.equal(last);
         expect(widget.isSelected(widget.widgets[0])).to.equal(false);
         expect(widget.mode).to.equal('edit');
@@ -993,25 +1004,25 @@ describe('@jupyterlab/notebook', () => {
       it('should deselect the current cell if the cell below is selected', () => {
         const last = widget.widgets.length - 1;
         widget.activeCellIndex = last;
-        NotebookActions.extendSelectionAbove(widget, false);
-        NotebookActions.extendSelectionAbove(widget, false);
+        NotebookActions.extendSelectionAbove(widget);
+        NotebookActions.extendSelectionAbove(widget);
         const current = widget.activeCell;
-        NotebookActions.extendSelectionBelow(widget, false);
+        NotebookActions.extendSelectionBelow(widget);
         expect(widget.isSelected(current)).to.equal(false);
       });
 
       it('should select only the last cell if we move from the second last to last', () => {
         const last = widget.widgets.length - 1;
         widget.activeCellIndex = last;
-        NotebookActions.extendSelectionAbove(widget, false);
+        NotebookActions.extendSelectionAbove(widget);
         const current = widget.activeCell;
-        NotebookActions.extendSelectionBelow(widget, false);
+        NotebookActions.extendSelectionBelow(widget);
         expect(widget.isSelected(current)).to.equal(false);
         expect(widget.activeCellIndex).to.equal(last);
       });
 
       it('should activate the cell', () => {
-        NotebookActions.extendSelectionBelow(widget, false);
+        NotebookActions.extendSelectionBelow(widget);
         expect(widget.activeCellIndex).to.equal(1);
       });
     });
@@ -1019,7 +1030,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#moveUp()', () => {
       it('should move the selected cells up', () => {
         widget.activeCellIndex = 2;
-        NotebookActions.extendSelectionAbove(widget, false);
+        NotebookActions.extendSelectionAbove(widget);
         NotebookActions.moveUp(widget);
         expect(widget.isSelected(widget.widgets[0])).to.equal(true);
         expect(widget.isSelected(widget.widgets[1])).to.equal(true);
@@ -1051,7 +1062,7 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#moveDown()', () => {
       it('should move the selected cells down', () => {
-        NotebookActions.extendSelectionBelow(widget, false);
+        NotebookActions.extendSelectionBelow(widget);
         NotebookActions.moveDown(widget);
         expect(widget.isSelected(widget.widgets[0])).to.equal(false);
         expect(widget.isSelected(widget.widgets[1])).to.equal(true);
