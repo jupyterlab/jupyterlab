@@ -374,7 +374,7 @@ export class Context<T extends DocumentRegistry.IModel>
       // we should update `foo/test` to `bar/test` as well
 
       if (oldPath !== this._path) {
-        newPath = this._path.replace(new RegExp(`^${oldPath}/`), newPath + '/');
+        newPath = this._path.replace(new RegExp(`^${oldPath}/`), `${newPath}/`);
         oldPath = this._path;
 
         // Update client file model from folder change
