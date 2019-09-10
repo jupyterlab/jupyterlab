@@ -42,6 +42,7 @@ export class TabBarSvg<T> extends TabBar<T> {
         defaultIconRegistry.icon({
           name: title.iconClass,
           className: '',
+          title: title.iconLabel,
           container: iconNode,
           center: true,
           kind: this._kind
