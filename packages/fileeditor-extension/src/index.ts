@@ -36,7 +36,9 @@ import { JSONObject } from '@phosphor/coreutils';
 
 import { Menu } from '@phosphor/widgets';
 
-import Commands, { EDITOR_ICON_CLASS, FACTORY } from './commands';
+import { Commands, EDITOR_ICON_CLASS, FACTORY } from './commands';
+
+export { Commands } from './commands';
 
 /**
  * The editor tracker extension.

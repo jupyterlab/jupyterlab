@@ -85,11 +85,11 @@ export const FACTORY = 'Editor';
  * A utility class for adding commands and menu items,
  * for use by the File Editor extension or other Editor extensions.
  */
-export default class Commands {
+export namespace Commands {
   /**
    * Accessor function that returns the createConsole function for use by Create Console commands
    */
-  private static getCreateConsoleFunction(
+  function getCreateConsoleFunction(
     commands: CommandRegistry
   ): (
     widget: IDocumentWidget<FileEditor>,
@@ -119,7 +119,7 @@ export default class Commands {
   /**
    * Wrapper function for adding the default File Editor commands
    */
-  static addCommands(
+  export function addCommands(
     commands: CommandRegistry,
     config: CodeEditor.IConfig,
     settingRegistry: ISettingRegistry,
@@ -129,49 +129,37 @@ export default class Commands {
     browserFactory: IFileBrowserFactory
   ) {
     // Add a command to change font size.
-    this.addChangeFontSizeCommand(commands, config, settingRegistry, id);
+    addChangeFontSizeCommand(commands, config, settingRegistry, id);
 
-    this.addLineNumbersCommand(
-      commands,
-      config,
-      settingRegistry,
-      id,
-      isEnabled
-    );
+    addLineNumbersCommand(commands, config, settingRegistry, id, isEnabled);
 
-    this.addWordWrapCommand(commands, config, settingRegistry, id, isEnabled);
+    addWordWrapCommand(commands, config, settingRegistry, id, isEnabled);
 
-    this.addChangeTabsCommand(commands, config, settingRegistry, id);
+    addChangeTabsCommand(commands, config, settingRegistry, id);
 
-    this.addMatchBracketsCommand(
-      commands,
-      config,
-      settingRegistry,
-      id,
-      isEnabled
-    );
+    addMatchBracketsCommand(commands, config, settingRegistry, id, isEnabled);
 
-    this.addAutoClosingBracketsCommand(commands, config, settingRegistry, id);
+    addAutoClosingBracketsCommand(commands, config, settingRegistry, id);
 
-    this.addCreateConsoleCommand(commands, tracker, isEnabled);
+    addCreateConsoleCommand(commands, tracker, isEnabled);
 
-    this.addRunCodeCommand(commands, tracker, isEnabled);
+    addRunCodeCommand(commands, tracker, isEnabled);
 
-    this.addRunAllCodeCommand(commands, tracker, isEnabled);
+    addRunAllCodeCommand(commands, tracker, isEnabled);
 
-    this.addMarkdownPreviewCommand(commands, tracker);
+    addMarkdownPreviewCommand(commands, tracker);
 
     // Add a command for creating a new text file.
-    this.addCreateNewCommand(commands, browserFactory);
+    addCreateNewCommand(commands, browserFactory);
 
     // Add a command for creating a new Markdown file.
-    this.addCreateNewMarkdownCommand(commands, browserFactory);
+    addCreateNewMarkdownCommand(commands, browserFactory);
   }
 
   /**
    * Add a command to change font size for File Editor
    */
-  static addChangeFontSizeCommand(
+  export function addChangeFontSizeCommand(
     commands: CommandRegistry,
     config: CodeEditor.IConfig,
     settingRegistry: ISettingRegistry,
@@ -206,7 +194,7 @@ export default class Commands {
   /**
    * Add the Line Numbers command
    */
-  static addLineNumbersCommand(
+  export function addLineNumbersCommand(
     commands: CommandRegistry,
     config: CodeEditor.IConfig,
     settingRegistry: ISettingRegistry,
@@ -231,7 +219,7 @@ export default class Commands {
   /**
    * Add the Word Wrap command
    */
-  static addWordWrapCommand(
+  export function addWordWrapCommand(
     commands: CommandRegistry,
     config: CodeEditor.IConfig,
     settingRegistry: ISettingRegistry,
@@ -261,7 +249,7 @@ export default class Commands {
   /**
    * Add command for changing tabs size or type in File Editor
    */
-  static addChangeTabsCommand(
+  export function addChangeTabsCommand(
     commands: CommandRegistry,
     config: CodeEditor.IConfig,
     settingRegistry: ISettingRegistry,
@@ -289,7 +277,7 @@ export default class Commands {
   /**
    * Add the Match Brackets command
    */
-  static addMatchBracketsCommand(
+  export function addMatchBracketsCommand(
     commands: CommandRegistry,
     config: CodeEditor.IConfig,
     settingRegistry: ISettingRegistry,
@@ -314,7 +302,7 @@ export default class Commands {
   /**
    * Add the Auto Close Brackets for Text Editor command
    */
-  static addAutoClosingBracketsCommand(
+  export function addAutoClosingBracketsCommand(
     commands: CommandRegistry,
     config: CodeEditor.IConfig,
     settingRegistry: ISettingRegistry,
@@ -337,7 +325,7 @@ export default class Commands {
   /**
    * Add the Create Console for Editor command
    */
-  static addCreateConsoleCommand(
+  export function addCreateConsoleCommand(
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
     isEnabled: () => boolean
@@ -350,7 +338,7 @@ export default class Commands {
           return;
         }
 
-        return Commands.getCreateConsoleFunction(commands)(widget, args);
+        return getCreateConsoleFunction(commands)(widget, args);
       },
       isEnabled,
       label: 'Create Console for Editor'
@@ -360,7 +348,7 @@ export default class Commands {
   /**
    * Add the Run Code command
    */
-  static addRunCodeCommand(
+  export function addRunCodeCommand(
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
     isEnabled: () => boolean
@@ -430,7 +418,7 @@ export default class Commands {
   /**
    * Add the Run All Code command
    */
-  static addRunAllCodeCommand(
+  export function addRunAllCodeCommand(
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
     isEnabled: () => boolean
@@ -474,7 +462,7 @@ export default class Commands {
   /**
    * Add the command
    */
-  static addMarkdownPreviewCommand(
+  export function addMarkdownPreviewCommand(
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>
   ) {
@@ -505,11 +493,11 @@ export default class Commands {
   /**
    * Function to create a new untitled text file, given the current working directory.
    */
-  private static createNew = (
+  function createNew(
     commands: CommandRegistry,
     cwd: string,
     ext: string = 'txt'
-  ) => {
+  ) {
     return commands
       .execute('docmanager:new-untitled', {
         path: cwd,
@@ -522,12 +510,12 @@ export default class Commands {
           factory: FACTORY
         });
       });
-  };
+  }
 
   /**
    * Add the New File command
    */
-  static addCreateNewCommand(
+  export function addCreateNewCommand(
     commands: CommandRegistry,
     browserFactory: IFileBrowserFactory
   ) {
@@ -537,7 +525,7 @@ export default class Commands {
       iconClass: args => (args['isPalette'] ? '' : EDITOR_ICON_CLASS),
       execute: args => {
         let cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
-        return this.createNew(commands, cwd as string);
+        return createNew(commands, cwd as string);
       }
     });
   }
@@ -545,7 +533,7 @@ export default class Commands {
   /**
    * Add the New Markdown File command
    */
-  static addCreateNewMarkdownCommand(
+  export function addCreateNewMarkdownCommand(
     commands: CommandRegistry,
     browserFactory: IFileBrowserFactory
   ) {
@@ -556,7 +544,7 @@ export default class Commands {
       iconClass: args => (args['isPalette'] ? '' : MARKDOWN_ICON_CLASS),
       execute: args => {
         let cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
-        return this.createNew(commands, cwd as string, 'md');
+        return createNew(commands, cwd as string, 'md');
       }
     });
   }
@@ -564,16 +552,16 @@ export default class Commands {
   /**
    * Wrapper function for adding the default launcher items for File Editor
    */
-  static addLauncherItems(launcher: ILauncher) {
-    this.addCreateNewToLauncher(launcher);
+  export function addLauncherItems(launcher: ILauncher) {
+    addCreateNewToLauncher(launcher);
 
-    this.addCreateNewMarkdownToLauncher(launcher);
+    addCreateNewMarkdownToLauncher(launcher);
   }
 
   /**
    * Add Create New Text File to the Launcher
    */
-  static addCreateNewToLauncher(launcher: ILauncher) {
+  export function addCreateNewToLauncher(launcher: ILauncher) {
     launcher.add({
       command: CommandIDs.createNew,
       category: 'Other',
@@ -584,7 +572,7 @@ export default class Commands {
   /**
    * Add Create New Markdown to the Launcher
    */
-  static addCreateNewMarkdownToLauncher(launcher: ILauncher) {
+  export function addCreateNewMarkdownToLauncher(launcher: ILauncher) {
     launcher.add({
       command: CommandIDs.createNewMarkdown,
       category: 'Other',
@@ -595,32 +583,32 @@ export default class Commands {
   /**
    * Wrapper function for adding the default items to the File Editor palette
    */
-  static addPaletteItems(palette: ICommandPalette) {
-    this.addChangeTabsCommandsToPalette(palette);
+  export function addPaletteItems(palette: ICommandPalette) {
+    addChangeTabsCommandsToPalette(palette);
 
-    this.addCreateNewCommandToPalette(palette);
+    addCreateNewCommandToPalette(palette);
 
-    this.addCreateNewMarkdownCommandToPalette(palette);
+    addCreateNewMarkdownCommandToPalette(palette);
 
-    this.addChangeFontSizeCommandsToPalette(palette);
+    addChangeFontSizeCommandsToPalette(palette);
   }
 
   /**
    * The category for File Editor palette commands for use in addToPalette functions
    */
-  private static paletteCategory = 'Text Editor';
+  const paletteCategory = 'Text Editor';
 
   /**
    * Add commands to change the tab indentation to the File Editor palette
    */
-  static addChangeTabsCommandsToPalette(palette: ICommandPalette) {
+  export function addChangeTabsCommandsToPalette(palette: ICommandPalette) {
     let args: JSONObject = {
       insertSpaces: false,
       size: 4,
       name: 'Indent with Tab'
     };
     let command = 'fileeditor:change-tabs';
-    palette.addItem({ command, args, category: this.paletteCategory });
+    palette.addItem({ command, args, category: paletteCategory });
 
     for (let size of [1, 2, 4, 8]) {
       let args: JSONObject = {
@@ -628,81 +616,83 @@ export default class Commands {
         size,
         name: `Spaces: ${size} `
       };
-      palette.addItem({ command, args, category: this.paletteCategory });
+      palette.addItem({ command, args, category: paletteCategory });
     }
   }
 
   /**
    * Add a Create New File command to the File Editor palette
    */
-  static addCreateNewCommandToPalette(palette: ICommandPalette) {
+  export function addCreateNewCommandToPalette(palette: ICommandPalette) {
     palette.addItem({
       command: CommandIDs.createNew,
       args: { isPalette: true },
-      category: this.paletteCategory
+      category: paletteCategory
     });
   }
 
   /**
    * Add a Create New Markdown command to the File Editor palette
    */
-  static addCreateNewMarkdownCommandToPalette(palette: ICommandPalette) {
+  export function addCreateNewMarkdownCommandToPalette(
+    palette: ICommandPalette
+  ) {
     palette.addItem({
       command: CommandIDs.createNewMarkdown,
       args: { isPalette: true },
-      category: this.paletteCategory
+      category: paletteCategory
     });
   }
 
   /**
    * Add commands to change the font size to the File Editor palette
    */
-  static addChangeFontSizeCommandsToPalette(palette: ICommandPalette) {
+  export function addChangeFontSizeCommandsToPalette(palette: ICommandPalette) {
     let command = CommandIDs.changeFontSize;
 
     let args = { name: 'Increase Font Size', delta: 1 };
-    palette.addItem({ command, args, category: this.paletteCategory });
+    palette.addItem({ command, args, category: paletteCategory });
 
     args = { name: 'Decrease Font Size', delta: -1 };
-    palette.addItem({ command, args, category: this.paletteCategory });
+    palette.addItem({ command, args, category: paletteCategory });
   }
 
   /**
    * Wrapper function for adding the default menu items for File Editor
    */
-  static addMenuItems(
+  export function addMenuItems(
     menu: IMainMenu,
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
     consoleTracker: IConsoleTracker
   ) {
     // Add the editing commands to the settings menu.
-    this.addEditingCommandsToSettingsMenu(menu, commands);
+    addEditingCommandsToSettingsMenu(menu, commands);
 
     // Add new text file creation to the file menu.
-    this.addCreateNewFileToFileMenu(menu);
+    addCreateNewFileToFileMenu(menu);
 
     // Add new markdown file creation to the file menu.
-    this.addCreateNewMarkdownFileToFileMenu(menu);
+    addCreateNewMarkdownFileToFileMenu(menu);
 
     // Add undo/redo hooks to the edit menu.
-    this.addUndoRedoToEditMenu(menu, tracker);
+    addUndoRedoToEditMenu(menu, tracker);
 
     // Add editor view options.
-    this.addEditorViewerToViewMenu(menu, tracker);
+    addEditorViewerToViewMenu(menu, tracker);
 
     // Add a console creator the the file menu.
-    this.addConsoleCreatorToFileMenu(menu, commands, tracker);
+    addConsoleCreatorToFileMenu(menu, commands, tracker);
 
     // Add a code runner to the run menu.
-    this.addCodeRunnersToRunMenu(menu, commands, tracker, consoleTracker);
+    addCodeRunnersToRunMenu(menu, commands, tracker, consoleTracker);
   }
 
   /**
    * Add File Editor editing commands to the Settings menu, including:
    * Indent with Tab, Tab Spaces, Change Font Size, and auto closing brackets
    */
-  static addEditingCommandsToSettingsMenu(
+  export function addEditingCommandsToSettingsMenu(
     menu: IMainMenu,
     commands: CommandRegistry
   ) {
@@ -745,14 +735,14 @@ export default class Commands {
   /**
    * Add a Create New File command to the File menu
    */
-  static addCreateNewFileToFileMenu(menu: IMainMenu) {
+  export function addCreateNewFileToFileMenu(menu: IMainMenu) {
     menu.fileMenu.newMenu.addGroup([{ command: CommandIDs.createNew }], 30);
   }
 
   /**
    * Add a Create New Markdown File command to the File menu
    */
-  static addCreateNewMarkdownFileToFileMenu(menu: IMainMenu) {
+  export function addCreateNewMarkdownFileToFileMenu(menu: IMainMenu) {
     menu.fileMenu.newMenu.addGroup(
       [{ command: CommandIDs.createNewMarkdown }],
       30
@@ -762,7 +752,7 @@ export default class Commands {
   /**
    * Add File Editor undo and redo widgets to the Edit menu
    */
-  static addUndoRedoToEditMenu(
+  export function addUndoRedoToEditMenu(
     menu: IMainMenu,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>
   ) {
@@ -780,7 +770,7 @@ export default class Commands {
   /**
    * Add a File Editor editor viewer to the View Menu
    */
-  static addEditorViewerToViewMenu(
+  export function addEditorViewerToViewMenu(
     menu: IMainMenu,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>
   ) {
@@ -811,14 +801,14 @@ export default class Commands {
   /**
    * Add a File Editor console creator to the File menu
    */
-  static addConsoleCreatorToFileMenu(
+  export function addConsoleCreatorToFileMenu(
     menu: IMainMenu,
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>
   ) {
     let createConsole: (
       widget: IDocumentWidget<FileEditor>
-    ) => Promise<void> = this.getCreateConsoleFunction(commands);
+    ) => Promise<void> = getCreateConsoleFunction(commands);
     menu.fileMenu.consoleCreators.add({
       tracker,
       name: 'Editor',
@@ -829,7 +819,7 @@ export default class Commands {
   /**
    * Add a File Editor code runner to the Run menu
    */
-  static addCodeRunnersToRunMenu(
+  export function addCodeRunnersToRunMenu(
     menu: IMainMenu,
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
@@ -861,15 +851,15 @@ export default class Commands {
   /**
    * Wrapper function for adding the default items to the File Editor context menu
    */
-  static addContextMenuItems(app: JupyterFrontEnd) {
-    this.addCreateConsoleToContextMenu(app);
-    this.addMarkdownPreviewToContextMenu(app);
+  export function addContextMenuItems(app: JupyterFrontEnd) {
+    addCreateConsoleToContextMenu(app);
+    addMarkdownPreviewToContextMenu(app);
   }
 
   /**
    * Add a Create Console item to the File Editor context menu
    */
-  static addCreateConsoleToContextMenu(app: JupyterFrontEnd) {
+  export function addCreateConsoleToContextMenu(app: JupyterFrontEnd) {
     app.contextMenu.addItem({
       command: CommandIDs.createConsole,
       selector: '.jp-FileEditor'
@@ -879,7 +869,7 @@ export default class Commands {
   /**
    * Add a Markdown Preview item to the File Editor context menu
    */
-  static addMarkdownPreviewToContextMenu(app: JupyterFrontEnd) {
+  export function addMarkdownPreviewToContextMenu(app: JupyterFrontEnd) {
     app.contextMenu.addItem({
       command: CommandIDs.markdownPreview,
       selector: '.jp-FileEditor'
