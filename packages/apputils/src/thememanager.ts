@@ -283,6 +283,7 @@ export class ThemeManager implements IThemeManager {
     const definitions = this._settings.schema.definitions as any;
 
     // workaround for 1.0.x versions of Jlab pulling in 1.1.x versions of apputils
+    // TODO: delete workaround in v2.0.0
     if (definitions && definitions.cssOverrides) {
       const oSchema = definitions.cssOverrides.properties;
       // the description field of each item in the overrides schema stores a

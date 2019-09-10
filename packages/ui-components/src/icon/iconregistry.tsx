@@ -169,6 +169,7 @@ export class IconRegistry implements IIconRegistry {
     let svgHtml = this.svg(name);
 
     // workaround for 1.0.x versions of Jlab pulling in 1.1.x versions of ui-components
+    // TODO: delete workaround in v2.0.0
     const bprefix = 'data:image/svg+xml;base64,';
     if (svgHtml.startsWith(bprefix)) {
       // slice off the prefix and covert base64 to string
