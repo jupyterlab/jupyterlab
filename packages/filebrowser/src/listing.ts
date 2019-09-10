@@ -1815,7 +1815,7 @@ export namespace DirListing {
         if (
           !this._iconRegistry.icon({
             name: fileType.iconClass,
-            className: ITEM_ICON_CLASS,
+            className: '',
             title: fileType.iconLabel,
             container: icon,
             center: true,

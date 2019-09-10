@@ -280,14 +280,17 @@ export class ThemeManager implements IThemeManager {
    * Initialize the key -> property dict for the overrides
    */
   private _initOverrideProps(): void {
-    const oSchema = (this._settings.schema.definitions as any).cssOverrides
-      .properties;
+    const definitions = this._settings.schema.definitions as any;
 
-    // the description field of each item in the overrides schema stores a
-    // CSS property that will be used to validate that override's values
-    Object.keys(oSchema).forEach(key => {
-      this._overrideProps[key] = oSchema[key].description;
-    });
+    // workaround for 1.0.x versions of Jlab pulling in 1.1.x versions of apputils
+    if (definitions && definitions.cssOverrides) {
+      const oSchema = definitions.cssOverrides.properties;
+      // the description field of each item in the overrides schema stores a
+      // CSS property that will be used to validate that override's values
+      Object.keys(oSchema).forEach(key => {
+        this._overrideProps[key] = oSchema[key].description;
+      });
+    }
   }
 
   /**

@@ -62,20 +62,25 @@ export class IconRegistry implements IIconRegistry {
         container.dataset.icon === resolvedName)
     ) {
       // bail if failing silently or icon node is already set
-      return;
+      return null;
     }
 
-    let svgNode = Private.parseSvg(this.svg(resolvedName));
+    // ensure that svg html is valid
+    const svgElement = this.resolveSvg(resolvedName);
+    if (!svgElement) {
+      // bail if failing silently
+      return null;
+    }
 
     if (title) {
-      Private.setTitleSvg(svgNode, title);
+      Private.setTitleSvg(svgElement, title);
     }
 
     if (container) {
       // clear any existing icon in container (and all other child elements)
       container.textContent = '';
       container.dataset.icon = resolvedName;
-      container.appendChild(svgNode);
+      container.appendChild(svgElement);
 
       let styleClass = propsStyle ? iconStyle(propsStyle) : '';
       if (className || className === '') {
@@ -87,13 +92,13 @@ export class IconRegistry implements IIconRegistry {
       }
     } else {
       // add icon styling class directly to the svg node
-      svgNode.setAttribute(
+      svgElement.setAttribute(
         'class',
         classes(className, propsStyle ? iconStyleFlat(propsStyle) : '')
       );
     }
 
-    return svgNode;
+    return svgElement;
   }
 
   /**
@@ -107,8 +112,15 @@ export class IconRegistry implements IIconRegistry {
     const Tag = tag || 'div';
 
     // we may have been handed a className in place of name
-    let resolvedName = this.resolveName(name);
+    const resolvedName = this.resolveName(name);
     if (!resolvedName) {
+      // bail if failing silently
+      return <></>;
+    }
+
+    // ensure that svg html is valid
+    const svgElement = this.resolveSvg(resolvedName);
+    if (!svgElement) {
       // bail if failing silently
       return <></>;
     }
@@ -117,7 +129,7 @@ export class IconRegistry implements IIconRegistry {
       <Tag
         className={classes(className, propsStyle ? iconStyle(propsStyle) : '')}
         dangerouslySetInnerHTML={{
-          __html: resolvedName ? this.svg(resolvedName) : ''
+          __html: svgElement.outerHTML
         }}
       />
     );
@@ -146,6 +158,36 @@ export class IconRegistry implements IIconRegistry {
     }
 
     return name;
+  }
+
+  resolveSvg(name: string): HTMLElement | null {
+    let svgHtml = this.svg(name);
+
+    // workaround for 1.0.x versions of Jlab pulling in 1.1.x versions of ui-components
+    const bprefix = 'data:image/svg+xml;base64,';
+    if (svgHtml.startsWith(bprefix)) {
+      // slice off the prefix and covert base64 to string
+      svgHtml = atob(svgHtml.slice(bprefix.length));
+    }
+
+    const parser = new DOMParser();
+    const svgElement = parser.parseFromString(svgHtml, 'image/svg+xml')
+      .documentElement;
+
+    if (svgElement.getElementsByTagName('parsererror').length > 0) {
+      // parse failed, svgElement will be an error box
+      if (this._debug) {
+        // fail noisily, render the error box
+        console.error(`SVG HTML was malformed for icon name: ${name}`);
+        return svgElement;
+      } else {
+        // silently fail by returning null
+        return null;
+      }
+    } else {
+      // parse succeeded
+      return svgElement;
+    }
   }
 
   svg(name: string): string {
@@ -197,11 +239,6 @@ export namespace IconRegistry {
 }
 
 namespace Private {
-  export function parseSvg(svg: string): HTMLElement {
-    let parser = new DOMParser();
-    return parser.parseFromString(svg, 'image/svg+xml').documentElement;
-  }
-
   export function setTitleSvg(svgNode: HTMLElement, title: string): void {
     // add a title node to the top level svg node
     let titleNodes = svgNode.getElementsByTagName('title');
