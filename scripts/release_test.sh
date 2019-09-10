@@ -1,17 +1,19 @@
 # Test a release wheel in a fresh conda environment with and without installed
 # extensions
-set -e
+old=${CONDA_DEFAULT_ENV}
 env=${CONDA_DEFAULT_ENV}_test
 
 conda deactivate
 conda remove --all -y -n $env
 
-conda create -c conda-forge -y -n $env notebook nodejs twine
+conda create --override-channels --strict-channel-priority -c conda-forge -c anaconda -y -n $env notebook nodejs twine
 conda activate $env
 
 pip install dist/*.whl
 
-WORK_DIR=`mktemp -d`
+WORK_DIR='/tmp/$env'
+rm -rf $WORK_DIR
+mkdir -p $WORK_DIR
 cp examples/notebooks/*.ipynb $WORK_DIR
 cd $WORK_DIR
 
@@ -24,9 +26,9 @@ jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
 jupyter labextension install bqplot --no-build
 jupyter labextension install jupyter-leaflet --no-build
 jupyter lab clean
-jupyter lab build
 
-conda install -c conda-forge -y ipywidgets
-python -m jupyterlab.browser_check
+conda install --override-channels --strict-channel-priority -c conda-forge -c anaconda -y ipywidgets altair matplotlib vega_datasets
+jupyter lab build && python -m jupyterlab.browser_check && jupyter lab
 
-jupyter lab
+
+cd /tmp/$old
