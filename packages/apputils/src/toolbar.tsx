@@ -473,6 +473,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
           className={'jp-ToolbarButtonComponent-icon'}
           fallback={true}
           center={true}
+          kind={'toolbarButton'}
           tag={'span'}
         />
       )}
