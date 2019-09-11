@@ -116,23 +116,30 @@ const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
       }
     })();
 
+    const registry = new SettingRegistry({
+      connector,
+      plugins: (await connector.list('active')).values
+    });
+
     // If there are deferred plugins that have settings schemas, do not stall
     // returning the setting registry for them; load them manually after the
     // application has restored in order to make sure their settings exist in
     // the setting registry, even if nothing else has activated them.
+    //
+    // The plugins are activated before their settings are loaded into the
+    // registry in order to guarantee any setting transformations that exist in
+    // the plugin are registered with the setting registry.
     void app.restored.then(async () => {
       const plugins = await connector.list('all');
-      plugins.ids.forEach(id => {
+      plugins.ids.forEach(async id => {
         if (isDeferred(id) && !isDisabled(id)) {
-          void app.activatePlugin(id);
+          await app.activatePlugin(id);
+          void registry.load(id);
         }
       });
     });
 
-    return new SettingRegistry({
-      connector,
-      plugins: (await connector.list('active')).values
-    });
+    return registry;
   },
   autoStart: true,
   provides: ISettingRegistry
