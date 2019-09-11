@@ -6,16 +6,14 @@ import { CodeCell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { Editor, Doc } from 'codemirror';
 import { DebugSession } from './../session';
+import { Breakpoints } from '../breakpoints';
 
 export class DebuggerNotebookTracker {
   constructor(options: DebuggerNotebookTracker.IOptions) {
     this.notebookTracker = options.notebookTracker;
     this.notebookTracker.widgetAdded.connect(
-      (sender, notePanel: NotebookPanel) => {}
-    );
-
-    this.notebookTracker.currentChanged.connect(
       (sender, notePanel: NotebookPanel) => {
+        console.log('first');
         if (!this.debuggerSession) {
           this.debuggerSession = new DebugSession({
             client: notePanel.session
@@ -24,6 +22,12 @@ export class DebuggerNotebookTracker {
         this.debuggerSession.client = notePanel.session;
       }
     );
+
+    // this.notebookTracker.currentChanged.connect(
+    //   (sender, notePanel: NotebookPanel) => {
+
+    //   }
+    // );
 
     this.notebookTracker.activeCellChanged.connect(
       this.onActiveCellChanged,
@@ -36,14 +40,17 @@ export class DebuggerNotebookTracker {
   debuggerSession: DebugSession;
 
   protected onActiveCellChanged() {
+    console.log('second');
     const activeCell = this.getCell();
-    if (activeCell) {
+    if (activeCell && activeCell.editor && this.debuggerSession) {
       if (this.previousCell && !this.previousCell.isDisposed) {
         this.removeListner(this.previousCell);
       }
       this.previousCell = activeCell;
+      // console.log(activeCell.editor.uuid);
       this.setEditor(activeCell);
     }
+    // console.log(this.debuggerSession);
   }
 
   protected setEditor(cell: CodeCell) {
@@ -52,6 +59,9 @@ export class DebuggerNotebookTracker {
     }
 
     const editor = cell.editor as CodeMirrorEditor;
+
+    this.previousLineCount = editor.lineCount;
+
     editor.setOption('lineNumbers', true);
     editor.editor.setOption('gutters', [
       'CodeMirror-linenumbers',
@@ -59,18 +69,22 @@ export class DebuggerNotebookTracker {
     ]);
 
     editor.editor.on('gutterClick', this.onGutterClick);
-    // editor.editor.on('renderLine', this.onNewRenderLine);
+    editor.editor.on('renderLine', this.onNewRenderLine);
   }
 
   protected removeListner(cell: CodeCell) {
     const editor = cell.editor as CodeMirrorEditor;
     editor.setOption('lineNumbers', false);
     editor.editor.off('gutterClick', this.onGutterClick);
-    // editor.editor.off('renderLine', this.onNewRenderLine);
+    editor.editor.off('renderLine', this.onNewRenderLine);
   }
 
   protected getCell(): CodeCell {
     return this.notebookTracker.activeCell as CodeCell;
+  }
+
+  protected getEditorId(): string {
+    return this.getCell().editor.uuid;
   }
 
   protected getCurrentNoteBook(): NotebookPanel {
@@ -82,7 +96,13 @@ export class DebuggerNotebookTracker {
     if (!info) {
       return;
     }
+
     const isRemoveGutter = !!info.gutterMarkers;
+    if (isRemoveGutter) {
+      this.removeBreakpoint(lineNumber);
+    } else {
+      this.addBreakpoint(lineNumber);
+    }
 
     editor.setGutterMarker(
       lineNumber,
@@ -90,6 +110,10 @@ export class DebuggerNotebookTracker {
       isRemoveGutter ? null : this.createMarkerNode()
     );
   };
+
+  protected removeBreakpoint(lineNumber: number) {}
+
+  protected addBreakpoint(lineNumber: number) {}
 
   protected onNewRenderLine = (editor: Editor, line: any) => {
     const lineInfo = editor.lineInfo(line);
@@ -101,9 +125,9 @@ export class DebuggerNotebookTracker {
     const linesNumber = doc.lineCount();
 
     if (this.previousLineCount !== linesNumber) {
-      if (this.previousLineCount > linesNumber) {
-      }
       if (this.previousLineCount < linesNumber) {
+      }
+      if (this.previousLineCount > linesNumber) {
       }
       this.previousLineCount = linesNumber;
     }
@@ -111,6 +135,22 @@ export class DebuggerNotebookTracker {
     if (lineInfo.line === 0) {
     }
   };
+
+  protected changeLines(
+    breakpoints: Breakpoints.IBreakpoint[],
+    lineInfo: any,
+    sign: number
+  ) {
+    breakpoints.map(ele => {
+      if (
+        ele.line > lineInfo.line ||
+        (lineInfo.text === '' && lineInfo.line === ele.line)
+      ) {
+        ele.line = ele.line + sign;
+      }
+      return ele;
+    });
+  }
 
   private createMarkerNode() {
     var marker = document.createElement('div');

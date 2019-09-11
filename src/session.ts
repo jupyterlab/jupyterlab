@@ -21,16 +21,22 @@ export class DebugSession implements IDebugger.ISession {
    */
   constructor(options: DebugSession.IOptions) {
     this.client = options.client;
-    this.path = this.client.path || '';
-    this.type = this.client.type;
+    this.id = this.client.name;
   }
 
   /**
    * The client session to connect to a debugger.
    */
   private _client: IClientSession;
-  type: string;
-  path?: string;
+  private _id: string;
+
+  get id() {
+    return this._id;
+  }
+
+  set id(id: string) {
+    this._id = id;
+  }
 
   get client(): IClientSession {
     return this._client;
@@ -46,6 +52,7 @@ export class DebugSession implements IDebugger.ISession {
     }
 
     this._client = client;
+    this._id = client.name;
     this._client.iopubMessage.connect(this._handleEvent, this);
   }
 
