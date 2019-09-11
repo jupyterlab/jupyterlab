@@ -33,7 +33,7 @@ const copy = JSONExt.deepCopy;
  * will wait before timing out if it requires a transformation that has not been
  * registered.
  */
-const DEFAULT_TRANSFORM_TIMEOUT = 7000;
+const DEFAULT_TRANSFORM_TIMEOUT = 1000;
 
 /**
  * The ASCII record separator character.
