@@ -1809,22 +1809,15 @@ export namespace DirListing {
 
       if (fileType) {
         // add icon as svg node. Can be styled using CSS
-        if (
-          !this._iconRegistry.icon({
-            name: fileType.iconClass,
-            className: ITEM_ICON_CLASS,
-            title: fileType.iconLabel,
-            container: icon,
-            center: true,
-            kind: 'listing'
-          })
-        ) {
-          // add icon as CSS background image. Can't be styled using CSS
-          icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
-          icon.textContent = fileType.iconLabel || '';
-          // clean up the svg icon annotation, if any
-          delete icon.dataset.icon;
-        }
+        this._iconRegistry.icon({
+          name: fileType.iconClass,
+          className: ITEM_ICON_CLASS,
+          title: fileType.iconLabel,
+          fallback: true,
+          container: icon,
+          center: true,
+          kind: 'listing'
+        });
       } else {
         // use default icon as CSS background image
         icon.className = ITEM_ICON_CLASS;
