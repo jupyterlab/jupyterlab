@@ -11,13 +11,11 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { DebuggerSidebar } from './sidebar';
 import { INotebookTracker } from '@jupyterlab/notebook';
-import { CodeCell } from '@jupyterlab/cells';
-import { IEditorTracker } from '@jupyterlab/fileeditor';
+import { BreakpointsService } from './breakpointsService';
 
 export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
     super({ direction: 'left-to-right' });
-
     this.model = new Debugger.Model(options);
     this.sidebar = new DebuggerSidebar(this.model);
     this.title.label = 'Debugger';
@@ -29,8 +27,6 @@ export class Debugger extends BoxPanel {
   readonly model: Debugger.Model;
 
   readonly sidebar: DebuggerSidebar;
-
-  previousCell: CodeCell;
 
   dispose(): void {
     if (this.isDisposed) {
@@ -47,16 +43,15 @@ export class Debugger extends BoxPanel {
 export namespace Debugger {
   export interface IOptions {
     connector?: IDataConnector<ReadonlyJSONValue>;
-    noteTracker?: INotebookTracker;
-    editorTracker?: IEditorTracker;
     id?: string;
+    breakpointsService?: BreakpointsService;
   }
 
   export class Model implements IDisposable {
     constructor(options: Debugger.Model.IOptions) {
       this.connector = options.connector || null;
+      this.breakpointsService = options.breakpointsService;
       this.id = options.id || UUID.uuid4();
-      this._notebook = options.noteTracker;
       void this._populate();
     }
 
@@ -86,9 +81,12 @@ export namespace Debugger {
 
     private _isDisposed = false;
     private _notebook: INotebookTracker;
+    breakpointsService: BreakpointsService;
   }
 
   export namespace Model {
-    export interface IOptions extends Debugger.IOptions {}
+    export interface IOptions extends Debugger.IOptions {
+      breakpointsService?: BreakpointsService;
+    }
   }
 }

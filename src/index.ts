@@ -25,6 +25,7 @@ import { Debugger } from './debugger';
 
 import { IDebugger, IDebuggerSidebar } from './tokens';
 import { DebuggerNotebookTracker } from './notebookTracker';
+import { BreakpointsService } from './breakpointsService';
 
 // import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
@@ -42,6 +43,9 @@ export namespace CommandIDs {
 
   export const debugNotebook = 'debugger:debug-notebook';
 }
+
+// Service for controll state of breakpoints in extensione
+const service = new BreakpointsService();
 
 /**
  * A plugin that provides visual debugging support for consoles.
@@ -98,8 +102,10 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     palette: ICommandPalette
   ) => {
     new DebuggerNotebookTracker({
-      notebookTracker: notebook
+      notebookTracker: notebook,
+      breakpointService: service
     });
+
     // console.log(debugetNoteTracker);
     // this exist only for my test in futre will be removed
     const command: string = CommandIDs.debugNotebook;
@@ -126,7 +132,7 @@ const sidebar: JupyterFrontEndPlugin<Debugger> = {
     const { shell } = app;
     const label = 'Environment';
     const namespace = 'jp-debugger-sidebar';
-    const sidebar = new Debugger({});
+    const sidebar = new Debugger({ breakpointsService: service });
     sidebar.id = namespace;
     sidebar.title.label = label;
     shell.add(sidebar, 'right', { activate: false });

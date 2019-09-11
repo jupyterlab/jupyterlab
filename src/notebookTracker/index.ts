@@ -7,50 +7,54 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { Editor, Doc } from 'codemirror';
 import { DebugSession } from './../session';
 import { Breakpoints } from '../breakpoints';
+import { IClientSession } from '@jupyterlab/apputils';
+import { BreakpointsService } from '../breakpointsService';
 
 export class DebuggerNotebookTracker {
   constructor(options: DebuggerNotebookTracker.IOptions) {
+    this.breakpointService = options.breakpointService;
     this.notebookTracker = options.notebookTracker;
     this.notebookTracker.widgetAdded.connect(
       (sender, notePanel: NotebookPanel) => {
-        console.log('first');
-        if (!this.debuggerSession) {
-          this.debuggerSession = new DebugSession({
-            client: notePanel.session
-          });
-        }
-        this.debuggerSession.client = notePanel.session;
+        this.newDebuggerSession(notePanel.session);
       }
     );
 
-    // this.notebookTracker.currentChanged.connect(
-    //   (sender, notePanel: NotebookPanel) => {
-
-    //   }
-    // );
-
-    this.notebookTracker.activeCellChanged.connect(
-      this.onActiveCellChanged,
-      this
+    this.notebookTracker.currentChanged.connect(
+      (sender, notePanel: NotebookPanel) => {
+        this.newDebuggerSession(notePanel.session);
+        this.notebookTracker.activeCellChanged.connect(
+          this.onActiveCellChanged,
+          this
+        );
+      }
     );
   }
+
   notebookTracker: INotebookTracker;
   previousCell: CodeCell;
   previousLineCount: number;
   debuggerSession: DebugSession;
+  breakpointService: BreakpointsService;
+
+  protected newDebuggerSession(client: IClientSession) {
+    if (this.debuggerSession) {
+      this.debuggerSession.dispose();
+    }
+    this.debuggerSession = new DebugSession({
+      client: client
+    });
+  }
 
   protected onActiveCellChanged() {
-    console.log('second');
     const activeCell = this.getCell();
     if (activeCell && activeCell.editor && this.debuggerSession) {
       if (this.previousCell && !this.previousCell.isDisposed) {
         this.removeListner(this.previousCell);
       }
       this.previousCell = activeCell;
-      // console.log(activeCell.editor.uuid);
       this.setEditor(activeCell);
     }
-    // console.log(this.debuggerSession);
   }
 
   protected setEditor(cell: CodeCell) {
@@ -83,12 +87,8 @@ export class DebuggerNotebookTracker {
     return this.notebookTracker.activeCell as CodeCell;
   }
 
-  protected getEditorId(): string {
+  get getEditorId(): string {
     return this.getCell().editor.uuid;
-  }
-
-  protected getCurrentNoteBook(): NotebookPanel {
-    return this.notebookTracker.currentWidget;
   }
 
   protected onGutterClick = (editor: Editor, lineNumber: number) => {
@@ -99,9 +99,12 @@ export class DebuggerNotebookTracker {
 
     const isRemoveGutter = !!info.gutterMarkers;
     if (isRemoveGutter) {
-      this.removeBreakpoint(lineNumber);
     } else {
-      this.addBreakpoint(lineNumber);
+      this.breakpointService.addBreakpoint(
+        this.debuggerSession.id,
+        this.getEditorId,
+        info as LineInfo
+      );
     }
 
     editor.setGutterMarker(
@@ -110,10 +113,6 @@ export class DebuggerNotebookTracker {
       isRemoveGutter ? null : this.createMarkerNode()
     );
   };
-
-  protected removeBreakpoint(lineNumber: number) {}
-
-  protected addBreakpoint(lineNumber: number) {}
 
   protected onNewRenderLine = (editor: Editor, line: any) => {
     const lineInfo = editor.lineInfo(line);
@@ -163,5 +162,19 @@ export class DebuggerNotebookTracker {
 export namespace DebuggerNotebookTracker {
   export interface IOptions {
     notebookTracker: INotebookTracker;
+    breakpointService: BreakpointsService;
   }
+}
+
+export interface LineInfo {
+  line: any;
+  handle: any;
+  text: string;
+  /** Object mapping gutter IDs to marker elements. */
+  gutterMarkers: any;
+  textClass: string;
+  bgClass: string;
+  wrapClass: string;
+  /** Array of line widgets attached to this line. */
+  widgets: any;
 }

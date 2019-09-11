@@ -7,10 +7,17 @@ import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { Body } from './body';
 import { Signal, ISignal } from '@phosphor/signaling';
+import { BreakpointsService } from '../breakpointsService';
 
 export class Breakpoints extends Panel {
   constructor(options: Breakpoints.IOptions) {
     super();
+
+    this.service = options.service;
+
+    this.service.testSignal.connect((sender, update) => {
+      console.log('test');
+    });
 
     this.model = new Breakpoints.IModel([]);
     this.addClass('jp-DebuggerBreakpoints');
@@ -52,6 +59,7 @@ export class Breakpoints extends Panel {
   private isAllActive = true;
   readonly body: Widget;
   readonly model: Breakpoints.IModel;
+  service: BreakpointsService;
 }
 class BreakpointsHeader extends Widget {
   constructor(title: string) {
@@ -126,5 +134,7 @@ export namespace Breakpoints {
   /**
    * Instantiation options for `Breakpoints`;
    */
-  export interface IOptions extends Panel.IOptions {}
+  export interface IOptions extends Panel.IOptions {
+    service?: BreakpointsService;
+  }
 }
