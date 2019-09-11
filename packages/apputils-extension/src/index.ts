@@ -121,20 +121,22 @@ const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
       plugins: (await connector.list('active')).values
     });
 
-    // If there are deferred plugins that have settings schemas, do not stall
-    // returning the setting registry for them; load them manually after the
-    // application has restored in order to make sure their settings exist in
-    // the setting registry, even if nothing else has activated them.
-    //
-    // The plugins are activated before their settings are loaded into the
-    // registry in order to guarantee any setting transformations that exist in
-    // the plugin are registered with the setting registry.
+    // If there are plugins that have schemas that are not in the setting
+    // registry after the application has restored, try to load them manually.
     void app.restored.then(async () => {
       const plugins = await connector.list('all');
-      plugins.ids.forEach(async id => {
-        if (isDeferred(id) && !isDisabled(id)) {
-          await app.activatePlugin(id);
-          void registry.load(id);
+      plugins.ids.forEach(async (id, index) => {
+        if (isDisabled(id) || id in registry.plugins) {
+          return;
+        }
+
+        try {
+          await registry.load(id);
+        } catch (error) {
+          console.warn(`Settings failed to load for ${id}`, error);
+          if (plugins.values[index].schema['jupyter.lab.transform']) {
+            console.warn(`This may happen if {autoStart: false} in ${id}`);
+          }
         }
       });
     });
