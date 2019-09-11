@@ -30,7 +30,6 @@
 
   --jp-about-header-logo: url('icons/jupyter/jupyter.svg');
   --jp-about-header-wordmark: url('images/jupyterlab-wordmark.svg');
-  --jp-icon-add: url('icons/md/ic_add_24px.svg');
   --jp-icon-bug: url('icons/md/bug.svg');
   --jp-icon-caretdown: url('icons/md/caretdown.svg');
   --jp-icon-caretleft: url('icons/md/caretleft.svg');
@@ -43,8 +42,6 @@
   --jp-icon-close: url('icons/md/close.svg');
   --jp-icon-console-selected: url('icons/jupyter/console_selected.svg');
   --jp-icon-console: url('icons/jupyter/console.svg');
-  --jp-icon-copy: url('icons/md/copy.svg');
-  --jp-icon-cut: url('icons/md/cut.svg');
   --jp-icon-download: url('icons/md/download.svg');
   --jp-icon-edit: url('icons/md/edit.svg');
   --jp-icon-ellipses: url('icons/md/ellipses.svg');
@@ -64,10 +61,6 @@
   --jp-icon-link: url('icons/md/link.svg');
   --jp-icon-more: url('icons/md/more-horiz.svg');
   --jp-icon-new-folder: url('icons/md/ic_create_new_folder_24px.svg');
-  --jp-icon-paste: url('icons/md/paste.svg');
-  --jp-icon-refresh: url('icons/md/ic_refresh_18px.svg');
-  --jp-icon-run: url('icons/md/run.svg');
-  --jp-icon-save: url('icons/md/save.svg');
   --jp-icon-search-white: url('icons/md/search-white.svg');
   --jp-icon-search: url('icons/md/search.svg');
   --jp-icon-search-arrow-up: url('icons/jupyter/search_arrow_up.svg');
@@ -76,10 +69,18 @@
   --jp-icon-search-regex: url('icons/jupyter/search_regex.svg');
   --jp-icon-settings-selected: url('icons/md/ic_settings_24px_selected.svg');
   --jp-icon-settings: url('icons/md/ic_settings_24px.svg');
-  --jp-icon-stop: url('icons/md/stop.svg');
   --jp-icon-stop-circle: url('icons/md/stop-circle.svg');
   --jp-icon-text-editor-selected: url('icons/md/ic_format_align_left_24px_selected.svg');
   --jp-icon-text-editor: url('icons/md/ic_format_align_left_24px.svg');
   --jp-icon-undo: url('icons/md/undo.svg');
   --jp-icon-vega: url('icons/jupyter/vega.svg');
 }
+
+/*--jp-icon-add: url('icons/md/ic_add_24px.svg');*/
+/*--jp-icon-copy: url('icons/md/copy.svg');*/
+/*--jp-icon-cut: url('icons/md/cut.svg');*/
+/*--jp-icon-paste: url('icons/md/paste.svg');*/
+/*--jp-icon-refresh: url('icons/md/ic_refresh_18px.svg');*/
+/*--jp-icon-run: url('icons/md/run.svg');*/
+/*--jp-icon-save: url('icons/md/save.svg');*/
+/*--jp-icon-stop: url('icons/md/stop.svg');*/
