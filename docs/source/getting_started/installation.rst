@@ -3,7 +3,7 @@
 Installation
 ------------
 
-JupyterLab can be installed using ``conda``, ``pip``, ``pipenv``. or ``docker``
+JupyterLab can be installed using ``conda``, ``pip``, ``pipenv`` or ``docker``.
 
 conda
 ~~~~~
@@ -53,29 +53,14 @@ For example, in the directory where ``pipenv``'s ``Pipfile`` and ``Pipfile.lock`
     pipenv shell
      jupyter lab
 
-docker
+Docker
 ~~~~~~
 
-If you have `Docker installed <https://docs.docker.com/install/>`__, you can install and use JupyterLab by running:
-
-.. code:: bash
-
-    docker run --rm -p 10000:8888 -e JUPYTER_ENABLE_LAB=yes -v "$PWD":/home/jovyan/work jupyter/datascience-notebook:latest
-
-In your web browser, navigate to:
-
-.. code:: bash
-
-     http://<hostname>:10000/?token=<token>
-
-where ``<hostname>`` is the name of the computer running docker and ``<token>`` is the
-secret token printed in the console after starting the container.
-
-This example pulls the ``jupyter/datascience-notebook`` image tagged ``latest`` from Docker Hub if it is not already
-present on the local host. It then starts an ephemeral container running a Jupyter Notebook server and exposes
-the server on host port ``10000``. The command mounts the current working directory ``$PWD`` on the host as ``/home/jovyan/work``
-in the container. Docker destroys the container after notebook server exit, but any files written to
-``/home/jovyan/work`` in the container remain intact on the host.
+If you have `Docker installed <https://docs.docker.com/install/>`__, you can install and use JupyterLab by selecting one
+of the many `ready-to-run Docker images <https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html>`__
+maintained by the Jupyter Team. Follow the instructions in the `Quick Start Guide <https://jupyter-docker-stacks.readthedocs.io/en/latest/>`__
+to deploy the chosen Docker image. NOTE: Ensure your docker command includes the `-e JUPYTER_ENABLE_LAB=yes` flag to ensure
+JupyterLab is enabled in your container.
 
 
 
