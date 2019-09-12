@@ -15,8 +15,8 @@ export class Breakpoints extends Panel {
 
     this.service = options.service;
 
-    this.service.breakpointChanged.connect((sender, update) => {
-      this.model.breakpoint = update;
+    this.service.selectedBreakpointsChanged.connect((sender, update) => {
+      this.model.breakpoints = update;
     });
 
     this.model = new Breakpoints.IModel([]);
@@ -49,7 +49,6 @@ export class Breakpoints extends Panel {
       new ToolbarButton({
         iconClassName: 'jp-CloseAllIcon',
         onClick: () => {
-          this.model.breakpoints = [];
           this.service.clearSelectedBreakpoints();
         },
         tooltip: 'Remove All Breakpoints'

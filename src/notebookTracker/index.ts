@@ -6,7 +6,6 @@ import { CodeCell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { Editor, Doc } from 'codemirror';
 import { DebugSession } from './../session';
-import { Breakpoints } from '../breakpoints';
 import { IClientSession } from '@jupyterlab/apputils';
 import { BreakpointsService } from '../breakpointsService';
 
@@ -23,17 +22,13 @@ export class DebuggerNotebookTracker {
     this.notebookTracker.currentChanged.connect(
       (sender, notePanel: NotebookPanel) => {
         this.newDebuggerSession(notePanel.session);
-        this.notebookTracker.activeCellChanged.connect(
-          this.onActiveCellChanged,
-          this
-        );
       }
     );
 
     this.breakpointService.selectedBreakpointsChanged.connect(
       (sender, update) => {
         if (update && update.length === 0) {
-          this.clearGutter();
+          this.clearGutter(this.getCell());
         }
       }
     );
@@ -45,17 +40,23 @@ export class DebuggerNotebookTracker {
   debuggerSession: DebugSession;
   breakpointService: BreakpointsService;
 
-  protected newDebuggerSession(client: IClientSession) {
+  protected async newDebuggerSession(client: IClientSession) {
     if (this.debuggerSession) {
       this.debuggerSession.dispose();
     }
+
+    // create new session. Just changing client make sometimes that kernel is not attach to note
     this.debuggerSession = new DebugSession({
       client: client
     });
+    await this.notebookTracker.activeCellChanged.connect(
+      this.onActiveCellChanged,
+      this
+    );
   }
 
-  protected clearGutter() {
-    const editor = this.getCell().editor as CodeMirrorEditor;
+  protected clearGutter(cell: CodeCell) {
+    const editor = cell.editor as CodeMirrorEditor;
     editor.doc.eachLine(line => {
       if ((line as LineInfo).gutterMarkers) {
         editor.editor.setGutterMarker(line, 'breakpoints', null);
@@ -63,11 +64,18 @@ export class DebuggerNotebookTracker {
     });
   }
 
-  protected onActiveCellChanged() {
+  protected async onActiveCellChanged() {
     const activeCell = this.getCell();
+    // this run before change note, consider how to resolve this
     if (activeCell && activeCell.editor && this.debuggerSession) {
+      this.breakpointService.onSelectedBreakpoints(
+        this.debuggerSession.id,
+        this.getEditorId()
+      );
       if (this.previousCell && !this.previousCell.isDisposed) {
         this.removeListner(this.previousCell);
+        this.clearGutter(this.previousCell);
+        this.breakpointService.clearSelectedBreakpoints();
       }
       this.previousCell = activeCell;
       this.setEditor(activeCell);
@@ -104,12 +112,11 @@ export class DebuggerNotebookTracker {
     return this.notebookTracker.activeCell as CodeCell;
   }
 
-  get getEditorId(): string {
+  getEditorId(): string {
     return this.getCell().editor.uuid;
   }
 
   protected onGutterClick = (editor: Editor, lineNumber: number) => {
-    console.log(lineNumber);
     const info = editor.lineInfo(lineNumber);
     if (!info) {
       return;
@@ -117,10 +124,15 @@ export class DebuggerNotebookTracker {
 
     const isRemoveGutter = !!info.gutterMarkers;
     if (isRemoveGutter) {
+      this.breakpointService.removeBreakpoint(
+        this.debuggerSession.id,
+        this.getEditorId,
+        info as LineInfo
+      );
     } else {
       this.breakpointService.addBreakpoint(
         this.debuggerSession.id,
-        this.getEditorId,
+        this.getEditorId(),
         info as LineInfo
       );
     }
@@ -143,31 +155,14 @@ export class DebuggerNotebookTracker {
 
     if (this.previousLineCount !== linesNumber) {
       if (this.previousLineCount < linesNumber) {
+        this.breakpointService.changeLines(lineInfo, +1);
       }
       if (this.previousLineCount > linesNumber) {
+        this.breakpointService.changeLines(lineInfo, -1);
       }
       this.previousLineCount = linesNumber;
     }
-    // eage case for backspace line 2
-    if (lineInfo.line === 0) {
-    }
   };
-
-  protected changeLines(
-    breakpoints: Breakpoints.IBreakpoint[],
-    lineInfo: any,
-    sign: number
-  ) {
-    breakpoints.map(ele => {
-      if (
-        ele.line > lineInfo.line ||
-        (lineInfo.text === '' && lineInfo.line === ele.line)
-      ) {
-        ele.line = ele.line + sign;
-      }
-      return ele;
-    });
-  }
 
   private createMarkerNode() {
     var marker = document.createElement('div');
