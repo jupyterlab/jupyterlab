@@ -133,9 +133,12 @@ const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
         try {
           await registry.load(id);
         } catch (error) {
-          console.warn(`Settings failed to load for ${id}`, error);
+          console.warn(`Settings failed to load for (${id})`, error);
           if (plugins.values[index].schema['jupyter.lab.transform']) {
-            console.warn(`This may happen if {autoStart: false} in ${id}`);
+            console.warn(
+              `This may happen if {autoStart: false} in (${id}) ` +
+                `or if it is one of the deferredExtensions in page config.`
+            );
           }
         }
       });
