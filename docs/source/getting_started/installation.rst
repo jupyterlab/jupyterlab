@@ -3,7 +3,7 @@
 Installation
 ------------
 
-JupyterLab can be installed using ``conda``, ``pip``, or ``pipenv``.
+JupyterLab can be installed using ``conda``, ``pip``, ``pipenv``. or ``docker``
 
 conda
 ~~~~~
@@ -52,6 +52,32 @@ For example, in the directory where ``pipenv``'s ``Pipfile`` and ``Pipfile.lock`
 
     pipenv shell
      jupyter lab
+
+docker
+~~~~~~
+
+If you have `Docker installed <https://docs.docker.com/install/>`__, you can install and use JupyterLab by running:
+
+.. code:: bash
+
+    docker run --rm -p 10000:8888 -e JUPYTER_ENABLE_LAB=yes -v "$PWD":/home/jovyan/work jupyter/datascience-notebook:latest
+
+In your web browser, navigate to:
+
+.. code:: bash
+
+     http://<hostname>:10000/?token=<token>
+
+where ``<hostname>`` is the name of the computer running docker and ``<token>`` is the
+secret token printed in the console after starting the container.
+
+This example pulls the ``jupyter/datascience-notebook`` image tagged ``latest`` from Docker Hub if it is not already
+present on the local host. It then starts an ephemeral container running a Jupyter Notebook server and exposes
+the server on host port ``10000``. The command mounts the current working directory ``$PWD`` on the host as ``/home/jovyan/work``
+in the container. Docker destroys the container after notebook server exit, but any files written to
+``/home/jovyan/work`` in the container remain intact on the host.
+
+
 
 Installing with Previous Versions of Notebook
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
