@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/documentsearch-extension",
-  "version": "1.1.0-alpha.1",
+  "version": "1.2.0-alpha.0",
   "description": "Search document types",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -33,11 +33,11 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.1.0-alpha.1",
-    "@jupyterlab/apputils": "^1.1.0-alpha.1",
-    "@jupyterlab/documentsearch": "^1.1.0-alpha.1",
-    "@jupyterlab/mainmenu": "^1.1.0-alpha.1",
-    "@phosphor/widgets": "^1.8.0"
+    "@jupyterlab/application": "^1.2.0-alpha.0",
+    "@jupyterlab/apputils": "^1.2.0-alpha.0",
+    "@jupyterlab/documentsearch": "^1.2.0-alpha.0",
+    "@jupyterlab/mainmenu": "^1.2.0-alpha.0",
+    "@phosphor/widgets": "^1.9.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

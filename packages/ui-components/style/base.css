@@ -112,3 +112,7 @@ input::placeholder {
 select {
   box-sizing: border-box;
 }
+
+/* Sibling imports */
+@import './deprecated.css';
+@import './deprecatedExtra.css';

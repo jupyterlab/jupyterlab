@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/imageviewer-extension",
-  "version": "1.1.0-alpha.1",
+  "version": "1.2.0-alpha.0",
   "description": "JupyterLab - Image Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,10 +36,10 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.1.0-alpha.1",
-    "@jupyterlab/apputils": "^1.1.0-alpha.1",
-    "@jupyterlab/docregistry": "^1.1.0-alpha.1",
-    "@jupyterlab/imageviewer": "^1.1.0-alpha.1"
+    "@jupyterlab/application": "^1.2.0-alpha.0",
+    "@jupyterlab/apputils": "^1.2.0-alpha.0",
+    "@jupyterlab/docregistry": "^1.2.0-alpha.0",
+    "@jupyterlab/imageviewer": "^1.2.0-alpha.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

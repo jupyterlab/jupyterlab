@@ -104,15 +104,19 @@ export class DocumentRegistry implements IDisposable {
    * @returns A disposable which will unregister the factory.
    *
    * #### Notes
-   * If a factory with the given `'displayName'` is already registered,
+   * If a factory with the given `'name'` is already registered,
    * a warning will be logged, and this will be a no-op.
    * If `'*'` is given as a default extension, the factory will be registered
    * as the global default.
    * If an extension or global default is already registered, this factory
    * will override the existing default.
+   * The factory cannot be named an empty string or the string `'default'`.
    */
   addWidgetFactory(factory: DocumentRegistry.WidgetFactory): IDisposable {
     let name = factory.name.toLowerCase();
+    if (!name || name === 'default') {
+      throw Error('Invalid factory name');
+    }
     if (this._widgetFactories[name]) {
       console.warn(`Duplicate registered factory ${name}`);
       return new DisposableDelegate(Private.noOp);
@@ -136,10 +140,10 @@ export class DocumentRegistry implements IDisposable {
     }
     // For convenience, store a mapping of file type name -> name
     for (let ft of factory.fileTypes) {
-      if (!this._widgetFactoryExtensions[ft]) {
-        this._widgetFactoryExtensions[ft] = [];
+      if (!this._widgetFactoriesForFileType[ft]) {
+        this._widgetFactoriesForFileType[ft] = [];
       }
-      this._widgetFactoryExtensions[ft].push(name);
+      this._widgetFactoriesForFileType[ft].push(name);
     }
     this._changed.emit({
       type: 'widgetFactory',
@@ -161,10 +165,15 @@ export class DocumentRegistry implements IDisposable {
           delete this._defaultRenderedWidgetFactories[ext];
         }
       }
-      for (let ext of Object.keys(this._widgetFactoryExtensions)) {
-        ArrayExt.removeFirstOf(this._widgetFactoryExtensions[ext], name);
-        if (this._widgetFactoryExtensions[ext].length === 0) {
-          delete this._widgetFactoryExtensions[ext];
+      for (let ext of Object.keys(this._widgetFactoriesForFileType)) {
+        ArrayExt.removeFirstOf(this._widgetFactoriesForFileType[ext], name);
+        if (this._widgetFactoriesForFileType[ext].length === 0) {
+          delete this._widgetFactoriesForFileType[ext];
+        }
+      }
+      for (let ext of Object.keys(this._defaultWidgetFactoryOverrides)) {
+        if (this._defaultWidgetFactoryOverrides[ext] === name) {
+          delete this._defaultWidgetFactoryOverrides[ext];
         }
       }
       this._changed.emit({
@@ -308,7 +317,14 @@ export class DocumentRegistry implements IDisposable {
     // Get the ordered matching file types.
     let fts = this.getFileTypesForPath(PathExt.basename(path));
 
-    // Start with the file type default factories.
+    // Start with any user overrides for the defaults.
+    fts.forEach(ft => {
+      if (ft.name in this._defaultWidgetFactoryOverrides) {
+        factories.add(this._defaultWidgetFactoryOverrides[ft.name]);
+      }
+    });
+
+    // Next add the file type default factories.
     fts.forEach(ft => {
       if (ft.name in this._defaultWidgetFactories) {
         factories.add(this._defaultWidgetFactories[ft.name]);
@@ -329,16 +345,16 @@ export class DocumentRegistry implements IDisposable {
 
     // Add the file type factories in registration order.
     fts.forEach(ft => {
-      if (ft.name in this._widgetFactoryExtensions) {
-        each(this._widgetFactoryExtensions[ft.name], n => {
+      if (ft.name in this._widgetFactoriesForFileType) {
+        each(this._widgetFactoriesForFileType[ft.name], n => {
           factories.add(n);
         });
       }
     });
 
     // Add the rest of the global factories, in registration order.
-    if ('*' in this._widgetFactoryExtensions) {
-      each(this._widgetFactoryExtensions['*'], n => {
+    if ('*' in this._widgetFactoriesForFileType) {
+      each(this._widgetFactoriesForFileType['*'], n => {
         factories.add(n);
       });
     }
@@ -405,6 +421,51 @@ export class DocumentRegistry implements IDisposable {
       return this._widgetFactories[this._defaultWidgetFactory];
     }
     return this.preferredWidgetFactories(path)[0];
+  }
+
+  /**
+   * Set overrides for the default widget factory for a file type.
+   *
+   * Normally, a widget factory informs the document registry which file types
+   * it should be the default for using the `defaultFor` option in the
+   * IWidgetFactoryOptions. This function can be used to override that after
+   * the fact.
+   *
+   * @param fileType: The name of the file type.
+   *
+   * @param factory: The name of the factory.
+   *
+   * #### Notes
+   * If `factory` is undefined, then any override will be unset, and the
+   * default factory will revert to the original value.
+   *
+   * If `factory` or `fileType` are not known to the docregistry, or
+   * if `factory` cannot open files of type `fileType`, this will throw
+   * an error.
+   */
+  setDefaultWidgetFactory(fileType: string, factory: string | undefined): void {
+    fileType = fileType.toLowerCase();
+    if (!this.getFileType(fileType)) {
+      throw Error(`Cannot find file type ${fileType}`);
+    }
+    if (!factory) {
+      if (this._defaultWidgetFactoryOverrides[fileType]) {
+        delete this._defaultWidgetFactoryOverrides[fileType];
+      }
+      return;
+    }
+    if (!this.getWidgetFactory(factory)) {
+      throw Error(`Cannot find widget factory ${factory}`);
+    }
+    factory = factory.toLowerCase();
+    const factories = this._widgetFactoriesForFileType[fileType];
+    if (
+      factory !== this._defaultWidgetFactory &&
+      !(factories && factories.includes(factory))
+    ) {
+      throw Error(`Factory ${factory} cannot view file type ${fileType}`);
+    }
+    this._defaultWidgetFactoryOverrides[fileType] = factory;
   }
 
   /**
@@ -604,15 +665,18 @@ export class DocumentRegistry implements IDisposable {
     [key: string]: DocumentRegistry.WidgetFactory;
   } = Object.create(null);
   private _defaultWidgetFactory = '';
+  private _defaultWidgetFactoryOverrides: {
+    [key: string]: string;
+  } = Object.create(null);
   private _defaultWidgetFactories: { [key: string]: string } = Object.create(
     null
   );
   private _defaultRenderedWidgetFactories: {
     [key: string]: string;
   } = Object.create(null);
-  private _widgetFactoryExtensions: { [key: string]: string[] } = Object.create(
-    null
-  );
+  private _widgetFactoriesForFileType: {
+    [key: string]: string[];
+  } = Object.create(null);
   private _fileTypes: DocumentRegistry.IFileType[] = [];
   private _extenders: {
     [key: string]: DocumentRegistry.WidgetExtension[];
@@ -1212,7 +1276,7 @@ export namespace DocumentRegistry {
       displayName: 'JSON File',
       extensions: ['.json'],
       mimeTypes: ['application/json'],
-      iconClass: 'jp-MaterialIcon jp-JSONIcon'
+      iconClass: 'jp-MaterialIcon jp-JsonIcon'
     },
     {
       name: 'csv',
@@ -1240,7 +1304,7 @@ export namespace DocumentRegistry {
       displayName: 'YAML File',
       mimeTypes: ['text/x-yaml', 'text/yaml'],
       extensions: ['.yaml', '.yml'],
-      iconClass: 'jp-MaterialIcon jp-YAMLIcon'
+      iconClass: 'jp-MaterialIcon jp-YamlIcon'
     },
     {
       name: 'svg',

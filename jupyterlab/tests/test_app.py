@@ -77,27 +77,6 @@ def _create_workspaces_dir():
     return root_dir
 
 
-def _install_kernels():
-    # Install echo and ipython kernels - should be done after env patch
-    kernel_json = {
-        'argv': [
-            sys.executable,
-            '-m', 'jupyterlab.tests.echo_kernel',
-            '-f', '{connection_file}'
-        ],
-        'display_name': "Echo Kernel",
-        'language': 'echo'
-    }
-    paths = jupyter_core.paths
-    kernel_dir = pjoin(paths.jupyter_data_dir(), 'kernels', 'echo')
-    os.makedirs(kernel_dir)
-    with open(pjoin(kernel_dir, 'kernel.json'), 'w') as f:
-        f.write(json.dumps(kernel_json))
-
-    ipykernel_dir = pjoin(paths.jupyter_data_dir(), 'kernels', 'ipython')
-    write_kernel_spec(ipykernel_dir)
-
-
 class TestEnv(object):
     """Set Jupyter path variables to a temporary directory
 
@@ -157,12 +136,47 @@ class ProcessTestApp(ProcessApp):
         pass
 
     def start(self):
-        _install_kernels()
+        self._install_default_kernels()
         self.kernel_manager.default_kernel_name = 'echo'
         self.lab_config.schemas_dir = self.schemas_dir
         self.lab_config.user_settings_dir = self.user_settings_dir
         self.lab_config.workspaces_dir = self.workspaces_dir
         ProcessApp.start(self)
+
+    def install_kernel(self, kernel_name, kernel_spec):
+        """Install a kernel spec to the data directory.
+
+        Parameters
+        ----------
+        kernel_name: str
+            Name of the kernel.
+        kernel_spec: dict
+            The kernel spec for the kernel
+        """
+        paths = jupyter_core.paths
+        kernel_dir = pjoin(paths.jupyter_data_dir(), 'kernels', kernel_name)
+        os.makedirs(kernel_dir)
+        with open(pjoin(kernel_dir, 'kernel.json'), 'w') as f:
+            f.write(json.dumps(kernel_spec))
+
+    def _install_default_kernels(self):
+        # Install echo and ipython kernels - should be done after env patch
+        self.install_kernel(
+            kernel_name="echo",
+            kernel_spec={
+                'argv': [
+                    sys.executable,
+                    '-m', 'jupyterlab.tests.echo_kernel',
+                    '-f', '{connection_file}'
+                ],
+                'display_name': "Echo Kernel",
+                'language': 'echo'
+            }
+        )
+
+        paths = jupyter_core.paths
+        ipykernel_dir = pjoin(paths.jupyter_data_dir(), 'kernels', 'ipython')
+        write_kernel_spec(ipykernel_dir)
 
     def _process_finished(self, future):
         self.http_server.stop()

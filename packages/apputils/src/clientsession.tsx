@@ -373,6 +373,7 @@ export class ClientSession implements IClientSession {
           console.error(`Kernel not shut down ${reason}`);
         });
       }
+      this._session.dispose();
       this._session = null;
     }
     if (this._dialog) {
@@ -585,7 +586,10 @@ export class ClientSession implements IClientSession {
     }
     let session = this._session;
     if (session && session.status !== 'dead') {
-      return session.changeKernel(options);
+      return session.changeKernel(options).catch(err => {
+        void this._handleSessionError(err);
+        return Promise.reject(err);
+      });
     } else {
       return this._startSession(options);
     }

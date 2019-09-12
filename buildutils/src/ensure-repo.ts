@@ -13,7 +13,11 @@
  */
 import * as path from 'path';
 import * as utils from './utils';
-import { ensurePackage, IEnsurePackageOptions } from './ensure-package';
+import {
+  ensurePackage,
+  ensureUiComponents,
+  IEnsurePackageOptions
+} from './ensure-package';
 
 type Dict<T> = { [key: string]: T };
 
@@ -148,7 +152,7 @@ function ensureJupyterlab(): string[] {
   corePackage.dependencies = {};
   corePackage.resolutions = {};
 
-  let singletonPackages = corePackage.jupyterlab.singletonPackages;
+  let singletonPackages: string[] = corePackage.jupyterlab.singletonPackages;
   const coreData = new Map<string, any>();
 
   utils.getCorePaths().forEach(pkgPath => {
@@ -162,11 +166,39 @@ function ensureJupyterlab(): string[] {
     coreData.set(data.name, data);
   });
 
+  // Populate the yarn resolutions. First we make sure direct packages have
+  // resolutions.
   coreData.forEach((data, name) => {
-    // Insist on this version in the yarn resolution.
-    const version = `~${data.version}`;
-    corePackage.resolutions[name] = version;
+    // Insist on a restricted version in the yarn resolution.
+    corePackage.resolutions[name] = `~${data.version}`;
   });
+
+  // Then fill in any missing packages that should be singletons from the direct
+  // package dependencies.
+  coreData.forEach(data => {
+    if (data.dependencies) {
+      Object.entries(data.dependencies).forEach(([dep, version]) => {
+        if (
+          singletonPackages.includes(dep) &&
+          !(dep in corePackage.resolutions)
+        ) {
+          corePackage.resolutions[dep] = version;
+        }
+      });
+    }
+  });
+
+  // At this point, each singleton should have a resolution. Check this.
+  let unresolvedSingletons = singletonPackages.filter(
+    pkg => !(pkg in corePackage.resolutions)
+  );
+  if (unresolvedSingletons.length > 0) {
+    throw new Error(
+      `Singleton packages must have a resolved version number; these do not: ${unresolvedSingletons.join(
+        ', '
+      )}`
+    );
+  }
 
   coreData.forEach((data, name) => {
     // Determine if the package wishes to be included in the top-level
@@ -181,19 +213,7 @@ function ensureJupyterlab(): string[] {
     }
 
     // Make sure it is included as a dependency.
-    const version = `~${data.version}`;
-    corePackage.dependencies[data.name] = version;
-
-    // Add its dependencies to the resolutions if they are in the singleton
-    // packages packages. This lets yarn force the singleton status.
-    let deps = data.dependencies || {};
-    for (let dep in deps) {
-      if (singletonPackages.indexOf(dep) !== -1) {
-        if (!(dep in corePackage.resolutions)) {
-          corePackage.resolutions[dep] = deps[dep];
-        }
-      }
-    }
+    corePackage.dependencies[data.name] = `~${data.version}`;
 
     // Handle extensions.
     ['extension', 'mimeExtension'].forEach(item => {
@@ -339,6 +359,16 @@ export async function ensureIntegrity(): Promise<boolean> {
     if (pkgMessages.length > 0) {
       messages[name] = pkgMessages;
     }
+  }
+
+  // ensure the icon svg imports
+  pkgMessages = await ensureUiComponents(pkgPaths['@jupyterlab/ui-components']);
+  if (pkgMessages.length > 0) {
+    let pkgName = '@jupyterlab/ui-components';
+    if (!messages[pkgName]) {
+      messages[pkgName] = [];
+    }
+    messages[pkgName] = messages[pkgName].concat(pkgMessages);
   }
 
   // Handle the top level package.

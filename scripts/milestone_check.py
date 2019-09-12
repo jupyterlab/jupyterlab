@@ -8,20 +8,35 @@
 import subprocess
 import requests
 import os
-
-try:
-  api_token = os.environ['GITHUB_TOKEN']
-except KeyError:
-  print('Error: set the environment variable GITHUB_TOKEN to a GitHub authentication token (see https://github.com/settings/tokens)')
-  exit(1)
-
-MILESTONE='1.0'
+import sys
 
 ranges = {
-    18: 'origin/0.35.0 --not origin/0.34.x', #0.35.0
-    20: 'origin/0.35.x --not v0.35.0', #0.35.x
-    '1.0': 'origin/master --not origin/0.35.x',
+    '0.35': 'origin/0.35.0 --not origin/0.34.x',
+    '0.35.x': 'origin/0.35.x --not v0.35.0',
+    '1.0': 'origin/1.0.x --not origin/0.35.x',
+    '1.1': 'v1.1.0 --not origin/1.0.x',
+    '1.1.1': 'v1.1.1 --not v1.1.0',
+    '1.1.2': 'v1.1.2 --not v1.1.1',
+    '1.1.3': 'v1.1.3 --not v1.1.2',
+    '1.2': 'origin/master --not origin/1.1.x',
 }
+
+try:
+    api_token = os.environ['GITHUB_TOKEN']
+except KeyError:
+    print('Error: set the environment variable GITHUB_TOKEN to a GitHub authentication token (see https://github.com/settings/tokens)')
+    exit(1)
+
+if len(sys.argv) != 2:
+    print('Error: exactly one argument expected, the milestone.')
+    exit(1)
+
+MILESTONE=sys.argv[1]
+
+if MILESTONE not in ranges:
+    print('Error: I do not know about milestone %r. Possible milestones are %r'%(MILESTONE, list(ranges.keys())))
+    exit(1)
+
 
 out = subprocess.run("git log {} --format='%H,%cE,%s'".format(ranges[MILESTONE]), shell=True, encoding='utf8', stdout=subprocess.PIPE)
 commits = {i[0]: (i[1], i[2]) for i in (x.split(',',2) for x in out.stdout.splitlines())}

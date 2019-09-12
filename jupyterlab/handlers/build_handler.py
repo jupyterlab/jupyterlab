@@ -10,7 +10,8 @@ from notebook.base.handlers import APIHandler
 from tornado import gen, web
 from tornado.concurrent import run_on_executor
 
-from ..commands import build, clean, build_check
+from ..commands import build, clean, build_check, AppOptions, _ensure_options
+from ..coreconfig import CoreConfig
 
 
 class Builder(object):
@@ -21,10 +22,14 @@ class Builder(object):
     _kill_event = None
     _future = None
 
-    def __init__(self, log, core_mode, app_dir):
-        self.log = log
+    # TODO 2.0: Clean up signature to (self, core_mode, app_options=None)
+    def __init__(self, log, core_mode, app_dir, core_config=None, app_options=None):
+        app_options = _ensure_options(
+            app_options, logger=log, app_dir=app_dir, core_config=core_config)
+        self.log = app_options.logger
         self.core_mode = core_mode
-        self.app_dir = app_dir
+        self.app_dir = app_options.app_dir
+        self.core_config = app_options.core_config
 
     @gen.coroutine
     def get_status(self):
@@ -34,7 +39,8 @@ class Builder(object):
             raise gen.Return(dict(status='building', message=''))
 
         try:
-            messages = yield self._run_build_check(self.app_dir, self.log)
+            messages = yield self._run_build_check(
+                self.app_dir, self.log, self.core_config)
             status = 'needed' if messages else 'stable'
             if messages:
                 self.log.warn('Build recommended')
@@ -60,7 +66,8 @@ class Builder(object):
             self.building = True
             self._kill_event = evt = Event()
             try:
-                yield self._run_build(self.app_dir, self.log, evt)
+                yield self._run_build(
+                    self.app_dir, self.log, evt, self.core_config)
                 future.set_result(True)
             except Exception as e:
                 if str(e) == 'Aborted':
@@ -84,20 +91,23 @@ class Builder(object):
         self.canceled = True
 
     @run_on_executor
-    def _run_build_check(self, app_dir, logger):
-        return build_check(app_dir=app_dir, logger=logger)
+    def _run_build_check(self, app_dir, logger, core_config):
+        return build_check(app_options=AppOptions(
+            app_dir=app_dir, logger=logger, core_config=core_config))
 
     @run_on_executor
-    def _run_build(self, app_dir, logger, kill_event):
-        kwargs = dict(app_dir=app_dir, logger=logger, kill_event=kill_event, command='build')
+    def _run_build(self, app_dir, logger, kill_event, core_config):
+        app_options = AppOptions(
+            app_dir=app_dir, logger=logger, kill_event=kill_event,
+            core_config=core_config)
         try:
-            return build(**kwargs)
+            return build(command='build', app_options=app_options)
         except Exception as e:
             if self._kill_event.is_set():
                 return
             self.log.warn('Build failed, running a clean and rebuild')
-            clean(app_dir)
-            return build(**kwargs)
+            clean(app_options=app_options)
+            return build(command='build', app_options=app_options)
 
 
 class BuildHandler(APIHandler):
@@ -114,7 +124,7 @@ class BuildHandler(APIHandler):
     @web.authenticated
     @gen.coroutine
     def delete(self):
-        self.log.warn('Canceling build')
+        self.log.warning('Canceling build')
         try:
             yield self.builder.cancel()
         except Exception as e:

@@ -3,16 +3,14 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+/* CSS for specific icons */
+
 .jp-ImageJupyterLab {
   background-image: var(--jp-image-jupyterlab);
 }
 
 .jp-ImageJupyterLab-wordmark {
   background-image: var(--jp-image-jupyterlab-wordmark);
-}
-
-.jp-ImageJupyter-favicon {
-  background-image: var(--jp-image-jupyter-favicon);
 }
 
 .jp-JupyterIcon {

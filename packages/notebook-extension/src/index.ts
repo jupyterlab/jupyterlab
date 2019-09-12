@@ -173,6 +173,8 @@ namespace CommandIDs {
 
   export const toggleAllLines = 'notebook:toggle-all-cell-line-numbers';
 
+  export const toggleRecordTiming = 'notebook:toggle-record-timing';
+
   export const undoCellAction = 'notebook:undo-cell-action';
 
   export const redoCellAction = 'notebook:redo-cell-action';
@@ -306,12 +308,17 @@ const tools: JupyterFrontEndPlugin<INotebookTools> = {
 export const commandEditItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:mode-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker],
+  requires: [INotebookTracker],
+  optional: [IStatusBar],
   activate: (
     app: JupyterFrontEnd,
-    statusBar: IStatusBar,
-    tracker: INotebookTracker
+    tracker: INotebookTracker,
+    statusBar: IStatusBar | null
   ) => {
+    if (!statusBar) {
+      // Automatically disable if statusbar missing
+      return;
+    }
     const { shell } = app;
     const item = new CommandEditStatus();
 
@@ -339,12 +346,17 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
 export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:trust-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker, ILabShell],
+  requires: [INotebookTracker],
+  optional: [IStatusBar],
   activate: (
     app: JupyterFrontEnd,
-    statusBar: IStatusBar,
-    tracker: INotebookTracker
+    tracker: INotebookTracker,
+    statusBar: IStatusBar | null
   ) => {
+    if (!statusBar) {
+      // Automatically disable if statusbar missing
+      return;
+    }
     const { shell } = app;
     const item = new NotebookTrustStatus();
 
@@ -1520,6 +1532,17 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.toggleRecordTiming, {
+    label: 'Toggle Recording Cell Timing',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.toggleRecordTiming(current.content);
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.commandMode, {
     label: 'Enter Command Mode',
     execute: args => {
@@ -1858,6 +1881,7 @@ function populatePalette(
     CommandIDs.deselectAll,
     CommandIDs.clearAllOutputs,
     CommandIDs.toggleAllLines,
+    CommandIDs.toggleRecordTiming,
     CommandIDs.editMode,
     CommandIDs.commandMode,
     CommandIDs.changeKernel,

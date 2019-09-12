@@ -340,6 +340,9 @@ export namespace IRenderMime {
 
     /**
      * Get the download url for a given absolute url path.
+     *
+     * #### Notes
+     * This URL may include a query parameter.
      */
     getDownloadUrl(url: string): Promise<string>;
 

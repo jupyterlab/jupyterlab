@@ -5,6 +5,8 @@ import { Debouncer } from '@jupyterlab/coreutils';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
+import { DockPanelSvg, TabBarSvg } from '@jupyterlab/ui-components';
+
 import { ArrayExt, find, IIterator, iter, toArray } from '@phosphor/algorithm';
 
 import { PromiseDelegate, Token } from '@phosphor/coreutils';
@@ -176,7 +178,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     let bottomPanel = (this._bottomPanel = new BoxPanel());
     let topPanel = (this._topPanel = new Panel());
     let hboxPanel = new BoxPanel();
-    let dockPanel = (this._dockPanel = new DockPanel());
+    let dockPanel = (this._dockPanel = new DockPanelSvg({
+      kind: 'dockPanelBar'
+    }));
     let headerPanel = (this._headerPanel = new Panel());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
@@ -1028,7 +1032,8 @@ namespace Private {
      * Construct a new side bar handler.
      */
     constructor(side: string) {
-      this._sideBar = new TabBar<Widget>({
+      this._sideBar = new TabBarSvg<Widget>({
+        kind: 'sideBar',
         insertBehavior: 'none',
         removeBehavior: 'none',
         allowDeselect: true
