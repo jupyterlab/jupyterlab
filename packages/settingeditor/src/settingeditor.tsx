@@ -231,37 +231,33 @@ export class SettingEditor extends Widget {
   /**
    * Handle root level layout state changes.
    */
-  private _onStateChanged(): void {
+  private async _onStateChanged(): Promise<void> {
     this._state.sizes = this._panel.relativeSizes();
     this._state.container = this._editor.state;
     this._state.container.plugin = this._list.selection;
-    this._saveState()
-      .then(() => {
-        this._setState();
-      })
-      .catch(reason => {
-        console.error('Saving setting editor state failed', reason);
-        this._setState();
-      });
+    try {
+      await this._saveState();
+    } catch (error) {
+      console.error('Saving setting editor state failed', error);
+    }
+    this._setState();
   }
 
   /**
    * Set the state of the setting editor.
    */
-  private _saveState(): Promise<void> {
+  private async _saveState(): Promise<void> {
     const { key, state } = this;
     const value = this._state;
 
     this._saving = true;
-    return state
-      .save(key, value)
-      .then(() => {
-        this._saving = false;
-      })
-      .catch((reason: any) => {
-        this._saving = false;
-        throw reason;
-      });
+    try {
+      await state.save(key, value);
+      this._saving = false;
+    } catch (error) {
+      this._saving = false;
+      throw error;
+    }
   }
 
   /**

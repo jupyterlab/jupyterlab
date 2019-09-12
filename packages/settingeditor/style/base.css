@@ -62,7 +62,7 @@
 
 #setting-editor .jp-PluginList {
   min-width: 175px;
-  width: 175px;
+  max-width: 275px;
 }
 
 #setting-editor .jp-PluginList ul {
