@@ -17,13 +17,15 @@ import { IStateDB } from '@jupyterlab/coreutils';
 
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { Debugger } from './debugger';
 
 // import { DebuggerSidebar } from './sidebar';
 
 import { IDebugger, IDebuggerSidebar } from './tokens';
+import { DebuggerNotebookTracker } from './notebookTracker';
+import { BreakpointsService } from './breakpointsService';
 
 // import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
@@ -41,6 +43,9 @@ export namespace CommandIDs {
 
   export const debugNotebook = 'debugger:debug-notebook';
 }
+
+// Service for controll state of breakpoints in extensione
+const service = new BreakpointsService();
 
 /**
  * A plugin that provides visual debugging support for consoles.
@@ -96,8 +101,12 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     notebook: INotebookTracker,
     palette: ICommandPalette
   ) => {
-    notebook.widgetAdded.connect((sender, notePanel: NotebookPanel) => {});
+    new DebuggerNotebookTracker({
+      notebookTracker: notebook,
+      breakpointService: service
+    });
 
+    // console.log(debugetNoteTracker);
     // this exist only for my test in futre will be removed
     const command: string = CommandIDs.debugNotebook;
     app.commands.addCommand(command, {
@@ -118,16 +127,12 @@ const sidebar: JupyterFrontEndPlugin<Debugger> = {
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
-    restorer: ILayoutRestorer | null,
-    notebookTracker: INotebookTracker
+    restorer: ILayoutRestorer | null
   ): Debugger => {
     const { shell } = app;
     const label = 'Environment';
     const namespace = 'jp-debugger-sidebar';
-    const sidebar = new Debugger({
-      noteTracker: notebookTracker
-    });
-
+    const sidebar = new Debugger({ breakpointsService: service });
     sidebar.id = namespace;
     sidebar.title.label = label;
     shell.add(sidebar, 'right', { activate: false });
@@ -158,7 +163,9 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
     const tracker = new WidgetTracker<MainAreaWidget<Debugger>>({
       namespace: 'debugger'
     });
-
+    tracker.widgetUpdated.connect((_, upadete) => {
+      upadete;
+    });
     app.commands.addCommand(CommandIDs.create, {
       execute: args => {
         const id = (args.id as string) || '';

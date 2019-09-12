@@ -18,11 +18,11 @@ export class DebuggerSidebar extends SplitPanel {
     this.orientation = 'vertical';
     this.addClass('jp-DebuggerSidebar');
 
-    const notebook = this.model.notebookTracker;
-
     this.variables = new Variables();
     this.callstack = new Callstack();
-    this.breakpoints = new Breakpoints({ noteTracker: notebook });
+    this.breakpoints = new Breakpoints({
+      service: this.model.breakpointsService
+    });
 
     this.addWidget(this.variables);
     this.addWidget(this.callstack);
