@@ -15,9 +15,11 @@ export class Breakpoints extends Panel {
 
     this.service = options.service;
 
-    this.service.selectedBreakpointsChanged.connect((sender, update) => {
-      this.model.breakpoints = update;
-    });
+    if (this.service) {
+      this.service.selectedBreakpointsChanged.connect((sender, update) => {
+        this.model.breakpoints = update;
+      });
+    }
 
     this.model = new Breakpoints.IModel([]);
     this.addClass('jp-DebuggerBreakpoints');
