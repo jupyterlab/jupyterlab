@@ -4,8 +4,7 @@
   "description": "JupyterLab extension to render HTML files",
   "keywords": [
     "jupyter",
-    "jupyterlab",
-    "jupyterlab-extension"
+    "jupyterlab"
   ],
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
