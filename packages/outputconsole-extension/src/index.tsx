@@ -38,15 +38,19 @@ import {
   interactiveItem
 } from '@jupyterlab/statusbar';
 
+import { ISettingRegistry } from '@jupyterlab/coreutils';
+
+const OUTPUT_CONSOLE_PLUGIN_ID = '@jupyterlab/outputconsole-extension:plugin';
+
 /**
  * The Output Log extension.
  */
 const outputLogPlugin: JupyterFrontEndPlugin<IOutputLogRegistry> = {
   activate: activateOutputLog,
-  id: '@jupyterlab/outputconsole-extension:plugin',
+  id: OUTPUT_CONSOLE_PLUGIN_ID,
   provides: IOutputLogRegistry,
   requires: [INotebookTracker, IStatusBar],
-  optional: [ILayoutRestorer],
+  optional: [ILayoutRestorer, ISettingRegistry],
   autoStart: true
 };
 
@@ -282,7 +286,8 @@ function activateOutputLog(
   app: JupyterFrontEnd,
   nbtracker: INotebookTracker,
   statusBar: IStatusBar,
-  restorer: ILayoutRestorer | null
+  restorer: ILayoutRestorer | null,
+  settingRegistry: ISettingRegistry | null
 ): IOutputLogRegistry {
   const logRegistry = new OutputLogRegistry();
 
@@ -315,6 +320,8 @@ function activateOutputLog(
   });
 
   let loggerWidget: MainAreaWidget<OutputLoggerView> = null;
+  let messageLimit: number = 1000;
+  let highlightingEnabled: boolean = true;
 
   const createLoggerWidget = () => {
     let activeSource: string = nbtracker.currentWidget
@@ -326,6 +333,7 @@ function activateOutputLog(
     loggerWidget.title.closable = true;
     loggerWidget.title.label = 'Output Console';
     loggerWidget.title.iconClass = 'fa fa-list lab-output-console-icon';
+    loggerView.messageLimit = messageLimit;
 
     app.shell.add(loggerWidget, 'main', {
       ref: '',
@@ -343,7 +351,7 @@ function activateOutputLog(
 
     loggerWidget.disposed.connect(() => {
       loggerWidget = null;
-      status.model.highlightingEnabled = true;
+      status.model.highlightingEnabled = highlightingEnabled;
     });
   };
 
@@ -381,6 +389,31 @@ function activateOutputLog(
       });
     }
   );
+
+  if (settingRegistry) {
+    const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+      const maxLogEntries = settings.get('maxLogEntries').composite as number;
+      messageLimit = maxLogEntries;
+
+      if (loggerWidget) {
+        loggerWidget.content.messageLimit = messageLimit;
+      }
+
+      highlightingEnabled = settings.get('flash').composite as boolean;
+      status.model.highlightingEnabled = highlightingEnabled;
+    };
+
+    Promise.all([settingRegistry.load(OUTPUT_CONSOLE_PLUGIN_ID), app.restored])
+      .then(([settings]) => {
+        updateSettings(settings);
+        settings.changed.connect(settings => {
+          updateSettings(settings);
+        });
+      })
+      .catch((reason: Error) => {
+        console.error(reason.message);
+      });
+  }
 
   return logRegistry;
   // The notebook can call this command.
