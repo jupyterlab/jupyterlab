@@ -330,10 +330,15 @@ export async function ensurePackage(
  * of ui-components/style/icons.
  *
  * @param pkgPath - The path to the @jupyterlab/ui-components package.
+ * @param dorequire - If true, use `require` function in place of `import`
+ *  statements when loading the icon svg files
  *
  * @returns A list of changes that were made to ensure the package.
  */
-export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
+export async function ensureUiComponents(
+  pkgPath: string,
+  dorequire: boolean = false
+): Promise<string[]> {
   const funcName = 'ensureUiComponents';
   let messages: string[] = [];
 
@@ -347,14 +352,23 @@ export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
   let _iconModelDeclarations: string[] = [];
   svgs.forEach(svg => {
     const name = utils.stem(svg);
-    const nameCamel = utils.camelCase(name) + 'Svg';
-    _iconImportStatements.push(
-      `import ${nameCamel} from '${path
-        .relative(iconSrcDir, svg)
-        .split(path.sep)
-        .join('/')}';`
-    );
-    _iconModelDeclarations.push(`{ name: '${name}', svg: ${nameCamel} }`);
+    const svgpath = path
+      .relative(iconSrcDir, svg)
+      .split(path.sep)
+      .join('/');
+
+    if (dorequire) {
+      // load the icon svg using `require`
+      _iconModelDeclarations.push(
+        `{ name: '${name}', svg: require('${svgpath}').default }`
+      );
+    } else {
+      // load the icon svg using `import`
+      const nameCamel = utils.camelCase(name) + 'Svg';
+
+      _iconImportStatements.push(`import ${nameCamel} from '${svgpath}';`);
+      _iconModelDeclarations.push(`{ name: '${name}', svg: ${nameCamel} }`);
+    }
   });
   const iconImportStatements = _iconImportStatements.join('\n');
   const iconModelDeclarations = _iconModelDeclarations.join(',\n');
