@@ -29,6 +29,14 @@ export class DebuggerNotebookTracker {
         );
       }
     );
+
+    this.breakpointService.selectedBreakpointsChanged.connect(
+      (sender, update) => {
+        if (update && update.length === 0) {
+          this.clearGutter();
+        }
+      }
+    );
   }
 
   notebookTracker: INotebookTracker;
@@ -43,6 +51,15 @@ export class DebuggerNotebookTracker {
     }
     this.debuggerSession = new DebugSession({
       client: client
+    });
+  }
+
+  protected clearGutter() {
+    const editor = this.getCell().editor as CodeMirrorEditor;
+    editor.doc.eachLine(line => {
+      if ((line as LineInfo).gutterMarkers) {
+        editor.editor.setGutterMarker(line, 'breakpoints', null);
+      }
     });
   }
 
@@ -92,6 +109,7 @@ export class DebuggerNotebookTracker {
   }
 
   protected onGutterClick = (editor: Editor, lineNumber: number) => {
+    console.log(lineNumber);
     const info = editor.lineInfo(lineNumber);
     if (!info) {
       return;
