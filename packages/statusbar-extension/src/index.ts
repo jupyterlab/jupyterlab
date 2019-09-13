@@ -253,7 +253,11 @@ export const lineColItem: JupyterFrontEndPlugin<void> = {
         );
         const cell = (newValue as NotebookPanel).content.activeCell;
         item.model!.editor = cell && cell.editor;
-      } else if (newValue && editorTracker.has(newValue)) {
+      } else if (
+        newValue &&
+        editorTracker.has(newValue) &&
+        (newValue as IDocumentWidget<FileEditor>).content.editor
+      ) {
         item.model!.editor = (newValue as IDocumentWidget<
           FileEditor
         >).content.editor;

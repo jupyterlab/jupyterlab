@@ -148,21 +148,21 @@ export class FileEditor extends Widget {
    * Get the context for the editor widget.
    */
   get context(): DocumentRegistry.Context {
-    return this._editorWidget.context;
+    return this._context;
   }
 
   /**
    * The code editor model associated with the file.
    */
   get model(): CodeEditor.IModel | null {
-    return this._editorWidget.model;
+    return this._editorWidget ? this._editorWidget.model : null;
   }
 
   /**
    * The code editor widget associated with the file.
    */
   get editor(): CodeEditor.IEditor | null {
-    return this._editorWidget.editor;
+    return this._editorWidget ? this._editorWidget.editor : null;
   }
 
   /**
