@@ -5,5 +5,6 @@ export * from './components';
 export * from './icon';
 
 export * from './blueprint';
+export * from './font';
 export * from './tokens';
 export * from './utils';

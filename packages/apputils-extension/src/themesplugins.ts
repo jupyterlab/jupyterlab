@@ -15,18 +15,15 @@ import {
   ThemeManager
 } from '@jupyterlab/apputils';
 
-import {
-  FontMenu,
-  PageConfig,
-  URLExt,
-  validFonts
-} from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { ITranslator } from '@jupyterlab/translation';
+
+import { FontMenu, validFonts } from '@jupyterlab/ui-components';
 
 import { Menu } from '@lumino/widgets';
 
