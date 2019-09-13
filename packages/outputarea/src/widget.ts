@@ -218,9 +218,30 @@ export class OutputArea extends Widget {
         this.outputLengthChanged.emit(this.model.length);
         break;
       case 'remove':
-        // Only clear is supported by the model.
         if (this.widgets.length) {
-          this._clear();
+          // all items removed from model
+          if (this.model.length === 0) {
+            this._clear();
+          } else {
+            // range of items removed from model
+            // remove widgets corresponding to removed model items
+            const startIndex = args.oldIndex;
+            for (
+              let i = 0;
+              i < args.oldValues.length && startIndex < this.widgets.length;
+              ++i
+            ) {
+              let widget = this.widgets[startIndex];
+              widget.parent = null;
+              widget.dispose();
+            }
+
+            // apply item offset to target model item indices in _displayIdMap
+            this._moveDisplayIdIndices(startIndex, args.oldValues.length);
+
+            // prevent jitter caused by immediate height change
+            this._preventHeightChangeJitter();
+          }
           this.outputLengthChanged.emit(this.model.length);
         }
         break;
@@ -231,6 +252,31 @@ export class OutputArea extends Widget {
       default:
         break;
     }
+  }
+
+  /**
+   * Update indices in _displayIdMap in response to element remove from model items
+   * *
+   * @param startIndex - The index of first element removed
+   *
+   * @param count - The number of elements removed from model items
+   *
+   */
+  private _moveDisplayIdIndices(startIndex: number, count: number) {
+    this._displayIdMap.forEach((indices: number[]) => {
+      const rangeEnd = startIndex + count;
+      const numIndices = indices.length;
+      for (let i = numIndices - 1; i >= 0; --i) {
+        const index = indices[i];
+        // remove model item indices in removed range
+        if (index >= startIndex && index < rangeEnd) {
+          indices.splice(i, 1);
+        } else if (index >= rangeEnd) {
+          // move model item indices that were larger than range end
+          indices[i] -= count;
+        }
+      }
+    });
   }
 
   /**
@@ -263,6 +309,11 @@ export class OutputArea extends Widget {
     // Clear the display id map.
     this._displayIdMap.clear();
 
+    // prevent jitter caused by immediate height change
+    this._preventHeightChangeJitter();
+  }
+
+  private _preventHeightChangeJitter() {
     // When an output area is cleared and then quickly replaced with new
     // content (as happens with @interact in widgets, for example), the
     // quickly changing height can make the page jitter.
