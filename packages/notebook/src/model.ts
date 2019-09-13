@@ -91,14 +91,19 @@ export class NotebookModel implements INotebookModel {
     } else {
       this.data = options.data;
     }
-    // Handle initialization of data.
-    DatastoreExt.withTransaction(this.data.record.datastore, () => {
-      DatastoreExt.updateRecord(this.data.record, {
-        nbformat: nbformat.MAJOR_VERSION,
-        nbformatMinor: nbformat.MINOR_VERSION
+    if (!DatastoreExt.getRecord(this.data.record)) {
+      this.isPrepopulated = false;
+      // Handle initialization of data.
+      DatastoreExt.withTransaction(this.data.record.datastore, () => {
+        DatastoreExt.updateRecord(this.data.record, {
+          nbformat: nbformat.MAJOR_VERSION,
+          nbformatMinor: nbformat.MINOR_VERSION
+        });
+        this._ensureMetadata();
       });
-      this._ensureMetadata();
-    });
+    } else {
+      this.isPrepopulated = true;
+    }
 
     // Get a content factory that will create new content in the notebook
     // data location.
@@ -119,8 +124,15 @@ export class NotebookModel implements INotebookModel {
    */
   readonly data: INotebookData.DataLocation;
 
+  /**
+   * Whether the notebook model is collaborative.
+   */
   readonly isCollaborative = true;
-  readonly isPrepopulated = false;
+
+  /**
+   * Whether the notebook model comes prepopulated.
+   */
+  readonly isPrepopulated: boolean;
 
   /**
    * The metadata associated with the notebook.

@@ -221,7 +221,7 @@ export class CollaborationClient extends WSConnection<
         throw new Error('Critical! Out of order transactions in datastore.');
       }
       this._serverSerial = t.serial;
-      MessageLoop.postMessage(
+      MessageLoop.sendMessage(
         this.handler,
         new Datastore.TransactionMessage(t)
       );

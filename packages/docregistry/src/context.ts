@@ -249,6 +249,7 @@ export class Context<T extends DocumentRegistry.IModel>
       model.isCollaborative &&
       ((model as any) as DocumentRegistry.ICollaborativeModel).isPrepopulated
     ) {
+      this._populate();
       return;
     }
     // TODO how to handle prepopulated collaborative sessions?
