@@ -209,7 +209,8 @@ function activateEditorCommands(
   /**
    * Handle the settings of new widgets.
    */
-  tracker.widgetAdded.connect((sender, widget) => {
+  tracker.widgetAdded.connect(async (sender, widget) => {
+    await widget.context.ready;
     if (widget.content.editor instanceof CodeMirrorEditor) {
       let cm = widget.content.editor.editor;
       cm.setOption('keyMap', keyMap);

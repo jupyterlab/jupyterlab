@@ -249,6 +249,9 @@ function activate(
    */
   function updateWidget(widget: FileEditor): void {
     const editor = widget.editor;
+    if (!editor) {
+      return;
+    }
     Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
       editor.setOption(key, config[key]);
     });
@@ -270,7 +273,7 @@ function activate(
       updateTracker();
     });
 
-  factory.widgetCreated.connect((sender, widget) => {
+  factory.widgetCreated.connect(async (sender, widget) => {
     widget.title.icon = EDITOR_ICON_CLASS;
 
     // Notify the widget tracker if restore data needs to update.
@@ -278,12 +281,14 @@ function activate(
       void tracker.save(widget);
     });
     void tracker.add(widget);
+    await widget.context.ready;
     updateWidget(widget.content);
   });
   app.docRegistry.addWidgetFactory(factory);
 
   // Handle the settings of new widgets.
-  tracker.widgetAdded.connect((sender, widget) => {
+  tracker.widgetAdded.connect(async (sender, widget) => {
+    await widget.context.ready;
     updateWidget(widget.content);
   });
 

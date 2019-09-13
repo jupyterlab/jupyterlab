@@ -176,7 +176,7 @@ export namespace NotebookTrustStatus {
         this._notebook.modelContentChanged.connect(this._onModelChanged, this);
 
         // Derive values
-        if (this._notebook.activeCell !== undefined) {
+        if (this._notebook.activeCell) {
           let trusted = DatastoreExt.getField({
             ...this._notebook.activeCell.data.record,
             field: 'trusted'

@@ -606,6 +606,9 @@ export namespace NotebookTools {
       const nb =
         this.notebookTools.activeNotebookPanel &&
         this.notebookTools.activeNotebookPanel.content;
+      if (!nb || !nb.model) {
+        return;
+      }
       this.editor.source = nb
         ? { ...nb.model.data.record, field: 'metadata' }
         : null;

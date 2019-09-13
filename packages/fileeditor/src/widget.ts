@@ -161,7 +161,7 @@ export class FileEditor extends Widget {
   /**
    * The code editor widget associated with the file.
    */
-  get editor(): CodeEditor.IEditor {
+  get editor(): CodeEditor.IEditor | null {
     return this._editorWidget.editor;
   }
 
@@ -239,7 +239,7 @@ export class FileEditor extends Widget {
   }
 
   private _context: DocumentRegistry.Context;
-  private _editorWidget: FileEditorCodeWrapper | null;
+  private _editorWidget: FileEditorCodeWrapper | null = null;
   private _mimeTypeService: IEditorMimeTypeService;
 }
 

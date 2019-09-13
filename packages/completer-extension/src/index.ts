@@ -261,9 +261,9 @@ const files: JupyterFrontEndPlugin<void> = {
     } = {};
 
     // When a new file editor is created, make the completer for it.
-    editorTracker.widgetAdded.connect((sender, widget) => {
+    editorTracker.widgetAdded.connect(async (sender, widget) => {
       const sessions = app.serviceManager.sessions;
-      const editor = widget.content.editor;
+      const editor = await widget.content.editor;
       const contextConnector = new ContextConnector({ editor });
 
       // When the list of running sessions changes,
