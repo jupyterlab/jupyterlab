@@ -47,12 +47,11 @@ class CollaborationsManagerHandler(DatastoreHandler):
     @web.authenticated
     def get(self, *args, **kwargs) -> None:
         # For unqualified GET, list current sessions we have read access to
-        collaborations = {
-            (key, dict(id=key, friendlyName=c.friendly_name))
+        collaborations = dict({
+            key: dict(id=key, friendlyName=c.friendly_name)
             for key, c in self.collaborations.items()
             if self.auth.check_permissions(self.current_user, key, "r")
-        }
-        self.log.info(collaborations)
+        })
         self.finish(json.dumps(dict(collaborations=collaborations)))
 
 
@@ -116,6 +115,7 @@ class CollaborationHandler(WSBaseHandler):
         self.collaboration_id = collaboration_id
 
         if self.collaborations.get(collaboration_id, None) is None:
+            self.log.info("Created new collaboration %s" % collaboration_id)
             self.collaborations[collaboration_id] = Collaboration(
                 collaboration_id, self.datastore_file
             )

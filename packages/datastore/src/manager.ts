@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Schema, Datastore, AnyField } from '@phosphor/datastore';
+import { Schema, Datastore } from '@phosphor/datastore';
 
 import { CollaborationClient } from './client';
 import { PageConfig } from '@jupyterlab/coreutils';
@@ -25,10 +25,3 @@ export async function createDatastore(
   await client.replayHistory();
   return datastore;
 }
-
-/*
- * A type alias for the schema field type from the phosphor datastore package.
- */
-export type SchemaFields = {
-  readonly [name: string]: AnyField;
-};

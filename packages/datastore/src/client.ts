@@ -113,12 +113,16 @@ export class CollaborationClient extends WSConnection<
    *
    * The transactions of the history will be sent to the set handler.
    */
-  async replayHistory(checkpointId?: number): Promise<void> {
+  async replayHistory(checkpointId?: number): Promise<boolean> {
     const msg = Collaboration.createMessage('history-request', {
       checkpointId: checkpointId === undefined ? null : checkpointId
     });
     const response = await this._requestMessageReply(msg);
+    if (response.content.transactions.length) {
+      return false;
+    }
     this._handleTransactions(response.content.transactions);
+    return true;
   }
 
   /**
