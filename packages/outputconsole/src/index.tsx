@@ -16,8 +16,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 import {
   OutputArea,
   IOutputAreaModel,
-  OutputAreaModel,
-  IOutputPrompt
+  OutputAreaModel
 } from '@jupyterlab/outputarea';
 
 import {
@@ -162,6 +161,17 @@ export class LoggerOutputArea extends OutputArea {
     return;
   }
 
+  private _createOutputPrompt(model: LoggerOutputModel): Widget {
+    const prompt = new Widget();
+    const timestamp = model.timestamp;
+
+    const content = document.createElement('div');
+    content.innerHTML = timestamp.toLocaleTimeString();
+    prompt.node.append(content);
+
+    return prompt;
+  }
+
   /**
    * Create an output item with a prompt and actual output
    */
@@ -176,9 +186,7 @@ export class LoggerOutputArea extends OutputArea {
 
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
-    let prompt = (this
-      .contentFactory as LoggerContentFactory).createLoggerPrompt(model);
-    prompt.executionCount = model.executionCount;
+    let prompt = this._createOutputPrompt(model as LoggerOutputModel);
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
@@ -213,37 +221,6 @@ export class LoggerOutputAreaModel extends OutputAreaModel {
   }
 
   private _messageLimit: number = 1000;
-}
-
-/**
- * The default output prompt implementation
- */
-class LoggerOutputPrompt extends Widget implements IOutputPrompt {
-  constructor(model: IOutputModel) {
-    super();
-
-    const timestamp = (model as LoggerOutputModel).timestamp;
-
-    const content = document.createElement('div');
-    content.innerHTML = timestamp.toLocaleTimeString();
-    this.node.append(content);
-  }
-  /**
-   * The execution count for the prompt.
-   */
-  executionCount: nbformat.ExecutionCount;
-}
-
-/**
- * The default implementation of `IContentFactory`.
- */
-export class LoggerContentFactory extends OutputArea.ContentFactory {
-  /**
-   * Create the output prompt for the widget.
-   */
-  createLoggerPrompt(model: IOutputModel): IOutputPrompt {
-    return new LoggerOutputPrompt(model);
-  }
 }
 
 export class LoggerOutputModel extends OutputModel {
@@ -347,7 +324,6 @@ export class OutputLoggerView extends StackedPanel {
       if (!this._outputViews.has(viewId)) {
         const outputView = new LoggerOutputArea({
           rendermime: logger.rendermime,
-          contentFactory: new LoggerContentFactory(),
           model: logger.outputAreaModel
         });
         outputView.id = viewId;
