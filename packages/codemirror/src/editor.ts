@@ -1361,31 +1361,30 @@ namespace Private {
    */
   export function delSpaceToPrevTabStop(cm: CodeMirror.Editor): void {
     let doc = cm.getDoc();
-    let from = doc.getCursor('from');
-    let to = doc.getCursor('to');
-    let sel = !posEq(from, to);
-    if (sel) {
-      let ranges = doc.listSelections();
-      for (let i = ranges.length - 1; i >= 0; i--) {
-        let head = ranges[i].head;
-        let anchor = ranges[i].anchor;
-        doc.replaceRange(
-          '',
-          CodeMirror.Pos(head.line, head.ch),
-          CodeMirror.Pos(anchor.line, anchor.ch)
-        );
+    var tabSize = doc.getOption('indentUnit');
+    var ranges = doc.listSelections(); // handle multicursor
+    for (var i = ranges.length - 1; i >= 0; i--) {
+      // iterate reverse so any deletions don't overlap
+      var head = ranges[i].head;
+      var anchor = ranges[i].anchor;
+      var sel = !posEq(head, anchor);
+      if (sel) {
+        // range is selection
+        doc.replaceRange('', anchor, head);
+      } else {
+        // range is cursor
+        var line = doc.getLine(head.line).substring(0, head.ch);
+        if (line.match(/^\ +$/) !== null) {
+          // delete tabs
+          var prevTabStop = (Math.ceil(head.ch / tabSize) - 1) * tabSize;
+          var from = CodeMirror.Position(head.line, prevTabStop);
+          doc.replaceRange('', from, head);
+        } else {
+          // delete non-tabs
+          var from = CodeMirror.Position(head.line, head.ch - 1);
+          doc.replaceRange('', from, head);
+        }
       }
-      return;
-    }
-    let cur = doc.getCursor();
-    let tabsize = cm.getOption('indentUnit');
-    let chToPrevTabStop = cur.ch - (Math.ceil(cur.ch / tabsize) - 1) * tabsize;
-    from = { ch: cur.ch - chToPrevTabStop, line: cur.line };
-    let select = doc.getRange(from, cur);
-    if (select.match(/^\ +$/) !== null) {
-      doc.replaceRange('', from, cur);
-    } else {
-      CodeMirror.commands['delCharBefore'](cm);
     }
   }
 
