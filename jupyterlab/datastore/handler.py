@@ -60,9 +60,9 @@ class WSBaseHandler(WebSocketMixin, WebSocketHandler, DatastoreHandler):
     """Base class for websockets reusing jupyter code"""
 
     def set_default_headers(self):
-        """Undo the set_default_headers in IPythonHandler
-
-        which doesn't make sense for websockets
+        """
+        Undo the set_default_headers in IPythonHandler which doesn't make
+        sense for websockets
         """
         pass
 

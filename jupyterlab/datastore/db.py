@@ -34,10 +34,8 @@ def decode_serials(rows):
 History = collections.namedtuple('History', ('state', 'transactions'))
 
 
-_table_name_re = re.compile(r'[a-zA-Z][a-zA-Z0-9_\-]*')
-
 def validate_table_name(name):
-    if _table_name_re.fullmatch(name) is None or name.startswith('checkpoints'):
+    if name is None or name.startswith('checkpoints'):
         raise ValueError('Invalid table name %r' % (name,))
 
 
