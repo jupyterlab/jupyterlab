@@ -58,8 +58,8 @@ export class Context<T extends DocumentRegistry.IModel>
       this._model.contentChanged.connect(this._onModelContentChanged, this);
     });
 
-    this._readyPromise = manager.ready.then(() => {
-      return this._populatedPromise.promise;
+    this._readyPromise = manager.ready.then(async () => {
+      await Promise.all([this._modelPromise, this._populatedPromise.promise]);
     });
 
     let ext = PathExt.extname(this._path);

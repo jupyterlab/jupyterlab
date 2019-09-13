@@ -1,9 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { CellData } from '@jupyterlab/cells';
+
+import { createDatastore } from '@jupyterlab/datastore';
+
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
+import { OutputData } from '@jupyterlab/rendermime';
+
 import { Contents } from '@jupyterlab/services';
+
+import { NotebookData } from './data';
 
 import { INotebookModel, NotebookModel } from './model';
 
@@ -70,8 +78,21 @@ export class NotebookModelFactory
   async createNew(
     options: DocumentRegistry.IModelFactory.IOptions = {}
   ): Promise<INotebookModel> {
-    let contentFactory = this.contentFactory;
-    let { languagePreference } = options;
+    const contentFactory = this.contentFactory;
+    const { languagePreference, path } = options;
+    if (path) {
+      const datastore = await createDatastore(path, [
+        NotebookData.SCHEMA,
+        OutputData.SCHEMA,
+        CellData.SCHEMA
+      ]);
+      const data = {
+        record: { datastore, schema: NotebookData.SCHEMA, record: 'data' },
+        cells: { datastore, schema: CellData.SCHEMA },
+        outputs: { datastore, schema: OutputData.SCHEMA }
+      };
+      return new NotebookModel({ data, languagePreference, contentFactory });
+    }
     return new NotebookModel({ languagePreference, contentFactory });
   }
 

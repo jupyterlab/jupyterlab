@@ -71,25 +71,28 @@ export class NotebookModel implements INotebookModel {
    */
   constructor(options: NotebookModel.IOptions = {}) {
     let factory = options.contentFactory || NotebookModel.defaultContentFactory;
-
-    const datastore = (this._store = NotebookData.createStore());
-    this.data = {
-      record: {
-        datastore,
-        schema: NotebookData.SCHEMA,
-        record: 'data'
-      },
-      cells: {
-        datastore,
-        schema: CellData.SCHEMA
-      },
-      outputs: {
-        datastore,
-        schema: OutputData.SCHEMA
-      }
-    };
+    if (!options.data) {
+      const datastore = (this._store = NotebookData.createStore());
+      this.data = {
+        record: {
+          datastore,
+          schema: NotebookData.SCHEMA,
+          record: 'data'
+        },
+        cells: {
+          datastore,
+          schema: CellData.SCHEMA
+        },
+        outputs: {
+          datastore,
+          schema: OutputData.SCHEMA
+        }
+      };
+    } else {
+      this.data = options.data;
+    }
     // Handle initialization of data.
-    DatastoreExt.withTransaction(datastore, () => {
+    DatastoreExt.withTransaction(this.data.record.datastore, () => {
       DatastoreExt.updateRecord(this.data.record, {
         nbformat: nbformat.MAJOR_VERSION,
         nbformatMinor: nbformat.MINOR_VERSION
@@ -102,7 +105,7 @@ export class NotebookModel implements INotebookModel {
     this.contentFactory = factory.clone(this.data);
 
     // Trigger a content change when appropriate.
-    this._store.changed.connect(this._onGenericChange, this);
+    this.data.record.datastore.changed.connect(this._onGenericChange, this);
     this._deletedCells = [];
   }
 
@@ -439,6 +442,11 @@ export namespace NotebookModel {
      * The default is a shared factory instance.
      */
     contentFactory?: IContentFactory;
+
+    /**
+     * The location for data stored in the notebook model.
+     */
+    data?: INotebookData.DataLocation;
   }
 
   /**
