@@ -160,18 +160,14 @@ export class LoggerOutputArea extends OutputArea {
 export class LoggerOutputAreaModel extends OutputAreaModel {
   constructor(options?: IOutputAreaModel.IOptions) {
     super(options);
-
-    this.changed.connect(() => {
-      this._applyLimit();
-    });
   }
 
   set messageLimit(limit: number) {
     this._messageLimit = limit;
-    this._applyLimit();
+    this.applyLimit();
   }
 
-  private _applyLimit() {
+  applyLimit() {
     if (this.list.length > this._messageLimit) {
       const diff = this.list.length - this._messageLimit;
       this.list.removeRange(0, diff);
@@ -296,6 +292,12 @@ export class OutputLoggerView extends StackedPanel {
         logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
           this._scrollOuputViewToBottom(outputView);
         });
+
+        outputView.outputLengthChanged.connect(
+          (sender: LoggerOutputArea, args: number) => {
+            outputView.model.applyLimit();
+          }
+        );
 
         this.addWidget(outputView);
         this._outputViews.set(viewId, outputView);
