@@ -44,10 +44,10 @@ export interface IOutputLogRegistry {
 }
 
 export interface IOutputWithTimestamp extends nbformat.IBaseOutput {
-  timestamp: string;
+  timestamp: number;
 }
 
-type IOutputWithDateType = nbformat.IOutput | IOutputWithTimestamp;
+type IOutputWithTimestampType = nbformat.IOutput | IOutputWithTimestamp;
 
 export interface ILogger {
   log(log: nbformat.IOutput): void;
@@ -80,7 +80,7 @@ export class Logger implements ILogger {
 
   log(log: nbformat.IOutput) {
     const timestamp = new Date();
-    this.outputAreaModel.add({ ...log, timestamp: timestamp.toJSON() });
+    this.outputAreaModel.add({ ...log, timestamp: timestamp.valueOf() });
     this._count++;
     this._logChanged.emit('append');
   }
@@ -182,7 +182,7 @@ export class LoggerOutputModel extends OutputModel {
   constructor(options: LoggerOutputModel.IOptions) {
     super(options);
 
-    this.timestamp = new Date(options.value.timestamp as string);
+    this.timestamp = new Date(options.value.timestamp as number);
   }
 
   timestamp: Date = null;
@@ -190,7 +190,7 @@ export class LoggerOutputModel extends OutputModel {
 
 export namespace LoggerOutputModel {
   export interface IOptions extends IOutputModel.IOptions {
-    value: IOutputWithDateType;
+    value: IOutputWithTimestampType;
   }
 }
 
