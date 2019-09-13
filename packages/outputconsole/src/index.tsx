@@ -1,7 +1,5 @@
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import { StackedPanel, Widget, Panel } from '@phosphor/widgets';
 
@@ -16,7 +14,8 @@ import { nbformat } from '@jupyterlab/coreutils';
 import {
   OutputArea,
   IOutputAreaModel,
-  OutputAreaModel
+  OutputAreaModel,
+  IOutputPrompt
 } from '@jupyterlab/outputarea';
 
 import {
@@ -135,21 +134,6 @@ export class OutputLogRegistry implements IOutputLogRegistry {
   private _registryChanged = new Signal<this, ILogRegistryChange>(this);
 }
 
-/**
- * The class name added to the direction children of OutputArea
- */
-const OUTPUT_AREA_ITEM_CLASS = 'jp-OutputArea-child';
-
-/**
- * The class name added to actual outputs
- */
-const OUTPUT_AREA_OUTPUT_CLASS = 'jp-OutputArea-output';
-
-/**
- * The class name added to prompt children of OutputArea.
- */
-const OUTPUT_AREA_PROMPT_CLASS = 'jp-OutputArea-prompt';
-
 export class LoggerOutputArea extends OutputArea {
   /**
    * Handle an input request from a kernel by doing nothing.
@@ -161,37 +145,12 @@ export class LoggerOutputArea extends OutputArea {
     return;
   }
 
-  private _createOutputPrompt(model: LoggerOutputModel): Widget {
-    const prompt = new Widget();
-    const timestamp = model.timestamp;
-
-    const content = document.createElement('div');
-    content.innerHTML = timestamp.toLocaleTimeString();
-    prompt.node.append(content);
-
-    return prompt;
-  }
-
   /**
    * Create an output item with a prompt and actual output
    */
-  protected createOutputItem(model: IOutputModel): Widget | null {
-    let output = this.createRenderedMimetype(model);
-
-    if (!output) {
-      return null;
-    }
-
-    let panel = new Panel();
-
-    panel.addClass(OUTPUT_AREA_ITEM_CLASS);
-
-    let prompt = this._createOutputPrompt(model as LoggerOutputModel);
-    prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
-    panel.addWidget(prompt);
-
-    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
-    panel.addWidget(output);
+  protected createOutputItem(model: LoggerOutputModel): Widget | null {
+    const panel = super.createOutputItem(model) as Panel;
+    (panel.widgets[0] as LoggerOutputPrompt).timestamp = model.timestamp;
     return panel;
   }
 
@@ -224,14 +183,19 @@ export class LoggerOutputAreaModel extends OutputAreaModel {
 }
 
 export class LoggerOutputModel extends OutputModel {
-  constructor(options: IOutputModel.IOptions) {
+  constructor(options: LoggerOutputModel.IOptions) {
     super(options);
 
-    this.timestamp = new Date((options.value as IOutputWithDateType)
-      .timestamp as string);
+    this.timestamp = new Date(options.value.timestamp as string);
   }
 
   timestamp: Date = null;
+}
+
+export namespace LoggerOutputModel {
+  export interface IOptions extends IOutputModel.IOptions {
+    value: IOutputWithDateType;
+  }
 }
 
 /**
@@ -241,7 +205,7 @@ export class LoggerModelFactory extends OutputAreaModel.ContentFactory {
   /**
    * Create an output model.
    */
-  createOutputModel(options: IOutputModel.IOptions): IOutputModel {
+  createOutputModel(options: IOutputModel.IOptions): LoggerOutputModel {
     return new LoggerOutputModel(options);
   }
 }
@@ -324,6 +288,7 @@ export class OutputLoggerView extends StackedPanel {
       if (!this._outputViews.has(viewId)) {
         const outputView = new LoggerOutputArea({
           rendermime: logger.rendermime,
+          contentFactory: new LoggerContentFactory(),
           model: logger.outputAreaModel
         });
         outputView.id = viewId;
@@ -355,7 +320,7 @@ export class OutputLoggerView extends StackedPanel {
   set messageLimit(limit: number) {
     if (limit > 0) {
       this._outputViews.forEach((outputView: LoggerOutputArea) => {
-        const model = outputView.model as LoggerOutputAreaModel;
+        const model = outputView.model;
         model.messageLimit = limit;
       });
     }
@@ -364,4 +329,39 @@ export class OutputLoggerView extends StackedPanel {
   private _outputLogRegistry: IOutputLogRegistry;
   private _outputViews = new Map<string, LoggerOutputArea>();
   private _activeSource: string = null;
+}
+
+/**
+ * The default output prompt implementation
+ */
+class LoggerOutputPrompt extends Widget implements IOutputPrompt {
+  constructor() {
+    super();
+
+    this._timestampNode = document.createElement('div');
+    this.node.append(this._timestampNode);
+  }
+
+  set timestamp(value: Date) {
+    this._timestampNode.innerHTML = value.toLocaleTimeString();
+  }
+
+  /**
+   * The execution count for the prompt.
+   */
+  executionCount: nbformat.ExecutionCount;
+
+  private _timestampNode: HTMLDivElement;
+}
+
+/**
+ * The default implementation of `IContentFactory`.
+ */
+export class LoggerContentFactory extends OutputArea.ContentFactory {
+  /**
+   * Create the output prompt for the widget.
+   */
+  createOutputPrompt(): LoggerOutputPrompt {
+    return new LoggerOutputPrompt();
+  }
 }
