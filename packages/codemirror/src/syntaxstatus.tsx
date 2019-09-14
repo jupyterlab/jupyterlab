@@ -167,7 +167,8 @@ export namespace EditorSyntaxStatus {
         this._mode = spec.name || spec.mode;
 
         DatastoreExt.listenField(
-          { ...editor.model.record, field: 'mimeType' },
+          editor.model.data.datastore,
+          { ...editor.model.data.record, field: 'mimeType' },
           this._onMIMETypeChange
         );
       }

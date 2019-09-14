@@ -51,7 +51,8 @@ export class CodeEditorWrapper extends Widget {
       selectionStyle: options.selectionStyle
     }));
     DatastoreExt.listenField(
-      { ...editor.model.record, field: 'selections' },
+      editor.model.data.datastore,
+      { ...editor.model.data.record, field: 'selections' },
       this._onSelectionsChanged,
       this
     );
@@ -277,9 +278,10 @@ export class CodeEditorWrapper extends Widget {
     };
     const position = this.editor.getPositionForCoordinate(coordinate);
     const offset = this.editor.getOffsetAt(position);
-    DatastoreExt.withTransaction(this.model.record.datastore, () => {
+    DatastoreExt.withTransaction(this.model.data.datastore, () => {
       DatastoreExt.updateField(
-        { ...this.model.record, field: 'text' },
+        this.model.data.datastore,
+        { ...this.model.data.record, field: 'text' },
         { index: offset, remove: 0, text: data }
       );
     });

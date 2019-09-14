@@ -68,6 +68,16 @@ export namespace IOutputData {
       raw: RegisterField<ReadonlyJSONObject>;
     };
   };
+
+  /**
+   * A description of where data is stored in a code editor.
+   */
+  export type DataLocation = DatastoreExt.DataLocation & {
+    /**
+     * The record in which the data is located.
+     */
+    record: DatastoreExt.RecordLocation<Schema>;
+  };
 }
 
 /**
@@ -149,9 +159,9 @@ export namespace IOutputModel {
     trusted?: boolean;
 
     /**
-     * A record in which to store the data.
+     * A location in which to store the data.
      */
-    record?: DatastoreExt.RecordLocation<IOutputData.Schema>;
+    data?: IOutputData.DataLocation;
   }
 }
 
@@ -163,17 +173,19 @@ export class OutputModel implements IOutputModel {
    * Construct a new output model.
    */
   constructor(options: IOutputModel.IOptions) {
-    if (options.record) {
-      this._record = options.record;
+    if (options.data) {
+      this._data = options.data;
     } else {
       this._datastore = OutputData.createStore();
-      this._record = {
+      this._data = {
         datastore: this._datastore,
-        schema: OutputData.SCHEMA,
-        record: 'data'
+        record: {
+          schema: OutputData.SCHEMA,
+          record: 'data'
+        }
       };
       if (options.value) {
-        OutputModel.fromJSON(this._record, options.value, options.trusted);
+        OutputModel.fromJSON(this._data, options.value, options.trusted);
       }
     }
   }
@@ -182,21 +194,30 @@ export class OutputModel implements IOutputModel {
    * The output type.
    */
   get type(): string {
-    return DatastoreExt.getField({ ...this._record, field: 'type' });
+    return DatastoreExt.getField(this._data.datastore, {
+      ...this._data.record,
+      field: 'type'
+    });
   }
 
   /**
    * The execution count.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return DatastoreExt.getField({ ...this._record, field: 'executionCount' });
+    return DatastoreExt.getField(this._data.datastore, {
+      ...this._data.record,
+      field: 'executionCount'
+    });
   }
 
   /**
    * Whether the model is trusted.
    */
   get trusted(): boolean {
-    return DatastoreExt.getField({ ...this._record, field: 'trusted' });
+    return DatastoreExt.getField(this._data.datastore, {
+      ...this._data.record,
+      field: 'trusted'
+    });
   }
 
   /**
@@ -217,14 +238,20 @@ export class OutputModel implements IOutputModel {
    * The data associated with the model.
    */
   get data(): ReadonlyJSONObject {
-    return DatastoreExt.getField({ ...this._record, field: 'data' });
+    return DatastoreExt.getField(this._data.datastore, {
+      ...this._data.record,
+      field: 'data'
+    });
   }
 
   /**
    * The metadata associated with the model.
    */
   get metadata(): ReadonlyJSONObject {
-    return DatastoreExt.getField({ ...this._record, field: 'metadata' });
+    return DatastoreExt.getField(this._data.datastore, {
+      ...this._data.record,
+      field: 'metadata'
+    });
   }
 
   /**
@@ -243,8 +270,9 @@ export class OutputModel implements IOutputModel {
     if (options.metadata) {
       metadataUpdate = { metadata: options.metadata };
     }
-    DatastoreExt.withTransaction(this._record.datastore, () => {
-      DatastoreExt.updateRecord(this._record, {
+    const { datastore, record } = this._data;
+    DatastoreExt.withTransaction(datastore, () => {
+      DatastoreExt.updateRecord(datastore, record, {
         ...dataUpdate,
         ...metadataUpdate
       });
@@ -255,13 +283,13 @@ export class OutputModel implements IOutputModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput {
-    return OutputModel.toJSON(this._record);
+    return OutputModel.toJSON(this._data);
   }
 
   /**
    * The record in which the output model is stored.
    */
-  private readonly _record: DatastoreExt.RecordLocation<IOutputData.Schema>;
+  private readonly _data: IOutputData.DataLocation;
   private _datastore: Datastore | null = null;
   private _isDisposed = false;
 }
@@ -295,16 +323,18 @@ export namespace OutputModel {
   /**
    * Serialize an output record to JSON.
    */
-  export function toJSON(
-    loc: DatastoreExt.RecordLocation<IOutputData.Schema>
-  ): nbformat.IOutput {
-    let output: JSONObject = DatastoreExt.getField({
-      ...loc,
+  export function toJSON(loc: IOutputData.DataLocation): nbformat.IOutput {
+    let { datastore, record } = loc;
+    let output: JSONObject = DatastoreExt.getField(datastore, {
+      ...record,
       field: 'raw'
     }) as JSONObject;
-    const type = DatastoreExt.getField({ ...loc, field: 'type' });
-    const data = DatastoreExt.getField({ ...loc, field: 'data' });
-    const metadata = DatastoreExt.getField({ ...loc, field: 'metadata' });
+    const type = DatastoreExt.getField(datastore, { ...record, field: 'type' });
+    const data = DatastoreExt.getField(datastore, { ...record, field: 'data' });
+    const metadata = DatastoreExt.getField(datastore, {
+      ...record,
+      field: 'metadata'
+    });
     switch (type) {
       case 'display_data':
       case 'execute_result':
@@ -321,10 +351,11 @@ export namespace OutputModel {
   }
 
   export function fromJSON(
-    loc: DatastoreExt.RecordLocation<IOutputData.Schema>,
+    loc: IOutputData.DataLocation,
     value: nbformat.IOutput,
     trusted: boolean = false
   ): void {
+    const { datastore, record } = loc;
     let data = Private.getData(value);
     let metadata = Private.getData(value);
     trusted = !!trusted;
@@ -345,8 +376,8 @@ export namespace OutputModel {
       ? value.execution_count
       : null;
 
-    DatastoreExt.withTransaction(loc.datastore, () => {
-      DatastoreExt.updateRecord(loc, {
+    DatastoreExt.withTransaction(datastore, () => {
+      DatastoreExt.updateRecord(datastore, record, {
         data,
         executionCount,
         metadata,
@@ -360,11 +391,10 @@ export namespace OutputModel {
   /**
    * Clear an output record from a table.
    */
-  export function clear(
-    loc: DatastoreExt.RecordLocation<IOutputData.Schema>
-  ): void {
-    DatastoreExt.withTransaction(loc.datastore, () => {
-      DatastoreExt.updateRecord(loc, {
+  export function clear(loc: IOutputData.DataLocation): void {
+    const { datastore, record } = loc;
+    DatastoreExt.withTransaction(datastore, () => {
+      DatastoreExt.updateRecord(datastore, record, {
         data: {},
         executionCount: null,
         metadata: {},

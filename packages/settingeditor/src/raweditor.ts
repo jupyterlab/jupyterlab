@@ -87,7 +87,8 @@ export class RawEditor extends SplitPanel {
     user.addClass(USER_CLASS);
     user.editor.model.mimeType = 'text/javascript';
     DatastoreExt.listenField(
-      { ...user.editor.model.record, field: 'text' },
+      user.editor.model.data.datastore,
+      { ...user.editor.model.data.record, field: 'text' },
       this._onTextChanged,
       this
     );

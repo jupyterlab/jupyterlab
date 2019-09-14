@@ -106,9 +106,9 @@ export class ForeignHandler implements IDisposable {
       case 'execute_input':
         let inputMsg = msg as KernelMessage.IExecuteInputMsg;
         cell = this._newCell(parentMsgId);
-        let data = cell.data;
-        DatastoreExt.withTransaction(data.record.datastore, () => {
-          DatastoreExt.updateRecord(data.record, {
+        const { datastore, record } = cell.data;
+        DatastoreExt.withTransaction(datastore, () => {
+          DatastoreExt.updateRecord(datastore, record, {
             executionCount: inputMsg.content.execution_count,
             text: {
               index: 0,

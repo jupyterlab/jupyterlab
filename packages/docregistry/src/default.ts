@@ -37,10 +37,12 @@ export class TextDocumentModel extends CodeEditor.Model
    */
   constructor(options: TextDocumentModel.IOptions = {}) {
     super({
-      record: options.record || {
+      data: options.data || {
         datastore: CodeEditorData.createStore(),
-        schema: CodeEditorData.SCHEMA,
-        record: 'data'
+        record: {
+          schema: CodeEditorData.SCHEMA,
+          record: 'data'
+        }
       }
     });
 
@@ -48,7 +50,8 @@ export class TextDocumentModel extends CodeEditor.Model
     // We don't want to trigger a content change for text selection changes,
     // only actual content changes to the data owned by the document
     this._listener = DatastoreExt.listenField(
-      { ...this.record, field: 'text' },
+      this.data.datastore,
+      { ...this.data.record, field: 'text' },
       this.triggerContentChange,
       this
     );
@@ -162,7 +165,7 @@ export namespace TextDocumentModel {
     /**
      * A record in a datastore in which to hold the data.
      */
-    record?: DatastoreExt.RecordLocation<ICodeEditorData.Schema>;
+    data?: ICodeEditorData.DataLocation;
 
     /**
      * The preferred kernel language for the document.
@@ -323,12 +326,14 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
     const { languagePreference, path } = options;
     if (path) {
       const datastore = await createDatastore(path, [CodeEditorData.SCHEMA]);
-      const record = {
+      const data = {
         datastore,
-        schema: CodeEditorData.SCHEMA,
-        record: 'data'
+        record: {
+          schema: CodeEditorData.SCHEMA,
+          record: 'data'
+        }
       };
-      return new TextDocumentModel({ record, languagePreference });
+      return new TextDocumentModel({ data, languagePreference });
     }
     return new TextDocumentModel({ languagePreference });
   }

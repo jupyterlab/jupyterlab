@@ -51,6 +51,16 @@ export namespace IAttachmentsData {
       attachments: MapField<nbformat.IMimeBundle>;
     };
   };
+
+  /**
+   * The location of data in a datastore for attachments.
+   */
+  export type DataLocation = DatastoreExt.DataLocation & {
+    /**
+     * A record for storing an attachment.
+     */
+    record: DatastoreExt.RecordLocation<Schema>;
+  };
 }
 
 /**
@@ -72,16 +82,19 @@ export namespace AttachmentsData {
    * Serialize the attachment model to JSON.
    */
   export function toJSON(
-    loc: DatastoreExt.RecordLocation<IAttachmentsData.Schema>
+    loc: IAttachmentsData.DataLocation
   ): nbformat.IAttachments {
-    return DatastoreExt.getField({ ...loc, field: 'attachments' });
+    return DatastoreExt.getField(loc.datastore, {
+      ...loc.record,
+      field: 'attachments'
+    });
   }
 
   /**
    * Deserialize an attachment model from JSON, inserting it into a record.
    */
   export function fromJSON(
-    loc: DatastoreExt.RecordLocation<IAttachmentsData.Schema>,
+    loc: IAttachmentsData.DataLocation,
     value: nbformat.IAttachments
   ): void {
     // Construct an update, removing any old data from the bundle.
@@ -91,7 +104,11 @@ export namespace AttachmentsData {
     });
     const update = { ...old, ...value };
     DatastoreExt.withTransaction(loc.datastore, () => {
-      DatastoreExt.updateField({ ...loc, field: 'attachments' }, update);
+      DatastoreExt.updateField(
+        loc.datastore,
+        { ...loc.record, field: 'attachments' },
+        update
+      );
     });
   }
 }
@@ -107,7 +124,7 @@ export class AttachmentsResolver implements IRenderMime.IResolver {
    */
   constructor(options: AttachmentsResolver.IOptions) {
     this._parent = options.parent || null;
-    this._record = options.record;
+    this._data = options.data;
   }
   /**
    * Resolve a relative url to a correct server path.
@@ -128,8 +145,8 @@ export class AttachmentsResolver implements IRenderMime.IResolver {
     }
     // Return a data URL with the data of the url
     const key = path.slice('attachment:'.length);
-    const attachment = DatastoreExt.getField({
-      ...this._record,
+    const attachment = DatastoreExt.getField(this._data.datastore, {
+      ...this._data.record,
       field: 'attachments'
     });
     if (!attachment || !attachment[key]) {
@@ -159,7 +176,7 @@ export class AttachmentsResolver implements IRenderMime.IResolver {
     return true;
   }
 
-  private _record: DatastoreExt.RecordLocation<IAttachmentsData.Schema>;
+  private _data: IAttachmentsData.DataLocation;
   private _parent: IRenderMime.IResolver | null;
 }
 
@@ -174,7 +191,7 @@ export namespace AttachmentsResolver {
     /**
      * The attachments model to resolve against.
      */
-    record: DatastoreExt.RecordLocation<IAttachmentsData.Schema>;
+    data: IAttachmentsData.DataLocation;
 
     /**
      * A parent resolver to use if the URL/path is not for an attachment.

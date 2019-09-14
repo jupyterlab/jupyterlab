@@ -87,9 +87,10 @@ export class NotebookModelFactory
         CellData.SCHEMA
       ]);
       const data = {
-        record: { datastore, schema: NotebookData.SCHEMA, record: 'data' },
-        cells: { datastore, schema: CellData.SCHEMA },
-        outputs: { datastore, schema: OutputData.SCHEMA }
+        datastore,
+        record: { schema: NotebookData.SCHEMA, record: 'data' },
+        cells: { schema: CellData.SCHEMA },
+        outputs: { schema: OutputData.SCHEMA }
       };
       return new NotebookModel({ data, languagePreference, contentFactory });
     }

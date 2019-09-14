@@ -285,9 +285,11 @@ export class CodeConsole extends Widget {
     if (!promptCell) {
       return Promise.reject('Cannot execute without a prompt cell');
     }
-    DatastoreExt.withTransaction(promptCell.data.record.datastore, () => {
+    const { datastore, record } = promptCell.data;
+    DatastoreExt.withTransaction(datastore, () => {
       DatastoreExt.updateField(
-        { ...promptCell.data.record, field: 'trusted' },
+        datastore,
+        { ...record, field: 'trusted' },
         true
       );
     });
@@ -333,8 +335,9 @@ export class CodeConsole extends Widget {
    */
   inject(code: string, metadata: JSONObject = {}): Promise<void> {
     let cell = this.createCodeCell();
-    DatastoreExt.withTransaction(cell.data.record.datastore, () => {
-      DatastoreExt.updateRecord(cell.data.record, {
+    const { datastore, record } = cell.data;
+    DatastoreExt.withTransaction(datastore, () => {
+      DatastoreExt.updateRecord(datastore, record, {
         text: { index: 0, remove: 0, text: code },
         metadata
       });
@@ -636,8 +639,10 @@ export class CodeConsole extends Widget {
       this.clear();
       return Promise.resolve(void 0);
     }
+    const { datastore, record } = cell.data;
     const listener = DatastoreExt.listenRecord(
-      cell.data.record,
+      datastore,
+      record,
       this.update,
       this
     );
@@ -660,7 +665,7 @@ export class CodeConsole extends Widget {
         }
       } else if (value && value.content.status === 'error') {
         each(this._cells, (cell: CodeCell) => {
-          const executionCount = DatastoreExt.getField({
+          const executionCount = DatastoreExt.getField(cell.data.datastore, {
             ...cell.data.record,
             field: 'executionCount'
           });

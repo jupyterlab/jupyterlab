@@ -211,9 +211,11 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Update the kernel language.
    */
   private _updateLanguage(language: KernelMessage.ILanguageInfo): void {
-    DatastoreExt.withTransaction(this.model.data.record.datastore, () => {
+    const { datastore, record } = this.model.data;
+    DatastoreExt.withTransaction(datastore, () => {
       DatastoreExt.updateField(
-        { ...this.model.data.record, field: 'metadata' },
+        datastore,
+        { ...record, field: 'metadata' },
         { language_info: language }
       );
     });
@@ -227,9 +229,11 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       if (this.isDisposed) {
         return;
       }
-      DatastoreExt.withTransaction(this.model.data.record.datastore, () => {
+      const { datastore, record } = this.model.data;
+      DatastoreExt.withTransaction(datastore, () => {
         DatastoreExt.updateField(
-          { ...this.model.data.record, field: 'metadata' },
+          datastore,
+          { ...record, field: 'metadata' },
           {
             kernelspec: {
               name: kernel.name,

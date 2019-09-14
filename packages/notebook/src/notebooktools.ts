@@ -163,8 +163,10 @@ export class NotebookTools extends Widget implements INotebookTools {
         ? this.activeNotebookPanel.content.model
         : null;
     if (activeNBModel) {
+      const { datastore, record } = activeNBModel.data;
       this._nbMetadataListener = DatastoreExt.listenField(
-        { ...activeNBModel.data.record, field: 'metadata' },
+        datastore,
+        { ...record, field: 'metadata' },
         this._onActiveNotebookPanelMetadataChanged,
         this
       );
@@ -185,8 +187,10 @@ export class NotebookTools extends Widget implements INotebookTools {
     const activeCell = this.activeCell ? this.activeCell.data : null;
     this._prevActiveCell = activeCell;
     if (activeCell) {
+      const { datastore, record } = this._prevActiveCell;
       DatastoreExt.listenField(
-        { ...this._prevActiveCell.record, field: 'metadata' },
+        datastore,
+        { ...record, field: 'metadata' },
         this._onActiveCellMetadataChanged,
         this
       );
@@ -479,12 +483,14 @@ export namespace NotebookTools {
 
       let cellLoc = (this._cellModel = activeCell.editor.model);
       this._valueListener = DatastoreExt.listenField(
-        { ...cellLoc.record, field: 'text' },
+        cellLoc.data.datastore,
+        { ...cellLoc.data.record, field: 'text' },
         this._onValueChanged,
         this
       );
       this._mimeTypeListener = DatastoreExt.listenField(
-        { ...cellLoc.record, field: 'mimeType' },
+        cellLoc.data.datastore,
+        { ...cellLoc.data.record, field: 'mimeType' },
         this._onMimeTypeChanged,
         this
       );
@@ -610,7 +616,10 @@ export namespace NotebookTools {
         return;
       }
       this.editor.source = nb
-        ? { ...nb.model.data.record, field: 'metadata' }
+        ? {
+            datastore: nb.model.data.datastore,
+            field: { ...nb.model.data.record, field: 'metadata' }
+          }
         : null;
     }
   }
@@ -643,7 +652,10 @@ export namespace NotebookTools {
     private _update() {
       let cell = this.notebookTools.activeCell;
       this.editor.source = cell
-        ? { ...cell.data.record, field: 'metadata' }
+        ? {
+            datastore: cell.data.datastore,
+            field: { ...cell.data.record, field: 'metadata' }
+          }
         : null;
     }
   }
@@ -779,8 +791,9 @@ export namespace NotebookTools {
      * Get the value for the data.
      */
     private _getValue = (cell: Cell) => {
-      const metadata = DatastoreExt.getField({
-        ...cell.data.record,
+      const { datastore, record } = cell.data;
+      const metadata = DatastoreExt.getField(datastore, {
+        ...record,
         field: 'metadata'
       });
       let value = metadata[this.key];
@@ -794,15 +807,18 @@ export namespace NotebookTools {
      * Set the value for the data.
      */
     private _setValue = (cell: Cell, value: JSONValue) => {
-      DatastoreExt.withTransaction(cell.data.record.datastore, () => {
+      const { datastore, record } = cell.data;
+      DatastoreExt.withTransaction(datastore, () => {
         if (value === this._default) {
           DatastoreExt.updateField(
-            { ...cell.data.record, field: 'metadata' },
+            datastore,
+            { ...record, field: 'metadata' },
             { [this.key]: null }
           );
         } else {
           DatastoreExt.updateField(
-            { ...cell.data.record, field: 'metadata' },
+            datastore,
+            { ...record, field: 'metadata' },
             { [this.key]: value }
           );
         }
@@ -893,16 +909,18 @@ export namespace NotebookTools {
         Notes: 'notes'
       },
       getter: cell => {
-        let metadata = DatastoreExt.getField({
-          ...cell.data.record,
+        let { datastore, record } = cell.data;
+        let metadata = DatastoreExt.getField(datastore, {
+          ...record,
           field: 'metadata'
         });
         let value = metadata['slideshow'];
         return value && (value as JSONObject)['slide_type'];
       },
       setter: (cell, value) => {
-        let metadata = DatastoreExt.getField({
-          ...cell.data.record,
+        let { datastore, record } = cell.data;
+        let metadata = DatastoreExt.getField(datastore, {
+          ...record,
           field: 'metadata'
         });
         let data = metadata['slideshow'] || Object.create(null);
@@ -913,9 +931,10 @@ export namespace NotebookTools {
         } else {
           data = { ...data, slide_type: value };
         }
-        DatastoreExt.withTransaction(cell.data.record.datastore, () => {
+        DatastoreExt.withTransaction(datastore, () => {
           DatastoreExt.updateField(
-            { ...cell.data.record, field: 'metadata' },
+            datastore,
+            { ...record, field: 'metadata' },
             { slideshow: Object.keys(data).length > 0 ? data : null }
           );
         });

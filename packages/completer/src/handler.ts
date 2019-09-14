@@ -105,16 +105,18 @@ export class CompletionHandler implements IDisposable {
     // Update the editor and signal connections.
     editor = this._editor = newValue;
     if (editor) {
-      const model = editor.model;
+      const { datastore, record } = editor.model.data;
 
       this._enabled = false;
       this._textListener = DatastoreExt.listenField(
-        { ...model.record, field: 'text' },
+        datastore,
+        { ...record, field: 'text' },
         this.onTextChanged,
         this
       );
       this._selectionListener = DatastoreExt.listenField(
-        { ...model.record, field: 'selections' },
+        datastore,
+        { ...record, field: 'selections' },
         this.onSelectionsChanged,
         this
       );
@@ -194,9 +196,11 @@ export class CompletionHandler implements IDisposable {
     }
 
     const { start, end, value } = patch;
-    DatastoreExt.withTransaction(editor.model.record.datastore, () => {
+    const { datastore, record } = editor.model.data;
+    DatastoreExt.withTransaction(datastore, () => {
       DatastoreExt.updateField(
-        { ...editor.model.record, field: 'text' },
+        datastore,
+        { ...record, field: 'text' },
         { index: start, remove: end - start, text: value }
       );
     });

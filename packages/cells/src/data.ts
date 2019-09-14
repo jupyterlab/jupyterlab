@@ -81,7 +81,7 @@ export namespace ICellData {
   /**
    * The location of cell data in a datastore.
    */
-  export type DataLocation = {
+  export type DataLocation = DatastoreExt.DataLocation & {
     /**
      * The record for the cell data.
      */
@@ -219,8 +219,9 @@ export namespace CellData {
       type = cell.cell_type as nbformat.CellType;
     }
     // Set the intitial data for the model.
-    DatastoreExt.withTransaction(loc.record.datastore, () => {
-      DatastoreExt.updateRecord(loc.record, {
+    let { datastore, record } = loc;
+    DatastoreExt.withTransaction(datastore, () => {
+      DatastoreExt.updateRecord(datastore, record, {
         type,
         metadata,
         trusted,
@@ -235,7 +236,7 @@ export namespace CellData {
    * on the cell type.
    */
   export function toJSON(loc: ICellData.DataLocation): nbformat.ICell {
-    let data = DatastoreExt.getRecord(loc.record);
+    let data = DatastoreExt.getRecord(loc.datastore, loc.record);
     switch (data.type) {
       case 'code':
         return CodeCellData.toJSON(loc);
@@ -253,15 +254,16 @@ export namespace CellData {
    * is emptied as much as possible to allow it to garbage collect.
    */
   export function clear(loc: ICellData.DataLocation): void {
-    let cellData = DatastoreExt.getRecord(loc.record);
+    let { datastore, record } = loc;
+    let cellData = DatastoreExt.getRecord(loc.datastore, loc.record);
 
     let attachments: { [x: string]: nbformat.IMimeBundle | null } = {};
     Object.keys(cellData.attachments).forEach(key => (attachments[key] = null));
     let metadata: { [x: string]: ReadonlyJSONValue | null } = {};
     Object.keys(cellData.metadata).forEach(key => (metadata[key] = null));
 
-    DatastoreExt.withTransaction(loc.record.datastore, () => {
-      DatastoreExt.updateRecord(loc.record, {
+    DatastoreExt.withTransaction(datastore, () => {
+      DatastoreExt.updateRecord(datastore, record, {
         attachments,
         metadata,
         executionCount: null,
@@ -270,7 +272,7 @@ export namespace CellData {
         outputs: { index: 0, remove: cellData.outputs.length, values: [] }
       });
       OutputAreaData.clear(loc);
-      CodeEditorData.clear(loc.record);
+      CodeEditorData.clear(loc);
     });
   }
 }
@@ -288,7 +290,7 @@ export namespace AttachmentsCellData {
   ): void {
     CellData.fromJSON(loc, cell);
     const attachments = (cell && cell.attachments) || {};
-    AttachmentsData.fromJSON(loc.record, attachments);
+    AttachmentsData.fromJSON(loc, attachments);
   }
 
   /**
@@ -300,7 +302,7 @@ export namespace AttachmentsCellData {
     const cell = Private.baseToJSON(loc) as
       | nbformat.IRawCell
       | nbformat.IMarkdownCell;
-    const attachments = AttachmentsData.toJSON(loc.record);
+    const attachments = AttachmentsData.toJSON(loc);
     if (Object.keys(attachments).length) {
       cell.attachments = attachments;
     }
@@ -319,9 +321,10 @@ export namespace RawCellData {
     loc: ICellData.DataLocation,
     cell?: nbformat.IRawCell
   ): void {
-    DatastoreExt.withTransaction(loc.record.datastore, () => {
+    const { datastore, record } = loc;
+    DatastoreExt.withTransaction(datastore, () => {
       AttachmentsCellData.fromJSON(loc, cell);
-      DatastoreExt.updateRecord(loc.record, {
+      DatastoreExt.updateRecord(datastore, record, {
         type: 'raw'
       });
     });
@@ -346,9 +349,10 @@ export namespace MarkdownCellData {
     loc: ICellData.DataLocation,
     cell?: nbformat.IMarkdownCell
   ): void {
-    DatastoreExt.withTransaction(loc.record.datastore, () => {
+    const { datastore, record } = loc;
+    DatastoreExt.withTransaction(datastore, () => {
       AttachmentsCellData.fromJSON(loc, cell);
-      DatastoreExt.updateRecord(loc.record, {
+      DatastoreExt.updateRecord(datastore, record, {
         mimeType: 'text/x-ipythongfm',
         type: 'markdown'
       });
@@ -374,9 +378,10 @@ export namespace CodeCellData {
     loc: ICellData.DataLocation,
     cell?: nbformat.ICodeCell
   ) {
-    DatastoreExt.withTransaction(loc.record.datastore, () => {
+    const { datastore, record } = loc;
+    DatastoreExt.withTransaction(datastore, () => {
       CellData.fromJSON(loc, cell);
-      DatastoreExt.updateRecord(loc.record, {
+      DatastoreExt.updateRecord(datastore, record, {
         executionCount: cell ? cell.execution_count || null : null,
         type: 'code'
       });
@@ -390,8 +395,9 @@ export namespace CodeCellData {
    */
   export function toJSON(loc: ICellData.DataLocation): nbformat.ICodeCell {
     let cell = Private.baseToJSON(loc) as nbformat.ICodeCell;
-    cell.execution_count = DatastoreExt.getField({
-      ...loc.record,
+    const { datastore, record } = loc;
+    cell.execution_count = DatastoreExt.getField(datastore, {
+      ...record,
       field: 'executionCount'
     });
     cell.outputs = OutputAreaData.toJSON(loc);
@@ -413,7 +419,8 @@ namespace Private {
    * to the different subtypes.
    */
   export function baseToJSON(loc: ICellData.DataLocation): nbformat.ICell {
-    let data = DatastoreExt.getRecord(loc.record);
+    const { datastore, record } = loc;
+    let data = DatastoreExt.getRecord(datastore, record);
     let metadata = data.metadata as JSONObject;
     if (data.trusted) {
       metadata['trusted'] = true;

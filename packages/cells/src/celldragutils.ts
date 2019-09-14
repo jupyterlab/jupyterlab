@@ -146,7 +146,10 @@ export namespace CellDragUtils {
   ): HTMLElement {
     const count = selectedCells.length;
     let promptNumber: string;
-    const cellData = DatastoreExt.getRecord(activeCell.data.record);
+    const cellData = DatastoreExt.getRecord(
+      activeCell.data.datastore,
+      activeCell.data.record
+    );
     if (cellData.type === 'code') {
       let executionCount = cellData.executionCount;
       promptNumber = ' ';

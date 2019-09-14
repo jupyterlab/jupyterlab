@@ -52,8 +52,10 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     this._query = query;
     // Listen for cell model change to redo the search in case of
     // new/pasted/deleted cells
+    const { datastore, record } = this._searchTarget.content.model.data;
     this._cellListener = DatastoreExt.listenField(
-      { ...this._searchTarget.content.model.data.record, field: 'cells' },
+      datastore,
+      { ...record, field: 'cells' },
       this._restartQuery,
       this
     );

@@ -74,28 +74,27 @@ export class NotebookModel implements INotebookModel {
     if (!options.data) {
       const datastore = (this._store = NotebookData.createStore());
       this.data = {
+        datastore,
         record: {
-          datastore,
           schema: NotebookData.SCHEMA,
           record: 'data'
         },
         cells: {
-          datastore,
           schema: CellData.SCHEMA
         },
         outputs: {
-          datastore,
           schema: OutputData.SCHEMA
         }
       };
     } else {
       this.data = options.data;
     }
-    if (!DatastoreExt.getRecord(this.data.record)) {
+    const { datastore, record } = this.data;
+    if (!DatastoreExt.getRecord(datastore, record)) {
       this.isPrepopulated = false;
       // Handle initialization of data.
-      DatastoreExt.withTransaction(this.data.record.datastore, () => {
-        DatastoreExt.updateRecord(this.data.record, {
+      DatastoreExt.withTransaction(datastore, () => {
+        DatastoreExt.updateRecord(datastore, record, {
           nbformat: nbformat.MAJOR_VERSION,
           nbformatMinor: nbformat.MINOR_VERSION
         });
@@ -110,7 +109,7 @@ export class NotebookModel implements INotebookModel {
     this.contentFactory = factory.clone(this.data);
 
     // Trigger a content change when appropriate.
-    this.data.record.datastore.changed.connect(this._onGenericChange, this);
+    datastore.changed.connect(this._onGenericChange, this);
     this._deletedCells = [];
   }
 
@@ -138,22 +137,25 @@ export class NotebookModel implements INotebookModel {
    * The metadata associated with the notebook.
    */
   get metadata(): ReadonlyJSONObject {
-    return DatastoreExt.getField({ ...this.data.record, field: 'metadata' });
+    const { datastore, record } = this.data;
+    return DatastoreExt.getField(datastore, { ...record, field: 'metadata' });
   }
 
   /**
    * The major version number of the nbformat.
    */
   get nbformat(): number {
-    return DatastoreExt.getField({ ...this.data.record, field: 'nbformat' });
+    const { datastore, record } = this.data;
+    return DatastoreExt.getField(datastore, { ...record, field: 'nbformat' });
   }
 
   /**
    * The minor version number of the nbformat.
    */
   get nbformatMinor(): number {
-    return DatastoreExt.getField({
-      ...this.data.record,
+    const { datastore, record } = this.data;
+    return DatastoreExt.getField(datastore, {
+      ...record,
       field: 'nbformatMinor'
     });
   }
@@ -238,14 +240,16 @@ export class NotebookModel implements INotebookModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.INotebookContent {
-    let cells: nbformat.ICell[] = [];
-    let data = DatastoreExt.getRecord(this.data.record);
+    let cellsJSON: nbformat.ICell[] = [];
+    let { datastore, record, cells, outputs } = this.data;
+    let data = DatastoreExt.getRecord(datastore, record);
     for (let i = 0; i < data.cells.length; i++) {
       let cell = CellData.toJSON({
-        record: { ...this.data.cells, record: data.cells[i] },
-        outputs: this.data.outputs
+        datastore,
+        record: { ...cells, record: data.cells[i] },
+        outputs
       });
-      cells.push(cell);
+      cellsJSON.push(cell);
     }
     this._ensureMetadata();
     let metadata = Object.create(null) as nbformat.INotebookMetadata;
@@ -256,7 +260,7 @@ export class NotebookModel implements INotebookModel {
       metadata,
       nbformat_minor: data.nbformatMinor,
       nbformat: data.nbformat,
-      cells
+      cells: cellsJSON
     };
   }
 
@@ -267,14 +271,16 @@ export class NotebookModel implements INotebookModel {
    * Should emit a [contentChanged] signal.
    */
   fromJSON(value: nbformat.INotebookContent): void {
-    DatastoreExt.withTransaction(this.data.record.datastore, () => {
+    let { datastore, record, cells, outputs } = this.data;
+    DatastoreExt.withTransaction(datastore, () => {
       const cellIds: string[] = [];
       for (let cell of value.cells) {
         const id = UUID.uuid4();
         cellIds.push(id);
         const loc = {
-          record: { ...this.data.cells, record: id },
-          outputs: this.data.outputs
+          datastore,
+          record: { ...cells, record: id },
+          outputs
         };
         switch (cell.cell_type) {
           case 'code':
@@ -293,15 +299,16 @@ export class NotebookModel implements INotebookModel {
       const cellLoc: DatastoreExt.FieldLocation<
         INotebookData.Schema,
         'cells'
-      > = { ...this.data.record, field: 'cells' };
-      const oldCells = DatastoreExt.getField(cellLoc);
-      DatastoreExt.updateField(cellLoc, {
+      > = { ...record, field: 'cells' };
+      const oldCells = DatastoreExt.getField(datastore, cellLoc);
+      DatastoreExt.updateField(datastore, cellLoc, {
         index: 0,
         remove: oldCells.length,
         values: cellIds
       });
       oldCells.forEach(cell =>
         CellData.clear({
+          datastore,
           outputs: this.data.outputs,
           record: { ...this.data.cells, record: cell }
         })
@@ -313,14 +320,16 @@ export class NotebookModel implements INotebookModel {
       if (value.nbformat !== nbformat.MAJOR_VERSION) {
         newValue = value.nbformat;
         DatastoreExt.updateField(
-          { ...this.data.record, field: 'nbformat' },
+          datastore,
+          { ...record, field: 'nbformat' },
           newValue
         );
       }
       if (value.nbformat_minor > nbformat.MINOR_VERSION) {
         newValue = value.nbformat_minor;
         DatastoreExt.updateField(
-          { ...this.data.record, field: 'nbformatMinor' },
+          datastore,
+          { ...record, field: 'nbformatMinor' },
           newValue
         );
       }
@@ -352,7 +361,8 @@ export class NotebookModel implements INotebookModel {
       }
       let update = { ...oldMetadata, ...metadata };
       DatastoreExt.updateField(
-        { ...this.data.record, field: 'metadata' },
+        datastore,
+        { ...record, field: 'metadata' },
         update
       );
       this._ensureMetadata();
@@ -370,7 +380,8 @@ export class NotebookModel implements INotebookModel {
    * Make sure we have the required metadata fields.
    */
   private _ensureMetadata(): void {
-    DatastoreExt.withTransaction(this.data.record.datastore, () => {
+    const { datastore, record } = this.data;
+    DatastoreExt.withTransaction(datastore, () => {
       let metadata = { ...this.metadata };
       metadata['language_info'] = metadata['language_info'] || { name: '' };
       metadata['kernelspec'] = metadata['kernelspec'] || {
@@ -378,7 +389,8 @@ export class NotebookModel implements INotebookModel {
         display_name: ''
       };
       DatastoreExt.updateField(
-        { ...this.data.record, field: 'metadata' },
+        datastore,
+        { ...record, field: 'metadata' },
         metadata
       );
     });
@@ -407,8 +419,9 @@ export class NotebookModel implements INotebookModel {
     }
 
     // Check the cells for changes, ignoring cursors and mimetype.
-    const cells = DatastoreExt.getField({
-      ...this.data.record,
+    const { datastore, record } = this.data;
+    const cells = DatastoreExt.getField(datastore, {
+      ...record,
       field: 'cells'
     });
     // Check the cell changes to see if some should be considered content.
@@ -559,13 +572,11 @@ export namespace NotebookModel {
      */
     createCodeCell(value?: nbformat.ICodeCell): string {
       const id = UUID.uuid4();
+      const { datastore, cells, outputs } = this._data;
       const loc = {
-        record: {
-          datastore: this._data.cells.datastore,
-          schema: this._data.cells.schema,
-          record: id
-        },
-        outputs: this._data.outputs
+        datastore,
+        record: { ...cells, record: id },
+        outputs
       };
       CodeCellData.fromJSON(loc, value);
       return id;
@@ -581,13 +592,11 @@ export namespace NotebookModel {
      */
     createMarkdownCell(value?: nbformat.IMarkdownCell): string {
       const id = UUID.uuid4();
+      const { datastore, cells, outputs } = this._data;
       const loc = {
-        record: {
-          datastore: this._data.cells.datastore,
-          schema: this._data.cells.schema,
-          record: id
-        },
-        outputs: this._data.outputs
+        datastore,
+        record: { ...cells, record: id },
+        outputs
       };
       MarkdownCellData.fromJSON(loc, value);
       return id;
@@ -603,13 +612,11 @@ export namespace NotebookModel {
      */
     createRawCell(value?: nbformat.IRawCell): string {
       const id = UUID.uuid4();
+      const { datastore, cells, outputs } = this._data;
       const loc = {
-        record: {
-          datastore: this._data.cells.datastore,
-          schema: this._data.cells.schema,
-          record: id
-        },
-        outputs: this._data.outputs
+        datastore,
+        record: { ...cells, record: id },
+        outputs
       };
       RawCellData.fromJSON(loc, value);
       return id;
@@ -644,7 +651,7 @@ export namespace NotebookModel {
     /**
      * Data location for a cell content factory.
      */
-    export type DataLocation = {
+    export type DataLocation = DatastoreExt.DataLocation & {
       /**
        * A cell table.
        */

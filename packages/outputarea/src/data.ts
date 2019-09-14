@@ -49,7 +49,7 @@ export namespace IOutputAreaData {
    * A set of locations in a datastore in which an output area
    * stores its data.
    */
-  export type DataLocation = {
+  export type DataLocation = DatastoreExt.DataLocation & {
     /**
      * A record in a datastore to hold the output area model.
      */
@@ -101,7 +101,7 @@ export namespace OutputAreaData {
     loc: IOutputAreaData.DataLocation,
     values: nbformat.IOutput[]
   ): void {
-    DatastoreExt.withTransaction(loc.record.datastore, () => {
+    DatastoreExt.withTransaction(loc.datastore, () => {
       clear(loc);
       values.forEach(value => appendItem(loc, value));
     });
@@ -114,19 +114,31 @@ export namespace OutputAreaData {
     loc: IOutputAreaData.DataLocation,
     value: boolean
   ) {
-    if (value === DatastoreExt.getField({ ...loc.record, field: 'trusted' })) {
+    const { datastore, record, outputs } = loc;
+    if (
+      value ===
+      DatastoreExt.getField(datastore, { ...record, field: 'trusted' })
+    ) {
       return;
     }
-    DatastoreExt.withTransaction(loc.record.datastore, () => {
-      const list = DatastoreExt.getField({
-        ...loc.record,
+    DatastoreExt.withTransaction(datastore, () => {
+      const list = DatastoreExt.getField(datastore, {
+        ...record,
         field: 'outputs'
       });
-      DatastoreExt.updateField({ ...loc.record, field: 'trusted' }, true);
+      DatastoreExt.updateField(
+        datastore,
+        { ...record, field: 'trusted' },
+        true
+      );
       for (let i = 0; i < list.length; i++) {
         const id = list[i];
-        const record = { ...loc.outputs, record: id };
-        DatastoreExt.updateField({ ...record, field: 'trusted' }, true);
+        const outputRecord = { ...outputs, record: id };
+        DatastoreExt.updateField(
+          datastore,
+          { ...outputRecord, field: 'trusted' },
+          true
+        );
       }
     });
   }
@@ -139,35 +151,44 @@ export namespace OutputAreaData {
     index: number,
     value: nbformat.IOutput
   ): void {
-    const list = DatastoreExt.getField({
-      ...loc.record,
+    const { datastore, record, outputs } = loc;
+    const list = DatastoreExt.getField(datastore, {
+      ...record,
       field: 'outputs'
     });
-    const trusted = DatastoreExt.getField({
-      ...loc.record,
+    const trusted = DatastoreExt.getField(datastore, {
+      ...record,
       field: 'trusted'
     });
     // Normalize stream data.
     Private.normalize(value);
-    const record = { ...loc.outputs, record: list[index] };
-    OutputModel.fromJSON(record, value, trusted);
+    const outputData = {
+      datastore,
+      record: { ...outputs, record: list[index] }
+    };
+    OutputModel.fromJSON(outputData, value, trusted);
   }
 
   /**
    * Clear all of the output.
    */
   export function clear(loc: IOutputAreaData.DataLocation): void {
-    const list = DatastoreExt.getField({
-      ...loc.record,
+    const { datastore, record, outputs } = loc;
+    const list = DatastoreExt.getField(datastore, {
+      ...record,
       field: 'outputs'
     });
-    DatastoreExt.withTransaction(loc.record.datastore, () => {
+    DatastoreExt.withTransaction(datastore, () => {
       DatastoreExt.updateField(
-        { ...loc.record, field: 'outputs' },
+        datastore,
+        { ...record, field: 'outputs' },
         { index: 0, remove: list.length, values: [] }
       );
       list.forEach(output => {
-        OutputModel.clear({ ...loc.outputs, record: output });
+        OutputModel.clear({
+          datastore,
+          record: { ...outputs, record: output }
+        });
       });
     });
   }
@@ -178,11 +199,14 @@ export namespace OutputAreaData {
   export function toJSON(
     loc: IOutputAreaData.DataLocation
   ): nbformat.IOutput[] {
-    const list = DatastoreExt.getField({
-      ...loc.record,
+    const { datastore, record, outputs } = loc;
+    const list = DatastoreExt.getField(datastore, {
+      ...record,
       field: 'outputs'
     });
-    return list.map(id => OutputModel.toJSON({ ...loc.outputs, record: id }));
+    return list.map(id =>
+      OutputModel.toJSON({ datastore, record: { ...outputs, record: id } })
+    );
   }
 
   /**
@@ -196,17 +220,18 @@ export namespace OutputAreaData {
     loc: IOutputAreaData.DataLocation,
     value: nbformat.IOutput
   ): void {
-    let trusted = DatastoreExt.getField({
-      ...loc.record,
+    const { datastore, record, outputs } = loc;
+    let trusted = DatastoreExt.getField(datastore, {
+      ...record,
       field: 'trusted'
     });
 
-    DatastoreExt.withTransaction(loc.record.datastore, () => {
+    DatastoreExt.withTransaction(datastore, () => {
       // Normalize the value.
       Private.normalize(value);
 
-      const list = DatastoreExt.getField({
-        ...loc.record,
+      const list = DatastoreExt.getField(datastore, {
+        ...record,
         field: 'outputs'
       });
 
@@ -214,15 +239,18 @@ export namespace OutputAreaData {
       if (list.length) {
         const index = list.length - 1;
         const id = list[index];
-        const record = { ...loc.outputs, record: id };
-        const lastValue = OutputModel.toJSON(record);
+        const outputData = {
+          datastore,
+          record: { ...outputs, record: id }
+        };
+        const lastValue = OutputModel.toJSON(outputData);
         if (nbformat.isStream(value) && lastValue.name === value.name) {
           lastValue.text += value.text as string;
           lastValue.text = Private.removeOverwrittenChars(
             lastValue.text as string
           );
           value.text = lastValue.text;
-          OutputModel.fromJSON(record, value, trusted);
+          OutputModel.fromJSON(outputData, value, trusted);
         }
         return;
       }
@@ -232,11 +260,12 @@ export namespace OutputAreaData {
       }
 
       const id = UUID.uuid4();
-      const record = { ...loc.outputs, record: id };
-      OutputModel.fromJSON(record, value, trusted);
+      const outputData = { datastore, record: { ...outputs, record: id } };
+      OutputModel.fromJSON(outputData, value, trusted);
 
       DatastoreExt.updateField(
-        { ...loc.record, field: 'outputs' },
+        datastore,
+        { ...record, field: 'outputs' },
         { index: list.length, remove: 0, values: [id] }
       );
     });

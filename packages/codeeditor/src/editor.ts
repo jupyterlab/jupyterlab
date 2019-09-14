@@ -184,9 +184,9 @@ export namespace CodeEditor {
     readonly selections: { [id: string]: ITextSelection[] };
 
     /**
-     * The record in the datastore in which this codeeditor keeps its data.
+     * The location in the datastore in which this codeeditor keeps its data.
      */
-    readonly record: DatastoreExt.RecordLocation<ICodeEditorData.Schema>;
+    readonly data: ICodeEditorData.DataLocation;
   }
 
   /**
@@ -199,21 +199,24 @@ export namespace CodeEditor {
     constructor(options?: Model.IOptions) {
       options = options || {};
 
-      if (options.record) {
-        this.record = options.record;
+      if (options.data) {
+        this.data = options.data;
       } else {
         const datastore = (this._datastore = CodeEditorData.createStore());
-        this.record = {
+        this.data = {
           datastore,
-          schema: CodeEditorData.SCHEMA,
-          record: 'data'
+          record: {
+            schema: CodeEditorData.SCHEMA,
+            record: 'data'
+          }
         };
       }
-      if (!DatastoreExt.getRecord(this.record)) {
+      const { datastore, record } = this.data;
+      if (!DatastoreExt.getRecord(datastore, record)) {
         this.isPrepopulated = false;
         // Initialize the record if it hasn't been.
-        DatastoreExt.withTransaction(this.record.datastore, () => {
-          DatastoreExt.updateRecord(this.record, {
+        DatastoreExt.withTransaction(datastore, () => {
+          DatastoreExt.updateRecord(datastore, record, {
             mimeType: options.mimeType || 'text/plain',
             text: { index: 0, remove: 0, text: options.value || '' }
           });
@@ -237,7 +240,7 @@ export namespace CodeEditor {
     /**
      * The record in the datastore in which this codeeditor keeps its data.
      */
-    readonly record: DatastoreExt.RecordLocation<ICodeEditorData.Schema>;
+    readonly data: ICodeEditorData.DataLocation;
 
     readonly isPrepopulated: boolean;
 
@@ -245,13 +248,17 @@ export namespace CodeEditor {
      * Get the value of the model.
      */
     get value(): string {
-      return DatastoreExt.getField({ ...this.record, field: 'text' });
+      return DatastoreExt.getField(this.data.datastore, {
+        ...this.data.record,
+        field: 'text'
+      });
     }
     set value(value: string) {
       const current = this.value;
-      DatastoreExt.withTransaction(this.record.datastore, () => {
+      DatastoreExt.withTransaction(this.data.datastore, () => {
         DatastoreExt.updateField(
-          { ...this.record, field: 'text' },
+          this.data.datastore,
+          { ...this.data.record, field: 'text' },
           {
             index: 0,
             remove: current.length,
@@ -265,23 +272,31 @@ export namespace CodeEditor {
      * Get the selections for the model.
      */
     get selections(): { [id: string]: ITextSelection[] } {
-      return DatastoreExt.getField({ ...this.record, field: 'selections' });
+      return DatastoreExt.getField(this.data.datastore, {
+        ...this.data.record,
+        field: 'selections'
+      });
     }
 
     /**
      * A mime type of the model.
      */
     get mimeType(): string {
-      return DatastoreExt.getField({ ...this.record, field: 'mimeType' });
+      return DatastoreExt.getField(this.data.datastore, {
+        ...this.data.record,
+        field: 'mimeType'
+      });
     }
     set mimeType(newValue: string) {
       const oldValue = this.mimeType;
       if (oldValue === newValue) {
         return;
       }
-      DatastoreExt.withTransaction(this.record.datastore, () => {
+      const { datastore, record } = this.data;
+      DatastoreExt.withTransaction(datastore, () => {
         DatastoreExt.updateField(
-          { ...this.record, field: 'mimeType' },
+          datastore,
+          { ...record, field: 'mimeType' },
           newValue
         );
       });
@@ -721,9 +736,9 @@ export namespace CodeEditor {
       mimeType?: string;
 
       /**
-       * A record location in an existing datastore in which to store the model.
+       * A location in an existing datastore in which to store the model.
        */
-      record?: DatastoreExt.RecordLocation<ICodeEditorData.Schema>;
+      data?: ICodeEditorData.DataLocation;
     }
   }
 }

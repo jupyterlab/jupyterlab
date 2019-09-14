@@ -69,7 +69,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
       // Call onEditorChange to cover the case where the user changes
       // the active cell
       this.onEditorChange();
-      editor.model.record.datastore.changed.connect(this._onChange, this);
+      editor.model.data.datastore.changed.connect(this._onChange, this);
     }
   }
 

@@ -114,7 +114,8 @@ export class ConsoleHistory implements IConsoleHistory {
     if (value) {
       value.edgeRequested.connect(this.onEdgeRequest, this);
       this._listener = DatastoreExt.listenField(
-        { ...value.model.record, field: 'text' },
+        value.model.data.datastore,
+        { ...value.model.data.record, field: 'text' },
         this.onTextChange,
         this
       );

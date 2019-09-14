@@ -24,7 +24,7 @@ export namespace INotebookData {
   /**
    * A specification for where notebook data is stored in a datastore.
    */
-  export type DataLocation = {
+  export type DataLocation = DatastoreExt.DataLocation & {
     /**
      * The top-level record for the notebook data.
      */

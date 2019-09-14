@@ -90,7 +90,8 @@ export class JSONEditor<
     model.value = 'No data!';
     model.mimeType = 'application/json';
     DatastoreExt.listenField(
-      { ...model.record, field: 'text' },
+      model.data.datastore,
+      { ...model.data.record, field: 'text' },
       this._onValueChanged,
       this
     );
@@ -147,7 +148,8 @@ export class JSONEditor<
     this.editor.setOption('readOnly', value === null);
     if (value) {
       this._listener = DatastoreExt.listenField(
-        this._source,
+        this._source.datastore,
+        this._source.field,
         this._onSourceChanged,
         this
       );
@@ -320,8 +322,9 @@ export class JSONEditor<
         update[key] = user[key];
       }
     });
-    DatastoreExt.withTransaction(this._source.datastore, () => {
-      DatastoreExt.updateField(this._source, update);
+    let { datastore, field } = this._source;
+    DatastoreExt.withTransaction(datastore, () => {
+      DatastoreExt.updateField(datastore, field, update);
     });
   }
 
@@ -336,7 +339,10 @@ export class JSONEditor<
     this.removeClass(ERROR_CLASS);
     let model = this.editor.model;
     let content = this._source
-      ? (DatastoreExt.getField(this._source) as ReadonlyJSONObject)
+      ? (DatastoreExt.getField(
+          this._source.datastore,
+          this._source.field
+        ) as ReadonlyJSONObject)
       : {};
     this._changeGuard = true;
     if (content === void 0) {
@@ -394,5 +400,7 @@ export namespace JSONEditor {
   export type DataLocation<
     S extends Schema,
     F extends keyof MapFields<S>
-  > = DatastoreExt.FieldLocation<S, F>;
+  > = DatastoreExt.DataLocation & {
+    field: DatastoreExt.FieldLocation<S, F>;
+  };
 }

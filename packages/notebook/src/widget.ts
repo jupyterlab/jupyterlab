@@ -366,36 +366,41 @@ export class StaticNotebook extends Widget {
       return;
     }
     this._updateMimetype();
-    let cells = DatastoreExt.getField({
-      ...newValue.data.record,
+    const { datastore, record, cells, outputs } = newValue.data;
+    let cellIds = DatastoreExt.getField(datastore, {
+      ...record,
       field: 'cells'
     });
-    cells.forEach((id: string, i: number) => {
+    cellIds.forEach((id: string, i: number) => {
       this._insertCell(i, {
-        record: { ...newValue.data.cells, record: id },
-        outputs: newValue.data.outputs
+        datastore,
+        record: { ...cells, record: id },
+        outputs
       });
     });
     this._cellListener = DatastoreExt.listenField(
+      datastore,
       {
-        ...newValue.data.record,
+        ...record,
         field: 'cells'
       },
       this._onCellsChanged,
       this
     );
     this._metadataListener = DatastoreExt.listenField(
-      { ...newValue.data.record, field: 'metadata' },
+      datastore,
+      { ...record, field: 'metadata' },
       this.onMetadataChanged,
       this
     );
-    if (!cells.length) {
-      DatastoreExt.withTransaction(newValue.data.record.datastore, () => {
+    if (!cellIds.length) {
+      DatastoreExt.withTransaction(datastore, () => {
         const cellId = newValue.contentFactory.createCell(
           this.notebookConfig.defaultCell
         );
         DatastoreExt.updateField(
-          { ...newValue.data.record, field: 'cells' },
+          datastore,
+          { ...record, field: 'cells' },
           { index: 0, remove: 0, values: [cellId] }
         );
       });
@@ -406,32 +411,37 @@ export class StaticNotebook extends Widget {
    * Handle a change cells event.
    */
   private _onCellsChanged(sender: Datastore, args: ListField.Change<string>) {
-    const data = this.model.data;
+    const { datastore, record, cells, outputs } = this.model.data;
     args.forEach(change => {
       for (let i = 0; i < change.removed.length; i++) {
         this._removeCell(change.index);
       }
       for (let i = 0; i < change.inserted.length; i++) {
         const loc = {
+          datastore,
           record: {
-            ...data.cells,
+            ...cells,
             record: change.inserted[i]
           },
-          outputs: data.outputs
+          outputs
         };
         this._insertCell(change.index + i, loc);
       }
-      const cells = DatastoreExt.getField({ ...data.record, field: 'cells' });
-      if (!cells.length) {
+      const cellIds = DatastoreExt.getField(datastore, {
+        ...record,
+        field: 'cells'
+      });
+      if (!cellIds.length) {
         requestAnimationFrame(() => {
           // Add a new cell in a new frame so we don't trigger the
           // same change listener in this one.
-          DatastoreExt.withTransaction(data.record.datastore, () => {
+          DatastoreExt.withTransaction(datastore, () => {
             const cellId = this.model.contentFactory.createCell(
               this.notebookConfig.defaultCell
             );
             DatastoreExt.updateField(
-              { ...data.record, field: 'cells' },
+              datastore,
+              { ...record, field: 'cells' },
               { index: 0, remove: 0, values: [cellId] }
             );
           });
@@ -445,7 +455,7 @@ export class StaticNotebook extends Widget {
    */
   private _insertCell(index: number, cell: ICellData.DataLocation): void {
     let widget: Cell;
-    const cellData = DatastoreExt.getRecord(cell.record);
+    const cellData = DatastoreExt.getRecord(cell.datastore, cell.record);
     switch (cellData.type) {
       case 'code':
         widget = this._createCodeCell(cell);
@@ -548,8 +558,9 @@ export class StaticNotebook extends Widget {
     }
     this._mimetype = this._mimetypeService.getMimeTypeByLanguage(info);
     each(this.widgets, widget => {
-      const cellType = DatastoreExt.getField({
-        ...widget.data.record,
+      const { datastore, record } = widget.data;
+      const cellType = DatastoreExt.getField(datastore, {
+        ...record,
         field: 'type'
       });
       if (cellType === 'code') {
@@ -565,11 +576,7 @@ export class StaticNotebook extends Widget {
     for (let i = 0; i < this.widgets.length; i++) {
       const cell = this.widgets[i];
       let config: Partial<CodeEditor.IConfig>;
-      const cellType = DatastoreExt.getField({
-        ...cell.data.record,
-        field: 'type'
-      });
-      switch (cellType) {
+      switch (cell.type) {
         case 'code':
           config = this._editorConfig.code;
           break;
@@ -1880,17 +1887,19 @@ export class Notebook extends StaticNotebook {
         return;
       }
 
-      let model = this.model;
       // Move the cells one by one
-      DatastoreExt.withTransaction(this.model.data.record.datastore, () => {
+      const { datastore, record } = this.model.data;
+      DatastoreExt.withTransaction(datastore, () => {
         if (fromIndex < toIndex) {
           each(toMove, cellWidget => {
             DatastoreExt.updateField(
-              { ...model.data.record, field: 'cells' },
+              datastore,
+              { ...record, field: 'cells' },
               { index: fromIndex, remove: 1, values: [] }
             );
             DatastoreExt.updateField(
-              { ...model.data.record, field: 'cells' },
+              datastore,
+              { ...record, field: 'cells' },
               {
                 index: toIndex,
                 remove: 0,
@@ -1901,11 +1910,13 @@ export class Notebook extends StaticNotebook {
         } else if (fromIndex > toIndex) {
           each(toMove, cellWidget => {
             DatastoreExt.updateField(
-              { ...model.data.record, field: 'cells' },
+              datastore,
+              { ...record, field: 'cells' },
               { index: fromIndex++, remove: 1, values: [] }
             );
             DatastoreExt.updateField(
-              { ...model.data.record, field: 'cells' },
+              datastore,
+              { ...record, field: 'cells' },
               {
                 index: toIndex++,
                 remove: 0,
@@ -1930,7 +1941,8 @@ export class Notebook extends StaticNotebook {
       let factory = model.contentFactory;
 
       // Insert the copies of the original cells.
-      DatastoreExt.withTransaction(model.data.record.datastore, () => {
+      const { datastore, record } = this.model.data;
+      DatastoreExt.withTransaction(datastore, () => {
         each(values, (cell: nbformat.ICell) => {
           let value: string;
           switch (cell.cell_type) {
@@ -1947,7 +1959,8 @@ export class Notebook extends StaticNotebook {
               break;
           }
           DatastoreExt.updateField(
-            { ...model.data.record, field: 'cells' },
+            datastore,
+            { ...record, field: 'cells' },
             { index: index++, remove: 0, values: [value] }
           );
         });
@@ -1977,7 +1990,7 @@ export class Notebook extends StaticNotebook {
     let dragImage: HTMLElement = null;
     let countString: string;
     if (activeCell.type === 'code') {
-      let executionCount = DatastoreExt.getField({
+      let executionCount = DatastoreExt.getField(activeCell.data.datastore, {
         ...activeCell.data.record,
         field: 'executionCount'
       });
@@ -2121,13 +2134,14 @@ export class Notebook extends StaticNotebook {
       return;
     }
     this.activeCellIndex = i;
-    const cells = DatastoreExt.getField({
-      ...model.data.record,
+    const { datastore, record, cells } = model.data;
+    const cellIds = DatastoreExt.getField(datastore, {
+      ...record,
       field: 'cells'
     });
-    const cellType = DatastoreExt.getField({
-      ...model.data.cells,
-      record: cells[i],
+    const cellType = DatastoreExt.getField(datastore, {
+      ...cells,
+      record: cellIds[i],
       field: 'type'
     });
     if (cellType === 'markdown') {
@@ -2146,9 +2160,11 @@ export class Notebook extends StaticNotebook {
     for (let i = 0; i < this.widgets.length; i++) {
       if (i !== this._activeCellIndex) {
         let cell = this.widgets[i];
-        DatastoreExt.withTransaction(cell.data.record.datastore, () => {
+        let { datastore, record } = cell.data;
+        DatastoreExt.withTransaction(datastore, () => {
           DatastoreExt.updateField(
-            { ...cell.editor.model.record, field: 'selections' },
+            datastore,
+            { ...record, field: 'selections' },
             { [cell.editor.uuid]: null }
           );
         });

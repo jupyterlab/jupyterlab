@@ -103,13 +103,12 @@ export class OutputArea extends Widget {
     } else {
       const datastore = (this._datastore = OutputAreaData.createStore());
       data = this.data = {
+        datastore,
         record: {
-          datastore,
           schema: OutputAreaData.SCHEMA,
           record: 'data'
         },
         outputs: {
-          datastore,
           schema: OutputData.SCHEMA
         }
       };
@@ -119,12 +118,15 @@ export class OutputArea extends Widget {
     this.contentFactory =
       options.contentFactory || OutputArea.defaultContentFactory;
     this.layout = new PanelLayout();
-    const list = DatastoreExt.getField({ ...data.record, field: 'outputs' });
+    const list = DatastoreExt.getField(data.datastore, {
+      ...data.record,
+      field: 'outputs'
+    });
     for (let i = 0; i < list.length; i++) {
       this._insertOutput(i, { ...data.outputs, record: list[i] });
     }
 
-    data.record.datastore.changed.connect(this.onChange, this);
+    data.datastore.changed.connect(this.onChange, this);
   }
 
   /**
@@ -261,7 +263,7 @@ export class OutputArea extends Widget {
     if (!outputChanges) {
       return;
     }
-    const outputs = DatastoreExt.getField({
+    const outputs = DatastoreExt.getField(this.data.datastore, {
       ...this.data.record,
       field: 'outputs'
     });
@@ -374,7 +376,12 @@ export class OutputArea extends Widget {
       : panel) as IRenderMime.IRenderer;
     if (renderer.renderModel) {
       // Create a temporary output model view to pass of to the renderer.
-      let model = new OutputModel({ record: loc });
+      let model = new OutputModel({
+        data: {
+          datastore: this.data.datastore,
+          record: loc
+        }
+      });
       void renderer.renderModel(model);
     } else {
       layout.widgets[index].dispose();
@@ -390,7 +397,7 @@ export class OutputArea extends Widget {
     loc: DatastoreExt.RecordLocation<IOutputData.Schema>
   ): void {
     let output = this.createOutputItem(loc);
-    let executionCount = DatastoreExt.getField({
+    let executionCount = DatastoreExt.getField(this.data.datastore, {
       ...loc,
       field: 'executionCount'
     });
@@ -415,7 +422,7 @@ export class OutputArea extends Widget {
       return null;
     }
 
-    let executionCount = DatastoreExt.getField({
+    let executionCount = DatastoreExt.getField(this.data.datastore, {
       ...loc,
       field: 'executionCount'
     });
@@ -441,7 +448,12 @@ export class OutputArea extends Widget {
     loc: DatastoreExt.RecordLocation<IOutputData.Schema>
   ): Widget | null {
     // Create a temporary output model view to pass of to the renderer.
-    let model = new OutputModel({ record: loc });
+    let model = new OutputModel({
+      data: {
+        datastore: this.data.datastore,
+        record: loc
+      }
+    });
     let mimeType = this.rendermime.preferredMimeType(
       model.data,
       model.trusted ? 'any' : 'ensure'
@@ -524,7 +536,7 @@ export class OutputArea extends Widget {
         break;
     }
     if (displayId && msgType === 'display_data') {
-      let list = DatastoreExt.getField({
+      let list = DatastoreExt.getField(this.data.datastore, {
         ...this.data.record,
         field: 'outputs'
       });

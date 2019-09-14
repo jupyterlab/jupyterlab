@@ -56,7 +56,7 @@ export class InputArea extends Widget {
     prompt.addClass(INPUT_AREA_PROMPT_CLASS);
 
     // Editor
-    let editorModel = new CodeEditor.Model({ record: data.record });
+    let editorModel = new CodeEditor.Model({ data });
     let editorOptions = {
       model: editorModel,
       factory: contentFactory.editorFactory,

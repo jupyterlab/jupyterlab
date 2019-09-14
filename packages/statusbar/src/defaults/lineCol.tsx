@@ -306,7 +306,8 @@ export namespace LineCol {
         this._line = 1;
       } else {
         DatastoreExt.listenField(
-          { ...editor.model.record, field: 'selections' },
+          editor.model.data.datastore,
+          { ...editor.model.data.record, field: 'selections' },
           this._onSelectionChanged
         );
 

@@ -177,8 +177,9 @@ export namespace NotebookTrustStatus {
 
         // Derive values
         if (this._notebook.activeCell) {
-          let trusted = DatastoreExt.getField({
-            ...this._notebook.activeCell.data.record,
+          const { datastore, record } = this._notebook.activeCell.data;
+          let trusted = DatastoreExt.getField(datastore, {
+            ...record,
             field: 'trusted'
           });
           this._activeCellTrusted = trusted;
@@ -213,7 +214,7 @@ export namespace NotebookTrustStatus {
     private _onActiveCellChanged(model: Notebook, cell: Cell | null): void {
       const oldState = this._getAllState();
       if (cell) {
-        let trusted = DatastoreExt.getField({
+        let trusted = DatastoreExt.getField(cell.data.datastore, {
           ...cell.data.record,
           field: 'trusted'
         });
@@ -233,7 +234,7 @@ export namespace NotebookTrustStatus {
       let cells = toArray(notebook.widgets);
 
       let trusted = cells.reduce((accum, current) => {
-        let trusted = DatastoreExt.getField({
+        let trusted = DatastoreExt.getField(current.data.datastore, {
           ...current.data.record,
           field: 'trusted'
         });

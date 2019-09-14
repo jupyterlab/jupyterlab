@@ -169,13 +169,12 @@ export class Cell extends Widget {
     } else {
       const datastore = (this._datastore = CellData.createStore());
       data = this._data = {
+        datastore,
         record: {
-          datastore,
           schema: CellData.SCHEMA,
           record: 'data'
         },
         outputs: {
-          datastore,
           schema: OutputData.SCHEMA
         }
       };
@@ -223,6 +222,7 @@ export class Cell extends Widget {
     }
 
     this._metadataListener = DatastoreExt.listenField(
+      this.data.datastore,
       { ...this.data.record, field: 'metadata' },
       this.onMetadataChanged,
       this
@@ -313,8 +313,9 @@ export class Cell extends Widget {
    * Save view editable state to model
    */
   saveEditableState() {
-    let metadata = DatastoreExt.getField({
-      ...this.data.record,
+    let { datastore, record } = this.data;
+    let metadata = DatastoreExt.getField(datastore, {
+      ...record,
       field: 'metadata'
     }) as JSONObject;
     const current = metadata['editable'];
@@ -326,15 +327,17 @@ export class Cell extends Widget {
       return;
     }
 
-    DatastoreExt.withTransaction(this.data.record.datastore, () => {
+    DatastoreExt.withTransaction(datastore, () => {
       if (this.readOnly) {
         DatastoreExt.updateField(
-          { ...this.data.record, field: 'metadata' },
+          datastore,
+          { ...record, field: 'metadata' },
           { editable: false }
         );
       } else {
         DatastoreExt.updateField(
-          { ...this.data.record, field: 'metadata' },
+          datastore,
+          { ...record, field: 'metadata' },
           { editable: null }
         );
       }
@@ -345,7 +348,7 @@ export class Cell extends Widget {
    * Load view editable state from model.
    */
   loadEditableState() {
-    const metadata = DatastoreExt.getField({
+    const metadata = DatastoreExt.getField(this.data.datastore, {
       ...this.data.record,
       field: 'metadata'
     });
@@ -395,8 +398,9 @@ export class Cell extends Widget {
    * Save view collapse state to model
    */
   saveCollapseState() {
-    const metadata = DatastoreExt.getField({
-      ...this.data.record,
+    const { datastore, record } = this.data;
+    const metadata = DatastoreExt.getField(datastore, {
+      ...record,
       field: 'metadata'
     });
     const jupyter = {
@@ -415,15 +419,17 @@ export class Cell extends Widget {
     } else {
       delete jupyter.source_hidden;
     }
-    DatastoreExt.withTransaction(this.data.record.datastore, () => {
+    DatastoreExt.withTransaction(datastore, () => {
       if (Object.keys(jupyter).length === 0) {
         DatastoreExt.updateField(
-          { ...this.data.record, field: 'metadata' },
+          datastore,
+          { ...record, field: 'metadata' },
           { jupyter: null }
         );
       } else {
         DatastoreExt.updateField(
-          { ...this.data.record, field: 'metadata' },
+          datastore,
+          { ...record, field: 'metadata' },
           { jupyter }
         );
       }
@@ -434,7 +440,7 @@ export class Cell extends Widget {
    * Revert view collapse state from model.
    */
   loadCollapseState() {
-    const metadata = DatastoreExt.getField({
+    const metadata = DatastoreExt.getField(this.data.datastore, {
       ...this.data.record,
       field: 'metadata'
     });
@@ -766,6 +772,7 @@ export class CodeCell extends Cell {
       this.outputHidden = !this.outputHidden;
     });
     this._executionCountListener = DatastoreExt.listenField(
+      this.data.datastore,
       { ...this.data.record, field: 'executionCount' },
       this.onExecutionCountChanged,
       this
@@ -790,7 +797,7 @@ export class CodeCell extends Cell {
   initializeState(): this {
     super.initializeState();
     this.loadScrolledState();
-    const executionCount = DatastoreExt.getField({
+    const executionCount = DatastoreExt.getField(this.data.datastore, {
       ...this.data.record,
       field: 'executionCount'
     });
@@ -846,11 +853,12 @@ export class CodeCell extends Cell {
     // Otherwise setting one key can trigger a write to the other key to
     // maintain the synced consistency.
     super.saveCollapseState();
+    const { datastore, record } = this.data;
     const loc: DatastoreExt.FieldLocation<ICellData.Schema, 'metadata'> = {
-      ...this.data.record,
+      ...record,
       field: 'metadata'
     };
-    const metadata = DatastoreExt.getField(loc);
+    const metadata = DatastoreExt.getField(datastore, loc);
 
     const collapsed = metadata['collapsed'] as boolean | undefined;
 
@@ -863,11 +871,11 @@ export class CodeCell extends Cell {
 
     // Do not set jupyter.outputs_hidden since it is redundant. See
     // and https://github.com/jupyter/nbformat/issues/137
-    DatastoreExt.withTransaction(this.data.record.datastore, () => {
+    DatastoreExt.withTransaction(datastore, () => {
       if (this.outputHidden) {
-        DatastoreExt.updateField(loc, { collapsed: true });
+        DatastoreExt.updateField(datastore, loc, { collapsed: true });
       } else {
-        DatastoreExt.updateField(loc, { collapsed: null });
+        DatastoreExt.updateField(datastore, loc, { collapsed: null });
       }
     });
   }
@@ -880,7 +888,7 @@ export class CodeCell extends Cell {
    */
   loadCollapseState() {
     super.loadCollapseState();
-    const metadata = DatastoreExt.getField({
+    const metadata = DatastoreExt.getField(this.data.datastore, {
       ...this.data.record,
       field: 'metadata'
     });
@@ -905,8 +913,9 @@ export class CodeCell extends Cell {
    * Save view collapse state to model
    */
   saveScrolledState() {
-    const metadata = DatastoreExt.getField({
-      ...this.data.record,
+    const { datastore, record } = this.data;
+    const metadata = DatastoreExt.getField(datastore, {
+      ...record,
       field: 'metadata'
     });
     const current = metadata['scrolled'];
@@ -917,15 +926,17 @@ export class CodeCell extends Cell {
     ) {
       return;
     }
-    DatastoreExt.withTransaction(this.data.record.datastore, () => {
+    DatastoreExt.withTransaction(datastore, () => {
       if (this.outputsScrolled) {
         DatastoreExt.updateField(
-          { ...this.data.record, field: 'metadata' },
+          datastore,
+          { ...record, field: 'metadata' },
           { scrolled: true }
         );
       } else {
         DatastoreExt.updateField(
-          { ...this.data.record, field: 'metadata' },
+          datastore,
+          { ...record, field: 'metadata' },
           { scrolled: null }
         );
       }
@@ -936,7 +947,7 @@ export class CodeCell extends Cell {
    * Revert view collapse state from model.
    */
   loadScrolledState() {
-    const metadata = DatastoreExt.getField({
+    const metadata = DatastoreExt.getField(this.data.datastore, {
       ...this.data.record,
       field: 'metadata'
     });
@@ -1078,8 +1089,9 @@ export class CodeCell extends Cell {
    * https://github.com/jupyter/nbformat/issues/137
    */
   private _syncCollapsed(preference: 'collapsed' | 'outputs_hidden') {
-    const metadata = DatastoreExt.getField({
-      ...this.data.record,
+    const { datastore, record } = this.data;
+    const metadata = DatastoreExt.getField(datastore, {
+      ...record,
       field: 'metadata'
     });
     const collapsed = metadata['collapsed'] as boolean | undefined;
@@ -1106,9 +1118,10 @@ export class CodeCell extends Cell {
         update = { collapsed: null };
       }
     }
-    DatastoreExt.withTransaction(this.data.record.datastore, () => {
+    DatastoreExt.withTransaction(datastore, () => {
       DatastoreExt.updateField(
-        { ...this.data.record, field: 'metadata' },
+        datastore,
+        { ...record, field: 'metadata' },
         update
       );
     });
@@ -1148,10 +1161,12 @@ export namespace CodeCell {
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     let code = cell.editor.model.value;
+    const { datastore, record } = cell.data;
     if (!code.trim() || !session.kernel) {
-      DatastoreExt.withTransaction(cell.data.record.datastore, () => {
+      DatastoreExt.withTransaction(datastore, () => {
         DatastoreExt.updateField(
-          { ...cell.data.record, field: 'executionCount' },
+          datastore,
+          { ...record, field: 'executionCount' },
           null
         );
         OutputAreaData.clear(cell.data);
@@ -1163,8 +1178,8 @@ export namespace CodeCell {
     metadata = { ...metadata, ...cellId };
     cell.outputHidden = false;
     cell.setPrompt('*');
-    DatastoreExt.withTransaction(cell.data.record.datastore, () => {
-      DatastoreExt.updateRecord(cell.data.record, {
+    DatastoreExt.withTransaction(datastore, () => {
+      DatastoreExt.updateRecord(datastore, record, {
         executionCount: null,
         trusted: true
       });
@@ -1184,9 +1199,10 @@ export namespace CodeCell {
       // Save this execution's future so we can compare in the catch below.
       future = cell.outputArea.future;
       const msg = await msgPromise;
-      DatastoreExt.withTransaction(cell.data.record.datastore, () => {
+      DatastoreExt.withTransaction(datastore, () => {
         DatastoreExt.updateField(
-          { ...cell.data.record, field: 'executionCount' },
+          datastore,
+          { ...record, field: 'executionCount' },
           msg.content.execution_count
         );
       });
@@ -1225,7 +1241,7 @@ export class MarkdownCell extends Cell {
     this._rendermime = options.rendermime.clone({
       resolver: new AttachmentsResolver({
         parent: options.rendermime.resolver,
-        record: this.data.record
+        data: this.data
       })
     });
 
@@ -1237,7 +1253,8 @@ export class MarkdownCell extends Cell {
     }, RENDER_TIMEOUT);
 
     this._listener = DatastoreExt.listenField(
-      { ...this.editor.model.record, field: 'text' },
+      this.editor.model.data.datastore,
+      { ...this.editor.model.data.record, field: 'text' },
       () => this._debouncer.invoke()
     );
 

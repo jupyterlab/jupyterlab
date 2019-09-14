@@ -46,6 +46,16 @@ export namespace ICodeEditorData {
       readonly selections: MapField<CodeEditor.ITextSelection[]>;
     };
   };
+
+  /**
+   * A description of where data is stored in a code editor.
+   */
+  export type DataLocation = DatastoreExt.DataLocation & {
+    /**
+     * The record in which the data is located.
+     */
+    record: DatastoreExt.RecordLocation<Schema>;
+  };
 }
 
 /**
@@ -85,16 +95,15 @@ export namespace CodeEditorData {
    * Clear editor data. The record is not actually removed, but its data
    * is emptied as much as possible to allow it to garbage collect.
    */
-  export function clear(
-    loc: DatastoreExt.RecordLocation<ICodeEditorData.Schema>
-  ): void {
-    let editorData = DatastoreExt.getRecord(loc);
+  export function clear(data: ICodeEditorData.DataLocation): void {
+    let { datastore, record } = data;
+    const editorData = DatastoreExt.getRecord(datastore, record);
 
-    let selections: { [x: string]: CodeEditor.ITextSelection[] | null } = {};
+    const selections: { [x: string]: CodeEditor.ITextSelection[] | null } = {};
     Object.keys(editorData.selections).forEach(key => (selections[key] = null));
 
-    DatastoreExt.withTransaction(loc.datastore, () => {
-      DatastoreExt.updateRecord(loc, {
+    DatastoreExt.withTransaction(datastore, () => {
+      DatastoreExt.updateRecord(datastore, record, {
         selections,
         text: { index: 0, remove: editorData.text.length, text: '' },
         mimeType: 'text/plain'

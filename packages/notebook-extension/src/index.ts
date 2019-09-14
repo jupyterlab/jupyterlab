@@ -958,7 +958,7 @@ function addCommands(
       const { context, content } = current;
 
       let cell = content.activeCell;
-      let metadata = DatastoreExt.getField({
+      let metadata = DatastoreExt.getField(cell.data.datastore, {
         ...cell.data.record,
         field: 'metadata'
       });
@@ -1637,8 +1637,10 @@ function addCommands(
         void clonedOutputs.save(widget);
       };
       current.context.pathChanged.connect(updateCloned);
+      const { datastore, record } = current.content.model.data;
       const cloneListener = DatastoreExt.listenField(
-        { ...current.content.model.data.record, field: 'cells' },
+        datastore,
+        { ...record, field: 'cells' },
         updateCloned
       );
 

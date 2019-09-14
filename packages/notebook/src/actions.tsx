@@ -133,7 +133,8 @@ export namespace NotebookActions {
     if (child.type === 'code') {
       OutputAreaData.clear(clone0);
     }
-    DatastoreExt.withTransaction(clone0.record.datastore, () => {
+    const datastore = nbModel.data.datastore;
+    DatastoreExt.withTransaction(datastore, () => {
       const text0 = orig
         .slice(0, offset)
         .replace(/^\n+/, '')
@@ -143,14 +144,17 @@ export namespace NotebookActions {
         .replace(/^\n+/, '')
         .replace(/\n+$/, '');
       DatastoreExt.updateField(
+        datastore,
         { ...clone0.record, field: 'text' },
         { index: 0, remove: orig.length, text: text0 }
       );
       DatastoreExt.updateField(
+        datastore,
         { ...clone1.record, field: 'text' },
         { index: 0, remove: orig.length, text: text1 }
       );
       DatastoreExt.updateField(
+        datastore,
         { ...nbModel.data.record, field: 'cells' },
         {
           index,
@@ -223,17 +227,20 @@ export namespace NotebookActions {
 
     // Create a new cell for the source to preserve history.
     const clone = Private.cloneCell(model, primary);
+    const datastore = model.data.datastore;
 
-    DatastoreExt.withTransaction(clone.record.datastore, () => {
+    DatastoreExt.withTransaction(datastore, () => {
       const text = toMerge.join('\n\n');
       if (primary.type === 'code') {
         OutputAreaData.clear(clone);
       }
       DatastoreExt.updateField(
+        datastore,
         { ...clone.record, field: 'text' },
         { index: 0, remove: primary.editor.model.value.length, text }
       );
       DatastoreExt.updateField(
+        datastore,
         { ...model.data.record, field: 'cells' },
         {
           index: first,
@@ -297,9 +304,11 @@ export namespace NotebookActions {
     );
     const active = notebook.activeCellIndex;
 
-    DatastoreExt.withTransaction(model.data.record.datastore, () => {
+    const { datastore, record } = model.data;
+    DatastoreExt.withTransaction(datastore, () => {
       DatastoreExt.updateField(
-        { ...model.data.record, field: 'cells' },
+        datastore,
+        { ...record, field: 'cells' },
         { index: active, remove: 0, values: [cellId] }
       );
     });
@@ -333,9 +342,11 @@ export namespace NotebookActions {
       notebook.notebookConfig.defaultCell
     );
 
-    DatastoreExt.withTransaction(model.data.record.datastore, () => {
+    const { datastore, record } = model.data;
+    DatastoreExt.withTransaction(datastore, () => {
       DatastoreExt.updateField(
-        { ...model.data.record, field: 'cells' },
+        datastore,
+        { ...record, field: 'cells' },
         { index: active + 1, remove: 0, values: [cellId] }
       );
     });
@@ -371,18 +382,21 @@ export namespace NotebookActions {
     if (indices.length && indices[indices.length - 1] === widgets.length) {
       return;
     }
-    DatastoreExt.withTransaction(notebook.model.data.record.datastore, () => {
+    const { datastore, record } = notebook.model.data;
+    DatastoreExt.withTransaction(datastore, () => {
       // Proceed through the toMove list in the reverse direction
       // so we get the final ordering right.
       toMove.reverse();
       indices.reverse();
       toMove.forEach((id, idx) => {
         DatastoreExt.updateField(
-          { ...notebook.model.data.record, field: 'cells' },
+          datastore,
+          { ...record, field: 'cells' },
           { index: indices[idx], remove: 1, values: [] }
         );
         DatastoreExt.updateField(
-          { ...notebook.model.data.record, field: 'cells' },
+          datastore,
+          { ...record, field: 'cells' },
           { index: indices[idx] + 1, remove: 0, values: [id] }
         );
       });
@@ -423,16 +437,19 @@ export namespace NotebookActions {
     if (indices.length && indices[0] === 0) {
       return;
     }
-    DatastoreExt.withTransaction(notebook.model.data.record.datastore, () => {
+    const { datastore, record } = notebook.model.data;
+    DatastoreExt.withTransaction(datastore, () => {
       // Proceed through the toMove list in the forward direction
       // so we get the final ordering right.
       toMove.forEach((id, idx) => {
         DatastoreExt.updateField(
-          { ...notebook.model.data.record, field: 'cells' },
+          datastore,
+          { ...record, field: 'cells' },
           { index: indices[idx], remove: 1, values: [] }
         );
         DatastoreExt.updateField(
-          { ...notebook.model.data.record, field: 'cells' },
+          datastore,
+          { ...record, field: 'cells' },
           { index: indices[idx] - 1, remove: 0, values: [id] }
         );
       });
@@ -533,9 +550,11 @@ export namespace NotebookActions {
         notebook.notebookConfig.defaultCell
       );
 
-      DatastoreExt.withTransaction(model.data.record.datastore, () => {
+      const { datastore, record } = model.data;
+      DatastoreExt.withTransaction(datastore, () => {
         DatastoreExt.updateField(
-          { ...model.data.record, field: 'cells' },
+          datastore,
+          { ...record, field: 'cells' },
           { index: notebook.activeCellIndex + 1, remove: 0, values: [cellId] }
         );
       });
@@ -578,9 +597,11 @@ export namespace NotebookActions {
       notebook.notebookConfig.defaultCell
     );
 
-    DatastoreExt.withTransaction(model.data.record.datastore, () => {
+    const { datastore, record } = model.data;
+    DatastoreExt.withTransaction(datastore, () => {
       DatastoreExt.updateField(
-        { ...model.data.record, field: 'cells' },
+        datastore,
+        { ...record, field: 'cells' },
         { index: notebook.activeCellIndex + 1, remove: 0, values: [cellId] }
       );
     });
@@ -949,8 +970,8 @@ export namespace NotebookActions {
     });
 
     let index: number;
-
-    DatastoreExt.withTransaction(model.data.record.datastore, () => {
+    const { datastore, record } = model.data;
+    DatastoreExt.withTransaction(datastore, () => {
       // Set the starting index of the paste operation depending upon the mode.
       switch (mode) {
         case 'below':
@@ -964,7 +985,7 @@ export namespace NotebookActions {
           const toDelete: number[] = [];
 
           notebook.widgets.forEach((child, index) => {
-            const metadata = DatastoreExt.getField({
+            const metadata = DatastoreExt.getField(child.data.datastore, {
               ...child.data.record,
               field: 'metadata'
             });
@@ -980,7 +1001,8 @@ export namespace NotebookActions {
             // Delete the cells as one undo event.
             toDelete.reverse().forEach(i => {
               DatastoreExt.updateField(
-                { ...model.data.record, field: 'cells' },
+                datastore,
+                { ...record, field: 'cells' },
                 { index: i, remove: 1, values: [] }
               );
             });
@@ -993,7 +1015,8 @@ export namespace NotebookActions {
 
       newCells.forEach(cellId => {
         DatastoreExt.updateField(
-          { ...model.data.record, field: 'cells' },
+          datastore,
+          { ...record, field: 'cells' },
           { index: ++index, remove: 0, values: [cellId] }
         );
       });
@@ -1085,10 +1108,12 @@ export namespace NotebookActions {
 
       if (notebook.isSelectedOrActive(child) && cell.type === 'code') {
         (child as CodeCell).outputHidden = false;
-        DatastoreExt.withTransaction(cell.data.record.datastore, () => {
+        const { datastore, record } = cell.data;
+        DatastoreExt.withTransaction(datastore, () => {
           OutputAreaData.clear(cell.data);
           DatastoreExt.updateField(
-            { ...cell.data.record, field: 'executionCount' },
+            datastore,
+            { ...record, field: 'executionCount' },
             null
           );
         });
@@ -1114,11 +1139,12 @@ export namespace NotebookActions {
 
     each(notebook.widgets, (cell: Cell, index) => {
       if (cell.type === 'code') {
-        OutputAreaData.clear(cell.data);
-        DatastoreExt.withTransaction(cell.data.record.datastore, () => {
+        const { datastore, record } = cell.data;
+        DatastoreExt.withTransaction(datastore, () => {
           OutputAreaData.clear(cell.data);
           DatastoreExt.updateField(
-            { ...cell.data.record, field: 'executionCount' },
+            datastore,
+            { ...record, field: 'executionCount' },
             null
           );
         });
@@ -1375,7 +1401,10 @@ export namespace NotebookActions {
     }
     // Do nothing if already trusted.
     const trusted = notebook.widgets.every(cell =>
-      DatastoreExt.getField({ ...cell.data.record, field: 'trusted' })
+      DatastoreExt.getField(cell.data.datastore, {
+        ...cell.data.record,
+        field: 'trusted'
+      })
     );
     if (trusted) {
       return showDialog({
@@ -1390,9 +1419,10 @@ export namespace NotebookActions {
       buttons: [Dialog.cancelButton(), Dialog.warnButton()]
     }).then(result => {
       if (result.button.accept) {
-        DatastoreExt.withTransaction(model.data.record.datastore, () => {
+        DatastoreExt.withTransaction(model.data.datastore, () => {
           notebook.widgets.forEach(cell => {
             DatastoreExt.updateField(
+              cell.data.datastore,
               { ...cell.data.record, field: 'trusted' },
               true
             );
@@ -1500,7 +1530,11 @@ namespace Private {
         id = model.contentFactory.createRawCell(RawCellData.toJSON(data));
         break;
     }
-    return { record: { ...data.record, record: id }, outputs: data.outputs };
+    return {
+      datastore: data.datastore,
+      record: { ...data.record, record: id },
+      outputs: data.outputs
+    };
   }
 
   /**
@@ -1541,7 +1575,7 @@ namespace Private {
         if (reason.message === 'KernelReplyNotOK') {
           selected.map(cell => {
             // Remove '*' prompt from cells that didn't execute
-            const executionCount = DatastoreExt.getField({
+            const executionCount = DatastoreExt.getField(cell.data.datastore, {
               ...cell.data.record,
               field: 'executionCount'
             });
@@ -1660,13 +1694,16 @@ namespace Private {
     const newCell = notebook.model.contentFactory.createCodeCell();
     let index = ArrayExt.firstIndexOf(notebook.widgets, cell);
     index = index === -1 ? notebook.widgets.length : index;
-    DatastoreExt.withTransaction(notebook.model.data.record.datastore, () => {
+    const { datastore, record, cells } = notebook.model.data;
+    DatastoreExt.withTransaction(datastore, () => {
       DatastoreExt.updateField(
-        { ...notebook.model.data.record, field: 'cells' },
+        datastore,
+        { ...record, field: 'cells' },
         { index, remove: 0, values: [newCell] }
       );
       DatastoreExt.updateField(
-        { ...notebook.model.data.cells, record: newCell, field: 'text' },
+        datastore,
+        { ...cells, record: newCell, field: 'text' },
         { index: 0, remove: 0, text }
       );
     });
@@ -1729,7 +1766,8 @@ namespace Private {
     const model = notebook.model;
     const index = notebook.activeCellIndex;
 
-    DatastoreExt.withTransaction(model.data.record.datastore, () => {
+    const { datastore, record } = model.data;
+    DatastoreExt.withTransaction(datastore, () => {
       notebook.widgets.forEach((child, index) => {
         if (!notebook.isSelectedOrActive(child)) {
           return;
@@ -1760,7 +1798,8 @@ namespace Private {
               break;
           }
           DatastoreExt.updateField(
-            { ...model.data.record, field: 'cells' },
+            datastore,
+            { ...record, field: 'cells' },
             { index, remove: 1, values: [cellId] }
           );
         }
@@ -1790,8 +1829,9 @@ namespace Private {
 
     // Find the cells to delete.
     notebook.widgets.forEach((child, index) => {
-      const metadata = DatastoreExt.getField({
-        ...child.data.record,
+      const { datastore, record } = child.data;
+      const metadata = DatastoreExt.getField(datastore, {
+        ...record,
         field: 'metadata'
       });
       const deletable = metadata['deletable'] !== false;
@@ -1804,11 +1844,13 @@ namespace Private {
 
     // If cells are not deletable, we may not have anything to delete.
     if (toDelete.length > 0) {
-      DatastoreExt.withTransaction(model.data.record.datastore, () => {
+      const { datastore, record } = model.data;
+      DatastoreExt.withTransaction(datastore, () => {
         // Delete cells in reverse order to maintain the correct indices.
         toDelete.reverse().forEach(index => {
           DatastoreExt.updateField(
-            { ...model.data.record, field: 'cells' },
+            datastore,
+            { ...record, field: 'cells' },
             { index, remove: 1, values: [] }
           );
         });
@@ -1820,7 +1862,8 @@ namespace Private {
             notebook.notebookConfig.defaultCell
           );
           DatastoreExt.updateField(
-            { ...model.data.record, field: 'cells' },
+            datastore,
+            { ...record, field: 'cells' },
             { index: 0, remove: 0, values: [cellId] }
           );
         }

@@ -137,18 +137,22 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     });
 
     // Connect to changes.
+    let { record, datastore } = model.data;
     DatastoreExt.listenField(
-      { ...model.record, field: 'text' },
+      datastore,
+      { ...record, field: 'text' },
       this._onValueChanged,
       this
     );
     DatastoreExt.listenField(
-      { ...model.record, field: 'mimeType' },
+      datastore,
+      { ...record, field: 'mimeType' },
       this._onMimeTypeChanged,
       this
     );
     DatastoreExt.listenField(
-      { ...model.record, field: 'selections' },
+      datastore,
+      { ...record, field: 'selections' },
       this._onSelectionsChanged,
       this
     );
@@ -544,9 +548,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // will get screened out in _onCursorsChanged(). Make an
     // exception for this method.
     if (!this.editor.hasFocus()) {
-      DatastoreExt.withTransaction(this.model.record.datastore, () => {
+      const { datastore, record } = this.model.data;
+      DatastoreExt.withTransaction(datastore, () => {
         DatastoreExt.updateField(
-          { ...this.model.record, field: 'selections' },
+          datastore,
+          { ...record, field: 'selections' },
           { [this.uuid]: this.getSelections() }
         );
       });
@@ -803,9 +809,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // Only add selections if the editor has focus. This avoids unwanted
     // triggering of cursor activity due to collaborator actions.
     if (this._editor.hasFocus()) {
-      DatastoreExt.withTransaction(this.model.record.datastore, () => {
+      const { datastore, record } = this.model.data;
+      DatastoreExt.withTransaction(datastore, () => {
         DatastoreExt.updateField(
-          { ...this.model.record, field: 'selections' },
+          datastore,
+          { ...record, field: 'selections' },
           { [this.uuid]: this.getSelections() }
         );
       });
@@ -913,9 +921,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     const text = change.text.join('\n');
     // If this was a local change, update the table.
     this._changeGuard = true;
-    DatastoreExt.withTransaction(this.model.record.datastore, () => {
+    const { datastore, record } = this.model.data;
+    DatastoreExt.withTransaction(datastore, () => {
       DatastoreExt.updateField(
-        { ...this.model.record, field: 'text' },
+        datastore,
+        { ...record, field: 'text' },
         { index: start, remove: end - start, text }
       );
     });
