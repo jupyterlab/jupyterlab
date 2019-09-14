@@ -25,7 +25,7 @@ const icon = (): NestedCSSProperties => {
 };
 
 /**
- * A namespace for IconItem statics.
+ * (DEPRECATED) A namespace for IconItem statics.
  */
 export namespace IconItem {
   /**
@@ -40,7 +40,7 @@ export namespace IconItem {
 }
 
 /**
- * A functional tsx component for an icon.
+ * (DEPRECATED) A functional tsx component for an icon.
  */
 export function IconItem(
   props: IconItem.IProps & React.HTMLAttributes<HTMLDivElement>
