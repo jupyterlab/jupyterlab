@@ -14,6 +14,8 @@ import {
 
 import { Token } from '@phosphor/coreutils';
 
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+
 /**
  * The class name added to a running widget.
  */
@@ -83,7 +85,7 @@ export interface IRunningSessionManagers {
    * @param manager - The running item manager.
    *
    */
-  add(manager: IRunningSessions.IManager): void;
+  add(manager: IRunningSessions.IManager): IDisposable;
   /**
    * Return an array of managers.
    */
@@ -97,8 +99,15 @@ export class RunningSessionManagers implements IRunningSessionManagers {
    * @param manager - The running item manager.
    *
    */
-  add(manager: IRunningSessions.IManager): void {
+  add(manager: IRunningSessions.IManager): IDisposable {
     this._managers.push(manager);
+    return new DisposableDelegate(() => {
+      let i = this._managers.indexOf(manager);
+
+      if (i > -1) {
+        this._managers.splice(i, 1);
+      }
+    });
   }
 
   /**
