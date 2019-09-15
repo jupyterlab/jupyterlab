@@ -263,6 +263,10 @@ export class OutputLoggerView extends StackedPanel {
     this._showOutputFromSource(this._activeSource);
   }
 
+  get activeSource(): string {
+    return this._activeSource;
+  }
+
   private _scrollOuputViewToBottom(outputView: LoggerOutputArea) {
     outputView.node.scrollTo({
       left: 0,

@@ -291,18 +291,22 @@ function activateOutputLog(
 ): IOutputLogRegistry {
   const logRegistry = new OutputLogRegistry();
 
-  //let command = 'outputconsole:open';
+  const command = 'outputconsole:open';
 
   let tracker = new WidgetTracker<MainAreaWidget<OutputLoggerView>>({
     namespace: 'outputlogger'
   });
-  // if (restorer) {
-  //   void restorer.restore(tracker, {
-  //     command,
-  //     args: obj => ({ source: obj.content.logger.source }),
-  //     name: () => 'outputLogger'
-  //   });
-  // }
+
+  if (restorer) {
+    void restorer.restore(tracker, {
+      command,
+      args: obj => ({
+        fromRestorer: true,
+        activeSource: obj.content.activeSource
+      }),
+      name: () => 'outputLogger'
+    });
+  }
 
   const status = new OutputStatus({
     outputLogRegistry: logRegistry,
@@ -339,7 +343,7 @@ function activateOutputLog(
       ref: '',
       mode: 'split-bottom'
     });
-    void tracker.add(loggerWidget);
+
     loggerWidget.update();
 
     app.shell.activateById(loggerWidget.id);
@@ -349,11 +353,34 @@ function activateOutputLog(
       loggerView.activeSource = activeSource;
     }
 
+    void tracker.add(loggerWidget);
+
     loggerWidget.disposed.connect(() => {
       loggerWidget = null;
       status.model.highlightingEnabled = highlightingEnabled;
     });
   };
+
+  app.commands.addCommand(command, {
+    label: 'Output Console',
+    execute: (args: any) => {
+      if (!loggerWidget) {
+        createLoggerWidget();
+      } else if (!(args && args.fromRestorer)) {
+        loggerWidget.activate();
+      }
+
+      if (args && args.activeSource) {
+        loggerWidget.content.activeSource = args.activeSource;
+      }
+    }
+  });
+
+  let appRestored = false;
+
+  app.restored.then(() => {
+    appRestored = true;
+  });
 
   statusBar.registerStatusItem('@jupyterlab/outputconsole-extension:status', {
     item: status,
@@ -381,9 +408,16 @@ function activateOutputLog(
       //// TEST ////
 
       nb.activated.connect((nb: NotebookPanel, args: void) => {
+        // set activeSource only after app is restored
+        // in order to allow restorer to restore previous activeSource
+        if (!appRestored) {
+          return;
+        }
+
         const sourceName = nb.context.path;
         if (loggerWidget) {
           loggerWidget.content.activeSource = sourceName;
+          void tracker.save(loggerWidget);
         }
         status.model.activeSource = sourceName;
       });
