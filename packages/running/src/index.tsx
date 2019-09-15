@@ -170,7 +170,10 @@ function Section(props: { manager: IRunningSessions.IManager }) {
   function onShutdown() {
     void showDialog({
       title: `Shut Down All ${props.manager.name} Sessions?`,
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'SHUTDOWN' })]
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({ label: 'SHUT DOWN' })
+      ]
     }).then(result => {
       if (result.button.accept) {
         props.manager.shutdownAll();
