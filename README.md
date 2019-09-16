@@ -1,13 +1,13 @@
 # MathJAX 3 extension
 
-A JupyterLab extension for rendering math with [MathJax 3 alpha](https://github.com/mathjax/mathjax-v3).
+A JupyterLab extension for rendering math with [MathJax 3](https://github.com/mathjax/mathjax).
 
-The default LaTeX renderer in JupyterLab uses [MathJax](https://www.mathjax.org/).
-This extension substitutes the MathJax renderer with the MathJax 3 (beta) renderer.
+The default LaTeX renderer in JupyterLab uses [MathJax 2](https://www.mathjax.org/).
+This extension substitutes the MathJax 2 renderer with the MathJax 3 renderer.
 
 ## Prerequisites
 
-* JupyterLab ^0.34
+* JupyterLab ^1.0
 * Node.js >= 8
 
 ## Install
@@ -27,7 +27,9 @@ npm install
 # Build Typescript source
 npm run build
 # Link your development version of the extension with JupyterLab
-jupyter labextension link packages/mathjax3-extension
+jupyter labextension install packages/mathjax3-extension
+# Disable the default mathjax 2 renderer
+jupyter labextension disable @jupyterlab/mathjax2-extension
 # Rebuild Typescript source after making changes
 npm run build
 # Rebuild JupyterLab after making any changes
