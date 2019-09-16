@@ -42,7 +42,7 @@ export class IconRegistry implements IIconRegistry {
   }
 
   contains(name: string): boolean {
-    return name in this._svg || name in this._classNameToName;
+    return !!this._resolveName(name);
   }
 
   /**
@@ -51,21 +51,47 @@ export class IconRegistry implements IIconRegistry {
   icon(
     props: Icon.INodeOptions & { container?: HTMLElement }
   ): HTMLElement | null {
-    const { name, className, title, container, ...propsStyle } = props;
+    const {
+      name,
+      className,
+      title,
+      fallback,
+      container,
+      ...propsStyle
+    } = props;
 
     // we may have been handed a className in place of name
     let resolvedName = this.resolveName(name);
     if (!resolvedName) {
-      // bail if failing silently or icon node is already set
+      // TODO: remove fallback in jlab 2.0
+      if (fallback) {
+        if (container) {
+          container.textContent = title || '';
+          container.className = classes(
+            name,
+            className,
+            propsStyle ? iconStyleFlat(propsStyle) : ''
+          );
+          return container;
+        } else {
+          // the non-container fallback isn't implemented
+          console.error('unimplemented');
+          return null;
+        }
+      }
+
+      // bail if failing silently
       return null;
     }
+
+    // check if icon element is already set
     if (
       container &&
       container.dataset.icon &&
       container.dataset.icon === resolvedName &&
       container.children[0]
     ) {
-      // return the existing icon node
+      // return the existing icon element
       return container.children[0] as HTMLElement;
     }
 
@@ -112,12 +138,27 @@ export class IconRegistry implements IIconRegistry {
   iconReact(
     props: Icon.INodeOptions & { tag?: 'div' | 'span' }
   ): React.ReactElement {
-    const { name, className, title, tag, ...propsStyle } = props;
+    const { name, className, title, fallback, tag, ...propsStyle } = props;
     const Tag = tag || 'div';
 
     // we may have been handed a className in place of name
     const resolvedName = this.resolveName(name);
     if (!resolvedName) {
+      // TODO: remove fallback in jlab 2.0
+      if (fallback) {
+        return (
+          <Tag
+            className={classes(
+              name,
+              className,
+              propsStyle ? iconStyleFlat(propsStyle) : ''
+            )}
+          >
+            {title || ''}
+          </Tag>
+        );
+      }
+
       // bail if failing silently
       return <></>;
     }
@@ -127,6 +168,10 @@ export class IconRegistry implements IIconRegistry {
     if (!svgElement) {
       // bail if failing silently
       return <></>;
+    }
+
+    if (title) {
+      Private.setTitleSvg(svgElement, title);
     }
 
     return (
@@ -140,7 +185,7 @@ export class IconRegistry implements IIconRegistry {
     );
   }
 
-  resolveName(name: string): string {
+  private _resolveName(name: string): string {
     if (!(name in this._svg)) {
       // skip resolution if name is not defined
       if (name) {
@@ -152,6 +197,16 @@ export class IconRegistry implements IIconRegistry {
         }
       }
 
+      // couldn't resolve name, fail silently
+      return '';
+    }
+
+    return name;
+  }
+
+  resolveName(name: string): string {
+    const resolvedName = this._resolveName(name);
+    if (!resolvedName) {
       if (this._debug) {
         // couldn't resolve name, mark as bad and warn
         console.error(`Invalid icon name: ${name}`);
@@ -162,7 +217,7 @@ export class IconRegistry implements IIconRegistry {
       }
     }
 
-    return name;
+    return resolvedName;
   }
 
   resolveSvg(name: string): HTMLElement | null {
@@ -250,7 +305,7 @@ namespace Private {
   export function setTitleSvg(svgNode: HTMLElement, title: string): void {
     // add a title node to the top level svg node
     let titleNodes = svgNode.getElementsByTagName('title');
-    if (titleNodes) {
+    if (titleNodes.length) {
       titleNodes[0].textContent = title;
     } else {
       let titleNode = document.createElement('title');
