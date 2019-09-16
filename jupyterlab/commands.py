@@ -317,6 +317,8 @@ class AppOptions(HasTraits):
 
     kill_event = Instance(Event, args=(), help='Event for aborting call')
 
+    registry = Unicode(help="NPM packages registry URL")
+
     @default('logger')
     def _default_logger(self):
         return logging.getLogger('jupyterlab')
@@ -330,6 +332,11 @@ class AppOptions(HasTraits):
     @default('core_config')
     def _default_core_config(self):
         return CoreConfig()
+
+    @default('registry')
+    def _default_registry(self):
+        config = _yarn_config(self.logger)["yarn config"]
+        return config.get("registry", YARN_DEFAULT_REGISTRY)
 
 
 def _ensure_options(options, **kwargs):
@@ -402,10 +409,8 @@ def uninstall_extension(name=None, app_dir=None, logger=None, all_=False, core_c
 
 def update_extension(name=None, all_=False, app_dir=None, logger=None, core_config=None, app_options=None):
     """Update an extension by name, or all extensions.
-
     Either `name` must be given as a string, or `all_` must be `True`.
     If `all_` is `True`, the value of `name` is ignored.
-
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     app_options = _ensure_options(
@@ -413,6 +418,11 @@ def update_extension(name=None, all_=False, app_dir=None, logger=None, core_conf
     _node_check(app_options.logger)
     handler = _AppHandler(app_options)
     if all_ is True:
+        return handler.update_all_extensions()
+    return handler.update_extension(name)
+
+
+def clean(app_dir=None, logger=None, app_options=None):
     """Clean the JupyterLab application directory."""
     app_options = _ensure_options(
         app_options, app_dir=app_dir, logger=logger)
@@ -560,15 +570,11 @@ class _AppHandler(object):
         """
         self.app_dir = options.app_dir
         self.sys_dir = get_app_dir() if options.use_sys_dir else self.app_dir
+        self.logger = options.logger
         self.core_data = options.core_config._data
-        self._registry = None
-
-    @property
-    def registry(self):
-        if self._registry is None:
-            config = _yarn_config(self.logger)["yarn config"]
-            self._registry = config.get("registry", YARN_DEFAULT_REGISTRY)
-        return self._registry or 'https://registry.npmjs.org'
+        self.info = self._get_app_info()
+        self.kill_event = options.kill_event
+        self.registry = options.registry
 
     def install_extension(self, extension, existing=None, pin=None):
         """Install an extension package into JupyterLab.

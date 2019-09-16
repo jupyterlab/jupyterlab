@@ -58,7 +58,7 @@ class TestAppHandlerRegistry(AppHandlerTest):
                 b'{"type":"inspect","data":{"registry":"' + bytes(yarn_registry, 'utf-8') + b'"}}'
             ])
             
-            handler = commands._AppHandler(self.app_dir)
+            handler = commands.AppOptions()
 
             self.assertEqual(handler.registry, yarn_registry)
 
@@ -73,7 +73,7 @@ class TestAppHandlerRegistry(AppHandlerTest):
             ])
 
             staging = pjoin(self.app_dir, 'staging')
-            handler = commands._AppHandler(self.app_dir)
+            handler = commands._AppHandler(commands.AppOptions())
             handler._populate_staging()
 
             lock_path = pjoin(staging, 'yarn.lock')
