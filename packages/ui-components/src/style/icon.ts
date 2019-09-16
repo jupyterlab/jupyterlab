@@ -26,6 +26,7 @@ export type IconKindType =
   | 'splash'
   | 'statusBar'
   | 'tabManager'
+  | 'toolbarButton'
   | 'unset';
 
 export interface IIconStyle extends NestedCSSProperties {
@@ -126,6 +127,11 @@ const iconCSSTabManager: NestedCSSProperties = {
   width: '16px'
 };
 
+const iconCSSToolbarButton: NestedCSSProperties = {
+  height: '16px',
+  width: '16px'
+};
+
 const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   breadCrumb: iconCSSBreadCrumb,
   dockPanelBar: iconCSSDockPanelBar,
@@ -137,6 +143,7 @@ const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   splash: iconCSSSplash,
   statusBar: iconCSSStatusBar,
   tabManager: iconCSSTabManager,
+  toolbarButton: iconCSSToolbarButton,
   unset: {}
 };
 
@@ -194,6 +201,7 @@ const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   splash: containerCSSSplash,
   statusBar: {},
   tabManager: containerCSSTabManager,
+  toolbarButton: {},
   unset: {}
 };
 

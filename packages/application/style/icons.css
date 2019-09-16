@@ -237,10 +237,6 @@
   background-size: 20px;
 }
 
-.jp-AddIcon {
-  background-image: var(--jp-icon-add);
-}
-
 .jp-BugIcon {
   background-image: var(--jp-icon-bug);
 }
@@ -259,14 +255,6 @@
 
 .jp-CodeConsoleIcon {
   background-image: var(--jp-icon-console);
-}
-
-.jp-CopyIcon {
-  background-image: var(--jp-icon-copy);
-}
-
-.jp-CutIcon {
-  background-image: var(--jp-icon-cut);
 }
 
 .jp-DirectionsRunIcon {
@@ -355,28 +343,8 @@
   background-image: var(--jp-icon-new-folder);
 }
 
-.jp-PasteIcon {
-  background-image: var(--jp-icon-paste);
-}
-
-.jp-RefreshIcon {
-  background-image: var(--jp-icon-refresh);
-}
-
-.jp-RunIcon {
-  background-image: var(--jp-icon-run);
-}
-
-.jp-SaveIcon {
-  background-image: var(--jp-icon-save);
-}
-
 .jp-SettingsIcon {
   background-image: var(--jp-icon-settings);
-}
-
-.jp-StopIcon {
-  background-image: var(--jp-icon-stop);
 }
 
 .jp-TextEditorIcon {
