@@ -114,8 +114,9 @@ export class OutputStatus extends VDomRenderer<OutputStatus.Model> {
     let timer: number = null;
 
     this.model.stateChanged.connect(() => {
-      if (!this.model.highlightingEnabled) {
+      if (!this.model.highlightingEnabled || this.model.logCount === 0) {
         this._clearHighlight();
+        this.model.activeSourceChanged = false;
         return;
       }
 
