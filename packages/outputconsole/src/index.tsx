@@ -290,7 +290,9 @@ export class OutputLoggerView extends StackedPanel {
     this._outputViews.forEach((outputView: LoggerOutputArea, name: string) => {
       if (outputView.id === viewId) {
         outputView.show();
-        this._scrollOuputAreaToBottom(outputView);
+        setTimeout(() => {
+          this._scrollOuputAreaToBottom(outputView);
+        }, 50);
       } else {
         outputView.hide();
       }
