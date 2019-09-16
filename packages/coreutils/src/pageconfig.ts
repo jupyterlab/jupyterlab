@@ -14,7 +14,7 @@ declare var process: any;
 declare var require: any;
 
 /**
- * The namespace for Page Config functions.
+ * The namespace for `PageConfig` functions.
  */
 export namespace PageConfig {
   /**
@@ -37,7 +37,7 @@ export namespace PageConfig {
    */
   export function getOption(name: string): string {
     if (configData) {
-      return configData[name] || Private.getBodyData(name);
+      return configData[name] || getBodyData(name);
     }
     configData = Object.create(null);
     let found = false;
@@ -85,7 +85,7 @@ export namespace PageConfig {
         }
       }
     }
-    return configData![name] || Private.getBodyData(name);
+    return configData![name] || getBodyData(name);
   }
 
   /**
@@ -157,7 +157,7 @@ export namespace PageConfig {
    * Get the authorization token for a Jupyter application.
    */
   export function getToken(): string {
-    return getOption('token') || Private.getBodyData('jupyterApiToken');
+    return getOption('token') || getBodyData('jupyterApiToken');
   }
 
   /**
@@ -175,18 +175,13 @@ export namespace PageConfig {
    * Private page config data for the Jupyter application.
    */
   let configData: { [key: string]: string } | null = null;
-}
 
-/**
- * A namespace for module private data.
- */
-namespace Private {
   /**
    * Get a url-encoded item from `body.data` and decode it
    * We should never have any encoded URLs anywhere else in code
    * until we are building an actual request.
    */
-  export function getBodyData(key: string): string {
+  function getBodyData(key: string): string {
     if (typeof document === 'undefined' || !document.body) {
       return '';
     }
@@ -195,5 +190,60 @@ namespace Private {
       return '';
     }
     return decodeURIComponent(val);
+  }
+
+  /**
+   * The namespace for page config `Extension` functions.
+   */
+  export namespace Extension {
+    /**
+     * Populate an array from page config.
+     *
+     * @param key - The page config key (e.g., `deferredExtensions`).
+     *
+     * #### Notes
+     * This is intended for `deferredExtensions` and `disabledExtensions`.
+     */
+    function populate(key: string): { raw: string; rule: RegExp }[] {
+      try {
+        const raw = getOption(key);
+        if (raw) {
+          return JSON.parse(raw).map((pattern: string) => {
+            return { raw: pattern, rule: new RegExp(pattern) };
+          });
+        }
+      } catch (error) {
+        console.warn(`Unable to parse ${key}.`, error);
+      }
+      return [];
+    }
+
+    /**
+     * The collection of deferred extensions in page config.
+     */
+    export const deferred = populate('deferredExtensions');
+
+    /**
+     * The collection of disabled extensions in page config.
+     */
+    export const disabled = populate('disabledExtensions');
+
+    /**
+     * Returns whether a plugin is deferred.
+     *
+     * @param id - The plugin ID.
+     */
+    export function isDeferred(id: string): boolean {
+      return deferred.some(val => val.raw === id || val.rule.test(id));
+    }
+
+    /**
+     * Returns whether a plugin is disabled.
+     *
+     * @param id - The plugin ID.
+     */
+    export function isDisabled(id: string): boolean {
+      return disabled.some(val => val.raw === id || val.rule.test(id));
+    }
   }
 }
