@@ -3,7 +3,7 @@
 
 import { Breakpoints } from './breakpoints';
 import { Signal } from '@phosphor/signaling';
-import { LineInfo } from './notebookTracker';
+import { LineInfo } from './cellManeger';
 
 export class BreakpointsService {
   constructor() {}
