@@ -28,7 +28,7 @@ export class DebuggerNotebookTracker {
     this.breakpointService.selectedBreakpointsChanged.connect(
       (sender, update) => {
         if (update && update.length === 0) {
-          this.clearGutter(this.getCell());
+          // this.clearGutter(this.getCell());
         }
       }
     );
@@ -149,17 +149,16 @@ export class DebuggerNotebookTracker {
     if (lineInfo.handle && lineInfo.handle.order === false) {
       return;
     }
-
     const doc: Doc = editor.getDoc();
     const linesNumber = doc.lineCount();
-
     if (this.previousLineCount !== linesNumber) {
-      if (this.previousLineCount < linesNumber) {
-        this.breakpointService.changeLines(lineInfo, +1);
-      }
-      if (this.previousLineCount > linesNumber) {
-        this.breakpointService.changeLines(lineInfo, -1);
-      }
+      var lines: LineInfo[] = [];
+      doc.eachLine(line => {
+        if ((line as LineInfo).gutterMarkers) {
+          lines.push(editor.lineInfo(line));
+        }
+      });
+      this.breakpointService.changeLines(lines);
       this.previousLineCount = linesNumber;
     }
   };

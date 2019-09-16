@@ -62,20 +62,37 @@ export class BreakpointsService {
     this.selectedBreakpointsChanged.emit([]);
   }
 
-  changeLines(lineInfo: LineInfo, sign: number) {
-    // need better way, maybe just look to gutter in editor?
-    const breakpoints = this.selectedBreakpoints.map(ele => {
-      if (
-        ele.line > lineInfo.line ||
-        (lineInfo.text === '' && lineInfo.line === ele.line)
-      ) {
-        ele.line = ele.line + sign;
-      }
-      if (ele.line > 0) {
-        return ele;
-      }
-    });
-    this.selectedBreakpoints = [...breakpoints];
-    this.selectedBreakpointsChanged.emit(this.selectedBreakpoints);
+  changeLines(linesInfo: LineInfo[]) {
+    if (!linesInfo && this.breakpoints.length === 0) {
+      return;
+    }
+    if (linesInfo.length === 0) {
+      this.selectedBreakpoints = [];
+      this.selectedBreakpointsChanged.emit([]);
+    } else {
+      const breakpoint = { ...this.breakpoints[0] };
+      var breakpoints: Breakpoints.IBreakpoint[] = [];
+      linesInfo.forEach(ele => {
+        breakpoints.push({ ...breakpoint, line: ele.line });
+      });
+      this.selectedBreakpoints = [...breakpoints];
+      this.selectedBreakpointsChanged.emit(this.selectedBreakpoints);
+    }
   }
 }
+
+// changeLines(lineInfo: LineInfo, sign: number) {
+//   const breakpoints = this.selectedBreakpoints.map(ele => {
+//     if (
+//       ele.line > lineInfo.line ||
+//       (lineInfo.text === '' && lineInfo.line === ele.line)
+//     ) {
+//       ele.line = ele.line + sign;
+//     }
+//     if (ele.line > 0) {
+//       return ele;
+//     }
+//   });
+//   this.selectedBreakpoints = [...breakpoints];
+//   this.selectedBreakpointsChanged.emit(this.selectedBreakpoints);
+// }
