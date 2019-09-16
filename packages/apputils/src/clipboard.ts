@@ -3,6 +3,9 @@
 
 import { MimeData } from '@phosphor/coreutils';
 
+// 'string' is allowed so as to make it non-breaking for any 1.x releases
+export type ClipboardData = string | MimeData;
+
 /**
  * The clipboard interface.
  */
@@ -27,11 +30,17 @@ export namespace Clipboard {
    * #### Notes
    * This can only be called in response to a user input event.
    */
-  export function copyToSystem(text: string): void {
+  export function copyToSystem(clipboardData: ClipboardData): void {
     let node = document.body;
     let handler = (event: ClipboardEvent) => {
       let data = event.clipboardData || (window as any).clipboardData;
-      data.setData('text', text);
+      if (typeof clipboardData === 'string') {
+        data.setData('text', clipboardData);
+      } else {
+        (clipboardData as MimeData).types().map((mimeType: string) => {
+          data.setData(mimeType, clipboardData.getData(mimeType));
+        });
+      }
       event.preventDefault();
       node.removeEventListener('copy', handler);
     };
