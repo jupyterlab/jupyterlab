@@ -3,7 +3,7 @@
 Installation
 ------------
 
-JupyterLab can be installed using ``conda``, ``pip``, or ``pipenv``.
+JupyterLab can be installed using ``conda``, ``pip``, ``pipenv`` or ``docker``.
 
 conda
 ~~~~~
@@ -52,6 +52,17 @@ For example, in the directory where ``pipenv``'s ``Pipfile`` and ``Pipfile.lock`
 
     pipenv shell
      jupyter lab
+
+Docker
+~~~~~~
+
+If you have `Docker installed <https://docs.docker.com/install/>`__, you can install and use JupyterLab by selecting one
+of the many `ready-to-run Docker images <https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html>`__
+maintained by the Jupyter Team. Follow the instructions in the `Quick Start Guide <https://jupyter-docker-stacks.readthedocs.io/en/latest/>`__
+to deploy the chosen Docker image. NOTE: Ensure your docker command includes the `-e JUPYTER_ENABLE_LAB=yes` flag to ensure
+JupyterLab is enabled in your container.
+
+
 
 Installing with Previous Versions of Notebook
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
