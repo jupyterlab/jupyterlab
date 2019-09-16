@@ -38,7 +38,7 @@
   "dependencies": {
     "@jupyterlab/application": "^1.0.0",
     "@jupyterlab/rendermime": "^1.0.0",
-    "mathjax-full": "^3"
+    "mathjax-full": "^3.0.0"
   },
   "devDependencies": {
     "rimraf": "^2.6.2",

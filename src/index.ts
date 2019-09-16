@@ -6,19 +6,19 @@ import { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
 // MathJax core
-import { mathjax } from 'mathjax-full/ts/mathjax';
+import { mathjax } from 'mathjax-full/js/mathjax';
 
 // TeX input
-import { TeX } from 'mathjax-full/ts/input/tex';
+import { TeX } from 'mathjax-full/js/input/tex';
 
 // HTML output
-import { CHTML } from 'mathjax-full/ts/output/chtml';
+import { CHTML } from 'mathjax-full/js/output/chtml';
 
-import { browserAdaptor } from 'mathjax-full/ts/adaptors/browserAdaptor';
+import { browserAdaptor } from 'mathjax-full/js/adaptors/browserAdaptor';
 
-import { TeXFont } from 'mathjax-full/ts/output/chtml/fonts/tex';
+import { TeXFont } from 'mathjax-full/js/output/chtml/fonts/tex';
 
-import { RegisterHTMLHandler } from 'mathjax-full/ts/handlers/html';
+import { RegisterHTMLHandler } from 'mathjax-full/js/handlers/html';
 
 RegisterHTMLHandler(browserAdaptor());
 
