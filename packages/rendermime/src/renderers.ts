@@ -597,10 +597,12 @@ namespace Private {
         resolver && resolver.isLocal
           ? resolver.isLocal(path)
           : URLExt.isLocal(path);
-      if (isLocal) {
-        el.target = '_self';
-      } else {
-        el.target = '_blank';
+      // set target attribute if not already present
+      if (!el.target) {
+        el.target = isLocal ? '_self' : '_blank';
+      }
+      // set rel as 'noopener' for non-local anchors
+      if (!isLocal) {
         el.rel = 'noopener';
       }
     }
