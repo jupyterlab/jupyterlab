@@ -6,24 +6,21 @@ import { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
 // MathJax core
-import { MathJax } from 'mathjax3/mathjax3/mathjax';
+import { mathjax } from 'mathjax-full/ts/mathjax';
 
 // TeX input
-import { TeX } from 'mathjax3/mathjax3/input/tex';
+import { TeX } from 'mathjax-full/ts/input/tex';
 
 // HTML output
-import { CHTML } from 'mathjax3/mathjax3/output/chtml';
+import { CHTML } from 'mathjax-full/ts/output/chtml';
 
-import { browserAdaptor } from 'mathjax3/mathjax3/adaptors/browserAdaptor';
+import { browserAdaptor } from 'mathjax-full/ts/adaptors/browserAdaptor';
 
-import { TeXFont } from 'mathjax3/mathjax3/output/chtml/fonts/tex';
+import { TeXFont } from 'mathjax-full/ts/output/chtml/fonts/tex';
 
-import { RegisterHTMLHandler } from 'mathjax3/mathjax3/handlers/html';
+import { RegisterHTMLHandler } from 'mathjax-full/ts/handlers/html';
 
 RegisterHTMLHandler(browserAdaptor());
-
-// Load the MathJax fonts
-import '../style/index.css';
 
 // Override dynamically generated fonts in favor
 // of our font css that is picked up by webpack.
@@ -37,7 +34,7 @@ export class MathJax3Typesetter implements ILatexTypesetter {
   constructor() {
     const chtml = new CHTML({ font: new emptyFont() });
     const tex = new TeX({ inlineMath: [['$', '$'], ['\\(', '\\)']] });
-    this._html = MathJax.document(window.document, {
+    this._html = mathjax.document(window.document, {
       InputJax: tex,
       OutputJax: chtml
     });
