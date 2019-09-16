@@ -1808,22 +1808,23 @@ export namespace DirListing {
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       if (fileType) {
-        // add icon as svg node. Can be styled using CSS
-        if (
-          !this._iconRegistry.icon({
+        // TODO: remove workaround if...else/code in else clause in v2.0.0
+        // workaround for 1.0.x versions of Jlab pulling in 1.1.x versions of filebrowser
+        if (this._iconRegistry) {
+          // add icon as svg node. Can be styled using CSS
+          this._iconRegistry.icon({
             name: fileType.iconClass,
             className: ITEM_ICON_CLASS,
             title: fileType.iconLabel,
+            fallback: true,
             container: icon,
             center: true,
             kind: 'listing'
-          })
-        ) {
+          });
+        } else {
           // add icon as CSS background image. Can't be styled using CSS
           icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
           icon.textContent = fileType.iconLabel || '';
-          // clean up the svg icon annotation, if any
-          delete icon.dataset.icon;
         }
       } else {
         // use default icon as CSS background image

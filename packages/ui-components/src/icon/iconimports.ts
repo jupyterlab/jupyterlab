@@ -31,6 +31,14 @@ import lineFormSvg from '../../style/icons/statusbar/line-form.svg';
 import notTrustedSvg from '../../style/icons/statusbar/not-trusted.svg';
 import terminalSvg from '../../style/icons/statusbar/terminal.svg';
 import trustedSvg from '../../style/icons/statusbar/trusted.svg';
+import addSvg from '../../style/icons/toolbar/add.svg';
+import copySvg from '../../style/icons/toolbar/copy.svg';
+import cutSvg from '../../style/icons/toolbar/cut.svg';
+import pasteSvg from '../../style/icons/toolbar/paste.svg';
+import refreshSvg from '../../style/icons/toolbar/refresh.svg';
+import runSvg from '../../style/icons/toolbar/run.svg';
+import saveSvg from '../../style/icons/toolbar/save.svg';
+import stopSvg from '../../style/icons/toolbar/stop.svg';
 
 // defaultIcons definition
 export namespace IconImports {
@@ -57,6 +65,14 @@ export namespace IconImports {
     { name: 'line-form', svg: lineFormSvg },
     { name: 'not-trusted', svg: notTrustedSvg },
     { name: 'terminal', svg: terminalSvg },
-    { name: 'trusted', svg: trustedSvg }
+    { name: 'trusted', svg: trustedSvg },
+    { name: 'add', svg: addSvg },
+    { name: 'copy', svg: copySvg },
+    { name: 'cut', svg: cutSvg },
+    { name: 'paste', svg: pasteSvg },
+    { name: 'refresh', svg: refreshSvg },
+    { name: 'run', svg: runSvg },
+    { name: 'save', svg: saveSvg },
+    { name: 'stop', svg: stopSvg }
   ];
 }
