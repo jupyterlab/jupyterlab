@@ -449,7 +449,7 @@ function activateOutputLog(
       status.model.messageLimit = messageLimit;
 
       highlightingEnabled = settings.get('flash').composite as boolean;
-      status.model.highlightingEnabled = highlightingEnabled;
+      status.model.highlightingEnabled = !loggerWidget && highlightingEnabled;
     };
 
     Promise.all([settingRegistry.load(OUTPUT_CONSOLE_PLUGIN_ID), app.restored])

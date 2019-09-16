@@ -58,6 +58,10 @@ export interface ILogger {
    * A signal emitted when the log changes.
    */
   readonly logChanged: ISignal<this, ILoggerChange>;
+  /**
+   * A signal emitted when the rendermime changes.
+   */
+  readonly rendermimeChanged: ISignal<this, void>;
   readonly source: string;
   readonly outputAreaModel: LoggerOutputAreaModel;
 }
@@ -78,6 +82,13 @@ export class Logger implements ILogger {
     return this._logChanged;
   }
 
+  /**
+   * A signal emitted when the log model changes.
+   */
+  get rendermimeChanged(): ISignal<this, void> {
+    return this._rendermimeChanged;
+  }
+
   log(log: nbformat.IOutput) {
     const timestamp = new Date();
     this.outputAreaModel.add({ ...log, timestamp: timestamp.valueOf() });
@@ -91,13 +102,26 @@ export class Logger implements ILogger {
     this._logChanged.emit('clear');
   }
 
+  set rendermime(value: IRenderMimeRegistry | null) {
+    if (value !== this._rendermime) {
+      this._rendermime = value;
+      this._rendermimeChanged.emit();
+    }
+  }
+
+  get rendermime(): IRenderMimeRegistry | null {
+    return this._rendermime;
+  }
+
   private _count = 0;
   private _logChanged = new Signal<this, ILoggerChange>(this);
+  private _rendermimeChanged = new Signal<this, void>(this);
   readonly source: string;
   readonly outputAreaModel = new LoggerOutputAreaModel({
     contentFactory: new LoggerModelFactory()
   });
-  rendermime: IRenderMimeRegistry | null = null;
+
+  _rendermime: IRenderMimeRegistry | null = null;
 }
 
 export type ILogRegistryChange = 'append' | 'remove';
@@ -153,6 +177,11 @@ export class LoggerOutputArea extends OutputArea {
     (panel.widgets[0] as LoggerOutputPrompt).timestamp = model.timestamp;
     return panel;
   }
+
+  /**
+   * The rendermime instance used by the widget.
+   */
+  rendermime: IRenderMimeRegistry;
 
   readonly model: LoggerOutputAreaModel;
 }
@@ -222,19 +251,33 @@ export class OutputLoggerView extends StackedPanel {
 
     outputLogRegistry.registryChanged.connect(
       (sender: IOutputLogRegistry, args: ILogRegistryChange) => {
-        const loggers = this._outputLogRegistry.getLoggers();
-        for (let logger of loggers) {
-          // TODO: optimize
-          logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
-            this._updateOutputViews();
-          });
-        }
+        this._bindLoggerSignals();
       }
     );
+
+    this._bindLoggerSignals();
   }
 
   protected onAfterAttach(msg: Message): void {
     this._updateOutputViews();
+  }
+
+  private _bindLoggerSignals() {
+    const loggers = this._outputLogRegistry.getLoggers();
+    for (let logger of loggers) {
+      // TODO: optimize
+      logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
+        this._updateOutputViews();
+      });
+
+      logger.rendermimeChanged.connect((sender: ILogger) => {
+        const viewId = `source:${sender.source}`;
+        const view = this._outputViews.get(viewId);
+        if (view) {
+          view.rendermime = sender.rendermime;
+        }
+      });
+    }
   }
 
   get outputLogRegistry(): IOutputLogRegistry {
