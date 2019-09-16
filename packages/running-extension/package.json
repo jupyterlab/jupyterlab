@@ -36,7 +36,10 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^1.2.0-alpha.0",
-    "@jupyterlab/running": "^1.2.0-alpha.0"
+    "@jupyterlab/coreutils": "^3.2.0-alpha.0",
+    "@jupyterlab/running": "^1.2.0-alpha.0",
+    "@jupyterlab/services": "^4.2.0-alpha.0",
+    "@phosphor/algorithm": "^1.2.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
