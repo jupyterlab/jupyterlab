@@ -247,7 +247,7 @@ export class OutputLoggerView extends StackedPanel {
     this._outputViews.forEach((outputView: LoggerOutputArea, name: string) => {
       if (outputView.id === viewId) {
         outputView.show();
-        this._scrollOuputViewToBottom(outputView);
+        this._scrollOuputAreaToBottom(outputView);
       } else {
         outputView.hide();
       }
@@ -267,7 +267,7 @@ export class OutputLoggerView extends StackedPanel {
     return this._activeSource;
   }
 
-  private _scrollOuputViewToBottom(outputView: LoggerOutputArea) {
+  private _scrollOuputAreaToBottom(outputView: LoggerOutputArea) {
     outputView.node.scrollTo({
       left: 0,
       top: outputView.node.scrollHeight,
@@ -292,14 +292,19 @@ export class OutputLoggerView extends StackedPanel {
           model: logger.outputAreaModel
         });
         outputView.id = viewId;
+        outputView.model.messageLimit = this.messageLimit;
 
         logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
-          this._scrollOuputViewToBottom(outputView);
+          this._scrollOuputAreaToBottom(outputView);
         });
 
         outputView.outputLengthChanged.connect(
           (sender: LoggerOutputArea, args: number) => {
             outputView.model.applyLimit();
+            clearTimeout(this._scrollTimer);
+            this._scrollTimer = setTimeout(() => {
+              this._scrollOuputAreaToBottom(outputView);
+            }, 50);
           }
         );
 
@@ -321,6 +326,13 @@ export class OutputLoggerView extends StackedPanel {
   }
 
   /**
+   * Message entry limit.
+   */
+  get messageLimit(): number {
+    return this._messageLimit;
+  }
+
+  /**
    * Sets message entry limit.
    */
   set messageLimit(limit: number) {
@@ -329,12 +341,16 @@ export class OutputLoggerView extends StackedPanel {
         const model = outputView.model;
         model.messageLimit = limit;
       });
+
+      this._messageLimit = limit;
     }
   }
 
   private _outputLogRegistry: IOutputLogRegistry;
   private _outputViews = new Map<string, LoggerOutputArea>();
   private _activeSource: string = null;
+  private _messageLimit: number = 1000;
+  private _scrollTimer: number = null;
 }
 
 /**

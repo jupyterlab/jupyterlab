@@ -225,7 +225,7 @@ export namespace OutputStatus {
     get logCount(): number {
       if (this._activeSource) {
         const logger = this._outputLogRegistry.getLogger(this._activeSource);
-        return logger.length;
+        return Math.min(logger.length, this._messageLimit);
       }
 
       return 0;
@@ -243,6 +243,18 @@ export namespace OutputStatus {
       this.stateChanged.emit(void 0);
     }
 
+    /**
+     * Sets message entry limit.
+     */
+    set messageLimit(limit: number) {
+      if (limit > 0) {
+        this._messageLimit = limit;
+
+        // refresh rendering
+        this.stateChanged.emit(void 0);
+      }
+    }
+
     markSourceOutputRead(name: string) {
       this._loggersWatched.set(name, true);
     }
@@ -258,6 +270,7 @@ export namespace OutputStatus {
     public activeSourceChanged: boolean = false;
     private _outputLogRegistry: IOutputLogRegistry;
     private _activeSource: string = null;
+    private _messageLimit: number = 1000;
     private _loggersWatched: Map<string, boolean> = new Map();
   }
 
@@ -289,8 +302,11 @@ function activateOutputLog(
   restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null
 ): IOutputLogRegistry {
-  const logRegistry = new OutputLogRegistry();
+  let loggerWidget: MainAreaWidget<OutputLoggerView> = null;
+  let messageLimit: number = 1000;
+  let highlightingEnabled: boolean = true;
 
+  const logRegistry = new OutputLogRegistry();
   const command = 'outputconsole:open';
 
   let tracker = new WidgetTracker<MainAreaWidget<OutputLoggerView>>({
@@ -317,15 +333,12 @@ function activateOutputLog(
         loggerWidget.activate();
       }
 
+      status.model.messageLimit = messageLimit;
       status.model.markSourceOutputRead(status.model.activeSource);
       status.model.highlightingEnabled = false;
       status.model.stateChanged.emit(void 0);
     }
   });
-
-  let loggerWidget: MainAreaWidget<OutputLoggerView> = null;
-  let messageLimit: number = 1000;
-  let highlightingEnabled: boolean = true;
 
   const createLoggerWidget = () => {
     let activeSource: string = nbtracker.currentWidget
@@ -432,6 +445,7 @@ function activateOutputLog(
       if (loggerWidget) {
         loggerWidget.content.messageLimit = messageLimit;
       }
+      status.model.messageLimit = messageLimit;
 
       highlightingEnabled = settings.get('flash').composite as boolean;
       status.model.highlightingEnabled = highlightingEnabled;
