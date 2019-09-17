@@ -26,7 +26,9 @@ import { KernelMessage } from '@jupyterlab/services';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+import { ICommandPalette, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+
+import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import React from 'react';
 
@@ -49,7 +51,7 @@ const outputLogPlugin: JupyterFrontEndPlugin<IOutputLogRegistry> = {
   activate: activateOutputLog,
   id: OUTPUT_CONSOLE_PLUGIN_ID,
   provides: IOutputLogRegistry,
-  requires: [INotebookTracker, IStatusBar],
+  requires: [IMainMenu, ICommandPalette, INotebookTracker, IStatusBar],
   optional: [ILayoutRestorer, ISettingRegistry],
   autoStart: true
 };
@@ -298,6 +300,8 @@ export namespace OutputStatus {
  */
 function activateOutputLog(
   app: JupyterFrontEnd,
+  mainMenu: IMainMenu,
+  palette: ICommandPalette,
   nbtracker: INotebookTracker,
   statusBar: IStatusBar,
   restorer: ILayoutRestorer | null,
@@ -309,6 +313,7 @@ function activateOutputLog(
 
   const logRegistry = new OutputLogRegistry();
   const command = 'outputconsole:open';
+  const category: string = 'Main Area';
 
   let tracker = new WidgetTracker<MainAreaWidget<OutputLoggerView>>({
     namespace: 'outputlogger'
@@ -376,7 +381,7 @@ function activateOutputLog(
   };
 
   app.commands.addCommand(command, {
-    label: 'Output Console',
+    label: 'Log Console',
     execute: (args: any) => {
       if (!loggerWidget) {
         createLoggerWidget();
@@ -389,6 +394,9 @@ function activateOutputLog(
       }
     }
   });
+
+  mainMenu.viewMenu.addGroup([{ command }]);
+  palette.addItem({ command, category });
 
   let appRestored = false;
 
