@@ -72,7 +72,7 @@ export class Logger implements ILogger {
   }
 
   get length(): number {
-    return this._count;
+    return this.outputAreaModel.length;
   }
 
   /**
@@ -92,13 +92,11 @@ export class Logger implements ILogger {
   log(log: nbformat.IOutput) {
     const timestamp = new Date();
     this.outputAreaModel.add({ ...log, timestamp: timestamp.valueOf() });
-    this._count++;
     this._logChanged.emit('append');
   }
 
   clear() {
     this.outputAreaModel.clear(false);
-    this._count = 0;
     this._logChanged.emit('clear');
   }
 
@@ -113,7 +111,6 @@ export class Logger implements ILogger {
     return this._rendermime;
   }
 
-  private _count = 0;
   private _logChanged = new Signal<this, ILoggerChange>(this);
   private _rendermimeChanged = new Signal<this, void>(this);
   readonly source: string;
