@@ -12,6 +12,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 
 import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
+import { JSONExt } from '@phosphor/coreutils';
 
 /**
  * The model for an output area.
@@ -288,10 +289,11 @@ export class OutputAreaModel implements IOutputAreaModel {
   }
 
   /**
-   * Add an item to the list.
+   * Add a copy of the item to the list.
    */
   private _add(value: nbformat.IOutput): number {
     let trusted = this._trusted;
+    value = JSONExt.deepCopy(value);
 
     // Normalize the value.
     Private.normalize(value);
