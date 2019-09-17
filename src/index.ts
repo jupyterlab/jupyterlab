@@ -20,6 +20,8 @@ import { TeXFont } from 'mathjax-full/js/output/chtml/fonts/tex';
 
 import { RegisterHTMLHandler } from 'mathjax-full/js/handlers/html';
 
+import { AllPackages } from 'mathjax-full/js/input/tex/AllPackages';
+
 RegisterHTMLHandler(browserAdaptor());
 
 // Override dynamically generated fonts in favor
@@ -32,8 +34,16 @@ class emptyFont extends TeXFont {}
  */
 export class MathJax3Typesetter implements ILatexTypesetter {
   constructor() {
-    const chtml = new CHTML({ font: new emptyFont() });
-    const tex = new TeX({ inlineMath: [['$', '$'], ['\\(', '\\)']] });
+    const chtml = new CHTML({
+      font: new emptyFont()
+    });
+    const tex = new TeX({
+      packages: AllPackages,
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      processEscapes: true,
+      processEnvironments: true
+    });
     this._html = mathjax.document(window.document, {
       InputJax: tex,
       OutputJax: chtml
