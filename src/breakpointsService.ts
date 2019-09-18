@@ -8,7 +8,7 @@ import { LineInfo } from './cellManeger';
 export class BreakpointsService {
   constructor() {}
 
-  state: any = {};
+  selectedType: SessionTypes;
   selectedBreakpoints: Breakpoints.IBreakpoint[] = [];
 
   selectedBreakpointsChanged = new Signal<this, Breakpoints.IBreakpoint[]>(
@@ -16,7 +16,7 @@ export class BreakpointsService {
   );
   breakpointChanged = new Signal<this, Breakpoints.IBreakpoint>(this);
 
-  addBreakpoint(session_id: string, editor_id: string, lineInfo: LineInfo) {
+  addBreakpoint(session_id: string, type: string, lineInfo: LineInfo) {
     const breakpoint: Breakpoints.IBreakpoint = {
       line: lineInfo.line,
       active: true,
@@ -33,16 +33,12 @@ export class BreakpointsService {
     return this.selectedBreakpoints;
   }
 
-  onSelectedBreakpoints(session_id: string, editor_id: string) {
-    if (!this.state[session_id]) {
-      this.state[session_id] = {};
-      if (!this.state[session_id][editor_id]) {
-        this.state[session_id][editor_id] = [];
-      }
-    } else {
-      if (!this.state[session_id][editor_id]) {
-        this.state[session_id][editor_id] = [];
-      }
+  onSelectedBreakpoints(session_id: string, type: SessionTypes) {
+    // this still not work
+
+    this.selectedType = type;
+    if (this.selectedType && this.selectedType !== type) {
+      this.clearSelectedBreakpoints();
     }
   }
 
@@ -81,18 +77,4 @@ export class BreakpointsService {
   }
 }
 
-// changeLines(lineInfo: LineInfo, sign: number) {
-//   const breakpoints = this.selectedBreakpoints.map(ele => {
-//     if (
-//       ele.line > lineInfo.line ||
-//       (lineInfo.text === '' && lineInfo.line === ele.line)
-//     ) {
-//       ele.line = ele.line + sign;
-//     }
-//     if (ele.line > 0) {
-//       return ele;
-//     }
-//   });
-//   this.selectedBreakpoints = [...breakpoints];
-//   this.selectedBreakpointsChanged.emit(this.selectedBreakpoints);
-// }
+export type SessionTypes = 'console' | 'notebook';

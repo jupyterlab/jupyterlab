@@ -34,14 +34,14 @@ export class DebuggerNotebookTracker {
   protected onNewCell(noteTracker: NotebookTracker, codeCell: CodeCell) {
     setTimeout(() => {
       if (this.cellManager) {
-        this.cellManager.debuggerSessionId = this.debuggerSession.id;
+        this.cellManager.debuggerSession = this.debuggerSession;
         this.cellManager.activeCell = codeCell;
         this.cellManager.onActiveCellChanged();
       } else {
         const options: CellManager.IOptions = {
           breakpointService: this.breakpointService,
           activeCell: codeCell,
-          sessionId: this.debuggerSession.id
+          session: this.debuggerSession
         };
         this.cellManager = new CellManager(options);
       }

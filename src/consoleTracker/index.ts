@@ -36,9 +36,8 @@ export class DebuggerConsoleTracker {
     consolePanel: ConsolePanel,
     widgetTrack: WidgetTracker
   ) {
-    console.log('current change');
     this.consoleSession = consolePanel ? consolePanel.session : false;
-    if (this.debuggerSession) {
+    if (this.debuggerSession && this.consoleSession) {
       this.debuggerSession.dispose();
       this.debuggerSession = new DebugSession({
         client: this.consoleSession as IClientSession
@@ -49,12 +48,12 @@ export class DebuggerConsoleTracker {
           this
         );
         if (consolePanel.console.promptCell) {
-          this.cellManager.debuggerSessionId = this.debuggerSession.id;
+          this.cellManager.debuggerSession = this.debuggerSession;
           this.cellManager.previousCell = this.cellManager.activeCell;
           this.cellManager.activeCell = consolePanel.console.promptCell;
         }
       }
-    } else {
+    } else if (this.consoleSession) {
       this.debuggerSession = new DebugSession({
         client: this.consoleSession as IClientSession
       });
@@ -80,7 +79,7 @@ export class DebuggerConsoleTracker {
       this.cellManager = new CellManager({
         activeCell: update,
         breakpointService: this.breakpointService,
-        sessionId: this.debuggerSession.id
+        session: this.debuggerSession
       });
     }
   }

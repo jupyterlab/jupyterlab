@@ -4,20 +4,20 @@
 import { CodeCell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { Editor, Doc } from 'codemirror';
-import { BreakpointsService } from '../breakpointsService';
+import { BreakpointsService, SessionTypes } from '../breakpointsService';
+import { DebugSession } from '../session';
 
 export class CellManager {
   constructor(options: CellManager.IOptions) {
     this.breakpointService = options.breakpointService;
     this.activeCell = options.activeCell;
-    this.debuggerSessionId = options.sessionId;
+    this.debuggerSession = options.session;
     this.onActiveCellChanged();
-    console.log('new Cell manager');
   }
 
   private _previousCell: CodeCell;
   previousLineCount: number;
-  private _debuggerSessionId: string;
+  private _debuggerSession: DebugSession;
   breakpointService: BreakpointsService;
   private _activeCell: CodeCell;
 
@@ -29,12 +29,12 @@ export class CellManager {
     return this._previousCell;
   }
 
-  set debuggerSessionId(id: string) {
-    this._debuggerSessionId = id;
+  set debuggerSession(session: DebugSession) {
+    this._debuggerSession = session;
   }
 
-  get debuggerSessionId() {
-    return this._debuggerSessionId;
+  get debuggerSession() {
+    return this._debuggerSession;
   }
 
   set activeCell(cell: CodeCell) {
@@ -56,11 +56,9 @@ export class CellManager {
   }
 
   onActiveCellChanged() {
-    if (this.activeCell && this.activeCell.editor && this.debuggerSessionId) {
-      this.breakpointService.onSelectedBreakpoints(
-        this.debuggerSessionId,
-        this.getEditorId()
-      );
+    if (this.activeCell && this.activeCell.editor && this.debuggerSession) {
+      this.breakpointService.onSelectedBreakpoints(this.debuggerSession.id, this
+        .debuggerSession.type as SessionTypes);
       if (this.previousCell && !this.previousCell.isDisposed) {
         this.removeListner(this.previousCell);
         this.clearGutter(this.previousCell);
@@ -114,13 +112,13 @@ export class CellManager {
     const isRemoveGutter = !!info.gutterMarkers;
     if (isRemoveGutter) {
       this.breakpointService.removeBreakpoint(
-        this.debuggerSessionId,
+        this.debuggerSession,
         this.getEditorId,
         info as LineInfo
       );
     } else {
       this.breakpointService.addBreakpoint(
-        this.debuggerSessionId,
+        this.debuggerSession.id,
         this.getEditorId(),
         info as LineInfo
       );
@@ -162,7 +160,7 @@ export class CellManager {
 
 export namespace CellManager {
   export interface IOptions {
-    sessionId: string;
+    session: DebugSession;
     breakpointService: BreakpointsService;
     activeCell?: CodeCell;
   }
