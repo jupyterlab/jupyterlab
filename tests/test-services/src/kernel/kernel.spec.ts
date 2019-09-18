@@ -316,5 +316,23 @@ describe('kernel', () => {
         'value'
       );
     });
+
+    it('should handle env values', async () => {
+      const PYTHON_SPEC_W_ENV = JSON.parse(JSON.stringify(PYTHON_SPEC));
+      PYTHON_SPEC_W_ENV.spec.env = {
+        SOME_ENV: 'some_value',
+        LANG: 'en_US.UTF-8'
+      };
+      const serverSettings = getRequestHandler(200, {
+        default: 'python',
+        kernelspecs: { python: PYTHON_SPEC_W_ENV }
+      });
+      const specs = await Kernel.getSpecs(serverSettings);
+
+      expect(specs.kernelspecs['python']).to.have.property('env');
+      const env = specs.kernelspecs['python'].env;
+      expect(env).to.have.property('SOME_ENV', 'some_value');
+      expect(env).to.have.property('LANG', 'en_US.UTF-8');
+    });
   });
 });
