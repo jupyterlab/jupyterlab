@@ -26,6 +26,7 @@ import { Debugger } from './debugger';
 import { IDebugger, IDebuggerSidebar } from './tokens';
 import { DebuggerNotebookTracker } from './notebookTracker';
 import { BreakpointsService } from './breakpointsService';
+import { DebuggerConsoleTracker } from './consoleTracker';
 
 // import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
@@ -45,7 +46,7 @@ export namespace CommandIDs {
 }
 
 // Service for controll state of breakpoints in extensione
-const service = new BreakpointsService();
+const breakpointService = new BreakpointsService();
 
 /**
  * A plugin that provides visual debugging support for consoles.
@@ -53,14 +54,12 @@ const service = new BreakpointsService();
 const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:consoles',
   autoStart: true,
-  requires: [IDebugger],
-  optional: [IConsoleTracker],
-  activate: (_, debug, tracker: IConsoleTracker | null) => {
-    if (!tracker) {
-      console.log(`${consoles.id} load failed. There is no console tracker.`);
-      return;
-    }
-    console.log(`${consoles.id} has not been implemented.`, debug);
+  requires: [IDebugger, IConsoleTracker, IEditorTracker],
+  activate: (_, debug, tracker: IConsoleTracker) => {
+    new DebuggerConsoleTracker({
+      consoleTracker: tracker,
+      breakpointService: breakpointService
+    });
   }
 };
 
@@ -103,7 +102,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   ) => {
     new DebuggerNotebookTracker({
       notebookTracker: notebook,
-      breakpointService: service
+      breakpointService: breakpointService
     });
 
     // console.log(debugetNoteTracker);
@@ -132,7 +131,7 @@ const sidebar: JupyterFrontEndPlugin<Debugger> = {
     const { shell } = app;
     const label = 'Environment';
     const namespace = 'jp-debugger-sidebar';
-    const sidebar = new Debugger({ breakpointsService: service });
+    const sidebar = new Debugger({ breakpointsService: breakpointService });
     sidebar.id = namespace;
     sidebar.title.label = label;
     shell.add(sidebar, 'right', { activate: false });

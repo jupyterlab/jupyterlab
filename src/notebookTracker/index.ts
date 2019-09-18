@@ -20,7 +20,8 @@ export class DebuggerNotebookTracker {
 
     this.notebookTracker.currentChanged.connect(
       (sender, notePanel: NotebookPanel) => {
-        this.newDebuggerSession(notePanel.session, sender);
+        const session = notePanel ? notePanel.session : false;
+        this.newDebuggerSession(session, sender);
       }
     );
   }
@@ -30,35 +31,38 @@ export class DebuggerNotebookTracker {
   breakpointService: BreakpointsService;
   cellManager: CellManager;
 
-  protected test(noteTracker: NotebookTracker, codeCell: CodeCell) {
+  protected onNewCell(noteTracker: NotebookTracker, codeCell: CodeCell) {
     setTimeout(() => {
       if (this.cellManager) {
-        this.cellManager.debuggerSessionId = this.debuggerSession.id;
+        this.cellManager.debuggerSession = this.debuggerSession;
         this.cellManager.activeCell = codeCell;
         this.cellManager.onActiveCellChanged();
       } else {
         const options: CellManager.IOptions = {
           breakpointService: this.breakpointService,
           activeCell: codeCell,
-          sessionId: this.debuggerSession.id
+          session: this.debuggerSession
         };
         this.cellManager = new CellManager(options);
       }
-      // console.log('active cell changed', this);
     });
   }
 
-  protected newDebuggerSession(client: IClientSession, note: INotebookTracker) {
+  protected newDebuggerSession(
+    client: IClientSession | Boolean,
+    note: INotebookTracker
+  ) {
     if (this.debuggerSession) {
       this.debuggerSession.dispose();
-      note.activeCellChanged.disconnect(this.test, this);
+      note.activeCellChanged.disconnect(this.onNewCell, this);
     }
     // create new session. Just changing client make sometimes that kernel is not attach to note
-    this.debuggerSession = new DebugSession({
-      client: client
-    });
-
-    note.activeCellChanged.connect(this.test, this);
+    if (client) {
+      this.debuggerSession = new DebugSession({
+        client: client as IClientSession
+      });
+      note.activeCellChanged.connect(this.onNewCell, this);
+    }
   }
 }
 

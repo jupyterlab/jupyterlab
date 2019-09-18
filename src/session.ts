@@ -32,6 +32,10 @@ export class DebugSession implements IDebugger.ISession {
     return this.client.name;
   }
 
+  get type() {
+    return this.client.type;
+  }
+
   get client(): IClientSession {
     return this._client;
   }
