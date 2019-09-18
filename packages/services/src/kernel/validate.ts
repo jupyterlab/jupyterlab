@@ -120,12 +120,19 @@ export function validateSpecModel(data: any): Kernel.ISpecModel {
   validateProperty(spec, 'language', 'string');
   validateProperty(spec, 'display_name', 'string');
   validateProperty(spec, 'argv', 'array');
+
+  let metadata: any = null;
+  if (spec.hasOwnProperty('metadata')) {
+    validateProperty(spec, 'metadata', 'object');
+    metadata = spec.metadata;
+  }
   return {
     name: data.name,
     resources: data.resources,
     language: spec.language,
     display_name: spec.display_name,
-    argv: spec.argv
+    argv: spec.argv,
+    metadata
   };
 }
 
