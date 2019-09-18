@@ -71,13 +71,16 @@ export class Component extends React.Component<IProps, IState> {
           }}
           invertTheme={false}
           keyPath={[root]}
-          getItemString={(type, data, itemType) =>
-            ((Array.isArray(data) && data) || Object.keys(data)).length ===
-            0 ? (
-              // When there is no data, we display the collection type ("{}" or "[]").
+          getItemString={(type, data, itemType, itemString) =>
+            Array.isArray(data) ? (
+              // Always display array type and the number of items i.e. "[] 2 items".
+              <span>
+                {itemType} {itemString}
+              </span>
+            ) : Object.keys(data).length === 0 ? (
+              // Only display object type when it's empty i.e. "{}".
               <span>{itemType}</span>
-            ) : // Otherwise, the data speaks for itself.
-            null
+            ) : null
           }
           labelRenderer={([label, type]) => {
             // let className = 'cm-variable';
