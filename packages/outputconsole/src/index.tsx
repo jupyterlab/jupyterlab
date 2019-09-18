@@ -253,6 +253,12 @@ export class OutputLoggerView extends StackedPanel {
     );
 
     this._bindLoggerSignals();
+
+    this._placeholder = new Widget();
+    this._placeholder.addClass('jlab-output-logger-placeholder');
+    this._placeholder.node.innerHTML = 'No log messages.';
+
+    this.addWidget(this._placeholder);
   }
 
   protected onAfterAttach(msg: Message): void {
@@ -265,6 +271,7 @@ export class OutputLoggerView extends StackedPanel {
       // TODO: optimize
       logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
         this._updateOutputViews();
+        this._showPlaceholderIfNoMessage();
       });
 
       logger.rendermimeChanged.connect((sender: ILogger) => {
@@ -303,10 +310,23 @@ export class OutputLoggerView extends StackedPanel {
   set activeSource(name: string) {
     this._activeSource = name;
     this._showOutputFromSource(this._activeSource);
+    this._showPlaceholderIfNoMessage();
   }
 
   get activeSource(): string {
     return this._activeSource;
+  }
+
+  private _showPlaceholderIfNoMessage() {
+    const noMessage =
+      !this.activeSource ||
+      this._outputLogRegistry.getLogger(this.activeSource).length === 0;
+
+    if (noMessage) {
+      this._placeholder.show();
+    } else {
+      this._placeholder.hide();
+    }
   }
 
   private _scrollOuputAreaToBottom(outputView: LoggerOutputArea) {
@@ -393,6 +413,7 @@ export class OutputLoggerView extends StackedPanel {
   private _activeSource: string = null;
   private _messageLimit: number = 1000;
   private _scrollTimer: number = null;
+  private _placeholder: Widget;
 }
 
 /**

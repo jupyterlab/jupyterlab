@@ -7,6 +7,12 @@
   overflow-y: auto;
 }
 
+.jlab-output-logger-placeholder {
+  padding: 5px;
+  font-size: 13px;
+  color: var(--jp-ui-font-color3);
+}
+
 .lab-output-console-icon {
   line-height: var(--jp-private-horizontal-tab-height);
 }
