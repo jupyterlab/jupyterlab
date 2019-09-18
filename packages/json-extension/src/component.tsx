@@ -71,6 +71,7 @@ export class Component extends React.Component<IProps, IState> {
           }}
           invertTheme={false}
           keyPath={[root]}
+          getItemString={() => null}
           labelRenderer={([label, type]) => {
             // let className = 'cm-variable';
             // if (type === 'root') {
