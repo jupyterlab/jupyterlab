@@ -12,13 +12,22 @@ export class CellManager {
     this.activeCell = options.activeCell;
     this.debuggerSessionId = options.sessionId;
     this.onActiveCellChanged();
+    console.log('new Cell manager');
   }
 
-  previousCell: CodeCell;
+  private _previousCell: CodeCell;
   previousLineCount: number;
   private _debuggerSessionId: string;
   breakpointService: BreakpointsService;
   private _activeCell: CodeCell;
+
+  set previousCell(cell: CodeCell) {
+    this._previousCell = cell;
+  }
+
+  get previousCell() {
+    return this._previousCell;
+  }
 
   set debuggerSessionId(id: string) {
     this._debuggerSessionId = id;
@@ -30,6 +39,7 @@ export class CellManager {
 
   set activeCell(cell: CodeCell) {
     this._activeCell = cell;
+    this.onActiveCellChanged();
   }
 
   get activeCell(): CodeCell {
@@ -46,7 +56,6 @@ export class CellManager {
   }
 
   onActiveCellChanged() {
-    // this run before change note, consider how to resolve this
     if (this.activeCell && this.activeCell.editor && this.debuggerSessionId) {
       this.breakpointService.onSelectedBreakpoints(
         this.debuggerSessionId,
