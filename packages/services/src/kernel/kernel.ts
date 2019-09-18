@@ -1061,6 +1061,11 @@ export namespace Kernel {
      * A mapping of resource file name to download path.
      */
     readonly resources: { [key: string]: string };
+
+    /**
+     * A dictionary of additional attributes about this kernel; used by clients to aid in kernel selection.
+     */
+    readonly metadata?: JSONObject;
   }
 
   /**
