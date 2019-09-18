@@ -2,9 +2,9 @@
  * Prints the @font-face CSS directives for the CHTML TeX font
  */
 const fs = require('fs');
-const TeXFont = require('mathjax3/mathjax3/output/chtml/fonts/tex');
+const TeXFont = require('mathjax-full/js/output/chtml/fonts/tex');
 
-const CssStyles = require('mathjax3/mathjax3/output/common/CssStyles');
+const CssStyles = require('mathjax-full/js/output/common/CssStyles');
 
 class myFont extends TeXFont.TeXFont {}
 myFont.defaultVariants = [];
@@ -14,7 +14,7 @@ myFont.defaultVariantClasses = {};
 myFont.defaultStyles = {};
 
 const font = new myFont({
-  fontURL: '~mathjax3/mathjax3-ts/output/chtml/fonts/tex-woff-v2' // Path to fonts.
+  fontURL: '~mathjax-full/es5/output/chtml/fonts/woff-v2' // Path to fonts.
 });
 
 const styles = new CssStyles.CssStyles();
