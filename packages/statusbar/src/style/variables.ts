@@ -12,9 +12,6 @@ export default {
   textClickColor: 'white',
   itemMargin: '2px',
   itemPadding: '6px',
-  textIconHalfSpacing: '3px',
   statusBarPadding: '10px',
-  iconImageSize: '18px',
-  iconWidth: '20px',
   interItemHalfSpacing: '2px' // this amount accounts for half the spacing between items
 };
