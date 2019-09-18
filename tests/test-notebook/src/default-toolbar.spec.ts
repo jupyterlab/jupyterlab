@@ -58,11 +58,11 @@ describe('@jupyterlab/notebook', () => {
           button.dispose();
         });
 
-        it("should have the `'jp-SaveIcon'` class", async () => {
+        it("should add an inline svg node with the 'save' icon", async () => {
           const button = ToolbarItems.createSaveButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector('.jp-SaveIcon')).to.exist;
+          expect(button.node.querySelector("[data-icon='save']")).to.exist;
         });
       });
 
@@ -77,11 +77,11 @@ describe('@jupyterlab/notebook', () => {
           button.dispose();
         });
 
-        it("should have the `'jp-AddIcon'` class", async () => {
+        it("should add an inline svg node with the 'add' icon", async () => {
           const button = ToolbarItems.createInsertButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector('.jp-AddIcon')).to.exist;
+          expect(button.node.querySelector("[data-icon='add']")).to.exist;
           button.dispose();
         });
       });
@@ -100,11 +100,11 @@ describe('@jupyterlab/notebook', () => {
           button.dispose();
         });
 
-        it("should have the `'jp-CutIcon'` class", async () => {
+        it("should add an inline svg node with the 'cut' icon", async () => {
           const button = ToolbarItems.createCutButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector('.jp-CutIcon')).to.exist;
+          expect(button.node.querySelector("[data-icon='cut']")).to.exist;
           button.dispose();
         });
       });
@@ -123,11 +123,11 @@ describe('@jupyterlab/notebook', () => {
           button.dispose();
         });
 
-        it("should have the `'jp-CopyIcon'` class", async () => {
+        it("should add an inline svg node with the 'copy' icon", async () => {
           const button = ToolbarItems.createCopyButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector('.jp-CopyIcon')).to.exist;
+          expect(button.node.querySelector("[data-icon='copy']")).to.exist;
           button.dispose();
         });
       });
@@ -145,11 +145,11 @@ describe('@jupyterlab/notebook', () => {
           button.dispose();
         });
 
-        it("should have the `'jp-PasteIcon'` class", async () => {
+        it("should add an inline svg node with the 'paste' icon", async () => {
           const button = ToolbarItems.createPasteButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector('.jp-PasteIcon')).to.exist;
+          expect(button.node.querySelector("[data-icon='paste']")).to.exist;
           button.dispose();
         });
       });
@@ -270,11 +270,11 @@ describe('@jupyterlab/notebook', () => {
           await p.promise;
         }).timeout(30000); // Allow for slower CI
 
-        it("should have the `'jp-RunIcon'` class", async () => {
+        it("should add an inline svg node with the 'run' icon", async () => {
           const button = ToolbarItems.createRunButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector('.jp-RunIcon')).to.exist;
+          expect(button.node.querySelector("[data-icon='run']")).to.exist;
         });
       });
     });

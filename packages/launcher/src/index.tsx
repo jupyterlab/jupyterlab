@@ -425,16 +425,15 @@ function Card(
             </div>
           )}
         </div>
-      ) : defaultIconRegistry.contains(iconClass) ? (
-        <DefaultIconReact
-          name={iconClass}
-          className={''}
-          center={true}
-          kind={'launcherCard'}
-        />
       ) : (
         <div className="jp-LauncherCard-icon">
-          <div className={`${iconClass} jp-Launcher-icon`} />
+          <DefaultIconReact
+            name={`${iconClass} jp-Launcher-icon`}
+            className={''}
+            fallback={true}
+            center={true}
+            kind={'launcherCard'}
+          />
         </div>
       )}
       <div className="jp-LauncherCard-label" title={title}>

@@ -330,10 +330,15 @@ export async function ensurePackage(
  * of ui-components/style/icons.
  *
  * @param pkgPath - The path to the @jupyterlab/ui-components package.
+ * @param dorequire - If true, use `require` function in place of `import`
+ *  statements when loading the icon svg files
  *
  * @returns A list of changes that were made to ensure the package.
  */
-export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
+export async function ensureUiComponents(
+  pkgPath: string,
+  dorequire: boolean = false
+): Promise<string[]> {
   const funcName = 'ensureUiComponents';
   let messages: string[] = [];
 
@@ -347,14 +352,23 @@ export async function ensureUiComponents(pkgPath: string): Promise<string[]> {
   let _iconModelDeclarations: string[] = [];
   svgs.forEach(svg => {
     const name = utils.stem(svg);
-    const nameCamel = utils.camelCase(name) + 'Svg';
-    _iconImportStatements.push(
-      `import ${nameCamel} from '${path
-        .relative(iconSrcDir, svg)
-        .split(path.sep)
-        .join('/')}';`
-    );
-    _iconModelDeclarations.push(`{ name: '${name}', svg: ${nameCamel} }`);
+    const svgpath = path
+      .relative(iconSrcDir, svg)
+      .split(path.sep)
+      .join('/');
+
+    if (dorequire) {
+      // load the icon svg using `require`
+      _iconModelDeclarations.push(
+        `{ name: '${name}', svg: require('${svgpath}').default }`
+      );
+    } else {
+      // load the icon svg using `import`
+      const nameCamel = utils.camelCase(name) + 'Svg';
+
+      _iconImportStatements.push(`import ${nameCamel} from '${svgpath}';`);
+      _iconModelDeclarations.push(`{ name: '${name}', svg: ${nameCamel} }`);
+    }
   });
   const iconImportStatements = _iconImportStatements.join('\n');
   const iconModelDeclarations = _iconModelDeclarations.join(',\n');
@@ -457,7 +471,7 @@ export interface IEnsurePackageOptions {
  * do nothing and return an empty array. If they don't match, overwrite the
  * file and return an array with an update message.
  *
- * @param path: The path to the file being checked. The file must exist,
+ * @param fpath: The path to the file being checked. The file must exist,
  * or else this function does nothing.
  *
  * @param contents: The desired file contents.
@@ -469,35 +483,36 @@ export interface IEnsurePackageOptions {
  * @returns a string array with 0 or 1 messages.
  */
 function ensureFile(
-  path: string,
+  fpath: string,
   contents: string,
   prettify: boolean = true
 ): string[] {
   let messages: string[] = [];
 
-  if (!fs.existsSync(path)) {
+  if (!fs.existsSync(fpath)) {
     // bail
     messages.push(
-      `Tried to ensure the contents of ./${path}, but the file does not exist`
+      `Tried to ensure the contents of ${fpath}, but the file does not exist`
     );
     return messages;
   }
 
-  // run the newly generated contents through prettier before comparing
-  if (prettify) {
-    contents = prettier.format(contents, { filepath: path, singleQuote: true });
-  }
+  // (maybe) run the newly generated contents through prettier before comparing
+  let formatted = prettify
+    ? prettier.format(contents, { filepath: fpath, singleQuote: true })
+    : contents;
 
-  const prev = fs.readFileSync(path, {
-    encoding: 'utf8'
-  });
-  // Normalize line endings to match current content
+  const prev = fs.readFileSync(fpath, { encoding: 'utf8' });
   if (prev.indexOf('\r') !== -1) {
-    contents = contents.replace(/\n/g, '\r\n');
+    // Normalize line endings to match current content
+    formatted = formatted.replace(/\n/g, '\r\n');
   }
-  if (prev !== contents) {
-    fs.writeFileSync(path, contents);
-    messages.push(`Updated ./${path}`);
+  if (prev !== formatted) {
+    // Write out changes and notify
+    fs.writeFileSync(fpath, formatted);
+
+    const msgpath = fpath.startsWith('/') ? fpath : `./${fpath}`;
+    messages.push(`Updated ${msgpath}`);
   }
 
   return messages;

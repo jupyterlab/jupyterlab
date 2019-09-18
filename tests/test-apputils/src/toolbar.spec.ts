@@ -286,20 +286,20 @@ describe('@jupyterlab/apputils', () => {
       });
 
       describe('.createInterruptButton()', () => {
-        it("should have the `'jp-StopIcon'` class", async () => {
+        it("should add an inline svg node with the 'stop' icon", async () => {
           const button = Toolbar.createInterruptButton(session);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector('.jp-StopIcon')).to.exist;
+          expect(button.node.querySelector("[data-icon='stop']")).to.exist;
         });
       });
 
       describe('.createRestartButton()', () => {
-        it("should have the `'jp-RefreshIcon'` class", async () => {
+        it("should add an inline svg node with the 'refresh' icon", async () => {
           const button = Toolbar.createRestartButton(session);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector('.jp-RefreshIcon')).to.exist;
+          expect(button.node.querySelector("[data-icon='refresh']")).to.exist;
         });
       });
 

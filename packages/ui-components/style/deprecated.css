@@ -35,6 +35,14 @@
   --jp-icon-not-trusted: url('icons/statusbar/not-trusted.svg');
   --jp-icon-terminal: url('icons/statusbar/terminal.svg');
   --jp-icon-trusted: url('icons/statusbar/trusted.svg');
+  --jp-icon-add: url('icons/toolbar/add.svg');
+  --jp-icon-copy: url('icons/toolbar/copy.svg');
+  --jp-icon-cut: url('icons/toolbar/cut.svg');
+  --jp-icon-paste: url('icons/toolbar/paste.svg');
+  --jp-icon-refresh: url('icons/toolbar/refresh.svg');
+  --jp-icon-run: url('icons/toolbar/run.svg');
+  --jp-icon-save: url('icons/toolbar/save.svg');
+  --jp-icon-stop: url('icons/toolbar/stop.svg');
 }
 
 /* Icon CSS class declarations */
@@ -107,4 +115,28 @@
 }
 .jp-TrustedIcon {
   background-image: var(--jp-icon-trusted);
+}
+.jp-AddIcon {
+  background-image: var(--jp-icon-add);
+}
+.jp-CopyIcon {
+  background-image: var(--jp-icon-copy);
+}
+.jp-CutIcon {
+  background-image: var(--jp-icon-cut);
+}
+.jp-PasteIcon {
+  background-image: var(--jp-icon-paste);
+}
+.jp-RefreshIcon {
+  background-image: var(--jp-icon-refresh);
+}
+.jp-RunIcon {
+  background-image: var(--jp-icon-run);
+}
+.jp-SaveIcon {
+  background-image: var(--jp-icon-save);
+}
+.jp-StopIcon {
+  background-image: var(--jp-icon-stop);
 }
