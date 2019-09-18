@@ -1164,17 +1164,16 @@ class _AppHandler(object):
             json.dump(data, fid, indent=4)
 
         # copy known-good yarn.lock if missing
-        lock_path = pjoin(staging, 'yarn.lock')
-        if not osp.exists(lock_path):
-            lock_template = pjoin(HERE, 'staging', 'yarn.lock')
-            if self.registry != YARN_DEFAULT_REGISTRY:  # Replace on the fly the yarn repository see #3658
-                with open(lock_template) as f:
-                    template = f.read()
-                template = template.replace(YARN_DEFAULT_REGISTRY, self.registry.strip("/"))
-                with open(lock_path, 'w+') as f:
-                    f.write(template)
-            else:
-                shutil.copy(lock_template, lock_path)
+        lock_path = pjoin(staging, 'yarn.lock')        
+        lock_template = pjoin(HERE, 'staging', 'yarn.lock')
+        if self.registry != YARN_DEFAULT_REGISTRY:  # Replace on the fly the yarn repository see #3658
+            with open(lock_template) as f:
+                template = f.read()
+            template = template.replace(YARN_DEFAULT_REGISTRY, self.registry.strip("/"))
+            with open(lock_path, 'w+') as f:
+                f.write(template)
+        elif not osp.exists(lock_path):
+            shutil.copy(lock_template, lock_path)
 
     def _get_package_template(self, silent=False):
         """Get the template the for staging package.json file.
