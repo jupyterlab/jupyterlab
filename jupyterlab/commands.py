@@ -1170,7 +1170,7 @@ class _AppHandler(object):
             with open(lock_template) as f:
                 template = f.read()
             template = template.replace(YARN_DEFAULT_REGISTRY, self.registry.strip("/"))
-            with open(lock_path, 'w+') as f:
+            with open(lock_path, 'w', encoding='utf-8') as f:
                 f.write(template)
         elif not osp.exists(lock_path):
             shutil.copy(lock_template, lock_path)
