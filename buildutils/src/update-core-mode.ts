@@ -27,6 +27,8 @@ utils.writePackageData(path.join(staging, 'package.json'), data);
   'index.js',
   'webpack.config.js',
   'webpack.prod.config.js',
+  'webpack.prod.minimize.config.js',
+  'webpack.prod.release.config.js',
   'templates'
 ].forEach(name => {
   fs.copySync(
