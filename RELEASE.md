@@ -98,7 +98,7 @@ If there is a network error during JS publish, run `npm run publish:all --skip-b
 
 Note that the use of `npm` instead of `jlpm` is [significant on Windows](https://github.com/jupyterlab/jupyterlab/issues/6733).
 
-At this point, run the `source scripts/release_test.sh` to test the wheel in
+At this point, run the `./scripts/release_test.sh` to test the wheel in
 a fresh conda environment with and without extensions installed. Open and run
 the Outputs notebook and verify everything runs properly. Also add a cell with the following code and make sure the widget renders:
 

@@ -1,17 +1,16 @@
 # Test a release wheel in a fresh conda environment with and without installed
 # extensions
-set -v
+set -x
+set -e
 old="${CONDA_DEFAULT_ENV}"
 JLAB_TEST_ENV="${CONDA_DEFAULT_ENV}_test"
-TEST_DIR="$WORK_DIR/test"
+TEST_DIR=$(mktemp -d -t $JLAB_TEST_ENV)
 
 conda create --override-channels --strict-channel-priority -c conda-forge -c anaconda -y -n "$JLAB_TEST_ENV" notebook nodejs twine
 conda activate "$JLAB_TEST_ENV"
 
 pip install dist/*.whl
 
-
-mkdir -p $TEST_DIR
 cp examples/notebooks/*.ipynb $TEST_DIR/
 pushd $TEST_DIR
 
