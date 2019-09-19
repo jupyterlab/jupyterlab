@@ -5,9 +5,6 @@ old="${CONDA_DEFAULT_ENV}"
 JLAB_TEST_ENV="${CONDA_DEFAULT_ENV}_test"
 TEST_DIR="$WORK_DIR/test"
 
-conda deactivate
-conda remove --all -y -n "$JLAB_TEST_ENV"
-
 conda create --override-channels --strict-channel-priority -c conda-forge -c anaconda -y -n "$JLAB_TEST_ENV" notebook nodejs twine
 conda activate "$JLAB_TEST_ENV"
 
@@ -31,4 +28,5 @@ jupyter lab clean
 conda install --override-channels --strict-channel-priority -c conda-forge -c anaconda -y ipywidgets altair matplotlib vega_datasets
 jupyter lab build && python -m jupyterlab.browser_check && jupyter lab
 
+conda deactivate
 popd
