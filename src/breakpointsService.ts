@@ -8,13 +8,15 @@ import { LineInfo } from './cellManeger';
 export class BreakpointsService {
   constructor() {}
 
-  selectedType: SessionTypes;
-  selectedBreakpoints: Breakpoints.IBreakpoint[] = [];
-
+  private selectedType: SessionTypes;
+  private state = {
+    console: [] as Breakpoints.IBreakpoint[],
+    notebook: [] as Breakpoints.IBreakpoint[]
+  };
+  private selectedBreakpoints: Breakpoints.IBreakpoint[] = [];
   selectedBreakpointsChanged = new Signal<this, Breakpoints.IBreakpoint[]>(
     this
   );
-  breakpointChanged = new Signal<this, Breakpoints.IBreakpoint>(this);
 
   addBreakpoint(session_id: string, type: string, lineInfo: LineInfo) {
     const breakpoint: Breakpoints.IBreakpoint = {
@@ -33,13 +35,14 @@ export class BreakpointsService {
     return this.selectedBreakpoints;
   }
 
-  onSelectedBreakpoints(session_id: string, type: SessionTypes) {
-    // this still not work
-
-    this.selectedType = type;
-    if (this.selectedType && this.selectedType !== type) {
-      this.clearSelectedBreakpoints();
+  set type(newType: SessionTypes) {
+    if (newType === this.selectedType) {
+      return;
     }
+    this.state[this.selectedType] = this.selectedBreakpoints;
+    this.selectedType = newType;
+    this.selectedBreakpoints = this.state[newType];
+    this.selectedBreakpointsChanged.emit(this.selectedBreakpoints);
   }
 
   removeBreakpoint(session_id: any, editor_id: any, lineInfo: any) {
@@ -48,10 +51,6 @@ export class BreakpointsService {
     );
     this.selectedBreakpointsChanged.emit(this.selectedBreakpoints);
   }
-
-  getBreakpointState(session_id: any, editor_id: any, lineInfo: any) {}
-
-  setBreakpointState(session_id: any, editor_id: any, lineInfo: any) {}
 
   clearSelectedBreakpoints() {
     this.selectedBreakpoints = [];

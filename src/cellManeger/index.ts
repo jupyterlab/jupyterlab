@@ -4,7 +4,7 @@
 import { CodeCell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { Editor, Doc } from 'codemirror';
-import { BreakpointsService, SessionTypes } from '../breakpointsService';
+import { BreakpointsService } from '../breakpointsService';
 import { DebugSession } from '../session';
 
 export class CellManager {
@@ -57,8 +57,6 @@ export class CellManager {
 
   onActiveCellChanged() {
     if (this.activeCell && this.activeCell.editor && this.debuggerSession) {
-      this.breakpointService.onSelectedBreakpoints(this.debuggerSession.id, this
-        .debuggerSession.type as SessionTypes);
       if (this.previousCell && !this.previousCell.isDisposed) {
         this.removeListner(this.previousCell);
         this.clearGutter(this.previousCell);

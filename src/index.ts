@@ -4,20 +4,21 @@
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  LabShell
 } from '@jupyterlab/application';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
 
 import { WidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 
-import { IConsoleTracker } from '@jupyterlab/console';
+import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 
 import { IStateDB } from '@jupyterlab/coreutils';
 
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 
-import { INotebookTracker } from '@jupyterlab/notebook';
+import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { Debugger } from './debugger';
 
@@ -25,7 +26,8 @@ import { Debugger } from './debugger';
 
 import { IDebugger, IDebuggerSidebar } from './tokens';
 import { DebuggerNotebookTracker } from './notebookTracker';
-import { BreakpointsService } from './breakpointsService';
+import { BreakpointsService, SessionTypes } from './breakpointsService';
+
 import { DebuggerConsoleTracker } from './consoleTracker';
 
 // import { ClientSession, IClientSession } from '@jupyterlab/apputils';
@@ -54,7 +56,7 @@ const breakpointService = new BreakpointsService();
 const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:consoles',
   autoStart: true,
-  requires: [IDebugger, IConsoleTracker, IEditorTracker],
+  requires: [IDebugger, IConsoleTracker],
   activate: (_, debug, tracker: IConsoleTracker) => {
     new DebuggerConsoleTracker({
       consoleTracker: tracker,
@@ -69,8 +71,21 @@ const consoles: JupyterFrontEndPlugin<void> = {
 const files: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:files',
   autoStart: true,
-  optional: [IEditorTracker],
+  requires: [IEditorTracker],
   activate: (app: JupyterFrontEnd, tracker: IEditorTracker | null) => {
+    const shell = app.shell;
+
+    (shell as LabShell).currentChanged.connect((sender, update) => {
+      const newWidget = update.newValue;
+      const session =
+        newWidget && (newWidget as NotebookPanel | ConsolePanel).session
+          ? (newWidget as NotebookPanel | ConsolePanel).session
+          : false;
+      if (session) {
+        breakpointService.type = session.type as SessionTypes;
+      }
+    });
+
     app.commands.addCommand(CommandIDs.debugFile, {
       execute: async _ => {
         if (!tracker || !tracker.currentWidget) {
@@ -105,7 +120,6 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       breakpointService: breakpointService
     });
 
-    // console.log(debugetNoteTracker);
     // this exist only for my test in futre will be removed
     const command: string = CommandIDs.debugNotebook;
     app.commands.addCommand(command, {
@@ -122,7 +136,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
  */
 const sidebar: JupyterFrontEndPlugin<Debugger> = {
   id: '@jupyterlab/debugger:sidebar',
-  optional: [ILayoutRestorer, INotebookTracker, IEditorTracker],
+  optional: [ILayoutRestorer],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
