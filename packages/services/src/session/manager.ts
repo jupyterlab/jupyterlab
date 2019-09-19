@@ -29,15 +29,12 @@ export class SessionManager implements Session.IManager {
       options.serverSettings || ServerConnection.makeSettings();
 
     // Initialize internal data.
-    this._ready = Promise.all([this.requestRunning(), this.requestSpecs()])
-      .then(_ => undefined)
-      .catch(_ => undefined)
-      .then(() => {
-        if (this.isDisposed) {
-          return;
-        }
+    this._ready = (async () => {
+      await Promise.all([this.requestRunning(), this.requestSpecs()]);
+      if (!this.isDisposed) {
         this._isReady = true;
-      });
+      }
+    })();
 
     // Start model and specs polling with exponential backoff.
     this._pollModels = new Poll({
