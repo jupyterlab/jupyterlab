@@ -28,6 +28,15 @@ export namespace Kernel {
    * a websocket connection internally, and will auto-restart if the websocket
    * temporarily loses connection.  Restarting creates a new Kernel process on
    * the server, but preserves the Kernel id.
+   *
+   * The IKernelConnection is notably missing the full IKernel signals. This
+   * interface is for situations where a kernel may change, but we want a user
+   * to not have to worry about disconnecting and reconnecting signals when a
+   * kernel is swapped. The object that maintains an IKernel, but only provides
+   * a user with an IKernelConnection should proxy the appropriate IKernel
+   * signals for the user with its own signals. The advantage is that when the
+   * kernel is changed, the object itself can take care of disconnecting and
+   * reconnecting listeners.
    */
   export interface IKernelConnection extends IDisposable {
     /**
@@ -62,6 +71,11 @@ export namespace Kernel {
      * The current status of the kernel.
      */
     readonly status: Kernel.Status;
+
+    /**
+     * The current connection status of the kernel.
+     */
+    readonly connectionStatus: Kernel.ConnectionStatus;
 
     /**
      * The cached kernel info.

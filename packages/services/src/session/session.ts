@@ -21,6 +21,8 @@ import { DefaultSession } from './default';
 export namespace Session {
   /**
    * Interface of a session object.
+   *
+   * A session object represents a live connection to a session kernel.
    */
   export interface ISession extends IDisposable {
     /**

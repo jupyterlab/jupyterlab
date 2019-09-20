@@ -16,6 +16,17 @@ import { ServerConnection } from '../serverconnection';
 import { Session } from './session';
 
 /**
+ * We have a session manager that maintains a list of models from the server.
+ * Separately, we have a list of running sessions maintained by the DefaultSessions
+ *
+ * Perhaps we have *one* list of models, with a separate possible session connection for each model.
+ *
+ * Also, we should be able to modify the session information without a session connection - that's just a server request, and doesn't require a kernel connection.
+ *
+ *
+ */
+
+/**
  * An implementation of a session manager.
  */
 export class SessionManager implements Session.IManager {

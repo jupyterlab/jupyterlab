@@ -21,6 +21,11 @@ import * as validate from './validate';
 const SESSION_SERVICE_URL = 'api/sessions';
 
 /**
+ * TODO: It appears there is no way to just rename a session without opening a
+ * kernel connection to the session.
+ */
+
+/**
  * Session object for accessing the session REST api. The session
  * should be used to start kernels and then shut them down -- for
  * all other operations, the kernel object should be used.
