@@ -1167,7 +1167,7 @@ class _AppHandler(object):
         lock_path = pjoin(staging, 'yarn.lock')        
         lock_template = pjoin(HERE, 'staging', 'yarn.lock')
         if self.registry != YARN_DEFAULT_REGISTRY:  # Replace on the fly the yarn repository see #3658
-            with open(lock_template) as f:
+            with open(lock_template, encoding='utf-8') as f:
                 template = f.read()
             template = template.replace(YARN_DEFAULT_REGISTRY, self.registry.strip("/"))
             with open(lock_path, 'w', encoding='utf-8') as f:
