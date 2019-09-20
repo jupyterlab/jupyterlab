@@ -25,7 +25,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    * Construct a new JupyterLab object.
    */
   constructor(options: JupyterLab.IOptions = { shell: new LabShell() }) {
-    super({ shell: options.shell || new LabShell() });
+    super({ ...options, shell: options.shell || new LabShell() });
     this.restored = this.shell.restored
       .then(() => undefined)
       .catch(() => undefined);
