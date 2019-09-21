@@ -279,6 +279,8 @@ namespace Private {
       // Convert the TypeError into a more specific error.
       throw new ServerConnection.NetworkError(e);
     });
+    // TODO: *this* is probably where we need a system-wide connectionFailure
+    // signal we can hook into.
   }
 
   /**

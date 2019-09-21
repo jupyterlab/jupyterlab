@@ -333,7 +333,7 @@ export class KernelManager implements Kernel.IManager {
       this._models.push(kernel.model);
       this._runningChanged.emit(this._models.slice());
     }
-    kernel.terminated.connect(() => {
+    kernel.disposed.connect(() => {
       this._onTerminated(id);
     });
   }

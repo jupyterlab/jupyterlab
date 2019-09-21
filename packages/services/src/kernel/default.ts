@@ -64,19 +64,32 @@ export class DefaultKernel implements Kernel.IKernel {
     this.handleComms =
       options.handleComms === undefined ? true : options.handleComms;
 
-    void this._readyPromise.promise.then(() => {
-      this._sendPending();
+    this.connectionStatusChanged.connect((sender, connectionStatus) => {
+      // Send pending messages and update status to be consistent.
+      if (connectionStatus === 'connected' && this.status !== 'dead') {
+        // Make sure we send at least one message to get kernel status back.
+        if (this._pendingMessages.length > 0) {
+          this._sendPending();
+        } else {
+          void this.requestKernelInfo();
+        }
+      } else {
+        // If the connection is down, then we don't know what is happening with
+        // the kernel, so set the status to unknown.
+        this._updateStatus('unknown');
+      }
     });
 
     this._createSocket();
+
+    // Immediately queue up a request for initial kernel info.
+    void this.requestKernelInfo();
+
     Private.runningKernels.push(this);
   }
 
-  /**
-   * A signal emitted when the kernel is shut down.
-   */
-  get terminated(): ISignal<this, void> {
-    return this._terminated;
+  get disposed(): ISignal<this, void> {
+    return this._disposed;
   }
 
   /**
@@ -101,6 +114,13 @@ export class DefaultKernel implements Kernel.IKernel {
    */
   get statusChanged(): ISignal<this, Kernel.Status> {
     return this._statusChanged;
+  }
+
+  /**
+   * A signal emitted when the kernel status changes.
+   */
+  get connectionStatusChanged(): ISignal<this, Kernel.ConnectionStatus> {
+    return this._connectionStatusChanged;
   }
 
   /**
@@ -131,8 +151,15 @@ export class DefaultKernel implements Kernel.IKernel {
    * This signal is emitted when a message is received, before it is handled
    * asynchronously.
    *
-   * The behavior is undefined if the message is modified during message
-   * handling. As such, the message should be treated as read-only.
+   * This message is emitted when a message is queued for sending (either in
+   * the websocket buffer, or our own pending message buffer). The message may
+   * actually be sent across the wire at a later time.
+   *
+   * The message emitted in this signal should not be modified in any way.
+   *
+   * TODO: should we only emit copies of the message? Is that prohibitively
+   * expensive? Note that we can't just do a JSON copy since the message may
+   * include binary buffers. We could minimally copy the top-level, though.
    */
   get anyMessage(): ISignal<this, Kernel.IAnyMessageArgs> {
     return this._anyMessage;
@@ -181,6 +208,13 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
+   * The current connection status of the kernel connection.
+   */
+  get connectionStatus(): Kernel.ConnectionStatus {
+    return this._connectionStatus;
+  }
+
+  /**
    * Test whether the kernel has been disposed.
    */
   get isDisposed(): boolean {
@@ -189,26 +223,9 @@ export class DefaultKernel implements Kernel.IKernel {
 
   /**
    * The cached kernel info.
-   *
-   * #### Notes
-   * This value will be null until the kernel is ready.
    */
-  get info(): KernelMessage.IInfoReply | null {
-    return this._info;
-  }
-
-  /**
-   * Test whether the kernel is ready.
-   */
-  get isReady(): boolean {
-    return this._isReady;
-  }
-
-  /**
-   * A promise that is fulfilled when the kernel is ready.
-   */
-  get ready(): Promise<void> {
-    return this._readyPromise.promise;
+  get info(): Promise<KernelMessage.IInfoReply> {
+    return this._info.promise;
   }
 
   /**
@@ -235,6 +252,8 @@ export class DefaultKernel implements Kernel.IKernel {
         name: this._name,
         username: this._username,
         serverSettings: this.serverSettings,
+        // TODO: should this be !this.handleComms, because we only want one
+        // connection to handle comms?
         handleComms: this.handleComms,
         ...options
       },
@@ -250,10 +269,11 @@ export class DefaultKernel implements Kernel.IKernel {
       return;
     }
     this._isDisposed = true;
-    this._terminated.emit();
-    this._status = 'dead';
-    // Trigger the async _clearState, but do not wait for it.
-    void this._clearState();
+    this._disposed.emit();
+
+    // Took out this._status = 'dead' - figure out ramifications of this.
+    this._updateConnectionStatus('disconnected');
+    this._clearState();
     this._clearSocket();
     this._kernelSession = '';
     this._msgChain = null;
@@ -337,15 +357,9 @@ export class DefaultKernel implements Kernel.IKernel {
     KernelMessage.IShellControlMessage,
     KernelMessage.IShellControlMessage
   > {
-    if (this.status === 'dead') {
-      throw new Error('Kernel is dead');
-    }
-    if (!this._isReady || !this._ws) {
-      this._pendingMessages.push(msg);
-    } else {
-      this._ws.send(serialize.serialize(msg));
-    }
+    this._sendMessage(msg);
     this._anyMessage.emit({ msg, direction: 'send' });
+
     let future = new ctor(
       () => {
         let msgId = msg.header.msg_id;
@@ -382,6 +396,33 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
+   * Send a message on the websocket.
+   *
+   * If pending is true, queue the message for later sending if we cannot send
+   * now. Otherwise throw an error.
+   */
+  private _sendMessage(msg: KernelMessage.IMessage, pending = true) {
+    if (this.status === 'dead') {
+      throw new Error('Kernel is dead');
+    }
+
+    if (this.connectionStatus === 'disconnected') {
+      throw new Error('Kernel connection is disconnected');
+    }
+
+    // Send if the ws allows it, otherwise buffer the message.
+    if (this.connectionStatus === 'connected') {
+      this._ws.send(serialize.serialize(msg));
+      console.log(`SENT WS message to ${this.id}`, msg);
+    } else if (pending) {
+      this._pendingMessages.push(msg);
+      console.log(`PENDING WS message to ${this.id}`, msg);
+    } else {
+      throw new Error('Could not send message');
+    }
+  }
+
+  /**
    * Interrupt a kernel.
    *
    * #### Notes
@@ -399,14 +440,18 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
-   * Restart a kernel.
+   * Request a kernel restart.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
+   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels)
+   * and validates the response model.
    *
-   * Any existing Future or Comm objects are cleared.
+   * Any existing Future or Comm objects are cleared once the kernel has
+   * actually be restarted.
    *
-   * The promise is fulfilled on a valid response and rejected otherwise.
+   * The promise is fulfilled on a valid server response and rejected otherwise.
+   * Note that this does not mean the kernel has been restarted, only that a
+   * restart has been requested.
    *
    * It is assumed that the API call does not mutate the kernel id or name.
    *
@@ -424,6 +469,13 @@ export class DefaultKernel implements Kernel.IKernel {
   async handleRestart(): Promise<void> {
     await this._clearState();
     this._updateStatus('restarting');
+
+    // Kick off an async kernel request to eventually reset the kernel status.
+    // We do this with a setTimeout to avoid race conditions with the
+    // restarting/autostarting logic.
+    setTimeout(() => {
+      void this.requestKernelInfo();
+    }, 0);
   }
 
   /**
@@ -431,12 +483,30 @@ export class DefaultKernel implements Kernel.IKernel {
    *
    * #### Notes
    * Used when the websocket connection to the kernel is lost.
+   *
+   * TODO: should we remove this method? It doesn't play well with
+   * 'disconnected' being a terminal state. We already have the automatic
+   * reconnection.
    */
   reconnect(): Promise<void> {
+    this._updateConnectionStatus('connecting');
+    let result = new PromiseDelegate<void>();
+
+    // TODO: can we use one of the test functions that has this pattern of a
+    // promise resolving on a single signal emission?
+    let fulfill = (sender: this, status: Kernel.ConnectionStatus) => {
+      if (status === 'connected') {
+        result.resolve();
+      } else if (status === 'disconnected') {
+        result.reject(new Error('Kernel connection disconnected'));
+      }
+      this.connectionStatusChanged.disconnect(fulfill);
+    };
+    this.connectionStatusChanged.connect(fulfill);
+
     this._clearSocket();
-    this._updateStatus('reconnecting');
     this._createSocket();
-    return this._readyPromise.promise;
+    return result.promise;
   }
 
   /**
@@ -451,16 +521,19 @@ export class DefaultKernel implements Kernel.IKernel {
    * object, and fulfills the promise.
    *
    * If the kernel is already `dead`, it closes the websocket and returns
-   * without a server request.
+   * without a server request.a
    */
   async shutdown(): Promise<void> {
+    // TODO: review the logic here. Why are the clear statements in different orders?
     if (this.status === 'dead') {
+      this._updateConnectionStatus('disconnected');
       this._clearSocket();
       await this._clearState();
       return;
     }
     await Private.shutdownKernel(this.id, this.serverSettings);
     await this._clearState();
+    this._updateConnectionStatus('disconnected');
     this._clearSocket();
   }
 
@@ -488,13 +561,22 @@ export class DefaultKernel implements Kernel.IKernel {
     if (this.isDisposed) {
       throw new Error('Disposed kernel');
     }
-    // Relax the requirement that a kernel info reply has a status attribute,
-    // since this part of the spec is not yet widely conformed-to.
-    if (reply.content.status && reply.content.status !== 'ok') {
+    // Kernels sometimes do not include a status field on kernel_info_reply
+    // messages, so set a default for now.
+    // See https://github.com/jupyterlab/jupyterlab/issues/6760
+    if (reply.content.status === undefined) {
+      reply.content.status = 'ok';
+    }
+
+    if (reply.content.status !== 'ok') {
       throw new Error('Kernel info reply errored');
     }
-    // Type assertion is necessary until we can rely on the status message.
-    this._info = reply.content as KernelMessage.IInfoReply;
+
+    // TODO: Since we never make another _info promise delegate, this only
+    // resolves to the *first* return, and ignores all calls after that. Is
+    // that what we want, or do we want this info updated when another request
+    // is made?
+    this._info.resolve(reply.content);
     return reply;
   }
 
@@ -705,9 +787,6 @@ export class DefaultKernel implements Kernel.IKernel {
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
    */
   sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void {
-    if (this.status === 'dead') {
-      throw new Error('Kernel is dead');
-    }
     let msg = KernelMessage.createMessage({
       msgType: 'input_reply',
       channel: 'stdin',
@@ -715,11 +794,8 @@ export class DefaultKernel implements Kernel.IKernel {
       session: this._clientId,
       content
     });
-    if (!this._isReady || !this._ws) {
-      this._pendingMessages.push(msg);
-    } else {
-      this._ws.send(serialize.serialize(msg));
-    }
+
+    this._sendMessage(msg);
     this._anyMessage.emit({ msg, direction: 'send' });
   }
 
@@ -923,12 +999,14 @@ export class DefaultKernel implements Kernel.IKernel {
   /**
    * Clear the socket state.
    *
+   * TODO: does this not apply anymore.
+   *
    * #### Notes
-   * When calling this, you should also set the status to something like
-   * 'reconnecting' to reset the kernel ready state.
+   * When calling this, you should also set the connectionStatus to
+   * 'connecting' if you are going to try to reconnect, or 'disconnected' if
+   * not.
    */
   private _clearSocket(): void {
-    this._wsStopped = true;
     if (this._ws !== null) {
       // Clear the websocket event handlers and the socket itself.
       this._ws.onopen = this._noOp;
@@ -944,57 +1022,17 @@ export class DefaultKernel implements Kernel.IKernel {
    * Handle status iopub messages from the kernel.
    */
   private _updateStatus(status: Kernel.Status): void {
-    switch (status) {
-      case 'idle':
-      case 'busy':
-        if (!this._isReady && this._initialized) {
-          this._isReady = true;
-          this._readyPromise.resolve();
-        }
-        break;
-      case 'restarting':
-        // Send a kernel_info_request to get to a known kernel state.
-        void this.requestKernelInfo().catch(this._noOp);
-        break;
-      case 'starting':
-      case 'autorestarting':
-        // 'starting' can happen at initialization or 'restarting'.
-        // 'autorestarting' is always preceded by 'restarting'. In either case,
-        // the 'restarting' handler above is fine, so we do nothing here.
-        /* no-op */
-        break;
-      case 'connected':
-        // requestKernelInfo is sent by the onWSOpen
-        break;
-      case 'reconnecting':
-        if (this._isReady) {
-          this._isReady = false;
-          this._readyPromise = new PromiseDelegate();
-          void this._readyPromise.promise.then(() => {
-            // when we are ready again, send any pending messages.
-            this._sendPending();
-          });
-        }
-        break;
-      case 'dead':
-        if (this._isReady) {
-          this._isReady = false;
-          this._readyPromise = new PromiseDelegate();
-        }
-        void this._readyPromise.promise.catch(this._noOp);
-        this._readyPromise.reject('Kernel is dead');
-        break;
-      default:
-        console.error('invalid kernel status:', status);
-        return;
+    // "unknown" | "starting" | "idle" | "busy" | "restarting" | "autorestarting" | "dead"
+
+    if (this._status === status || this._status === 'dead') {
+      return;
     }
-    if (status !== this._status) {
-      this._status = status;
-      Private.logKernelStatus(this);
-      this._statusChanged.emit(status);
-      if (status === 'dead') {
-        this.dispose();
-      }
+
+    this._status = status;
+    Private.logKernelStatus(this);
+    this._statusChanged.emit(status);
+    if (status === 'dead') {
+      this.dispose();
     }
   }
 
@@ -1002,12 +1040,22 @@ export class DefaultKernel implements Kernel.IKernel {
    * Send pending messages to the kernel.
    */
   private _sendPending(): void {
-    // We shift the message off the queue
-    // after the message is sent so that if there is an exception,
-    // the message is still pending.
-    while (this._ws && this._pendingMessages.length > 0) {
-      let msg = serialize.serialize(this._pendingMessages[0]);
-      this._ws.send(msg);
+    // We check to make sure we are still connected each time. For
+    // example, if a websocket buffer overflows, it may close, so we should
+    // stop sending messages.
+    while (
+      this.connectionStatus === 'connected' &&
+      this._pendingMessages.length > 0
+    ) {
+      this._sendMessage(this._pendingMessages[0], false);
+      // TODO: remove debuging console.log below.
+      // console.log(
+      //   `SENT pending message to ${this.id}`,
+      //   this._pendingMessages[0]
+      // );
+
+      // We shift the message off the queue after the message is sent so that
+      // if there is an exception, the message is still pending.
       this._pendingMessages.shift();
     }
   }
@@ -1160,7 +1208,7 @@ export class DefaultKernel implements Kernel.IKernel {
     // Strip any authentication from the display string.
     // TODO - Audit tests for extra websockets started
     let display = partialUrl.replace(/^((?:\w+:)?\/\/)(?:[^@\/]+@)/, '$1');
-    console.log('Starting WebSocket:', display);
+    console.log(`Starting WebSocket: ${display}`);
 
     let url = URLExt.join(
       partialUrl,
@@ -1172,7 +1220,6 @@ export class DefaultKernel implements Kernel.IKernel {
       url = url + `&token=${encodeURIComponent(token)}`;
     }
 
-    this._wsStopped = false;
     this._ws = new settings.WebSocket(url);
 
     // Ensure incoming binary messages are not Blobs
@@ -1189,38 +1236,13 @@ export class DefaultKernel implements Kernel.IKernel {
    */
   private _onWSOpen = (evt: Event) => {
     this._reconnectAttempt = 0;
-    this._updateStatus('connected');
-
-    // We temporarily set the ready status to true so our kernel info request
-    // below will go through.
-    this._isReady = true;
-
-    // Get the kernel info, signaling that the kernel is ready.
-    this.requestKernelInfo()
-      .then(() => {
-        this._initialized = true;
-        this._isReady = true;
-        this._readyPromise.resolve();
-      })
-      .catch(err => {
-        this._initialized = true;
-        this._readyPromise.reject(err);
-      });
-
-    // Reset the isReady status after we sent our message so others wait for
-    // the kernel info request to come back.
-    this._isReady = false;
+    this._updateConnectionStatus('connected');
   };
 
   /**
    * Handle a websocket message, validating and routing appropriately.
    */
   private _onWSMessage = (evt: MessageEvent) => {
-    if (this._wsStopped) {
-      // If the socket is being closed, ignore any messages
-      return;
-    }
-
     // Notify immediately if there is an error with the message.
     let msg: KernelMessage.IMessage;
     try {
@@ -1251,6 +1273,28 @@ export class DefaultKernel implements Kernel.IKernel {
     // Emit the message receive signal
     this._anyMessage.emit({ msg, direction: 'recv' });
   };
+
+  /**
+   * Handle connection status changes.
+   *
+   * #### Notes
+   * The 'disconnected' state is considered a terminal state.
+   */
+  private _updateConnectionStatus(
+    connectionStatus: Kernel.ConnectionStatus
+  ): void {
+    if (
+      this._connectionStatus === connectionStatus ||
+      this._connectionStatus === 'disconnected'
+    ) {
+      return;
+    }
+
+    this._connectionStatus = connectionStatus;
+
+    // Notify others that the connection status changed.
+    this._connectionStatusChanged.emit(connectionStatus);
+  }
 
   private async _handleMessage(msg: KernelMessage.IMessage): Promise<void> {
     let handled = false;
@@ -1339,14 +1383,9 @@ export class DefaultKernel implements Kernel.IKernel {
    * Handle a websocket close event.
    */
   private _onWSClose = (evt: Event) => {
-    if (this._wsStopped || !this._ws) {
-      return;
-    }
-    // Clear the websocket event handlers and the socket itself.
-    this._clearSocket();
-
+    // Update the connection status and schedule a possible reconnection.
     if (this._reconnectAttempt < this._reconnectLimit) {
-      this._updateStatus('reconnecting');
+      this._updateConnectionStatus('connecting');
       let timeout = Math.pow(2, this._reconnectAttempt);
       console.error(
         'Connection lost, reconnecting in ' + timeout + ' seconds.'
@@ -1354,24 +1393,28 @@ export class DefaultKernel implements Kernel.IKernel {
       setTimeout(this._createSocket, 1e3 * timeout);
       this._reconnectAttempt += 1;
     } else {
-      this._updateStatus('dead');
+      this._updateConnectionStatus('disconnected');
     }
+
+    // Clear the websocket event handlers and the socket itself.
+    this._clearSocket();
   };
 
   private _id = '';
   private _name = '';
   private _status: Kernel.Status = 'unknown';
+  private _connectionStatus: Kernel.ConnectionStatus = 'connecting';
   private _kernelSession = '';
   private _clientId = '';
   private _isDisposed = false;
-  private _wsStopped = false;
+  /**
+   * Websocket to communicate with kernel.
+   */
   private _ws: WebSocket | null = null;
   private _username = '';
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
-  private _isReady = false;
-  private _readyPromise = new PromiseDelegate<void>();
-  private _initialized = false;
+
   private _futures = new Map<
     string,
     KernelFutureHandler<
@@ -1386,16 +1429,19 @@ export class DefaultKernel implements Kernel.IKernel {
       msg: KernelMessage.ICommOpenMsg
     ) => void;
   } = Object.create(null);
-  private _info: KernelMessage.IInfoReply | null = null;
+  private _info = new PromiseDelegate<KernelMessage.IInfoReply>();
   private _pendingMessages: KernelMessage.IMessage[] = [];
   private _specPromise: Promise<Kernel.ISpecModel>;
   private _statusChanged = new Signal<this, Kernel.Status>(this);
+  private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
+    this
+  );
+  private _disposed = new Signal<this, void>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _displayIdToParentIds = new Map<string, string[]>();
   private _msgIdToDisplayIds = new Map<string, string[]>();
-  private _terminated = new Signal<this, void>(this);
   private _msgChain: Promise<void> | null = Promise.resolve();
   private _noOp = () => {
     /* no-op */
@@ -1413,20 +1459,19 @@ export namespace DefaultKernel {
    *
    * @param settings - The optional server settings.
    *
-   * @returns A promise that resolves with the model for the kernel.
+   * @returns A promise that resolves with the model for the kernel, or undefined if not found.
    *
    * #### Notes
    * If the kernel was already started via `startNewKernel`, we return its
    * `Kernel.IModel`.
    *
    * Otherwise, we attempt to find an existing kernel by connecting to the
-   * server. The promise is fulfilled when the kernel is found, otherwise the
-   * promise is rejected.
+   * server.
    */
   export function findById(
     id: string,
     settings?: ServerConnection.ISettings
-  ): Promise<Kernel.IModel> {
+  ): Promise<Kernel.IModel | undefined> {
     return Private.findById(id, settings);
   }
 
@@ -1554,20 +1599,29 @@ namespace Private {
    * Find a kernel by id.
    *
    * Will reach out to the server if needed to find the kernel.
+   *
+   * Returns undefined if the kernel is not found.
    */
-  export function findById(
+  export async function findById(
     id: string,
     settings?: ServerConnection.ISettings
-  ): Promise<Kernel.IModel> {
-    let kernel = find(runningKernels, value => {
-      return value.id === id;
-    });
+  ): Promise<Kernel.IModel | undefined> {
+    let kernel = find(runningKernels, value => value.id === id);
     if (kernel) {
-      return Promise.resolve(kernel.model);
+      return kernel.model;
     }
-    return getKernelModel(id, settings).catch(() => {
-      throw new Error(`No running kernel with id: ${id}`);
-    });
+    try {
+      return getKernelModel(id, settings);
+    } catch (e) {
+      // If the error is a 404, the session wasn't found.
+      if (
+        e instanceof ServerConnection.ResponseError &&
+        e.response.status === 404
+      ) {
+        return undefined;
+      }
+      throw e;
+    }
   }
 
   /**
@@ -1647,9 +1701,8 @@ namespace Private {
     kernels: Kernel.IModel[]
   ): Kernel.IModel[] {
     each(runningKernels.slice(), kernel => {
-      let updated = find(kernels, model => {
-        return kernel.id === model.id;
-      });
+      let updated = find(kernels, model => kernel.id === model.id);
+
       // If kernel is no longer running on disk, emit dead signal.
       if (!updated && kernel.status !== 'dead') {
         kernel.dispose();

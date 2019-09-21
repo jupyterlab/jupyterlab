@@ -196,9 +196,9 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       return;
     }
     let { newValue } = args;
-    void newValue.ready.then(() => {
+    void newValue.info.then(info => {
       if (this.model && this.context.session.kernel === newValue) {
-        this._updateLanguage(newValue.info.language_info);
+        this._updateLanguage(info.language_info);
       }
     });
     void this._updateSpec(newValue);

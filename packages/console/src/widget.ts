@@ -774,38 +774,23 @@ export class CodeConsole extends Widget {
   /**
    * Handle a change to the kernel.
    */
-  private _onKernelChanged(): void {
+  private async _onKernelChanged(): Promise<void> {
     this.clear();
     if (this._banner) {
       this._banner.dispose();
       this._banner = null;
     }
     this.addBanner();
+    this._handleInfo(await this.session.kernel.info);
   }
 
   /**
    * Handle a change to the kernel status.
    */
-  private _onKernelStatusChanged(): void {
-    if (this.session.status === 'connected') {
-      // we just had a kernel restart or reconnect - reset banner
-      let kernel = this.session.kernel;
-      if (!kernel) {
-        return;
-      }
-      kernel.ready
-        .then(() => {
-          if (this.isDisposed || !kernel || !kernel.info) {
-            return;
-          }
-          this._handleInfo(this.session.kernel.info);
-        })
-        .catch(err => {
-          console.error('could not get kernel info');
-        });
-    } else if (this.session.status === 'restarting') {
+  private async _onKernelStatusChanged(): Promise<void> {
+    if (this.session.status === 'restarting') {
       this.addBanner();
-      this._handleInfo(this.session.kernel.info);
+      this._handleInfo(await this.session.kernel.info);
     }
   }
 

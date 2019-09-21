@@ -5,7 +5,7 @@ import { IIterator } from '@phosphor/algorithm';
 
 import { JSONObject, JSONValue } from '@phosphor/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
 
 import { ISignal } from '@phosphor/signaling';
 
@@ -38,7 +38,7 @@ export namespace Kernel {
    * kernel is changed, the object itself can take care of disconnecting and
    * reconnecting listeners.
    */
-  export interface IKernelConnection extends IDisposable {
+  export interface IKernelConnection extends IObservableDisposable {
     /**
      * The id of the server-side kernel.
      */
@@ -78,31 +78,9 @@ export namespace Kernel {
     readonly connectionStatus: Kernel.ConnectionStatus;
 
     /**
-     * The cached kernel info.
-     *
-     * #### Notes
-     * This value will be null until the kernel is ready.
+     * The kernel info
      */
-    readonly info: KernelMessage.IInfoReply | null;
-
-    /**
-     * Test whether the kernel is ready.
-     *
-     * #### Notes
-     * A kernel is ready when the communication channel is active and we have
-     * cached the kernel info.
-     */
-    readonly isReady: boolean;
-
-    /**
-     * A promise that resolves when the kernel is initially ready after a start
-     * or restart.
-     *
-     * #### Notes
-     * A kernel is ready when the communication channel is active and we have
-     * cached the kernel info.
-     */
-    readonly ready: Promise<void>;
+    readonly info: Promise<KernelMessage.IInfoReply>;
 
     /**
      * Whether the kernel connection handles comm messages.
@@ -163,6 +141,7 @@ export namespace Kernel {
       expectReply?: boolean,
       disposeOnDone?: boolean
     ): Kernel.IControlFuture<KernelMessage.IControlMessage<T>>;
+
     /**
      * Reconnect to a disconnected kernel.
      *
@@ -462,21 +441,16 @@ export namespace Kernel {
       msgId: string,
       hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>
     ): void;
-  }
-
-  /**
-   * The full interface of a kernel.
-   */
-  export interface IKernel extends IKernelConnection {
-    /**
-     * A signal emitted when the kernel is shut down.
-     */
-    terminated: ISignal<this, void>;
 
     /**
      * A signal emitted when the kernel status changes.
      */
     statusChanged: ISignal<this, Kernel.Status>;
+
+    /**
+     * A signal emitted when the kernel connection status changes.
+     */
+    connectionStatusChanged: ISignal<this, Kernel.ConnectionStatus>;
 
     /**
      * A signal emitted after an iopub kernel message is handled.
@@ -497,7 +471,12 @@ export namespace Kernel {
      * message should be treated as read-only.
      */
     anyMessage: ISignal<this, IAnyMessageArgs>;
+  }
 
+  /**
+   * The full interface of a kernel.
+   */
+  export interface IKernel extends IKernelConnection {
     /**
      * The server settings for the kernel.
      */
@@ -512,8 +491,8 @@ export namespace Kernel {
      * Uses the [Jupyter Notebook
      * API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
      *
-     * On a valid response, closes the websocket, emits the [[terminated]]
-     * signal, disposes of the kernel object, and fulfills the promise.
+     * On a valid response, closes the websocket, disposes of the kernel
+     * object, and fulfills the promise.
      *
      * The promise will be rejected if the kernel status is `'dead'`, the
      * request fails, or the response is invalid.
@@ -532,14 +511,12 @@ export namespace Kernel {
    *
    * #### Notes
    * If the kernel was already started via `startNewKernel`, we return its
-   * `Kernel.IModel`. Otherwise, we attempt to find the existing kernel. The
-   * promise is fulfilled when the kernel is found, otherwise the promise is
-   * rejected.
+   * `Kernel.IModel`. Otherwise, we attempt to find the existing kernel.
    */
   export function findById(
     id: string,
     settings?: ServerConnection.ISettings
-  ): Promise<IModel> {
+  ): Promise<IModel | undefined> {
     return DefaultKernel.findById(id, settings);
   }
 
@@ -708,6 +685,7 @@ export namespace Kernel {
 
     /**
      * A signal emitted when there is a connection failure.
+     * TODO: figure out the relationship between this and the other connection status signals for kernels.
      */
     connectionFailure: ISignal<IManager, ServerConnection.NetworkError>;
 
@@ -779,10 +757,10 @@ export namespace Kernel {
      * Find a kernel by id.
      *
      * @param id - The id of the target kernel.
-     *
-     * @returns A promise that resolves with the kernel's model.
+     * TODO: should we return undefined or reject if we can't find the model?
+     * @returns A promise that resolves with the kernel's model, or undefined if not found.
      */
-    findById(id: string): Promise<IModel>;
+    findById(id: string): Promise<IModel | undefined>;
 
     /**
      * Connect to an existing kernel.
@@ -1016,17 +994,46 @@ export namespace Kernel {
 
   /**
    * The valid Kernel status states.
+   *
+   * #### Notes
+   * The status states are:
+   * * `unknown`: The kernel status is unkown, often because the connection is
+   *   disconnected or connecting. This state is determined by the kernel
+   *   connection status.
+   * * `starting`: The kernel is starting
+   * * `idle`: The kernel has finished processing messages.
+   * * `busy`: The kernel is currently processing messages.
+   * * `restarting`: The kernel is restarting. This state is sent by the Jupyter
+   *   server.
+   * * `dead`: The kernel is dead and will not be restarted. This state is set
+   *   by the Jupyter server and is a final state.
    */
   export type Status =
     | 'unknown'
     | 'starting'
-    | 'reconnecting'
     | 'idle'
     | 'busy'
     | 'restarting'
     | 'autorestarting'
-    | 'dead'
-    | 'connected';
+    | 'dead';
+
+  /**
+   * The valid kernel connection states.
+   *
+   * #### Notes
+   * The status states are:
+   * * `connected`: The kernel connection is live.
+   * * `connecting`: The kernel connection is not live, but we are attempting
+   *   to reconnect to the kernel.
+   * * `disconnected`: The kernel connection is permanently down, we will not
+   *   try to reconnect.
+   *
+   * When a kernel connection is `connected`, the kernel status should be
+   * valid. When a kernel connection is either `connecting` or `disconnected`,
+   * the kernel status will be `unknown` unless the kernel status was `dead`,
+   * in which case it stays `dead`.
+   */
+  export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
   /**
    * The kernel model provided by the server.
