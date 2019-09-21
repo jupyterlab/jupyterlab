@@ -264,7 +264,7 @@ export async function initNotebookContext(
 
   if (startKernel) {
     await context.session.initialize();
-    await context.session.kernel.ready;
+    await context.session.kernel.info;
   }
 
   return context;

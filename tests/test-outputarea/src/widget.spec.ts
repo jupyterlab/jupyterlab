@@ -122,7 +122,7 @@ describe('outputarea/widget', () => {
       beforeEach(async () => {
         session = await createClientSession();
         await session.initialize();
-        await session.kernel.ready;
+        await session.kernel.info;
       });
 
       afterEach(async () => {
@@ -236,7 +236,7 @@ describe('outputarea/widget', () => {
       beforeEach(async () => {
         session = await createClientSession();
         await session.initialize();
-        await session.kernel.ready;
+        await session.kernel.info;
       });
 
       afterEach(async () => {
@@ -294,7 +294,6 @@ describe('outputarea/widget', () => {
           kernelPreference: { name: 'ipython' }
         });
         await ipySession.initialize();
-        await ipySession.kernel.ready;
         const promise0 = OutputArea.execute(code0, widget0, ipySession);
         const promise1 = OutputArea.execute(code1, widget1, ipySession);
         await Promise.all([promise0, promise1]);
@@ -318,7 +317,6 @@ describe('outputarea/widget', () => {
           kernelPreference: { name: 'ipython' }
         });
         await ipySession.initialize();
-        await ipySession.kernel.ready;
         const widget1 = new LogOutputArea({ rendermime, model });
         const future1 = OutputArea.execute('a++1', widget, ipySession);
         const future2 = OutputArea.execute('a=1', widget1, ipySession);
@@ -337,7 +335,6 @@ describe('outputarea/widget', () => {
           kernelPreference: { name: 'ipython' }
         });
         await ipySession.initialize();
-        await ipySession.kernel.ready;
         const widget1 = new LogOutputArea({ rendermime, model });
         const metadata = { tags: ['raises-exception'] };
         const future1 = OutputArea.execute(
@@ -367,7 +364,6 @@ describe('outputarea/widget', () => {
       describe('#createStdin()', () => {
         it('should create a stdin widget', async () => {
           const kernel = await Kernel.startNew();
-          await kernel.ready;
           const factory = new OutputArea.ContentFactory();
           const future = kernel.requestExecute({ code: CODE });
           const options = {

@@ -327,7 +327,7 @@ describe('@jupyterlab/apputils', () => {
       describe('.createKernelStatusItem()', () => {
         beforeEach(async () => {
           await session.initialize();
-          await session.kernel.ready;
+          await session.kernel.info;
         });
 
         it('should display a busy status if the kernel status is busy', async () => {
@@ -361,14 +361,14 @@ describe('@jupyterlab/apputils', () => {
         });
 
         it('should handle a starting session', async () => {
-          await session.kernel.ready;
+          await session.kernel.info;
           await session.shutdown();
           session = await createClientSession();
           const item = Toolbar.createKernelStatusItem(session);
           expect(item.node.title).to.equal('Kernel Starting');
           expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
           await session.initialize();
-          await session.kernel.ready;
+          await session.kernel.info;
         });
       });
     });

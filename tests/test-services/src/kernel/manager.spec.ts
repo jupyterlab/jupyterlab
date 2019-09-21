@@ -213,7 +213,7 @@ describe('kernel/manager', () => {
     describe('shutdown()', () => {
       it('should shut down a kernel by id', async () => {
         const kernel = await manager.startNew();
-        await kernel.ready;
+        await kernel.info;
         await manager.shutdown(kernel.id);
         expect(kernel.isDisposed).to.equal(true);
       });

@@ -28,8 +28,10 @@ describe('kernel', () => {
 
   beforeAll(async () => {
     defaultKernel = await Kernel.startNew();
+    await defaultKernel.info;
     // Start another kernel.
-    await Kernel.startNew();
+    let k = await Kernel.startNew();
+    await k.info;
   });
 
   afterEach(() => {
@@ -80,6 +82,7 @@ describe('kernel', () => {
     it('should create an Kernel.IKernel object', async () => {
       const kernel = await Kernel.startNew({});
       expect(kernel.status).to.equal('unknown');
+      await kernel.info;
       await kernel.shutdown();
     });
 
@@ -87,6 +90,7 @@ describe('kernel', () => {
       const serverSettings = makeSettings();
       const kernel = await Kernel.startNew({ serverSettings });
       expect(kernel.status).to.equal('unknown');
+      await kernel.info;
       await kernel.shutdown();
     });
 
@@ -139,10 +143,10 @@ describe('kernel', () => {
     it('should auto-reconnect on websocket error', async () => {
       tester = new KernelTester();
       const kernel = await tester.start();
-      await kernel.ready;
+      await kernel.info;
 
-      const emission = testEmission(kernel.statusChanged, {
-        find: (k, status) => status === 'reconnecting'
+      const emission = testEmission(kernel.connectionStatusChanged, {
+        find: (k, status) => status === 'connecting'
       });
       await tester.close();
       await emission;
@@ -150,18 +154,20 @@ describe('kernel', () => {
   });
 
   describe('Kernel.connectTo()', () => {
-    it('should connect to an existing kernel', () => {
+    it('should connect to an existing kernel', async () => {
       const id = defaultKernel.id;
       const kernel = Kernel.connectTo(defaultKernel.model);
       expect(kernel.id).to.equal(id);
+      await kernel.info;
       kernel.dispose();
     });
 
-    it('should accept server settings', () => {
+    it('should accept server settings', async () => {
       const id = defaultKernel.id;
       const serverSettings = makeSettings();
       const kernel = Kernel.connectTo(defaultKernel.model, serverSettings);
       expect(kernel.id).to.equal(id);
+      await kernel.info;
       kernel.dispose();
     });
 
@@ -170,6 +176,8 @@ describe('kernel', () => {
       expect(kernel.handleComms).to.be.true;
       const kernel2 = Kernel.connectTo(kernel.model);
       expect(kernel2.handleComms).to.be.false;
+      await kernel.info;
+      await kernel2.info;
       kernel.dispose();
       kernel2.dispose();
     });
@@ -179,6 +187,8 @@ describe('kernel', () => {
       expect(kernel.handleComms).to.be.false;
       const kernel2 = Kernel.connectTo(defaultKernel.model);
       expect(kernel2.handleComms).to.be.true;
+      await kernel.info;
+      await kernel2.info;
       kernel.dispose();
       kernel2.dispose();
     });
@@ -187,6 +197,7 @@ describe('kernel', () => {
   describe('Kernel.shutdown()', () => {
     it('should shut down a kernel by id', async () => {
       const k = await Kernel.startNew();
+      await k.info;
       await Kernel.shutdown(k.id);
     });
 

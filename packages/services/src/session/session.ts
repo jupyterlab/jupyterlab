@@ -5,7 +5,7 @@ import { IIterator } from '@phosphor/algorithm';
 
 import { JSONObject } from '@phosphor/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
 
 import { ISignal } from '@phosphor/signaling';
 
@@ -23,13 +23,11 @@ export namespace Session {
    * Interface of a session object.
    *
    * A session object represents a live connection to a session kernel.
+   *
+   * This represents a persistent kernel connection with a particular key,
+   * that persists across changing kernels and kernels getting terminated.
    */
-  export interface ISession extends IDisposable {
-    /**
-     * A signal emitted when the session is shut down.
-     */
-    terminated: ISignal<this, void>;
-
+  export interface ISession extends IObservableDisposable {
     /**
      * A signal emitted when the kernel changes.
      */

@@ -728,7 +728,7 @@ describe('cells/widget', () => {
       beforeEach(async () => {
         session = await createClientSession();
         await (session as ClientSession).initialize();
-        await session.kernel.ready;
+        await session.kernel.info;
       });
 
       afterEach(() => {

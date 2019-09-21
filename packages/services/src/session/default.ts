@@ -45,11 +45,8 @@ export class DefaultSession implements Session.ISession {
     this.setupKernel(model);
   }
 
-  /**
-   * A signal emitted when the session is shut down.
-   */
-  get terminated(): ISignal<this, void> {
-    return this._terminated;
+  get disposed(): ISignal<this, void> {
+    return this._disposed;
   }
 
   /**
@@ -218,9 +215,9 @@ export class DefaultSession implements Session.ISession {
       return;
     }
     this._isDisposed = true;
+    this._disposed.emit();
     this._kernel.dispose();
     this._statusChanged.emit('dead');
-    this._terminated.emit(void 0);
     Private.removeRunning(this);
     Signal.clearData(this);
   }
@@ -411,13 +408,13 @@ export class DefaultSession implements Session.ISession {
   private _kernel: Kernel.IKernel;
   private _isDisposed = false;
   private _updating = false;
+  private _disposed = new Signal<this, void>(this);
   private _kernelChanged = new Signal<this, Session.IKernelChangedArgs>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
-  private _terminated = new Signal<this, void>(this);
 }
 
 /**

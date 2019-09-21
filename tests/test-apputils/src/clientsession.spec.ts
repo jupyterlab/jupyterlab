@@ -321,14 +321,14 @@ describe('@jupyterlab/apputils', () => {
           find: (_, args) => args === 'restarting'
         });
         await session.initialize();
-        await session.kernel.ready;
+        await session.kernel.info;
         const restart = session.restart();
 
         await acceptDialog();
         expect(await restart).to.equal(true);
         await emission;
         // Wait for the restarted kernel to be ready
-        await session.kernel.ready;
+        await session.kernel.info;
       });
 
       it('should not restart if the user rejects the dialog', async () => {
@@ -390,7 +390,7 @@ describe('@jupyterlab/apputils', () => {
           }
         });
         await session.initialize();
-        await session.kernel.ready;
+        await session.kernel.info;
 
         const restart = ClientSession.restartKernel(session.kernel);
 
@@ -408,7 +408,7 @@ describe('@jupyterlab/apputils', () => {
           }
         });
         await session.initialize();
-        await session.kernel.ready;
+        await session.kernel.info;
 
         const restart = ClientSession.restartKernel(session.kernel);
 

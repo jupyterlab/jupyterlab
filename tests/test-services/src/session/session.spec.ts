@@ -50,18 +50,18 @@ describe('session', () => {
 
   beforeAll(async () => {
     defaultSession = await startNew();
-    await defaultSession.kernel.ready;
+    await defaultSession.kernel.info;
   });
 
   afterEach(async () => {
     if (session && !session.isDisposed) {
-      await session.kernel.ready;
+      await session.kernel.info;
       await session.shutdown();
     }
   });
 
   afterAll(async () => {
-    await defaultSession.kernel.ready;
+    await defaultSession.kernel.info;
     await defaultSession.shutdown();
   });
 
@@ -190,7 +190,7 @@ describe('session', () => {
   describe('Session.shutdown()', () => {
     it('should shut down a kernel by id', async () => {
       session = await startNew();
-      await session.kernel.ready;
+      await session.kernel.info;
       await Session.shutdown(session.id);
     });
 

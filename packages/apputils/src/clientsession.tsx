@@ -687,7 +687,7 @@ export class ClientSession implements IClientSession {
       this._propertyChanged.emit('type');
     }
 
-    session.terminated.connect(this._onTerminated, this);
+    session.disposed.connect(this._onTerminated, this);
     session.propertyChanged.connect(this._onPropertyChanged, this);
     session.kernelChanged.connect(this._onKernelChanged, this);
     session.statusChanged.connect(this._onStatusChanged, this);

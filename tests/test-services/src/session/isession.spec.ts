@@ -22,8 +22,10 @@ init();
 /**
  * Start a new session with a unique name.
  */
-function startNew(): Promise<Session.ISession> {
-  return Session.startNew({ path: UUID.uuid4() });
+async function startNew(): Promise<Session.ISession> {
+  const session = await Session.startNew({ path: UUID.uuid4() });
+  await session.kernel.info;
+  return session;
 }
 
 describe('session', () => {
@@ -32,28 +34,28 @@ describe('session', () => {
 
   beforeAll(async () => {
     defaultSession = await startNew();
-    await defaultSession.kernel.ready;
+    await defaultSession.kernel.info;
   });
 
   afterEach(async () => {
     if (session && !session.isDisposed) {
-      await session.kernel.ready;
+      await session.kernel.info;
       await session.shutdown();
     }
   });
 
   afterAll(async () => {
-    await defaultSession.kernel.ready;
+    await defaultSession.kernel.info;
     await defaultSession.shutdown();
   });
 
   describe('Session.ISession', () => {
-    describe('#terminated', () => {
-      it('should emit when the session is shut down', async () => {
+    describe('#disposed', () => {
+      it('should emit when the session is disposed', async () => {
         let called = false;
         session = await startNew();
-        await session.kernel.ready;
-        session.terminated.connect(() => {
+        await session.kernel.info;
+        session.disposed.connect(() => {
           called = true;
         });
         await session.shutdown();
@@ -72,7 +74,7 @@ describe('session', () => {
         }, object);
         const previous = defaultSession.kernel;
         await defaultSession.changeKernel({ name: previous.name });
-        await defaultSession.kernel.ready;
+        await defaultSession.kernel.info;
         expect(previous).to.not.equal(defaultSession.kernel);
         expect(called).to.deep.equal({
           oldValue: previous,
@@ -112,7 +114,7 @@ describe('session', () => {
       it('should be emitted for an unhandled message', async () => {
         const tester = new SessionTester();
         const session = await tester.startSession();
-        await session.kernel.ready;
+        await session.kernel.info;
         const msgId = UUID.uuid4();
         const emission = testEmission(session.unhandledMessage, {
           find: (k, msg) => msg.header.msg_id === msgId
@@ -337,9 +339,9 @@ describe('session', () => {
       it('should create a new kernel with the new name', async () => {
         session = await startNew();
         const previous = session.kernel;
-        await previous.ready;
+        await previous.info;
         await session.changeKernel({ name: previous.name });
-        await session.kernel.ready;
+        await session.kernel.info;
         expect(session.kernel.name).to.equal(previous.name);
         expect(session.kernel.id).to.not.equal(previous.id);
         expect(session.kernel).to.not.equal(previous);
@@ -349,11 +351,11 @@ describe('session', () => {
       it('should accept the id of the new kernel', async () => {
         session = await startNew();
         const previous = session.kernel;
-        await previous.ready;
+        await previous.info;
         const kernel = await Kernel.startNew();
-        await kernel.ready;
+        await kernel.info;
         await session.changeKernel({ id: kernel.id });
-        await session.kernel.ready;
+        await session.kernel.info;
         expect(session.kernel.id).to.equal(kernel.id);
         expect(session.kernel).to.not.equal(previous);
         expect(session.kernel).to.not.equal(kernel);
@@ -364,11 +366,11 @@ describe('session', () => {
       it('should update the session path if it has changed', async () => {
         session = await startNew();
         const previous = session.kernel;
-        await previous.ready;
+        await previous.info;
         const model = { ...session.model, path: 'foo.ipynb' };
         handleRequest(session, 200, model);
         await session.changeKernel({ name: previous.name });
-        await session.kernel.ready;
+        await session.kernel.info;
         expect(session.kernel.name).to.equal(previous.name);
         expect(session.path).to.equal(model.path);
         previous.dispose();
@@ -381,10 +383,10 @@ describe('session', () => {
         await session.shutdown();
       });
 
-      it('should emit a terminated signal', async () => {
+      it('should emit a disposed signal', async () => {
         let called = false;
         session = await startNew();
-        session.terminated.connect(() => {
+        session.disposed.connect(() => {
           called = true;
         });
         await session.shutdown();

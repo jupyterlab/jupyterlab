@@ -13,6 +13,11 @@ import { ServerConnection } from '..';
 
 import { Kernel } from './kernel';
 
+// TODO: Migrate kernel connection status etc. up to session
+// TODO: move session management work up to session manager rather than session objects
+// TODO: Get rid of ClientSession
+// TODO: put session persistence in jlab server end (even if not in notebook)
+
 /**
  * An implementation of a kernel manager.
  */
