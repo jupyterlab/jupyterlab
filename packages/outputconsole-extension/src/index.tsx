@@ -93,7 +93,9 @@ function OutputStatusComponent(
       onClick={props.handleClick}
       title={`${props.logCount} messages in Output Console`}
     >
-      <IconItem source={'jp-StatusItem-output-console fa fa-list'} />
+      <IconItem
+        source={'jp-StatusItem-output-console lab-output-console-icon'}
+      />
       <TextItem source={props.logCount} />
     </GroupItem>
   );
@@ -355,7 +357,7 @@ function activateOutputLog(
     loggerWidget = new MainAreaWidget({ content: loggerView });
     loggerWidget.title.closable = true;
     loggerWidget.title.label = 'Output Console';
-    loggerWidget.title.iconClass = 'fa fa-list lab-output-console-icon';
+    loggerWidget.title.iconClass = 'lab-output-console-icon';
     loggerView.messageLimit = messageLimit;
 
     app.shell.add(loggerWidget, 'main', {

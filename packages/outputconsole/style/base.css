@@ -13,10 +13,6 @@
   color: var(--jp-ui-font-color3);
 }
 
-.lab-output-console-icon {
-  line-height: var(--jp-private-horizontal-tab-height);
-}
-
 .lab-output-console-dropdown select {
   height: var(--jp-private-horizontal-tab-height);
 }
