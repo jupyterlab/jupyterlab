@@ -263,6 +263,8 @@ export class OutputLoggerView extends StackedPanel {
 
   protected onAfterAttach(msg: Message): void {
     this._updateOutputViews();
+    this._showOutputFromSource(this._activeSource);
+    this._showPlaceholderIfNoMessage();
   }
 
   private _bindLoggerSignals() {
@@ -302,7 +304,7 @@ export class OutputLoggerView extends StackedPanel {
       }
     });
 
-    const title = `Log: ${source}`;
+    const title = source ? `Log: ${source}` : 'Log Console';
     this.title.label = title;
     this.title.caption = title;
   }

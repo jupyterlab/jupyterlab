@@ -341,6 +341,7 @@ function activateOutputLog(
         loggerWidget.activate();
       }
 
+      // TODO, repeat in command?
       status.model.messageLimit = messageLimit;
       status.model.markSourceOutputRead(status.model.activeSource);
       status.model.highlightingEnabled = false;
@@ -383,17 +384,20 @@ function activateOutputLog(
   };
 
   app.commands.addCommand(command, {
-    label: 'Log Console',
+    label: 'Show Log Console',
     execute: (args: any) => {
       if (!loggerWidget) {
         createLoggerWidget();
-      } else if (!(args && args.fromRestorer)) {
-        loggerWidget.activate();
-      }
 
-      if (args && args.activeSource) {
-        loggerWidget.content.activeSource = args.activeSource;
+        if (args && args.activeSource) {
+          loggerWidget.content.activeSource = args.activeSource;
+        }
+      } else if (!(args && args.fromRestorer)) {
+        loggerWidget.dispose();
       }
+    },
+    isToggled: () => {
+      return loggerWidget !== null;
     }
   });
 
@@ -444,6 +448,17 @@ function activateOutputLog(
           void tracker.save(loggerWidget);
         }
         status.model.activeSource = sourceName;
+      });
+
+      nb.disposed.connect((nb: NotebookPanel, args: void) => {
+        const sourceName = nb.context.path;
+        if (loggerWidget && loggerWidget.content.activeSource === sourceName) {
+          loggerWidget.content.activeSource = null;
+          void tracker.save(loggerWidget);
+        }
+        if (status.model.activeSource === sourceName) {
+          status.model.activeSource = null;
+        }
       });
     }
   );
