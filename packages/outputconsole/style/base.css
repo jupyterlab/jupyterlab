@@ -21,11 +21,6 @@
   line-height: var(--jp-private-horizontal-tab-height);
 }
 
-.lab-output-console-widget .clear-icon {
-  transform: rotate(90deg);
-  margin-top: -1px;
-}
-
 .lab-output-console-line {
   border-bottom: 1px solid var(--jp-border-color3);
   padding: 2px;

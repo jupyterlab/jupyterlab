@@ -9,7 +9,11 @@ import {
   ILayoutRestorer
 } from '@jupyterlab/application';
 
-import { MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
+import {
+  MainAreaWidget,
+  WidgetTracker,
+  ToolbarButton
+} from '@jupyterlab/apputils';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
@@ -356,6 +360,7 @@ function activateOutputLog(
 
     const loggerView = new OutputLoggerView(logRegistry);
     loggerWidget = new MainAreaWidget({ content: loggerView });
+    loggerWidget.addClass('lab-output-console');
     loggerWidget.title.closable = true;
     loggerWidget.title.label = 'Output Console';
     loggerWidget.title.iconClass = 'lab-output-console-icon';
@@ -374,6 +379,37 @@ function activateOutputLog(
     if (activeSource) {
       loggerView.activeSource = activeSource;
     }
+
+    const addTimestampButton = new ToolbarButton({
+      onClick: (): void => {
+        const logger = logRegistry.getLogger(loggerView.activeSource);
+        logger.log({
+          data: {
+            'text/html': '<hr>'
+          },
+          output_type: 'display_data'
+        });
+      },
+      iconClassName: 'jp-AddIcon',
+      tooltip: 'Add Timestamp',
+      label: 'Add Timestamp'
+    });
+
+    const clearButton = new ToolbarButton({
+      onClick: (): void => {
+        const logger = logRegistry.getLogger(loggerView.activeSource);
+        logger.clear();
+      },
+      iconClassName: 'fa fa-ban clear-icon',
+      tooltip: 'Clear Logs',
+      label: 'Clear Logs'
+    });
+
+    loggerWidget.toolbar.addItem(
+      'lab-output-console-add-timestamp',
+      addTimestampButton
+    );
+    loggerWidget.toolbar.addItem('lab-output-console-clear', clearButton);
 
     void tracker.add(loggerWidget);
 

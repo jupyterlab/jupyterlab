@@ -23,3 +23,8 @@
 .lab-output-console-icon {
   background-image: var(--jp-icon-output-console);
 }
+
+.lab-output-console .clear-icon {
+  transform: rotate(90deg);
+  margin-top: -1px;
+}
