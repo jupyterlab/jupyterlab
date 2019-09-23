@@ -249,7 +249,8 @@ export class OutputLoggerView extends StackedPanel {
     outputLogRegistry.registryChanged.connect(
       (sender: IOutputLogRegistry, args: ILogRegistryChange) => {
         this._bindLoggerSignals();
-      }
+      },
+      this
     );
 
     this._bindLoggerSignals();
@@ -274,7 +275,7 @@ export class OutputLoggerView extends StackedPanel {
       logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
         this._updateOutputViews();
         this._showPlaceholderIfNoMessage();
-      });
+      }, this);
 
       logger.rendermimeChanged.connect((sender: ILogger) => {
         const viewId = `source:${sender.source}`;
@@ -282,7 +283,7 @@ export class OutputLoggerView extends StackedPanel {
         if (view) {
           view.rendermime = sender.rendermime;
         }
-      });
+      }, this);
     }
   }
 
@@ -360,7 +361,7 @@ export class OutputLoggerView extends StackedPanel {
 
         logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
           this._scrollOuputAreaToBottom(outputView);
-        });
+        }, this);
 
         outputView.outputLengthChanged.connect(
           (sender: LoggerOutputArea, args: number) => {
@@ -369,7 +370,8 @@ export class OutputLoggerView extends StackedPanel {
             this._scrollTimer = setTimeout(() => {
               this._scrollOuputAreaToBottom(outputView);
             }, 50);
-          }
+          },
+          this
         );
 
         this.addWidget(outputView);
