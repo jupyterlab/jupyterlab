@@ -491,8 +491,7 @@ export class OutputArea extends Widget {
       case 'display_data':
       case 'stream':
       case 'error':
-        output = msg.content as nbformat.IOutput;
-        output.output_type = msgType as nbformat.OutputType;
+        output = { ...msg.content, output_type: msgType };
         model.add(output);
         break;
       case 'clear_output':
@@ -500,8 +499,7 @@ export class OutputArea extends Widget {
         model.clear(wait);
         break;
       case 'update_display_data':
-        output = msg.content as nbformat.IOutput;
-        output.output_type = 'display_data';
+        output = { ...msg.content, output_type: 'display_data' };
         targets = this._displayIdMap.get(displayId);
         if (targets) {
           for (let index of targets) {

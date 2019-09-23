@@ -465,7 +465,11 @@ function activateOutputLog(
           ) {
             const logger = logRegistry.getLogger(nb.context.path);
             logger.rendermime = nb.content.rendermime;
-            logger.log((msg.content as unknown) as nbformat.IOutput);
+            const output: nbformat.IOutput = {
+              ...msg.content,
+              output_type: msg.header.msg_type
+            };
+            logger.log(output);
           }
         }
       );
