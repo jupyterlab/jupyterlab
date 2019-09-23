@@ -83,8 +83,6 @@ export class CodeMirrorSearchProvider
     // canSearchOn is a type guard that guarantees the type of .editor
     this._cm = searchTarget.content.editor;
     return this._startQuery(query);
-
-    throw new Error('Cannot find Codemirror instance to search');
   }
 
   /**
@@ -300,6 +298,9 @@ export class CodeMirrorSearchProvider
     return null;
   }
 
+  get editor(): CodeMirrorEditor {
+    return this._cm;
+  }
   /**
    * Set whether or not the CodemirrorSearchProvider will wrap to the beginning
    * or end of the document on invocations of highlightNext or highlightPrevious, respectively
