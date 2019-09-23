@@ -57,28 +57,35 @@ export class DefaultSession implements Session.ISession {
   }
 
   /**
-   * A signal emitted when the kernel status changes.
+   * A signal proxied from the connection about the kernel status.
    */
   get statusChanged(): ISignal<this, Kernel.Status> {
     return this._statusChanged;
   }
 
   /**
-   * A signal emitted for a kernel messages.
+   * A signal proxied from the kernel about the connection status.
+   */
+  get connectionStatusChanged(): ISignal<this, Kernel.ConnectionStatus> {
+    return this._connectionStatusChanged;
+  }
+
+  /**
+   * A signal proxied from the kernel about iopub kernel messages.
    */
   get iopubMessage(): ISignal<this, KernelMessage.IIOPubMessage> {
     return this._iopubMessage;
   }
 
   /**
-   * A signal emitted for an unhandled kernel message.
+   * A signal proxied from the kernel for an unhandled kernel message.
    */
   get unhandledMessage(): ISignal<this, KernelMessage.IMessage> {
     return this._unhandledMessage;
   }
 
   /**
-   * A signal emitted for any kernel message.
+   * A signal proxied from the kernel emitted for any kernel message.
    *
    * Note: The behavior is undefined if the message is modified
    * during message handling. As such, it should be treated as read-only.
@@ -316,6 +323,7 @@ export class DefaultSession implements Session.ISession {
     const kernel = Kernel.connectTo(model, this.serverSettings);
     this._kernel = kernel;
     kernel.statusChanged.connect(this.onKernelStatus, this);
+    kernel.connectionStatusChanged.connect(this.onKernelConnectionStatus, this);
     kernel.unhandledMessage.connect(this.onUnhandledMessage, this);
     kernel.iopubMessage.connect(this.onIOPubMessage, this);
     kernel.anyMessage.connect(this.onAnyMessage, this);
@@ -326,6 +334,16 @@ export class DefaultSession implements Session.ISession {
    */
   protected onKernelStatus(sender: Kernel.IKernel, state: Kernel.Status) {
     this._statusChanged.emit(state);
+  }
+
+  /**
+   * Handle to changes in the Kernel status.
+   */
+  protected onKernelConnectionStatus(
+    sender: Kernel.IKernel,
+    state: Kernel.ConnectionStatus
+  ) {
+    this._connectionStatusChanged.emit(state);
   }
 
   /**
@@ -411,6 +429,9 @@ export class DefaultSession implements Session.ISession {
   private _disposed = new Signal<this, void>(this);
   private _kernelChanged = new Signal<this, Session.IKernelChangedArgs>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
+  private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
+    this
+  );
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);

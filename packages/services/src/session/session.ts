@@ -34,9 +34,14 @@ export namespace Session {
     kernelChanged: ISignal<this, IKernelChangedArgs>;
 
     /**
-     * A signal emitted when the session status changes.
+     * A signal proxied from the current kernel about its status.
      */
     statusChanged: ISignal<this, Kernel.Status>;
+
+    /**
+     * A signal proxied from the current kernel about its connection status.
+     */
+    connectionStatusChanged: ISignal<this, Kernel.ConnectionStatus>;
 
     /**
      * A signal emitted when a session property changes.
