@@ -3,78 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.lab-output-console-widget {
-  overflow-y: auto;
-}
-
-.jlab-output-logger-placeholder {
-  padding: 5px;
-  font-size: 13px;
-  color: var(--jp-ui-font-color3);
-}
-
-.lab-output-console-dropdown select {
-  height: var(--jp-private-horizontal-tab-height);
-}
-
-.lab-output-console-widget .jp-ToolbarButtonComponent-label {
-  line-height: var(--jp-private-horizontal-tab-height);
-}
-
-.lab-output-console-line {
-  border-bottom: 1px solid var(--jp-border-color3);
-  padding: 2px;
-  font-size: 13px;
-}
-
-.lab-output-console-line .log-meta {
-  width: 120px;
-  padding: 2px;
-  box-sizing: border-box;
-  display: inline-block;
-  vertical-align: top;
-}
-.lab-output-console-line .log-count-time {
-  width: 100%;
-}
-.lab-output-console-line .log-count {
-  display: inline-block;
-  min-width: 20px;
-  color: var(--jp-ui-font-color3);
-  vertical-align: top;
-}
-.lab-output-console-line .log-time {
-  display: inline-block;
-  color: var(--jp-ui-font-color2);
-  vertical-align: top;
-}
-.lab-output-console-line .log-sender-icon {
-  width: 14px;
-  height: 14px;
-  display: inline-block;
-  vertical-align: middle;
-}
-.lab-output-console-line .log-sender {
-  display: inline-block;
-  box-sizing: border-box;
-  width: 100%;
-  padding-top: 3px;
-  color: var(--jp-warn-color2);
-  vertical-align: top;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.lab-output-console-line .log-sender:hover {
-  background-color: var(--jp-layout-color2);
-}
-
-.lab-output-console-line .log-content {
-  display: inline-block;
-  width: calc(100% - 135px);
-}
-
 .jp-LogConsolePanel {
   overflow-y: auto;
 }
@@ -88,4 +16,10 @@
   color: var(--jp-ui-font-color2);
   font-size: 13px;
   padding: 2px;
+}
+
+.jp-LogConsoleListPlaceholder {
+  padding: 5px;
+  font-size: 13px;
+  color: var(--jp-ui-font-color3);
 }

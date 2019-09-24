@@ -106,9 +106,7 @@ function LogConsoleStatusComponent(
       onClick={props.handleClick}
       title={`${props.logCount} logs in Log Console`}
     >
-      <IconItem
-        source={'jp-StatusItem-output-console lab-output-console-icon'}
-      />
+      <IconItem source={'jp-LogConsoleIcon'} />
       <TextItem source={props.logCount} />
     </GroupItem>
   );
@@ -126,7 +124,7 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
     this._handleClick = opts.handleClick;
     this.model = new LogConsoleStatus.Model(opts.loggerRegistry);
     this.addClass(interactiveItem);
-    this.addClass('outputconsole-status-item');
+    this.addClass('jp-LogConsoleStatusItem');
 
     let timer: number = null;
 
@@ -364,10 +362,10 @@ function activateLogConsole(
 
     const logConsolePanel = new LogConsolePanel(loggerRegistry);
     logConsoleWidget = new MainAreaWidget({ content: logConsolePanel });
-    logConsoleWidget.addClass('lab-output-console');
+    logConsoleWidget.addClass('jp-LogConsole');
     logConsoleWidget.title.closable = true;
     logConsoleWidget.title.label = 'Log Console';
-    logConsoleWidget.title.iconClass = 'lab-output-console-icon';
+    logConsoleWidget.title.iconClass = 'jp-LogConsoleIcon';
     logConsolePanel.entryLimit = entryLimit;
 
     const addTimestampButton = new ToolbarButton({

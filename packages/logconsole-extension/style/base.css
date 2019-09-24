@@ -6,25 +6,19 @@
   --jp-icon-output-console: url('./list-icon-dark.svg');
 }
 
-.outputconsole-status-item.hilite {
-  transition: background-color 1s ease-out;
-  background-color: var(--jp-info-color0);
-}
-.outputconsole-status-item.hilited {
-  background-color: var(--jp-info-color0);
-}
-
-.jp-StatusItem-output-console {
-  line-height: 24px;
-  vertical-align: middle;
-  color: var(--jp-ui-font-color1);
-}
-
-.lab-output-console-icon {
+.jp-LogConsoleIcon {
   background-image: var(--jp-icon-output-console);
 }
 
-.lab-output-console .clear-icon {
+.jp-LogConsoleStatusItem.hilite {
+  transition: background-color 1s ease-out;
+  background-color: var(--jp-info-color0);
+}
+.jp-LogConsoleStatusItem.hilited {
+  background-color: var(--jp-info-color0);
+}
+
+.jp-LogConsole .clear-icon {
   transform: rotate(90deg);
   margin-top: -1px;
 }

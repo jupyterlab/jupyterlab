@@ -298,7 +298,7 @@ export class LogConsolePanel extends StackedPanel {
     this._bindLoggerSignals();
 
     this._placeholder = new Widget();
-    this._placeholder.addClass('jlab-output-logger-placeholder');
+    this._placeholder.addClass('jp-LogConsoleListPlaceholder');
     this._placeholder.node.innerHTML = 'No log messages.';
 
     this.addWidget(this._placeholder);
