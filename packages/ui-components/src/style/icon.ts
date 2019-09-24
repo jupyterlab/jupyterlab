@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { cssRule, style } from 'typestyle/lib';
+import { style } from 'typestyle/lib';
 import { NestedCSSProperties } from 'typestyle/lib/types';
 
 /**
@@ -66,6 +66,7 @@ const iconCSSBreadCrumb: NestedCSSProperties = {
   height: '16px',
   width: '16px',
   verticalAlign: 'middle',
+  // `&` will be substituted for the generated classname (interpolation)
   $nest: {
     '&:hover': {
       backgroundColor: 'var(--jp-layout-color2)'
@@ -73,7 +74,7 @@ const iconCSSBreadCrumb: NestedCSSProperties = {
     '&:first-child': {
       marginLeft: '0px'
     },
-    ['.jp-mod-dropTarget']: {
+    ['.jp-mod-dropTarget&']: {
       backgroundColor: 'var(--jp-brand-color2)',
       opacity: 0.7
     }
@@ -175,7 +176,36 @@ const containerCSSSettingsEditor: NestedCSSProperties = {
 };
 
 const containerCSSSideBar: NestedCSSProperties = {
-  transform: 'rotate(90deg)'
+  // `&` will be substituted for the generated classname (interpolation)
+  $nest: {
+    // left sidebar tab divs
+    '.jp-SideBar.jp-mod-left .p-TabBar-tab &': {
+      transform: 'rotate(90deg)'
+    },
+    // left sidebar currently selected tab div
+    '.jp-SideBar.jp-mod-left .p-TabBar-tab.p-mod-current &': {
+      transform:
+        'rotate(90deg)\n' +
+        '    translate(\n' +
+        '      calc(-0.5 * var(--jp-border-width)),\n' +
+        '      calc(-0.5 * var(--jp-border-width))\n' +
+        '    )'
+    },
+
+    // right sidebar tab divs
+    '.jp-SideBar.jp-mod-right .p-TabBar-tab &': {
+      transform: 'rotate(-90deg)'
+    },
+    // right sidebar currently selected tab div
+    '.jp-SideBar.jp-mod-right .p-TabBar-tab.p-mod-current &': {
+      transform:
+        'rotate(-90deg)\n' +
+        '    translate(\n' +
+        '      calc(0.5 * var(--jp-border-width)),\n' +
+        '      calc(-0.5 * var(--jp-border-width))\n' +
+        '    )'
+    }
+  }
 };
 
 const containerCSSSplash: NestedCSSProperties = {
@@ -236,9 +266,12 @@ function containerCSS(props: IIconStyle): NestedCSSProperties {
  * for setting the style on the container of an svg node representing an icon
  */
 export const iconStyle = (props: IIconStyle): string => {
+  const conCSS = containerCSS(props);
+
   return style({
-    ...containerCSS(props),
+    ...conCSS,
     $nest: {
+      ...conCSS.$nest,
       ['svg']: iconCSS(props)
     }
   });
@@ -250,19 +283,3 @@ export const iconStyle = (props: IIconStyle): string => {
 export const iconStyleFlat = (props: IIconStyle): string => {
   return style(iconCSS(props));
 };
-
-// TODO: Figure out a better cludge for styling current sidebar tab selection
-cssRule(
-  `.p-TabBar-tab.p-mod-current .${iconStyle({
-    center: true,
-    kind: 'sideBar'
-  })}`,
-  {
-    transform:
-      'rotate(90deg)\n' +
-      '    translate(\n' +
-      '      calc(-0.5 * var(--jp-border-width)),\n' +
-      '      calc(-0.5 * var(--jp-border-width))\n' +
-      '    )'
-  }
-);
