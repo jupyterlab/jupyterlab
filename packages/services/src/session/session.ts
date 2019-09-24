@@ -25,7 +25,9 @@ export namespace Session {
    * A session object represents a live connection to a session kernel.
    *
    * This represents a persistent kernel connection with a particular key,
-   * that persists across changing kernels and kernels getting terminated.
+   * that persists across changing kernels and kernels getting terminated. As
+   * such, a number of signals are proxied from the current kernel for
+   * convenience.
    */
   export interface ISession extends IObservableDisposable {
     /**
@@ -34,12 +36,13 @@ export namespace Session {
     kernelChanged: ISignal<this, IKernelChangedArgs>;
 
     /**
-     * A signal proxied from the current kernel about its status.
+     * The kernel statusChanged signal, proxied from the current kernel.
      */
     statusChanged: ISignal<this, Kernel.Status>;
 
     /**
-     * A signal proxied from the current kernel about its connection status.
+     * The kernel connectionStatusChanged signal, proxied from the current
+     * kernel.
      */
     connectionStatusChanged: ISignal<this, Kernel.ConnectionStatus>;
 
@@ -49,20 +52,17 @@ export namespace Session {
     readonly propertyChanged: ISignal<this, 'path' | 'name' | 'type'>;
 
     /**
-     * A signal emitted for iopub kernel messages.
+     * The kernel iopubMessage signal, proxied from the current kernel.
      */
     iopubMessage: ISignal<this, KernelMessage.IIOPubMessage>;
 
     /**
-     * A signal emitted for unhandled kernel message.
+     * The kernel unhandledMessage signal, proxied from the current kernel.
      */
     unhandledMessage: ISignal<this, KernelMessage.IMessage>;
 
     /**
-     * A signal emitted for any kernel message.
-     *
-     * Note: The behavior is undefined if the message is modified
-     * during message handling. As such, it should be treated as read-only.
+     * The kernel anyMessage signal, proxied from the current kernel.
      */
     anyMessage: ISignal<this, Kernel.IAnyMessageArgs>;
 
@@ -101,16 +101,11 @@ export namespace Session {
      *
      * #### Notes
      * This is a read-only property, and can be altered by [changeKernel].
+     *
+     * A number of kernel signals are proxied through the session from
+     * whatever the current kernel is for convenience.
      */
     readonly kernel: Kernel.IKernelConnection;
-
-    /**
-     * The current status of the session.
-     *
-     * #### Notes
-     * This is a delegate to the kernel status.
-     */
-    readonly status: Kernel.Status;
 
     /**
      * Change the session path.

@@ -153,16 +153,6 @@ export class DefaultSession implements Session.ISession {
   }
 
   /**
-   * The current status of the session.
-   *
-   * #### Notes
-   * This is a delegate to the kernel status.
-   */
-  get status(): Kernel.Status {
-    return this._kernel ? this._kernel.status : 'dead';
-  }
-
-  /**
    * The server settings of the session.
    */
   readonly serverSettings: ServerConnection.ISettings;
@@ -224,7 +214,6 @@ export class DefaultSession implements Session.ISession {
     this._isDisposed = true;
     this._disposed.emit();
     this._kernel.dispose();
-    this._statusChanged.emit('dead');
     Private.removeRunning(this);
     Signal.clearData(this);
   }
@@ -293,7 +282,11 @@ export class DefaultSession implements Session.ISession {
     }
     let data = JSON.stringify({ kernel: options });
     this._kernel.dispose();
-    this._statusChanged.emit('restarting');
+
+    // This status is not technically correct, but it may be useful to refresh
+    // clients TODO: evaluate whether we want to do this, or tell people to
+    // listen to the kernelChanged signal.
+    // this._statusChanged.emit('restarting');
     return this._patch(data).then(() => this.kernel);
   }
 
@@ -810,8 +803,8 @@ namespace Private {
         }
         return false;
       });
-      // If session is no longer running on disk, emit dead signal.
-      if (!updated && session.status !== 'dead') {
+      // If session is no longer running on disk, dispose the session.
+      if (!updated && session.isDisposed !== true) {
         session.dispose();
       }
     });

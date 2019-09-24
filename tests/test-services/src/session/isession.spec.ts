@@ -192,7 +192,7 @@ describe('session', () => {
     });
 
     describe('#isDisposed', () => {
-      it('should be true after we dispose of the session', async () => {   
+      it('should be true after we dispose of the session', async () => {
         const session = await startNew();
         expect(session.isDisposed).to.equal(false);
         session.dispose();

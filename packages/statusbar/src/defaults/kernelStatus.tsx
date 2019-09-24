@@ -150,7 +150,7 @@ export namespace KernelStatus {
         this._kernelStatus = 'unknown';
         this._kernelName = 'unknown';
       } else {
-        this._kernelStatus = this._session.status;
+        this._kernelStatus = this._session.kernel.status;
         this._kernelName = this._session.kernelDisplayName;
 
         this._session.statusChanged.connect(this._onKernelStatusChanged);

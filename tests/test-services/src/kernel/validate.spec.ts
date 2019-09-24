@@ -113,6 +113,16 @@ describe('kernel/validate', () => {
       expect(() => validateMessage(msg)).to.throw();
     });
 
+    it('should throw on invalid iopub status message content', () => {
+      const msg = KernelMessage.createMessage<KernelMessage.IStatusMsg>({
+        msgType: 'status',
+        channel: 'iopub',
+        session: 'baz',
+        content: { execution_state: 'invalid-status' as Kernel.Status }
+      });
+      expect(() => validateMessage(msg)).to.throw();
+    });
+
     it('should handle no buffers field', () => {
       const msg = KernelMessage.createMessage({
         msgType: 'comm_msg',

@@ -997,14 +997,17 @@ export namespace Kernel {
    *
    * #### Notes
    * The status states are:
-   * * `unknown`: The kernel status is unkown, often because the connection is
-   *   disconnected or connecting. This state is determined by the kernel
+   * * `unknown`: The kernel status is unknown, often because the connection
+   *   is disconnected or connecting. This state is determined by the kernel
    *   connection status.
+   * * `autorestarting`: The kernel is restarting, initiated by the server.
+   *   This state is set by the services library, not explicitly sent from the
+   *   kernel.
    * * `starting`: The kernel is starting
    * * `idle`: The kernel has finished processing messages.
    * * `busy`: The kernel is currently processing messages.
-   * * `restarting`: The kernel is restarting. This state is sent by the Jupyter
-   *   server.
+   * * `restarting`: The kernel is restarting. This state is sent by the
+   *   Jupyter server.
    * * `dead`: The kernel is dead and will not be restarted. This state is set
    *   by the Jupyter server and is a final state.
    */

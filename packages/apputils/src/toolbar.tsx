@@ -704,7 +704,7 @@ namespace Private {
       if (this.isDisposed) {
         return;
       }
-      let status = session.status;
+      let status = session.kernel.status;
       const busy = this._isBusy(status);
       this.toggleClass(TOOLBAR_BUSY_CLASS, busy);
       this.toggleClass(TOOLBAR_IDLE_CLASS, !busy);

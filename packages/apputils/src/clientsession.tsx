@@ -86,11 +86,6 @@ export interface IClientSession extends IDisposable {
   readonly type: string;
 
   /**
-   * The current status of the client session.
-   */
-  readonly status: Kernel.Status;
-
-  /**
    * Whether the session is ready.
    */
   readonly isReady: boolean;
@@ -311,16 +306,6 @@ export class ClientSession implements IClientSession {
    * The session manager used by the session.
    */
   readonly manager: Session.IManager;
-
-  /**
-   * The current status of the session.
-   */
-  get status(): Kernel.Status {
-    if (!this.isReady) {
-      return 'starting';
-    }
-    return this._session ? this._session.status : 'dead';
-  }
 
   /**
    * Whether the session is ready.
@@ -585,7 +570,7 @@ export class ClientSession implements IClientSession {
       return Promise.reject('Disposed');
     }
     let session = this._session;
-    if (session && session.status !== 'dead') {
+    if (session && session.kernel.status !== 'dead') {
       return session.changeKernel(options).catch(err => {
         void this._handleSessionError(err);
         return Promise.reject(err);
@@ -782,7 +767,7 @@ export class ClientSession implements IClientSession {
     // If we have already, and now we aren't busy, dispose
     // of the busy disposable.
     if (this._setBusy) {
-      if (this.status === 'busy') {
+      if (this.kernel.status === 'busy') {
         if (!this._busyDisposable) {
           this._busyDisposable = this._setBusy();
         }
@@ -794,7 +779,7 @@ export class ClientSession implements IClientSession {
       }
     }
 
-    this._statusChanged.emit(this.status);
+    this._statusChanged.emit(this.kernel.status);
   }
 
   /**

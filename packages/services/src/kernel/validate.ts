@@ -24,7 +24,12 @@ const IOPUB_CONTENT_FIELDS: { [key: string]: any } = {
     metadata: 'object'
   },
   error: { ename: 'string', evalue: 'string', traceback: 'object' },
-  status: { execution_state: 'string' },
+  status: {
+    execution_state: [
+      'string',
+      ['starting', 'idle', 'busy', 'restarting', 'dead']
+    ]
+  },
   clear_output: { wait: 'boolean' },
   comm_open: { comm_id: 'string', target_name: 'string', data: 'object' },
   comm_msg: { comm_id: 'string', data: 'object' },
@@ -34,15 +39,21 @@ const IOPUB_CONTENT_FIELDS: { [key: string]: any } = {
 
 /**
  * Validate a property as being on an object, and optionally
- * of a given type.
+ * of a given type and among a given set of values.
  */
-function validateProperty(object: any, name: string, typeName?: string): void {
+function validateProperty(
+  object: any,
+  name: string,
+  typeName?: string,
+  values: any[] = []
+): void {
   if (!object.hasOwnProperty(name)) {
     throw Error(`Missing property '${name}'`);
   }
+  const value = object[name];
+
   if (typeName !== void 0) {
     let valid = true;
-    let value = object[name];
     switch (typeName) {
       case 'array':
         valid = Array.isArray(value);
@@ -55,6 +66,27 @@ function validateProperty(object: any, name: string, typeName?: string): void {
     }
     if (!valid) {
       throw new Error(`Property '${name}' is not of type '${typeName}`);
+    }
+
+    if (values.length > 0) {
+      let valid = true;
+      switch (typeName) {
+        case 'string':
+        case 'number':
+        case 'boolean':
+          valid = values.includes(value);
+          break;
+        default:
+          valid = values.findIndex(v => v === value) >= 0;
+          break;
+      }
+      if (!valid) {
+        throw new Error(
+          `Property '${name}' is not one of the valid values ${JSON.stringify(
+            values
+          )}`
+        );
+      }
     }
   }
 }
@@ -94,7 +126,11 @@ function validateIOPubContent(msg: KernelMessage.IIOPubMessage): void {
     let names = Object.keys(fields);
     let content = msg.content;
     for (let i = 0; i < names.length; i++) {
-      validateProperty(content, names[i], fields[names[i]]);
+      let args = fields[names[i]];
+      if (!Array.isArray(args)) {
+        args = [args];
+      }
+      validateProperty(content, names[i], ...args);
     }
   }
 }
