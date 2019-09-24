@@ -29,25 +29,27 @@ import { Message } from '@phosphor/messaging';
 /**
  * The Output Log Registry token.
  */
-export const IOutputLogRegistry = new Token<IOutputLogRegistry>(
-  '@jupyterlab/outputconsole:IOutputLogRegistry'
+export const ILoggerRegistry = new Token<ILoggerRegistry>(
+  '@jupyterlab/logconsole:ILoggerRegistry'
 );
 
-export interface IOutputLogRegistry {
-  getLogger(name: string): ILogger;
+export interface ILoggerRegistry {
+  getLogger(source: string): ILogger;
   getLoggers(): ILogger[];
 
   /**
    * A signal emitted when the log registry changes.
    */
-  readonly registryChanged: ISignal<this, ILogRegistryChange>;
+  readonly registryChanged: ISignal<this, ILoggerRegistryChange>;
 }
 
-export interface IOutputWithTimestamp extends nbformat.IBaseOutput {
+export interface ITimestampedOutput extends nbformat.IBaseOutput {
   timestamp: number;
 }
 
-type IOutputWithTimestampType = nbformat.IOutput | IOutputWithTimestamp;
+type IOutputWithTimestamp = nbformat.IOutput | ITimestampedOutput;
+
+export type ILoggerChange = 'append' | 'clear';
 
 export interface ILogger {
   log(log: nbformat.IOutput): void;
@@ -64,6 +66,34 @@ export interface ILogger {
   readonly rendermimeChanged: ISignal<this, void>;
   readonly source: string;
   readonly outputAreaModel: LoggerOutputAreaModel;
+}
+
+export class LogOutputModel extends OutputModel {
+  constructor(options: LogOutputModel.IOptions) {
+    super(options);
+
+    this.timestamp = new Date(options.value.timestamp as number);
+  }
+
+  timestamp: Date = null;
+}
+
+export namespace LogOutputModel {
+  export interface IOptions extends IOutputModel.IOptions {
+    value: IOutputWithTimestamp;
+  }
+}
+
+/**
+ * The default implementation of `IContentFactory`.
+ */
+export class LogConsoleModelContentFactory extends OutputAreaModel.ContentFactory {
+  /**
+   * Create an output model.
+   */
+  createOutputModel(options: IOutputModel.IOptions): LogOutputModel {
+    return new LogOutputModel(options);
+  }
 }
 
 export class Logger implements ILogger {
@@ -83,7 +113,7 @@ export class Logger implements ILogger {
   }
 
   /**
-   * A signal emitted when the log model changes.
+   * A signal emitted when the rendermime changes.
    */
   get rendermimeChanged(): ISignal<this, void> {
     return this._rendermimeChanged;
@@ -111,34 +141,32 @@ export class Logger implements ILogger {
     return this._rendermime;
   }
 
-  private _logChanged = new Signal<this, ILoggerChange>(this);
-  private _rendermimeChanged = new Signal<this, void>(this);
   readonly source: string;
   readonly outputAreaModel = new LoggerOutputAreaModel({
-    contentFactory: new LoggerModelFactory()
+    contentFactory: new LogConsoleModelContentFactory()
   });
-
-  _rendermime: IRenderMimeRegistry | null = null;
+  private _logChanged = new Signal<this, ILoggerChange>(this);
+  private _rendermimeChanged = new Signal<this, void>(this);
+  private _rendermime: IRenderMimeRegistry | null = null;
 }
 
-export type ILogRegistryChange = 'append' | 'remove';
-export type ILoggerChange = 'append' | 'clear';
+export type ILoggerRegistryChange = 'append';
 
-export class OutputLogRegistry implements IOutputLogRegistry {
+export class LoggerRegistry implements ILoggerRegistry {
   constructor(defaultRendermime: IRenderMimeRegistry) {
     this._defaultRendermime = defaultRendermime;
   }
 
-  getLogger(name: string): ILogger {
+  getLogger(source: string): ILogger {
     const loggers = this._loggers;
-    let logger = loggers.get(name);
+    let logger = loggers.get(source);
     if (logger) {
       return logger;
     }
 
-    logger = new Logger(name);
+    logger = new Logger(source);
     logger.rendermime = this._defaultRendermime;
-    loggers.set(name, logger);
+    loggers.set(source, logger);
 
     this._registryChanged.emit('append');
 
@@ -152,284 +180,19 @@ export class OutputLogRegistry implements IOutputLogRegistry {
   /**
    * A signal emitted when the log registry changes.
    */
-  get registryChanged(): ISignal<this, ILogRegistryChange> {
+  get registryChanged(): ISignal<this, ILoggerRegistryChange> {
     return this._registryChanged;
   }
 
   private _loggers = new Map<string, Logger>();
-  private _registryChanged = new Signal<this, ILogRegistryChange>(this);
+  private _registryChanged = new Signal<this, ILoggerRegistryChange>(this);
   private _defaultRendermime: IRenderMimeRegistry = null;
-}
-
-export class LoggerOutputArea extends OutputArea {
-  /**
-   * Handle an input request from a kernel by doing nothing.
-   */
-  protected onInputRequest(
-    msg: KernelMessage.IInputRequestMsg,
-    future: Kernel.IShellFuture
-  ): void {
-    return;
-  }
-
-  /**
-   * Create an output item with a prompt and actual output
-   */
-  protected createOutputItem(model: LoggerOutputModel): Widget | null {
-    const panel = super.createOutputItem(model) as Panel;
-    (panel.widgets[0] as LoggerOutputPrompt).timestamp = model.timestamp;
-    return panel;
-  }
-
-  /**
-   * The rendermime instance used by the widget.
-   */
-  rendermime: IRenderMimeRegistry;
-
-  readonly model: LoggerOutputAreaModel;
-}
-
-export class LoggerOutputAreaModel extends OutputAreaModel {
-  constructor(options?: IOutputAreaModel.IOptions) {
-    super(options);
-  }
-
-  set messageLimit(limit: number) {
-    this._messageLimit = limit;
-    this.applyLimit();
-  }
-
-  applyLimit() {
-    if (this.list.length > this._messageLimit) {
-      const diff = this.list.length - this._messageLimit;
-      this.list.removeRange(0, diff);
-      this.trusted = false;
-    }
-  }
-
-  private _messageLimit: number = 1000;
-}
-
-export class LoggerOutputModel extends OutputModel {
-  constructor(options: LoggerOutputModel.IOptions) {
-    super(options);
-
-    this.timestamp = new Date(options.value.timestamp as number);
-  }
-
-  timestamp: Date = null;
-}
-
-export namespace LoggerOutputModel {
-  export interface IOptions extends IOutputModel.IOptions {
-    value: IOutputWithTimestampType;
-  }
-}
-
-/**
- * The default implementation of `IContentFactory`.
- */
-export class LoggerModelFactory extends OutputAreaModel.ContentFactory {
-  /**
-   * Create an output model.
-   */
-  createOutputModel(options: IOutputModel.IOptions): LoggerOutputModel {
-    return new LoggerOutputModel(options);
-  }
-}
-
-/**
- * A List View widget that shows Output Console logs.
- */
-export class OutputLoggerView extends StackedPanel {
-  /**
-   * Construct an OutputConsoleView instance.
-   */
-  constructor(outputLogRegistry: IOutputLogRegistry) {
-    super();
-
-    this._outputLogRegistry = outputLogRegistry;
-    this.addClass('jlab-output-logger-view');
-    this.node.style.overflowY = 'auto'; // TODO: use CSS class
-
-    outputLogRegistry.registryChanged.connect(
-      (sender: IOutputLogRegistry, args: ILogRegistryChange) => {
-        this._bindLoggerSignals();
-      },
-      this
-    );
-
-    this._bindLoggerSignals();
-
-    this._placeholder = new Widget();
-    this._placeholder.addClass('jlab-output-logger-placeholder');
-    this._placeholder.node.innerHTML = 'No log messages.';
-
-    this.addWidget(this._placeholder);
-  }
-
-  protected onAfterAttach(msg: Message): void {
-    this._updateOutputViews();
-    this._showOutputFromSource(this._activeSource);
-    this._showPlaceholderIfNoMessage();
-  }
-
-  private _bindLoggerSignals() {
-    const loggers = this._outputLogRegistry.getLoggers();
-    for (let logger of loggers) {
-      // TODO: optimize
-      logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
-        this._updateOutputViews();
-        this._showPlaceholderIfNoMessage();
-      }, this);
-
-      logger.rendermimeChanged.connect((sender: ILogger) => {
-        const viewId = `source:${sender.source}`;
-        const view = this._outputViews.get(viewId);
-        if (view) {
-          view.rendermime = sender.rendermime;
-        }
-      }, this);
-    }
-  }
-
-  get outputLogRegistry(): IOutputLogRegistry {
-    return this._outputLogRegistry;
-  }
-
-  private _showOutputFromSource(source: string) {
-    const viewId = `source:${source}`;
-
-    this._outputViews.forEach((outputView: LoggerOutputArea, name: string) => {
-      if (outputView.id === viewId) {
-        outputView.show();
-        setTimeout(() => {
-          this._scrollOuputAreaToBottom(outputView);
-        }, 50);
-      } else {
-        outputView.hide();
-      }
-    });
-
-    const title = source ? `Log: ${source}` : 'Log Console';
-    this.title.label = title;
-    this.title.caption = title;
-  }
-
-  set activeSource(name: string) {
-    this._activeSource = name;
-    this._showOutputFromSource(this._activeSource);
-    this._showPlaceholderIfNoMessage();
-  }
-
-  get activeSource(): string {
-    return this._activeSource;
-  }
-
-  private _showPlaceholderIfNoMessage() {
-    const noMessage =
-      !this.activeSource ||
-      this._outputLogRegistry.getLogger(this.activeSource).length === 0;
-
-    if (noMessage) {
-      this._placeholder.show();
-    } else {
-      this._placeholder.hide();
-    }
-  }
-
-  private _scrollOuputAreaToBottom(outputView: LoggerOutputArea) {
-    outputView.node.scrollTo({
-      left: 0,
-      top: outputView.node.scrollHeight,
-      behavior: 'smooth'
-    });
-  }
-
-  private _updateOutputViews() {
-    const loggerIds = new Set<string>();
-    const loggers = this._outputLogRegistry.getLoggers();
-
-    for (let logger of loggers) {
-      const viewId = `source:${logger.source}`;
-      loggerIds.add(viewId);
-
-      // add view for logger if not exist
-      // TODO: or rendermime changed
-      if (!this._outputViews.has(viewId)) {
-        const outputView = new LoggerOutputArea({
-          rendermime: logger.rendermime,
-          contentFactory: new LoggerContentFactory(),
-          model: logger.outputAreaModel
-        });
-        outputView.id = viewId;
-        outputView.model.messageLimit = this.messageLimit;
-
-        logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
-          this._scrollOuputAreaToBottom(outputView);
-        }, this);
-
-        outputView.outputLengthChanged.connect(
-          (sender: LoggerOutputArea, args: number) => {
-            outputView.model.applyLimit();
-            clearTimeout(this._scrollTimer);
-            this._scrollTimer = setTimeout(() => {
-              this._scrollOuputAreaToBottom(outputView);
-            }, 50);
-          },
-          this
-        );
-
-        this.addWidget(outputView);
-        this._outputViews.set(viewId, outputView);
-      }
-    }
-
-    // remove views that do not have corresponding loggers anymore
-    const viewIds = this._outputViews.keys();
-
-    for (let viewId of viewIds) {
-      if (!loggerIds.has(viewId)) {
-        const outputView = this._outputViews.get(viewId);
-        outputView.dispose();
-        this._outputViews.delete(viewId);
-      }
-    }
-  }
-
-  /**
-   * Message entry limit.
-   */
-  get messageLimit(): number {
-    return this._messageLimit;
-  }
-
-  /**
-   * Sets message entry limit.
-   */
-  set messageLimit(limit: number) {
-    if (limit > 0) {
-      this._outputViews.forEach((outputView: LoggerOutputArea) => {
-        const model = outputView.model;
-        model.messageLimit = limit;
-      });
-
-      this._messageLimit = limit;
-    }
-  }
-
-  private _outputLogRegistry: IOutputLogRegistry;
-  private _outputViews = new Map<string, LoggerOutputArea>();
-  private _activeSource: string = null;
-  private _messageLimit: number = 1000;
-  private _scrollTimer: number = null;
-  private _placeholder: Widget;
 }
 
 /**
  * The default output prompt implementation
  */
-class LoggerOutputPrompt extends Widget implements IOutputPrompt {
+class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
   constructor() {
     super();
 
@@ -449,14 +212,252 @@ class LoggerOutputPrompt extends Widget implements IOutputPrompt {
   private _timestampNode: HTMLDivElement;
 }
 
+export class LogConsoleOutputArea extends OutputArea {
+  /**
+   * Handle an input request from a kernel by doing nothing.
+   */
+  protected onInputRequest(
+    msg: KernelMessage.IInputRequestMsg,
+    future: Kernel.IShellFuture
+  ): void {
+    return;
+  }
+
+  /**
+   * Create an output item with a prompt and actual output
+   */
+  protected createOutputItem(model: LogOutputModel): Widget | null {
+    const panel = super.createOutputItem(model) as Panel;
+    // first widget in panel is prompt of type LoggerOutputPrompt
+    (panel.widgets[0] as LogConsoleOutputPrompt).timestamp = model.timestamp;
+    return panel;
+  }
+
+  /**
+   * The rendermime instance used by the widget.
+   */
+  rendermime: IRenderMimeRegistry;
+  readonly model: LoggerOutputAreaModel;
+}
+
+export class LoggerOutputAreaModel extends OutputAreaModel {
+  constructor(options?: IOutputAreaModel.IOptions) {
+    super(options);
+  }
+
+  set entryLimit(limit: number) {
+    this._entryLimit = limit;
+    this.applyLimit();
+  }
+
+  applyLimit() {
+    if (this.list.length > this._entryLimit) {
+      const diff = this.list.length - this._entryLimit;
+      this.list.removeRange(0, diff);
+      this.trusted = false;
+    }
+  }
+
+  private _entryLimit: number = 1000;
+}
+
 /**
  * The default implementation of `IContentFactory`.
  */
-export class LoggerContentFactory extends OutputArea.ContentFactory {
+export class LogConsoleContentFactory extends OutputArea.ContentFactory {
   /**
    * Create the output prompt for the widget.
    */
-  createOutputPrompt(): LoggerOutputPrompt {
-    return new LoggerOutputPrompt();
+  createOutputPrompt(): LogConsoleOutputPrompt {
+    return new LogConsoleOutputPrompt();
   }
+}
+
+/**
+ * A List View widget that shows Output Console logs.
+ */
+export class LogConsolePanel extends StackedPanel {
+  /**
+   * Construct an OutputConsoleView instance.
+   */
+  constructor(loggerRegistry: ILoggerRegistry) {
+    super();
+
+    this._loggerRegistry = loggerRegistry;
+    this.addClass('jlab-output-logger-view');
+    this.node.style.overflowY = 'auto'; // TODO: use CSS class
+
+    loggerRegistry.registryChanged.connect(
+      (sender: ILoggerRegistry, args: ILoggerRegistryChange) => {
+        this._bindLoggerSignals();
+      },
+      this
+    );
+
+    this._bindLoggerSignals();
+
+    this._placeholder = new Widget();
+    this._placeholder.addClass('jlab-output-logger-placeholder');
+    this._placeholder.node.innerHTML = 'No log messages.';
+
+    this.addWidget(this._placeholder);
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    this._updateOutputAreas();
+    this._showOutputFromSource(this._activeSource);
+    this._showPlaceholderIfNoMessage();
+  }
+
+  private _bindLoggerSignals() {
+    const loggers = this._loggerRegistry.getLoggers();
+    for (let logger of loggers) {
+      // TODO: optimize
+      logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
+        this._updateOutputAreas();
+        this._showPlaceholderIfNoMessage();
+      }, this);
+
+      logger.rendermimeChanged.connect((sender: ILogger) => {
+        const viewId = `source:${sender.source}`;
+        const outputArea = this._outputAreas.get(viewId);
+        if (outputArea) {
+          outputArea.rendermime = sender.rendermime;
+        }
+      }, this);
+    }
+  }
+
+  get loggerRegistry(): ILoggerRegistry {
+    return this._loggerRegistry;
+  }
+
+  private _showOutputFromSource(source: string) {
+    const viewId = `source:${source}`;
+
+    this._outputAreas.forEach(
+      (outputArea: LogConsoleOutputArea, name: string) => {
+        if (outputArea.id === viewId) {
+          outputArea.show();
+          setTimeout(() => {
+            this._scrollOuputAreaToBottom(outputArea);
+          }, 50);
+        } else {
+          outputArea.hide();
+        }
+      }
+    );
+
+    const title = source ? `Log: ${source}` : 'Log Console';
+    this.title.label = title;
+    this.title.caption = title;
+  }
+
+  set activeSource(name: string) {
+    this._activeSource = name;
+    this._showOutputFromSource(this._activeSource);
+    this._showPlaceholderIfNoMessage();
+  }
+
+  get activeSource(): string {
+    return this._activeSource;
+  }
+
+  private _showPlaceholderIfNoMessage() {
+    const noMessage =
+      !this.activeSource ||
+      this._loggerRegistry.getLogger(this.activeSource).length === 0;
+
+    if (noMessage) {
+      this._placeholder.show();
+    } else {
+      this._placeholder.hide();
+    }
+  }
+
+  private _scrollOuputAreaToBottom(outputArea: LogConsoleOutputArea) {
+    outputArea.node.scrollTo({
+      left: 0,
+      top: outputArea.node.scrollHeight,
+      behavior: 'smooth'
+    });
+  }
+
+  private _updateOutputAreas() {
+    const loggerIds = new Set<string>();
+    const loggers = this._loggerRegistry.getLoggers();
+
+    for (let logger of loggers) {
+      const viewId = `source:${logger.source}`;
+      loggerIds.add(viewId);
+
+      // add view for logger if not exist
+      // TODO: or rendermime changed
+      if (!this._outputAreas.has(viewId)) {
+        const outputArea = new LogConsoleOutputArea({
+          rendermime: logger.rendermime,
+          contentFactory: new LogConsoleContentFactory(),
+          model: logger.outputAreaModel
+        });
+        outputArea.id = viewId;
+        outputArea.model.entryLimit = this.entryLimit;
+
+        logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
+          this._scrollOuputAreaToBottom(outputArea);
+        }, this);
+
+        outputArea.outputLengthChanged.connect(
+          (sender: LogConsoleOutputArea, args: number) => {
+            outputArea.model.applyLimit();
+            clearTimeout(this._scrollTimer);
+            this._scrollTimer = setTimeout(() => {
+              this._scrollOuputAreaToBottom(outputArea);
+            }, 50);
+          },
+          this
+        );
+
+        this.addWidget(outputArea);
+        this._outputAreas.set(viewId, outputArea);
+      }
+    }
+
+    // remove views that do not have corresponding loggers anymore
+    const viewIds = this._outputAreas.keys();
+
+    for (let viewId of viewIds) {
+      if (!loggerIds.has(viewId)) {
+        const outputArea = this._outputAreas.get(viewId);
+        outputArea.dispose();
+        this._outputAreas.delete(viewId);
+      }
+    }
+  }
+
+  /**
+   * Message entry limit.
+   */
+  get entryLimit(): number {
+    return this._entryLimit;
+  }
+
+  /**
+   * Sets message entry limit.
+   */
+  set entryLimit(limit: number) {
+    if (limit > 0) {
+      this._outputAreas.forEach((outputView: LogConsoleOutputArea) => {
+        outputView.model.entryLimit = limit;
+      });
+
+      this._entryLimit = limit;
+    }
+  }
+
+  private _loggerRegistry: ILoggerRegistry;
+  private _outputAreas = new Map<string, LogConsoleOutputArea>();
+  private _activeSource: string = null;
+  private _entryLimit: number = 1000;
+  private _scrollTimer: number = null;
+  private _placeholder: Widget;
 }

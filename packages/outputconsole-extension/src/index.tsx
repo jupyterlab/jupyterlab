@@ -18,12 +18,12 @@ import {
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import {
-  IOutputLogRegistry,
-  OutputLoggerView,
-  OutputLogRegistry,
+  ILoggerRegistry,
+  LoggerRegistry,
+  LogConsolePanel,
   ILogger,
   ILoggerChange,
-  ILogRegistryChange
+  ILoggerRegistryChange
 } from '@jupyterlab/outputconsole';
 
 import { KernelMessage } from '@jupyterlab/services';
@@ -48,15 +48,15 @@ import {
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-const OUTPUT_CONSOLE_PLUGIN_ID = '@jupyterlab/outputconsole-extension:plugin';
+const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
 
 /**
  * The Output Log extension.
  */
-const outputLogPlugin: JupyterFrontEndPlugin<IOutputLogRegistry> = {
-  activate: activateOutputLog,
-  id: OUTPUT_CONSOLE_PLUGIN_ID,
-  provides: IOutputLogRegistry,
+const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
+  activate: activateLogConsole,
+  id: LOG_CONSOLE_PLUGIN_ID,
+  provides: ILoggerRegistry,
   requires: [
     IMainMenu,
     ICommandPalette,
@@ -71,7 +71,7 @@ const outputLogPlugin: JupyterFrontEndPlugin<IOutputLogRegistry> = {
 /*
  * A namespace for OutputStatusComponent.
  */
-namespace OutputStatusComponent {
+namespace LogConsoleStatusComponent {
   /**
    * The props for the OutputStatusComponent.
    */
@@ -96,14 +96,14 @@ namespace OutputStatusComponent {
  *
  * @returns a tsx component for rendering the Output Console logs.
  */
-function OutputStatusComponent(
-  props: OutputStatusComponent.IProps
-): React.ReactElement<OutputStatusComponent.IProps> {
+function LogConsoleStatusComponent(
+  props: LogConsoleStatusComponent.IProps
+): React.ReactElement<LogConsoleStatusComponent.IProps> {
   return (
     <GroupItem
       spacing={0}
       onClick={props.handleClick}
-      title={`${props.logCount} messages in Output Console`}
+      title={`${props.logCount} logs in Log Console`}
     >
       <IconItem
         source={'jp-StatusItem-output-console lab-output-console-icon'}
@@ -116,14 +116,14 @@ function OutputStatusComponent(
 /**
  * A VDomRenderer widget for displaying the status of Output Console logs.
  */
-export class OutputStatus extends VDomRenderer<OutputStatus.Model> {
+export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
   /**
    * Construct the output console status widget.
    */
-  constructor(opts: OutputStatus.IOptions) {
+  constructor(opts: LogConsoleStatus.IOptions) {
     super();
     this._handleClick = opts.handleClick;
-    this.model = new OutputStatus.Model(opts.outputLogRegistry);
+    this.model = new LogConsoleStatus.Model(opts.loggerRegistry);
     this.addClass(interactiveItem);
     this.addClass('outputconsole-status-item');
 
@@ -139,7 +139,7 @@ export class OutputStatus extends VDomRenderer<OutputStatus.Model> {
       if (this.model.activeSourceChanged) {
         if (
           !this.model.activeSource ||
-          this.model.isSourceOutputRead(this.model.activeSource)
+          this.model.isSourceLogsRead(this.model.activeSource)
         ) {
           this._clearHighlight();
         } else {
@@ -173,7 +173,7 @@ export class OutputStatus extends VDomRenderer<OutputStatus.Model> {
       return null;
     } else {
       return (
-        <OutputStatusComponent
+        <LogConsoleStatusComponent
           handleClick={this._handleClick}
           logCount={this.model.logCount}
         />
@@ -200,7 +200,7 @@ export class OutputStatus extends VDomRenderer<OutputStatus.Model> {
 /**
  * A namespace for Output Console log status.
  */
-export namespace OutputStatus {
+export namespace LogConsoleStatus {
   /**
    * A VDomModel for the OutputStatus item.
    */
@@ -208,14 +208,14 @@ export namespace OutputStatus {
     /**
      * Create a new OutputStatus model.
      */
-    constructor(outputLogRegistry: IOutputLogRegistry) {
+    constructor(loggerRegistry: ILoggerRegistry) {
       super();
 
-      this._outputLogRegistry = outputLogRegistry;
+      this._loggerRegistry = loggerRegistry;
 
-      this._outputLogRegistry.registryChanged.connect(
-        (sender: IOutputLogRegistry, args: ILogRegistryChange) => {
-          const loggers = this._outputLogRegistry.getLoggers();
+      this._loggerRegistry.registryChanged.connect(
+        (sender: ILoggerRegistry, args: ILoggerRegistryChange) => {
+          const loggers = this._loggerRegistry.getLoggers();
           for (let logger of loggers) {
             if (this._loggersWatched.has(logger.source)) {
               continue;
@@ -241,7 +241,7 @@ export namespace OutputStatus {
 
     get logCount(): number {
       if (this._activeSource) {
-        const logger = this._outputLogRegistry.getLogger(this._activeSource);
+        const logger = this._loggerRegistry.getLogger(this._activeSource);
         return Math.min(logger.length, this._messageLimit);
       }
 
@@ -263,7 +263,7 @@ export namespace OutputStatus {
     /**
      * Sets message entry limit.
      */
-    set messageLimit(limit: number) {
+    set entryLimit(limit: number) {
       if (limit > 0) {
         this._messageLimit = limit;
 
@@ -272,11 +272,11 @@ export namespace OutputStatus {
       }
     }
 
-    markSourceOutputRead(name: string) {
+    markSourceLogsRead(name: string) {
       this._loggersWatched.set(name, true);
     }
 
-    isSourceOutputRead(name: string): boolean {
+    isSourceLogsRead(name: string): boolean {
       return (
         !this._loggersWatched.has(name) ||
         this._loggersWatched.get(name) === true
@@ -285,7 +285,7 @@ export namespace OutputStatus {
 
     public highlightingEnabled: boolean = true;
     public activeSourceChanged: boolean = false;
-    private _outputLogRegistry: IOutputLogRegistry;
+    private _loggerRegistry: ILoggerRegistry;
     private _activeSource: string = null;
     private _messageLimit: number = 1000;
     private _loggersWatched: Map<string, boolean> = new Map();
@@ -299,7 +299,7 @@ export namespace OutputStatus {
      * Output Console widget which provides
      * Output Console interface and access to log info
      */
-    outputLogRegistry: IOutputLogRegistry;
+    loggerRegistry: ILoggerRegistry;
 
     /**
      * A click handler for the item. By default
@@ -312,7 +312,7 @@ export namespace OutputStatus {
 /**
  * Activate the Output Log extension.
  */
-function activateOutputLog(
+function activateLogConsole(
   app: JupyterFrontEnd,
   mainMenu: IMainMenu,
   palette: ICommandPalette,
@@ -321,17 +321,17 @@ function activateOutputLog(
   rendermime: IRenderMimeRegistry,
   restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null
-): IOutputLogRegistry {
-  let loggerWidget: MainAreaWidget<OutputLoggerView> = null;
-  let messageLimit: number = 1000;
+): ILoggerRegistry {
+  let logConsoleWidget: MainAreaWidget<LogConsolePanel> = null;
+  let entryLimit: number = 1000;
   let highlightingEnabled: boolean = true;
 
-  const logRegistry = new OutputLogRegistry(rendermime);
-  const command = 'outputconsole:open';
+  const loggerRegistry = new LoggerRegistry(rendermime);
+  const command = 'logconsole:open';
   const category: string = 'Main Area';
 
-  let tracker = new WidgetTracker<MainAreaWidget<OutputLoggerView>>({
-    namespace: 'outputlogger'
+  const tracker = new WidgetTracker<MainAreaWidget<LogConsolePanel>>({
+    namespace: 'logconsole'
   });
 
   if (restorer) {
@@ -341,61 +341,61 @@ function activateOutputLog(
         fromRestorer: true,
         activeSource: obj.content.activeSource
       }),
-      name: () => 'outputLogger'
+      name: () => 'logconsole'
     });
   }
 
-  const status = new OutputStatus({
-    outputLogRegistry: logRegistry,
+  const status = new LogConsoleStatus({
+    loggerRegistry: loggerRegistry,
     handleClick: () => {
-      if (!loggerWidget) {
-        createLoggerWidget();
+      if (!logConsoleWidget) {
+        createLogConsoleWidget();
       } else {
-        loggerWidget.activate();
+        logConsoleWidget.activate();
       }
 
       // TODO, repeat in command?
-      status.model.messageLimit = messageLimit;
-      status.model.markSourceOutputRead(status.model.activeSource);
+      status.model.entryLimit = entryLimit;
+      status.model.markSourceLogsRead(status.model.activeSource);
       status.model.highlightingEnabled = false;
       status.model.stateChanged.emit(void 0);
     }
   });
 
-  const createLoggerWidget = () => {
+  const createLogConsoleWidget = () => {
     let activeSource: string = nbtracker.currentWidget
       ? nbtracker.currentWidget.context.path
       : null;
 
-    const loggerView = new OutputLoggerView(logRegistry);
-    loggerWidget = new MainAreaWidget({ content: loggerView });
-    loggerWidget.addClass('lab-output-console');
-    loggerWidget.title.closable = true;
-    loggerWidget.title.label = 'Output Console';
-    loggerWidget.title.iconClass = 'lab-output-console-icon';
-    loggerView.messageLimit = messageLimit;
+    const logConsolePanel = new LogConsolePanel(loggerRegistry);
+    logConsoleWidget = new MainAreaWidget({ content: logConsolePanel });
+    logConsoleWidget.addClass('lab-output-console');
+    logConsoleWidget.title.closable = true;
+    logConsoleWidget.title.label = 'Log Console';
+    logConsoleWidget.title.iconClass = 'lab-output-console-icon';
+    logConsolePanel.entryLimit = entryLimit;
 
-    app.shell.add(loggerWidget, 'main', {
+    app.shell.add(logConsoleWidget, 'main', {
       ref: '',
       mode: 'split-bottom'
     });
 
-    loggerWidget.update();
+    logConsoleWidget.update();
 
-    app.shell.activateById(loggerWidget.id);
+    app.shell.activateById(logConsoleWidget.id);
     status.model.highlightingEnabled = false;
 
     if (activeSource) {
-      loggerView.activeSource = activeSource;
+      logConsolePanel.activeSource = activeSource;
     }
 
     const addTimestampButton = new ToolbarButton({
       onClick: (): void => {
-        if (!loggerView.activeSource) {
+        if (!logConsolePanel.activeSource) {
           return;
         }
 
-        const logger = logRegistry.getLogger(loggerView.activeSource);
+        const logger = loggerRegistry.getLogger(logConsolePanel.activeSource);
         logger.log({
           data: {
             'text/html': '<hr>'
@@ -410,7 +410,7 @@ function activateOutputLog(
 
     const clearButton = new ToolbarButton({
       onClick: (): void => {
-        const logger = logRegistry.getLogger(loggerView.activeSource);
+        const logger = loggerRegistry.getLogger(logConsolePanel.activeSource);
         logger.clear();
       },
       iconClassName: 'fa fa-ban clear-icon',
@@ -418,16 +418,16 @@ function activateOutputLog(
       label: 'Clear Logs'
     });
 
-    loggerWidget.toolbar.addItem(
+    logConsoleWidget.toolbar.addItem(
       'lab-output-console-add-timestamp',
       addTimestampButton
     );
-    loggerWidget.toolbar.addItem('lab-output-console-clear', clearButton);
+    logConsoleWidget.toolbar.addItem('lab-output-console-clear', clearButton);
 
-    void tracker.add(loggerWidget);
+    void tracker.add(logConsoleWidget);
 
-    loggerWidget.disposed.connect(() => {
-      loggerWidget = null;
+    logConsoleWidget.disposed.connect(() => {
+      logConsoleWidget = null;
       status.model.highlightingEnabled = highlightingEnabled;
     });
   };
@@ -435,18 +435,18 @@ function activateOutputLog(
   app.commands.addCommand(command, {
     label: 'Show Log Console',
     execute: (args: any) => {
-      if (!loggerWidget) {
-        createLoggerWidget();
+      if (!logConsoleWidget) {
+        createLogConsoleWidget();
 
         if (args && args.activeSource) {
-          loggerWidget.content.activeSource = args.activeSource;
+          logConsoleWidget.content.activeSource = args.activeSource;
         }
       } else if (!(args && args.fromRestorer)) {
-        loggerWidget.dispose();
+        logConsoleWidget.dispose();
       }
     },
     isToggled: () => {
-      return loggerWidget !== null;
+      return logConsoleWidget !== null;
     }
   });
 
@@ -463,7 +463,7 @@ function activateOutputLog(
     appRestored = true;
   });
 
-  statusBar.registerStatusItem('@jupyterlab/outputconsole-extension:status', {
+  statusBar.registerStatusItem('@jupyterlab/logconsole-extension:status', {
     item: status,
     align: 'left',
     isActive: () => true,
@@ -480,7 +480,7 @@ function activateOutputLog(
             KernelMessage.isStreamMsg(msg) ||
             KernelMessage.isErrorMsg(msg)
           ) {
-            const logger = logRegistry.getLogger(nb.context.path);
+            const logger = loggerRegistry.getLogger(nb.context.path);
             logger.rendermime = nb.content.rendermime;
             const output: nbformat.IOutput = {
               ...msg.content,
@@ -500,18 +500,21 @@ function activateOutputLog(
         }
 
         const sourceName = nb.context.path;
-        if (loggerWidget) {
-          loggerWidget.content.activeSource = sourceName;
-          void tracker.save(loggerWidget);
+        if (logConsoleWidget) {
+          logConsoleWidget.content.activeSource = sourceName;
+          void tracker.save(logConsoleWidget);
         }
         status.model.activeSource = sourceName;
       });
 
       nb.disposed.connect((nb: NotebookPanel, args: void) => {
         const sourceName = nb.context.path;
-        if (loggerWidget && loggerWidget.content.activeSource === sourceName) {
-          loggerWidget.content.activeSource = null;
-          void tracker.save(loggerWidget);
+        if (
+          logConsoleWidget &&
+          logConsoleWidget.content.activeSource === sourceName
+        ) {
+          logConsoleWidget.content.activeSource = null;
+          void tracker.save(logConsoleWidget);
         }
         if (status.model.activeSource === sourceName) {
           status.model.activeSource = null;
@@ -523,18 +526,19 @@ function activateOutputLog(
   if (settingRegistry) {
     const updateSettings = (settings: ISettingRegistry.ISettings): void => {
       const maxLogEntries = settings.get('maxLogEntries').composite as number;
-      messageLimit = maxLogEntries;
+      entryLimit = maxLogEntries;
 
-      if (loggerWidget) {
-        loggerWidget.content.messageLimit = messageLimit;
+      if (logConsoleWidget) {
+        logConsoleWidget.content.entryLimit = entryLimit;
       }
-      status.model.messageLimit = messageLimit;
+      status.model.entryLimit = entryLimit;
 
       highlightingEnabled = settings.get('flash').composite as boolean;
-      status.model.highlightingEnabled = !loggerWidget && highlightingEnabled;
+      status.model.highlightingEnabled =
+        !logConsoleWidget && highlightingEnabled;
     };
 
-    Promise.all([settingRegistry.load(OUTPUT_CONSOLE_PLUGIN_ID), app.restored])
+    Promise.all([settingRegistry.load(LOG_CONSOLE_PLUGIN_ID), app.restored])
       .then(([settings]) => {
         updateSettings(settings);
         settings.changed.connect(settings => {
@@ -546,9 +550,9 @@ function activateOutputLog(
       });
   }
 
-  return logRegistry;
+  return loggerRegistry;
   // The notebook can call this command.
   // When is the output model disposed?
 }
 
-export default [outputLogPlugin];
+export default [logConsolePlugin];
