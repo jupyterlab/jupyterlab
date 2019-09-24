@@ -19,11 +19,11 @@
 @import url('~@jupyterlab/javascript-extension/style/index.css');
 @import url('~@jupyterlab/json-extension/style/index.css');
 @import url('~@jupyterlab/launcher-extension/style/index.css');
+@import url('~@jupyterlab/logconsole-extension/style/index.css');
 @import url('~@jupyterlab/mainmenu-extension/style/index.css');
 @import url('~@jupyterlab/markdownviewer-extension/style/index.css');
 @import url('~@jupyterlab/mathjax2-extension/style/index.css');
 @import url('~@jupyterlab/notebook-extension/style/index.css');
-@import url('~@jupyterlab/outputconsole-extension/style/index.css');
 @import url('~@jupyterlab/pdf-extension/style/index.css');
 @import url('~@jupyterlab/rendermime-extension/style/index.css');
 @import url('~@jupyterlab/running-extension/style/index.css');

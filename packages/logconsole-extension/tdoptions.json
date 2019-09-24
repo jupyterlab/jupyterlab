@@ -9,7 +9,7 @@
     "lib.es2015.promise.d.ts",
     "lib.dom.d.ts"
   ],
-  "out": "../../docs/api/outputconsole-extension",
+  "out": "../../docs/api/logconsole-extension",
   "baseUrl": ".",
   "paths": {
     "@jupyterlab/*": ["../packages/*"]

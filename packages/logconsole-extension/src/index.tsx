@@ -25,7 +25,7 @@ import {
   ILoggerChange,
   ILoggerRegistryChange,
   DEFAULT_LOG_ENTRY_LIMIT
-} from '@jupyterlab/outputconsole';
+} from '@jupyterlab/logconsole';
 
 import { KernelMessage } from '@jupyterlab/services';
 

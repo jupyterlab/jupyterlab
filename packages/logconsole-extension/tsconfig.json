@@ -25,7 +25,7 @@
       "path": "../notebook"
     },
     {
-      "path": "../outputconsole"
+      "path": "../logconsole"
     },
     {
       "path": "../rendermime"

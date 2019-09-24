@@ -154,10 +154,10 @@
       "path": "../outputarea"
     },
     {
-      "path": "../outputconsole"
+      "path": "../logconsole"
     },
     {
-      "path": "../outputconsole-extension"
+      "path": "../logconsole-extension"
     },
     {
       "path": "../pdf-extension"

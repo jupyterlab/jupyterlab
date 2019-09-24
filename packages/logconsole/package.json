@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/outputconsole",
+  "name": "@jupyterlab/logconsole",
   "version": "0.1.0-alpha.1",
-  "description": "JupyterLab - Output Console",
+  "description": "JupyterLab - Log Console",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
