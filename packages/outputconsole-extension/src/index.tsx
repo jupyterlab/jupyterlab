@@ -391,6 +391,10 @@ function activateOutputLog(
 
     const addTimestampButton = new ToolbarButton({
       onClick: (): void => {
+        if (!loggerView.activeSource) {
+          return;
+        }
+
         const logger = logRegistry.getLogger(loggerView.activeSource);
         logger.log({
           data: {
@@ -448,6 +452,10 @@ function activateOutputLog(
 
   mainMenu.viewMenu.addGroup([{ command }]);
   palette.addItem({ command, category });
+  app.contextMenu.addItem({
+    command: command,
+    selector: '.jp-Notebook'
+  });
 
   let appRestored = false;
 
