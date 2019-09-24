@@ -23,7 +23,8 @@ import {
   LogConsolePanel,
   ILogger,
   ILoggerChange,
-  ILoggerRegistryChange
+  ILoggerRegistryChange,
+  DEFAULT_LOG_ENTRY_LIMIT
 } from '@jupyterlab/outputconsole';
 
 import { KernelMessage } from '@jupyterlab/services';
@@ -242,7 +243,7 @@ export namespace LogConsoleStatus {
     get logCount(): number {
       if (this._activeSource) {
         const logger = this._loggerRegistry.getLogger(this._activeSource);
-        return Math.min(logger.length, this._messageLimit);
+        return Math.min(logger.length, this._entryLimit);
       }
 
       return 0;
@@ -265,7 +266,7 @@ export namespace LogConsoleStatus {
      */
     set entryLimit(limit: number) {
       if (limit > 0) {
-        this._messageLimit = limit;
+        this._entryLimit = limit;
 
         // refresh rendering
         this.stateChanged.emit(void 0);
@@ -287,7 +288,7 @@ export namespace LogConsoleStatus {
     public activeSourceChanged: boolean = false;
     private _loggerRegistry: ILoggerRegistry;
     private _activeSource: string = null;
-    private _messageLimit: number = 1000;
+    private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
     private _loggersWatched: Map<string, boolean> = new Map();
   }
 
@@ -323,7 +324,7 @@ function activateLogConsole(
   settingRegistry: ISettingRegistry | null
 ): ILoggerRegistry {
   let logConsoleWidget: MainAreaWidget<LogConsolePanel> = null;
-  let entryLimit: number = 1000;
+  let entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
   let highlightingEnabled: boolean = true;
 
   const loggerRegistry = new LoggerRegistry(rendermime);

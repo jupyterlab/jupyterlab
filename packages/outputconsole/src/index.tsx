@@ -43,9 +43,11 @@ export interface ILoggerRegistry {
   readonly registryChanged: ISignal<this, ILoggerRegistryChange>;
 }
 
-export interface ITimestampedOutput extends nbformat.IBaseOutput {
+interface ITimestampedOutput extends nbformat.IBaseOutput {
   timestamp: number;
 }
+
+export const DEFAULT_LOG_ENTRY_LIMIT: number = 1000;
 
 type IOutputWithTimestamp = nbformat.IOutput | ITimestampedOutput;
 
@@ -68,7 +70,7 @@ export interface ILogger {
   readonly outputAreaModel: LoggerOutputAreaModel;
 }
 
-export class LogOutputModel extends OutputModel {
+class LogOutputModel extends OutputModel {
   constructor(options: LogOutputModel.IOptions) {
     super(options);
 
@@ -78,7 +80,7 @@ export class LogOutputModel extends OutputModel {
   timestamp: Date = null;
 }
 
-export namespace LogOutputModel {
+namespace LogOutputModel {
   export interface IOptions extends IOutputModel.IOptions {
     value: IOutputWithTimestamp;
   }
@@ -87,7 +89,7 @@ export namespace LogOutputModel {
 /**
  * The default implementation of `IContentFactory`.
  */
-export class LogConsoleModelContentFactory extends OutputAreaModel.ContentFactory {
+class LogConsoleModelContentFactory extends OutputAreaModel.ContentFactory {
   /**
    * Create an output model.
    */
@@ -212,7 +214,7 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
   private _timestampNode: HTMLDivElement;
 }
 
-export class LogConsoleOutputArea extends OutputArea {
+class LogConsoleOutputArea extends OutputArea {
   /**
    * Handle an input request from a kernel by doing nothing.
    */
@@ -240,7 +242,7 @@ export class LogConsoleOutputArea extends OutputArea {
   readonly model: LoggerOutputAreaModel;
 }
 
-export class LoggerOutputAreaModel extends OutputAreaModel {
+class LoggerOutputAreaModel extends OutputAreaModel {
   constructor(options?: IOutputAreaModel.IOptions) {
     super(options);
   }
@@ -258,13 +260,13 @@ export class LoggerOutputAreaModel extends OutputAreaModel {
     }
   }
 
-  private _entryLimit: number = 1000;
+  private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
 }
 
 /**
  * The default implementation of `IContentFactory`.
  */
-export class LogConsoleContentFactory extends OutputArea.ContentFactory {
+class LogConsoleContentFactory extends OutputArea.ContentFactory {
   /**
    * Create the output prompt for the widget.
    */
@@ -457,7 +459,7 @@ export class LogConsolePanel extends StackedPanel {
   private _loggerRegistry: ILoggerRegistry;
   private _outputAreas = new Map<string, LogConsoleOutputArea>();
   private _activeSource: string = null;
-  private _entryLimit: number = 1000;
+  private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
   private _scrollTimer: number = null;
   private _placeholder: Widget;
 }
