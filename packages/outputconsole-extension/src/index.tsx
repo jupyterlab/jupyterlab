@@ -32,6 +32,8 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import { ICommandPalette, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import React from 'react';
@@ -55,7 +57,13 @@ const outputLogPlugin: JupyterFrontEndPlugin<IOutputLogRegistry> = {
   activate: activateOutputLog,
   id: OUTPUT_CONSOLE_PLUGIN_ID,
   provides: IOutputLogRegistry,
-  requires: [IMainMenu, ICommandPalette, INotebookTracker, IStatusBar],
+  requires: [
+    IMainMenu,
+    ICommandPalette,
+    INotebookTracker,
+    IStatusBar,
+    IRenderMimeRegistry
+  ],
   optional: [ILayoutRestorer, ISettingRegistry],
   autoStart: true
 };
@@ -310,6 +318,7 @@ function activateOutputLog(
   palette: ICommandPalette,
   nbtracker: INotebookTracker,
   statusBar: IStatusBar,
+  rendermime: IRenderMimeRegistry,
   restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null
 ): IOutputLogRegistry {
@@ -317,7 +326,7 @@ function activateOutputLog(
   let messageLimit: number = 1000;
   let highlightingEnabled: boolean = true;
 
-  const logRegistry = new OutputLogRegistry();
+  const logRegistry = new OutputLogRegistry(rendermime);
   const command = 'outputconsole:open';
   const category: string = 'Main Area';
 

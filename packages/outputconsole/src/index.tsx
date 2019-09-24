@@ -125,6 +125,10 @@ export type ILogRegistryChange = 'append' | 'remove';
 export type ILoggerChange = 'append' | 'clear';
 
 export class OutputLogRegistry implements IOutputLogRegistry {
+  constructor(defaultRendermime: IRenderMimeRegistry) {
+    this._defaultRendermime = defaultRendermime;
+  }
+
   getLogger(name: string): ILogger {
     const loggers = this._loggers;
     let logger = loggers.get(name);
@@ -133,6 +137,7 @@ export class OutputLogRegistry implements IOutputLogRegistry {
     }
 
     logger = new Logger(name);
+    logger.rendermime = this._defaultRendermime;
     loggers.set(name, logger);
 
     this._registryChanged.emit('append');
@@ -153,6 +158,7 @@ export class OutputLogRegistry implements IOutputLogRegistry {
 
   private _loggers = new Map<string, Logger>();
   private _registryChanged = new Signal<this, ILogRegistryChange>(this);
+  private _defaultRendermime: IRenderMimeRegistry = null;
 }
 
 export class LoggerOutputArea extends OutputArea {
