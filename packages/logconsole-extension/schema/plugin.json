@@ -1,8 +1,8 @@
 {
   "jupyter.lab.setting-icon-class": "jp-SettingsIcon",
-  "jupyter.lab.setting-icon-label": "Output Console",
-  "title": "Output Console",
-  "description": "Output Console settings.",
+  "jupyter.lab.setting-icon-label": "Log Console",
+  "title": "Log Console",
+  "description": "Log Console settings.",
   "properties": {
     "maxLogEntries": {
       "type": "number",

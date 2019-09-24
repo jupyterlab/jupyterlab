@@ -286,8 +286,7 @@ export class LogConsolePanel extends StackedPanel {
     super();
 
     this._loggerRegistry = loggerRegistry;
-    this.addClass('jlab-output-logger-view');
-    this.node.style.overflowY = 'auto'; // TODO: use CSS class
+    this.addClass('jp-LogConsolePanel');
 
     loggerRegistry.registryChanged.connect(
       (sender: ILoggerRegistry, args: ILoggerRegistryChange) => {
@@ -309,12 +308,16 @@ export class LogConsolePanel extends StackedPanel {
     this._updateOutputAreas();
     this._showOutputFromSource(this._activeSource);
     this._showPlaceholderIfNoMessage();
+    this.attached.emit();
   }
 
   private _bindLoggerSignals() {
     const loggers = this._loggerRegistry.getLoggers();
     for (let logger of loggers) {
-      // TODO: optimize
+      if (this._loggersWatched.has(logger.source)) {
+        continue;
+      }
+
       logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
         this._updateOutputAreas();
         this._showPlaceholderIfNoMessage();
@@ -327,6 +330,8 @@ export class LogConsolePanel extends StackedPanel {
           outputArea.rendermime = sender.rendermime;
         }
       }, this);
+
+      this._loggersWatched.add(logger.source);
     }
   }
 
@@ -394,7 +399,6 @@ export class LogConsolePanel extends StackedPanel {
       loggerIds.add(viewId);
 
       // add view for logger if not exist
-      // TODO: or rendermime changed
       if (!this._outputAreas.has(viewId)) {
         const outputArea = new LogConsoleOutputArea({
           rendermime: logger.rendermime,
@@ -456,10 +460,12 @@ export class LogConsolePanel extends StackedPanel {
     }
   }
 
+  readonly attached = new Signal<this, void>(this);
   private _loggerRegistry: ILoggerRegistry;
   private _outputAreas = new Map<string, LogConsoleOutputArea>();
   private _activeSource: string = null;
   private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
   private _scrollTimer: number = null;
   private _placeholder: Widget;
+  private _loggersWatched: Set<string> = new Set();
 }

@@ -124,6 +124,12 @@
       "path": "../launcher-extension"
     },
     {
+      "path": "../logconsole"
+    },
+    {
+      "path": "../logconsole-extension"
+    },
+    {
       "path": "../mainmenu"
     },
     {
@@ -152,12 +158,6 @@
     },
     {
       "path": "../outputarea"
-    },
-    {
-      "path": "../logconsole"
-    },
-    {
-      "path": "../logconsole-extension"
     },
     {
       "path": "../pdf-extension"

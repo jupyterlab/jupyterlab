@@ -19,13 +19,13 @@
       "path": "../docregistry"
     },
     {
+      "path": "../logconsole"
+    },
+    {
       "path": "../mainmenu"
     },
     {
       "path": "../notebook"
-    },
-    {
-      "path": "../logconsole"
     },
     {
       "path": "../rendermime"

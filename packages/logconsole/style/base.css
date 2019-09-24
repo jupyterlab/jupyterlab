@@ -75,11 +75,15 @@
   width: calc(100% - 135px);
 }
 
-.jlab-output-logger-view .jp-OutputArea-child {
+.jp-LogConsolePanel {
+  overflow-y: auto;
+}
+
+.jp-LogConsolePanel .jp-OutputArea-child {
   border-bottom: 1px solid var(--jp-border-color3);
 }
 
-.jlab-output-logger-view .jp-OutputArea-prompt {
+.jp-LogConsolePanel .jp-OutputArea-prompt {
   width: 85px;
   color: var(--jp-ui-font-color2);
   font-size: 13px;

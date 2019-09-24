@@ -354,12 +354,6 @@ function activateLogConsole(
       } else {
         logConsoleWidget.activate();
       }
-
-      // TODO, repeat in command?
-      status.model.entryLimit = entryLimit;
-      status.model.markSourceLogsRead(status.model.activeSource);
-      status.model.highlightingEnabled = false;
-      status.model.stateChanged.emit(void 0);
     }
   });
 
@@ -375,20 +369,6 @@ function activateLogConsole(
     logConsoleWidget.title.label = 'Log Console';
     logConsoleWidget.title.iconClass = 'lab-output-console-icon';
     logConsolePanel.entryLimit = entryLimit;
-
-    app.shell.add(logConsoleWidget, 'main', {
-      ref: '',
-      mode: 'split-bottom'
-    });
-
-    logConsoleWidget.update();
-
-    app.shell.activateById(logConsoleWidget.id);
-    status.model.highlightingEnabled = false;
-
-    if (activeSource) {
-      logConsolePanel.activeSource = activeSource;
-    }
 
     const addTimestampButton = new ToolbarButton({
       onClick: (): void => {
@@ -427,10 +407,29 @@ function activateLogConsole(
 
     void tracker.add(logConsoleWidget);
 
+    logConsolePanel.attached.connect(() => {
+      status.model.markSourceLogsRead(status.model.activeSource);
+      status.model.highlightingEnabled = false;
+      status.model.stateChanged.emit(void 0);
+    }, this);
+
     logConsoleWidget.disposed.connect(() => {
       logConsoleWidget = null;
       status.model.highlightingEnabled = highlightingEnabled;
+    }, this);
+
+    app.shell.add(logConsoleWidget, 'main', {
+      ref: '',
+      mode: 'split-bottom'
     });
+
+    logConsoleWidget.update();
+
+    app.shell.activateById(logConsoleWidget.id);
+
+    if (activeSource) {
+      logConsolePanel.activeSource = activeSource;
+    }
   };
 
   app.commands.addCommand(command, {
