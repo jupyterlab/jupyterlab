@@ -35,7 +35,6 @@ class TestManager extends SessionManager {
  */
 async function startNew(manager: SessionManager): Promise<Session.ISession> {
   const session = await manager.startNew({ path: UUID.uuid4() });
-  await session.kernel.info;
   return session;
 }
 
@@ -45,7 +44,6 @@ describe('session/manager', () => {
 
   beforeAll(async () => {
     session = await Session.startNew({ path: UUID.uuid4() });
-    await session.kernel.info;
   });
 
   beforeEach(() => {
@@ -142,7 +140,6 @@ describe('session/manager', () => {
       it('should be emitted when a session is shut down', async () => {
         let called = false;
         const s = await startNew(manager);
-        await s.kernel.info;
         manager.runningChanged.connect(() => {
           called = true;
         });
@@ -198,7 +195,6 @@ describe('session/manager', () => {
     describe('#startNew()', () => {
       it('should start a session', async () => {
         const session = await manager.startNew({ path: UUID.uuid4() });
-        await session.kernel.info;
         expect(session.id).to.be.ok;
         return session.shutdown();
       });
@@ -208,8 +204,7 @@ describe('session/manager', () => {
         manager.runningChanged.connect(() => {
           called = true;
         });
-        const session = await manager.startNew({ path: UUID.uuid4() });
-        await session.kernel.info;
+        await manager.startNew({ path: UUID.uuid4() });
         expect(called).to.equal(true);
       });
     });
@@ -241,7 +236,6 @@ describe('session/manager', () => {
     describe('shutdown()', () => {
       it('should shut down a session by id', async () => {
         const temp = await startNew(manager);
-        await temp.kernel.info;
         await manager.shutdown(temp.id);
         expect(temp.isDisposed).to.equal(true);
       });
@@ -249,7 +243,6 @@ describe('session/manager', () => {
       it('should emit a runningChanged signal', async () => {
         let called = false;
         const session = await startNew(manager);
-        await session.kernel.info;
         manager.runningChanged.connect((sender, sessions) => {
           // Make sure the sessions list does not have our shutdown session in it.
           if (!sessions.find(s => s.id === session.id)) {

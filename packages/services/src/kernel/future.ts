@@ -167,15 +167,6 @@ export abstract class KernelFutureHandler<
     this._reply = Private.noOp;
     this._hooks = null;
     if (!this._testFlag(Private.KernelFutureFlag.IsDone)) {
-      // Reject the `done` promise, but catch its error here in case no one else
-      // is waiting for the promise to resolve. This prevents the error from
-      // being displayed in the console, but does not prevent it from being
-      // caught by a client who is waiting for it.
-      this._done.reject(new Error('Canceled'));
-      this._done.promise.catch(() => {
-        /* no-op */
-      });
-
       // TODO: Uncomment the following logging code, and check for any tests that trigger it.
       // let status = [];
       // if (!this._testFlag(Private.KernelFutureFlag.GotIdle)) {
@@ -184,7 +175,23 @@ export abstract class KernelFutureHandler<
       // if (!this._testFlag(Private.KernelFutureFlag.GotReply)) {
       //   status.push('reply');
       // }
-      // console.warn(`*************** DISPOSED BEFORE DONE: K${this._kernel.id.slice(0, 6)} M${this._msg.header.msg_id.slice(0, 6)} missing ${status.join(' ')}`);
+      // console.warn(
+      //   `*************** DISPOSED BEFORE DONE: K${this._kernel.id.slice(
+      //     0,
+      //     6
+      //   )} M${this._msg.header.msg_id.slice(0, 6)} missing ${status.join(' ')}`
+      // );
+
+      // Reject the `done` promise, but catch its error here in case no one else
+      // is waiting for the promise to resolve. This prevents the error from
+      // being displayed in the console, but does not prevent it from being
+      // caught by a client who is waiting for it.
+      this._done.promise.catch(() => {
+        /* no-op */
+      });
+      this._done.reject(
+        `Canceled future for ${this.msg.header.msg_type} message before replies were done`
+      );
     }
     super.dispose();
   }

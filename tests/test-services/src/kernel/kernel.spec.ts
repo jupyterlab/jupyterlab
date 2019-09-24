@@ -28,10 +28,6 @@ describe('kernel', () => {
 
   beforeAll(async () => {
     defaultKernel = await Kernel.startNew();
-    await defaultKernel.info;
-    // Start another kernel.
-    let k = await Kernel.startNew();
-    await k.info;
   });
 
   afterEach(() => {
@@ -82,7 +78,6 @@ describe('kernel', () => {
     it('should create an Kernel.IKernel object', async () => {
       const kernel = await Kernel.startNew({});
       expect(kernel.status).to.equal('unknown');
-      await kernel.info;
       await kernel.shutdown();
     });
 
@@ -90,7 +85,6 @@ describe('kernel', () => {
       const serverSettings = makeSettings();
       const kernel = await Kernel.startNew({ serverSettings });
       expect(kernel.status).to.equal('unknown');
-      await kernel.info;
       await kernel.shutdown();
     });
 
@@ -143,7 +137,6 @@ describe('kernel', () => {
     it('should auto-reconnect on websocket error', async () => {
       tester = new KernelTester();
       const kernel = await tester.start();
-      await kernel.info;
 
       const emission = testEmission(kernel.connectionStatusChanged, {
         find: (k, status) => status === 'connecting'
@@ -158,7 +151,6 @@ describe('kernel', () => {
       const id = defaultKernel.id;
       const kernel = Kernel.connectTo(defaultKernel.model);
       expect(kernel.id).to.equal(id);
-      await kernel.info;
       kernel.dispose();
     });
 
@@ -167,7 +159,6 @@ describe('kernel', () => {
       const serverSettings = makeSettings();
       const kernel = Kernel.connectTo(defaultKernel.model, serverSettings);
       expect(kernel.id).to.equal(id);
-      await kernel.info;
       kernel.dispose();
     });
 
@@ -176,8 +167,6 @@ describe('kernel', () => {
       expect(kernel.handleComms).to.be.true;
       const kernel2 = Kernel.connectTo(kernel.model);
       expect(kernel2.handleComms).to.be.false;
-      await kernel.info;
-      await kernel2.info;
       kernel.dispose();
       kernel2.dispose();
     });
@@ -185,10 +174,8 @@ describe('kernel', () => {
     it('should turn on comm handling in the new connection if it was disabled in all other connections', async () => {
       const kernel = await Kernel.startNew({ handleComms: false });
       expect(kernel.handleComms).to.be.false;
-      const kernel2 = Kernel.connectTo(defaultKernel.model);
+      const kernel2 = Kernel.connectTo(kernel.model);
       expect(kernel2.handleComms).to.be.true;
-      await kernel.info;
-      await kernel2.info;
       kernel.dispose();
       kernel2.dispose();
     });
@@ -197,7 +184,6 @@ describe('kernel', () => {
   describe('Kernel.shutdown()', () => {
     it('should shut down a kernel by id', async () => {
       const k = await Kernel.startNew();
-      await k.info;
       await Kernel.shutdown(k.id);
     });
 

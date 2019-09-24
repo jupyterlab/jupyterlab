@@ -26,7 +26,6 @@ describe('Kernel.IKernel', () => {
 
   beforeEach(async () => {
     defaultKernel = await Kernel.startNew();
-    await defaultKernel.info;
   });
 
   afterEach(async () => {
@@ -77,7 +76,6 @@ describe('Kernel.IKernel', () => {
     it('should be emitted regardless of the sender', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
-      await kernel.info;
       const msgId = UUID.uuid4();
       const emission = testEmission(kernel.iopubMessage, {
         find: (k, msg) => msg.header.msg_id === msgId
@@ -305,6 +303,10 @@ describe('Kernel.IKernel', () => {
   });
 
   describe('#status', () => {
+    beforeEach(async () => {
+      await defaultKernel.info;
+    });
+
     it('should get an idle status', async () => {
       const emission = testEmission(defaultKernel.statusChanged, {
         find: () => defaultKernel.status === 'idle'
@@ -317,6 +319,8 @@ describe('Kernel.IKernel', () => {
       const emission = testEmission(defaultKernel.statusChanged, {
         find: () => defaultKernel.status === 'restarting'
       });
+      // TODO: should restart cancel all existing futures and catch the
+      // errors?
       await defaultKernel.restart();
       await emission;
     });
@@ -353,27 +357,6 @@ describe('Kernel.IKernel', () => {
       await dead;
       tester.dispose();
     });
-
-    it('should not emit an invalid status', async () => {
-      const tester = new KernelTester();
-      const kernel = await tester.start();
-      await kernel.info;
-      const emission = testEmission(kernel.statusChanged, {
-        test: (k, status) => {
-          expect(status).to.equal('busy');
-          expect(kernel.status).to.equal('busy');
-        }
-      });
-
-      // This invalid status is not emitted.
-      tester.sendStatus(UUID.uuid4(), 'invalid-status' as Kernel.Status);
-
-      // This valid status is emitted.
-      tester.sendStatus(UUID.uuid4(), 'busy');
-
-      await emission;
-      tester.dispose();
-    });
   });
 
   describe('#info', () => {
@@ -392,14 +375,14 @@ describe('Kernel.IKernel', () => {
   });
 
   describe('#isDisposed', () => {
-    it('should be true after we dispose of the kernel', () => {
+    it('should be true after we dispose of the kernel', async () => {
       const kernel = Kernel.connectTo(defaultKernel.model);
       expect(kernel.isDisposed).to.equal(false);
       kernel.dispose();
       expect(kernel.isDisposed).to.equal(true);
     });
 
-    it('should be safe to call multiple times', () => {
+    it('should be safe to call multiple times', async () => {
       const kernel = Kernel.connectTo(defaultKernel.model);
       expect(kernel.isDisposed).to.equal(false);
       expect(kernel.isDisposed).to.equal(false);
@@ -410,7 +393,7 @@ describe('Kernel.IKernel', () => {
   });
 
   describe('#dispose()', () => {
-    it('should dispose of the resources held by the kernel', () => {
+    it('should dispose of the resources held by the kernel', async () => {
       const kernel = Kernel.connectTo(defaultKernel.model);
       const future = kernel.requestExecute({ code: 'foo' });
       expect(future.isDisposed).to.equal(false);
@@ -418,7 +401,7 @@ describe('Kernel.IKernel', () => {
       expect(future.isDisposed).to.equal(true);
     });
 
-    it('should be safe to call twice', () => {
+    it('should be safe to call twice', async () => {
       const kernel = Kernel.connectTo(defaultKernel.model);
       const future = kernel.requestExecute({ code: 'foo' });
       expect(future.isDisposed).to.equal(false);
@@ -573,7 +556,6 @@ describe('Kernel.IKernel', () => {
   describe('#interrupt()', () => {
     it('should interrupt and resolve with a valid server response', async () => {
       const kernel = await Kernel.startNew();
-      await kernel.info;
       await kernel.interrupt();
       await kernel.shutdown();
     });
@@ -609,9 +591,12 @@ describe('Kernel.IKernel', () => {
   });
 
   describe('#restart()', () => {
+    beforeEach(async () => {
+      await defaultKernel.info;
+    });
+
     it('should restart and resolve with a valid server response', async () => {
       await defaultKernel.restart();
-      await defaultKernel.info;
     });
 
     it('should fail if the kernel does not restart', async () => {
@@ -621,10 +606,10 @@ describe('Kernel.IKernel', () => {
     });
 
     it('should throw an error for an invalid response', async () => {
-      const kernel = defaultKernel;
-      handleRequest(kernel, 205, { id: kernel.id, name: kernel.name });
+      const { id, name } = defaultKernel;
+      handleRequest(defaultKernel, 205, { id, name });
       await expectFailure(
-        kernel.restart(),
+        defaultKernel.restart(),
         'Invalid response: 205 Reset Content'
       );
     });
@@ -642,11 +627,9 @@ describe('Kernel.IKernel', () => {
     });
 
     it('should dispose of existing comm and future objects', async () => {
-      const kernel = defaultKernel;
-      const comm = kernel.connectToComm('test');
-      const future = kernel.requestExecute({ code: 'foo' });
-      await kernel.restart();
-      await kernel.info;
+      const comm = defaultKernel.connectToComm('test');
+      const future = defaultKernel.requestExecute({ code: 'foo' });
+      await defaultKernel.restart();
       expect(future.isDisposed).to.equal(true);
       expect(comm.isDisposed).to.equal(true);
     });
@@ -658,6 +641,7 @@ describe('Kernel.IKernel', () => {
     });
 
     it('should emit `"reconnecting"`, then `"connected"` status', async () => {
+      await defaultKernel.info;
       let connectedEmission: Promise<void>;
       const emission = testEmission(defaultKernel.statusChanged, {
         find: () => defaultKernel.status === 'unknown',
@@ -677,7 +661,6 @@ describe('Kernel.IKernel', () => {
   describe('#shutdown()', () => {
     it('should shut down and resolve with a valid server response', async () => {
       const kernel = await Kernel.startNew();
-      await kernel.info;
       await kernel.shutdown();
     });
 
@@ -1319,6 +1302,7 @@ describe('Kernel.IKernel', () => {
 
       const tester = new KernelTester();
       const kernel = await tester.start();
+      await kernel.info;
       const future = kernel.requestExecute(options, false);
 
       // The list of emissions from the anyMessage signal.

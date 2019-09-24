@@ -413,10 +413,10 @@ export class DefaultKernel implements Kernel.IKernel {
     // Send if the ws allows it, otherwise buffer the message.
     if (this.connectionStatus === 'connected') {
       this._ws.send(serialize.serialize(msg));
-      console.log(`SENT WS message to ${this.id}`, msg);
+      // console.log(`SENT WS message to ${this.id}`, msg);
     } else if (pending) {
       this._pendingMessages.push(msg);
-      console.log(`PENDING WS message to ${this.id}`, msg);
+      // console.log(`PENDING WS message to ${this.id}`, msg);
     } else {
       throw new Error('Could not send message');
     }
@@ -467,7 +467,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * interface.
    */
   async handleRestart(): Promise<void> {
-    await this._clearState();
+    this._clearState();
     this._updateStatus('restarting');
 
     // Kick off an async kernel request to eventually reset the kernel status.
@@ -528,11 +528,11 @@ export class DefaultKernel implements Kernel.IKernel {
     if (this.status === 'dead') {
       this._updateConnectionStatus('disconnected');
       this._clearSocket();
-      await this._clearState();
+      this._clearState();
       return;
     }
     await Private.shutdownKernel(this.id, this.serverSettings);
-    await this._clearState();
+    this._clearState();
     this._updateConnectionStatus('disconnected');
     this._clearSocket();
   }
@@ -554,10 +554,20 @@ export class DefaultKernel implements Kernel.IKernel {
       session: this._clientId,
       content: {}
     });
-    let reply = (await Private.handleShellMessage(
-      this,
-      msg
-    )) as KernelMessage.IInfoReplyMsg;
+    let reply: KernelMessage.IInfoReplyMsg;
+    try {
+      reply = (await Private.handleShellMessage(
+        this,
+        msg
+      )) as KernelMessage.IInfoReplyMsg;
+    } catch (e) {
+      // If we rejected because the future was disposed, ignore and return.
+      if (this.isDisposed) {
+        return;
+      } else {
+        throw e;
+      }
+    }
     if (this.isDisposed) {
       throw new Error('Disposed kernel');
     }
@@ -1063,11 +1073,9 @@ export class DefaultKernel implements Kernel.IKernel {
   /**
    * Clear the internal state.
    */
-  private async _clearState(): Promise<void> {
+  private _clearState(): void {
     this._pendingMessages = [];
-    const futuresResolved: Promise<void>[] = [];
     this._futures.forEach(future => {
-      futuresResolved.push(future.done.then(this._noOp, this._noOp));
       future.dispose();
     });
     this._comms.forEach(comm => {
@@ -1085,8 +1093,6 @@ export class DefaultKernel implements Kernel.IKernel {
     this._comms = new Map<string, Kernel.IComm>();
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
-
-    await Promise.all(futuresResolved);
   }
 
   /**
@@ -1912,10 +1918,9 @@ namespace Private {
   /**
    * Send a kernel message to the kernel and resolve the reply message.
    */
-  export async function handleShellMessage(
-    kernel: Kernel.IKernel,
-    msg: KernelMessage.IShellMessage
-  ): Promise<KernelMessage.IShellMessage> {
+  export async function handleShellMessage<
+    T extends KernelMessage.ShellMessageType
+  >(kernel: Kernel.IKernel, msg: KernelMessage.IShellMessage<T>) {
     let future = kernel.sendShellMessage(msg, true);
     return future.done;
   }

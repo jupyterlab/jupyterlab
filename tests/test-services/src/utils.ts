@@ -454,7 +454,6 @@ export class KernelTester extends SocketTester {
     const serverSettings = this.serverSettings;
     this._kernel = await Kernel.startNew({ serverSettings });
     await this.ready;
-    await this._kernel.info;
     return this._kernel;
   }
 
@@ -561,7 +560,6 @@ export class SessionTester extends SocketTester {
       serverSettings
     });
     await this.ready;
-    await this._session.kernel.info;
     return this._session;
   }
 
