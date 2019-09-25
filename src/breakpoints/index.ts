@@ -21,7 +21,7 @@ export class Breakpoints extends Panel {
       });
     }
 
-    this.model = new Breakpoints.IModel([]);
+    this.model = new Breakpoints.Model([]);
     this.addClass('jp-DebuggerBreakpoints');
     this.title.label = 'Breakpoints';
 
@@ -60,9 +60,10 @@ export class Breakpoints extends Panel {
 
   private isAllActive = true;
   readonly body: Widget;
-  readonly model: Breakpoints.IModel;
+  readonly model: Breakpoints.Model;
   service: BreakpointsService;
 }
+
 class BreakpointsHeader extends Widget {
   constructor(title: string) {
     super({ node: document.createElement('header') });
@@ -84,12 +85,7 @@ export namespace Breakpoints {
     active: boolean;
   }
 
-  /**
-   * The breakpoints UI model.
-   */
-  export interface IModel {}
-
-  export class IModel implements IModel {
+  export class Model {
     constructor(model: IBreakpoint[]) {
       this._state = model;
     }

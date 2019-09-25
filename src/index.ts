@@ -30,7 +30,7 @@ import { DebuggerNotebookTracker } from './handlers/notebook';
 
 import { BreakpointsService, SessionTypes } from './breakpointsService';
 
-import { DebuggerConsoleTracker } from './consoleTracker';
+import { DebuggerConsoleTracker } from './handlers/console';
 
 // import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
