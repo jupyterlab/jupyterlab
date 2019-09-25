@@ -105,8 +105,8 @@ export abstract class JupyterFrontEnd<
 
   /**
    * Walks up the DOM hierarchy of the target of the active `contextmenu`
-   * event, testing the nodes for a user-supplied funcion. This can
-   * be used to find a node on which to operate, given a context menu click.
+   * event, testing each HTMLElement ancestor for a user-supplied funcion. This can
+   * be used to find an HTMLElement on which to operate, given a context menu click.
    *
    * @param test - a function that takes an `HTMLElement` and returns a
    *   boolean for whether it is the element the requester is seeking.
@@ -118,16 +118,16 @@ export abstract class JupyterFrontEnd<
   ): HTMLElement | undefined {
     if (
       !this._contextMenuEvent ||
-      !(this._contextMenuEvent.target instanceof HTMLElement)
+      !(this._contextMenuEvent.target instanceof Node)
     ) {
       return undefined;
     }
-    let node = this._contextMenuEvent.target as HTMLElement;
+    let node = this._contextMenuEvent.target;
     do {
-      if (test(node)) {
+      if (node instanceof HTMLElement && test(node)) {
         return node;
       }
-      node = node.parentNode as HTMLElement;
+      node = node.parentNode;
     } while (node && node.parentNode && node !== node.parentNode);
     return undefined;
 
