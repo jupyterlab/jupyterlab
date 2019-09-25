@@ -1,7 +1,5 @@
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import {
   JupyterFrontEnd,
@@ -52,7 +50,7 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
 
 /**
- * The Output Log extension.
+ * The Log Console extension.
  */
 const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
   activate: activateLogConsole,
@@ -70,16 +68,16 @@ const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
 };
 
 /*
- * A namespace for OutputStatusComponent.
+ * A namespace for LogConsoleStatusComponent.
  */
 namespace LogConsoleStatusComponent {
   /**
-   * The props for the OutputStatusComponent.
+   * The props for the LogConsoleStatusComponent.
    */
   export interface IProps {
     /**
      * A click handler for the item. By default
-     * Output Console panel is launched.
+     * Log Console panel is launched.
      */
     handleClick: () => void;
 
@@ -91,11 +89,11 @@ namespace LogConsoleStatusComponent {
 }
 
 /**
- * A pure functional component for a Output Console status item.
+ * A pure functional component for a Log Console status item.
  *
  * @param props - the props for the component.
  *
- * @returns a tsx component for rendering the Output Console logs.
+ * @returns a tsx component for rendering the Log Console status.
  */
 function LogConsoleStatusComponent(
   props: LogConsoleStatusComponent.IProps
@@ -113,16 +111,18 @@ function LogConsoleStatusComponent(
 }
 
 /**
- * A VDomRenderer widget for displaying the status of Output Console logs.
+ * A VDomRenderer widget for displaying the status of Log Console logs.
  */
 export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
   /**
-   * Construct the output console status widget.
+   * Construct the log console status widget.
+   *
+   * @param options - The status widget initialization options.
    */
-  constructor(opts: LogConsoleStatus.IOptions) {
+  constructor(options: LogConsoleStatus.IOptions) {
     super();
-    this._handleClick = opts.handleClick;
-    this.model = new LogConsoleStatus.Model(opts.loggerRegistry);
+    this._handleClick = options.handleClick;
+    this.model = new LogConsoleStatus.Model(options.loggerRegistry);
     this.addClass(interactiveItem);
     this.addClass('jp-LogConsoleStatusItem');
 
@@ -138,7 +138,7 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
       if (this.model.activeSourceChanged) {
         if (
           !this.model.activeSource ||
-          this.model.isSourceLogsRead(this.model.activeSource)
+          this.model.isSourceLogsViewed(this.model.activeSource)
         ) {
           this._clearHighlight();
         } else {
@@ -165,7 +165,7 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
   }
 
   /**
-   * Render the output console status item.
+   * Render the log console status item.
    */
   render() {
     if (this.model === null) {
@@ -197,15 +197,17 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
 }
 
 /**
- * A namespace for Output Console log status.
+ * A namespace for Log Console log status.
  */
 export namespace LogConsoleStatus {
   /**
-   * A VDomModel for the OutputStatus item.
+   * A VDomModel for the LogConsoleStatus item.
    */
   export class Model extends VDomModel {
     /**
-     * Create a new OutputStatus model.
+     * Create a new LogConsoleStatus model.
+     *
+     * @param loggerRegistry - The logger registry providing the logs.
      */
     constructor(loggerRegistry: ILoggerRegistry) {
       super();
@@ -238,6 +240,9 @@ export namespace LogConsoleStatus {
       );
     }
 
+    /**
+     * Number of logs.
+     */
     get logCount(): number {
       if (this._activeSource) {
         const logger = this._loggerRegistry.getLogger(this._activeSource);
@@ -247,6 +252,9 @@ export namespace LogConsoleStatus {
       return 0;
     }
 
+    /**
+     * The name of the active log source
+     */
     get activeSource(): string {
       return this._activeSource;
     }
@@ -260,7 +268,7 @@ export namespace LogConsoleStatus {
     }
 
     /**
-     * Sets message entry limit.
+     * Log output entry limit.
      */
     set entryLimit(limit: number) {
       if (limit > 0) {
@@ -271,14 +279,26 @@ export namespace LogConsoleStatus {
       }
     }
 
-    markSourceLogsRead(name: string) {
-      this._loggersWatched.set(name, true);
+    /**
+     * Mark logs from the source as viewed.
+     *
+     * @param source - The name of the log source.
+     */
+    markSourceLogsViewed(source: string) {
+      this._loggersWatched.set(source, true);
     }
 
-    isSourceLogsRead(name: string): boolean {
+    /**
+     * Check if logs from the source are viewed.
+     *
+     * @param source - The name of the log source.
+     *
+     * @returns True if logs from source are viewer.
+     */
+    isSourceLogsViewed(source: string): boolean {
       return (
-        !this._loggersWatched.has(name) ||
-        this._loggersWatched.get(name) === true
+        !this._loggersWatched.has(source) ||
+        this._loggersWatched.get(source) === true
       );
     }
 
@@ -287,29 +307,30 @@ export namespace LogConsoleStatus {
     private _loggerRegistry: ILoggerRegistry;
     private _activeSource: string = null;
     private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
+    // A map storing keys as source names of the loggers watched
+    // and values as whether logs from the source are viewed
     private _loggersWatched: Map<string, boolean> = new Map();
   }
 
   /**
-   * Options for creating a new OutputStatus item
+   * Options for creating a new LogConsoleStatus item
    */
   export interface IOptions {
     /**
-     * Output Console widget which provides
-     * Output Console interface and access to log info
+     * The logger registry providing the logs.
      */
     loggerRegistry: ILoggerRegistry;
 
     /**
      * A click handler for the item. By default
-     * Output Console panel is launched.
+     * Log Console panel is launched.
      */
     handleClick: () => void;
   }
 }
 
 /**
- * Activate the Output Log extension.
+ * Activate the Log Console extension.
  */
 function activateLogConsole(
   app: JupyterFrontEnd,
@@ -406,7 +427,7 @@ function activateLogConsole(
     void tracker.add(logConsoleWidget);
 
     logConsolePanel.attached.connect(() => {
-      status.model.markSourceLogsRead(status.model.activeSource);
+      status.model.markSourceLogsViewed(status.model.activeSource);
       status.model.highlightingEnabled = false;
       status.model.stateChanged.emit(void 0);
     }, this);

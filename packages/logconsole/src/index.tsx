@@ -27,59 +27,121 @@ import { Message } from '@phosphor/messaging';
 
 /* tslint:disable */
 /**
- * The Output Log Registry token.
+ * The Logger Registry token.
  */
 export const ILoggerRegistry = new Token<ILoggerRegistry>(
   '@jupyterlab/logconsole:ILoggerRegistry'
 );
 
+/**
+ * A Logger Registry that registers and provides loggers by source.
+ */
 export interface ILoggerRegistry {
+  /**
+   * Get the logger for the specified source.
+   *
+   * @param source - The name of the log source.
+   *
+   * @returns The logger for the specified source.
+   */
   getLogger(source: string): ILogger;
+  /**
+   * Get all loggers registered.
+   *
+   * @returns The array containing all registered loggers.
+   */
   getLoggers(): ILogger[];
 
   /**
-   * A signal emitted when the log registry changes.
+   * A signal emitted when the logger registry changes.
    */
   readonly registryChanged: ISignal<this, ILoggerRegistryChange>;
 }
 
+/**
+ * Custom Notebook Output with timestamp member.
+ */
 interface ITimestampedOutput extends nbformat.IBaseOutput {
+  /**
+   * Date & time when output is logged in integer representation.
+   */
   timestamp: number;
 }
 
 export const DEFAULT_LOG_ENTRY_LIMIT: number = 1000;
 
+/**
+ * Custom Notebook Output with optional timestamp.
+ */
 type IOutputWithTimestamp = nbformat.IOutput | ITimestampedOutput;
 
 export type ILoggerChange = 'append' | 'clear';
 
+/**
+ * A Logger that manages logs from a particular source.
+ */
 export interface ILogger {
+  /**
+   * Log an output to logger.
+   *
+   * @param log - The output to be logged.
+   */
   log(log: nbformat.IOutput): void;
+  /**
+   * Clear all outputs logged.
+   */
   clear(): void;
+  /**
+   * Number of outputs logged.
+   */
   readonly length: number;
+  /**
+   * Rendermime to use when rendering outputs logged.
+   */
   rendermime: IRenderMimeRegistry;
   /**
-   * A signal emitted when the log changes.
+   * A signal emitted when the log model changes.
    */
   readonly logChanged: ISignal<this, ILoggerChange>;
   /**
    * A signal emitted when the rendermime changes.
    */
   readonly rendermimeChanged: ISignal<this, void>;
+  /**
+   * The name of the log source.
+   */
   readonly source: string;
+  /**
+   * Output Area Model used to manage log storage in memory.
+   */
   readonly outputAreaModel: LoggerOutputAreaModel;
 }
 
+/**
+ * Log Output Model with timestamp which provides
+ * item information for Output Area Model.
+ */
 class LogOutputModel extends OutputModel {
+  /**
+   * Construct a LogOutputModel.
+   *
+   * @param options - The model initialization options.
+   */
   constructor(options: LogOutputModel.IOptions) {
     super(options);
 
     this.timestamp = new Date(options.value.timestamp as number);
   }
 
+  /**
+   * Date & time when output is logged.
+   */
   timestamp: Date = null;
 }
 
+/**
+ * Log Output Model namespace that defines initialization options.
+ */
 namespace LogOutputModel {
   export interface IOptions extends IOutputModel.IOptions {
     value: IOutputWithTimestamp;
@@ -87,22 +149,34 @@ namespace LogOutputModel {
 }
 
 /**
- * The default implementation of `IContentFactory`.
+ * Implementation of `IContentFactory` for Output Area Model
+ * which creates LogOutputModel instances.
  */
 class LogConsoleModelContentFactory extends OutputAreaModel.ContentFactory {
   /**
-   * Create an output model.
+   * Create a rendermime output model from notebook output.
    */
   createOutputModel(options: IOutputModel.IOptions): LogOutputModel {
     return new LogOutputModel(options);
   }
 }
 
+/**
+ * A concrete implementation of ILogger.
+ */
 export class Logger implements ILogger {
+  /**
+   * Construct a Logger.
+   *
+   * @param source - The name of the log source.
+   */
   constructor(source: string) {
     this.source = source;
   }
 
+  /**
+   * Number of outputs logged.
+   */
   get length(): number {
     return this.outputAreaModel.length;
   }
@@ -121,12 +195,20 @@ export class Logger implements ILogger {
     return this._rendermimeChanged;
   }
 
+  /**
+   * Log an output to logger.
+   *
+   * @param log - The output to be logged.
+   */
   log(log: nbformat.IOutput) {
     const timestamp = new Date();
     this.outputAreaModel.add({ ...log, timestamp: timestamp.valueOf() });
     this._logChanged.emit('append');
   }
 
+  /**
+   * Clear all outputs logged.
+   */
   clear() {
     this.outputAreaModel.clear(false);
     this._logChanged.emit('clear');
@@ -139,6 +221,9 @@ export class Logger implements ILogger {
     }
   }
 
+  /**
+   * Rendermime to use when rendering outputs logged.
+   */
   get rendermime(): IRenderMimeRegistry | null {
     return this._rendermime;
   }
@@ -154,11 +239,27 @@ export class Logger implements ILogger {
 
 export type ILoggerRegistryChange = 'append';
 
+/**
+ * A concrete implementation of ILoggerRegistry.
+ */
 export class LoggerRegistry implements ILoggerRegistry {
+  /**
+   * Construct a LoggerRegistry.
+   *
+   * @param defaultRendermime - Default rendermime to render outputs
+   * with when logger is not supplied with one.
+   */
   constructor(defaultRendermime: IRenderMimeRegistry) {
     this._defaultRendermime = defaultRendermime;
   }
 
+  /**
+   * Get the logger for the specified source.
+   *
+   * @param source - The name of the log source.
+   *
+   * @returns The logger for the specified source.
+   */
   getLogger(source: string): ILogger {
     const loggers = this._loggers;
     let logger = loggers.get(source);
@@ -175,12 +276,17 @@ export class LoggerRegistry implements ILoggerRegistry {
     return logger;
   }
 
+  /**
+   * Get all loggers registered.
+   *
+   * @returns The array containing all registered loggers.
+   */
   getLoggers(): ILogger[] {
     return Array.from(this._loggers.values());
   }
 
   /**
-   * A signal emitted when the log registry changes.
+   * A signal emitted when the logger registry changes.
    */
   get registryChanged(): ISignal<this, ILoggerRegistryChange> {
     return this._registryChanged;
@@ -192,7 +298,7 @@ export class LoggerRegistry implements ILoggerRegistry {
 }
 
 /**
- * The default output prompt implementation
+ * Log console output prompt implementation
  */
 class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
   constructor() {
@@ -202,6 +308,9 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
     this.node.append(this._timestampNode);
   }
 
+  /**
+   * Date & time when output is logged.
+   */
   set timestamp(value: Date) {
     this._timestampNode.innerHTML = value.toLocaleTimeString();
   }
@@ -214,6 +323,10 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
   private _timestampNode: HTMLDivElement;
 }
 
+/**
+ * Output Area implementation displaying log outputs
+ * with prompts showing log timestamps.
+ */
 class LogConsoleOutputArea extends OutputArea {
   /**
    * Handle an input request from a kernel by doing nothing.
@@ -239,19 +352,32 @@ class LogConsoleOutputArea extends OutputArea {
    * The rendermime instance used by the widget.
    */
   rendermime: IRenderMimeRegistry;
+  /**
+   * Output area model used by the widget.
+   */
   readonly model: LoggerOutputAreaModel;
 }
 
+/**
+ * Output Area Model implementation which is able to
+ * limit number of outputs stored.
+ */
 class LoggerOutputAreaModel extends OutputAreaModel {
   constructor(options?: IOutputAreaModel.IOptions) {
     super(options);
   }
 
+  /**
+   * Maximum number of log entries to store in the model.
+   */
   set entryLimit(limit: number) {
     this._entryLimit = limit;
     this.applyLimit();
   }
 
+  /**
+   * Manually apply entry limit.
+   */
   applyLimit() {
     if (this.list.length > this._entryLimit) {
       const diff = this.list.length - this._entryLimit;
@@ -264,7 +390,8 @@ class LoggerOutputAreaModel extends OutputAreaModel {
 }
 
 /**
- * The default implementation of `IContentFactory`.
+ * Implementation of `IContentFactory` for Output Area
+ * which creates custom output prompts.
  */
 class LogConsoleContentFactory extends OutputArea.ContentFactory {
   /**
@@ -276,11 +403,15 @@ class LogConsoleContentFactory extends OutputArea.ContentFactory {
 }
 
 /**
- * A List View widget that shows Output Console logs.
+ * A StackedPanel implementation that creates Output Areas
+ * for each log source and activates as source is switched.
  */
 export class LogConsolePanel extends StackedPanel {
   /**
-   * Construct an OutputConsoleView instance.
+   * Construct a LogConsolePanel instance.
+   *
+   * @param loggerRegistry - The logger registry that provides
+   * logs to be displayed.
    */
   constructor(loggerRegistry: ILoggerRegistry) {
     super();
@@ -335,6 +466,9 @@ export class LogConsolePanel extends StackedPanel {
     }
   }
 
+  /**
+   * The logger registry providing the logs.
+   */
   get loggerRegistry(): ILoggerRegistry {
     return this._loggerRegistry;
   }
@@ -366,6 +500,9 @@ export class LogConsolePanel extends StackedPanel {
     this._showPlaceholderIfNoMessage();
   }
 
+  /**
+   * The name of the active log source
+   */
   get activeSource(): string {
     return this._activeSource;
   }
@@ -428,7 +565,7 @@ export class LogConsolePanel extends StackedPanel {
       }
     }
 
-    // remove views that do not have corresponding loggers anymore
+    // remove output areas that do not have corresponding loggers anymore
     const viewIds = this._outputAreas.keys();
 
     for (let viewId of viewIds) {
@@ -441,15 +578,12 @@ export class LogConsolePanel extends StackedPanel {
   }
 
   /**
-   * Message entry limit.
+   * Log output entry limit.
    */
   get entryLimit(): number {
     return this._entryLimit;
   }
 
-  /**
-   * Sets message entry limit.
-   */
   set entryLimit(limit: number) {
     if (limit > 0) {
       this._outputAreas.forEach((outputView: LogConsoleOutputArea) => {
