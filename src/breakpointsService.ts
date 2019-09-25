@@ -3,11 +3,9 @@
 
 import { Breakpoints } from './breakpoints';
 import { Signal } from '@phosphor/signaling';
-import { LineInfo } from './cellManeger';
+import { LineInfo } from './handlers/cell';
 
 export class BreakpointsService {
-  constructor() {}
-
   private selectedType: SessionTypes;
   private state = {
     console: [] as Breakpoints.IBreakpoint[],
@@ -18,13 +16,13 @@ export class BreakpointsService {
     this
   );
 
-  addBreakpoint(session_id: string, type: string, lineInfo: LineInfo) {
+  addBreakpoint(session: string, type: string, lineInfo: LineInfo) {
     const breakpoint: Breakpoints.IBreakpoint = {
       line: lineInfo.line,
       active: true,
       verified: true,
       source: {
-        name: session_id
+        name: session
       }
     };
     this.selectedBreakpoints = [...this.selectedBreakpoints, breakpoint];

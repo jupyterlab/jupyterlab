@@ -25,10 +25,12 @@ import { Debugger } from './debugger';
 // import { DebuggerSidebar } from './sidebar';
 
 import { IDebugger, IDebuggerSidebar } from './tokens';
-import { DebuggerNotebookTracker } from './notebookTracker';
+
+import { DebuggerNotebookTracker } from './handlers/notebook';
+
 import { BreakpointsService, SessionTypes } from './breakpointsService';
 
-import { DebuggerConsoleTracker } from './consoleTracker';
+import { DebuggerConsoleTracker } from './handlers/console';
 
 // import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 

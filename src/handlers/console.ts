@@ -10,7 +10,7 @@ import {
 import { DebugSession } from '../session';
 import { IClientSession, WidgetTracker } from '@jupyterlab/apputils';
 import { BreakpointsService } from '../breakpointsService';
-import { CellManager } from '../cellManeger';
+import { CellManager } from '../handlers/cell';
 import { CodeCell } from '@jupyterlab/cells';
 
 export class DebuggerConsoleTracker {

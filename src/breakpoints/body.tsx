@@ -8,7 +8,7 @@ import { ArrayExt } from '@phosphor/algorithm';
 import { ISignal } from '@phosphor/signaling';
 
 export class Body extends ReactWidget {
-  constructor(model: Breakpoints.IModel) {
+  constructor(model: Breakpoints.Model) {
     super();
     this.model = model;
     this.addClass('jp-DebuggerBreakpoints-body');
@@ -18,14 +18,14 @@ export class Body extends ReactWidget {
     return <BreakpointsComponent model={this.model} />;
   }
 
-  readonly model: Breakpoints.IModel;
+  readonly model: Breakpoints.Model;
 }
 
-const BreakpointsComponent = ({ model }: { model: Breakpoints.IModel }) => {
+const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
   const [breakpoints, setBreakpoints] = useState(model.breakpoints);
 
   model.breakpointsChanged.connect(
-    (_: Breakpoints.IModel, updates: Breakpoints.IBreakpoint[]) => {
+    (_: Breakpoints.Model, updates: Breakpoints.IBreakpoint[]) => {
       if (ArrayExt.shallowEqual(breakpoints, updates)) {
         return;
       }
@@ -51,13 +51,13 @@ const BreakpointComponent = ({
   breakpointChanged
 }: {
   breakpoint: Breakpoints.IBreakpoint;
-  breakpointChanged: ISignal<Breakpoints.IModel, Breakpoints.IBreakpoint>;
+  breakpointChanged: ISignal<Breakpoints.Model, Breakpoints.IBreakpoint>;
 }) => {
   const [active, setActive] = useState(breakpoint.active);
   breakpoint.active = active;
 
   breakpointChanged.connect(
-    (_: Breakpoints.IModel, updates: Breakpoints.IBreakpoint) => {
+    (_: Breakpoints.Model, updates: Breakpoints.IBreakpoint) => {
       setActive(updates.active);
     }
   );

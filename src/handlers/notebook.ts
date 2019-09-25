@@ -11,7 +11,7 @@ import { DebugSession } from './../session';
 import { IClientSession } from '@jupyterlab/apputils';
 import { BreakpointsService } from '../breakpointsService';
 import { CodeCell } from '@jupyterlab/cells';
-import { CellManager } from '../cellManeger';
+import { CellManager } from './cell';
 
 export class DebuggerNotebookTracker {
   constructor(options: DebuggerNotebookTracker.IOptions) {
