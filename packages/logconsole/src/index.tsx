@@ -382,7 +382,6 @@ class LoggerOutputAreaModel extends OutputAreaModel {
     if (this.list.length > this._entryLimit) {
       const diff = this.list.length - this._entryLimit;
       this.list.removeRange(0, diff);
-      this.trusted = false;
     }
   }
 

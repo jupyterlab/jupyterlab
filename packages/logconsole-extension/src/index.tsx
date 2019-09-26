@@ -47,6 +47,8 @@ import {
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
+import { Signal } from '@phosphor/signaling';
+
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
 
 /**
@@ -126,36 +128,41 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
     this.addClass(interactiveItem);
     this.addClass('jp-LogConsoleStatusItem');
 
-    let timer: number = null;
+    let flashRequestTimer: number = null;
 
-    this.model.stateChanged.connect(() => {
-      if (!this.model.highlightingEnabled || this.model.logCount === 0) {
+    this.model.activeSourceChanged.connect(() => {
+      if (
+        this.model.activeSource &&
+        this.model.flashEnabled &&
+        !this.model.isSourceLogsViewed(this.model.activeSource)
+      ) {
+        this._showHighlighted();
+      } else {
         this._clearHighlight();
-        this.model.activeSourceChanged = false;
+      }
+    });
+
+    this.model.flashEnabledChanged.connect(() => {
+      if (!this.model.flashEnabled) {
+        this._clearHighlight();
+      }
+    });
+
+    this.model.logChanged.connect(() => {
+      if (!this.model.flashEnabled || this.model.logCount === 0) {
+        // cancel existing request
+        clearTimeout(flashRequestTimer);
+        flashRequestTimer = null;
+        this._clearHighlight();
         return;
       }
 
-      if (this.model.activeSourceChanged) {
-        if (
-          !this.model.activeSource ||
-          this.model.isSourceLogsViewed(this.model.activeSource)
-        ) {
-          this._clearHighlight();
-        } else {
-          this._showHighlighted();
-        }
-
-        this.model.activeSourceChanged = false;
-        return;
-      }
-
-      // new message arrived
-      const wasHilited = this.hasClass('hilite') || this.hasClass('hilited');
-      if (wasHilited) {
+      const wasFlashed = this.hasClass('hilite') || this.hasClass('hilited');
+      if (wasFlashed) {
         this._clearHighlight();
         // cancel previous request
-        clearTimeout(timer);
-        timer = setTimeout(() => {
+        clearTimeout(flashRequestTimer);
+        flashRequestTimer = setTimeout(() => {
           this._flashHighlight();
         }, 100);
       } else {
@@ -223,9 +230,10 @@ export namespace LogConsoleStatus {
             }
 
             logger.logChanged.connect(
-              (sender: ILogger, args: ILoggerChange) => {
+              (sender: ILogger, change: ILoggerChange) => {
                 if (sender.source === this._activeSource) {
-                  this.stateChanged.emit(void 0);
+                  this.stateChanged.emit();
+                  this.logChanged.emit();
                 }
 
                 // mark logger as dirty
@@ -260,11 +268,34 @@ export namespace LogConsoleStatus {
     }
 
     set activeSource(name: string) {
+      if (this._activeSource === name) {
+        return;
+      }
+
       this._activeSource = name;
-      this.activeSourceChanged = true;
+      this.activeSourceChanged.emit();
 
       // refresh rendering
-      this.stateChanged.emit(void 0);
+      this.stateChanged.emit();
+    }
+
+    /**
+     * Flag to toggle flashing when new logs added.
+     */
+    get flashEnabled(): boolean {
+      return this._flashEnabled;
+    }
+
+    set flashEnabled(enabled: boolean) {
+      if (this._flashEnabled === enabled) {
+        return;
+      }
+
+      this._flashEnabled = enabled;
+      this.flashEnabledChanged.emit();
+
+      // refresh rendering
+      this.stateChanged.emit();
     }
 
     /**
@@ -275,7 +306,7 @@ export namespace LogConsoleStatus {
         this._entryLimit = limit;
 
         // refresh rendering
-        this.stateChanged.emit(void 0);
+        this.stateChanged.emit();
       }
     }
 
@@ -302,8 +333,19 @@ export namespace LogConsoleStatus {
       );
     }
 
-    public highlightingEnabled: boolean = true;
-    public activeSourceChanged: boolean = false;
+    /**
+     * A signal emitted when the log model changes.
+     */
+    public logChanged = new Signal<this, void>(this);
+    /**
+     * A signal emitted when the active log source changes.
+     */
+    public activeSourceChanged = new Signal<this, void>(this);
+    /**
+     * A signal emitted when the flash enablement changes.
+     */
+    public flashEnabledChanged = new Signal<this, void>(this);
+    private _flashEnabled: boolean = true;
     private _loggerRegistry: ILoggerRegistry;
     private _activeSource: string = null;
     private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
@@ -344,7 +386,7 @@ function activateLogConsole(
 ): ILoggerRegistry {
   let logConsoleWidget: MainAreaWidget<LogConsolePanel> = null;
   let entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
-  let highlightingEnabled: boolean = true;
+  let flashEnabled: boolean = true;
 
   const loggerRegistry = new LoggerRegistry(rendermime);
   const command = 'logconsole:open';
@@ -428,13 +470,12 @@ function activateLogConsole(
 
     logConsolePanel.attached.connect(() => {
       status.model.markSourceLogsViewed(status.model.activeSource);
-      status.model.highlightingEnabled = false;
-      status.model.stateChanged.emit(void 0);
+      status.model.flashEnabled = false;
     }, this);
 
     logConsoleWidget.disposed.connect(() => {
       logConsoleWidget = null;
-      status.model.highlightingEnabled = highlightingEnabled;
+      status.model.flashEnabled = flashEnabled;
     }, this);
 
     app.shell.add(logConsoleWidget, 'main', {
@@ -521,6 +562,7 @@ function activateLogConsole(
         const sourceName = nb.context.path;
         if (logConsoleWidget) {
           logConsoleWidget.content.activeSource = sourceName;
+          status.model.markSourceLogsViewed(sourceName);
           void tracker.save(logConsoleWidget);
         }
         status.model.activeSource = sourceName;
@@ -552,9 +594,8 @@ function activateLogConsole(
       }
       status.model.entryLimit = entryLimit;
 
-      highlightingEnabled = settings.get('flash').composite as boolean;
-      status.model.highlightingEnabled =
-        !logConsoleWidget && highlightingEnabled;
+      flashEnabled = settings.get('flash').composite as boolean;
+      status.model.flashEnabled = !logConsoleWidget && flashEnabled;
     };
 
     Promise.all([settingRegistry.load(LOG_CONSOLE_PLUGIN_ID), app.restored])
