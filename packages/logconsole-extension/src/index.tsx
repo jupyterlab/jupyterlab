@@ -25,10 +25,6 @@ import {
   DEFAULT_LOG_ENTRY_LIMIT
 } from '@jupyterlab/logconsole';
 
-import { KernelMessage } from '@jupyterlab/services';
-
-import { nbformat } from '@jupyterlab/coreutils';
-
 import { ICommandPalette, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -533,26 +529,6 @@ function activateLogConsole(
 
   nbtracker.widgetAdded.connect(
     (sender: INotebookTracker, nb: NotebookPanel) => {
-      //// TEST ////
-      nb.context.session.iopubMessage.connect(
-        (_, msg: KernelMessage.IIOPubMessage) => {
-          if (
-            KernelMessage.isDisplayDataMsg(msg) ||
-            KernelMessage.isStreamMsg(msg) ||
-            KernelMessage.isErrorMsg(msg)
-          ) {
-            const logger = loggerRegistry.getLogger(nb.context.path);
-            logger.rendermime = nb.content.rendermime;
-            const output: nbformat.IOutput = {
-              ...msg.content,
-              output_type: msg.header.msg_type
-            };
-            logger.log(output);
-          }
-        }
-      );
-      //// TEST ////
-
       nb.activated.connect((nb: NotebookPanel, args: void) => {
         // set activeSource only after app is restored
         // in order to allow restorer to restore previous activeSource
