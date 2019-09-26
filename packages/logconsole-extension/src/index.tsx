@@ -134,7 +134,8 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
       if (
         this.model.activeSource &&
         this.model.flashEnabled &&
-        !this.model.isSourceLogsViewed(this.model.activeSource)
+        !this.model.isSourceLogsViewed(this.model.activeSource) &&
+        this.model.logCount > 0
       ) {
         this._showHighlighted();
       } else {
