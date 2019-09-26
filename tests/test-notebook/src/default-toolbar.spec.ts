@@ -230,6 +230,7 @@ describe('@jupyterlab/notebook', () => {
       let panel: NotebookPanel;
 
       beforeEach(async function() {
+        // tslint:disable-next-line:no-invalid-this
         this.timeout(60000);
         context = await initNotebookContext({ startKernel: true });
         panel = NBTestUtils.createNotebookPanel(context);

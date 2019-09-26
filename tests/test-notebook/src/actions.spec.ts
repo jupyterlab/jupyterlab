@@ -37,6 +37,7 @@ describe('@jupyterlab/notebook', () => {
     let ipySession: ClientSession;
 
     before(async function() {
+      // tslint:disable-next-line:no-invalid-this
       this.timeout(60000);
       [session, ipySession] = await Promise.all([
         createClientSession(),
