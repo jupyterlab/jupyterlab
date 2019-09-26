@@ -36,11 +36,12 @@ describe('@jupyterlab/notebook', () => {
     let session: ClientSession;
     let ipySession: ClientSession;
 
-    before(async () => {
-      session = await createClientSession();
-      ipySession = await createClientSession({
-        kernelPreference: { name: 'ipython' }
-      });
+    before(async function() {
+      this.timeout(60000);
+      [session, ipySession] = await Promise.all([
+        createClientSession(),
+        createClientSession({ kernelPreference: { name: 'ipython' } })
+      ]);
       await Promise.all([ipySession.initialize(), session.initialize()]);
       await Promise.all([ipySession.kernel.ready, session.kernel.ready]);
     });
@@ -63,8 +64,8 @@ describe('@jupyterlab/notebook', () => {
       NBTestUtils.clipboard.clear();
     });
 
-    after(() => {
-      return Promise.all([session.shutdown(), ipySession.shutdown()]);
+    after(async () => {
+      await Promise.all([session.shutdown(), ipySession.shutdown()]);
     });
 
     describe('#executed', () => {

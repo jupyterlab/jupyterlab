@@ -229,7 +229,8 @@ describe('@jupyterlab/notebook', () => {
       let context: Context<INotebookModel>;
       let panel: NotebookPanel;
 
-      beforeEach(async () => {
+      beforeEach(async function() {
+        this.timeout(60000);
         context = await initNotebookContext({ startKernel: true });
         panel = NBTestUtils.createNotebookPanel(context);
         context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
