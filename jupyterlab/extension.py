@@ -34,11 +34,12 @@ def load_config(nbapp):
         get_app_info,
         get_workspaces_dir,
         get_user_settings_dir,
-        pjoin
+        pjoin,
+        AppOptions,
     )
 
     app_dir = getattr(nbapp, 'app_dir', get_app_dir())
-    info = get_app_info(app_dir)
+    info = get_app_info(app_options=AppOptions(app_dir=app_dir))
     static_url = info['staticUrl']
     user_settings_dir = getattr(
         nbapp, 'user_settings_dir', get_user_settings_dir()
@@ -89,7 +90,7 @@ def load_jupyter_server_extension(nbapp):
     from .handlers.error_handler import ErrorHandler
     from .commands import (
         DEV_DIR, HERE, ensure_app, ensure_core, ensure_dev, watch,
-        watch_dev, get_app_dir
+        watch_dev, get_app_dir, AppOptions
     )
 
     web_app = nbapp.web_app
@@ -98,6 +99,8 @@ def load_jupyter_server_extension(nbapp):
 
     # Handle the app_dir
     app_dir = getattr(nbapp, 'app_dir', get_app_dir())
+
+    build_handler_options = AppOptions(logger=logger, app_dir=app_dir)
 
     # Check for core mode.
     core_mode = False
@@ -141,13 +144,9 @@ def load_jupyter_server_extension(nbapp):
     page_config['devMode'] = dev_mode
     page_config['token'] = nbapp.token
 
-    # Export the version info tuple to a JSON array. This gets printed
-    # inside double quote marks, so we render it to a JSON string of the
-    # JSON data (so that we can call JSON.parse on the frontend on it).
-    # We also have to wrap it in `Markup` so that it isn't escaped
-    # by Jinja. Otherwise, if the version has string parts these will be
-    # escaped and then will have to be unescaped on the frontend.
-    page_config['notebookVersion'] = Markup(dumps(dumps(version_info))[1:-1])
+    # Client-side code assumes notebookVersion is a JSON-encoded string
+    # TODO: fix this when we can make such a change
+    page_config['notebookVersion'] = dumps(version_info)
 
     if nbapp.file_to_run and type(nbapp).__name__ == "LabApp":
         relpath = os.path.relpath(nbapp.file_to_run, nbapp.notebook_dir)
@@ -160,7 +159,7 @@ def load_jupyter_server_extension(nbapp):
     logger.info('JupyterLab application directory is %s' % app_dir)
 
     build_url = ujoin(base_url, build_path)
-    builder = Builder(logger, core_mode, app_dir)
+    builder = Builder(None, core_mode, None, app_options=build_handler_options)
     build_handler = (build_url, BuildHandler, {'builder': builder})
     handlers = [build_handler]
 
@@ -192,14 +191,14 @@ def load_jupyter_server_extension(nbapp):
         if dev_mode:
             watch_dev(logger)
         else:
-            watch(app_dir, logger)
+            watch(app_options=build_handler_options)
             page_config['buildAvailable'] = False
 
         config.cache_files = False
 
     if not core_mode and not errored:
         ext_url = ujoin(base_url, extensions_handler_path)
-        ext_manager = ExtensionManager(logger, app_dir)
+        ext_manager = ExtensionManager(app_options=build_handler_options)
         ext_handler = (ext_url, ExtensionHandler, {'manager': ext_manager})
         handlers.append(ext_handler)
 
@@ -211,6 +210,9 @@ def load_jupyter_server_extension(nbapp):
         page_config['hubPrefix'] = nbapp.hub_prefix
         page_config['hubHost'] = nbapp.hub_host
         page_config['hubUser'] = nbapp.user
+        # Assume the server_name property indicates running JupyterHub 1.0.
+        if hasattr(nbapp, 'server_name'):
+            page_config['hubServerName'] = nbapp.server_name
         api_token = os.getenv('JUPYTERHUB_API_TOKEN', '')
         page_config['token'] = api_token
 

@@ -1,14 +1,9 @@
 {
   "excludeNotExported": true,
   "mode": "file",
-  "target": "es5",
+  "target": "es2017",
   "module": "es5",
-  "lib": [
-    "lib.es2015.d.ts",
-    "lib.es2015.collection.d.ts",
-    "lib.es2015.promise.d.ts",
-    "lib.dom.d.ts"
-  ],
+  "lib": ["lib.dom.d.ts", "lib.es2017.d.ts"],
   "out": "../../docs/api/console-extension",
   "baseUrl": ".",
   "paths": {

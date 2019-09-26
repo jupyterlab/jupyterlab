@@ -143,6 +143,18 @@ export namespace KernelMessage {
   ): T;
 
   export function createMessage<T extends Message>(options: IOptions<T>): T {
+    // Backwards compatibility workaround for services 4.0 defining the wrong
+    // comm_info_request content. This should be removed with the deprecated
+    // `target` content option in services 5.0. See
+    // https://github.com/jupyterlab/jupyterlab/issues/6947
+    if (options.msgType === 'comm_info_request') {
+      const content = options.content as ICommInfoRequestMsg['content'];
+      if (content.target_name === undefined) {
+        content.target_name = content.target;
+      }
+      delete content.target;
+    }
+
     return {
       buffers: options.buffers || [],
       channel: options.channel,
@@ -974,7 +986,7 @@ export namespace KernelMessage {
   }
 
   /**
-   * An `execute_request` message on the `
+   * An `execute_request` message on the `'shell'` channel.
    */
   export interface IExecuteRequestMsg extends IShellMessage<'execute_request'> {
     content: {
@@ -1076,10 +1088,22 @@ export namespace KernelMessage {
    *
    * **See also:** [[ICommInfoReplyMsg]], [[IKernel.commInfo]]
    */
-
   export interface ICommInfoRequestMsg
     extends IShellMessage<'comm_info_request'> {
     content: {
+      /**
+       * The comm target name to filter returned comms
+       */
+      target_name?: string;
+
+      /**
+       * Filter for returned comms
+       *
+       * @deprecated - this is a non-standard field. Use target_name instead
+       *
+       * #### Notes
+       * See https://github.com/jupyterlab/jupyterlab/issues/6947
+       */
       target?: string;
     };
   }
@@ -1091,7 +1115,6 @@ export namespace KernelMessage {
    *
    * **See also:** [[ICommInfoRequest]], [[IKernel.commInfo]]
    */
-
   export interface ICommInfoReply extends IReplyOkContent {
     /**
      * Mapping of comm ids to target names.

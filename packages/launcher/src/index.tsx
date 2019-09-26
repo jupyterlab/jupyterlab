@@ -8,6 +8,12 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  combineClasses,
+  DefaultIconReact,
+  defaultIconRegistry
+} from '@jupyterlab/ui-components';
+
+import {
   ArrayExt,
   ArrayIterator,
   IIterator,
@@ -188,17 +194,31 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     // Now create the sections for each category
     orderedCategories.forEach(cat => {
       const item = categories[cat][0] as ILauncher.IItemOptions;
-      let iconClass =
-        `${this._commands.iconClass(item.command, {
-          ...item.args,
-          cwd: this.cwd
-        })} ` + 'jp-Launcher-sectionIcon jp-Launcher-icon';
+      let iconClass = this._commands.iconClass(item.command, {
+        ...item.args,
+        cwd: this.cwd
+      });
       let kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
       if (cat in categories) {
         section = (
           <div className="jp-Launcher-section" key={cat}>
             <div className="jp-Launcher-sectionHeader">
-              {kernel && <div className={iconClass} />}
+              {kernel && defaultIconRegistry.contains(iconClass) ? (
+                <DefaultIconReact
+                  name={iconClass}
+                  className={''}
+                  center={true}
+                  kind={'launcherSection'}
+                />
+              ) : (
+                <div
+                  className={combineClasses(
+                    iconClass,
+                    'jp-Launcher-sectionIcon',
+                    'jp-Launcher-icon'
+                  )}
+                />
+              )}
               <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
             </div>
             <div className="jp-Launcher-cardContainer">
@@ -384,6 +404,7 @@ function Card(
   };
 
   // Return the VDOM element.
+  const iconClass = kernel ? '' : commands.iconClass(command, args);
   return (
     <div
       className="jp-LauncherCard"
@@ -394,21 +415,27 @@ function Card(
       data-category={item.category || 'Other'}
       key={Private.keyProperty.get(item)}
     >
-      <div className="jp-LauncherCard-icon">
-        {item.kernelIconUrl && kernel && (
-          <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
-        )}
-        {!item.kernelIconUrl && !kernel && (
-          <div
-            className={`${commands.iconClass(command, args)} jp-Launcher-icon`}
+      {kernel ? (
+        <div className="jp-LauncherCard-icon">
+          {item.kernelIconUrl ? (
+            <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
+          ) : (
+            <div className="jp-LauncherCard-noKernelIcon">
+              {label[0].toUpperCase()}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="jp-LauncherCard-icon">
+          <DefaultIconReact
+            name={`${iconClass} jp-Launcher-icon`}
+            className={''}
+            fallback={true}
+            center={true}
+            kind={'launcherCard'}
           />
-        )}
-        {!item.kernelIconUrl && kernel && (
-          <div className="jp-LauncherCard-noKernelIcon">
-            {label[0].toUpperCase()}
-          </div>
-        )}
-      </div>
+        </div>
+      )}
       <div className="jp-LauncherCard-label" title={title}>
         <p>{label}</p>
       </div>

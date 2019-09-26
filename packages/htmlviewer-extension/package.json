@@ -1,11 +1,10 @@
 {
   "name": "@jupyterlab/htmlviewer-extension",
-  "version": "1.1.0-alpha.1",
+  "version": "2.0.0-alpha.0",
   "description": "JupyterLab extension to render HTML files",
   "keywords": [
     "jupyter",
-    "jupyterlab",
-    "jupyterlab-extension"
+    "jupyterlab"
   ],
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -13,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mflevine/jupyterlab_html.git"
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter Contributors",
@@ -34,10 +33,10 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.1.0-alpha.1",
-    "@jupyterlab/apputils": "^1.1.0-alpha.1",
-    "@jupyterlab/docregistry": "^1.1.0-alpha.1",
-    "@jupyterlab/htmlviewer": "^1.1.0-alpha.1"
+    "@jupyterlab/application": "^2.0.0-alpha.0",
+    "@jupyterlab/apputils": "^2.0.0-alpha.0",
+    "@jupyterlab/docregistry": "^2.0.0-alpha.0",
+    "@jupyterlab/htmlviewer": "^2.0.0-alpha.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

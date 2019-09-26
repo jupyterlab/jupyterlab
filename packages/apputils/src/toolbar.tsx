@@ -5,7 +5,7 @@ import { UseSignal, ReactWidget } from './vdom';
 
 import { Kernel } from '@jupyterlab/services';
 
-import { Button } from '@jupyterlab/ui-components';
+import { Button, DefaultIconReact } from '@jupyterlab/ui-components';
 
 import { IIterator, find, map, some } from '@phosphor/algorithm';
 
@@ -468,11 +468,13 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
       minimal
     >
       {props.iconClassName && (
-        <span
-          className={
-            props.iconClassName +
-            ' jp-ToolbarButtonComponent-icon jp-Icon jp-Icon-16'
-          }
+        <DefaultIconReact
+          name={`${props.iconClassName} jp-Icon jp-Icon-16`}
+          className={'jp-ToolbarButtonComponent-icon'}
+          fallback={true}
+          center={true}
+          kind={'toolbarButton'}
+          tag={'span'}
         />
       )}
       {props.label && (

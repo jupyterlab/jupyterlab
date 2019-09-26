@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-cell",
-  "version": "1.1.0-alpha.1",
+  "version": "2.0.0-alpha.0",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -8,15 +8,15 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^1.1.0-alpha.1",
-    "@jupyterlab/cells": "^1.1.0-alpha.1",
-    "@jupyterlab/codemirror": "^1.1.0-alpha.1",
-    "@jupyterlab/completer": "^1.1.0-alpha.1",
-    "@jupyterlab/rendermime": "^1.1.0-alpha.1",
-    "@jupyterlab/services": "^4.1.0-alpha.1",
-    "@jupyterlab/theme-light-extension": "^1.1.0-alpha.1",
-    "@phosphor/commands": "^1.6.3",
-    "@phosphor/widgets": "^1.8.0",
+    "@jupyterlab/apputils": "^2.0.0-alpha.0",
+    "@jupyterlab/cells": "^2.0.0-alpha.0",
+    "@jupyterlab/codemirror": "^2.0.0-alpha.0",
+    "@jupyterlab/completer": "^2.0.0-alpha.0",
+    "@jupyterlab/rendermime": "^2.0.0-alpha.0",
+    "@jupyterlab/services": "^5.0.0-alpha.0",
+    "@jupyterlab/theme-light-extension": "^2.0.0-alpha.0",
+    "@phosphor/commands": "^1.7.0",
+    "@phosphor/widgets": "^1.9.0",
     "es6-promise": "~4.2.6"
   },
   "devDependencies": {

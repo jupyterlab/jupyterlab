@@ -14,9 +14,7 @@ import {
   Dialog,
   ICommandPalette,
   ISplashScreen,
-  IThemeManager,
   IWindowResolver,
-  ThemeManager,
   WindowResolver,
   Printing
 } from '@jupyterlab/apputils';
@@ -32,15 +30,15 @@ import {
   URLExt
 } from '@jupyterlab/coreutils';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
+import { defaultIconRegistry } from '@jupyterlab/ui-components';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { DisposableDelegate } from '@phosphor/disposable';
 
-import { Menu } from '@phosphor/widgets';
-
 import { Palette } from './palette';
+
+import { themesPlugin, themesPaletteMenuPlugin } from './themeplugins';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -51,8 +49,6 @@ const SPLASH_RECOVER_TIMEOUT = 12000;
  * The command IDs used by the apputils plugin.
  */
 namespace CommandIDs {
-  export const changeTheme = 'apputils:change-theme';
-
   export const loadState = 'apputils:load-statedb';
 
   export const print = 'apputils:print';
@@ -101,128 +97,6 @@ const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
   },
   autoStart: true,
   provides: ISettingRegistry
-};
-
-/**
- * The default theme manager provider.
- */
-const themes: JupyterFrontEndPlugin<IThemeManager> = {
-  id: '@jupyterlab/apputils-extension:themes',
-  requires: [ISettingRegistry, JupyterFrontEnd.IPaths],
-  optional: [ISplashScreen],
-  activate: (
-    app: JupyterFrontEnd,
-    settings: ISettingRegistry,
-    paths: JupyterFrontEnd.IPaths,
-    splash: ISplashScreen | null
-  ): IThemeManager => {
-    const host = app.shell;
-    const commands = app.commands;
-    const url = URLExt.join(paths.urls.base, paths.urls.themes);
-    const key = themes.id;
-    const manager = new ThemeManager({ key, host, settings, splash, url });
-
-    // Keep a synchronously set reference to the current theme,
-    // since the asynchronous setting of the theme in `changeTheme`
-    // can lead to an incorrect toggle on the currently used theme.
-    let currentTheme: string;
-
-    // Set data attributes on the application shell for the current theme.
-    manager.themeChanged.connect((sender, args) => {
-      currentTheme = args.newValue;
-      document.body.dataset.jpThemeLight = String(
-        manager.isLight(currentTheme)
-      );
-      document.body.dataset.jpThemeName = currentTheme;
-      if (
-        document.body.dataset.jpThemeScrollbars !==
-        String(manager.themeScrollbars(currentTheme))
-      ) {
-        document.body.dataset.jpThemeScrollbars = String(
-          manager.themeScrollbars(currentTheme)
-        );
-      }
-      commands.notifyCommandChanged(CommandIDs.changeTheme);
-    });
-
-    commands.addCommand(CommandIDs.changeTheme, {
-      label: args => {
-        const theme = args['theme'] as string;
-        return args['isPalette'] ? `Use ${theme} Theme` : theme;
-      },
-      isToggled: args => args['theme'] === currentTheme,
-      execute: args => {
-        const theme = args['theme'] as string;
-        if (theme === manager.theme) {
-          return;
-        }
-        return manager.setTheme(theme);
-      }
-    });
-
-    return manager;
-  },
-  autoStart: true,
-  provides: IThemeManager
-};
-
-/**
- * The default theme manager's UI command palette and main menu functionality.
- *
- * #### Notes
- * This plugin loads separately from the theme manager plugin in order to
- * prevent blocking of the theme manager while it waits for the command palette
- * and main menu to become available.
- */
-const themesPaletteMenu: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/apputils-extension:themes-palette-menu',
-  requires: [IThemeManager],
-  optional: [ICommandPalette, IMainMenu],
-  activate: (
-    app: JupyterFrontEnd,
-    manager: IThemeManager,
-    palette: ICommandPalette | null,
-    mainMenu: IMainMenu | null
-  ): void => {
-    const commands = app.commands;
-
-    // If we have a main menu, add the theme manager to the settings menu.
-    if (mainMenu) {
-      const themeMenu = new Menu({ commands });
-      themeMenu.title.label = 'JupyterLab Theme';
-      void app.restored.then(() => {
-        const command = CommandIDs.changeTheme;
-        const isPalette = false;
-
-        manager.themes.forEach(theme => {
-          themeMenu.addItem({ command, args: { isPalette, theme } });
-        });
-      });
-      mainMenu.settingsMenu.addGroup(
-        [
-          {
-            type: 'submenu' as Menu.ItemType,
-            submenu: themeMenu
-          }
-        ],
-        0
-      );
-    }
-
-    // If we have a command palette, add theme switching options to it.
-    if (palette) {
-      void app.restored.then(() => {
-        const category = 'Settings';
-        const command = CommandIDs.changeTheme;
-        const isPalette = true;
-
-        manager.themes.forEach(theme => {
-          palette.addItem({ command, args: { isPalette, theme }, category });
-        });
-      });
-    }
-  },
-  autoStart: true
 };
 
 /**
@@ -290,6 +164,13 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
     splash.id = 'jupyterlab-splash';
     galaxy.id = 'galaxy';
     logo.id = 'main-logo';
+
+    defaultIconRegistry.icon({
+      name: 'jupyter-favicon',
+      container: logo,
+      center: true,
+      kind: 'splash'
+    });
 
     galaxy.appendChild(logo);
     ['1', '2', '3'].forEach(id => {
@@ -435,6 +316,9 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
       await workspaces.save(id, { data, metadata });
     });
 
+    // Any time the local state database changes, save the workspace.
+    db.changed.connect(() => void save.invoke(), db);
+
     commands.addCommand(CommandIDs.loadState, {
       execute: async (args: IRouter.ILocation) => {
         // Since the command can be executed an arbitrary number of times, make
@@ -458,9 +342,6 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
           console.error(`${CommandIDs.loadState} cannot load null workspace.`);
           return;
         }
-
-        // Any time the local state database changes, save the workspace.
-        db.changed.connect(() => void save.invoke(), db);
 
         try {
           const saved = await workspaces.fetch(source);
@@ -541,7 +422,10 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         delete query['reset'];
 
         const url = path + URLExt.objectToQueryString(query) + hash;
-        const cleared = db.clear().then(() => router.stop);
+        const cleared = db
+          .clear()
+          .then(() => save.invoke())
+          .then(() => router.stop);
 
         // After the state has been reset, navigate to the URL.
         if (clone) {
@@ -585,8 +469,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   settings,
   state,
   splash,
-  themes,
-  themesPaletteMenu,
+  themesPlugin,
+  themesPaletteMenuPlugin,
   print
 ];
 export default plugins;

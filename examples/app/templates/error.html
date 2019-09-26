@@ -8,7 +8,7 @@ Distributed under the terms of the Modified BSD License.
 <head>
   <meta charset="utf-8">
 
-  <title>{% block title %}{{page_title}}{% endblock %}</title>
+  <title>{% block title %}{{page_title | e}}{% endblock %}</title>
 
   {% block favicon %}<link rel="shortcut icon" type="image/x-icon" href="/static/base/images/favicon.ico">{% endblock %}
 
@@ -28,13 +28,13 @@ div#header, div#site {
 
 <div class="error">
     {% block h1_error %}
-    <h1>{{status_code}} : {{status_message}}</h1>
+    <h1>{{status_code | e}} : {{status_message | e}}</h1>
     {% endblock h1_error %}
     {% block error_detail %}
     {% if message %}
     <p>The error was:</p>
     <div class="traceback-wrapper">
-    <pre class="traceback">{{message}}</pre>
+    <pre class="traceback">{{message | e}}</pre>
     </div>
     {% endif %}
     {% endblock %}
@@ -48,7 +48,7 @@ window.onload = function () {
   var tb = document.getElementsByClassName('traceback')[0];
   tb.scrollTop = tb.scrollHeight;
   {% if message %}
-  console.error("{{message}}")
+  console.error("{{message | e}}")
   {% endif %}
 };
 </script>

@@ -24,6 +24,16 @@ the nomenclature of the classic notebook; these URLs are ``/tree`` URLs:
 Entering this URL will open the notebook in JupyterLab in
 :ref:`single-document mode <tabs>`.
 
+By default, the file browser will navigate to the directory containing the requested
+file. This behavior can be changed with the optional ``file-browser-path`` query parameter:
+
+.. code-block:: none
+
+  http(s)://<server:port>/<lab-location>/lab/tree/path/to/notebook.ipynb?file-browser-path=/
+
+Entering the above URL will show the workspace root directory instead of the ``/path/to/``
+directory in the file browser.
+
 
 .. _url-workspaces-ui:
 

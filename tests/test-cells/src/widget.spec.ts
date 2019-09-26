@@ -756,6 +756,29 @@ describe('cells/widget', () => {
         expect(executionCount).not.toEqual(originalCount);
       });
 
+      const TIMING_KEYS = [
+        'iopub.execute_input',
+        'shell.execute_reply.started',
+        'shell.execute_reply',
+        'iopub.status.busy',
+        'iopub.status.idle'
+      ];
+
+      it('should not save timing info by default', async () => {
+        const widget = new CodeCell({ model, rendermime, contentFactory });
+        await CodeCell.execute(widget, session);
+        expect(widget.model.metadata.get('execution')).toBeUndefined();
+      });
+      it('should save timing info if requested', async () => {
+        const widget = new CodeCell({ model, rendermime, contentFactory });
+        await CodeCell.execute(widget, session, { recordTiming: true });
+        expect(widget.model.metadata.get('execution')).toBeDefined();
+        const timingInfo = widget.model.metadata.get('execution') as any;
+        for (const key of TIMING_KEYS) {
+          expect(timingInfo[key]).toBeDefined();
+        }
+      });
+
       it('should set the cell prompt properly while executing', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
         widget.initializeState();

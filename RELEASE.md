@@ -15,27 +15,44 @@ setup instructions and for why twine is the recommended method.
 
 ## Getting a clean environment
 
-For convenience, here are commands for getting a completely clean repo. This
-makes sure that we don't have any extra tags or commits in our repo (especially
-since we will push our tags later in the process), and that we are on the master
-branch.
+### Using Docker
+
+If desired, you can use Docker to create a new container with a fresh clone of JupyterLab.
+
+First, build a Docker base image. This container is customized with your git commit information. The build is cached so rebuilding it is fast and easy.
 
 ```bash
-cd release
-conda deactivate
-conda remove --all -y -n jlabrelease
-rm -rf jupyterlab
-
-conda create -c conda-forge -y -n jlabrelease notebook nodejs twine
-conda activate jlabrelease
-git clone git@github.com:jupyterlab/jupyterlab.git
-cd jupyterlab
-pip install -ve .
+docker build -t jlabreleaseimage release/ --build-arg "GIT_AUTHOR_NAME=`git config user.name`" --build-arg "GIT_AUTHOR_EMAIL=`git config user.email`"
 ```
 
-## How Python and NPM versions increment
+Note: if you must rebuild your Docker image from scratch without the cache, you can run the same build command above with `--no-cache --pull`.
+
+Then run a new instance of this container:
+
+```bash
+docker rm jlabrelease # delete any old container
+docker run -it --name jlabrelease -w /usr/src/app jlabreleaseimage bash
+```
+
+Now you should be at a shell prompt as root inside the docker container (the prompt should be something like `root@20dcc0cdc0b4:/usr/src/app`).
+
+### Clean environment
+
+For convenience, here is a script for getting a completely clean repo. This
+makes sure that we don't have any extra tags or commits in our repo (especially
+since we will push our tags later in the process), and that we are on the correct branch. The script creates a conda env, pulls down a git checkout with the
+appropriate branch, and installs JupyterLab with `pip install -e .`.
+
+`source scripts/release_prep.sh <branch_name>`
+
+## Bump version
+
+The next step is to bump the appropriate version numbers. We use
+[bump2version](https://github.com/c4urself/bump2version) to manage the Python
+version, and we keep the JS versions and tags in sync with the release cycle.
 
 Here is an example of how version numbers progress through a release process.
+Choose and run an appropriate command to bump version numbers for this release.
 
 | Command                            | Python Version Change | NPM Version change                 |
 | ---------------------------------- | --------------------- | ---------------------------------- |
@@ -45,9 +62,15 @@ Here is an example of how version numbers progress through a release process.
 | `jlpm bumpversion release`         | x.y.z.rc0-> x.y.z     | All a.b.c-rc0 -> a.b.c             |
 | `jlpm patch:release [...packages]` | x.y.z -> x.y.(z+1)    | Selected a.b.c -> a.b.(c+1)        |
 
+Note: if you are making a patch release, and want to update whatever JS packages changed, just do `jlpm patch:release js` (in fact, _any_ argument, not just `js`, forces all JS packages to be examined).
+
 ### JS major release(s)
 
-Command:
+In a major Python release, we can have one or more JavaScript packages also have
+a major bump. During the prerelease stage of a major release, if there is a
+backwards-incompatible change to a JS package, bump the major version number for
+that JS package:
+
 `jlpm bump:js:major [...packages]`
 
 Results:
@@ -57,26 +80,43 @@ Results:
 - Packages that have already had a major bump in this prerelease cycle are not affected.
 - All affected packages changed to match the current release type of the Python package (`alpha` or `rc`).
 
-### Publishing Packages
+## Publishing Packages
 
-We use [bump2version](https://github.com/c4urself/bump2version) to manage the Python
-version, and we keep the JS versions and tags in sync with the release cycle.
-For a backwards-incompatible changes to JS packages, bump the major version number(s)
-using `jlpm run bump:js:major` with the package name(s). For a major release of
-JupyterLab itself, run `jlpm run bumpversion major`.
+Currently we end up with some uncommitted changes at this step. We'll need to commit them before running the publish.
 
-- Run `jlpm run bumpversion build` to create a new `alpha` version.
-- Push the commits and tags as prompted.
-- Run `npm run publish:all` to publish the JS and Python packages.
-  Note that the use of `npm` instead of `jlpm` is
-  [significant on Windows](https://github.com/jupyterlab/jupyterlab/issues/6733).
-  Execute the suggested commands after doing a quick sanity check.
-  If there is a network error during JS publish, run `npm run publish:all --skip-build` to resume publish without requiring another
-  clean and build phase of the JS packages.
-- Run `jlpm run bumpversion release` to switch to an `rc` version.
-  (running `jlpm run bumpversion build` will then increment `rc` versions).
+```bash
+git commit -am "bump version"
+```
 
-### Post release candidate checklist
+Now publish the JS packages and build the python packages
+
+```bash
+npm run publish:all
+```
+
+If there is a network error during JS publish, run `npm run publish:all --skip-build` to resume publish without requiring another clean and build phase of the JS packages.
+
+Note that the use of `npm` instead of `jlpm` is [significant on Windows](https://github.com/jupyterlab/jupyterlab/issues/6733).
+
+At this point, run the `source scripts/release_test.sh` to test the wheel in
+a fresh conda environment with and without extensions installed. Open and run
+the Outputs notebook and verify everything runs properly. Also add a cell with the following code and make sure the widget renders:
+
+```python
+from ipywidgets import IntSlider
+IntSlider()
+```
+
+## Finish
+
+Follow instructions printed at the end of the publish step above, including:
+
+- committing changes
+- tagging the release
+- and uploading to pypi with twine
+- double-check what branch you are on, then push changes to the correct upstream branch with the `--tags` option.
+
+## Post release candidate checklist
 
 - [ ] Modify and run `python scripts/milestone_check.py` to check the issues assigned to this milestone
 - [ ] Write [release highlights](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/getting_started/changelog.rst), starting with:

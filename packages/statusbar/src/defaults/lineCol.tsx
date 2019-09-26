@@ -7,7 +7,11 @@ import { VDomRenderer, VDomModel, ReactWidget } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { interactiveItem, showPopup, Popup, TextItem } from '..';
+import { DefaultIconReact } from '@jupyterlab/ui-components';
+
+import { classes } from 'typestyle/lib';
+
+import { interactiveItem, Popup, showPopup, TextItem } from '..';
 
 import {
   lineFormWrapper,
@@ -15,10 +19,10 @@ import {
   lineFormSearch,
   lineFormWrapperFocusWithin,
   lineFormCaption,
+  lineFormButtonDiv,
+  lineFormButtonIcon,
   lineFormButton
 } from '../style/lineForm';
-
-import { classes } from 'typestyle/lib';
 
 /**
  * A namespace for LineFormComponent statics.
@@ -111,12 +115,14 @@ class LineFormComponent extends React.Component<
                 this._textInput = input;
               }}
             />
-
-            <input
-              type="submit"
-              className={classes(lineFormButton, 'jp-StatusItem-line-form')}
-              value=""
-            />
+            <div className={lineFormButtonDiv}>
+              <DefaultIconReact
+                name="line-form"
+                className={lineFormButtonIcon}
+                center={true}
+              />
+              <input type="submit" className={lineFormButton} value="" />
+            </div>
           </div>
           <label className={lineFormCaption}>
             Go to line number between 1 and {this.props.maxLine}

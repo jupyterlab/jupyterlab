@@ -1,7 +1,7 @@
 # Configuration for Lock Threads - https://github.com/dessant/lock-threads
 
 # Number of days of inactivity before a closed issue or pull request is locked
-daysUntilLock: 10000
+daysUntilLock: 30
 
 # Skip issues and pull requests created before a given timestamp. Timestamp must
 # follow ISO 8601 (`YYYY-MM-DD`). Set to `false` to disable
@@ -11,13 +11,15 @@ skipCreatedBefore: false
 exemptLabels: []
 
 # Label to add before locking, such as `outdated`. Set to `false` to disable
-lockLabel: false
+lockLabel: status:resolved-locked
 
 # Comment to post before locking. Set to `false` to disable
-lockComment: >
-  This thread has been automatically locked since there has not been
-  any recent activity after it was closed. Please open a [new issue](https://github.com/jupyterlab/jupyterlab/issues/new/choose)
-  for related discussion.
+lockComment: false
+
+# lockComment: >
+#   This thread has been automatically locked since there has not been
+#   any recent activity after it was closed. Please open a [new issue](https://github.com/jupyterlab/jupyterlab/issues/new/choose)
+#   for related discussion.
 
 # Assign `resolved` as the reason for locking. Set to `false` to disable
 setLockReason: true

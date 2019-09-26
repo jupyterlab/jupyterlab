@@ -67,6 +67,14 @@ export interface IAttachmentsModel extends IDisposable {
    */
   set(key: string, attachment: nbformat.IMimeBundle): void;
 
+  // TODO: This is marked optional so as to be non-breaking for 1.x
+  // Make this property mandatory for 2.0
+  /**
+   * Remove the attachment whose name is the specified key.
+   * Note that this is optional only until Jupyterlab 2.0 release.
+   */
+  remove?: (key: string) => void;
+
   /**
    * Clear all of the attachments.
    */
@@ -235,6 +243,13 @@ export class AttachmentsModel implements IAttachmentsModel {
   }
 
   /**
+   * Remove the attachment whose name is the specified key
+   */
+  remove(key: string): void {
+    this._map.delete(key);
+  }
+
+  /**
    * Clear all of the attachments.
    */
   clear(): void {
@@ -374,6 +389,9 @@ export class AttachmentsResolver implements IRenderMime.IResolver {
 
   /**
    * Get the download url of a given absolute server path.
+   *
+   * #### Notes
+   * The returned URL may include a query parameter.
    */
   getDownloadUrl(path: string): Promise<string> {
     if (this._parent && !path.startsWith('attachment:')) {

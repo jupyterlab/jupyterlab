@@ -8,12 +8,6 @@
   "references": [
     {
       "path": "../apputils"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../services"
     }
   ]
 }

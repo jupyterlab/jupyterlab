@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { showDialog, Dialog } from '@jupyterlab/apputils';
+
 import {
   IChangedArgs,
   IStateDB,
@@ -13,13 +15,16 @@ import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
 
 import { Contents, Kernel, Session } from '@jupyterlab/services';
 
+import { IIconRegistry } from '@jupyterlab/ui-components';
+
 import {
   ArrayIterator,
   each,
   find,
   IIterator,
   IterableOrArrayLike,
-  ArrayExt
+  ArrayExt,
+  filter
 } from '@phosphor/algorithm';
 
 import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
@@ -27,8 +32,6 @@ import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
-
-import { showDialog, Dialog } from '@jupyterlab/apputils';
 
 /**
  * The default duration of the auto-refresh in ms
@@ -68,6 +71,7 @@ export class FileBrowserModel implements IDisposable {
    * Construct a new file browser model.
    */
   constructor(options: FileBrowserModel.IOptions) {
+    this.iconRegistry = options.iconRegistry;
     this.manager = options.manager;
     this._driveName = options.driveName || '';
     let rootPath = this._driveName ? this._driveName + ':' : '';
@@ -108,6 +112,11 @@ export class FileBrowserModel implements IDisposable {
       standby: 'when-hidden'
     });
   }
+
+  /**
+   * The icon registry instance used by the file browser model.
+   */
+  readonly iconRegistry: IIconRegistry;
 
   /**
    * The document manager instance used by the file browser model.
@@ -312,24 +321,15 @@ export class FileBrowserModel implements IDisposable {
    * @returns A promise which resolves when the file has begun
    *   downloading.
    */
-  download(path: string): Promise<void> {
-    return this.manager.services.contents.getDownloadUrl(path).then(url => {
-      // Check the browser is Chrome https://stackoverflow.com/a/9851769
-      const chrome = (window as any).chrome;
-      const isChrome = !!chrome && (!!chrome.webstore || !!chrome.runtime);
-      if (isChrome) {
-        // Workaround https://bugs.chromium.org/p/chromium/issues/detail?id=455987
-        window.open(url);
-      } else {
-        let element = document.createElement('a');
-        document.body.appendChild(element);
-        element.setAttribute('href', url);
-        element.setAttribute('download', '');
-        element.click();
-        document.body.removeChild(element);
-        return void 0;
-      }
-    });
+  async download(path: string): Promise<void> {
+    const url = await this.manager.services.contents.getDownloadUrl(path);
+    let element = document.createElement('a');
+    element.href = url;
+    element.download = '';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    return void 0;
   }
 
   /**
@@ -644,6 +644,11 @@ export namespace FileBrowserModel {
    */
   export interface IOptions {
     /**
+     * An icon registry instance.
+     */
+    iconRegistry: IIconRegistry;
+
+    /**
      * A document manager instance.
      */
     manager: IDocumentManager;
@@ -656,15 +661,58 @@ export namespace FileBrowserModel {
     driveName?: string;
 
     /**
+     * The time interval for browser refreshing, in ms.
+     */
+    refreshInterval?: number;
+
+    /**
      * An optional state database. If provided, the model will restore which
      * folder was last opened when it is restored.
      */
     state?: IStateDB;
+  }
+}
 
+/**
+ * File browser model with optional filter on element.
+ */
+export class FilterFileBrowserModel extends FileBrowserModel {
+  constructor(options: FilterFileBrowserModel.IOptions) {
+    super(options);
+
+    this._filter = options.filter ? options.filter : model => true;
+  }
+
+  /**
+   * Create an iterator over the filtered model's items.
+   *
+   * @returns A new iterator over the model's items.
+   */
+  items(): IIterator<Contents.IModel> {
+    return filter(super.items(), (value, index) => {
+      if (value.type === 'directory') {
+        return true;
+      } else {
+        return this._filter(value);
+      }
+    });
+  }
+
+  private _filter: (value: Contents.IModel) => boolean;
+}
+
+/**
+ * Namespace for the filtered file browser model
+ */
+export namespace FilterFileBrowserModel {
+  /**
+   * Constructor options
+   */
+  export interface IOptions extends FileBrowserModel.IOptions {
     /**
-     * The time interval for browser refreshing, in ms.
+     * Filter function on file browser item model
      */
-    refreshInterval?: number;
+    filter?: (value: Contents.IModel) => boolean;
   }
 }
 

@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { style } from 'typestyle/lib';
+import { NestedCSSProperties } from 'typestyle/lib/types';
 
 export const hoverItem = style({
   boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)'
@@ -22,21 +23,39 @@ export const lineFormCaption = style({
   color: 'var(--jp-ui-font-color0)'
 });
 
-export const lineFormButton = style({
-  color: 'white',
+export const baseLineForm: NestedCSSProperties = {
   border: 'none',
   borderRadius: '0px',
-  backgroundColor: 'var(--jp-brand-color1)',
   position: 'absolute',
-  top: '4px',
-  right: '8px',
-  height: '24px',
-  width: '12px',
-  padding: '0px 12px',
   backgroundSize: '16px',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center',
-  outline: 'none'
+  outline: 'none',
+  top: '0px',
+  right: '0px'
+};
+
+export const lineFormButtonDiv = style(baseLineForm, {
+  top: '4px',
+  right: '8px',
+  height: '24px',
+  padding: '0px 12px',
+  width: '12px'
+});
+
+export const lineFormButtonIcon = style(baseLineForm, {
+  backgroundColor: 'var(--jp-brand-color1)',
+  height: '100%',
+  width: '100%',
+  boxSizing: 'border-box',
+  padding: '4px 6px'
+});
+
+export const lineFormButton = style(baseLineForm, {
+  backgroundColor: 'transparent',
+  height: '100%',
+  width: '100%',
+  boxSizing: 'border-box'
 });
 
 export const lineFormWrapper = style({
