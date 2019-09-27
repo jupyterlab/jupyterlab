@@ -9,15 +9,16 @@ import {
 // import { CodeCell } from '@jupyterlab/cells';
 import { DebugSession } from './../session';
 import { IClientSession } from '@jupyterlab/apputils';
-import { BreakpointsService } from '../breakpointsService';
 import { CodeCell } from '@jupyterlab/cells';
 import { CellManager } from './cell';
+import { Debugger } from '../debugger';
+import { Breakpoints } from '../breakpoints';
 
-export class DebuggerNotebookTracker {
-  constructor(options: DebuggerNotebookTracker.IOptions) {
-    this.breakpointService = options.breakpointService;
+export class DebuggerNotebookHandler {
+  constructor(options: DebuggerNotebookHandler.IOptions) {
+    this.debugger = options.debugger;
     this.notebookTracker = options.notebookTracker;
-
+    this.breakpoints = this.debugger.sidebar.breakpoints.model;
     this.notebookTracker.currentChanged.connect(
       (sender, notePanel: NotebookPanel) => {
         const session = notePanel ? notePanel.session : false;
@@ -27,8 +28,9 @@ export class DebuggerNotebookTracker {
   }
 
   notebookTracker: INotebookTracker;
+  debugger: Debugger;
   debuggerSession: DebugSession;
-  breakpointService: BreakpointsService;
+  breakpoints: Breakpoints.Model;
   cellManager: CellManager;
 
   protected onNewCell(noteTracker: NotebookTracker, codeCell: CodeCell) {
@@ -39,7 +41,7 @@ export class DebuggerNotebookTracker {
         this.cellManager.onActiveCellChanged();
       } else {
         const options: CellManager.IOptions = {
-          breakpointService: this.breakpointService,
+          breakpoints: this.breakpoints,
           activeCell: codeCell,
           session: this.debuggerSession
         };
@@ -53,7 +55,7 @@ export class DebuggerNotebookTracker {
     note: INotebookTracker
   ) {
     if (this.debuggerSession) {
-      this.debuggerSession.dispose();
+      this.debugger.model.session.dispose();
       note.activeCellChanged.disconnect(this.onNewCell, this);
     }
     // create new session. Just changing client make sometimes that kernel is not attach to note
@@ -61,14 +63,15 @@ export class DebuggerNotebookTracker {
       this.debuggerSession = new DebugSession({
         client: client as IClientSession
       });
+      this.debugger.model.session = this.debuggerSession;
       note.activeCellChanged.connect(this.onNewCell, this);
     }
   }
 }
 
-export namespace DebuggerNotebookTracker {
+export namespace DebuggerNotebookHandler {
   export interface IOptions {
+    debugger: Debugger;
     notebookTracker: INotebookTracker;
-    breakpointService: BreakpointsService;
   }
 }

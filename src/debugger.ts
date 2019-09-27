@@ -12,6 +12,8 @@ import { IDisposable } from '@phosphor/disposable';
 import { DebuggerSidebar } from './sidebar';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { BreakpointsService } from './breakpointsService';
+import { DebugSession } from './session';
+import { IClientSession } from '@jupyterlab/apputils';
 
 export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
@@ -44,6 +46,7 @@ export namespace Debugger {
   export interface IOptions {
     connector?: IDataConnector<ReadonlyJSONValue>;
     id?: string;
+    session?: IClientSession;
     breakpointsService?: BreakpointsService;
   }
 
@@ -51,6 +54,7 @@ export namespace Debugger {
     constructor(options: Debugger.Model.IOptions) {
       this.connector = options.connector || null;
       this.breakpointsService = options.breakpointsService;
+      this.session = new DebugSession({ client: options.session });
       this.id = options.id || UUID.uuid4();
       void this._populate();
     }
@@ -58,6 +62,14 @@ export namespace Debugger {
     readonly connector: IDataConnector<ReadonlyJSONValue> | null;
 
     readonly id: string;
+
+    get session() {
+      return this._session;
+    }
+
+    set session(session: DebugSession) {
+      this._session = session;
+    }
 
     get isDisposed(): boolean {
       return this._isDisposed;
@@ -81,12 +93,11 @@ export namespace Debugger {
 
     private _isDisposed = false;
     private _notebook: INotebookTracker;
+    private _session: DebugSession;
     breakpointsService: BreakpointsService;
   }
 
   export namespace Model {
-    export interface IOptions extends Debugger.IOptions {
-      breakpointsService?: BreakpointsService;
-    }
+    export interface IOptions extends Debugger.IOptions {}
   }
 }

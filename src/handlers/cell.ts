@@ -4,12 +4,13 @@
 import { CodeCell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { Editor, Doc } from 'codemirror';
-import { BreakpointsService } from '../breakpointsService';
 import { DebugSession } from '../session';
+import { Breakpoints } from '../breakpoints';
 
 export class CellManager {
   constructor(options: CellManager.IOptions) {
-    this.breakpointService = options.breakpointService;
+    this.breakpointService = options.breakpoints;
+    console.log({ breakpoint: this.breakpointService });
     this.activeCell = options.activeCell;
     this.debuggerSession = options.session;
     this.onActiveCellChanged();
@@ -18,7 +19,7 @@ export class CellManager {
   private _previousCell: CodeCell;
   previousLineCount: number;
   private _debuggerSession: DebugSession;
-  breakpointService: BreakpointsService;
+  breakpointService: Breakpoints.Model;
   private _activeCell: CodeCell;
 
   set previousCell(cell: CodeCell) {
@@ -109,11 +110,7 @@ export class CellManager {
 
     const isRemoveGutter = !!info.gutterMarkers;
     if (isRemoveGutter) {
-      this.breakpointService.removeBreakpoint(
-        this.debuggerSession,
-        this.getEditorId,
-        info as LineInfo
-      );
+      this.breakpointService.removeBreakpoint(info as LineInfo);
     } else {
       this.breakpointService.addBreakpoint(
         this.debuggerSession.id,
@@ -143,7 +140,7 @@ export class CellManager {
           lines.push(editor.lineInfo(line));
         }
       });
-      this.breakpointService.changeLines(lines);
+      // this.breakpointService.changeLines(lines);
       this.previousLineCount = linesNumber;
     }
   };
@@ -159,7 +156,7 @@ export class CellManager {
 export namespace CellManager {
   export interface IOptions {
     session: DebugSession;
-    breakpointService: BreakpointsService;
+    breakpoints: Breakpoints.Model;
     activeCell?: CodeCell;
   }
 }

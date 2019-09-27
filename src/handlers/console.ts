@@ -9,13 +9,12 @@ import {
 } from '@jupyterlab/console';
 import { DebugSession } from '../session';
 import { IClientSession, WidgetTracker } from '@jupyterlab/apputils';
-import { BreakpointsService } from '../breakpointsService';
 import { CellManager } from '../handlers/cell';
 import { CodeCell } from '@jupyterlab/cells';
+import { Breakpoints } from '../breakpoints';
 
-export class DebuggerConsoleTracker {
-  constructor(options: DebuggerNotebookTracker.IOptions) {
-    this.breakpointService = options.breakpointService;
+export class DebuggerConsoleHandler {
+  constructor(options: DebuggerNotebookHandler.IOptions) {
     this.consoleTracker = options.consoleTracker;
 
     this.consoleTracker.currentChanged.connect(
@@ -27,7 +26,7 @@ export class DebuggerConsoleTracker {
 
   consoleTracker: IConsoleTracker;
   debuggerSession: DebugSession;
-  breakpointService: BreakpointsService;
+  breakpointService: Breakpoints.Model;
   cellManager: CellManager;
   consoleSession: IClientSession | Boolean;
   previousConsole: ConsolePanel;
@@ -78,16 +77,16 @@ export class DebuggerConsoleTracker {
     } else if (!this.cellManager) {
       this.cellManager = new CellManager({
         activeCell: update,
-        breakpointService: this.breakpointService,
+        breakpoints: this.breakpointService,
         session: this.debuggerSession
       });
     }
   }
 }
 
-export namespace DebuggerNotebookTracker {
+export namespace DebuggerNotebookHandler {
   export interface IOptions {
     consoleTracker: IConsoleTracker;
-    breakpointService: BreakpointsService;
+    breakpoints: Breakpoints.Model;
   }
 }
