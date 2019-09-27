@@ -27,6 +27,7 @@ import { IDebugger, IDebuggerSidebar } from './tokens';
 import { DebuggerNotebookHandler } from './handlers/notebook';
 
 import { DebuggerConsoleHandler } from './handlers/console';
+import { DebuggerSidebar } from './sidebar';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -153,28 +154,29 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 /**
  * A plugin providing a condensed sidebar UI for debugging.
  */
-// const sidebar: JupyterFrontEndPlugin<DebuggerSidebar> = {
-//   id: '@jupyterlab/debugger:sidebar',
-//   optional: [ILayoutRestorer],
-//   autoStart: true,
-//   activate: (
-//     app: JupyterFrontEnd,
-//     restorer: ILayoutRestorer | null
-//   ): DebuggerSidebar => {
-//     const { shell } = app;
-//     const label = 'Environment';
-//     const namespace = 'jp-debugger-sidebar';
-//     const sidebar = new DebuggerSidebar(null);
-//     sidebar.id = namespace;
-//     sidebar.title.label = label;
-//     shell.add(sidebar, 'right', { activate: false });
-//     if (restorer) {
-//       restorer.add(sidebar, sidebar.id);
-//     }
+const sidebar: JupyterFrontEndPlugin<IDebuggerSidebar> = {
+  id: '@jupyterlab/debugger:sidebar',
+  optional: [ILayoutRestorer],
+  provides: IDebuggerSidebar,
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    restorer: ILayoutRestorer | null
+  ): DebuggerSidebar => {
+    const { shell } = app;
+    const label = 'Environment';
+    const namespace = 'jp-debugger-sidebar';
+    const sidebar = new DebuggerSidebar(null);
+    sidebar.id = namespace;
+    sidebar.title.label = label;
+    shell.add(sidebar, 'right', { activate: false });
+    if (restorer) {
+      restorer.add(sidebar, sidebar.id);
+    }
 
-//     return sidebar;
-//   }
-// };
+    return sidebar;
+  }
+};
 
 /**
  * A plugin providing a tracker code debuggers.
@@ -262,7 +264,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   consoles,
   files,
   notebooks,
-  // sidebar,
+  sidebar,
   tracker
 ];
 
