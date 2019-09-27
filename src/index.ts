@@ -154,9 +154,10 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 /**
  * A plugin providing a condensed sidebar UI for debugging.
  */
-const sidebar: JupyterFrontEndPlugin<DebuggerSidebar> = {
+const sidebar: JupyterFrontEndPlugin<IDebuggerSidebar> = {
   id: '@jupyterlab/debugger:sidebar',
   optional: [ILayoutRestorer],
+  provides: IDebuggerSidebar,
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
