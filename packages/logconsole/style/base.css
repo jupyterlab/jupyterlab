@@ -1,0 +1,25 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-LogConsolePanel {
+  overflow-y: auto;
+}
+
+.jp-LogConsolePanel .jp-OutputArea-child {
+  border-bottom: 1px solid var(--jp-border-color3);
+}
+
+.jp-LogConsolePanel .jp-OutputArea-prompt {
+  width: 85px;
+  color: var(--jp-ui-font-color2);
+  font-size: 13px;
+  padding: 2px;
+}
+
+.jp-LogConsoleListPlaceholder {
+  padding: 5px;
+  font-size: 13px;
+  color: var(--jp-ui-font-color3);
+}

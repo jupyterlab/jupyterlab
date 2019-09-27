@@ -124,6 +124,12 @@
       "path": "../launcher-extension"
     },
     {
+      "path": "../logconsole"
+    },
+    {
+      "path": "../logconsole-extension"
+    },
+    {
       "path": "../mainmenu"
     },
     {
