@@ -67,11 +67,7 @@ export class IconRegistry implements IIconRegistry {
       if (fallback) {
         if (container) {
           container.textContent = title || '';
-          container.className = classes(
-            name,
-            className,
-            propsStyle ? iconStyleFlat(propsStyle) : ''
-          );
+          container.className = classes(name, className);
           return container;
         } else {
           // the non-container fallback isn't implemented
@@ -146,17 +142,7 @@ export class IconRegistry implements IIconRegistry {
     if (!resolvedName) {
       // TODO: remove fallback in jlab 2.0
       if (fallback) {
-        return (
-          <Tag
-            className={classes(
-              name,
-              className,
-              propsStyle ? iconStyleFlat(propsStyle) : ''
-            )}
-          >
-            {title || ''}
-          </Tag>
-        );
+        return <Tag className={classes(name, className)}>{title || ''}</Tag>;
       }
 
       // bail if failing silently

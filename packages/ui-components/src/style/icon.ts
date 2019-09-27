@@ -220,6 +220,12 @@ const containerCSSTabManager: NestedCSSProperties = {
   position: 'relative'
 };
 
+const containerCSSToolbarButton: NestedCSSProperties = {
+  display: 'inline-block',
+  margin: 'auto',
+  verticalAlign: 'middle'
+};
+
 const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   breadCrumb: {},
   dockPanelBar: containerCSSDockPanelBar,
@@ -231,7 +237,7 @@ const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   splash: containerCSSSplash,
   statusBar: {},
   tabManager: containerCSSTabManager,
-  toolbarButton: {},
+  toolbarButton: containerCSSToolbarButton,
   unset: {}
 };
 
