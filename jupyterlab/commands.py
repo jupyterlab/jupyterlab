@@ -302,6 +302,11 @@ class AppOptions(HasTraits):
             kwargs['core_config'] = core_config
         if logger is not None:
             kwargs['logger'] = logger
+
+        # use the default if app_dir is empty
+        if 'app_dir' in kwargs and not kwargs['app_dir']:
+            kwargs.pop('app_dir')
+
         super(AppOptions, self).__init__(**kwargs)
 
     app_dir = Unicode(help='The application directory')
