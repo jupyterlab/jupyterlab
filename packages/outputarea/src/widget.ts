@@ -266,6 +266,7 @@ export class OutputArea extends Widget {
     this._displayIdMap.forEach((indices: number[]) => {
       const rangeEnd = startIndex + count;
       const numIndices = indices.length;
+      // reverse loop in order to prevent removing element affecting the index
       for (let i = numIndices - 1; i >= 0; --i) {
         const index = indices[i];
         // remove model item indices in removed range
