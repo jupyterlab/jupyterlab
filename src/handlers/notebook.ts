@@ -6,32 +6,37 @@ import {
   NotebookPanel,
   NotebookTracker
 } from '@jupyterlab/notebook';
-// import { CodeCell } from '@jupyterlab/cells';
+
 import { DebugSession } from './../session';
+
 import { IClientSession } from '@jupyterlab/apputils';
+
 import { CodeCell } from '@jupyterlab/cells';
+
 import { CellManager } from './cell';
+
 import { Debugger } from '../debugger';
+
 import { Breakpoints } from '../breakpoints';
 
 export class DebuggerNotebookHandler {
   constructor(options: DebuggerNotebookHandler.IOptions) {
     this.debugger = options.debugger;
     this.notebookTracker = options.notebookTracker;
-    this.breakpoints = this.debugger.sidebar.breakpoints.model;
+    this.breakpoints = this.debugger.model.sidebar.breakpoints.model;
     this.notebookTracker.currentChanged.connect(
-      (sender, notePanel: NotebookPanel) => {
-        const session = notePanel ? notePanel.session : false;
+      (sender, notebookPanel: NotebookPanel) => {
+        const session = notebookPanel ? notebookPanel.session : null;
         this.newDebuggerSession(session, sender);
       }
     );
   }
 
-  notebookTracker: INotebookTracker;
-  debugger: Debugger;
-  debuggerSession: DebugSession;
-  breakpoints: Breakpoints.Model;
-  cellManager: CellManager;
+  private notebookTracker: INotebookTracker;
+  private debugger: Debugger;
+  private debuggerSession: DebugSession;
+  private breakpoints: Breakpoints.Model;
+  private cellManager: CellManager;
 
   protected onNewCell(noteTracker: NotebookTracker, codeCell: CodeCell) {
     setTimeout(() => {
@@ -51,7 +56,7 @@ export class DebuggerNotebookHandler {
   }
 
   protected newDebuggerSession(
-    client: IClientSession | Boolean,
+    client: IClientSession | null,
     note: INotebookTracker
   ) {
     if (this.debuggerSession) {

@@ -2,9 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeCell } from '@jupyterlab/cells';
+
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+
 import { Editor, Doc } from 'codemirror';
+
 import { DebugSession } from '../session';
+
 import { Breakpoints } from '../breakpoints';
 
 export class CellManager {
@@ -20,9 +24,9 @@ export class CellManager {
   }
 
   private _previousCell: CodeCell;
-  previousLineCount: number;
+  private previousLineCount: number;
   private _debuggerSession: DebugSession;
-  breakpoints: Breakpoints.Model;
+  private breakpoints: Breakpoints.Model;
   private _activeCell: CodeCell;
 
   set previousCell(cell: CodeCell) {

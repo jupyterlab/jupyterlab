@@ -1,25 +1,29 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-// import { CodeCell } from '@jupyterlab/cells';
 
 import {
   IConsoleTracker,
   ConsolePanel,
   CodeConsole
 } from '@jupyterlab/console';
+
 import { DebugSession } from '../session';
+
 import { IClientSession, WidgetTracker } from '@jupyterlab/apputils';
+
 import { CellManager } from '../handlers/cell';
+
 import { CodeCell } from '@jupyterlab/cells';
+
 import { Breakpoints } from '../breakpoints';
+
 import { Debugger } from '../debugger';
 
 export class DebuggerConsoleHandler {
   constructor(options: DebuggerNotebookHandler.IOptions) {
     this.debugger = options.debugger;
     this.consoleTracker = options.consoleTracker;
-    this.breakpoints = this.debugger.sidebar.breakpoints.model;
-    console.log(this.breakpoints);
+    this.breakpoints = this.debugger.model.sidebar.breakpoints.model;
     this.consoleTracker.currentChanged.connect(
       (sender: WidgetTracker<ConsolePanel>, consolePanel: ConsolePanel) => {
         this.newDebuggerSession(consolePanel, sender);
@@ -27,19 +31,19 @@ export class DebuggerConsoleHandler {
     );
   }
 
-  consoleTracker: IConsoleTracker;
-  debuggerSession: DebugSession;
-  debugger: Debugger;
-  breakpoints: Breakpoints.Model;
-  cellManager: CellManager;
-  consoleSession: IClientSession | Boolean;
-  previousConsole: ConsolePanel;
+  private consoleTracker: IConsoleTracker;
+  private debuggerSession: DebugSession;
+  private debugger: Debugger;
+  private breakpoints: Breakpoints.Model;
+  private cellManager: CellManager;
+  private consoleSession: IClientSession | null;
+  private previousConsole: ConsolePanel;
 
   protected newDebuggerSession(
     consolePanel: ConsolePanel,
     widgetTrack: WidgetTracker
   ) {
-    this.consoleSession = consolePanel ? consolePanel.session : false;
+    this.consoleSession = consolePanel ? consolePanel.session : null;
     if (this.debuggerSession && this.consoleSession) {
       this.debugger.model.session.dispose();
       this.debuggerSession = new DebugSession({
