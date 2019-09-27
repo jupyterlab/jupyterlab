@@ -103,11 +103,16 @@ describe('@jupyterlab/console', () => {
     let handler: TestHandler;
     let session: IClientSession;
 
-    before(async () => {
+    before(async function() {
+      // tslint:disable-next-line:no-invalid-this
+      this.timeout(60000);
+
       const path = UUID.uuid4();
-      const sessions = [Session.startNew({ path }), Session.startNew({ path })];
-      [local, foreign] = await Promise.all(sessions);
-      session = await createClientSession({ path: local.path });
+      [local, foreign, session] = await Promise.all([
+        Session.startNew({ path }),
+        Session.startNew({ path }),
+        createClientSession({ path: local.path })
+      ]);
       await (session as ClientSession).initialize();
       await session.kernel.ready;
     });
