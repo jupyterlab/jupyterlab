@@ -468,12 +468,12 @@ function activateLogConsole(
     logConsolePanel.attached.connect(() => {
       status.model.markSourceLogsViewed(status.model.activeSource);
       status.model.flashEnabled = false;
-    }, this);
+    });
 
     logConsoleWidget.disposed.connect(() => {
       logConsoleWidget = null;
       status.model.flashEnabled = flashEnabled;
-    }, this);
+    });
 
     app.shell.add(logConsoleWidget, 'main', {
       ref: '',
@@ -516,7 +516,7 @@ function activateLogConsole(
 
   let appRestored = false;
 
-  app.restored.then(() => {
+  void app.restored.then(() => {
     appRestored = true;
   });
 
