@@ -228,6 +228,7 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Set the value at the specified index.
    */
   set(index: number, value: nbformat.IOutput): void {
+    value = JSONExt.deepCopy(value);
     // Normalize stream data.
     Private.normalize(value);
     let item = this._createItem({ value, trusted: this._trusted });
