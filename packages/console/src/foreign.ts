@@ -116,8 +116,10 @@ export class ForeignHandler implements IDisposable {
         if (!cell) {
           return false;
         }
-        let output = msg.content as nbformat.IOutput;
-        output.output_type = msgType as nbformat.OutputType;
+        const output: nbformat.IOutput = {
+          ...msg.content,
+          output_type: msgType
+        };
         cell.model.outputs.add(output);
         parent.update();
         return true;

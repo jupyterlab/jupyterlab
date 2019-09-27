@@ -1,0 +1,24 @@
+:root [data-jp-theme-light='true'] {
+  --jp-icon-output-console: url('./list-icon-light.svg');
+}
+
+:root [data-jp-theme-light='false'] {
+  --jp-icon-output-console: url('./list-icon-dark.svg');
+}
+
+.jp-LogConsoleIcon {
+  background-image: var(--jp-icon-output-console);
+}
+
+.jp-LogConsoleStatusItem.hilite {
+  transition: background-color 1s ease-out;
+  background-color: var(--jp-info-color0);
+}
+.jp-LogConsoleStatusItem.hilited {
+  background-color: var(--jp-info-color0);
+}
+
+.jp-LogConsole .clear-icon {
+  transform: rotate(90deg);
+  margin-top: -1px;
+}

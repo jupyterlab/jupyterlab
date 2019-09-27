@@ -251,7 +251,7 @@ export class ClientSession implements IClientSession {
   /**
    * A signal emitted for iopub kernel messages.
    */
-  get iopubMessage(): ISignal<this, KernelMessage.IMessage> {
+  get iopubMessage(): ISignal<this, KernelMessage.IIOPubMessage> {
     return this._iopubMessage;
   }
 
@@ -830,7 +830,7 @@ export class ClientSession implements IClientSession {
   private _terminated = new Signal<this, void>(this);
   private _kernelChanged = new Signal<this, Session.IKernelChangedArgs>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
-  private _iopubMessage = new Signal<this, KernelMessage.IMessage>(this);
+  private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
   private _dialog: Dialog<any> | null = null;
