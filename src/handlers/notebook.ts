@@ -58,7 +58,6 @@ export class DebuggerNotebookHandler {
       this.debugger.model.session.dispose();
       note.activeCellChanged.disconnect(this.onNewCell, this);
     }
-    // create new session. Just changing client make sometimes that kernel is not attach to note
     if (client) {
       this.debuggerSession = new DebugSession({
         client: client as IClientSession

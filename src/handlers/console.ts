@@ -12,11 +12,14 @@ import { IClientSession, WidgetTracker } from '@jupyterlab/apputils';
 import { CellManager } from '../handlers/cell';
 import { CodeCell } from '@jupyterlab/cells';
 import { Breakpoints } from '../breakpoints';
+import { Debugger } from '../debugger';
 
 export class DebuggerConsoleHandler {
   constructor(options: DebuggerNotebookHandler.IOptions) {
+    this.debugger = options.debugger;
     this.consoleTracker = options.consoleTracker;
-
+    this.breakpoints = this.debugger.sidebar.breakpoints.model;
+    console.log(this.breakpoints);
     this.consoleTracker.currentChanged.connect(
       (sender: WidgetTracker<ConsolePanel>, consolePanel: ConsolePanel) => {
         this.newDebuggerSession(consolePanel, sender);
@@ -26,7 +29,8 @@ export class DebuggerConsoleHandler {
 
   consoleTracker: IConsoleTracker;
   debuggerSession: DebugSession;
-  breakpointService: Breakpoints.Model;
+  debugger: Debugger;
+  breakpoints: Breakpoints.Model;
   cellManager: CellManager;
   consoleSession: IClientSession | Boolean;
   previousConsole: ConsolePanel;
@@ -37,10 +41,11 @@ export class DebuggerConsoleHandler {
   ) {
     this.consoleSession = consolePanel ? consolePanel.session : false;
     if (this.debuggerSession && this.consoleSession) {
-      this.debuggerSession.dispose();
+      this.debugger.model.session.dispose();
       this.debuggerSession = new DebugSession({
         client: this.consoleSession as IClientSession
       });
+      this.debugger.model.session = this.debuggerSession;
       if (this.cellManager && this.previousConsole) {
         this.previousConsole.console.promptCellCreated.disconnect(
           this.promptCellCreated,
@@ -56,6 +61,7 @@ export class DebuggerConsoleHandler {
       this.debuggerSession = new DebugSession({
         client: this.consoleSession as IClientSession
       });
+      this.debugger.model.session = this.debuggerSession;
     }
 
     if (this.consoleSession) {
@@ -77,7 +83,7 @@ export class DebuggerConsoleHandler {
     } else if (!this.cellManager) {
       this.cellManager = new CellManager({
         activeCell: update,
-        breakpoints: this.breakpointService,
+        breakpoints: this.breakpoints,
         session: this.debuggerSession
       });
     }
@@ -86,7 +92,7 @@ export class DebuggerConsoleHandler {
 
 export namespace DebuggerNotebookHandler {
   export interface IOptions {
+    debugger: Debugger;
     consoleTracker: IConsoleTracker;
-    breakpoints: Breakpoints.Model;
   }
 }

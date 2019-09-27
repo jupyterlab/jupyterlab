@@ -44,7 +44,7 @@ export class Breakpoints extends Panel {
       new ToolbarButton({
         iconClassName: 'jp-CloseAllIcon',
         onClick: () => {
-          // this.service.clearSelectedBreakpoints();
+          this.model.clearSelectedBreakpoints();
         },
         tooltip: 'Remove All Breakpoints'
       })
@@ -79,11 +79,11 @@ export namespace Breakpoints {
 
   export class Model {
     constructor(model: IBreakpoint[]) {
-      this._state = model;
+      this._breakpoints = model;
     }
 
     get breakpoints(): IBreakpoint[] {
-      return this._state;
+      return this._breakpoints;
     }
 
     get breakpointChanged(): Signal<this, IBreakpoint> {
@@ -91,14 +91,16 @@ export namespace Breakpoints {
     }
 
     set breakpoints(breakpoints: IBreakpoint[]) {
-      this._state = [...breakpoints];
-      this.breakpointsChanged.emit(this._state);
+      this._breakpoints = [...breakpoints];
+      this.breakpointsChanged.emit(this._breakpoints);
     }
 
     set breakpoint(breakpoint: IBreakpoint) {
-      const index = this._state.findIndex(ele => ele.line === breakpoint.line);
+      const index = this._breakpoints.findIndex(
+        ele => ele.line === breakpoint.line
+      );
       if (index !== -1) {
-        this._state[index] = breakpoint;
+        this._breakpoints[index] = breakpoint;
         this._breakpointChanged.emit(breakpoint);
       } else {
         this.breakpoints = [...this.breakpoints, breakpoint];
@@ -114,7 +116,16 @@ export namespace Breakpoints {
           name: session
         }
       };
-      this.breakpoints = [...this._state, breakpoint];
+      this.breakpoints = [...this._breakpoints, breakpoint];
+    }
+
+    set type(newType: SessionTypes) {
+      if (newType === this.selectedType) {
+        return;
+      }
+      this.state[this.selectedType] = this.breakpoints;
+      this.selectedType = newType;
+      this.breakpoints = this.state[newType];
     }
 
     removeBreakpoint(lineInfo: any) {
@@ -126,6 +137,7 @@ export namespace Breakpoints {
 
     clearSelectedBreakpoints() {
       this.breakpoints = [];
+      this.clearedBreakpoints.emit();
     }
 
     changeLines(linesInfo: LineInfo[]) {
@@ -144,9 +156,15 @@ export namespace Breakpoints {
       }
     }
 
-    private _state: IBreakpoint[];
+    private _breakpoints: IBreakpoint[];
     breakpointsChanged = new Signal<this, IBreakpoint[]>(this);
+    clearedBreakpoints = new Signal<this, void>(this);
+    private selectedType: SessionTypes;
     private _breakpointChanged = new Signal<this, IBreakpoint>(this);
+    private state = {
+      console: [] as Breakpoints.IBreakpoint[],
+      notebook: [] as Breakpoints.IBreakpoint[]
+    };
   }
 
   /**
@@ -154,3 +172,5 @@ export namespace Breakpoints {
    */
   export interface IOptions extends Panel.IOptions {}
 }
+
+export type SessionTypes = 'console' | 'notebook';

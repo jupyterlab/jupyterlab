@@ -26,13 +26,7 @@ import { IDebugger, IDebuggerSidebar } from './tokens';
 
 import { DebuggerNotebookHandler } from './handlers/notebook';
 
-import { DebuggerSidebar } from './sidebar';
-
-// import { DebuggerConsoleHandler } from './handlers/console';
-
-// import { ClientSession, IClientSession } from '@jupyterlab/apputils';
-
-// import { DebugSession } from './session';
+import { DebuggerConsoleHandler } from './handlers/console';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -54,12 +48,13 @@ const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:consoles',
   autoStart: true,
   requires: [IDebugger, IConsoleTracker],
-  activate: (_, debug, tracker: IConsoleTracker) => {
-    //Commend only for refactor;
-    // new DebuggerConsoleHandler({
-    //   consoleTracker: tracker,
-    //   breakpointService: breakpointService
-    // });
+  activate: (_, debug: IDebugger, tracker: IConsoleTracker) => {
+    debug.currentChanged.connect((_, update) => {
+      new DebuggerConsoleHandler({
+        debugger: update.content,
+        consoleTracker: tracker
+      });
+    });
   }
 };
 
@@ -69,8 +64,12 @@ const consoles: JupyterFrontEndPlugin<void> = {
 const files: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:files',
   autoStart: true,
-  requires: [IEditorTracker],
-  activate: (app: JupyterFrontEnd, tracker: IEditorTracker | null) => {
+  requires: [IEditorTracker, IDebugger],
+  activate: (
+    app: JupyterFrontEnd,
+    debug: IDebugger,
+    tracker: IEditorTracker | null
+  ) => {
     const shell = app.shell;
 
     (shell as LabShell).currentChanged.connect((sender, update) => {
@@ -154,28 +153,28 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 /**
  * A plugin providing a condensed sidebar UI for debugging.
  */
-const sidebar: JupyterFrontEndPlugin<DebuggerSidebar> = {
-  id: '@jupyterlab/debugger:sidebar',
-  optional: [ILayoutRestorer],
-  autoStart: true,
-  activate: (
-    app: JupyterFrontEnd,
-    restorer: ILayoutRestorer | null
-  ): DebuggerSidebar => {
-    const { shell } = app;
-    const label = 'Environment';
-    const namespace = 'jp-debugger-sidebar';
-    const sidebar = new DebuggerSidebar(null);
-    sidebar.id = namespace;
-    sidebar.title.label = label;
-    shell.add(sidebar, 'right', { activate: false });
-    if (restorer) {
-      restorer.add(sidebar, sidebar.id);
-    }
+// const sidebar: JupyterFrontEndPlugin<DebuggerSidebar> = {
+//   id: '@jupyterlab/debugger:sidebar',
+//   optional: [ILayoutRestorer],
+//   autoStart: true,
+//   activate: (
+//     app: JupyterFrontEnd,
+//     restorer: ILayoutRestorer | null
+//   ): DebuggerSidebar => {
+//     const { shell } = app;
+//     const label = 'Environment';
+//     const namespace = 'jp-debugger-sidebar';
+//     const sidebar = new DebuggerSidebar(null);
+//     sidebar.id = namespace;
+//     sidebar.title.label = label;
+//     shell.add(sidebar, 'right', { activate: false });
+//     if (restorer) {
+//       restorer.add(sidebar, sidebar.id);
+//     }
 
-    return sidebar;
-  }
-};
+//     return sidebar;
+//   }
+// };
 
 /**
  * A plugin providing a tracker code debuggers.
@@ -200,6 +199,9 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
       upadete;
     });
 
+    const { shell } = app;
+    const label = 'Environment';
+    const namespace = 'jp-debugger-sidebar';
     const command = CommandIDs.create;
 
     app.commands.addCommand(command, {
@@ -223,6 +225,12 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
 
         void tracker.add(widget);
 
+        const sidebar = widget.content.sidebar;
+
+        sidebar.id = namespace;
+        sidebar.title.label = label;
+        shell.add(sidebar, 'right', { activate: false });
+
         return widget;
       }
     });
@@ -239,7 +247,6 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
     }
 
     tracker.currentChanged.connect((_, current) => {
-      console.log({ sidebar });
       // sidebar.model = current ? current.content.model : null;
     });
 
@@ -255,7 +262,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   consoles,
   files,
   notebooks,
-  sidebar,
+  // sidebar,
   tracker
 ];
 

@@ -9,17 +9,20 @@ import { Breakpoints } from '../breakpoints';
 
 export class CellManager {
   constructor(options: CellManager.IOptions) {
-    this.breakpointService = options.breakpoints;
-    console.log({ breakpoint: this.breakpointService });
+    this.breakpoints = options.breakpoints;
     this.activeCell = options.activeCell;
     this.debuggerSession = options.session;
     this.onActiveCellChanged();
+
+    this.breakpoints.clearedBreakpoints.connect(() => {
+      this.clearGutter(this.activeCell);
+    });
   }
 
   private _previousCell: CodeCell;
   previousLineCount: number;
   private _debuggerSession: DebugSession;
-  breakpointService: Breakpoints.Model;
+  breakpoints: Breakpoints.Model;
   private _activeCell: CodeCell;
 
   set previousCell(cell: CodeCell) {
@@ -61,7 +64,7 @@ export class CellManager {
       if (this.previousCell && !this.previousCell.isDisposed) {
         this.removeListner(this.previousCell);
         this.clearGutter(this.previousCell);
-        this.breakpointService.clearSelectedBreakpoints();
+        this.breakpoints.clearSelectedBreakpoints();
       }
       this.previousCell = this.activeCell;
       this.setEditor(this.activeCell);
@@ -110,9 +113,9 @@ export class CellManager {
 
     const isRemoveGutter = !!info.gutterMarkers;
     if (isRemoveGutter) {
-      this.breakpointService.removeBreakpoint(info as LineInfo);
+      this.breakpoints.removeBreakpoint(info as LineInfo);
     } else {
-      this.breakpointService.addBreakpoint(
+      this.breakpoints.addBreakpoint(
         this.debuggerSession.id,
         this.getEditorId(),
         info as LineInfo
@@ -140,7 +143,7 @@ export class CellManager {
           lines.push(editor.lineInfo(line));
         }
       });
-      // this.breakpointService.changeLines(lines);
+      this.breakpoints.changeLines(lines);
       this.previousLineCount = linesNumber;
     }
   };
