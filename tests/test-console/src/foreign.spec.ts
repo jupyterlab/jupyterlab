@@ -111,8 +111,12 @@ describe('@jupyterlab/console', () => {
       [local, foreign, session] = await Promise.all([
         Session.startNew({ path }),
         Session.startNew({ path }),
-        createClientSession({ path: local.path })
+        createClientSession({ path })
       ]);
+
+      // check path prop
+      expect(local.path).to.equal(path);
+
       await (session as ClientSession).initialize();
       await session.kernel.ready;
     });
@@ -127,9 +131,11 @@ describe('@jupyterlab/console', () => {
     });
 
     after(async () => {
+      // local, foreign, and session share state, so only one shutdown
+      await session.shutdown();
+
       local.dispose();
       foreign.dispose();
-      await session.shutdown();
       session.dispose();
     });
 
