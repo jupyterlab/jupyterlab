@@ -175,13 +175,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     this.addClass(APPLICATION_SHELL_CLASS);
     this.id = 'main';
 
-    let bottomPanel = (this._bottomPanel = new BoxPanel());
+    let headerPanel = (this._headerPanel = new Panel());
     let topHandler = (this._topHandler = new Private.PanelHandler());
+    let bottomPanel = (this._bottomPanel = new BoxPanel());
     let hboxPanel = new BoxPanel();
     let dockPanel = (this._dockPanel = new DockPanelSvg({
       kind: 'dockPanelBar'
     }));
-    let headerPanel = (this._headerPanel = new Panel());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
     let hsplitPanel = new SplitPanel();
@@ -191,12 +191,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     ));
     let rootLayout = new BoxLayout();
 
-    bottomPanel.id = 'jp-bottom-panel';
+    headerPanel.id = 'jp-header-panel';
     topHandler.panel.id = 'jp-top-panel';
+    bottomPanel.id = 'jp-bottom-panel';
     hboxPanel.id = 'jp-main-content-panel';
     dockPanel.id = 'jp-main-dock-panel';
     hsplitPanel.id = 'jp-main-split-panel';
-    headerPanel.id = 'jp-header-panel';
 
     leftHandler.sideBar.addClass(SIDEBAR_CLASS);
     leftHandler.sideBar.addClass('jp-mod-left');
@@ -206,13 +206,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     rightHandler.sideBar.addClass('jp-mod-right');
     rightHandler.stackedPanel.id = 'jp-right-stack';
 
-    bottomPanel.direction = 'bottom-to-top';
     hboxPanel.spacing = 0;
     dockPanel.spacing = 5;
     hsplitPanel.spacing = 1;
 
     hboxPanel.direction = 'left-to-right';
     hsplitPanel.orientation = 'horizontal';
+    bottomPanel.direction = 'bottom-to-top';
 
     SplitPanel.setStretch(leftHandler.stackedPanel, 0);
     SplitPanel.setStretch(dockPanel, 1);
