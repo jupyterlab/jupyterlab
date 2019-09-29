@@ -1029,7 +1029,7 @@ namespace Private {
   }
 
   /**
-   * A class which manages a panel and sort its widgets by rank.
+   * A class which manages a panel and sorts its widgets by rank.
    */
   export class PanelHandler {
     /**
