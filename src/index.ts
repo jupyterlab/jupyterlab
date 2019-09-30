@@ -26,8 +26,10 @@ import { IDebugger, IDebuggerSidebar } from './tokens';
 
 import { DebuggerNotebookHandler } from './handlers/notebook';
 
-// import { DebuggerConsoleHandler } from './handlers/console';
+import { DebuggerConsoleHandler } from './handlers/console';
+
 import { DebuggerSidebar } from './sidebar';
+
 import { SessionTypes } from './breakpoints';
 
 /**
@@ -56,13 +58,13 @@ const consoles: JupyterFrontEndPlugin<void> = {
     sidebar: IDebuggerSidebar,
     tracker: IConsoleTracker
   ) => {
-    // debug.currentChanged.connect((_, update) => {
-    //   update.content.model.sidebar = sidebar;
-    //   new DebuggerConsoleHandler({
-    //     debugger: update.content,
-    //     consoleTracker: tracker
-    //   });
-    // });
+    debug.currentChanged.connect((_, update) => {
+      update.content.model.sidebar = sidebar;
+      new DebuggerConsoleHandler({
+        debugger: update.content,
+        consoleTracker: tracker
+      });
+    });
   }
 };
 
@@ -75,8 +77,8 @@ const files: JupyterFrontEndPlugin<void> = {
   requires: [IEditorTracker, IDebugger],
   activate: (
     app: JupyterFrontEnd,
-    debug: IDebugger,
-    tracker: IEditorTracker | null
+    tracker: IEditorTracker | null,
+    debug: IDebugger
   ) => {
     const shell = app.shell;
     (shell as LabShell).currentChanged.connect((sender, update) => {
@@ -86,7 +88,9 @@ const files: JupyterFrontEndPlugin<void> = {
           ? (newWidget as NotebookPanel | ConsolePanel).session
           : false;
       if (session && debug.currentWidget) {
-        debug.currentWidget.content.model.sidebar.breakpoints.model.type = session.type as SessionTypes;
+        const debugModel: Debugger.Model = debug.currentWidget.content.model;
+        debugModel.session.client = session;
+        debugModel.sidebar.breakpoints.model.type = session.type as SessionTypes;
       }
     });
 

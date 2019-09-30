@@ -87,8 +87,9 @@ export class DebuggerConsoleHandler {
     } else if (!this.cellManager) {
       this.cellManager = new CellManager({
         activeCell: update,
-        breakpoints: this.breakpoints,
-        session: this.debuggerSession
+        breakpointsModel: this.breakpoints,
+        session: this.debuggerSession,
+        type: 'console'
       });
     }
   }

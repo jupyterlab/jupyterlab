@@ -137,7 +137,7 @@ export namespace Breakpoints {
 
     clearSelectedBreakpoints() {
       this.breakpoints = [];
-      this.clearedBreakpoints.emit();
+      this.clearedBreakpoints.emit(this.selectedType);
     }
 
     changeLines(linesInfo: LineInfo[]) {
@@ -158,7 +158,7 @@ export namespace Breakpoints {
 
     private _breakpoints: IBreakpoint[];
     breakpointsChanged = new Signal<this, IBreakpoint[]>(this);
-    clearedBreakpoints = new Signal<this, void>(this);
+    clearedBreakpoints = new Signal<this, SessionTypes | null>(this);
     private selectedType: SessionTypes;
     private _breakpointChanged = new Signal<this, IBreakpoint>(this);
     private state = {

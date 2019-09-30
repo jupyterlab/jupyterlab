@@ -45,12 +45,12 @@ export class DebuggerNotebookHandler {
         this.cellManager.activeCell = codeCell;
         this.cellManager.onActiveCellChanged();
       } else {
-        const options: CellManager.IOptions = {
-          breakpoints: this.breakpoints,
+        this.cellManager = new CellManager({
+          breakpointsModel: this.breakpoints,
           activeCell: codeCell,
-          session: this.debuggerSession
-        };
-        this.cellManager = new CellManager(options);
+          session: this.debuggerSession,
+          type: 'notebook'
+        });
       }
     });
   }
