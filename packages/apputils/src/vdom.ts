@@ -13,7 +13,7 @@ import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-type ReactRenderElement =
+export type ReactRenderElement =
   | Array<React.ReactElement<any>>
   | React.ReactElement<any>;
 
