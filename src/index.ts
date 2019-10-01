@@ -61,7 +61,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
     debug.currentChanged.connect((_, update) => {
       update.content.model.sidebar = sidebar;
       new DebuggerConsoleHandler({
-        debugger: update.content,
+        debuggerModel: update.content.model,
         consoleTracker: tracker
       });
     });
@@ -90,6 +90,7 @@ const files: JupyterFrontEndPlugin<void> = {
       if (session && debug.currentWidget) {
         const debugModel: Debugger.Model = debug.currentWidget.content.model;
         debugModel.session.client = session;
+        console.log(session.name);
         debugModel.sidebar.breakpoints.model.type = session.type as SessionTypes;
       }
     });
@@ -131,7 +132,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     debug.currentChanged.connect((_, update) => {
       update.content.model.sidebar = sidebar;
       new DebuggerNotebookHandler({
-        debugger: update.content,
+        debuggerModel: update.content.model,
         notebookTracker: notebook
       });
     });

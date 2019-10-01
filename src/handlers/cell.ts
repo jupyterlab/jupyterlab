@@ -7,15 +7,14 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { Editor, Doc } from 'codemirror';
 
-import { DebugSession } from '../session';
-
 import { Breakpoints, SessionTypes } from '../breakpoints';
+import { Debugger } from '../debugger';
 
 export class CellManager {
   constructor(options: CellManager.IOptions) {
+    this._debuggerModel = options.debuggerModel;
     this.breakpointsModel = options.breakpointsModel;
     this.activeCell = options.activeCell;
-    this.debuggerSession = options.session;
     this._type = options.type;
     this.onActiveCellChanged();
 
@@ -29,7 +28,7 @@ export class CellManager {
 
   private _previousCell: CodeCell;
   private previousLineCount: number;
-  private _debuggerSession: DebugSession;
+  private _debuggerModel: Debugger.Model;
   private _type: SessionTypes;
   private breakpointsModel: Breakpoints.Model;
   private _activeCell: CodeCell;
@@ -40,10 +39,6 @@ export class CellManager {
 
   get previousCell() {
     return this._previousCell;
-  }
-
-  set debuggerSession(session: DebugSession) {
-    this._debuggerSession = session;
   }
 
   set activeCell(cell: CodeCell) {
@@ -65,7 +60,12 @@ export class CellManager {
   }
 
   onActiveCellChanged() {
-    if (this.activeCell && this.activeCell.editor && this._debuggerSession) {
+    if (
+      this.activeCell &&
+      this.activeCell.editor &&
+      this._debuggerModel &&
+      this._debuggerModel.session
+    ) {
       if (this.previousCell && !this.previousCell.isDisposed) {
         this.removeListner(this.previousCell);
         this.clearGutter(this.previousCell);
@@ -117,7 +117,7 @@ export class CellManager {
       this.breakpointsModel.removeBreakpoint(info as LineInfo);
     } else {
       this.breakpointsModel.addBreakpoint(
-        this._debuggerSession.id,
+        this._debuggerModel.session.id,
         this.getEditorId(),
         info as LineInfo
       );
@@ -159,7 +159,7 @@ export class CellManager {
 
 export namespace CellManager {
   export interface IOptions {
-    session: DebugSession;
+    debuggerModel: Debugger.Model;
     breakpointsModel: Breakpoints.Model;
     activeCell?: CodeCell;
     type: SessionTypes;

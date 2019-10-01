@@ -21,9 +21,9 @@ import { Breakpoints } from '../breakpoints';
 
 export class DebuggerNotebookHandler {
   constructor(options: DebuggerNotebookHandler.IOptions) {
-    this.debugger = options.debugger;
+    this.debuggerModel = options.debuggerModel;
     this.notebookTracker = options.notebookTracker;
-    this.breakpoints = this.debugger.model.sidebar.breakpoints.model;
+    this.breakpoints = this.debuggerModel.sidebar.breakpoints.model;
     this.notebookTracker.currentChanged.connect(
       (sender, notebookPanel: NotebookPanel) => {
         const session = notebookPanel ? notebookPanel.session : null;
@@ -33,22 +33,21 @@ export class DebuggerNotebookHandler {
   }
 
   private notebookTracker: INotebookTracker;
-  private debugger: Debugger;
-  private debuggerSession: DebugSession;
+  private debuggerModel: Debugger.Model;
+  // private debuggerSession: DebugSession;
   private breakpoints: Breakpoints.Model;
   private cellManager: CellManager;
 
   protected onNewCell(noteTracker: NotebookTracker, codeCell: CodeCell) {
     setTimeout(() => {
       if (this.cellManager) {
-        this.cellManager.debuggerSession = this.debuggerSession;
         this.cellManager.activeCell = codeCell;
         this.cellManager.onActiveCellChanged();
       } else {
         this.cellManager = new CellManager({
           breakpointsModel: this.breakpoints,
           activeCell: codeCell,
-          session: this.debuggerSession,
+          debuggerModel: this.debuggerModel,
           type: 'notebook'
         });
       }
@@ -59,15 +58,15 @@ export class DebuggerNotebookHandler {
     client: IClientSession | null,
     note: INotebookTracker
   ) {
-    if (this.debuggerSession) {
-      this.debugger.model.session.dispose();
+    if (this.debuggerModel.session) {
+      this.debuggerModel.session.dispose();
       note.activeCellChanged.disconnect(this.onNewCell, this);
     }
     if (client) {
-      this.debuggerSession = new DebugSession({
+      const newSession = new DebugSession({
         client: client as IClientSession
       });
-      this.debugger.model.session = this.debuggerSession;
+      this.debuggerModel.session = newSession;
       note.activeCellChanged.connect(this.onNewCell, this);
     }
   }
@@ -75,7 +74,7 @@ export class DebuggerNotebookHandler {
 
 export namespace DebuggerNotebookHandler {
   export interface IOptions {
-    debugger: Debugger;
+    debuggerModel: Debugger.Model;
     notebookTracker: INotebookTracker;
   }
 }

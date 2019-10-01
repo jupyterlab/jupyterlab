@@ -21,9 +21,9 @@ import { Debugger } from '../debugger';
 
 export class DebuggerConsoleHandler {
   constructor(options: DebuggerNotebookHandler.IOptions) {
-    this.debugger = options.debugger;
+    this.debuggerModel = options.debuggerModel;
     this.consoleTracker = options.consoleTracker;
-    this.breakpoints = this.debugger.model.sidebar.breakpoints.model;
+    this.breakpoints = this.debuggerModel.sidebar.breakpoints.model;
     this.consoleTracker.currentChanged.connect(
       (sender: WidgetTracker<ConsolePanel>, consolePanel: ConsolePanel) => {
         this.newDebuggerSession(consolePanel, sender);
@@ -32,8 +32,7 @@ export class DebuggerConsoleHandler {
   }
 
   private consoleTracker: IConsoleTracker;
-  private debuggerSession: DebugSession;
-  private debugger: Debugger;
+  private debuggerModel: Debugger.Model;
   private breakpoints: Breakpoints.Model;
   private cellManager: CellManager;
   private consoleSession: IClientSession | null;
@@ -44,28 +43,27 @@ export class DebuggerConsoleHandler {
     widgetTrack: WidgetTracker
   ) {
     this.consoleSession = consolePanel ? consolePanel.session : null;
-    if (this.debuggerSession && this.consoleSession) {
-      this.debugger.model.session.dispose();
-      this.debuggerSession = new DebugSession({
+    if (this.debuggerModel.session && this.consoleSession) {
+      this.debuggerModel.session.dispose();
+      const newSession = new DebugSession({
         client: this.consoleSession as IClientSession
       });
-      this.debugger.model.session = this.debuggerSession;
+      this.debuggerModel.session = newSession;
       if (this.cellManager && this.previousConsole) {
         this.previousConsole.console.promptCellCreated.disconnect(
           this.promptCellCreated,
           this
         );
         if (consolePanel.console.promptCell) {
-          this.cellManager.debuggerSession = this.debuggerSession;
           this.cellManager.previousCell = this.cellManager.activeCell;
           this.cellManager.activeCell = consolePanel.console.promptCell;
         }
       }
     } else if (this.consoleSession) {
-      this.debuggerSession = new DebugSession({
+      const newSession = new DebugSession({
         client: this.consoleSession as IClientSession
       });
-      this.debugger.model.session = this.debuggerSession;
+      this.debuggerModel.session = newSession;
     }
 
     if (this.consoleSession) {
@@ -80,15 +78,18 @@ export class DebuggerConsoleHandler {
   protected promptCellCreated(sender: CodeConsole, update: CodeCell) {
     if (
       this.cellManager &&
-      this.debuggerSession.id === (this.consoleSession as IClientSession).name
+      this.debuggerModel.session.id ===
+        (this.consoleSession as IClientSession).name
     ) {
+      console.log('?');
       this.cellManager.previousCell = this.cellManager.activeCell;
       this.cellManager.activeCell = update;
     } else if (!this.cellManager) {
+      console.log('??');
       this.cellManager = new CellManager({
         activeCell: update,
         breakpointsModel: this.breakpoints,
-        session: this.debuggerSession,
+        debuggerModel: this.debuggerModel,
         type: 'console'
       });
     }
@@ -97,7 +98,7 @@ export class DebuggerConsoleHandler {
 
 export namespace DebuggerNotebookHandler {
   export interface IOptions {
-    debugger: Debugger;
+    debuggerModel: Debugger.Model;
     consoleTracker: IConsoleTracker;
   }
 }
