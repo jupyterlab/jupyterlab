@@ -297,7 +297,7 @@ function addRunningSessionManager(
       this._model = model;
     }
     open() {
-      app.commands.execute('terminal:open', { name: this._model.name });
+      void app.commands.execute('terminal:open', { name: this._model.name });
     }
     iconClass() {
       return `${ITEM_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
