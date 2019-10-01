@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-filebrowser",
-  "version": "2.0.0-alpha.0",
+  "version": "2.0.0-alpha.1",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -8,15 +8,15 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.0.0-alpha.0",
-    "@jupyterlab/codemirror": "^2.0.0-alpha.0",
-    "@jupyterlab/docmanager": "^2.0.0-alpha.0",
-    "@jupyterlab/docregistry": "^2.0.0-alpha.0",
-    "@jupyterlab/filebrowser": "^2.0.0-alpha.0",
-    "@jupyterlab/fileeditor": "^2.0.0-alpha.0",
-    "@jupyterlab/services": "^5.0.0-alpha.0",
-    "@jupyterlab/theme-light-extension": "^2.0.0-alpha.0",
-    "@jupyterlab/ui-components": "^2.0.0-alpha.0",
+    "@jupyterlab/apputils": "^2.0.0-alpha.1",
+    "@jupyterlab/codemirror": "^2.0.0-alpha.1",
+    "@jupyterlab/docmanager": "^2.0.0-alpha.1",
+    "@jupyterlab/docregistry": "^2.0.0-alpha.1",
+    "@jupyterlab/filebrowser": "^2.0.0-alpha.1",
+    "@jupyterlab/fileeditor": "^2.0.0-alpha.1",
+    "@jupyterlab/services": "^5.0.0-alpha.1",
+    "@jupyterlab/theme-light-extension": "^2.0.0-alpha.1",
+    "@jupyterlab/ui-components": "^2.0.0-alpha.1",
     "@phosphor/algorithm": "^1.2.0",
     "@phosphor/commands": "^1.7.0",
     "@phosphor/widgets": "^1.9.0",
