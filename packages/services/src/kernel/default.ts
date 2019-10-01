@@ -790,34 +790,32 @@ export class KernelConnection implements Kernel.IKernelConnection {
   }
 
   /**
-   * Connect to a comm, or create a new one.
+   * Create a new comm.
    *
    * #### Notes
-   * If a client-side comm already exists with the given commId, it is
-   * returned. An error is thrown if the kernel does not handle comms.
-   *
-   * TODO: this means that I can just take over a comm just by knowing its id.
-   * So we can't *really* share comms, since only one message handler is
-   * installed. So why would we return someone else's comm object? Perhaps
-   * instead we should throw an error if a comm is already existing with that
-   * id, signifying that someone else has already hooked up to that comm?
+   * If a client-side comm already exists with the given commId, an error is thrown.
+   * If the kernel does not handle comms, an error is thrown.
    */
-  connectToComm(
-    targetName: string,
-    commId: string = UUID.uuid4()
-  ): Kernel.IComm {
+  createComm(targetName: string, commId: string = UUID.uuid4()): Kernel.IComm {
     if (!this.handleComms) {
       throw new Error('Comms are disabled on this kernel connection');
     }
-
     if (this._comms.has(commId)) {
-      return this._comms.get(commId);
+      throw new Error('Comm is already created');
     }
+
     let comm = new CommHandler(targetName, commId, this, () => {
       this._unregisterComm(commId);
     });
     this._comms.set(commId, comm);
     return comm;
+  }
+
+  /**
+   * Check if a comm exists.
+   */
+  hasComm(commId: string): boolean {
+    return this._comms.has(commId);
   }
 
   /**

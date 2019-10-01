@@ -636,9 +636,10 @@ describe('Kernel.IKernel', () => {
     });
 
     it('should dispose of existing comm and future objects', async () => {
-      const comm = defaultKernel.connectToComm('test');
+      const comm = defaultKernel.createComm('test');
       const future = defaultKernel.requestExecute({ code: 'foo' });
       await defaultKernel.restart();
+      await defaultKernel.info;
       expect(future.isDisposed).to.equal(true);
       // TODO: sometimes this next test fails.
       expect(comm.isDisposed).to.equal(true);

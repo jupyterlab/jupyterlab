@@ -108,7 +108,7 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
     if (kernel) {
       this._timer = window.setTimeout(() => {
         if (!this._comms[targetName]) {
-          this._comms[targetName] = kernel.connectToComm(targetName);
+          this._comms[targetName] = kernel.createComm(targetName);
           this._comms[targetName].open();
         }
         this._comms[targetName].send(JSON.stringify(event));
