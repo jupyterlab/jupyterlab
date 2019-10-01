@@ -346,3 +346,111 @@ TerminalSession.startNew().then(session => {
   session.send({ type: 'stdin', content: ['foo'] });
 });
 ```
+
+## Overview
+
+### Clients
+
+A _client_ is a single entity connected to a kernel. Since kernel messages
+include the client id, it is easy for a client to filter kernel messages for
+just messages between it and the kernel. In JupyterLab, different activities
+(such as a console and a notebook) are often considered separate clients when
+connected to the same kernel.
+
+### Kernel specs
+
+A _kernel spec_ is the data about an available kernel on the system. You can
+retrieve a current list of kernel specs from the server.
+
+### Kernels
+
+A _kernel_ represents a running process on the server that implements the
+Jupyter kernel messaging protocol.
+
+#### Kernel model
+
+A _kernel model_ mirrors the server kernel models, and represents a single
+running kernel on the server. The kernel models can be refreshed from the
+server, created, restarted, and shut down. A kernel model's lifecycle mirrors
+the server kernel model's lifecycle, and it will be disposed when the server
+kernel is shut down.
+
+TODO: How do we operate on kernel models?
+
+- Module-level functions?
+- Kernel model methods?
+- Kernel connection methods?
+- A separate kernel manager?
+
+#### Kernel connection
+
+A _kernel connection_ represents a single client connecting to a kernel over a
+websocket. The kernel connection owns a websocket connection (which may be
+recreated if the connection is dropped), and holds a reference to the kernel
+model. Typically only one kernel connection handles comms for any given kernel
+model. The kernel connection is disposed when the client no longer has a need
+for the connection, but disposal will not cause the kernel to shut down. If a
+kernel is shut down, all existing kernel connections will be disposed.
+
+The kernel connection has a number of signals, such as for kernel status, etc.
+It also tracks the connection status as a separate thing.
+
+### Sessions
+
+A _session_ is a mapping on the server from an identifying string name to a
+kernel. A session has a few other pieces of information to allow for easy
+categorization and searching of sessions.
+
+The primary usecase of a session is to enable persisting a connection to a
+kernel. For example, a notebook viewer may start a session with session name
+of the notebook's file path. When a browser is refreshed, the notebook viewer
+can connect to the same kernel by asking the server for the session
+corresponding with the notebook file path.
+
+Note that for this to be really useful across kernel changes and shutdowns, we
+may need to change the notebook server behavior to let sessions persist beyond
+the kernel's lifetime. See https://github.com/jupyter/notebook/pull/4874 for a
+way to do this.
+
+#### Session model
+
+A _session model_ mirrors a server session. A session owns its associated
+kernel and is responsible for its life cycle. The session models can be
+refreshed from the server, created, changed (including creating a new session
+kernel), and shut down (which implies that the kernel will be shut down). A
+session model's lifecycle mirrors the server session's lifecycle, and it will
+be disposed when the server session is shut down.
+
+TODO: How do we operate on session models?
+
+- Module-level functions?
+- session model methods?
+- session connection methods?
+- A separate session manager?
+
+#### Session connection
+
+A session connection represents a single client connected to a session's
+kernel. A session's kernel connection can change and may be null to signify no
+current kernel connection (this may happen between when a user stops a kernel
+and starts a new kernel). A session connection owns the kernel connection,
+meaning the kernel connection is created and disposed by the session
+connection as needed. The session connection proxies signals from the kernel
+connection for convenience (e.g., you can listen to the session's status
+signal to get status changes for whatever the current kernel is, without
+having to disconnect and reconnect your signal handlers every time the session
+kernel changes). The session connection holds a reference to the session
+model. The session connection can be disposed when the client no longer is
+connected to that session's kernel, and disposal will not cause the session
+model to be deleted.
+
+### Client session connection
+
+A _client session connection_ is an object which has the same lifecycle as the
+client. The client session connection owns a session connection (which may be
+null if the client is not currently associated with a session). The client
+session proxies the current session connection's signals for convenience. The
+client session primarily serves as a stable object for a client to keep track
+of the current session connection. A client may serialize the current session
+connection's name so that it can rehydrate a client session having the right
+session connection.
