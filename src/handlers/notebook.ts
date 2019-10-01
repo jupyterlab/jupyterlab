@@ -34,7 +34,6 @@ export class DebuggerNotebookHandler {
 
   private notebookTracker: INotebookTracker;
   private debuggerModel: Debugger.Model;
-  // private debuggerSession: DebugSession;
   private breakpoints: Breakpoints.Model;
   private cellManager: CellManager;
 
@@ -59,7 +58,10 @@ export class DebuggerNotebookHandler {
     note: INotebookTracker
   ) {
     if (this.debuggerModel.session) {
-      this.debuggerModel.session.dispose();
+      const newSession = new DebugSession({
+        client: client as IClientSession
+      });
+      this.debuggerModel.session = newSession;
       note.activeCellChanged.disconnect(this.onNewCell, this);
     }
     if (client) {

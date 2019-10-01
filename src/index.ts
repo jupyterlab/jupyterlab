@@ -31,6 +31,7 @@ import { DebuggerConsoleHandler } from './handlers/console';
 import { DebuggerSidebar } from './sidebar';
 
 import { SessionTypes } from './breakpoints';
+import { DebugSession } from './session';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -89,8 +90,7 @@ const files: JupyterFrontEndPlugin<void> = {
           : false;
       if (session && debug.currentWidget) {
         const debugModel: Debugger.Model = debug.currentWidget.content.model;
-        debugModel.session.client = session;
-        console.log(session.name);
+        debugModel.session = new DebugSession({ client: session });
         debugModel.sidebar.breakpoints.model.type = session.type as SessionTypes;
       }
     });

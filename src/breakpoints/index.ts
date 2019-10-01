@@ -148,7 +148,7 @@ export namespace Breakpoints {
         this.breakpoints = [];
       } else {
         const breakpoint = { ...this.breakpoints[0] };
-        var breakpoints: Breakpoints.IBreakpoint[] = [];
+        let breakpoints: Breakpoints.IBreakpoint[] = [];
         linesInfo.forEach(ele => {
           breakpoints.push({ ...breakpoint, line: ele.line + 1 });
         });
