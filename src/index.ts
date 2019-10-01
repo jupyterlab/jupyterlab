@@ -90,7 +90,6 @@ const files: JupyterFrontEndPlugin<void> = {
       if (session && debug.currentWidget) {
         const debugModel: Debugger.Model = debug.currentWidget.content.model;
         debugModel.session.client = session;
-        console.log(session.name);
         debugModel.sidebar.breakpoints.model.type = session.type as SessionTypes;
       }
     });

@@ -44,7 +44,6 @@ export class DebuggerConsoleHandler {
   ) {
     this.consoleSession = consolePanel ? consolePanel.session : null;
     if (this.debuggerModel.session && this.consoleSession) {
-      this.debuggerModel.session.dispose();
       const newSession = new DebugSession({
         client: this.consoleSession as IClientSession
       });
@@ -81,11 +80,9 @@ export class DebuggerConsoleHandler {
       this.debuggerModel.session.id ===
         (this.consoleSession as IClientSession).name
     ) {
-      console.log('?');
       this.cellManager.previousCell = this.cellManager.activeCell;
       this.cellManager.activeCell = update;
     } else if (!this.cellManager) {
-      console.log('??');
       this.cellManager = new CellManager({
         activeCell: update,
         breakpointsModel: this.breakpoints,
