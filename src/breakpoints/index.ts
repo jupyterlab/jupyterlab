@@ -109,7 +109,7 @@ export namespace Breakpoints {
 
     addBreakpoint(session: string, type: string, lineInfo: LineInfo) {
       const breakpoint: Breakpoints.IBreakpoint = {
-        line: lineInfo.line,
+        line: lineInfo.line + 1,
         active: true,
         verified: true,
         source: {
@@ -150,7 +150,7 @@ export namespace Breakpoints {
         const breakpoint = { ...this.breakpoints[0] };
         var breakpoints: Breakpoints.IBreakpoint[] = [];
         linesInfo.forEach(ele => {
-          breakpoints.push({ ...breakpoint, line: ele.line });
+          breakpoints.push({ ...breakpoint, line: ele.line + 1 });
         });
         this.breakpoints = [...breakpoints];
       }
