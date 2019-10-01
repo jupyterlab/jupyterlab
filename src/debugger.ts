@@ -3,17 +3,19 @@
 
 import { IDataConnector } from '@jupyterlab/coreutils';
 
-import { BoxPanel } from '@phosphor/widgets';
-
 import { ReadonlyJSONValue, UUID } from '@phosphor/coreutils';
-
-import { IDisposable } from '@phosphor/disposable';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
-import { DebugSession } from './session';
-
 import { IClientSession } from '@jupyterlab/apputils';
+
+import { IDisposable } from '@phosphor/disposable';
+
+import { ISignal, Signal } from '@phosphor/signaling';
+
+import { BoxPanel } from '@phosphor/widgets';
+
+import { DebugSession } from './session';
 
 import { IDebuggerSidebar } from './tokens';
 
@@ -74,8 +76,19 @@ export namespace Debugger {
       return this._session;
     }
 
-    set session(session: DebugSession) {
+    set session(session: DebugSession | null) {
+      if (this._session === session) {
+        return;
+      }
+      if (this._session) {
+        this._session.dispose();
+      }
       this._session = session;
+      this._sessionChanged.emit(undefined);
+    }
+
+    get sessionChanged(): ISignal<this, void> {
+      return this._sessionChanged;
     }
 
     get isDisposed(): boolean {
@@ -100,7 +113,8 @@ export namespace Debugger {
 
     private _isDisposed = false;
     private _notebook: INotebookTracker;
-    private _session: DebugSession;
+    private _session: DebugSession | null;
+    private _sessionChanged = new Signal<this, void>(this);
     private _sidebar: IDebuggerSidebar;
   }
 
