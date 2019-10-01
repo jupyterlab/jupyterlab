@@ -185,10 +185,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
     let hsplitPanel = new SplitPanel();
-    let leftHandler = (this._leftHandler = new Private.SideBarHandler('left'));
-    let rightHandler = (this._rightHandler = new Private.SideBarHandler(
-      'right'
-    ));
+    let leftHandler = (this._leftHandler = new Private.SideBarHandler());
+    let rightHandler = (this._rightHandler = new Private.SideBarHandler());
     let rootLayout = new BoxLayout();
 
     bottomPanel.id = 'jp-bottom-panel';
@@ -1031,7 +1029,7 @@ namespace Private {
     /**
      * Construct a new side bar handler.
      */
-    constructor(side: string) {
+    constructor() {
       this._sideBar = new TabBarSvg<Widget>({
         kind: 'sideBar',
         insertBehavior: 'none',
