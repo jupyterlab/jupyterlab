@@ -66,23 +66,22 @@ describe('jupyter.services - Comm', () => {
   });
 
   describe('Kernel', () => {
-    describe('#connectToComm()', () => {
+    describe('#createComm()', () => {
       it('should create an instance of IComm', () => {
-        const comm = kernel.connectToComm('test');
+        const comm = kernel.createComm('test');
         expect(comm.targetName).to.equal('test');
         expect(typeof comm.commId).to.equal('string');
       });
 
       it('should use the given id', () => {
-        const comm = kernel.connectToComm('test', '1234');
+        const comm = kernel.createComm('test', '1234');
         expect(comm.targetName).to.equal('test');
         expect(comm.commId).to.equal('1234');
       });
 
-      it('should reuse an existing comm', () => {
-        const comm = kernel.connectToComm('test', '1234');
-        const comm2 = kernel.connectToComm('test', '1234');
-        expect(comm).to.equal(comm2);
+      it('should throw an error if there is an existing comm', () => {
+        kernel.createComm('test', '1234');
+        expect(() => kernel.createComm('test', '1234')).to.throw();
       });
 
       it('should throw an error when the kernel does not handle comms', async () => {
@@ -91,7 +90,17 @@ describe('jupyter.services - Comm', () => {
           handleComms: false
         });
         expect(kernel2.handleComms).to.be.false;
-        expect(() => kernel2.connectToComm('test', '1234')).to.throw();
+        expect(() => kernel2.createComm('test', '1234')).to.throw();
+      });
+    });
+
+    describe('#hasComm()', () => {
+      it('should test if there is a registered comm', () => {
+        expect(kernel.hasComm('test comm')).to.false;
+        const comm = kernel.createComm('test', 'test comm');
+        expect(kernel.hasComm('test comm')).to.true;
+        comm.dispose();
+        expect(kernel.hasComm('test comm')).to.false;
       });
     });
 
@@ -194,14 +203,14 @@ describe('jupyter.services - Comm', () => {
 
     describe('#isDisposed', () => {
       it('should be true after we dispose of the comm', () => {
-        const comm = kernel.connectToComm('test');
+        const comm = kernel.createComm('test');
         expect(comm.isDisposed).to.equal(false);
         comm.dispose();
         expect(comm.isDisposed).to.equal(true);
       });
 
       it('should be safe to call multiple times', () => {
-        const comm = kernel.connectToComm('test');
+        const comm = kernel.createComm('test');
         expect(comm.isDisposed).to.equal(false);
         expect(comm.isDisposed).to.equal(false);
         comm.dispose();
@@ -212,7 +221,7 @@ describe('jupyter.services - Comm', () => {
 
     describe('#dispose()', () => {
       it('should dispose of the resources held by the comm', () => {
-        const comm = kernel.connectToComm('foo');
+        const comm = kernel.createComm('foo');
         comm.dispose();
         expect(comm.isDisposed).to.equal(true);
       });
@@ -223,7 +232,7 @@ describe('jupyter.services - Comm', () => {
     let comm: Kernel.IComm;
 
     beforeEach(() => {
-      comm = kernel.connectToComm('test');
+      comm = kernel.createComm('test');
     });
 
     describe('#id', () => {

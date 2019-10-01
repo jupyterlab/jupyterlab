@@ -359,7 +359,7 @@ export namespace Kernel {
     sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
 
     /**
-     * Connect to a comm, or create a new one.
+     * Create a new comm.
      *
      * @param targetName - The name of the comm target.
      *
@@ -367,7 +367,12 @@ export namespace Kernel {
      *
      * @returns A comm instance.
      */
-    connectToComm(targetName: string, commId?: string): Kernel.IComm;
+    createComm(targetName: string, commId?: string): Kernel.IComm;
+
+    /**
+     * Check if a comm exists.
+     */
+    hasComm(commId: string): boolean;
 
     /**
      * Register a comm target handler.

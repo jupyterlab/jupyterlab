@@ -724,28 +724,35 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
-   * Connect to a comm, or create a new one.
+   * Create a new comm.
    *
    * #### Notes
-   * If a client-side comm already exists with the given commId, it is returned.
-   * An error is thrown if the kernel does not handle comms.
+   * If a client-side comm already exists with the given commId, an error is thrown.
+   * If the kernel does not handle comms, an error is thrown.
    */
-  connectToComm(
+  createComm(
     targetName: string,
     commId: string = UUID.uuid4()
   ): Kernel.IComm {
     if (!this.handleComms) {
       throw new Error('Comms are disabled on this kernel connection');
     }
-
     if (this._comms.has(commId)) {
-      return this._comms.get(commId);
+      throw new Error('Comm is already created');
     }
+
     let comm = new CommHandler(targetName, commId, this, () => {
       this._unregisterComm(commId);
     });
     this._comms.set(commId, comm);
     return comm;
+  }
+
+  /**
+   * Check if a comm exists.
+   */
+  hasComm(commId: string): boolean {
+    return this._comms.has(commId);
   }
 
   /**

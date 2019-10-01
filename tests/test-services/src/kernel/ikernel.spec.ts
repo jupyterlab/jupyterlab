@@ -658,7 +658,7 @@ describe('Kernel.IKernel', () => {
 
     it('should dispose of existing comm and future objects', async () => {
       const kernel = defaultKernel;
-      const comm = kernel.connectToComm('test');
+      const comm = kernel.createComm('test');
       const future = kernel.requestExecute({ code: 'foo' });
       await kernel.restart();
       await kernel.ready;
