@@ -153,7 +153,7 @@ export class Logger implements ILogger {
           }
         };
         break;
-      case 'notebook':
+      case 'output':
         output = log.data;
         break;
       default:

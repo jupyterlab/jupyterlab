@@ -46,26 +46,62 @@ export interface ILoggerRegistry {
   readonly registryChanged: ISignal<this, ILoggerRegistryChange>;
 }
 
+/**
+ * The base log payload type.
+ */
 export interface ILogPayloadBase {
+  /**
+   * Type of log data.
+   */
   type: string;
 }
 
+/**
+ * Plain text log payload.
+ */
 export interface ITextLog extends ILogPayloadBase {
+  /**
+   * Type of log data.
+   */
   type: 'text';
+  /**
+   * Log data as plain text.
+   */
   data: string;
 }
 
+/**
+ * HTML log payload.
+ */
 export interface IHtmlLog extends ILogPayloadBase {
+  /**
+   * Type of log data.
+   */
   type: 'html';
+  /**
+   * Log data as HTML string.
+   */
   data: string;
 }
 
-export interface INotebookLog extends ILogPayloadBase {
-  type: 'notebook';
+/**
+ * Notebook kernel output log payload.
+ */
+export interface IOutputLog extends ILogPayloadBase {
+  /**
+   * Type of log data.
+   */
+  type: 'output';
+  /**
+   * Log data as Notebook kernel output.
+   */
   data: nbformat.IOutput;
 }
 
-export type ILogPayload = ITextLog | IHtmlLog | INotebookLog;
+/**
+ * Log payload union type.
+ */
+export type ILogPayload = ITextLog | IHtmlLog | IOutputLog;
 
 export type ILoggerChange = 'append' | 'clear';
 
