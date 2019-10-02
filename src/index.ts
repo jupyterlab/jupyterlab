@@ -60,11 +60,13 @@ const consoles: JupyterFrontEndPlugin<void> = {
     tracker: IConsoleTracker
   ) => {
     debug.currentChanged.connect((_, update) => {
-      update.content.model.sidebar = sidebar;
-      new DebuggerConsoleHandler({
-        debuggerModel: update.content.model,
-        consoleTracker: tracker
-      });
+      if (update) {
+        update.content.model.sidebar = sidebar;
+        new DebuggerConsoleHandler({
+          debuggerModel: update.content.model,
+          consoleTracker: tracker
+        });
+      }
     });
   }
 };
@@ -75,11 +77,12 @@ const consoles: JupyterFrontEndPlugin<void> = {
 const files: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:files',
   autoStart: true,
-  requires: [IEditorTracker, IDebugger],
+  requires: [IEditorTracker, IDebugger, INotebookTracker],
   activate: (
     app: JupyterFrontEnd,
     tracker: IEditorTracker | null,
-    debug: IDebugger
+    debug: IDebugger,
+    notebook: INotebookTracker
   ) => {
     const shell = app.shell;
     (shell as LabShell).currentChanged.connect((sender, update) => {
@@ -130,11 +133,13 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     // 3. If a notebook is closed, dispose the debugger session.
 
     debug.currentChanged.connect((_, update) => {
-      update.content.model.sidebar = sidebar;
-      new DebuggerNotebookHandler({
-        debuggerModel: update.content.model,
-        notebookTracker: notebook
-      });
+      if (update) {
+        update.content.model.sidebar = sidebar;
+        new DebuggerNotebookHandler({
+          debuggerModel: update.content.model,
+          notebookTracker: notebook
+        });
+      }
     });
 
     //   // Debugger model:
@@ -215,7 +220,12 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
           console.log('Debugger ID: ', id);
         }
 
-        if (tracker.find(widget => id === widget.content.model.id)) {
+        const existedWidget = tracker.find(
+          widget => id === widget.content.model.id
+        );
+
+        if (existedWidget) {
+          app.shell.add(existedWidget, 'main');
           return;
         }
 
@@ -227,6 +237,7 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
         });
 
         void tracker.add(widget);
+        app.shell.add(widget, 'main');
 
         return widget;
       }

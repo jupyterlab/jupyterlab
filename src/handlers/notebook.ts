@@ -30,6 +30,23 @@ export class DebuggerNotebookHandler {
         this.newDebuggerSession(session, sender);
       }
     );
+    this.debuggerModel.sessionChanged.connect(() => {
+      const notebookPanel: NotebookPanel = this.notebookTracker.currentWidget;
+      if (
+        notebookPanel &&
+        notebookPanel.session.name === this.debuggerModel.session.id
+      ) {
+        this.notebookTracker.activeCellChanged.connect(this.onNewCell, this);
+        if (!this.cellManager) {
+          this.cellManager = new CellManager({
+            breakpointsModel: this.breakpoints,
+            activeCell: this.notebookTracker.activeCell as CodeCell,
+            debuggerModel: this.debuggerModel,
+            type: 'notebook'
+          });
+        }
+      }
+    });
   }
 
   private notebookTracker: INotebookTracker;
@@ -58,10 +75,6 @@ export class DebuggerNotebookHandler {
     note: INotebookTracker
   ) {
     if (this.debuggerModel.session) {
-      const newSession = new DebugSession({
-        client: client as IClientSession
-      });
-      this.debuggerModel.session = newSession;
       note.activeCellChanged.disconnect(this.onNewCell, this);
     }
     if (client) {
@@ -69,7 +82,6 @@ export class DebuggerNotebookHandler {
         client: client as IClientSession
       });
       this.debuggerModel.session = newSession;
-      note.activeCellChanged.connect(this.onNewCell, this);
     }
   }
 }

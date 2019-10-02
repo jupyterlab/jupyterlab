@@ -50,7 +50,10 @@ export class DebugSession implements IDebugger.ISession {
     }
 
     this._client = client;
-    this._client.iopubMessage.connect(this._handleEvent, this);
+
+    if (client) {
+      this._client.iopubMessage.connect(this._handleEvent, this);
+    }
   }
 
   /**

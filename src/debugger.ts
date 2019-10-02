@@ -3,7 +3,7 @@
 
 import { IDataConnector } from '@jupyterlab/coreutils';
 
-import { ReadonlyJSONValue, UUID } from '@phosphor/coreutils';
+import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
@@ -24,7 +24,7 @@ export class Debugger extends BoxPanel {
     super({ direction: 'left-to-right' });
     this.model = new Debugger.Model(options);
     // this.sidebar = new DebuggerSidebar(this.model);
-    this.title.label = 'Debugger';
+    this.title.label = 'Debugger-' + options.id;
 
     this.addClass('jp-Debugger');
     // this.addWidget(this.sidebar);
@@ -56,7 +56,7 @@ export namespace Debugger {
     constructor(options: Debugger.Model.IOptions) {
       this.connector = options.connector || null;
       this.session = new DebugSession({ client: options.session });
-      this.id = options.id || UUID.uuid4();
+      this.id = options.id;
       void this._populate();
     }
 
