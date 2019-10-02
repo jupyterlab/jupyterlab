@@ -480,7 +480,7 @@ export class LogConsolePanel extends StackedPanel {
         if (outputArea.id === viewId) {
           outputArea.show();
           setTimeout(() => {
-            this._scrollOuputAreaToBottom(outputArea);
+            this._scrollOuputAreaToBottom(outputArea, false);
           }, 50);
         } else {
           outputArea.hide();
@@ -518,11 +518,14 @@ export class LogConsolePanel extends StackedPanel {
     }
   }
 
-  private _scrollOuputAreaToBottom(outputArea: LogConsoleOutputArea) {
+  private _scrollOuputAreaToBottom(
+    outputArea: LogConsoleOutputArea,
+    animate: boolean = true
+  ) {
     outputArea.node.scrollTo({
       left: 0,
       top: outputArea.node.scrollHeight,
-      behavior: 'smooth'
+      behavior: animate ? 'smooth' : 'auto'
     });
   }
 
