@@ -77,6 +77,27 @@ type IOutputWithTimestamp = nbformat.IOutput | ITimestampedOutput;
 
 export type ILoggerChange = 'append' | 'clear';
 
+export interface ILogPayloadBase {
+  type: string;
+}
+
+export interface ITextLog extends ILogPayloadBase {
+  type: 'text';
+  data: string;
+}
+
+export interface IHtmlLog extends ILogPayloadBase {
+  type: 'html';
+  data: string;
+}
+
+export interface INotebookLog extends ILogPayloadBase {
+  type: 'notebook';
+  data: nbformat.IOutput;
+}
+
+export type ILogPayload = ITextLog | IHtmlLog | INotebookLog;
+
 /**
  * A Logger that manages logs from a particular source.
  */
@@ -86,7 +107,7 @@ export interface ILogger {
    *
    * @param log - The output to be logged.
    */
-  log(log: nbformat.IOutput): void;
+  log(log: ILogPayload): void;
   /**
    * Clear all outputs logged.
    */
@@ -200,10 +221,38 @@ export class Logger implements ILogger {
    *
    * @param log - The output to be logged.
    */
-  log(log: nbformat.IOutput) {
+  log(log: ILogPayload) {
     const timestamp = new Date();
-    this.outputAreaModel.add({ ...log, timestamp: timestamp.valueOf() });
-    this._logChanged.emit('append');
+    let output: nbformat.IOutput = null;
+
+    switch (log.type) {
+      case 'text':
+        output = {
+          output_type: 'display_data',
+          data: {
+            'text/plain': log.data
+          }
+        };
+        break;
+      case 'html':
+        output = {
+          output_type: 'display_data',
+          data: {
+            'text/html': log.data
+          }
+        };
+        break;
+      case 'notebook':
+        output = log.data;
+        break;
+      default:
+        break;
+    }
+
+    if (output) {
+      this.outputAreaModel.add({ ...output, timestamp: timestamp.valueOf() });
+      this._logChanged.emit('append');
+    }
   }
 
   /**
