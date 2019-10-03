@@ -12,6 +12,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { ServerConnection } from '..';
 
 import { Kernel } from './kernel';
+import { BaseManager } from '../basemanager';
 
 // TODO: Migrate kernel connection status etc. up to session
 // TODO: move session management work up to session manager rather than session objects
@@ -21,15 +22,14 @@ import { Kernel } from './kernel';
 /**
  * An implementation of a kernel manager.
  */
-export class KernelManager implements Kernel.IManager {
+export class KernelManager extends BaseManager implements Kernel.IManager {
   /**
    * Construct a new kernel manager.
    *
    * @param options - The default options for kernel.
    */
   constructor(options: KernelManager.IOptions = {}) {
-    this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+    super(options);
 
     // Initialize internal data.
     this._ready = (async () => {
@@ -61,13 +61,6 @@ export class KernelManager implements Kernel.IManager {
    * The server settings for the manager.
    */
   readonly serverSettings: ServerConnection.ISettings;
-
-  /**
-   * Test whether the kernel manager is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
 
   /**
    * Test whether the manager is ready.
@@ -114,13 +107,9 @@ export class KernelManager implements Kernel.IManager {
    * Dispose of the resources used by the manager.
    */
   dispose(): void {
-    if (this._isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
     this._models.length = 0;
     this._pollModels.dispose();
-    Signal.clearData(this);
+    super.dispose();
   }
 
   /**
@@ -253,7 +242,7 @@ export class KernelManager implements Kernel.IManager {
       }
       throw err;
     });
-    if (this._isDisposed) {
+    if (this.isDisposed) {
       return;
     }
     if (!JSONExt.deepEqual(models, this._models)) {
@@ -297,7 +286,6 @@ export class KernelManager implements Kernel.IManager {
     }
   }
 
-  private _isDisposed = false;
   private _isReady = false;
   private _kernels = new Set<Kernel.IKernel>();
   private _models: Kernel.IModel[] = [];
@@ -314,12 +302,7 @@ export namespace KernelManager {
   /**
    * The options used to initialize a KernelManager.
    */
-  export interface IOptions {
-    /**
-     * The server settings for the manager.
-     */
-    serverSettings?: ServerConnection.ISettings;
-
+  export interface IOptions extends BaseManager.IOptions {
     /**
      * When the manager stops polling the API. Defaults to `when-hidden`.
      */

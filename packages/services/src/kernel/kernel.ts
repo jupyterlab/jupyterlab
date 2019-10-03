@@ -16,6 +16,7 @@ import { DefaultKernel } from './default';
 import { KernelMessage } from './messages';
 
 import { KernelSpec } from '../kernelspec';
+import { IManager as IBaseManager } from '../basemanager';
 
 /**
  * A namespace for kernel types, interfaces, and type checker functions.
@@ -659,7 +660,7 @@ export namespace Kernel {
    * through polling the server. Use a manager if you want to be notified of
    * changes to kernels.
    */
-  export interface IManager extends IDisposable {
+  export interface IManager extends IBaseManager {
     /**
      * A signal emitted when the running kernels change.
      */
@@ -670,11 +671,6 @@ export namespace Kernel {
      * TODO: figure out the relationship between this and the other connection status signals for kernels.
      */
     connectionFailure: ISignal<IManager, ServerConnection.NetworkError>;
-
-    /**
-     * The server settings for the manager.
-     */
-    serverSettings?: ServerConnection.ISettings;
 
     /**
      * Whether the manager is ready.

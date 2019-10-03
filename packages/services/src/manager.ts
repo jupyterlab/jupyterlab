@@ -13,8 +13,6 @@ import { NbConvert, NbConvertManager } from './nbconvert';
 
 import { Contents, ContentsManager } from './contents';
 
-import { Kernel } from './kernel';
-
 import { KernelSpec, KernelSpecManager } from './kernelspec';
 
 import { Session, SessionManager } from './session';

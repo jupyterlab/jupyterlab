@@ -12,6 +12,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { ServerConnection } from '../serverconnection';
 
 import { Session } from './session';
+import { BaseManager } from '../basemanager';
 
 /**
  * We have a session manager that maintains a list of models from the server.
@@ -27,15 +28,14 @@ import { Session } from './session';
 /**
  * An implementation of a session manager.
  */
-export class SessionManager implements Session.IManager {
+export class SessionManager extends BaseManager implements Session.IManager {
   /**
    * Construct a new session manager.
    *
    * @param options - The default options for each session.
    */
   constructor(options: SessionManager.IOptions = {}) {
-    this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+    super(options);
 
     // Initialize internal data.
     this._ready = (async () => {
@@ -44,7 +44,6 @@ export class SessionManager implements Session.IManager {
         this._isReady = true;
       }
     })();
-
     // Start model polling with exponential backoff.
     this._pollModels = new Poll({
       auto: false,
@@ -77,18 +76,6 @@ export class SessionManager implements Session.IManager {
   }
 
   /**
-   * Test whether the manager is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
-   * The server settings of the manager.
-   */
-  readonly serverSettings: ServerConnection.ISettings;
-
-  /**
    * Test whether the manager is ready.
    */
   get isReady(): boolean {
@@ -106,13 +93,9 @@ export class SessionManager implements Session.IManager {
    * Dispose of the resources used by the manager.
    */
   dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
     this._models.length = 0;
     this._pollModels.dispose();
-    Signal.clearData(this);
+    super.dispose();
   }
 
   /**
@@ -336,7 +319,6 @@ export class SessionManager implements Session.IManager {
     }
   }
 
-  private _isDisposed = false;
   private _isReady = false;
   private _models: Session.IModel[] = [];
   private _pollModels: Poll;
@@ -353,12 +335,7 @@ export namespace SessionManager {
   /**
    * The options used to initialize a SessionManager.
    */
-  export interface IOptions {
-    /**
-     * The server settings for the manager.
-     */
-    serverSettings?: ServerConnection.ISettings;
-
+  export interface IOptions extends BaseManager.IOptions {
     /**
      * When the manager stops polling the API. Defaults to `when-hidden`.
      */

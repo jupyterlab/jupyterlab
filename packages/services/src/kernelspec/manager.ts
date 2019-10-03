@@ -6,18 +6,19 @@ import { ServerConnection } from '../serverconnection';
 import { KernelSpec } from './kernelspec';
 import { ISignal, Signal } from '@phosphor/signaling';
 import { JSONExt } from '@phosphor/coreutils';
+import { BaseManager } from '../basemanager';
 /**
  * An implementation of a kernel manager.
  */
-export class KernelSpecManager implements KernelSpec.IManager {
+export class KernelSpecManager extends BaseManager
+  implements KernelSpec.IManager {
   /**
    * Construct a new kernel manager.
    *
    * @param options - The default options for kernel.
    */
   constructor(options: KernelSpecManager.IOptions = {}) {
-    this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+    super(options);
 
     // Initialize internal data.
     this._ready = Promise.all([this.requestSpecs()])
@@ -50,13 +51,6 @@ export class KernelSpecManager implements KernelSpec.IManager {
    * The server settings for the manager.
    */
   readonly serverSettings: ServerConnection.ISettings;
-
-  /**
-   * Test whether the kernel manager is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
 
   /**
    * Test whether the manager is ready.
@@ -97,12 +91,8 @@ export class KernelSpecManager implements KernelSpec.IManager {
    * Dispose of the resources used by the manager.
    */
   dispose(): void {
-    if (this._isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
     this._pollSpecs.dispose();
-    Signal.clearData(this);
+    super.dispose();
   }
 
   /**
@@ -124,7 +114,7 @@ export class KernelSpecManager implements KernelSpec.IManager {
    */
   protected async requestSpecs(): Promise<void> {
     const specs = await KernelSpec.getSpecs(this.serverSettings);
-    if (this._isDisposed) {
+    if (this.isDisposed) {
       return;
     }
     if (!JSONExt.deepEqual(specs, this._specs)) {
@@ -133,7 +123,6 @@ export class KernelSpecManager implements KernelSpec.IManager {
     }
   }
 
-  private _isDisposed = false;
   private _isReady = false;
   private _connectionFailure = new Signal<this, Error>(this);
 
@@ -151,12 +140,7 @@ export namespace KernelSpecManager {
   /**
    * The options used to initialize a KernelManager.
    */
-  export interface IOptions {
-    /**
-     * The server settings for the manager.
-     */
-    serverSettings?: ServerConnection.ISettings;
-
+  export interface IOptions extends BaseManager.IOptions {
     /**
      * When the manager stops polling the API. Defaults to `when-hidden`.
      */
