@@ -3,32 +3,34 @@
 
 import { IDataConnector } from '@jupyterlab/coreutils';
 
-import { BoxPanel, TabPanel } from '@phosphor/widgets';
+import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
-import { ReadonlyJSONValue, UUID } from '@phosphor/coreutils';
+import { INotebookTracker } from '@jupyterlab/notebook';
+
+import { IClientSession } from '@jupyterlab/apputils';
 
 import { IDisposable } from '@phosphor/disposable';
 
-import { DebuggerSidebar } from './sidebar';
+import { ISignal, Signal } from '@phosphor/signaling';
+
+import { BoxPanel } from '@phosphor/widgets';
+
+import { DebugSession } from './session';
+
+import { IDebuggerSidebar } from './tokens';
 
 export class Debugger extends BoxPanel {
-  readonly model: Debugger.Model;
-
-  readonly tabs = new TabPanel();
-
-  readonly sidebar: DebuggerSidebar;
-
   constructor(options: Debugger.IOptions) {
     super({ direction: 'left-to-right' });
-
     this.model = new Debugger.Model(options);
-    this.sidebar = new DebuggerSidebar(this.model);
-    this.title.label = 'Debugger';
+    // this.sidebar = new DebuggerSidebar(this.model);
+    this.title.label = 'Debugger-' + options.id;
 
     this.addClass('jp-Debugger');
-    this.addWidget(this.tabs);
-    this.addWidget(this.sidebar);
+    // this.addWidget(this.sidebar);
   }
+
+  readonly model: Debugger.Model;
 
   dispose(): void {
     if (this.isDisposed) {
@@ -45,14 +47,16 @@ export class Debugger extends BoxPanel {
 export namespace Debugger {
   export interface IOptions {
     connector?: IDataConnector<ReadonlyJSONValue>;
-
     id?: string;
+    session?: IClientSession;
+    sidebar?: IDebuggerSidebar;
   }
 
   export class Model implements IDisposable {
     constructor(options: Debugger.Model.IOptions) {
       this.connector = options.connector || null;
-      this.id = options.id || UUID.uuid4();
+      this.session = new DebugSession({ client: options.session });
+      this.id = options.id;
       void this._populate();
     }
 
@@ -60,8 +64,39 @@ export namespace Debugger {
 
     readonly id: string;
 
+    get sidebar() {
+      return this._sidebar;
+    }
+
+    set sidebar(newSidebar: IDebuggerSidebar) {
+      this._sidebar = newSidebar;
+    }
+
+    get session() {
+      return this._session;
+    }
+
+    set session(session: DebugSession | null) {
+      if (this._session === session) {
+        return;
+      }
+      if (this._session) {
+        this._session.dispose();
+      }
+      this._session = session;
+      this._sessionChanged.emit(undefined);
+    }
+
+    get sessionChanged(): ISignal<this, void> {
+      return this._sessionChanged;
+    }
+
     get isDisposed(): boolean {
       return this._isDisposed;
+    }
+
+    get notebookTracker() {
+      return this._notebook;
     }
 
     dispose(): void {
@@ -77,6 +112,10 @@ export namespace Debugger {
     }
 
     private _isDisposed = false;
+    private _notebook: INotebookTracker;
+    private _session: DebugSession | null;
+    private _sessionChanged = new Signal<this, void>(this);
+    private _sidebar: IDebuggerSidebar;
   }
 
   export namespace Model {
