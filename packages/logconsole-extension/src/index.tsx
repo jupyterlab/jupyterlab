@@ -435,12 +435,7 @@ function activateLogConsole(
         }
 
         const logger = loggerRegistry.getLogger(logConsolePanel.activeSource);
-        logger.log({
-          data: {
-            'text/html': '<hr>'
-          },
-          output_type: 'display_data'
-        });
+        logger.log({ type: 'html', data: '<hr>' });
       },
       iconClassName: 'jp-AddIcon',
       tooltip: 'Add Timestamp',
