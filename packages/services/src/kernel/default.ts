@@ -28,16 +28,12 @@ import {
 import * as serialize from './serialize';
 
 import * as validate from './validate';
+import { KernelSpec } from '../kernelspec/kernelspec';
 
 /**
  * The url for the kernel service.
  */
 const KERNEL_SERVICE_URL = 'api/kernels';
-
-/**
- * The url for the kernelspec service.
- */
-const KERNELSPEC_SERVICE_URL = 'api/kernelspecs';
 
 // Stub for requirejs.
 declare var requirejs: any;
@@ -233,11 +229,11 @@ export class DefaultKernel implements Kernel.IKernel {
    *
    * @returns A promise that resolves with the kernel spec.
    */
-  getSpec(): Promise<Kernel.ISpecModel> {
+  getSpec(): Promise<KernelSpec.ISpecModel> {
     if (this._specPromise) {
       return this._specPromise;
     }
-    this._specPromise = Private.findSpecs(this.serverSettings).then(specs => {
+    this._specPromise = KernelSpec.getSpecs(this.serverSettings).then(specs => {
       return specs.kernelspecs[this._name];
     });
     return this._specPromise;
@@ -1437,7 +1433,7 @@ export class DefaultKernel implements Kernel.IKernel {
   } = Object.create(null);
   private _info = new PromiseDelegate<KernelMessage.IInfoReply>();
   private _pendingMessages: KernelMessage.IMessage[] = [];
-  private _specPromise: Promise<Kernel.ISpecModel>;
+  private _specPromise: Promise<KernelSpec.ISpecModel>;
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
     this
@@ -1479,22 +1475,6 @@ export namespace DefaultKernel {
     settings?: ServerConnection.ISettings
   ): Promise<Kernel.IModel | undefined> {
     return Private.findById(id, settings);
-  }
-
-  /**
-   * Fetch all of the kernel specs.
-   *
-   * @param settings - The optional server settings.
-   *
-   * @returns A promise that resolves with the kernel specs.
-   *
-   * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
-   */
-  export function getSpecs(
-    settings?: ServerConnection.ISettings
-  ): Promise<Kernel.ISpecModels> {
-    return Private.getSpecs(settings);
   }
 
   /**
@@ -1595,13 +1575,6 @@ namespace Private {
   export const runningKernels: DefaultKernel[] = [];
 
   /**
-   * A module private store of kernel specs by base url.
-   */
-  export const specs: {
-    [key: string]: Promise<Kernel.ISpecModels>;
-  } = Object.create(null);
-
-  /**
    * Find a kernel by id.
    *
    * Will reach out to the server if needed to find the kernel.
@@ -1628,45 +1601,6 @@ namespace Private {
       }
       throw e;
     }
-  }
-
-  /**
-   * Get the cached kernel specs or fetch them.
-   */
-  export function findSpecs(
-    settings?: ServerConnection.ISettings
-  ): Promise<Kernel.ISpecModels> {
-    settings = settings || ServerConnection.makeSettings();
-    let promise = specs[settings.baseUrl];
-    if (promise) {
-      return promise;
-    }
-    return getSpecs(settings);
-  }
-
-  /**
-   * Fetch all of the kernel specs.
-   *
-   * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
-   */
-  export function getSpecs(
-    settings?: ServerConnection.ISettings
-  ): Promise<Kernel.ISpecModels> {
-    settings = settings || ServerConnection.makeSettings();
-    let url = URLExt.join(settings.baseUrl, KERNELSPEC_SERVICE_URL);
-    let promise = ServerConnection.makeRequest(url, {}, settings)
-      .then(response => {
-        if (response.status !== 200) {
-          throw new ServerConnection.ResponseError(response);
-        }
-        return response.json();
-      })
-      .then(data => {
-        return validate.validateSpecModels(data);
-      });
-    Private.specs[settings.baseUrl] = promise;
-    return promise;
   }
 
   /**

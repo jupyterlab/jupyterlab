@@ -15,6 +15,8 @@ import { DefaultKernel } from './default';
 
 import { KernelMessage } from './messages';
 
+import { KernelSpec } from '../kernelspec';
+
 /**
  * A namespace for kernel types, interfaces, and type checker functions.
  */
@@ -99,7 +101,7 @@ export namespace Kernel {
      *
      * @returns A promise that resolves with the kernel spec for this kernel.
      */
-    getSpec(): Promise<Kernel.ISpecModel>;
+    getSpec(): Promise<KernelSpec.ISpecModel>;
 
     /**
      * Send a shell message to the kernel.
@@ -521,22 +523,6 @@ export namespace Kernel {
   }
 
   /**
-   * Fetch all of the kernel specs.
-   *
-   * @param settings - The optional server settings.
-   *
-   * @returns A promise that resolves with the kernel specs.
-   *
-   * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
-   */
-  export function getSpecs(
-    settings?: ServerConnection.ISettings
-  ): Promise<Kernel.ISpecModels> {
-    return DefaultKernel.getSpecs(settings);
-  }
-
-  /**
    * Fetch the running kernels.
    *
    * @param settings - The optional server settings.
@@ -669,15 +655,11 @@ export namespace Kernel {
    * Object which manages kernel instances for a given base url.
    *
    * #### Notes
-   * The manager is responsible for maintaining the state of running
-   * kernels and the initial fetch of kernel specs.
+   * The manager is responsible for maintaining the state of running kernels
+   * through polling the server. Use a manager if you want to be notified of
+   * changes to kernels.
    */
   export interface IManager extends IDisposable {
-    /**
-     * A signal emitted when the kernel specs change.
-     */
-    specsChanged: ISignal<IManager, ISpecModels>;
-
     /**
      * A signal emitted when the running kernels change.
      */
@@ -695,14 +677,6 @@ export namespace Kernel {
     serverSettings?: ServerConnection.ISettings;
 
     /**
-     * The kernel spec models.
-     *
-     * #### Notes
-     * The value will be null until the manager is ready.
-     */
-    readonly specs: Kernel.ISpecModels | null;
-
-    /**
      * Whether the manager is ready.
      */
     readonly isReady: boolean;
@@ -718,17 +692,6 @@ export namespace Kernel {
      * @returns A new iterator over the running kernels.
      */
     running(): IIterator<IModel>;
-
-    /**
-     * Force a refresh of the specs from the server.
-     *
-     * @returns A promise that resolves when the specs are fetched.
-     *
-     * #### Notes
-     * This is intended to be called only in response to a user action,
-     * since the manager maintains its internal state.
-     */
-    refreshSpecs(): Promise<void>;
 
     /**
      * Force a refresh of the running kernels.
@@ -1054,67 +1017,6 @@ export namespace Kernel {
      * The name of the kernel.
      */
     readonly name: string;
-  }
-
-  /**
-   * Kernel Spec interface.
-   *
-   * #### Notes
-   * See [Kernel specs](https://jupyter-client.readthedocs.io/en/latest/kernels.html#kernelspecs).
-   */
-  export interface ISpecModel extends JSONObject {
-    /**
-     * The name of the kernel spec.
-     */
-    readonly name: string;
-
-    /**
-     * The name of the language of the kernel.
-     */
-    readonly language: string;
-
-    /**
-     * A list of command line arguments used to start the kernel.
-     */
-    readonly argv: string[];
-
-    /**
-     * The kernel’s name as it should be displayed in the UI.
-     */
-    readonly display_name: string;
-
-    /**
-     * A dictionary of environment variables to set for the kernel.
-     */
-    readonly env?: JSONObject;
-
-    /**
-     * A mapping of resource file name to download path.
-     */
-    readonly resources: { [key: string]: string };
-
-    /**
-     * A dictionary of additional attributes about this kernel; used by clients to aid in kernel selection.
-     */
-    readonly metadata?: JSONObject;
-  }
-
-  /**
-   * The available kernelSpec models.
-   *
-   * #### Notes
-   * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
-   */
-  export interface ISpecModels extends JSONObject {
-    /**
-     * The name of the default kernel spec.
-     */
-    default: string;
-
-    /**
-     * A mapping of kernel spec name to spec.
-     */
-    readonly kernelspecs: { [key: string]: ISpecModel };
   }
 
   /**

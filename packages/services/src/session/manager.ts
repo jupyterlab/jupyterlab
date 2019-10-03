@@ -9,8 +9,6 @@ import { JSONExt } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { Kernel } from '../kernel';
-
 import { ServerConnection } from '../serverconnection';
 
 import { Session } from './session';
@@ -41,13 +39,13 @@ export class SessionManager implements Session.IManager {
 
     // Initialize internal data.
     this._ready = (async () => {
-      await Promise.all([this.requestRunning(), this.requestSpecs()]);
+      await this.requestRunning();
       if (!this.isDisposed) {
         this._isReady = true;
       }
     })();
 
-    // Start model and specs polling with exponential backoff.
+    // Start model polling with exponential backoff.
     this._pollModels = new Poll({
       auto: false,
       factory: () => this.requestRunning(),
@@ -59,28 +57,9 @@ export class SessionManager implements Session.IManager {
       name: `@jupyterlab/services:SessionManager#models`,
       standby: options.standby || 'when-hidden'
     });
-    this._pollSpecs = new Poll({
-      auto: false,
-      factory: () => this.requestSpecs(),
-      frequency: {
-        interval: 61 * 1000,
-        backoff: true,
-        max: 300 * 1000
-      },
-      name: `@jupyterlab/services:SessionManager#specs`,
-      standby: options.standby || 'when-hidden'
-    });
     void this.ready.then(() => {
       void this._pollModels.start();
-      void this._pollSpecs.start();
     });
-  }
-
-  /**
-   * A signal emitted when the kernel specs change.
-   */
-  get specsChanged(): ISignal<this, Kernel.ISpecModels> {
-    return this._specsChanged;
   }
 
   /**
@@ -110,13 +89,6 @@ export class SessionManager implements Session.IManager {
   readonly serverSettings: ServerConnection.ISettings;
 
   /**
-   * Get the most recently fetched kernel specs.
-   */
-  get specs(): Kernel.ISpecModels | null {
-    return this._specs;
-  }
-
-  /**
    * Test whether the manager is ready.
    */
   get isReady(): boolean {
@@ -140,7 +112,6 @@ export class SessionManager implements Session.IManager {
     this._isDisposed = true;
     this._models.length = 0;
     this._pollModels.dispose();
-    this._pollSpecs.dispose();
     Signal.clearData(this);
   }
 
@@ -151,20 +122,6 @@ export class SessionManager implements Session.IManager {
    */
   running(): IIterator<Session.IModel> {
     return iter(this._models);
-  }
-
-  /**
-   * Force a refresh of the specs from the server.
-   *
-   * @returns A promise that resolves when the specs are fetched.
-   *
-   * #### Notes
-   * This is intended to be called only in response to a user action,
-   * since the manager maintains its internal state.
-   */
-  async refreshSpecs(): Promise<void> {
-    await this._pollSpecs.refresh();
-    await this._pollSpecs.tick;
   }
 
   /**
@@ -326,20 +283,6 @@ export class SessionManager implements Session.IManager {
   }
 
   /**
-   * Execute a request to the server to poll specs and update state.
-   */
-  protected async requestSpecs(): Promise<void> {
-    const specs = await Kernel.getSpecs(this.serverSettings);
-    if (this.isDisposed) {
-      return;
-    }
-    if (!JSONExt.deepEqual(specs, this._specs)) {
-      this._specs = specs;
-      this._specsChanged.emit(specs);
-    }
-  }
-
-  /**
    * Handle a session terminating.
    */
   private _onDisposed(id: string): void {
@@ -397,13 +340,10 @@ export class SessionManager implements Session.IManager {
   private _isReady = false;
   private _models: Session.IModel[] = [];
   private _pollModels: Poll;
-  private _pollSpecs: Poll;
   private _ready: Promise<void>;
   private _runningChanged = new Signal<this, Session.IModel[]>(this);
   private _connectionFailure = new Signal<this, Error>(this);
   private _sessions = new Set<Session.ISession>();
-  private _specs: Kernel.ISpecModels | null = null;
-  private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
 }
 
 /**

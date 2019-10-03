@@ -367,14 +367,9 @@ export namespace Session {
    *
    * #### Notes
    * The manager is responsible for maintaining the state of running
-   * sessions and the initial fetch of kernel specs.
+   * sessions.
    */
   export interface IManager extends IDisposable {
-    /**
-     * A signal emitted when the kernel specs change.
-     */
-    specsChanged: ISignal<this, Kernel.ISpecModels>;
-
     /**
      * A signal emitted when the running sessions change.
      */
@@ -389,14 +384,6 @@ export namespace Session {
      * The server settings for the manager.
      */
     serverSettings?: ServerConnection.ISettings;
-
-    /**
-     * The cached kernel specs.
-     *
-     * #### Notes
-     * This value will be null until the manager is ready.
-     */
-    readonly specs: Kernel.ISpecModels | null;
 
     /**
      * Test whether the manager is ready.
@@ -471,17 +458,6 @@ export namespace Session {
      * @returns A promise that resolves when all of the sessions are shut down.
      */
     shutdownAll(): Promise<void>;
-
-    /**
-     * Force a refresh of the specs from the server.
-     *
-     * @returns A promise that resolves when the specs are fetched.
-     *
-     * #### Notes
-     * This is intended to be called only in response to a user action,
-     * since the manager maintains its internal state.
-     */
-    refreshSpecs(): Promise<void>;
 
     /**
      * Force a refresh of the running sessions.

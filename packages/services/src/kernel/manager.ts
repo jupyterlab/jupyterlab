@@ -32,15 +32,13 @@ export class KernelManager implements Kernel.IManager {
       options.serverSettings || ServerConnection.makeSettings();
 
     // Initialize internal data.
-    this._ready = Promise.all([this.requestRunning(), this.requestSpecs()])
-      .then(_ => undefined)
-      .catch(_ => undefined)
-      .then(() => {
-        if (this.isDisposed) {
-          return;
-        }
-        this._isReady = true;
-      });
+    this._ready = (async () => {
+      await this.requestRunning();
+      if (this.isDisposed) {
+        return;
+      }
+      this._isReady = true;
+    })();
 
     // Start model and specs polling with exponential backoff.
     this._pollModels = new Poll({
@@ -54,20 +52,8 @@ export class KernelManager implements Kernel.IManager {
       name: `@jupyterlab/services:KernelManager#models`,
       standby: options.standby || 'when-hidden'
     });
-    this._pollSpecs = new Poll({
-      auto: false,
-      factory: () => this.requestSpecs(),
-      frequency: {
-        interval: 61 * 1000,
-        backoff: true,
-        max: 300 * 1000
-      },
-      name: `@jupyterlab/services:KernelManager#specs`,
-      standby: options.standby || 'when-hidden'
-    });
     void this.ready.then(() => {
       void this._pollModels.start();
-      void this._pollSpecs.start();
     });
   }
 
@@ -77,7 +63,7 @@ export class KernelManager implements Kernel.IManager {
   readonly serverSettings: ServerConnection.ISettings;
 
   /**
-   * Test whether the terminal manager is disposed.
+   * Test whether the kernel manager is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
@@ -102,20 +88,6 @@ export class KernelManager implements Kernel.IManager {
    */
   get runningChanged(): ISignal<this, Kernel.IModel[]> {
     return this._runningChanged;
-  }
-
-  /**
-   * Get the most recently fetched kernel specs.
-   */
-  get specs(): Kernel.ISpecModels | null {
-    return this._specs;
-  }
-
-  /**
-   * A signal emitted when the specs change.
-   */
-  get specsChanged(): ISignal<this, Kernel.ISpecModels> {
-    return this._specsChanged;
   }
 
   /**
@@ -148,7 +120,6 @@ export class KernelManager implements Kernel.IManager {
     this._isDisposed = true;
     this._models.length = 0;
     this._pollModels.dispose();
-    this._pollSpecs.dispose();
     Signal.clearData(this);
   }
 
@@ -175,20 +146,6 @@ export class KernelManager implements Kernel.IManager {
   async refreshRunning(): Promise<void> {
     await this._pollModels.refresh();
     await this._pollModels.tick;
-  }
-
-  /**
-   * Force a refresh of the specs from the server.
-   *
-   * @returns A promise that resolves when the specs are fetched.
-   *
-   * #### Notes
-   * This is intended to be called only in response to a user action,
-   * since the manager maintains its internal state.
-   */
-  async refreshSpecs(): Promise<void> {
-    await this._pollSpecs.refresh();
-    await this._pollSpecs.tick;
   }
 
   /**
@@ -314,20 +271,6 @@ export class KernelManager implements Kernel.IManager {
   }
 
   /**
-   * Execute a request to the server to poll specs and update state.
-   */
-  protected async requestSpecs(): Promise<void> {
-    const specs = await Kernel.getSpecs(this.serverSettings);
-    if (this._isDisposed) {
-      return;
-    }
-    if (!JSONExt.deepEqual(specs, this._specs)) {
-      this._specs = specs;
-      this._specsChanged.emit(specs);
-    }
-  }
-
-  /**
    * Handle a kernel starting.
    */
   private _onStarted(kernel: Kernel.IKernel): void {
@@ -359,11 +302,8 @@ export class KernelManager implements Kernel.IManager {
   private _kernels = new Set<Kernel.IKernel>();
   private _models: Kernel.IModel[] = [];
   private _pollModels: Poll;
-  private _pollSpecs: Poll;
   private _ready: Promise<void>;
   private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
-  private _specs: Kernel.ISpecModels | null = null;
-  private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
   private _connectionFailure = new Signal<this, Error>(this);
 }
 

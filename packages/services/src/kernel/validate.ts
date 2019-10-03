@@ -38,7 +38,6 @@ const IOPUB_CONTENT_FIELDS: { [key: string]: any } = {
   shutdown_reply: { restart: 'boolean' } // Emitted by the IPython kernel.
 };
 
-
 /**
  * Validate the header of a kernel message.
  */
@@ -90,4 +89,3 @@ export function validateModel(model: Kernel.IModel): void {
   validateProperty(model, 'name', 'string');
   validateProperty(model, 'id', 'string');
 }
-

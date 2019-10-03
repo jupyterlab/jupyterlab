@@ -15,6 +15,8 @@ import { Contents, ContentsManager } from './contents';
 
 import { Kernel } from './kernel';
 
+import { KernelSpec, KernelSpecManager } from './kernelspec';
+
 import { Session, SessionManager } from './session';
 
 import { Setting, SettingManager } from './setting';
@@ -47,10 +49,7 @@ export class ServiceManager implements ServiceManager.IManager {
     this.builder = new BuildManager(normalized);
     this.workspaces = new WorkspaceManager(normalized);
     this.nbconvert = new NbConvertManager(normalized);
-
-    this.sessions.specsChanged.connect((_, specs) => {
-      this._specsChanged.emit(specs);
-    });
+    this.kernelspecs = new KernelSpecManager(normalized);
 
     // Relay connection failures from the service managers that poll
     // the server for running sessions.
@@ -66,13 +65,6 @@ export class ServiceManager implements ServiceManager.IManager {
     void this._readyPromise.then(() => {
       this._isReady = true;
     });
-  }
-
-  /**
-   * A signal emitted when the kernel specs change.
-   */
-  get specsChanged(): ISignal<this, Kernel.ISpecModels> {
-    return this._specsChanged;
   }
 
   /**
@@ -106,13 +98,6 @@ export class ServiceManager implements ServiceManager.IManager {
   }
 
   /**
-   * The kernel spec models.
-   */
-  get specs(): Kernel.ISpecModels | null {
-    return this.sessions.specs;
-  }
-
-  /**
    * The server settings of the manager.
    */
   readonly serverSettings: ServerConnection.ISettings;
@@ -121,6 +106,11 @@ export class ServiceManager implements ServiceManager.IManager {
    * Get the session manager instance.
    */
   readonly sessions: SessionManager;
+
+  /**
+   * Get the session manager instance.
+   */
+  readonly kernelspecs: KernelSpecManager;
 
   /**
    * Get the setting manager instance.
@@ -172,7 +162,6 @@ export class ServiceManager implements ServiceManager.IManager {
 
   private _isDisposed = false;
   private _readyPromise: Promise<void>;
-  private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
   private _connectionFailure = new Signal<this, Error>(this);
   private _isReady = false;
 }
@@ -216,19 +205,14 @@ export namespace ServiceManager {
     readonly sessions: Session.IManager;
 
     /**
+     * The session manager for the manager.
+     */
+    readonly kernelspecs: KernelSpec.IManager;
+
+    /**
      * The setting manager for the manager.
      */
     readonly settings: Setting.IManager;
-
-    /**
-     * The kernel spec models.
-     */
-    readonly specs: Kernel.ISpecModels | null;
-
-    /**
-     * A signal emitted when the kernel specs change.
-     */
-    readonly specsChanged: ISignal<IManager, Kernel.ISpecModels>;
 
     /**
      * The terminals manager for the manager.
