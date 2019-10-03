@@ -346,12 +346,12 @@ describe('@jupyterlab/apputils', () => {
 
         it('should show the current status in the node title', async () => {
           const item = Toolbar.createKernelStatusItem(session);
-          const status = session.status;
+          const status = session.kernel.status;
           expect(item.node.title.toLowerCase()).to.contain(status);
           let called = false;
           const future = session.kernel.requestExecute({ code: 'a = 1' });
           future.onIOPub = msg => {
-            if (session.status === 'busy') {
+            if (session.kernel.status === 'busy') {
               expect(item.node.title.toLowerCase()).to.contain('busy');
               called = true;
             }

@@ -171,12 +171,6 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('#status', () => {
-      it('should be the current status of the session', () => {
-        expect(typeof session.status).to.equal('string');
-      });
-    });
-
     describe('#isReady', () => {
       it('should be false until ready', async () => {
         expect(session.isReady).to.equal(false);

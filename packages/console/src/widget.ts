@@ -289,8 +289,8 @@ export class CodeConsole extends Widget {
    * incomplete before attempting submission anyway. The default value is `250`.
    */
   execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
-    if (this.session.status === 'dead') {
-      return Promise.resolve(void 0);
+    if (this.session.kernel.status === 'dead') {
+      return Promise.resolve();
     }
 
     const promptCell = this.promptCell;
@@ -789,7 +789,7 @@ export class CodeConsole extends Widget {
    * Handle a change to the kernel status.
    */
   private async _onKernelStatusChanged(): Promise<void> {
-    if (this.session.status === 'restarting') {
+    if (this.session.kernel.status === 'restarting') {
       this.addBanner();
       this._handleInfo(await this.session.kernel.info);
     }
