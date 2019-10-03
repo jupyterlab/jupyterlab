@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PathExt } from '@jupyterlab/coreutils';
+import { PathExt, IChangedArgs } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
 
@@ -43,7 +43,20 @@ export interface IClientSession extends IDisposable {
   /**
    * A signal emitted when the kernel changes.
    */
-  readonly kernelChanged: ISignal<this, Session.IKernelChangedArgs>;
+  readonly sessionChanged: ISignal<
+    this,
+    IChangedArgs<Session.ISession | null, 'session'>
+  >;
+
+  session: Session.ISession | null;
+
+  /**
+   * A signal emitted when the kernel changes.
+   */
+  readonly kernelChanged: ISignal<
+    this,
+    IChangedArgs<Kernel.IKernelConnection | null, 'kernel'>
+  >;
 
   /**
    * A signal emitted when the kernel status changes.

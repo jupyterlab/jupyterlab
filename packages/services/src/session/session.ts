@@ -14,6 +14,7 @@ import { Kernel, KernelMessage } from '../kernel';
 import { ServerConnection } from '..';
 
 import { DefaultSession } from './default';
+import { IChangedArgs } from '@jupyterlab/coreutils';
 
 /**
  * A namespace for session interfaces and factory functions.
@@ -31,9 +32,17 @@ export namespace Session {
    */
   export interface ISession extends IObservableDisposable {
     /**
+     * A signal emitted when a session property changes.
+     */
+    readonly propertyChanged: ISignal<this, 'path' | 'name' | 'type'>;
+
+    /**
      * A signal emitted when the kernel changes.
      */
-    kernelChanged: ISignal<this, IKernelChangedArgs>;
+    kernelChanged: ISignal<
+      this,
+      IChangedArgs<Kernel.IKernelConnection, 'kernel'>
+    >;
 
     /**
      * The kernel statusChanged signal, proxied from the current kernel.
@@ -45,11 +54,6 @@ export namespace Session {
      * kernel.
      */
     connectionStatusChanged: ISignal<this, Kernel.ConnectionStatus>;
-
-    /**
-     * A signal emitted when a session property changes.
-     */
-    readonly propertyChanged: ISignal<this, 'path' | 'name' | 'type'>;
 
     /**
      * The kernel iopubMessage signal, proxied from the current kernel.
@@ -105,7 +109,7 @@ export namespace Session {
      * A number of kernel signals are proxied through the session from
      * whatever the current kernel is for convenience.
      */
-    readonly kernel: Kernel.IKernelConnection;
+    readonly kernel: Kernel.IKernelConnection | null;
 
     /**
      * Change the session path.
@@ -143,7 +147,7 @@ export namespace Session {
      */
     changeKernel(
       options: Partial<Kernel.IModel>
-    ): Promise<Kernel.IKernelConnection>;
+    ): Promise<Kernel.IKernelConnection | null>;
 
     /**
      * Kill the kernel and shutdown the session.
@@ -351,11 +355,18 @@ export namespace Session {
   /**
    * An arguments object for the kernel changed signal.
    */
-  export interface IKernelChangedArgs {
+  export interface IKernelChangedArgs
+    extends IChangedArgs<Kernel.IKernelConnection | null> {
+    /**
+     * The property name
+     */
+    name: 'kernel';
+
     /**
      * The old kernel.
      */
     oldValue: Kernel.IKernelConnection | null;
+
     /**
      * The new kernel.
      */

@@ -133,7 +133,8 @@ export class CodeConsole extends Widget {
       session: this.session
     });
 
-    this._onKernelChanged();
+    void this._onKernelChanged();
+
     this.session.kernelChanged.connect(this._onKernelChanged, this);
     this.session.statusChanged.connect(this._onKernelStatusChanged, this);
   }

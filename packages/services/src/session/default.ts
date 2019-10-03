@@ -198,7 +198,7 @@ export class DefaultSession implements Session.ISession {
       this.setupKernel(model.kernel);
       let newValue = this._kernel;
       oldValue.dispose();
-      this._kernelChanged.emit({ oldValue, newValue });
+      this._kernelChanged.emit({ name: 'kernel', oldValue, newValue });
     }
 
     this._handleModelChange(oldModel);
