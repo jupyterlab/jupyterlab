@@ -2,33 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Contents } from './index';
-
-/**
- * Validate a property as being on an object, and optionally
- * of a given type.
- */
-function validateProperty(object: any, name: string, typeName?: string): void {
-  if (!object.hasOwnProperty(name)) {
-    throw Error(`Missing property '${name}'`);
-  }
-  if (typeName !== void 0) {
-    let valid = true;
-    let value = object[name];
-    switch (typeName) {
-      case 'array':
-        valid = Array.isArray(value);
-        break;
-      case 'object':
-        valid = typeof value !== 'undefined';
-        break;
-      default:
-        valid = typeof value === typeName;
-    }
-    if (!valid) {
-      throw new Error(`Property '${name}' is not of type '${typeName}`);
-    }
-  }
-}
+import { validateProperty } from '../validate';
 
 /**
  * Validate an `Contents.IModel` object.
