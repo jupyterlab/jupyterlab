@@ -22,7 +22,7 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { Debugger } from './debugger';
 
-import { IDebugger, IDebuggerSidebar } from './tokens';
+import { IDebugger } from './tokens';
 
 import { DebuggerNotebookHandler } from './handlers/notebook';
 
@@ -52,13 +52,8 @@ export namespace CommandIDs {
 const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:consoles',
   autoStart: true,
-  requires: [IDebugger, IDebuggerSidebar, IConsoleTracker],
-  activate: (
-    _,
-    debug: IDebugger,
-    sidebar: IDebuggerSidebar,
-    tracker: IConsoleTracker
-  ) => {
+  requires: [IDebugger, IConsoleTracker],
+  activate: (_, debug: IDebugger, tracker: IConsoleTracker) => {
     debug.currentChanged.connect((_, update) => {
       if (update) {
         update.content.model.sidebar = sidebar;
@@ -191,7 +186,7 @@ const sidebar: JupyterFrontEndPlugin<IDebuggerSidebar> = {
  */
 const tracker: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:tracker',
-  optional: [ILayoutRestorer, IDebuggerSidebar, ICommandPalette],
+  optional: [ILayoutRestorer, ICommandPalette],
   requires: [IStateDB],
   provides: IDebugger,
   autoStart: true,
@@ -199,15 +194,10 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
     app: JupyterFrontEnd,
     state: IStateDB,
     restorer: ILayoutRestorer | null,
-    sidebar: IDebuggerSidebar | null,
-    palette: ICommandPalette
+    palette: ICommandPalette | null
   ): IDebugger => {
     const tracker = new WidgetTracker<MainAreaWidget<Debugger>>({
       namespace: 'debugger'
-    });
-
-    tracker.widgetUpdated.connect((_, update) => {
-      update;
     });
 
     const command = CommandIDs.create;
@@ -216,28 +206,25 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
       label: 'Debugger',
       execute: args => {
         const id = (args.id as string) || '';
+        const mode = (args.mode as IDebugger.Mode) || 'expanded';
+
         if (id) {
           console.log('Debugger ID: ', id);
         }
 
-        const existedWidget = tracker.find(
-          widget => id === widget.content.model.id
-        );
+        let widget: MainAreaWidget<Debugger>;
 
-        if (existedWidget) {
-          app.shell.add(existedWidget, 'main');
-          return;
+        if (tracker.currentWidget) {
+          widget = tracker.currentWidget;
+        } else {
+          widget = new MainAreaWidget({
+            content: new Debugger({
+              connector: state,
+              id: id
+            })
+          });
+          void tracker.add(widget);
         }
-
-        const widget = new MainAreaWidget({
-          content: new Debugger({
-            connector: state,
-            id: id
-          })
-        });
-
-        void tracker.add(widget);
-        app.shell.add(widget, 'main');
 
         return widget;
       }
@@ -249,12 +236,39 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
       // Handle state restoration.
       void restorer.restore(tracker, {
         command: command,
-        args: widget => ({ id: widget.content.model.id }),
+        args: widget => ({
+          id: widget.content.model.id,
+          mode: widget.content.model.mode
+        }),
         name: widget => widget.content.model.id
       });
     }
 
-    return tracker;
+    // Create a proxy to pass the `session` and `mode` to the debugger.
+
+    const proxy: IDebugger = Object.defineProperties(
+      {},
+      {
+        mode: {
+          get: (): IDebugger.Mode => {
+            return 'expanded';
+          },
+          set: (mode: IDebugger.Mode) => {
+            // Set the debugger mode.
+          }
+        },
+        session: {
+          get: (): IDebugger.ISession | null => {
+            return null;
+          },
+          set: (src: IDebugger.ISession | null) => {
+            // Set the debugger session.
+          }
+        }
+      }
+    );
+
+    return proxy;
   }
 };
 
