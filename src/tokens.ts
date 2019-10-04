@@ -22,7 +22,7 @@ export interface IDebugger {
    * There is only ever one debugger instance. If it is `expanded`, it exists
    * as a `MainAreaWidget`, otherwise it is a sidebar.
    */
-  mode: 'condensed' | 'expanded';
+  mode: IDebugger.Mode;
 
   /**
    * The current debugger session.
@@ -34,6 +34,11 @@ export interface IDebugger {
  * A namespace for visual debugger types.
  */
 export namespace IDebugger {
+  /**
+   * The mode of the debugger UI.
+   */
+  export type Mode = 'condensed' | 'expanded';
+
   /**
    * A visual debugger session.
    */
