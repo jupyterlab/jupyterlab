@@ -17,8 +17,6 @@ import { BoxPanel } from '@phosphor/widgets';
 
 import { DebugSession } from './session';
 
-import { IDebuggerSidebar } from './tokens';
-
 export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
     super({ direction: 'left-to-right' });
@@ -49,7 +47,6 @@ export namespace Debugger {
     connector?: IDataConnector<ReadonlyJSONValue>;
     id?: string;
     session?: IClientSession;
-    sidebar?: IDebuggerSidebar;
   }
 
   export class Model implements IDisposable {
@@ -63,14 +60,6 @@ export namespace Debugger {
     readonly connector: IDataConnector<ReadonlyJSONValue> | null;
 
     readonly id: string;
-
-    get sidebar() {
-      return this._sidebar;
-    }
-
-    set sidebar(newSidebar: IDebuggerSidebar) {
-      this._sidebar = newSidebar;
-    }
 
     get session() {
       return this._session;
