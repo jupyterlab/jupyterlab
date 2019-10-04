@@ -20,6 +20,8 @@ import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
+import { UUID } from '@phosphor/coreutils';
+
 import { Debugger } from './debugger';
 
 import { IDebugger } from './tokens';
@@ -193,7 +195,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.create, {
       label: 'Debugger',
       execute: async args => {
-        const id = (args.id as string) || '';
+        const id = (args.id as string) || UUID.uuid4();
         const mode = (args.mode as IDebugger.Mode) || 'expanded';
 
         if (id) {
