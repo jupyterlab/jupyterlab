@@ -28,6 +28,11 @@ const SERVICE_DRIVE_URL = 'api/contents';
 const FILES_URL = 'files';
 
 /**
+ * The url for the folder access.
+ */
+const DIRECTORIES_URL = 'directories';
+
+/**
  * A namespace for contents interfaces.
  */
 export namespace Contents {
@@ -283,6 +288,17 @@ export namespace Contents {
     getDownloadUrl(path: string): Promise<string>;
 
     /**
+     * Get an encoded download url given a folder path.
+     *
+     * @param A promise which resolves with the absolute POSIX
+     *   folder path on the server.
+     *
+     * #### Notes
+     * The returned URL may include a query parameter.
+     */
+    getDownloadFolderUrl(path: string): Promise<string>;
+
+    /**
      * Create a new untitled file or directory in the specified directory path.
      *
      * @param options: The options used to create the file.
@@ -428,6 +444,17 @@ export namespace Contents {
      * The returned URL may include a query parameter.
      */
     getDownloadUrl(localPath: string): Promise<string>;
+
+    /**
+     * Get an encoded download url given a folder path.
+     *
+     * @param A promise which resolves with the absolute POSIX
+     *   folder path on the server.
+     *
+     * #### Notes
+     * The returned URL may include a query parameter.
+     */
+    getDownloadFolderUrl(localPath: string): Promise<string>;
 
     /**
      * Create a new untitled file or directory in the specified directory path.
@@ -702,6 +729,21 @@ export class ContentsManager implements Contents.IManager {
   getDownloadUrl(path: string): Promise<string> {
     let [drive, localPath] = this._driveForPath(path);
     return drive.getDownloadUrl(localPath);
+  }
+
+  /**
+   * Get an encoded download url given a folder path.
+   *
+   * @param path - An absolute POSIX folder path on the server.
+   *
+   * #### Notes
+   * It is expected that the path contains no relative paths.
+   *
+   * The returned URL may include a query parameter.
+   */
+  getDownloadFolderUrl(path: string): Promise<string> {
+    let [drive, localPath] = this._driveForPath(path);
+    return drive.getDownloadFolderUrl(localPath);
   }
 
   /**
@@ -1061,6 +1103,50 @@ export class Drive implements Contents.IDrive {
       fullurl.searchParams.append('_xsrf', xsrfTokenMatch[1]);
       url = fullurl.toString();
     }
+    return Promise.resolve(url);
+  }
+
+  /**
+   * Get an encoded download url given a folder path.
+   *
+   * @param localPath - An absolute POSIX folder path on the server.
+   *
+   * #### Notes
+   * It is expected that the path contains no relative paths.
+   *
+   * The returned URL may include a query parameter.
+   */
+  getDownloadFolderUrl(localPath: string): Promise<string> {
+    let baseUrl = this.serverSettings.baseUrl;
+    let url = URLExt.join(
+      baseUrl,
+      DIRECTORIES_URL,
+      URLExt.encodeParts(localPath)
+    );
+
+    const fullurl = new URL(url);
+
+    // Generate a random token.
+    const rand = () =>
+      Math.random()
+        .toString(36)
+        .substr(2);
+    const token = (length: number) =>
+      (rand() + rand() + rand() + rand()).substr(0, length);
+
+    // TODO: Get `archiveFormat` from the settings.
+    // Must be 'zip', 'tgz', 'tbz' or 'txz'.
+    let archiveFormat: string = 'zip';
+
+    fullurl.searchParams.append('archiveToken', token(20));
+    fullurl.searchParams.append('archiveFormat', archiveFormat);
+
+    const xsrfTokenMatch = document.cookie.match('\\b_xsrf=([^;]*)\\b');
+    if (xsrfTokenMatch) {
+      fullurl.searchParams.append('_xsrf', xsrfTokenMatch[1]);
+    }
+
+    url = fullurl.toString();
     return Promise.resolve(url);
   }
 

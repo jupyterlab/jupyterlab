@@ -213,10 +213,17 @@ export class FileBrowser extends Widget {
   }
 
   /**
-   * Download the currently selected item(s).
+   * Download the currently selected file(s).
    */
   download(): Promise<void> {
     return this._listing.download();
+  }
+
+  /**
+   * Download the currently selected folder(s).
+   */
+  downloadFolder(): Promise<void> {
+    return this._listing.downloadFolder();
   }
 
   /**

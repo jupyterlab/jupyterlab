@@ -333,6 +333,25 @@ export class FileBrowserModel implements IDisposable {
   }
 
   /**
+   * Download a folder.
+   *
+   * @param path - The path of the folder to be downloaded.
+   *
+   * @returns A promise which resolves when the folder has begun
+   *   downloading.
+   */
+  async downloadFolder(path: string): Promise<void> {
+    const url = await this.manager.services.contents.getDownloadFolderUrl(path);
+    let element = document.createElement('a');
+    element.href = url;
+    element.download = '';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    return void 0;
+  }
+
+  /**
    * Restore the state of the file browser.
    *
    * @param id - The unique ID that is used to construct a state database key.

@@ -70,6 +70,8 @@ namespace CommandIDs {
 
   export const download = 'filebrowser:download';
 
+  export const downloadFolder = 'filebrowser:downloadFolder';
+
   export const duplicate = 'filebrowser:duplicate';
 
   // For main browser only.
@@ -434,6 +436,18 @@ function addCommands(
     },
     iconClass: 'jp-MaterialIcon jp-DownloadIcon',
     label: 'Download'
+  });
+
+  commands.addCommand(CommandIDs.downloadFolder, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+
+      if (widget) {
+        return widget.downloadFolder();
+      }
+    },
+    iconClass: 'jp-MaterialIcon jp-DownloadIcon',
+    label: 'Download as an archive'
   });
 
   commands.addCommand(CommandIDs.duplicate, {
@@ -832,6 +846,8 @@ function addCommands(
   const selectorItem = '.jp-DirListing-item[data-isdir]';
   // matches only non-directory items
   const selectorNotDir = '.jp-DirListing-item[data-isdir="false"]';
+  // matches only non-file items
+  const selectorNotFile = '.jp-DirListing-item[data-isdir="true"]';
 
   // If the user did not click on any file, we still want to show paste and new folder,
   // so target the content rather than an item.
@@ -901,25 +917,30 @@ function addCommands(
     rank: 9
   });
   app.contextMenu.addItem({
+    command: CommandIDs.downloadFolder,
+    selector: selectorNotFile,
+    rank: 10
+  });
+  app.contextMenu.addItem({
     command: CommandIDs.shutdown,
     selector: selectorNotDir,
-    rank: 10
+    rank: 11
   });
 
   app.contextMenu.addItem({
     command: CommandIDs.share,
     selector: selectorItem,
-    rank: 11
+    rank: 12
   });
   app.contextMenu.addItem({
     command: CommandIDs.copyPath,
     selector: selectorItem,
-    rank: 12
+    rank: 13
   });
   app.contextMenu.addItem({
     command: CommandIDs.copyDownloadLink,
     selector: selectorNotDir,
-    rank: 13
+    rank: 14
   });
 }
 

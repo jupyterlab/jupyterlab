@@ -422,13 +422,24 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Download the currently selected item(s).
+   * Download the currently selected file(s).
    */
   async download(): Promise<void> {
     await Promise.all(
       toArray(this.selectedItems())
         .filter(item => item.type !== 'directory')
         .map(item => this._model.download(item.path))
+    );
+  }
+
+  /**
+   * Download the currently selected folder(s).
+   */
+  async downloadFolder(): Promise<void> {
+    await Promise.all(
+      toArray(this.selectedItems())
+        .filter(item => item.type == 'directory')
+        .map(item => this._model.downloadFolder(item.path))
     );
   }
 
