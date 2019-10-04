@@ -11,12 +11,38 @@ import { ISignal } from '@phosphor/signaling';
 
 import { ServerConnection } from '..';
 
-import { DefaultKernel } from './default';
+import { KernelConnection } from './default';
 
 import { KernelMessage } from './messages';
 
 import { KernelSpec } from '../kernelspec';
 import { IManager as IBaseManager } from '../basemanager';
+
+import * as restapi from './restapi';
+
+/**
+ * TODO: how should models be managed, or in other words, how should we manage
+ * kernels without having a connection, through the API. Currently we can:
+ *
+ * - invoke a Kernel namespace method
+ * - invoke a method on the manager
+ * - invoke a method on the kernel connection
+ *
+ * The manager is really only good for polling the server and having signals
+ * for new kernels. That's the only value it adds. The manager doesn't
+ * actually use the rest api, just defers to the default kernel
+ *
+ * We need:
+ *
+ * - users to be able to use the rest api without needing to poll (i.e., without needing to use the manager)
+ * - have cached state from the rest api (like a list of kernels)
+ * - make it easy to poll to update the cached state and get notifications of updates of the cached state.
+ *
+ * How about a set of functions to query the rest api, which the manager uses. The manager manages a cache of state that is automatically updated. You can create a new kernel connection from a model (managed by the manager, or directly obtained). Each kernel connection listens to the model disposed signal. The model can have metadata, for example if there is a connection which handles comms.
+ *
+ * Perhaps
+ *
+ */
 
 /**
  * A namespace for kernel types, interfaces, and type checker functions.
@@ -51,11 +77,6 @@ export namespace Kernel {
      * The name of the server-side kernel.
      */
     readonly name: string;
-
-    /**
-     * The model associated with the kernel.
-     */
-    readonly model: Kernel.IModel;
 
     /**
      * The client username.
@@ -474,12 +495,7 @@ export namespace Kernel {
      * message should be treated as read-only.
      */
     anyMessage: ISignal<this, IAnyMessageArgs>;
-  }
 
-  /**
-   * The full interface of a kernel.
-   */
-  export interface IKernel extends IKernelConnection {
     /**
      * The server settings for the kernel.
      */
@@ -515,12 +531,14 @@ export namespace Kernel {
    * #### Notes
    * If the kernel was already started via `startNewKernel`, we return its
    * `Kernel.IModel`. Otherwise, we attempt to find the existing kernel.
+   *
+   * TODO: Delete as unnecessary?
    */
   export function findById(
     id: string,
     settings?: ServerConnection.ISettings
   ): Promise<IModel | undefined> {
-    return DefaultKernel.findById(id, settings);
+    return restapi.getKernelModel(id, settings);
   }
 
   /**
@@ -538,7 +556,7 @@ export namespace Kernel {
   export function listRunning(
     settings?: ServerConnection.ISettings
   ): Promise<Kernel.IModel[]> {
-    return DefaultKernel.listRunning(settings);
+    return restapi.listRunning(settings);
   }
 
   /**
@@ -557,8 +575,10 @@ export namespace Kernel {
    * Wraps the result in a Kernel object. The promise is fulfilled
    * when the kernel is started by the server, otherwise the promise is rejected.
    */
-  export function startNew(options: Kernel.IOptions = {}): Promise<IKernel> {
-    return DefaultKernel.startNew(options);
+  export function startNew(
+    options: Kernel.IOptions = {}
+  ): Promise<IKernelConnection> {
+    return KernelConnection.startNew(options);
   }
 
   /**
@@ -573,12 +593,14 @@ export namespace Kernel {
    * #### Notes
    * If the kernel was already started via `startNewKernel`, the existing
    * Kernel object info is used to create another instance.
+   *
+   * TODO: Delete as unnecessary?
    */
   export function connectTo(
     model: Kernel.IModel,
     settings?: ServerConnection.ISettings
-  ): IKernel {
-    return DefaultKernel.connectTo(model, settings);
+  ): IKernelConnection {
+    return KernelConnection.connectTo(model, settings);
   }
 
   /**
@@ -589,23 +611,15 @@ export namespace Kernel {
    * @param settings - The server settings for the request.
    *
    * @returns A promise that resolves when the kernel is shut down.
+   *
+   * #### Notes
+   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
    */
   export function shutdown(
     id: string,
     settings?: ServerConnection.ISettings
   ): Promise<void> {
-    return DefaultKernel.shutdown(id, settings);
-  }
-
-  /**
-   * Shut down all kernels.
-   *
-   * @returns A promise that resolves when all of the kernels are shut down.
-   */
-  export function shutdownAll(
-    settings?: ServerConnection.ISettings
-  ): Promise<void> {
-    return DefaultKernel.shutdownAll(settings);
+    return restapi.shutdownKernel(id, settings);
   }
 
   /**
@@ -710,7 +724,7 @@ export namespace Kernel {
      * #### Notes
      * The manager `serverSettings` will be always be used.
      */
-    startNew(options?: IOptions): Promise<IKernel>;
+    startNew(options?: IOptions): Promise<IKernelConnection>;
 
     /**
      * Find a kernel by id.
@@ -728,7 +742,7 @@ export namespace Kernel {
      *
      * @returns A promise that resolves with the new kernel instance.
      */
-    connectTo(model: Kernel.IModel): IKernel;
+    connectTo(model: Kernel.IModel): IKernelConnection;
 
     /**
      * Shut down a kernel by id.

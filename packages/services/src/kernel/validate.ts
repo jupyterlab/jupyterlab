@@ -11,6 +11,9 @@ import { validateProperty } from '../validate';
  */
 const HEADER_FIELDS = ['username', 'version', 'session', 'msg_id', 'msg_type'];
 
+// TODO: use the typescript 3.7 assert functionality in validation functions
+// when we upgrade typescript.
+
 /**
  * Required fields and types for contents of various types of `kernel.IMessage`
  * messages on the iopub channel.
@@ -67,7 +70,7 @@ function validateIOPubContent(msg: KernelMessage.IIOPubMessage): void {
   if (msg.channel === 'iopub') {
     let fields = IOPUB_CONTENT_FIELDS[msg.header.msg_type];
     // Check for unknown message type.
-    if (fields === void 0) {
+    if (fields === undefined) {
       return;
     }
     let names = Object.keys(fields);
@@ -88,4 +91,14 @@ function validateIOPubContent(msg: KernelMessage.IIOPubMessage): void {
 export function validateModel(model: Kernel.IModel): void {
   validateProperty(model, 'name', 'string');
   validateProperty(model, 'id', 'string');
+}
+
+/**
+ * Validate an array of `Kernel.IModel` objects.
+ */
+export function validateModels(models: Kernel.IModel[]): void {
+  if (!Array.isArray(models)) {
+    throw new Error('Invalid kernel list');
+  }
+  models.forEach(d => validateModel(d));
 }

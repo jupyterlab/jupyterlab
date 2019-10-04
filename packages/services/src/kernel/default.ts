@@ -5,8 +5,6 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
 
-import { ArrayExt, each, find, some } from '@phosphor/algorithm';
-
 import { JSONExt, JSONObject, PromiseDelegate } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -30,10 +28,7 @@ import * as serialize from './serialize';
 import * as validate from './validate';
 import { KernelSpec } from '../kernelspec/kernelspec';
 
-/**
- * The url for the kernel service.
- */
-const KERNEL_SERVICE_URL = 'api/kernels';
+import * as restapi from './restapi';
 
 // Stub for requirejs.
 declare var requirejs: any;
@@ -46,7 +41,7 @@ declare var requirejs: any;
  * asynchronously. Any message handler can return a promise, and message
  * handling will pause until the promise is fulfilled.
  */
-export class DefaultKernel implements Kernel.IKernel {
+export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Construct a kernel object.
    */
@@ -80,8 +75,6 @@ export class DefaultKernel implements Kernel.IKernel {
 
     // Immediately queue up a request for initial kernel info.
     void this.requestKernelInfo();
-
-    Private.runningKernels.push(this);
   }
 
   get disposed(): ISignal<this, void> {
@@ -176,13 +169,6 @@ export class DefaultKernel implements Kernel.IKernel {
   }
 
   /**
-   * Get the model associated with the kernel.
-   */
-  get model(): Kernel.IModel {
-    return { name: this.name, id: this.id };
-  }
-
-  /**
    * The client username.
    */
   get username(): string {
@@ -242,8 +228,8 @@ export class DefaultKernel implements Kernel.IKernel {
   /**
    * Clone the current kernel with a new clientId.
    */
-  clone(options: Kernel.IOptions = {}): Kernel.IKernel {
-    return new DefaultKernel(
+  clone(options: Kernel.IOptions = {}): Kernel.IKernelConnection {
+    return new KernelConnection(
       {
         name: this._name,
         username: this._username,
@@ -273,7 +259,6 @@ export class DefaultKernel implements Kernel.IKernel {
     this._clearSocket();
     this._kernelSession = '';
     this._msgChain = null;
-    ArrayExt.removeFirstOf(Private.runningKernels, this);
     Signal.clearData(this);
   }
 
@@ -432,7 +417,7 @@ export class DefaultKernel implements Kernel.IKernel {
    * request fails or the response is invalid.
    */
   interrupt(): Promise<void> {
-    return Private.interruptKernel(this, this.serverSettings);
+    return restapi.interruptKernel(this, this.serverSettings);
   }
 
   /**
@@ -455,7 +440,12 @@ export class DefaultKernel implements Kernel.IKernel {
    * invalid.
    */
   restart(): Promise<void> {
-    return Private.restartKernel(this, this.serverSettings);
+    // Handle the restart on all of the kernels with the same id.
+    // TODO:
+    // await Promise.all(
+    //   runningKernels.filter(k => k.id === kernel.id).map(k => k.handleRestart())
+    // );
+    return restapi.restartKernel(this, this.serverSettings);
   }
 
   /**
@@ -527,7 +517,7 @@ export class DefaultKernel implements Kernel.IKernel {
       this._clearState();
       return;
     }
-    await Private.shutdownKernel(this.id, this.serverSettings);
+    await restapi.shutdownKernel(this.id, this.serverSettings);
     this._clearState();
     this._updateConnectionStatus('disconnected');
     this._clearSocket();
@@ -809,8 +799,14 @@ export class DefaultKernel implements Kernel.IKernel {
    * Connect to a comm, or create a new one.
    *
    * #### Notes
-   * If a client-side comm already exists with the given commId, it is returned.
-   * An error is thrown if the kernel does not handle comms.
+   * If a client-side comm already exists with the given commId, it is
+   * returned. An error is thrown if the kernel does not handle comms.
+   *
+   * TODO: this means that I can just take over a comm just by knowing its id.
+   * So we can't *really* share comms, since only one message handler is
+   * installed. So why would we return someone else's comm object? Perhaps
+   * instead we should throw an error if a comm is already existing with that
+   * id, signifying that someone else has already hooked up to that comm?
    */
   connectToComm(
     targetName: string,
@@ -1203,7 +1199,7 @@ export class DefaultKernel implements Kernel.IKernel {
     let settings = this.serverSettings;
     let partialUrl = URLExt.join(
       settings.wsUrl,
-      KERNEL_SERVICE_URL,
+      restapi.KERNEL_SERVICE_URL,
       encodeURIComponent(this._id)
     );
 
@@ -1453,48 +1449,7 @@ export class DefaultKernel implements Kernel.IKernel {
 /**
  * The namespace for `DefaultKernel` statics.
  */
-export namespace DefaultKernel {
-  /**
-   * Find a kernel by id.
-   *
-   * @param id - The id of the kernel of interest.
-   *
-   * @param settings - The optional server settings.
-   *
-   * @returns A promise that resolves with the model for the kernel, or undefined if not found.
-   *
-   * #### Notes
-   * If the kernel was already started via `startNewKernel`, we return its
-   * `Kernel.IModel`.
-   *
-   * Otherwise, we attempt to find an existing kernel by connecting to the
-   * server.
-   */
-  export function findById(
-    id: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<Kernel.IModel | undefined> {
-    return Private.findById(id, settings);
-  }
-
-  /**
-   * Fetch the running kernels.
-   *
-   * @param settings - The optional server settings.
-   *
-   * @returns A promise that resolves with the list of running kernels.
-   *
-   * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
-   *
-   * The promise is fulfilled on a valid response and rejected otherwise.
-   */
-  export function listRunning(
-    settings?: ServerConnection.ISettings
-  ): Promise<Kernel.IModel[]> {
-    return Private.listRunning(settings);
-  }
-
+export namespace KernelConnection {
   /**
    * Start a new kernel.
    *
@@ -1511,7 +1466,9 @@ export namespace DefaultKernel {
    * Wraps the result in a Kernel object. The promise is fulfilled
    * when the kernel is started by the server, otherwise the promise is rejected.
    */
-  export function startNew(options: Kernel.IOptions): Promise<Kernel.IKernel> {
+  export function startNew(
+    options: Kernel.IOptions
+  ): Promise<Kernel.IKernelConnection> {
     return Private.startNew(options);
   }
 
@@ -1531,37 +1488,9 @@ export namespace DefaultKernel {
   export function connectTo(
     model: Kernel.IModel,
     settings?: ServerConnection.ISettings
-  ): Kernel.IKernel {
-    return Private.connectTo(model, settings);
-  }
-
-  /**
-   * Shut down a kernel by id.
-   *
-   * @param id - The id of the running kernel.
-   *
-   * @param settings - The server settings for the request.
-   *
-   * @returns A promise that resolves when the kernel is shut down.
-   */
-  export function shutdown(
-    id: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<void> {
-    return Private.shutdownKernel(id, settings);
-  }
-
-  /**
-   * Shut down all kernels.
-   *
-   * @param settings - The server settings to use.
-   *
-   * @returns A promise that resolves when all the kernels are shut down.
-   */
-  export function shutdownAll(
-    settings?: ServerConnection.ISettings
-  ): Promise<void> {
-    return Private.shutdownAll(settings);
+  ): Kernel.IKernelConnection {
+    let serverSettings = settings || ServerConnection.makeSettings();
+    return new KernelConnection({ name: model.name, serverSettings }, model.id);
   }
 }
 
@@ -1570,274 +1499,50 @@ export namespace DefaultKernel {
  */
 namespace Private {
   /**
-   * A module private store for running kernels.
-   */
-  export const runningKernels: DefaultKernel[] = [];
-
-  /**
-   * Find a kernel by id.
+   * TODO: We need some way to coordinate between kernels which one is
+   * handling comms. If we are going to keep track of each kernel and whether
+   * it has comms handled - we might as well keep track of the actual kernel
+   * connections themselves. And if we do that, we might as well update the
+   * kernel connections in listRunning, etc.
    *
-   * Will reach out to the server if needed to find the kernel.
+   * The other option is to have persistent kernel models, but then we require
+   * a persistent list of models which would be maintained in the manager, but
+   * that means that we really need the manager here.
    *
-   * Returns undefined if the kernel is not found.
-   */
-  export async function findById(
-    id: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<Kernel.IModel | undefined> {
-    let kernel = find(runningKernels, value => value.id === id);
-    if (kernel) {
-      return kernel.model;
-    }
-    try {
-      return getKernelModel(id, settings);
-    } catch (e) {
-      // If the error is a 404, the session wasn't found.
-      if (
-        e instanceof ServerConnection.ResponseError &&
-        e.response.status === 404
-      ) {
-        return undefined;
-      }
-      throw e;
-    }
-  }
+   * A lot of this goes away if we just insist that people use a manager with
+   * persistent models.
+   * 
+   * Let's just say you must manually guarantee this.
+   * 
+   *       // If there is already a kernel connection handling comms, don't handle
+      // them in our clone, since the comm message protocol has implicit
+      // assumptions that only one connection is handling comm messages.
+      // See https://github.com/jupyter/jupyter_client/issues/263
 
-  /**
-   * Fetch the running kernels.
-   *
-   * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
-   *
-   * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  export function listRunning(
-    settings?: ServerConnection.ISettings
-  ): Promise<Kernel.IModel[]> {
-    settings = settings || ServerConnection.makeSettings();
-    let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
-    return ServerConnection.makeRequest(url, {}, settings)
-      .then(response => {
-        if (response.status !== 200) {
-          throw new ServerConnection.ResponseError(response);
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (!Array.isArray(data)) {
-          throw new Error('Invalid kernel list');
-        }
-        for (let i = 0; i < data.length; i++) {
-          validate.validateModel(data[i]);
-        }
-        return updateRunningKernels(data);
-      });
-  }
-
-  /**
-   * Update the running kernels based on new data from the server.
-   */
-  export function updateRunningKernels(
-    kernels: Kernel.IModel[]
-  ): Kernel.IModel[] {
-    each(runningKernels.slice(), kernel => {
-      let updated = find(kernels, model => kernel.id === model.id);
-
-      // If kernel is no longer running on disk, emit dead signal.
-      if (!updated && kernel.status !== 'dead') {
-        kernel.dispose();
-      }
-    });
-    return kernels;
-  }
 
   /**
    * Start a new kernel.
    */
   export async function startNew(
     options: Kernel.IOptions
-  ): Promise<Kernel.IKernel> {
-    let settings = options.serverSettings || ServerConnection.makeSettings();
-    let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
-    let init = {
-      method: 'POST',
-      body: JSON.stringify({ name: options.name, env: options.env })
-    };
-    let response = await ServerConnection.makeRequest(url, init, settings);
-    if (response.status !== 201) {
-      throw new ServerConnection.ResponseError(response);
-    }
-    let data = await response.json();
-    validate.validateModel(data);
-    return new DefaultKernel(
+  ): Promise<Kernel.IKernelConnection> {
+    options.serverSettings =
+      options.serverSettings || ServerConnection.makeSettings();
+    const data = await restapi.startNew(options);
+    return new KernelConnection(
       {
         ...options,
-        name: data.name,
-        serverSettings: settings
+        name: data.name
       },
       data.id
     );
   }
 
   /**
-   * Connect to a running kernel.
-   */
-  export function connectTo(
-    model: Kernel.IModel,
-    settings?: ServerConnection.ISettings
-  ): Kernel.IKernel {
-    let serverSettings = settings || ServerConnection.makeSettings();
-    let kernel = find(runningKernels, value => {
-      return value.id === model.id;
-    });
-    if (kernel) {
-      // If there is already a kernel connection handling comms, don't handle
-      // them in our clone, since the comm message protocol has implicit
-      // assumptions that only one connection is handling comm messages.
-      // See https://github.com/jupyter/jupyter_client/issues/263
-      const handleComms = !some(
-        runningKernels,
-        k => k.id === model.id && k.handleComms
-      );
-      const newKernel = kernel.clone({ handleComms });
-      return newKernel;
-    }
-
-    return new DefaultKernel({ name: model.name, serverSettings }, model.id);
-  }
-
-  /**
-   * Restart a kernel.
-   */
-  export async function restartKernel(
-    kernel: Kernel.IKernel,
-    settings?: ServerConnection.ISettings
-  ): Promise<void> {
-    if (kernel.status === 'dead') {
-      throw new Error('Kernel is dead');
-    }
-    settings = settings || ServerConnection.makeSettings();
-    let url = URLExt.join(
-      settings.baseUrl,
-      KERNEL_SERVICE_URL,
-      encodeURIComponent(kernel.id),
-      'restart'
-    );
-    let init = { method: 'POST' };
-
-    // Handle the restart on all of the kernels with the same id.
-    await Promise.all(
-      runningKernels.filter(k => k.id === kernel.id).map(k => k.handleRestart())
-    );
-    let response = await ServerConnection.makeRequest(url, init, settings);
-    if (response.status !== 200) {
-      throw new ServerConnection.ResponseError(response);
-    }
-    let data = await response.json();
-    validate.validateModel(data);
-  }
-
-  /**
-   * Interrupt a kernel.
-   */
-  export async function interruptKernel(
-    kernel: Kernel.IKernel,
-    settings?: ServerConnection.ISettings
-  ): Promise<void> {
-    if (kernel.status === 'dead') {
-      throw new Error('Kernel is dead');
-    }
-    settings = settings || ServerConnection.makeSettings();
-    let url = URLExt.join(
-      settings.baseUrl,
-      KERNEL_SERVICE_URL,
-      encodeURIComponent(kernel.id),
-      'interrupt'
-    );
-    let init = { method: 'POST' };
-    let response = await ServerConnection.makeRequest(url, init, settings);
-    if (response.status !== 204) {
-      throw new ServerConnection.ResponseError(response);
-    }
-  }
-
-  /**
-   * Delete a kernel.
-   */
-  export async function shutdownKernel(
-    id: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<void> {
-    settings = settings || ServerConnection.makeSettings();
-    let url = URLExt.join(
-      settings.baseUrl,
-      KERNEL_SERVICE_URL,
-      encodeURIComponent(id)
-    );
-    let init = { method: 'DELETE' };
-    let response = await ServerConnection.makeRequest(url, init, settings);
-    if (response.status === 404) {
-      let msg = `The kernel "${id}" does not exist on the server`;
-      console.warn(msg);
-    } else if (response.status !== 204) {
-      throw new ServerConnection.ResponseError(response);
-    }
-    killKernels(id);
-  }
-
-  /**
-   * Shut down all kernels.
-   *
-   * @param settings - The server settings to use.
-   *
-   * @returns A promise that resolves when all the kernels are shut down.
-   */
-  export async function shutdownAll(
-    settings?: ServerConnection.ISettings
-  ): Promise<void> {
-    settings = settings || ServerConnection.makeSettings();
-    let running = await listRunning(settings);
-    await Promise.all(running.map(k => shutdownKernel(k.id, settings)));
-  }
-
-  /**
-   * Kill the kernels by id.
-   */
-  function killKernels(id: string): void {
-    // Iterate on an array copy so disposals will not affect the iteration.
-    runningKernels.slice().forEach(kernel => {
-      if (kernel.id === id) {
-        kernel.dispose();
-      }
-    });
-  }
-
-  /**
-   * Get a full kernel model from the server by kernel id string.
-   */
-  export async function getKernelModel(
-    id: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<Kernel.IModel> {
-    settings = settings || ServerConnection.makeSettings();
-    let url = URLExt.join(
-      settings.baseUrl,
-      KERNEL_SERVICE_URL,
-      encodeURIComponent(id)
-    );
-    let response = await ServerConnection.makeRequest(url, {}, settings);
-    if (response.status !== 200) {
-      throw new ServerConnection.ResponseError(response);
-    }
-    let data = await response.json();
-    validate.validateModel(data);
-    return data;
-  }
-
-  /**
    * Log the current kernel status.
    */
-  export function logKernelStatus(kernel: Kernel.IKernel): void {
+  export function logKernelStatus(kernel: Kernel.IKernelConnection): void {
     switch (kernel.status) {
       case 'idle':
       case 'busy':
@@ -1854,7 +1559,7 @@ namespace Private {
    */
   export async function handleShellMessage<
     T extends KernelMessage.ShellMessageType
-  >(kernel: Kernel.IKernel, msg: KernelMessage.IShellMessage<T>) {
+  >(kernel: Kernel.IKernelConnection, msg: KernelMessage.IShellMessage<T>) {
     let future = kernel.sendShellMessage(msg, true);
     return future.done;
   }
@@ -1865,6 +1570,9 @@ namespace Private {
    * Try to load an object from a module asynchronously if a module
    * is specified, otherwise tries to load an object from the global
    * registry, if the global registry is provided.
+   *
+   * #### Notes
+   * Loading a module uses requirejs.
    */
   export function loadObject(
     name: string,
@@ -1872,7 +1580,7 @@ namespace Private {
     registry?: { [key: string]: any }
   ): Promise<any> {
     return new Promise((resolve, reject) => {
-      // Try loading the view module using require.js
+      // Try loading the module using require.js
       if (moduleName) {
         if (typeof requirejs === 'undefined') {
           throw new Error('requirejs not found');

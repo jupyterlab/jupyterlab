@@ -31,7 +31,7 @@ export abstract class KernelFutureHandler<
     msg: REQUEST,
     expectReply: boolean,
     disposeOnDone: boolean,
-    kernel: Kernel.IKernel
+    kernel: Kernel.IKernelConnection
   ) {
     super(cb);
     this._msg = msg;
@@ -302,7 +302,7 @@ export abstract class KernelFutureHandler<
   private _replyMsg: REPLY;
   private _hooks = new Private.HookList<KernelMessage.IIOPubMessage>();
   private _disposeOnDone = true;
-  private _kernel: Kernel.IKernel;
+  private _kernel: Kernel.IKernelConnection;
 }
 
 export class KernelControlFutureHandler<

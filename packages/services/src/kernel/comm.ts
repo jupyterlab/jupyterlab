@@ -19,7 +19,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
   constructor(
     target: string,
     id: string,
-    kernel: Kernel.IKernel,
+    kernel: Kernel.IKernelConnection,
     disposeCb: () => void
   ) {
     super(disposeCb);
@@ -211,7 +211,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
 
   private _target = '';
   private _id = '';
-  private _kernel: Kernel.IKernel;
+  private _kernel: Kernel.IKernelConnection;
   private _onClose: (
     msg: KernelMessage.ICommCloseMsg<'iopub'>
   ) => void | PromiseLike<void>;

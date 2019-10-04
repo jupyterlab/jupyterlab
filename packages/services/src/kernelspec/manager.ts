@@ -8,12 +8,12 @@ import { ISignal, Signal } from '@phosphor/signaling';
 import { JSONExt } from '@phosphor/coreutils';
 import { BaseManager } from '../basemanager';
 /**
- * An implementation of a kernel manager.
+ * An implementation of a kernel spec manager.
  */
 export class KernelSpecManager extends BaseManager
   implements KernelSpec.IManager {
   /**
-   * Construct a new kernel manager.
+   * Construct a new kernel spec manager.
    *
    * @param options - The default options for kernel.
    */

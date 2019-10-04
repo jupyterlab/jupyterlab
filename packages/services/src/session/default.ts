@@ -145,7 +145,7 @@ export class DefaultSession implements Session.ISession {
   get model(): Session.IModel {
     return {
       id: this.id,
-      kernel: this.kernel.model,
+      kernel: { id: this.kernel.id, name: this.kernel.name },
       path: this._path,
       type: this._type,
       name: this._name
@@ -176,7 +176,7 @@ export class DefaultSession implements Session.ISession {
         serverSettings: this.serverSettings
       },
       this._id,
-      this.kernel.model
+      { id: this.kernel.id, name: this.kernel.name }
     );
   }
 
@@ -325,7 +325,10 @@ export class DefaultSession implements Session.ISession {
   /**
    * Handle to changes in the Kernel status.
    */
-  protected onKernelStatus(sender: Kernel.IKernel, state: Kernel.Status) {
+  protected onKernelStatus(
+    sender: Kernel.IKernelConnection,
+    state: Kernel.Status
+  ) {
     this._statusChanged.emit(state);
   }
 
@@ -333,7 +336,7 @@ export class DefaultSession implements Session.ISession {
    * Handle to changes in the Kernel status.
    */
   protected onKernelConnectionStatus(
-    sender: Kernel.IKernel,
+    sender: Kernel.IKernelConnection,
     state: Kernel.ConnectionStatus
   ) {
     this._connectionStatusChanged.emit(state);
@@ -343,7 +346,7 @@ export class DefaultSession implements Session.ISession {
    * Handle iopub kernel messages.
    */
   protected onIOPubMessage(
-    sender: Kernel.IKernel,
+    sender: Kernel.IKernelConnection,
     msg: KernelMessage.IIOPubMessage
   ) {
     this._iopubMessage.emit(msg);
@@ -353,7 +356,7 @@ export class DefaultSession implements Session.ISession {
    * Handle unhandled kernel messages.
    */
   protected onUnhandledMessage(
-    sender: Kernel.IKernel,
+    sender: Kernel.IKernelConnection,
     msg: KernelMessage.IMessage
   ) {
     this._unhandledMessage.emit(msg);
@@ -362,7 +365,10 @@ export class DefaultSession implements Session.ISession {
   /**
    * Handle any kernel messages.
    */
-  protected onAnyMessage(sender: Kernel.IKernel, args: Kernel.IAnyMessageArgs) {
+  protected onAnyMessage(
+    sender: Kernel.IKernelConnection,
+    args: Kernel.IAnyMessageArgs
+  ) {
     this._anyMessage.emit(args);
   }
 
@@ -416,7 +422,7 @@ export class DefaultSession implements Session.ISession {
   private _path = '';
   private _name = '';
   private _type = '';
-  private _kernel: Kernel.IKernel;
+  private _kernel: Kernel.IKernelConnection;
   private _isDisposed = false;
   private _updating = false;
   private _disposed = new Signal<this, void>(this);
