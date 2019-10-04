@@ -17,6 +17,8 @@ import { BoxPanel } from '@phosphor/widgets';
 
 import { DebugSession } from './session';
 
+import { IDebugger } from './tokens';
+
 export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
     super({ direction: 'left-to-right' });
@@ -61,11 +63,27 @@ export namespace Debugger {
 
     readonly id: string;
 
-    get session() {
+    get mode(): IDebugger.Mode {
+      return this._mode;
+    }
+
+    set mode(mode: IDebugger.Mode) {
+      if (this._mode === mode) {
+        return;
+      }
+      this._mode = mode;
+      this._modeChanged.emit(mode);
+    }
+
+    get modeChanged(): ISignal<this, IDebugger.Mode> {
+      return this._modeChanged;
+    }
+
+    get session(): IDebugger.ISession {
       return this._session;
     }
 
-    set session(session: DebugSession | null) {
+    set session(session: IDebugger.ISession | null) {
       if (this._session === session) {
         return;
       }
@@ -101,10 +119,11 @@ export namespace Debugger {
     }
 
     private _isDisposed = false;
+    private _mode: IDebugger.Mode;
+    private _modeChanged = new Signal<this, IDebugger.Mode>(this);
     private _notebook: INotebookTracker;
-    private _session: DebugSession | null;
+    private _session: IDebugger.ISession | null;
     private _sessionChanged = new Signal<this, void>(this);
-    private _sidebar: IDebuggerSidebar;
   }
 
   export namespace Model {
