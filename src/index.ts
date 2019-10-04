@@ -5,7 +5,7 @@ import {
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
-  LabShell
+  ILabShell
 } from '@jupyterlab/application';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
@@ -16,22 +16,13 @@ import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 
 import { IStateDB } from '@jupyterlab/coreutils';
 
-import { IEditorTracker } from '@jupyterlab/fileeditor';
+import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { Debugger } from './debugger';
 
 import { IDebugger } from './tokens';
-
-import { DebuggerNotebookHandler } from './handlers/notebook';
-
-import { DebuggerConsoleHandler } from './handlers/console';
-
-import { DebuggerSidebar } from './sidebar';
-
-import { SessionTypes } from './breakpoints';
-import { DebugSession } from './session';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -44,6 +35,8 @@ export namespace CommandIDs {
   export const debugFile = 'debugger:debug-file';
 
   export const debugNotebook = 'debugger:debug-notebook';
+
+  export const mount = 'debugger:mount';
 }
 
 /**
@@ -53,15 +46,22 @@ const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:consoles',
   autoStart: true,
   requires: [IDebugger, IConsoleTracker],
-  activate: (_, debug: IDebugger, tracker: IConsoleTracker) => {
-    debug.currentChanged.connect((_, update) => {
-      if (update) {
-        update.content.model.sidebar = sidebar;
-        new DebuggerConsoleHandler({
-          debuggerModel: update.content.model,
-          consoleTracker: tracker
-        });
+  activate: (
+    _,
+    debug: IDebugger,
+    tracker: IConsoleTracker,
+    labShell: ILabShell
+  ) => {
+    labShell.currentChanged.connect((_, update) => {
+      const widget = update.newValue;
+
+      if (!(widget instanceof ConsolePanel)) {
+        return;
       }
+
+      debug.session.client = widget.session;
+      // TODO: If necessary, create a console handler here. Dispose an old one
+      // if it is holding on to memory.
     });
   }
 };
@@ -72,25 +72,23 @@ const consoles: JupyterFrontEndPlugin<void> = {
 const files: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:files',
   autoStart: true,
-  requires: [IEditorTracker, IDebugger, INotebookTracker],
+  requires: [IDebugger, IEditorTracker, ILabShell],
   activate: (
     app: JupyterFrontEnd,
-    tracker: IEditorTracker | null,
     debug: IDebugger,
-    notebook: INotebookTracker
+    tracker: IEditorTracker,
+    labShell: ILabShell
   ) => {
-    const shell = app.shell;
-    (shell as LabShell).currentChanged.connect((sender, update) => {
-      const newWidget = update.newValue;
-      const session =
-        newWidget && (newWidget as NotebookPanel | ConsolePanel).session
-          ? (newWidget as NotebookPanel | ConsolePanel).session
-          : false;
-      if (session && debug.currentWidget) {
-        const debugModel: Debugger.Model = debug.currentWidget.content.model;
-        debugModel.session = new DebugSession({ client: session });
-        debugModel.sidebar.breakpoints.model.type = session.type as SessionTypes;
+    labShell.currentChanged.connect((_, update) => {
+      const widget = update.newValue;
+
+      if (!(widget instanceof FileEditor)) {
+        return;
       }
+
+      // TODO: Check @jupyterlab/completer-extension:files to see how to connect
+      // a file editor's kernel session to the debugger. Update line below.
+      debug.session = null;
     });
 
     app.commands.addCommand(CommandIDs.debugFile, {
@@ -114,78 +112,32 @@ const files: JupyterFrontEndPlugin<void> = {
 const notebooks: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:notebooks',
   autoStart: true,
-  requires: [IDebugger, IDebuggerSidebar],
-  optional: [INotebookTracker, ICommandPalette],
+  requires: [IDebugger, INotebookTracker, ILabShell],
   activate: (
-    app: JupyterFrontEnd,
+    _,
     debug: IDebugger,
-    sidebar: IDebuggerSidebar,
-    notebook: INotebookTracker,
-    palette: ICommandPalette
+    tracker: INotebookTracker,
+    labShell: ILabShell
   ) => {
-    // 1. Keep track of any new notebook that is created.
-    // 2. When the *active* notebook changes, hook it up to the debugger.
-    // 3. If a notebook is closed, dispose the debugger session.
+    labShell.currentChanged.connect((_, update) => {
+      const widget = update.newValue;
 
-    debug.currentChanged.connect((_, update) => {
-      if (update) {
-        update.content.model.sidebar = sidebar;
-        new DebuggerNotebookHandler({
-          debuggerModel: update.content.model,
-          notebookTracker: notebook
-        });
+      if (!(widget instanceof NotebookPanel)) {
+        return;
       }
+
+      debug.session.client = widget.session;
+      // TODO: If necessary, create a notebook handler here. Dispose an old one
+      // if it is holding on to memory.
     });
-
-    //   // Debugger model:
-    //   // LIST of editors that it currently cares about.
-    //   // Manages life cycle signal connections.
-    //   // Manages variables
-    // });
-
-    // this exist only for my test in futre will be removed
-    const command: string = CommandIDs.debugNotebook;
-    app.commands.addCommand(command, {
-      label: 'test',
-      execute: () => {}
-    });
-
-    palette.addItem({ command, category: 'dev test' });
-  }
-};
-
-/**
- * A plugin providing a condensed sidebar UI for debugging.
- */
-const sidebar: JupyterFrontEndPlugin<IDebuggerSidebar> = {
-  id: '@jupyterlab/debugger:sidebar',
-  optional: [ILayoutRestorer],
-  provides: IDebuggerSidebar,
-  autoStart: true,
-  activate: (
-    app: JupyterFrontEnd,
-    restorer: ILayoutRestorer | null
-  ): DebuggerSidebar => {
-    const { shell } = app;
-    const label = 'Environment';
-    const namespace = 'jp-debugger-sidebar';
-    const sidebar = new DebuggerSidebar(null);
-    sidebar.id = namespace;
-    sidebar.title.label = label;
-    shell.add(sidebar, 'right', { activate: false });
-    if (restorer) {
-      restorer.add(sidebar, sidebar.id);
-    }
-
-    return sidebar;
   }
 };
 
 /**
  * A plugin providing a tracker code debuggers.
  */
-const tracker: JupyterFrontEndPlugin<IDebugger> = {
-  id: '@jupyterlab/debugger:tracker',
+const main: JupyterFrontEndPlugin<IDebugger> = {
+  id: '@jupyterlab/debugger:main',
   optional: [ILayoutRestorer, ICommandPalette],
   requires: [IStateDB],
   provides: IDebugger,
@@ -199,20 +151,54 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
     const tracker = new WidgetTracker<MainAreaWidget<Debugger>>({
       namespace: 'debugger'
     });
+    const { commands, shell } = app;
+    let widget: MainAreaWidget<Debugger>;
 
-    const command = CommandIDs.create;
-
-    app.commands.addCommand(command, {
-      label: 'Debugger',
+    commands.addCommand(CommandIDs.mount, {
       execute: args => {
+        if (!widget) {
+          return;
+        }
+
+        const mode = (args.mode as IDebugger.Mode) || 'expanded';
+        const { sidebar } = widget.content;
+
+        if (!mode) {
+          throw new Error(`Could not mount debugger in mode: "${mode}"`);
+        }
+
+        if (mode === 'expanded') {
+          if (widget.isAttached) {
+            return;
+          }
+
+          if (sidebar.isAttached) {
+            sidebar.parent = null;
+          }
+
+          shell.add(widget, 'main');
+          return;
+        }
+
+        if (sidebar.isAttached) {
+          return;
+        }
+
+        sidebar.id = 'jp-debugger-sidebar';
+        sidebar.title.label = 'Environment';
+        shell.add(sidebar, 'right', { activate: false });
+      }
+    });
+
+    commands.addCommand(CommandIDs.create, {
+      label: 'Debugger',
+      execute: async args => {
         const id = (args.id as string) || '';
         const mode = (args.mode as IDebugger.Mode) || 'expanded';
 
         if (id) {
           console.log('Debugger ID: ', id);
         }
-
-        let widget: MainAreaWidget<Debugger>;
 
         if (tracker.currentWidget) {
           widget = tracker.currentWidget;
@@ -226,16 +212,18 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
           void tracker.add(widget);
         }
 
+        await commands.execute(CommandIDs.mount, { mode });
+
         return widget;
       }
     });
 
-    palette.addItem({ command, category: 'Debugger' });
+    palette.addItem({ command: CommandIDs.create, category: 'Debugger' });
 
     if (restorer) {
       // Handle state restoration.
       void restorer.restore(tracker, {
-        command: command,
+        command: CommandIDs.create,
         args: widget => ({
           id: widget.content.model.id,
           mode: widget.content.model.mode
@@ -280,8 +268,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   consoles,
   files,
   notebooks,
-  sidebar,
-  tracker
+  main
 ];
 
 export default plugins;

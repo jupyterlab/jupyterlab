@@ -15,9 +15,11 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { BoxPanel } from '@phosphor/widgets';
 
+import { IDebugger } from './tokens';
+
 import { DebugSession } from './session';
 
-import { IDebugger } from './tokens';
+import { DebuggerSidebar } from './sidebar';
 
 export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
@@ -31,6 +33,8 @@ export class Debugger extends BoxPanel {
   }
 
   readonly model: Debugger.Model;
+
+  readonly sidebar: DebuggerSidebar;
 
   dispose(): void {
     if (this.isDisposed) {
