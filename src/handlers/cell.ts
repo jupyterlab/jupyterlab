@@ -60,8 +60,10 @@ export class CellManager {
   }
 
   onActiveCellChanged() {
+    console.log({ cell: this.activeCell });
     if (
       this.activeCell &&
+      this.activeCell.isAttached &&
       this.activeCell.editor &&
       this._debuggerModel &&
       this._debuggerModel.session

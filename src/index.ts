@@ -34,12 +34,17 @@ import { DebuggerSidebar } from './sidebar';
 
 import { SessionTypes } from './breakpoints';
 import { DebugSession } from './session';
+import { IDisposable } from '@phosphor/disposable';
 
 /**
  * The command IDs used by the debugger plugin.
  */
 export namespace CommandIDs {
   export const create = 'debugger:create';
+
+  export const start = 'debugger:start';
+
+  export const stop = 'debugger:stop';
 
   export const debugConsole = 'debugger:debug-console';
 
@@ -149,15 +154,6 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     //   // Manages life cycle signal connections.
     //   // Manages variables
     // });
-
-    // this exist only for my test in futre will be removed
-    const command: string = CommandIDs.debugNotebook;
-    app.commands.addCommand(command, {
-      label: 'test',
-      execute: () => {}
-    });
-
-    palette.addItem({ command, category: 'dev test' });
   }
 };
 
@@ -212,9 +208,45 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
       update;
     });
 
-    const command = CommandIDs.create;
+    const commandCreateDebugger = CommandIDs.create;
 
-    app.commands.addCommand(command, {
+    const commandStartDebugger = CommandIDs.start;
+
+    const commandStopDebugger = CommandIDs.stop;
+
+    var commandStop: IDisposable;
+
+    const getModel = () => {
+      return tracker.currentWidget ? tracker.currentWidget.content.model : null;
+    };
+
+    app.commands.addCommand(commandStopDebugger, {
+      label: 'Stop',
+      execute: async () => {
+        const debuggerModel = getModel();
+
+        if (debuggerModel) {
+          await debuggerModel.session.stop();
+          commandStop.dispose();
+        }
+      }
+    });
+
+    app.commands.addCommand(commandStartDebugger, {
+      label: 'Start',
+      execute: async () => {
+        const debuggerModel = getModel();
+        if (debuggerModel) {
+          await debuggerModel.session.start();
+          commandStop = await palette.addItem({
+            command: commandStopDebugger,
+            category: 'Debugger'
+          });
+        }
+      }
+    });
+
+    app.commands.addCommand(commandCreateDebugger, {
       label: 'Debugger',
       execute: args => {
         const id = (args.id as string) || UUID.uuid4();
@@ -225,7 +257,6 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
         const existedWidget = tracker.find(
           widget => id === widget.content.model.id
         );
-
         if (existedWidget) {
           app.shell.add(existedWidget, 'main');
           return;
@@ -245,12 +276,16 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
-    palette.addItem({ command, category: 'Debugger' });
+    palette.addItem({ command: commandCreateDebugger, category: 'Debugger' });
+    palette.addItem({
+      command: commandStartDebugger,
+      category: 'Debugger'
+    });
 
     if (restorer) {
       // Handle state restoration.
       void restorer.restore(tracker, {
-        command: command,
+        command: commandCreateDebugger,
         args: widget => ({ id: widget.content.model.id }),
         name: widget => widget.content.model.id
       });
