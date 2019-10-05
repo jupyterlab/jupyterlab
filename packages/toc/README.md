@@ -45,7 +45,7 @@ This will automatically recompile `@jupyterlab/toc` upon changes, and JupyterLab
 <!-- links -->
 
 [badge-binder]: https://mybinder.org/badge_logo.svg
-[binder]: https://mybinder.org/v2/gh/kgryte/jupyterlab-toc/demo-notebook?filepath=notebooks%2Fdemo.ipynb
+[binder]: https://mybinder.org/v2/gh/kgryte/jupyterlab-toc/demo-notebook?urlpath=lab%2Ftree%2Fnotebooks%2Fdemo.ipynb
 [python-data-science-handbook]: https://github.com/jakevdp/PythonDataScienceHandbook
 
 <!-- /.links -->
