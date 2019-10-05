@@ -8,4 +8,7 @@
 set -o errexit
 set -o xtrace
 
+jlpm install
+jlpm run clean
 jlpm run build
+jupyter labextension install .
