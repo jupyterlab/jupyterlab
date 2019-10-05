@@ -8,4 +8,4 @@
 set -o errexit
 set -o xtrace
 
-jlpm build
+jlpm run build
