@@ -13,7 +13,7 @@ import { Kernel, KernelMessage } from '../kernel';
 
 import { ServerConnection } from '..';
 
-import { DefaultSession } from './default';
+import { SessionConnection } from './default';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
 /**
@@ -29,8 +29,11 @@ export namespace Session {
    * that persists across changing kernels and kernels getting terminated. As
    * such, a number of signals are proxied from the current kernel for
    * convenience.
+   *
+   * The kernel is owned by the session, in that the session creates the
+   * kernel and manages its lifecycle.
    */
-  export interface ISession extends IObservableDisposable {
+  export interface ISessionConnection extends IObservableDisposable {
     /**
      * A signal emitted when a session property changes.
      */
@@ -126,11 +129,23 @@ export namespace Session {
 
     /**
      * Change the session name.
+     *
+     * @returns A promise that resolves when the session has renamed.
+     *
+     * #### Notes
+     * This uses the Jupyter REST API, and the response is validated.
+     * The promise is fulfilled on a valid response and rejected otherwise.
      */
     setName(name: string): Promise<void>;
 
     /**
      * Change the session type.
+     *
+     * @returns A promise that resolves when the session has renamed.
+     *
+     * #### Notes
+     * This uses the Jupyter REST API, and the response is validated.
+     * The promise is fulfilled on a valid response and rejected otherwise.
      */
     setType(type: string): Promise<void>;
 
@@ -142,8 +157,11 @@ export namespace Session {
      * @returns A promise that resolves with the new kernel model.
      *
      * #### Notes
-     * This shuts down the existing kernel and creates a new kernel,
-     * keeping the existing session ID and path.
+     * This shuts down the existing kernel and creates a new kernel, keeping
+     * the existing session ID and path. The session assumes it owns the
+     * kernel.
+     *
+     * To start now kernel, pass an empty dictionary.
      */
     changeKernel(
       options: Partial<Kernel.IModel>
@@ -178,7 +196,7 @@ export namespace Session {
   export function listRunning(
     settings?: ServerConnection.ISettings
   ): Promise<Session.IModel[]> {
-    return DefaultSession.listRunning(settings);
+    return SessionConnection.listRunning(settings);
   }
 
   /**
@@ -201,8 +219,10 @@ export namespace Session {
    * when the session is created on the server, otherwise the promise is
    * rejected.
    */
-  export function startNew(options: Session.IOptions): Promise<ISession> {
-    return DefaultSession.startNew(options);
+  export function startNew(
+    options: Session.IOptions
+  ): Promise<ISessionConnection> {
+    return SessionConnection.startNew(options);
   }
 
   /**
@@ -226,7 +246,7 @@ export namespace Session {
     id: string,
     settings?: ServerConnection.ISettings
   ): Promise<Session.IModel> {
-    return DefaultSession.findById(id, settings);
+    return SessionConnection.findById(id, settings);
   }
 
   /**
@@ -254,7 +274,7 @@ export namespace Session {
     path: string,
     settings?: ServerConnection.ISettings
   ): Promise<Session.IModel> {
-    return DefaultSession.findByPath(path, settings);
+    return SessionConnection.findByPath(path, settings);
   }
 
   /**
@@ -275,8 +295,8 @@ export namespace Session {
   export function connectTo(
     model: Session.IModel,
     settings?: ServerConnection.ISettings
-  ): ISession {
-    return DefaultSession.connectTo(model, settings);
+  ): ISessionConnection {
+    return SessionConnection.connectTo(model, settings);
   }
 
   /**
@@ -293,7 +313,7 @@ export namespace Session {
     id: string,
     settings?: ServerConnection.ISettings
   ): Promise<void> {
-    return DefaultSession.shutdown(id, settings);
+    return SessionConnection.shutdown(id, settings);
   }
 
   /**
@@ -304,7 +324,7 @@ export namespace Session {
   export function shutdownAll(
     settings?: ServerConnection.ISettings
   ): Promise<void> {
-    return DefaultSession.shutdownAll(settings);
+    return SessionConnection.shutdownAll(settings);
   }
 
   /**
@@ -350,6 +370,14 @@ export namespace Session {
      * The unique identifier for the session client.
      */
     clientId?: string;
+
+    /**
+     * Connects to an existing kernel
+     */
+    connectToKernel(
+      options: Kernel.IModel,
+      settings?: ServerConnection.ISettings
+    ): Kernel.IKernelConnection;
   }
 
   /**
@@ -423,7 +451,7 @@ export namespace Session {
      * #### Notes
      * The `serverSettings` of the manager will be used.
      */
-    startNew(options: IOptions): Promise<ISession>;
+    startNew(options: IOptions): Promise<ISessionConnection>;
 
     /**
      * Find a session by id.
@@ -452,7 +480,7 @@ export namespace Session {
      *
      * @returns The new session instance.
      */
-    connectTo(model: Session.IModel): ISession;
+    connectTo(model: Session.IModel): ISessionConnection;
 
     /**
      * Shut down a session by id.

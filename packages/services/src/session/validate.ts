@@ -32,3 +32,13 @@ export function validateModel(data: any): Session.IModel {
   validateKernelModel(model.kernel);
   return model;
 }
+
+/**
+ * Validate an array of `Session.IModel` objects.
+ */
+export function validateModels(models: Session.IModel[]): void {
+  if (!Array.isArray(models)) {
+    throw new Error('Invalid session list');
+  }
+  models.forEach(d => validateModel(d));
+}

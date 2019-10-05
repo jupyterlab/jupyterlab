@@ -1,9 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { URLExt } from '@jupyterlab/coreutils';
-
-import { ArrayExt, each, find } from '@phosphor/algorithm';
+import { each, find } from '@phosphor/algorithm';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -13,35 +11,30 @@ import { ServerConnection } from '..';
 
 import { Session } from './session';
 
-import * as validate from './validate';
-
-/**
- * The url for the session service.
- */
-const SESSION_SERVICE_URL = 'api/sessions';
-
-/**
- * TODO: It appears there is no way to just rename a session without opening a
- * kernel connection to the session.
- */
+import { listRunning } from './restapi';
+import * as restapi from './restapi';
 
 /**
  * Session object for accessing the session REST api. The session
  * should be used to start kernels and then shut them down -- for
  * all other operations, the kernel object should be used.
  */
-export class DefaultSession implements Session.ISession {
+export class SessionConnection implements Session.ISessionConnection {
   /**
    * Construct a new session.
    */
-  constructor(options: Session.IOptions, id: string, model: Kernel.IModel) {
+  constructor(
+    options: Session.IOptions,
+    id: string,
+    model: Kernel.IModel | null
+  ) {
     this._id = id;
     this._path = options.path;
     this._type = options.type || 'file';
     this._name = options.name || '';
+    this._connectToKernel = options.connectToKernel;
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
-    Private.addRunning(this);
     this.setupKernel(model);
   }
 
@@ -161,19 +154,20 @@ export class DefaultSession implements Session.ISession {
    * Test whether the session has been disposed.
    */
   get isDisposed(): boolean {
-    return this._isDisposed === true;
+    return this._isDisposed;
   }
 
   /**
    * Clone the current session with a new clientId.
    */
-  clone(): Session.ISession {
-    return new DefaultSession(
+  clone(): Session.ISessionConnection {
+    return new SessionConnection(
       {
         path: this._path,
         name: this._name,
         type: this._type,
-        serverSettings: this.serverSettings
+        serverSettings: this.serverSettings,
+        connectToKernel: this._connectToKernel
       },
       this._id,
       { id: this.kernel.id, name: this.kernel.name }
@@ -193,11 +187,19 @@ export class DefaultSession implements Session.ISession {
     this._name = model.name;
     this._type = model.type;
 
-    if (this._kernel.isDisposed || model.kernel.id !== this._kernel.id) {
+    if (
+      (this._kernel === null && model.kernel !== null) ||
+      (this._kernel !== null && model.kernel === null) ||
+      (this._kernel !== null &&
+        model.kernel !== null &&
+        this._kernel.id !== model.kernel.id)
+    ) {
+      if (this._kernel !== null) {
+        this._kernel.dispose();
+      }
       let oldValue = this._kernel;
       this.setupKernel(model.kernel);
       let newValue = this._kernel;
-      oldValue.dispose();
       this._kernelChanged.emit({ name: 'kernel', oldValue, newValue });
     }
 
@@ -214,7 +216,6 @@ export class DefaultSession implements Session.ISession {
     this._isDisposed = true;
     this._disposed.emit();
     this._kernel.dispose();
-    Private.removeRunning(this);
     Signal.clearData(this);
   }
 
@@ -229,40 +230,34 @@ export class DefaultSession implements Session.ISession {
    * This uses the Jupyter REST API, and the response is validated.
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  setPath(path: string): Promise<void> {
+  async setPath(path: string): Promise<void> {
     if (this.isDisposed) {
-      return Promise.reject(new Error('Session is disposed'));
+      throw new Error('Session is disposed');
     }
     let data = JSON.stringify({ path });
-    return this._patch(data).then(() => {
-      return void 0;
-    });
+    await this._patch(data);
   }
 
   /**
    * Change the session name.
    */
-  setName(name: string): Promise<void> {
+  async setName(name: string): Promise<void> {
     if (this.isDisposed) {
-      return Promise.reject(new Error('Session is disposed'));
+      throw new Error('Session is disposed');
     }
     let data = JSON.stringify({ name });
-    return this._patch(data).then(() => {
-      return void 0;
-    });
+    await this._patch(data);
   }
 
   /**
    * Change the session type.
    */
-  setType(type: string): Promise<void> {
+  async setType(type: string): Promise<void> {
     if (this.isDisposed) {
-      return Promise.reject(new Error('Session is disposed'));
+      throw new Error('Session is disposed');
     }
     let data = JSON.stringify({ type });
-    return this._patch(data).then(() => {
-      return void 0;
-    });
+    await this._patch(data);
   }
 
   /**
@@ -274,20 +269,22 @@ export class DefaultSession implements Session.ISession {
    * This shuts down the existing kernel and creates a new kernel,
    * keeping the existing session ID and session path.
    */
-  changeKernel(
+  async changeKernel(
     options: Partial<Kernel.IModel>
   ): Promise<Kernel.IKernelConnection> {
     if (this.isDisposed) {
-      return Promise.reject(new Error('Session is disposed'));
+      throw new Error('Session is disposed');
     }
     let data = JSON.stringify({ kernel: options });
-    this._kernel.dispose();
+    this.kernel.dispose();
 
     // This status is not technically correct, but it may be useful to refresh
     // clients TODO: evaluate whether we want to do this, or tell people to
     // listen to the kernelChanged signal.
     // this._statusChanged.emit('restarting');
-    return this._patch(data).then(() => this.kernel);
+    // TODO: probably change this to adjusting the kernel connection status.
+    await this._patch(data);
+    return this.kernel;
   }
 
   /**
@@ -299,27 +296,31 @@ export class DefaultSession implements Session.ISession {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/sessions), and validates the response.
    * Disposes of the session and emits a [sessionDied] signal on success.
    */
-  shutdown(): Promise<void> {
+  async shutdown(): Promise<void> {
     if (this.isDisposed) {
-      return Promise.reject(new Error('Session is disposed'));
+      throw new Error('Session is disposed');
     }
-    return Private.shutdownSession(this.id, this.serverSettings);
+    return restapi.shutdownSession(this.id, this.serverSettings);
   }
 
   /**
-   * Create a new kernel connection and hook up to its events.
+   * Create a new kernel connection and connect to its signals.
    *
    * #### Notes
    * This method is not meant to be subclassed.
    */
-  protected setupKernel(model: Kernel.IModel): void {
-    const kernel = Kernel.connectTo(model, this.serverSettings);
-    this._kernel = kernel;
-    kernel.statusChanged.connect(this.onKernelStatus, this);
-    kernel.connectionStatusChanged.connect(this.onKernelConnectionStatus, this);
-    kernel.unhandledMessage.connect(this.onUnhandledMessage, this);
-    kernel.iopubMessage.connect(this.onIOPubMessage, this);
-    kernel.anyMessage.connect(this.onAnyMessage, this);
+  protected setupKernel(model: Kernel.IModel | null): void {
+    if (model === null) {
+      this._kernel = null;
+      return;
+    }
+    const kc = this._connectToKernel(model, this.serverSettings);
+    this._kernel = kc;
+    kc.statusChanged.connect(this.onKernelStatus, this);
+    kc.connectionStatusChanged.connect(this.onKernelConnectionStatus, this);
+    kc.unhandledMessage.connect(this.onUnhandledMessage, this);
+    kc.iopubMessage.connect(this.onIOPubMessage, this);
+    kc.anyMessage.connect(this.onAnyMessage, this);
   }
 
   /**
@@ -375,32 +376,18 @@ export class DefaultSession implements Session.ISession {
   /**
    * Send a PATCH to the server, updating the session path or the kernel.
    */
-  private _patch(body: string): Promise<Session.IModel> {
+  private async _patch(body: string): Promise<Session.IModel> {
     this._updating = true;
-    let settings = this.serverSettings;
-    let url = Private.getSessionUrl(settings.baseUrl, this._id);
-    let init = {
-      method: 'PATCH',
-      body
-    };
-    return ServerConnection.makeRequest(url, init, settings)
-      .then(response => {
-        this._updating = false;
-        if (response.status !== 200) {
-          throw new ServerConnection.ResponseError(response);
-        }
-        return response.json();
-      })
-      .then(
-        data => {
-          let model = validate.validateModel(data);
-          return Private.updateFromServer(model, settings.baseUrl);
-        },
-        error => {
-          this._updating = false;
-          throw error;
-        }
+    try {
+      let model = await restapi.updateSession(
+        this._id,
+        body,
+        this.serverSettings
       );
+      return model;
+    } finally {
+      this._updating = false;
+    }
   }
 
   /**
@@ -435,19 +422,23 @@ export class DefaultSession implements Session.ISession {
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
+  private _connectToKernel: (
+    options: Kernel.IModel,
+    settings?: ServerConnection.ISettings
+  ) => Kernel.IKernelConnection;
 }
 
 /**
  * The namespace for `DefaultSession` statics.
  */
-export namespace DefaultSession {
+export namespace SessionConnection {
   /**
    * List the running sessions.
    */
   export function listRunning(
     settings?: ServerConnection.ISettings
   ): Promise<Session.IModel[]> {
-    return Private.listRunning(settings);
+    return listRunning(settings);
   }
 
   /**
@@ -455,7 +446,7 @@ export namespace DefaultSession {
    */
   export function startNew(
     options: Session.IOptions
-  ): Promise<Session.ISession> {
+  ): Promise<Session.ISessionConnection> {
     return Private.startNew(options);
   }
 
@@ -485,7 +476,7 @@ export namespace DefaultSession {
   export function connectTo(
     model: Session.IModel,
     settings?: ServerConnection.ISettings
-  ): Session.ISession {
+  ): Session.ISessionConnection {
     return Private.connectTo(model, settings);
   }
 
@@ -496,7 +487,7 @@ export namespace DefaultSession {
     id: string,
     settings?: ServerConnection.ISettings
   ): Promise<void> {
-    return Private.shutdownSession(id, settings);
+    return restapi.shutdownSession(id, settings);
   }
 
   /**
@@ -518,38 +509,12 @@ export namespace DefaultSession {
  */
 namespace Private {
   /**
-   * The running sessions mapped by base url.
-   */
-  const runningSessions = new Map<string, DefaultSession[]>();
-
-  /**
-   * Add a session to the running sessions.
-   */
-  export function addRunning(session: DefaultSession): void {
-    let running: DefaultSession[] =
-      runningSessions.get(session.serverSettings.baseUrl) || [];
-    running.push(session);
-    runningSessions.set(session.serverSettings.baseUrl, running);
-  }
-
-  /**
-   * Remove a session from the running sessions.
-   */
-  export function removeRunning(session: DefaultSession): void {
-    let running = runningSessions.get(session.serverSettings.baseUrl);
-    if (running) {
-      ArrayExt.removeFirstOf(running, session);
-    }
-  }
-
-  /**
    * Connect to a running session.
    */
   export function connectTo(
     model: Session.IModel,
-    settings?: ServerConnection.ISettings
-  ): Session.ISession {
-    settings = settings || ServerConnection.makeSettings();
+    settings: ServerConnection.ISettings = ServerConnection.makeSettings()
+  ): Session.ISessionConnection {
     let running = runningSessions.get(settings.baseUrl) || [];
     let session = find(running, value => value.id === model.id);
     if (session) {
@@ -566,9 +531,9 @@ namespace Private {
   export function createSession(
     model: Session.IModel,
     settings?: ServerConnection.ISettings
-  ): DefaultSession {
+  ): SessionConnection {
     settings = settings || ServerConnection.makeSettings();
-    return new DefaultSession(
+    return new SessionConnection(
       {
         path: model.path,
         type: model.type,
@@ -625,102 +590,6 @@ namespace Private {
   }
 
   /**
-   * Get a full session model from the server by session id string.
-   */
-  export function getSessionModel(
-    id: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
-    settings = settings || ServerConnection.makeSettings();
-    let url = getSessionUrl(settings.baseUrl, id);
-    return ServerConnection.makeRequest(url, {}, settings)
-      .then(response => {
-        if (response.status !== 200) {
-          throw new ServerConnection.ResponseError(response);
-        }
-        return response.json();
-      })
-      .then(data => {
-        const model = validate.validateModel(data);
-        return updateFromServer(model, settings!.baseUrl);
-      });
-  }
-
-  /**
-   * Get a session url.
-   */
-  export function getSessionUrl(baseUrl: string, id: string): string {
-    return URLExt.join(baseUrl, SESSION_SERVICE_URL, id);
-  }
-
-  /**
-   * Kill the sessions by id.
-   */
-  function killSessions(id: string, baseUrl: string): void {
-    let running = runningSessions.get(baseUrl) || [];
-    each(running.slice(), session => {
-      if (session.id === id) {
-        session.dispose();
-      }
-    });
-  }
-
-  /**
-   * List the running sessions.
-   */
-  export function listRunning(
-    settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel[]> {
-    settings = settings || ServerConnection.makeSettings();
-    let url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
-    return ServerConnection.makeRequest(url, {}, settings)
-      .then(response => {
-        if (response.status !== 200) {
-          throw new ServerConnection.ResponseError(response);
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (!Array.isArray(data)) {
-          throw new Error('Invalid Session list');
-        }
-        for (let i = 0; i < data.length; i++) {
-          data[i] = validate.validateModel(data[i]);
-        }
-        return updateRunningSessions(data, settings!.baseUrl);
-      });
-  }
-
-  /**
-   * Shut down a session by id.
-   */
-  export function shutdownSession(
-    id: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<void> {
-    settings = settings || ServerConnection.makeSettings();
-    let url = getSessionUrl(settings.baseUrl, id);
-    let init = { method: 'DELETE' };
-    return ServerConnection.makeRequest(url, init, settings).then(response => {
-      if (response.status === 404) {
-        return response.json().then(data => {
-          let msg =
-            data.message || `The session "${id}"" does not exist on the server`;
-          console.warn(msg);
-        });
-      } else if (response.status === 410) {
-        throw new ServerConnection.ResponseError(
-          response,
-          'The kernel was deleted but the session was not'
-        );
-      } else if (response.status !== 204) {
-        throw new ServerConnection.ResponseError(response);
-      }
-      killSessions(id, settings!.baseUrl);
-    });
-  }
-
-  /**
    * Shut down all sessions.
    */
   export async function shutdownAll(
@@ -734,47 +603,14 @@ namespace Private {
   /**
    * Start a new session.
    */
-  export function startNew(
+  export async function startNew(
     options: Session.IOptions
-  ): Promise<Session.ISession> {
-    if (options.path === void 0) {
+  ): Promise<Session.ISessionConnection> {
+    if (options.path === undefined) {
       return Promise.reject(new Error('Must specify a path'));
     }
-    return startSession(options).then(model => {
-      return createSession(model, options.serverSettings);
-    });
-  }
-
-  /**
-   * Create a new session, or return an existing session if
-   * the session path already exists
-   */
-  export function startSession(
-    options: Session.IOptions
-  ): Promise<Session.IModel> {
-    let settings = options.serverSettings || ServerConnection.makeSettings();
-    let model = {
-      kernel: { name: options.kernelName, id: options.kernelId },
-      path: options.path,
-      type: options.type || '',
-      name: options.name || ''
-    };
-    let url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
-    let init = {
-      method: 'POST',
-      body: JSON.stringify(model)
-    };
-    return ServerConnection.makeRequest(url, init, settings)
-      .then(response => {
-        if (response.status !== 201) {
-          throw new ServerConnection.ResponseError(response);
-        }
-        return response.json();
-      })
-      .then(data => {
-        const model = validate.validateModel(data);
-        return updateFromServer(model, settings.baseUrl);
-      });
+    let model = await restapi.startSession(options);
+    return createSession(model, options.serverSettings);
   }
 
   /**

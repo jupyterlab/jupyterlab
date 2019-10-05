@@ -126,7 +126,9 @@ export class SessionManager extends BaseManager implements Session.IManager {
    *
    * @param options - Overrides for the default options, must include a `path`.
    */
-  async startNew(options: Session.IOptions): Promise<Session.ISession> {
+  async startNew(
+    options: Session.IOptions
+  ): Promise<Session.ISessionConnection> {
     const { serverSettings } = this;
     const session = await Session.startNew({ ...options, serverSettings });
     this._onStarted(session);
@@ -173,7 +175,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   /*
    * Connect to a running session.  See also [[connectToSession]].
    */
-  connectTo(model: Session.IModel): Session.ISession {
+  connectTo(model: Session.IModel): Session.ISessionConnection {
     const session = Session.connectTo(model, this.serverSettings);
     this._onStarted(session);
     return session;
@@ -286,7 +288,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   /**
    * Handle a session starting.
    */
-  private _onStarted(session: Session.ISession): void {
+  private _onStarted(session: Session.ISessionConnection): void {
     let id = session.id;
     let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
     this._sessions.add(session);
@@ -325,7 +327,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   private _ready: Promise<void>;
   private _runningChanged = new Signal<this, Session.IModel[]>(this);
   private _connectionFailure = new Signal<this, Error>(this);
-  private _sessions = new Set<Session.ISession>();
+  private _sessions = new Set<Session.ISessionConnection>();
 }
 
 /**
