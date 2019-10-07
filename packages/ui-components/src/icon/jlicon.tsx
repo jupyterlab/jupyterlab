@@ -2,8 +2,12 @@ import React from 'react';
 import { classes } from 'typestyle';
 import { iconStyle, IIconStyle } from '../style/icon';
 
-export function createIcon(svgstr: string, debug: boolean = false) {
-  function resolveSvg(svgstr: string): HTMLElement | null {
+export function createIcon(
+  svgname: string,
+  svgstr: string,
+  debug: boolean = false
+) {
+  function resolveSvg(svgstr: string, title?: string): HTMLElement | null {
     const svgElement = new DOMParser().parseFromString(svgstr, 'image/svg+xml')
       .documentElement;
 
@@ -21,73 +25,73 @@ export function createIcon(svgstr: string, debug: boolean = false) {
       }
     } else {
       // parse succeeded
+      if (title) {
+        Private.setTitleSvg(svgElement, title);
+      }
+
       return svgElement;
     }
   }
 
-  return class JLIcon<
-    P extends JLIcon.IProps = JLIcon.IProps,
-    S extends JLIcon.IState = JLIcon.IState
-  > extends React.Component<P, S> {
-    render() {
-      const { className, title, tag, ...propsStyle } = this.props;
-      const Tag: 'div' | 'span' = tag || 'div';
+  const _JLIcon = React.forwardRef(
+    (props: JLIcon.IProps, ref: React.RefObject<HTMLDivElement>) => {
+      const { className, title, tag = 'div', ...propsStyle } = props;
+      const Tag = tag;
+      const classNames = classes(
+        className,
+        propsStyle ? iconStyle(propsStyle) : ''
+      );
 
       // ensure that svg html is valid
-      const svgElement = resolveSvg(svgstr);
+      const svgElement = resolveSvg(svgstr, title);
       if (!svgElement) {
         // bail if failing silently
         return <></>;
       }
 
-      if (title) {
-        Private.setTitleSvg(svgElement, title);
-      }
-
       return (
         <Tag
-          className={classes(
-            className,
-            propsStyle ? iconStyle(propsStyle) : ''
-          )}
-          dangerouslySetInnerHTML={{
-            // __html: svgstr
-            __html: svgElement.outerHTML
-          }}
+          className={classNames}
+          dangerouslySetInnerHTML={{ __html: svgElement.outerHTML }}
+          ref={ref}
         />
       );
     }
+  );
 
-    /**
-     * Get the icon as an HTMLElement of tag <svg><svg/>
-     */
-    static element({
+  // widen type to include .element
+  let JLIcon: typeof _JLIcon & {
+    element: (props: JLIcon.IProps) => HTMLElement;
+  } = _JLIcon as any;
+
+  JLIcon.element = ({
+    className,
+    title,
+    tag = 'div',
+    ...propsStyle
+  }: JLIcon.IProps): HTMLElement | null => {
+    const classNames = classes(
       className,
-      title,
-      tag = 'div',
-      ...propsStyle
-    }: JLIcon.IProps): HTMLElement | null {
-      // ensure that svg html is valid
-      const svgElement = resolveSvg(svgstr);
-      if (!svgElement) {
-        // bail if failing silently
-        return null;
-      }
+      propsStyle ? iconStyle(propsStyle) : ''
+    );
 
-      if (title) {
-        Private.setTitleSvg(svgElement, title);
-      }
-
-      const container = document.createElement(tag);
-      container.appendChild(svgElement);
-      container.className = classes(
-        className || '',
-        propsStyle ? iconStyle(propsStyle) : ''
-      );
-
-      return container;
+    // ensure that svg html is valid
+    const svgElement = resolveSvg(svgstr, title);
+    if (!svgElement) {
+      // bail if failing silently
+      return null;
     }
+
+    const container = document.createElement(tag);
+    container.appendChild(svgElement);
+    container.className = classNames;
+    return container;
   };
+
+  // set display name of JLIcon for debugging
+  JLIcon.displayName = `JLIcon_${svgname}`;
+
+  return JLIcon;
 }
 
 /**
@@ -130,3 +134,9 @@ namespace Private {
     }
   }
 }
+
+// import notTrustedSvg from '../../style/icons/statusbar/not-trusted.svg';
+// import trustedSvg from '../../style/icons/statusbar/trusted.svg';
+//
+// export const NotTrustedIcon = createIcon('notTrusted', notTrustedSvg);
+// export const TrustedIcon = createIcon('trusted', trustedSvg);
