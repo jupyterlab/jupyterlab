@@ -2,13 +2,8 @@ import React from 'react';
 import { classes } from 'typestyle';
 import { iconStyle, IIconStyle } from '../style/icon';
 
-export class JLIcon<
-  P extends JLIcon.IProps & { tag?: 'div' | 'span' } = JLIcon.IProps & {
-    tag?: 'div' | 'span';
-  },
-  S extends JLIcon.IState = JLIcon.IState
-> extends React.Component<P, S> {
-  static resolveSvg(svgstr: string): HTMLElement | null {
+export function createIcon(svgstr: string, debug: boolean = false) {
+  function resolveSvg(svgstr: string): HTMLElement | null {
     const parser = new DOMParser();
     const svgElement = parser.parseFromString(svgstr, 'image/svg+xml')
       .documentElement;
@@ -16,7 +11,7 @@ export class JLIcon<
     if (svgElement.getElementsByTagName('parsererror').length > 0) {
       const errmsg = `SVG HTML was malformed for icon name: ${name}`;
       // parse failed, svgElement will be an error box
-      if (this._debug) {
+      if (debug) {
         // fail noisily, render the error box
         console.error(errmsg);
         return svgElement;
@@ -31,33 +26,39 @@ export class JLIcon<
     }
   }
 
-  render() {
-    const { className, title, tag, ...propsStyle } = this.props;
-    const Tag: 'div' | 'span' = tag || 'div';
+  return class JLIcon<
+    P extends JLIcon.IProps = JLIcon.IProps,
+    S extends JLIcon.IState = JLIcon.IState
+  > extends React.Component<P, S> {
+    render() {
+      const { className, title, tag, ...propsStyle } = this.props;
+      const Tag: 'div' | 'span' = tag || 'div';
 
-    // // ensure that svg html is valid
-    // const svgElement = JLIcon.resolveSvg(this.props.svgstr);
-    // if (!svgElement) {
-    //   // bail if failing silently
-    //   return <></>;
-    // }
+      // ensure that svg html is valid
+      const svgElement = resolveSvg(svgstr);
+      if (!svgElement) {
+        // bail if failing silently
+        return <></>;
+      }
 
-    if (title) {
-      // TODO: reimplement setTitleSvg here
+      if (title) {
+        // TODO: reimplement setTitleSvg here
+      }
+
+      return (
+        <Tag
+          className={classes(
+            className,
+            propsStyle ? iconStyle(propsStyle) : ''
+          )}
+          dangerouslySetInnerHTML={{
+            __html: svgstr
+            // __html: svgElement.outerHTML
+          }}
+        />
+      );
     }
-
-    return (
-      <Tag
-        className={classes(className, propsStyle ? iconStyle(propsStyle) : '')}
-        dangerouslySetInnerHTML={{
-          __html: this.props.svgstr
-          // __html: svgElement.outerHTML
-        }}
-      />
-    );
-  }
-
-  static _debug: boolean = false;
+  };
 }
 
 /**
@@ -73,15 +74,13 @@ export namespace JLIcon {
      */
     className?: string;
 
-    svgstr: string;
+    tag?: 'div' | 'span';
 
     /**
      * Icon title
      */
     title?: string;
   }
-
-  export interface IProps {}
 
   /**
    * The state for a JLIcon component
