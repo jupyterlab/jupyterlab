@@ -1,11 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IClientSession,
-  IWidgetTracker,
-  MainAreaWidget
-} from '@jupyterlab/apputils';
+import { IClientSession } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -15,19 +11,34 @@ import { IObservableDisposable } from '@phosphor/disposable';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
-import { Debugger } from './debugger';
-
-import { DebuggerSidebar } from './sidebar';
-
 /**
  * An interface describing an application's visual debugger.
  */
-export interface IDebugger extends IWidgetTracker<MainAreaWidget<Debugger>> {}
+export interface IDebugger {
+  /**
+   * The mode of the debugger UI.
+   *
+   * #### Notes
+   * There is only ever one debugger instance. If it is `expanded`, it exists
+   * as a `MainAreaWidget`, otherwise it is a sidebar.
+   */
+  mode: IDebugger.Mode;
+
+  /**
+   * The current debugger session.
+   */
+  session: IDebugger.ISession | null;
+}
 
 /**
  * A namespace for visual debugger types.
  */
 export namespace IDebugger {
+  /**
+   * The mode of the debugger UI.
+   */
+  export type Mode = 'condensed' | 'expanded';
+
   /**
    * A visual debugger session.
    */
@@ -169,15 +180,3 @@ export namespace IDebugger {
  * A token for a tracker for an application's visual debugger instances.
  */
 export const IDebugger = new Token<IDebugger>('@jupyterlab/debugger');
-
-/**
- * An interface describing an application's visual debugger.
- */
-export interface IDebuggerSidebar extends DebuggerSidebar {}
-
-/**
- * A token for a tracker for an application's visual debugger condensed sidebar.
- */
-export const IDebuggerSidebar = new Token<IDebuggerSidebar>(
-  '@jupyterlab/debugger-sidebar'
-);
