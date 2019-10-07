@@ -60,7 +60,6 @@ export class CellManager {
   }
 
   onActiveCellChanged() {
-    console.log({ cell: this.activeCell });
     if (
       this.activeCell &&
       this.activeCell.isAttached &&

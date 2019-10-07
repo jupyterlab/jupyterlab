@@ -254,11 +254,9 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
           console.log('Debugger ID: ', id);
         }
 
-        const existedWidget = tracker.find(
-          widget => id === widget.content.model.id
-        );
+        const existedWidget = tracker.currentWidget;
+
         if (existedWidget) {
-          app.shell.add(existedWidget, 'main');
           return;
         }
 
