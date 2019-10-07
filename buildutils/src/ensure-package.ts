@@ -21,6 +21,7 @@ const HEADER_TEMPLATE = `
 `;
 
 const ICON_IMPORTS_TEMPLATE = `
+import { createIcon } from './jlicon';
 import { Icon } from './interfaces';
 
 // icon svg import statements
@@ -32,6 +33,9 @@ export namespace IconImports {
     {{iconModelDeclarations}}
   ];
 }
+
+// wrapped icon definitions
+{{wrappedIconDefs}}
 `;
 
 const ICON_CSS_CLASSES_TEMPLATE = `
@@ -369,6 +373,7 @@ export async function ensureUiComponents(
   // build the per-icon import code
   let _iconImportStatements: string[] = [];
   let _iconModelDeclarations: string[] = [];
+  let _wrappedIconDefs: string[] = [];
   svgs.forEach(svg => {
     const name = utils.stem(svg);
     const svgpath = path
@@ -383,20 +388,25 @@ export async function ensureUiComponents(
       );
     } else {
       // load the icon svg using `import`
-      const nameCamel = utils.camelCase(name) + 'Svg';
+      const svgname = utils.camelCase(name) + 'Svg';
+      const iconname = utils.camelCase(name, true) + 'Icon';
 
-      _iconImportStatements.push(`import ${nameCamel} from '${svgpath}';`);
-      _iconModelDeclarations.push(`{ name: '${name}', svg: ${nameCamel} }`);
+      _iconImportStatements.push(`import ${svgname} from '${svgpath}';`);
+      _iconModelDeclarations.push(`{ name: '${name}', svg: ${svgname} }`);
+      _wrappedIconDefs.push(
+        `export const ${iconname} = createIcon('${name}', ${svgname});`
+      );
     }
   });
   const iconImportStatements = _iconImportStatements.join('\n');
   const iconModelDeclarations = _iconModelDeclarations.join(',\n');
+  const wrappedIconDefs = _wrappedIconDefs.join('\n');
 
   // generate the actual contents of the iconImports file
   const iconImportsPath = path.join(iconSrcDir, 'iconimports.ts');
   const iconImportsContents = utils.fromTemplate(
     HEADER_TEMPLATE + ICON_IMPORTS_TEMPLATE,
-    { funcName, iconImportStatements, iconModelDeclarations }
+    { funcName, iconImportStatements, iconModelDeclarations, wrappedIconDefs }
   );
   messages.push(...ensureFile(iconImportsPath, iconImportsContents));
 

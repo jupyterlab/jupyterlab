@@ -33,7 +33,7 @@ export function createIcon(
     }
   }
 
-  const JLIcon: JLIcon.IComponent = React.forwardRef(
+  const _JLIcon = React.forwardRef(
     (props: JLIcon.IProps, ref: React.RefObject<HTMLDivElement>) => {
       const { className, title, tag = 'div', ...propsStyle } = props;
       const Tag = tag;
@@ -58,6 +58,11 @@ export function createIcon(
       );
     }
   );
+
+  // widen type to include .element
+  let JLIcon: typeof _JLIcon & {
+    element: (props: JLIcon.IProps) => HTMLElement;
+  } = _JLIcon as any;
 
   JLIcon.element = ({
     className,
@@ -108,14 +113,6 @@ export namespace JLIcon {
      * Icon title
      */
     title?: string;
-  }
-
-  /**
-   * The type of the react component-like object that gets
-   * returned by createIcon
-   */
-  export interface IComponent extends ReturnType<typeof React.forwardRef> {
-    element?: (props: IProps) => HTMLElement;
   }
 }
 
