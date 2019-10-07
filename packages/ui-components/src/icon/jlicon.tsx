@@ -4,8 +4,7 @@ import { iconStyle, IIconStyle } from '../style/icon';
 
 export function createIcon(svgstr: string, debug: boolean = false) {
   function resolveSvg(svgstr: string): HTMLElement | null {
-    const parser = new DOMParser();
-    const svgElement = parser.parseFromString(svgstr, 'image/svg+xml')
+    const svgElement = new DOMParser().parseFromString(svgstr, 'image/svg+xml')
       .documentElement;
 
     if (svgElement.getElementsByTagName('parsererror').length > 0) {
@@ -42,7 +41,7 @@ export function createIcon(svgstr: string, debug: boolean = false) {
       }
 
       if (title) {
-        // TODO: reimplement setTitleSvg here
+        Private.setTitleSvg(svgElement, title);
       }
 
       return (
@@ -52,11 +51,41 @@ export function createIcon(svgstr: string, debug: boolean = false) {
             propsStyle ? iconStyle(propsStyle) : ''
           )}
           dangerouslySetInnerHTML={{
-            __html: svgstr
-            // __html: svgElement.outerHTML
+            // __html: svgstr
+            __html: svgElement.outerHTML
           }}
         />
       );
+    }
+
+    /**
+     * Get the icon as an HTMLElement of tag <svg><svg/>
+     */
+    static element({
+      className,
+      title,
+      tag = 'div',
+      ...propsStyle
+    }: JLIcon.IProps): HTMLElement | null {
+      // ensure that svg html is valid
+      const svgElement = resolveSvg(svgstr);
+      if (!svgElement) {
+        // bail if failing silently
+        return null;
+      }
+
+      if (title) {
+        Private.setTitleSvg(svgElement, title);
+      }
+
+      const container = document.createElement(tag);
+      container.appendChild(svgElement);
+      container.className = classes(
+        className || '',
+        propsStyle ? iconStyle(propsStyle) : ''
+      );
+
+      return container;
     }
   };
 }
@@ -86,4 +115,18 @@ export namespace JLIcon {
    * The state for a JLIcon component
    */
   export interface IState {}
+}
+
+namespace Private {
+  export function setTitleSvg(svgNode: HTMLElement, title: string): void {
+    // add a title node to the top level svg node
+    let titleNodes = svgNode.getElementsByTagName('title');
+    if (titleNodes.length) {
+      titleNodes[0].textContent = title;
+    } else {
+      let titleNode = document.createElement('title');
+      titleNode.textContent = title;
+      svgNode.appendChild(titleNode);
+    }
+  }
 }
