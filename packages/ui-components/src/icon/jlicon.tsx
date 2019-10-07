@@ -33,7 +33,7 @@ export function createIcon(
     }
   }
 
-  const _JLIcon = React.forwardRef(
+  const JLIcon: JLIcon.IComponent = React.forwardRef(
     (props: JLIcon.IProps, ref: React.RefObject<HTMLDivElement>) => {
       const { className, title, tag = 'div', ...propsStyle } = props;
       const Tag = tag;
@@ -58,11 +58,6 @@ export function createIcon(
       );
     }
   );
-
-  // widen type to include .element
-  let JLIcon: typeof _JLIcon & {
-    element: (props: JLIcon.IProps) => HTMLElement;
-  } = _JLIcon as any;
 
   JLIcon.element = ({
     className,
@@ -116,9 +111,12 @@ export namespace JLIcon {
   }
 
   /**
-   * The state for a JLIcon component
+   * The type of the react component-like object that gets
+   * returned by createIcon
    */
-  export interface IState {}
+  export interface IComponent extends ReturnType<typeof React.forwardRef> {
+    element?: (props: IProps) => HTMLElement;
+  }
 }
 
 namespace Private {
@@ -134,9 +132,3 @@ namespace Private {
     }
   }
 }
-
-// import notTrustedSvg from '../../style/icons/statusbar/not-trusted.svg';
-// import trustedSvg from '../../style/icons/statusbar/trusted.svg';
-//
-// export const NotTrustedIcon = createIcon('notTrusted', notTrustedSvg);
-// export const TrustedIcon = createIcon('trusted', trustedSvg);
