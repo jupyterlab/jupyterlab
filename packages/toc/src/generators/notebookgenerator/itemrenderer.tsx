@@ -181,6 +181,7 @@ export function notebookItemRenderer(
       collapsed = collapsed !== undefined ? collapsed : false;
       cellRef!.model.metadata.set('toc-hr-collapsed', !collapsed);
       if (cellRef && tracker) {
+        // NOTE: we can imagine a future in which this extension combines with a collapsible-header/ings extension such that we can programmatically close notebook "sections". In the meantime, we need to resort to manually "collapsing" sections...
         if (collapsed) {
           uncollapseCell(tracker as any, cellRef);
         } else {
