@@ -51,7 +51,7 @@ export function createNotebookGenerator(
       return notebookGeneratorToolbar(options, tracker);
     },
     itemRenderer: (item: INotebookHeading) => {
-      return notebookItemRenderer(options, item);
+      return notebookItemRenderer(options, tracker, item);
     },
     generate: panel => {
       let headings: INotebookHeading[] = [];
@@ -364,7 +364,7 @@ namespace Private {
    */
   export function getCodeCells(
     text: string,
-    onClickFactory: (line: number) => (() => void),
+    onClickFactory: (line: number) => () => void,
     executionCount: string,
     lastLevel: number,
     cellRef: Cell
@@ -398,7 +398,7 @@ namespace Private {
    */
   export function getMarkdownHeading(
     text: string,
-    onClickFactory: (line: number) => (() => void),
+    onClickFactory: (line: number) => () => void,
     numberingDict: any,
     lastLevel: number,
     cellRef: Cell
@@ -474,7 +474,7 @@ namespace Private {
    */
   export function getRenderedHTMLHeading(
     node: HTMLElement,
-    onClickFactory: (el: Element) => (() => void),
+    onClickFactory: (el: Element) => () => void,
     sanitizer: ISanitizer,
     numberingDict: { [level: number]: number },
     lastLevel: number,

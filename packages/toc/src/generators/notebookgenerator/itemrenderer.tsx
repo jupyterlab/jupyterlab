@@ -5,6 +5,8 @@ import { CodeComponent } from './codemirror';
 
 import { Cell } from '@jupyterlab/cells';
 
+import { INotebookTracker } from '@jupyterlab/notebook';
+
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
 import { INotebookHeading } from './heading';
@@ -13,8 +15,161 @@ import { sanitizerOptions } from '../shared';
 
 import * as React from 'react';
 
+/**
+ * Returns the header level for a provided cell.
+ *
+ * ## Notes
+ *
+ * -   If a cell does not contain a header, the function returns the sentinel value `-1`.
+ *
+ * -   Cell header examples:
+ *
+ *     -   Markdown header:
+ *
+ *         ```
+ *         # Foo
+ *         ```
+ *
+ *     -   Markdown header:
+ *
+ *         ```
+ *         Foo
+ *         ===
+ *         ```
+ *
+ *         ```
+ *         Foo
+ *         ---
+ *         ```
+ *
+ *     -   HTML heading:
+ *
+ *         ```
+ *         <h3>Foo</h3>
+ *         ```
+ *
+ * @private
+ * @param cell - notebook cell
+ * @returns header level
+ */
+function headerLevel(cell: Cell): number {
+  if (cell.constructor.name !== 'MarkdownCell') {
+    return -1;
+  }
+  const lines = cell.model.value.text.split('\n');
+
+  // Case: Markdown header
+  let match = lines[0].match(/^([#]{1,6}) (.*)/);
+  if (match) {
+    return match[1].length;
+  }
+  // Case: Markdown header
+  if (lines.length > 1) {
+    match = lines[1].match(/^([=]{2,}|[-]{2,})/);
+    if (match) {
+      return match[1][0] === '=' ? 1 : 2;
+    }
+  }
+  // Case: HTML heading (WARNING: this is not particularly robust, as HTML headings can span multiple lines)
+  match = lines[0].match(/<h([1-6])>(.*)<\/h\1>/i);
+  if (match) {
+    return parseInt(match[1], 10);
+  }
+  return -1;
+}
+
+/**
+ * Collapses a notebook cell by hiding its section-defined sub-cells (i.e., cells which have lower precedence).
+ *
+ * @private
+ * @param tracker - notebook tracker
+ * @param cell - notebook cell
+ */
+function collapseCell(tracker: any, cell: Cell): void {
+  // Guard against attempting to collapse already hidden cells...
+  if (cell.isHidden) {
+    return;
+  }
+  const level: number = headerLevel(cell);
+
+  // Guard against attempting to collapse cells which are not "collapsible" (i.e., do not define sections)...
+  if (level === -1) {
+    return;
+  }
+  const widgets = tracker.currentWidget.content.widgets;
+  const len = widgets.length;
+  const idx = widgets.indexOf(cell);
+
+  // Guard against an unrecognized "cell" argument...
+  if (idx === -1) {
+    return;
+  }
+  // Search for notebook cells which are semantically defined as sub-cells...
+  for (let i = idx + 1; i < len; i++) {
+    let w = widgets[i];
+    let l: number = headerLevel(w);
+
+    // Check if a widget is at the same or higher level...
+    if (l >= 0 && l <= level) {
+      // We've reached the end of the section...
+      break;
+    }
+    // Collapse a sub-cell by setting its `hidden` state:
+    w.setHidden(true);
+  }
+  // Set a meta-data flag to indicate that we've collapsed notebook sections:
+  cell.model.metadata.set('toc-nb-collapsed', true);
+}
+
+/**
+ * Expands a notebook cell by displaying its section-defined sub-cells (i.e., cells which have lower precedence).
+ *
+ * @private
+ * @param tracker - notebook tracker
+ * @param cell - notebook cell
+ */
+function uncollapseCell(tracker: any, cell: Cell): void {
+  // Guard against attempting to un-collapse cells which we did not collapse or are already un-collapsed...
+  if (
+    cell.model.metadata.has('toc-nb-collapsed') === false ||
+    cell.model.metadata.get('toc-nb-collapsed') === false
+  ) {
+    return;
+  }
+  const level: number = headerLevel(cell);
+
+  // Guard against attempting to un-collapse cells which are not "collapsible" (i.e., do not define sections)...
+  if (level === -1) {
+    return;
+  }
+  const widgets = tracker.currentWidget.content.widgets;
+  const len = widgets.length;
+  const idx = widgets.indexOf(cell);
+
+  // Guard against an unrecognized "cell" argument...
+  if (idx === -1) {
+    return;
+  }
+  // Search for notebook cells which are semantically defined as sub-cells...
+  for (let i = idx + 1; i < len; i++) {
+    let w = widgets[i];
+    let l: number = headerLevel(w);
+
+    // Check if a widget is at the same or higher level...
+    if (l >= 0 && l <= level) {
+      // We've reached the end of the section...
+      break;
+    }
+    // Un-collapse a sub-cell by setting its `hidden` state:
+    w.setHidden(false);
+  }
+  // Set a meta-data flag to indicate that we've un-collapsed notebook sections:
+  cell.model.metadata.set('toc-nb-collapsed', false);
+}
+
 export function notebookItemRenderer(
   options: NotebookGeneratorOptionsManager,
+  tracker: INotebookTracker,
   item: INotebookHeading
 ) {
   let jsx;
@@ -23,8 +178,15 @@ export function notebookItemRenderer(
       let collapsed = cellRef!.model.metadata.get(
         'toc-hr-collapsed'
       ) as boolean;
-      collapsed = collapsed != undefined ? collapsed : false;
+      collapsed = collapsed !== undefined ? collapsed : false;
       cellRef!.model.metadata.set('toc-hr-collapsed', !collapsed);
+      if (cellRef && tracker) {
+        if (collapsed) {
+          uncollapseCell(tracker as any, cellRef);
+        } else {
+          collapseCell(tracker as any, cellRef);
+        }
+      }
       options.updateWidget();
     };
     let fontSizeClass = 'toc-level-size-default';
@@ -51,18 +213,7 @@ export function notebookItemRenderer(
         collapsed = collapsed != undefined ? collapsed : false;
 
         // Render the twist button
-        let twistButton = (
-          <div
-            className="toc-collapse-button"
-            onClick={event => {
-              event.stopPropagation();
-              collapseOnClick(item.cellRef);
-            }}
-          >
-            <div className="toc-twist-placeholder">placeholder</div>
-            <div className="toc-downarrow-img toc-arrow-img" />
-          </div>
-        );
+        let twistButton;
         if (collapsed) {
           twistButton = (
             <div
@@ -76,11 +227,24 @@ export function notebookItemRenderer(
               <div className="toc-rightarrow-img toc-arrow-img" />
             </div>
           );
+        } else {
+          twistButton = (
+            <div
+              className="toc-collapse-button"
+              onClick={event => {
+                event.stopPropagation();
+                collapseOnClick(item.cellRef);
+              }}
+            >
+              <div className="toc-twist-placeholder">placeholder</div>
+              <div className="toc-downarrow-img toc-arrow-img" />
+            </div>
+          );
         }
         // Render the header item
         jsx = (
           <div className="toc-entry-holder">
-            {item.hasChild && twistButton}
+            {twistButton}
             {jsx}
           </div>
         );
@@ -97,18 +261,7 @@ export function notebookItemRenderer(
           'toc-hr-collapsed'
         ) as boolean;
         collapsed = collapsed != undefined ? collapsed : false;
-        let twistButton = (
-          <div
-            className="toc-collapse-button"
-            onClick={event => {
-              event.stopPropagation();
-              collapseOnClick(item.cellRef);
-            }}
-          >
-            <div className="toc-twist-placeholder">placeholder</div>
-            <div className="toc-downarrow-img toc-arrow-img" />
-          </div>
-        );
+        let twistButton;
         if (collapsed) {
           twistButton = (
             <div
@@ -122,10 +275,23 @@ export function notebookItemRenderer(
               <div className="toc-rightarrow-img toc-arrow-img" />
             </div>
           );
+        } else {
+          twistButton = (
+            <div
+              className="toc-collapse-button"
+              onClick={event => {
+                event.stopPropagation();
+                collapseOnClick(item.cellRef);
+              }}
+            >
+              <div className="toc-twist-placeholder">placeholder</div>
+              <div className="toc-downarrow-img toc-arrow-img" />
+            </div>
+          );
         }
         jsx = (
           <div className="toc-entry-holder">
-            {item.hasChild && twistButton}
+            {twistButton}
             {jsx}
           </div>
         );
