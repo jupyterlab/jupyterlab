@@ -397,8 +397,7 @@ export async function ensureIntegrity(): Promise<boolean> {
       );
       process.exit(1);
     }
-    // skip redundant rebuild of buildutils with --ignore-scripts
-    utils.run('jlpm install --ignore-scripts');
+    utils.run('jlpm install');
     console.log('\n\nMade integrity changes!');
     console.log('Please commit the changes by running:');
     console.log('git commit -a -m "Package integrity updates"');

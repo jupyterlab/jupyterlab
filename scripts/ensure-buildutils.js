@@ -2,6 +2,8 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+// uncomment to time script
+// var start = new Date();
 
 var fs = require('fs-extra');
 var glob = require('glob');
@@ -49,17 +51,14 @@ if (fs.existsSync(path.join(basePath, 'lib'))) {
 }
 
 if (!current) {
-  try {
-    childProcess.execSync('jlpm run build', {
-      stdio: [0, 1, 2],
-      cwd: path.resolve('./buildutils')
-    });
-  } catch (e) {
-    // fallback to `npm` during `pip install -e .` before jlpm is installed.
-    // Using `npm` can cause `jlpm check --integrity` to fail
-    childProcess.execSync('npm run build', {
-      stdio: [0, 1, 2],
-      cwd: path.resolve('./buildutils')
-    });
-  }
+  // This must be "npm" because it is run during `pip install -e .` before
+  // jlpm is installed.
+  childProcess.execSync('npm run build', {
+    stdio: [0, 1, 2],
+    cwd: path.resolve('./buildutils')
+  });
 }
+
+// uncomment to time script
+// var end = new Date() - start;
+// console.info('Execution time: %dms', end);
