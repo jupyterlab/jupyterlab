@@ -49,10 +49,17 @@ if (fs.existsSync(path.join(basePath, 'lib'))) {
 }
 
 if (!current) {
-  // This must be "npm" because it is run during `pip install -e .` before
-  // jlpm is installed.
-  childProcess.execSync('npm run build', {
-    stdio: [0, 1, 2],
-    cwd: path.resolve('./buildutils')
-  });
+  try {
+    childProcess.execSync('jlpm run build', {
+      stdio: [0, 1, 2],
+      cwd: path.resolve('./buildutils')
+    });
+  } catch (e) {
+    // fallback to `npm` during `pip install -e .` before jlpm is installed.
+    // Using `npm` can cause `jlpm check --integrity` to fail
+    childProcess.execSync('npm run build', {
+      stdio: [0, 1, 2],
+      cwd: path.resolve('./buildutils')
+    });
+  }
 }
