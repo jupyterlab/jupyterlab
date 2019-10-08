@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { each, find } from '@phosphor/algorithm';
-
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Kernel, KernelMessage } from '../kernel';
@@ -11,7 +9,6 @@ import { ServerConnection } from '..';
 
 import { Session } from './session';
 
-import { listRunning } from './restapi';
 import * as restapi from './restapi';
 
 /**
@@ -102,7 +99,7 @@ export class SessionConnection implements Session.ISessionConnection {
   }
 
   /**
-   * Get the session kernel object.
+   * Get the session kernel connection object.
    *
    * #### Notes
    * This is a read-only property, and can be altered by [changeKernel].
@@ -159,6 +156,8 @@ export class SessionConnection implements Session.ISessionConnection {
 
   /**
    * Clone the current session with a new clientId.
+   *
+   * TODO: remove?
    */
   clone(): Session.ISessionConnection {
     return new SessionConnection(
@@ -178,10 +177,6 @@ export class SessionConnection implements Session.ISessionConnection {
    * Update the session based on a session model from the server.
    */
   update(model: Session.IModel): void {
-    // Avoid a race condition if we are waiting for a REST call return.
-    if (this._updating) {
-      return;
-    }
     let oldModel = this.model;
     this._path = model.path;
     this._name = model.name;
@@ -234,8 +229,7 @@ export class SessionConnection implements Session.ISessionConnection {
     if (this.isDisposed) {
       throw new Error('Session is disposed');
     }
-    let data = JSON.stringify({ path });
-    await this._patch(data);
+    await this._patch({ path });
   }
 
   /**
@@ -245,8 +239,7 @@ export class SessionConnection implements Session.ISessionConnection {
     if (this.isDisposed) {
       throw new Error('Session is disposed');
     }
-    let data = JSON.stringify({ name });
-    await this._patch(data);
+    await this._patch({ name });
   }
 
   /**
@@ -256,8 +249,7 @@ export class SessionConnection implements Session.ISessionConnection {
     if (this.isDisposed) {
       throw new Error('Session is disposed');
     }
-    let data = JSON.stringify({ type });
-    await this._patch(data);
+    await this._patch({ type });
   }
 
   /**
@@ -275,7 +267,6 @@ export class SessionConnection implements Session.ISessionConnection {
     if (this.isDisposed) {
       throw new Error('Session is disposed');
     }
-    let data = JSON.stringify({ kernel: options });
     this.kernel.dispose();
 
     // This status is not technically correct, but it may be useful to refresh
@@ -283,7 +274,7 @@ export class SessionConnection implements Session.ISessionConnection {
     // listen to the kernelChanged signal.
     // this._statusChanged.emit('restarting');
     // TODO: probably change this to adjusting the kernel connection status.
-    await this._patch(data);
+    await this._patch({ kernel: options });
     return this.kernel;
   }
 
@@ -376,18 +367,16 @@ export class SessionConnection implements Session.ISessionConnection {
   /**
    * Send a PATCH to the server, updating the session path or the kernel.
    */
-  private async _patch(body: string): Promise<Session.IModel> {
-    this._updating = true;
-    try {
-      let model = await restapi.updateSession(
-        this._id,
-        body,
-        this.serverSettings
-      );
-      return model;
-    } finally {
-      this._updating = false;
-    }
+  private async _patch(
+    body: restapi.DeepPartial<Session.IModel>
+  ): Promise<Session.IModel> {
+    let model = await restapi.updateSession(
+      this._id,
+      body,
+      this.serverSettings
+    );
+    this.update(model);
+    return model;
   }
 
   /**
@@ -411,7 +400,6 @@ export class SessionConnection implements Session.ISessionConnection {
   private _type = '';
   private _kernel: Kernel.IKernelConnection;
   private _isDisposed = false;
-  private _updating = false;
   private _disposed = new Signal<this, void>(this);
   private _kernelChanged = new Signal<this, Session.IKernelChangedArgs>(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
@@ -426,230 +414,4 @@ export class SessionConnection implements Session.ISessionConnection {
     options: Kernel.IModel,
     settings?: ServerConnection.ISettings
   ) => Kernel.IKernelConnection;
-}
-
-/**
- * The namespace for `DefaultSession` statics.
- */
-export namespace SessionConnection {
-  /**
-   * List the running sessions.
-   */
-  export function listRunning(
-    settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel[]> {
-    return listRunning(settings);
-  }
-
-  /**
-   * Start a new session.
-   */
-  export function startNew(
-    options: Session.IOptions
-  ): Promise<Session.ISessionConnection> {
-    return Private.startNew(options);
-  }
-
-  /**
-   * Find a session by id.
-   */
-  export function findById(
-    id: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
-    return Private.findById(id, settings);
-  }
-
-  /**
-   * Find a session by path.
-   */
-  export function findByPath(
-    path: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
-    return Private.findByPath(path, settings);
-  }
-
-  /**
-   * Connect to a running session.
-   */
-  export function connectTo(
-    model: Session.IModel,
-    settings?: ServerConnection.ISettings
-  ): Session.ISessionConnection {
-    return Private.connectTo(model, settings);
-  }
-
-  /**
-   * Shut down a session by id.
-   */
-  export function shutdown(
-    id: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<void> {
-    return restapi.shutdownSession(id, settings);
-  }
-
-  /**
-   * Shut down all sessions.
-   *
-   * @param settings - The server settings to use.
-   *
-   * @returns A promise that resolves when all the sessions are shut down.
-   */
-  export function shutdownAll(
-    settings?: ServerConnection.ISettings
-  ): Promise<void> {
-    return Private.shutdownAll(settings);
-  }
-}
-
-/**
- * A namespace for session private data.
- */
-namespace Private {
-  /**
-   * Connect to a running session.
-   */
-  export function connectTo(
-    model: Session.IModel,
-    settings: ServerConnection.ISettings = ServerConnection.makeSettings()
-  ): Session.ISessionConnection {
-    let running = runningSessions.get(settings.baseUrl) || [];
-    let session = find(running, value => value.id === model.id);
-    if (session) {
-      return session.clone();
-    }
-    return createSession(model, settings);
-  }
-
-  /**
-   * Create a Session object.
-   *
-   * @returns - A promise that resolves with a started session.
-   */
-  export function createSession(
-    model: Session.IModel,
-    settings?: ServerConnection.ISettings
-  ): SessionConnection {
-    settings = settings || ServerConnection.makeSettings();
-    return new SessionConnection(
-      {
-        path: model.path,
-        type: model.type,
-        name: model.name,
-        serverSettings: settings
-      },
-      model.id,
-      model.kernel
-    );
-  }
-
-  /**
-   * Find a session by id.
-   */
-  export function findById(
-    id: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
-    settings = settings || ServerConnection.makeSettings();
-    let running = runningSessions.get(settings.baseUrl) || [];
-    let session = find(running, value => value.id === id);
-    if (session) {
-      return Promise.resolve(session.model);
-    }
-
-    return getSessionModel(id, settings).catch(() => {
-      throw new Error(`No running session for id: ${id}`);
-    });
-  }
-
-  /**
-   * Find a session by path.
-   */
-  export function findByPath(
-    path: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
-    settings = settings || ServerConnection.makeSettings();
-    let running = runningSessions.get(settings.baseUrl) || [];
-    let session = find(running, value => value.path === path);
-    if (session) {
-      return Promise.resolve(session.model);
-    }
-
-    return listRunning(settings).then(models => {
-      let model = find(models, value => {
-        return value.path === path;
-      });
-      if (model) {
-        return model;
-      }
-      throw new Error(`No running session for path: ${path}`);
-    });
-  }
-
-  /**
-   * Shut down all sessions.
-   */
-  export async function shutdownAll(
-    settings?: ServerConnection.ISettings
-  ): Promise<void> {
-    settings = settings || ServerConnection.makeSettings();
-    const running = await listRunning(settings);
-    await Promise.all(running.map(s => shutdownSession(s.id, settings)));
-  }
-
-  /**
-   * Start a new session.
-   */
-  export async function startNew(
-    options: Session.IOptions
-  ): Promise<Session.ISessionConnection> {
-    if (options.path === undefined) {
-      return Promise.reject(new Error('Must specify a path'));
-    }
-    let model = await restapi.startSession(options);
-    return createSession(model, options.serverSettings);
-  }
-
-  /**
-   * Update the running sessions given an updated session Id.
-   */
-  export function updateFromServer(
-    model: Session.IModel,
-    baseUrl: string
-  ): Session.IModel {
-    let running = runningSessions.get(baseUrl) || [];
-    each(running.slice(), session => {
-      if (session.id === model.id) {
-        session.update(model);
-      }
-    });
-    return model;
-  }
-
-  /**
-   * Update the running sessions based on new data from the server.
-   */
-  export function updateRunningSessions(
-    sessions: Session.IModel[],
-    baseUrl: string
-  ): Session.IModel[] {
-    let running = runningSessions.get(baseUrl) || [];
-    each(running.slice(), session => {
-      let updated = find(sessions, sId => {
-        if (session.id === sId.id) {
-          session.update(sId);
-          return true;
-        }
-        return false;
-      });
-      // If session is no longer running on disk, dispose the session.
-      if (!updated && session.isDisposed !== true) {
-        session.dispose();
-      }
-    });
-    return sessions;
-  }
 }

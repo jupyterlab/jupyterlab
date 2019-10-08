@@ -24,6 +24,7 @@ import { TerminalSession, TerminalManager } from './terminal';
 import { ServerConnection } from './serverconnection';
 
 import { Workspace, WorkspaceManager } from './workspace';
+import { KernelManager } from './kernel';
 
 /**
  * A Jupyter services manager.
@@ -39,9 +40,13 @@ export class ServiceManager implements ServiceManager.IManager {
     const standby = options.standby || 'when-hidden';
     const normalized = { defaultDrive, serverSettings, standby };
 
+    const kernelManager = new KernelManager(normalized);
     this.serverSettings = serverSettings;
     this.contents = new ContentsManager(normalized);
-    this.sessions = new SessionManager(normalized);
+    this.sessions = new SessionManager({
+      ...normalized,
+      kernelManager: kernelManager
+    });
     this.settings = new SettingManager(normalized);
     this.terminals = new TerminalManager(normalized);
     this.builder = new BuildManager(normalized);

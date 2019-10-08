@@ -13,7 +13,7 @@ import { ServerConnection } from '..';
 
 import { Kernel } from './kernel';
 import { BaseManager } from '../basemanager';
-import { shutdownKernel, startNew } from './restapi';
+import { shutdownKernel, startNew, listRunning } from './restapi';
 import { KernelConnection } from './default';
 
 // TODO: Migrate kernel connection status etc. up to session
@@ -87,6 +87,16 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   }
 
   /**
+   * Dispose of the resources used by the manager.
+   */
+  dispose(): void {
+    this._models.clear();
+    this._kernelConnections.forEach(x => x.dispose());
+    this._pollModels.dispose();
+    super.dispose();
+  }
+
+  /**
    * Connect to an existing kernel.
    *
    * @param model - The model of the target kernel.
@@ -116,28 +126,12 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   }
 
   /**
-   * Dispose of the resources used by the manager.
-   */
-  dispose(): void {
-    this._models.clear();
-    this._kernelConnections.forEach(x => x.dispose());
-    this._pollModels.dispose();
-    super.dispose();
-  }
-
-  /**
-   * Find a kernel by id.
+   * Create an iterator over the most recent running kernels.
    *
-   * @param id - The id of the target kernel.
-   *
-   * @returns A promise that resolves with the kernel's model.
+   * @returns A new iterator over the running kernels.
    */
-  async findById(id: string): Promise<Kernel.IModel> {
-    if (this._models.has(id)) {
-      return this._models.get(id);
-    }
-    await this.refreshRunning();
-    return this._models.get(id);
+  running(): IIterator<Kernel.IModel> {
+    return iter([...this._models.values()]);
   }
 
   /**
@@ -155,12 +149,24 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   }
 
   /**
-   * Create an iterator over the most recent running kernels.
+   * Start a new kernel.
    *
-   * @returns A new iterator over the running kernels.
+   * @param options - The kernel options to use.
+   *
+   * @returns A promise that resolves with the kernel connection.
+   *
+   * #### Notes
+   * The manager `serverSettings` will be always be used.
    */
-  running(): IIterator<Kernel.IModel> {
-    return iter([...this._models.values()]);
+  async startNew(
+    options: Kernel.IOptions = {}
+  ): Promise<Kernel.IKernelConnection> {
+    const model = await startNew({
+      ...options,
+      serverSettings: this.serverSettings
+    });
+    await this.refreshRunning();
+    return this.connectTo(model);
   }
 
   /**
@@ -187,7 +193,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
     // Shut down all models.
     await Promise.all(
       [...this._models.keys()].map(id =>
-        Kernel.shutdown(id, this.serverSettings)
+        shutdownKernel(id, this.serverSettings)
       )
     );
 
@@ -196,24 +202,18 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   }
 
   /**
-   * Start a new kernel.
+   * Find a kernel by id.
    *
-   * @param options - The kernel options to use.
+   * @param id - The id of the target kernel.
    *
-   * @returns A promise that resolves with the kernel connection.
-   *
-   * #### Notes
-   * The manager `serverSettings` will be always be used.
+   * @returns A promise that resolves with the kernel's model.
    */
-  async startNew(
-    options: Kernel.IOptions = {}
-  ): Promise<Kernel.IKernelConnection> {
-    const model = await startNew({
-      ...options,
-      serverSettings: this.serverSettings
-    });
+  async findById(id: string): Promise<Kernel.IModel> {
+    if (this._models.has(id)) {
+      return this._models.get(id);
+    }
     await this.refreshRunning();
-    return this.connectTo(model);
+    return this._models.get(id);
   }
 
   /**
@@ -222,7 +222,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   protected async requestRunning(): Promise<void> {
     let models: Kernel.IModel[];
     try {
-      models = await Kernel.listRunning(this.serverSettings);
+      models = await listRunning(this.serverSettings);
     } catch (err) {
       // Check for a network error, or a 503 error, which is returned
       // by a JupyterHub when a server is shut down.
@@ -231,7 +231,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
         (err.response && err.response.status === 503)
       ) {
         this._connectionFailure.emit(err);
-        models = [] as Kernel.IModel[];
+        models = [];
       }
       throw err;
     }
@@ -271,9 +271,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    */
   private _onStarted(kernelConnection: Kernel.IKernelConnection): void {
     this._kernelConnections.add(kernelConnection);
-    kernelConnection.disposed.connect(sender => {
-      this._kernelConnections.delete(sender);
-    });
+    kernelConnection.disposed.connect(this._onDisposed);
   }
 
   private _isReady = false;
@@ -283,6 +281,11 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   private _ready: Promise<void>;
   private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
   private _connectionFailure = new Signal<this, Error>(this);
+
+  // We define this here so that it binds to `this`
+  private _onDisposed = (kernelConnection: Kernel.IKernelConnection) => {
+    this._kernelConnections.delete(kernelConnection);
+  };
 }
 
 /**

@@ -8,6 +8,10 @@ import { validateModel } from './validate';
  */
 export const SESSION_SERVICE_URL = 'api/sessions';
 
+export type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
 /**
  * List the running sessions.
  */
@@ -65,6 +69,18 @@ export async function shutdownSession(
 }
 
 /**
+ * Shut down all sessions.
+ *
+ * TODO: Delete as too simple to keep around?
+ */
+export async function shutdownAll(
+  settings?: ServerConnection.ISettings
+): Promise<void> {
+  const running = await listRunning(settings);
+  await Promise.all(running.map(s => shutdownSession(s.id, settings)));
+}
+
+/**
  * Get a full session model from the server by session id string.
  */
 export async function getSessionModel(
@@ -114,13 +130,13 @@ export async function startSession(
  */
 export async function updateSession(
   id: string,
-  body: string,
+  model: DeepPartial<Session.IModel>,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Session.IModel> {
   let url = getSessionUrl(settings.baseUrl, id);
   let init = {
     method: 'PATCH',
-    body
+    body: JSON.stringify(model)
   };
   let response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 200) {
@@ -129,4 +145,17 @@ export async function updateSession(
   let data = await response.json();
   validateModel(data);
   return data;
+}
+
+/**
+ * Find a session by path.
+ *
+ * TODO: delete as too simple to keep around?
+ */
+export async function findByPath(
+  path: string,
+  settings?: ServerConnection.ISettings
+): Promise<Session.IModel | undefined> {
+  const models = await listRunning(settings);
+  return models.find(value => value.path === path);
 }

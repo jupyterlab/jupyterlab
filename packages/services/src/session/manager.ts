@@ -3,9 +3,9 @@
 
 import { Poll } from '@jupyterlab/coreutils';
 
-import { ArrayExt, IIterator, iter } from '@phosphor/algorithm';
+import { IIterator, iter, every } from '@phosphor/algorithm';
 
-import { JSONExt } from '@phosphor/coreutils';
+import { JSONExt, JSONObject } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -13,16 +13,28 @@ import { ServerConnection } from '../serverconnection';
 
 import { Session } from './session';
 import { BaseManager } from '../basemanager';
+import { SessionConnection } from './default';
+import { startSession, shutdownSession, listRunning } from './restapi';
+import { Kernel } from '../kernel';
 
 /**
  * We have a session manager that maintains a list of models from the server.
- * Separately, we have a list of running sessions maintained by the DefaultSessions
+ * Separately, we have a list of running sessions maintained by the
+ * DefaultSessions
  *
- * Perhaps we have *one* list of models, with a separate possible session connection for each model.
+ * Perhaps we have *one* list of models, with a separate possible session
+ * connection for each model.
  *
- * Also, we should be able to modify the session information without a session connection - that's just a server request, and doesn't require a kernel connection.
+ * Also, we should be able to modify the session information without a session
+ * connection - that's just a server request, and doesn't require a kernel
+ * connection.
  *
+ * So how about this:
  *
+ * - every session model has an associated ISession instance. Since we don't
+ *   want to open up websockets for *every* session, an ISession instance may
+ *   not have a kernel connection.
+ * -
  */
 
 /**
@@ -34,16 +46,11 @@ export class SessionManager extends BaseManager implements Session.IManager {
    *
    * @param options - The default options for each session.
    */
-  constructor(options: SessionManager.IOptions = {}) {
+  constructor(options: SessionManager.IOptions) {
     super(options);
 
-    // Initialize internal data.
-    this._ready = (async () => {
-      await this.requestRunning();
-      if (!this.isDisposed) {
-        this._isReady = true;
-      }
-    })();
+    this._kernelManager = options.kernelManager;
+
     // Start model polling with exponential backoff.
     this._pollModels = new Poll({
       auto: false,
@@ -56,9 +63,32 @@ export class SessionManager extends BaseManager implements Session.IManager {
       name: `@jupyterlab/services:SessionManager#models`,
       standby: options.standby || 'when-hidden'
     });
-    void this.ready.then(() => {
-      void this._pollModels.start();
-    });
+
+    // Initialize internal data.
+    this._ready = (async () => {
+      await this._pollModels.start();
+      await this._pollModels.tick;
+      this._isReady = true;
+    })();
+  }
+
+  /**
+   * The server settings for the manager.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * Test whether the manager is ready.
+   */
+  get isReady(): boolean {
+    return this._isReady;
+  }
+
+  /**
+   * A promise that fulfills when the manager is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready;
   }
 
   /**
@@ -76,26 +106,32 @@ export class SessionManager extends BaseManager implements Session.IManager {
   }
 
   /**
-   * Test whether the manager is ready.
-   */
-  get isReady(): boolean {
-    return this._isReady;
-  }
-
-  /**
-   * A promise that fulfills when the manager is ready.
-   */
-  get ready(): Promise<void> {
-    return this._ready;
-  }
-
-  /**
    * Dispose of the resources used by the manager.
    */
   dispose(): void {
-    this._models.length = 0;
+    this._models.clear();
+    this._sessionConnections.forEach(x => x.dispose());
     this._pollModels.dispose();
     super.dispose();
+  }
+
+  /*
+   * Connect to a running session.  See also [[connectToSession]].
+   */
+  connectTo(model: Session.IModel): Session.ISessionConnection {
+    const sessionConnection = new SessionConnection(
+      { ...model, connectToKernel: this._connectToKernel },
+      model.id,
+      model.kernel
+    );
+    this._onStarted(sessionConnection);
+    if (!this._models.has(model.id)) {
+      // We trust the user to connect to an existing session, but we verify
+      // asynchronously.
+      void this.refreshRunning();
+    }
+
+    return sessionConnection;
   }
 
   /**
@@ -104,7 +140,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
    * @returns A new iterator over the running sessions.
    */
   running(): IIterator<Session.IModel> {
-    return iter(this._models);
+    return iter([...this._models.values()]);
   }
 
   /**
@@ -129,10 +165,40 @@ export class SessionManager extends BaseManager implements Session.IManager {
   async startNew(
     options: Session.IOptions
   ): Promise<Session.ISessionConnection> {
-    const { serverSettings } = this;
-    const session = await Session.startNew({ ...options, serverSettings });
-    this._onStarted(session);
-    return session;
+    const model = await startSession({
+      ...options,
+      serverSettings: this.serverSettings
+    });
+    await this.refreshRunning();
+    return this.connectTo(model);
+  }
+
+  /**
+   * Shut down a session by id.
+   */
+  async shutdown(id: string): Promise<void> {
+    await shutdownSession(id, this.serverSettings);
+    await this.refreshRunning();
+  }
+
+  /**
+   * Shut down all sessions.
+   *
+   * @returns A promise that resolves when all of the kernels are shut down.
+   */
+  async shutdownAll(): Promise<void> {
+    // Update the list of models to make sure our list is current.
+    await this.refreshRunning();
+
+    // Shut down all models.
+    await Promise.all(
+      [...this._models.keys()].map(id =>
+        shutdownSession(id, this.serverSettings)
+      )
+    );
+
+    // Update the list of models to clear out our state.
+    await this.refreshRunning();
   }
 
   /**
@@ -145,13 +211,11 @@ export class SessionManager extends BaseManager implements Session.IManager {
    */
   async stopIfNeeded(path: string): Promise<void> {
     try {
-      const sessions = await Session.listRunning(this.serverSettings);
+      const sessions = await listRunning(this.serverSettings);
       const matches = sessions.filter(value => value.path === path);
       if (matches.length === 1) {
         const id = matches[0].id;
-        return this.shutdown(id).catch(() => {
-          /* no-op */
-        });
+        await this.shutdown(id);
       }
     } catch (error) {
       /* Always succeed. */
@@ -161,84 +225,40 @@ export class SessionManager extends BaseManager implements Session.IManager {
   /**
    * Find a session by id.
    */
-  findById(id: string): Promise<Session.IModel> {
-    return Session.findById(id, this.serverSettings);
+  async findById(id: string): Promise<Session.IModel> {
+    if (this._models.has(id)) {
+      return this._models.get(id);
+    }
+    await this.refreshRunning();
+    return this._models.get(id);
   }
 
   /**
    * Find a session by path.
    */
-  findByPath(path: string): Promise<Session.IModel> {
-    return Session.findByPath(path, this.serverSettings);
-  }
-
-  /*
-   * Connect to a running session.  See also [[connectToSession]].
-   */
-  connectTo(model: Session.IModel): Session.ISessionConnection {
-    const session = Session.connectTo(model, this.serverSettings);
-    this._onStarted(session);
-    return session;
-  }
-
-  /**
-   * Shut down a session by id.
-   */
-  async shutdown(id: string): Promise<void> {
-    const models = this._models;
-    const sessions = this._sessions;
-    const index = ArrayExt.findFirstIndex(models, model => model.id === id);
-
-    if (index === -1) {
-      return;
-    }
-
-    // Proactively remove the model.
-    models.splice(index, 1);
-    this._runningChanged.emit(models.slice());
-
-    sessions.forEach(session => {
-      if (session.id === id) {
-        sessions.delete(session);
-        session.dispose();
-      }
-    });
-
-    await Session.shutdown(id, this.serverSettings);
-  }
-
-  /**
-   * Shut down all sessions.
-   *
-   * @returns A promise that resolves when all of the kernels are shut down.
-   */
-  async shutdownAll(): Promise<void> {
-    // Update the list of models then shut down every session.
-    try {
-      await this.requestRunning();
-      await Promise.all(
-        this._models.map(({ id }) => Session.shutdown(id, this.serverSettings))
-      );
-    } finally {
-      // Dispose every session and clear the set.
-      this._sessions.forEach(kernel => {
-        kernel.dispose();
-      });
-      this._sessions.clear();
-
-      // Remove all models even if we had an error.
-      if (this._models.length) {
-        this._models.length = 0;
-        this._runningChanged.emit([]);
+  async findByPath(path: string): Promise<Session.IModel> {
+    for (let m of this._models.values()) {
+      if (m.path === path) {
+        return m;
       }
     }
+    await this.refreshRunning();
+    for (let m of this._models.values()) {
+      if (m.path === path) {
+        return m;
+      }
+    }
+    return undefined;
   }
 
   /**
    * Execute a request to the server to poll running kernels and update state.
    */
   protected async requestRunning(): Promise<void> {
-    const models = await Session.listRunning(this.serverSettings).catch(err => {
+    let models: Session.IModel[];
+    try {
+      models = await listRunning(this.serverSettings);
+    } catch (err) {
       // Check for a network error, or a 503 error, which is returned
       // by a JupyterHub when a server is shut down.
       if (
@@ -246,88 +266,82 @@ export class SessionManager extends BaseManager implements Session.IManager {
         (err.response && err.response.status === 503)
       ) {
         this._connectionFailure.emit(err);
-        return [] as Session.IModel[];
+        models = [];
       }
       throw err;
-    });
+    }
+
     if (this.isDisposed) {
       return;
     }
-    if (!JSONExt.deepEqual(models, this._models)) {
-      const ids = models.map(model => model.id);
-      const sessions = this._sessions;
-      sessions.forEach(session => {
-        if (ids.indexOf(session.id) === -1) {
-          session.dispose();
-          sessions.delete(session);
-        }
-      });
-      this._models = models.slice();
-      this._runningChanged.emit(models);
-    }
-  }
 
-  /**
-   * Handle a session terminating.
-   */
-  private _onDisposed(id: string): void {
-    // A session termination emission could mean the server session is deleted,
-    // or that the session JS object is disposed and the session still exists on
-    // the server, so we refresh from the server to make sure we reflect the
-    // server state.
-    this.refreshRunning().catch(e => {
-      // Ignore poll rejection that arises if we are disposed
-      // during this call.
-      if (this.isDisposed) {
-        return;
+    if (
+      this._models.size === models.length &&
+      every(models, x =>
+        JSONExt.deepEqual(
+          (this._models.get(x.id) as unknown) as JSONObject,
+          (x as unknown) as JSONObject
+        )
+      )
+    ) {
+      // Identical models list (presuming models does not contain duplicate
+      // ids), so just return
+      return;
+    }
+
+    this._models = new Map(models.map(x => [x.id, x]));
+
+    this._sessionConnections.forEach(sc => {
+      if (this._models.has(sc.id)) {
+        sc.update(this._models.get(sc.id));
+      } else {
+        sc.dispose();
       }
-      throw e;
     });
+
+    this._runningChanged.emit(models);
   }
 
   /**
    * Handle a session starting.
    */
-  private _onStarted(session: Session.ISessionConnection): void {
-    let id = session.id;
-    let index = ArrayExt.findFirstIndex(this._models, value => value.id === id);
-    this._sessions.add(session);
-    if (index === -1) {
-      this._models.push(session.model);
-      this._runningChanged.emit(this._models.slice());
-    }
-    session.disposed.connect(s => {
-      this._onDisposed(id);
-    });
-    session.propertyChanged.connect((sender, prop) => {
-      this._onChanged(session.model);
-    });
-    session.kernelChanged.connect(() => {
-      this._onChanged(session.model);
-    });
-  }
-
-  /**
-   * Handle a change to a session.
-   */
-  private _onChanged(model: Session.IModel): void {
-    let index = ArrayExt.findFirstIndex(
-      this._models,
-      value => value.id === model.id
-    );
-    if (index !== -1) {
-      this._models[index] = model;
-      this._runningChanged.emit(this._models.slice());
-    }
+  private _onStarted(sessionConnection: Session.ISessionConnection): void {
+    this._sessionConnections.add(sessionConnection);
+    sessionConnection.disposed.connect(this._onDisposed);
+    sessionConnection.propertyChanged.connect(this._onChanged);
+    sessionConnection.kernelChanged.connect(this._onChanged);
   }
 
   private _isReady = false;
-  private _models: Session.IModel[] = [];
+  private _sessionConnections = new Set<Session.ISessionConnection>();
+  private _models = new Map<string, Session.IModel>();
   private _pollModels: Poll;
   private _ready: Promise<void>;
   private _runningChanged = new Signal<this, Session.IModel[]>(this);
   private _connectionFailure = new Signal<this, Error>(this);
-  private _sessions = new Set<Session.ISessionConnection>();
+
+  // We define these here so they bind `this` correctly
+  private readonly _onDisposed = (
+    sessionConnection: Session.ISessionConnection
+  ) => {
+    this._sessionConnections.delete(sessionConnection);
+    // A session termination emission could mean the server session is deleted,
+    // or that the session JS object is disposed and the session still exists on
+    // the server, so we refresh from the server to make sure we reflect the
+    // server state.
+
+    void this.refreshRunning();
+  };
+
+  private readonly _onChanged = () => {
+    void this.refreshRunning();
+  };
+
+  private readonly _connectToKernel = (
+    model: Kernel.IModel
+  ): Kernel.IKernelConnection => this._kernelManager.connectTo(model);
+
+  private _kernelManager: Kernel.IManager;
 }
 
 /**
@@ -342,5 +356,10 @@ export namespace SessionManager {
      * When the manager stops polling the API. Defaults to `when-hidden`.
      */
     standby?: Poll.Standby;
+
+    /**
+     * Kernel Manager
+     */
+    kernelManager: Kernel.IManager;
   }
 }

@@ -13,7 +13,6 @@ import { Kernel, KernelMessage } from '../kernel';
 
 import { ServerConnection } from '..';
 
-import { SessionConnection } from './default';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
 /**
@@ -177,6 +176,11 @@ export namespace Session {
      * The promise is fulfilled on a valid response and rejected otherwise.
      */
     shutdown(): Promise<void>;
+
+    /**
+     * Update the session connection with the new information.
+     */
+    update(model: Session.IModel): void;
   }
 
   /**
@@ -193,11 +197,11 @@ export namespace Session {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  export function listRunning(
-    settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel[]> {
-    return SessionConnection.listRunning(settings);
-  }
+  // export function listRunning(
+  //   settings?: ServerConnection.ISettings
+  // ): Promise<Session.IModel[]> {
+  //   return restapi.listRunning(settings);
+  // }
 
   /**
    * Start a new session.
@@ -219,11 +223,11 @@ export namespace Session {
    * when the session is created on the server, otherwise the promise is
    * rejected.
    */
-  export function startNew(
-    options: Session.IOptions
-  ): Promise<ISessionConnection> {
-    return SessionConnection.startNew(options);
-  }
+  // export function startNew(
+  //   options: Session.IOptions
+  // ): Promise<ISessionConnection> {
+  //   return restapi.startSession(options);
+  // }
 
   /**
    * Find a session by id.
@@ -242,12 +246,12 @@ export namespace Session {
    * The promise is fulfilled when the session is found,
    * otherwise the promise is rejected.
    */
-  export function findById(
-    id: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
-    return SessionConnection.findById(id, settings);
-  }
+  // export function findById(
+  //   id: string,
+  //   settings?: ServerConnection.ISettings
+  // ): Promise<Session.IModel> {
+  //   return restapi.getSessionModel(id, settings);
+  // }
 
   /**
    * Find a session by path.
@@ -270,12 +274,12 @@ export namespace Session {
    * If the session was not already started and no `options` are given,
    * the promise is rejected.
    */
-  export function findByPath(
-    path: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<Session.IModel> {
-    return SessionConnection.findByPath(path, settings);
-  }
+  // export function findByPath(
+  //   path: string,
+  //   settings?: ServerConnection.ISettings
+  // ): Promise<Session.IModel> {
+  //   return restapi.findByPath(path, settings);
+  // }
 
   /**
    * Connect to a running session.
@@ -292,12 +296,12 @@ export namespace Session {
    *
    * Otherwise, we attempt to connect to the existing session.
    */
-  export function connectTo(
-    model: Session.IModel,
-    settings?: ServerConnection.ISettings
-  ): ISessionConnection {
-    return SessionConnection.connectTo(model, settings);
-  }
+  // export function connectTo(
+  //   model: Session.IModel,
+  //   settings?: ServerConnection.ISettings
+  // ): ISessionConnection {
+  //   return new SessionConnection(model, settings);
+  // }
 
   /**
    * Shut down a session by id.
@@ -309,23 +313,23 @@ export namespace Session {
    * @returns A promise that resolves when the session is shut down.
    *
    */
-  export function shutdown(
-    id: string,
-    settings?: ServerConnection.ISettings
-  ): Promise<void> {
-    return SessionConnection.shutdown(id, settings);
-  }
+  // export function shutdown(
+  //   id: string,
+  //   settings?: ServerConnection.ISettings
+  // ): Promise<void> {
+  //   return restapi.shutdownSession(id, settings);
+  // }
 
   /**
    * Shut down all sessions.
    *
    * @returns A promise that resolves when all of the sessions are shut down.
    */
-  export function shutdownAll(
-    settings?: ServerConnection.ISettings
-  ): Promise<void> {
-    return SessionConnection.shutdownAll(settings);
-  }
+  // export function shutdownAll(
+  //   settings?: ServerConnection.ISettings
+  // ): Promise<void> {
+  //   return restapi.shutdownAll(settings);
+  // }
 
   /**
    * The session initialization options.
