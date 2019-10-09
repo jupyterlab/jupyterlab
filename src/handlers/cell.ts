@@ -118,7 +118,7 @@ export class CellManager {
       this.breakpointsModel.removeBreakpoint(info as LineInfo);
     } else {
       this.breakpointsModel.addBreakpoint(
-        this._debuggerModel.session.id,
+        this._debuggerModel.session.client.name,
         this.getEditorId(),
         info as LineInfo
       );

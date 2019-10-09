@@ -51,7 +51,7 @@ export namespace CommandIDs {
 const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:consoles',
   autoStart: true,
-  requires: [IDebugger, IConsoleTracker],
+  requires: [IDebugger, IConsoleTracker, ILabShell],
   activate: (
     _,
     debug: IDebugger,
@@ -131,7 +131,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       if (!(widget instanceof NotebookPanel)) {
         return;
       }
-
+      console.log({ debug });
       debug.session.client = widget.session;
       // TODO: If necessary, create a notebook handler here. Dispose an old one
       // if it is holding on to memory.

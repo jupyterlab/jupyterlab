@@ -34,7 +34,7 @@ export class DebuggerNotebookHandler {
       const notebookPanel: NotebookPanel = this.notebookTracker.currentWidget;
       if (
         notebookPanel &&
-        notebookPanel.session.name === this.debuggerModel.session.id
+        notebookPanel.session.name === this.debuggerModel.session.client.name
       ) {
         this.notebookTracker.activeCellChanged.connect(this.onNewCell, this);
         if (!this.cellManager) {

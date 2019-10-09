@@ -25,11 +25,12 @@ export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
     super({ direction: 'left-to-right' });
     this.model = new Debugger.Model(options);
-    // this.sidebar = new DebuggerSidebar(this.model);
+    this.sidebar = new DebuggerSidebar(this.model);
+    this.model.sidebar = this.sidebar;
     this.title.label = 'Debugger-' + options.id;
 
     this.addClass('jp-Debugger');
-    // this.addWidget(this.sidebar);
+    this.addWidget(this.sidebar);
   }
 
   readonly model: Debugger.Model;
@@ -79,6 +80,14 @@ export namespace Debugger {
       this._modeChanged.emit(mode);
     }
 
+    get sidebar() {
+      return this._sidebar;
+    }
+
+    set sidebar(sidebar: DebuggerSidebar) {
+      this._sidebar = sidebar;
+    }
+
     get modeChanged(): ISignal<this, IDebugger.Mode> {
       return this._modeChanged;
     }
@@ -122,6 +131,7 @@ export namespace Debugger {
       }
     }
 
+    private _sidebar: DebuggerSidebar;
     private _isDisposed = false;
     private _mode: IDebugger.Mode;
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);

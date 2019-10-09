@@ -33,7 +33,7 @@ export class DebuggerConsoleHandler {
       const consolePanel: ConsolePanel = this.consoleTracker.currentWidget;
       if (
         consolePanel &&
-        consolePanel.session.name === this.debuggerModel.session.id
+        consolePanel.session.name === this.debuggerModel.session.client.name
       ) {
         if (!this.cellManager) {
           consolePanel.console.promptCellCreated.connect(
@@ -94,7 +94,7 @@ export class DebuggerConsoleHandler {
   protected promptCellCreated(sender: CodeConsole, update: CodeCell) {
     if (
       this.cellManager &&
-      this.debuggerModel.session.id ===
+      this.debuggerModel.session.client.name ===
         (this.consoleTracker.currentWidget.session as IClientSession).name
     ) {
       this.cellManager.previousCell = this.cellManager.activeCell;
