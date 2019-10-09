@@ -149,7 +149,6 @@ export class DebugSession implements IDebugger.ISession {
     sender: IClientSession,
     message: KernelMessage.IIOPubMessage
   ): void {
-    // console.log({ sender, message });
     const msgType = message.header.msg_type;
     if (msgType !== 'debug_event') {
       return;

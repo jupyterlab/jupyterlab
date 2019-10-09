@@ -208,19 +208,13 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
       update;
     });
 
-    const commandCreateDebugger = CommandIDs.create;
-
-    const commandStartDebugger = CommandIDs.start;
-
-    const commandStopDebugger = CommandIDs.stop;
-
-    var commandStop: IDisposable;
+    let commandStop: IDisposable;
 
     const getModel = () => {
       return tracker.currentWidget ? tracker.currentWidget.content.model : null;
     };
 
-    app.commands.addCommand(commandStopDebugger, {
+    app.commands.addCommand(CommandIDs.stop, {
       label: 'Stop',
       execute: async () => {
         const debuggerModel = getModel();
@@ -232,21 +226,21 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
-    app.commands.addCommand(commandStartDebugger, {
+    app.commands.addCommand(CommandIDs.start, {
       label: 'Start',
       execute: async () => {
         const debuggerModel = getModel();
         if (debuggerModel) {
           await debuggerModel.session.start();
-          commandStop = await palette.addItem({
-            command: commandStopDebugger,
+          commandStop = palette.addItem({
+            command: CommandIDs.stop,
             category: 'Debugger'
           });
         }
       }
     });
 
-    app.commands.addCommand(commandCreateDebugger, {
+    app.commands.addCommand(CommandIDs.create, {
       label: 'Debugger',
       execute: args => {
         const id = (args.id as string) || UUID.uuid4();
@@ -274,16 +268,18 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
-    palette.addItem({ command: commandCreateDebugger, category: 'Debugger' });
-    palette.addItem({
-      command: commandStartDebugger,
-      category: 'Debugger'
-    });
+    if (palette) {
+      palette.addItem({ command: CommandIDs.create, category: 'Debugger' });
+      palette.addItem({
+        command: CommandIDs.start,
+        category: 'Debugger'
+      });
+    }
 
     if (restorer) {
       // Handle state restoration.
       void restorer.restore(tracker, {
-        command: commandCreateDebugger,
+        command: CommandIDs.create,
         args: widget => ({ id: widget.content.model.id }),
         name: widget => widget.content.model.id
       });
