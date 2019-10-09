@@ -228,9 +228,14 @@ const tracker: JupyterFrontEndPlugin<IDebugger> = {
 
     app.commands.addCommand(CommandIDs.start, {
       label: 'Start',
+      isEnabled: () => {
+        const debuggerModel = getModel();
+        return (debuggerModel &&
+          debuggerModel.session !== undefined) as boolean;
+      },
       execute: async () => {
         const debuggerModel = getModel();
-        if (debuggerModel) {
+        if (debuggerModel && debuggerModel.session) {
           await debuggerModel.session.start();
           commandStop = palette.addItem({
             command: CommandIDs.stop,
