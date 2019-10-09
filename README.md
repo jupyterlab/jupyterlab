@@ -13,7 +13,7 @@ This extension is under active development and is not yet available.
 
 ```bash
 # Create a new conda environment
-conda create -n jupyterlab-debugger -c conda-forge jupyterlab nodejs xeus-python=0.5 ptvsd
+conda create -n jupyterlab-debugger -c conda-forge jupyterlab nodejs xeus-python=0.5.3 ptvsd
 
 # Activate the conda environment
 conda activate jupyterlab-debugger
