@@ -560,7 +560,7 @@ export namespace Kernel {
   }
 
   /**
-   * Start a new kernel.
+   * A convenience function to start a kernel and connect to it.
    *
    * @param options - The options used to create the kernel.
    *
@@ -571,36 +571,14 @@ export namespace Kernel {
    *
    * If no options are given or the kernel name is not given, the
    * default kernel will by started by the server.
-   *
-   * Wraps the result in a Kernel object. The promise is fulfilled
-   * when the kernel is started by the server, otherwise the promise is rejected.
    */
-  export function startNew(
-    options: Kernel.IOptions = {}
-  ): Promise<IKernelConnection> {
-    return KernelConnection.startNew(options);
-  }
-
-  /**
-   * Connect to a running kernel.
-   *
-   * @param model - The model of the running kernel.
-   *
-   * @param settings - The server settings for the request.
-   *
-   * @returns The kernel object.
-   *
-   * #### Notes
-   * If the kernel was already started via `startNewKernel`, the existing
-   * Kernel object info is used to create another instance.
-   *
-   * TODO: Delete as unnecessary?
-   */
-  export function connectTo(
-    model: Kernel.IModel,
-    settings?: ServerConnection.ISettings
-  ): IKernelConnection {
-    return KernelConnection.connectTo(model, settings);
+  export async function startNew(
+    options: Omit<Kernel.IOptions, 'model'> & { model: Partial<Kernel.IModel> }
+  ): Promise<Kernel.IKernelConnection> {
+    options.serverSettings =
+      options.serverSettings || ServerConnection.makeSettings();
+    const model = await restapi.startNew(options.model);
+    return new KernelConnection({ ...options, model });
   }
 
   /**
@@ -627,9 +605,9 @@ export namespace Kernel {
    */
   export interface IOptions {
     /**
-     * The kernel type (e.g. python3).
+     * The kernel model
      */
-    name?: string;
+    model: Kernel.IModel;
 
     /**
      * Environment variables passed to the kernelspec (used in Enterprise Gateway)
@@ -742,7 +720,7 @@ export namespace Kernel {
      *
      * @returns A promise that resolves with the new kernel instance.
      */
-    connectTo(model: Kernel.IModel): IKernelConnection;
+    connectTo(options: Kernel.IOptions): Kernel.IKernelConnection;
 
     /**
      * Shut down a kernel by id.

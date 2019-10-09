@@ -19,20 +19,25 @@ import * as restapi from './restapi';
 export class SessionConnection implements Session.ISessionConnection {
   /**
    * Construct a new session.
+   *
+   * TODO: the constructor here is a bit awkward, especially given that usually we have a model from the kernel we are trying to use. Perhaps we should take the model?
+   * * How do we make sure that the information here is what matches the server? A: we don't. we depend on the person creating the connection to keep the information up to date. The only reason we store the information like the path, type, etc., is as a convenience for the user so the user doesn't have to keep track of the model separately.
+   *
+   * Also, there is a conflict between the IOptions and the model passed in here. Which should we use?
+   *
+   * How about the session takes options. Options must have a session model, plus username, clientId, a connectToKernel function, and serverSettings. Perhaps serverSettings is a separate arg (audit where they are separate...).
    */
-  constructor(
-    options: Session.IOptions,
-    id: string,
-    model: Kernel.IModel | null
-  ) {
-    this._id = id;
-    this._path = options.path;
-    this._type = options.type || 'file';
-    this._name = options.name || '';
+  constructor(options: Session.IOptions) {
+    this._id = options.model.id;
+    this._name = options.model.name;
+    this._path = options.model.path;
+    this._type = options.model.type;
+    this._username = options.username;
+    this._clientId = options.clientId;
     this._connectToKernel = options.connectToKernel;
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
-    this.setupKernel(model);
+    this.setupKernel(options.model.kernel);
   }
 
   get disposed(): ISignal<this, void> {
@@ -159,19 +164,19 @@ export class SessionConnection implements Session.ISessionConnection {
    *
    * TODO: remove?
    */
-  clone(): Session.ISessionConnection {
-    return new SessionConnection(
-      {
-        path: this._path,
-        name: this._name,
-        type: this._type,
-        serverSettings: this.serverSettings,
-        connectToKernel: this._connectToKernel
-      },
-      this._id,
-      { id: this.kernel.id, name: this.kernel.name }
-    );
-  }
+  // clone(): Session.ISessionConnection {
+  //   return new SessionConnection(
+  //     {
+  //       path: this._path,
+  //       name: this._name,
+  //       type: this._type,
+  //       serverSettings: this.serverSettings,
+  //       connectToKernel: this._connectToKernel
+  //     },
+  //     this._id,
+  //     { id: this.kernel.id, name: this.kernel.name }
+  //   );
+  // }
 
   /**
    * Update the session based on a session model from the server.
@@ -305,7 +310,12 @@ export class SessionConnection implements Session.ISessionConnection {
       this._kernel = null;
       return;
     }
-    const kc = this._connectToKernel(model, this.serverSettings);
+    const kc = this._connectToKernel({
+      model,
+      username: this._username,
+      clientId: this._clientId,
+      settings: this.serverSettings
+    });
     this._kernel = kc;
     kc.statusChanged.connect(this.onKernelStatus, this);
     kc.connectionStatusChanged.connect(this.onKernelConnectionStatus, this);
@@ -398,6 +408,8 @@ export class SessionConnection implements Session.ISessionConnection {
   private _path = '';
   private _name = '';
   private _type = '';
+  private _username = '';
+  private _clientId = '';
   private _kernel: Kernel.IKernelConnection;
   private _isDisposed = false;
   private _disposed = new Signal<this, void>(this);
@@ -411,7 +423,6 @@ export class SessionConnection implements Session.ISessionConnection {
   private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
   private _connectToKernel: (
-    options: Kernel.IModel,
-    settings?: ServerConnection.ISettings
+    options: Session.IConnectOptions
   ) => Kernel.IKernelConnection;
 }

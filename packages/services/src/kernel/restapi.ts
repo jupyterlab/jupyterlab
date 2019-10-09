@@ -41,9 +41,9 @@ export async function listRunning(
  * The promise is fulfilled on a valid response and rejected otherwise.
  */
 export async function startNew(
-  options: Kernel.IOptions
+  options: Partial<Kernel.IModel>,
+  settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Kernel.IModel> {
-  let settings = options.serverSettings || ServerConnection.makeSettings();
   let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
   let init = {
     method: 'POST',

@@ -105,16 +105,10 @@ export async function startSession(
   options: Session.IOptions
 ): Promise<Session.IModel> {
   let settings = options.serverSettings || ServerConnection.makeSettings();
-  let model = {
-    kernel: { name: options.kernelName, id: options.kernelId },
-    path: options.path,
-    type: options.type || '',
-    name: options.name || ''
-  };
   let url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
   let init = {
     method: 'POST',
-    body: JSON.stringify(model)
+    body: JSON.stringify(options.model)
   };
   let response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 201) {

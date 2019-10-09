@@ -45,9 +45,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Construct a kernel object.
    */
-  constructor(options: Kernel.IOptions, id: string) {
-    this._name = options.name;
-    this._id = id;
+  constructor(options: Kernel.IOptions) {
+    this._name = options.model.name;
+    this._id = options.model.id;
     this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
     this._clientId = options.clientId || UUID.uuid4();
@@ -131,6 +131,16 @@ export class KernelConnection implements Kernel.IKernelConnection {
    */
   get unhandledMessage(): ISignal<this, KernelMessage.IMessage> {
     return this._unhandledMessage;
+  }
+
+  /**
+   * The kernel model
+   */
+  get model(): Kernel.IModel {
+    return {
+      id: this.id,
+      name: this.name
+    };
   }
 
   /**
@@ -228,19 +238,17 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Clone the current kernel with a new clientId.
    */
-  clone(options: Kernel.IOptions = {}): Kernel.IKernelConnection {
-    return new KernelConnection(
-      {
-        name: this._name,
-        username: this._username,
-        serverSettings: this.serverSettings,
-        // TODO: should this be !this.handleComms, because we only want one
-        // connection to handle comms?
-        handleComms: this.handleComms,
-        ...options
-      },
-      this._id
-    );
+  clone(
+    options: Pick<Kernel.IOptions, 'clientId' | 'username' | 'handleComms'> = {}
+  ): Kernel.IKernelConnection {
+    return new KernelConnection({
+      model: this.model,
+      username: this.username,
+      serverSettings: this.serverSettings,
+      // handleComms defaults to false since that is safer
+      handleComms: false,
+      ...options
+    });
   }
 
   /**
@@ -1447,54 +1455,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
 }
 
 /**
- * The namespace for `DefaultKernel` statics.
- */
-export namespace KernelConnection {
-  /**
-   * Start a new kernel.
-   *
-   * @param options - The options used to create the kernel.
-   *
-   * @returns A promise that resolves with a kernel object.
-   *
-   * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
-   *
-   * If no options are given or the kernel name is not given, the
-   * default kernel will by started by the server.
-   *
-   * Wraps the result in a Kernel object. The promise is fulfilled
-   * when the kernel is started by the server, otherwise the promise is rejected.
-   */
-  export function startNew(
-    options: Kernel.IOptions
-  ): Promise<Kernel.IKernelConnection> {
-    return Private.startNew(options);
-  }
-
-  /**
-   * Connect to a running kernel.
-   *
-   * @param model - The model of the running kernel.
-   *
-   * @param settings - The server settings for the request.
-   *
-   * @returns The kernel object.
-   *
-   * #### Notes
-   * If the kernel was already started via `startNewKernel`, the existing
-   * Kernel object info is used to create another instance.
-   */
-  export function connectTo(
-    model: Kernel.IModel,
-    settings?: ServerConnection.ISettings
-  ): Kernel.IKernelConnection {
-    let serverSettings = settings || ServerConnection.makeSettings();
-    return new KernelConnection({ name: model.name, serverSettings }, model.id);
-  }
-}
-
-/**
  * A private namespace for the Kernel.
  */
 namespace Private {
@@ -1520,24 +1480,6 @@ namespace Private {
       // See https://github.com/jupyter/jupyter_client/issues/263
 
    */
-
-  /**
-   * Start a new kernel.
-   */
-  export async function startNew(
-    options: Kernel.IOptions
-  ): Promise<Kernel.IKernelConnection> {
-    options.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
-    const data = await restapi.startNew(options);
-    return new KernelConnection(
-      {
-        ...options,
-        name: data.name
-      },
-      data.id
-    );
-  }
 
   /**
    * Log the current kernel status.

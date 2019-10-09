@@ -103,19 +103,19 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    *
    * @returns A promise that resolves with the new kernel instance.
    */
-  connectTo({ name, id }: Kernel.IModel): Kernel.IKernelConnection {
-    // Only handle comms if no other kernel connection is handling comms.
+  connectTo(options: Kernel.IOptions): Kernel.IKernelConnection {
+    const { id } = options.model;
     let handleComms = true;
-    for (let kc of this._kernelConnections) {
-      if (kc.id === id && kc.handleComms) {
-        handleComms = false;
-        break;
+    // By default, handle comms only if no other kernel connection is.
+    if (!options.handleComms) {
+      for (let kc of this._kernelConnections) {
+        if (kc.id === id && kc.handleComms) {
+          handleComms = false;
+          break;
+        }
       }
     }
-    let kernelConnection = new KernelConnection(
-      { name, serverSettings: this.serverSettings, handleComms },
-      id
-    );
+    let kernelConnection = new KernelConnection({ handleComms, ...options });
     this._onStarted(kernelConnection);
     if (!this._models.has(id)) {
       // We trust the user to connect to an existing kernel, but we verify
@@ -158,15 +158,14 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    * #### Notes
    * The manager `serverSettings` will be always be used.
    */
-  async startNew(
-    options: Kernel.IOptions = {}
-  ): Promise<Kernel.IKernelConnection> {
-    const model = await startNew({
+  async startNew(options: Kernel.IOptions): Promise<Kernel.IKernelConnection> {
+    const model = await startNew(options.model, this.serverSettings);
+    await this.refreshRunning();
+    return this.connectTo({
       ...options,
+      model,
       serverSettings: this.serverSettings
     });
-    await this.refreshRunning();
-    return this.connectTo(model);
   }
 
   /**
@@ -283,7 +282,9 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   private _connectionFailure = new Signal<this, Error>(this);
 
   // We define this here so that it binds to `this`
-  private _onDisposed = (kernelConnection: Kernel.IKernelConnection) => {
+  private readonly _onDisposed = (
+    kernelConnection: Kernel.IKernelConnection
+  ) => {
     this._kernelConnections.delete(kernelConnection);
   };
 }

@@ -336,29 +336,9 @@ export namespace Session {
    */
   export interface IOptions {
     /**
-     * The path (not including name) to the session.
+     * Session model.
      */
-    path: string;
-
-    /**
-     * The name of the session.
-     */
-    name?: string;
-
-    /**
-     * The type of the session.
-     */
-    type?: string;
-
-    /**
-     * The type of kernel (e.g. python3).
-     */
-    kernelName?: string;
-
-    /**
-     * The id of an existing kernel.
-     */
-    kernelId?: string;
+    model: Session.IModel;
 
     /**
      * The server settings.
@@ -378,10 +358,7 @@ export namespace Session {
     /**
      * Connects to an existing kernel
      */
-    connectToKernel(
-      options: Kernel.IModel,
-      settings?: ServerConnection.ISettings
-    ): Kernel.IKernelConnection;
+    connectToKernel(options: Kernel.IOptions): Kernel.IKernelConnection;
   }
 
   /**
@@ -538,6 +515,6 @@ export namespace Session {
     readonly name: string;
     readonly path: string;
     readonly type: string;
-    readonly kernel: Kernel.IModel;
+    readonly kernel: Kernel.IModel | null;
   }
 }

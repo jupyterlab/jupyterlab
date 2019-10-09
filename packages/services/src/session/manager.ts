@@ -118,12 +118,18 @@ export class SessionManager extends BaseManager implements Session.IManager {
   /*
    * Connect to a running session.  See also [[connectToSession]].
    */
-  connectTo(model: Session.IModel): Session.ISessionConnection {
-    const sessionConnection = new SessionConnection(
-      { ...model, connectToKernel: this._connectToKernel },
-      model.id,
-      model.kernel
-    );
+  connectTo(
+    model: Session.IModel,
+    username?: string,
+    clientId?: string
+  ): Session.ISessionConnection {
+    const sessionConnection = new SessionConnection({
+      model,
+      username,
+      clientId,
+      connectToKernel: this._connectToKernel,
+      serverSettings: this.serverSettings
+    });
     this._onStarted(sessionConnection);
     if (!this._models.has(model.id)) {
       // We trust the user to connect to an existing session, but we verify
@@ -337,9 +343,9 @@ export class SessionManager extends BaseManager implements Session.IManager {
     void this.refreshRunning();
   };
 
-  private readonly _connectToKernel = (
-    model: Kernel.IModel
-  ): Kernel.IKernelConnection => this._kernelManager.connectTo(model);
+  private readonly _connectToKernel = (options: Session.IConnectOptions) => {
+    return this._kernelManager.connectTo(options);
+  };
 
   private _kernelManager: Kernel.IManager;
 }
