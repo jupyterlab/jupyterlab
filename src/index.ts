@@ -25,6 +25,7 @@ import { UUID } from '@phosphor/coreutils';
 import { Debugger } from './debugger';
 
 import { IDebugger } from './tokens';
+import { DebugSession } from './session';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -65,7 +66,11 @@ const consoles: JupyterFrontEndPlugin<void> = {
         return;
       }
 
-      debug.session.client = widget.session;
+      if (!debug.session) {
+        debug.session = new DebugSession({ client: widget.session });
+      } else {
+        debug.session.client = widget.session;
+      }
       // TODO: If necessary, create a console handler here. Dispose an old one
       // if it is holding on to memory.
     });
@@ -131,8 +136,11 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       if (!(widget instanceof NotebookPanel)) {
         return;
       }
-      console.log({ debug });
-      debug.session.client = widget.session;
+      if (!debug.session) {
+        debug.session = new DebugSession({ client: widget.session });
+      } else {
+        debug.session.client = widget.session;
+      }
       // TODO: If necessary, create a notebook handler here. Dispose an old one
       // if it is holding on to memory.
     });
