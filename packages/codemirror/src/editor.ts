@@ -1430,7 +1430,6 @@ namespace Private {
     config: CodeMirrorEditor.IConfig
   ): void {
     let el = editor.getWrapperElement();
-    console.log('losing my mind', option);
     switch (option) {
       case 'lineWrap':
         const lineWrapping = value === 'off' ? false : true;
