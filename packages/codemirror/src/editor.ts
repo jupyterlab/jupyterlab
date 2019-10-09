@@ -1410,9 +1410,8 @@ namespace Private {
       'CodeMirror-linenumbers': 'lineNumbers',
       'CodeMirror-foldgutter': 'codeFolding'
     };
-    // do not remove custom gutters
 
-    console.log(config, config.gutters);
+    // do not remove custom gutters
     const customGutters = (config.gutters || []).filter(
       gutter => !classToSwitch[gutter]
     );
