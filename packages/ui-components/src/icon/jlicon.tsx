@@ -1,4 +1,9 @@
-import React from 'react';
+import React, {
+  ForwardRefExoticComponent,
+  PropsWithoutRef,
+  RefAttributes,
+  RefObject
+} from 'react';
 import { classes } from 'typestyle';
 import { iconStyle, IIconStyle } from '../style/icon';
 
@@ -6,7 +11,7 @@ export function createIcon(
   svgname: string,
   svgstr: string,
   debug: boolean = false
-) {
+): JLIcon.IComponent {
   function resolveSvg(svgstr: string, title?: string): HTMLElement | null {
     const svgElement = new DOMParser().parseFromString(svgstr, 'image/svg+xml')
       .documentElement;
@@ -33,8 +38,11 @@ export function createIcon(
     }
   }
 
-  const _JLIcon = React.forwardRef(
-    (props: JLIcon.IProps, ref: React.RefObject<HTMLDivElement>) => {
+  const JLIcon: JLIcon.IComponent = React.forwardRef<
+    HTMLDivElement,
+    JLIcon.IProps
+  >(
+    (props: JLIcon.IProps, ref: RefObject<HTMLDivElement>): JSX.Element => {
       const { className, title, tag = 'div', ...propsStyle } = props;
       const Tag = tag;
       const classNames = classes(
@@ -58,11 +66,6 @@ export function createIcon(
       );
     }
   );
-
-  // widen type to include .element
-  let JLIcon: typeof _JLIcon & {
-    element: (props: JLIcon.IProps) => HTMLElement;
-  } = _JLIcon as any;
 
   JLIcon.element = ({
     className,
@@ -113,6 +116,13 @@ export namespace JLIcon {
      * Icon title
      */
     title?: string;
+  }
+
+  export interface IComponent
+    extends ForwardRefExoticComponent<
+      PropsWithoutRef<IProps> & RefAttributes<HTMLDivElement>
+    > {
+    element?: (props: IProps) => HTMLElement;
   }
 }
 
