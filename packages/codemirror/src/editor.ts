@@ -1412,10 +1412,10 @@ namespace Private {
     };
     // do not remove custom gutters
 
-    const customGutters = config.gutters.filter(
+    console.log(config, config.gutters);
+    const customGutters = (config.gutters || []).filter(
       gutter => !classToSwitch[gutter]
     );
-
     return Object.keys(classToSwitch)
       .filter(gutter => config[classToSwitch[gutter]])
       .concat(customGutters);
@@ -1431,7 +1431,7 @@ namespace Private {
     config: CodeMirrorEditor.IConfig
   ): void {
     let el = editor.getWrapperElement();
-    console.log('losing my mind');
+    console.log('losing my mind', option);
     switch (option) {
       case 'lineWrap':
         const lineWrapping = value === 'off' ? false : true;
