@@ -47,3 +47,13 @@ export XEUS_LOG=1
 
 jlpm run test
 ```
+
+### Inspecting debug messages
+
+The [kernelspy extension for JupyterLab](https://github.com/vidartf/jupyterlab-kernelspy) can be used to inspect the debug messages sent between the debugger UI and the kernel.
+
+To install it:
+
+```bash
+jupyter labextension install jupyterlab-kernelspy
+```
