@@ -14,6 +14,8 @@ import { WidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 
 import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
 
+import { IDebugger } from './tokens';
+
 import { IStateDB } from '@jupyterlab/coreutils';
 
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
@@ -24,8 +26,12 @@ import { UUID } from '@phosphor/coreutils';
 
 import { Debugger } from './debugger';
 
-import { IDebugger } from './tokens';
 import { DebugSession } from './session';
+
+import { DebuggerNotebookHandler } from './handlers/notebook';
+import { DebuggerConsoleHandler } from './handlers/console';
+
+// import { Session } from '@jupyterlab/services';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -61,6 +67,11 @@ const consoles: JupyterFrontEndPlugin<void> = {
     tracker: IConsoleTracker,
     labShell: ILabShell
   ) => {
+    let oldhandler: {
+      id: string;
+      handler: DebuggerConsoleHandler;
+    };
+
     labShell.currentChanged.connect((_, update) => {
       const widget = update.newValue;
 
@@ -73,8 +84,22 @@ const consoles: JupyterFrontEndPlugin<void> = {
       } else {
         debug.session.client = widget.session;
       }
-      // TODO: If necessary, create a console handler here. Dispose an old one
-      // if it is holding on to memory.
+      if (debug.tracker.currentWidget) {
+        const handler = new DebuggerConsoleHandler({
+          consoleTracker: tracker,
+          debuggerModel: debug.tracker.currentWidget.content.model
+        });
+        if (!oldhandler) {
+          oldhandler = {
+            id: widget.id,
+            handler: handler
+          };
+        } else if (oldhandler.id !== widget.id) {
+          oldhandler.id = widget.id;
+          oldhandler.handler.dispose();
+          oldhandler.handler = handler;
+        }
+      }
     });
   }
 };
@@ -94,10 +119,25 @@ const files: JupyterFrontEndPlugin<void> = {
   ) => {
     labShell.currentChanged.connect((_, update) => {
       const widget = update.newValue;
-
       if (!(widget instanceof FileEditor)) {
         return;
       }
+      (widget as FileEditor).context.path;
+      // const sessions = app.serviceManager.sessions;
+
+      // sessions.runningChanged.connect((sender, models: Session.IModel[]) => {
+      //   const model = models.find(
+      //     model => model.path === (widget as FileEditor).context.path
+      //   );
+
+      //   const session = sessions.connectTo(model);
+      //   console.log({ session });
+      //   if (!debug.session) {
+      //     debug.session = new DebugSession(session);
+      //   } else {
+      //     debug.session.client = session;
+      //   }
+      // });
 
       // TODO: Check @jupyterlab/completer-extension:files to see how to connect
       // a file editor's kernel session to the debugger. Update line below.
@@ -132,21 +172,37 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     tracker: INotebookTracker,
     labShell: ILabShell
   ) => {
+    let oldhandler: {
+      id: string;
+      handler: DebuggerNotebookHandler;
+    };
+
     labShell.currentChanged.connect((_, update) => {
       const widget = update.newValue;
-
       if (!(widget instanceof NotebookPanel)) {
         return;
       }
-
-      console.log({ debug });
       if (!debug.session) {
         debug.session = new DebugSession({ client: widget.session });
       } else {
         debug.session.client = widget.session;
       }
-      // TODO: If necessary, create a notebook handler here. Dispose an old one
-      // if it is holding on to memory.
+      if (debug.tracker.currentWidget) {
+        const handler = new DebuggerNotebookHandler({
+          notebookTracker: tracker,
+          debuggerModel: debug.tracker.currentWidget.content.model
+        });
+        if (!oldhandler) {
+          oldhandler = {
+            id: widget.id,
+            handler: handler
+          };
+        } else if (oldhandler.id !== widget.id) {
+          oldhandler.id = widget.id;
+          oldhandler.handler.dispose();
+          oldhandler.handler = handler;
+        }
+      }
     });
   }
 };
@@ -179,14 +235,11 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         }
         const mode = (args.mode as IDebugger.Mode) || 'expanded';
         const { sidebar } = widget.content;
-        const { mainArea } = widget.content;
-
         if (!mode) {
           throw new Error(`Could not mount debugger in mode: "${mode}"`);
         }
-
         if (mode === 'expanded') {
-          if (mainArea.isAttached) {
+          if (widget.isAttached) {
             return;
           }
 
@@ -194,9 +247,9 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
             sidebar.parent = null;
           }
 
-          mainArea.id = 'jp-debugger-mainArea';
-          mainArea.title.label = 'Debugger';
-          shell.add(mainArea, 'main');
+          //edge case when realod page after set condensed mode
+          widget.title.label = 'Debugger';
+          shell.add(widget, 'main');
           return;
         }
 
@@ -204,8 +257,8 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
           return;
         }
 
-        if (mainArea.isAttached) {
-          mainArea.parent = null;
+        if (widget.isAttached) {
+          widget.parent = null;
         }
 
         sidebar.id = 'jp-debugger-sidebar';
@@ -227,7 +280,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
         if (mode === 'condensed') {
           commands.execute(CommandIDs.mount, { mode });
-          widget.content.mainArea.close();
         } else if (mode === 'expanded') {
           widget.content.sidebar.close();
           commands.execute(CommandIDs.mount, { mode });
@@ -241,7 +293,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         const id = (args.id as string) || UUID.uuid4();
         const mode = (args.mode as IDebugger.Mode) || 'expanded';
 
-        console.log({ args });
         if (id) {
           console.log('Debugger ID: ', id);
         }
@@ -255,6 +306,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
               id: id
             })
           });
+
           void tracker.add(widget);
 
           widget.content.model.mode = mode;
@@ -306,6 +358,11 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
             if (widget) {
               widget.content.model.session = src;
             }
+          }
+        },
+        tracker: {
+          get: (): WidgetTracker<MainAreaWidget<Debugger>> => {
+            return tracker;
           }
         }
       }

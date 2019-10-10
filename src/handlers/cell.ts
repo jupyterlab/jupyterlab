@@ -9,8 +9,10 @@ import { Editor, Doc } from 'codemirror';
 
 import { Breakpoints, SessionTypes } from '../breakpoints';
 import { Debugger } from '../debugger';
+import { IDisposable } from '@phosphor/disposable';
+import { Signal } from '@phosphor/signaling';
 
-export class CellManager {
+export class CellManager implements IDisposable {
   constructor(options: CellManager.IOptions) {
     this._debuggerModel = options.debuggerModel;
     this.breakpointsModel = options.breakpointsModel;
@@ -32,6 +34,18 @@ export class CellManager {
   private _type: SessionTypes;
   private breakpointsModel: Breakpoints.Model;
   private _activeCell: CodeCell;
+  isDisposed: boolean;
+
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    if (this.previousCell) {
+      this.removeListner(this.previousCell);
+    }
+    this.removeListner(this.activeCell);
+    Signal.clearData(this);
+  }
 
   set previousCell(cell: CodeCell) {
     this._previousCell = cell;

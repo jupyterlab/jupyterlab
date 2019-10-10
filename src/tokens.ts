@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IClientSession } from '@jupyterlab/apputils';
+import {
+  IClientSession,
+  MainAreaWidget,
+  WidgetTracker
+} from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -10,6 +14,7 @@ import { Token } from '@phosphor/coreutils';
 import { IObservableDisposable } from '@phosphor/disposable';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
+import { Debugger } from './debugger';
 
 /**
  * An interface describing an application's visual debugger.
@@ -28,6 +33,9 @@ export interface IDebugger {
    * The current debugger session.
    */
   session: IDebugger.ISession | null;
+
+  //tracker for get instance of debugger
+  tracker: WidgetTracker<MainAreaWidget<Debugger>>;
 }
 
 /**
