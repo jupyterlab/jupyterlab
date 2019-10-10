@@ -5,6 +5,8 @@ import { expect } from 'chai';
 
 import { framePromise } from '@jupyterlab/testutils';
 
+import { toArray } from '@phosphor/algorithm';
+
 import { Message } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
@@ -165,6 +167,16 @@ describe('LabShell', () => {
       widget.id = 'foo';
       shell.add(widget, 'top', { rank: 10 });
       expect(shell.isEmpty('top')).to.equal(false);
+    });
+
+    it('should add widgets according to their ranks', () => {
+      const foo = new Widget();
+      const bar = new Widget();
+      foo.id = 'foo';
+      bar.id = 'bar';
+      shell.add(foo, 'top', { rank: 20 });
+      shell.add(bar, 'top', { rank: 10 });
+      expect(toArray(shell.widgets('top'))).to.deep.equal([bar, foo]);
     });
   });
 

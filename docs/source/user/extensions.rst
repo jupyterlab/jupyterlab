@@ -304,6 +304,23 @@ If you wish to run JupyterLab with the set of pinned requirements that was
 shipped with the Python package, you can launch as
 ``jupyter lab --core-mode``.
 
+**Note**
+
+The build process uses a specific ``yarn`` version with a default working 
+combination of npm packages stored in a ``yarn.lock`` file shipped with
+JupyterLab. Those package source urls point to the default yarn registry.
+But if you defined your own yarn registry in yarn configuration, the 
+default yarn registry will be replaced by your custom registry.
+
+If then you switch back to the default yarn registry, you will need to 
+clean your ``staging`` folder before building:
+
+.. code:: bash
+
+    jupyter lab clean
+    jupyter lab build
+
+
 JupyterLab Application Directory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -7,3 +7,6 @@ dependencies:
 - sphinx-copybutton
 - sphinx_rtd_theme
 - recommonmark
+- pytest
+- pip:
+  - pytest-check-links

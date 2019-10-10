@@ -56,7 +56,7 @@
     "eslint:check": "eslint .",
     "get:dependency": "node buildutils/lib/get-dependency.js",
     "postinstall": "node scripts/ensure-buildutils.js",
-    "integrity": "node buildutils/lib/ensure-repo.js",
+    "integrity": "node scripts/ensure-buildutils.js && node buildutils/lib/ensure-repo.js",
     "lighthouse": "lighthouse http://localhost:8888/ --chrome-flags='--headless' --emulated-form-factor=none --throttling-method=provided --only-categories performance",
     "lighthouse:compare": "node testutils/lib/compare-lighthouse.js",
     "lighthouse:throttling:start": "comcast --latency=40 --target-bw=30000 --packet-loss=0.2%",

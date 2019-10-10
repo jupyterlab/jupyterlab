@@ -50,7 +50,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
   ): IInspector => {
     const { commands, shell } = app;
     const command = CommandIDs.open;
-    const label = 'Contextual Help';
+    const label = 'Show Contextual Help';
     const namespace = 'inspector';
     const tracker = new WidgetTracker<MainAreaWidget<InspectorPanel>>({
       namespace
