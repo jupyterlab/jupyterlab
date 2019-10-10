@@ -6,11 +6,8 @@ else
     JLAB_REL_BRANCH=$1
     JLAB_REL_ENV=jlabrelease_$JLAB_REL_BRANCH
 
-    WORK_DIR=$(mktemp -d)
+    WORK_DIR=$(mktemp -d -t $JLAB_REL_ENV)
     cd $WORK_DIR
-
-    conda deactivate
-    conda remove --all -y -n $JLAB_REL_ENV
 
     conda create --override-channels --strict-channel-priority -c conda-forge -c anaconda -y -n $JLAB_REL_ENV notebook nodejs twine
     conda activate $JLAB_REL_ENV
