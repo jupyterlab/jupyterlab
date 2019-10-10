@@ -25,16 +25,17 @@ export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
     super({ direction: 'left-to-right' });
     this.model = new Debugger.Model(options);
+
     this.sidebar = new DebuggerSidebar(this.model);
+    this.mainArea = new BoxPanel();
+
     this.model.sidebar = this.sidebar;
-    this.title.label = 'Debugger-' + options.id;
 
     this.addClass('jp-Debugger');
-    this.addWidget(this.sidebar);
   }
 
   readonly model: Debugger.Model;
-
+  readonly mainArea: BoxPanel;
   readonly sidebar: DebuggerSidebar;
 
   dispose(): void {
@@ -97,6 +98,7 @@ export namespace Debugger {
     }
 
     set session(session: IDebugger.ISession | null) {
+      console.log({ session });
       if (this._session === session) {
         return;
       }

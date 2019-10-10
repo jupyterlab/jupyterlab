@@ -44,6 +44,8 @@ export namespace CommandIDs {
   export const debugNotebook = 'debugger:debug-notebook';
 
   export const mount = 'debugger:mount';
+
+  export const changeMode = 'debugger:change-mode';
 }
 
 /**
@@ -136,6 +138,8 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       if (!(widget instanceof NotebookPanel)) {
         return;
       }
+
+      console.log({ debug });
       if (!debug.session) {
         debug.session = new DebugSession({ client: widget.session });
       } else {
@@ -173,16 +177,16 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         if (!widget) {
           return;
         }
-
         const mode = (args.mode as IDebugger.Mode) || 'expanded';
         const { sidebar } = widget.content;
+        const { mainArea } = widget.content;
 
         if (!mode) {
           throw new Error(`Could not mount debugger in mode: "${mode}"`);
         }
 
         if (mode === 'expanded') {
-          if (widget.isAttached) {
+          if (mainArea.isAttached) {
             return;
           }
 
@@ -190,7 +194,9 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
             sidebar.parent = null;
           }
 
-          shell.add(widget, 'main');
+          mainArea.id = 'jp-debugger-mainArea';
+          mainArea.title.label = 'Debugger';
+          shell.add(mainArea, 'main');
           return;
         }
 
@@ -198,9 +204,34 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
           return;
         }
 
+        if (mainArea.isAttached) {
+          mainArea.parent = null;
+        }
+
         sidebar.id = 'jp-debugger-sidebar';
         sidebar.title.label = 'Environment';
         shell.add(sidebar, 'right', { activate: false });
+      }
+    });
+
+    commands.addCommand(CommandIDs.changeMode, {
+      label: 'Change Mode',
+      isEnabled: () => {
+        return !!tracker.currentWidget;
+      },
+      execute: () => {
+        const currentMode = tracker.currentWidget.content.model.mode;
+        tracker.currentWidget.content.model.mode =
+          currentMode === 'expanded' ? 'condensed' : 'expanded';
+        let mode = tracker.currentWidget.content.model.mode;
+
+        if (mode === 'condensed') {
+          commands.execute(CommandIDs.mount, { mode });
+          widget.content.mainArea.close();
+        } else if (mode === 'expanded') {
+          widget.content.sidebar.close();
+          commands.execute(CommandIDs.mount, { mode });
+        }
       }
     });
 
@@ -210,6 +241,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         const id = (args.id as string) || UUID.uuid4();
         const mode = (args.mode as IDebugger.Mode) || 'expanded';
 
+        console.log({ args });
         if (id) {
           console.log('Debugger ID: ', id);
         }
@@ -224,6 +256,8 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
             })
           });
           void tracker.add(widget);
+
+          widget.content.model.mode = mode;
         }
 
         await commands.execute(CommandIDs.mount, { mode });
@@ -232,7 +266,10 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
-    palette.addItem({ command: CommandIDs.create, category: 'Debugger' });
+    if (palette) {
+      palette.addItem({ command: CommandIDs.changeMode, category: 'Debugger' });
+      palette.addItem({ command: CommandIDs.create, category: 'Debugger' });
+    }
 
     if (restorer) {
       // Handle state restoration.
@@ -253,10 +290,12 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       {
         mode: {
           get: (): IDebugger.Mode => {
-            return 'expanded';
+            return widget.content.model.mode;
           },
           set: (mode: IDebugger.Mode) => {
-            // Set the debugger mode.
+            if (widget) {
+              widget.content.model.mode = mode;
+            }
           }
         },
         session: {
@@ -264,7 +303,9 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
             return null;
           },
           set: (src: IDebugger.ISession | null) => {
-            // Set the debugger session.
+            if (widget) {
+              widget.content.model.session = src;
+            }
           }
         }
       }
