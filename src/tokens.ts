@@ -74,22 +74,20 @@ export namespace IDebugger {
 
   export namespace ISession {
     /**
-     * Arguments for 'updateCell' request.
+     * Arguments for 'dumpCell' request.
      * This is an addition to the Debug Adapter Protocol to support
      * setting breakpoints for cells
      */
-    export interface IUpdateCellArguments {
-      cellId: number;
-      nextId: number;
+    export interface IDumpCellArguments {
       code: string;
     }
 
     /**
-     * Response to 'updateCell' request.
+     * Response to 'dumpCell' request.
      * This is an addition to the Debug Adapter Protocol to support
      * setting breakpoints for cells
      */
-    export interface IUpdateCellResponse extends DebugProtocol.Response {
+    export interface IDumpCellResponse extends DebugProtocol.Response {
       body: {
         sourcePath: string;
       };
@@ -132,7 +130,7 @@ export namespace IDebugger {
       terminate: DebugProtocol.TerminateArguments;
       terminateThreads: DebugProtocol.TerminateThreadsArguments;
       threads: {};
-      updateCell: IUpdateCellArguments;
+      dumpCell: IDumpCellArguments;
       variables: DebugProtocol.VariablesArguments;
     };
 
@@ -173,7 +171,7 @@ export namespace IDebugger {
       terminate: DebugProtocol.TerminateResponse;
       terminateThreads: DebugProtocol.TerminateThreadsResponse;
       threads: DebugProtocol.ThreadsResponse;
-      updateCell: IUpdateCellResponse;
+      dumpCell: IDumpCellResponse;
       variables: DebugProtocol.VariablesResponse;
     };
 

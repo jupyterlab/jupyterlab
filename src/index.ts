@@ -30,6 +30,7 @@ import { DebugSession } from './session';
 
 import { DebuggerNotebookHandler } from './handlers/notebook';
 import { DebuggerConsoleHandler } from './handlers/console';
+import { IDisposable } from '@phosphor/disposable';
 
 // import { Session } from '@jupyterlab/services';
 
@@ -227,6 +228,11 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     });
     const { commands, shell } = app;
     let widget: MainAreaWidget<Debugger>;
+    let commandStop: IDisposable;
+
+    const getModel = () => {
+      return tracker.currentWidget ? tracker.currentWidget.content.model : null;
+    };
 
     commands.addCommand(CommandIDs.mount, {
       execute: args => {
@@ -264,6 +270,37 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         sidebar.id = 'jp-debugger-sidebar';
         sidebar.title.label = 'Environment';
         shell.add(sidebar, 'right', { activate: false });
+      }
+    });
+
+    commands.addCommand(CommandIDs.stop, {
+      label: 'Stop',
+      execute: async () => {
+        const debuggerModel = getModel();
+        if (debuggerModel) {
+          await debuggerModel.session.stop();
+          commandStop.dispose();
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.start, {
+      label: 'Start',
+      isEnabled: () => {
+        const debuggerModel = getModel();
+        return (debuggerModel &&
+          debuggerModel.session !== undefined) as boolean;
+      },
+      execute: async () => {
+        const debuggerModel = getModel();
+        if (debuggerModel && debuggerModel.session) {
+          await debuggerModel.session.start();
+          console.log('?');
+          commandStop = palette.addItem({
+            command: CommandIDs.stop,
+            category: 'Debugger'
+          });
+        }
       }
     });
 
@@ -321,6 +358,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     if (palette) {
       palette.addItem({ command: CommandIDs.changeMode, category: 'Debugger' });
       palette.addItem({ command: CommandIDs.create, category: 'Debugger' });
+      palette.addItem({ command: CommandIDs.start, category: 'Debugger' });
     }
 
     if (restorer) {

@@ -13,7 +13,7 @@ This extension is under active development and is not yet available.
 
 ```bash
 # Create a new conda environment
-conda create -n jupyterlab-debugger -c conda-forge jupyterlab nodejs xeus-python=0.5 ptvsd
+conda create -n jupyterlab-debugger -c conda-forge jupyterlab nodejs xeus-python=0.5.3 ptvsd
 
 # Activate the conda environment
 conda activate jupyterlab-debugger
@@ -46,4 +46,14 @@ To run the tests:
 export XEUS_LOG=1
 
 jlpm run test
+```
+
+### Inspecting debug messages
+
+The [kernelspy extension for JupyterLab](https://github.com/vidartf/jupyterlab-kernelspy) can be used to inspect the debug messages sent between the debugger UI and the kernel.
+
+To install it:
+
+```bash
+jupyter labextension install jupyterlab-kernelspy
 ```
