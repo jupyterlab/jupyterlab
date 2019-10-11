@@ -16,9 +16,6 @@
       "path": "../coreutils"
     },
     {
-      "path": "../docregistry"
-    },
-    {
       "path": "../logconsole"
     },
     {
@@ -29,9 +26,6 @@
     },
     {
       "path": "../rendermime"
-    },
-    {
-      "path": "../services"
     },
     {
       "path": "../statusbar"
