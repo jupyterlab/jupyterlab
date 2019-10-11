@@ -320,7 +320,7 @@ export namespace IRenderMime {
     /**
      * Add the link handler to the node.
      *
-     * @param node: the node for which to handle the link.
+     * @param node: the anchor node for which to handle the link.
      *
      * @param path: the path to open when the link is clicked.
      *
