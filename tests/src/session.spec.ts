@@ -71,9 +71,7 @@ describe('DebugSession', () => {
 
     it('should send debug messages to the kernel', async () => {
       const code = 'i=0\ni+=1\ni+=1';
-      const reply = await debugSession.sendRequest('updateCell', {
-        cellId: 0,
-        nextId: 1,
+      const reply = await debugSession.sendRequest('dumpCell', {
         code
       });
       expect(reply.body.sourcePath).to.contain('.py');
@@ -130,9 +128,7 @@ describe('protocol', () => {
       }
     );
 
-    const reply = await debugSession.sendRequest('updateCell', {
-      cellId: 0,
-      nextId: 1,
+    const reply = await debugSession.sendRequest('dumpCell', {
       code
     });
     await debugSession.sendRequest('setBreakpoints', {

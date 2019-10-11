@@ -62,6 +62,7 @@ export class CellManager {
   onActiveCellChanged() {
     if (
       this.activeCell &&
+      this.activeCell.isAttached &&
       this.activeCell.editor &&
       this._debuggerModel &&
       this._debuggerModel.session
