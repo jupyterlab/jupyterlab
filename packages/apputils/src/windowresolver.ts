@@ -85,6 +85,18 @@ namespace Private {
   const WINDOW = `${PREFIX}:window`;
 
   /**
+   * Current beacon request
+   *
+   * #### Notes
+   * We keep track of the current request so that we can ignore our own beacon
+   * requests. This is to work around a bug in Safari, where Safari sometimes
+   * triggers local storage events for changes made by the current tab. See
+   * https://github.com/jupyterlab/jupyterlab/issues/6921#issuecomment-540817283
+   * for more details.
+   */
+  let currentBeaconRequest: string | null = null;
+
+  /**
    * A potential preferred default window name.
    */
   let candidate: string | null = null;
@@ -123,7 +135,11 @@ namespace Private {
       }
 
       // If the beacon was fired, respond with a ping.
-      if (key === BEACON && candidate !== null) {
+      if (
+        key === BEACON &&
+        newValue !== currentBeaconRequest &&
+        candidate !== null
+      ) {
         ping(resolved ? name : candidate);
         return;
       }
@@ -163,6 +179,7 @@ namespace Private {
    */
   function reject(): void {
     resolved = true;
+    currentBeaconRequest = null;
     delegate.reject(`Window name candidate "${candidate}" already exists`);
   }
 
@@ -197,12 +214,14 @@ namespace Private {
       }
 
       resolved = true;
+      currentBeaconRequest = null;
       delegate.resolve((name = candidate));
       ping(name);
     }, TIMEOUT);
 
     // Fire the beacon to collect other windows' names.
-    localStorage.setItem(BEACON, `${Math.random()}-${new Date().getTime()}`);
+    currentBeaconRequest = `${Math.random()}-${new Date().getTime()}`;
+    localStorage.setItem(BEACON, currentBeaconRequest);
 
     return delegate.promise;
   }
