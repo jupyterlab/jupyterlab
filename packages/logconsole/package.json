@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/logconsole",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.2",
   "description": "JupyterLab - Log Console",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
