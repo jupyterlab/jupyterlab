@@ -1,25 +1,24 @@
-import React, {
-  ForwardRefExoticComponent,
-  PropsWithoutRef,
-  RefAttributes,
-  RefObject
-} from 'react';
+import React, { RefObject } from 'react';
 import { classes } from 'typestyle';
 import { iconStyle, IIconStyle } from '../style/icon';
 
-export function createIcon(
-  svgname: string,
-  svgstr: string,
-  debug: boolean = false
-): JLIcon.IComponent {
-  function resolveSvg(svgstr: string, title?: string): HTMLElement | null {
-    const svgElement = new DOMParser().parseFromString(svgstr, 'image/svg+xml')
-      .documentElement;
+export class JLIcon {
+  constructor(
+    readonly name: string,
+    readonly svgstr: string,
+    protected _debug: boolean = false
+  ) {}
+
+  resolveSvg(title?: string): HTMLElement | null {
+    const svgElement = new DOMParser().parseFromString(
+      this.svgstr,
+      'image/svg+xml'
+    ).documentElement;
 
     if (svgElement.getElementsByTagName('parsererror').length > 0) {
       const errmsg = `SVG HTML was malformed for icon name: ${name}`;
       // parse failed, svgElement will be an error box
-      if (debug) {
+      if (this._debug) {
         // fail noisily, render the error box
         console.error(errmsg);
         return svgElement;
@@ -38,48 +37,19 @@ export function createIcon(
     }
   }
 
-  const JLIcon: JLIcon.IComponent = React.forwardRef<
-    HTMLDivElement,
-    JLIcon.IProps
-  >(
-    (props: JLIcon.IProps, ref: RefObject<HTMLDivElement>): JSX.Element => {
-      const { className, title, tag = 'div', ...propsStyle } = props;
-      const Tag = tag;
-      const classNames = classes(
-        className,
-        propsStyle ? iconStyle(propsStyle) : ''
-      );
-
-      // ensure that svg html is valid
-      const svgElement = resolveSvg(svgstr, title);
-      if (!svgElement) {
-        // bail if failing silently
-        return <></>;
-      }
-
-      return (
-        <Tag
-          className={classNames}
-          dangerouslySetInnerHTML={{ __html: svgElement.outerHTML }}
-          ref={ref}
-        />
-      );
-    }
-  );
-
-  JLIcon.element = ({
+  element({
     className,
     title,
     tag = 'div',
     ...propsStyle
-  }: JLIcon.IProps): HTMLElement | null => {
+  }: JLIcon.IProps): HTMLElement | null {
     const classNames = classes(
       className,
       propsStyle ? iconStyle(propsStyle) : ''
     );
 
     // ensure that svg html is valid
-    const svgElement = resolveSvg(svgstr, title);
+    const svgElement = this.resolveSvg(title);
     if (!svgElement) {
       // bail if failing silently
       return null;
@@ -89,12 +59,40 @@ export function createIcon(
     container.appendChild(svgElement);
     container.className = classNames;
     return container;
-  };
+  }
 
-  // set display name of JLIcon for debugging
-  JLIcon.displayName = `JLIcon_${svgname}`;
+  get react() {
+    const component = React.forwardRef(
+      (
+        { className, title, tag = 'div', ...propsStyle }: JLIcon.IProps,
+        ref: RefObject<HTMLDivElement>
+      ) => {
+        const Tag = tag;
+        const classNames = classes(
+          className,
+          propsStyle ? iconStyle(propsStyle) : ''
+        );
 
-  return JLIcon;
+        // ensure that svg html is valid
+        const svgElement = this.resolveSvg(title);
+        if (!svgElement) {
+          // bail if failing silently
+          return <></>;
+        }
+
+        return (
+          <Tag
+            className={classNames}
+            dangerouslySetInnerHTML={{ __html: svgElement.outerHTML }}
+            ref={ref}
+          />
+        );
+      }
+    );
+
+    component.displayName = `JLIcon_${this.name}`;
+    return component;
+  }
 }
 
 /**
@@ -116,13 +114,6 @@ export namespace JLIcon {
      * Icon title
      */
     title?: string;
-  }
-
-  export interface IComponent
-    extends ForwardRefExoticComponent<
-      PropsWithoutRef<IProps> & RefAttributes<HTMLDivElement>
-    > {
-    element?: (props: IProps) => HTMLElement;
   }
 }
 

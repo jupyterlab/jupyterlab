@@ -21,7 +21,7 @@ const HEADER_TEMPLATE = `
 `;
 
 const ICON_IMPORTS_TEMPLATE = `
-import { createIcon } from './jlicon';
+import { JLIcon } from './jlicon';
 import { Icon } from './interfaces';
 
 // icon svg import statements
@@ -389,12 +389,12 @@ export async function ensureUiComponents(
     } else {
       // load the icon svg using `import`
       const svgname = utils.camelCase(name) + 'Svg';
-      const iconname = utils.camelCase(name, true) + 'Icon';
+      const iconname = utils.camelCase(name) + 'Icon';
 
       _iconImportStatements.push(`import ${svgname} from '${svgpath}';`);
       _iconModelDeclarations.push(`{ name: '${name}', svg: ${svgname} }`);
       _wrappedIconDefs.push(
-        `export const ${iconname} = createIcon('${name}', ${svgname});`
+        `export const ${iconname} = new JLIcon('${iconname}', ${svgname});`
       );
     }
   });
