@@ -295,7 +295,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         const debuggerModel = getModel();
         if (debuggerModel && debuggerModel.session) {
           await debuggerModel.session.start();
-          console.log('?');
           commandStop = palette.addItem({
             command: CommandIDs.stop,
             category: 'Debugger'
