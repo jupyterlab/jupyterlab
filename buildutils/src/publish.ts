@@ -15,7 +15,11 @@ commander
   .description('Publish the JS packages and prep the Python package')
   .option(
     '--skip-build',
-    'Skip the clean and build step (if there was a network error during a JS publish'
+    'Skip the clean and build step (if there was a network error during a JS publish)'
+  )
+  .option(
+    '--skip-publish',
+    'Skip the npm publish step (if there was an error during the python build process)'
   )
   .action(async (options: any) => {
     // Make sure we are logged in.
@@ -29,23 +33,25 @@ commander
       utils.run('npm run clean:slate');
     }
 
-    // Publish JS to the appropriate tag.
     const curr = utils.getPythonVersion();
-    if (curr.indexOf('rc') === -1 && curr.indexOf('a') === -1) {
-      utils.run('lerna publish from-package -m "Publish"');
-    } else {
-      utils.run('lerna publish from-package --npm-tag=next -m "Publish"');
-    }
+    if (!options.skipPublish) {
+      // Publish JS to the appropriate tag.
+      if (curr.indexOf('rc') === -1 && curr.indexOf('a') === -1) {
+        utils.run('lerna publish from-package -m "Publish"');
+      } else {
+        utils.run('lerna publish from-package --npm-tag=next -m "Publish"');
+      }
 
-    // Fix up any tagging issues.
-    const basePath = path.resolve('.');
-    const paths = utils.getLernaPaths(basePath).sort();
-    const cmds = await Promise.all(paths.map(handlePackage));
-    cmds.forEach(cmdList => {
-      cmdList.forEach(cmd => {
-        utils.run(cmd);
+      // Fix up any tagging issues.
+      const basePath = path.resolve('.');
+      const paths = utils.getLernaPaths(basePath).sort();
+      const cmds = await Promise.all(paths.map(handlePackage));
+      cmds.forEach(cmdList => {
+        cmdList.forEach(cmd => {
+          utils.run(cmd);
+        });
       });
-    });
+    }
 
     // Update core mode.  This cannot be done until the JS packages are
     // released.
