@@ -916,6 +916,14 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.isSelected(widget.widgets[0])).to.equal(true);
       });
 
+      it('should extend the selection to the topmost cell', () => {
+        widget.activeCellIndex = 1;
+        NotebookActions.extendSelectionAbove(widget, true);
+        for (let i = widget.activeCellIndex; i >= 0; i--) {
+          expect(widget.isSelected(widget.widgets[i])).to.equal(true);
+        }
+      });
+
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.extendSelectionAbove(widget);
@@ -968,6 +976,12 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.isSelected(widget.widgets[1])).to.equal(true);
       });
 
+      it('should extend the selection the bottomost cell', () => {
+        NotebookActions.extendSelectionBelow(widget, true);
+        for (let i = widget.activeCellIndex; i < widget.widgets.length; i++) {
+          expect(widget.isSelected(widget.widgets[i])).to.equal(true);
+        }
+      });
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.extendSelectionBelow(widget);

@@ -157,7 +157,11 @@ namespace CommandIDs {
 
   export const extendAbove = 'notebook:extend-marked-cells-above';
 
+  export const extendTop = 'notebook:extend-marked-cells-top';
+
   export const extendBelow = 'notebook:extend-marked-cells-below';
+
+  export const extendBottom = 'notebook:extend-marked-cells-bottom';
 
   export const selectAll = 'notebook:select-all';
 
@@ -1466,6 +1470,17 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.extendTop, {
+    label: 'Extend Selection to Top',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.extendSelectionAbove(current.content, true);
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.extendBelow, {
     label: 'Extend Selection Below',
     execute: args => {
@@ -1473,6 +1488,17 @@ function addCommands(
 
       if (current) {
         return NotebookActions.extendSelectionBelow(current.content);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.extendBottom, {
+    label: 'Extend Selection to Bottom',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.extendSelectionBelow(current.content, true);
       }
     },
     isEnabled
@@ -1922,7 +1948,9 @@ function populatePalette(
     CommandIDs.selectAbove,
     CommandIDs.selectBelow,
     CommandIDs.extendAbove,
+    CommandIDs.extendTop,
     CommandIDs.extendBelow,
+    CommandIDs.extendBottom,
     CommandIDs.moveDown,
     CommandIDs.moveUp,
     CommandIDs.undoCellAction,

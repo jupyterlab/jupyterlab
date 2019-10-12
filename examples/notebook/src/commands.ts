@@ -30,7 +30,9 @@ const cmdIds = {
   selectAbove: 'notebook-cells:select-above',
   selectBelow: 'notebook-cells:select-below',
   extendAbove: 'notebook-cells:extend-above',
+  extendTop: 'notebook-cells:extend-top',
   extendBelow: 'notebook-cells:extend-below',
+  extendBottom: 'notebook-cells:extend-bottom',
   editMode: 'notebook:edit-mode',
   merge: 'notebook-cells:merge',
   split: 'notebook-cells:split',
@@ -166,9 +168,17 @@ export const SetupCommands = (
     label: 'Extend Above',
     execute: () => NotebookActions.extendSelectionAbove(nbWidget.content)
   });
+  commands.addCommand(cmdIds.extendTop, {
+    label: 'Extend to Top',
+    execute: () => NotebookActions.extendSelectionAbove(nbWidget.content, true)
+  });
   commands.addCommand(cmdIds.extendBelow, {
     label: 'Extend Below',
     execute: () => NotebookActions.extendSelectionBelow(nbWidget.content)
+  });
+  commands.addCommand(cmdIds.extendBottom, {
+    label: 'Extend to Bottom',
+    execute: () => NotebookActions.extendSelectionBelow(nbWidget.content, true)
   });
   commands.addCommand(cmdIds.merge, {
     label: 'Merge Cells',
