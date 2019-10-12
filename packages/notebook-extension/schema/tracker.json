@@ -89,7 +89,7 @@
     },
     {
       "command": "notebook:extend-marked-cells-top",
-      "keys": ["Shift PageUp"],
+      "keys": ["Shift Home"],
       "selector": ".jp-Notebook:focus"
     },
     {
@@ -99,7 +99,7 @@
     },
     {
       "command": "notebook:extend-marked-cells-bottom",
-      "keys": ["Shift PageDown"],
+      "keys": ["Shift End"],
       "selector": ".jp-Notebook:focus"
     },
     {
