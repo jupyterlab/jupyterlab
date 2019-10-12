@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ILabShell,
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
   ILayoutRestorer
@@ -55,6 +56,7 @@ const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
   id: LOG_CONSOLE_PLUGIN_ID,
   provides: ILoggerRegistry,
   requires: [
+    ILabShell,
     IMainMenu,
     ICommandPalette,
     INotebookTracker,
@@ -373,6 +375,7 @@ export namespace LogConsoleStatus {
  */
 function activateLogConsole(
   app: JupyterFrontEnd,
+  labShell: ILabShell,
   mainMenu: IMainMenu,
   palette: ICommandPalette,
   nbtracker: INotebookTracker,
@@ -555,6 +558,21 @@ function activateLogConsole(
       });
     }
   );
+
+  labShell.currentChanged.connect((_, change) => {
+    const newValue = change.newValue;
+
+    // if a new tab is activated which is not a notebook,
+    // then reset log display and count
+    if (newValue && newValue !== logConsoleWidget && !nbtracker.has(newValue)) {
+      if (logConsoleWidget) {
+        logConsoleWidget.content.activeSource = null;
+        void tracker.save(logConsoleWidget);
+      }
+
+      status.model.activeSource = null;
+    }
+  });
 
   if (settingRegistry) {
     const updateSettings = (settings: ISettingRegistry.ISettings): void => {
