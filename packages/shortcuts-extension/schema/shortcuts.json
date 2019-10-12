@@ -22,7 +22,18 @@
         "command": { "type": "string" },
         "keys": {
           "items": { "type": "string" },
-          "minItems": 1,
+          "type": "array"
+        },
+        "winKeys": {
+          "items": { "type": "string" },
+          "type": "array"
+        },
+        "macKeys": {
+          "items": { "type": "string" },
+          "type": "array"
+        },
+        "linuxKeys": {
+          "items": { "type": "string" },
           "type": "array"
         },
         "selector": { "type": "string" }
