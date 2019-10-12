@@ -61,7 +61,7 @@ export class JLIcon {
     return container;
   }
 
-  get react() {
+  protected _initReact() {
     const component = React.forwardRef(
       (
         { className, title, tag = 'div', ...propsStyle }: JLIcon.IProps,
@@ -93,6 +93,10 @@ export class JLIcon {
     component.displayName = `JLIcon_${this.name}`;
     return component;
   }
+
+  // NB: this._initReact() will be run after the property initializers
+  // defined by the constructor signature, but before the constructor body
+  readonly react = this._initReact();
 }
 
 /**
