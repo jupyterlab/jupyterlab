@@ -42,6 +42,7 @@
     "@lumino/virtualdom": "^1.2.1",
     "@lumino/widgets": "^1.9.4",
     "react": "~16.9.0",
+    "react-dom": "~16.9.0",
     "typestyle": "^2.0.4"
   },
   "devDependencies": {
@@ -50,6 +51,7 @@
     "@storybook/addon-actions": "^5.2.5",
     "@storybook/react": "^5.2.5",
     "@types/react": "~16.9.16",
+    "@types/react-dom": "^16.9.4",
     "@types/webpack-env": "^1.14.1",
     "awesome-typescript-loader": "^5.2.1",
     "babel-loader": "^8.0.6",
