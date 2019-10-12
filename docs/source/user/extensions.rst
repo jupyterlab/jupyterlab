@@ -453,7 +453,7 @@ staging and static
 ''''''''''''''''''
 
 The ``static`` directory contains the assets that will be loaded by the
-JuptyerLab application. The ``staging`` directory is used to create the
+JupyterLab application. The ``staging`` directory is used to create the
 build and then populate the ``static`` directory.
 
 Running ``jupyter lab`` will attempt to run the ``static`` assets in the
