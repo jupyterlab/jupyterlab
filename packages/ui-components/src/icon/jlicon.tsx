@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { classes } from 'typestyle';
 import { iconStyle, IIconStyle } from '../style/icon';
 
@@ -10,10 +11,11 @@ export class JLIcon {
   ) {}
 
   resolveSvg(title?: string): HTMLElement | null {
-    const svgElement = new DOMParser().parseFromString(
+    const svgDoc = new DOMParser().parseFromString(
       this.svgstr,
       'image/svg+xml'
-    ).documentElement;
+    );
+    const svgElement = svgDoc.documentElement;
 
     if (svgElement.getElementsByTagName('parsererror').length > 0) {
       const errmsg = `SVG HTML was malformed for icon name: ${name}`;
@@ -59,6 +61,13 @@ export class JLIcon {
     container.appendChild(svgElement);
     container.className = classNames;
     return container;
+  }
+
+  phosphor(props: JLIcon.IProps): JLIcon.IPhosphor {
+    return {
+      render: (host: HTMLElement) =>
+        ReactDOM.render(<this.react {...props} />, host)
+    };
   }
 
   protected _initReact() {
@@ -123,6 +132,10 @@ export namespace JLIcon {
      * Optional title that will be set on the icon's svg node
      */
     title?: string;
+  }
+
+  export interface IPhosphor {
+    render: (host: HTMLElement) => void;
   }
 }
 
