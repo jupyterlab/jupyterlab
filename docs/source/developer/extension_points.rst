@@ -13,6 +13,9 @@ and more detailed descriptions of their public APIs may be found in the
 `JupyterLab <http://jupyterlab.github.io/jupyterlab/index.html>`__ and
 `Phosphor <http://phosphorjs.github.io/docs.html>`__ API documentation.
 
+.. contents:: Table of contents
+    :local:
+    :depth: 1
 
 Commands
 ~~~~~~~~
