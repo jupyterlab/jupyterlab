@@ -36,7 +36,7 @@ import { JSONObject } from '@phosphor/coreutils';
 
 import { Menu } from '@phosphor/widgets';
 
-import { Commands, EDITOR_ICON_CLASS, FACTORY } from './commands';
+import { CommandIDs, Commands, EDITOR_ICON_CLASS, FACTORY } from './commands';
 
 export { Commands } from './commands';
 
@@ -240,6 +240,110 @@ function activate(
   // Handle the settings of new widgets.
   tracker.widgetAdded.connect((sender, widget) => {
     updateWidget(widget.content);
+  });
+
+  // Add a command to change font size.
+  commands.addCommand(CommandIDs.changeFontSize, {
+    execute: args => {
+      const delta = Number(args['delta']);
+      if (Number.isNaN(delta)) {
+        console.error(
+          `${CommandIDs.changeFontSize}: delta arg must be a number`
+        );
+        return;
+      }
+      const style = window.getComputedStyle(document.documentElement);
+      const cssSize = parseInt(
+        style.getPropertyValue('--jp-code-font-size'),
+        10
+      );
+      const currentSize = config.fontSize || cssSize;
+      config.fontSize = currentSize + delta;
+      return settingRegistry
+        .set(id, 'editorConfig', (config as unknown) as JSONObject)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        });
+    },
+    label: args => args['name'] as string
+  });
+
+  commands.addCommand(CommandIDs.lineNumbers, {
+    execute: () => {
+      config.lineNumbers = !config.lineNumbers;
+      return settingRegistry
+        .set(id, 'editorConfig', (config as unknown) as JSONObject)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        });
+    },
+    isEnabled,
+    isToggled: () => config.lineNumbers,
+    label: 'Line Numbers'
+  });
+
+  type wrappingMode = 'on' | 'off' | 'wordWrapColumn' | 'bounded';
+
+  commands.addCommand(CommandIDs.lineWrap, {
+    execute: args => {
+      config.lineWrap = (args['mode'] as wrappingMode) || 'off';
+      return settingRegistry
+        .set(id, 'editorConfig', (config as unknown) as JSONObject)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        });
+    },
+    isEnabled,
+    isToggled: args => {
+      const lineWrap = (args['mode'] as wrappingMode) || 'off';
+      return config.lineWrap === lineWrap;
+    },
+    label: 'Word Wrap'
+  });
+
+  commands.addCommand(CommandIDs.changeTabs, {
+    label: args => args['name'] as string,
+    execute: args => {
+      config.tabSize = (args['size'] as number) || 4;
+      config.insertSpaces = !!args['insertSpaces'];
+      return settingRegistry
+        .set(id, 'editorConfig', (config as unknown) as JSONObject)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        });
+    },
+    isToggled: args => {
+      const insertSpaces = !!args['insertSpaces'];
+      const size = (args['size'] as number) || 4;
+      return config.insertSpaces === insertSpaces && config.tabSize === size;
+    }
+  });
+
+  commands.addCommand(CommandIDs.matchBrackets, {
+    execute: () => {
+      config.matchBrackets = !config.matchBrackets;
+      return settingRegistry
+        .set(id, 'editorConfig', (config as unknown) as JSONObject)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        });
+    },
+    label: 'Match Brackets',
+    isEnabled,
+    isToggled: () => config.matchBrackets
+  });
+
+  commands.addCommand(CommandIDs.autoClosingBrackets, {
+    execute: () => {
+      config.autoClosingBrackets = !config.autoClosingBrackets;
+      return settingRegistry
+        .set(id, 'editorConfig', (config as unknown) as JSONObject)
+        .catch((reason: Error) => {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        });
+    },
+    label: 'Auto Close Brackets for Text Editor',
+    isToggled: () => config.autoClosingBrackets
   });
 
   Commands.addCommands(
