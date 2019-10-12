@@ -18,7 +18,8 @@ ranges = {
     '1.1.1': 'v1.1.1 --not v1.1.0',
     '1.1.2': 'v1.1.2 --not v1.1.1',
     '1.1.3': 'v1.1.3 --not v1.1.2',
-    '1.2': 'origin/master --not origin/1.1.x',
+    '1.2': 'origin/1.x --not origin/1.1.x',
+    '2.0': 'origin/master --not origin/1.x --not origin/1.1.x'
 }
 
 try:
