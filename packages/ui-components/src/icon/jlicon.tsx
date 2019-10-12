@@ -1,4 +1,4 @@
-import React, { RefObject } from 'react';
+import React from 'react';
 import { classes } from 'typestyle';
 import { iconStyle, IIconStyle } from '../style/icon';
 
@@ -65,7 +65,7 @@ export class JLIcon {
     const component = React.forwardRef(
       (
         { className, title, tag = 'div', ...propsStyle }: JLIcon.IProps,
-        ref: RefObject<HTMLDivElement>
+        ref: React.RefObject<HTMLDivElement>
       ) => {
         const Tag = tag;
         const classNames = classes(
@@ -108,14 +108,19 @@ export namespace JLIcon {
    */
   export interface IProps extends IIconStyle {
     /**
-     * Extra classNames, used in addition to the typestyle className
+     * Extra classNames. Used in addition to the typestyle className to
+     * set the className of the icon's outermost container node
      */
     className?: string;
 
+    /**
+     * HTML element tag of the icon's outermost node, which acts as a
+     * container for the actual svg node
+     */
     tag?: 'div' | 'span';
 
     /**
-     * Icon title
+     * Optional title that will be set on the icon's svg node
      */
     title?: string;
   }
