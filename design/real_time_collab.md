@@ -1,7 +1,7 @@
 # Read Time Collaboration Design
 
 This purpose of this document is to describe the design of the real-time collaboration (RTC)
-features we are building for JuptyerLab. The focus here is primarily on the user experience
+features we are building for JupyterLab. The focus here is primarily on the user experience
 and usage cases, rather than on the implementation details.
 
 ## Personas
@@ -49,7 +49,7 @@ software engieering practices (version control with Git/GitHub, Travis, Slack, e
 control everything and run an extensive test suite on each commit. The collaboration is exploring the possibility of using JupyterHub to provide a unified user-experience for their users to access data
 and their analysis software.
 
-The collaboration would run JupyterLab with JuptyerHub, and build custom JupyterLab extensions that
+The collaboration would run JupyterLab with JupyterHub, and build custom JupyterLab extensions that
 have custom front-end UIs that talk to their various backend services. They want to provide RTC
 capabilities for all of their services to enable the users and scientists to work with notebooks,
 text files and their custom backend services in a collaborative manner. Most of their RTC session will
