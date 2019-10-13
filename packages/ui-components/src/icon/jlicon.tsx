@@ -41,6 +41,7 @@ export class JLIcon {
 
   element({
     className,
+    container,
     title,
     tag = 'div',
     ...propsStyle
@@ -57,7 +58,7 @@ export class JLIcon {
       return null;
     }
 
-    const container = document.createElement(tag);
+    container = container || document.createElement(tag);
     container.appendChild(svgElement);
     container.className = classNames;
     return container;
@@ -73,9 +74,44 @@ export class JLIcon {
   }
 
   protected _initReact() {
+    // const component = React.forwardRef(
+    //   (
+    //     { className, container, title, tag = 'div', ...propsStyle }: JLIcon.IProps = {},
+    //     ref: React.RefObject<HTMLDivElement>
+    //   ) => {
+    //     // const Tag = tag;
+    //     // const classNames = classes(
+    //     //   className,
+    //     //   propsStyle ? iconStyle(propsStyle) : ''
+    //     // );
+    //
+    //     // ensure that svg html is valid
+    //     const svgElement = this.resolveSvg(title);
+    //     if (!svgElement) {
+    //       // bail if failing silently
+    //       return <></>;
+    //     }
+    //
+    //     const attrs = svgElement.getAttributeNames().reduce((d, name) => {d[name] = svgElement.getAttribute(name); return d}, ({} as any));
+    //
+    //     return (
+    //       <svg
+    //         {...attrs}
+    //         dangerouslySetInnerHTML={{ __html: svgElement.innerHTML }}
+    //       />
+    //     );
+    //   }
+    // );
+
     const component = React.forwardRef(
       (
-        { className, title, tag = 'div', ...propsStyle }: JLIcon.IProps = {},
+        {
+          className,
+          container,
+          title,
+          tag = 'div',
+          ...propsStyle
+        }: JLIcon.IProps = {},
         ref: React.RefObject<HTMLDivElement>
       ) => {
         const Tag = tag;
@@ -124,6 +160,7 @@ export namespace JLIcon {
      */
     className?: string;
 
+    container?: HTMLElement;
     /**
      * HTML element tag of the icon's outermost node, which acts as a
      * container for the actual svg node
