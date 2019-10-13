@@ -26,9 +26,6 @@
     },
     {
       "path": "../statedb"
-    },
-    {
-      "path": "../ui-components"
     }
   ]
 }
