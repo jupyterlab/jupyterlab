@@ -64,6 +64,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
         labShell.layoutModified.connect(() => {
           populate();
         });
+
+        // when current tab changes, make sure it is activated
+        labShell.currentChanged.connect((sender, args) => {
+          if (args.newValue) {
+            shell.activateById(args.newValue.id);
+          }
+        });
       }
 
       // Populate the tab manager.
