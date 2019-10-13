@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Contents, Kernel } from '@jupyterlab/services';
-
 import {
   ArrayExt,
   ArrayIterator,
@@ -33,6 +31,22 @@ import {
 import { IModelDB } from '@jupyterlab/observables';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
+import { Contents, Kernel } from '@jupyterlab/services';
+
+import {
+  fileIcon,
+  folderIcon,
+  imageIcon,
+  JLIcon,
+  jsonIcon,
+  markdownIcon,
+  notebookIcon,
+  pythonIcon,
+  rKernelIcon,
+  spreadsheetIcon,
+  yamlIcon
+} from '@jupyterlab/ui-components';
 
 import { TextModelFactory } from './default';
 
@@ -1171,6 +1185,8 @@ export namespace DocumentRegistry {
      */
     readonly iconLabel?: string;
 
+    readonly iconPass?: JLIcon.IPhosphor;
+
     /**
      * The content type of the new file.
      */
@@ -1189,7 +1205,7 @@ export namespace DocumentRegistry {
     name: 'default',
     extensions: [],
     mimeTypes: [],
-    iconClass: 'jp-MaterialIcon jp-FileIcon',
+    iconPass: fileIcon.phosphor({ kind: 'dockPanelBar', center: true }),
     iconLabel: '',
     contentType: 'file',
     fileFormat: 'text'
@@ -1240,7 +1256,7 @@ export namespace DocumentRegistry {
     extensions: ['.ipynb'],
     contentType: 'notebook',
     fileFormat: 'json',
-    iconClass: 'jp-MaterialIcon jp-NotebookIcon'
+    iconPass: notebookIcon.phosphor({ kind: 'dockPanelBar', center: true })
   };
 
   /**
@@ -1252,7 +1268,7 @@ export namespace DocumentRegistry {
     extensions: [],
     mimeTypes: ['text/directory'],
     contentType: 'directory',
-    iconClass: 'jp-MaterialIcon jp-FolderIcon'
+    iconPass: folderIcon.phosphor({ kind: 'dockPanelBar', center: true })
   };
 
   /**
@@ -1267,56 +1283,56 @@ export namespace DocumentRegistry {
       displayName: 'Markdown File',
       extensions: ['.md'],
       mimeTypes: ['text/markdown'],
-      iconClass: 'jp-MaterialIcon jp-MarkdownIcon'
+      iconPass: markdownIcon.phosphor({ kind: 'dockPanelBar', center: true })
     },
     {
       name: 'python',
       displayName: 'Python File',
       extensions: ['.py'],
       mimeTypes: ['text/x-python'],
-      iconClass: 'jp-MaterialIcon jp-PythonIcon'
+      iconPass: pythonIcon.phosphor({ kind: 'dockPanelBar', center: true })
     },
     {
       name: 'json',
       displayName: 'JSON File',
       extensions: ['.json'],
       mimeTypes: ['application/json'],
-      iconClass: 'jp-MaterialIcon jp-JsonIcon'
+      iconPass: jsonIcon.phosphor({ kind: 'dockPanelBar', center: true })
     },
     {
       name: 'csv',
       displayName: 'CSV File',
       extensions: ['.csv'],
       mimeTypes: ['text/csv'],
-      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+      iconPass: spreadsheetIcon.phosphor({ kind: 'dockPanelBar', center: true })
     },
     {
       name: 'tsv',
       displayName: 'TSV File',
       extensions: ['.tsv'],
       mimeTypes: ['text/csv'],
-      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+      iconPass: spreadsheetIcon.phosphor({ kind: 'dockPanelBar', center: true })
     },
     {
       name: 'r',
       displayName: 'R File',
       mimeTypes: ['text/x-rsrc'],
       extensions: ['.r'],
-      iconClass: 'jp-MaterialIcon jp-RKernelIcon'
+      iconPass: rKernelIcon.phosphor({ kind: 'dockPanelBar', center: true })
     },
     {
       name: 'yaml',
       displayName: 'YAML File',
       mimeTypes: ['text/x-yaml', 'text/yaml'],
       extensions: ['.yaml', '.yml'],
-      iconClass: 'jp-MaterialIcon jp-YamlIcon'
+      iconPass: yamlIcon.phosphor({ kind: 'dockPanelBar', center: true })
     },
     {
       name: 'svg',
       displayName: 'Image',
       mimeTypes: ['image/svg+xml'],
       extensions: ['.svg'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconPass: imageIcon.phosphor({ kind: 'dockPanelBar', center: true }),
       fileFormat: 'base64'
     },
     {
@@ -1325,6 +1341,7 @@ export namespace DocumentRegistry {
       mimeTypes: ['image/tiff'],
       extensions: ['.tif', '.tiff'],
       iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconPass: imageIcon.phosphor({ kind: 'dockPanelBar', center: true }),
       fileFormat: 'base64'
     },
     {
@@ -1332,7 +1349,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/jpeg'],
       extensions: ['.jpg', '.jpeg'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconPass: imageIcon.phosphor({ kind: 'dockPanelBar', center: true }),
       fileFormat: 'base64'
     },
     {
@@ -1340,7 +1357,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/gif'],
       extensions: ['.gif'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconPass: imageIcon.phosphor({ kind: 'dockPanelBar', center: true }),
       fileFormat: 'base64'
     },
     {
@@ -1348,7 +1365,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/png'],
       extensions: ['.png'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconPass: imageIcon.phosphor({ kind: 'dockPanelBar', center: true }),
       fileFormat: 'base64'
     },
     {
@@ -1356,7 +1373,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/bmp'],
       extensions: ['.bmp'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconPass: imageIcon.phosphor({ kind: 'dockPanelBar', center: true }),
       fileFormat: 'base64'
     }
   ];

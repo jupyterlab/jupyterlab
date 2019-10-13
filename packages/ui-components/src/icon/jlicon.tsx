@@ -44,7 +44,7 @@ export class JLIcon {
     title,
     tag = 'div',
     ...propsStyle
-  }: JLIcon.IProps): HTMLElement | null {
+  }: JLIcon.IProps = {}): HTMLElement | null {
     const classNames = classes(
       className,
       propsStyle ? iconStyle(propsStyle) : ''
@@ -63,17 +63,19 @@ export class JLIcon {
     return container;
   }
 
-  phosphor(props: JLIcon.IProps): JLIcon.IPhosphor {
+  phosphor(props: JLIcon.IProps = {}): JLIcon.IPhosphor {
     return {
-      render: (host: HTMLElement) =>
-        ReactDOM.render(<this.react {...props} />, host)
+      render: (host: HTMLElement, innerProps: JLIcon.IProps = {}) => {
+        const comb = { ...props, ...innerProps };
+        return ReactDOM.render(<this.react {...comb} />, host);
+      }
     };
   }
 
   protected _initReact() {
     const component = React.forwardRef(
       (
-        { className, title, tag = 'div', ...propsStyle }: JLIcon.IProps,
+        { className, title, tag = 'div', ...propsStyle }: JLIcon.IProps = {},
         ref: React.RefObject<HTMLDivElement>
       ) => {
         const Tag = tag;

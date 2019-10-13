@@ -569,10 +569,14 @@ function activateNotebookHandler(
 
   let id = 0; // The ID counter for notebook panels.
 
+  let ft = app.docRegistry.getFileType('notebook');
+
   factory.widgetCreated.connect((sender, widget) => {
     // If the notebook panel does not have an ID, assign it one.
     widget.id = widget.id || `notebook-${++id}`;
-    widget.title.icon = NOTEBOOK_ICON_CLASS;
+    widget.title.iconClass = ft.iconClass;
+    widget.title.iconLabel = ft.iconLabel;
+    widget.title.iconPass = ft.iconPass;
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);

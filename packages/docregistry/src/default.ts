@@ -389,6 +389,12 @@ export abstract class ABCWidgetFactory<
     // Create the new widget
     const widget = this.createNewWidget(context, source);
 
+    const ft = this._fileTypes[0];
+    if (ft) {
+      widget.title.iconClass = ft.iconClass;
+      widget.title.iconLabel = ft.iconLabel;
+      widget.title.iconPass = ft.iconPass;
+    }
     // Add toolbar items
     let items: DocumentRegistry.IToolbarItem[];
     if (this._toolbarFactory) {

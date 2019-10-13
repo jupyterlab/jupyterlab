@@ -3,8 +3,6 @@
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { DockPanelSvg, TabBarSvg } from '@jupyterlab/ui-components';
-
 import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
 
 import { PromiseDelegate, Token } from '@lumino/coreutils';
@@ -179,9 +177,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     let topHandler = (this._topHandler = new Private.PanelHandler());
     let bottomPanel = (this._bottomPanel = new BoxPanel());
     let hboxPanel = new BoxPanel();
-    let dockPanel = (this._dockPanel = new DockPanelSvg({
-      kind: 'dockPanelBar'
-    }));
+    let dockPanel = (this._dockPanel = new DockPanel());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
     let hsplitPanel = new SplitPanel();
@@ -1086,8 +1082,7 @@ namespace Private {
      * Construct a new side bar handler.
      */
     constructor() {
-      this._sideBar = new TabBarSvg<Widget>({
-        kind: 'sideBar',
+      this._sideBar = new TabBar<Widget>({
         insertBehavior: 'none',
         removeBehavior: 'none',
         allowDeselect: true
