@@ -8,11 +8,9 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { TabBarSvg } from '@jupyterlab/ui-components';
-
 import { each } from '@lumino/algorithm';
 
-import { Widget } from '@lumino/widgets';
+import { TabBar, Widget } from '@lumino/widgets';
 
 /**
  * The default tab manager extension.
@@ -25,10 +23,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     restorer: ILayoutRestorer | null
   ): void => {
     const { shell } = app;
-    const tabs = new TabBarSvg<Widget>({
-      kind: 'tabManager',
-      orientation: 'vertical'
-    });
+    const tabs = new TabBar<Widget>({ orientation: 'vertical' });
     const header = document.createElement('header');
 
     if (restorer) {
