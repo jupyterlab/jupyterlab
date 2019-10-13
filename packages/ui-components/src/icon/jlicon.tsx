@@ -74,35 +74,6 @@ export class JLIcon {
   }
 
   protected _initReact() {
-    // const component = React.forwardRef(
-    //   (
-    //     { className, container, title, tag = 'div', ...propsStyle }: JLIcon.IProps = {},
-    //     ref: React.RefObject<HTMLDivElement>
-    //   ) => {
-    //     // const Tag = tag;
-    //     // const classNames = classes(
-    //     //   className,
-    //     //   propsStyle ? iconStyle(propsStyle) : ''
-    //     // );
-    //
-    //     // ensure that svg html is valid
-    //     const svgElement = this.resolveSvg(title);
-    //     if (!svgElement) {
-    //       // bail if failing silently
-    //       return <></>;
-    //     }
-    //
-    //     const attrs = svgElement.getAttributeNames().reduce((d, name) => {d[name] = svgElement.getAttribute(name); return d}, ({} as any));
-    //
-    //     return (
-    //       <svg
-    //         {...attrs}
-    //         dangerouslySetInnerHTML={{ __html: svgElement.innerHTML }}
-    //       />
-    //     );
-    //   }
-    // );
-
     const component = React.forwardRef(
       (
         {
