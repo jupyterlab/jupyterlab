@@ -107,7 +107,7 @@ function activate(
     if (types.length > 0) {
       widget.title.iconClass = types[0].iconClass ?? '';
       widget.title.iconLabel = types[0].iconLabel ?? '';
-      widget.title.iconPass = types[0].iconPass;
+      widget.title.iconRender = types[0].iconRender;
     }
   });
 
