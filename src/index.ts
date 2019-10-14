@@ -29,10 +29,12 @@ import { Debugger } from './debugger';
 import { DebugSession } from './session';
 
 import { DebuggerNotebookHandler } from './handlers/notebook';
+
 import { DebuggerConsoleHandler } from './handlers/console';
+
 import { IDisposable } from '@phosphor/disposable';
+
 import { Kernel } from '@jupyterlab/services';
-// import { Session } from '@jupyterlab/services';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -124,16 +126,16 @@ const files: JupyterFrontEndPlugin<void> = {
       if (!(widget instanceof FileEditor)) {
         return;
       }
+
+      //  Finding if the file is backed by a kernel or attach it to one.
+
       const sessions = app.serviceManager.sessions;
 
-      sessions.findByPath((widget as FileEditor).context.path).then(model => {
+      sessions.findByPath(widget.context.path).then(model => {
         _model = model;
         const session = sessions.connectTo(model);
         debug.session.client = session;
       });
-
-      // TODO: Check @jupyterlab/completer-extension:files to see how to connect
-      // a file editor's kernel session to the debugger. Update line below.
     });
 
     app.commands.addCommand(CommandIDs.debugFile, {
@@ -148,9 +150,6 @@ const files: JupyterFrontEndPlugin<void> = {
               Kernel.connectTo(_model);
             }
           });
-          // TODO: Find if the file is backed by a kernel or attach it to one.
-          // const widget = await app.commands.execute(CommandIDs.create);
-          // app.shell.add(widget, 'main');
         }
       }
     });
@@ -312,10 +311,10 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         let mode = tracker.currentWidget.content.model.mode;
 
         if (mode === 'condensed') {
-          commands.execute(CommandIDs.mount, { mode });
+          void commands.execute(CommandIDs.mount, { mode });
         } else if (mode === 'expanded') {
           widget.content.sidebar.close();
-          commands.execute(CommandIDs.mount, { mode });
+          void commands.execute(CommandIDs.mount, { mode });
         }
       }
     });

@@ -36,7 +36,9 @@ export interface IDebugger {
    */
   session: IDebugger.ISession;
 
-  //tracker for get instance of debugger
+  /**
+   * tracker for get instance of debugger.
+   */
   tracker: WidgetTracker<MainAreaWidget<Debugger>>;
 }
 

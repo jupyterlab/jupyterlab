@@ -41,9 +41,9 @@ export class CellManager implements IDisposable {
       return;
     }
     if (this.previousCell) {
-      this.removeListner(this.previousCell);
+      this.removeListener(this.previousCell);
     }
-    this.removeListner(this.activeCell);
+    this.removeListener(this.activeCell);
     Signal.clearData(this);
   }
 
@@ -82,7 +82,7 @@ export class CellManager implements IDisposable {
       this._debuggerModel.session
     ) {
       if (this.previousCell && !this.previousCell.isDisposed) {
-        this.removeListner(this.previousCell);
+        this.removeListener(this.previousCell);
         this.clearGutter(this.previousCell);
         this.breakpointsModel.breakpoints = [];
       }
@@ -110,7 +110,7 @@ export class CellManager implements IDisposable {
     editor.editor.on('renderLine', this.onNewRenderLine);
   }
 
-  protected removeListner(cell: CodeCell) {
+  protected removeListener(cell: CodeCell) {
     const editor = cell.editor as CodeMirrorEditor;
     editor.setOption('lineNumbers', false);
     editor.editor.off('gutterClick', this.onGutterClick);
