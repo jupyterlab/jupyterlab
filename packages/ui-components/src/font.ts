@@ -1,3 +1,13 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+// previously, font.ts was in @jupyterlab/coreutils, and added
+// a dependency on @phosphor/widgets -> @phosphor/domutils. domutils
+// initializes some static vars using the navigator object, which is
+// browser only, and will break code running in a node environment. Thus,
+// font.ts has ended up in @jupyuterlab/ui-components, which is not
+// meant to run in a node env in any case
+
 import { VirtualElement, h } from '@phosphor/virtualdom';
 
 import { Menu } from '@phosphor/widgets';
