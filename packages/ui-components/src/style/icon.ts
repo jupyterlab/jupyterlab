@@ -17,15 +17,14 @@ import { NestedCSSProperties } from 'typestyle/lib/types';
  */
 export type IconKindTypeStr =
   | 'breadCrumb'
-  | 'dockPanelBar'
   | 'launcherCard'
   | 'launcherSection'
   | 'listing'
+  | 'mainAreaTab'
   | 'settingsEditor'
   | 'sideBar'
   | 'splash'
   | 'statusBar'
-  | 'tabManager'
   | 'toolbarButton';
 
 export type IconKindType = IconKindTypeStr | undefined;
@@ -82,11 +81,6 @@ const iconCSSBreadCrumb: NestedCSSProperties = {
   }
 };
 
-const iconCSSDockPanelBar: NestedCSSProperties = {
-  height: '14px',
-  width: '14px'
-};
-
 const iconCSSLauncherCard: NestedCSSProperties = {
   height: 'var(--jp-private-launcher-large-icon-size)',
   width: 'var(--jp-private-launcher-large-icon-size)'
@@ -101,6 +95,19 @@ const iconCSSLauncherSection: NestedCSSProperties = {
 const iconCSSListing: NestedCSSProperties = {
   height: '16px',
   width: '16px'
+};
+
+const iconCSSMainAreaTab: NestedCSSProperties = {
+  $nest: {
+    '.p-DockPanel-tabBar &': {
+      height: '14px',
+      width: '14px'
+    },
+    '#tab-manager &': {
+      height: '16px',
+      width: '16px'
+    }
+  }
 };
 
 const iconCSSSettingsEditor: NestedCSSProperties = {
@@ -124,11 +131,6 @@ const iconCSSStatusBar: NestedCSSProperties = {
   position: 'relative'
 };
 
-const iconCSSTabManager: NestedCSSProperties = {
-  height: '16px',
-  width: '16px'
-};
-
 const iconCSSToolbarButton: NestedCSSProperties = {
   height: '16px',
   width: '16px'
@@ -136,23 +138,15 @@ const iconCSSToolbarButton: NestedCSSProperties = {
 
 const iconCSSKind: { [k in IconKindTypeStr]: NestedCSSProperties } = {
   breadCrumb: iconCSSBreadCrumb,
-  dockPanelBar: iconCSSDockPanelBar,
   launcherCard: iconCSSLauncherCard,
   launcherSection: iconCSSLauncherSection,
   listing: iconCSSListing,
+  mainAreaTab: iconCSSMainAreaTab,
   settingsEditor: iconCSSSettingsEditor,
   sideBar: iconCSSSideBar,
   splash: iconCSSSplash,
   statusBar: iconCSSStatusBar,
-  tabManager: iconCSSTabManager,
   toolbarButton: iconCSSToolbarButton
-};
-
-/**
- * container kind specific styles
- */
-const containerCSSDockPanelBar: NestedCSSProperties = {
-  marginRight: '4px'
 };
 
 const containerCSSLauncherCard: NestedCSSProperties = {
@@ -163,6 +157,21 @@ const containerCSSListing: NestedCSSProperties = {
   flex: '0 0 20px',
   marginRight: '4px',
   position: 'relative'
+};
+
+/**
+ * container kind specific styles
+ */
+const containerCSSMainAreaTab: NestedCSSProperties = {
+  $nest: {
+    '.p-DockPanel-tabBar &': {
+      marginRight: '4px'
+    },
+    '#tab-manager &': {
+      marginRight: '2px',
+      position: 'relative'
+    }
+  }
 };
 
 const containerCSSSettingsEditor: NestedCSSProperties = {
@@ -215,11 +224,6 @@ const containerCSSSplash: NestedCSSProperties = {
   zIndex: 1
 };
 
-const containerCSSTabManager: NestedCSSProperties = {
-  marginRight: '2px',
-  position: 'relative'
-};
-
 const containerCSSToolbarButton: NestedCSSProperties = {
   display: 'inline-block',
   margin: 'auto',
@@ -228,15 +232,14 @@ const containerCSSToolbarButton: NestedCSSProperties = {
 
 const containerCSSKind: { [k in IconKindTypeStr]: NestedCSSProperties } = {
   breadCrumb: {},
-  dockPanelBar: containerCSSDockPanelBar,
   launcherCard: containerCSSLauncherCard,
   launcherSection: {},
   listing: containerCSSListing,
+  mainAreaTab: containerCSSMainAreaTab,
   settingsEditor: containerCSSSettingsEditor,
   sideBar: containerCSSSideBar,
   splash: containerCSSSplash,
   statusBar: {},
-  tabManager: containerCSSTabManager,
   toolbarButton: containerCSSToolbarButton
 };
 
