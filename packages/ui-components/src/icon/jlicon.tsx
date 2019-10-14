@@ -1,7 +1,12 @@
 import React from 'react';
+
 import ReactDOM from 'react-dom';
+
 import { classes } from 'typestyle';
-import { iconStyle, IIconStyle } from '../style/icon';
+
+import { iconStyle, iconStyleFlat, IIconStyle } from '../style/icon';
+
+import { domAttrToReact } from '../utils';
 
 export class JLIcon {
   constructor(
@@ -85,10 +90,10 @@ export class JLIcon {
         }: JLIcon.IProps = {},
         ref: React.RefObject<HTMLDivElement>
       ) => {
-        const Tag = tag;
+        // const Tag = tag;
         const classNames = classes(
           className,
-          propsStyle ? iconStyle(propsStyle) : ''
+          propsStyle ? iconStyleFlat(propsStyle) : ''
         );
 
         // ensure that svg html is valid
@@ -98,11 +103,21 @@ export class JLIcon {
           return <></>;
         }
 
+        const attrs = svgElement.getAttributeNames().reduce(
+          (d, name) => {
+            if (name !== 'style') {
+              d[domAttrToReact(name)] = svgElement.getAttribute(name);
+            }
+            return d;
+          },
+          {} as any
+        );
+
         return (
-          <Tag
+          <svg
+            {...attrs}
             className={classNames}
-            dangerouslySetInnerHTML={{ __html: svgElement.outerHTML }}
-            ref={ref}
+            dangerouslySetInnerHTML={{ __html: svgElement.innerHTML }}
           />
         );
       }
@@ -145,7 +160,7 @@ export namespace JLIcon {
   }
 
   export interface IPhosphor {
-    render: (host: HTMLElement) => void;
+    render: (host: HTMLElement, innerProps?: JLIcon.IProps) => void;
   }
 }
 
