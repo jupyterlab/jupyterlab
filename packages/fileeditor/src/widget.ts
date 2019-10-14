@@ -15,7 +15,7 @@ import {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 
-import { fileIcon } from '@jupyterlab/ui-components';
+import { textEditorIcon } from '@jupyterlab/ui-components';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
@@ -326,7 +326,7 @@ export class FileEditorFactory extends ABCWidgetFactory<
       mimeTypeService: this._services.mimeTypeService
     });
 
-    content.title.iconPass = fileIcon.phosphor({
+    content.title.iconPass = textEditorIcon.phosphor({
       kind: 'dockPanelBar',
       center: true
     });
