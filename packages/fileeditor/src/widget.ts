@@ -327,7 +327,7 @@ export class FileEditorFactory extends ABCWidgetFactory<
     });
 
     content.title.iconPass = textEditorIcon.phosphor({
-      kind: 'dockPanelBar',
+      kind: 'mainAreaTab',
       center: true
     });
 
