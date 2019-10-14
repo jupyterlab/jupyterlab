@@ -163,8 +163,8 @@ function uncollapseCell(tracker: any, cell: Cell): void {
     // Un-collapse a sub-cell by setting its `hidden` state:
     w.setHidden(false);
   }
-  // Set a meta-data flag to indicate that we've un-collapsed notebook sections:
-  cell.model.metadata.set('toc-nb-collapsed', false);
+  // Remove the meta-data flag indicating that we'd collapsed notebook sections:
+  cell.model.metadata.delete('toc-nb-collapsed');
 }
 
 export function notebookItemRenderer(
