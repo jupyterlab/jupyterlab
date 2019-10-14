@@ -4,9 +4,9 @@ import ReactDOM from 'react-dom';
 
 import { classes } from 'typestyle';
 
-import { iconStyle, iconStyleFlat, IIconStyle } from '../style/icon';
+import { iconStyle, IIconStyle } from '../style/icon';
 
-import { domAttrToReact } from '../utils';
+import { getReactAttrs } from '../utils';
 
 export class JLIcon {
   constructor(
@@ -63,10 +63,16 @@ export class JLIcon {
       return null;
     }
 
+    // create a container if needed
     container = container || document.createElement(tag);
-    container.appendChild(svgElement);
+
+    // set the container class to style class + explicitly passed className
     container.className = classNames;
-    return container;
+
+    // add the svg node to the container
+    container.appendChild(svgElement);
+
+    return svgElement;
   }
 
   phosphor(props: JLIcon.IProps = {}): JLIcon.IPhosphor {
@@ -88,12 +94,12 @@ export class JLIcon {
           tag = 'div',
           ...propsStyle
         }: JLIcon.IProps = {},
-        ref: React.RefObject<HTMLDivElement>
+        ref: React.RefObject<SVGElement>
       ) => {
-        // const Tag = tag;
+        const Tag = tag;
         const classNames = classes(
           className,
-          propsStyle ? iconStyleFlat(propsStyle) : ''
+          propsStyle ? iconStyle(propsStyle) : ''
         );
 
         // ensure that svg html is valid
@@ -103,23 +109,21 @@ export class JLIcon {
           return <></>;
         }
 
-        const attrs = svgElement.getAttributeNames().reduce(
-          (d, name) => {
-            if (name !== 'style') {
-              d[domAttrToReact(name)] = svgElement.getAttribute(name);
-            }
-            return d;
-          },
-          {} as any
-        );
-
-        return (
+        const svgComponent = (
           <svg
-            {...attrs}
-            className={classNames}
+            {...getReactAttrs(svgElement)}
             dangerouslySetInnerHTML={{ __html: svgElement.innerHTML }}
+            ref={ref}
           />
         );
+
+        if (container) {
+          container.className = classNames;
+
+          return svgComponent;
+        } else {
+          return <Tag className={classNames}>{svgComponent}</Tag>;
+        }
       }
     );
 
