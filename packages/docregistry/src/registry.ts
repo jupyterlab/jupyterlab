@@ -1185,7 +1185,7 @@ export namespace DocumentRegistry {
      */
     readonly iconLabel?: string;
 
-    readonly iconRender?: JLIcon.IPhosphor;
+    readonly iconRenderer?: JLIcon;
 
     /**
      * The content type of the new file.
@@ -1243,7 +1243,7 @@ export namespace DocumentRegistry {
     name: 'text',
     mimeTypes: ['text/plain'],
     extensions: ['.txt'],
-    iconRender: fileIcon.phosphor({ kind: 'mainAreaTab', center: true })
+    iconRenderer: fileIcon.bindStyle({ kind: 'mainAreaTab', center: true })
   };
 
   /**
@@ -1257,7 +1257,7 @@ export namespace DocumentRegistry {
     extensions: ['.ipynb'],
     contentType: 'notebook',
     fileFormat: 'json',
-    iconRender: notebookIcon.phosphor({ kind: 'mainAreaTab', center: true })
+    iconRenderer: notebookIcon.bindStyle({ kind: 'mainAreaTab', center: true })
   };
 
   /**
@@ -1269,7 +1269,7 @@ export namespace DocumentRegistry {
     extensions: [],
     mimeTypes: ['text/directory'],
     contentType: 'directory',
-    iconRender: folderIcon.phosphor({ kind: 'mainAreaTab', center: true })
+    iconRenderer: folderIcon.bindStyle({ kind: 'mainAreaTab', center: true })
   };
 
   /**
@@ -1284,28 +1284,31 @@ export namespace DocumentRegistry {
       displayName: 'Markdown File',
       extensions: ['.md'],
       mimeTypes: ['text/markdown'],
-      iconRender: markdownIcon.phosphor({ kind: 'mainAreaTab', center: true })
+      iconRenderer: markdownIcon.bindStyle({
+        kind: 'mainAreaTab',
+        center: true
+      })
     },
     {
       name: 'python',
       displayName: 'Python File',
       extensions: ['.py'],
       mimeTypes: ['text/x-python'],
-      iconRender: pythonIcon.phosphor({ kind: 'mainAreaTab', center: true })
+      iconRenderer: pythonIcon.bindStyle({ kind: 'mainAreaTab', center: true })
     },
     {
       name: 'json',
       displayName: 'JSON File',
       extensions: ['.json'],
       mimeTypes: ['application/json'],
-      iconRender: jsonIcon.phosphor({ kind: 'mainAreaTab', center: true })
+      iconRenderer: jsonIcon.bindStyle({ kind: 'mainAreaTab', center: true })
     },
     {
       name: 'csv',
       displayName: 'CSV File',
       extensions: ['.csv'],
       mimeTypes: ['text/csv'],
-      iconRender: spreadsheetIcon.phosphor({
+      iconRenderer: spreadsheetIcon.bindStyle({
         kind: 'mainAreaTab',
         center: true
       })
@@ -1315,7 +1318,7 @@ export namespace DocumentRegistry {
       displayName: 'TSV File',
       extensions: ['.tsv'],
       mimeTypes: ['text/csv'],
-      iconRender: spreadsheetIcon.phosphor({
+      iconRenderer: spreadsheetIcon.bindStyle({
         kind: 'mainAreaTab',
         center: true
       })
@@ -1325,21 +1328,21 @@ export namespace DocumentRegistry {
       displayName: 'R File',
       mimeTypes: ['text/x-rsrc'],
       extensions: ['.r'],
-      iconRender: rKernelIcon.phosphor({ kind: 'mainAreaTab', center: true })
+      iconRenderer: rKernelIcon.bindStyle({ kind: 'mainAreaTab', center: true })
     },
     {
       name: 'yaml',
       displayName: 'YAML File',
       mimeTypes: ['text/x-yaml', 'text/yaml'],
       extensions: ['.yaml', '.yml'],
-      iconRender: yamlIcon.phosphor({ kind: 'mainAreaTab', center: true })
+      iconRenderer: yamlIcon.bindStyle({ kind: 'mainAreaTab', center: true })
     },
     {
       name: 'svg',
       displayName: 'Image',
       mimeTypes: ['image/svg+xml'],
       extensions: ['.svg'],
-      iconRender: imageIcon.phosphor({ kind: 'mainAreaTab', center: true }),
+      iconRenderer: imageIcon.bindStyle({ kind: 'mainAreaTab', center: true }),
       fileFormat: 'base64'
     },
     {
@@ -1348,7 +1351,7 @@ export namespace DocumentRegistry {
       mimeTypes: ['image/tiff'],
       extensions: ['.tif', '.tiff'],
       iconClass: 'jp-MaterialIcon jp-ImageIcon',
-      iconRender: imageIcon.phosphor({ kind: 'mainAreaTab', center: true }),
+      iconRenderer: imageIcon.bindStyle({ kind: 'mainAreaTab', center: true }),
       fileFormat: 'base64'
     },
     {
@@ -1356,7 +1359,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/jpeg'],
       extensions: ['.jpg', '.jpeg'],
-      iconRender: imageIcon.phosphor({ kind: 'mainAreaTab', center: true }),
+      iconRenderer: imageIcon.bindStyle({ kind: 'mainAreaTab', center: true }),
       fileFormat: 'base64'
     },
     {
@@ -1364,7 +1367,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/gif'],
       extensions: ['.gif'],
-      iconRender: imageIcon.phosphor({ kind: 'mainAreaTab', center: true }),
+      iconRenderer: imageIcon.bindStyle({ kind: 'mainAreaTab', center: true }),
       fileFormat: 'base64'
     },
     {
@@ -1372,7 +1375,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/png'],
       extensions: ['.png'],
-      iconRender: imageIcon.phosphor({ kind: 'mainAreaTab', center: true }),
+      iconRenderer: imageIcon.bindStyle({ kind: 'mainAreaTab', center: true }),
       fileFormat: 'base64'
     },
     {
@@ -1380,7 +1383,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/bmp'],
       extensions: ['.bmp'],
-      iconRender: imageIcon.phosphor({ kind: 'mainAreaTab', center: true }),
+      iconRenderer: imageIcon.bindStyle({ kind: 'mainAreaTab', center: true }),
       fileFormat: 'base64'
     }
   ];

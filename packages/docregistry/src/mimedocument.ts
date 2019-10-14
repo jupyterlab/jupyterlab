@@ -289,7 +289,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
 
     content.title.iconClass = ft?.iconClass ?? '';
     content.title.iconLabel = ft?.iconLabel ?? '';
-    content.title.iconRender = ft.iconRender;
+    content.title.iconRenderer = ft?.iconRenderer;
 
     const widget = new MimeDocument({ content, context });
 
