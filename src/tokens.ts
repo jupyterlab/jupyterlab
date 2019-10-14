@@ -14,7 +14,9 @@ import { Token } from '@phosphor/coreutils';
 import { IObservableDisposable } from '@phosphor/disposable';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
+
 import { Debugger } from './debugger';
+import { Session } from '@jupyterlab/services';
 
 /**
  * An interface describing an application's visual debugger.
@@ -32,7 +34,7 @@ export interface IDebugger {
   /**
    * The current debugger session.
    */
-  session: IDebugger.ISession | null;
+  session: IDebugger.ISession;
 
   //tracker for get instance of debugger
   tracker: WidgetTracker<MainAreaWidget<Debugger>>;
@@ -54,7 +56,7 @@ export namespace IDebugger {
     /**
      * The API client session to connect to a debugger.
      */
-    client: IClientSession;
+    client: IClientSession | Session.ISession;
 
     /**
      * The code editors in a debugger session.

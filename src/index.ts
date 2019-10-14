@@ -31,7 +31,7 @@ import { DebugSession } from './session';
 import { DebuggerNotebookHandler } from './handlers/notebook';
 import { DebuggerConsoleHandler } from './handlers/console';
 import { IDisposable } from '@phosphor/disposable';
-
+import { Kernel } from '@jupyterlab/services';
 // import { Session } from '@jupyterlab/services';
 
 /**
@@ -118,31 +118,22 @@ const files: JupyterFrontEndPlugin<void> = {
     tracker: IEditorTracker,
     labShell: ILabShell
   ) => {
+    let _model: any;
     labShell.currentChanged.connect((_, update) => {
       const widget = update.newValue;
       if (!(widget instanceof FileEditor)) {
         return;
       }
-      (widget as FileEditor).context.path;
-      // const sessions = app.serviceManager.sessions;
+      const sessions = app.serviceManager.sessions;
 
-      // sessions.runningChanged.connect((sender, models: Session.IModel[]) => {
-      //   const model = models.find(
-      //     model => model.path === (widget as FileEditor).context.path
-      //   );
-
-      //   const session = sessions.connectTo(model);
-      //   console.log({ session });
-      //   if (!debug.session) {
-      //     debug.session = new DebugSession(session);
-      //   } else {
-      //     debug.session.client = session;
-      //   }
-      // });
+      sessions.findByPath((widget as FileEditor).context.path).then(model => {
+        _model = model;
+        const session = sessions.connectTo(model);
+        debug.session.client = session;
+      });
 
       // TODO: Check @jupyterlab/completer-extension:files to see how to connect
       // a file editor's kernel session to the debugger. Update line below.
-      debug.session = null;
     });
 
     app.commands.addCommand(CommandIDs.debugFile, {
@@ -151,6 +142,12 @@ const files: JupyterFrontEndPlugin<void> = {
           return;
         }
         if (tracker.currentWidget) {
+          const idKernel = debug.session.client.kernel.id;
+          Kernel.findById(idKernel).catch(() => {
+            if (_model) {
+              Kernel.connectTo(_model);
+            }
+          });
           // TODO: Find if the file is backed by a kernel or attach it to one.
           // const widget = await app.commands.execute(CommandIDs.create);
           // app.shell.add(widget, 'main');
