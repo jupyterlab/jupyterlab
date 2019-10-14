@@ -1810,14 +1810,11 @@ export namespace DirListing {
       if (fileType) {
         // TODO: remove workaround if...else/code in else clause in v2.0.0
         // workaround for 1.0.x versions of Jlab pulling in 1.1.x versions of filebrowser
-        if (this._iconRegistry) {
+        if (fileType.iconPass) {
           // add icon as svg node. Can be styled using CSS
-          this._iconRegistry.icon({
-            name: fileType.iconClass ?? '',
+          fileType.iconPass.render(icon, {
             className: ITEM_ICON_CLASS,
             title: fileType.iconLabel,
-            fallback: true,
-            container: icon,
             center: true,
             kind: 'listing'
           });
