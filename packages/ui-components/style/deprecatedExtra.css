@@ -21,5 +21,6 @@
   --jp-icon-python-selected: url('deprecated/selected/python_selected.svg');
   --jp-icon-r-selected: url('deprecated/selected/r_selected.svg');
   --jp-icon-spreadsheet-selected: url('deprecated/selected/csv_selected.svg');
+  --jp-icon-text-editor-selected: url('deprecated/selected/ic_format_align_left_24px_selected.svg');
   --jp-icon-yaml-selected: url('deprecated/selected/yml_selected.svg');
 }

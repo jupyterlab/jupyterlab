@@ -20,6 +20,7 @@ import pythonSvg from '../../style/icons/filetype/python.svg';
 import rKernelSvg from '../../style/icons/filetype/r-kernel.svg';
 import reactSvg from '../../style/icons/filetype/react.svg';
 import spreadsheetSvg from '../../style/icons/filetype/spreadsheet.svg';
+import textEditorSvg from '../../style/icons/filetype/text-editor.svg';
 import yamlSvg from '../../style/icons/filetype/yaml.svg';
 import buildSvg from '../../style/icons/sidebar/build.svg';
 import extensionSvg from '../../style/icons/sidebar/extension.svg';
@@ -57,6 +58,7 @@ export namespace IconImports {
     { name: 'r-kernel', svg: rKernelSvg },
     { name: 'react', svg: reactSvg },
     { name: 'spreadsheet', svg: spreadsheetSvg },
+    { name: 'text-editor', svg: textEditorSvg },
     { name: 'yaml', svg: yamlSvg },
     { name: 'build', svg: buildSvg },
     { name: 'extension', svg: extensionSvg },
@@ -94,6 +96,7 @@ export const pythonIcon = new JLIcon('pythonIcon', pythonSvg);
 export const rKernelIcon = new JLIcon('rKernelIcon', rKernelSvg);
 export const reactIcon = new JLIcon('reactIcon', reactSvg);
 export const spreadsheetIcon = new JLIcon('spreadsheetIcon', spreadsheetSvg);
+export const textEditorIcon = new JLIcon('textEditorIcon', textEditorSvg);
 export const yamlIcon = new JLIcon('yamlIcon', yamlSvg);
 export const buildIcon = new JLIcon('buildIcon', buildSvg);
 export const extensionIcon = new JLIcon('extensionIcon', extensionSvg);

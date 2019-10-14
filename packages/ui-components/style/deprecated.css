@@ -23,6 +23,7 @@
   --jp-icon-r-kernel: url('icons/filetype/r-kernel.svg');
   --jp-icon-react: url('icons/filetype/react.svg');
   --jp-icon-spreadsheet: url('icons/filetype/spreadsheet.svg');
+  --jp-icon-text-editor: url('icons/filetype/text-editor.svg');
   --jp-icon-yaml: url('icons/filetype/yaml.svg');
   --jp-icon-build: url('icons/sidebar/build.svg');
   --jp-icon-extension: url('icons/sidebar/extension.svg');
@@ -81,6 +82,9 @@
 }
 .jp-SpreadsheetIcon {
   background-image: var(--jp-icon-spreadsheet);
+}
+.jp-TextEditorIcon {
+  background-image: var(--jp-icon-text-editor);
 }
 .jp-YamlIcon {
   background-image: var(--jp-icon-yaml);
