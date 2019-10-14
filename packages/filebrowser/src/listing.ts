@@ -45,6 +45,8 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { Widget } from '@lumino/widgets';
 
+import ReactDOM from 'react-dom';
+
 import { FileBrowserModel } from './model';
 
 /**
@@ -734,7 +736,10 @@ export class DirListing extends Widget {
 
     // Remove any excess item nodes.
     while (nodes.length > items.length) {
-      content.removeChild(nodes.pop()!);
+      let node = nodes.pop();
+      let icon = DOMUtils.findElement(node!, ITEM_ICON_CLASS);
+      ReactDOM.unmountComponentAtNode(icon);
+      content.removeChild(node!);
     }
 
     // Add any missing item nodes.
@@ -1810,20 +1815,27 @@ export namespace DirListing {
       if (fileType) {
         // TODO: remove workaround if...else/code in else clause in v2.0.0
         // workaround for 1.0.x versions of Jlab pulling in 1.1.x versions of filebrowser
-        if (fileType.iconPass) {
+        if (fileType.iconRender) {
           // add icon as svg node. Can be styled using CSS
-          fileType.iconPass.render(icon, {
+          fileType.iconRender(icon, {
             className: ITEM_ICON_CLASS,
+            container: icon,
             title: fileType.iconLabel,
             center: true,
             kind: 'listing'
           });
         } else {
+          // cleanup after react
+          ReactDOM.unmountComponentAtNode(icon);
+
           // add icon as CSS background image. Can't be styled using CSS
           icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
           icon.textContent = fileType.iconLabel || '';
         }
       } else {
+        // cleanup after react
+        ReactDOM.unmountComponentAtNode(icon);
+
         // use default icon as CSS background image
         icon.className = ITEM_ICON_CLASS;
         icon.textContent = '';

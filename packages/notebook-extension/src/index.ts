@@ -576,7 +576,7 @@ function activateNotebookHandler(
     widget.id = widget.id || `notebook-${++id}`;
     widget.title.iconClass = ft.iconClass;
     widget.title.iconLabel = ft.iconLabel;
-    widget.title.iconPass = ft.iconPass;
+    widget.title.iconRender = ft.iconRender;
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);

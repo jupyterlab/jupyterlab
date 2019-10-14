@@ -76,11 +76,9 @@ export class JLIcon {
   }
 
   phosphor(props: JLIcon.IProps = {}): JLIcon.IPhosphor {
-    return {
-      render: (host: HTMLElement, innerProps: JLIcon.IProps = {}) => {
-        const comb = { ...props, ...innerProps };
-        return ReactDOM.render(<this.react {...comb} />, host);
-      }
+    return (host: HTMLElement, innerProps: JLIcon.IProps = {}) => {
+      const comb = { ...props, ...innerProps };
+      return ReactDOM.render(<this.react {...comb} container={host} />, host);
     };
   }
 
@@ -163,9 +161,10 @@ export namespace JLIcon {
     title?: string;
   }
 
-  export interface IPhosphor {
-    render: (host: HTMLElement, innerProps?: JLIcon.IProps) => void;
-  }
+  export type IPhosphor = (
+    host: HTMLElement,
+    innerProps?: JLIcon.IProps
+  ) => void;
 }
 
 namespace Private {
