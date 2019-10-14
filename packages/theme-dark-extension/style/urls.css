@@ -70,8 +70,6 @@
   --jp-icon-settings-selected: url('icons/md/ic_settings_24px_selected.svg');
   --jp-icon-settings: url('icons/md/ic_settings_24px.svg');
   --jp-icon-stop-circle: url('icons/md/stop-circle.svg');
-  --jp-icon-text-editor-selected: url('icons/md/ic_format_align_left_24px_selected.svg');
-  --jp-icon-text-editor: url('icons/md/ic_format_align_left_24px.svg');
   --jp-icon-undo: url('icons/md/undo.svg');
   --jp-icon-vega: url('icons/jupyter/vega.svg');
 }

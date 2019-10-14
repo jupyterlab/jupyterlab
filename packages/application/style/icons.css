@@ -356,10 +356,6 @@
   background-image: var(--jp-icon-settings);
 }
 
-.jp-TextEditorIcon {
-  background-image: var(--jp-icon-text-editor);
-}
-
 .jp-UndoIcon {
   background-image: var(--jp-icon-undo);
 }
