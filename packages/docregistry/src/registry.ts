@@ -1205,6 +1205,7 @@ export namespace DocumentRegistry {
     name: 'default',
     extensions: [],
     mimeTypes: [],
+    iconClass: '',
     iconPass: fileIcon.phosphor({ kind: 'dockPanelBar', center: true }),
     iconLabel: '',
     contentType: 'file',
