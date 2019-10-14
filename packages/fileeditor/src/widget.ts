@@ -326,7 +326,7 @@ export class FileEditorFactory extends ABCWidgetFactory<
       mimeTypeService: this._services.mimeTypeService
     });
 
-    content.title.iconRender = textEditorIcon.phosphor({
+    content.title.iconRenderer = textEditorIcon.bindStyle({
       kind: 'mainAreaTab',
       center: true
     });

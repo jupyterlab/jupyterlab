@@ -12,6 +12,7 @@ export class JLIcon {
   constructor(
     readonly name: string,
     readonly svgstr: string,
+    readonly style: IIconStyle = {},
     protected _debug: boolean = false
   ) {}
 
@@ -51,9 +52,10 @@ export class JLIcon {
     tag = 'div',
     ...propsStyle
   }: JLIcon.IProps = {}): HTMLElement | null {
+    const propsStyleComb = { ...this.style, ...propsStyle };
     const classNames = classes(
       className,
-      propsStyle ? iconStyle(propsStyle) : ''
+      propsStyleComb ? iconStyle(propsStyleComb) : ''
     );
 
     // ensure that svg html is valid
@@ -75,11 +77,16 @@ export class JLIcon {
     return svgElement;
   }
 
-  phosphor(props: JLIcon.IProps = {}): JLIcon.IPhosphor {
-    return (host: HTMLElement, innerProps: JLIcon.IProps = {}) => {
-      const comb = { ...props, ...innerProps };
-      return ReactDOM.render(<this.react {...comb} container={host} />, host);
-    };
+  render(host: HTMLElement, props: JLIcon.IProps = {}): void {
+    return ReactDOM.render(<this.react {...props} container={host} />, host);
+  }
+
+  unrender(host: HTMLElement): void {
+    ReactDOM.unmountComponentAtNode(host);
+  }
+
+  bindStyle(propsStyle: IIconStyle = {}): JLIcon {
+    return new JLIcon(this.name, this.svgstr, propsStyle, this._debug);
   }
 
   protected _initReact() {
@@ -95,9 +102,10 @@ export class JLIcon {
         ref: React.RefObject<SVGElement>
       ) => {
         const Tag = tag;
+        const propsStyleComb = { ...this.style, ...propsStyle };
         const classNames = classes(
           className,
-          propsStyle ? iconStyle(propsStyle) : ''
+          propsStyleComb ? iconStyle(propsStyleComb) : ''
         );
 
         // ensure that svg html is valid
@@ -160,11 +168,6 @@ export namespace JLIcon {
      */
     title?: string;
   }
-
-  export type IPhosphor = (
-    host: HTMLElement,
-    innerProps?: JLIcon.IProps
-  ) => void;
 }
 
 namespace Private {
