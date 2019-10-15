@@ -112,9 +112,10 @@ const main: JupyterFrontEndPlugin<void> = {
       app.commands.notifyCommandChanged();
     });
 
-    // when current tab changes, make sure it is activated
+    // when current tab changes, activate the new current tab
+    // if there isn't an active tab
     app.shell.currentChanged.connect((sender, args) => {
-      if (args.newValue) {
+      if (!app.shell.activeWidget && args.newValue) {
         app.shell.activateById(args.newValue.id);
       }
     });
