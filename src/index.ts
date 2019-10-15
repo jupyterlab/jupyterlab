@@ -32,8 +32,6 @@ import { DebuggerNotebookHandler } from './handlers/notebook';
 
 import { DebuggerConsoleHandler } from './handlers/console';
 
-import { IDisposable } from '@phosphor/disposable';
-
 import { Kernel } from '@jupyterlab/services';
 
 /**
@@ -224,7 +222,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     });
     const { commands, shell } = app;
     let widget: MainAreaWidget<Debugger>;
-    let commandStop: IDisposable;
 
     const getModel = () => {
       return tracker.currentWidget ? tracker.currentWidget.content.model : null;
@@ -265,17 +262,25 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
         sidebar.id = 'jp-debugger-sidebar';
         sidebar.title.label = 'Environment';
-        shell.add(sidebar, 'right', { activate: false });
+        shell.add(sidebar, 'right');
       }
     });
 
     commands.addCommand(CommandIDs.stop, {
       label: 'Stop',
+      isEnabled: () => {
+        const debuggerModel = getModel();
+        return (
+          debuggerModel &&
+          debuggerModel.session &&
+          debuggerModel.session.isStarted
+        );
+      },
       execute: async () => {
         const debuggerModel = getModel();
         if (debuggerModel) {
           await debuggerModel.session.stop();
-          commandStop.dispose();
+          debuggerModel.session.isStarted = false;
         }
       }
     });
@@ -285,16 +290,15 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       isEnabled: () => {
         const debuggerModel = getModel();
         return (debuggerModel &&
-          debuggerModel.session !== undefined) as boolean;
+          debuggerModel.session !== undefined &&
+          !!debuggerModel.session.client &&
+          debuggerModel.session.client.kernel !== undefined) as boolean;
       },
       execute: async () => {
         const debuggerModel = getModel();
         if (debuggerModel && debuggerModel.session) {
           await debuggerModel.session.start();
-          commandStop = palette.addItem({
-            command: CommandIDs.stop,
-            category: 'Debugger'
-          });
+          debuggerModel.session.isStarted = true;
         }
       }
     });
@@ -323,13 +327,16 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       label: 'Debugger',
       execute: async args => {
         const id = (args.id as string) || UUID.uuid4();
-        const mode = (args.mode as IDebugger.Mode) || 'expanded';
+        const mode = tracker.currentWidget
+          ? tracker.currentWidget.content.model.mode
+          : 'expanded';
 
         if (id) {
           console.log('Debugger ID: ', id);
         }
 
         if (tracker.currentWidget) {
+          console.log({ mode });
           widget = tracker.currentWidget;
         } else {
           widget = new MainAreaWidget({
@@ -346,6 +353,11 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
         await commands.execute(CommandIDs.mount, { mode });
 
+        console.log({ widget });
+        if (!widget.isAttached) {
+          console.error('?????');
+        }
+
         return widget;
       }
     });
@@ -354,6 +366,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       palette.addItem({ command: CommandIDs.changeMode, category: 'Debugger' });
       palette.addItem({ command: CommandIDs.create, category: 'Debugger' });
       palette.addItem({ command: CommandIDs.start, category: 'Debugger' });
+      palette.addItem({ command: CommandIDs.stop, category: 'Debugger' });
     }
 
     if (restorer) {
