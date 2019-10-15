@@ -74,11 +74,6 @@ export namespace IDebugger {
      * Stop a running debug session.
      */
     stop(): void;
-
-    /**
-     * Return true if debug session is running.
-     */
-    isStarted: boolean;
   }
 
   export namespace ISession {

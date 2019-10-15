@@ -88,17 +88,6 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   /**
-   * Whether the session is started.
-   */
-
-  get isStarted(): boolean {
-    return this._isStarted;
-  }
-
-  set isStarted(value: boolean) {
-    this._isStarted = value;
-  }
-  /**
    * Start a new debug session
    */
   async start(): Promise<void> {
@@ -114,6 +103,7 @@ export class DebugSession implements IDebugger.ISession {
       supportsRunInTerminalRequest: true,
       locale: 'en-us'
     });
+
     await this.sendRequest('attach', {});
   }
 
@@ -190,7 +180,6 @@ export class DebugSession implements IDebugger.ISession {
     this
   );
   private _seq: number = 0;
-  private _isStarted: boolean;
 }
 
 /**
