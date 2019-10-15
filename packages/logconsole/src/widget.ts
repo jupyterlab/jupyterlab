@@ -394,7 +394,7 @@ export class LogConsolePanel extends StackedPanel {
 
   protected onAfterAttach(msg: Message): void {
     this._updateOutputAreas();
-    this._showOutputFromSource(this._activeSource);
+    this._showOutputFromSource(this._source);
     this._showPlaceholderIfNoMessage();
     this.attached.emit();
   }
@@ -451,23 +451,21 @@ export class LogConsolePanel extends StackedPanel {
     this.title.caption = title;
   }
 
-  set activeSource(name: string) {
-    this._activeSource = name;
-    this._showOutputFromSource(this._activeSource);
-    this._showPlaceholderIfNoMessage();
-  }
-
   /**
-   * The name of the active log source
+   * The log source displayed
    */
-  get activeSource(): string {
-    return this._activeSource;
+  get source(): string {
+    return this._source;
+  }
+  set source(name: string) {
+    this._source = name;
+    this._showOutputFromSource(this._source);
+    this._showPlaceholderIfNoMessage();
   }
 
   private _showPlaceholderIfNoMessage() {
     const noMessage =
-      !this.activeSource ||
-      this._loggerRegistry.getLogger(this.activeSource).length === 0;
+      !this.source || this._loggerRegistry.getLogger(this.source).length === 0;
 
     if (noMessage) {
       this._placeholder.show();
@@ -557,7 +555,7 @@ export class LogConsolePanel extends StackedPanel {
   readonly attached = new Signal<this, void>(this);
   private _loggerRegistry: ILoggerRegistry;
   private _outputAreas = new Map<string, LogConsoleOutputArea>();
-  private _activeSource: string = null;
+  private _source: string = null;
   private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
   private _scrollTimer: number = null;
   private _placeholder: Widget;

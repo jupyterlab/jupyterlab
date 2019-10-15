@@ -128,11 +128,11 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
 
     let flashRequestTimer: number = null;
 
-    this.model.activeSourceChanged.connect(() => {
+    this.model.sourceChanged.connect(() => {
       if (
-        this.model.activeSource &&
+        this.model.source &&
         this.model.flashEnabled &&
-        !this.model.isSourceLogsViewed(this.model.activeSource) &&
+        !this.model.isSourceLogsViewed(this.model.source) &&
         this.model.logCount > 0
       ) {
         this._showHighlighted();
@@ -230,7 +230,7 @@ export namespace LogConsoleStatus {
 
             logger.logChanged.connect(
               (sender: ILogger, change: ILoggerChange) => {
-                if (sender.source === this._activeSource) {
+                if (sender.source === this._source) {
                   this.stateChanged.emit();
                   this.logChanged.emit();
                 }
@@ -251,8 +251,8 @@ export namespace LogConsoleStatus {
      * Number of logs.
      */
     get logCount(): number {
-      if (this._activeSource) {
-        const logger = this._loggerRegistry.getLogger(this._activeSource);
+      if (this._source) {
+        const logger = this._loggerRegistry.getLogger(this._source);
         return Math.min(logger.length, this._entryLimit);
       }
 
@@ -262,17 +262,17 @@ export namespace LogConsoleStatus {
     /**
      * The name of the active log source
      */
-    get activeSource(): string {
-      return this._activeSource;
+    get source(): string {
+      return this._source;
     }
 
-    set activeSource(name: string) {
-      if (this._activeSource === name) {
+    set source(name: string) {
+      if (this._source === name) {
         return;
       }
 
-      this._activeSource = name;
-      this.activeSourceChanged.emit();
+      this._source = name;
+      this.sourceChanged.emit();
 
       // refresh rendering
       this.stateChanged.emit();
@@ -339,14 +339,14 @@ export namespace LogConsoleStatus {
     /**
      * A signal emitted when the active log source changes.
      */
-    public activeSourceChanged = new Signal<this, void>(this);
+    public sourceChanged = new Signal<this, void>(this);
     /**
      * A signal emitted when the flash enablement changes.
      */
     public flashEnabledChanged = new Signal<this, void>(this);
     private _flashEnabled: boolean = true;
     private _loggerRegistry: ILoggerRegistry;
-    private _activeSource: string = null;
+    private _source: string = null;
     private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
     // A map storing keys as source names of the loggers watched
     // and values as whether logs from the source are viewed
@@ -401,7 +401,7 @@ function activateLogConsole(
       command,
       args: obj => ({
         fromRestorer: true,
-        activeSource: obj.content.activeSource
+        source: obj.content.source
       }),
       name: () => 'logconsole'
     });
@@ -419,7 +419,9 @@ function activateLogConsole(
   });
 
   const createLogConsoleWidget = () => {
-    let activeSource: string = nbtracker.currentWidget
+    // TODO: have an open option for the split-bottom that we explicitly request
+    // The restorer probably doesn't need the split bottom?
+    let source: string = nbtracker.currentWidget
       ? nbtracker.currentWidget.context.path
       : null;
 
@@ -433,11 +435,11 @@ function activateLogConsole(
 
     const addTimestampButton = new ToolbarButton({
       onClick: (): void => {
-        if (!logConsolePanel.activeSource) {
+        if (!logConsolePanel.source) {
           return;
         }
 
-        const logger = loggerRegistry.getLogger(logConsolePanel.activeSource);
+        const logger = loggerRegistry.getLogger(logConsolePanel.source);
         logger.log({ type: 'html', data: '<hr>' });
       },
       iconClassName: 'jp-AddIcon',
@@ -447,7 +449,7 @@ function activateLogConsole(
 
     const clearButton = new ToolbarButton({
       onClick: (): void => {
-        const logger = loggerRegistry.getLogger(logConsolePanel.activeSource);
+        const logger = loggerRegistry.getLogger(logConsolePanel.source);
         logger.clear();
       },
       iconClassName: 'fa fa-ban clear-icon',
@@ -464,7 +466,7 @@ function activateLogConsole(
     void tracker.add(logConsoleWidget);
 
     logConsolePanel.attached.connect(() => {
-      status.model.markSourceLogsViewed(status.model.activeSource);
+      status.model.markSourceLogsViewed(status.model.source);
       status.model.flashEnabled = false;
     });
 
@@ -480,21 +482,19 @@ function activateLogConsole(
 
     logConsoleWidget.update();
 
-    app.shell.activateById(logConsoleWidget.id);
-
-    if (activeSource) {
-      logConsolePanel.activeSource = activeSource;
+    if (source) {
+      logConsolePanel.source = source;
     }
   };
 
   app.commands.addCommand(command, {
     label: 'Show Log Console',
-    execute: (args: any) => {
+    execute: (args: { source?: string; fromRestorer?: boolean }) => {
       if (!logConsoleWidget) {
         createLogConsoleWidget();
 
-        if (args && args.activeSource) {
-          logConsoleWidget.content.activeSource = args.activeSource;
+        if (args && args.source) {
+          logConsoleWidget.content.source = args.source;
         }
       } else if (!(args && args.fromRestorer)) {
         logConsoleWidget.dispose();
@@ -528,32 +528,32 @@ function activateLogConsole(
   nbtracker.widgetAdded.connect(
     (sender: INotebookTracker, nb: NotebookPanel) => {
       nb.activated.connect((nb: NotebookPanel, args: void) => {
-        // set activeSource only after app is restored
-        // in order to allow restorer to restore previous activeSource
+        // set source only after app is restored
+        // in order to allow restorer to restore previous Source
         if (!appRestored) {
           return;
         }
 
         const sourceName = nb.context.path;
         if (logConsoleWidget) {
-          logConsoleWidget.content.activeSource = sourceName;
+          logConsoleWidget.content.source = sourceName;
           status.model.markSourceLogsViewed(sourceName);
           void tracker.save(logConsoleWidget);
         }
-        status.model.activeSource = sourceName;
+        status.model.source = sourceName;
       });
 
       nb.disposed.connect((nb: NotebookPanel, args: void) => {
         const sourceName = nb.context.path;
         if (
           logConsoleWidget &&
-          logConsoleWidget.content.activeSource === sourceName
+          logConsoleWidget.content.source === sourceName
         ) {
-          logConsoleWidget.content.activeSource = null;
+          logConsoleWidget.content.source = null;
           void tracker.save(logConsoleWidget);
         }
-        if (status.model.activeSource === sourceName) {
-          status.model.activeSource = null;
+        if (status.model.source === sourceName) {
+          status.model.source = null;
         }
       });
     }
@@ -566,11 +566,11 @@ function activateLogConsole(
     // then reset log display and count
     if (newValue && newValue !== logConsoleWidget && !nbtracker.has(newValue)) {
       if (logConsoleWidget) {
-        logConsoleWidget.content.activeSource = null;
+        logConsoleWidget.content.source = null;
         void tracker.save(logConsoleWidget);
       }
 
-      status.model.activeSource = null;
+      status.model.source = null;
     }
   });
 
