@@ -7,9 +7,7 @@ import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { Body } from './body';
 import { Signal } from '@phosphor/signaling';
-import { LineInfo } from '../handlers/cell';
-
-// import { BreakpointsService } from '../breakpointsService';
+import { ILineInfo } from '../handlers/cell';
 
 export class Breakpoints extends Panel {
   constructor(options: Breakpoints.IOptions) {
@@ -107,7 +105,7 @@ export namespace Breakpoints {
       }
     }
 
-    addBreakpoint(session: string, type: string, lineInfo: LineInfo) {
+    addBreakpoint(session: string, type: string, lineInfo: ILineInfo) {
       const breakpoint: Breakpoints.IBreakpoint = {
         line: lineInfo.line + 1,
         active: true,
@@ -140,7 +138,7 @@ export namespace Breakpoints {
       this.clearedBreakpoints.emit(this.selectedType);
     }
 
-    changeLines(linesInfo: LineInfo[]) {
+    changeLines(linesInfo: ILineInfo[]) {
       if (!linesInfo && this.breakpoints.length === 0) {
         return;
       }

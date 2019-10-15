@@ -86,7 +86,6 @@ const useOutsideClick = (ref: any, callback: any) => {
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      //unbind
       document.removeEventListener('mousedown', handleClickOutside);
     };
   });
