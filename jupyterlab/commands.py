@@ -44,6 +44,11 @@ DEV_DIR = osp.abspath(os.path.join(HERE, '..', 'dev_mode'))
 # If we are pinning the package, rename it `pin@<alias>`
 PIN_PREFIX = 'pin@'
 
+
+# Default Yarn registry used in default yarn.lock
+YARN_DEFAULT_REGISTRY = 'https://registry.yarnpkg.com'
+
+
 class ProgressProcess(Process):
 
     def __init__(self, cmd, logger=None, cwd=None, kill_event=None,
@@ -317,6 +322,8 @@ class AppOptions(HasTraits):
 
     kill_event = Instance(Event, args=(), help='Event for aborting call')
 
+    registry = Unicode(help="NPM packages registry URL")
+
     @default('logger')
     def _default_logger(self):
         return logging.getLogger('jupyterlab')
@@ -330,6 +337,11 @@ class AppOptions(HasTraits):
     @default('core_config')
     def _default_core_config(self):
         return CoreConfig()
+
+    @default('registry')
+    def _default_registry(self):
+        config = _yarn_config(self.logger)["yarn config"]
+        return config.get("registry", YARN_DEFAULT_REGISTRY)
 
 
 def _ensure_options(options, **kwargs):
@@ -402,10 +414,8 @@ def uninstall_extension(name=None, app_dir=None, logger=None, all_=False, core_c
 
 def update_extension(name=None, all_=False, app_dir=None, logger=None, core_config=None, app_options=None):
     """Update an extension by name, or all extensions.
-
     Either `name` must be given as a string, or `all_` must be `True`.
     If `all_` is `True`, the value of `name` is ignored.
-
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     app_options = _ensure_options(
@@ -569,8 +579,7 @@ class _AppHandler(object):
         self.core_data = options.core_config._data
         self.info = self._get_app_info()
         self.kill_event = options.kill_event
-        # TODO: Make this configurable
-        self.registry = 'https://registry.npmjs.org'
+        self.registry = options.registry
 
     def install_extension(self, extension, existing=None, pin=None):
         """Install an extension package into JupyterLab.
@@ -1160,9 +1169,16 @@ class _AppHandler(object):
             json.dump(data, fid, indent=4)
 
         # copy known-good yarn.lock if missing
-        lock_path = pjoin(staging, 'yarn.lock')
-        if not osp.exists(lock_path):
-            shutil.copy(pjoin(HERE, 'staging', 'yarn.lock'), lock_path)
+        lock_path = pjoin(staging, 'yarn.lock')        
+        lock_template = pjoin(HERE, 'staging', 'yarn.lock')
+        if self.registry != YARN_DEFAULT_REGISTRY:  # Replace on the fly the yarn repository see #3658
+            with open(lock_template, encoding='utf-8') as f:
+                template = f.read()
+            template = template.replace(YARN_DEFAULT_REGISTRY, self.registry.strip("/"))
+            with open(lock_path, 'w', encoding='utf-8') as f:
+                f.write(template)
+        elif not osp.exists(lock_path):
+            shutil.copy(lock_template, lock_path)
 
     def _get_package_template(self, silent=False):
         """Get the template the for staging package.json file.
@@ -1738,6 +1754,37 @@ def _node_check(logger):
         ver = data['engines']['node']
         msg = 'Please install nodejs %s before continuing. nodejs may be installed using conda or directly from the nodejs website.' % ver
         raise ValueError(msg)
+
+def _yarn_config(logger):
+    """Get the yarn configuration.
+    
+    Returns
+    -------
+    {"yarn config": dict, "npm config": dict} if unsuccessfull the subdictionary are empty
+    """
+    node = which('node')
+    configuration = {"yarn config": {}, "npm config": {}}
+    try:
+        output_binary = subprocess.check_output([node, YARN_PATH, 'config', 'list', '--json'], stderr=subprocess.PIPE, cwd=HERE)
+        output = output_binary.decode('utf-8')
+        lines = iter(output.splitlines())
+        try:
+            for line in lines:
+                info = json.loads(line)
+                if info["type"] == "info":
+                    key = info["data"]
+                    inspect = json.loads(next(lines))
+                    if inspect["type"] == "inspect":
+                        configuration[key] = inspect["data"]
+        except StopIteration:
+            pass
+        logger.debug("Yarn configuration loaded.")
+    except subprocess.CalledProcessError as e:
+        logger.error("Fail to get yarn configuration. {!s}{!s}".format(e.stderr.decode('utf-8'), e.output.decode('utf-8')))
+    except Exception as e:
+        logger.error("Fail to get yarn configuration. {!s}".format(e))
+    finally:
+        return configuration
 
 
 def _ensure_logger(logger=None):
