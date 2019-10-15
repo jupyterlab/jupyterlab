@@ -15,8 +15,6 @@ import { BoxPanel } from '@phosphor/widgets';
 
 import { IDebugger } from './tokens';
 
-import { DebugSession } from './session';
-
 import { DebuggerSidebar } from './sidebar';
 
 export class Debugger extends BoxPanel {
@@ -57,7 +55,12 @@ export namespace Debugger {
   export class Model implements IDisposable {
     constructor(options: Debugger.Model.IOptions) {
       this.connector = options.connector || null;
-      this.session = new DebugSession({ client: options.session });
+      // Avoids setting session with invalid client
+      // session should be set only when a notebook or
+      // a console get the focus.
+      // TODO: also checks that the notebook or console
+      // runs a kernel with debugging ability
+      this.session = null;
       this.id = options.id;
       void this._populate();
     }
