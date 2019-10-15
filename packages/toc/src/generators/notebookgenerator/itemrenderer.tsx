@@ -79,62 +79,26 @@ function headerLevel(cell: Cell): number {
 }
 
 /**
- * Collapses a notebook cell by hiding its section-defined sub-cells (i.e., cells which have lower precedence).
+ * Collapses or expands ("un-collapses") a notebook cell by either hiding or displaying its section-defined sub-cells (i.e., cells which have lower precedence).
  *
  * @private
  * @param tracker - notebook tracker
  * @param cell - notebook cell
+ * @param state - collapsed state (`true` if collapse; `false` if expand)
  */
-function collapseCell(tracker: INotebookTracker, cell: Cell): void {
+function setCollapsedState(
+  tracker: INotebookTracker,
+  cell: Cell,
+  state: boolean
+): void {
   // Guard against attempting to collapse already hidden cells...
-  if (cell.isHidden) {
-    return;
-  }
-  const level: number = headerLevel(cell);
-
-  // Guard against attempting to collapse cells which are not "collapsible" (i.e., do not define sections)...
-  if (level === -1) {
-    return;
-  }
-  // Ensure a widget is currently focused...
-  if (tracker.currentWidget === null) {
-    return;
-  }
-  const widgets = tracker.currentWidget.content.widgets;
-  const len = widgets.length;
-  const idx = widgets.indexOf(cell);
-
-  // Guard against an unrecognized "cell" argument...
-  if (idx === -1) {
-    return;
-  }
-  // Search for notebook cells which are semantically defined as sub-cells...
-  for (let i = idx + 1; i < len; i++) {
-    let w = widgets[i];
-    let l: number = headerLevel(w);
-
-    // Check if a widget is at the same or higher level...
-    if (l >= 0 && l <= level) {
-      // We've reached the end of the section...
-      break;
+  if (state) {
+    if (cell.isHidden) {
+      return;
     }
-    // Collapse a sub-cell by setting its `hidden` state:
-    w.setHidden(true);
   }
-  // Set a meta-data flag to indicate that we've collapsed notebook sections:
-  cell.model.metadata.set('toc-nb-collapsed', true);
-}
-
-/**
- * Expands a notebook cell by displaying its section-defined sub-cells (i.e., cells which have lower precedence).
- *
- * @private
- * @param tracker - notebook tracker
- * @param cell - notebook cell
- */
-function uncollapseCell(tracker: INotebookTracker, cell: Cell): void {
   // Guard against attempting to un-collapse cells which we did not collapse or are already un-collapsed...
-  if (
+  else if (
     cell.model.metadata.has('toc-nb-collapsed') === false ||
     cell.model.metadata.get('toc-nb-collapsed') === false
   ) {
@@ -142,7 +106,7 @@ function uncollapseCell(tracker: INotebookTracker, cell: Cell): void {
   }
   const level: number = headerLevel(cell);
 
-  // Guard against attempting to un-collapse cells which are not "collapsible" (i.e., do not define sections)...
+  // Guard against attempting to (un-)collapse cells which are not "collapsible" (i.e., do not define sections)...
   if (level === -1) {
     return;
   }
@@ -168,11 +132,16 @@ function uncollapseCell(tracker: INotebookTracker, cell: Cell): void {
       // We've reached the end of the section...
       break;
     }
-    // Un-collapse a sub-cell by setting its `hidden` state:
-    w.setHidden(false);
+    // Collapse/expand a sub-cell by setting its `hidden` state:
+    w.setHidden(state);
   }
-  // Remove the meta-data flag indicating that we'd collapsed notebook sections:
-  cell.model.metadata.delete('toc-nb-collapsed');
+  if (state) {
+    // Set a meta-data flag to indicate that we've collapsed notebook sections:
+    cell.model.metadata.set('toc-nb-collapsed', true);
+  } else {
+    // Remove the meta-data flag indicating that we'd collapsed notebook sections:
+    cell.model.metadata.delete('toc-nb-collapsed');
+  }
 }
 
 export function notebookItemRenderer(
@@ -190,11 +159,7 @@ export function notebookItemRenderer(
       cellRef!.model.metadata.set('toc-hr-collapsed', !collapsed);
       if (cellRef) {
         // NOTE: we can imagine a future in which this extension combines with a collapsible-header/ings extension such that we can programmatically close notebook "sections". In the meantime, we need to resort to manually "collapsing" sections...
-        if (collapsed) {
-          uncollapseCell(tracker, cellRef);
-        } else {
-          collapseCell(tracker, cellRef);
-        }
+        setCollapsedState(tracker, cellRef, !collapsed);
       }
       options.updateWidget();
     };
