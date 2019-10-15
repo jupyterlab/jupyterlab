@@ -85,7 +85,7 @@ function headerLevel(cell: Cell): number {
  * @param tracker - notebook tracker
  * @param cell - notebook cell
  */
-function collapseCell(tracker: any, cell: Cell): void {
+function collapseCell(tracker: INotebookTracker, cell: Cell): void {
   // Guard against attempting to collapse already hidden cells...
   if (cell.isHidden) {
     return;
@@ -94,6 +94,10 @@ function collapseCell(tracker: any, cell: Cell): void {
 
   // Guard against attempting to collapse cells which are not "collapsible" (i.e., do not define sections)...
   if (level === -1) {
+    return;
+  }
+  // Ensure a widget is currently focused...
+  if (tracker.currentWidget === null) {
     return;
   }
   const widgets = tracker.currentWidget.content.widgets;
@@ -128,7 +132,7 @@ function collapseCell(tracker: any, cell: Cell): void {
  * @param tracker - notebook tracker
  * @param cell - notebook cell
  */
-function uncollapseCell(tracker: any, cell: Cell): void {
+function uncollapseCell(tracker: INotebookTracker, cell: Cell): void {
   // Guard against attempting to un-collapse cells which we did not collapse or are already un-collapsed...
   if (
     cell.model.metadata.has('toc-nb-collapsed') === false ||
@@ -140,6 +144,10 @@ function uncollapseCell(tracker: any, cell: Cell): void {
 
   // Guard against attempting to un-collapse cells which are not "collapsible" (i.e., do not define sections)...
   if (level === -1) {
+    return;
+  }
+  // Ensure a widget is currently focused...
+  if (tracker.currentWidget === null) {
     return;
   }
   const widgets = tracker.currentWidget.content.widgets;
@@ -180,12 +188,12 @@ export function notebookItemRenderer(
       ) as boolean;
       collapsed = collapsed !== undefined ? collapsed : false;
       cellRef!.model.metadata.set('toc-hr-collapsed', !collapsed);
-      if (cellRef && tracker) {
+      if (cellRef) {
         // NOTE: we can imagine a future in which this extension combines with a collapsible-header/ings extension such that we can programmatically close notebook "sections". In the meantime, we need to resort to manually "collapsing" sections...
         if (collapsed) {
-          uncollapseCell(tracker as any, cellRef);
+          uncollapseCell(tracker, cellRef);
         } else {
-          collapseCell(tracker as any, cellRef);
+          collapseCell(tracker, cellRef);
         }
       }
       options.updateWidget();
