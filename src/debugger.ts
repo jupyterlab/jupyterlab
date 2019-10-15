@@ -53,6 +53,7 @@ export namespace Debugger {
   export interface IOptions {
     connector?: IDataConnector<ReadonlyJSONValue>;
     id?: string;
+    mode?: IDebugger.Mode;
     session?: IClientSession;
   }
 
@@ -65,7 +66,6 @@ export namespace Debugger {
     }
 
     readonly connector: IDataConnector<ReadonlyJSONValue> | null;
-
     readonly id: string;
 
     get mode(): IDebugger.Mode {

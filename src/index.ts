@@ -236,6 +236,8 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
           return;
         }
         const mode = (args.mode as IDebugger.Mode) || 'expanded';
+
+        console.log(mode);
         const { sidebar } = widget.content;
         if (!mode) {
           throw new Error(`Could not mount debugger in mode: "${mode}"`);
@@ -323,7 +325,9 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       label: 'Debugger',
       execute: async args => {
         const id = (args.id as string) || UUID.uuid4();
-        const mode = (args.mode as IDebugger.Mode) || 'expanded';
+        console.log({ tracker });
+
+        const mode = tracker.currentWidget.content.model.mode || 'expanded';
 
         if (id) {
           console.log('Debugger ID: ', id);
@@ -335,13 +339,18 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
           widget = new MainAreaWidget({
             content: new Debugger({
               connector: state,
-              id: id
+              id: id,
+              mode: mode
             })
           });
 
           void tracker.add(widget);
 
           widget.content.model.mode = mode;
+
+          widget.content.model.modeChanged.connect(mode => {
+            console.log({ restorer });
+          });
         }
 
         await commands.execute(CommandIDs.mount, { mode });
@@ -360,8 +369,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       void restorer.restore(tracker, {
         command: CommandIDs.create,
         args: widget => ({
-          id: widget.content.model.id,
-          mode: widget.content.model.mode
+          id: widget.content.model.id
         }),
         name: widget => widget.content.model.id
       });
