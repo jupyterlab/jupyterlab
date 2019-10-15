@@ -14,12 +14,12 @@ import { Styling } from '@jupyterlab/apputils';
 /**
  * The supported parsing delimiters.
  */
-const DELIMITERS = [',', ';', '\t', '|'];
+const DELIMITERS = [',', ';', '\t', '|', '#'];
 
 /**
  * The labels for each delimiter as they appear in the dropdown menu.
  */
-const LABELS = [',', ';', 'tab', 'pipe'];
+const LABELS = [',', ';', 'tab', 'pipe', 'hash'];
 
 /**
  * The class name added to a csv toolbar widget.
