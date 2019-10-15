@@ -1,5 +1,6 @@
 # Test a release wheel in a fresh conda environment with and without installed
 # extensions
+. $HOME/miniconda3/etc/profile.d/conda.sh
 set -x
 set -e
 old="${CONDA_DEFAULT_ENV}"
