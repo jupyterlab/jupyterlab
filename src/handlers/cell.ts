@@ -53,7 +53,7 @@ export class CellManager {
   protected clearGutter(cell: CodeCell) {
     const editor = cell.editor as CodeMirrorEditor;
     editor.doc.eachLine(line => {
-      if ((line as LineInfo).gutterMarkers) {
+      if ((line as ILineInfo).gutterMarkers) {
         editor.editor.setGutterMarker(line, 'breakpoints', null);
       }
     });
@@ -115,12 +115,12 @@ export class CellManager {
 
     const isRemoveGutter = !!info.gutterMarkers;
     if (isRemoveGutter) {
-      this.breakpointsModel.removeBreakpoint(info as LineInfo);
+      this.breakpointsModel.removeBreakpoint(info as ILineInfo);
     } else {
       this.breakpointsModel.addBreakpoint(
         this._debuggerModel.session.id,
         this.getEditorId(),
-        info as LineInfo
+        info as ILineInfo
       );
     }
 
@@ -139,9 +139,9 @@ export class CellManager {
     const doc: Doc = editor.getDoc();
     const linesNumber = doc.lineCount();
     if (this.previousLineCount !== linesNumber) {
-      var lines: LineInfo[] = [];
+      let lines: ILineInfo[] = [];
       doc.eachLine(line => {
-        if ((line as LineInfo).gutterMarkers) {
+        if ((line as ILineInfo).gutterMarkers) {
           lines.push(editor.lineInfo(line));
         }
       });
@@ -151,7 +151,7 @@ export class CellManager {
   };
 
   private createMarkerNode() {
-    var marker = document.createElement('div');
+    let marker = document.createElement('div');
     marker.className = 'jp-breakpoint-marker';
     marker.innerHTML = '●';
     return marker;
@@ -167,7 +167,7 @@ export namespace CellManager {
   }
 }
 
-export interface LineInfo {
+export interface ILineInfo {
   line: any;
   handle: any;
   text: string;
