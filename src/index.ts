@@ -325,12 +325,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       label: 'Debugger',
       execute: async args => {
         const id = (args.id as string) || UUID.uuid4();
-        let savedMode: IDebugger.Mode;
-
-        await state.fetch('mode').then(mode => {
-          savedMode = mode as IDebugger.Mode;
-        });
-
+        const savedMode = (await state.fetch('mode')) as IDebugger.Mode;
         const mode = savedMode ? savedMode : 'expanded';
 
         if (id) {
