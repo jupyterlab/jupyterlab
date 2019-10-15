@@ -166,8 +166,6 @@ function activate(
     tracker.currentWidget !== null &&
     tracker.currentWidget === shell.currentWidget;
 
-  let config: CodeEditor.IConfig = { ...CodeEditor.defaultConfig };
-
   // Handle state restoration.
   if (restorer) {
     void restorer.restore(tracker, {
@@ -177,52 +175,20 @@ function activate(
     });
   }
 
-  /**
-   * Update the setting values.
-   */
-  function updateSettings(settings: ISettingRegistry.ISettings): void {
-    config = {
-      ...CodeEditor.defaultConfig,
-      ...(settings.get('editorConfig').composite as JSONObject)
-    };
-
-    // Trigger a refresh of the rendered commands
-    app.commands.notifyCommandChanged();
-  }
-
-  /**
-   * Update the settings of the current tracker instances.
-   */
-  function updateTracker(): void {
-    tracker.forEach(widget => {
-      updateWidget(widget.content);
-    });
-  }
-
-  /**
-   * Update the settings of a widget.
-   */
-  function updateWidget(widget: FileEditor): void {
-    const editor = widget.editor;
-    Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-      editor.setOption(key, config[key]);
-    });
-  }
-
   // Add a console creator to the File menu
   // Fetch the initial state of the settings.
   Promise.all([settingRegistry.load(id), restored])
     .then(([settings]) => {
-      updateSettings(settings);
-      updateTracker();
+      Commands.updateSettings(settings, commands);
+      Commands.updateTracker(tracker);
       settings.changed.connect(() => {
-        updateSettings(settings);
-        updateTracker();
+        Commands.updateSettings(settings, commands);
+        Commands.updateTracker(tracker);
       });
     })
     .catch((reason: Error) => {
       console.error(reason.message);
-      updateTracker();
+      Commands.updateTracker(tracker);
     });
 
   factory.widgetCreated.connect((sender, widget) => {
@@ -233,18 +199,17 @@ function activate(
       void tracker.save(widget);
     });
     void tracker.add(widget);
-    updateWidget(widget.content);
+    Commands.updateWidget(widget.content);
   });
   app.docRegistry.addWidgetFactory(factory);
 
   // Handle the settings of new widgets.
   tracker.widgetAdded.connect((sender, widget) => {
-    updateWidget(widget.content);
+    Commands.updateWidget(widget.content);
   });
 
   Commands.addCommands(
     commands,
-    config,
     settingRegistry,
     id,
     isEnabled,
