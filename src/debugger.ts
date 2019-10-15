@@ -5,8 +5,6 @@ import { IDataConnector } from '@jupyterlab/coreutils';
 
 import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
-import { INotebookTracker } from '@jupyterlab/notebook';
-
 import { IClientSession } from '@jupyterlab/apputils';
 
 import { IDisposable } from '@phosphor/disposable';
@@ -15,22 +13,25 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { BoxPanel } from '@phosphor/widgets';
 
-import { DebugSession } from './session';
+import { IDebugger } from './tokens';
 
-import { IDebuggerSidebar } from './tokens';
+import { DebuggerSidebar } from './sidebar';
 
 export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
     super({ direction: 'left-to-right' });
     this.model = new Debugger.Model(options);
-    // this.sidebar = new DebuggerSidebar(this.model);
-    this.title.label = 'Debugger-' + options.id;
+
+    this.sidebar = new DebuggerSidebar(this.model);
+
+    this.title.label = 'Debugger';
+    this.model.sidebar = this.sidebar;
 
     this.addClass('jp-Debugger');
-    // this.addWidget(this.sidebar);
   }
 
   readonly model: Debugger.Model;
+  readonly sidebar: DebuggerSidebar;
 
   dispose(): void {
     if (this.isDisposed) {
@@ -49,34 +50,53 @@ export namespace Debugger {
     connector?: IDataConnector<ReadonlyJSONValue>;
     id?: string;
     session?: IClientSession;
-    sidebar?: IDebuggerSidebar;
   }
 
   export class Model implements IDisposable {
     constructor(options: Debugger.Model.IOptions) {
       this.connector = options.connector || null;
-      this.session = new DebugSession({ client: options.session });
+      // Avoids setting session with invalid client
+      // session should be set only when a notebook or
+      // a console get the focus.
+      // TODO: also checks that the notebook or console
+      // runs a kernel with debugging ability
+      this.session = null;
       this.id = options.id;
       void this._populate();
     }
 
     readonly connector: IDataConnector<ReadonlyJSONValue> | null;
-
     readonly id: string;
+
+    get mode(): IDebugger.Mode {
+      return this._mode;
+    }
+
+    set mode(mode: IDebugger.Mode) {
+      if (this._mode === mode) {
+        return;
+      }
+      this._mode = mode;
+      this._modeChanged.emit(mode);
+    }
 
     get sidebar() {
       return this._sidebar;
     }
 
-    set sidebar(newSidebar: IDebuggerSidebar) {
-      this._sidebar = newSidebar;
+    set sidebar(sidebar: DebuggerSidebar) {
+      this._sidebar = sidebar;
     }
 
-    get session() {
+    get modeChanged(): ISignal<this, IDebugger.Mode> {
+      return this._modeChanged;
+    }
+
+    get session(): IDebugger.ISession {
       return this._session;
     }
 
-    set session(session: DebugSession | null) {
+    set session(session: IDebugger.ISession | null) {
       if (this._session === session) {
         return;
       }
@@ -95,10 +115,6 @@ export namespace Debugger {
       return this._isDisposed;
     }
 
-    get notebookTracker() {
-      return this._notebook;
-    }
-
     dispose(): void {
       this._isDisposed = true;
     }
@@ -111,11 +127,12 @@ export namespace Debugger {
       }
     }
 
+    private _sidebar: DebuggerSidebar;
     private _isDisposed = false;
-    private _notebook: INotebookTracker;
-    private _session: DebugSession | null;
+    private _mode: IDebugger.Mode;
+    private _modeChanged = new Signal<this, IDebugger.Mode>(this);
+    private _session: IDebugger.ISession | null;
     private _sessionChanged = new Signal<this, void>(this);
-    private _sidebar: IDebuggerSidebar;
   }
 
   export namespace Model {

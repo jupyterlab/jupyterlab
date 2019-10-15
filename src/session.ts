@@ -88,9 +88,17 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   /**
+   * Whether the debug session is started
+   */
+  get isStarted(): boolean {
+    return this._isStarted;
+  }
+
+  /**
    * Start a new debug session
    */
   async start(): Promise<void> {
+    this._isStarted = true;
     await this.sendRequest('initialize', {
       clientID: 'jupyterlab',
       clientName: 'JupyterLab',
@@ -111,6 +119,7 @@ export class DebugSession implements IDebugger.ISession {
    * Stop the running debug session.
    */
   async stop(): Promise<void> {
+    this._isStarted = false;
     await this.sendRequest('disconnect', {
       restart: false,
       terminateDebuggee: true
@@ -176,6 +185,7 @@ export class DebugSession implements IDebugger.ISession {
 
   private _disposed = new Signal<this, void>(this);
   private _isDisposed: boolean = false;
+  private _isStarted: boolean = false;
   private _eventMessage = new Signal<DebugSession, IDebugger.ISession.Event>(
     this
   );

@@ -33,9 +33,13 @@
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo && rimraf tests/build",
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
+    "lint": "jlpm && jlpm run prettier && jlpm run tslint",
     "prepublishOnly": "npm run build",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
+    "prettier:check": "prettier --list-different '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "test": "python tests/run-test.py",
+    "tslint": "tslint --fix -c tslint.json --project tsconfig.json '**/*{.ts,.tsx}'",
+    "tslint:check": "tslint -c tslint.json --project tsconfig.json '**/*{.ts,.tsx}'",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -70,6 +74,7 @@
     "rimraf": "~2.6.2",
     "ts-jest": "^24",
     "tslint": "^5.18.0",
+    "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
     "typedoc": "^0.15.0",
     "typescript": "~3.5.1"
@@ -81,7 +86,11 @@
   },
   "lint-staged": {
     "**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}": [
-      "prettier --write",
+      "jlpm run prettier",
+      "git add"
+    ],
+    "**/*{.ts,.tsx}": [
+      "jlpm run tslint",
       "git add"
     ]
   },
