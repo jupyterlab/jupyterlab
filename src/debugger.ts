@@ -5,8 +5,6 @@ import { IDataConnector } from '@jupyterlab/coreutils';
 
 import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
-import { INotebookTracker } from '@jupyterlab/notebook';
-
 import { IClientSession } from '@jupyterlab/apputils';
 
 import { IDisposable } from '@phosphor/disposable';
@@ -53,7 +51,6 @@ export namespace Debugger {
   export interface IOptions {
     connector?: IDataConnector<ReadonlyJSONValue>;
     id?: string;
-    mode?: IDebugger.Mode;
     session?: IClientSession;
   }
 
@@ -115,10 +112,6 @@ export namespace Debugger {
       return this._isDisposed;
     }
 
-    get notebookTracker() {
-      return this._notebook;
-    }
-
     dispose(): void {
       this._isDisposed = true;
     }
@@ -135,7 +128,6 @@ export namespace Debugger {
     private _isDisposed = false;
     private _mode: IDebugger.Mode;
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
-    private _notebook: INotebookTracker;
     private _session: IDebugger.ISession | null;
     private _sessionChanged = new Signal<this, void>(this);
   }
