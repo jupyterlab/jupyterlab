@@ -9,8 +9,10 @@ import { Editor, Doc } from 'codemirror';
 
 import { Breakpoints, SessionTypes } from '../breakpoints';
 import { Debugger } from '../debugger';
+import { IDisposable } from '@phosphor/disposable';
+import { Signal } from '@phosphor/signaling';
 
-export class CellManager {
+export class CellManager implements IDisposable {
   constructor(options: CellManager.IOptions) {
     this._debuggerModel = options.debuggerModel;
     this.breakpointsModel = options.breakpointsModel;
@@ -32,6 +34,18 @@ export class CellManager {
   private _type: SessionTypes;
   private breakpointsModel: Breakpoints.Model;
   private _activeCell: CodeCell;
+  isDisposed: boolean;
+
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    if (this.previousCell) {
+      this.removeListener(this.previousCell);
+    }
+    this.removeListener(this.activeCell);
+    Signal.clearData(this);
+  }
 
   set previousCell(cell: CodeCell) {
     this._previousCell = cell;
@@ -68,7 +82,7 @@ export class CellManager {
       this._debuggerModel.session
     ) {
       if (this.previousCell && !this.previousCell.isDisposed) {
-        this.removeListner(this.previousCell);
+        this.removeListener(this.previousCell);
         this.clearGutter(this.previousCell);
         this.breakpointsModel.breakpoints = [];
       }
@@ -96,7 +110,7 @@ export class CellManager {
     editor.editor.on('renderLine', this.onNewRenderLine);
   }
 
-  protected removeListner(cell: CodeCell) {
+  protected removeListener(cell: CodeCell) {
     const editor = cell.editor as CodeMirrorEditor;
     editor.setOption('lineNumbers', false);
     editor.editor.off('gutterClick', this.onGutterClick);
@@ -118,7 +132,7 @@ export class CellManager {
       this.breakpointsModel.removeBreakpoint(info as ILineInfo);
     } else {
       this.breakpointsModel.addBreakpoint(
-        this._debuggerModel.session.id,
+        this._debuggerModel.session.client.name,
         this.getEditorId(),
         info as ILineInfo
       );
