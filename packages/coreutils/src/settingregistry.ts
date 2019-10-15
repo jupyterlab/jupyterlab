@@ -956,7 +956,7 @@ export namespace Settings {
 /**
  * A namespace for private module data.
  */
-export namespace Private {
+namespace Private {
   /**
    * The default indentation level, uses spaces instead of tabs.
    */
