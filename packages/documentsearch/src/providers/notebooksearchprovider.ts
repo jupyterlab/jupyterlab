@@ -121,9 +121,6 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     // and so that the next step will scroll correctly to the first match
     this._searchTarget.show();
 
-    this._currentMatch = await this._stepNext(
-      this._searchTarget.content.activeCell
-    );
     this._refreshCurrentCellEditor();
 
     this._refreshCellsEditorsInBackground(this._cellsWithMatches);
