@@ -68,12 +68,12 @@ export namespace IDebugger {
     /**
      * Start a new debug session.
      */
-    start(): void;
+    start(): Promise<void>;
 
     /**
      * Stop a running debug session.
      */
-    stop(): void;
+    stop(): Promise<void>;
   }
 
   export namespace ISession {

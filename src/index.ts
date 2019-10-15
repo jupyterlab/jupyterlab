@@ -251,7 +251,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
             sidebar.parent = null;
           }
 
-          //edge case when realod page after set condensed mode
+          // edge case when realod page after set condensed mode
           widget.title.label = 'Debugger';
           shell.add(widget, 'main');
           return;
