@@ -131,7 +131,7 @@ const files: JupyterFrontEndPlugin<void> = {
 
       const sessions = app.serviceManager.sessions;
 
-      sessions.findByPath(widget.context.path).then(model => {
+      void sessions.findByPath(widget.context.path).then(model => {
         _model = model;
         const session = sessions.connectTo(model);
         debug.session.client = session;
@@ -145,7 +145,7 @@ const files: JupyterFrontEndPlugin<void> = {
         }
         if (tracker.currentWidget) {
           const idKernel = debug.session.client.kernel.id;
-          Kernel.findById(idKernel).catch(() => {
+          void Kernel.findById(idKernel).catch(() => {
             if (_model) {
               Kernel.connectTo(_model);
             }
