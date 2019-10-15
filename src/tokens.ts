@@ -66,6 +66,11 @@ export namespace IDebugger {
     editors: CodeEditor.IEditor[];
 
     /**
+     * Whether the debug session is started
+     */
+    isStarted: boolean;
+
+    /**
      * Start a new debug session.
      */
     start(): Promise<void>;
