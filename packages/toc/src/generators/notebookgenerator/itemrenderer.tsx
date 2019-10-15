@@ -124,8 +124,8 @@ function setCollapsedState(
   }
   // Search for notebook cells which are semantically defined as sub-cells...
   for (let i = idx + 1; i < len; i++) {
-    let w = widgets[i];
-    let l: number = headerLevel(w);
+    const w = widgets[i];
+    const l: number = headerLevel(w);
 
     // Check if a widget is at the same or higher level...
     if (l >= 0 && l <= level) {
