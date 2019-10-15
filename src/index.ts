@@ -330,6 +330,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         }
 
         if (tracker.currentWidget) {
+          console.log({ mode });
           widget = tracker.currentWidget;
         } else {
           widget = new MainAreaWidget({
@@ -345,6 +346,11 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         }
 
         await commands.execute(CommandIDs.mount, { mode });
+
+        console.log({ widget });
+        if (!widget.isAttached) {
+          console.error('?????');
+        }
 
         return widget;
       }
