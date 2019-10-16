@@ -1,5 +1,14 @@
+Contributing to JupyterLab
+--------------------------
+
+This page provides general information about contributing to the project.
+
+.. contents:: Table of contents
+    :local:
+    :depth: 1
+
 Writing Documentation
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 This section provides information about writing documentation for JupyterLab.
 See  our  `Contributor
@@ -7,7 +16,7 @@ Guide <https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md>`_ f
 details on installation and testing.
 
 Writing Style
-~~~~~~~~~~~~~
+'''''''''''''
 
 -  The documentation should be written in the second person, referring
    to the reader as "you" and not using the first person plural "we."
