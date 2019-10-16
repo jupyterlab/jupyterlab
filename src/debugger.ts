@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { CodeEditor } from '@jupyterlab/codeeditor';
+
 import { IDataConnector } from '@jupyterlab/coreutils';
 
 import { ReadonlyJSONValue } from '@phosphor/coreutils';
@@ -11,11 +13,13 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { BoxPanel, TabPanel } from '@phosphor/widgets';
+import { BoxPanel } from '@phosphor/widgets';
 
-import { IDebugger } from './tokens';
+import { CodeEditors } from './editors';
 
 import { DebuggerSidebar } from './sidebar';
+
+import { IDebugger } from './tokens';
 
 export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
@@ -27,12 +31,14 @@ export class Debugger extends BoxPanel {
     this.sidebar = new DebuggerSidebar(this.model);
     this.model.sidebar = this.sidebar;
 
-    this.editors = new TabPanel();
+    const { editorFactory } = options;
+    this.editors = new CodeEditors({ editorFactory });
+    this.addWidget(this.editors);
 
     this.addClass('jp-Debugger');
   }
 
-  readonly editors: TabPanel;
+  readonly editors: CodeEditors;
   readonly model: Debugger.Model;
   readonly sidebar: DebuggerSidebar;
 
@@ -50,6 +56,7 @@ export class Debugger extends BoxPanel {
  */
 export namespace Debugger {
   export interface IOptions {
+    editorFactory: CodeEditor.Factory;
     connector?: IDataConnector<ReadonlyJSONValue>;
     id?: string;
     session?: IClientSession;
