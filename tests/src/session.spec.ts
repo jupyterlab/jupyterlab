@@ -77,7 +77,7 @@ describe('DebugSession', () => {
       expect(reply.body.sourcePath).to.contain('.py');
     });
 
-    it.skip('should handle replies with success false', async () => {
+    it('should handle replies with success false', async () => {
       const reply = await debugSession.sendRequest('evaluate', {
         expression: 'a'
       });
@@ -216,7 +216,7 @@ describe('protocol', () => {
   });
 
   describe('#continue', () => {
-    it.skip('should proceed to the next breakpoint', async () => {
+    it('should proceed to the next breakpoint', async () => {
       let events: string[] = [];
       const eventsFuture = new PromiseDelegate<string[]>();
       debugSession.eventMessage.connect((sender, event) => {
