@@ -222,7 +222,7 @@ export function notebookItemRenderer(
     const collapseOnClick = (cellRef?: Cell) => {
       let collapsed;
       if (cellRef!.model.metadata.has('toc-hr-collapsed')) {
-        collapsed = true;
+        collapsed = cellRef!.model.metadata.get('toc-hr-collapsed') as boolean;
         cellRef!.model.metadata.delete('toc-hr-collapsed');
       } else {
         collapsed = false;
