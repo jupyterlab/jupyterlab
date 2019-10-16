@@ -88,6 +88,10 @@ function setCollapsedState(
   cell: Cell,
   state: boolean
 ): void {
+  // Ensure a widget is currently focused...
+  if (tracker.currentWidget === null) {
+    return;
+  }
   // Guard against attempting to collapse already hidden cells...
   if (state) {
     if (cell.isHidden) {
@@ -109,10 +113,6 @@ function setCollapsedState(
 
   // Guard against attempting to (un-)collapse cells which are not "collapsible" (i.e., do not define sections)...
   if (level === -1) {
-    return;
-  }
-  // Ensure a widget is currently focused...
-  if (tracker.currentWidget === null) {
     return;
   }
   const widgets = tracker.currentWidget.content.widgets;
