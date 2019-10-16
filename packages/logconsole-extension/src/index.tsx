@@ -46,6 +46,8 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { Signal } from '@phosphor/signaling';
 
+import { DockLayout } from '@phosphor/widgets';
+
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
 
 /**
@@ -400,7 +402,6 @@ function activateLogConsole(
     void restorer.restore(tracker, {
       command,
       args: obj => ({
-        fromRestorer: true,
         source: obj.content.source
       }),
       name: () => 'logconsole'
@@ -411,21 +412,32 @@ function activateLogConsole(
     loggerRegistry: loggerRegistry,
     handleClick: () => {
       if (!logConsoleWidget) {
-        createLogConsoleWidget();
+        createLogConsoleWidget({
+          insertMode: 'split-bottom',
+          ref: app.shell.currentWidget.id
+        });
       } else {
         logConsoleWidget.activate();
       }
     }
   });
 
-  const createLogConsoleWidget = () => {
-    // TODO: have an open option for the split-bottom that we explicitly request
-    // The restorer probably doesn't need the split bottom?
-    let source: string = nbtracker.currentWidget
-      ? nbtracker.currentWidget.context.path
-      : null;
+  interface ILogConsoleOptions {
+    source?: string;
+    insertMode?: DockLayout.InsertMode;
+    ref?: string;
+  }
 
+  const createLogConsoleWidget = (options: ILogConsoleOptions = {}) => {
     const logConsolePanel = new LogConsolePanel(loggerRegistry);
+
+    logConsolePanel.source =
+      options.source !== undefined
+        ? options.source
+        : nbtracker.currentWidget
+        ? nbtracker.currentWidget.context.path
+        : null;
+
     logConsoleWidget = new MainAreaWidget({ content: logConsolePanel });
     logConsoleWidget.addClass('jp-LogConsole');
     logConsoleWidget.title.closable = true;
@@ -476,28 +488,21 @@ function activateLogConsole(
     });
 
     app.shell.add(logConsoleWidget, 'main', {
-      ref: '',
-      mode: 'split-bottom'
+      ref: options.ref,
+      mode: options.insertMode
     });
 
     logConsoleWidget.update();
-
-    if (source) {
-      logConsolePanel.source = source;
-    }
   };
 
   app.commands.addCommand(command, {
     label: 'Show Log Console',
-    execute: (args: { source?: string; fromRestorer?: boolean }) => {
-      if (!logConsoleWidget) {
-        createLogConsoleWidget();
-
-        if (args && args.source) {
-          logConsoleWidget.content.source = args.source;
-        }
-      } else if (!(args && args.fromRestorer)) {
+    execute: (options: ILogConsoleOptions = {}) => {
+      // Toggle the display
+      if (logConsoleWidget) {
         logConsoleWidget.dispose();
+      } else {
+        createLogConsoleWidget(options);
       }
     },
     isToggled: () => {
