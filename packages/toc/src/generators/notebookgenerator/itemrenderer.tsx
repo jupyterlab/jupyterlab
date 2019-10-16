@@ -203,7 +203,7 @@ function setCollapsedState(
       const ow = c.outputArea.widgets[j] as Panel;
       ow.setHidden(state);
     }
-    // Collapse/expand a sub-cell's input area by setting the its `hidden` state:
+    // Collapse/expand a sub-cell's input area by setting the its `hidden` state (NOTE: a collapsed input area will still appear collapsed!!! Once a user clicks on the collapsed cell ellipses will the input area display as being fully hidden. If we want an input area to always be present, whether collapsed or expanded, we could remove the following line.):
     w.inputArea.setHidden(state);
   }
   if (state) {
