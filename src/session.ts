@@ -98,32 +98,41 @@ export class DebugSession implements IDebugger.ISession {
    * Start a new debug session
    */
   async start(): Promise<void> {
-    this._isStarted = true;
-    await this.sendRequest('initialize', {
-      clientID: 'jupyterlab',
-      clientName: 'JupyterLab',
-      adapterID: 'python',
-      pathFormat: 'path',
-      linesStartAt1: true,
-      columnsStartAt1: true,
-      supportsVariableType: true,
-      supportsVariablePaging: true,
-      supportsRunInTerminalRequest: true,
-      locale: 'en-us'
-    });
+    try {
+      await this.sendRequest('initialize', {
+        clientID: 'jupyterlab',
+        clientName: 'JupyterLab',
+        adapterID: 'python',
+        pathFormat: 'path',
+        linesStartAt1: true,
+        columnsStartAt1: true,
+        supportsVariableType: true,
+        supportsVariablePaging: true,
+        supportsRunInTerminalRequest: true,
+        locale: 'en-us'
+      });
 
-    await this.sendRequest('attach', {});
+      this._isStarted = true;
+
+      await this.sendRequest('attach', {});
+    } catch (err) {
+      console.error('Error: ', err.message);
+    }
   }
 
   /**
    * Stop the running debug session.
    */
   async stop(): Promise<void> {
-    this._isStarted = false;
-    await this.sendRequest('disconnect', {
-      restart: false,
-      terminateDebuggee: true
-    });
+    try {
+      await this.sendRequest('disconnect', {
+        restart: false,
+        terminateDebuggee: true
+      });
+      this._isStarted = false;
+    } catch (err) {
+      console.error('Error: ', err.message);
+    }
   }
 
   /**

@@ -279,6 +279,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       execute: async () => {
         const debuggerModel = getModel();
         await debuggerModel.session.stop();
+        commands.notifyCommandChanged();
       }
     });
 
@@ -293,6 +294,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       execute: async () => {
         const debuggerModel = getModel();
         await debuggerModel.session.start();
+        commands.notifyCommandChanged();
       }
     });
 
