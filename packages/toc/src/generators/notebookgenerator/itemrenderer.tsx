@@ -203,7 +203,8 @@ function setCollapsedState(
       const ow = c.outputArea.widgets[j] as Panel;
       ow.setHidden(state);
     }
-    // TODO: handle input widget hidden state
+    // Collapse/expand a sub-cell's input area by setting the its `hidden` state:
+    w.inputArea.setHidden(state);
   }
   if (state) {
     // Set a meta-data flag to indicate that we've collapsed notebook sections:
