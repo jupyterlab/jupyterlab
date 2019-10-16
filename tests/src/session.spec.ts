@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
-import { createClientSession, sleep } from '@jupyterlab/testutils';
+import { createClientSession } from '@jupyterlab/testutils';
 
 import { find } from '@phosphor/algorithm';
 
@@ -118,12 +118,19 @@ describe('protocol', () => {
     debugSession = new DebugSession({ client });
     await debugSession.start();
 
+    const stoppedFuture = new PromiseDelegate<void>();
     debugSession.eventMessage.connect(
       (sender: DebugSession, event: IDebugger.ISession.Event) => {
-        const eventName = event.event;
-        if (eventName === 'thread') {
-          const msg = event as DebugProtocol.ThreadEvent;
-          threadId = msg.body.threadId;
+        switch (event.event) {
+          case 'thread':
+            const msg = event as DebugProtocol.ThreadEvent;
+            threadId = msg.body.threadId;
+            break;
+          case 'stopped':
+            stoppedFuture.resolve();
+            break;
+          default:
+            break;
         }
       }
     );
@@ -141,8 +148,8 @@ describe('protocol', () => {
     // trigger an execute_request
     client.kernel.requestExecute({ code });
 
-    // TODO: handle events instead
-    await sleep(2000);
+    // wait for the first stopped event
+    await stoppedFuture.promise;
   });
 
   afterEach(async () => {
