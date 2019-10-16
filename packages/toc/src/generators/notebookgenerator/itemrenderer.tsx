@@ -1,28 +1,28 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeComponent } from './codemirror';
-
-import { Cell } from '@jupyterlab/cells';
+import { Cell, CodeCell, CodeCellModel } from '@jupyterlab/cells';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
+
+import { Panel } from '@phosphor/widgets';
+
+import { CodeComponent } from './codemirror';
 
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
 import { INotebookHeading } from './heading';
 
-import { sanitizerOptions } from '../shared';
+import { sanitizerOptions, isDOM, isMarkdown } from '../shared';
 
 import * as React from 'react';
 
 /**
- * Returns the header level for a provided cell.
+ * Returns the heading level from a provided string.
  *
  * ## Notes
  *
- * -   If a cell does not contain a header, the function returns the sentinel value `-1`.
- *
- * -   Cell header examples:
+ * -   Header examples:
  *
  *     -   Markdown header:
  *
@@ -49,21 +49,18 @@ import * as React from 'react';
  *         ```
  *
  * @private
- * @param cell - notebook cell
- * @returns header level
+ * @param str - input text
+ * @returns heading level
  */
-function headerLevel(cell: Cell): number {
-  if (cell.constructor.name !== 'MarkdownCell') {
-    return -1;
-  }
-  const lines = cell.model.value.text.split('\n');
+function headingLevel(str: string): number {
+  const lines = str.split('\n');
 
-  // Case: Markdown header
+  // Case: Markdown heading
   let match = lines[0].match(/^([#]{1,6}) (.*)/);
   if (match) {
     return match[1].length;
   }
-  // Case: Markdown header
+  // Case: Markdown heading
   if (lines.length > 1) {
     match = lines[1].match(/^([=]{2,}|[-]{2,})/);
     if (match) {
@@ -104,7 +101,11 @@ function setCollapsedState(
   ) {
     return;
   }
-  const level: number = headerLevel(cell);
+  if (cell.model.type !== 'markdown') {
+    console.log(cell);
+    return;
+  }
+  const level: number = headingLevel(cell.model.value.text);
 
   // Guard against attempting to (un-)collapse cells which are not "collapsible" (i.e., do not define sections)...
   if (level === -1) {
@@ -125,15 +126,82 @@ function setCollapsedState(
   // Search for notebook cells which are semantically defined as sub-cells...
   for (let i = idx + 1; i < len; i++) {
     const w = widgets[i];
-    const l: number = headerLevel(w);
 
-    // Check if a widget is at the same or higher level...
-    if (l >= 0 && l <= level) {
-      // We've reached the end of the section...
-      break;
+    // Cells which are neither Markdown nor code cells can be readily collapsed/expanded...
+    if (w.model.type !== 'markdown' && w.model.type !== 'code') {
+      w.setHidden(state);
+      continue;
     }
-    // Collapse/expand a sub-cell by setting its `hidden` state:
-    w.setHidden(state);
+    // Markdown cells are relatively straightforward, as we can determine whether to collapse/expand based on the level of the **first** encountered heading...
+    if (w.model.type === 'markdown') {
+      const l: number = headingLevel(w.model.value.text);
+
+      // Check if a widget is at the same or higher level...
+      if (l >= 0 && l <= level) {
+        // We've reached the end of the section...
+        break;
+      }
+      // Collapse/expand a sub-cell by setting the its `hidden` state:
+      w.setHidden(state);
+      continue;
+    }
+    // Code cells are more involved, as we need to analyze the outputs to check for generated Markdown/HTML...
+    const c = w as CodeCell;
+    const model = w.model as CodeCellModel;
+    const outputs = model.outputs;
+
+    // First, we do an initial pass to check for generated Markdown/HTML. If we don't find Markdown/HTML, then the entire cell can be collapsed/expanded (both inputs and outputs)...
+    let FLG = false;
+    let dtypes: string[] = [];
+    for (let j = 0; j < outputs.length; j++) {
+      // Retrieve the cell output model:
+      const m = outputs.get(j);
+
+      // Check the cell output MIME types:
+      dtypes = Object.keys(m.data);
+      for (let k = 0; k < dtypes.length; k++) {
+        const t = dtypes[k];
+        if (isMarkdown(t) || isDOM(t)) {
+          FLG = true;
+        } else {
+          dtypes[k] = '';
+        }
+      }
+    }
+    // If we did not find Markdown/HTML, collapse/expand the entire cell...
+    if (FLG === false) {
+      w.setHidden(state);
+      continue;
+    }
+    // Now, we perform a second pass to determine whether the output areas containing generated Markdown/HTML contain headings at the same or higher level...
+    let idx = -1;
+    for (let j = 0; j < outputs.length; j++) {
+      if (dtypes[j] === '') {
+        continue;
+      }
+      // Retrieve the output area widget:
+      const ow = c.outputArea.widgets[j] as Panel;
+
+      // Determine the heading level from the rendered HTML of the output area result:
+      const l: number = headingLevel(ow.widgets[1].node.innerHTML);
+
+      // Check if an output widget contains a heading at the same or higher level...
+      if (l >= 0 && l <= level) {
+        // We've reached the end of the section...
+        idx = j;
+        break;
+      }
+    }
+    // If we did not encounter a new section, we can safely collapse/expand the entire widget...
+    if (idx === -1) {
+      w.setHidden(state);
+    }
+    // Finally, we perform a third pass to collapse/expand individual output area widgets...
+    for (let j = 0; j < idx; j++) {
+      const ow = c.outputArea.widgets[j] as Panel;
+      ow.setHidden(state);
+    }
+    // TODO: handle input widget hidden state
   }
   if (state) {
     // Set a meta-data flag to indicate that we've collapsed notebook sections:
@@ -152,13 +220,16 @@ export function notebookItemRenderer(
   let jsx;
   if (item.type === 'markdown' || item.type === 'header') {
     const collapseOnClick = (cellRef?: Cell) => {
-      let collapsed = cellRef!.model.metadata.get(
-        'toc-hr-collapsed'
-      ) as boolean;
-      collapsed = collapsed !== undefined ? collapsed : false;
-      cellRef!.model.metadata.set('toc-hr-collapsed', !collapsed);
+      let collapsed;
+      if (cellRef!.model.metadata.has('toc-hr-collapsed')) {
+        collapsed = true;
+        cellRef!.model.metadata.delete('toc-hr-collapsed');
+      } else {
+        collapsed = false;
+        cellRef!.model.metadata.set('toc-hr-collapsed', true);
+      }
       if (cellRef) {
-        // NOTE: we can imagine a future in which this extension combines with a collapsible-header/ings extension such that we can programmatically close notebook "sections". In the meantime, we need to resort to manually "collapsing" sections...
+        // NOTE: we can imagine a future in which this extension combines with a collapsible-header/ings extension such that we can programmatically close notebook "sections" according to a public API specifically intended for collapsing notebook sections. In the meantime, we need to resort to manually "collapsing" sections...
         setCollapsedState(tracker, cellRef, !collapsed);
       }
       options.updateWidget();
