@@ -11,7 +11,7 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { BoxPanel } from '@phosphor/widgets';
+import { BoxPanel, TabPanel } from '@phosphor/widgets';
 
 import { IDebugger } from './tokens';
 
@@ -20,16 +20,19 @@ import { DebuggerSidebar } from './sidebar';
 export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
     super({ direction: 'left-to-right' });
+    this.title.label = 'Debugger';
+
     this.model = new Debugger.Model(options);
 
     this.sidebar = new DebuggerSidebar(this.model);
-
-    this.title.label = 'Debugger';
     this.model.sidebar = this.sidebar;
+
+    this.editors = new TabPanel();
 
     this.addClass('jp-Debugger');
   }
 
+  readonly editors: TabPanel;
   readonly model: Debugger.Model;
   readonly sidebar: DebuggerSidebar;
 
