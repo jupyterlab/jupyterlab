@@ -68,7 +68,7 @@ function headingLevel(str: string): number {
     }
   }
   // Case: HTML heading (WARNING: this is not particularly robust, as HTML headings can span multiple lines)
-  match = lines[0].match(/<h([1-6])>(.*)<\/h\1>/i);
+  match = lines[0].match(/<h([1-6]).*>(.*)<\/h\1>/i);
   if (match) {
     return parseInt(match[1], 10);
   }
@@ -161,7 +161,8 @@ function setCollapsedState(
       dtypes = Object.keys(m.data);
       for (let k = 0; k < dtypes.length; k++) {
         const t = dtypes[k];
-        if (isMarkdown(t) || isDOM(t)) {
+        if (isMarkdown(t) || isDOM(t) || t === 'text/plain') {
+          // FIXME: apparent Jupyter bug where additional Markdown displays have a `text/plain` MIME type
           FLG = true;
         } else {
           dtypes[k] = '';
@@ -195,6 +196,7 @@ function setCollapsedState(
     // If we did not encounter a new section, we can safely collapse/expand the entire widget...
     if (idx === -1) {
       w.setHidden(state);
+      continue;
     }
     // Finally, we perform a third pass to collapse/expand individual output area widgets...
     for (let j = 0; j < idx; j++) {
