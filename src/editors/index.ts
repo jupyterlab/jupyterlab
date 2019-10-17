@@ -9,13 +9,13 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { TabPanel } from '@phosphor/widgets';
 
-export class CodeEditors extends TabPanel {
-  constructor(options: CodeEditors.IOptions) {
+export class DebuggerEditors extends TabPanel {
+  constructor(options: DebuggerEditors.IOptions) {
     super();
 
     this.tabsMovable = true;
 
-    this.model = new CodeEditors.IModel();
+    this.model = new DebuggerEditors.IModel();
     this.model.editorAdded.connect((sender, data) => {
       let editor = new CodeEditorWrapper({
         model: new CodeEditor.Model({
@@ -40,21 +40,36 @@ export class CodeEditors extends TabPanel {
     this.addClass('jp-DebuggerEditors');
   }
 
+  /**
+   * The debugger editors model.
+   */
+  model: DebuggerEditors.IModel;
+
+  /**
+   * Dispose the debug editors.
+   */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
     Signal.clearData(this);
   }
-
-  readonly model: CodeEditors.IModel;
 }
 
-export namespace CodeEditors {
+/**
+ * A namespace for `DebuggerEditors` statics.
+ */
+export namespace DebuggerEditors {
+  /**
+   * The options used to create a DebuggerEditors.
+   */
   export interface IOptions {
     editorFactory: CodeEditor.Factory;
   }
 
+  /**
+   * An interface for read only editors.
+   */
   export interface IEditor {
     title: string;
     code: string;
@@ -64,21 +79,34 @@ export namespace CodeEditors {
   export interface IModel {}
 
   export class IModel implements IModel {
-    get editorAdded(): ISignal<CodeEditors.IModel, CodeEditors.IEditor> {
+    /**
+     * A signal emitted when a new editor is added.
+     */
+    get editorAdded(): ISignal<
+      DebuggerEditors.IModel,
+      DebuggerEditors.IEditor
+    > {
       return this._editorAdded;
     }
 
+    /**
+     * Get all the editors currently opened.
+     */
     get editors() {
       return this._state;
     }
 
-    addEditor(editor: CodeEditors.IEditor) {
+    /**
+     * Add a new editor to the editor TabPanel.
+     * @param editor The read-only editor info to add.
+     */
+    addEditor(editor: DebuggerEditors.IEditor) {
       this._state.push(editor);
       this._editorAdded.emit(editor);
     }
 
-    private _state: CodeEditors.IEditor[] = [];
-    private _editorAdded = new Signal<this, CodeEditors.IEditor>(this);
+    private _state: DebuggerEditors.IEditor[] = [];
+    private _editorAdded = new Signal<this, DebuggerEditors.IEditor>(this);
   }
 }
 

@@ -15,7 +15,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { BoxPanel } from '@phosphor/widgets';
 
-import { CodeEditors } from './editors';
+import { DebuggerEditors } from './editors';
 
 import { DebuggerSidebar } from './sidebar';
 
@@ -33,13 +33,13 @@ export class Debugger extends BoxPanel {
     this.model.sidebar = this.sidebar;
 
     const { editorFactory } = options;
-    this.editors = new CodeEditors({ editorFactory });
+    this.editors = new DebuggerEditors({ editorFactory });
     this.addWidget(this.editors);
 
     this.addClass('jp-Debugger');
   }
 
-  readonly editors: CodeEditors;
+  readonly editors: DebuggerEditors;
   readonly model: Debugger.Model;
   readonly sidebar: DebuggerSidebar;
 
