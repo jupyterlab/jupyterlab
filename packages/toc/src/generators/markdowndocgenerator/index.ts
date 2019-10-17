@@ -14,17 +14,15 @@ import {
 
 import { TableOfContentsRegistry } from '../../registry';
 
-import {
-  generateNumbering,
-  sanitizerOptions,
-  INumberedHeading
-} from '../shared';
+import { generateNumbering, INumberedHeading } from '../shared';
 
 import { TableOfContents } from '../../toc';
 
 import { parseHeading } from '../../utils/parse_heading';
 
 import { isMarkdown } from '../../utils/is_markdown';
+
+import { sanitizerOptions } from '../../utils/sanitizer_options';
 
 import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
 

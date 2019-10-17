@@ -9,7 +9,7 @@ import { Panel } from '@phosphor/widgets';
 
 import * as React from 'react';
 
-import { sanitizerOptions } from '../shared';
+import { sanitizerOptions } from '../../utils/sanitizer_options';
 
 import { parseHeading } from '../../utils/parse_heading';
 

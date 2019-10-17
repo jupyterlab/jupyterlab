@@ -48,38 +48,3 @@ export function generateNumbering(
   }
   return numbering;
 }
-
-/**
- * Allowed HTML tags for the ToC entries. We use this to
- * sanitize HTML headings, if they are given. We specifically
- * disallow anchor tags, since we are adding our own.
- */
-export const sanitizerOptions = {
-  allowedTags: [
-    'p',
-    'blockquote',
-    'b',
-    'i',
-    'strong',
-    'em',
-    'strike',
-    'code',
-    'br',
-    'div',
-    'span',
-    'pre',
-    'del'
-  ],
-  allowedAttributes: {
-    // Allow "class" attribute for <code> tags.
-    code: ['class'],
-    // Allow "class" attribute for <span> tags.
-    span: ['class'],
-    // Allow "class" attribute for <div> tags.
-    div: ['class'],
-    // Allow "class" attribute for <p> tags.
-    p: ['class'],
-    // Allow "class" attribute for <pre> tags.
-    pre: ['class']
-  }
-};

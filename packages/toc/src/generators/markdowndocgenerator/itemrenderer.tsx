@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
+import { sanitizerOptions } from '../../utils/sanitizer_options';
 
-import { INumberedHeading, sanitizerOptions } from '../shared';
+import { INumberedHeading } from '../shared';
+
+import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
 
 import * as React from 'react';
 

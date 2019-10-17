@@ -5,9 +5,9 @@ import * as React from 'react';
 
 import { ISanitizer } from '@jupyterlab/apputils';
 
-import { INotebookHeading } from './heading';
+import { sanitizerOptions } from '../../utils/sanitizer_options';
 
-import { sanitizerOptions } from '../shared';
+import { INotebookHeading } from './heading';
 
 export interface ICodeComponentProps {
   sanitizer: ISanitizer;
