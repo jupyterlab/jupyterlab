@@ -25,6 +25,7 @@ export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
     super({ direction: 'left-to-right' });
     this.title.label = 'Debugger';
+    this.title.iconClass = 'jp-BugIcon';
 
     this.model = new Debugger.Model(options);
 
