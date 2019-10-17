@@ -10,8 +10,8 @@ export interface ITagComponentProps {
 }
 
 /*
-* Create a React component containing one tag label
-*/
+ * Create a React component containing one tag label
+ */
 export abstract class TagComponent extends React.Component<ITagComponentProps> {
   constructor(props: ITagComponentProps) {
     super(props);

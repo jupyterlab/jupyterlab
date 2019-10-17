@@ -19,8 +19,8 @@ export interface ITagsToolComponentState {
 }
 
 /*
-* Create a React component that handles state for the tag dropdown
-*/
+ * Create a React component that handles state for the tag dropdown
+ */
 export class TagsToolComponent extends React.Component<
   ITagsToolComponentProps,
   ITagsToolComponentState
@@ -33,9 +33,9 @@ export class TagsToolComponent extends React.Component<
   }
 
   /*
-  * Manage the selection state of the dropdown, taking in the name of a tag and
-  * whether to add or remove it.
-  */
+   * Manage the selection state of the dropdown, taking in the name of a tag and
+   * whether to add or remove it.
+   */
   changeSelectionState = (newState: string, add: boolean) => {
     if (add) {
       let selectedTags = this.state.selected;
@@ -63,8 +63,8 @@ export class TagsToolComponent extends React.Component<
   }
 
   /*
-  * Deselect all tags in the dropdown and clear filters in the TOC.
-  */
+   * Deselect all tags in the dropdown and clear filters in the TOC.
+   */
   deselectAllTags = () => {
     this.setState({ selected: [] });
     this.props.generatorOptionsRef.updateWidget();
@@ -89,8 +89,8 @@ export class TagsToolComponent extends React.Component<
   }
 
   /*
-  * Tells the generator to filter the TOC by the selected tags.
-  */
+   * Tells the generator to filter the TOC by the selected tags.
+   */
   filterTags = (selected: string[]) => {
     this.setState({ selected });
     this.props.generatorOptionsRef.updateWidget();
@@ -121,8 +121,8 @@ export class TagsToolComponent extends React.Component<
   }
 
   /*
-  * Render the interior of the tag dropdown.
-  */
+   * Render the interior of the tag dropdown.
+   */
   render() {
     let renderedJSX = <div className="toc-no-tags-div">No Tags Available</div>;
     let filterText;

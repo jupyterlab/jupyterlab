@@ -5,9 +5,9 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
-import { TableOfContentsRegistry } from '../registry';
+import { TableOfContentsRegistry } from '../../registry';
 
-import { IHeading } from '../utils/headings';
+import { IHeading } from '../../utils/headings';
 
 /**
  * Create a TOC generator for LaTeX files.

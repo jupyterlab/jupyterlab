@@ -1,6 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-export * from './markdowndocgenerator';
-export * from './latexgenerator';
-export * from './notebookgenerator';
+export * from './markdowndoc';
+export * from './latex';
+export * from './notebook';

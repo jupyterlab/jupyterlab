@@ -6,9 +6,9 @@ import { TagComponent } from './tag';
 import * as React from 'react';
 
 /*
-* The TagList takes a list of selected tags, a handler to change selection state,
-* and a list of all tags (strings).
-*/
+ * The TagList takes a list of selected tags, a handler to change selection state,
+ * and a list of all tags (strings).
+ */
 export interface ITagListComponentProps {
   selectedTags: string[];
   selectionStateHandler: (newState: string, add: boolean) => void;
@@ -16,15 +16,15 @@ export interface ITagListComponentProps {
 }
 
 /*
-* The TagList state contains a list of selected tags
-*/
+ * The TagList state contains a list of selected tags
+ */
 export interface ITagListComponentState {
   selected: string[];
 }
 
 /*
-* Create a React component that renders all tags in a list.
-*/
+ * Create a React component that renders all tags in a list.
+ */
 export class TagListComponent extends React.Component<
   ITagListComponentProps,
   ITagListComponentState
@@ -35,8 +35,8 @@ export class TagListComponent extends React.Component<
   }
 
   /*
-  * Toggle whether a tag is selected when it is clicked
-  */
+   * Toggle whether a tag is selected when it is clicked
+   */
   selectedTagWithName = (name: string) => {
     if (this.props.selectedTags.indexOf(name) >= 0) {
       this.props.selectionStateHandler(name, false);
@@ -46,8 +46,8 @@ export class TagListComponent extends React.Component<
   };
 
   /*
-  * Render a tag, putting it in a TagComponent
-  */
+   * Render a tag, putting it in a TagComponent
+   */
   renderElementForTags = (tags: string[]) => {
     const selectedTags = this.props.selectedTags;
     const _self = this;
@@ -76,8 +76,8 @@ export class TagListComponent extends React.Component<
   };
 
   /*
-  * Render the list of tags in the TOC tags dropdown.
-  */
+   * Render the list of tags in the TOC tags dropdown.
+   */
   render() {
     let allTagsList = this.props.allTagsList;
     let renderedTagsForAllCells = null;
