@@ -75,6 +75,10 @@ export namespace Variables {
       return this._currentChanged;
     }
 
+    get scopesChanged(): ISignal<this, IScope[]> {
+      return this._scopesChanged;
+    }
+
     get currentVariable(): IVariable {
       return this._currentVariable;
     }
@@ -101,6 +105,14 @@ export namespace Variables {
 
     get scopes(): IScope[] {
       return this._state;
+    }
+
+    set scopes(scopes: IScope[]) {
+      if (!!scopes && scopes.length > 0) {
+        this._state = scopes;
+        this._scopesChanged.emit(scopes);
+        this.currentScope = scopes[0];
+      }
     }
 
     get variables(): IVariable[] {
@@ -137,6 +149,7 @@ export namespace Variables {
     private _filterState: string = '';
     protected _state: IScope[];
     private _currentScope: IScope;
+    private _scopesChanged = new Signal<this, IScope[]>(this);
   }
 
   export interface IOptions extends Panel.IOptions {}

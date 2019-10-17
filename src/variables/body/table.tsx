@@ -103,12 +103,12 @@ const useTbody = (items: Array<any>, defaultState: any) => {
             >
               <td style={{ paddingLeft: `${12}px`, width: `${25}%` }}>
                 <span
-                  className={`jp-Icon jp-Icon-16 ${setClassIcon(item.value)}`}
+                  className={`jp-Icon jp-Icon-16 ${setClassIcon(item.type)}`}
                 ></span>
                 {item.name}
               </td>
               <td style={{ paddingLeft: `${12}px`, width: `${75}%` }}>
-                {item.value}
+                {item.type}
               </td>
             </tr>
           ))}

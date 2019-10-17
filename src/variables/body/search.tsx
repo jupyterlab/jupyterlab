@@ -76,7 +76,10 @@ class ScopeSearch extends ReactWidget {
   }
 }
 
-const useOutsideClick = (ref: any, callback: any) => {
+const useOutsideClick = (
+  ref: React.MutableRefObject<any>,
+  callback: Function
+) => {
   const handleClickOutside = (e: Event) => {
     if (ref.current && !ref.current.contains(e.target)) {
       callback();
@@ -93,22 +96,22 @@ const useOutsideClick = (ref: any, callback: any) => {
 
 const ScopeMenuComponent = ({ model }: { model: Variables.IModel }) => {
   const [toggleState, setToggle] = useState(false);
+  const [scopes, setScopes] = useState(model.scopes);
   const [scope, setScope] = useState(model.currentScope);
   const wrapperRef = useRef(null);
-  const scopes = model.scopes;
 
-  const ListScopes = () =>
-    scopes.map(scope => (
-      <li key={scope.name} onClick={e => changeScope(scope)}>
-        {scope.name}
-      </li>
-    ));
+  model.scopesChanged.connect((_, update) => {
+    if (!!update && update.length > 0) {
+      setScopes(update);
+      setScope(update[0]);
+    }
+  });
 
   const onClickOutSide = () => {
     setToggle(false);
   };
 
-  const toggle = (e: any) => {
+  const toggle = () => {
     if (!!scopes) {
       setToggle(!toggleState);
     }
@@ -125,10 +128,20 @@ const ScopeMenuComponent = ({ model }: { model: Variables.IModel }) => {
     setToggle(false);
   };
 
-  const List = <ul>{!!scopes ? ListScopes : null}</ul>;
+  const List = (
+    <ul>
+      {!!scopes
+        ? scopes.map(scope => (
+            <li key={scope.name} onClick={e => changeScope(scope)}>
+              {scope.name}
+            </li>
+          ))
+        : null}
+    </ul>
+  );
 
   return (
-    <div onClick={e => toggle(e)} ref={wrapperRef}>
+    <div onClick={e => toggle()} ref={wrapperRef}>
       <span className="label">{scope ? scope.name : '-'}</span>
       <span className="fa fa-caret-down"></span>
       {toggleState ? List : null}

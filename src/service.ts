@@ -2,6 +2,7 @@ import { DebugSession } from './session';
 import { IDebugger } from './tokens';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { Debugger } from './debugger';
+import { Variables } from './variables';
 
 export class DebugService {
   constructor(session: DebugSession | null, debuggerModel: Debugger.Model) {
@@ -11,7 +12,7 @@ export class DebugService {
 
   private _session: DebugSession;
   // private _currentFrame: DebugProtocol.StackFrame;
-  private _debuggerModel: Debugger.Model;
+  private model: Debugger.Model;
 
   set session(session: DebugSession) {
     this._session = session;
@@ -19,14 +20,6 @@ export class DebugService {
 
   get session() {
     return this._session;
-  }
-
-  get model() {
-    return this._debuggerModel;
-  }
-
-  set model(model: Debugger.Model) {
-    this._debuggerModel = model;
   }
 
   // this will change for after execute cell
@@ -44,11 +37,9 @@ export class DebugService {
     );
 
     const breakpoints: DebugProtocol.SourceBreakpoint[] = this.setBreakpoints();
-    const reply = await this.session
-      .sendRequest('dumpCell', {
-        code
-      })
-      .catch(error => error);
+    const reply = await this.session.sendRequest('dumpCell', {
+      code
+    });
 
     await this.session.sendRequest('setBreakpoints', {
       breakpoints: breakpoints,
@@ -59,11 +50,14 @@ export class DebugService {
 
     this.session.client.kernel.requestExecute({ code });
 
-    const stackFrameReply = await this.getFrames(threadId);
-    const scopeReply = await this.getScopes(stackFrameReply);
-    const variablesReply = await this.getVariables(scopeReply);
+    const stackFrame = await this.getFrames(threadId);
+    const scopes = await this.getScopes(stackFrame);
+    const variables = await this.getVariables(scopes);
 
-    console.log({ variablesReply, scopeReply, stackFrameReply });
+    this.model.sidebar.variables.model.scopes = this.convertData(
+      scopes,
+      variables
+    );
   }
 
   getFrames = async (threadId: number) => {
@@ -92,6 +86,20 @@ export class DebugService {
     return this.model.sidebar.breakpoints.model.breakpoints.map(breakpoint => {
       return {
         line: breakpoint.line
+      };
+    });
+  };
+
+  protected convertData = (
+    scopes: DebugProtocol.Scope[],
+    variables: DebugProtocol.Variable[]
+  ): Variables.IScope[] => {
+    return scopes.map(scope => {
+      return {
+        name: scope.name,
+        variables: variables.map(variable => {
+          return { ...variable, description: '' };
+        })
       };
     });
   };
