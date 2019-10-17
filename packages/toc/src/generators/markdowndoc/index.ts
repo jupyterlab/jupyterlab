@@ -14,9 +14,9 @@ import {
 
 import { TableOfContentsRegistry } from '../../registry';
 
-import { generateNumbering } from '../shared';
-
 import { TableOfContents } from '../../toc';
+
+import { generateNumbering } from '../../utils/generate_numbering';
 
 import { INumberedHeading } from '../../utils/headings';
 

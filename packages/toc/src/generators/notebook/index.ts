@@ -25,9 +25,9 @@ import { sanitizerOptions } from '../../utils/sanitizer_options';
 
 import { INotebookHeading } from '../../utils/headings';
 
-import { NotebookGeneratorOptionsManager } from './optionsmanager';
+import { generateNumbering } from '../../utils/generate_numbering';
 
-import { generateNumbering } from '../shared';
+import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
 /**
  * Create a TOC generator for notebooks.
