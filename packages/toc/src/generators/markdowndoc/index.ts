@@ -32,7 +32,7 @@ import { OptionsManager } from './options_manager';
 
 import { render } from './render';
 
-import { markdownDocGeneratorToolbar } from './toolbar';
+import { toolbar } from './toolbar_generator';
 
 /**
  * Create a TOC generator for markdown files.
@@ -56,7 +56,7 @@ export function createMarkdownGenerator(
     usesLatex: true,
     options: options,
     toolbarGenerator: () => {
-      return markdownDocGeneratorToolbar(options);
+      return toolbar(options);
     },
     itemRenderer: (item: INumberedHeading) => {
       return render(options, item);
@@ -104,7 +104,7 @@ export function createRenderedMarkdownGenerator(
     usesLatex: true,
     options: options,
     toolbarGenerator: () => {
-      return markdownDocGeneratorToolbar(options);
+      return toolbar(options);
     },
     itemRenderer: (item: INumberedHeading) => {
       return render(options, item);
