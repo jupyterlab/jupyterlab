@@ -79,14 +79,15 @@ function generate(
  *
  * @private
  * @param tracker - file editor tracker
- * @returns A TOC generator that can parse markdown files.
+ * @param widget - table of contents widget
+ * @param sanitizer - HTML sanitizer
+ * @returns ToC generator capable of parsing Markdown files
  */
 function createMarkdownGenerator(
   tracker: IEditorTracker,
   widget: TableOfContents,
   sanitizer: ISanitizer
 ): Registry.IGenerator<IDocumentWidget<FileEditor>> {
-  // Create an options manager to manage user settings:
   const options = new OptionsManager(widget, {
     numbering: true,
     sanitizer
@@ -104,6 +105,7 @@ function createMarkdownGenerator(
   /**
    * Returns a toolbar generator.
    *
+   * @private
    * @returns toolbar generator
    */
   function generateToolbar() {
@@ -123,11 +125,12 @@ function createMarkdownGenerator(
 }
 
 /**
- * Create a TOC generator for rendered markdown files.
+ * Returns a ToC generator for rendered Markdown files.
  *
- * @param tracker: A file editor tracker.
- *
- * @returns A TOC generator that can parse markdown files.
+ * @param tracker - file editor tracker
+ * @param sanitizer - HTML sanitizer
+ * @param widget - table of contents widget
+ * @returns ToC generator capable of parsing rendered Markdown files
  */
 function createRenderedMarkdownGenerator(
   tracker: IMarkdownViewerTracker,
@@ -150,6 +153,7 @@ function createRenderedMarkdownGenerator(
   /**
    * Returns a toolbar generator.
    *
+   * @private
    * @returns toolbar generator
    */
   function generateToolbar() {
