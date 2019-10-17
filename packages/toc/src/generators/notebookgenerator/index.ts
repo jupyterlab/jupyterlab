@@ -15,6 +15,8 @@ import { TableOfContentsRegistry } from '../../registry';
 
 import { TableOfContents } from '../../toc';
 
+import { parseHeading } from '../../utils/parse_heading';
+
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
 import { INotebookHeading } from './heading';
@@ -403,69 +405,28 @@ namespace Private {
     lastLevel: number,
     cellRef: Cell
   ): INotebookHeading {
-    const lines = text.split('\n');
-    const line = lines[0];
-    const line2 = lines.length > 1 ? lines[1] : undefined;
     const onClick = onClickFactory(0);
-    // First test for '#'-style headers.
-    let match = line.match(/^([#]{1,6}) (.*)/);
-    let match2 = line2 && line2.match(/^([=]{2,}|[-]{2,})/);
-    let match3 = line.match(/<h([1-6])>(.*)<\/h\1>/i);
-    if (match) {
-      const level = match[1].length;
-      // Take special care to parse markdown links into raw text.
-      const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
-      let numbering = generateNumbering(numberingDict, level);
+    const heading = parseHeading(text);
+    if (heading) {
+      const numbering = generateNumbering(numberingDict, heading.level);
       return {
-        text,
-        level,
+        text: heading.text,
+        level: heading.level,
         numbering,
         onClick,
         type: 'header',
-        cellRef: cellRef,
-        hasChild: false
-      };
-    } else if (match2) {
-      // Next test for '==='-style headers.
-      const level = match2[1][0] === '=' ? 1 : 2;
-      // Take special care to parse markdown links into raw text.
-      const text = line.replace(/\[(.+)\]\(.+\)/g, '$1');
-      let numbering = generateNumbering(numberingDict, level);
-      return {
-        text,
-        level,
-        numbering,
-        onClick,
-        type: 'header',
-        cellRef: cellRef,
-        hasChild: false
-      };
-    } else if (match3) {
-      // Finally test for HTML headers. This will not catch multiline
-      // headers, nor will it catch multiple headers on the same line.
-      // It should do a decent job of catching many, though.
-      const level = parseInt(match3[1], 10);
-      const text = match3[2];
-      let numbering = generateNumbering(numberingDict, level);
-      return {
-        text,
-        level,
-        numbering,
-        onClick,
-        type: 'header',
-        cellRef: cellRef,
-        hasChild: false
-      };
-    } else {
-      return {
-        text: line,
-        level: lastLevel + 1,
-        onClick,
-        type: 'markdown',
         cellRef: cellRef,
         hasChild: false
       };
     }
+    return {
+      text: text,
+      level: lastLevel + 1,
+      onClick,
+      type: 'markdown',
+      cellRef: cellRef,
+      hasChild: false
+    };
   }
 
   /**
