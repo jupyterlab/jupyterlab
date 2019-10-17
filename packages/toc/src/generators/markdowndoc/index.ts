@@ -127,7 +127,7 @@ function createMarkdownGenerator(
 /**
  * Returns a ToC generator for rendered Markdown files.
  *
- * @param tracker - file editor tracker
+ * @param tracker - Markdown viewer tracker
  * @param sanitizer - HTML sanitizer
  * @param widget - table of contents widget
  * @returns ToC generator capable of parsing rendered Markdown files
