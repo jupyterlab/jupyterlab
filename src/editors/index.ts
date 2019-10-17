@@ -5,6 +5,8 @@
 
 import { CodeEditorWrapper, CodeEditor } from '@jupyterlab/codeeditor';
 
+import { ISignal, Signal } from '@phosphor/signaling';
+
 import { TabPanel } from '@phosphor/widgets';
 
 export class CodeEditors extends TabPanel {
@@ -13,23 +15,36 @@ export class CodeEditors extends TabPanel {
 
     this.tabsMovable = true;
 
-    this.model = new CodeEditors.IModel(MOCK_EDITORS);
-    this.model.editors.forEach(data => {
+    this.model = new CodeEditors.IModel();
+    this.model.editorAdded.connect((sender, data) => {
       let editor = new CodeEditorWrapper({
-        model: new CodeEditor.Model(),
+        model: new CodeEditor.Model({
+          value: data.code,
+          mimeType: data.mimeType
+        }),
         factory: options.editorFactory,
-        config: { lineNumbers: true }
+        config: {
+          readOnly: true,
+          lineNumbers: true
+        }
       });
-      editor.editor.model.value.text = data.code;
-      editor.editor.model.mimeType = data.mimeType;
+
       editor.title.label = data.title;
-      editor.editor.setOption('readOnly', true);
       editor.title.closable = true;
 
       this.addWidget(editor);
     });
 
+    MOCK_EDITORS.forEach(editor => this.model.addEditor(editor));
+
     this.addClass('jp-DebuggerEditors');
+  }
+
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    Signal.clearData(this);
   }
 
   readonly model: CodeEditors.IModel;
@@ -37,7 +52,7 @@ export class CodeEditors extends TabPanel {
 
 export namespace CodeEditors {
   export interface IOptions {
-    editorFactory?: CodeEditor.Factory;
+    editorFactory: CodeEditor.Factory;
   }
 
   export interface IEditor {
@@ -49,19 +64,21 @@ export namespace CodeEditors {
   export interface IModel {}
 
   export class IModel implements IModel {
-    constructor(model: CodeEditors.IEditor[]) {
-      this._state = model;
-    }
-
-    addFile(title: string, mimeType: string, code: string) {
-      this._state.push({ title, mimeType, code });
+    get editorAdded(): ISignal<CodeEditors.IModel, CodeEditors.IEditor> {
+      return this._editorAdded;
     }
 
     get editors() {
       return this._state;
     }
 
-    private _state: CodeEditors.IEditor[];
+    addEditor(editor: CodeEditors.IEditor) {
+      this._state.push(editor);
+      this._editorAdded.emit(editor);
+    }
+
+    private _state: CodeEditors.IEditor[] = [];
+    private _editorAdded = new Signal<this, CodeEditors.IEditor>(this);
   }
 }
 
