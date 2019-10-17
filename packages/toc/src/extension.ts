@@ -97,8 +97,8 @@ function activateTOC(
   // Create an rendered markdown editor TableOfContentsRegistry.IGenerator
   const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
     markdownViewerTracker,
-    rendermime.sanitizer,
-    toc
+    toc,
+    rendermime.sanitizer
   );
   registry.addGenerator(renderedMarkdownGenerator);
 

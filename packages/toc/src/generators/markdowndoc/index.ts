@@ -134,8 +134,8 @@ function createMarkdownGenerator(
  */
 function createRenderedMarkdownGenerator(
   tracker: IMarkdownViewerTracker,
-  sanitizer: ISanitizer,
-  widget: TableOfContents
+  widget: TableOfContents,
+  sanitizer: ISanitizer
 ): Registry.IGenerator<MarkdownDocument> {
   const options = new OptionsManager(widget, {
     numbering: true,
