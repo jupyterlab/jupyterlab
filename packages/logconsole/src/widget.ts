@@ -464,7 +464,8 @@ export class LogConsolePanel extends StackedPanel {
     this.addWidget(this._placeholder);
   }
 
-  protected onAfterShow(msg: Message): void {
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
     this._updateOutputAreas();
     this._showOutputFromSource(this._source);
     this._handlePlaceholder();

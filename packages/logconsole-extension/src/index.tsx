@@ -159,10 +159,14 @@ function activateLogConsole(
     MessageLoop.installMessageHook(logConsolePanel, (_, msg) => {
       switch (msg.type) {
         case 'after-show':
-          status.model.markSourceLogsViewed(status.model.source);
-          status.model.flashEnabled = false;
+        case 'after-attach':
+          if (logConsolePanel.isVisible) {
+            status.model.markSourceLogsViewed(status.model.source);
+            status.model.flashEnabled = false;
+          }
           break;
         case 'after-hide':
+        case 'after-detach':
           status.model.flashEnabled = flashEnabled;
           break;
         default:
