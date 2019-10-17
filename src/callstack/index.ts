@@ -11,7 +11,7 @@ export class Callstack extends Panel {
   constructor(options: Callstack.IOptions = {}) {
     super();
 
-    this.model = new Callstack.IModel(MOCK_FRAMES);
+    this.model = new Callstack.IModel([]);
     this.addClass('jp-DebuggerCallstack');
     this.title.label = 'Callstack';
 
@@ -116,23 +116,23 @@ export namespace Callstack {
   export interface IOptions extends Panel.IOptions {}
 }
 
-const MOCK_FRAMES: Callstack.IFrame[] = [
-  {
-    id: 0,
-    name: 'test',
-    source: {
-      name: 'untitled.py'
-    },
-    line: 6,
-    column: 1
-  },
-  {
-    id: 1,
-    name: '<module>',
-    source: {
-      name: 'untitled.py'
-    },
-    line: 7,
-    column: 1
-  }
-];
+// const MOCK_FRAMES: Callstack.IFrame[] = [
+//   {
+//     id: 0,
+//     name: 'test',
+//     source: {
+//       name: 'untitled.py'
+//     },
+//     line: 6,
+//     column: 1
+//   },
+//   {
+//     id: 1,
+//     name: '<module>',
+//     source: {
+//       name: 'untitled.py'
+//     },
+//     line: 7,
+//     column: 1
+//   }
+// ];

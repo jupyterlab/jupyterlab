@@ -97,12 +97,21 @@ const ScopeMenuComponent = ({ model }: { model: Variables.IModel }) => {
   const wrapperRef = useRef(null);
   const scopes = model.scopes;
 
+  const ListScopes = () =>
+    scopes.map(scope => (
+      <li key={scope.name} onClick={e => changeScope(scope)}>
+        {scope.name}
+      </li>
+    ));
+
   const onClickOutSide = () => {
     setToggle(false);
   };
 
   const toggle = (e: any) => {
-    setToggle(!toggleState);
+    if (!!scopes) {
+      setToggle(!toggleState);
+    }
   };
 
   useOutsideClick(wrapperRef, onClickOutSide);
@@ -116,19 +125,11 @@ const ScopeMenuComponent = ({ model }: { model: Variables.IModel }) => {
     setToggle(false);
   };
 
-  const List = (
-    <ul>
-      {scopes.map(scope => (
-        <li key={scope.name} onClick={e => changeScope(scope)}>
-          {scope.name}
-        </li>
-      ))}
-    </ul>
-  );
+  const List = <ul>{!!scopes ? ListScopes : null}</ul>;
 
   return (
     <div onClick={e => toggle(e)} ref={wrapperRef}>
-      <span className="label">{scope.name}</span>
+      <span className="label">{scope ? scope.name : '-'}</span>
       <span className="fa fa-caret-down"></span>
       {toggleState ? List : null}
     </div>

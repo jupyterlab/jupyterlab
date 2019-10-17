@@ -17,6 +17,12 @@ import { IDebugger } from './tokens';
 
 import { DebuggerSidebar } from './sidebar';
 
+import { IObservableString } from '@jupyterlab/observables';
+
+import { DebugService } from './service';
+
+import { DebugSession } from './session';
+
 export class Debugger extends BoxPanel {
   constructor(options: Debugger.IOptions) {
     super({ direction: 'left-to-right' });
@@ -104,7 +110,12 @@ export namespace Debugger {
         this._session.dispose();
       }
       this._session = session;
+      this._service.session = session as DebugSession;
       this._sessionChanged.emit(undefined);
+    }
+
+    get service(): DebugService {
+      return this._service;
     }
 
     get sessionChanged(): ISignal<this, void> {
@@ -113,6 +124,14 @@ export namespace Debugger {
 
     get isDisposed(): boolean {
       return this._isDisposed;
+    }
+
+    get codeValue() {
+      return this._codeValue;
+    }
+
+    set codeValue(observableString: IObservableString) {
+      this._codeValue = observableString;
     }
 
     dispose(): void {
@@ -127,12 +146,14 @@ export namespace Debugger {
       }
     }
 
+    private _codeValue: IObservableString;
     private _sidebar: DebuggerSidebar;
     private _isDisposed = false;
     private _mode: IDebugger.Mode;
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
     private _session: IDebugger.ISession | null;
     private _sessionChanged = new Signal<this, void>(this);
+    private _service = new DebugService(null, this);
   }
 
   export namespace Model {

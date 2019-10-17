@@ -221,6 +221,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       namespace: 'debugger'
     });
     const { commands, shell } = app;
+    const categoryLabel = 'Debugger';
     let widget: MainAreaWidget<Debugger>;
 
     const getModel = () => {
@@ -296,6 +297,20 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
+    commands.addCommand(CommandIDs.debugNotebook, {
+      label: 'Launch',
+      isEnabled: () => {
+        const debuggerModel = getModel();
+        return (debuggerModel &&
+          debuggerModel.session !== null &&
+          debuggerModel.session.isStarted) as boolean;
+      },
+      execute: async () => {
+        const debuggerModel = getModel();
+        await debuggerModel.service.launch(debuggerModel.codeValue.text);
+      }
+    });
+
     commands.addCommand(CommandIDs.changeMode, {
       label: 'Change Mode',
       isEnabled: () => {
@@ -356,6 +371,10 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       palette.addItem({ command: CommandIDs.create, category: 'Debugger' });
       palette.addItem({ command: CommandIDs.start, category: 'Debugger' });
       palette.addItem({ command: CommandIDs.stop, category: 'Debugger' });
+      palette.addItem({
+        command: CommandIDs.debugNotebook,
+        category: categoryLabel
+      });
     }
 
     if (restorer) {

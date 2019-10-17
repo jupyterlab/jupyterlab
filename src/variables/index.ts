@@ -13,7 +13,7 @@ export class Variables extends Panel {
   constructor(options: Variables.IOptions = {}) {
     super();
 
-    this.model = new Variables.IModel(MOCK_DATA_ROW.scopes);
+    this.model = new Variables.IModel();
     this.addClass('jp-DebuggerVariables');
     this.title.label = 'Variables';
 
@@ -54,9 +54,9 @@ export namespace Variables {
   export interface IModel {}
 
   export class IModel implements IModel {
-    constructor(model: IScope[]) {
+    constructor(model?: IScope[] | null) {
       this._state = model;
-      this._currentScope = this._state[0];
+      this._currentScope = !!this._state ? this._state[0] : null;
     }
 
     get currentScope(): IScope {
@@ -94,7 +94,9 @@ export namespace Variables {
         return;
       }
       this._filterState = value;
-      this._variablesChanged.emit(this._filterVariables());
+      if (!!this._currentScope) {
+        this._variablesChanged.emit(this._filterVariables());
+      }
     }
 
     get scopes(): IScope[] {
@@ -105,8 +107,9 @@ export namespace Variables {
       if (this._filterState) {
         return this._filterVariables();
       }
-      return this._currentScope.variables;
+      return !!this._currentScope ? this._currentScope.variables : [];
     }
+
     set variables(variables: IVariable[]) {
       this._currentScope.variables = variables;
     }
@@ -138,79 +141,3 @@ export namespace Variables {
 
   export interface IOptions extends Panel.IOptions {}
 }
-
-const MOCK_DATA_ROW = {
-  scopes: [
-    {
-      name: 'local',
-      variables: [
-        {
-          name: 'test 1',
-          value: 'function()',
-          type: 'function',
-          variablesReference: 0,
-          description: 'def test1(): return 0'
-        },
-        {
-          name: 'Classtest',
-          value: 'class',
-          type: 'class',
-          variablesReference: 1,
-          description: 'def test2(): return 0'
-        },
-        {
-          name: 'test 3',
-          value: 'function()',
-          type: 'function',
-          variablesReference: 0,
-          description: 'def test1(): return 0'
-        },
-        {
-          name: 'test 4',
-          value: 'function()',
-          type: 'function',
-          variablesReference: 0,
-          description: 'def test2(): return 0'
-        },
-        {
-          name: 'test 5',
-          value: 'function()',
-          type: 'function',
-          variablesReference: 0,
-          description: 'def test1(): return 0'
-        },
-        {
-          name: 'test 6',
-          value: 'function()',
-          type: 'function',
-          variablesReference: 0,
-          description: 'def test2(): return 0'
-        }
-      ]
-    },
-    {
-      name: 'global',
-      variables: [
-        {
-          name: 'exampleGlobal',
-          value: 'function()',
-          type: 'function',
-          variablesReference: 0,
-          description: 'def exampleGlobal(): return 0'
-        }
-      ] as Variables.IVariable[]
-    },
-    {
-      name: 'built-in',
-      variables: [
-        {
-          name: 'exmapleBuiltIn',
-          value: 'function()',
-          type: 'function',
-          variablesReference: 0,
-          description: 'def texmapleBuiltIn(): return 0'
-        }
-      ] as Variables.IVariable[]
-    }
-  ]
-};
