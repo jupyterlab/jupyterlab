@@ -110,7 +110,7 @@ function activateLogConsole(
           ref: app.shell.currentWidget.id
         });
       } else {
-        logConsoleWidget.activate();
+        app.shell.activateById(logConsoleWidget.id);
       }
     }
   });
