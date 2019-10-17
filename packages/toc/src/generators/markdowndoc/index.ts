@@ -18,13 +18,9 @@ import { TableOfContents } from '../../toc';
 
 import { INumberingDictionary } from '../../utils/numbering_dictionary';
 
-import { generateNumbering } from '../../utils/generate_numbering';
-
 import { INumberedHeading } from '../../utils/headings';
 
 import { isMarkdown } from '../../utils/is_markdown';
-
-import { sanitizerOptions } from '../../utils/sanitizer_options';
 
 import { OptionsManager } from './options_manager';
 
@@ -34,53 +30,7 @@ import { toolbar } from './toolbar_generator';
 
 import { getHeadings } from './get_headings';
 
-function getRenderedHeadings(
-  node: HTMLElement,
-  sanitizer: ISanitizer,
-  dict: INumberingDictionary,
-  numbering = true
-): INumberedHeading[] {
-  let headings: INumberedHeading[] = [];
-  let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
-  for (let i = 0; i < headingNodes.length; i++) {
-    const heading = headingNodes[i];
-    const level = parseInt(heading.tagName[1], 10);
-    let text = heading.textContent ? heading.textContent : '';
-    let shallHide = !numbering;
-
-    // Show/hide numbering DOM element based on user settings
-    if (heading.getElementsByClassName('numbering-entry').length > 0) {
-      heading.removeChild(heading.getElementsByClassName('numbering-entry')[0]);
-    }
-    let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
-    html = html.replace('¶', ''); // Remove the anchor symbol.
-    const onClick = () => {
-      heading.scrollIntoView();
-    };
-
-    // Get the numbering string
-    let nstr = generateNumbering(dict, level);
-
-    // Generate the DOM element for numbering
-    let numDOM = '';
-    if (!shallHide) {
-      numDOM = '<span class="numbering-entry">' + nstr + '</span>';
-    }
-
-    // Add DOM numbering element to document
-    heading.innerHTML = numDOM + html;
-
-    text = text.replace('¶', '');
-    headings.push({
-      level,
-      text,
-      numbering: nstr,
-      html,
-      onClick
-    });
-  }
-  return headings;
-}
+import { getRenderedHeadings } from './get_rendered_headings';
 
 /**
  * Returns a boolean indicating whether this ToC generator is enabled.
