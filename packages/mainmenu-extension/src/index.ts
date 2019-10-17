@@ -116,13 +116,13 @@ export namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
-  requires: [ICommandPalette, IRouter],
-  optional: [ILabShell],
+  requires: [IRouter],
+  optional: [ICommandPalette, ILabShell],
   provides: IMainMenu,
   activate: (
     app: JupyterFrontEnd,
-    palette: ICommandPalette,
     router: IRouter,
+    palette: ICommandPalette | null,
     labShell: ILabShell | null
   ): IMainMenu => {
     const { commands } = app;
@@ -203,27 +203,29 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
       }
     });
 
-    // Add some of the commands defined here to the command palette.
-    if (menu.fileMenu.quitEntry) {
+    if (palette) {
+      // Add some of the commands defined here to the command palette.
+      if (menu.fileMenu.quitEntry) {
+        palette.addItem({
+          command: CommandIDs.shutdown,
+          category: 'Main Area'
+        });
+        palette.addItem({
+          command: CommandIDs.logout,
+          category: 'Main Area'
+        });
+      }
+
       palette.addItem({
-        command: CommandIDs.shutdown,
-        category: 'Main Area'
+        command: CommandIDs.shutdownAllKernels,
+        category: 'Kernel Operations'
       });
+
       palette.addItem({
-        command: CommandIDs.logout,
+        command: CommandIDs.activatePreviouslyUsedTab,
         category: 'Main Area'
       });
     }
-
-    palette.addItem({
-      command: CommandIDs.shutdownAllKernels,
-      category: 'Kernel Operations'
-    });
-
-    palette.addItem({
-      command: CommandIDs.activatePreviouslyUsedTab,
-      category: 'Main Area'
-    });
 
     app.shell.add(logo, 'top');
     app.shell.add(menu, 'top');

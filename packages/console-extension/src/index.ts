@@ -97,8 +97,6 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   id: '@jupyterlab/console-extension:tracker',
   provides: IConsoleTracker,
   requires: [
-    IMainMenu,
-    ICommandPalette,
     ConsolePanel.IContentFactory,
     IEditorServices,
     ILayoutRestorer,
@@ -106,7 +104,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     IRenderMimeRegistry,
     ISettingRegistry
   ],
-  optional: [ILauncher, ILabStatus, ISessionContextDialogs],
+  optional: [IMainMenu, ICommandPalette, ILauncher, ILabStatus, ISessionContextDialogs],
   activate: activateConsole,
   autoStart: true
 };
@@ -136,14 +134,14 @@ export default plugins;
  */
 async function activateConsole(
   app: JupyterFrontEnd,
-  mainMenu: IMainMenu,
-  palette: ICommandPalette,
   contentFactory: ConsolePanel.IContentFactory,
   editorServices: IEditorServices,
   restorer: ILayoutRestorer,
   browserFactory: IFileBrowserFactory,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
+  mainMenu: IMainMenu | null,
+  palette: ICommandPalette | null,
   launcher: ILauncher | null,
   status: ILabStatus | null,
   sessionDialogs: ISessionContextDialogs | null
@@ -511,90 +509,94 @@ async function activateConsole(
     isEnabled
   });
 
-  // Add command palette items
-  [
-    CommandIDs.create,
-    CommandIDs.linebreak,
-    CommandIDs.clear,
-    CommandIDs.runUnforced,
-    CommandIDs.runForced,
-    CommandIDs.restart,
-    CommandIDs.interrupt,
-    CommandIDs.changeKernel,
-    CommandIDs.closeAndShutdown
-  ].forEach(command => {
-    palette.addItem({ command, category, args: { isPalette: true } });
-  });
+  if (palette) {
+    // Add command palette items
+    [
+      CommandIDs.create,
+      CommandIDs.linebreak,
+      CommandIDs.clear,
+      CommandIDs.runUnforced,
+      CommandIDs.runForced,
+      CommandIDs.restart,
+      CommandIDs.interrupt,
+      CommandIDs.changeKernel,
+      CommandIDs.closeAndShutdown
+    ].forEach(command => {
+      palette.addItem({ command, category, args: { isPalette: true } });
+    });
+  }
 
-  // Add a console creator to the File menu
-  mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.create }], 0);
+  if (mainMenu) {
+    // Add a console creator to the File menu
+    mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.create }], 0);
 
-  // Add a close and shutdown command to the file menu.
-  mainMenu.fileMenu.closeAndCleaners.add({
-    tracker,
-    action: 'Shutdown',
-    name: 'Console',
-    closeAndCleanup: (current: ConsolePanel) => {
-      return showDialog({
-        title: 'Shut down the console?',
-        body: `Are you sure you want to close "${current.title.label}"?`,
-        buttons: [Dialog.cancelButton(), Dialog.warnButton()]
-      }).then(result => {
-        if (result.button.accept) {
-          return current.console.sessionContext.shutdown().then(() => {
-            current.dispose();
-          });
-        } else {
-          return void 0;
-        }
-      });
-    }
-  } as IFileMenu.ICloseAndCleaner<ConsolePanel>);
-
-  // Add a kernel user to the Kernel menu
-  mainMenu.kernelMenu.kernelUsers.add({
-    tracker,
-    interruptKernel: current => {
-      let kernel = current.console.sessionContext.session?.kernel;
-      if (kernel) {
-        return kernel.interrupt();
-      }
-      return Promise.resolve(void 0);
-    },
-    noun: 'Console',
-    restartKernel: current =>
-      sessionDialogs!.restart(current.console.sessionContext),
-    restartKernelAndClear: current => {
-      return sessionDialogs!
-        .restart(current.console.sessionContext)
-        .then(restarted => {
-          if (restarted) {
-            current.console.clear();
+    // Add a close and shutdown command to the file menu.
+    mainMenu.fileMenu.closeAndCleaners.add({
+      tracker,
+      action: 'Shutdown',
+      name: 'Console',
+      closeAndCleanup: (current: ConsolePanel) => {
+        return showDialog({
+          title: 'Shut down the console?',
+          body: `Are you sure you want to close "${current.title.label}"?`,
+          buttons: [Dialog.cancelButton(), Dialog.warnButton()]
+        }).then(result => {
+          if (result.button.accept) {
+            return current.console.sessionContext.shutdown().then(() => {
+              current.dispose();
+            });
+          } else {
+            return void 0;
           }
-          return restarted;
         });
-    },
-    changeKernel: current =>
-      sessionDialogs!.selectKernel(current.console.sessionContext),
-    shutdownKernel: current => current.console.sessionContext.shutdown()
-  } as IKernelMenu.IKernelUser<ConsolePanel>);
+      }
+    } as IFileMenu.ICloseAndCleaner<ConsolePanel>);
 
-  // Add a code runner to the Run menu.
-  mainMenu.runMenu.codeRunners.add({
-    tracker,
-    noun: 'Cell',
-    pluralNoun: 'Cells',
-    run: current => current.console.execute(true)
-  } as IRunMenu.ICodeRunner<ConsolePanel>);
+    // Add a kernel user to the Kernel menu
+    mainMenu.kernelMenu.kernelUsers.add({
+      tracker,
+      interruptKernel: current => {
+        let kernel = current.console.sessionContext.session?.kernel;
+        if (kernel) {
+          return kernel.interrupt();
+        }
+        return Promise.resolve(void 0);
+      },
+      noun: 'Console',
+      restartKernel: current =>
+        sessionDialogs!.restart(current.console.sessionContext),
+      restartKernelAndClear: current => {
+        return sessionDialogs!
+          .restart(current.console.sessionContext)
+          .then(restarted => {
+            if (restarted) {
+              current.console.clear();
+            }
+            return restarted;
+          });
+      },
+      changeKernel: current =>
+        sessionDialogs!.selectKernel(current.console.sessionContext),
+      shutdownKernel: current => current.console.sessionContext.shutdown()
+    } as IKernelMenu.IKernelUser<ConsolePanel>);
 
-  // Add a clearer to the edit menu
-  mainMenu.editMenu.clearers.add({
-    tracker,
-    noun: 'Console Cells',
-    clearCurrent: (current: ConsolePanel) => {
-      return current.console.clear();
-    }
-  } as IEditMenu.IClearer<ConsolePanel>);
+    // Add a code runner to the Run menu.
+    mainMenu.runMenu.codeRunners.add({
+      tracker,
+      noun: 'Cell',
+      pluralNoun: 'Cells',
+      run: current => current.console.execute(true)
+    } as IRunMenu.ICodeRunner<ConsolePanel>);
+
+    // Add a clearer to the edit menu
+    mainMenu.editMenu.clearers.add({
+      tracker,
+      noun: 'Console Cells',
+      clearCurrent: (current: ConsolePanel) => {
+        return current.console.clear();
+      }
+    } as IEditMenu.IClearer<ConsolePanel>);
+  }
 
   // For backwards compatibility and clarity, we explicitly label the run
   // keystroke with the actual effected change, rather than the generic
@@ -634,21 +636,23 @@ async function activateConsole(
     })
   );
 
-  mainMenu.settingsMenu.addGroup(
-    [
-      {
-        type: 'submenu' as Menu.ItemType,
-        submenu: executeMenu
-      }
-    ],
-    10
-  );
+  if (mainMenu) {
+    mainMenu.settingsMenu.addGroup(
+      [
+        {
+          type: 'submenu' as Menu.ItemType,
+          submenu: executeMenu
+        }
+      ],
+      10
+    );
 
-  // Add kernel information to the application help menu.
-  mainMenu.helpMenu.kernelUsers.add({
-    tracker,
+    // Add kernel information to the application help menu.
+    mainMenu.helpMenu.kernelUsers.add({
+      tracker,
     getKernel: current => current.sessionContext.session?.kernel
-  } as IHelpMenu.IKernelUser<ConsolePanel>);
+    } as IHelpMenu.IKernelUser<ConsolePanel>);
+  }
 
   app.contextMenu.addItem({
     command: CommandIDs.clear,

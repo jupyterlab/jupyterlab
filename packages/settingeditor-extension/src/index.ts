@@ -46,10 +46,10 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
     ISettingRegistry,
     IEditorServices,
     IStateDB,
-    IRenderMimeRegistry,
-    ICommandPalette,
+    IRenderMimeRegistry
     ILabStatus
   ],
+  optional: [ICommandPalette],
   autoStart: true,
   provides: ISettingEditorTracker,
   activate
@@ -65,8 +65,8 @@ function activate(
   editorServices: IEditorServices,
   state: IStateDB,
   rendermime: IRenderMimeRegistry,
-  palette: ICommandPalette,
   status: ILabStatus
+  palette: ICommandPalette | null
 ): ISettingEditorTracker {
   const { commands, shell } = app;
   const namespace = 'setting-editor';
@@ -141,7 +141,9 @@ function activate(
     },
     label: 'Advanced Settings Editor'
   });
-  palette.addItem({ category: 'Settings', command: CommandIDs.open });
+  if (palette) {
+    palette.addItem({ category: 'Settings', command: CommandIDs.open });
+  }
 
   commands.addCommand(CommandIDs.revert, {
     execute: () => {
