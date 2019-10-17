@@ -32,7 +32,7 @@ import { OptionsManager } from './options_manager';
 
 import { render } from './render';
 
-import { markdownDocGeneratorToolbar } from './toolbargenerator';
+import { markdownDocGeneratorToolbar } from './toolbar';
 
 /**
  * Create a TOC generator for markdown files.
