@@ -5,8 +5,7 @@ import {
   ILoggerRegistry,
   ILogger,
   ILoggerChange,
-  ILoggerRegistryChange,
-  DEFAULT_LOG_ENTRY_LIMIT
+  ILoggerRegistryChange
 } from '@jupyterlab/logconsole';
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
@@ -36,10 +35,10 @@ function LogConsoleStatusComponent(
     <GroupItem
       spacing={0}
       onClick={props.handleClick}
-      title={`${props.logCount} logs in Log Console`}
+      title={`${props.messages} messages in current log`}
     >
       <IconItem source={'jp-LogConsoleIcon'} />
-      <TextItem source={props.logCount} />
+      <TextItem source={props.messages} />
     </GroupItem>
   );
 }
@@ -59,9 +58,9 @@ namespace LogConsoleStatusComponent {
     handleClick: () => void;
 
     /**
-     * Number of logs.
+     * Number of log messages.
      */
-    logCount: number;
+    messages: number;
   }
 }
 
@@ -88,7 +87,7 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
         this.model.source &&
         this.model.flashEnabled &&
         !this.model.isSourceLogsViewed(this.model.source) &&
-        this.model.logCount > 0
+        this.model.messages > 0
       ) {
         this._showHighlighted();
       } else {
@@ -103,7 +102,7 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
     });
 
     this.model.logChanged.connect(() => {
-      if (!this.model.flashEnabled || this.model.logCount === 0) {
+      if (!this.model.flashEnabled || this.model.messages === 0) {
         // cancel existing request
         clearTimeout(flashRequestTimer);
         flashRequestTimer = null;
@@ -136,7 +135,7 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
     return (
       <LogConsoleStatusComponent
         handleClick={this._handleClick}
-        logCount={this.model.logCount}
+        messages={this.model.messages}
       />
     );
   }
@@ -205,10 +204,10 @@ export namespace LogConsoleStatus {
     /**
      * Number of logs.
      */
-    get logCount(): number {
+    get messages(): number {
       if (this._source) {
         const logger = this._loggerRegistry.getLogger(this._source);
-        return Math.min(logger.length, this._entryLimit);
+        return logger.length;
       }
 
       return 0;
@@ -253,18 +252,6 @@ export namespace LogConsoleStatus {
     }
 
     /**
-     * Log output entry limit.
-     */
-    set entryLimit(limit: number) {
-      if (limit > 0) {
-        this._entryLimit = limit;
-
-        // refresh rendering
-        this.stateChanged.emit();
-      }
-    }
-
-    /**
      * Mark logs from the source as viewed.
      *
      * @param source - The name of the log source.
@@ -302,7 +289,6 @@ export namespace LogConsoleStatus {
     private _flashEnabled: boolean = true;
     private _loggerRegistry: ILoggerRegistry;
     private _source: string = null;
-    private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
     // A map storing keys as source names of the loggers watched
     // and values as whether logs from the source are viewed
     private _loggersWatched: Map<string, boolean> = new Map();

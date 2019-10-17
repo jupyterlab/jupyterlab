@@ -54,6 +54,11 @@ export interface ILogPayloadBase {
    * Type of log data.
    */
   type: string;
+
+  /**
+   * Data
+   */
+  data: any;
 }
 
 /**
@@ -123,6 +128,10 @@ export interface ILogger {
    * Number of outputs logged.
    */
   readonly length: number;
+  /**
+   * Max number of messages.
+   */
+  maxLength: number;
   /**
    * Rendermime to use when rendering outputs logged.
    */

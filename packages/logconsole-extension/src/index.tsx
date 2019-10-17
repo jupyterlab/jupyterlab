@@ -19,8 +19,7 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import {
   ILoggerRegistry,
   LoggerRegistry,
-  LogConsolePanel,
-  DEFAULT_LOG_ENTRY_LIMIT
+  LogConsolePanel
 } from '@jupyterlab/logconsole';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
@@ -84,10 +83,13 @@ function activateLogConsole(
   settingRegistry: ISettingRegistry | null
 ): ILoggerRegistry {
   let logConsoleWidget: MainAreaWidget<LogConsolePanel> = null;
-  let entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
   let flashEnabled: boolean = true;
 
-  const loggerRegistry = new LoggerRegistry(rendermime);
+  const loggerRegistry = new LoggerRegistry({
+    defaultRendermime: rendermime,
+    // The maxLength is reset below from settings
+    maxLength: 1000
+  });
 
   const tracker = new WidgetTracker<MainAreaWidget<LogConsolePanel>>({
     namespace: 'logconsole'
@@ -135,7 +137,6 @@ function activateLogConsole(
     logConsoleWidget.title.closable = true;
     logConsoleWidget.title.label = 'Log Console';
     logConsoleWidget.title.iconClass = 'jp-LogConsoleIcon';
-    logConsolePanel.entryLimit = entryLimit;
 
     const addTimestampButton = new CommandToolbarButton({
       commands: app.commands,
@@ -278,14 +279,8 @@ function activateLogConsole(
 
   if (settingRegistry) {
     const updateSettings = (settings: ISettingRegistry.ISettings): void => {
-      const maxLogEntries = settings.get('maxLogEntries').composite as number;
-      entryLimit = maxLogEntries;
-
-      if (logConsoleWidget) {
-        logConsoleWidget.content.entryLimit = entryLimit;
-      }
-      status.model.entryLimit = entryLimit;
-
+      loggerRegistry.maxLength = settings.get('maxLogEntries')
+        .composite as number;
       flashEnabled = settings.get('flash').composite as boolean;
       status.model.flashEnabled = !logConsoleWidget && flashEnabled;
     };

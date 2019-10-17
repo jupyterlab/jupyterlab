@@ -42,8 +42,6 @@ interface ITimestampedOutput extends nbformat.IBaseOutput {
   timestamp: number;
 }
 
-export const DEFAULT_LOG_ENTRY_LIMIT: number = 1000;
-
 /**
  * Custom Notebook Output with optional timestamp.
  */
@@ -102,8 +100,26 @@ export class Logger implements ILogger {
    *
    * @param source - The name of the log source.
    */
-  constructor(source: string) {
-    this.source = source;
+  constructor(options: Logger.IOptions) {
+    this.source = options.source;
+    this.outputAreaModel = new LoggerOutputAreaModel({
+      contentFactory: new LogConsoleModelContentFactory(),
+      maxLength: options.maxLength
+    });
+  }
+
+  /**
+   * The maximum number of outputs stored.
+   *
+   * #### Notes
+   * Oldest entries will be trimmed to ensure the length is at most
+   * `.maxLength`.
+   */
+  get maxLength() {
+    return this.outputAreaModel.maxLength;
+  }
+  set maxLength(value: number) {
+    this.outputAreaModel.maxLength = value;
   }
 
   /**
@@ -174,6 +190,12 @@ export class Logger implements ILogger {
     this._logChanged.emit('clear');
   }
 
+  /**
+   * Rendermime to use when rendering outputs logged.
+   */
+  get rendermime(): IRenderMimeRegistry | null {
+    return this._rendermime;
+  }
   set rendermime(value: IRenderMimeRegistry | null) {
     if (value !== this._rendermime) {
       this._rendermime = value;
@@ -181,20 +203,24 @@ export class Logger implements ILogger {
     }
   }
 
-  /**
-   * Rendermime to use when rendering outputs logged.
-   */
-  get rendermime(): IRenderMimeRegistry | null {
-    return this._rendermime;
-  }
-
   readonly source: string;
-  readonly outputAreaModel = new LoggerOutputAreaModel({
-    contentFactory: new LogConsoleModelContentFactory()
-  });
+  readonly outputAreaModel: LoggerOutputAreaModel;
   private _logChanged = new Signal<this, ILoggerChange>(this);
   private _rendermimeChanged = new Signal<this, void>(this);
   private _rendermime: IRenderMimeRegistry | null = null;
+}
+
+export namespace Logger {
+  export interface IOptions {
+    /**
+     * The log source identifier.
+     */
+    source: string;
+    /**
+     * The maximum number of messages to store.
+     */
+    maxLength: number;
+  }
 }
 
 /**
@@ -207,8 +233,9 @@ export class LoggerRegistry implements ILoggerRegistry {
    * @param defaultRendermime - Default rendermime to render outputs
    * with when logger is not supplied with one.
    */
-  constructor(defaultRendermime: IRenderMimeRegistry) {
-    this._defaultRendermime = defaultRendermime;
+  constructor(options: LoggerRegistry.IOptions) {
+    this._defaultRendermime = options.defaultRendermime;
+    this._maxLength = options.maxLength;
   }
 
   /**
@@ -225,7 +252,7 @@ export class LoggerRegistry implements ILoggerRegistry {
       return logger;
     }
 
-    logger = new Logger(source);
+    logger = new Logger({ source, maxLength: this.maxLength });
     logger.rendermime = this._defaultRendermime;
     loggers.set(source, logger);
 
@@ -250,9 +277,31 @@ export class LoggerRegistry implements ILoggerRegistry {
     return this._registryChanged;
   }
 
+  /**
+   * The max length for loggers.
+   */
+  get maxLength(): number {
+    return this._maxLength;
+  }
+  set maxLength(value: number) {
+    this._maxLength = value;
+    this._loggers.forEach(logger => {
+      logger.maxLength = value;
+    });
+  }
+
+  private _maxLength: number;
+
   private _loggers = new Map<string, Logger>();
   private _registryChanged = new Signal<this, ILoggerRegistryChange>(this);
   private _defaultRendermime: IRenderMimeRegistry = null;
+}
+
+export namespace LoggerRegistry {
+  export interface IOptions {
+    defaultRendermime: IRenderMimeRegistry;
+    maxLength: number;
+  }
 }
 
 /**
@@ -321,29 +370,54 @@ class LogConsoleOutputArea extends OutputArea {
  * limit number of outputs stored.
  */
 class LoggerOutputAreaModel extends OutputAreaModel {
-  constructor(options?: IOutputAreaModel.IOptions) {
+  constructor({ maxLength, ...options }: LoggerOutputAreaModel.IOptions) {
     super(options);
+    this.maxLength = maxLength;
   }
 
   /**
-   * Maximum number of log entries to store in the model.
+   * Add an output, which may be combined with previous output.
+   *
+   * @returns The total number of outputs.
+   *
+   * #### Notes
+   * The output bundle is copied. Contiguous stream outputs of the same `name`
+   * are combined. The oldest outputs are possibly removed to ensure the total
+   * number of outputs is at most `.maxLength`.
    */
-  set entryLimit(limit: number) {
-    this._entryLimit = limit;
-    this.applyLimit();
+  add(output: nbformat.IOutput): number {
+    super.add(output);
+    this._applyMaxLength();
+    return this.length;
   }
 
   /**
-   * Manually apply entry limit.
+   * Maximum number of outputs to store in the model.
    */
-  applyLimit() {
-    if (this.list.length > this._entryLimit) {
-      const diff = this.list.length - this._entryLimit;
-      this.list.removeRange(0, diff);
+  set maxLength(value: number) {
+    this._maxLength = value;
+    this._applyMaxLength();
+  }
+
+  /**
+   * Manually apply length limit.
+   */
+  private _applyMaxLength() {
+    if (this.list.length > this._maxLength) {
+      this.list.removeRange(0, this.list.length - this._maxLength);
     }
   }
 
-  private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
+  private _maxLength: number;
+}
+
+export namespace LoggerOutputAreaModel {
+  export interface IOptions extends IOutputAreaModel.IOptions {
+    /**
+     * The maximum number of messages stored.
+     */
+    maxLength: number;
+  }
 }
 
 /**
@@ -508,7 +582,6 @@ export class LogConsolePanel extends StackedPanel {
           model: logger.outputAreaModel
         });
         outputArea.id = viewId;
-        outputArea.model.entryLimit = this.entryLimit;
 
         logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
           this._scrollOuputAreaToBottom(outputArea);
@@ -516,7 +589,6 @@ export class LogConsolePanel extends StackedPanel {
 
         outputArea.outputLengthChanged.connect(
           (sender: LogConsoleOutputArea, args: number) => {
-            outputArea.model.applyLimit();
             clearTimeout(this._scrollTimer);
             this._scrollTimer = setTimeout(() => {
               this._scrollOuputAreaToBottom(outputArea);
@@ -542,28 +614,10 @@ export class LogConsolePanel extends StackedPanel {
     }
   }
 
-  /**
-   * Log output entry limit.
-   */
-  get entryLimit(): number {
-    return this._entryLimit;
-  }
-
-  set entryLimit(limit: number) {
-    if (limit > 0) {
-      this._outputAreas.forEach((outputView: LogConsoleOutputArea) => {
-        outputView.model.entryLimit = limit;
-      });
-
-      this._entryLimit = limit;
-    }
-  }
-
   private _loggerRegistry: ILoggerRegistry;
   private _outputAreas = new Map<string, LogConsoleOutputArea>();
   private _source: string | null = null;
   private _sourceChanged = new Signal<this, string | null>(this);
-  private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
   private _scrollTimer: number = null;
   private _placeholder: Widget;
   private _loggersWatched: Set<string> = new Set();
