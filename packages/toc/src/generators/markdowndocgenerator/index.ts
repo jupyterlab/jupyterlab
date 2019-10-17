@@ -21,9 +21,11 @@ import {
   INumberedHeading
 } from '../shared';
 
-import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
-
 import { TableOfContents } from '../../toc';
+
+import { parseHeading } from '../../utils/parse_heading';
+
+import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
 
 import { markdownDocItemRenderer } from './itemrenderer';
 
@@ -122,7 +124,7 @@ export function createRenderedMarkdownGenerator(
 namespace Private {
   export function getMarkdownDocHeadings(
     text: string,
-    onClickFactory: (line: number) => (() => void),
+    onClickFactory: (line: number) => () => void,
     numberingDict: { [level: number]: number }
   ): INumberedHeading[] {
     // Split the text into lines.
@@ -130,10 +132,11 @@ namespace Private {
     let headings: INumberedHeading[] = [];
 
     let inCodeBlock = false;
+
     // Iterate over the lines to get the header level and
     // the text for the line.
     lines.forEach((line, idx) => {
-      // Don't check for markdown headings if we
+      // Don't check for Markdown headings if we
       // are in a code block (demarcated by backticks).
       if (line.indexOf('```') === 0) {
         inCodeBlock = !inCodeBlock;
@@ -141,61 +144,16 @@ namespace Private {
       if (inCodeBlock) {
         return;
       }
-      // Make an onClick handler for this line.
-      const onClick = onClickFactory(idx);
-
-      // First test for '#'-style headers.
-      let match = line.match(/^([#]{1,6}) (.*)/);
-      if (match) {
-        const level = match[1].length;
-        // Take special care to parse markdown links into raw text.
-        const text = match[2].replace(/\[(.+)\]\(.+\)/g, '$1');
-        let numbering = generateNumbering(numberingDict, level);
+      // Attempt to parse a heading:
+      const heading = parseHeading(
+        line + (lines[idx + 1] ? '\n' + lines[idx + 1] : '')
+      ); // append the next line to capture alternative style Markdown headings
+      if (heading) {
         headings.push({
-          text,
-          numbering,
-          level,
-          onClick
-        });
-        return;
-      }
-
-      // Next test for '==='-style headers.
-      match = line.match(/^([=]{2,}|[-]{2,})/);
-      if (match && idx > 0) {
-        const level = match[1][0] === '=' ? 1 : 2;
-        const prev = lines[idx - 1];
-        // If the previous line is already a '#'-style heading,
-        // then this is not a '===' style heading.
-        const prevMatch = prev.match(/^([#]{1,6}) (.*)/);
-        if (prevMatch) {
-          return;
-        }
-        // Take special care to parse markdown links into raw text.
-        const text = prev.replace(/\[(.+)\]\(.+\)/g, '$1');
-        let numbering = generateNumbering(numberingDict, level);
-        headings.push({
-          text,
-          numbering,
-          level,
-          onClick
-        });
-        return;
-      }
-
-      // Finally test for HTML headers. This will not catch multiline
-      // headers, nor will it catch multiple headers on the same line.
-      // It should do a decent job of catching many, though.
-      match = line.match(/<h([1-6])>(.*)<\/h\1>/i);
-      if (match) {
-        const level = parseInt(match[1], 10);
-        const text = match[2];
-        let numbering = generateNumbering(numberingDict, level);
-        headings.push({
-          text,
-          numbering,
-          level,
-          onClick
+          text: heading.text,
+          numbering: generateNumbering(numberingDict, heading.level),
+          level: heading.level,
+          onClick: onClickFactory(idx)
         });
         return;
       }

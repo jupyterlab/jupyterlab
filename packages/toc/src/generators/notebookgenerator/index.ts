@@ -408,11 +408,10 @@ namespace Private {
     const onClick = onClickFactory(0);
     const heading = parseHeading(text);
     if (heading) {
-      const numbering = generateNumbering(numberingDict, heading.level);
       return {
         text: heading.text,
         level: heading.level,
-        numbering,
+        numbering: generateNumbering(numberingDict, heading.level),
         onClick,
         type: 'header',
         cellRef: cellRef,
