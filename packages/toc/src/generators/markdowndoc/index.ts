@@ -48,7 +48,7 @@ export function createMarkdownGenerator(
 ): TableOfContentsRegistry.IGenerator<IDocumentWidget<FileEditor>> {
   // Create a option manager to manage user settings
   const options = new OptionsManager(widget, {
-    needsNumbering: true,
+    numbering: true,
     sanitizer
   });
   return {
@@ -96,7 +96,7 @@ export function createRenderedMarkdownGenerator(
   widget: TableOfContents
 ): TableOfContentsRegistry.IGenerator<MarkdownDocument> {
   const options = new OptionsManager(widget, {
-    needsNumbering: true,
+    numbering: true,
     sanitizer
   });
   return {
@@ -172,7 +172,7 @@ namespace Private {
     node: HTMLElement,
     sanitizer: ISanitizer,
     numberingDict: INumberingDictionary,
-    needsNumbering = true
+    numbering = true
   ): INumberedHeading[] {
     let headings: INumberedHeading[] = [];
     let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6');
@@ -180,7 +180,7 @@ namespace Private {
       const heading = headingNodes[i];
       const level = parseInt(heading.tagName[1], 10);
       let text = heading.textContent ? heading.textContent : '';
-      let shallHide = !needsNumbering;
+      let shallHide = !numbering;
 
       // Show/hide numbering DOM element based on user settings
       if (heading.getElementsByClassName('numbering-entry').length > 0) {
@@ -195,12 +195,12 @@ namespace Private {
       };
 
       // Get the numbering string
-      let numbering = generateNumbering(numberingDict, level);
+      let nstr = generateNumbering(numberingDict, level);
 
       // Generate the DOM element for numbering
       let numDOM = '';
       if (!shallHide) {
-        numDOM = '<span class="numbering-entry">' + numbering + '</span>';
+        numDOM = '<span class="numbering-entry">' + nstr + '</span>';
       }
 
       // Add DOM numbering element to document
@@ -210,7 +210,7 @@ namespace Private {
       headings.push({
         level,
         text,
-        numbering,
+        numbering: nstr,
         html,
         onClick
       });
