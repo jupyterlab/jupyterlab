@@ -160,8 +160,11 @@ function activateLogConsole(
       switch (msg.type) {
         case 'after-show':
         case 'after-attach':
-          if (logConsolePanel.isVisible) {
-            status.model.markSourceLogsViewed(status.model.source);
+          // Because we are running in a message hook,
+          // logConsolePanel.isVisible hasn't been updated yet, so we figure
+          // out visibility based on the parent logConsoleWidget's visibility.
+          if (logConsoleWidget.isVisible) {
+            status.model.markSourceLogsViewed(logConsolePanel.source);
             status.model.flashEnabled = false;
           }
           break;
@@ -175,14 +178,16 @@ function activateLogConsole(
       return true;
     });
 
-    logConsolePanel.sourceChanged.connect(() => {
+    logConsolePanel.sourceChanged.connect(panel => {
+      if (panel.isVisible && panel.source) {
+        status.model.markSourceLogsViewed(panel.source);
+      }
       app.commands.notifyCommandChanged();
     });
 
     logConsoleWidget.disposed.connect(() => {
       logConsoleWidget = null;
       app.commands.notifyCommandChanged();
-      status.model.flashEnabled = flashEnabled;
     });
 
     app.shell.add(logConsoleWidget, 'main', {
