@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 /**
- * Allowed HTML tags and associated attributes for the ToC entries when sanitizing HTML headings.
+ * Allowed HTML tags and associated attributes for ToC entries when sanitizing HTML headings.
  *
  * ## Notes
  *
