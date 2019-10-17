@@ -190,14 +190,14 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
   render() {
     if (this.model === null) {
       return null;
-    } else {
-      return (
-        <LogConsoleStatusComponent
-          handleClick={this._handleClick}
-          logCount={this.model.logCount}
-        />
-      );
     }
+
+    return (
+      <LogConsoleStatusComponent
+        handleClick={this._handleClick}
+        logCount={this.model.logCount}
+      />
+    );
   }
 
   private _flashHighlight() {
