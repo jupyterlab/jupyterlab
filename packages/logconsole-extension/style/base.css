@@ -12,10 +12,14 @@
 
 .jp-LogConsoleStatusItem.hilite {
   transition: background-color 1s ease-out;
-  background-color: var(--jp-info-color0);
+  color: var(--jp-info-color0);
+  background-color: var(--jp-info-color3);
+  border-color: var(--jp-info-color2);
 }
 .jp-LogConsoleStatusItem.hilited {
-  background-color: var(--jp-info-color0);
+  color: var(--jp-info-color0);
+  background-color: var(--jp-info-color3);
+  border-color: var(--jp-info-color2);
 }
 
 .jp-LogConsole .clear-icon {
