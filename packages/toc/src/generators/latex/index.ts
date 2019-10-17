@@ -15,6 +15,8 @@ import { IHeading } from '../../utils/headings';
  * ## Notes
  *
  * -   As `part` and `chapter` section headings appear to be less common, assign them to heading level 1.
+ *
+ * @private
  */
 const LATEX_LEVELS: { [label: string]: number } = {
   part: 1, // Only available for report and book classes
