@@ -23,9 +23,9 @@ import { isDOM } from '../../utils/is_dom';
 
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 
-import { NotebookGeneratorOptionsManager } from './optionsmanager';
+import { INotebookHeading } from '../../utils/inotebookheading';
 
-import { INotebookHeading } from './heading';
+import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
 import { generateNumbering } from '../shared';
 

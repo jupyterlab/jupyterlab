@@ -17,11 +17,11 @@ import { isMarkdown } from '../../utils/is_markdown';
 
 import { isDOM } from '../../utils/is_dom';
 
+import { INotebookHeading } from '../../utils/inotebookheading';
+
 import { CodeComponent } from './codemirror';
 
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
-
-import { INotebookHeading } from './heading';
 
 /**
  * Collapses or expands ("un-collapses") a notebook cell by either hiding or displaying its section-defined sub-cells (i.e., cells which have lower precedence).

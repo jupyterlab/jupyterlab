@@ -1,12 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IHeading } from '../toc';
-
-export interface INumberedHeading extends IHeading {
-  numbering?: string | null;
-}
-
 /**
  * Given a dictionary that keep tracks of the numbering and the level,
  * update the dictionary.

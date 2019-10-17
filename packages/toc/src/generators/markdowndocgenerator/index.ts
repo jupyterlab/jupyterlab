@@ -14,9 +14,11 @@ import {
 
 import { TableOfContentsRegistry } from '../../registry';
 
-import { generateNumbering, INumberedHeading } from '../shared';
+import { generateNumbering } from '../shared';
 
 import { TableOfContents } from '../../toc';
+
+import { INumberedHeading } from '../../utils/inumberedheading';
 
 import { parseHeading } from '../../utils/parse_heading';
 

@@ -3,7 +3,7 @@
 
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 
-import { INumberedHeading } from '../shared';
+import { INumberedHeading } from '../../utils/inumberedheading';
 
 import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
 
