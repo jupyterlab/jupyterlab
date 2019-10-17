@@ -451,13 +451,21 @@ export class LogConsolePanel extends StackedPanel {
   /**
    * The log source displayed
    */
-  get source(): string {
+  get source(): string | null {
     return this._source;
   }
-  set source(name: string) {
+  set source(name: string | null) {
     this._source = name;
     this._showOutputFromSource(this._source);
     this._handlePlaceholder();
+    this._sourceChanged.emit(name);
+  }
+
+  /**
+   * Signal for source changes
+   */
+  get sourceChanged(): ISignal<this, string | null> {
+    return this._sourceChanged;
   }
 
   private _handlePlaceholder() {
@@ -554,6 +562,7 @@ export class LogConsolePanel extends StackedPanel {
   private _loggerRegistry: ILoggerRegistry;
   private _outputAreas = new Map<string, LogConsoleOutputArea>();
   private _source: string | null = null;
+  private _sourceChanged = new Signal<this, string | null>(this);
   private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
   private _scrollTimer: number = null;
   private _placeholder: Widget;

@@ -488,8 +488,13 @@ function activateLogConsole(
       return true;
     });
 
+    logConsolePanel.sourceChanged.connect(() => {
+      app.commands.notifyCommandChanged();
+    });
+
     logConsoleWidget.disposed.connect(() => {
       logConsoleWidget = null;
+      app.commands.notifyCommandChanged();
       status.model.flashEnabled = flashEnabled;
     });
 
@@ -499,6 +504,7 @@ function activateLogConsole(
     });
 
     logConsoleWidget.update();
+    app.commands.notifyCommandChanged();
   };
 
   app.commands.addCommand(CommandIDs.open, {
@@ -516,8 +522,6 @@ function activateLogConsole(
     }
   });
 
-  // TODO: call app.commands.notifyCommandChanged() when enabled status
-  // changes
   app.commands.addCommand(CommandIDs.addTimestamp, {
     label: 'Add Timestamp',
     execute: () => {
