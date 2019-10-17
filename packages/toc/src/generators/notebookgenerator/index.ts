@@ -17,16 +17,13 @@ import { TableOfContents } from '../../toc';
 
 import { parseHeading } from '../../utils/parse_heading';
 
+import { isMarkdown } from '../../utils/is_markdown';
+
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
 import { INotebookHeading } from './heading';
 
-import {
-  generateNumbering,
-  isDOM,
-  isMarkdown,
-  sanitizerOptions
-} from '../shared';
+import { generateNumbering, isDOM, sanitizerOptions } from '../shared';
 
 /**
  * Create a TOC generator for notebooks.

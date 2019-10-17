@@ -9,9 +9,11 @@ import { Panel } from '@phosphor/widgets';
 
 import * as React from 'react';
 
-import { sanitizerOptions, isDOM, isMarkdown } from '../shared';
+import { sanitizerOptions, isDOM } from '../shared';
 
 import { parseHeading } from '../../utils/parse_heading';
+
+import { isMarkdown } from '../../utils/is_markdown';
 
 import { CodeComponent } from './codemirror';
 
