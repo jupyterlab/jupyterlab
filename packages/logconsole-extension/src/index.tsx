@@ -58,15 +58,14 @@ const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
   activate: activateLogConsole,
   id: LOG_CONSOLE_PLUGIN_ID,
   provides: ILoggerRegistry,
-  requires: [
-    ILabShell,
+  requires: [ILabShell, IRenderMimeRegistry, INotebookTracker],
+  optional: [
     IMainMenu,
     ICommandPalette,
-    INotebookTracker,
     IStatusBar,
-    IRenderMimeRegistry
+    ILayoutRestorer,
+    ISettingRegistry
   ],
-  optional: [ILayoutRestorer, ISettingRegistry],
   autoStart: true
 };
 
@@ -76,11 +75,11 @@ const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
 function activateLogConsole(
   app: JupyterFrontEnd,
   labShell: ILabShell,
-  mainMenu: IMainMenu,
-  palette: ICommandPalette,
-  nbtracker: INotebookTracker,
-  statusBar: IStatusBar,
   rendermime: IRenderMimeRegistry,
+  nbtracker: INotebookTracker,
+  mainMenu: IMainMenu | null,
+  palette: ICommandPalette | null,
+  statusBar: IStatusBar | null,
   restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null
 ): ILoggerRegistry {
@@ -227,18 +226,24 @@ function activateLogConsole(
     iconClass: 'fa fa-ban clear-icon'
   });
 
-  mainMenu.viewMenu.addGroup([{ command: CommandIDs.open }]);
-  palette.addItem({ command: CommandIDs.open, category: 'Main Area' });
   app.contextMenu.addItem({
     command: CommandIDs.open,
     selector: '.jp-Notebook'
   });
-  statusBar.registerStatusItem('@jupyterlab/logconsole-extension:status', {
-    item: status,
-    align: 'left',
-    isActive: () => true,
-    activeStateChanged: status.model!.stateChanged
-  });
+  if (mainMenu) {
+    mainMenu.viewMenu.addGroup([{ command: CommandIDs.open }]);
+  }
+  if (palette) {
+    palette.addItem({ command: CommandIDs.open, category: 'Main Area' });
+  }
+  if (statusBar) {
+    statusBar.registerStatusItem('@jupyterlab/logconsole-extension:status', {
+      item: status,
+      align: 'left',
+      isActive: () => true,
+      activeStateChanged: status.model!.stateChanged
+    });
+  }
 
   function setSource(newValue: Widget) {
     if (logConsoleWidget && newValue === logConsoleWidget) {
