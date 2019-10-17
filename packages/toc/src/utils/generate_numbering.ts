@@ -2,43 +2,73 @@
 // Distributed under the terms of the Modified BSD License.
 
 /**
- * Given a dictionary that keep tracks of the numbering and the level,
- * update the dictionary.
+ * Interface describing a numbering dictionary.
+ *
+ * @private
  */
-function incrementNumberingDict(dict: any, level: number) {
-  let x = level + 1;
-  while (x <= 6) {
-    if (dict[x] != undefined) {
-      dict[x] = undefined;
+interface INumberingDictionary {
+  /**
+   * Level numbering.
+   */
+  [level: number]: number;
+}
+
+// Maximum heading level:
+const MAX_HEADING_LEVEL = 6;
+
+/**
+ * Updates numbering dictionary levels.
+ *
+ * ## Notes
+ *
+ * -   Mutates a provided dictionary.
+ *
+ * @private
+ * @param dict - numbering dictionary
+ * @param level - current level
+ * @returns input dictionary
+ */
+function update(dict: any, level: number) {
+  for (let l = level + 1; l <= MAX_HEADING_LEVEL; l++) {
+    if (dict[l] !== void 0) {
+      dict[l] = void 0;
     }
-    x++;
   }
-  if (dict[level] === undefined) {
+  if (dict[level] === void 0) {
     dict[level] = 1;
   } else {
-    dict[level]++;
+    dict[level] += 1;
   }
+  return dict;
 }
 
 /**
- * Given a dictionary that keep tracks of the numbering and the current level,
- * generate the current numbering based on the dictionary and current level.
+ * Generate the current numbering based on a provided numbering dictionary and the current level.
+ *
+ * @private
+ * @param dict - numbering dictionary
+ * @param level - current level
+ * @returns numbering
  */
-export function generateNumbering(
-  numberingDict: { [level: number]: number },
+function generateNumbering(
+  dict: INumberingDictionary,
   level: number
-) {
-  let numbering = undefined;
-  if (numberingDict != null) {
-    incrementNumberingDict(numberingDict, level);
-    numbering = '';
+): string | undefined {
+  if (dict === null) {
+    return;
+  }
+  let numbering = '';
+  dict = update(dict, level);
+  if (level >= 1) {
     for (let j = 1; j <= level; j++) {
-      numbering +=
-        (numberingDict[j] == undefined ? '0' : numberingDict[j]) + '.';
-      if (j === level) {
-        numbering += ' ';
-      }
+      numbering += (dict[j] === void 0 ? '0' : dict[j]) + '.';
     }
+    numbering += ' ';
   }
   return numbering;
 }
+
+/**
+ * Exports.
+ */
+export { generateNumbering };
