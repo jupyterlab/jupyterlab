@@ -1,31 +1,38 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as React from 'react';
+
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 
 import { INumberedHeading } from '../../utils/headings';
 
 import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
 
-import * as React from 'react';
-
-export function markdownDocItemRenderer(
+/**
+ * Renders a Markdown table of contents item.
+ *
+ * @private
+ * @param options - generator options
+ * @param item - numbered heading
+ * @returns rendered item
+ */
+function render(
   options: MarkdownDocGeneratorOptionsManager,
   item: INumberedHeading
 ) {
-  let fontSizeClass = 'toc-level-size-default';
+  let fontSizeClass = 'toc-level-size-' + item.level;
 
-  // Render numbering if needed
+  // Render item numbering:
   let numbering = item.numbering && options.numbering ? item.numbering : '';
-  fontSizeClass = 'toc-level-size-' + item.level;
+
+  // Render the item:
   let jsx;
   if (item.html) {
+    let html = options.sanitizer.sanitize(item.html, sanitizerOptions);
     jsx = (
       <span
-        dangerouslySetInnerHTML={{
-          __html:
-            numbering + options.sanitizer.sanitize(item.html, sanitizerOptions)
-        }}
+        dangerouslySetInnerHTML={{ __html: numbering + html }}
         className={'toc-markdown-cell ' + fontSizeClass}
       />
     );
@@ -34,3 +41,8 @@ export function markdownDocItemRenderer(
   }
   return jsx;
 }
+
+/**
+ * Exports.
+ */
+export { render };

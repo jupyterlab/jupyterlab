@@ -30,7 +30,7 @@ import { sanitizerOptions } from '../../utils/sanitizer_options';
 
 import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
 
-import { markdownDocItemRenderer } from './itemrenderer';
+import { render } from './render';
 
 import { markdownDocGeneratorToolbar } from './toolbargenerator';
 
@@ -59,7 +59,7 @@ export function createMarkdownGenerator(
       return markdownDocGeneratorToolbar(options);
     },
     itemRenderer: (item: INumberedHeading) => {
-      return markdownDocItemRenderer(options, item);
+      return render(options, item);
     },
     isEnabled: editor => {
       // Only enable this if the editor mimetype matches
@@ -107,7 +107,7 @@ export function createRenderedMarkdownGenerator(
       return markdownDocGeneratorToolbar(options);
     },
     itemRenderer: (item: INumberedHeading) => {
-      return markdownDocItemRenderer(options, item);
+      return render(options, item);
     },
     generate: widget => {
       let numberingDict: INumberingDictionary = {};
