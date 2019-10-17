@@ -5,7 +5,7 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
-import { TableOfContentsRegistry } from '../../registry';
+import { TableOfContentsRegistry as Registry } from '../../registry';
 
 import { IHeading } from '../../utils/headings';
 
@@ -114,7 +114,7 @@ function generate(editor: IDocumentWidget<FileEditor>): Array<IHeading> {
  */
 function createLatexGenerator(
   tracker: IEditorTracker
-): TableOfContentsRegistry.IGenerator<IDocumentWidget<FileEditor>> {
+): Registry.IGenerator<IDocumentWidget<FileEditor>> {
   return {
     tracker,
     usesLatex: true,
