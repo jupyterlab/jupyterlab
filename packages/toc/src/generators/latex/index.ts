@@ -109,8 +109,8 @@ function generate(editor: IDocumentWidget<FileEditor>): Array<IHeading> {
  * Returns a ToC generator for LaTeX files.
  *
  * @private
- * @param tracker - A file editor tracker
- * @returns ToC generator for parsing LaTeX files
+ * @param tracker - file editor tracker
+ * @returns ToC generator capable of parsing LaTeX files
  */
 function createLatexGenerator(
   tracker: IEditorTracker
