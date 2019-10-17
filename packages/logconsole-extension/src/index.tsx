@@ -46,7 +46,7 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { Signal } from '@phosphor/signaling';
 
-import { DockLayout } from '@phosphor/widgets';
+import { DockLayout, Widget } from '@phosphor/widgets';
 import { MessageLoop } from '@phosphor/messaging';
 
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
@@ -411,9 +411,6 @@ function activateLogConsole(
   if (restorer) {
     void restorer.restore(tracker, {
       command: CommandIDs.open,
-      args: obj => ({
-        source: obj.content.source
-      }),
       name: () => 'logconsole'
     });
   }
@@ -550,13 +547,6 @@ function activateLogConsole(
     command: CommandIDs.open,
     selector: '.jp-Notebook'
   });
-
-  let appRestored = false;
-
-  void app.restored.then(() => {
-    appRestored = true;
-  });
-
   statusBar.registerStatusItem('@jupyterlab/logconsole-extension:status', {
     item: status,
     align: 'left',
@@ -564,53 +554,35 @@ function activateLogConsole(
     activeStateChanged: status.model!.stateChanged
   });
 
-  nbtracker.widgetAdded.connect(
-    (sender: INotebookTracker, nb: NotebookPanel) => {
-      nb.activated.connect((nb: NotebookPanel, args: void) => {
-        // set source only after app is restored
-        // in order to allow restorer to restore previous Source
-        if (!appRestored) {
-          return;
-        }
-
-        const sourceName = nb.context.path;
-        if (logConsoleWidget) {
-          logConsoleWidget.content.source = sourceName;
-          status.model.markSourceLogsViewed(sourceName);
-          void tracker.save(logConsoleWidget);
-        }
-        status.model.source = sourceName;
-      });
-
-      nb.disposed.connect((nb: NotebookPanel, args: void) => {
-        const sourceName = nb.context.path;
-        if (
-          logConsoleWidget &&
-          logConsoleWidget.content.source === sourceName
-        ) {
-          logConsoleWidget.content.source = null;
-          void tracker.save(logConsoleWidget);
-        }
-        if (status.model.source === sourceName) {
-          status.model.source = null;
-        }
-      });
+  function setSource(newValue: Widget) {
+    if (logConsoleWidget && newValue === logConsoleWidget) {
+      // Do not change anything if we are just focusing on ourself
+      return;
     }
-  );
 
-  labShell.currentChanged.connect((_, change) => {
-    const newValue = change.newValue;
+    let source: string | null;
+    if (newValue && nbtracker.has(newValue)) {
+      source = (newValue as NotebookPanel).context.path;
+    } else {
+      source = null;
+    }
 
-    // if a new tab is activated which is not a notebook,
-    // then reset log display and count
-    if (newValue && newValue !== logConsoleWidget && !nbtracker.has(newValue)) {
-      if (logConsoleWidget) {
-        logConsoleWidget.content.source = null;
-        void tracker.save(logConsoleWidget);
+    status.model.source = source;
+    if (logConsoleWidget) {
+      logConsoleWidget.content.source = source;
+      // We don't need to save the source, since when we restore we just pick
+      // up whatever source is currently active.
+      // void tracker.save(logConsoleWidget);
+      if (logConsoleWidget.isVisible) {
+        status.model.markSourceLogsViewed(source);
       }
-
-      status.model.source = null;
     }
+  }
+  void app.restored.then(() => {
+    // Set source only after app is restored in order to allow restorer to
+    // restore previous source first, which may set the renderer
+    setSource(labShell.currentWidget);
+    labShell.currentChanged.connect((_, { newValue }) => setSource(newValue));
   });
 
   if (settingRegistry) {
