@@ -23,7 +23,7 @@ type onClickFactory = (line: number) => () => void;
  *
  * @private
  * @param text - input text
- * @param onClick - "click" handler
+ * @param onClick - callback which returns a "click" handler
  * @param dict - numbering dictionary
  * @returns list of headings
  */
@@ -32,37 +32,33 @@ function getHeadings(
   onClick: onClickFactory,
   dict: INumberingDictionary
 ): INumberedHeading[] {
-  // Split the text into lines.
+  // Split the text into lines:
   const lines = text.split('\n');
+
+  // Iterate over the lines to get the header level and text for each line:
   let headings: INumberedHeading[] = [];
+  let FLG;
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
 
-  let inCodeBlock = false;
-
-  // Iterate over the lines to get the header level and
-  // the text for the line.
-  lines.forEach((line, idx) => {
-    // Don't check for Markdown headings if we
-    // are in a code block (demarcated by backticks).
+    // Don't check for Markdown headings if in a code block:
     if (line.indexOf('```') === 0) {
-      inCodeBlock = !inCodeBlock;
+      FLG = !FLG;
     }
-    if (inCodeBlock) {
-      return;
+    if (FLG) {
+      continue;
     }
-    // Attempt to parse a heading:
-    const heading = parseHeading(
-      line + (lines[idx + 1] ? '\n' + lines[idx + 1] : '')
-    ); // append the next line to capture alternative style Markdown headings
+    line += lines[i + 1] ? '\n' + lines[i + 1] : '';
+    const heading = parseHeading(line); // append the next line to capture alternative style Markdown headings
     if (heading) {
       headings.push({
         text: heading.text,
         numbering: generateNumbering(dict, heading.level),
         level: heading.level,
-        onClick: onClick(idx)
+        onClick: onClick(i)
       });
-      return;
     }
-  });
+  }
   return headings;
 }
 
