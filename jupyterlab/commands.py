@@ -29,7 +29,7 @@ from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 
 from .semver import Range, gte, lt, lte, gt, make_semver
 from .jlpmapp import YARN_PATH, HERE
-from .coreconfig import _get_default_core_data
+from .coreconfig import _get_default_core_data, CoreConfig
 
 
 # The regex for expecting the webpack output.
