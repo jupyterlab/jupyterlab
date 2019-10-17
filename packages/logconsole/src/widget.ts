@@ -555,7 +555,7 @@ export class LogConsolePanel extends StackedPanel {
   readonly attached = new Signal<this, void>(this);
   private _loggerRegistry: ILoggerRegistry;
   private _outputAreas = new Map<string, LogConsoleOutputArea>();
-  private _source: string = null;
+  private _source: string | null = null;
   private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
   private _scrollTimer: number = null;
   private _placeholder: Widget;

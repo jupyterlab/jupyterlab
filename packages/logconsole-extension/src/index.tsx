@@ -11,7 +11,7 @@ import {
 import {
   MainAreaWidget,
   WidgetTracker,
-  ToolbarButton
+  CommandToolbarButton
 } from '@jupyterlab/apputils';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
@@ -49,6 +49,17 @@ import { Signal } from '@phosphor/signaling';
 import { DockLayout } from '@phosphor/widgets';
 
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
+
+/**
+ * The command IDs used by the plugin.
+ */
+namespace CommandIDs {
+  export const open = 'logconsole:open';
+
+  export const addTimestamp = 'logconsole:add-timestamp';
+
+  export const clear = 'logconsole:clear';
+}
 
 /**
  * The Log Console extension.
@@ -391,8 +402,6 @@ function activateLogConsole(
   let flashEnabled: boolean = true;
 
   const loggerRegistry = new LoggerRegistry(rendermime);
-  const command = 'logconsole:open';
-  const category: string = 'Main Area';
 
   const tracker = new WidgetTracker<MainAreaWidget<LogConsolePanel>>({
     namespace: 'logconsole'
@@ -400,7 +409,7 @@ function activateLogConsole(
 
   if (restorer) {
     void restorer.restore(tracker, {
-      command,
+      command: CommandIDs.open,
       args: obj => ({
         source: obj.content.source
       }),
@@ -445,28 +454,14 @@ function activateLogConsole(
     logConsoleWidget.title.iconClass = 'jp-LogConsoleIcon';
     logConsolePanel.entryLimit = entryLimit;
 
-    const addTimestampButton = new ToolbarButton({
-      onClick: (): void => {
-        if (!logConsolePanel.source) {
-          return;
-        }
-
-        const logger = loggerRegistry.getLogger(logConsolePanel.source);
-        logger.log({ type: 'html', data: '<hr>' });
-      },
-      iconClassName: 'jp-AddIcon',
-      tooltip: 'Add Timestamp',
-      label: 'Add Timestamp'
+    const addTimestampButton = new CommandToolbarButton({
+      commands: app.commands,
+      id: CommandIDs.addTimestamp
     });
 
-    const clearButton = new ToolbarButton({
-      onClick: (): void => {
-        const logger = loggerRegistry.getLogger(logConsolePanel.source);
-        logger.clear();
-      },
-      iconClassName: 'fa fa-ban clear-icon',
-      tooltip: 'Clear Logs',
-      label: 'Clear Logs'
+    const clearButton = new CommandToolbarButton({
+      commands: app.commands,
+      id: CommandIDs.clear
     });
 
     logConsoleWidget.toolbar.addItem(
@@ -495,7 +490,7 @@ function activateLogConsole(
     logConsoleWidget.update();
   };
 
-  app.commands.addCommand(command, {
+  app.commands.addCommand(CommandIDs.open, {
     label: 'Show Log Console',
     execute: (options: ILogConsoleOptions = {}) => {
       // Toggle the display
@@ -510,10 +505,34 @@ function activateLogConsole(
     }
   });
 
-  mainMenu.viewMenu.addGroup([{ command }]);
-  palette.addItem({ command, category });
+  // TODO: call app.commands.notifyCommandChanged() when enabled status
+  // changes
+  app.commands.addCommand(CommandIDs.addTimestamp, {
+    label: 'Add Timestamp',
+    execute: () => {
+      const logger = loggerRegistry.getLogger(logConsoleWidget.content.source);
+      logger.log({ type: 'html', data: '<hr>' });
+    },
+    isEnabled: () =>
+      logConsoleWidget && logConsoleWidget.content.source !== null,
+    iconClass: 'jp-AddIcon'
+  });
+
+  app.commands.addCommand(CommandIDs.clear, {
+    label: 'Clear Log',
+    execute: () => {
+      const logger = loggerRegistry.getLogger(logConsoleWidget.content.source);
+      logger.clear();
+    },
+    isEnabled: () =>
+      logConsoleWidget && logConsoleWidget.content.source !== null,
+    iconClass: 'fa fa-ban clear-icon'
+  });
+
+  mainMenu.viewMenu.addGroup([{ command: CommandIDs.open }]);
+  palette.addItem({ command: CommandIDs.open, category: 'Main Area' });
   app.contextMenu.addItem({
-    command: command,
+    command: CommandIDs.open,
     selector: '.jp-Notebook'
   });
 
