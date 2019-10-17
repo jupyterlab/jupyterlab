@@ -9,35 +9,78 @@ import { sanitizerOptions } from '../../utils/sanitizer_options';
 
 import { INotebookHeading } from '../../utils/headings';
 
-export interface ICodeComponentProps {
+/**
+ * Interface describing code component properties.
+ *
+ * @private
+ */
+interface IProperties {
+  /**
+   * HTML sanitizer.
+   */
   sanitizer: ISanitizer;
+
+  /**
+   * Notebook heading.
+   */
   heading: INotebookHeading;
 }
 
-export interface ICodeComponentState {
+/**
+ * Interface describing code component state.
+ */
+interface IState {
+  /**
+   * Notebook heading.
+   */
   heading: INotebookHeading;
 }
 
-export class CodeComponent extends React.Component<
-  ICodeComponentProps,
-  ICodeComponentState
-> {
-  constructor(props: ICodeComponentProps) {
+/**
+ * Class for rendering a code component.
+ *
+ * @private
+ */
+class CodeComponent extends React.Component<IProperties, IState> {
+  /**
+   * Returns a code component.
+   *
+   * @param props - component properties
+   * @returns code component
+   */
+  constructor(props: IProperties) {
     super(props);
     this.state = { heading: props.heading };
   }
 
-  componentWillReceiveProps(nextProps: ICodeComponentProps) {
+  /**
+   * Updates code component state.
+   *
+   * @param props - component properties
+   */
+  componentWillReceiveProps(nextProps: IProperties) {
     this.setState({ heading: nextProps.heading });
   }
 
+  /**
+   * Renders a code component.
+   *
+   * @returns rendered component
+   */
   render() {
-    // Grab the rendered CodeMirror DOM in the document, show it in TOC.
+    // Get the current rendered CodeMirror:
     let html = this.state.heading.cellRef!.editor.host.innerHTML;
-    // Sanitize it to be safe.
+
+    // Sanitize the HTML:
     html = this.props.sanitizer.sanitize(html, sanitizerOptions);
+
     return (
       <div className="cm-toc" dangerouslySetInnerHTML={{ __html: html }} />
     );
   }
 }
+
+/**
+ * Exports.
+ */
+export { CodeComponent };
