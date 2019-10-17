@@ -10,13 +10,30 @@ import { TableOfContentsRegistry } from '../../registry';
 import { IHeading } from '../../utils/headings';
 
 /**
- * Create a TOC generator for LaTeX files.
+ * Maps LaTeX section headings to HTML header levels.
  *
- * @param tracker: A file editor tracker.
+ * ## Notes
  *
- * @returns A TOC generator that can parse LaTeX files.
+ * -   As `part` and `chapter` section headings appear to be less common, assign them to heading level 1.
  */
-export function createLatexGenerator(
+const LATEX_LEVELS: { [label: string]: number } = {
+  part: 1, // Only available for report and book classes
+  chapter: 1, // Only available for report and book classes
+  section: 1,
+  subsection: 2,
+  subsubsection: 3,
+  paragraph: 4,
+  subparagraph: 5
+};
+
+/**
+ * Returns a ToC generator for LaTeX files.
+ *
+ * @private
+ * @param tracker - A file editor tracker
+ * @returns ToC generator for parsing LaTeX files
+ */
+function createLatexGenerator(
   tracker: IEditorTracker
 ): TableOfContentsRegistry.IGenerator<IDocumentWidget<FileEditor>> {
   return {
@@ -46,7 +63,7 @@ export function createLatexGenerator(
           /^\s*\\(section|subsection|subsubsection){(.+)}/
         );
         if (match) {
-          const level = Private.latexLevels[match[1]];
+          const level = LATEX_LEVELS[match[1]];
           const text = match[2];
           const onClick = () => {
             editor.content.editor.setCursorPosition({
@@ -63,21 +80,6 @@ export function createLatexGenerator(
 }
 
 /**
- * A private namespace for miscellaneous things.
+ * Exports.
  */
-namespace Private {
-  /**
-   * A mapping from LaTeX section headers to HTML header
-   * levels. `part` and `chapter` are less common in my experience,
-   * so assign them to header level 1.
-   */
-  export const latexLevels: { [label: string]: number } = {
-    part: 1, // Only available for report and book classes
-    chapter: 1, // Only available for report and book classes
-    section: 1,
-    subsection: 2,
-    subsubsection: 3,
-    paragraph: 4,
-    subparagraph: 5
-  };
-}
+export { createLatexGenerator };
