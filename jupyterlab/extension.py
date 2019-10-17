@@ -139,8 +139,8 @@ def load_jupyter_server_extension(nbapp):
         core_mode = False
 
     page_config = web_app.settings.setdefault('page_config_data', dict())
-    page_config['buildAvailable'] = not core_mode and not dev_mode
-    page_config['buildCheck'] = not core_mode and not dev_mode
+    page_config.setdefault('buildAvailable', not core_mode and not dev_mode)
+    page_config.setdefault('buildCheck', not core_mode and not dev_mode)
     page_config['devMode'] = dev_mode
     page_config['token'] = nbapp.token
 
