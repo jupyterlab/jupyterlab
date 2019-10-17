@@ -29,6 +29,37 @@ const LATEX_LEVELS: { [label: string]: number } = {
 };
 
 /**
+ * Converts array elements to "entries".
+ *
+ * @private
+ * @param arr - input array
+ * @returns input array
+ *
+ * @example
+ * const arr = toEntries([4,5,6]);
+ * // returns [[4,0], [5,1], [6,2]]
+ */
+function toEntries(arr: Array<any>): Array<any> {
+  for (let i = 0; i < arr.length; i++) {
+    arr[i] = [arr[i], i];
+  }
+  return arr;
+}
+
+/**
+ * Returns a boolean indicating whether this ToC generator is enabled.
+ *
+ * @private
+ * @param editor - editor
+ * @returns boolean indicating whether this ToC generator is enabled
+ */
+function isEnabled(editor: IDocumentWidget<FileEditor>) {
+  // Only enable this if the editor MIME type matches one of a few LaTeX variants.
+  let mime = editor.content.model.mimeType;
+  return mime === 'text/x-latex' || mime === 'text/x-stex';
+}
+
+/**
  * Returns a ToC generator for LaTeX files.
  *
  * @private
@@ -41,42 +72,44 @@ function createLatexGenerator(
   return {
     tracker,
     usesLatex: true,
-    isEnabled: editor => {
-      // Only enable this if the editor mimetype matches
-      // one of a few LaTeX variants.
-      let mime = editor.content.model.mimeType;
-      return mime === 'text/x-latex' || mime === 'text/x-stex';
-    },
+    isEnabled: isEnabled,
     generate: editor => {
-      let headings: IHeading[] = [];
-      let model = editor.content.model;
-
       // Split the text into lines, with the line number for each.
       // We will use the line number to scroll the editor upon
-      // TOC item click.
-      const lines = model.value.text.split('\n').map((value, idx) => {
-        return { value, idx };
-      });
+      // ToC item click.
+      const lines = toEntries(editor.content.model.value.text.split('\n'));
 
       // Iterate over the lines to get the header level and
       // the text for the line.
-      lines.forEach(line => {
-        const match = line.value.match(
-          /^\s*\\(section|subsection|subsubsection){(.+)}/
-        );
+      let headings: IHeading[] = [];
+      for (let i = 0; i < lines.length; i++) {
+        const RE = /^\s*\\(section|subsection|subsubsection){(.+)}/;
+        const match = lines[i][0].match(RE);
         if (match) {
-          const level = LATEX_LEVELS[match[1]];
-          const text = match[2];
-          const onClick = () => {
-            editor.content.editor.setCursorPosition({
-              line: line.idx,
-              column: 0
-            });
-          };
-          headings.push({ text, level, onClick });
+          headings.push({
+            text: match[2],
+            level: LATEX_LEVELS[match[1]],
+            onClick: onClick(lines[i][1])
+          });
         }
-      });
+      }
       return headings;
+
+      /**
+       * Returns a "click" handler.
+       *
+       * @private
+       * @param line - line number
+       * @returns click handler
+       */
+      function onClick(line: number) {
+        return () => {
+          editor.content.editor.setCursorPosition({
+            line: line,
+            column: 0
+          });
+        };
+      }
     }
   };
 }
