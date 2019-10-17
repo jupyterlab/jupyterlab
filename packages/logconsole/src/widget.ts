@@ -387,16 +387,13 @@ export class LogConsolePanel extends StackedPanel {
 
     this._placeholder = new Widget();
     this._placeholder.addClass('jp-LogConsoleListPlaceholder');
-    this._placeholder.node.innerHTML = 'No log messages.';
-
     this.addWidget(this._placeholder);
   }
 
-  protected onAfterAttach(msg: Message): void {
+  protected onAfterShow(msg: Message): void {
     this._updateOutputAreas();
     this._showOutputFromSource(this._source);
-    this._showPlaceholderIfNoMessage();
-    this.attached.emit();
+    this._handlePlaceholder();
   }
 
   private _bindLoggerSignals() {
@@ -408,7 +405,7 @@ export class LogConsolePanel extends StackedPanel {
 
       logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
         this._updateOutputAreas();
-        this._showPlaceholderIfNoMessage();
+        this._handlePlaceholder();
       }, this);
 
       logger.rendermimeChanged.connect((sender: ILogger) => {
@@ -460,17 +457,19 @@ export class LogConsolePanel extends StackedPanel {
   set source(name: string) {
     this._source = name;
     this._showOutputFromSource(this._source);
-    this._showPlaceholderIfNoMessage();
+    this._handlePlaceholder();
   }
 
-  private _showPlaceholderIfNoMessage() {
-    const noMessage =
-      !this.source || this._loggerRegistry.getLogger(this.source).length === 0;
-
-    if (noMessage) {
+  private _handlePlaceholder() {
+    if (this.source === null) {
+      this._placeholder.node.textContent = 'No source selected.';
+      this._placeholder.show();
+    } else if (this._loggerRegistry.getLogger(this.source).length === 0) {
+      this._placeholder.node.textContent = 'No log messages.';
       this._placeholder.show();
     } else {
       this._placeholder.hide();
+      this._placeholder.node.textContent = '';
     }
   }
 
@@ -552,7 +551,6 @@ export class LogConsolePanel extends StackedPanel {
     }
   }
 
-  readonly attached = new Signal<this, void>(this);
   private _loggerRegistry: ILoggerRegistry;
   private _outputAreas = new Map<string, LogConsoleOutputArea>();
   private _source: string | null = null;

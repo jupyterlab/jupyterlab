@@ -47,6 +47,7 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { Signal } from '@phosphor/signaling';
 
 import { DockLayout } from '@phosphor/widgets';
+import { MessageLoop } from '@phosphor/messaging';
 
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
 
@@ -472,9 +473,19 @@ function activateLogConsole(
 
     void tracker.add(logConsoleWidget);
 
-    logConsolePanel.attached.connect(() => {
-      status.model.markSourceLogsViewed(status.model.source);
-      status.model.flashEnabled = false;
+    MessageLoop.installMessageHook(logConsolePanel, (_, msg) => {
+      switch (msg.type) {
+        case 'after-show':
+          status.model.markSourceLogsViewed(status.model.source);
+          status.model.flashEnabled = false;
+          break;
+        case 'after-hide':
+          status.model.flashEnabled = flashEnabled;
+          break;
+        default:
+          break;
+      }
+      return true;
     });
 
     logConsoleWidget.disposed.connect(() => {
