@@ -90,14 +90,14 @@ namespace CommandIDs {
  */
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
-  requires: [ICommandPalette, IRouter, IWindowResolver],
-  optional: [IConnectionLost],
+  requires: [IRouter, IWindowResolver],
+  optional: [ICommandPalette, IConnectionLost],
   activate: (
     app: JupyterFrontEnd,
-    palette: ICommandPalette,
     router: IRouter,
     resolver: IWindowResolver,
-    connectionLost: IConnectionLost | undefined
+    palette: ICommandPalette | null,
+    connectionLost: IConnectionLost | null
   ) => {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${main.id} must be activated in JupyterLab.`);
@@ -486,7 +486,7 @@ const sidebar: JupyterFrontEndPlugin<void> = {
 /**
  * Add the main application commands.
  */
-function addCommands(app: JupyterLab, palette: ICommandPalette): void {
+function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
   const { commands, contextMenu, shell } = app;
   const category = 'Main Area';
 
@@ -572,7 +572,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       shell.activateNextTab();
     }
   });
-  palette.addItem({ command: CommandIDs.activateNextTab, category });
+  if (palette) {
+    palette.addItem({ command: CommandIDs.activateNextTab, category });
+  }
 
   commands.addCommand(CommandIDs.activatePreviousTab, {
     label: 'Activate Previous Tab',
@@ -580,7 +582,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       shell.activatePreviousTab();
     }
   });
-  palette.addItem({ command: CommandIDs.activatePreviousTab, category });
+  if (palette) {
+    palette.addItem({ command: CommandIDs.activatePreviousTab, category });
+  }
 
   commands.addCommand(CommandIDs.activateNextTabBar, {
     label: 'Activate Next Tab Bar',
@@ -614,7 +618,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       }
     }
   });
-  palette.addItem({ command: CommandIDs.close, category });
+  if (palette) {
+    palette.addItem({ command: CommandIDs.close, category });
+  }
   contextMenu.addItem({
     command: CommandIDs.close,
     selector: tabSelector,
@@ -627,7 +633,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       shell.closeAll();
     }
   });
-  palette.addItem({ command: CommandIDs.closeAll, category });
+  if (palette) {
+    palette.addItem({ command: CommandIDs.closeAll, category });
+  }
 
   commands.addCommand(CommandIDs.closeOtherTabs, {
     label: () => `Close All Other Tabs`,
@@ -648,7 +656,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       closeWidgets(otherWidgets);
     }
   });
-  palette.addItem({ command: CommandIDs.closeOtherTabs, category });
+  if (palette) {
+    palette.addItem({ command: CommandIDs.closeOtherTabs, category });
+  }
   contextMenu.addItem({
     command: CommandIDs.closeOtherTabs,
     selector: tabSelector,
@@ -667,7 +677,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       closeWidgets(widgetsRightOf(widget));
     }
   });
-  palette.addItem({ command: CommandIDs.closeRightTabs, category });
+  if (palette) {
+    palette.addItem({ command: CommandIDs.closeRightTabs, category });
+  }
   contextMenu.addItem({
     command: CommandIDs.closeRightTabs,
     selector: tabSelector,
@@ -689,7 +701,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     isToggled: () => !shell.leftCollapsed,
     isVisible: () => !shell.isEmpty('left')
   });
-  palette.addItem({ command: CommandIDs.toggleLeftArea, category });
+  if (palette) {
+    palette.addItem({ command: CommandIDs.toggleLeftArea, category });
+  }
 
   app.commands.addCommand(CommandIDs.toggleRightArea, {
     label: () => 'Show Right Sidebar',
@@ -706,7 +720,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     isToggled: () => !shell.rightCollapsed,
     isVisible: () => !shell.isEmpty('right')
   });
-  palette.addItem({ command: CommandIDs.toggleRightArea, category });
+  if (palette) {
+    palette.addItem({ command: CommandIDs.toggleRightArea, category });
+  }
 
   app.commands.addCommand(CommandIDs.togglePresentationMode, {
     label: () => 'Presentation Mode',
@@ -716,7 +732,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     isToggled: () => shell.presentationMode,
     isVisible: () => true
   });
-  palette.addItem({ command: CommandIDs.togglePresentationMode, category });
+  if (palette) {
+    palette.addItem({ command: CommandIDs.togglePresentationMode, category });
+  }
 
   app.commands.addCommand(CommandIDs.setMode, {
     isVisible: args => {
@@ -744,7 +762,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       return app.commands.execute(CommandIDs.setMode, args);
     }
   });
-  palette.addItem({ command: CommandIDs.toggleMode, category });
+  if (palette) {
+    palette.addItem({ command: CommandIDs.toggleMode, category });
+  }
 }
 
 /**
