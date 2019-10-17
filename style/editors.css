@@ -14,13 +14,14 @@
   min-width: 0;
   min-height: 0;
   align-items: flex-end;
-  border-bottom: 1px solid #c0c0c0;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 .jp-DebuggerEditors .p-TabBar-tab {
+  background: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color1);
   padding: 0px 10px;
-  background: #e5e5e5;
-  border: 1px solid #c0c0c0;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
   border-bottom: none;
   font: 12px Helvetica, Arial, sans-serif;
   flex: 0 1 125px;
@@ -38,11 +39,12 @@
 .jp-DebuggerEditors .p-TabBar-tab.p-mod-current {
   min-height: 24px;
   max-height: 24px;
-  background: white;
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
 }
 
 .jp-DebuggerEditors .p-TabBar-tab:hover:not(.p-mod-current) {
-  background: #f0f0f0;
+  background: var(--jp-layout-color1);
 }
 
 .jp-DebuggerEditors .p-TabBar-tabIcon,
