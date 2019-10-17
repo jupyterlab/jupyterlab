@@ -19,11 +19,13 @@ import { parseHeading } from '../../utils/parse_heading';
 
 import { isMarkdown } from '../../utils/is_markdown';
 
+import { isDOM } from '../../utils/is_dom';
+
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
 import { INotebookHeading } from './heading';
 
-import { generateNumbering, isDOM, sanitizerOptions } from '../shared';
+import { generateNumbering, sanitizerOptions } from '../shared';
 
 /**
  * Create a TOC generator for notebooks.

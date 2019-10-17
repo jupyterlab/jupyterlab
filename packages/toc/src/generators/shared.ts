@@ -3,10 +3,6 @@
 
 import { IHeading } from '../toc';
 
-const VDOM_MIME_TYPE = 'application/vdom.v1+json';
-
-const HTML_MIME_TYPE = 'text/html';
-
 export interface INumberedHeading extends IHeading {
   numbering?: string | null;
 }
@@ -51,25 +47,6 @@ export function generateNumbering(
     }
   }
   return numbering;
-}
-
-/**
- * Return whether the mime type is some flavor of markdown.
- */
-export function isMarkdown(mime: string): boolean {
-  return (
-    mime === 'text/x-ipythongfm' ||
-    mime === 'text/x-markdown' ||
-    mime === 'text/x-gfm' ||
-    mime === 'text/markdown'
-  );
-}
-
-/**
- * Return whether the mime type is DOM-ish (html or vdom).
- */
-export function isDOM(mime: string): boolean {
-  return mime === VDOM_MIME_TYPE || mime === HTML_MIME_TYPE;
 }
 
 /**
