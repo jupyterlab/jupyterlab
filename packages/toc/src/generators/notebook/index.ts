@@ -25,6 +25,8 @@ import { sanitizerOptions } from '../../utils/sanitizer_options';
 
 import { INotebookHeading } from '../../utils/headings';
 
+import { INumberingDictionary } from '../../utils/numbering_dictionary';
+
 import { generateNumbering } from '../../utils/generate_numbering';
 
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
@@ -58,7 +60,7 @@ export function createNotebookGenerator(
     },
     generate: panel => {
       let headings: INotebookHeading[] = [];
-      let numberingDict: { [level: number]: number } = {};
+      let numberingDict: INumberingDictionary = {};
       let collapseLevel = -1;
       // Keep track of the previous heading, so it can be
       // marked as having a child if one is discovered
@@ -437,7 +439,7 @@ namespace Private {
     node: HTMLElement,
     onClickFactory: (el: Element) => () => void,
     sanitizer: ISanitizer,
-    numberingDict: { [level: number]: number },
+    numberingDict: INumberingDictionary,
     lastLevel: number,
     needsNumbering = false,
     cellRef: Cell

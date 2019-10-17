@@ -16,6 +16,8 @@ import { TableOfContentsRegistry } from '../../registry';
 
 import { TableOfContents } from '../../toc';
 
+import { INumberingDictionary } from '../../utils/numbering_dictionary';
+
 import { generateNumbering } from '../../utils/generate_numbering';
 
 import { INumberedHeading } from '../../utils/headings';
@@ -65,7 +67,7 @@ export function createMarkdownGenerator(
       return isMarkdown(editor.content.model.mimeType);
     },
     generate: editor => {
-      let numberingDict: { [level: number]: number } = {};
+      let numberingDict: INumberingDictionary = {};
       let model = editor.content.model;
       let onClickFactory = (line: number) => {
         return () => {
@@ -108,7 +110,7 @@ export function createRenderedMarkdownGenerator(
       return markdownDocItemRenderer(options, item);
     },
     generate: widget => {
-      let numberingDict: { [level: number]: number } = {};
+      let numberingDict: INumberingDictionary = {};
       return Private.getRenderedHTMLHeadingsForMarkdownDoc(
         widget.content.node,
         sanitizer,
@@ -126,7 +128,7 @@ namespace Private {
   export function getMarkdownDocHeadings(
     text: string,
     onClickFactory: (line: number) => () => void,
-    numberingDict: { [level: number]: number }
+    numberingDict: INumberingDictionary
   ): INumberedHeading[] {
     // Split the text into lines.
     const lines = text.split('\n');
@@ -169,7 +171,7 @@ namespace Private {
   export function getRenderedHTMLHeadingsForMarkdownDoc(
     node: HTMLElement,
     sanitizer: ISanitizer,
-    numberingDict: { [level: number]: number },
+    numberingDict: INumberingDictionary,
     needsNumbering = true
   ): INumberedHeading[] {
     let headings: INumberedHeading[] = [];

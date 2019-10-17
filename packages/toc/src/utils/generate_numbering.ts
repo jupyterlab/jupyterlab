@@ -1,17 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-/**
- * Interface describing a numbering dictionary.
- *
- * @private
- */
-interface INumberingDictionary {
-  /**
-   * Level numbering.
-   */
-  [level: number]: number;
-}
+import { INumberingDictionary } from './numbering_dictionary';
 
 // Maximum heading level:
 const MAX_HEADING_LEVEL = 6;
