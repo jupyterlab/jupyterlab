@@ -18,7 +18,7 @@ import { generateNumbering } from '../shared';
 
 import { TableOfContents } from '../../toc';
 
-import { INumberedHeading } from '../../utils/inumberedheading';
+import { INumberedHeading } from '../../utils/headings';
 
 import { parseHeading } from '../../utils/parse_heading';
 

@@ -2,7 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 /**
- * Interface describing a heading result.
+ * Interface describing a parsed heading result.
+ *
+ * @private
  */
 interface IHeading {
   /**
@@ -111,4 +113,3 @@ function parseHeading(str: string): IHeading | null {
  * Exports.
  */
 export { parseHeading };
-export { IHeading };

@@ -23,7 +23,7 @@ import { isDOM } from '../../utils/is_dom';
 
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 
-import { INotebookHeading } from '../../utils/inotebookheading';
+import { INotebookHeading } from '../../utils/headings';
 
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
 

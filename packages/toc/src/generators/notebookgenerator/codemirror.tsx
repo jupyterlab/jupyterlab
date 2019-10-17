@@ -7,7 +7,7 @@ import { ISanitizer } from '@jupyterlab/apputils';
 
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 
-import { INotebookHeading } from '../../utils/inotebookheading';
+import { INotebookHeading } from '../../utils/headings';
 
 export interface ICodeComponentProps {
   sanitizer: ISanitizer;

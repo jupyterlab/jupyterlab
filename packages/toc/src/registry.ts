@@ -7,7 +7,7 @@ import { Token } from '@phosphor/coreutils';
 
 import { Widget } from '@phosphor/widgets';
 
-import { IHeading } from './toc';
+import { IHeading } from './utils/headings';
 
 /**
  * An interface for a TableOfContentsRegistry.

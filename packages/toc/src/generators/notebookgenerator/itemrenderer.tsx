@@ -17,7 +17,7 @@ import { isMarkdown } from '../../utils/is_markdown';
 
 import { isDOM } from '../../utils/is_dom';
 
-import { INotebookHeading } from '../../utils/inotebookheading';
+import { INotebookHeading } from '../../utils/headings';
 
 import { CodeComponent } from './codemirror';
 

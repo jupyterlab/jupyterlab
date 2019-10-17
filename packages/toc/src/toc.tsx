@@ -11,6 +11,8 @@ import { Message } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
 
+import { IHeading } from './utils/headings';
+
 import { TableOfContentsRegistry } from './registry';
 
 import * as React from 'react';

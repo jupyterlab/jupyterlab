@@ -7,7 +7,7 @@ import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { TableOfContentsRegistry } from '../registry';
 
-import { IHeading } from '../toc';
+import { IHeading } from '../utils/headings';
 
 /**
  * Create a TOC generator for LaTeX files.
