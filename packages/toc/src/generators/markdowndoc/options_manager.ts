@@ -3,11 +3,11 @@
 
 import { ISanitizer } from '@jupyterlab/apputils';
 
-import { TableOfContentsRegistry } from '../../registry';
+import { TableOfContentsRegistry as Registry } from '../../registry';
 
 import { TableOfContents } from '../../toc';
 
-export class MarkdownDocGeneratorOptionsManager extends TableOfContentsRegistry.IGeneratorOptionsManager {
+class OptionsManager extends Registry.IGeneratorOptionsManager {
   constructor(
     widget: TableOfContents,
     options: { needsNumbering: boolean; sanitizer: ISanitizer }
@@ -38,3 +38,8 @@ export class MarkdownDocGeneratorOptionsManager extends TableOfContentsRegistry.
   private _numbering: boolean;
   private _widget: TableOfContents;
 }
+
+/**
+ * Exports.
+ */
+export { OptionsManager };

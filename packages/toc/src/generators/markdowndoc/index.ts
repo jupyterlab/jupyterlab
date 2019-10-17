@@ -28,7 +28,7 @@ import { isMarkdown } from '../../utils/is_markdown';
 
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 
-import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
+import { OptionsManager } from './options_manager';
 
 import { render } from './render';
 
@@ -47,7 +47,7 @@ export function createMarkdownGenerator(
   sanitizer: ISanitizer
 ): TableOfContentsRegistry.IGenerator<IDocumentWidget<FileEditor>> {
   // Create a option manager to manage user settings
-  const options = new MarkdownDocGeneratorOptionsManager(widget, {
+  const options = new OptionsManager(widget, {
     needsNumbering: true,
     sanitizer
   });
@@ -95,7 +95,7 @@ export function createRenderedMarkdownGenerator(
   sanitizer: ISanitizer,
   widget: TableOfContents
 ): TableOfContentsRegistry.IGenerator<MarkdownDocument> {
-  const options = new MarkdownDocGeneratorOptionsManager(widget, {
+  const options = new OptionsManager(widget, {
     needsNumbering: true,
     sanitizer
   });

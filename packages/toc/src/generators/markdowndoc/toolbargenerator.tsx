@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
+import { OptionsManager } from './options_manager';
 
 import * as React from 'react';
 
@@ -11,9 +11,7 @@ interface INotebookGeneratorToolbarState {
   numbering: boolean;
 }
 
-export function markdownDocGeneratorToolbar(
-  options: MarkdownDocGeneratorOptionsManager
-) {
+export function markdownDocGeneratorToolbar(options: OptionsManager) {
   // Render the toolbar
   return class extends React.Component<
     INotebookGeneratorToolbarProps,

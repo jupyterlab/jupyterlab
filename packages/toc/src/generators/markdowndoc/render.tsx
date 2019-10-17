@@ -7,7 +7,7 @@ import { sanitizerOptions } from '../../utils/sanitizer_options';
 
 import { INumberedHeading } from '../../utils/headings';
 
-import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
+import { OptionsManager } from './options_manager';
 
 /**
  * Renders a Markdown table of contents item.
@@ -17,10 +17,7 @@ import { MarkdownDocGeneratorOptionsManager } from './optionsmanager';
  * @param item - numbered heading
  * @returns rendered item
  */
-function render(
-  options: MarkdownDocGeneratorOptionsManager,
-  item: INumberedHeading
-) {
+function render(options: OptionsManager, item: INumberedHeading) {
   let fontSizeClass = 'toc-level-size-' + item.level;
 
   // Render item numbering:
