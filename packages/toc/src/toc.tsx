@@ -1,22 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ActivityMonitor, PathExt } from '@jupyterlab/coreutils';
-
-import { IDocumentManager } from '@jupyterlab/docmanager';
-
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
-import { Message } from '@phosphor/messaging';
-
-import { Widget } from '@phosphor/widgets';
-
-import { IHeading } from './utils/headings';
-
-import { Registry } from './registry';
-
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { ActivityMonitor, PathExt } from '@jupyterlab/coreutils';
+import { IDocumentManager } from '@jupyterlab/docmanager';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { Message } from '@phosphor/messaging';
+import { Widget } from '@phosphor/widgets';
+import { IHeading } from './utils/headings';
+import { Registry } from './registry';
 
 /**
  * Timeout for throttling TOC rendering.
