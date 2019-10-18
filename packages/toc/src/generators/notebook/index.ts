@@ -18,7 +18,7 @@ import { getMarkdownHeading } from './get_markdown_heading';
 import { getRenderedHTMLHeading } from './get_rendered_html_heading';
 import { appendHeading } from './append_heading';
 import { render } from './render';
-import { notebookGeneratorToolbar } from './toolbargenerator';
+import { notebookGeneratorToolbar } from './toolbar_generator';
 
 /**
  * Create a TOC generator for notebooks.

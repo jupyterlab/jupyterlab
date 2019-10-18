@@ -33,7 +33,8 @@ import '../style/index.css';
  * @param restorer - application layout restorer
  * @param markdownViewerTracker - Markdown viewer tracker
  * @param notebookTracker - notebook tracker
- * @param rendermime - rendered MIME registiry
+ * @param rendermime - rendered MIME registry
+ * @returns table of contents registry
  */
 function activateTOC(
   app: JupyterFrontEnd,
