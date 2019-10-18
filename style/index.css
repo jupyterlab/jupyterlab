@@ -8,6 +8,7 @@
 
 @import './icons.css';
 @import './sidebar.css';
+@import './editors.css';
 
 .jp-Debugger {
   background: var(--jp-layout-color1);
@@ -15,7 +16,7 @@
   bottom: 0;
 }
 
-/* font awsome */
+/* font awesome */
 
 .fa {
   display: inline-block;
