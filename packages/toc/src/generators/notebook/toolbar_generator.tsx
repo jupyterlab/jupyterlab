@@ -49,7 +49,6 @@ interface IState {
  * @param tracker - notebook tracker
  * @returns toolbar generator
  */
-
 function toolbar(options: OptionsManager, tracker: INotebookTracker) {
   return class extends React.Component<IProperties, IState> {
     /**
@@ -150,16 +149,16 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
       let notebook = tracker.currentWidget;
       if (notebook) {
         const cells = notebook.model.cells;
-        const tagSet = new Set<string>();
+        const tags = new Set<string>();
         this.tags = [];
         for (let i = 0; i < cells.length; i++) {
           const cell = cells.get(i)!;
-          const tagData = cell.metadata.get('tags') as JSONValue;
-          if (Array.isArray(tagData)) {
-            tagData.forEach((tag: string) => tag && tagSet.add(tag));
+          const list = cell.metadata.get('tags') as JSONValue;
+          if (Array.isArray(list)) {
+            list.forEach((tag: string) => tag && tags.add(tag));
           }
         }
-        this.tags = Array.from(tagSet);
+        this.tags = Array.from(tags);
       }
     };
 
