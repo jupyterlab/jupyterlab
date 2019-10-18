@@ -4,8 +4,7 @@
 import {
   ILoggerRegistry,
   ILogger,
-  ILoggerChange,
-  ILoggerRegistryChange
+  ILoggerChange
 } from '@jupyterlab/logconsole';
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
@@ -79,49 +78,6 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
     this.model = new LogConsoleStatus.Model(options.loggerRegistry);
     this.addClass(interactiveItem);
     this.addClass('jp-LogConsoleStatusItem');
-
-    let flashRequestTimer: number = null;
-
-    this.model.sourceChanged.connect(() => {
-      if (
-        this.model.source &&
-        this.model.flashEnabled &&
-        !this.model.isSourceLogsViewed(this.model.source) &&
-        this.model.messages > 0
-      ) {
-        this._showHighlighted();
-      } else {
-        this._clearHighlight();
-      }
-    });
-
-    this.model.flashEnabledChanged.connect(() => {
-      if (!this.model.flashEnabled) {
-        this._clearHighlight();
-      }
-    });
-
-    this.model.logChanged.connect(() => {
-      if (!this.model.flashEnabled || this.model.messages === 0) {
-        // cancel existing request
-        clearTimeout(flashRequestTimer);
-        flashRequestTimer = null;
-        this._clearHighlight();
-        return;
-      }
-
-      const wasFlashed = this.hasClass('hilite') || this.hasClass('hilited');
-      if (wasFlashed) {
-        this._clearHighlight();
-        // cancel previous request
-        clearTimeout(flashRequestTimer);
-        flashRequestTimer = setTimeout(() => {
-          this._flashHighlight();
-        }, 100);
-      } else {
-        this._flashHighlight();
-      }
-    });
   }
 
   /**
@@ -132,16 +88,40 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
       return null;
     }
 
+    let { source, flashEnabled, sourceUnread, messages } = this.model;
+    if (source && flashEnabled && sourceUnread > 0) {
+      if (
+        this._lastSource === source &&
+        this._lastSourceUnread < sourceUnread
+      ) {
+        // There are new messages to notify the user about
+        this._flashHighlight();
+      } else {
+        this._showHighlighted();
+      }
+    } else {
+      this._clearHighlight();
+    }
+    this._lastSource = source;
+    this._lastSourceUnread = sourceUnread;
+
     return (
       <LogConsoleStatusComponent
         handleClick={this._handleClick}
-        messages={this.model.messages}
+        messages={messages}
       />
     );
   }
 
   private _flashHighlight() {
-    this.addClass('hilite');
+    this._showHighlighted();
+
+    // To make sure the browser triggers the animation, we remove the class,
+    // wait for an animation frame, then add it back
+    this.removeClass('hilite');
+    requestAnimationFrame(() => {
+      this.addClass('hilite');
+    });
   }
 
   private _showHighlighted() {
@@ -153,6 +133,8 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
     this.removeClass('hilited');
   }
 
+  private _lastSource: string | null = null;
+  private _lastSourceUnread: number = 0;
   private _handleClick: () => void;
 }
 
@@ -173,36 +155,14 @@ export namespace LogConsoleStatus {
       super();
 
       this._loggerRegistry = loggerRegistry;
-
       this._loggerRegistry.registryChanged.connect(
-        (sender: ILoggerRegistry, args: ILoggerRegistryChange) => {
-          const loggers = this._loggerRegistry.getLoggers();
-          for (let logger of loggers) {
-            if (this._loggersWatched.has(logger.source)) {
-              continue;
-            }
-
-            logger.logChanged.connect(
-              (sender: ILogger, change: ILoggerChange) => {
-                if (sender.source === this._source) {
-                  this.stateChanged.emit();
-                  this.logChanged.emit();
-                }
-
-                // mark logger as dirty
-                this._loggersWatched.set(sender.source, false);
-              }
-            );
-
-            // mark logger as viewed
-            this._loggersWatched.set(logger.source, true);
-          }
-        }
+        this._handleLogRegistryChange,
+        this
       );
     }
 
     /**
-     * Number of logs.
+     * Number of messages in the current source.
      */
     get messages(): number {
       if (this._source) {
@@ -226,10 +186,16 @@ export namespace LogConsoleStatus {
       }
 
       this._source = name;
-      this.sourceChanged.emit();
 
       // refresh rendering
       this.stateChanged.emit();
+    }
+
+    /**
+     * How many messages the source has emitted since its last clear or view.
+     */
+    get sourceUnread(): number {
+      return this._sourceUnread.get(this.source);
     }
 
     /**
@@ -252,36 +218,43 @@ export namespace LogConsoleStatus {
     }
 
     /**
-     * Mark logs from the source as viewed.
+     * Mark the logs from the source as displayed.
      *
      * @param source - The name of the log source.
      */
     markSourceLogsViewed(source: string) {
-      this._loggersWatched.set(source, true);
+      this._sourceUnread.set(source, 0);
+      if (source === this._source) {
+        this.stateChanged.emit();
+      }
     }
 
-    /**
-     * Check if logs from the source are viewed.
-     *
-     * @param source - The name of the log source.
-     *
-     * @returns True if logs from source are viewer.
-     */
-    isSourceLogsViewed(source: string): boolean {
-      return (
-        !this._loggersWatched.has(source) ||
-        this._loggersWatched.get(source) === true
-      );
+    private _handleLogRegistryChange() {
+      const loggers = this._loggerRegistry.getLoggers();
+      for (let logger of loggers) {
+        if (!this._sourceUnread.has(logger.source)) {
+          logger.logChanged.connect(this._handleLogChange, this);
+          this._sourceUnread.set(logger.source, logger.length);
+        }
+      }
     }
 
-    /**
-     * A signal emitted when the log model changes.
-     */
-    public logChanged = new Signal<this, void>(this);
-    /**
-     * A signal emitted when the active log source changes.
-     */
-    public sourceChanged = new Signal<this, void>(this);
+    private _handleLogChange({ source }: ILogger, change: ILoggerChange) {
+      switch (change) {
+        case 'append':
+          this._sourceUnread.set(source, this._sourceUnread.get(source) + 1);
+          break;
+        case 'clear':
+          this._sourceUnread.set(source, 0);
+          break;
+        default:
+          break;
+      }
+      if (source === this._source) {
+        this.stateChanged.emit();
+      }
+    }
+
     /**
      * A signal emitted when the flash enablement changes.
      */
@@ -289,9 +262,14 @@ export namespace LogConsoleStatus {
     private _flashEnabled: boolean = true;
     private _loggerRegistry: ILoggerRegistry;
     private _source: string = null;
-    // A map storing keys as source names of the loggers watched
-    // and values as whether logs from the source are viewed
-    private _loggersWatched: Map<string, boolean> = new Map();
+    /**
+     * The view status of each source.
+     *
+     * #### Notes
+     * Keys are source names, value is the number of messages logged since the
+     * last clear or view
+     */
+    private _sourceUnread: Map<string, number> = new Map();
   }
 
   /**

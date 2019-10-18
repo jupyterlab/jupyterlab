@@ -10,16 +10,28 @@
   background-image: var(--jp-icon-output-console);
 }
 
-.jp-LogConsoleStatusItem.hilite {
-  transition: background-color 1s ease-out;
-  color: var(--jp-info-color0);
-  background-color: var(--jp-info-color3);
-  border-color: var(--jp-info-color2);
+@keyframes flash {
+  0% {
+    color: var(--jp-info-color0);
+    background-color: var(--jp-info-color3);
+  }
+  50% {
+    color: unset;
+    background-color: unset;
+  }
+  100% {
+    color: var(--jp-info-color0);
+    background-color: var(--jp-info-color3);
+  }
 }
+
+.jp-LogConsoleStatusItem.hilite {
+  animation: flash 300ms both;
+}
+
 .jp-LogConsoleStatusItem.hilited {
   color: var(--jp-info-color0);
   background-color: var(--jp-info-color3);
-  border-color: var(--jp-info-color2);
 }
 
 .jp-LogConsole .clear-icon {
