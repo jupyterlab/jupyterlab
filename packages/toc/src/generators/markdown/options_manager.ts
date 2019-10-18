@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISanitizer } from '@jupyterlab/apputils';
-
 import { TableOfContentsRegistry as Registry } from '../../registry';
-
 import { TableOfContents } from '../../toc';
 
 /**

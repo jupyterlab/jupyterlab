@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { INumberingDictionary } from '../../utils/numbering_dictionary';
-
 import { INumberedHeading } from '../../utils/headings';
-
 import { generateNumbering } from '../../utils/generate_numbering';
-
 import { parseHeading } from '../../utils/parse_heading';
 
 /**

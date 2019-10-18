@@ -2,34 +2,21 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISanitizer } from '@jupyterlab/apputils';
-
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-
 import {
   IMarkdownViewerTracker,
   MarkdownDocument
 } from '@jupyterlab/markdownviewer';
-
 import { TableOfContentsRegistry as Registry } from '../../registry';
-
 import { TableOfContents } from '../../toc';
-
 import { INumberingDictionary } from '../../utils/numbering_dictionary';
-
 import { INumberedHeading } from '../../utils/headings';
-
 import { isMarkdown } from '../../utils/is_markdown';
-
 import { OptionsManager } from './options_manager';
-
 import { render } from './render';
-
 import { toolbar } from './toolbar_generator';
-
 import { getHeadings } from './get_headings';
-
 import { getRenderedHeadings } from './get_rendered_headings';
 
 /**
