@@ -105,47 +105,43 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
 
     /**
      * Toggle whether to show code previews.
-     *
-     * @param component - component
      */
-    toggleCode = (component: React.Component) => {
+    toggleCode() {
       options.showCode = !options.showCode;
       this.setState({ showCode: options.showCode });
-    };
+    }
 
     /**
      * Toggle whether to show Markdown previews.
-     *
-     * @param component - component
      */
-    toggleMarkdown = (component: React.Component) => {
+    toggleMarkdown() {
       options.showMarkdown = !options.showMarkdown;
       this.setState({ showMarkdown: options.showMarkdown });
-    };
+    }
 
     /**
      * Toggle whether to number headings.
      */
-    toggleNumbering = () => {
+    toggleNumbering() {
       options.numbering = !options.numbering;
       this.setState({ numbering: options.numbering });
-    };
+    }
 
     /**
      * Toggle tag dropdown.
      */
-    toggleTagDropdown = () => {
+    toggleTagDropdown() {
       if (options.showTags && this.tagTool) {
         options.storeTags = this.tagTool.state.selected;
       }
       options.showTags = !options.showTags;
       this.setState({ showTags: options.showTags });
-    };
+    }
 
     /**
      * Loads all document tags.
      */
-    getTags = () => {
+    getTags() {
       let notebook = tracker.currentWidget;
       if (notebook) {
         const cells = notebook.model.cells;
@@ -160,7 +156,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
         }
         this.tags = Array.from(tags);
       }
-    };
+    }
 
     /**
      * Renders a toolbar.
@@ -171,7 +167,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
       let codeIcon = this.state.showCode ? (
         <div
           className="toc-toolbar-code-button toc-toolbar-button"
-          onClick={event => this.toggleCode.bind(this)()}
+          onClick={event => this.toggleCode()}
         >
           <div
             role="text"
@@ -183,7 +179,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
       ) : (
         <div
           className="toc-toolbar-code-button toc-toolbar-button"
-          onClick={event => this.toggleCode.bind(this)()}
+          onClick={event => this.toggleCode()}
         >
           <div
             role="text"
@@ -197,7 +193,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
       let markdownIcon = this.state.showMarkdown ? (
         <div
           className="toc-toolbar-markdown-button toc-toolbar-button"
-          onClick={event => this.toggleMarkdown.bind(this)()}
+          onClick={event => this.toggleMarkdown()}
         >
           <div
             role="text"
@@ -209,7 +205,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
       ) : (
         <div
           className="toc-toolbar-markdown-button toc-toolbar-button"
-          onClick={event => this.toggleMarkdown.bind(this)()}
+          onClick={event => this.toggleMarkdown()}
         >
           <div
             role="text"
