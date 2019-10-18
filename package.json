@@ -89,7 +89,7 @@
       "jlpm run prettier",
       "git add"
     ],
-    "**/*{.ts,.tsx}": [
+    "src/**/*{.ts,.tsx}": [
       "jlpm run tslint",
       "git add"
     ]

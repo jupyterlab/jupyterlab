@@ -33,6 +33,7 @@ import { DebuggerNotebookHandler } from './handlers/notebook';
 import { DebuggerConsoleHandler } from './handlers/console';
 
 import { Kernel } from '@jupyterlab/services';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -208,19 +209,23 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 const main: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:main',
   optional: [ILayoutRestorer, ICommandPalette],
-  requires: [IStateDB],
+  requires: [IStateDB, IEditorServices],
   provides: IDebugger,
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     state: IStateDB,
+    editorServices: IEditorServices,
     restorer: ILayoutRestorer | null,
     palette: ICommandPalette | null
   ): IDebugger => {
     const tracker = new WidgetTracker<MainAreaWidget<Debugger>>({
       namespace: 'debugger'
     });
+
     const { commands, shell } = app;
+    const editorFactory = editorServices.factoryService.newInlineEditor;
+
     let widget: MainAreaWidget<Debugger>;
 
     const getModel = () => {
@@ -279,6 +284,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       execute: async () => {
         const debuggerModel = getModel();
         await debuggerModel.session.stop();
+        commands.notifyCommandChanged();
       }
     });
 
@@ -293,6 +299,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       execute: async () => {
         const debuggerModel = getModel();
         await debuggerModel.session.start();
+        commands.notifyCommandChanged();
       }
     });
 
@@ -333,7 +340,8 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
           widget = new MainAreaWidget({
             content: new Debugger({
               connector: state,
-              id: id
+              editorFactory,
+              id
             })
           });
 

@@ -1,5 +1,7 @@
 # @jupyterlab/debugger
 
+[![Build Status](https://dev.azure.com/jupyterlab/jupyterlab/_apis/build/status/jupyterlab.debugger?branchName=master)](https://dev.azure.com/jupyterlab/jupyterlab/_build/latest?definitionId=3&branchName=master)
+
 A JupyterLab debugger UI extension
 
 This extension is under active development and is not yet available.
