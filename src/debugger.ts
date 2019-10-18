@@ -11,9 +11,11 @@ import { IClientSession } from '@jupyterlab/apputils';
 
 import { IDisposable } from '@phosphor/disposable';
 
+import { Message } from '@phosphor/messaging';
+
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { BoxPanel } from '@phosphor/widgets';
+import { SplitPanel } from '@phosphor/widgets';
 
 import { DebuggerEditors } from './editors';
 
@@ -21,9 +23,9 @@ import { DebuggerSidebar } from './sidebar';
 
 import { IDebugger } from './tokens';
 
-export class Debugger extends BoxPanel {
+export class Debugger extends SplitPanel {
   constructor(options: Debugger.IOptions) {
-    super({ direction: 'left-to-right' });
+    super({ orientation: 'horizontal' });
     this.title.label = 'Debugger';
     this.title.iconClass = 'jp-BugIcon';
 
@@ -49,6 +51,11 @@ export class Debugger extends BoxPanel {
     }
     this.model.dispose();
     super.dispose();
+  }
+
+  protected onAfterAttach(msg: Message) {
+    this.addWidget(this.sidebar);
+    this.sidebar.show();
   }
 }
 
