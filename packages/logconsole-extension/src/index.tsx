@@ -311,4 +311,5 @@ function activateLogConsole(
   // When is the output model disposed?
 }
 
-export default [logConsolePlugin];
+import { logNotebookOutput } from './nboutput';
+export default [logConsolePlugin, logNotebookOutput];
