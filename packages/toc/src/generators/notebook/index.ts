@@ -21,16 +21,18 @@ import { render } from './render';
 import { toolbar } from './toolbar_generator';
 
 /**
- * Create a TOC generator for notebooks.
+ * Returns a ToC generator for notebooks.
  *
- * @param tracker: A notebook tracker.
- *
- * @returns A TOC generator that can parse notebooks.
+ * @private
+ * @param tracker - file editor tracker
+ * @param widget - table of contents widget
+ * @param sanitizer - HTML sanitizer
+ * @returns ToC generator capable of parsing notebooks
  */
-export function createNotebookGenerator(
+function createNotebookGenerator(
   tracker: INotebookTracker,
-  sanitizer: ISanitizer,
-  widget: TableOfContents
+  widget: TableOfContents,
+  sanitizer: ISanitizer
 ): Registry.IGenerator<NotebookPanel> {
   const options = new OptionsManager(widget, tracker, {
     numbering: false,
@@ -255,3 +257,8 @@ namespace Private {
     return [headings, prevHeading];
   }
 }
+
+/**
+ * Exports.
+ */
+export { createNotebookGenerator };

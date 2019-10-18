@@ -64,8 +64,8 @@ function activateTOC(
   // Create a notebook generator:
   const notebookGenerator = createNotebookGenerator(
     notebookTracker,
-    rendermime.sanitizer,
-    toc
+    toc,
+    rendermime.sanitizer
   );
   registry.add(notebookGenerator);
 
