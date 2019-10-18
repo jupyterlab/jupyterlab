@@ -15,8 +15,6 @@ import { TableOfContentsRegistry } from '../../registry';
 
 import { TableOfContents } from '../../toc';
 
-import { parseHeading } from '../../utils/parse_heading';
-
 import { isMarkdown } from '../../utils/is_markdown';
 
 import { isDOM } from '../../utils/is_dom';
@@ -36,6 +34,8 @@ import { getCodeCellHeading } from './get_code_cell_heading';
 import { isHeadingFiltered } from './is_heading_filtered';
 
 import { getLastHeadingLevel } from './get_last_heading_level';
+
+import { getMarkdownHeading } from './get_markdown_heading';
 
 /**
  * Create a TOC generator for notebooks.
@@ -183,7 +183,7 @@ export function createNotebookGenerator(
                 cell.node.scrollIntoView();
               };
             };
-            renderedHeading = Private.getMarkdownHeading(
+            renderedHeading = getMarkdownHeading(
               model!.value.text,
               onClickFactory,
               numberingDict,
@@ -328,39 +328,6 @@ namespace Private {
       }
     }
     return [headings, prevHeading, collapseLevel];
-  }
-
-  /**
-   * Given a string of markdown, get the markdown headings in that string.
-   */
-  export function getMarkdownHeading(
-    text: string,
-    onClickFactory: (line: number) => () => void,
-    numberingDict: any,
-    lastLevel: number,
-    cellRef: Cell
-  ): INotebookHeading {
-    const onClick = onClickFactory(0);
-    const heading = parseHeading(text);
-    if (heading) {
-      return {
-        text: heading.text,
-        level: heading.level,
-        numbering: generateNumbering(numberingDict, heading.level),
-        onClick,
-        type: 'header',
-        cellRef: cellRef,
-        hasChild: false
-      };
-    }
-    return {
-      text: text,
-      level: lastLevel + 1,
-      onClick,
-      type: 'markdown',
-      cellRef: cellRef,
-      hasChild: false
-    };
   }
 
   /**
