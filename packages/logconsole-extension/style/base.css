@@ -31,6 +31,13 @@
   background-color: var(--jp-brand-color1);
 }
 
+/* Need to be very specific to override the typestyle styles on status bar components */
+.jp-LogConsoleStatusItem.hilited,
+.jp-LogConsoleStatusItem.hilited div,
+.jp-LogConsoleStatusItem.hilited div span {
+  color: white;
+}
+
 .jp-LogConsole .clear-icon {
   transform: rotate(90deg);
   margin-top: -1px;
