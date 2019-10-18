@@ -68,7 +68,8 @@ export namespace Variables {
         return;
       }
       this._currentScope = value;
-      this._variablesChanged.emit(value.variables);
+      const variables = !!value ? value.variables : [];
+      this._variablesChanged.emit(variables);
     }
 
     get currentChanged(): ISignal<this, IVariable> {
@@ -108,11 +109,9 @@ export namespace Variables {
     }
 
     set scopes(scopes: IScope[]) {
-      if (!!scopes && scopes.length > 0) {
-        this._state = scopes;
-        this._scopesChanged.emit(scopes);
-        this.currentScope = scopes[0];
-      }
+      this._state = scopes;
+      this._scopesChanged.emit(scopes);
+      this.currentScope = !!scopes ? scopes[0] : null;
     }
 
     get variables(): IVariable[] {

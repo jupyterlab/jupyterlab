@@ -100,11 +100,17 @@ const ScopeMenuComponent = ({ model }: { model: Variables.IModel }) => {
   const [scope, setScope] = useState(model.currentScope);
   const wrapperRef = useRef(null);
 
-  model.scopesChanged.connect((_, update) => {
-    if (!!update && update.length > 0) {
-      setScopes(update);
-      setScope(update[0]);
-    }
+  useEffect(() => {
+    const updateScopes = (_: Variables.IModel, updates: Variables.IScope[]) => {
+      const scope = !!updates && updates.length > 0 ? updates[0] : null;
+      setScopes(updates);
+      setScope(scope);
+    };
+    model.scopesChanged.connect(updateScopes);
+
+    return () => {
+      model.scopesChanged.disconnect(updateScopes);
+    };
   });
 
   const onClickOutSide = () => {

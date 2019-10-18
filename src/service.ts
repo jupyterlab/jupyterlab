@@ -1,18 +1,21 @@
 import { DebugSession } from './session';
-import { IDebugger } from './tokens';
+
 import { DebugProtocol } from 'vscode-debugprotocol';
+
 import { Debugger } from './debugger';
+
+import { IDebugger } from './tokens';
+
 import { Variables } from './variables';
 
 export class DebugService {
   constructor(session: DebugSession | null, debuggerModel: Debugger.Model) {
     this.session = session;
-    this.model = debuggerModel;
+    this._model = debuggerModel;
   }
 
   private _session: DebugSession;
-  // private _currentFrame: DebugProtocol.StackFrame;
-  private model: Debugger.Model;
+  private _model: Debugger.Model;
 
   set session(session: DebugSession) {
     this._session = session;
@@ -50,11 +53,14 @@ export class DebugService {
 
     this.session.client.kernel.requestExecute({ code });
 
-    const stackFrame = await this.getFrames(threadId);
-    const scopes = await this.getScopes(stackFrame);
+    const stackFrames = await this.getFrames(threadId);
+    const scopes = await this.getScopes(stackFrames);
     const variables = await this.getVariables(scopes);
 
-    this.model.sidebar.variables.model.scopes = this.convertData(
+    if (!!stackFrames) {
+      this._model.sidebar.callstack.model.frames = stackFrames;
+    }
+    this._model.sidebar.variables.model.scopes = this.convertScope(
       scopes,
       variables
     );
@@ -68,14 +74,20 @@ export class DebugService {
     return stackFrames;
   };
 
-  getScopes = async (frame: DebugProtocol.StackFrame[]) => {
+  getScopes = async (frames: DebugProtocol.StackFrame[]) => {
+    if (!frames || frames.length === 0) {
+      return;
+    }
     const reply = await this.session.sendRequest('scopes', {
-      frameId: frame[0].id
+      frameId: frames[0].id
     });
     return reply.body.scopes;
   };
 
   getVariables = async (scopes: DebugProtocol.Scope[]) => {
+    if (!scopes || scopes.length === 0) {
+      return;
+    }
     const reply = await this.session.sendRequest('variables', {
       variablesReference: scopes[0].variablesReference
     });
@@ -83,17 +95,21 @@ export class DebugService {
   };
 
   setBreakpoints = (): DebugProtocol.SourceBreakpoint[] => {
-    return this.model.sidebar.breakpoints.model.breakpoints.map(breakpoint => {
+    return this._model.sidebar.breakpoints.model.breakpoints.map(breakpoint => {
       return {
         line: breakpoint.line
       };
     });
   };
 
-  protected convertData = (
+  protected convertScope = (
     scopes: DebugProtocol.Scope[],
     variables: DebugProtocol.Variable[]
   ): Variables.IScope[] => {
+    console.log({ variables });
+    if (!variables || !scopes) {
+      return;
+    }
     return scopes.map(scope => {
       return {
         name: scope.name,

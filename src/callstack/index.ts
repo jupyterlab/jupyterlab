@@ -6,6 +6,7 @@ import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
 import { Body } from './body';
 import { DebugProtocol } from 'vscode-debugprotocol';
+import { Signal, ISignal } from '@phosphor/signaling';
 
 export class Callstack extends Panel {
   constructor(options: Callstack.IOptions = {}) {
@@ -99,40 +100,40 @@ export namespace Callstack {
 
   export class IModel implements IModel {
     constructor(model: IFrame[]) {
-      this.state = model;
+      this._state = model;
     }
 
     set frames(newFrames: IFrame[]) {
-      this.state = newFrames;
+      this._state = newFrames;
+      this._framesChanged.emit(newFrames);
     }
 
     get frames(): IFrame[] {
-      return this.state;
+      return this._state;
     }
 
-    private state: IFrame[];
+    set frame(frame: IFrame) {
+      this._currentFrame = frame;
+      this._currentFrameChanged.emit(frame);
+    }
+
+    get frame(): IFrame {
+      return this._currentFrame;
+    }
+
+    get framesChanged(): ISignal<this, IFrame[]> {
+      return this._framesChanged;
+    }
+
+    get currentFrameChanged(): ISignal<this, IFrame> {
+      return this._currentFrameChanged;
+    }
+
+    private _state: IFrame[];
+    private _currentFrame: IFrame;
+    private _framesChanged = new Signal<this, IFrame[]>(this);
+    private _currentFrameChanged = new Signal<this, IFrame>(this);
   }
 
   export interface IOptions extends Panel.IOptions {}
 }
-
-// const MOCK_FRAMES: Callstack.IFrame[] = [
-//   {
-//     id: 0,
-//     name: 'test',
-//     source: {
-//       name: 'untitled.py'
-//     },
-//     line: 6,
-//     column: 1
-//   },
-//   {
-//     id: 1,
-//     name: '<module>',
-//     source: {
-//       name: 'untitled.py'
-//     },
-//     line: 7,
-//     column: 1
-//   }
-// ];

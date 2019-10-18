@@ -7,7 +7,7 @@ import { ArrayExt } from '@phosphor/algorithm';
 
 import { Widget, PanelLayout } from '@phosphor/widgets';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Variables } from '../index';
 
@@ -60,11 +60,21 @@ const TableComponent = ({ model }: { model: Variables.IModel }) => {
   const [variables, setVariables] = useState(model.variables);
   const [variable, TableBody] = useTbody(variables, model.currentVariable);
 
-  model.variablesChanged.connect((_: any, updates) => {
-    if (ArrayExt.shallowEqual(variables, updates)) {
-      return;
-    }
-    setVariables(updates);
+  useEffect(() => {
+    const updateVariables = (
+      _: Variables.IModel,
+      updates: Variables.IVariable[]
+    ) => {
+      if (ArrayExt.shallowEqual(variables, updates)) {
+        return;
+      }
+      setVariables(updates);
+    };
+    model.variablesChanged.connect(updateVariables);
+
+    return () => {
+      model.variablesChanged.disconnect(updateVariables);
+    };
   });
 
   model.currentVariable = variable;
