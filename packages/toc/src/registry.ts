@@ -118,13 +118,13 @@ export namespace Registry {
     itemRenderer?: (item: IHeading) => JSX.Element | null;
 
     /**
-     * Returns a toolbar generator.
+     * Returns a toolbar component.
      *
      * ## Notes
      *
      * -   If not provided, no toolbar is generated.
      *
-     * @returns toolbar generator
+     * @returns toolbar component
      */
     toolbarGenerator?: () => any;
 
