@@ -10,7 +10,6 @@ import {
 } from '@jupyterlab/markdownviewer';
 import { Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
-import { INumberingDictionary } from '../../utils/numbering_dictionary';
 import { INumberedHeading } from '../../utils/headings';
 import { isMarkdown } from '../../utils/is_markdown';
 import { OptionsManager } from './options_manager';
@@ -41,7 +40,7 @@ function isEnabled(editor: IDocumentWidget<FileEditor>) {
 function generate(
   editor: IDocumentWidget<FileEditor>
 ): Array<INumberedHeading> {
-  let dict: INumberingDictionary = {};
+  let dict = {};
   return getHeadings(editor.content.model.value.text, onClick, dict);
 
   /**
@@ -166,7 +165,7 @@ function createRenderedMarkdownGenerator(
    * @returns a list of headings
    */
   function generate(widget: MarkdownDocument): Array<INumberedHeading> {
-    let dict: INumberingDictionary = {};
+    let dict = {};
     return getRenderedHeadings(
       widget.content.node,
       sanitizer,

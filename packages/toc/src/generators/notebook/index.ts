@@ -9,14 +9,13 @@ import { TableOfContents } from '../../toc';
 import { isMarkdown } from '../../utils/is_markdown';
 import { isDOM } from '../../utils/is_dom';
 import { INotebookHeading } from '../../utils/headings';
-import { INumberingDictionary } from '../../utils/numbering_dictionary';
 import { OptionsManager } from './options_manager';
 import { getCodeCellHeading } from './get_code_cell_heading';
 import { isHeadingFiltered } from './is_heading_filtered';
 import { getLastHeadingLevel } from './get_last_heading_level';
 import { getMarkdownHeading } from './get_markdown_heading';
 import { getRenderedHTMLHeading } from './get_rendered_html_heading';
-import { appendHeading } from './append_heading';
+import { appendCollapsibleHeading } from './append_collapsible_heading';
 import { render } from './render';
 import { toolbar } from './toolbar_generator';
 
@@ -50,97 +49,94 @@ function createNotebookGenerator(
     },
     generate: panel => {
       let headings: INotebookHeading[] = [];
-      let numberingDict: INumberingDictionary = {};
       let collapseLevel = -1;
-      // Keep track of the previous heading, so it can be
-      // marked as having a child if one is discovered
-      let prevHeading: INotebookHeading | null = null;
-      // Iterate through the cells in the notebook, generating their headings
+      let dict = {};
+
+      // Initialize a variable for keeping track of the previous heading:
+      let prev: INotebookHeading | null = null;
+
+      // Generate headings by iterating through all notebook cells...
       for (let i = 0; i < panel.content.widgets.length; i++) {
         let cell: Cell = panel.content.widgets[i];
-        let collapsed = cell.model.metadata.get('toc-hr-collapsed') as boolean;
-        collapsed = collapsed !== undefined ? collapsed : false;
         let model = cell.model;
+
+        let collapsed = cell.model.metadata.get('toc-hr-collapsed') as boolean;
+        collapsed = collapsed || false;
+
         if (model.type === 'code') {
-          // Code is shown by default, overridden by previously saved settings
           if (!widget || (widget && options.showCode)) {
-            // Generate the heading and add to headings if appropriate
-            let executionCountNumber = (cell as CodeCell).model
-              .executionCount as number | null;
-            let executionCount =
-              executionCountNumber !== null
-                ? '[' + executionCountNumber + ']: '
-                : '[ ]: ';
-            let text = (model as CodeCellModel).value.text;
-            const onClickFactory = (line: number) => {
+            const onClick = (line: number) => {
               return () => {
                 panel.content.activeCellIndex = i;
                 cell.node.scrollIntoView();
               };
             };
-            let lastLevel = getLastHeadingLevel(headings);
-            let renderedHeading = getCodeCellHeading(
-              text,
-              onClickFactory,
+            let count = (cell as CodeCell).model.executionCount as
+              | number
+              | null;
+            let executionCount = count !== null ? '[' + count + ']: ' : '[ ]: ';
+            let heading = getCodeCellHeading(
+              (model as CodeCellModel).value.text,
+              onClick,
               executionCount,
-              lastLevel,
+              getLastHeadingLevel(headings),
               cell
             );
-            [headings, prevHeading] = Private.addMDOrCode(
+            [headings, prev] = Private.addMDOrCode(
               headings,
-              renderedHeading,
-              prevHeading,
+              heading,
+              prev,
               collapseLevel,
               options.filtered
             );
           }
-          // Iterate over the code cell outputs to check for MD/HTML
+          // Iterate over the code cell outputs to check for Markdown or HTML from which we can generate ToC headings...
           for (let j = 0; j < (model as CodeCellModel).outputs.length; j++) {
-            const outputModel = (model as CodeCellModel).outputs.get(j);
-            const dataTypes = Object.keys(outputModel.data);
-            const htmlData = dataTypes.filter(t => isMarkdown(t) || isDOM(t));
-            if (!htmlData.length) {
+            const m = (model as CodeCellModel).outputs.get(j);
+
+            let dtypes = Object.keys(m.data);
+            dtypes = dtypes.filter(t => isMarkdown(t) || isDOM(t));
+            if (!dtypes.length) {
               continue;
             }
-            // If MD/HTML generate the heading and add to headings if applicable
-            const outputWidget = (cell as CodeCell).outputArea.widgets[j];
-            const onClickFactory = (el: Element) => {
+            const onClick = (el: Element) => {
               return () => {
                 panel.content.activeCellIndex = i;
                 panel.content.mode = 'command';
                 el.scrollIntoView();
               };
             };
-            let lastLevel = getLastHeadingLevel(headings);
-            let numbering = options.numbering;
-            let renderedHeading = getRenderedHTMLHeading(
-              outputWidget.node,
-              onClickFactory,
+            let heading = getRenderedHTMLHeading(
+              (cell as CodeCell).outputArea.widgets[j].node,
+              onClick,
               sanitizer,
-              numberingDict,
-              lastLevel,
-              numbering,
+              dict,
+              getLastHeadingLevel(headings),
+              options.numbering,
               cell
             );
-            [headings, prevHeading, collapseLevel] = Private.processMD(
-              renderedHeading,
+            [headings, prev, collapseLevel] = Private.processMD(
+              heading,
               options.showMarkdown,
               headings,
-              prevHeading,
+              prev,
               collapseLevel,
               options.filtered,
               collapsed
             );
           }
-        } else if (model.type === 'markdown') {
-          let mdCell = cell as MarkdownCell;
-          let renderedHeading: INotebookHeading | undefined = undefined;
+          continue;
+        }
+        if (model.type === 'markdown') {
+          let mcell = cell as MarkdownCell;
+          let heading: INotebookHeading | undefined;
           let lastLevel = getLastHeadingLevel(headings);
-          // If the cell is rendered, generate the ToC items from the HTML
-          if (mdCell.rendered && !mdCell.inputHidden) {
-            const onClickFactory = (el: Element) => {
+
+          // If the cell is rendered, generate the ToC items from the HTML...
+          if (mcell.rendered && !mcell.inputHidden) {
+            const onClick = (el: Element) => {
               return () => {
-                if (!mdCell.rendered) {
+                if (!mcell.rendered) {
                   panel.content.activeCellIndex = i;
                   el.scrollIntoView();
                 } else {
@@ -150,37 +146,36 @@ function createNotebookGenerator(
                 }
               };
             };
-            renderedHeading = getRenderedHTMLHeading(
+            heading = getRenderedHTMLHeading(
               cell.node,
-              onClickFactory,
+              onClick,
               sanitizer,
-              numberingDict,
+              dict,
               lastLevel,
               options.numbering,
               cell
             );
-            // If not rendered, generate ToC items from the text of the cell
+            // If not rendered, generate ToC items from the cell text...
           } else {
-            const onClickFactory = (line: number) => {
+            const onClick = (line: number) => {
               return () => {
                 panel.content.activeCellIndex = i;
                 cell.node.scrollIntoView();
               };
             };
-            renderedHeading = getMarkdownHeading(
+            heading = getMarkdownHeading(
               model!.value.text,
-              onClickFactory,
-              numberingDict,
+              onClick,
+              dict,
               lastLevel,
               cell
             );
           }
-          // Add to headings if applicable
-          [headings, prevHeading, collapseLevel] = Private.processMD(
-            renderedHeading,
+          [headings, prev, collapseLevel] = Private.processMD(
+            heading,
             options.showMarkdown,
             headings,
-            prevHeading,
+            prev,
             collapseLevel,
             options.filtered,
             collapsed
@@ -194,7 +189,7 @@ function createNotebookGenerator(
 
 namespace Private {
   export function processMD(
-    renderedHeading: INotebookHeading | undefined,
+    heading: INotebookHeading | undefined,
     showMarkdown: boolean,
     headings: INotebookHeading[],
     prevHeading: INotebookHeading | null,
@@ -203,23 +198,19 @@ namespace Private {
     collapsed: boolean
   ): [INotebookHeading[], INotebookHeading | null, number] {
     // If the heading is MD and MD is shown, add to headings
-    if (
-      renderedHeading &&
-      renderedHeading.type === 'markdown' &&
-      showMarkdown
-    ) {
+    if (heading && heading.type === 'markdown' && showMarkdown) {
       [headings, prevHeading] = Private.addMDOrCode(
         headings,
-        renderedHeading,
+        heading,
         prevHeading,
         collapseLevel,
         filtered
       );
       // Otherwise, if the heading is a header, add to headings
-    } else if (renderedHeading && renderedHeading.type === 'header') {
-      [headings, prevHeading, collapseLevel] = appendHeading(
+    } else if (heading && heading.type === 'header') {
+      [headings, prevHeading, collapseLevel] = appendCollapsibleHeading(
         headings,
-        renderedHeading,
+        heading,
         prevHeading,
         collapseLevel,
         filtered,
@@ -229,32 +220,38 @@ namespace Private {
     return [headings, prevHeading, collapseLevel];
   }
 
+  /**
+   * Appends a notebook heading to a list of headings.
+   *
+   * @private
+   * @param headings - list of notebook headings
+   * @param heading - rendered heading
+   * @param prev - previous heading
+   * @param collapseLevel - collapse level
+   * @param tags - filter tags
+   * @returns result tuple
+   */
   export function addMDOrCode(
     headings: INotebookHeading[],
-    renderedHeading: INotebookHeading,
-    prevHeading: INotebookHeading | null,
+    heading: INotebookHeading,
+    prev: INotebookHeading | null,
     collapseLevel: number,
-    filtered: string[]
+    tags: string[]
   ): [INotebookHeading[], INotebookHeading | null] {
-    if (
-      !isHeadingFiltered(renderedHeading, filtered) &&
-      renderedHeading &&
-      renderedHeading.text
-    ) {
-      // If there is a previous header, find it and mark hasChild true
-      if (prevHeading && prevHeading.type === 'header') {
+    if (heading && !isHeadingFiltered(heading, tags) && heading.text) {
+      if (prev && prev.type === 'header') {
         for (let j = headings.length - 1; j >= 0; j--) {
-          if (headings[j] === prevHeading) {
+          if (headings[j] === prev) {
             headings[j].hasChild = true;
           }
         }
       }
       if (collapseLevel < 0) {
-        headings.push(renderedHeading);
+        headings.push(heading);
       }
-      prevHeading = renderedHeading;
+      prev = heading;
     }
-    return [headings, prevHeading];
+    return [headings, prev];
   }
 }
 

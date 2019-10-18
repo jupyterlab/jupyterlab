@@ -5,7 +5,7 @@ import { INotebookHeading } from '../../utils/headings';
 import { isHeadingFiltered } from './is_heading_filtered';
 
 /**
- * Appends a notebook heading to a list of headings.
+ * Appends a collapsible notebook heading to a list of headings.
  *
  * @private
  * @param headings - list of notebook headings
@@ -16,7 +16,7 @@ import { isHeadingFiltered } from './is_heading_filtered';
  * @param collapsed - boolean indicating whether a heading is collapsed
  * @returns result tuple
  */
-function appendHeading(
+function appendCollapsibleHeading(
   headings: INotebookHeading[],
   heading: INotebookHeading,
   prev: INotebookHeading | null,
@@ -69,4 +69,4 @@ function appendHeading(
 /**
  * Exports.
  */
-export { appendHeading };
+export { appendCollapsibleHeading };
