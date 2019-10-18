@@ -7,17 +7,57 @@ import { JSONValue } from '@phosphor/coreutils';
 import { OptionsManager } from './options_manager';
 import { TagsToolComponent } from './tagstool';
 
+/**
+ * Interface describing toolbar properties.
+ *
+ * @private
+ */
 interface IProperties {}
 
+/**
+ * Interface describing toolbar state.
+ *
+ * @private
+ */
 interface IState {
+  /**
+   * Boolean indicating whether to show code previews.
+   */
   showCode: boolean;
+
+  /**
+   * Boolean indicating whether to show Markdown previews.
+   */
   showMarkdown: boolean;
+
+  /**
+   * Boolean indicating whether to show tags.
+   */
   showTags: boolean;
+
+  /**
+   * Boolean indicating whether to show numbering.
+   */
   numbering: boolean;
 }
 
+/**
+ * Returns a generator for rendering a notebook table of contents toolbar.
+ *
+ * @private
+ * @param options - generator options
+ * @param tracker - notebook tracker
+ * @returns toolbar generator
+ */
+
 function toolbar(options: OptionsManager, tracker: INotebookTracker) {
   return class extends React.Component<IProperties, IState> {
+    /**
+     * Returns a generator for rendering a notebook table of contents toolbar.
+     *
+     * @param props - toolbar properties
+     * @returns toolbar generator
+     */
     constructor(props: IProperties) {
       super(props);
       this.tagTool = null;
@@ -28,38 +68,29 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
         numbering: false
       };
       if (tracker.currentWidget) {
-        // Read saved user settings in notebook metadata
+        // Read saved user settings in notebook meta data:
         tracker.currentWidget.context.ready.then(() => {
           if (tracker.currentWidget) {
             tracker.currentWidget.content.activeCellChanged.connect(() => {
               options.updateWidget();
             });
-            let _numbering = tracker.currentWidget.model.metadata.get(
+            let numbering = tracker.currentWidget.model.metadata.get(
               'toc-autonumbering'
             ) as boolean;
-            let numbering =
-              _numbering != undefined ? _numbering : options.numbering;
-            let _showCode = tracker.currentWidget.model.metadata.get(
+            let showCode = tracker.currentWidget.model.metadata.get(
               'toc-showcode'
             ) as boolean;
-            let showCode =
-              _showCode != undefined ? _showCode : options.showCode;
-            let _showMarkdown = tracker.currentWidget.model.metadata.get(
+            let showMarkdown = tracker.currentWidget.model.metadata.get(
               'toc-showmarkdowntxt'
             ) as boolean;
-            let showMarkdown =
-              _showMarkdown != undefined ? _showMarkdown : options.showMarkdown;
-            let _showTags = tracker.currentWidget.model.metadata.get(
+            let showTags = tracker.currentWidget.model.metadata.get(
               'toc-showtags'
             ) as boolean;
-            let showTags =
-              _showTags != undefined ? _showTags : options.showTags;
-            this.allTags = [];
             options.initializeOptions(
-              numbering,
-              showCode,
-              showMarkdown,
-              showTags
+              numbering || options.numbering,
+              showCode || options.showCode,
+              showMarkdown || options.showMarkdown,
+              showTags || options.showTags
             );
             this.setState({
               showCode: options.showCode,
@@ -67,26 +98,43 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
               showTags: options.showTags,
               numbering: options.numbering
             });
+            this.tags = [];
           }
         });
       }
     }
 
+    /**
+     * Toggle whether to show code previews.
+     *
+     * @param component - component
+     */
     toggleCode = (component: React.Component) => {
       options.showCode = !options.showCode;
       this.setState({ showCode: options.showCode });
     };
 
+    /**
+     * Toggle whether to show Markdown previews.
+     *
+     * @param component - component
+     */
     toggleMarkdown = (component: React.Component) => {
       options.showMarkdown = !options.showMarkdown;
       this.setState({ showMarkdown: options.showMarkdown });
     };
 
-    toggleAutoNumbering = () => {
+    /**
+     * Toggle whether to number headings.
+     */
+    toggleNumbering = () => {
       options.numbering = !options.numbering;
       this.setState({ numbering: options.numbering });
     };
 
+    /**
+     * Toggle tag dropdown.
+     */
     toggleTagDropdown = () => {
       if (options.showTags && this.tagTool) {
         options.storeTags = this.tagTool.state.selected;
@@ -95,13 +143,15 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
       this.setState({ showTags: options.showTags });
     };
 
-    // Load all tags in the document
+    /**
+     * Loads all document tags.
+     */
     getTags = () => {
       let notebook = tracker.currentWidget;
       if (notebook) {
         const cells = notebook.model.cells;
         const tagSet = new Set<string>();
-        this.allTags = [];
+        this.tags = [];
         for (let i = 0; i < cells.length; i++) {
           const cell = cells.get(i)!;
           const tagData = cell.metadata.get('tags') as JSONValue;
@@ -109,10 +159,15 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
             tagData.forEach((tag: string) => tag && tagSet.add(tag));
           }
         }
-        this.allTags = Array.from(tagSet);
+        this.tags = Array.from(tagSet);
       }
     };
 
+    /**
+     * Renders a toolbar.
+     *
+     * @returns rendered toolbar
+     */
     render() {
       let codeIcon = this.state.showCode ? (
         <div
@@ -169,7 +224,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
       let numberingIcon = this.state.numbering ? (
         <div
           className="toc-toolbar-auto-numbering-button toc-toolbar-button"
-          onClick={event => this.toggleAutoNumbering()}
+          onClick={event => this.toggleNumbering()}
         >
           <div
             role="text"
@@ -181,7 +236,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
       ) : (
         <div
           className="toc-toolbar-auto-numbering-button toc-toolbar-button"
-          onClick={event => this.toggleAutoNumbering()}
+          onClick={event => this.toggleNumbering()}
         >
           <div
             role="text"
@@ -207,7 +262,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
         this.getTags();
         let tagTool = (
           <TagsToolComponent
-            tags={this.allTags}
+            tags={this.tags}
             tracker={tracker}
             options={options}
             inputFilter={options.storeTags}
@@ -244,7 +299,14 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
       );
     }
 
-    allTags: string[];
+    /**
+     * List of tags.
+     */
+    tags: string[];
+
+    /**
+     * Tag tool component.
+     */
     tagTool: TagsToolComponent | null;
   };
 }

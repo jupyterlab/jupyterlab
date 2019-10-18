@@ -50,7 +50,7 @@ function toolbar(options: OptionsManager) {
      * @returns rendered toolbar
      */
     render() {
-      const toggleAutoNumbering = () => {
+      const toggleNumbering = () => {
         options.numbering = !options.numbering;
         this.setState({ numbering: options.numbering });
       };
@@ -59,7 +59,7 @@ function toolbar(options: OptionsManager) {
         icon = (
           <div
             className="toc-toolbar-auto-numbering-button toc-toolbar-button"
-            onClick={event => toggleAutoNumbering()}
+            onClick={event => toggleNumbering()}
           >
             <div
               role="text"
@@ -73,7 +73,7 @@ function toolbar(options: OptionsManager) {
         icon = (
           <div
             className="toc-toolbar-auto-numbering-button toc-toolbar-button"
-            onClick={event => toggleAutoNumbering()}
+            onClick={event => toggleNumbering()}
           >
             <div
               role="text"
