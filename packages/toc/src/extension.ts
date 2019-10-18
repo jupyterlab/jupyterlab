@@ -69,7 +69,7 @@ function activateTOC(
   );
   registry.add(notebookGenerator);
 
-  // Create a markdown generator:
+  // Create a Markdown generator:
   const markdownGenerator = createMarkdownGenerator(
     editorTracker,
     toc,
@@ -77,7 +77,7 @@ function activateTOC(
   );
   registry.add(markdownGenerator);
 
-  // Create a rendered markdown generator:
+  // Create a rendered Markdown generator:
   const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
     markdownViewerTracker,
     toc,
