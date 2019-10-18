@@ -110,7 +110,7 @@ export namespace Registry {
      *
      * ## Notes
      *
-     * -   If not provided, a default renderer will be used.
+     * -   If not present, a default renderer will be used.
      *
      * @param item - heading
      * @returns JSX element
@@ -122,7 +122,7 @@ export namespace Registry {
      *
      * ## Notes
      *
-     * -   If not provided, no toolbar is generated.
+     * -   If not present, no toolbar is generated.
      *
      * @returns toolbar component
      */
