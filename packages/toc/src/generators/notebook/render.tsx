@@ -17,6 +17,8 @@ import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
 import { setCollapsedState } from './set_collapsed_state';
 
+import { twistButton } from './twist_button';
+
 /**
  * Renders a notebook table of contents item.
  *
@@ -71,39 +73,13 @@ function render(
         ) as boolean;
         collapsed = collapsed != undefined ? collapsed : false;
 
-        // Render the twist button
-        let twistButton;
-        if (collapsed) {
-          twistButton = (
-            <div
-              className="toc-collapse-button"
-              onClick={event => {
-                event.stopPropagation();
-                collapseOnClick(item.cellRef);
-              }}
-            >
-              <div className="toc-twist-placeholder">placeholder</div>
-              <div className="toc-rightarrow-img toc-arrow-img" />
-            </div>
-          );
-        } else {
-          twistButton = (
-            <div
-              className="toc-collapse-button"
-              onClick={event => {
-                event.stopPropagation();
-                collapseOnClick(item.cellRef);
-              }}
-            >
-              <div className="toc-twist-placeholder">placeholder</div>
-              <div className="toc-downarrow-img toc-arrow-img" />
-            </div>
-          );
-        }
-        // Render the header item
+        // Render the twist button:
+        let button = twistButton(item.cellRef, collapsed, collapseOnClick);
+
+        // Render the heading item:
         jsx = (
           <div className="toc-entry-holder">
-            {twistButton}
+            {button}
             {jsx}
           </div>
         );
@@ -120,37 +96,10 @@ function render(
           'toc-hr-collapsed'
         ) as boolean;
         collapsed = collapsed != undefined ? collapsed : false;
-        let twistButton;
-        if (collapsed) {
-          twistButton = (
-            <div
-              className="toc-collapse-button"
-              onClick={event => {
-                event.stopPropagation();
-                collapseOnClick(item.cellRef);
-              }}
-            >
-              <div className="toc-twist-placeholder">placeholder</div>
-              <div className="toc-rightarrow-img toc-arrow-img" />
-            </div>
-          );
-        } else {
-          twistButton = (
-            <div
-              className="toc-collapse-button"
-              onClick={event => {
-                event.stopPropagation();
-                collapseOnClick(item.cellRef);
-              }}
-            >
-              <div className="toc-twist-placeholder">placeholder</div>
-              <div className="toc-downarrow-img toc-arrow-img" />
-            </div>
-          );
-        }
+        let button = twistButton(item.cellRef, collapsed, collapseOnClick);
         jsx = (
           <div className="toc-entry-holder">
-            {twistButton}
+            {button}
             {jsx}
           </div>
         );
