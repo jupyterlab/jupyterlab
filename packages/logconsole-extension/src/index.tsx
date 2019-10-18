@@ -271,9 +271,6 @@ function activateLogConsole(
     status.model.source = source;
     if (logConsoleWidget) {
       logConsoleWidget.content.source = source;
-      // We don't need to save the source, since when we restore we just pick
-      // up whatever source is currently active.
-      // void tracker.save(logConsoleWidget);
       if (logConsoleWidget.isVisible) {
         status.model.markSourceLogsViewed(source);
       }

@@ -175,7 +175,7 @@ export class LogConsolePanel extends StackedPanel {
         if (outputArea.id === viewId) {
           outputArea.show();
           setTimeout(() => {
-            this._scrollOuputAreaToBottom(outputArea, false);
+            this._scrollOutputAreaToBottom(outputArea, false);
           }, 50);
         } else {
           outputArea.hide();
@@ -221,7 +221,7 @@ export class LogConsolePanel extends StackedPanel {
     }
   }
 
-  private _scrollOuputAreaToBottom(
+  private _scrollOutputAreaToBottom(
     outputArea: LogConsoleOutputArea,
     animate: boolean = true
   ) {
@@ -250,14 +250,14 @@ export class LogConsolePanel extends StackedPanel {
         outputArea.id = viewId;
 
         logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
-          this._scrollOuputAreaToBottom(outputArea);
+          this._scrollOutputAreaToBottom(outputArea);
         }, this);
 
         outputArea.outputLengthChanged.connect(
           (sender: LogConsoleOutputArea, args: number) => {
             clearTimeout(this._scrollTimer);
             this._scrollTimer = setTimeout(() => {
-              this._scrollOuputAreaToBottom(outputArea);
+              this._scrollOutputAreaToBottom(outputArea);
             }, 50);
           },
           this
