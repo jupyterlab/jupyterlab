@@ -152,4 +152,8 @@ export interface ILogger {
    * Output Area Model used to manage log storage in memory.
    */
   readonly outputAreaModel: IOutputAreaModel;
+  /**
+   * Whether the log has ever had a message.
+   */
+  readonly active: boolean;
 }

@@ -130,7 +130,7 @@ export class Logger implements ILogger {
   }
 
   /**
-   * A signal emitted when the log model changes.
+   * A signal emitted when the list of log messages changes.
    */
   get logChanged(): ISignal<this, ILoggerChange> {
     return this._logChanged;
@@ -178,6 +178,7 @@ export class Logger implements ILogger {
 
     if (output) {
       this.outputAreaModel.add({ ...output, timestamp: timestamp.valueOf() });
+      this._active = true;
       this._logChanged.emit('append');
     }
   }
@@ -203,11 +204,19 @@ export class Logger implements ILogger {
     }
   }
 
+  /**
+   * Whether the log has ever had a message.
+   */
+  get active(): boolean {
+    return this._active;
+  }
+
   readonly source: string;
   readonly outputAreaModel: LoggerOutputAreaModel;
   private _logChanged = new Signal<this, ILoggerChange>(this);
   private _rendermimeChanged = new Signal<this, void>(this);
   private _rendermime: IRenderMimeRegistry | null = null;
+  private _active = false;
 }
 
 export namespace Logger {

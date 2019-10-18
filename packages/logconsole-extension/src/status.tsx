@@ -84,10 +84,11 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
    * Render the log console status item.
    */
   render() {
-    if (this.model === null) {
+    if (this.model === null || !this.model.active) {
+      this.hide();
       return null;
     }
-
+    this.show();
     let { source, flashEnabled, sourceUnread, messages } = this.model;
     if (source && flashEnabled && sourceUnread > 0) {
       if (
@@ -171,6 +172,17 @@ export namespace LogConsoleStatus {
       }
 
       return 0;
+    }
+
+    /**
+     * Whether the current source is active (has ever had a message).
+     */
+    get active(): boolean {
+      if (this._source) {
+        const logger = this._loggerRegistry.getLogger(this._source);
+        return logger.active;
+      }
+      return false;
     }
 
     /**
