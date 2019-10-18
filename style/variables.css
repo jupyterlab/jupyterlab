@@ -99,6 +99,8 @@
 }
 
 .jp-DebuggerVariables-search input {
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
   min-height: 22px;
   vertical-align: top;
   width: 100%;
