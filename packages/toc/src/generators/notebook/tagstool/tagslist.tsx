@@ -1,41 +1,68 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { TagComponent } from './tag';
-
 import * as React from 'react';
 
-/*
- * The TagList takes a list of selected tags, a handler to change selection state,
- * and a list of all tags (strings).
+import { TagComponent } from './tag';
+
+/**
+ * Interface describing component properties.
+ *
+ * @private
  */
-export interface ITagListComponentProps {
-  selectedTags: string[];
+interface IProperties {
+  /**
+   * Selection state handler.
+   *
+   * @param newState - new state
+   * @param add - boolean flag
+   */
   selectionStateHandler: (newState: string, add: boolean) => void;
+
+  /**
+   * List of selected tags.
+   */
+  selectedTags: string[];
+
+  /**
+   * List of all tags.
+   */
   allTagsList: string[] | null;
 }
 
-/*
- * The TagList state contains a list of selected tags
+/**
+ * Interface describing component state.
+ *
+ * @private
  */
-export interface ITagListComponentState {
+interface IState {
+  /**
+   * List of selected tags.
+   */
   selected: string[];
 }
 
-/*
- * Create a React component that renders all tags in a list.
+/**
+ * Class for a React component that renders all tags in a list.
+ *
+ * @private
  */
-export class TagListComponent extends React.Component<
-  ITagListComponentProps,
-  ITagListComponentState
-> {
-  constructor(props: ITagListComponentProps) {
+class TagListComponent extends React.Component<IProperties, IState> {
+  /**
+   * Returns a React component.
+   *
+   * @param props - properties
+   * @returns component
+   */
+  constructor(props: IProperties) {
     super(props);
     this.state = { selected: this.props.selectedTags };
   }
 
-  /*
-   * Toggle whether a tag is selected when it is clicked
+  /**
+   * Toggles whether a tag is selected when clicked.
+   *
+   * @param name - tag name
    */
   selectedTagWithName = (name: string) => {
     if (this.props.selectedTags.indexOf(name) >= 0) {
@@ -45,12 +72,14 @@ export class TagListComponent extends React.Component<
     }
   };
 
-  /*
-   * Render a tag, putting it in a TagComponent
+  /**
+   * Renders a tag component for each tag within a list of tags.
+   *
+   * @param tags - list of tags
    */
-  renderElementForTags = (tags: string[]) => {
+  renderTagComponents = (tags: string[]) => {
     const selectedTags = this.props.selectedTags;
-    const _self = this;
+    const self = this;
     return tags.map((tag, index) => {
       const tagClass =
         selectedTags.indexOf(tag) >= 0
@@ -61,7 +90,7 @@ export class TagListComponent extends React.Component<
           key={tag}
           className={tagClass}
           onClick={event => {
-            _self.selectedTagWithName(tag);
+            self.selectedTagWithName(tag);
           }}
           tabIndex={-1}
         >
@@ -75,15 +104,22 @@ export class TagListComponent extends React.Component<
     });
   };
 
-  /*
-   * Render the list of tags in the TOC tags dropdown.
+  /**
+   * Renders the list of tags in the ToC tags dropdown.
+   *
+   * @returns rendered list
    */
   render() {
-    let allTagsList = this.props.allTagsList;
-    let renderedTagsForAllCells = null;
-    if (allTagsList) {
-      renderedTagsForAllCells = this.renderElementForTags(allTagsList);
+    let tags = this.props.allTagsList;
+    let jsx = null;
+    if (tags) {
+      jsx = this.renderTagComponents(tags);
     }
-    return <div className="toc-tag-holder">{renderedTagsForAllCells}</div>;
+    return <div className="toc-tag-holder">{jsx}</div>;
   }
 }
+
+/**
+ * Exports.
+ */
+export { TagListComponent };
