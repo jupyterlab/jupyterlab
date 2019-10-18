@@ -11,14 +11,10 @@ import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
 import React from 'react';
 
-import {
-  GroupItem,
-  IconItem,
-  TextItem,
-  interactiveItem
-} from '@jupyterlab/statusbar';
+import { GroupItem, TextItem, interactiveItem } from '@jupyterlab/statusbar';
 
 import { Signal } from '@phosphor/signaling';
+import { DefaultIconReact } from '@jupyterlab/ui-components';
 
 /**
  * A pure functional component for a Log Console status item.
@@ -36,7 +32,7 @@ function LogConsoleStatusComponent(
       onClick={props.handleClick}
       title={`${props.messages} messages in current log`}
     >
-      <IconItem source={'jp-LogConsoleIcon'} />
+      <DefaultIconReact name={'list'} top={'2px'} kind={'statusBar'} />
       <TextItem source={props.messages} />
     </GroupItem>
   );
@@ -119,19 +115,19 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
 
     // To make sure the browser triggers the animation, we remove the class,
     // wait for an animation frame, then add it back
-    this.removeClass('hilite');
+    this.removeClass('jp-LogConsole-flash');
     requestAnimationFrame(() => {
-      this.addClass('hilite');
+      this.addClass('jp-LogConsole-flash');
     });
   }
 
   private _showHighlighted() {
-    this.addClass('hilited');
+    this.addClass('jp-mod-selected');
   }
 
   private _clearHighlight() {
-    this.removeClass('hilite');
-    this.removeClass('hilited');
+    this.removeClass('jp-LogConsole-flash');
+    this.removeClass('jp-mod-selected');
   }
 
   private _lastSource: string | null = null;
