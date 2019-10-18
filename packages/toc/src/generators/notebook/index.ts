@@ -31,7 +31,7 @@ import { generateNumbering } from '../../utils/generate_numbering';
 
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
-import { getCodeCells } from './get_code_cells';
+import { getCodeCellHeading } from './get_code_cell_heading';
 
 /**
  * Create a TOC generator for notebooks.
@@ -91,7 +91,7 @@ export function createNotebookGenerator(
               };
             };
             let lastLevel = Private.getLastLevel(headings);
-            let renderedHeading = getCodeCells(
+            let renderedHeading = getCodeCellHeading(
               text,
               onClickFactory,
               executionCount,

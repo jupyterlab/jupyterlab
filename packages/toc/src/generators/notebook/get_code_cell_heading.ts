@@ -25,7 +25,7 @@ type onClickFactory = (line: number) => () => void;
  * @param cellRef - cell reference
  * @returns notebook heading
  */
-function getCodeCells(
+function getCodeCellHeading(
   text: string,
   onClick: onClickFactory,
   executionCount: string,
@@ -58,4 +58,4 @@ function getCodeCells(
 /**
  * Exports.
  */
-export { getCodeCells };
+export { getCodeCellHeading };
