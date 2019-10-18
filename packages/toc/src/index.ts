@@ -3,3 +3,4 @@
 
 // Note: keep in alphabetical order...
 export * from './registry';
+export * from './toc';
