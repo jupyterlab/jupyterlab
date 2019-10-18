@@ -164,7 +164,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
      * @returns rendered toolbar
      */
     render() {
-      let codeIcon = this.state.showCode ? (
+      const codeIcon = this.state.showCode ? (
         <div
           className="toc-toolbar-code-button toc-toolbar-button"
           onClick={event => this.toggleCode()}
@@ -190,7 +190,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
         </div>
       );
 
-      let markdownIcon = this.state.showMarkdown ? (
+      const markdownIcon = this.state.showMarkdown ? (
         <div
           className="toc-toolbar-markdown-button toc-toolbar-button"
           onClick={event => this.toggleMarkdown()}
@@ -216,7 +216,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
         </div>
       );
 
-      let numberingIcon = this.state.numbering ? (
+      const numberingIcon = this.state.numbering ? (
         <div
           className="toc-toolbar-auto-numbering-button toc-toolbar-button"
           onClick={event => this.toggleNumbering()}
@@ -255,7 +255,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
       );
       if (this.state.showTags) {
         this.getTags();
-        let tagTool = (
+        const tagTool = (
           <TagsToolComponent
             tags={this.tags}
             tracker={tracker}
