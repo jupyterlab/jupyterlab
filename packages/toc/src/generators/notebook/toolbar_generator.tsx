@@ -142,7 +142,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
      * Loads all document tags.
      */
     getTags() {
-      let notebook = tracker.currentWidget;
+      const notebook = tracker.currentWidget;
       if (notebook) {
         const cells = notebook.model.cells;
         const tags = new Set<string>();
