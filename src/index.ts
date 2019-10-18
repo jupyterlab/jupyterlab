@@ -33,6 +33,7 @@ import { DebuggerNotebookHandler } from './handlers/notebook';
 import { DebuggerConsoleHandler } from './handlers/console';
 
 import { Kernel } from '@jupyterlab/services';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -208,20 +209,23 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 const main: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:main',
   optional: [ILayoutRestorer, ICommandPalette],
-  requires: [IStateDB],
+  requires: [IStateDB, IEditorServices],
   provides: IDebugger,
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     state: IStateDB,
+    editorServices: IEditorServices,
     restorer: ILayoutRestorer | null,
     palette: ICommandPalette | null
   ): IDebugger => {
     const tracker = new WidgetTracker<MainAreaWidget<Debugger>>({
       namespace: 'debugger'
     });
+
     const { commands, shell } = app;
-    const categoryLabel = 'Debugger';
+    const editorFactory = editorServices.factoryService.newInlineEditor;
+
     let widget: MainAreaWidget<Debugger>;
 
     const getModel = () => {
@@ -280,6 +284,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       execute: async () => {
         const debuggerModel = getModel();
         await debuggerModel.session.stop();
+        commands.notifyCommandChanged();
       }
     });
 
@@ -294,6 +299,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       execute: async () => {
         const debuggerModel = getModel();
         await debuggerModel.session.start();
+        commands.notifyCommandChanged();
       }
     });
 
@@ -348,7 +354,8 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
           widget = new MainAreaWidget({
             content: new Debugger({
               connector: state,
-              id: id
+              editorFactory,
+              id
             })
           });
 
@@ -366,11 +373,16 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
+    const categoryLabel = 'Debugger';
+
     if (palette) {
-      palette.addItem({ command: CommandIDs.changeMode, category: 'Debugger' });
-      palette.addItem({ command: CommandIDs.create, category: 'Debugger' });
-      palette.addItem({ command: CommandIDs.start, category: 'Debugger' });
-      palette.addItem({ command: CommandIDs.stop, category: 'Debugger' });
+      palette.addItem({
+        command: CommandIDs.changeMode,
+        category: categoryLabel
+      });
+      palette.addItem({ command: CommandIDs.create, category: categoryLabel });
+      palette.addItem({ command: CommandIDs.start, category: categoryLabel });
+      palette.addItem({ command: CommandIDs.stop, category: categoryLabel });
       palette.addItem({
         command: CommandIDs.debugNotebook,
         category: categoryLabel
