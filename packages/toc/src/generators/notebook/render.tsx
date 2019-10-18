@@ -17,7 +17,16 @@ import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
 import { setCollapsedState } from './set_collapsed_state';
 
-export function notebookItemRenderer(
+/**
+ * Renders a notebook table of contents item.
+ *
+ * @private
+ * @param options - generator options
+ * @param tracker - notebook tracker
+ * @param item - notebook heading
+ * @returns rendered item
+ */
+function render(
   options: NotebookGeneratorOptionsManager,
   tracker: INotebookTracker,
   item: INotebookHeading
@@ -164,3 +173,8 @@ export function notebookItemRenderer(
   }
   return jsx;
 }
+
+/**
+ * Exports.
+ */
+export { render };

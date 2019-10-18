@@ -7,10 +7,6 @@ import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-import { notebookItemRenderer } from './render';
-
-import { notebookGeneratorToolbar } from './toolbargenerator';
-
 import { TableOfContentsRegistry as Registry } from '../../registry';
 
 import { TableOfContents } from '../../toc';
@@ -37,6 +33,10 @@ import { getRenderedHTMLHeading } from './get_rendered_html_heading';
 
 import { appendHeading } from './append_heading';
 
+import { render } from './render';
+
+import { notebookGeneratorToolbar } from './toolbargenerator';
+
 /**
  * Create a TOC generator for notebooks.
  *
@@ -61,7 +61,7 @@ export function createNotebookGenerator(
       return notebookGeneratorToolbar(options, tracker);
     },
     itemRenderer: (item: INotebookHeading) => {
-      return notebookItemRenderer(options, tracker, item);
+      return render(options, tracker, item);
     },
     generate: panel => {
       let headings: INotebookHeading[] = [];
