@@ -42,20 +42,20 @@ interface IState {
 }
 
 /**
- * Returns a generator for rendering a notebook table of contents toolbar.
+ * Returns a component for rendering a notebook table of contents toolbar.
  *
  * @private
  * @param options - generator options
  * @param tracker - notebook tracker
- * @returns toolbar generator
+ * @returns toolbar component
  */
 function toolbar(options: OptionsManager, tracker: INotebookTracker) {
   return class Toolbar extends React.Component<IProperties, IState> {
     /**
-     * Returns a generator for rendering a notebook table of contents toolbar.
+     * Returns a component for rendering a notebook table of contents toolbar.
      *
      * @param props - toolbar properties
-     * @returns toolbar generator
+     * @returns toolbar component
      */
     constructor(props: IProperties) {
       super(props);
