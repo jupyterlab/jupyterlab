@@ -9,14 +9,14 @@ import { OptionsManager } from './options_manager';
  *
  * @private
  */
-interface IToolbarProps {}
+interface IProperties {}
 
 /**
  * Interface describing toolbar state.
  *
  * @private
  */
-interface IToolbarState {
+interface IState {
   /**
    * Boolean indicating whether numbering is enabled.
    */
@@ -31,14 +31,14 @@ interface IToolbarState {
  * @returns toolbar generator
  */
 function toolbar(options: OptionsManager) {
-  return class extends React.Component<IToolbarProps, IToolbarState> {
+  return class Toolbar extends React.Component<IProperties, IState> {
     /**
      * Returns a generator for rendering a Markdown table of contents toolbar.
      *
      * @param props - toolbar properties
      * @returns toolbar generator
      */
-    constructor(props: IToolbarProps) {
+    constructor(props: IProperties) {
       super(props);
       this.state = { numbering: false };
       options.initializeOptions(false);

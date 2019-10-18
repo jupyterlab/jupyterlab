@@ -50,7 +50,7 @@ interface IState {
  * @returns toolbar generator
  */
 function toolbar(options: OptionsManager, tracker: INotebookTracker) {
-  return class extends React.Component<IProperties, IState> {
+  return class Toolbar extends React.Component<IProperties, IState> {
     /**
      * Returns a generator for rendering a notebook table of contents toolbar.
      *

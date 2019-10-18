@@ -106,7 +106,7 @@ export namespace Registry {
     options?: IOptionsManager;
 
     /**
-     * Generates a JSX element for each heading.
+     * Returns a JSX element for each heading.
      *
      * ## Notes
      *
@@ -118,7 +118,7 @@ export namespace Registry {
     itemRenderer?: (item: IHeading) => JSX.Element | null;
 
     /**
-     * Generates a generator toolbar.
+     * Returns a toolbar generator.
      *
      * ## Notes
      *
@@ -129,7 +129,7 @@ export namespace Registry {
     toolbarGenerator?: () => any;
 
     /**
-     * Generates a list of headings.
+     * Returns a list of headings.
      *
      * @param widget - widget
      * @returns list of headings
