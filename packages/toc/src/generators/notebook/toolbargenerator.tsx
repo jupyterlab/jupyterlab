@@ -221,7 +221,7 @@ export function notebookGeneratorToolbar(
             ref={tagTool => (this.tagTool = tagTool)}
           />
         );
-        options.setTagTool(this.tagTool);
+        options.tagTool = this.tagTool;
         tagDropdown = <div className={'toc-tag-dropdown'}> {tagTool} </div>;
         tagIcon = (
           <div

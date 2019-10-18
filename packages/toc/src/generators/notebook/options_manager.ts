@@ -7,34 +7,81 @@ import { Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
 import { TagsToolComponent } from './tagstool';
 
+/**
+ * Interface describing constructor options.
+ */
+interface Options {
+  /**
+   * Boolean indicating whether items should be numbered.
+   */
+  numbering: boolean;
+
+  /**
+   * HTML sanitizer.
+   */
+  sanitizer: ISanitizer;
+
+  /**
+   * Tag tool component.
+   */
+  tagTool?: TagsToolComponent;
+}
+
+/**
+ * Class for managing notebook ToC generator options.
+ *
+ * @private
+ */
 class OptionsManager extends Registry.IOptionsManager {
+  /**
+   * Returns an options manager.
+   *
+   * @param widget - table of contents widget
+   * @param notebook - notebook tracker
+   * @param options - generator options
+   * @returns options manager
+   */
   constructor(
     widget: TableOfContents,
     notebook: INotebookTracker,
-    options: {
-      needsNumbering: boolean;
-      sanitizer: ISanitizer;
-      tagTool?: TagsToolComponent;
-    }
+    options: Options
   ) {
     super();
-    this._numbering = options.needsNumbering;
+    this._numbering = options.numbering;
     this._widget = widget;
     this._notebook = notebook;
     this.sanitizer = options.sanitizer;
-    this.tagTool = null;
     this.storeTags = [];
   }
 
+  /**
+   * HTML sanitizer.
+   */
   readonly sanitizer: ISanitizer;
-  public tagTool?: TagsToolComponent | null;
 
+  /**
+   * Gets/sets the tag tool component.
+   */
+  set tagTool(tagTool: TagsToolComponent | null) {
+    this._tagTool = tagTool;
+  }
+
+  get tagTool() {
+    return this._tagTool;
+  }
+
+  /**
+   * Sets notebook meta data.
+   */
   set notebookMetadata(value: [string, any]) {
     if (this._notebook.currentWidget != null) {
       this._notebook.currentWidget.model.metadata.set(value[0], value[1]);
     }
   }
 
+  /**
+   * Gets/sets ToC generator numbering.
+   */
   set numbering(value: boolean) {
     this._numbering = value;
     this._widget.update();
@@ -45,6 +92,9 @@ class OptionsManager extends Registry.IOptionsManager {
     return this._numbering;
   }
 
+  /**
+   * Toggles whether to show code previews in the table of contents.
+   */
   set showCode(value: boolean) {
     this._showCode = value;
     this.notebookMetadata = ['toc-showcode', this._showCode];
@@ -55,6 +105,9 @@ class OptionsManager extends Registry.IOptionsManager {
     return this._showCode;
   }
 
+  /**
+   * Toggles whether to show Markdown previews in the table of contents.
+   */
   set showMarkdown(value: boolean) {
     this._showMarkdown = value;
     this.notebookMetadata = ['toc-showmarkdowntxt', this._showMarkdown];
@@ -65,6 +118,9 @@ class OptionsManager extends Registry.IOptionsManager {
     return this._showMarkdown;
   }
 
+  /**
+   * Toggles whether to show tags in the table of contents.
+   */
   set showTags(value: boolean) {
     this._showTags = value;
     this.notebookMetadata = ['toc-showtags', this._showTags];
@@ -75,6 +131,9 @@ class OptionsManager extends Registry.IOptionsManager {
     return this._showTags;
   }
 
+  /**
+   * Returns a list of selected tags.
+   */
   get filtered() {
     if (this.tagTool) {
       this._filtered = this.tagTool.filtered;
@@ -86,6 +145,9 @@ class OptionsManager extends Registry.IOptionsManager {
     return this._filtered;
   }
 
+  /**
+   * Gets/sets a pre-rendered a toolbar.
+   */
   set preRenderedToolbar(value: any) {
     this._preRenderedToolbar = value;
   }
@@ -94,15 +156,25 @@ class OptionsManager extends Registry.IOptionsManager {
     return this._preRenderedToolbar;
   }
 
+  /**
+   * Updates a table of contents widget.
+   */
   updateWidget() {
     this._widget.update();
   }
 
-  setTagTool(tagTool: TagsToolComponent | null) {
-    this.tagTool = tagTool;
-  }
-
-  // initialize options, will NOT change notebook metadata
+  /**
+   * Initializes options.
+   *
+   * ## Notes
+   *
+   * -  This will **not** change notebook meta-data.
+   *
+   * @param numbering - boolean indicating whether to number items
+   * @param showCode - boolean indicating whether to show code previews
+   * @param showMarkdown - boolean indicating whether to show Markdown previews
+   * @param showTags - boolean indicating whether to show tags
+   */
   initializeOptions(
     numbering: boolean,
     showCode: boolean,
@@ -124,6 +196,7 @@ class OptionsManager extends Registry.IOptionsManager {
   private _showTags = false;
   private _notebook: INotebookTracker;
   private _widget: TableOfContents;
+  private _tagTool: TagsToolComponent | null = null;
   public storeTags: string[];
 }
 

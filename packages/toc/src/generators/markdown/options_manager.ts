@@ -60,7 +60,7 @@ class OptionsManager extends Registry.IOptionsManager {
   }
 
   /**
-   * Initialize options.
+   * Initializes options.
    *
    * ## Notes
    *

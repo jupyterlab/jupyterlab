@@ -33,7 +33,7 @@ export function createNotebookGenerator(
   widget: TableOfContents
 ): Registry.IGenerator<NotebookPanel> {
   const options = new OptionsManager(widget, tracker, {
-    needsNumbering: false,
+    numbering: false,
     sanitizer: sanitizer
   });
   return {
