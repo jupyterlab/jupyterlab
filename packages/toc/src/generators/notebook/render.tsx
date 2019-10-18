@@ -56,10 +56,8 @@ function render(
         let collapsed = item.cellRef!.model.metadata.get(
           'toc-hr-collapsed'
         ) as boolean;
-        collapsed = collapsed !== undefined ? collapsed : false;
-
         // Render the twist button:
-        let button = twistButton(item.cellRef, collapsed, onClick);
+        let button = twistButton(item.cellRef, collapsed || false, onClick);
 
         // Render the heading item:
         jsx = (
@@ -82,8 +80,7 @@ function render(
         let collapsed = item.cellRef!.model.metadata.get(
           'toc-hr-collapsed'
         ) as boolean;
-        collapsed = collapsed !== undefined ? collapsed : false;
-        let button = twistButton(item.cellRef, collapsed, onClick);
+        let button = twistButton(item.cellRef, collapsed || false, onClick);
         jsx = (
           <div className="toc-entry-holder">
             {button}
