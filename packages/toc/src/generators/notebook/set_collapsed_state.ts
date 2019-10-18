@@ -2,15 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Cell, CodeCell, CodeCellModel } from '@jupyterlab/cells';
-
 import { INotebookTracker } from '@jupyterlab/notebook';
-
 import { Panel } from '@phosphor/widgets';
-
 import { parseHeading } from '../../utils/parse_heading';
-
 import { isMarkdown } from '../../utils/is_markdown';
-
 import { isDOM } from '../../utils/is_dom';
 
 /**

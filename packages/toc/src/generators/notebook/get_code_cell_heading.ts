@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Cell } from '@jupyterlab/cells';
-
 import { INotebookHeading } from '../../utils/headings';
 
 /**

@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { INotebookHeading } from '../../utils/headings';
-
 import { isHeadingFiltered } from './is_heading_filtered';
 
 /**

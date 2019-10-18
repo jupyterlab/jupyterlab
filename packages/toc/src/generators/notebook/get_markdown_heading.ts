@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Cell } from '@jupyterlab/cells';
-
 import { INotebookHeading } from '../../utils/headings';
-
 import { generateNumbering } from '../../utils/generate_numbering';
-
 import { parseHeading } from '../../utils/parse_heading';
 
 /**

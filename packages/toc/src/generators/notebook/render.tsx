@@ -2,21 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-
 import { Cell } from '@jupyterlab/cells';
-
 import { INotebookTracker } from '@jupyterlab/notebook';
-
 import { sanitizerOptions } from '../../utils/sanitizer_options';
-
 import { INotebookHeading } from '../../utils/headings';
-
 import { CodeComponent } from './codemirror';
-
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
-
 import { setCollapsedState } from './set_collapsed_state';
-
 import { twistButton } from './twist_button';
 
 /**

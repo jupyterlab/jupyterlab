@@ -1,14 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { INotebookTracker } from '@jupyterlab/notebook';
-
-import { JSONValue } from '@phosphor/coreutils';
-
-import { NotebookGeneratorOptionsManager } from './optionsmanager';
-
 import * as React from 'react';
-
+import { INotebookTracker } from '@jupyterlab/notebook';
+import { JSONValue } from '@phosphor/coreutils';
+import { NotebookGeneratorOptionsManager } from './optionsmanager';
 import { TagsToolComponent } from './tagstool';
 
 interface INotebookGeneratorToolbarProps {}
