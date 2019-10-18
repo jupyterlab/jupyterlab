@@ -37,9 +37,7 @@ function isEnabled(editor: IDocumentWidget<FileEditor>) {
  * @param editor - editor widget
  * @returns a list of headings
  */
-function generate(
-  editor: IDocumentWidget<FileEditor>
-): Array<INumberedHeading> {
+function generate(editor: IDocumentWidget<FileEditor>): INumberedHeading[] {
   let dict = {};
   return getHeadings(editor.content.model.value.text, onClick, dict);
 
@@ -164,7 +162,7 @@ function createRenderedMarkdownGenerator(
    * @param widget - Markdown document widget
    * @returns a list of headings
    */
-  function generate(widget: MarkdownDocument): Array<INumberedHeading> {
+  function generate(widget: MarkdownDocument): INumberedHeading[] {
     let dict = {};
     return getRenderedHeadings(
       widget.content.node,

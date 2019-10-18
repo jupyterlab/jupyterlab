@@ -63,7 +63,7 @@ function isEnabled(editor: IDocumentWidget<FileEditor>) {
  * @param editor - editor widget
  * @returns a list of headings
  */
-function generate(editor: IDocumentWidget<FileEditor>): Array<IHeading> {
+function generate(editor: IDocumentWidget<FileEditor>): IHeading[] {
   // Split the text into lines:
   let lines = editor.content.model.value.text.split('\n') as Array<any>;
 
