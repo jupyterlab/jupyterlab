@@ -31,6 +31,8 @@ import { generateNumbering } from '../../utils/generate_numbering';
 
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
+import { getCodeCells } from './get_code_cells';
+
 /**
  * Create a TOC generator for notebooks.
  *
@@ -89,7 +91,7 @@ export function createNotebookGenerator(
               };
             };
             let lastLevel = Private.getLastLevel(headings);
-            let renderedHeading = Private.getCodeCells(
+            let renderedHeading = getCodeCells(
               text,
               onClickFactory,
               executionCount,
@@ -365,40 +367,6 @@ namespace Private {
   }
 
   /**
-   * Given a string of code, get the code entry.
-   */
-  export function getCodeCells(
-    text: string,
-    onClickFactory: (line: number) => () => void,
-    executionCount: string,
-    lastLevel: number,
-    cellRef: Cell
-  ): INotebookHeading {
-    let headings: INotebookHeading[] = [];
-    if (text) {
-      const lines = text.split('\n');
-      let headingText = '';
-      let numLines = Math.min(lines.length, 3);
-      for (let i = 0; i < numLines - 1; i++) {
-        headingText = headingText + lines[i] + '\n';
-      }
-      headingText = headingText + lines[numLines - 1];
-      const onClick = onClickFactory(0);
-      const level = lastLevel + 1;
-      headings.push({
-        text: headingText,
-        level,
-        onClick,
-        type: 'code',
-        prompt: executionCount,
-        cellRef: cellRef,
-        hasChild: false
-      });
-    }
-    return headings[0];
-  }
-
-  /**
    * Given a string of markdown, get the markdown headings in that string.
    */
   export function getMarkdownHeading(
@@ -444,57 +412,52 @@ namespace Private {
     needsNumbering = false,
     cellRef: Cell
   ): INotebookHeading | undefined {
-    let headingNodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
-    if (headingNodes.length > 0) {
-      let markdownCell = headingNodes[0];
-      if (markdownCell.nodeName.toLowerCase() === 'p') {
-        if (markdownCell.innerHTML) {
-          let html = sanitizer.sanitize(
-            markdownCell.innerHTML,
-            sanitizerOptions
-          );
-          html = html.replace('¶', '');
-          return {
-            level: lastLevel + 1,
-            html: html,
-            text: markdownCell.textContent ? markdownCell.textContent : '',
-            onClick: onClickFactory(markdownCell),
-            type: 'markdown',
-            cellRef: cellRef,
-            hasChild: false
-          };
-        }
-      } else {
-        const heading = headingNodes[0];
-        const level = parseInt(heading.tagName[1], 10);
-        const text = heading.textContent ? heading.textContent : '';
-        let shallHide = !needsNumbering;
-        if (heading.getElementsByClassName('numbering-entry').length > 0) {
-          heading.removeChild(
-            heading.getElementsByClassName('numbering-entry')[0]
-          );
-        }
-        let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
+    let nodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
+    if (nodes.length === 0) {
+      return;
+    }
+    let markdownCell = nodes[0];
+    if (markdownCell.nodeName.toLowerCase() === 'p') {
+      if (markdownCell.innerHTML) {
+        let html = sanitizer.sanitize(markdownCell.innerHTML, sanitizerOptions);
         html = html.replace('¶', '');
-        const onClick = onClickFactory(heading);
-        let numbering = generateNumbering(numberingDict, level);
-        let numDOM = '';
-        if (!shallHide) {
-          numDOM = '<span class="numbering-entry">' + numbering + '</span>';
-        }
-        heading.innerHTML = numDOM + html;
         return {
-          level,
-          text,
-          numbering,
-          html,
-          onClick,
-          type: 'header',
+          level: lastLevel + 1,
+          html: html,
+          text: markdownCell.textContent ? markdownCell.textContent : '',
+          onClick: onClickFactory(markdownCell),
+          type: 'markdown',
           cellRef: cellRef,
           hasChild: false
         };
       }
+      return;
     }
-    return undefined;
+    const heading = nodes[0];
+    const level = parseInt(heading.tagName[1], 10);
+    const text = heading.textContent ? heading.textContent : '';
+    let shallHide = !needsNumbering;
+    if (heading.getElementsByClassName('numbering-entry').length > 0) {
+      heading.removeChild(heading.getElementsByClassName('numbering-entry')[0]);
+    }
+    let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
+    html = html.replace('¶', '');
+    const onClick = onClickFactory(heading);
+    let numbering = generateNumbering(numberingDict, level);
+    let numDOM = '';
+    if (!shallHide) {
+      numDOM = '<span class="numbering-entry">' + numbering + '</span>';
+    }
+    heading.innerHTML = numDOM + html;
+    return {
+      level,
+      text,
+      numbering,
+      html,
+      onClick,
+      type: 'header',
+      cellRef: cellRef,
+      hasChild: false
+    };
   }
 }
