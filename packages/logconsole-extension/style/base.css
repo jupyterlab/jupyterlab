@@ -12,16 +12,14 @@
 
 @keyframes flash {
   0% {
-    color: var(--jp-info-color0);
-    background-color: var(--jp-info-color3);
+    background-color: var(--jp-brand-color1);
   }
   50% {
     color: unset;
     background-color: unset;
   }
   100% {
-    color: var(--jp-info-color0);
-    background-color: var(--jp-info-color3);
+    background-color: var(--jp-brand-color1);
   }
 }
 
@@ -30,8 +28,7 @@
 }
 
 .jp-LogConsoleStatusItem.hilited {
-  color: var(--jp-info-color0);
-  background-color: var(--jp-info-color3);
+  background-color: var(--jp-brand-color1);
 }
 
 .jp-LogConsole .clear-icon {
