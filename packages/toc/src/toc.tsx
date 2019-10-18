@@ -10,33 +10,73 @@ import { Message } from '@phosphor/messaging';
 import { Widget } from '@phosphor/widgets';
 import { IHeading } from './utils/headings';
 import { Registry } from './registry';
+import { TOCTree } from './toc_tree';
 
 /**
- * Timeout for throttling TOC rendering.
+ * Interface describing table of contents widget options.
+ *
+ * @private
+ */
+interface IOptions {
+  /**
+   * Application document manager.
+   */
+  docmanager: IDocumentManager;
+
+  /**
+   * Application rendered MIME type.
+   */
+  rendermime: IRenderMimeRegistry;
+}
+
+/**
+ * Interface describing the current widget.
+ *
+ * @private
+ */
+interface ICurrentWidget<W extends Widget = Widget> {
+  /**
+   * Current widget.
+   */
+  widget: W;
+
+  /**
+   * Table of contents generator for the current widget.
+   */
+  generator: Registry.IGenerator<W>;
+}
+
+/**
+ * Timeout for throttling ToC rendering.
+ *
+ * @private
  */
 const RENDER_TIMEOUT = 1000;
 
 /**
- * A widget for hosting a notebook table-of-contents.
+ * Widget for hosting a notebook table of contents.
  */
-export class TableOfContents extends Widget {
+class TableOfContents extends Widget {
   /**
-   * Create a new table of contents.
+   * Returns a new table of contents.
+   *
+   * @param options - options
+   * @returns widget
    */
-  constructor(options: TableOfContents.IOptions) {
+  constructor(options: IOptions) {
     super();
     this._docmanager = options.docmanager;
     this._rendermime = options.rendermime;
   }
 
   /**
-   * The current widget-generator tuple for the ToC.
+   * Current widget-generator tuple for the ToC.
    */
-  get current(): TableOfContents.ICurrentWidget | null {
+  get current(): ICurrentWidget | null {
     return this._current;
   }
-  set current(value: TableOfContents.ICurrentWidget | null) {
-    // If they are the same as previously, do nothing.
+  set current(value: ICurrentWidget | null) {
+    // If they are the same as previously, do nothing...
     if (
       value &&
       this._current &&
@@ -50,45 +90,34 @@ export class TableOfContents extends Widget {
     if (this.generator && this.generator.toolbarGenerator) {
       this._toolbar = this.generator.toolbarGenerator();
     }
-
-    // Dispose an old activity monitor if it existsd
+    // Dispose an old activity monitor if one existed...
     if (this._monitor) {
       this._monitor.dispose();
       this._monitor = null;
     }
-    // If we are wiping the ToC, update and return.
+    // If we are wiping the ToC, update and return...
     if (!this._current) {
-      this.updateTOC();
+      this.update();
       return;
     }
-
-    // Find the document model associated with the widget.
+    // Find the document model associated with the widget:
     const context = this._docmanager.contextForWidget(this._current.widget);
     if (!context || !context.model) {
       throw Error('Could not find a context for the Table of Contents');
     }
-
-    // Throttle the rendering rate of the table of contents.
+    // Throttle the rendering rate of the table of contents:
     this._monitor = new ActivityMonitor({
       signal: context.model.contentChanged,
       timeout: RENDER_TIMEOUT
     });
     this._monitor.activityStopped.connect(this.update, this);
-    this.updateTOC();
+    this.update();
   }
 
   /**
-   * Handle an update request.
+   * Updates a table of contents.
    */
-  protected onUpdateRequest(msg: Message): void {
-    // Don't bother if the TOC is not visible
-    /* if (!this.isVisible) {
-      return;
-    } */
-    this.updateTOC();
-  }
-
-  updateTOC() {
+  update() {
     let toc: IHeading[] = [];
     let title = 'Table of Contents';
     if (this._current) {
@@ -106,13 +135,13 @@ export class TableOfContents extends Widget {
     if (this._current && this._current.generator.itemRenderer) {
       itemRenderer = this._current.generator.itemRenderer!;
     }
-    let renderedJSX = (
+    let jsx = (
       <div className="jp-TableOfContents">
         <header>{title}</header>
       </div>
     );
     if (this._current && this._current.generator) {
-      renderedJSX = (
+      jsx = (
         <TOCTree
           title={title}
           toc={toc}
@@ -122,7 +151,7 @@ export class TableOfContents extends Widget {
         />
       );
     }
-    ReactDOM.render(renderedJSX, this.node, () => {
+    ReactDOM.render(jsx, this.node, () => {
       if (
         this._current &&
         this._current.generator.usesLatex === true &&
@@ -133,6 +162,11 @@ export class TableOfContents extends Widget {
     });
   }
 
+  /**
+   * Current table of contents generator.
+   *
+   * @returns table of contents generator
+   */
   get generator() {
     if (this._current) {
       return this._current.generator;
@@ -141,7 +175,22 @@ export class TableOfContents extends Widget {
   }
 
   /**
-   * Rerender after showing.
+   * Callback invoked upon an update request.
+   *
+   * @param msg - message
+   */
+  protected onUpdateRequest(msg: Message): void {
+    // Don't bother if the ToC is not visible...
+    /* if (!this.isVisible) {
+      return;
+    } */
+    this.update();
+  }
+
+  /**
+   * Callback invoked to re-render after showing a table of contents.
+   *
+   * @param msg - message
    */
   protected onAfterShow(msg: Message): void {
     this.update();
@@ -150,123 +199,11 @@ export class TableOfContents extends Widget {
   private _toolbar: any;
   private _rendermime: IRenderMimeRegistry;
   private _docmanager: IDocumentManager;
-  private _current: TableOfContents.ICurrentWidget | null;
+  private _current: ICurrentWidget | null;
   private _monitor: ActivityMonitor<any, any> | null;
 }
 
 /**
- * A namespace for TableOfContents statics.
+ * Exports.
  */
-export namespace TableOfContents {
-  /**
-   * Options for the constructor.
-   */
-  export interface IOptions {
-    /**
-     * The document manager for the application.
-     */
-    docmanager: IDocumentManager;
-
-    /**
-     * The rendermime for the application.
-     */
-    rendermime: IRenderMimeRegistry;
-  }
-
-  /**
-   * A type representing a tuple of a widget,
-   * and a generator that knows how to generate
-   * heading information from that widget.
-   */
-  export interface ICurrentWidget<W extends Widget = Widget> {
-    widget: W;
-    generator: Registry.IGenerator<W>;
-  }
-}
-
-/**
- * Props for the TOCItem component.
- */
-export interface ITOCItemProps extends React.Props<TOCItem> {
-  /**
-   * An IHeading to render.
-   */
-  heading: IHeading;
-  itemRenderer: (item: IHeading) => JSX.Element | null;
-}
-
-export interface ITOCItemStates {}
-
-/**
- * A React component for a table of contents entry.
- */
-export class TOCItem extends React.Component<ITOCItemProps, ITOCItemStates> {
-  /**
-   * Render the item.
-   */
-  render() {
-    const { heading } = this.props;
-
-    // Create an onClick handler for the TOC item
-    // that scrolls the anchor into view.
-    const handleClick = (event: React.SyntheticEvent<HTMLSpanElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-      heading.onClick();
-    };
-
-    let content = this.props.itemRenderer(heading);
-    return content && <li onClick={handleClick}>{content}</li>;
-  }
-}
-
-export interface ITOCTreeStates {}
-
-/**
- * Props for the TOCTree component.
- */
-export interface ITOCTreeProps extends React.Props<TOCTree> {
-  /**
-   * A title to display.
-   */
-  title: string;
-
-  /**
-   * A list of IHeadings to render.
-   */
-  toc: IHeading[];
-  toolbar: any;
-  generator: Registry.IGenerator<Widget> | null;
-  itemRenderer: (item: IHeading) => JSX.Element | null;
-}
-
-/**
- * A React component for a table of contents.
- */
-export class TOCTree extends React.Component<ITOCTreeProps, ITOCTreeStates> {
-  /**
-   * Render the TOCTree.
-   */
-
-  render() {
-    // Map the heading objects onto a list of JSX elements.
-    let i = 0;
-    const Toolbar = this.props.toolbar;
-    let listing: JSX.Element[] = this.props.toc.map(el => {
-      return (
-        <TOCItem
-          heading={el}
-          itemRenderer={this.props.itemRenderer}
-          key={`${el.text}-${el.level}-${i++}`}
-        />
-      );
-    });
-    return (
-      <div className="jp-TableOfContents">
-        <header>{this.props.title}</header>
-        {Toolbar && <Toolbar />}
-        <ul className="jp-TableOfContents-content">{listing}</ul>
-      </div>
-    );
-  }
-}
+export { TableOfContents };
