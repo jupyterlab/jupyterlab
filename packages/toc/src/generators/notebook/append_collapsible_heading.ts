@@ -30,6 +30,7 @@ function appendCollapsibleHeading(
     if (prev && prev.type === 'header' && prev.level < heading.level) {
       for (let j = len - 1; j >= 0; j--) {
         if (headings[j] === prev) {
+          // TODO: can a heading be the child of multiple headings? If not, we can `break` here upon finding a parent heading, so we don't traverse the entire heading list...
           headings[j].hasChild = true;
         }
       }
