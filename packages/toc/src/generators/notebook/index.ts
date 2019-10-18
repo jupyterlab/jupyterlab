@@ -7,7 +7,7 @@ import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-import { notebookItemRenderer } from './itemrenderer';
+import { notebookItemRenderer } from './render';
 
 import { notebookGeneratorToolbar } from './toolbargenerator';
 
