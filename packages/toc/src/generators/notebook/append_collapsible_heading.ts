@@ -56,7 +56,7 @@ function appendCollapsibleHeading(
       let isCollapsed = headings[k + 1].cellRef.model.metadata.get(
         'toc-hr-collapsed'
       ) as boolean;
-      collapseLevel = isCollapsed || false ? headings[k + 1].level : -1;
+      collapseLevel = isCollapsed ? headings[k + 1].level : -1;
     } else {
       prev = null;
       collapseLevel = -1;
