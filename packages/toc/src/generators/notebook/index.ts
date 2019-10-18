@@ -2,39 +2,22 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISanitizer } from '@jupyterlab/apputils';
-
 import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
-
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-
 import { Registry } from '../../registry';
-
 import { TableOfContents } from '../../toc';
-
 import { isMarkdown } from '../../utils/is_markdown';
-
 import { isDOM } from '../../utils/is_dom';
-
 import { INotebookHeading } from '../../utils/headings';
-
 import { INumberingDictionary } from '../../utils/numbering_dictionary';
-
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
-
 import { getCodeCellHeading } from './get_code_cell_heading';
-
 import { isHeadingFiltered } from './is_heading_filtered';
-
 import { getLastHeadingLevel } from './get_last_heading_level';
-
 import { getMarkdownHeading } from './get_markdown_heading';
-
 import { getRenderedHTMLHeading } from './get_rendered_html_heading';
-
 import { appendHeading } from './append_heading';
-
 import { render } from './render';
-
 import { notebookGeneratorToolbar } from './toolbargenerator';
 
 /**
