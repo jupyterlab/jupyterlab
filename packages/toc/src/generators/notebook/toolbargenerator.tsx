@@ -214,9 +214,9 @@ export function notebookGeneratorToolbar(
         this.getTags();
         let tagTool = (
           <TagsToolComponent
-            allTagsList={this.allTags}
+            tags={this.allTags}
             tracker={tracker}
-            generatorOptionsRef={options}
+            options={options}
             inputFilter={options.storeTags}
             ref={tagTool => (this.tagTool = tagTool)}
           />

@@ -26,7 +26,7 @@ interface IProperties {
   /**
    * List of all tags.
    */
-  allTagsList: string[] | null;
+  tags: string[] | null;
 }
 
 /**
@@ -109,7 +109,7 @@ class TagListComponent extends React.Component<IProperties, IState> {
    * @returns rendered list
    */
   render() {
-    let tags = this.props.allTagsList;
+    let tags = this.props.tags;
     let jsx = null;
     if (tags) {
       jsx = this.renderTagComponents(tags);

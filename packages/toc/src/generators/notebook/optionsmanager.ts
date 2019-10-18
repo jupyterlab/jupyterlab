@@ -81,7 +81,7 @@ export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGe
 
   get filtered() {
     if (this.tagTool) {
-      this._filtered = this.tagTool.getFiltered();
+      this._filtered = this.tagTool.filtered;
     } else if (this.storeTags.length > 0) {
       this._filtered = this.storeTags;
     } else {
