@@ -7,25 +7,18 @@ import { JSONValue } from '@phosphor/coreutils';
 import { OptionsManager } from './options_manager';
 import { TagsToolComponent } from './tagstool';
 
-interface INotebookGeneratorToolbarProps {}
+interface IProperties {}
 
-interface INotebookGeneratorToolbarState {
+interface IState {
   showCode: boolean;
   showMarkdown: boolean;
   showTags: boolean;
   numbering: boolean;
 }
 
-export function notebookGeneratorToolbar(
-  options: OptionsManager,
-  tracker: INotebookTracker
-) {
-  // Render the toolbar
-  return class extends React.Component<
-    INotebookGeneratorToolbarProps,
-    INotebookGeneratorToolbarState
-  > {
-    constructor(props: INotebookGeneratorToolbarProps) {
+function toolbar(options: OptionsManager, tracker: INotebookTracker) {
+  return class extends React.Component<IProperties, IState> {
+    constructor(props: IProperties) {
       super(props);
       this.tagTool = null;
       this.state = {
@@ -255,3 +248,8 @@ export function notebookGeneratorToolbar(
     tagTool: TagsToolComponent | null;
   };
 }
+
+/**
+ * Exports.
+ */
+export { toolbar };
