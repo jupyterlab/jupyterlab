@@ -110,6 +110,13 @@ export type ILogPayload = ITextLog | IHtmlLog | IOutputLog;
 
 export type ILoggerChange = 'append' | 'clear';
 
+export interface ILoggerOutputAreaModel extends IOutputAreaModel {
+  /**
+   * The maximum number of outputs to store.
+   */
+  maxLength: number;
+}
+
 /**
  * A Logger that manages logs from a particular source.
  */
@@ -151,7 +158,7 @@ export interface ILogger {
   /**
    * Output Area Model used to manage log storage in memory.
    */
-  readonly outputAreaModel: IOutputAreaModel;
+  readonly outputAreaModel: ILoggerOutputAreaModel;
   /**
    * Whether the log has ever had a message.
    */
