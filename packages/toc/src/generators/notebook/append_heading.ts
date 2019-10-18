@@ -17,7 +17,6 @@ import { isHeadingFiltered } from './is_heading_filtered';
  * @param collapsed - boolean indicating whether a heading is collapsed
  * @returns result tuple
  */
-
 function appendHeading(
   headings: INotebookHeading[],
   heading: INotebookHeading,
