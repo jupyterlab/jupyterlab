@@ -13,7 +13,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { IHeading } from './utils/headings';
 
-import { TableOfContentsRegistry } from './registry';
+import { Registry } from './registry';
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -187,7 +187,7 @@ export namespace TableOfContents {
    */
   export interface ICurrentWidget<W extends Widget = Widget> {
     widget: W;
-    generator: TableOfContentsRegistry.IGenerator<W>;
+    generator: Registry.IGenerator<W>;
   }
 }
 
@@ -243,7 +243,7 @@ export interface ITOCTreeProps extends React.Props<TOCTree> {
    */
   toc: IHeading[];
   toolbar: any;
-  generator: TableOfContentsRegistry.IGenerator<Widget> | null;
+  generator: Registry.IGenerator<Widget> | null;
   itemRenderer: (item: IHeading) => JSX.Element | null;
 }
 

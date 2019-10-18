@@ -8,7 +8,7 @@ import {
   IMarkdownViewerTracker,
   MarkdownDocument
 } from '@jupyterlab/markdownviewer';
-import { TableOfContentsRegistry as Registry } from '../../registry';
+import { Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
 import { INumberingDictionary } from '../../utils/numbering_dictionary';
 import { INumberedHeading } from '../../utils/headings';

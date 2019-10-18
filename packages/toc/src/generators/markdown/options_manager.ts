@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISanitizer } from '@jupyterlab/apputils';
-import { TableOfContentsRegistry as Registry } from '../../registry';
+import { Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
 
 /**
@@ -27,7 +27,7 @@ interface Options {
  *
  * @private
  */
-class OptionsManager extends Registry.IGeneratorOptionsManager {
+class OptionsManager extends Registry.IOptionsManager {
   /**
    * Returns an options manager.
    *

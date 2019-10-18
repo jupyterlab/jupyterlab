@@ -5,13 +5,13 @@ import { ISanitizer } from '@jupyterlab/apputils';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
-import { TableOfContentsRegistry } from '../../registry';
+import { Registry } from '../../registry';
 
 import { TableOfContents } from '../../toc';
 
 import { TagsToolComponent } from './tagstool';
 
-export class NotebookGeneratorOptionsManager extends TableOfContentsRegistry.IGeneratorOptionsManager {
+export class NotebookGeneratorOptionsManager extends Registry.IOptionsManager {
   constructor(
     widget: TableOfContents,
     notebook: INotebookTracker,

@@ -7,7 +7,7 @@ import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-import { TableOfContentsRegistry as Registry } from '../../registry';
+import { Registry } from '../../registry';
 
 import { TableOfContents } from '../../toc';
 

@@ -19,7 +19,7 @@ import {
   createMarkdownGenerator,
   createRenderedMarkdownGenerator
 } from './generators';
-import { ITableOfContentsRegistry, TableOfContentsRegistry } from './registry';
+import { ITableOfContentsRegistry, Registry } from './registry';
 import '../style/index.css';
 
 /**
@@ -49,7 +49,7 @@ function activateTOC(
   const toc = new TableOfContents({ docmanager, rendermime });
 
   // Create the ToC registry:
-  const registry = new TableOfContentsRegistry();
+  const registry = new Registry();
 
   // Add the ToC to the left area:
   toc.title.iconClass = 'jp-TableOfContents-icon jp-SideBar-tabIcon';
@@ -66,7 +66,7 @@ function activateTOC(
     rendermime.sanitizer,
     toc
   );
-  registry.addGenerator(notebookGenerator);
+  registry.add(notebookGenerator);
 
   // Create an markdown generator:
   const markdownGenerator = createMarkdownGenerator(
@@ -74,7 +74,7 @@ function activateTOC(
     toc,
     rendermime.sanitizer
   );
-  registry.addGenerator(markdownGenerator);
+  registry.add(markdownGenerator);
 
   // Create an rendered markdown generator:
   const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
@@ -82,11 +82,11 @@ function activateTOC(
     toc,
     rendermime.sanitizer
   );
-  registry.addGenerator(renderedMarkdownGenerator);
+  registry.add(renderedMarkdownGenerator);
 
   // Create a LaTeX generator:
   const latexGenerator = createLatexGenerator(editorTracker);
-  registry.addGenerator(latexGenerator);
+  registry.add(latexGenerator);
 
   // Update the ToC when the active widget changes:
   labShell.currentChanged.connect(onConnect);
@@ -103,7 +103,7 @@ function activateTOC(
     if (!widget) {
       return;
     }
-    let generator = registry.findGeneratorForWidget(widget);
+    let generator = registry.find(widget);
     if (!generator) {
       // If the previously used widget is still available, stick with it.
       // Otherwise, set the current ToC widget to null.

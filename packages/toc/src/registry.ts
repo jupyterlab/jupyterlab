@@ -7,113 +7,132 @@ import { Widget } from '@phosphor/widgets';
 import { IHeading } from './utils/headings';
 
 /**
- * An interface for a TableOfContentsRegistry.
+ * Interface describing the table of contents registry.
+ *
+ * @private
  */
-export interface ITableOfContentsRegistry extends TableOfContentsRegistry {}
+export interface ITableOfContentsRegistry extends Registry {}
 
 /* tslint:disable */
 /**
- * The TableOfContentsRegistry token.
+ * Table of contents registry token.
  */
-export const ITableOfContentsRegistry = new Token<TableOfContentsRegistry>(
+export const ITableOfContentsRegistry = new Token<Registry>(
   'jupyterlab-toc:ITableOfContentsRegistry'
 );
 /* tslint:enable */
 
 /**
- * A class that keeps track of the different kinds
- * of widgets for which there can be tables-of-contents.
+ * Class for registering widgets for which we can generate a table of contents.
  */
-export class TableOfContentsRegistry {
+export class Registry {
   /**
-   * Given a widget, find an IGenerator for it,
-   * or undefined if none can be found.
+   * Finds a table of contents generator for a widget.
+   *
+   * ## Notes
+   *
+   * -   If unable to find a table of contents generator, the method return `undefined`.
+   *
+   * @param widget - widget
+   * @returns table of contents generator
    */
-  findGeneratorForWidget(
-    widget: Widget
-  ): TableOfContentsRegistry.IGenerator | undefined {
-    let generator: TableOfContentsRegistry.IGenerator | undefined;
-    this._generators.forEach(gen => {
+  find(widget: Widget): Registry.IGenerator | undefined {
+    for (let i = 0; i < this._generators.length; i++) {
+      const gen = this._generators[i];
       if (gen.tracker.has(widget)) {
-        // If isEnabled is present, check for it.
         if (gen.isEnabled && !gen.isEnabled(widget)) {
-          return;
+          continue;
         }
-        generator = gen;
+        return gen;
       }
-    });
-    return generator;
+    }
   }
 
   /**
-   * Add a new IGenerator to the registry.
+   * Adds a table of contents generator to the registry.
+   *
+   * @param generator - table of contents generator
    */
-  addGenerator(generator: TableOfContentsRegistry.IGenerator): void {
+  add(generator: Registry.IGenerator): void {
     this._generators.push(generator);
   }
 
-  private _generators: TableOfContentsRegistry.IGenerator[] = [];
+  private _generators: Registry.IGenerator[] = [];
 }
 
 /**
- * A namespace for TableOfContentsRegistry statics.
+ * Static registry methods.
  */
-export namespace TableOfContentsRegistry {
+export namespace Registry {
   /**
-   * An interface for an object that knows how to generate a table-of-contents
-   * for a type of widget.
+   * Abstract class for managing options affecting how a table of contents is generated for a particular widget type.
    */
+  export abstract class IOptionsManager {}
 
-  export abstract class IGeneratorOptionsManager {}
-
+  /**
+   * Interface describing a widget table of contents generator.
+   */
   export interface IGenerator<W extends Widget = Widget> {
     /**
-     * An instance tracker for the widget.
+     * Widget instance tracker.
      */
     tracker: IWidgetTracker<W>;
 
     /**
-     * A function to test whether to generate a ToC for a widget.
+     * Returns a boolean indicating whether we can generate a ToC for a widget.
      *
-     * #### Notes
-     * By default is assumed to be enabled if the widget
-     * is hosted in `tracker`. However, the user may want to add
-     * additional checks. For instance, this can be used to generate
-     * a ToC for text files only if they have a given mimeType.
+     * ## Notes
+     *
+     * -   By default, we assume ToC generation is enabled if the widget is hosted in `tracker`.
+     * -   However, a user may want to add additional checks (e.g., only generate a ToC for text files only if they have a given MIME type).
+     *
+     * @param widget - widget
+     * @returns boolean indicating whether we can generate a ToC for a widget
      */
     isEnabled?: (widget: W) => boolean;
 
     /**
-     * Whether the document uses LaTeX typesetting.
+     * Boolean indicating whether a document uses LaTeX typesetting.
      *
-     * Defaults to `false`.
+     * @default false
      */
     usesLatex?: boolean;
 
     /**
-     * An object that manage user settings for the generator.
+     * Options manager.
      *
-     * Defaults to `undefined`.
+     * @default undefined
      */
-    options?: IGeneratorOptionsManager;
+    options?: IOptionsManager;
 
     /**
-     * A function that generates JSX element for each heading
+     * Generates a JSX element for each heading.
      *
-     * If not given, the default renderer will be used, which renders the text
+     * ## Notes
+     *
+     * -   If not provided, a default renderer will be used.
+     *
+     * @param item - heading
+     * @returns JSX element
      */
     itemRenderer?: (item: IHeading) => JSX.Element | null;
 
     /**
-     * A function that generates a toolbar for the generator
+     * Generates a generator toolbar.
      *
-     * If not given, no toolbar will show up
+     * ## Notes
+     *
+     * -   If not provided, no toolbar is generated.
+     *
+     * @returns toolbar generator
      */
     toolbarGenerator?: () => any;
 
     /**
-     * A function that takes the widget, and produces
-     * a list of headings.
+     * Generates a list of headings.
+     *
+     * @param widget - widget
+     * @returns list of headings
      */
     generate(widget: W): IHeading[];
   }
