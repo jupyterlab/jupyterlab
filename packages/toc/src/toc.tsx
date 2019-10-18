@@ -192,38 +192,6 @@ export namespace TableOfContents {
 }
 
 /**
- * An object that represents a heading.
- */
-export interface IHeading {
-  /**
-   * The text of the heading.
-   */
-  text: string;
-
-  /**
-   * The HTML header level for the heading.
-   */
-  level: number;
-
-  /**
-   * A function to execute when clicking the ToC
-   * item. Typically this will be used to scroll
-   * the parent widget to this item.
-   */
-  onClick: () => void;
-
-  /**
-   * If there is special markup, we can instead
-   * render the heading using a raw HTML string. This
-   * HTML *should be properly sanitized!*
-   *
-   * For instance, this can be used to render
-   * already-renderd-to-html markdown headings.
-   */
-  html?: string;
-}
-
-/**
  * Props for the TOCItem component.
  */
 export interface ITOCItemProps extends React.Props<TOCItem> {
