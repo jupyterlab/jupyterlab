@@ -50,7 +50,7 @@ interface IProperties extends React.Props<TOCTree> {
 interface IState {}
 
 /**
- * React component for a table of contents.
+ * React component for a table of contents tree.
  *
  * @private
  */
