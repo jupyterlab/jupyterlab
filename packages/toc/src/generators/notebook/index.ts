@@ -19,13 +19,9 @@ import { isMarkdown } from '../../utils/is_markdown';
 
 import { isDOM } from '../../utils/is_dom';
 
-import { sanitizerOptions } from '../../utils/sanitizer_options';
-
 import { INotebookHeading } from '../../utils/headings';
 
 import { INumberingDictionary } from '../../utils/numbering_dictionary';
-
-import { generateNumbering } from '../../utils/generate_numbering';
 
 import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
@@ -36,6 +32,8 @@ import { isHeadingFiltered } from './is_heading_filtered';
 import { getLastHeadingLevel } from './get_last_heading_level';
 
 import { getMarkdownHeading } from './get_markdown_heading';
+
+import { getRenderedHTMLHeading } from './get_rendered_html_heading';
 
 /**
  * Create a TOC generator for notebooks.
@@ -129,7 +127,7 @@ export function createNotebookGenerator(
             };
             let lastLevel = getLastHeadingLevel(headings);
             let numbering = options.numbering;
-            let renderedHeading = Private.getRenderedHTMLHeading(
+            let renderedHeading = getRenderedHTMLHeading(
               outputWidget.node,
               onClickFactory,
               sanitizer,
@@ -166,7 +164,7 @@ export function createNotebookGenerator(
                 }
               };
             };
-            renderedHeading = Private.getRenderedHTMLHeading(
+            renderedHeading = getRenderedHTMLHeading(
               cell.node,
               onClickFactory,
               sanitizer,
@@ -328,67 +326,5 @@ namespace Private {
       }
     }
     return [headings, prevHeading, collapseLevel];
-  }
-
-  /**
-   * Given an HTML element, generate ToC headings
-   * by finding all the headers and making IHeading objects for them.
-   */
-  export function getRenderedHTMLHeading(
-    node: HTMLElement,
-    onClickFactory: (el: Element) => () => void,
-    sanitizer: ISanitizer,
-    numberingDict: INumberingDictionary,
-    lastLevel: number,
-    needsNumbering = false,
-    cellRef: Cell
-  ): INotebookHeading | undefined {
-    let nodes = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
-    if (nodes.length === 0) {
-      return;
-    }
-    let markdownCell = nodes[0];
-    if (markdownCell.nodeName.toLowerCase() === 'p') {
-      if (markdownCell.innerHTML) {
-        let html = sanitizer.sanitize(markdownCell.innerHTML, sanitizerOptions);
-        html = html.replace('¶', '');
-        return {
-          level: lastLevel + 1,
-          html: html,
-          text: markdownCell.textContent ? markdownCell.textContent : '',
-          onClick: onClickFactory(markdownCell),
-          type: 'markdown',
-          cellRef: cellRef,
-          hasChild: false
-        };
-      }
-      return;
-    }
-    const heading = nodes[0];
-    const level = parseInt(heading.tagName[1], 10);
-    const text = heading.textContent ? heading.textContent : '';
-    let shallHide = !needsNumbering;
-    if (heading.getElementsByClassName('numbering-entry').length > 0) {
-      heading.removeChild(heading.getElementsByClassName('numbering-entry')[0]);
-    }
-    let html = sanitizer.sanitize(heading.innerHTML, sanitizerOptions);
-    html = html.replace('¶', '');
-    const onClick = onClickFactory(heading);
-    let numbering = generateNumbering(numberingDict, level);
-    let numDOM = '';
-    if (!shallHide) {
-      numDOM = '<span class="numbering-entry">' + numbering + '</span>';
-    }
-    heading.innerHTML = numDOM + html;
-    return {
-      level,
-      text,
-      numbering,
-      html,
-      onClick,
-      type: 'header',
-      cellRef: cellRef,
-      hasChild: false
-    };
   }
 }
