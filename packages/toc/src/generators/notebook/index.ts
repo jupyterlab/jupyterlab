@@ -33,6 +33,8 @@ import { NotebookGeneratorOptionsManager } from './optionsmanager';
 
 import { getCodeCellHeading } from './get_code_cell_heading';
 
+import { isHeadingFiltered } from './is_heading_filtered';
+
 /**
  * Create a TOC generator for notebooks.
  *
@@ -205,33 +207,6 @@ export function createNotebookGenerator(
 }
 
 namespace Private {
-  /**
-   * Determine whether a heading is filtered out by selected tags.
-   */
-  export function headingIsFilteredOut(
-    heading: INotebookHeading,
-    tags: string[]
-  ) {
-    if (tags.length === 0) {
-      return false;
-    }
-    if (heading && heading.cellRef) {
-      let cellMetadata = heading.cellRef.model.metadata;
-      let cellTagsData = cellMetadata.get('tags') as string[];
-      if (cellTagsData) {
-        for (let j = 0; j < cellTagsData.length; j++) {
-          let name = cellTagsData[j];
-          for (let k = 0; k < tags.length; k++) {
-            if (tags[k] === name) {
-              return false;
-            }
-          }
-        }
-      }
-    }
-    return true;
-  }
-
   export function getLastLevel(headings: INotebookHeading[]) {
     if (headings.length > 0) {
       let location = headings.length - 1;
@@ -289,7 +264,7 @@ namespace Private {
     filtered: string[]
   ): [INotebookHeading[], INotebookHeading | null] {
     if (
-      !Private.headingIsFilteredOut(renderedHeading, filtered) &&
+      !isHeadingFiltered(renderedHeading, filtered) &&
       renderedHeading &&
       renderedHeading.text
     ) {
@@ -317,7 +292,7 @@ namespace Private {
     filtered: string[],
     collapsed: boolean
   ): [INotebookHeading[], INotebookHeading | null, number] {
-    if (!Private.headingIsFilteredOut(renderedHeading, filtered)) {
+    if (!isHeadingFiltered(renderedHeading, filtered)) {
       // if the previous heading is a header of a higher level,
       // find it and mark it as having a child
       if (
