@@ -3,20 +3,52 @@
 
 import * as React from 'react';
 
-export interface ITagComponentProps {
+/**
+ * Interface describing component properties.
+ *
+ * @private
+ */
+interface IProperties {
+  /**
+   * Selection state callback.
+   *
+   * @param newState - new state
+   * @param add - boolean flag
+   */
   selectionStateHandler: (newState: string, add: boolean) => void;
+
+  /**
+   * Selected tags.
+   */
   selectedTags: string[];
+
+  /**
+   * Tag.
+   */
   tag: string;
 }
 
-/*
- * Create a React component containing one tag label
+/**
+ * Abstract class defining a React component containing one tag label.
+ *
+ * @private
  */
-export abstract class TagComponent extends React.Component<ITagComponentProps> {
-  constructor(props: ITagComponentProps) {
+abstract class TagComponent extends React.Component<IProperties> {
+  /**
+   * Returns a React component.
+   *
+   * @param props - properties
+   * @returns component
+   */
+  constructor(props: IProperties) {
     super(props);
   }
 
+  /**
+   * Renders a component.
+   *
+   * @returns rendered component
+   */
   render() {
     const tag = this.props.tag as string;
     return (
@@ -28,3 +60,8 @@ export abstract class TagComponent extends React.Component<ITagComponentProps> {
     );
   }
 }
+
+/**
+ * Exports.
+ */
+export { TagComponent };
