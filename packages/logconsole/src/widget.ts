@@ -513,6 +513,7 @@ export class LogConsolePanel extends StackedPanel {
 
   private _showOutputFromSource(source: string) {
     const viewId = `source:${source}`;
+
     this._outputAreas.forEach(
       (outputArea: LogConsoleOutputArea, name: string) => {
         if (outputArea.id === viewId) {
@@ -529,9 +530,6 @@ export class LogConsolePanel extends StackedPanel {
     const title = source ? `Log: ${source}` : 'Log Console';
     this.title.label = title;
     this.title.caption = title;
-    if (source !== null) {
-      this._sourceDisplayed.emit(source);
-    }
   }
 
   /**
@@ -540,11 +538,11 @@ export class LogConsolePanel extends StackedPanel {
   get source(): string | null {
     return this._source;
   }
-  set source(source: string | null) {
-    this._source = source;
+  set source(name: string | null) {
+    this._source = name;
     this._showOutputFromSource(this._source);
     this._handlePlaceholder();
-    this._sourceChanged.emit(source);
+    this._sourceChanged.emit(name);
   }
 
   /**
@@ -552,13 +550,6 @@ export class LogConsolePanel extends StackedPanel {
    */
   get sourceChanged(): ISignal<this, string | null> {
     return this._sourceChanged;
-  }
-
-  /**
-   * Signal indicating all current messages for a source have been displayed.
-   */
-  get sourceDisplayed(): ISignal<this, string> {
-    return this._sourceDisplayed;
   }
 
   private _handlePlaceholder() {
@@ -590,8 +581,7 @@ export class LogConsolePanel extends StackedPanel {
     const loggers = this._loggerRegistry.getLoggers();
 
     for (let logger of loggers) {
-      const source = logger.source;
-      const viewId = `source:${source}`;
+      const viewId = `source:${logger.source}`;
       loggerIds.add(viewId);
 
       // add view for logger if not exist
@@ -613,12 +603,6 @@ export class LogConsolePanel extends StackedPanel {
             this._scrollTimer = setTimeout(() => {
               this._scrollOuputAreaToBottom(outputArea);
             }, 50);
-
-            // Signal that we have displayed the current messages for this
-            // source if it is currently displayed.
-            if (source === this.source) {
-              this._sourceDisplayed.emit(source);
-            }
           },
           this
         );
@@ -644,7 +628,6 @@ export class LogConsolePanel extends StackedPanel {
   private _outputAreas = new Map<string, LogConsoleOutputArea>();
   private _source: string | null = null;
   private _sourceChanged = new Signal<this, string | null>(this);
-  private _sourceDisplayed = new Signal<this, string>(this);
   private _scrollTimer: number = null;
   private _placeholder: Widget;
   private _loggersWatched: Set<string> = new Set();

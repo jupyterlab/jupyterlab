@@ -179,13 +179,10 @@ function activateLogConsole(
     });
 
     logConsolePanel.sourceChanged.connect(panel => {
-      app.commands.notifyCommandChanged();
-    });
-
-    logConsolePanel.sourceDisplayed.connect((panel, source) => {
-      if (panel.isVisible) {
-        status.model.markSourceLogsViewed(source);
+      if (panel.isVisible && panel.source) {
+        status.model.markSourceLogsViewed(panel.source);
       }
+      app.commands.notifyCommandChanged();
     });
 
     logConsoleWidget.disposed.connect(() => {
