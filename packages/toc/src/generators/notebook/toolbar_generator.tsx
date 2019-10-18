@@ -141,7 +141,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
     /**
      * Loads all document tags.
      */
-    getTags() {
+    loadTags() {
       const notebook = tracker.currentWidget;
       if (notebook) {
         const cells = notebook.model.cells;
@@ -254,7 +254,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
         </div>
       );
       if (this.state.showTags) {
-        this.getTags();
+        this.loadTags();
         const tagTool = (
           <TagsToolComponent
             tags={this.tags}
