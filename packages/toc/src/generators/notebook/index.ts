@@ -11,10 +11,10 @@ import { isDOM } from '../../utils/is_dom';
 import { INotebookHeading } from '../../utils/headings';
 import { OptionsManager } from './options_manager';
 import { getCodeCellHeading } from './get_code_cell_heading';
-import { isHeadingFiltered } from './is_heading_filtered';
 import { getLastHeadingLevel } from './get_last_heading_level';
 import { getMarkdownHeading } from './get_markdown_heading';
 import { getRenderedHTMLHeading } from './get_rendered_html_heading';
+import { appendHeading } from './append_heading';
 import { appendCollapsibleHeading } from './append_collapsible_heading';
 import { render } from './render';
 import { toolbar } from './toolbar_generator';
@@ -82,7 +82,7 @@ function createNotebookGenerator(
               getLastHeadingLevel(headings),
               cell
             );
-            [headings, prev] = Private.addMDOrCode(
+            [headings, prev] = appendHeading(
               headings,
               heading,
               prev,
@@ -199,7 +199,7 @@ namespace Private {
   ): [INotebookHeading[], INotebookHeading | null, number] {
     // If the heading is MD and MD is shown, add to headings
     if (heading && heading.type === 'markdown' && showMarkdown) {
-      [headings, prevHeading] = Private.addMDOrCode(
+      [headings, prevHeading] = appendHeading(
         headings,
         heading,
         prevHeading,
@@ -218,40 +218,6 @@ namespace Private {
       );
     }
     return [headings, prevHeading, collapseLevel];
-  }
-
-  /**
-   * Appends a notebook heading to a list of headings.
-   *
-   * @private
-   * @param headings - list of notebook headings
-   * @param heading - rendered heading
-   * @param prev - previous heading
-   * @param collapseLevel - collapse level
-   * @param tags - filter tags
-   * @returns result tuple
-   */
-  export function addMDOrCode(
-    headings: INotebookHeading[],
-    heading: INotebookHeading,
-    prev: INotebookHeading | null,
-    collapseLevel: number,
-    tags: string[]
-  ): [INotebookHeading[], INotebookHeading | null] {
-    if (heading && !isHeadingFiltered(heading, tags) && heading.text) {
-      if (prev && prev.type === 'header') {
-        for (let j = headings.length - 1; j >= 0; j--) {
-          if (headings[j] === prev) {
-            headings[j].hasChild = true;
-          }
-        }
-      }
-      if (collapseLevel < 0) {
-        headings.push(heading);
-      }
-      prev = heading;
-    }
-    return [headings, prev];
   }
 }
 
