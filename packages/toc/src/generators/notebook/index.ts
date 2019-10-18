@@ -11,7 +11,7 @@ import { notebookItemRenderer } from './itemrenderer';
 
 import { notebookGeneratorToolbar } from './toolbargenerator';
 
-import { TableOfContentsRegistry } from '../../registry';
+import { TableOfContentsRegistry as Registry } from '../../registry';
 
 import { TableOfContents } from '../../toc';
 
@@ -35,6 +35,8 @@ import { getMarkdownHeading } from './get_markdown_heading';
 
 import { getRenderedHTMLHeading } from './get_rendered_html_heading';
 
+import { appendHeading } from './append_heading';
+
 /**
  * Create a TOC generator for notebooks.
  *
@@ -46,8 +48,7 @@ export function createNotebookGenerator(
   tracker: INotebookTracker,
   sanitizer: ISanitizer,
   widget: TableOfContents
-): TableOfContentsRegistry.IGenerator<NotebookPanel> {
-  // Create a option manager to manage user settings
+): Registry.IGenerator<NotebookPanel> {
   const options = new NotebookGeneratorOptionsManager(widget, tracker, {
     needsNumbering: false,
     sanitizer: sanitizer
@@ -231,7 +232,7 @@ namespace Private {
       );
       // Otherwise, if the heading is a header, add to headings
     } else if (renderedHeading && renderedHeading.type === 'header') {
-      [headings, prevHeading, collapseLevel] = Private.addHeader(
+      [headings, prevHeading, collapseLevel] = appendHeading(
         headings,
         renderedHeading,
         prevHeading,
@@ -269,62 +270,5 @@ namespace Private {
       prevHeading = renderedHeading;
     }
     return [headings, prevHeading];
-  }
-
-  export function addHeader(
-    headings: INotebookHeading[],
-    renderedHeading: INotebookHeading,
-    prevHeading: INotebookHeading | null,
-    collapseLevel: number,
-    filtered: string[],
-    collapsed: boolean
-  ): [INotebookHeading[], INotebookHeading | null, number] {
-    if (!isHeadingFiltered(renderedHeading, filtered)) {
-      // if the previous heading is a header of a higher level,
-      // find it and mark it as having a child
-      if (
-        prevHeading &&
-        prevHeading.type === 'header' &&
-        prevHeading.level < renderedHeading.level
-      ) {
-        for (let j = headings.length - 1; j >= 0; j--) {
-          if (headings[j] === prevHeading) {
-            headings[j].hasChild = true;
-          }
-        }
-      }
-      // if the collapse level doesn't include the header, or if there is no
-      // collapsing, add to headings and adjust the collapse level appropriately
-      if (collapseLevel >= renderedHeading.level || collapseLevel < 0) {
-        headings.push(renderedHeading);
-        collapseLevel = collapsed ? renderedHeading.level : -1;
-      }
-      prevHeading = renderedHeading;
-    } else if (prevHeading && renderedHeading.level <= prevHeading.level) {
-      // If header is filtered out and has a previous heading of smaller level, go
-      // back through headings to determine if it has a parent
-      let k = headings.length - 1;
-      let parentHeading = false;
-      while (k >= 0 && parentHeading === false) {
-        if (headings[k].level < renderedHeading.level) {
-          prevHeading = headings[k];
-          parentHeading = true;
-        }
-        k--;
-      }
-      // If there is no parent, set prevHeading to null and reset collapsing
-      if (!parentHeading) {
-        prevHeading = null;
-        collapseLevel = -1;
-        // Otherwise, reset collapsing appropriately
-      } else {
-        let parentState = headings[k + 1].cellRef.model.metadata.get(
-          'toc-hr-collapsed'
-        ) as boolean;
-        parentState = parentState !== undefined ? parentState : false;
-        collapseLevel = parentState ? headings[k + 1].level : -1;
-      }
-    }
-    return [headings, prevHeading, collapseLevel];
   }
 }
