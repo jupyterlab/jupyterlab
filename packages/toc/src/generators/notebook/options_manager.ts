@@ -2,16 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISanitizer } from '@jupyterlab/apputils';
-
 import { INotebookTracker } from '@jupyterlab/notebook';
-
 import { Registry } from '../../registry';
-
 import { TableOfContents } from '../../toc';
-
 import { TagsToolComponent } from './tagstool';
 
-export class NotebookGeneratorOptionsManager extends Registry.IOptionsManager {
+class OptionsManager extends Registry.IOptionsManager {
   constructor(
     widget: TableOfContents,
     notebook: INotebookTracker,
@@ -130,3 +126,8 @@ export class NotebookGeneratorOptionsManager extends Registry.IOptionsManager {
   private _widget: TableOfContents;
   public storeTags: string[];
 }
+
+/**
+ * Exports.
+ */
+export { OptionsManager };

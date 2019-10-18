@@ -10,7 +10,7 @@ import { isMarkdown } from '../../utils/is_markdown';
 import { isDOM } from '../../utils/is_dom';
 import { INotebookHeading } from '../../utils/headings';
 import { INumberingDictionary } from '../../utils/numbering_dictionary';
-import { NotebookGeneratorOptionsManager } from './optionsmanager';
+import { OptionsManager } from './options_manager';
 import { getCodeCellHeading } from './get_code_cell_heading';
 import { isHeadingFiltered } from './is_heading_filtered';
 import { getLastHeadingLevel } from './get_last_heading_level';
@@ -32,7 +32,7 @@ export function createNotebookGenerator(
   sanitizer: ISanitizer,
   widget: TableOfContents
 ): Registry.IGenerator<NotebookPanel> {
-  const options = new NotebookGeneratorOptionsManager(widget, tracker, {
+  const options = new OptionsManager(widget, tracker, {
     needsNumbering: false,
     sanitizer: sanitizer
   });

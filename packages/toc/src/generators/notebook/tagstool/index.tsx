@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { Cell } from '@jupyterlab/cells';
-import { NotebookGeneratorOptionsManager } from '../optionsmanager';
+import { OptionsManager } from '../options_manager';
 import { TagListComponent } from './tag_list';
 
 /**
@@ -26,7 +26,7 @@ interface IProperties {
   /**
    * Notebook Generator options.
    */
-  options: NotebookGeneratorOptionsManager;
+  options: OptionsManager;
 
   /**
    * Input filter.

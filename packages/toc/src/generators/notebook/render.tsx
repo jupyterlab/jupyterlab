@@ -7,7 +7,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { INotebookHeading } from '../../utils/headings';
 import { CodeComponent } from './codemirror';
-import { NotebookGeneratorOptionsManager } from './optionsmanager';
+import { OptionsManager } from './options_manager';
 import { setCollapsedState } from './set_collapsed_state';
 import { twistButton } from './twist_button';
 
@@ -21,7 +21,7 @@ import { twistButton } from './twist_button';
  * @returns rendered item
  */
 function render(
-  options: NotebookGeneratorOptionsManager,
+  options: OptionsManager,
   tracker: INotebookTracker,
   item: INotebookHeading
 ) {
