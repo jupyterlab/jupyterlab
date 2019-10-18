@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Breakpoints } from '.';
 import { ReactWidget } from '@jupyterlab/apputils';
 import { ArrayExt } from '@phosphor/algorithm';
@@ -24,14 +24,23 @@ export class Body extends ReactWidget {
 const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
   const [breakpoints, setBreakpoints] = useState(model.breakpoints);
 
-  model.breakpointsChanged.connect(
-    (_: Breakpoints.Model, updates: Breakpoints.IBreakpoint[]) => {
+  useEffect(() => {
+    const updateBreakpoints = (
+      _: Breakpoints.Model,
+      updates: Breakpoints.IBreakpoint[]
+    ) => {
       if (ArrayExt.shallowEqual(breakpoints, updates)) {
         return;
       }
       setBreakpoints(updates);
-    }
-  );
+    };
+
+    model.breakpointsChanged.connect(updateBreakpoints);
+
+    return () => {
+      model.breakpointsChanged.disconnect(updateBreakpoints);
+    };
+  });
 
   return (
     <div>
@@ -56,15 +65,24 @@ const BreakpointComponent = ({
   const [active, setActive] = useState(breakpoint.active);
   breakpoint.active = active;
 
-  breakpointChanged.connect(
-    (_: Breakpoints.Model, updates: Breakpoints.IBreakpoint) => {
-      setActive(updates.active);
-    }
-  );
-
   const setBreakpointEnabled = (state: boolean) => {
     setActive(state);
   };
+
+  useEffect(() => {
+    const updateBreakpoints = (
+      _: Breakpoints.Model,
+      updates: Breakpoints.IBreakpoint
+    ) => {
+      setBreakpointEnabled(updates.active);
+    };
+
+    breakpointChanged.connect(updateBreakpoints);
+
+    return () => {
+      breakpointChanged.disconnect(updateBreakpoints);
+    };
+  });
 
   return (
     <div className={`breakpoint`}>
