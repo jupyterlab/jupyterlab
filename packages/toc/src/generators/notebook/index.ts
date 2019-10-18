@@ -35,6 +35,8 @@ import { getCodeCellHeading } from './get_code_cell_heading';
 
 import { isHeadingFiltered } from './is_heading_filtered';
 
+import { getLastHeadingLevel } from './get_last_heading_level';
+
 /**
  * Create a TOC generator for notebooks.
  *
@@ -92,7 +94,7 @@ export function createNotebookGenerator(
                 cell.node.scrollIntoView();
               };
             };
-            let lastLevel = Private.getLastLevel(headings);
+            let lastLevel = getLastHeadingLevel(headings);
             let renderedHeading = getCodeCellHeading(
               text,
               onClickFactory,
@@ -125,7 +127,7 @@ export function createNotebookGenerator(
                 el.scrollIntoView();
               };
             };
-            let lastLevel = Private.getLastLevel(headings);
+            let lastLevel = getLastHeadingLevel(headings);
             let numbering = options.numbering;
             let renderedHeading = Private.getRenderedHTMLHeading(
               outputWidget.node,
@@ -149,7 +151,7 @@ export function createNotebookGenerator(
         } else if (model.type === 'markdown') {
           let mdCell = cell as MarkdownCell;
           let renderedHeading: INotebookHeading | undefined = undefined;
-          let lastLevel = Private.getLastLevel(headings);
+          let lastLevel = getLastHeadingLevel(headings);
           // If the cell is rendered, generate the ToC items from the HTML
           if (mdCell.rendered && !mdCell.inputHidden) {
             const onClickFactory = (el: Element) => {
@@ -207,19 +209,6 @@ export function createNotebookGenerator(
 }
 
 namespace Private {
-  export function getLastLevel(headings: INotebookHeading[]) {
-    if (headings.length > 0) {
-      let location = headings.length - 1;
-      while (location >= 0) {
-        if (headings[location].type === 'header') {
-          return headings[location].level;
-        }
-        location = location - 1;
-      }
-    }
-    return 0;
-  }
-
   export function processMD(
     renderedHeading: INotebookHeading | undefined,
     showMarkdown: boolean,
