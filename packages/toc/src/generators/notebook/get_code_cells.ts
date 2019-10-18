@@ -35,12 +35,13 @@ function getCodeCells(
   let headings: INotebookHeading[] = [];
   if (text) {
     const lines = text.split('\n');
-    let len = Math.min(lines.length, 3);
+    const len = Math.min(lines.length, 3);
     let str = '';
-    for (let i = 0; i < len - 1; i++) {
+    let i = 0;
+    for (; i < len - 1; i++) {
       str += lines[i] + '\n';
     }
-    str += lines[len - 1];
+    str += lines[i];
     headings.push({
       text: str,
       level: lastLevel + 1,
