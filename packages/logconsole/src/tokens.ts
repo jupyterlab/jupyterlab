@@ -160,7 +160,7 @@ export interface ILogger {
    */
   readonly outputAreaModel: ILoggerOutputAreaModel;
   /**
-   * Whether the log has ever had a message.
+   * The cumulative number of messages the log has stored.
    */
-  readonly active: boolean;
+  readonly version: number;
 }

@@ -129,6 +129,7 @@ export class ScrollingWidget<T extends Widget> extends Widget {
 
   onAfterAttach(msg: Message) {
     super.onAfterAttach(msg);
+    // TODO: defer to an animation frame to give content a chance to attach first
     this._sentinel.scrollIntoView();
     this._scrollHeight = this.node.scrollHeight;
 
@@ -259,6 +260,12 @@ export class LogConsolePanel extends StackedPanel {
         // Show/hide the output area parents, the scrolling windows.
         if (outputArea.id === viewId) {
           outputArea.parent.show();
+          if (outputArea.isVisible) {
+            this._sourceDisplayed.emit({
+              source: this.source,
+              version: this.sourceVersion
+            });
+          }
         } else {
           outputArea.parent.hide();
         }
@@ -284,10 +291,25 @@ export class LogConsolePanel extends StackedPanel {
   }
 
   /**
+   * The source version displayed.
+   */
+  get sourceVersion(): number | null {
+    const source = this.source;
+    return source && this._loggerRegistry.getLogger(source).version;
+  }
+
+  /**
    * Signal for source changes
    */
   get sourceChanged(): ISignal<this, string | null> {
     return this._sourceChanged;
+  }
+
+  /**
+   * Signal for source changes
+   */
+  get sourceDisplayed(): ISignal<this, ISourceDisplayed> {
+    return this._sourceDisplayed;
   }
 
   private _handlePlaceholder() {
@@ -308,7 +330,8 @@ export class LogConsolePanel extends StackedPanel {
     const loggers = this._loggerRegistry.getLoggers();
 
     for (let logger of loggers) {
-      const viewId = `source:${logger.source}`;
+      const source = logger.source;
+      const viewId = `source:${source}`;
       loggerIds.add(viewId);
 
       // add view for logger if not exist
@@ -322,7 +345,12 @@ export class LogConsolePanel extends StackedPanel {
 
         outputArea.outputLengthChanged.connect(
           (sender: LogConsoleOutputArea, args: number) => {
-            // pass
+            if (this.source === source && sender.isVisible) {
+              this._sourceDisplayed.emit({
+                source: this.source,
+                version: this.sourceVersion
+              });
+            }
           },
           this
         );
@@ -351,6 +379,12 @@ export class LogConsolePanel extends StackedPanel {
   private _outputAreas = new Map<string, LogConsoleOutputArea>();
   private _source: string | null = null;
   private _sourceChanged = new Signal<this, string | null>(this);
+  private _sourceDisplayed = new Signal<this, ISourceDisplayed>(this);
   private _placeholder: Widget;
   private _loggersWatched: Set<string> = new Set();
+}
+
+export interface ISourceDisplayed {
+  source: string;
+  version: number;
 }

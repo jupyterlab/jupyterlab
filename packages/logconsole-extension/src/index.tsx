@@ -157,33 +157,37 @@ function activateLogConsole(
 
     void tracker.add(logConsoleWidget);
 
-    MessageLoop.installMessageHook(logConsolePanel, (_, msg) => {
-      switch (msg.type) {
-        case 'after-show':
-        case 'after-attach':
-          // Because we are running in a message hook,
-          // logConsolePanel.isVisible hasn't been updated yet, so we figure
-          // out visibility based on the parent logConsoleWidget's visibility.
-          if (logConsoleWidget.isVisible) {
-            status.model.markSourceLogsViewed(logConsolePanel.source);
-            status.model.flashEnabled = false;
-          }
-          break;
-        case 'after-hide':
-        case 'after-detach':
-          status.model.flashEnabled = flashEnabled;
-          break;
-        default:
-          break;
+    MessageLoop.installMessageHook(
+      logConsolePanel,
+      (panel: LogConsolePanel, msg) => {
+        switch (msg.type) {
+          case 'after-show':
+          case 'after-attach':
+            // Because we are running in a message hook,
+            // panel.isVisible hasn't been updated yet, so we figure
+            // out visibility based on the parent's visilibity.
+            if (panel.parent.isVisible) {
+              status.model.sourceDisplayed(panel.source, panel.sourceVersion);
+              status.model.flashEnabled = false;
+            }
+            break;
+          case 'after-hide':
+          case 'after-detach':
+            status.model.flashEnabled = flashEnabled;
+            break;
+          default:
+            break;
+        }
+        return true;
       }
-      return true;
+    );
+
+    logConsolePanel.sourceChanged.connect(() => {
+      app.commands.notifyCommandChanged();
     });
 
-    logConsolePanel.sourceChanged.connect(panel => {
-      if (panel.isVisible && panel.source) {
-        status.model.markSourceLogsViewed(panel.source);
-      }
-      app.commands.notifyCommandChanged();
+    logConsolePanel.sourceDisplayed.connect((panel, { source, version }) => {
+      status.model.sourceDisplayed(source, version);
     });
 
     logConsoleWidget.disposed.connect(() => {
@@ -257,7 +261,7 @@ function activateLogConsole(
 
   function setSource(newValue: Widget) {
     if (logConsoleWidget && newValue === logConsoleWidget) {
-      // Do not change anything if we are just focusing on ourself
+      // Do not change anything if we are just focusing on ourselves
       return;
     }
 
@@ -267,14 +271,14 @@ function activateLogConsole(
     } else {
       source = null;
     }
-
-    status.model.source = source;
-    if (logConsolePanel) {
+    // Update the log console panel first so the status panel knows what was
+    // displayed before it tries to update itself. TODO: this shouldn't be
+    // needed, because we should update the status model when the console
+    // panel is updated anyway.
+    if (logConsoleWidget) {
       logConsolePanel.source = source;
-      if (logConsolePanel.isVisible) {
-        status.model.markSourceLogsViewed(source);
-      }
     }
+    status.model.source = source;
   }
   void app.restored.then(() => {
     // Set source only after app is restored in order to allow restorer to

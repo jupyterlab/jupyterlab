@@ -224,8 +224,15 @@ export class Logger implements ILogger {
     }
 
     if (output) {
+      // First, make sure our version reflects the new message so things
+      // triggering from the signals below have the correct version.
+      this._version++;
+
+      // Next, trigger any displays of the message
       this.outputAreaModel.add({ ...output, timestamp: timestamp.valueOf() });
-      this._active = true;
+
+      // Finally, tell people that the message was appended (and possibly
+      // already displayed).
       this._logChanged.emit('append');
     }
   }
@@ -252,10 +259,10 @@ export class Logger implements ILogger {
   }
 
   /**
-   * Whether the log has ever had a message.
+   * The number of messages that have ever been stored.
    */
-  get active(): boolean {
-    return this._active;
+  get version(): number {
+    return this._version;
   }
 
   readonly source: string;
@@ -263,7 +270,7 @@ export class Logger implements ILogger {
   private _logChanged = new Signal<this, ILoggerChange>(this);
   private _rendermimeChanged = new Signal<this, void>(this);
   private _rendermime: IRenderMimeRegistry | null = null;
-  private _active = false;
+  private _version = 0;
 }
 
 export namespace Logger {

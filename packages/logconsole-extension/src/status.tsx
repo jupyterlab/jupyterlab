@@ -80,27 +80,33 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
    * Render the log console status item.
    */
   render() {
-    if (this.model === null || !this.model.active) {
+    if (this.model === null || this.model.version === 0) {
       this.hide();
       return null;
     }
     this.show();
-    let { source, flashEnabled, sourceUnread, messages } = this.model;
-    if (source && flashEnabled && sourceUnread > 0) {
-      if (
-        this._lastSource === source &&
-        this._lastSourceUnread < sourceUnread
-      ) {
-        // There are new messages to notify the user about
-        this._flashHighlight();
-      } else {
-        this._showHighlighted();
-      }
+    let {
+      flashEnabled,
+      messages,
+      source,
+      version,
+      versionDisplayed,
+      versionNotified
+    } = this.model;
+    // TODO: if the console viewer is displayed initially (with version 0),
+    // the very first message triggers a highlight (version is 1,
+    // versionNotified is 0 in the check below). Somewhere the version
+    // notified is not updated from the display of the first message before we
+    // get called here. This is masked right now because of the flashEnabled
+    // check.
+    if (source && flashEnabled && version > versionNotified) {
+      this._flashHighlight();
+      this.model.sourceNotified(source, version);
+    } else if (source && flashEnabled && version > versionDisplayed) {
+      this._showHighlighted();
     } else {
       this._clearHighlight();
     }
-    this._lastSource = source;
-    this._lastSourceUnread = sourceUnread;
 
     return (
       <LogConsoleStatusComponent
@@ -130,8 +136,6 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
     this.removeClass('jp-mod-selected');
   }
 
-  private _lastSource: string | null = null;
-  private _lastSourceUnread: number = 0;
   private _handleClick: () => void;
 }
 
@@ -156,10 +160,11 @@ export namespace LogConsoleStatus {
         this._handleLogRegistryChange,
         this
       );
+      this._handleLogRegistryChange();
     }
 
     /**
-     * Number of messages in the current source.
+     * Number of messages currently in the current source.
      */
     get messages(): number {
       if (this._source) {
@@ -171,14 +176,14 @@ export namespace LogConsoleStatus {
     }
 
     /**
-     * Whether the current source is active (has ever had a message).
+     * The number of messages ever stored by the current source.
      */
-    get active(): boolean {
+    get version(): number {
       if (this._source) {
         const logger = this._loggerRegistry.getLogger(this._source);
-        return logger.active;
+        return logger.version;
       }
-      return false;
+      return 0;
     }
 
     /**
@@ -200,10 +205,17 @@ export namespace LogConsoleStatus {
     }
 
     /**
-     * How many messages the source has emitted since its last clear or view.
+     * The last source version that was displayed.
      */
-    get sourceUnread(): number {
-      return this._sourceUnread.get(this.source);
+    get versionDisplayed(): number {
+      return this._sourceVersion.get(this.source).lastDisplayed;
+    }
+
+    /**
+     * The last source version we notified the user about.
+     */
+    get versionNotified(): number {
+      return this._sourceVersion.get(this.source).lastNotified;
     }
 
     /**
@@ -226,38 +238,61 @@ export namespace LogConsoleStatus {
     }
 
     /**
-     * Mark the logs from the source as displayed.
+     * Record the last source version displayed to the user.
      *
      * @param source - The name of the log source.
+     * @param version - The version of the log that was displayed.
+     *
+     * #### Notes
+     * This will also update the last notified version so that the last
+     * notified version is always at least the last displayed version.
      */
-    markSourceLogsViewed(source: string) {
-      this._sourceUnread.set(source, 0);
-      if (source === this._source) {
+    sourceDisplayed(source: string, version: number) {
+      const versions = this._sourceVersion.get(source);
+      let change = false;
+      if (versions.lastDisplayed < version) {
+        versions.lastDisplayed = version;
+        change = true;
+      }
+      if (versions.lastNotified < version) {
+        versions.lastNotified = version;
+        change = true;
+      }
+      if (change && source === this._source) {
         this.stateChanged.emit();
+      }
+    }
+
+    /**
+     * Record a source version we notified the user about.
+     *
+     * @param source - The name of the log source.
+     * @param version - The version of the log.
+     */
+    sourceNotified(source: string, version: number) {
+      const versions = this._sourceVersion.get(source);
+      if (versions.lastNotified < version) {
+        versions.lastNotified = version;
+        if (source === this._source) {
+          this.stateChanged.emit();
+        }
       }
     }
 
     private _handleLogRegistryChange() {
       const loggers = this._loggerRegistry.getLoggers();
       for (let logger of loggers) {
-        if (!this._sourceUnread.has(logger.source)) {
+        if (!this._sourceVersion.has(logger.source)) {
           logger.logChanged.connect(this._handleLogChange, this);
-          this._sourceUnread.set(logger.source, logger.length);
+          this._sourceVersion.set(logger.source, {
+            lastDisplayed: 0,
+            lastNotified: 0
+          });
         }
       }
     }
 
     private _handleLogChange({ source }: ILogger, change: ILoggerChange) {
-      switch (change) {
-        case 'append':
-          this._sourceUnread.set(source, this._sourceUnread.get(source) + 1);
-          break;
-        case 'clear':
-          this._sourceUnread.set(source, 0);
-          break;
-        default:
-          break;
-      }
       if (source === this._source) {
         this.stateChanged.emit();
       }
@@ -274,10 +309,17 @@ export namespace LogConsoleStatus {
      * The view status of each source.
      *
      * #### Notes
-     * Keys are source names, value is the number of messages logged since the
-     * last clear or view
+     * Keys are source names, value is a list of two numbers. The first
+     * represents the version of the messages that was last displayed to the
+     * user, the second represents the version that we last notified the user
+     * about.
      */
-    private _sourceUnread: Map<string, number> = new Map();
+    private _sourceVersion: Map<string, IVersionInfo> = new Map();
+  }
+
+  interface IVersionInfo {
+    lastDisplayed: number;
+    lastNotified: number;
   }
 
   /**
