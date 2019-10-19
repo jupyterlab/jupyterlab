@@ -273,10 +273,6 @@ function activateLogConsole(
     } else {
       source = null;
     }
-    // Update the log console panel first so the status panel knows what was
-    // displayed before it tries to update itself. TODO: this shouldn't be
-    // needed, because we should update the status model when the console
-    // panel is updated anyway.
     if (logConsoleWidget) {
       logConsolePanel.source = source;
     }
