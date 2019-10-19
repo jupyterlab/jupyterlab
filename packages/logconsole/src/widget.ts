@@ -108,8 +108,8 @@ class LogConsoleContentFactory extends OutputArea.ContentFactory {
  * has scrolled to the bottom, but not change the scrolling when the user has
  * changed the scroll position.
  */
-export class ScrollingWidget extends Widget {
-  constructor({ content, ...options }: ScrollingWidget.IOptions) {
+export class ScrollingWidget<T extends Widget> extends Widget {
+  constructor({ content, ...options }: ScrollingWidget.IOptions<T>) {
     super(options);
     this.addClass('jp-Scrolling');
     const layout = (this.layout = new PanelLayout());
@@ -118,6 +118,13 @@ export class ScrollingWidget extends Widget {
     this._content = content;
     this._sentinel = document.createElement('div');
     this.node.appendChild(this._sentinel);
+  }
+
+  /**
+   * The content widget.
+   */
+  get content(): T {
+    return this._content;
   }
 
   onAfterAttach(msg: Message) {
@@ -145,7 +152,7 @@ export class ScrollingWidget extends Widget {
     }
   }
 
-  _handleScroll([entry]: IntersectionObserverEntry[]) {
+  private _handleScroll([entry]: IntersectionObserverEntry[]) {
     if (entry.isIntersecting) {
       this._tracking = true;
     } else if (this.isVisible) {
@@ -162,16 +169,16 @@ export class ScrollingWidget extends Widget {
     }
   }
 
-  _content: Widget;
-  _observer: IntersectionObserver;
-  _scrollHeight: number;
-  _sentinel: HTMLDivElement;
-  _tracking: boolean;
+  private _content: T;
+  private _observer: IntersectionObserver;
+  private _scrollHeight: number;
+  private _sentinel: HTMLDivElement;
+  private _tracking: boolean;
 }
 
 export namespace ScrollingWidget {
-  export interface IOptions extends Widget.IOptions {
-    content: Widget;
+  export interface IOptions<T extends Widget> extends Widget.IOptions {
+    content: T;
   }
 }
 
