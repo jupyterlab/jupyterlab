@@ -148,6 +148,12 @@ export class Logger implements ILogger {
    * @param source - The name of the log source.
    */
   constructor(options: Logger.IOptions) {
+    // There a number of places we test source names | null for truthiness, so
+    // insist that source names are nonempty strings. TODO: change these
+    // places to explicitly check for null.
+    if (options.source.length === 0) {
+      throw new Error('Log sources must be nonempty strings');
+    }
     this.source = options.source;
     this.outputAreaModel = new LoggerOutputAreaModel({
       contentFactory: new LogConsoleModelContentFactory(),
