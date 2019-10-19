@@ -99,6 +99,86 @@ class LogConsoleContentFactory extends OutputArea.ContentFactory {
 }
 
 /**
+ * Implements a panel which supports pinning the position to the end if it is
+ * scrolled to the end.
+ *
+ * #### Notes
+ * This is useful for log viewing components or chat components that append
+ * elements at the end. We would like to automatically scroll when the user
+ * has scrolled to the bottom, but not change the scrolling when the user has
+ * changed the scroll position.
+ */
+export class ScrollingWidget extends Panel {
+  constructor({ viewport, content, ...options }: ScrollingWidget.IOptions) {
+    super(options);
+
+    this._content = content;
+
+    this.addWidget(content);
+
+    this._viewport = () => this.node;
+    // this._viewport = typeof viewport === 'function' ? viewport : () => viewport;
+
+    this._sentinel = document.createElement('div');
+
+    // Careful reading of the PanelLayout code shows that children logic works
+    // even if we have extra elements appended at the end. If this changes in
+    // the future, we may need to override the attach and detach methods in
+    // PanelLayout to account for our extra sentinel node.
+    this.node.appendChild(this._sentinel);
+  }
+
+  onAfterAttach(msg: Message) {
+    super.onAfterAttach(msg);
+    // Set up intersection observer for the sentinel
+    this._observer = new IntersectionObserver(
+      args => {
+        this._handleScroll(args);
+      },
+      { root: this._viewport(), threshold: 1 }
+    );
+    this._observer.observe(this._sentinel);
+    this._scrollHeight = this.node.scrollHeight;
+  }
+
+  onBeforeDetach(msg: Message) {
+    this._observer.disconnect();
+  }
+
+  _handleScroll([entry]: IntersectionObserverEntry[]) {
+    if (!entry.isIntersecting) {
+      const currentHeight = this.node.scrollHeight;
+      if (currentHeight !== this._scrollHeight) {
+        // We assume we scrolled because our size changed, so scroll to the end.
+        this._sentinel.scrollIntoView();
+        this._scrollHeight = currentHeight;
+      }
+    }
+  }
+
+  _viewport: () => HTMLElement | null;
+  _content: Widget;
+  _observer: IntersectionObserver;
+  _scrollHeight: number;
+  _sentinel: HTMLDivElement;
+}
+
+export namespace ScrollingWidget {
+  export interface IOptions extends Panel.IOptions {
+    /**
+     * The HTML element that defines the viewport.
+     *
+     * #### Notes
+     * If the DOM structure has not been fully constructed yet, you can give a
+     * function which will be called at attach time to return the viewport.
+     */
+    viewport: HTMLElement | (() => HTMLElement | null);
+
+    content: Widget;
+  }
+}
+
+/**
  * A StackedPanel implementation that creates Output Areas
  * for each log source and activates as source is switched.
  */
@@ -174,9 +254,6 @@ export class LogConsolePanel extends StackedPanel {
       (outputArea: LogConsoleOutputArea, name: string) => {
         if (outputArea.id === viewId) {
           outputArea.show();
-          setTimeout(() => {
-            this._scrollOutputAreaToBottom(outputArea, false);
-          }, 50);
         } else {
           outputArea.hide();
         }
@@ -221,17 +298,6 @@ export class LogConsolePanel extends StackedPanel {
     }
   }
 
-  private _scrollOutputAreaToBottom(
-    outputArea: LogConsoleOutputArea,
-    animate: boolean = true
-  ) {
-    outputArea.node.scrollTo({
-      left: 0,
-      top: outputArea.node.scrollHeight,
-      behavior: animate ? 'smooth' : 'auto'
-    });
-  }
-
   private _updateOutputAreas() {
     const loggerIds = new Set<string>();
     const loggers = this._loggerRegistry.getLoggers();
@@ -249,21 +315,18 @@ export class LogConsolePanel extends StackedPanel {
         });
         outputArea.id = viewId;
 
-        logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
-          this._scrollOutputAreaToBottom(outputArea);
-        }, this);
-
         outputArea.outputLengthChanged.connect(
           (sender: LogConsoleOutputArea, args: number) => {
-            clearTimeout(this._scrollTimer);
-            this._scrollTimer = setTimeout(() => {
-              this._scrollOutputAreaToBottom(outputArea);
-            }, 50);
+            // pass
           },
           this
         );
 
-        this.addWidget(outputArea);
+        let w = new ScrollingWidget({
+          viewport: this.node,
+          content: outputArea
+        });
+        this.addWidget(w);
         this._outputAreas.set(viewId, outputArea);
       }
     }
@@ -284,7 +347,6 @@ export class LogConsolePanel extends StackedPanel {
   private _outputAreas = new Map<string, LogConsoleOutputArea>();
   private _source: string | null = null;
   private _sourceChanged = new Signal<this, string | null>(this);
-  private _scrollTimer: number = null;
   private _placeholder: Widget;
   private _loggersWatched: Set<string> = new Set();
 }

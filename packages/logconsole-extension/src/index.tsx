@@ -19,7 +19,8 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import {
   ILoggerRegistry,
   LoggerRegistry,
-  LogConsolePanel
+  LogConsolePanel,
+  ScrollingWidget
 } from '@jupyterlab/logconsole';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
@@ -82,7 +83,8 @@ function activateLogConsole(
   restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null
 ): ILoggerRegistry {
-  let logConsoleWidget: MainAreaWidget<LogConsolePanel> = null;
+  let logConsoleWidget: MainAreaWidget = null;
+  let logConsolePanel: LogConsolePanel = null;
   let flashEnabled: boolean = true;
 
   const loggerRegistry = new LoggerRegistry({
@@ -91,7 +93,7 @@ function activateLogConsole(
     maxLength: 1000
   });
 
-  const tracker = new WidgetTracker<MainAreaWidget<LogConsolePanel>>({
+  const tracker = new WidgetTracker<MainAreaWidget>({
     namespace: 'logconsole'
   });
 
@@ -123,7 +125,7 @@ function activateLogConsole(
   }
 
   const createLogConsoleWidget = (options: ILogConsoleOptions = {}) => {
-    const logConsolePanel = new LogConsolePanel(loggerRegistry);
+    logConsolePanel = new LogConsolePanel(loggerRegistry);
 
     logConsolePanel.source =
       options.source !== undefined
@@ -132,7 +134,12 @@ function activateLogConsole(
         ? nbtracker.currentWidget.context.path
         : null;
 
-    logConsoleWidget = new MainAreaWidget({ content: logConsolePanel });
+    const scrolling = new ScrollingWidget({
+      viewport: () => logConsoleWidget.node,
+      content: logConsolePanel
+    });
+    // scrolling.addWidget(logConsolePanel);
+    logConsoleWidget = new MainAreaWidget({ content: scrolling });
     logConsoleWidget.addClass('jp-LogConsole');
     logConsoleWidget.title.closable = true;
     logConsoleWidget.title.label = 'Log Console';
@@ -187,6 +194,7 @@ function activateLogConsole(
 
     logConsoleWidget.disposed.connect(() => {
       logConsoleWidget = null;
+      logConsolePanel = null;
       app.commands.notifyCommandChanged();
     });
 
@@ -217,22 +225,22 @@ function activateLogConsole(
   app.commands.addCommand(CommandIDs.addTimestamp, {
     label: 'Add Timestamp',
     execute: () => {
-      const logger = loggerRegistry.getLogger(logConsoleWidget.content.source);
+      const logger = loggerRegistry.getLogger(logConsolePanel.source);
       logger.log({ type: 'html', data: '<hr>' });
     },
     isEnabled: () =>
-      logConsoleWidget && logConsoleWidget.content.source !== null,
+      logConsolePanel && logConsolePanel.source !== null,
     iconClass: 'jp-AddIcon'
   });
 
   app.commands.addCommand(CommandIDs.clear, {
     label: 'Clear Log',
     execute: () => {
-      const logger = loggerRegistry.getLogger(logConsoleWidget.content.source);
+      const logger = loggerRegistry.getLogger(logConsolePanel.source);
       logger.clear();
     },
     isEnabled: () =>
-      logConsoleWidget && logConsoleWidget.content.source !== null,
+      logConsolePanel && logConsolePanel.source !== null,
     iconClass: 'fa fa-ban clear-icon'
   });
 
@@ -269,9 +277,9 @@ function activateLogConsole(
     }
 
     status.model.source = source;
-    if (logConsoleWidget) {
-      logConsoleWidget.content.source = source;
-      if (logConsoleWidget.isVisible) {
+    if (logConsolePanel) {
+      logConsolePanel.source = source;
+      if (logConsolePanel.isVisible) {
         status.model.markSourceLogsViewed(source);
       }
     }
