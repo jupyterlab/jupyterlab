@@ -167,7 +167,7 @@ function activateLogConsole(
             // panel.isVisible hasn't been updated yet, so we figure
             // out visibility based on the parent's visilibity.
             if (panel.parent.isVisible) {
-              if (panel.source) {
+              if (panel.source !== null) {
                 status.model.sourceDisplayed(panel.source, panel.sourceVersion);
               }
               status.model.flashEnabled = false;

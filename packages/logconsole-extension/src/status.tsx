@@ -99,10 +99,10 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
     // notified is not updated from the display of the first message before we
     // get called here. This is masked right now because of the flashEnabled
     // check.
-    if (source && flashEnabled && version > versionNotified) {
+    if (source !== null && flashEnabled && version > versionNotified) {
       this._flashHighlight();
       this.model.sourceNotified(source, version);
-    } else if (source && flashEnabled && version > versionDisplayed) {
+    } else if (source !== null && flashEnabled && version > versionDisplayed) {
       this._showHighlighted();
     } else {
       this._clearHighlight();
@@ -167,33 +167,32 @@ export namespace LogConsoleStatus {
      * Number of messages currently in the current source.
      */
     get messages(): number {
-      if (this._source) {
-        const logger = this._loggerRegistry.getLogger(this._source);
-        return logger.length;
+      if (this._source === null) {
+        return 0;
       }
-
-      return 0;
+      const logger = this._loggerRegistry.getLogger(this._source);
+      return logger.length;
     }
 
     /**
      * The number of messages ever stored by the current source.
      */
     get version(): number {
-      if (this._source) {
-        const logger = this._loggerRegistry.getLogger(this._source);
-        return logger.version;
+      if (this._source === null) {
+        return 0;
       }
-      return 0;
+      const logger = this._loggerRegistry.getLogger(this._source);
+      return logger.version;
     }
 
     /**
      * The name of the active log source
      */
-    get source(): string {
+    get source(): string | null {
       return this._source;
     }
 
-    set source(name: string) {
+    set source(name: string | null) {
       if (this._source === name) {
         return;
       }
@@ -208,6 +207,9 @@ export namespace LogConsoleStatus {
      * The last source version that was displayed.
      */
     get versionDisplayed(): number {
+      if (this._source === null) {
+        return 0;
+      }
       return this._sourceVersion.get(this.source).lastDisplayed;
     }
 
@@ -215,6 +217,9 @@ export namespace LogConsoleStatus {
      * The last source version we notified the user about.
      */
     get versionNotified(): number {
+      if (this._source === null) {
+        return 0;
+      }
       return this._sourceVersion.get(this.source).lastNotified;
     }
 
@@ -247,7 +252,10 @@ export namespace LogConsoleStatus {
      * This will also update the last notified version so that the last
      * notified version is always at least the last displayed version.
      */
-    sourceDisplayed(source: string, version: number) {
+    sourceDisplayed(source: string | null, version: number) {
+      if (source === null) {
+        return;
+      }
       const versions = this._sourceVersion.get(source);
       let change = false;
       if (versions.lastDisplayed < version) {
@@ -269,7 +277,10 @@ export namespace LogConsoleStatus {
      * @param source - The name of the log source.
      * @param version - The version of the log.
      */
-    sourceNotified(source: string, version: number) {
+    sourceNotified(source: string | null, version: number) {
+      if (source === null) {
+        return;
+      }
       const versions = this._sourceVersion.get(source);
       if (versions.lastNotified < version) {
         versions.lastNotified = version;

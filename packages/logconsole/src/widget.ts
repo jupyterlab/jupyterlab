@@ -254,8 +254,9 @@ export class LogConsolePanel extends StackedPanel {
     return this._loggerRegistry;
   }
 
-  private _showOutputFromSource(source: string) {
-    const viewId = `source:${source}`;
+  private _showOutputFromSource(source: string | null) {
+    // If the source is null, pick a unique name so all output areas hide.
+    const viewId = source === null ? 'null source' : `source:${source}`;
 
     this._outputAreas.forEach(
       (outputArea: LogConsoleOutputArea, name: string) => {
@@ -274,7 +275,7 @@ export class LogConsolePanel extends StackedPanel {
       }
     );
 
-    const title = source ? `Log: ${source}` : 'Log Console';
+    const title = source === null ? 'Log Console' : `Log: ${source}`;
     this.title.label = title;
     this.title.caption = title;
   }
