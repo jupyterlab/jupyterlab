@@ -13,7 +13,7 @@ import { Message } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
+import { Widget, Panel, PanelLayout, StackedPanel } from '@phosphor/widgets';
 
 import { LogOutputModel, LoggerOutputAreaModel } from './logger';
 
@@ -164,7 +164,7 @@ export namespace ScrollingWidget {
  * A StackedPanel implementation that creates Output Areas
  * for each log source and activates as source is switched.
  */
-export class LogConsolePanel extends Panel {
+export class LogConsolePanel extends StackedPanel {
   /**
    * Construct a LogConsolePanel instance.
    *
@@ -304,10 +304,10 @@ export class LogConsolePanel extends Panel {
           this
         );
 
-        // let w = new ScrollingWidget({
-        //   content: outputArea
-        // });
-        this.addWidget(outputArea);
+        let w = new ScrollingWidget({
+          content: outputArea
+        });
+        this.addWidget(w);
         this._outputAreas.set(viewId, outputArea);
       }
     }

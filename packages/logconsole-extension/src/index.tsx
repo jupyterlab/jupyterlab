@@ -19,8 +19,7 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import {
   ILoggerRegistry,
   LoggerRegistry,
-  LogConsolePanel,
-  ScrollingWidget
+  LogConsolePanel
 } from '@jupyterlab/logconsole';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
@@ -83,7 +82,7 @@ function activateLogConsole(
   restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null
 ): ILoggerRegistry {
-  let logConsoleWidget: MainAreaWidget = null;
+  let logConsoleWidget: MainAreaWidget<LogConsolePanel> = null;
   let logConsolePanel: LogConsolePanel = null;
   let flashEnabled: boolean = true;
 
@@ -93,7 +92,7 @@ function activateLogConsole(
     maxLength: 1000
   });
 
-  const tracker = new WidgetTracker<MainAreaWidget>({
+  const tracker = new WidgetTracker<MainAreaWidget<LogConsolePanel>>({
     namespace: 'logconsole'
   });
 
@@ -134,10 +133,7 @@ function activateLogConsole(
         ? nbtracker.currentWidget.context.path
         : null;
 
-    const scrolling = new ScrollingWidget({
-      content: logConsolePanel
-    });
-    logConsoleWidget = new MainAreaWidget({ content: scrolling });
+    logConsoleWidget = new MainAreaWidget({ content: logConsolePanel });
     logConsoleWidget.addClass('jp-LogConsole');
     logConsoleWidget.title.closable = true;
     logConsoleWidget.title.label = 'Log Console';
