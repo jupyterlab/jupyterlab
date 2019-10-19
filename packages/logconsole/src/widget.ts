@@ -129,9 +129,11 @@ export class ScrollingWidget<T extends Widget> extends Widget {
 
   onAfterAttach(msg: Message) {
     super.onAfterAttach(msg);
-    // TODO: defer to an animation frame to give content a chance to attach first
-    this._sentinel.scrollIntoView();
-    this._scrollHeight = this.node.scrollHeight;
+    // defer so content gets a chance to attach first
+    requestAnimationFrame(() => {
+      this._sentinel.scrollIntoView();
+      this._scrollHeight = this.node.scrollHeight;
+    });
 
     // Set up intersection observer for the sentinel
     this._observer = new IntersectionObserver(
