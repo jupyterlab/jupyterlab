@@ -23,3 +23,7 @@
   font-size: 13px;
   color: var(--jp-ui-font-color3);
 }
+
+.jp-Scrolling {
+  overflow-y: auto;
+}

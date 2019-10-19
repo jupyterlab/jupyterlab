@@ -135,10 +135,8 @@ function activateLogConsole(
         : null;
 
     const scrolling = new ScrollingWidget({
-      viewport: () => logConsoleWidget.node,
       content: logConsolePanel
     });
-    // scrolling.addWidget(logConsolePanel);
     logConsoleWidget = new MainAreaWidget({ content: scrolling });
     logConsoleWidget.addClass('jp-LogConsole');
     logConsoleWidget.title.closable = true;
@@ -228,8 +226,7 @@ function activateLogConsole(
       const logger = loggerRegistry.getLogger(logConsolePanel.source);
       logger.log({ type: 'html', data: '<hr>' });
     },
-    isEnabled: () =>
-      logConsolePanel && logConsolePanel.source !== null,
+    isEnabled: () => logConsolePanel && logConsolePanel.source !== null,
     iconClass: 'jp-AddIcon'
   });
 
@@ -239,8 +236,7 @@ function activateLogConsole(
       const logger = loggerRegistry.getLogger(logConsolePanel.source);
       logger.clear();
     },
-    isEnabled: () =>
-      logConsolePanel && logConsolePanel.source !== null,
+    isEnabled: () => logConsolePanel && logConsolePanel.source !== null,
     iconClass: 'fa fa-ban clear-icon'
   });
 

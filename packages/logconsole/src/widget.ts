@@ -13,7 +13,7 @@ import { Message } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { StackedPanel, Widget, Panel } from '@phosphor/widgets';
+import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
 
 import { LogOutputModel, LoggerOutputAreaModel } from './logger';
 
@@ -108,23 +108,15 @@ class LogConsoleContentFactory extends OutputArea.ContentFactory {
  * has scrolled to the bottom, but not change the scrolling when the user has
  * changed the scroll position.
  */
-export class ScrollingWidget extends Panel {
-  constructor({ viewport, content, ...options }: ScrollingWidget.IOptions) {
+export class ScrollingWidget extends Widget {
+  constructor({ content, ...options }: ScrollingWidget.IOptions) {
     super(options);
+    this.addClass('jp-Scrolling');
+    const layout = (this.layout = new PanelLayout());
+    layout.addWidget(content);
 
     this._content = content;
-
-    this.addWidget(content);
-
-    this._viewport = () => this.node;
-    // this._viewport = typeof viewport === 'function' ? viewport : () => viewport;
-
     this._sentinel = document.createElement('div');
-
-    // Careful reading of the PanelLayout code shows that children logic works
-    // even if we have extra elements appended at the end. If this changes in
-    // the future, we may need to override the attach and detach methods in
-    // PanelLayout to account for our extra sentinel node.
     this.node.appendChild(this._sentinel);
   }
 
@@ -135,7 +127,7 @@ export class ScrollingWidget extends Panel {
       args => {
         this._handleScroll(args);
       },
-      { root: this._viewport(), threshold: 1 }
+      { root: this.node, threshold: 1 }
     );
     this._observer.observe(this._sentinel);
     this._scrollHeight = this.node.scrollHeight;
@@ -156,7 +148,6 @@ export class ScrollingWidget extends Panel {
     }
   }
 
-  _viewport: () => HTMLElement | null;
   _content: Widget;
   _observer: IntersectionObserver;
   _scrollHeight: number;
@@ -164,16 +155,7 @@ export class ScrollingWidget extends Panel {
 }
 
 export namespace ScrollingWidget {
-  export interface IOptions extends Panel.IOptions {
-    /**
-     * The HTML element that defines the viewport.
-     *
-     * #### Notes
-     * If the DOM structure has not been fully constructed yet, you can give a
-     * function which will be called at attach time to return the viewport.
-     */
-    viewport: HTMLElement | (() => HTMLElement | null);
-
+  export interface IOptions extends Widget.IOptions {
     content: Widget;
   }
 }
@@ -182,7 +164,7 @@ export namespace ScrollingWidget {
  * A StackedPanel implementation that creates Output Areas
  * for each log source and activates as source is switched.
  */
-export class LogConsolePanel extends StackedPanel {
+export class LogConsolePanel extends Panel {
   /**
    * Construct a LogConsolePanel instance.
    *
@@ -322,11 +304,10 @@ export class LogConsolePanel extends StackedPanel {
           this
         );
 
-        let w = new ScrollingWidget({
-          viewport: this.node,
-          content: outputArea
-        });
-        this.addWidget(w);
+        // let w = new ScrollingWidget({
+        //   content: outputArea
+        // });
+        this.addWidget(outputArea);
         this._outputAreas.set(viewId, outputArea);
       }
     }
