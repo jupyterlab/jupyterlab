@@ -122,6 +122,9 @@ export class ScrollingWidget extends Widget {
 
   onAfterAttach(msg: Message) {
     super.onAfterAttach(msg);
+    this._sentinel.scrollIntoView();
+    this._scrollHeight = this.node.scrollHeight;
+
     // Set up intersection observer for the sentinel
     this._observer = new IntersectionObserver(
       args => {
@@ -130,20 +133,31 @@ export class ScrollingWidget extends Widget {
       { root: this.node, threshold: 1 }
     );
     this._observer.observe(this._sentinel);
-    this._scrollHeight = this.node.scrollHeight;
   }
 
   onBeforeDetach(msg: Message) {
     this._observer.disconnect();
   }
 
+  onAfterShow(msg: Message) {
+    if (this._tracking) {
+      this._sentinel.scrollIntoView();
+    }
+  }
+
   _handleScroll([entry]: IntersectionObserverEntry[]) {
-    if (!entry.isIntersecting) {
+    if (entry.isIntersecting) {
+      this._tracking = true;
+    } else if (this.isVisible) {
       const currentHeight = this.node.scrollHeight;
-      if (currentHeight !== this._scrollHeight) {
+      if (currentHeight === this._scrollHeight) {
+        // Likely the user scrolled manually
+        this._tracking = false;
+      } else {
         // We assume we scrolled because our size changed, so scroll to the end.
         this._sentinel.scrollIntoView();
         this._scrollHeight = currentHeight;
+        this._tracking = true;
       }
     }
   }
@@ -152,6 +166,7 @@ export class ScrollingWidget extends Widget {
   _observer: IntersectionObserver;
   _scrollHeight: number;
   _sentinel: HTMLDivElement;
+  _tracking: boolean;
 }
 
 export namespace ScrollingWidget {
@@ -234,10 +249,11 @@ export class LogConsolePanel extends StackedPanel {
 
     this._outputAreas.forEach(
       (outputArea: LogConsoleOutputArea, name: string) => {
+        // Show/hide the output area parents, the scrolling windows.
         if (outputArea.id === viewId) {
-          outputArea.show();
+          outputArea.parent.show();
         } else {
-          outputArea.hide();
+          outputArea.parent.hide();
         }
       }
     );
