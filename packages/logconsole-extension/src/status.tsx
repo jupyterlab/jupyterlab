@@ -1,20 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ILoggerRegistry,
-  ILogger,
-  ILoggerChange
-} from '@jupyterlab/logconsole';
-
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
-import React from 'react';
+import {
+  ILogger,
+  ILoggerChange,
+  ILoggerRegistry
+} from '@jupyterlab/logconsole';
 
 import { GroupItem, TextItem, interactiveItem } from '@jupyterlab/statusbar';
 
-import { Signal } from '@phosphor/signaling';
 import { DefaultIconReact } from '@jupyterlab/ui-components';
+
+import { Signal } from '@phosphor/signaling';
+
+import React from 'react';
 
 /**
  * A pure functional component for a Log Console status item.

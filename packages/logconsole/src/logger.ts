@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal, Signal } from '@phosphor/signaling';
-
 import { nbformat } from '@jupyterlab/coreutils';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
@@ -12,6 +10,8 @@ import {
   IOutputModel,
   OutputModel
 } from '@jupyterlab/rendermime';
+
+import { ISignal, Signal } from '@phosphor/signaling';
 
 import {
   ILogger,
@@ -191,6 +191,40 @@ export class Logger implements ILogger {
   }
 
   /**
+   * Rendermime to use when rendering outputs logged.
+   */
+  get rendermime(): IRenderMimeRegistry | null {
+    return this._rendermime;
+  }
+  set rendermime(value: IRenderMimeRegistry | null) {
+    if (value !== this._rendermime) {
+      this._rendermime = value;
+      this._rendermimeChanged.emit();
+    }
+  }
+
+  /**
+   * The number of messages that have ever been stored.
+   */
+  get version(): number {
+    return this._version;
+  }
+
+  /**
+   * The source for the logger.
+   */
+  readonly source: string;
+
+  /**
+   * The output area model used for the logger.
+   *
+   * #### Notes
+   * This will usually not be accessed directly. It is a public attribute so
+   * that the renderer can access it.
+   */
+  readonly outputAreaModel: LoggerOutputAreaModel;
+
+  /**
    * Log an output to logger.
    *
    * @param log - The output to be logged.
@@ -245,31 +279,9 @@ export class Logger implements ILogger {
     this._logChanged.emit('clear');
   }
 
-  /**
-   * Rendermime to use when rendering outputs logged.
-   */
-  get rendermime(): IRenderMimeRegistry | null {
-    return this._rendermime;
-  }
-  set rendermime(value: IRenderMimeRegistry | null) {
-    if (value !== this._rendermime) {
-      this._rendermime = value;
-      this._rendermimeChanged.emit();
-    }
-  }
-
-  /**
-   * The number of messages that have ever been stored.
-   */
-  get version(): number {
-    return this._version;
-  }
-
-  readonly source: string;
-  readonly outputAreaModel: LoggerOutputAreaModel;
   private _logChanged = new Signal<this, ILoggerChange>(this);
-  private _rendermimeChanged = new Signal<this, void>(this);
   private _rendermime: IRenderMimeRegistry | null = null;
+  private _rendermimeChanged = new Signal<this, void>(this);
   private _version = 0;
 }
 

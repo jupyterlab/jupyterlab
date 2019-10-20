@@ -1,15 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Token } from '@phosphor/coreutils';
-
-import { ISignal } from '@phosphor/signaling';
-
 import { nbformat } from '@jupyterlab/coreutils';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
+
+import { Token } from '@phosphor/coreutils';
+
+import { ISignal } from '@phosphor/signaling';
 
 /* tslint:disable */
 /**
@@ -122,16 +122,6 @@ export interface ILoggerOutputAreaModel extends IOutputAreaModel {
  */
 export interface ILogger {
   /**
-   * Log an output to logger.
-   *
-   * @param log - The output to be logged.
-   */
-  log(log: ILogPayload): void;
-  /**
-   * Clear all outputs logged.
-   */
-  clear(): void;
-  /**
    * Number of outputs logged.
    */
   readonly length: number;
@@ -163,4 +153,14 @@ export interface ILogger {
    * The cumulative number of messages the log has stored.
    */
   readonly version: number;
+  /**
+   * Log an output to logger.
+   *
+   * @param log - The output to be logged.
+   */
+  log(log: ILogPayload): void;
+  /**
+   * Clear all outputs logged.
+   */
+  clear(): void;
 }

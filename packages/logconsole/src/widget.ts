@@ -56,14 +56,13 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
  */
 class LogConsoleOutputArea extends OutputArea {
   /**
-   * Handle an input request from a kernel by doing nothing.
+   * The rendermime instance used by the widget.
    */
-  protected onInputRequest(
-    msg: KernelMessage.IInputRequestMsg,
-    future: Kernel.IShellFuture
-  ): void {
-    return;
-  }
+  rendermime: IRenderMimeRegistry;
+  /**
+   * Output area model used by the widget.
+   */
+  readonly model: LoggerOutputAreaModel;
 
   /**
    * Create an output item with a prompt and actual output
@@ -76,13 +75,14 @@ class LogConsoleOutputArea extends OutputArea {
   }
 
   /**
-   * The rendermime instance used by the widget.
+   * Handle an input request from a kernel by doing nothing.
    */
-  rendermime: IRenderMimeRegistry;
-  /**
-   * Output area model used by the widget.
-   */
-  readonly model: LoggerOutputAreaModel;
+  protected onInputRequest(
+    msg: KernelMessage.IInputRequestMsg,
+    future: Kernel.IShellFuture
+  ): void {
+    return;
+  }
 }
 
 /**
@@ -127,7 +127,7 @@ export class ScrollingWidget<T extends Widget> extends Widget {
     return this._content;
   }
 
-  onAfterAttach(msg: Message) {
+  protected onAfterAttach(msg: Message) {
     super.onAfterAttach(msg);
     // defer so content gets a chance to attach first
     requestAnimationFrame(() => {
@@ -145,11 +145,11 @@ export class ScrollingWidget<T extends Widget> extends Widget {
     this._observer.observe(this._sentinel);
   }
 
-  onBeforeDetach(msg: Message) {
+  protected onBeforeDetach(msg: Message) {
     this._observer.disconnect();
   }
 
-  onAfterShow(msg: Message) {
+  protected onAfterShow(msg: Message) {
     if (this._tracking) {
       this._sentinel.scrollIntoView();
     }
@@ -216,6 +216,48 @@ export class LogConsolePanel extends StackedPanel {
     this.addWidget(this._placeholder);
   }
 
+  /**
+   * The logger registry providing the logs.
+   */
+  get loggerRegistry(): ILoggerRegistry {
+    return this._loggerRegistry;
+  }
+
+  /**
+   * The log source displayed
+   */
+  get source(): string | null {
+    return this._source;
+  }
+  set source(name: string | null) {
+    this._source = name;
+    this._showOutputFromSource(this._source);
+    this._handlePlaceholder();
+    this._sourceChanged.emit(name);
+  }
+
+  /**
+   * The source version displayed.
+   */
+  get sourceVersion(): number | null {
+    const source = this.source;
+    return source && this._loggerRegistry.getLogger(source).version;
+  }
+
+  /**
+   * Signal for source changes
+   */
+  get sourceChanged(): ISignal<this, string | null> {
+    return this._sourceChanged;
+  }
+
+  /**
+   * Signal for source changes
+   */
+  get sourceDisplayed(): ISignal<this, ISourceDisplayed> {
+    return this._sourceDisplayed;
+  }
+
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this._updateOutputAreas();
@@ -257,13 +299,6 @@ export class LogConsolePanel extends StackedPanel {
     }
   }
 
-  /**
-   * The logger registry providing the logs.
-   */
-  get loggerRegistry(): ILoggerRegistry {
-    return this._loggerRegistry;
-  }
-
   private _showOutputFromSource(source: string | null) {
     // If the source is null, pick a unique name so all output areas hide.
     const viewId = source === null ? 'null source' : `source:${source}`;
@@ -288,41 +323,6 @@ export class LogConsolePanel extends StackedPanel {
     const title = source === null ? 'Log Console' : `Log: ${source}`;
     this.title.label = title;
     this.title.caption = title;
-  }
-
-  /**
-   * The log source displayed
-   */
-  get source(): string | null {
-    return this._source;
-  }
-  set source(name: string | null) {
-    this._source = name;
-    this._showOutputFromSource(this._source);
-    this._handlePlaceholder();
-    this._sourceChanged.emit(name);
-  }
-
-  /**
-   * The source version displayed.
-   */
-  get sourceVersion(): number | null {
-    const source = this.source;
-    return source && this._loggerRegistry.getLogger(source).version;
-  }
-
-  /**
-   * Signal for source changes
-   */
-  get sourceChanged(): ISignal<this, string | null> {
-    return this._sourceChanged;
-  }
-
-  /**
-   * Signal for source changes
-   */
-  get sourceDisplayed(): ISignal<this, ISourceDisplayed> {
-    return this._sourceDisplayed;
   }
 
   private _handlePlaceholder() {

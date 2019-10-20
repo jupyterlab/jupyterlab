@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal, Signal } from '@phosphor/signaling';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { ILogger, ILoggerRegistry, ILoggerRegistryChange } from './tokens';
+import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Logger } from './logger';
+
+import { ILogger, ILoggerRegistry, ILoggerRegistryChange } from './tokens';
 
 /**
  * A concrete implementation of ILoggerRegistry.
@@ -76,11 +76,10 @@ export class LoggerRegistry implements ILoggerRegistry {
     });
   }
 
-  private _maxLength: number;
-
-  private _loggers = new Map<string, Logger>();
-  private _registryChanged = new Signal<this, ILoggerRegistryChange>(this);
   private _defaultRendermime: IRenderMimeRegistry = null;
+  private _loggers = new Map<string, Logger>();
+  private _maxLength: number;
+  private _registryChanged = new Signal<this, ILoggerRegistryChange>(this);
 }
 
 export namespace LoggerRegistry {

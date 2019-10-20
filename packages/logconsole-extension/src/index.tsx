@@ -3,34 +3,33 @@
 
 import {
   ILabShell,
+  ILayoutRestorer,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  ILayoutRestorer
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
+  CommandToolbarButton,
+  ICommandPalette,
   MainAreaWidget,
-  WidgetTracker,
-  CommandToolbarButton
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import {
   ILoggerRegistry,
-  LoggerRegistry,
-  LogConsolePanel
+  LogConsolePanel,
+  LoggerRegistry
 } from '@jupyterlab/logconsole';
-
-import { ICommandPalette } from '@jupyterlab/apputils';
-
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { IStatusBar } from '@jupyterlab/statusbar';
+import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+
+import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { DockLayout, Widget } from '@phosphor/widgets';
 
@@ -42,11 +41,9 @@ const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
  * The command IDs used by the plugin.
  */
 namespace CommandIDs {
-  export const open = 'logconsole:open';
-
   export const addTimestamp = 'logconsole:add-timestamp';
-
   export const clear = 'logconsole:clear';
+  export const open = 'logconsole:open';
 }
 
 /**
@@ -58,11 +55,11 @@ const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
   provides: ILoggerRegistry,
   requires: [ILabShell, IRenderMimeRegistry, INotebookTracker],
   optional: [
-    IMainMenu,
     ICommandPalette,
-    IStatusBar,
     ILayoutRestorer,
-    ISettingRegistry
+    IMainMenu,
+    ISettingRegistry,
+    IStatusBar
   ],
   autoStart: true
 };
@@ -75,11 +72,11 @@ function activateLogConsole(
   labShell: ILabShell,
   rendermime: IRenderMimeRegistry,
   nbtracker: INotebookTracker,
-  mainMenu: IMainMenu | null,
   palette: ICommandPalette | null,
-  statusBar: IStatusBar | null,
   restorer: ILayoutRestorer | null,
-  settingRegistry: ISettingRegistry | null
+  mainMenu: IMainMenu | null,
+  settingRegistry: ISettingRegistry | null,
+  statusBar: IStatusBar | null
 ): ILoggerRegistry {
   let logConsoleWidget: MainAreaWidget<LogConsolePanel> = null;
   let logConsolePanel: LogConsolePanel = null;
@@ -153,8 +150,6 @@ function activateLogConsole(
     );
     logConsoleWidget.toolbar.addItem('lab-output-console-clear', clearButton);
 
-    void tracker.add(logConsoleWidget);
-
     logConsolePanel.sourceChanged.connect(() => {
       app.commands.notifyCommandChanged();
     });
@@ -173,6 +168,7 @@ function activateLogConsole(
       ref: options.ref,
       mode: options.insertMode
     });
+    void tracker.add(logConsoleWidget);
 
     logConsoleWidget.update();
     app.commands.notifyCommandChanged();
@@ -276,8 +272,6 @@ function activateLogConsole(
   }
 
   return loggerRegistry;
-  // The notebook can call this command.
-  // When is the output model disposed?
 }
 
 import { logNotebookOutput } from './nboutput';
