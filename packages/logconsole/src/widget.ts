@@ -223,6 +223,16 @@ export class LogConsolePanel extends StackedPanel {
     this._handlePlaceholder();
   }
 
+  protected onAfterShow(msg: Message) {
+    super.onAfterShow(msg);
+    if (this.source !== null) {
+      this._sourceDisplayed.emit({
+        source: this.source,
+        version: this.sourceVersion
+      });
+    }
+  }
+
   private _bindLoggerSignals() {
     const loggers = this._loggerRegistry.getLoggers();
     for (let logger of loggers) {
@@ -346,23 +356,35 @@ export class LogConsolePanel extends StackedPanel {
         });
         outputArea.id = viewId;
 
-        outputArea.outputLengthChanged.connect(
-          (sender: LogConsoleOutputArea, args: number) => {
-            if (this.source === source && sender.isVisible) {
-              this._sourceDisplayed.emit({
-                source: this.source,
-                version: this.sourceVersion
-              });
-            }
-          },
-          this
-        );
-
+        // Attach the output area so it is visible, so the accounting
+        // functions below record the outputs actually displayed.
         let w = new ScrollingWidget({
           content: outputArea
         });
         this.addWidget(w);
         this._outputAreas.set(viewId, outputArea);
+
+        // This is where the source object is associated with the output area.
+        // We capture the source from this environment in the closure.
+        const outputUpdate = (sender: LogConsoleOutputArea) => {
+          // If the current log console panel source is the source associated
+          // with this output area, and the output area is visible, then emit
+          // the logConsolePanel source displayed signal.
+          if (this.source === source && sender.isVisible) {
+            // We assume that the output area has been updated to the current
+            // version of the source.
+            this._sourceDisplayed.emit({
+              source: this.source,
+              version: this.sourceVersion
+            });
+          }
+        };
+        // Notify messages were displayed any time the output area is updated
+        // and update for any outputs rendered on construction.
+        outputArea.outputLengthChanged.connect(outputUpdate, this);
+        // Since the output area was attached above, we can rely on its
+        // visibility to account for the messages displayed.
+        outputUpdate(outputArea);
       }
     }
 

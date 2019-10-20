@@ -93,12 +93,6 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
       versionDisplayed,
       versionNotified
     } = this.model;
-    // TODO: if the console viewer is displayed initially (with version 0),
-    // the very first message triggers a highlight (version is 1,
-    // versionNotified is 0 in the check below). Somewhere the version
-    // notified is not updated from the display of the first message before we
-    // get called here. This is masked right now because of the flashEnabled
-    // check.
     if (source !== null && flashEnabled && version > versionNotified) {
       this._flashHighlight();
       this.model.sourceNotified(source, version);

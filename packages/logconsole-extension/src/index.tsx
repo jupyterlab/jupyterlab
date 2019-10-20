@@ -33,7 +33,6 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { DockLayout, Widget } from '@phosphor/widgets';
-import { MessageLoop } from '@phosphor/messaging';
 
 import { LogConsoleStatus } from './status';
 
@@ -84,7 +83,6 @@ function activateLogConsole(
 ): ILoggerRegistry {
   let logConsoleWidget: MainAreaWidget<LogConsolePanel> = null;
   let logConsolePanel: LogConsolePanel = null;
-  let flashEnabled: boolean = true;
 
   const loggerRegistry = new LoggerRegistry({
     defaultRendermime: rendermime,
@@ -156,33 +154,6 @@ function activateLogConsole(
     logConsoleWidget.toolbar.addItem('lab-output-console-clear', clearButton);
 
     void tracker.add(logConsoleWidget);
-
-    MessageLoop.installMessageHook(
-      logConsolePanel,
-      (panel: LogConsolePanel, msg) => {
-        switch (msg.type) {
-          case 'after-show':
-          case 'after-attach':
-            // Because we are running in a message hook,
-            // panel.isVisible hasn't been updated yet, so we figure
-            // out visibility based on the parent's visilibity.
-            if (panel.parent.isVisible) {
-              if (panel.source !== null) {
-                status.model.sourceDisplayed(panel.source, panel.sourceVersion);
-              }
-              status.model.flashEnabled = false;
-            }
-            break;
-          case 'after-hide':
-          case 'after-detach':
-            status.model.flashEnabled = flashEnabled;
-            break;
-          default:
-            break;
-        }
-        return true;
-      }
-    );
 
     logConsolePanel.sourceChanged.connect(() => {
       app.commands.notifyCommandChanged();
@@ -289,8 +260,7 @@ function activateLogConsole(
     const updateSettings = (settings: ISettingRegistry.ISettings): void => {
       loggerRegistry.maxLength = settings.get('maxLogEntries')
         .composite as number;
-      flashEnabled = settings.get('flash').composite as boolean;
-      status.model.flashEnabled = !logConsoleWidget && flashEnabled;
+      status.model.flashEnabled = settings.get('flash').composite as boolean;
     };
 
     Promise.all([settingRegistry.load(LOG_CONSOLE_PLUGIN_ID), app.restored])
