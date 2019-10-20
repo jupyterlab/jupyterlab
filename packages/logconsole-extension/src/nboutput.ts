@@ -1,11 +1,18 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ILoggerRegistry } from '@jupyterlab/logconsole';
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { KernelMessage } from '@jupyterlab/services';
+
 import { nbformat } from '@jupyterlab/coreutils';
+
+import { ILoggerRegistry } from '@jupyterlab/logconsole';
+
+import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+
+import { KernelMessage } from '@jupyterlab/services';
 
 /**
  * The Log Console extension.

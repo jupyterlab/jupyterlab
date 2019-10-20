@@ -274,5 +274,6 @@ function activateLogConsole(
   return loggerRegistry;
 }
 
+// TODO: delete the nboutput widget, or at least make it a non-default option?
 import { logNotebookOutput } from './nboutput';
 export default [logConsolePlugin, logNotebookOutput];
