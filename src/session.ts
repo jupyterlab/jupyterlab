@@ -136,6 +136,18 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   /**
+   * Restore the state of a debug session.
+   */
+  async restoreState(): Promise<void> {
+    try {
+      const message = await this.sendRequest('debugInfo', {});
+      this._isStarted = message.body.isStarted;
+    } catch (err) {
+      console.error('Error: ', err.message);
+    }
+  }
+
+  /**
    * Send a custom debug request to the kernel.
    * @param command debug command.
    * @param args arguments for the debug command.

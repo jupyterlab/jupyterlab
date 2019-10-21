@@ -79,13 +79,18 @@ export namespace IDebugger {
      * Stop a running debug session.
      */
     stop(): Promise<void>;
+
+    /**
+     * Restore the state of a debug session.
+     */
+    restoreState(): Promise<void>;
   }
 
   export namespace ISession {
     /**
      * Arguments for 'dumpCell' request.
      * This is an addition to the Debug Adapter Protocol to support
-     * setting breakpoints for cells
+     * setting breakpoints for cells.
      */
     export interface IDumpCellArguments {
       code: string;
@@ -94,11 +99,33 @@ export namespace IDebugger {
     /**
      * Response to 'dumpCell' request.
      * This is an addition to the Debug Adapter Protocol to support
-     * setting breakpoints for cells
+     * setting breakpoints for cells.
      */
     export interface IDumpCellResponse extends DebugProtocol.Response {
       body: {
         sourcePath: string;
+      };
+    }
+
+    /**
+     * List of breakpoints in a source file.
+     */
+    export interface IDebugInfoBreakpoints {
+      source: string;
+      lines: number[];
+    }
+
+    /**
+     * Response to 'debugInfo' request.
+     * This is an addition to the Debug Adapter Protocol to be able
+     * to retrieve the debugger state when restoring a session.
+     */
+    export interface IDebugInfoResponse extends DebugProtocol.Response {
+      body: {
+        isStarted: boolean;
+        hashMethod: string;
+        hashSeed: number;
+        breakpoints: IDebugInfoBreakpoints[];
       };
     }
 
@@ -110,7 +137,9 @@ export namespace IDebugger {
       completions: DebugProtocol.CompletionsArguments;
       configurationDone: DebugProtocol.ConfigurationDoneArguments;
       continue: DebugProtocol.ContinueArguments;
+      debugInfo: {};
       disconnect: DebugProtocol.DisconnectArguments;
+      dumpCell: IDumpCellArguments;
       evaluate: DebugProtocol.EvaluateArguments;
       exceptionInfo: DebugProtocol.ExceptionInfoArguments;
       goto: DebugProtocol.GotoArguments;
@@ -139,7 +168,6 @@ export namespace IDebugger {
       terminate: DebugProtocol.TerminateArguments;
       terminateThreads: DebugProtocol.TerminateThreadsArguments;
       threads: {};
-      dumpCell: IDumpCellArguments;
       variables: DebugProtocol.VariablesArguments;
     };
 
@@ -151,7 +179,9 @@ export namespace IDebugger {
       completions: DebugProtocol.CompletionsResponse;
       configurationDone: DebugProtocol.ConfigurationDoneResponse;
       continue: DebugProtocol.ContinueResponse;
+      debugInfo: IDebugInfoResponse;
       disconnect: DebugProtocol.DisconnectResponse;
+      dumpCell: IDumpCellResponse;
       evaluate: DebugProtocol.EvaluateResponse;
       exceptionInfo: DebugProtocol.ExceptionInfoResponse;
       goto: DebugProtocol.GotoResponse;
@@ -180,7 +210,6 @@ export namespace IDebugger {
       terminate: DebugProtocol.TerminateResponse;
       terminateThreads: DebugProtocol.TerminateThreadsResponse;
       threads: DebugProtocol.ThreadsResponse;
-      dumpCell: IDumpCellResponse;
       variables: DebugProtocol.VariablesResponse;
     };
 

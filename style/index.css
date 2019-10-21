@@ -16,6 +16,10 @@
   bottom: 0;
 }
 
+.jp-Debugger .p-SplitPanel-handle {
+  background-color: var(--jp-border-color2);
+}
+
 /* font awesome */
 
 .fa {

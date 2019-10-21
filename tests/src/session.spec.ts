@@ -159,6 +159,20 @@ describe('protocol', () => {
     client.dispose();
   });
 
+  describe('#debugInfo', () => {
+    it('should return the state of the current debug session', async () => {
+      const reply = await debugSession.sendRequest('debugInfo', {});
+      expect(reply.body.isStarted).to.be.true;
+
+      const breakpoints = reply.body.breakpoints;
+      // breakpoints are in the same file
+      expect(breakpoints.length).to.equal(1);
+
+      const breakpointsInfo = breakpoints[0];
+      expect(breakpointsInfo.lines).to.deep.equal([3, 5]);
+    });
+  });
+
   describe('#stackTrace', () => {
     it('should return the correct stackframes', async () => {
       const reply = await debugSession.sendRequest('stackTrace', {
