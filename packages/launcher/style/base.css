@@ -8,9 +8,9 @@
 :root {
   --jp-private-launcher-top-padding: 16px;
   --jp-private-launcher-side-padding: 32px;
-  --jp-private-launcher-card-size: 100px;
-  --jp-private-launcher-card-label-height: 32px;
-  --jp-private-launcher-card-icon-height: 68px;
+  --jp-private-launcher-card-size: 150px;
+  --jp-private-launcher-card-label-height: 15px;
+  --jp-private-launcher-card-icon-height: 75px;
   --jp-private-launcher-large-icon-size: 52px;
   --jp-private-launcher-small-icon-size: 32px;
 }
@@ -37,6 +37,7 @@
   overflow: auto;
   display: flex;
   justify-content: center;
+  flex-direction: column;
 }
 
 .jp-Launcher-cwd h3 {
@@ -104,31 +105,22 @@
 
 .jp-LauncherCard {
   display: flex;
+  position: relative;
   flex-direction: column;
-  cursor: pointer;
+  /* cursor: pointer; */
   width: var(--jp-private-launcher-card-size);
   height: var(--jp-private-launcher-card-size);
   margin: 8px;
   padding: 0px;
-  border: 1px solid var(--jp-border-color2);
-  background: var(--jp-layout-color0);
-  box-shadow: var(--jp-elevation-z2);
+  border: 1px solid var(--jp-border-color1);
+  background: var(--jp-layout-color1);
   transition: 0.2s box-shadow;
   border-radius: var(--jp-border-radius);
-}
-
-.jp-LauncherCard:focus:not(:active) {
-  border: 1px solid var(--jp-brand-color1);
-  box-shadow: var(--jp-elevation-z6);
+  align-items: center;
 }
 
 .jp-LauncherCard:hover {
   box-shadow: var(--jp-elevation-z6);
-  background: var(--jp-layout-color1);
-}
-
-.jp-LauncherCard:active {
-  box-shadow: var(--jp-elevation-z4);
 }
 
 .jp-LauncherCard-icon {
@@ -159,20 +151,46 @@
 
 .jp-LauncherCard-label {
   width: 100%;
-  height: var(--jp-private-launcher-card-label-height);
-  padding: 0 4px 4px 4px;
+  line-height: var(--jp-private-launcher-card-label-height);
+  font-size: var(--jp-ui-font-size1);
+  padding: 0 8px;
+  color: var(--jp-ui-font-color1);
   box-sizing: border-box;
   overflow: hidden;
+  text-align: center;
 }
 
-.jp-LauncherCard-label p {
-  height: 28px;
-  word-break: break-word;
+.jp-Launcher-option-button {
+  width: fit-content;
+  height: 20px;
+  display: inline-flex;
+  color: rgb(0, 132, 255);
+  font-size: 11px;
+  display: table-cell;
+  padding-bottom: 10px;
   text-align: center;
-  color: var(--jp-ui-font-color1);
-  line-height: 14px;
-  font-size: 12px;
-  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.jp-LauncherCard-options {
+  /* margin-bottom: 10px; */
+  position: absolute;
+  bottom: 0px;
+  display: table;
+  width: 100%;
+  height: 100%;
+}
+
+.jp-Launcher-option-button-text {
+  width: 100%;
+}
+
+.jp-Launcher-option-button:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 77%,
+    var(--jp-layout-color2) 23%
+  );
 }
 
 /* Icons, kernel icons */
@@ -192,4 +210,63 @@
   height: var(--jp-private-launcher-large-icon-size);
   margin: 0px;
   padding: 0px;
+}
+
+/* Toolbar, search bar */
+.jp-Launcher-toolbar {
+  height: 50px;
+  border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  background: var(--jp-toolbar-background);
+  display: flex;
+  align-items: center;
+}
+
+.jp-Launcher-search-div {
+  padding-left: var(--jp-private-launcher-side-padding);
+}
+
+.jp-Launcher-search-input {
+  height: 28px;
+  width: 150px;
+  font-size: var(--jp-ui-font-size1);
+  line-height: var(--jp-private-commandpalette-search-height);
+  outline: none;
+  padding-left: 7px;
+  border: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
+.jp-Launcher-search-input:-webkit-input-placeholder {
+  color: var(--jp-ui-font-color3);
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-Launcher-search-input:-moz-placeholder {
+  color: var(--jp-ui-font-color3);
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-Launcher-search-input:-ms-input-placeholder {
+  color: var(--jp-ui-font-color3);
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-Launcher-search-input:focus {
+  border: var(--jp-border-width) solid var(--md-blue-500);
+  box-shadow: inset 0 0 4px var(--md-blue-300);
+}
+
+.jp-Launcher-search-div::after {
+  content: ' ';
+  color: white;
+  background-color: var(--jp-brand-color1);
+  position: absolute;
+  top: 8px;
+  height: 32px;
+  width: 12px;
+  padding: 0px 12px;
+  background-image: var(--jp-icon-search-white);
+  background-size: 20px;
+  background-repeat: no-repeat;
+  background-position: center;
 }

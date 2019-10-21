@@ -731,6 +731,10 @@ function Card(
   const label = commands.label(command, args);
   const title = kernel ? label : caption || label; */
 
+  const caption = Private.getCaption(args, item, commands);
+  const label = Private.getLabel(args, item, commands);
+  const title = caption || label;
+
   // Build the onclick handler.
   let onclickFactory = (currentCommand: string) => {
     let onclick = () => {
@@ -876,7 +880,6 @@ function Card(
       <div className="jp-LauncherCard-options">{getOptions()}</div>
     </div>
   );
-
 }
 
 /**
@@ -894,7 +897,7 @@ namespace Private {
   export const keyProperty = new AttachedProperty<
     ILauncher.IGroupedItemOptions,
     number
-  >({ 
+  >({
     name: 'key',
     create: () => id++
   });

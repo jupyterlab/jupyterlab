@@ -1,0 +1,914 @@
+{
+  "program": {
+    "fileInfos": {
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es5.d.ts": {
+        "version": "c8665e66018917580e71792b91022bcaf53fb946fab4aaf8dfb0738ed564db88",
+        "signature": "c8665e66018917580e71792b91022bcaf53fb946fab4aaf8dfb0738ed564db88"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.d.ts": {
+        "version": "7994d44005046d1413ea31d046577cdda33b8b2470f30281fd9c8b3c99fe2d96",
+        "signature": "7994d44005046d1413ea31d046577cdda33b8b2470f30281fd9c8b3c99fe2d96"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2016.d.ts": {
+        "version": "5f217838d25704474d9ef93774f04164889169ca31475fe423a9de6758f058d1",
+        "signature": "5f217838d25704474d9ef93774f04164889169ca31475fe423a9de6758f058d1"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.d.ts": {
+        "version": "459097c7bdd88fc5731367e56591e4f465f2c9de81a35427a7bd473165c34743",
+        "signature": "459097c7bdd88fc5731367e56591e4f465f2c9de81a35427a7bd473165c34743"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.dom.d.ts": {
+        "version": "6994c583b66862deca24d7bbf77297d95b9d3da8160dbd9beef6b847cf7c1376",
+        "signature": "6994c583b66862deca24d7bbf77297d95b9d3da8160dbd9beef6b847cf7c1376"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.dom.iterable.d.ts": {
+        "version": "4c892766803cef795d73d69aee436dc7a80157163e0cf35e6d0e86917cbd42f3",
+        "signature": "4c892766803cef795d73d69aee436dc7a80157163e0cf35e6d0e86917cbd42f3"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.webworker.importscripts.d.ts": {
+        "version": "fe4e59403e34c7ff747abe4ff6abbc7718229556d7c1a5b93473fb53156c913b",
+        "signature": "fe4e59403e34c7ff747abe4ff6abbc7718229556d7c1a5b93473fb53156c913b"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.scripthost.d.ts": {
+        "version": "b9faa17292f17d2ad75e34fac77dd63a6403af1dba02d39cd0cbb9ffdf3de8b9",
+        "signature": "b9faa17292f17d2ad75e34fac77dd63a6403af1dba02d39cd0cbb9ffdf3de8b9"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.core.d.ts": {
+        "version": "384f66a3422d80014c51de2682159bb26f1e35854029880ccd5f6d1f00e6a36d",
+        "signature": "384f66a3422d80014c51de2682159bb26f1e35854029880ccd5f6d1f00e6a36d"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.collection.d.ts": {
+        "version": "dd94d8ef48c562389eb58af8df3a3a34d11367f7c818192aa5f16470d469e3f0",
+        "signature": "dd94d8ef48c562389eb58af8df3a3a34d11367f7c818192aa5f16470d469e3f0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.generator.d.ts": {
+        "version": "828413486bdcaa342558e8e4570b1b287b776cb61b4b70b0214bd10c5d9a94c3",
+        "signature": "828413486bdcaa342558e8e4570b1b287b776cb61b4b70b0214bd10c5d9a94c3"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.iterable.d.ts": {
+        "version": "4d1f39313a169b8599b8817688f504b56ba8204c2ebafd03f66ff77ddb1899a4",
+        "signature": "4d1f39313a169b8599b8817688f504b56ba8204c2ebafd03f66ff77ddb1899a4"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.promise.d.ts": {
+        "version": "7c07d934680d0e33275a44d22fb11a4ff31d46c8c26a8d056828a478753f1efe",
+        "signature": "7c07d934680d0e33275a44d22fb11a4ff31d46c8c26a8d056828a478753f1efe"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.proxy.d.ts": {
+        "version": "5e72f949a89717db444e3bd9433468890068bb21a5638d8ab15a1359e05e54fe",
+        "signature": "5e72f949a89717db444e3bd9433468890068bb21a5638d8ab15a1359e05e54fe"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.reflect.d.ts": {
+        "version": "f5b242136ae9bfb1cc99a5971cccc44e99947ae6b5ef6fd8aa54b5ade553b976",
+        "signature": "f5b242136ae9bfb1cc99a5971cccc44e99947ae6b5ef6fd8aa54b5ade553b976"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.symbol.d.ts": {
+        "version": "9ae2860252d6b5f16e2026d8a2c2069db7b2a3295e98b6031d01337b96437230",
+        "signature": "9ae2860252d6b5f16e2026d8a2c2069db7b2a3295e98b6031d01337b96437230"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts": {
+        "version": "3e0a459888f32b42138d5a39f706ff2d55d500ab1031e0988b5568b0f67c2303",
+        "signature": "3e0a459888f32b42138d5a39f706ff2d55d500ab1031e0988b5568b0f67c2303"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2016.array.include.d.ts": {
+        "version": "3f96f1e570aedbd97bf818c246727151e873125d0512e4ae904330286c721bc0",
+        "signature": "3f96f1e570aedbd97bf818c246727151e873125d0512e4ae904330286c721bc0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.object.d.ts": {
+        "version": "ff8ad203e83338289b0f5defc1a5b5c253fb7d251b464db497383f915a0df3f4",
+        "signature": "ff8ad203e83338289b0f5defc1a5b5c253fb7d251b464db497383f915a0df3f4"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts": {
+        "version": "b8667586a618c5cf64523d4e500ae39e781428abfb28f3de441fc66b56144b6f",
+        "signature": "b8667586a618c5cf64523d4e500ae39e781428abfb28f3de441fc66b56144b6f"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.string.d.ts": {
+        "version": "21df2e0059f14dcb4c3a0e125859f6b6ff01332ee24b0065a741d121250bc71c",
+        "signature": "21df2e0059f14dcb4c3a0e125859f6b6ff01332ee24b0065a741d121250bc71c"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.intl.d.ts": {
+        "version": "c1759cb171c7619af0d2234f2f8fb2a871ee88e956e2ed91bb61778e41f272c6",
+        "signature": "c1759cb171c7619af0d2234f2f8fb2a871ee88e956e2ed91bb61778e41f272c6"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.typedarrays.d.ts": {
+        "version": "28569d59e07d4378cb3d54979c4c60f9f06305c9bb6999ffe6cab758957adc46",
+        "signature": "28569d59e07d4378cb3d54979c4c60f9f06305c9bb6999ffe6cab758957adc46"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.full.d.ts": {
+        "version": "873c09f1c309389742d98b7b67419a8e0a5fa6f10ce59fd5149ecd31a2818594",
+        "signature": "873c09f1c309389742d98b7b67419a8e0a5fa6f10ce59fd5149ecd31a2818594"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxengine.d.ts": {
+        "version": "f654ea3b882ce71f203fd785673e48e365008940c094c922c4d503c1f3b358f0",
+        "signature": "f654ea3b882ce71f203fd785673e48e365008940c094c922c4d503c1f3b358f0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts": {
+        "version": "6d4bce054cce22306edccc85e738a800ea0364a82e85f9bf61156ed03604d24f",
+        "signature": "6d4bce054cce22306edccc85e738a800ea0364a82e85f9bf61156ed03604d24f"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/array.d.ts": {
+        "version": "7c8adf0d13cee0b26c590d825463bd9d1e85cc7403fddcef10b6c813f19e9d2f",
+        "signature": "7c8adf0d13cee0b26c590d825463bd9d1e85cc7403fddcef10b6c813f19e9d2f"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts": {
+        "version": "2ec396db3f92fb5138c035df3694795c2159f1ccc57ea0acf165bcd762739eca",
+        "signature": "2ec396db3f92fb5138c035df3694795c2159f1ccc57ea0acf165bcd762739eca"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts": {
+        "version": "5d3db7107b3138edf0ddb9851bbba99caeb6b3e32074da4c7b45e751c296183b",
+        "signature": "5d3db7107b3138edf0ddb9851bbba99caeb6b3e32074da4c7b45e751c296183b"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts": {
+        "version": "b86137c60e0c62f7acfd8f0e761170bc6920c105ef03868c0518be562a5c5908",
+        "signature": "b86137c60e0c62f7acfd8f0e761170bc6920c105ef03868c0518be562a5c5908"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts": {
+        "version": "69d5afc46850b54ef3388769cd339f8dc88e15cd74a189bf71dac3937b4e8850",
+        "signature": "69d5afc46850b54ef3388769cd339f8dc88e15cd74a189bf71dac3937b4e8850"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts": {
+        "version": "052a7d0d927a2a307bda1b069a497e2a95263e6b412ed7db9bac6ef8a1b42015",
+        "signature": "052a7d0d927a2a307bda1b069a497e2a95263e6b412ed7db9bac6ef8a1b42015"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts": {
+        "version": "6256ad6e7c41a9f9ecb6349b5d5be72ea2c60ba1c6c6b3954929eb59a6980688",
+        "signature": "6256ad6e7c41a9f9ecb6349b5d5be72ea2c60ba1c6c6b3954929eb59a6980688"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts": {
+        "version": "77596a948c8deffc8f059fa0f3c38688f3b05caefa303506074034b5cb1a56ae",
+        "signature": "77596a948c8deffc8f059fa0f3c38688f3b05caefa303506074034b5cb1a56ae"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts": {
+        "version": "81ef0fab583499ba45dab44490620e7b870597d90c5e562ec5a9b38b6bd3fcdf",
+        "signature": "81ef0fab583499ba45dab44490620e7b870597d90c5e562ec5a9b38b6bd3fcdf"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts": {
+        "version": "f2b309d4f1bdf8e9f4fa03bf2183eb1b2f7cb66efb5b16da52e378ce75ac17bb",
+        "signature": "f2b309d4f1bdf8e9f4fa03bf2183eb1b2f7cb66efb5b16da52e378ce75ac17bb"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts": {
+        "version": "9cbaf0317ec49acb6c84d142077670a301015979260c4ecded7705fd2141379c",
+        "signature": "9cbaf0317ec49acb6c84d142077670a301015979260c4ecded7705fd2141379c"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts": {
+        "version": "5a49d16b6f7d3ca5c66569784290c0ed7a3d74821095e2ab91e17ea444ac4657",
+        "signature": "5a49d16b6f7d3ca5c66569784290c0ed7a3d74821095e2ab91e17ea444ac4657"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts": {
+        "version": "2e5fab5fe6e398cb14f695da07044a65f4e32c8d0fe9b31f5fe52d2cc7656230",
+        "signature": "2e5fab5fe6e398cb14f695da07044a65f4e32c8d0fe9b31f5fe52d2cc7656230"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/string.d.ts": {
+        "version": "f38d20ee516a6f12db2a988462a01589cc2375abe677fbb1236104948e4f86b5",
+        "signature": "f38d20ee516a6f12db2a988462a01589cc2375abe677fbb1236104948e4f86b5"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts": {
+        "version": "c9deb61903fd8318e6845e4e0f03b3bd813cdae1778f8dc9ee0ec05f9ca22094",
+        "signature": "c9deb61903fd8318e6845e4e0f03b3bd813cdae1778f8dc9ee0ec05f9ca22094"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts": {
+        "version": "7bc3152a4c8adf395ad486da44acb6e8c98dedd2becc83810b076114338a5045",
+        "signature": "7bc3152a4c8adf395ad486da44acb6e8c98dedd2becc83810b076114338a5045"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts": {
+        "version": "41375f954c8d8923153356307de4264c5f256da6b619b6e2823db1f6109d0931",
+        "signature": "41375f954c8d8923153356307de4264c5f256da6b619b6e2823db1f6109d0931"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts": {
+        "version": "d3323295ba67f1642899f5cc11dc9cccba82d9d46ec458cfdd3128775eb3d1b0",
+        "signature": "d3323295ba67f1642899f5cc11dc9cccba82d9d46ec458cfdd3128775eb3d1b0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts": {
+        "version": "c8a24a2440a34aea602f23947c59ce8d9d3bbd5301fd80160e9067b3ac3cce6b",
+        "signature": "c8a24a2440a34aea602f23947c59ce8d9d3bbd5301fd80160e9067b3ac3cce6b"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts": {
+        "version": "69154ab5c792b00111a4fb5a9f581c947b763305dc1c0c8fcf7e38d9b994da90",
+        "signature": "69154ab5c792b00111a4fb5a9f581c947b763305dc1c0c8fcf7e38d9b994da90"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts": {
+        "version": "cff8cce2b6396e6c5aba7ec4dcece82afeede3fc50338712de1590127018afc0",
+        "signature": "cff8cce2b6396e6c5aba7ec4dcece82afeede3fc50338712de1590127018afc0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts": {
+        "version": "2fb7a8f52040298e730c188642413fdba3c6db06549884dd9ebd3fd65ed947a6",
+        "signature": "2fb7a8f52040298e730c188642413fdba3c6db06549884dd9ebd3fd65ed947a6"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts": {
+        "version": "5a551464af396163e4a5e1f021ec84e41220e3dee5a064d9f8fcbf0e9868c782",
+        "signature": "5a551464af396163e4a5e1f021ec84e41220e3dee5a064d9f8fcbf0e9868c782"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts": {
+        "version": "a398a52d6789836e74dfa3470405958bd06dd82390b8f504e7e535e528911efc",
+        "signature": "a398a52d6789836e74dfa3470405958bd06dd82390b8f504e7e535e528911efc"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts": {
+        "version": "4a3eb9a99acb58ac24836b48cb880a78bca288670c75e71f3c1b94985df9b16e",
+        "signature": "4a3eb9a99acb58ac24836b48cb880a78bca288670c75e71f3c1b94985df9b16e"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts": {
+        "version": "e1a9cc40ab1817f6cba3ace1b0a670ea682737ad427ee8925466d3d8ed185c56",
+        "signature": "e1a9cc40ab1817f6cba3ace1b0a670ea682737ad427ee8925466d3d8ed185c56"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/json.d.ts": {
+        "version": "ba7019a8788c81131b5bcbfc888894b09c9443695fbb5d77f91691f8790c5d87",
+        "signature": "ba7019a8788c81131b5bcbfc888894b09c9443695fbb5d77f91691f8790c5d87"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/mime.d.ts": {
+        "version": "e5c65cf9fff8db2c8be24db16baf1e546687aad33b66fe2980ae1ce3d4a36dd1",
+        "signature": "e5c65cf9fff8db2c8be24db16baf1e546687aad33b66fe2980ae1ce3d4a36dd1"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/promise.d.ts": {
+        "version": "d74f7bd9a9ff0678b1e79e27d3c6b5eac329a9c687315ab3cd21aa423a9a44e3",
+        "signature": "d74f7bd9a9ff0678b1e79e27d3c6b5eac329a9c687315ab3cd21aa423a9a44e3"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/random.d.ts": {
+        "version": "f58339fa857a8f3f3a826e46c1821596b9b62becf20c5511d88961b073dcfc01",
+        "signature": "f58339fa857a8f3f3a826e46c1821596b9b62becf20c5511d88961b073dcfc01"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/token.d.ts": {
+        "version": "b78b2eb7c212fc4e52cbb3a062e157ca79a7b25939b51a88d82cfd8020e9d47d",
+        "signature": "b78b2eb7c212fc4e52cbb3a062e157ca79a7b25939b51a88d82cfd8020e9d47d"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/uuid.d.ts": {
+        "version": "b76145ed1fa2cb5f8046cc30e89d1d1e03623e13d96f180730af757e42dc6300",
+        "signature": "b76145ed1fa2cb5f8046cc30e89d1d1e03623e13d96f180730af757e42dc6300"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts": {
+        "version": "adeae5b75b38d80a69a97b65dc6c2ba01cc08a637b3cb1c0d4c278dc3dafb633",
+        "signature": "adeae5b75b38d80a69a97b65dc6c2ba01cc08a637b3cb1c0d4c278dc3dafb633"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts": {
+        "version": "8692a758393b38b0460ab58a45fa7d0521d5223fef7133a5c9bc10bb1be309c0",
+        "signature": "8692a758393b38b0460ab58a45fa7d0521d5223fef7133a5c9bc10bb1be309c0"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts": {
+        "version": "e582863f95c72400f8ddadeee51f6339c484aad6815b62a646b6bbedf4f579e2",
+        "signature": "e582863f95c72400f8ddadeee51f6339c484aad6815b62a646b6bbedf4f579e2"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts": {
+        "version": "c42b40b78808046ef81771edfcee3f443c31f299ab5c1286e551295a05c27cbf",
+        "signature": "c42b40b78808046ef81771edfcee3f443c31f299ab5c1286e551295a05c27cbf"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts": {
+        "version": "a55b0bb921749e3b0ed5a2c75449c9930dbece34dbe34c53c195920515743f46",
+        "signature": "a55b0bb921749e3b0ed5a2c75449c9930dbece34dbe34c53c195920515743f46"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts": {
+        "version": "7b78666949a8481e61619c4ae2450196ad42ee22b7260358a2ef8ccd5c489b25",
+        "signature": "7b78666949a8481e61619c4ae2450196ad42ee22b7260358a2ef8ccd5c489b25"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts": {
+        "version": "17e2ad38f5e2cec77ef265c2e87b9ae4143ff0d4666cc927533eb51f1a8bef6a",
+        "signature": "17e2ad38f5e2cec77ef265c2e87b9ae4143ff0d4666cc927533eb51f1a8bef6a"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts": {
+        "version": "ffe0e8d5fda270812a7256d40a9136de2abe40b78b8c1cdde337e7f63dc8e4c3",
+        "signature": "ffe0e8d5fda270812a7256d40a9136de2abe40b78b8c1cdde337e7f63dc8e4c3"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts": {
+        "version": "e37a382b0b15966b4daec5724cea815258732fe5006121e3bec69a67e25dc070",
+        "signature": "e37a382b0b15966b4daec5724cea815258732fe5006121e3bec69a67e25dc070"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts": {
+        "version": "41f45b1f8fe99c6bf177cb7256a1bd34fa367b406827817b7db3db1a3064dd39",
+        "signature": "41f45b1f8fe99c6bf177cb7256a1bd34fa367b406827817b7db3db1a3064dd39"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts": {
+        "version": "40fb364ece96b043dc62d8c5689e73373be5fdce5af6eba86e534fff1bcea2be",
+        "signature": "40fb364ece96b043dc62d8c5689e73373be5fdce5af6eba86e534fff1bcea2be"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts": {
+        "version": "1a122d5a933ad55a6d601effc385098d0ffc1a63f8ea7940cf5d8142ee55e19b",
+        "signature": "1a122d5a933ad55a6d601effc385098d0ffc1a63f8ea7940cf5d8142ee55e19b"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts": {
+        "version": "fa9674f9cd1a9b034c052fd7a3e47c7103fdd108f662cb96028ac70409222adf",
+        "signature": "fa9674f9cd1a9b034c052fd7a3e47c7103fdd108f662cb96028ac70409222adf"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts": {
+        "version": "edf93ecb3f4edcec45f9803418a9728110d7100f08070cb8be7af30ad34f7884",
+        "signature": "edf93ecb3f4edcec45f9803418a9728110d7100f08070cb8be7af30ad34f7884"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts": {
+        "version": "ff817eff62c578f72eee0feffa8178c8be79d750073010424768a41072530bfb",
+        "signature": "ff817eff62c578f72eee0feffa8178c8be79d750073010424768a41072530bfb"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts": {
+        "version": "d736803304297faf56f9bfaf41726451628acfd69fe2c311d790617b7ee0c677",
+        "signature": "d736803304297faf56f9bfaf41726451628acfd69fe2c311d790617b7ee0c677"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts": {
+        "version": "63693f0ba36b294a9b08d7aa7a36d22096fe4aba04a1c02750a35ae595daa9d4",
+        "signature": "63693f0ba36b294a9b08d7aa7a36d22096fe4aba04a1c02750a35ae595daa9d4"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts": {
+        "version": "7894ddb7d425ca0c26875609161a8969ac9f83d2da589bc605d90b493e2ef48b",
+        "signature": "7894ddb7d425ca0c26875609161a8969ac9f83d2da589bc605d90b493e2ef48b"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts": {
+        "version": "1a7ebdfed5b5b3f2e8587de3625fe8e977cdbb3216fa35b86eb2dae0de4ad265",
+        "signature": "1a7ebdfed5b5b3f2e8587de3625fe8e977cdbb3216fa35b86eb2dae0de4ad265"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts": {
+        "version": "69af5e5e6908d7756c6e1b13cbdfd74e1b9dbc18fe6c39710e62ed9dfb5d8322",
+        "signature": "69af5e5e6908d7756c6e1b13cbdfd74e1b9dbc18fe6c39710e62ed9dfb5d8322"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts": {
+        "version": "98189a1965d81f3d2cffbef6684783e271184812135bf33d664abc72e25ec85b",
+        "signature": "98189a1965d81f3d2cffbef6684783e271184812135bf33d664abc72e25ec85b"
+      },
+      "/users/david/github/jupyterlab/jupyterlab/packages/pdf-extension/src/index.ts": {
+        "version": "86fba3c0b0a39691eefbfa9470cc5234ad4fccdc307b4eb54ee3813f8f22a91a",
+        "signature": "9a4d89f22124a804402717e21bdcdd1cad4182f130af172f0936fd8c5a3479ff"
+      }
+    },
+    "options": {
+      "allowSyntheticDefaultImports": true,
+      "composite": true,
+      "declaration": true,
+      "esModuleInterop": true,
+      "incremental": true,
+      "jsx": 2,
+      "module": 1,
+      "moduleResolution": 2,
+      "noEmitOnError": true,
+      "noImplicitAny": true,
+      "noUnusedLocals": true,
+      "resolveJsonModule": true,
+      "target": 4,
+      "types": [],
+      "outDir": "/Users/David/github/jupyterlab/jupyterlab/packages/pdf-extension/lib",
+      "rootDir": "/Users/David/github/jupyterlab/jupyterlab/packages/pdf-extension/src",
+      "configFilePath": "/Users/David/github/jupyterlab/jupyterlab/packages/pdf-extension/tsconfig.json"
+    },
+    "referencedMap": {
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/array.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/string.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/json.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/mime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/promise.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/random.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/token.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/uuid.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxengine.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/pdf-extension/src/index.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts"
+      ]
+    },
+    "exportedModulesMap": {
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/array.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/string.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/json.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/mime.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/promise.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/random.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/token.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/uuid.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxengine.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
+      ],
+      "/users/david/github/jupyterlab/jupyterlab/packages/pdf-extension/src/index.ts": [
+        "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
+        "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts"
+      ]
+    },
+    "semanticDiagnosticsPerFile": [
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es5.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2016.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.dom.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.dom.iterable.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.webworker.importscripts.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.scripthost.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.core.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.collection.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.generator.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.iterable.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.promise.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.proxy.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.reflect.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.symbol.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2016.array.include.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.object.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.string.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.intl.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.typedarrays.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/typescript/lib/lib.es2017.full.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxengine.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/messaging/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/array.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/iter.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/chain.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/empty.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/filter.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/find.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/map.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/range.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/reduce.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/repeat.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/retro.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/sort.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/stride.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/string.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/take.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/zip.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/algorithm/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/disposable/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/signaling/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/title.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/widget.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/layout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panellayout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxlayout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/panel.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/boxpanel.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/json.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/mime.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/promise.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/random.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/token.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/uuid.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/coreutils/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/commands/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/virtualdom/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/commandpalette.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menu.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/contextmenu.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabbar.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/docklayout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/dockpanel.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/focustracker.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/gridlayout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/menubar.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/scrollbar.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/singletonlayout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitlayout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/splitpanel.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedlayout.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/stackedpanel.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/tabpanel.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/node_modules/@phosphor/widgets/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/packages/rendermime-interfaces/lib/index.d.ts",
+      "/users/david/github/jupyterlab/jupyterlab/packages/pdf-extension/src/index.ts"
+    ]
+  },
+  "version": "3.4.3"
+}
