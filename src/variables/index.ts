@@ -111,6 +111,7 @@ export namespace Variables {
     set scopes(scopes: IScope[]) {
       this._state = scopes;
       this._scopesChanged.emit(scopes);
+      console.log({ scopes });
       this.currentScope = !!scopes ? scopes[0] : null;
     }
 

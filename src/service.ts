@@ -7,6 +7,7 @@ import { Debugger } from './debugger';
 import { IDebugger } from './tokens';
 
 import { Variables } from './variables';
+import { Callstack } from './callstack';
 
 export class DebugService {
   constructor(session: DebugSession | null, debuggerModel: Debugger.Model) {
@@ -16,6 +17,7 @@ export class DebugService {
 
   private _session: DebugSession;
   private _model: Debugger.Model;
+  frames: any[];
 
   set session(session: DebugSession) {
     this._session = session;
@@ -28,7 +30,7 @@ export class DebugService {
   // this will change for after execute cell
   async launch(code: string): Promise<void> {
     let threadId: number = 1;
-
+    this.frames = [];
     this.session.eventMessage.connect(
       (sender: DebugSession, event: IDebugger.ISession.Event) => {
         const eventName = event.event;
@@ -54,17 +56,35 @@ export class DebugService {
     this.session.client.kernel.requestExecute({ code });
 
     const stackFrames = await this.getFrames(threadId);
-    const scopes = await this.getScopes(stackFrames);
-    const variables = await this.getVariables(scopes);
+
+    stackFrames.forEach(async (frame, index) => {
+      const scopes = await this.getScopes(frame);
+      const variables = await this.getVariables(scopes);
+      const values = this.convertScope(scopes, variables);
+      this.frames.push({
+        id: frame.id,
+        value: values
+      });
+      if (index === 0) {
+        this._model.sidebar.variables.model.scopes = values;
+      }
+    });
 
     if (!!stackFrames) {
       this._model.sidebar.callstack.model.frames = stackFrames;
     }
-    this._model.sidebar.variables.model.scopes = this.convertScope(
-      scopes,
-      variables
+
+    this._model.sidebar.callstack.model.currentFrameChanged.connect(
+      this.onChangeFrame
     );
   }
+
+  onChangeFrame = (_: Callstack.IModel, update: Callstack.IFrame) => {
+    const frame = this.frames.find(ele => ele.id === update.id);
+    if (frame && frame.value) {
+      this._model.sidebar.variables.model.scopes = frame.value;
+    }
+  };
 
   getFrames = async (threadId: number) => {
     const reply = await this.session.sendRequest('stackTrace', {
@@ -74,12 +94,12 @@ export class DebugService {
     return stackFrames;
   };
 
-  getScopes = async (frames: DebugProtocol.StackFrame[]) => {
-    if (!frames || frames.length === 0) {
+  getScopes = async (frame: DebugProtocol.StackFrame) => {
+    if (!frame) {
       return;
     }
     const reply = await this.session.sendRequest('scopes', {
-      frameId: frames[0].id
+      frameId: frame.id
     });
     return reply.body.scopes;
   };
@@ -106,7 +126,6 @@ export class DebugService {
     scopes: DebugProtocol.Scope[],
     variables: DebugProtocol.Variable[]
   ): Variables.IScope[] => {
-    console.log({ variables });
     if (!variables || !scopes) {
       return;
     }

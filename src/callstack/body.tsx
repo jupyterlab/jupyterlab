@@ -25,7 +25,7 @@ export class Body extends ReactWidget {
 
 const FramesComponent = ({ model }: { model: Callstack.IModel }) => {
   const [frames, setFrames] = useState(model.frames);
-  const [selected, setSelected] = useState();
+  const [selected, setSelected] = useState(model.frame);
 
   const onSelected = (frame: any) => {
     setSelected(frame);
@@ -38,6 +38,7 @@ const FramesComponent = ({ model }: { model: Callstack.IModel }) => {
         return;
       }
       setFrames(updates);
+      setSelected(updates[0]);
     };
     model.framesChanged.connect(updateFrames);
 
