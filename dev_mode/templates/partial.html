@@ -1,14 +1,20 @@
-{# Copy so we do not modify the page_config with updates. #}
-{% set page_config_full = page_config.copy() %}
+  {# Copy so we do not modify the page_config with updates. #}
+  {% set page_config_full = page_config.copy() %}
 
-{# Set a dummy variable - we just want the side effect of the update. #}
-{% set _ = page_config_full.update(baseUrl=base_url, wsUrl=ws_url) %}
+  {# Set a dummy variable - we just want the side effect of the update. #}
+  {% set _ = page_config_full.update(baseUrl=base_url, wsUrl=ws_url) %}
 
+  {% block header}
+
+  {% block page-config}
   <script id="jupyter-config-data" type="application/json">
     {{ page_config_full | tojson }}
   </script>
+  {% endblock %}
 
   {% block favicon %}
   <link rel="icon" type="image/x-icon" href="{{ base_url | escape }}static/base/images/favicon.ico" class="idle favicon">
   <link rel="" type="image/x-icon" href="{{ base_url | escape }}static/base/images/favicon-busy-1.ico" class="busy favicon">
+  {% endblock %}
+
   {% endblock %}
