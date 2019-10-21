@@ -64,7 +64,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   requires: [IDebugger, IConsoleTracker, ILabShell],
   activate: (
-    _,
+    app: JupyterFrontEnd,
     debug: IDebugger,
     tracker: IConsoleTracker,
     labShell: ILabShell
@@ -74,7 +74,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
       handler: DebuggerConsoleHandler;
     };
 
-    labShell.currentChanged.connect((_, update) => {
+    labShell.currentChanged.connect(async (_, update) => {
       const widget = update.newValue;
 
       if (!(widget instanceof ConsolePanel)) {
@@ -85,6 +85,10 @@ const consoles: JupyterFrontEndPlugin<void> = {
         debug.session = new DebugSession({ client: widget.session });
       } else {
         debug.session.client = widget.session;
+      }
+      if (debug.session) {
+        await debug.session.restoreState();
+        app.commands.notifyCommandChanged();
       }
       if (debug.tracker.currentWidget) {
         const handler = new DebuggerConsoleHandler({
@@ -163,7 +167,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   requires: [IDebugger, INotebookTracker, ILabShell],
   activate: (
-    _,
+    app: JupyterFrontEnd,
     debug: IDebugger,
     tracker: INotebookTracker,
     labShell: ILabShell
@@ -173,7 +177,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       handler: DebuggerNotebookHandler;
     };
 
-    labShell.currentChanged.connect((_, update) => {
+    labShell.currentChanged.connect(async (_, update) => {
       const widget = update.newValue;
       if (!(widget instanceof NotebookPanel)) {
         return;
@@ -182,6 +186,10 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         debug.session = new DebugSession({ client: widget.session });
       } else {
         debug.session.client = widget.session;
+      }
+      if (debug.session) {
+        await debug.session.restoreState();
+        app.commands.notifyCommandChanged();
       }
       if (debug.tracker.currentWidget) {
         const handler = new DebuggerNotebookHandler({
@@ -394,7 +402,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         },
         session: {
           get: (): IDebugger.ISession | null => {
-            return null;
+            return widget ? widget.content.model.session : null;
           },
           set: (src: IDebugger.ISession | null) => {
             if (widget) {
