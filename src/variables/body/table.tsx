@@ -43,7 +43,7 @@ export class Table extends ReactWidget {
     }
   }
 
-  protected resizeBody(msg: Widget.ResizeMessage): void {
+  resizeBody(msg: Widget.ResizeMessage): void {
     const head = this.getHead();
     const body = this.getBody();
     if (body && head) {
@@ -58,7 +58,12 @@ export class Table extends ReactWidget {
 
 const TableComponent = ({ model }: { model: Variables.IModel }) => {
   const [variables, setVariables] = useState(model.variables);
-  const [variable, TableBody] = useTbody(variables, model.currentVariable);
+  const [longHeader, setLongHeader] = useState('value');
+  const [variable, TableBody] = useTbody(
+    variables,
+    model.currentVariable,
+    longHeader
+  );
 
   useEffect(() => {
     const updateVariables = (
@@ -77,6 +82,10 @@ const TableComponent = ({ model }: { model: Variables.IModel }) => {
     };
   });
 
+  const setWidth = (headerName: string): string => {
+    return headerName === longHeader ? '75%' : '25%';
+  };
+
   model.currentVariable = variable;
 
   return (
@@ -84,8 +93,18 @@ const TableComponent = ({ model }: { model: Variables.IModel }) => {
       <table>
         <thead>
           <tr>
-            <th style={{ width: '25%' }}>Name</th>
-            <th style={{ width: '75%' }}>Value</th>
+            <th
+              onClick={() => setLongHeader('name')}
+              style={{ width: setWidth('name') }}
+            >
+              Name
+            </th>
+            <th
+              onClick={() => setLongHeader('value')}
+              style={{ width: setWidth('value') }}
+            >
+              Value
+            </th>
           </tr>
         </thead>
       </table>
@@ -94,11 +113,15 @@ const TableComponent = ({ model }: { model: Variables.IModel }) => {
   );
 };
 
-const useTbody = (items: Array<any>, defaultState: any) => {
+const useTbody = (items: Array<any>, defaultState: any, header: any) => {
   const [state, setState] = useState(defaultState);
 
   const setClassIcon = (typeOf: string) => {
     return typeOf === 'class' ? 'jp-ClassIcon' : 'jp-VariableIcon';
+  };
+
+  const setWidth = (headerName: string): string => {
+    return headerName === header ? '75%' : '25%';
   };
 
   const List = () => (
@@ -111,14 +134,14 @@ const useTbody = (items: Array<any>, defaultState: any) => {
               onClick={e => setState(item)}
               className={state === item ? ' selected' : ''}
             >
-              <td style={{ paddingLeft: `${12}px`, width: `${25}%` }}>
+              <td style={{ paddingLeft: `${12}px`, width: setWidth('name') }}>
                 <span
                   className={`jp-Icon jp-Icon-16 ${setClassIcon(item.type)}`}
                 ></span>
                 {item.name}
               </td>
-              <td style={{ paddingLeft: `${12}px`, width: `${75}%` }}>
-                {item.type}
+              <td style={{ paddingLeft: `${12}px`, width: setWidth('value') }}>
+                {item.value}
               </td>
             </tr>
           ))}
