@@ -184,19 +184,21 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         debug.session.client = widget.session;
       }
       if (debug.tracker.currentWidget) {
-        const handler = new DebuggerNotebookHandler({
-          notebookTracker: tracker,
-          debuggerModel: debug.tracker.currentWidget.content.model
-        });
         if (!oldhandler) {
           oldhandler = {
             id: widget.id,
-            handler: handler
+            handler: new DebuggerNotebookHandler({
+              notebookTracker: tracker,
+              debuggerModel: debug.tracker.currentWidget.content.model
+            })
           };
         } else if (oldhandler.id !== widget.id) {
           oldhandler.id = widget.id;
           oldhandler.handler.dispose();
-          oldhandler.handler = handler;
+          oldhandler.handler = new DebuggerNotebookHandler({
+            notebookTracker: tracker,
+            debuggerModel: debug.tracker.currentWidget.content.model
+          });
         }
       }
     });

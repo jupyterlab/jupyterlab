@@ -99,7 +99,7 @@ export namespace Variables {
         return;
       }
       this._filterState = value;
-      if (!!this._currentScope) {
+      if (this._currentScope) {
         this._variablesChanged.emit(this._filterVariables());
       }
     }
@@ -118,7 +118,7 @@ export namespace Variables {
       if (this._filterState) {
         return this._filterVariables();
       }
-      return !!this._currentScope ? this._currentScope.variables : [];
+      return this._currentScope ? this._currentScope.variables : [];
     }
 
     set variables(variables: IVariable[]) {

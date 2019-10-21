@@ -21,6 +21,12 @@ export class DebuggerNotebookHandler implements IDisposable {
     this.notebookTracker = options.notebookTracker;
     this.breakpoints = this.debuggerModel.sidebar.breakpoints.model;
     this.notebookTracker.activeCellChanged.connect(this.onNewCell, this);
+    this.cellManager = new CellManager({
+      breakpointsModel: this.breakpoints,
+      activeCell: this.notebookTracker.activeCell as CodeCell,
+      debuggerModel: this.debuggerModel,
+      type: 'notebook'
+    });
   }
 
   private notebookTracker: INotebookTracker;
@@ -35,13 +41,13 @@ export class DebuggerNotebookHandler implements IDisposable {
     }
     this.isDisposed = true;
     this.cellManager.dispose();
+    this.notebookTracker.activeCellChanged.disconnect(this.onNewCell);
     Signal.clearData(this);
   }
 
   protected onNewCell(noteTracker: NotebookTracker, codeCell: CodeCell) {
     if (this.cellManager) {
       this.cellManager.activeCell = codeCell;
-      this.cellManager.onActiveCellChanged();
     } else {
       this.cellManager = new CellManager({
         breakpointsModel: this.breakpoints,
