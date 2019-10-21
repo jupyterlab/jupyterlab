@@ -7,6 +7,7 @@ import { Debugger } from './debugger';
 import { IDebugger } from './tokens';
 
 import { Variables } from './variables';
+
 import { Callstack } from './callstack';
 
 export class DebugService {
@@ -17,7 +18,7 @@ export class DebugService {
 
   private _session: DebugSession;
   private _model: Debugger.Model;
-  frames: any[];
+  private frames: FrameStored[];
 
   set session(session: DebugSession) {
     this._session = session;
@@ -63,14 +64,14 @@ export class DebugService {
       const values = this.convertScope(scopes, variables);
       this.frames.push({
         id: frame.id,
-        value: values
+        scopes: values
       });
       if (index === 0) {
         this._model.sidebar.variables.model.scopes = values;
       }
     });
 
-    if (!!stackFrames) {
+    if (stackFrames) {
       this._model.sidebar.callstack.model.frames = stackFrames;
     }
 
@@ -81,8 +82,8 @@ export class DebugService {
 
   onChangeFrame = (_: Callstack.IModel, update: Callstack.IFrame) => {
     const frame = this.frames.find(ele => ele.id === update.id);
-    if (frame && frame.value) {
-      this._model.sidebar.variables.model.scopes = frame.value;
+    if (frame && frame.scopes) {
+      this._model.sidebar.variables.model.scopes = frame.scopes;
     }
   };
 
@@ -139,3 +140,8 @@ export class DebugService {
     });
   };
 }
+
+export type FrameStored = {
+  id: number;
+  scopes: Variables.IScope[];
+};

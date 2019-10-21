@@ -373,20 +373,14 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
-    const categoryLabel = 'Debugger';
+    const category = 'Debugger';
 
     if (palette) {
-      palette.addItem({
-        command: CommandIDs.changeMode,
-        category: categoryLabel
-      });
-      palette.addItem({ command: CommandIDs.create, category: categoryLabel });
-      palette.addItem({ command: CommandIDs.start, category: categoryLabel });
-      palette.addItem({ command: CommandIDs.stop, category: categoryLabel });
-      palette.addItem({
-        command: CommandIDs.debugNotebook,
-        category: categoryLabel
-      });
+      palette.addItem({ command: CommandIDs.changeMode, category });
+      palette.addItem({ command: CommandIDs.create, category });
+      palette.addItem({ command: CommandIDs.start, category });
+      palette.addItem({ command: CommandIDs.stop, category });
+      palette.addItem({ command: CommandIDs.debugNotebook, category });
     }
 
     if (restorer) {
