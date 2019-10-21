@@ -18,7 +18,7 @@ import { Signal } from '@phosphor/signaling';
 export class DebuggerNotebookHandler implements IDisposable {
   constructor(options: DebuggerNotebookHandler.IOptions) {
     this.debuggerModel = options.debuggerModel;
-    this.notebookTracker = options.notebookTracker;
+    this.notebookTracker = options.tracker;
     this.breakpoints = this.debuggerModel.sidebar.breakpoints.model;
     this.notebookTracker.activeCellChanged.connect(this.onNewCell, this);
     this.cellManager = new CellManager({
@@ -62,6 +62,6 @@ export class DebuggerNotebookHandler implements IDisposable {
 export namespace DebuggerNotebookHandler {
   export interface IOptions {
     debuggerModel: Debugger.Model;
-    notebookTracker: INotebookTracker;
+    tracker: INotebookTracker;
   }
 }

@@ -72,6 +72,34 @@ async function setDebugSession(
   }
 }
 
+class HandlerTracker<
+  H extends DebuggerConsoleHandler | DebuggerNotebookHandler
+> {
+  constructor(builder: new (option: any) => H) {
+    this.builder = builder;
+  }
+
+  update<
+    T extends IConsoleTracker | INotebookTracker,
+    W extends ConsolePanel | NotebookPanel
+  >(debug: IDebugger, tracker: T, widget: W): void {
+    if (debug.tracker.currentWidget && !this.handlers[widget.id]) {
+      const handler = new this.builder({
+        tracker: tracker,
+        debuggerModel: debug.tracker.currentWidget.content.model
+      });
+      this.handlers[widget.id] = handler;
+      widget.disposed.connect(() => {
+        delete this.handlers[widget.id];
+        handler.dispose();
+      });
+    }
+  }
+
+  private handlers: { [id: string]: H } = {};
+  private builder: new (option: any) => H;
+}
+
 /**
  * A plugin that provides visual debugging support for consoles.
  */
@@ -85,10 +113,9 @@ const consoles: JupyterFrontEndPlugin<void> = {
     tracker: IConsoleTracker,
     labShell: ILabShell
   ) => {
-    let oldhandler: {
-      id: string;
-      handler: DebuggerConsoleHandler;
-    };
+    const handlerTracker = new HandlerTracker<DebuggerConsoleHandler>(
+      DebuggerConsoleHandler
+    );
 
     labShell.currentChanged.connect(async (_, update) => {
       const widget = update.newValue;
@@ -96,22 +123,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
         return;
       }
       await setDebugSession(app, debug, widget.session);
-      if (debug.tracker.currentWidget) {
-        const handler = new DebuggerConsoleHandler({
-          consoleTracker: tracker,
-          debuggerModel: debug.tracker.currentWidget.content.model
-        });
-        if (!oldhandler) {
-          oldhandler = {
-            id: widget.id,
-            handler: handler
-          };
-        } else if (oldhandler.id !== widget.id) {
-          oldhandler.id = widget.id;
-          oldhandler.handler.dispose();
-          oldhandler.handler = handler;
-        }
-      }
+      handlerTracker.update(debug, tracker, widget);
     });
   }
 };
@@ -178,10 +190,9 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     tracker: INotebookTracker,
     labShell: ILabShell
   ) => {
-    let oldhandler: {
-      id: string;
-      handler: DebuggerNotebookHandler;
-    };
+    const handlerTracker = new HandlerTracker<DebuggerNotebookHandler>(
+      DebuggerNotebookHandler
+    );
 
     labShell.currentChanged.connect(async (_, update) => {
       const widget = update.newValue;
@@ -189,24 +200,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         return;
       }
       await setDebugSession(app, debug, widget.session);
-      if (debug.tracker.currentWidget) {
-        if (!oldhandler) {
-          oldhandler = {
-            id: widget.id,
-            handler: new DebuggerNotebookHandler({
-              notebookTracker: tracker,
-              debuggerModel: debug.tracker.currentWidget.content.model
-            })
-          };
-        } else if (oldhandler.id !== widget.id) {
-          oldhandler.id = widget.id;
-          oldhandler.handler.dispose();
-          oldhandler.handler = new DebuggerNotebookHandler({
-            notebookTracker: tracker,
-            debuggerModel: debug.tracker.currentWidget.content.model
-          });
-        }
-      }
+      handlerTracker.update(debug, tracker, widget);
     });
   }
 };
