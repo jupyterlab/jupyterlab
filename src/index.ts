@@ -8,7 +8,7 @@ import {
   ILabShell
 } from '@jupyterlab/application';
 
-import { ICommandPalette } from '@jupyterlab/apputils';
+import { IClientSession, ICommandPalette } from '@jupyterlab/apputils';
 
 import { WidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 
@@ -56,6 +56,22 @@ export namespace CommandIDs {
   export const changeMode = 'debugger:change-mode';
 }
 
+async function setDebugSession(
+  app: JupyterFrontEnd,
+  debug: IDebugger,
+  client: IClientSession
+) {
+  if (!debug.session) {
+    debug.session = new DebugSession({ client: client });
+  } else {
+    debug.session.client = client;
+  }
+  if (debug.session) {
+    await debug.session.restoreState();
+    app.commands.notifyCommandChanged();
+  }
+}
+
 /**
  * A plugin that provides visual debugging support for consoles.
  */
@@ -76,20 +92,10 @@ const consoles: JupyterFrontEndPlugin<void> = {
 
     labShell.currentChanged.connect(async (_, update) => {
       const widget = update.newValue;
-
       if (!(widget instanceof ConsolePanel)) {
         return;
       }
-
-      if (!debug.session) {
-        debug.session = new DebugSession({ client: widget.session });
-      } else {
-        debug.session.client = widget.session;
-      }
-      if (debug.session) {
-        await debug.session.restoreState();
-        app.commands.notifyCommandChanged();
-      }
+      await setDebugSession(app, debug, widget.session);
       if (debug.tracker.currentWidget) {
         const handler = new DebuggerConsoleHandler({
           consoleTracker: tracker,
@@ -182,15 +188,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       if (!(widget instanceof NotebookPanel)) {
         return;
       }
-      if (!debug.session) {
-        debug.session = new DebugSession({ client: widget.session });
-      } else {
-        debug.session.client = widget.session;
-      }
-      if (debug.session) {
-        await debug.session.restoreState();
-        app.commands.notifyCommandChanged();
-      }
+      await setDebugSession(app, debug, widget.session);
       if (debug.tracker.currentWidget) {
         if (!oldhandler) {
           oldhandler = {
