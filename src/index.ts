@@ -261,16 +261,13 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
             sidebar.parent = null;
           }
 
-          // edge case when realod page after set condensed mode
+          // edge case when reload page after set condensed mode
           widget.title.label = 'Debugger';
           shell.add(widget, 'main');
           return;
         }
 
-        if (sidebar.isAttached) {
-          return;
-        }
-
+        // mode = 'condensed'
         if (widget.isAttached) {
           widget.parent = null;
         }
@@ -318,16 +315,9 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       },
       execute: () => {
         const currentMode = tracker.currentWidget.content.model.mode;
-        tracker.currentWidget.content.model.mode =
-          currentMode === 'expanded' ? 'condensed' : 'expanded';
-        let mode = tracker.currentWidget.content.model.mode;
-
-        if (mode === 'condensed') {
-          void commands.execute(CommandIDs.mount, { mode });
-        } else if (mode === 'expanded') {
-          widget.content.sidebar.close();
-          void commands.execute(CommandIDs.mount, { mode });
-        }
+        const mode = currentMode === 'expanded' ? 'condensed' : 'expanded';
+        tracker.currentWidget.content.model.mode = mode;
+        void commands.execute(CommandIDs.mount, { mode });
       }
     });
 
