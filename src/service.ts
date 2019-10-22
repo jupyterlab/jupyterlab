@@ -18,7 +18,7 @@ export class DebugService {
 
   private _session: DebugSession;
   private _model: Debugger.Model;
-  private frames: FrameStored[];
+  private frames: Frame[];
 
   set session(session: DebugSession) {
     this._session = session;
@@ -141,7 +141,7 @@ export class DebugService {
   };
 }
 
-export type FrameStored = {
+export type Frame = {
   id: number;
   scopes: Variables.IScope[];
 };
