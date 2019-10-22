@@ -1361,7 +1361,7 @@ namespace Private {
    */
   export function delSpaceToPrevTabStop(cm: CodeMirror.Editor): void {
     let doc = cm.getDoc();
-    var tabSize = doc.getOption('indentUnit');
+    var tabSize = cm.getOption('indentUnit');
     var ranges = doc.listSelections(); // handle multicursor
     for (var i = ranges.length - 1; i >= 0; i--) {
       // iterate reverse so any deletions don't overlap
@@ -1377,11 +1377,11 @@ namespace Private {
         if (line.match(/^\ +$/) !== null) {
           // delete tabs
           var prevTabStop = (Math.ceil(head.ch / tabSize) - 1) * tabSize;
-          var from = CodeMirror.Position(head.line, prevTabStop);
+          var from = CodeMirror.Pos(head.line, prevTabStop);
           doc.replaceRange('', from, head);
         } else {
           // delete non-tabs
-          var from = CodeMirror.Position(head.line, head.ch - 1);
+          var from = CodeMirror.Pos(head.line, head.ch - 1);
           doc.replaceRange('', from, head);
         }
       }
