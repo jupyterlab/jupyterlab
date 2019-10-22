@@ -13,8 +13,8 @@ import sys
 import subprocess
 
 from tornado.ioloop import IOLoop
-from notebook.notebookapp import flags, aliases
-from notebook.utils import urljoin, pathname2url
+from jupyter_server.notebookapp import flags, aliases
+from jupyter_server.utils import urljoin, pathname2url
 from traitlets import Bool
 
 from .labapp import LabApp, get_app_dir

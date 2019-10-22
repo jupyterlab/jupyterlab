@@ -19,7 +19,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 import pytest
-from notebook.notebookapp import NotebookApp
+from jupyter_server.notebookapp import NotebookApp
 from jupyter_core import paths
 
 from jupyterlab import commands

@@ -12,8 +12,8 @@ import sys
 
 from jupyter_core.application import JupyterApp, base_aliases
 from jupyterlab_server import slugify, WORKSPACE_EXTENSION
-from notebook.notebookapp import NotebookApp, aliases, flags
-from notebook.utils import url_path_join as ujoin
+from .notebookapp import NotebookApp, aliases, flags
+from jupyter_server.utils import url_path_join as ujoin
 from traitlets import Bool, Instance, Unicode
 
 from ._version import __version__
@@ -25,6 +25,7 @@ from .commands import (
 )
 from .coreconfig import CoreConfig
 
+from jupyter_server.extension.application import ExtensionApp
 
 build_aliases = dict(base_aliases)
 build_aliases['app-dir'] = 'LabBuildApp.app_dir'
@@ -322,7 +323,7 @@ lab_flags['watch'] = (
 )
 
 
-class LabApp(NotebookApp):
+class LabApp(ExtensionApp):
     version = version
 
     description = """
@@ -400,16 +401,22 @@ class LabApp(NotebookApp):
     watch = Bool(False, config=True,
         help="Whether to serve the app in watch mode")
 
-    def init_webapp(self, *args, **kwargs):
-        super().init_webapp(*args, **kwargs)
-        settings = self.web_app.settings
-        if 'page_config_data' not in settings:
-            settings['page_config_data'] = {}
+    # The name of the extension
+    extension_name = "jupyterlab"
 
-        # Handle quit button with support for Notebook < 5.6
-        settings['page_config_data']['quitButton'] = getattr(self, 'quit_button', False)
+    # The url that your extension will serve its homepage.
+    default_url = '/lab'
 
-    def init_server_extensions(self):
+    # Should your extension expose other server extensions when launched directly?
+    load_other_extensions = True
+
+    # Local path to static files directory.
+    static_paths = []
+
+    # Local path to templates directory.
+    template_paths = []
+
+    def initialize_handlers(self):
         """Load any extensions specified by config.
 
         Import the module, then call the load_jupyter_server_extension function,
@@ -420,9 +427,15 @@ class LabApp(NotebookApp):
 
         The extension API is experimental, and may change in future releases.
         """
-        super(LabApp, self).init_server_extensions()
-        msg = 'JupyterLab server extension not enabled, manually loading...'
-        if not self.nbserver_extensions.get('jupyterlab', False):
+        # TODO ECH
+#        self.serverapp.init_server_extensions()
+        c = load_config(self)
+        self.static_paths = [c.static_dir]
+        self.template_paths = [c.templates_dir]
+        # TODO ECH
+#        if not self.serverapp.jpserver_extensions.get('jupyterlab', False):
+        if True:
+            msg = 'JupyterLab server extension not enabled, manually loading...'
             self.log.warning(msg)
             load_jupyter_server_extension(self)
 

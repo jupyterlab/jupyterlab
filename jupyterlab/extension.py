@@ -79,8 +79,8 @@ def load_jupyter_server_extension(nbapp):
     # Delay imports to speed up jlpmapp
     from json import dumps
     from jupyterlab_server import add_handlers
-    from notebook.utils import url_path_join as ujoin, url_escape
-    from notebook._version import version_info
+    from jupyter_server.utils import url_path_join as ujoin, url_escape
+    from jupyter_server._version import version_info
     from tornado.ioloop import IOLoop
     from markupsafe import Markup
     from .handlers.build_handler import build_path, Builder, BuildHandler
@@ -93,9 +93,9 @@ def load_jupyter_server_extension(nbapp):
         watch_dev, get_app_dir, AppOptions
     )
 
-    web_app = nbapp.web_app
+    web_app = nbapp.serverapp.web_app
     logger = nbapp.log
-    base_url = nbapp.base_url
+    base_url = nbapp.serverapp.base_url
 
     # Handle the app_dir
     app_dir = getattr(nbapp, 'app_dir', get_app_dir())
@@ -142,17 +142,17 @@ def load_jupyter_server_extension(nbapp):
     page_config['buildAvailable'] = not core_mode and not dev_mode
     page_config['buildCheck'] = not core_mode and not dev_mode
     page_config['devMode'] = dev_mode
-    page_config['token'] = nbapp.token
+    page_config['token'] = nbapp.serverapp.token
 
     # Client-side code assumes notebookVersion is a JSON-encoded string
     # TODO: fix this when we can make such a change
     page_config['notebookVersion'] = dumps(version_info)
 
-    if nbapp.file_to_run and type(nbapp).__name__ == "LabApp":
+    if nbapp.serverapp.file_to_run and type(nbapp).__name__ == "LabApp":
         relpath = os.path.relpath(nbapp.file_to_run, nbapp.notebook_dir)
         uri = url_escape(ujoin('/lab/tree', *relpath.split(os.sep)))
         nbapp.default_url = uri
-        nbapp.file_to_run = ''
+        nbapp.serverapp.file_to_run = ''
 
     # Print messages.
     logger.info('JupyterLab extension loaded from %s' % HERE)

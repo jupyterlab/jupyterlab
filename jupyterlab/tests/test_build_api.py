@@ -6,7 +6,7 @@ import pytest
 
 from jupyterlab.labapp import LabApp
 from jupyterlab_server.tests.utils import APITester, LabTestBase
-from notebook.tests.launchnotebook import assert_http_error
+from jupyter_server.tests.launchnotebook import assert_http_error
 
 
 class BuildAPITester(APITester):

@@ -5,7 +5,9 @@
 
 from ._version import __version__                     # noqa
 from .extension import load_jupyter_server_extension  # noqa
-
+from .labapp import LabApp
 
 def _jupyter_server_extension_paths():
     return [{'module': 'jupyterlab'}]
+
+load_jupyter_server_extension = LabApp.load_jupyter_server_extension
