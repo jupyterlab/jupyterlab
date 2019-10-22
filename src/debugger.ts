@@ -3,7 +3,13 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IDataConnector } from '@jupyterlab/coreutils';
+import { DebugService } from './service';
+
+import { DebugSession } from './session';
+
+import { DebuggerEditors } from './editors';
+
+import { DebuggerSidebar } from './sidebar';
 
 import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
@@ -17,11 +23,11 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { SplitPanel } from '@phosphor/widgets';
 
-import { DebuggerEditors } from './editors';
-
-import { DebuggerSidebar } from './sidebar';
+import { IObservableString } from '@jupyterlab/observables';
 
 import { IDebugger } from './tokens';
+
+import { IDataConnector } from '@jupyterlab/coreutils';
 
 export class Debugger extends SplitPanel {
   constructor(options: Debugger.IOptions) {
@@ -122,7 +128,12 @@ export namespace Debugger {
         this._session.dispose();
       }
       this._session = session;
+      this._service.session = session as DebugSession;
       this._sessionChanged.emit(undefined);
+    }
+
+    get service(): DebugService {
+      return this._service;
     }
 
     get sessionChanged(): ISignal<this, void> {
@@ -131,6 +142,14 @@ export namespace Debugger {
 
     get isDisposed(): boolean {
       return this._isDisposed;
+    }
+
+    get codeValue() {
+      return this._codeValue;
+    }
+
+    set codeValue(observableString: IObservableString) {
+      this._codeValue = observableString;
     }
 
     dispose(): void {
@@ -145,12 +164,14 @@ export namespace Debugger {
       }
     }
 
+    private _codeValue: IObservableString;
     private _sidebar: DebuggerSidebar;
     private _isDisposed = false;
     private _mode: IDebugger.Mode;
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
     private _session: IDebugger.ISession | null;
     private _sessionChanged = new Signal<this, void>(this);
+    private _service = new DebugService(null, this);
   }
 
   export namespace Model {
