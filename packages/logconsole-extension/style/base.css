@@ -1,21 +1,38 @@
-:root [data-jp-theme-light='true'] {
-  --jp-icon-output-console: url('./list-icon-light.svg');
-}
-
-:root [data-jp-theme-light='false'] {
-  --jp-icon-output-console: url('./list-icon-dark.svg');
-}
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
 
 .jp-LogConsoleIcon {
-  background-image: var(--jp-icon-output-console);
+  background-image: var(--jp-icon-list);
 }
 
-.jp-LogConsoleStatusItem.hilite {
-  transition: background-color 1s ease-out;
-  background-color: var(--jp-info-color0);
+@keyframes flash {
+  0% {
+    background-color: var(--jp-brand-color1);
+  }
+  50% {
+    color: unset;
+    background-color: unset;
+  }
+  100% {
+    background-color: var(--jp-brand-color1);
+  }
 }
-.jp-LogConsoleStatusItem.hilited {
-  background-color: var(--jp-info-color0);
+
+.jp-LogConsoleStatusItem.jp-LogConsole-flash {
+  animation: flash 300ms both;
+}
+
+.jp-LogConsoleStatusItem.jp-mod-selected {
+  background-color: var(--jp-brand-color1);
+}
+
+/* Need to be very specific to override the typestyle styles on status bar components */
+.jp-LogConsoleStatusItem.jp-mod-selected,
+.jp-LogConsoleStatusItem.jp-mod-selected div,
+.jp-LogConsoleStatusItem.jp-mod-selected div span {
+  color: white;
 }
 
 .jp-LogConsole .clear-icon {

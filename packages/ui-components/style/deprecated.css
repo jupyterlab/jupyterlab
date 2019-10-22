@@ -32,6 +32,7 @@
   --jp-icon-jupyter-favicon: url('icons/splash/jupyter-favicon.svg');
   --jp-icon-kernel: url('icons/statusbar/kernel.svg');
   --jp-icon-line-form: url('icons/statusbar/line-form.svg');
+  --jp-icon-list: url('icons/statusbar/list.svg');
   --jp-icon-not-trusted: url('icons/statusbar/not-trusted.svg');
   --jp-icon-terminal: url('icons/statusbar/terminal.svg');
   --jp-icon-trusted: url('icons/statusbar/trusted.svg');
@@ -106,6 +107,9 @@
 }
 .jp-LineFormIcon {
   background-image: var(--jp-icon-line-form);
+}
+.jp-ListIcon {
+  background-image: var(--jp-icon-list);
 }
 .jp-NotTrustedIcon {
   background-image: var(--jp-icon-not-trusted);
