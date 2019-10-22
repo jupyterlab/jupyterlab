@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 .jp-LogConsoleIcon {
-  background-image: var(--jp-icon-output-console);
+  background-image: var(--jp-icon-list);
 }
 
 @keyframes flash {
