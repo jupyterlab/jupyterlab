@@ -3,13 +3,17 @@
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
-import { ArrayExt } from '@phosphor/algorithm';
+// import { ArrayExt } from '@phosphor/algorithm';
 
 import { Widget, PanelLayout } from '@phosphor/widgets';
 
-import React, { useEffect, useState } from 'react';
+// import React, { useEffect, useState } from 'react';
+
+import React from 'react';
 
 import { Variables } from '../index';
+
+// import { ObjectInspector } from 'react-inspector';
 
 export class Table extends ReactWidget {
   constructor(model: Variables.IModel) {
@@ -21,7 +25,7 @@ export class Table extends ReactWidget {
   }
 
   render() {
-    return <TableComponent model={this.model} />;
+    return <VariableComponent model={this.model} />;
   }
 
   private model: Variables.IModel;
@@ -56,99 +60,103 @@ export class Table extends ReactWidget {
   }
 }
 
-const TableComponent = ({ model }: { model: Variables.IModel }) => {
-  const [variables, setVariables] = useState(model.variables);
-  const [longHeader, setLongHeader] = useState('value');
-  const [variable, TableBody] = useTbody(
-    variables,
-    model.currentVariable,
-    longHeader
-  );
-
-  useEffect(() => {
-    const updateVariables = (
-      _: Variables.IModel,
-      updates: Variables.IVariable[]
-    ) => {
-      if (ArrayExt.shallowEqual(variables, updates)) {
-        return;
-      }
-      setVariables(updates);
-    };
-    model.variablesChanged.connect(updateVariables);
-
-    return () => {
-      model.variablesChanged.disconnect(updateVariables);
-    };
-  });
-
-  const setWidth = (headerName: string): string => {
-    return headerName === longHeader ? '75%' : '25%';
-  };
-
-  model.currentVariable = variable;
-
-  return (
-    <div>
-      <table>
-        <thead>
-          <tr>
-            <th
-              onClick={() => setLongHeader('name')}
-              style={{ width: setWidth('name') }}
-            >
-              Name
-            </th>
-            <th
-              onClick={() => setLongHeader('value')}
-              style={{ width: setWidth('value') }}
-            >
-              Value
-            </th>
-          </tr>
-        </thead>
-      </table>
-      <TableBody />
-    </div>
-  );
+const VariableComponent = ({ model }: { model: Variables.IModel }) => {
+  return <></>;
 };
 
-const useTbody = (items: Array<any>, defaultState: any, header: any) => {
-  const [state, setState] = useState(defaultState);
+// const TableComponent = ({ model }: { model: Variables.IModel }) => {
+//   const [variables, setVariables] = useState(model.variables);
+//   const [longHeader, setLongHeader] = useState('value');
+//   const [variable, TableBody] = useTbody(
+//     variables,
+//     model.currentVariable,
+//     longHeader
+//   );
 
-  const setClassIcon = (typeOf: string) => {
-    return typeOf === 'class' ? 'jp-ClassIcon' : 'jp-VariableIcon';
-  };
+//   useEffect(() => {
+//     const updateVariables = (
+//       _: Variables.IModel,
+//       updates: Variables.IVariable[]
+//     ) => {
+//       if (ArrayExt.shallowEqual(variables, updates)) {
+//         return;
+//       }
+//       setVariables(updates);
+//     };
+//     model.variablesChanged.connect(updateVariables);
 
-  const setWidth = (headerName: string): string => {
-    return headerName === header ? '75%' : '25%';
-  };
+//     return () => {
+//       model.variablesChanged.disconnect(updateVariables);
+//     };
+//   });
 
-  const List = () => (
-    <div style={{ overflow: 'auto' }}>
-      <table>
-        <tbody>
-          {items.map(item => (
-            <tr
-              key={item.name}
-              onClick={e => setState(item)}
-              className={state === item ? ' selected' : ''}
-            >
-              <td style={{ paddingLeft: `${12}px`, width: setWidth('name') }}>
-                <span
-                  className={`jp-Icon jp-Icon-16 ${setClassIcon(item.type)}`}
-                ></span>
-                {item.name}
-              </td>
-              <td style={{ paddingLeft: `${12}px`, width: setWidth('value') }}>
-                {item.value}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+//   const setWidth = (headerName: string): string => {
+//     return headerName === longHeader ? '75%' : '25%';
+//   };
 
-  return [state, List, setState];
-};
+//   model.currentVariable = variable;
+
+//   return (
+//     <div>
+//       <table>
+//         <thead>
+//           <tr>
+//             <th
+//               onClick={() => setLongHeader('name')}
+//               style={{ width: setWidth('name') }}
+//             >
+//               Name
+//             </th>
+//             <th
+//               onClick={() => setLongHeader('value')}
+//               style={{ width: setWidth('value') }}
+//             >
+//               Value
+//             </th>
+//           </tr>
+//         </thead>
+//       </table>
+//       <TableBody />
+//     </div>
+//   );
+// };
+
+// const useTbody = (items: Array<any>, defaultState: any, header: any) => {
+//   const [state, setState] = useState(defaultState);
+
+//   const setClassIcon = (typeOf: string) => {
+//     return typeOf === 'class' ? 'jp-ClassIcon' : 'jp-VariableIcon';
+//   };
+
+//   const setWidth = (headerName: string): string => {
+//     return headerName === header ? '75%' : '25%';
+//   };
+
+//   const List = () => (
+//     <div style={{ overflow: 'auto' }}>
+//       <table>
+//         <tbody>
+//           {items.map(item => (
+//             <tr
+//               key={item.name}
+//               onClick={e => setState(item)}
+//               className={state === item ? ' selected' : ''}
+//             >
+//               <td style={{ paddingLeft: `${12}px`, width: setWidth('name') }}>
+//                 <span
+//                   className={`jp-Icon jp-Icon-16 ${setClassIcon(item.type)}`}
+//                 ></span>
+//                 {item.name}
+//               </td>
+//               <td style={{ paddingLeft: `${12}px`, width: setWidth('value') }}>
+//                 {item.value}
+//               </td>
+//             </tr>
+//           ))}
+//         </tbody>
+//       </table>
+//     </div>
+//   );
+
+//   return [state, List, setState];
+// };

@@ -8,6 +8,7 @@ import { Variables } from '../index';
 import { Table } from './table';
 
 import { Search } from './search';
+
 import { Message } from '@phosphor/messaging';
 
 export class Body extends Panel {
