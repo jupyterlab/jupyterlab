@@ -1,15 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Token } from '@phosphor/coreutils';
-
-import { ISignal } from '@phosphor/signaling';
-
 import { nbformat } from '@jupyterlab/coreutils';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
+
+import { Token } from '@phosphor/coreutils';
+
+import { ISignal } from '@phosphor/signaling';
 
 /* tslint:disable */
 /**
@@ -54,6 +54,11 @@ export interface ILogPayloadBase {
    * Type of log data.
    */
   type: string;
+
+  /**
+   * Data
+   */
+  data: any;
 }
 
 /**
@@ -105,24 +110,25 @@ export type ILogPayload = ITextLog | IHtmlLog | IOutputLog;
 
 export type ILoggerChange = 'append' | 'clear';
 
+export interface ILoggerOutputAreaModel extends IOutputAreaModel {
+  /**
+   * The maximum number of outputs to store.
+   */
+  maxLength: number;
+}
+
 /**
  * A Logger that manages logs from a particular source.
  */
 export interface ILogger {
   /**
-   * Log an output to logger.
-   *
-   * @param log - The output to be logged.
-   */
-  log(log: ILogPayload): void;
-  /**
-   * Clear all outputs logged.
-   */
-  clear(): void;
-  /**
    * Number of outputs logged.
    */
   readonly length: number;
+  /**
+   * Max number of messages.
+   */
+  maxLength: number;
   /**
    * Rendermime to use when rendering outputs logged.
    */
@@ -142,5 +148,19 @@ export interface ILogger {
   /**
    * Output Area Model used to manage log storage in memory.
    */
-  readonly outputAreaModel: IOutputAreaModel;
+  readonly outputAreaModel: ILoggerOutputAreaModel;
+  /**
+   * The cumulative number of messages the log has stored.
+   */
+  readonly version: number;
+  /**
+   * Log an output to logger.
+   *
+   * @param log - The output to be logged.
+   */
+  log(log: ILogPayload): void;
+  /**
+   * Clear all outputs logged.
+   */
+  clear(): void;
 }
