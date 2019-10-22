@@ -1367,12 +1367,10 @@ namespace Private {
       // iterate reverse so any deletions don't overlap
       var head = ranges[i].head;
       var anchor = ranges[i].anchor;
-      var sel = !posEq(head, anchor);
-      if (sel) {
-        // range is selection
+      var isSelection = !posEq(head, anchor);
+      if (isSelection) {
         doc.replaceRange('', anchor, head);
       } else {
-        // range is cursor
         var line = doc.getLine(head.line).substring(0, head.ch);
         if (line.match(/^\ +$/) !== null) {
           // delete tabs
