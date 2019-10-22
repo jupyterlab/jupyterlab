@@ -1379,8 +1379,18 @@ namespace Private {
           doc.replaceRange('', from, head);
         } else {
           // delete non-tabs
-          var from = CodeMirror.Pos(head.line, head.ch - 1);
-          doc.replaceRange('', from, head);
+          if (head.ch == 0) {
+            if (head.line != 0) {
+              var from = CodeMirror.Pos(
+                head.line - 1,
+                doc.getLine(head.line - 1).length
+              );
+              doc.replaceRange('', from, head);
+            }
+          } else {
+            var from = CodeMirror.Pos(head.line, head.ch - 1);
+            doc.replaceRange('', from, head);
+          }
         }
       }
     }
