@@ -120,16 +120,12 @@ export class DebugService implements IDebugger.IService {
       }
     });
 
-    const breakpoints: DebugProtocol.SourceBreakpoint[] = this.setBreakpoints();
-    const reply = await this.session.sendRequest('dumpCell', {
+    const breakpoints: DebugProtocol.SourceBreakpoint[] = this.getBreakpoints();
+    const dumpedCell = await this.session.sendRequest('dumpCell', {
       code
     });
 
-    await this.session.sendRequest('setBreakpoints', {
-      breakpoints: breakpoints,
-      source: { path: reply.body.sourcePath },
-      sourceModified: false
-    });
+    await this.setBreakpoints(breakpoints, dumpedCell.body.sourcePath);
     await this.session.sendRequest('configurationDone', {});
 
     this.session.client.kernel.requestExecute({ code });
@@ -166,6 +162,11 @@ export class DebugService implements IDebugger.IService {
     }
   };
 
+  dumpCell = async (code: string) => {
+    const reply = await this.session.sendRequest('dumpCell', { code });
+    return reply.body;
+  };
+
   getFrames = async (threadId: number) => {
     const reply = await this.session.sendRequest('stackTrace', {
       threadId
@@ -194,12 +195,34 @@ export class DebugService implements IDebugger.IService {
     return reply.body.variables;
   };
 
-  setBreakpoints = (): DebugProtocol.SourceBreakpoint[] => {
+  getBreakpoints = (): DebugProtocol.SourceBreakpoint[] => {
     return this._model.sidebar.breakpoints.model.breakpoints.map(breakpoint => {
       return {
         line: breakpoint.line
       };
     });
+  };
+
+  setBreakpoints = async (
+    breakpoints: DebugProtocol.SourceBreakpoint[],
+    path: string
+  ) => {
+    await this.session.sendRequest('setBreakpoints', {
+      breakpoints: breakpoints,
+      source: { path },
+      sourceModified: false
+    });
+  };
+
+  updateBreakpoints = async () => {
+    if (!this.session.isStarted) {
+      return;
+    }
+    const code = this._model.codeValue.text;
+    const dumpedCell = await this.dumpCell(code);
+    const breakpoints = this.getBreakpoints();
+    await this.setBreakpoints(breakpoints, dumpedCell.sourcePath);
+    await this.session.sendRequest('configurationDone', {});
   };
 
   protected convertScope = (
