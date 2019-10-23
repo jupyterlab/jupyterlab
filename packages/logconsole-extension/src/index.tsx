@@ -20,7 +20,8 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 import {
   ILoggerRegistry,
   LogConsolePanel,
-  LoggerRegistry
+  LoggerRegistry,
+  LogLevel
 } from '@jupyterlab/logconsole';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -44,6 +45,7 @@ namespace CommandIDs {
   export const addTimestamp = 'logconsole:add-timestamp';
   export const clear = 'logconsole:clear';
   export const open = 'logconsole:open';
+  export const setLevel = 'logconsole:set-level';
 }
 
 /**
@@ -144,11 +146,31 @@ function activateLogConsole(
       id: CommandIDs.clear
     });
 
+    const logLevelInfoButton = new CommandToolbarButton({
+      commands: app.commands,
+      id: CommandIDs.setLevel,
+      args: { level: 'info' }
+    });
+
+    const logLevelWarningButton = new CommandToolbarButton({
+      commands: app.commands,
+      id: CommandIDs.setLevel,
+      args: { level: 'warning' }
+    });
+
     logConsoleWidget.toolbar.addItem(
-      'lab-output-console-add-timestamp',
+      'lab-log-console-add-timestamp',
       addTimestampButton
     );
-    logConsoleWidget.toolbar.addItem('lab-output-console-clear', clearButton);
+    logConsoleWidget.toolbar.addItem('lab-log-console-clear', clearButton);
+    logConsoleWidget.toolbar.addItem(
+      'lab-log-console-info',
+      logLevelInfoButton
+    );
+    logConsoleWidget.toolbar.addItem(
+      'lab-log-console-warning',
+      logLevelWarningButton
+    );
 
     logConsolePanel.sourceChanged.connect(() => {
       app.commands.notifyCommandChanged();
@@ -193,7 +215,7 @@ function activateLogConsole(
     label: 'Add Timestamp',
     execute: () => {
       const logger = loggerRegistry.getLogger(logConsolePanel.source);
-      logger.log({ type: 'html', data: '<hr>' });
+      logger.log({ type: 'html', data: '<hr>', level: 'critical' });
     },
     isEnabled: () => logConsolePanel && logConsolePanel.source !== null,
     iconClass: 'jp-AddIcon'
@@ -207,6 +229,20 @@ function activateLogConsole(
     },
     isEnabled: () => logConsolePanel && logConsolePanel.source !== null,
     iconClass: 'fa fa-ban clear-icon'
+  });
+
+  function toTitleCase(value: string) {
+    return value.length === 0 ? value : value[0].toUpperCase() + value.slice(1);
+  }
+
+  app.commands.addCommand(CommandIDs.setLevel, {
+    label: args => `Set Log Level to ${toTitleCase(args.level as string)}`,
+    execute: (args: { level: LogLevel }) => {
+      const logger = loggerRegistry.getLogger(logConsolePanel.source);
+      logger.level = args.level;
+    },
+    isEnabled: () => logConsolePanel && logConsolePanel.source !== null
+    // TODO: find good icon class
   });
 
   app.contextMenu.addItem({

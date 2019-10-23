@@ -47,6 +47,11 @@ export interface ILoggerRegistry {
 }
 
 /**
+ * Log severity level
+ */
+export type LogLevel = 'critical' | 'error' | 'warning' | 'info' | 'debug';
+
+/**
  * The base log payload type.
  */
 export interface ILogPayloadBase {
@@ -54,6 +59,11 @@ export interface ILogPayloadBase {
    * Type of log data.
    */
   type: string;
+
+  /**
+   * Log level
+   */
+  level: LogLevel;
 
   /**
    * Data
@@ -129,6 +139,10 @@ export interface ILogger {
    * Max number of messages.
    */
   maxLength: number;
+  /**
+   * Log level.
+   */
+  level: LogLevel;
   /**
    * Rendermime to use when rendering outputs logged.
    */

@@ -17,23 +17,24 @@ import {
   ILogger,
   ILoggerChange,
   ILoggerOutputAreaModel,
-  ILogPayload
+  ILogPayload,
+  LogLevel
 } from './tokens';
 
 /**
- * Custom Notebook Output with timestamp member.
+ * Custom Notebook Output with log info.
  */
-interface ITimestampedOutput extends nbformat.IBaseOutput {
+type ILogOutput = nbformat.IOutput & {
   /**
    * Date & time when output is logged in integer representation.
    */
   timestamp: number;
-}
 
-/**
- * Custom Notebook Output with optional timestamp.
- */
-type IOutputWithTimestamp = nbformat.IOutput | ITimestampedOutput;
+  /**
+   * Log level
+   */
+  level: LogLevel;
+};
 
 /**
  * Log Output Model with timestamp which provides
@@ -49,12 +50,18 @@ export class LogOutputModel extends OutputModel {
     super(options);
 
     this.timestamp = new Date(options.value.timestamp as number);
+    this.level = options.value.level;
   }
 
   /**
    * Date & time when output is logged.
    */
   timestamp: Date = null;
+
+  /**
+   * Log level
+   */
+  level: LogLevel;
 }
 
 /**
@@ -62,7 +69,7 @@ export class LogOutputModel extends OutputModel {
  */
 namespace LogOutputModel {
   export interface IOptions extends IOutputModel.IOptions {
-    value: IOutputWithTimestamp;
+    value: ILogOutput;
   }
 }
 
@@ -74,7 +81,7 @@ class LogConsoleModelContentFactory extends OutputAreaModel.ContentFactory {
   /**
    * Create a rendermime output model from notebook output.
    */
-  createOutputModel(options: IOutputModel.IOptions): LogOutputModel {
+  createOutputModel(options: LogOutputModel.IOptions): LogOutputModel {
     return new LogOutputModel(options);
   }
 }
@@ -100,7 +107,7 @@ export class LoggerOutputAreaModel extends OutputAreaModel
    * are combined. The oldest outputs are possibly removed to ensure the total
    * number of outputs is at most `.maxLength`.
    */
-  add(output: nbformat.IOutput): number {
+  add(output: ILogOutput): number {
     super.add(output);
     this._applyMaxLength();
     return this.length;
@@ -170,6 +177,16 @@ export class Logger implements ILogger {
   }
 
   /**
+   * The level of outputs logged
+   */
+  get level(): LogLevel {
+    return Private.LogLevel[this._level] as keyof typeof Private.LogLevel;
+  }
+  set level(value: LogLevel) {
+    this._level = Private.LogLevel[value];
+  }
+
+  /**
    * Number of outputs logged.
    */
   get length(): number {
@@ -230,6 +247,10 @@ export class Logger implements ILogger {
    * @param log - The output to be logged.
    */
   log(log: ILogPayload) {
+    // Filter by our current log level
+    if (Private.LogLevel[log.level] < this._level) {
+      return;
+    }
     const timestamp = new Date();
     let output: nbformat.IOutput = null;
 
@@ -263,7 +284,11 @@ export class Logger implements ILogger {
       this._version++;
 
       // Next, trigger any displays of the message
-      this.outputAreaModel.add({ ...output, timestamp: timestamp.valueOf() });
+      this.outputAreaModel.add({
+        ...output,
+        timestamp: timestamp.valueOf(),
+        level: log.level
+      });
 
       // Finally, tell people that the message was appended (and possibly
       // already displayed).
@@ -283,6 +308,7 @@ export class Logger implements ILogger {
   private _rendermime: IRenderMimeRegistry | null = null;
   private _rendermimeChanged = new Signal<this, void>(this);
   private _version = 0;
+  private _level: Private.LogLevel = Private.LogLevel.warning;
 }
 
 export namespace Logger {
@@ -295,5 +321,15 @@ export namespace Logger {
      * The maximum number of messages to store.
      */
     maxLength: number;
+  }
+}
+
+namespace Private {
+  export enum LogLevel {
+    debug,
+    info,
+    warning,
+    error,
+    critical
   }
 }

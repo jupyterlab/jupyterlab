@@ -44,7 +44,7 @@ function activateNBOutput(
             ...msg.content,
             output_type: msg.header.msg_type
           };
-          logger.log({ type: 'output', data });
+          logger.log({ type: 'output', data, level: 'info' });
         }
       }
     );

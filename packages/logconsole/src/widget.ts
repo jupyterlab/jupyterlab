@@ -21,7 +21,8 @@ import {
   ILogger,
   ILoggerChange,
   ILoggerRegistry,
-  ILoggerRegistryChange
+  ILoggerRegistryChange,
+  LogLevel
 } from './tokens';
 
 /**
@@ -33,6 +34,10 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
 
     this._timestampNode = document.createElement('div');
     this.node.append(this._timestampNode);
+
+    // TODO: make a better level display
+    this._levelNode = document.createElement('div');
+    this.node.append(this._levelNode);
   }
 
   /**
@@ -43,11 +48,19 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
   }
 
   /**
+   * Log level
+   */
+  set level(value: LogLevel) {
+    this._levelNode.innerHTML = value;
+  }
+
+  /**
    * The execution count for the prompt.
    */
   executionCount: nbformat.ExecutionCount;
 
   private _timestampNode: HTMLDivElement;
+  private _levelNode: HTMLDivElement;
 }
 
 /**
@@ -70,7 +83,9 @@ class LogConsoleOutputArea extends OutputArea {
   protected createOutputItem(model: LogOutputModel): Widget | null {
     const panel = super.createOutputItem(model) as Panel;
     // first widget in panel is prompt of type LoggerOutputPrompt
-    (panel.widgets[0] as LogConsoleOutputPrompt).timestamp = model.timestamp;
+    let prompt = panel.widgets[0] as LogConsoleOutputPrompt;
+    prompt.timestamp = model.timestamp;
+    prompt.level = model.level;
     return panel;
   }
 
