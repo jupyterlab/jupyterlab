@@ -373,9 +373,8 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
-    const category = 'Debugger';
-
     if (palette) {
+      const category = 'Debugger';
       palette.addItem({ command: CommandIDs.changeMode, category });
       palette.addItem({ command: CommandIDs.create, category });
       palette.addItem({ command: CommandIDs.start, category });
