@@ -25,6 +25,10 @@ import {
   LogLevel
 } from './tokens';
 
+function toTitleCase(value: string) {
+  return value.length === 0 ? value : value[0].toUpperCase() + value.slice(1);
+}
+
 /**
  * Log console output prompt implementation
  */
@@ -51,7 +55,8 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
    * Log level
    */
   set level(value: LogLevel) {
-    this._levelNode.innerHTML = value;
+    this.node.dataset.logLevel = value;
+    this.node.title = `${toTitleCase(value)} message`;
   }
 
   /**
