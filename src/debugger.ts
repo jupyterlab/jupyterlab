@@ -37,7 +37,7 @@ export class Debugger extends SplitPanel {
 
     this.model = new Debugger.Model(options);
 
-    this.sidebar = new DebuggerSidebar(this.model);
+    this.sidebar = new DebuggerSidebar();
     this.model.sidebar = this.sidebar;
 
     const { editorFactory } = options;
