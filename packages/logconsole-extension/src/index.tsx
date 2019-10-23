@@ -228,7 +228,8 @@ function activateLogConsole(
       logger.clear();
     },
     isEnabled: () => logConsolePanel && logConsolePanel.source !== null,
-    iconClass: 'fa fa-ban clear-icon'
+    // TODO: figure out how this jp-clearIcon class should work, analagous to jp-AddIcon
+    iconClass: 'fa fa-ban jp-ClearIcon'
   });
 
   function toTitleCase(value: string) {

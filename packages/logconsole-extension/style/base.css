@@ -35,7 +35,7 @@
   color: white;
 }
 
-.jp-LogConsole .clear-icon {
+.jp-LogConsole .jp-ClearIcon {
   transform: rotate(90deg);
   margin-top: -1px;
 }
