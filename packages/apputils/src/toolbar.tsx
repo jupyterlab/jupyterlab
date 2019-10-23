@@ -20,6 +20,7 @@ import { PanelLayout, Widget } from '@phosphor/widgets';
 import { IClientSession } from './clientsession';
 
 import * as React from 'react';
+import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
 /**
  * The class name added to toolbars.
@@ -520,6 +521,7 @@ export namespace CommandToolbarButtonComponent {
   export interface IProps {
     commands: CommandRegistry;
     id: string;
+    args?: ReadonlyJSONObject;
   }
 }
 
@@ -578,23 +580,23 @@ namespace Private {
   export function propsFromCommand(
     options: CommandToolbarButtonComponent.IProps
   ): ToolbarButtonComponent.IProps {
-    let { commands, id } = options;
-    const iconClassName = commands.iconClass(id);
-    const iconLabel = commands.iconLabel(id);
-    const label = commands.label(id);
-    let className = commands.className(id);
+    let { commands, id, args } = options;
+    const iconClassName = commands.iconClass(id, args);
+    const iconLabel = commands.iconLabel(id, args);
+    const label = commands.label(id, args);
+    let className = commands.className(id, args);
     // Add the boolean state classes.
-    if (commands.isToggled(id)) {
+    if (commands.isToggled(id, args)) {
       className += ' p-mod-toggled';
     }
-    if (!commands.isVisible(id)) {
+    if (!commands.isVisible(id, args)) {
       className += ' p-mod-hidden';
     }
-    const tooltip = commands.caption(id) || label || iconLabel;
+    const tooltip = commands.caption(id, args) || label || iconLabel;
     const onClick = () => {
-      void commands.execute(id);
+      void commands.execute(id, args);
     };
-    const enabled = commands.isEnabled(id);
+    const enabled = commands.isEnabled(id, args);
     return { className, iconClassName, tooltip, onClick, enabled, label };
   }
 
