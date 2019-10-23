@@ -1,0 +1,1 @@
+jlpm && jlpm build && jupyter labextension install .
