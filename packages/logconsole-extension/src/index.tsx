@@ -146,6 +146,12 @@ function activateLogConsole(
       id: CommandIDs.clear
     });
 
+    logConsoleWidget.toolbar.addItem(
+      'lab-log-console-add-timestamp',
+      addTimestampButton
+    );
+    logConsoleWidget.toolbar.addItem('lab-log-console-clear', clearButton);
+
     const logLevelInfoButton = new CommandToolbarButton({
       commands: app.commands,
       id: CommandIDs.setLevel,
@@ -158,11 +164,12 @@ function activateLogConsole(
       args: { level: 'warning' }
     });
 
-    logConsoleWidget.toolbar.addItem(
-      'lab-log-console-add-timestamp',
-      addTimestampButton
-    );
-    logConsoleWidget.toolbar.addItem('lab-log-console-clear', clearButton);
+    const logLevelErrorButton = new CommandToolbarButton({
+      commands: app.commands,
+      id: CommandIDs.setLevel,
+      args: { level: 'error' }
+    });
+
     logConsoleWidget.toolbar.addItem(
       'lab-log-console-info',
       logLevelInfoButton
@@ -170,6 +177,10 @@ function activateLogConsole(
     logConsoleWidget.toolbar.addItem(
       'lab-log-console-warning',
       logLevelWarningButton
+    );
+    logConsoleWidget.toolbar.addItem(
+      'lab-log-console-error',
+      logLevelErrorButton
     );
 
     logConsolePanel.sourceChanged.connect(() => {

@@ -8,7 +8,7 @@ import {
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { ILoggerRegistry } from '@jupyterlab/logconsole';
+import { ILoggerRegistry, LogLevel } from '@jupyterlab/logconsole';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
@@ -45,6 +45,31 @@ function activateNBOutput(
             output_type: msg.header.msg_type
           };
           logger.log({ type: 'output', data, level: 'info' });
+        }
+      }
+    );
+    nb.context.session.unhandledMessage.connect(
+      (_, msg: KernelMessage.IIOPubMessage) => {
+        if (
+          KernelMessage.isDisplayDataMsg(msg) ||
+          KernelMessage.isStreamMsg(msg) ||
+          KernelMessage.isErrorMsg(msg) ||
+          KernelMessage.isExecuteResultMsg(msg)
+        ) {
+          const logger = loggerRegistry.getLogger(nb.context.path);
+          logger.rendermime = nb.content.rendermime;
+          const data: nbformat.IOutput = {
+            ...msg.content,
+            output_type: msg.header.msg_type
+          };
+          let level: LogLevel = 'warning';
+          if (
+            KernelMessage.isErrorMsg(msg) ||
+            (KernelMessage.isStreamMsg(msg) && msg.content.name === 'stderr')
+          ) {
+            level = 'error';
+          }
+          logger.log({ type: 'output', data, level });
         }
       }
     );
