@@ -56,8 +56,11 @@ export class CellManager implements IDisposable {
   }
 
   set activeCell(cell: CodeCell) {
-    this._activeCell = cell;
-    this.onActiveCellChanged();
+    if (cell) {
+      this._activeCell = cell;
+      this._debuggerModel.codeValue = cell.model.value;
+      this.onActiveCellChanged();
+    }
   }
 
   get activeCell(): CodeCell {

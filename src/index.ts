@@ -192,19 +192,21 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         app.commands.notifyCommandChanged();
       }
       if (debug.tracker.currentWidget) {
-        const handler = new DebuggerNotebookHandler({
-          notebookTracker: tracker,
-          debuggerModel: debug.tracker.currentWidget.content.model
-        });
         if (!oldhandler) {
           oldhandler = {
             id: widget.id,
-            handler: handler
+            handler: new DebuggerNotebookHandler({
+              notebookTracker: tracker,
+              debuggerModel: debug.tracker.currentWidget.content.model
+            })
           };
         } else if (oldhandler.id !== widget.id) {
           oldhandler.id = widget.id;
           oldhandler.handler.dispose();
-          oldhandler.handler = handler;
+          oldhandler.handler = new DebuggerNotebookHandler({
+            notebookTracker: tracker,
+            debuggerModel: debug.tracker.currentWidget.content.model
+          });
         }
       }
     });
@@ -308,6 +310,20 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
+    commands.addCommand(CommandIDs.debugNotebook, {
+      label: 'Launch',
+      isEnabled: () => {
+        const debuggerModel = getModel();
+        return (debuggerModel &&
+          debuggerModel.session !== null &&
+          debuggerModel.session.isStarted) as boolean;
+      },
+      execute: async () => {
+        const debuggerModel = getModel();
+        await debuggerModel.service.launch(debuggerModel.codeValue.text);
+      }
+    });
+
     commands.addCommand(CommandIDs.changeMode, {
       label: 'Change Mode',
       isEnabled: () => {
@@ -358,10 +374,12 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     });
 
     if (palette) {
-      palette.addItem({ command: CommandIDs.changeMode, category: 'Debugger' });
-      palette.addItem({ command: CommandIDs.create, category: 'Debugger' });
-      palette.addItem({ command: CommandIDs.start, category: 'Debugger' });
-      palette.addItem({ command: CommandIDs.stop, category: 'Debugger' });
+      const category = 'Debugger';
+      palette.addItem({ command: CommandIDs.changeMode, category });
+      palette.addItem({ command: CommandIDs.create, category });
+      palette.addItem({ command: CommandIDs.start, category });
+      palette.addItem({ command: CommandIDs.stop, category });
+      palette.addItem({ command: CommandIDs.debugNotebook, category });
     }
 
     if (restorer) {

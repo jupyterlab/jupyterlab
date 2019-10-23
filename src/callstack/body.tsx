@@ -1,9 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import { Callstack } from '.';
+
 import { ReactWidget } from '@jupyterlab/apputils';
+
+import { ArrayExt } from '@phosphor/algorithm';
 
 export class Body extends ReactWidget {
   constructor(model: Callstack.IModel) {
@@ -20,11 +24,28 @@ export class Body extends ReactWidget {
 }
 
 const FramesComponent = ({ model }: { model: Callstack.IModel }) => {
-  const [frames] = useState(model.frames);
-  const [selected, setSelected] = useState();
+  const [frames, setFrames] = useState(model.frames);
+  const [selected, setSelected] = useState(model.frame);
+
   const onSelected = (frame: any) => {
     setSelected(frame);
+    model.frame = frame;
   };
+
+  useEffect(() => {
+    const updateFrames = (_: Callstack.IModel, updates: Callstack.IFrame[]) => {
+      if (ArrayExt.shallowEqual(frames, updates)) {
+        return;
+      }
+      setFrames(updates);
+      setSelected(updates[0]);
+    };
+    model.framesChanged.connect(updateFrames);
+
+    return () => {
+      model.framesChanged.disconnect(updateFrames);
+    };
+  });
 
   return (
     <ul>
