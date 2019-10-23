@@ -17,16 +17,27 @@ export class Variables extends Panel {
     this.addClass('jp-DebuggerVariables');
     this.title.label = 'Variables';
 
-    const header = new VariablesHeader(this.title.label);
+    this.header = new VariablesHeader(this.title.label);
     this.body = new Body(this.model);
 
-    this.addWidget(header);
+    this.addWidget(this.header);
     this.addWidget(this.body);
   }
 
   readonly model: Variables.IModel;
-
+  readonly header: VariablesHeader;
   readonly body: Widget;
+
+  protected onResize(msg: Widget.ResizeMessage): void {
+    super.onResize(msg);
+    this.resizeBody(msg);
+  }
+
+  private resizeBody(msg: Widget.ResizeMessage) {
+    console.log(msg.height);
+    const height = msg.height - this.header.node.offsetHeight;
+    this.body.node.style.height = `${height}px`;
+  }
 }
 
 class VariablesHeader extends Widget {
@@ -42,9 +53,7 @@ class VariablesHeader extends Widget {
 }
 
 export namespace Variables {
-  export interface IVariable extends DebugProtocol.Variable {
-    description: string;
-  }
+  export interface IVariable extends DebugProtocol.Variable {}
 
   export interface IScope {
     name: string;
@@ -164,8 +173,7 @@ const demoDATA = [
         type: 'builtin_function_or_method',
         value:
           '<built-in method display of PyCapsule object at 0x7f1423490480>',
-        variablesReference: 4,
-        description: ''
+        variablesReference: 4
       },
       {
         evaluateName: 'ptvsd',
@@ -173,40 +181,35 @@ const demoDATA = [
         type: 'module',
         value:
           "<module 'ptvsd' from '/home/codete-bp/anaconda3/envs/jupyterlab-debugger/lib/python3.7/site-packages/ptvsd/__init__.py'>",
-        variablesReference: 5,
-        description: ''
+        variablesReference: 5
       },
       {
         evaluateName: '__annotations__',
         name: '__annotations__',
         type: 'dict',
         value: '{}',
-        variablesReference: 6,
-        description: ''
+        variablesReference: 6
       },
       {
         evaluateName: '__builtins__',
         name: '__builtins__',
         type: 'module',
         value: "<module 'builtins' (built-in)>",
-        variablesReference: 7,
-        description: ''
+        variablesReference: 7
       },
       {
         evaluateName: '__doc__',
         name: '__doc__',
         type: 'NoneType',
         value: 'None',
-        variablesReference: 0,
-        description: ''
+        variablesReference: 0
       },
       {
         evaluateName: '__loader__',
         name: '__loader__',
         type: 'type',
         value: "<class '_frozen_importlib.BuiltinImporter'>",
-        variablesReference: 8,
-        description: ''
+        variablesReference: 8
       },
       {
         evaluateName: '__name__',
@@ -216,24 +219,21 @@ const demoDATA = [
         },
         type: 'str',
         value: "'__main__'",
-        variablesReference: 0,
-        description: ''
+        variablesReference: 0
       },
       {
         evaluateName: '__package__',
         name: '__package__',
         type: 'NoneType',
         value: 'None',
-        variablesReference: 0,
-        description: ''
+        variablesReference: 0
       },
       {
         evaluateName: '__spec__',
         name: '__spec__',
         type: 'NoneType',
         value: 'None',
-        variablesReference: 0,
-        description: ''
+        variablesReference: 0
       }
     ]
   }

@@ -1,63 +1,68 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget, SplitPanel, Panel } from '@phosphor/widgets';
-
 import { Variables } from '../index';
 
-import { Table } from './table';
+import { ObjectInspector, ObjectLabel } from 'react-inspector';
 
-import { Search } from './search';
+import { ReactWidget } from '@jupyterlab/apputils';
 
-import { Message } from '@phosphor/messaging';
+import React from 'react';
 
-export class Body extends Panel {
+export class Body extends ReactWidget {
   constructor(model: Variables.IModel) {
     super();
     this.model = model;
     this.addClass('jp-DebuggerVariables-body');
-
-    const searchParams = new Search(this.model);
-    const splitPanel = new SplitPanel();
-    const table = new Table(this.model);
-    const description = new Description(this.model);
-
-    splitPanel.orientation = 'vertical';
-    splitPanel.node.style.height = `100%`;
-    splitPanel.addWidget(table);
-    splitPanel.addWidget(description);
-
-    this.addWidget(searchParams);
-    this.addWidget(splitPanel);
   }
 
   model: Variables.IModel;
+
+  render() {
+    return <VariableComponent model={this.model} />;
+  }
 }
 
-class Description extends Widget {
-  constructor(model: Variables.IModel) {
-    super();
-    this.addClass('jp-DebuggerVariables-description');
-    this.model = model;
+const defaultNodeRenderer = ({
+  depth,
+  name,
+  data,
+  isNonenumerable,
+  expanded
+}: {
+  depth: number;
+  name: string;
+  data: any;
+  isNonenumerable: boolean;
+  expanded: boolean;
+}) => {
+  const label = data.name === '' || data.name == null ? name : data.name;
+  const value = data.value;
 
-    this.model.currentChanged.connect(
-      (model: Variables.IModel, variable: Variables.IVariable) => {
-        this.currentVariable = variable;
-        this.update();
-      }
-    );
-  }
+  return depth === 0 ? (
+    <span>
+      <span>{label}</span>
+      <span>:</span>
+      <span>{data.length}</span>
+    </span>
+  ) : depth === 1 ? (
+    <span>
+      <span style={{ color: 'rgb(136, 19, 145)' }}>{label}</span>
+      <span>:</span>
+      <span>{value}</span>
+    </span>
+  ) : (
+    <ObjectLabel name={label} data={data} isNonenumerable={isNonenumerable} />
+  );
+};
 
-  protected onUpdateRequest(msg: Message) {
-    if (!this.currentVariable) {
-      return;
-    }
-    this.node.innerHTML = `<b>name: ${this.currentVariable.name}</b>
-                                       <p>type: ${this.currentVariable.type} </p>
-                                       Description:
-                                       <p>${this.currentVariable.description}</p> `;
-  }
-
-  model: Variables.IModel;
-  currentVariable: Variables.IVariable;
-}
+const VariableComponent = ({ model }: { model: Variables.IModel }) => {
+  const data = model.currentScope;
+  return (
+    <ObjectInspector
+      data={data.variables}
+      name={data.name}
+      nodeRenderer={defaultNodeRenderer}
+    />
+  );
+};

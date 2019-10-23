@@ -9,7 +9,7 @@
     "module": "esnext",
     "moduleResolution": "node",
     "noEmitOnError": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "noUnusedLocals": true,
     "outDir": "lib",
     "rootDir": "src",

@@ -135,7 +135,7 @@ export class DebugService {
       return {
         name: scope.name,
         variables: variables.map(variable => {
-          return { ...variable, description: '' };
+          return { ...variable };
         })
       };
     });
