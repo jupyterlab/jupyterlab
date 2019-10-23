@@ -34,7 +34,6 @@ export class Variables extends Panel {
   }
 
   private resizeBody(msg: Widget.ResizeMessage) {
-    console.log(msg.height);
     const height = msg.height - this.header.node.offsetHeight;
     this.body.node.style.height = `${height}px`;
   }
@@ -65,24 +64,6 @@ export namespace Variables {
   export class IModel implements IModel {
     constructor(model?: IScope[] | null) {
       this._state = model;
-      this._currentScope = !!this._state ? this._state[0] : null;
-    }
-
-    get currentScope(): IScope {
-      return this._currentScope;
-    }
-
-    set currentScope(value: IScope) {
-      if (this._currentScope === value) {
-        return;
-      }
-      this._currentScope = value;
-      const variables = !!value ? value.variables : [];
-      this._variablesChanged.emit(variables);
-    }
-
-    get currentChanged(): ISignal<this, IVariable> {
-      return this._currentChanged;
     }
 
     get scopesChanged(): ISignal<this, IScope[]> {
@@ -92,6 +73,7 @@ export namespace Variables {
     get currentVariable(): IVariable {
       return this._currentVariable;
     }
+
     set currentVariable(variable: IVariable) {
       if (this._currentVariable === variable) {
         return;
@@ -120,7 +102,6 @@ export namespace Variables {
     set scopes(scopes: IScope[]) {
       this._state = scopes;
       this._scopesChanged.emit(scopes);
-      this.currentScope = !!scopes ? scopes[0] : null;
     }
 
     get variables(): IVariable[] {
@@ -164,6 +145,19 @@ export namespace Variables {
 }
 
 const demoDATA = [
+  {
+    name: 'Global',
+    variables: [
+      {
+        evaluateName: 'ptvsd',
+        name: 'ptvsd',
+        type: 'module',
+        value:
+          "<module 'ptvsd' from '/home/codete-bp/anaconda3/envs/jupyterlab-debugger/lib/python3.7/site-packages/ptvsd/__init__.py'>",
+        variablesReference: 5
+      }
+    ]
+  },
   {
     name: 'Locals',
     variables: [

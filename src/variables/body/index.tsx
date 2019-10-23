@@ -7,7 +7,8 @@ import { ObjectInspector, ObjectLabel } from 'react-inspector';
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { ArrayExt } from '@phosphor/algorithm';
 
 export class Body extends ReactWidget {
   constructor(model: Variables.IModel) {
@@ -57,12 +58,35 @@ const defaultNodeRenderer = ({
 };
 
 const VariableComponent = ({ model }: { model: Variables.IModel }) => {
-  const data = model.currentScope;
-  return (
-    <ObjectInspector
-      data={data.variables}
-      name={data.name}
-      nodeRenderer={defaultNodeRenderer}
-    />
+  const [data, setData] = useState(model.scopes);
+
+  useEffect(() => {
+    const updateScopes = (_: Variables.IModel, update: Variables.IScope[]) => {
+      if (ArrayExt.shallowEqual(data, update)) {
+        return;
+      }
+      setData(update);
+    };
+
+    model.scopesChanged.connect(updateScopes);
+
+    return () => {
+      model.scopesChanged.disconnect(updateScopes);
+    };
+  });
+
+  const List = () => (
+    <>
+      {data.map(scopes => (
+        <ObjectInspector
+          key={scopes.name}
+          data={scopes.variables}
+          name={scopes.name}
+          nodeRenderer={defaultNodeRenderer}
+        />
+      ))}
+    </>
   );
+
+  return <>{List()}</>;
 };
