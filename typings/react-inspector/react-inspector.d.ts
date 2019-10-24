@@ -2,6 +2,7 @@
 // Project: https://github.com/xyc/react-inspector
 // Definitions by: vidartf <https://github.com/vidartf>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+// From  https://github.com/vidartf/jupyterlab-kernelspy
 
 declare module 'react-inspector' {
   import * as React from 'react';

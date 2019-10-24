@@ -45,13 +45,13 @@ const defaultNodeRenderer = ({
   return depth === 0 ? (
     <span>
       <span>{label}</span>
-      <span>:</span>
+      <span>: </span>
       <span>{data.length}</span>
     </span>
   ) : depth === 1 ? (
     <span>
       <span style={{ color: 'rgb(136, 19, 145)' }}>{label}</span>
-      <span>:</span>
+      <span>: </span>
       <span>{value}</span>
     </span>
   ) : (
@@ -60,7 +60,7 @@ const defaultNodeRenderer = ({
 };
 
 const VariableComponent = ({ model }: { model: Variables.IModel }) => {
-  const [data, setData] = useState(model.scopes || []);
+  const [data, setData] = useState(model.scopes);
 
   useEffect(() => {
     const updateScopes = (_: Variables.IModel, update: Variables.IScope[]) => {
@@ -86,6 +86,7 @@ const VariableComponent = ({ model }: { model: Variables.IModel }) => {
           name={scopes.name}
           nodeRenderer={defaultNodeRenderer}
           theme={theme}
+          expandLevel={1}
         />
       ))}
     </>
@@ -99,7 +100,7 @@ const theme = {
   BASE_FONT_SIZE: 'var(--jp-code-font-size)',
   BASE_LINE_HEIGHT: 'var(--jp-code-line-height)',
 
-  BASE_BACKGROUND_COLOR: 'var(--jp-layout-color0)',
+  BASE_BACKGROUND_COLOR: 'var(--jp-layout-color1)',
   BASE_COLOR: 'var(--jp-content-font-color1)',
 
   OBJECT_NAME_COLOR: 'var(--jp-mirror-editor-attribute-color)',

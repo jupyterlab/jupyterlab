@@ -67,7 +67,6 @@ export class DebugService {
         scopes: values
       });
       if (index === 0) {
-        console.log({ values });
         this._model.sidebar.variables.model.scopes = values;
       }
     });

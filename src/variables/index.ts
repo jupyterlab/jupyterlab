@@ -96,7 +96,7 @@ export namespace Variables {
     }
 
     get scopes(): IScope[] {
-      return this._state;
+      return this._state || [];
     }
 
     set scopes(scopes: IScope[]) {
