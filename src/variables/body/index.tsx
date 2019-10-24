@@ -60,7 +60,7 @@ const defaultNodeRenderer = ({
 };
 
 const VariableComponent = ({ model }: { model: Variables.IModel }) => {
-  const [data, setData] = useState(model.scopes);
+  const [data, setData] = useState(model.scopes || []);
 
   useEffect(() => {
     const updateScopes = (_: Variables.IModel, update: Variables.IScope[]) => {
