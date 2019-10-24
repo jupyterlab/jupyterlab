@@ -8,8 +8,11 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { Editor, Doc } from 'codemirror';
 
 import { Breakpoints, SessionTypes } from '../breakpoints';
+
 import { Debugger } from '../debugger';
+
 import { IDisposable } from '@phosphor/disposable';
+
 import { Signal } from '@phosphor/signaling';
 
 export class CellManager implements IDisposable {
@@ -26,6 +29,10 @@ export class CellManager implements IDisposable {
       }
       this.clearGutter(this.activeCell);
     });
+
+    this._debuggerModel.selectCurrentLine.connect((_, lineNumber) => {
+      this.showCurrentLine(lineNumber);
+    });
   }
 
   private _previousCell: CodeCell;
@@ -35,6 +42,16 @@ export class CellManager implements IDisposable {
   private breakpointsModel: Breakpoints.Model;
   private _activeCell: CodeCell;
   isDisposed: boolean;
+
+  showCurrentLine(lineNumber: number) {
+    if (this.activeCell) {
+      const editor = this.activeCell.editor as CodeMirrorEditor;
+      editor.doc.eachLine(line => {
+        editor.editor.removeLineClass(line, 'wrap', 'highlight');
+      });
+      editor.editor.addLineClass(lineNumber - 1, 'wrap', 'highlight');
+    }
+  }
 
   dispose(): void {
     if (this.isDisposed) {

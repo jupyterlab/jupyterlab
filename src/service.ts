@@ -68,6 +68,7 @@ export class DebugService {
       });
       if (index === 0) {
         this._model.sidebar.variables.model.scopes = values;
+        this._model.selectCurrentLine.emit(frame.line);
       }
     });
 
