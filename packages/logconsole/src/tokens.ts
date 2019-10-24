@@ -120,7 +120,9 @@ export type ILogPayload = ITextLog | IHtmlLog | IOutputLog;
 
 export type IContentChange = 'append' | 'clear';
 
-export type IStateChange = IChangedArgs<IRenderMimeRegistry, 'rendermime'> | IChangedArgs<LogLevel, 'level'>;
+export type IStateChange =
+  | IChangedArgs<IRenderMimeRegistry, 'rendermime'>
+  | IChangedArgs<LogLevel, 'level'>;
 
 export interface ILoggerOutputAreaModel extends IOutputAreaModel {
   /**
