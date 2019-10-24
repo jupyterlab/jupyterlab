@@ -178,6 +178,10 @@ export interface ILogger {
    */
   log(log: ILogPayload): void;
   /**
+   * Add a checkpoint in the log.
+   */
+  checkpoint(): void;
+  /**
    * Clear all outputs logged.
    */
   clear(): void;

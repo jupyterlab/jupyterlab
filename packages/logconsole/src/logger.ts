@@ -23,6 +23,11 @@ import {
 } from './tokens';
 
 /**
+ * All severity levels, including an internal one for metadata.
+ */
+type FullLogLevel = LogLevel | 'metadata';
+
+/**
  * Custom Notebook Output with log info.
  */
 type ILogOutput = nbformat.IOutput & {
@@ -34,7 +39,7 @@ type ILogOutput = nbformat.IOutput & {
   /**
    * Log level
    */
-  level: LogLevel;
+  level: FullLogLevel;
 };
 
 /**
@@ -62,7 +67,7 @@ export class LogOutputModel extends OutputModel {
   /**
    * Log level
    */
-  level: LogLevel;
+  level: FullLogLevel;
 }
 
 /**
@@ -181,16 +186,23 @@ export class Logger implements ILogger {
    * The level of outputs logged
    */
   get level(): LogLevel {
-    return Private.LogLevel[this._level] as keyof typeof Private.LogLevel;
+    return this._level;
   }
   set level(newValue: LogLevel) {
-    let oldValue = Private.LogLevel[
-      this._level
-    ] as keyof typeof Private.LogLevel;
+    let oldValue = this._level;
     if (oldValue === newValue) {
       return;
     }
-    this._level = Private.LogLevel[newValue];
+    this._level = newValue;
+    this._log({
+      output: {
+        output_type: 'display_data',
+        data: {
+          'text/html': `Log level set to ${newValue}`
+        }
+      },
+      level: 'metadata'
+    });
     this._stateChanged.emit({ name: 'level', oldValue, newValue });
   }
 
@@ -257,12 +269,13 @@ export class Logger implements ILogger {
    */
   log(log: ILogPayload) {
     // Filter by our current log level
-    if (Private.LogLevel[log.level] < this._level) {
+    if (
+      Private.LogLevel[log.level as keyof typeof Private.LogLevel] <
+      Private.LogLevel[this._level as keyof typeof Private.LogLevel]
+    ) {
       return;
     }
-    const timestamp = new Date();
     let output: nbformat.IOutput = null;
-
     switch (log.type) {
       case 'text':
         output = {
@@ -288,20 +301,10 @@ export class Logger implements ILogger {
     }
 
     if (output) {
-      // First, make sure our version reflects the new message so things
-      // triggering from the signals below have the correct version.
-      this._version++;
-
-      // Next, trigger any displays of the message
-      this.outputAreaModel.add({
-        ...output,
-        timestamp: timestamp.valueOf(),
+      this._log({
+        output,
         level: log.level
       });
-
-      // Finally, tell people that the message was appended (and possibly
-      // already displayed).
-      this._contentChanged.emit('append');
     }
   }
 
@@ -313,11 +316,43 @@ export class Logger implements ILogger {
     this._contentChanged.emit('clear');
   }
 
+  /**
+   * Add a checkpoint to the log.
+   */
+  checkpoint() {
+    this._log({
+      output: {
+        output_type: 'display_data',
+        data: {
+          'text/html': '<hr/>'
+        }
+      },
+      level: 'metadata'
+    });
+  }
+
+  private _log(options: { output: nbformat.IOutput; level: FullLogLevel }) {
+    // First, make sure our version reflects the new message so things
+    // triggering from the signals below have the correct version.
+    this._version++;
+
+    // Next, trigger any displays of the message
+    this.outputAreaModel.add({
+      ...options.output,
+      timestamp: Date.now(),
+      level: options.level
+    });
+
+    // Finally, tell people that the message was appended (and possibly
+    // already displayed).
+    this._contentChanged.emit('append');
+  }
+
   private _contentChanged = new Signal<this, IContentChange>(this);
   private _stateChanged = new Signal<this, IStateChange>(this);
   private _rendermime: IRenderMimeRegistry | null = null;
   private _version = 0;
-  private _level: Private.LogLevel = Private.LogLevel.warning;
+  private _level: LogLevel = 'warning';
 }
 
 export namespace Logger {
@@ -339,6 +374,7 @@ namespace Private {
     info,
     warning,
     error,
-    critical
+    critical,
+    metadata
   }
 }

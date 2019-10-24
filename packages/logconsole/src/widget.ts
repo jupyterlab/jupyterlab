@@ -31,6 +31,11 @@ function toTitleCase(value: string) {
 }
 
 /**
+ * All severity levels, including an internal one for metadata.
+ */
+type FullLogLevel = LogLevel | 'metadata';
+
+/**
  * Log console output prompt implementation
  */
 class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
@@ -55,7 +60,7 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
   /**
    * Log level
    */
-  set level(value: LogLevel) {
+  set level(value: FullLogLevel) {
     this.node.dataset.logLevel = value;
     this.node.title = `${toTitleCase(value)} message`;
   }

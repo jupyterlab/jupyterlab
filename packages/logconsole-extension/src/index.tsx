@@ -45,7 +45,7 @@ const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
  * The command IDs used by the plugin.
  */
 namespace CommandIDs {
-  export const addTimestamp = 'logconsole:add-timestamp';
+  export const addCheckpoint = 'logconsole:add-checkpoint';
   export const clear = 'logconsole:clear';
   export const open = 'logconsole:open';
   export const setLevel = 'logconsole:set-level';
@@ -139,9 +139,9 @@ function activateLogConsole(
     logConsoleWidget.title.label = 'Log Console';
     logConsoleWidget.title.iconClass = 'jp-LogConsoleIcon';
 
-    const addTimestampButton = new CommandToolbarButton({
+    const addCheckpointButton = new CommandToolbarButton({
       commands: app.commands,
-      id: CommandIDs.addTimestamp
+      id: CommandIDs.addCheckpoint
     });
 
     const clearButton = new CommandToolbarButton({
@@ -150,8 +150,8 @@ function activateLogConsole(
     });
 
     logConsoleWidget.toolbar.addItem(
-      'lab-log-console-add-timestamp',
-      addTimestampButton
+      'lab-log-console-add-checkpoint',
+      addCheckpointButton
     );
     logConsoleWidget.toolbar.addItem('lab-log-console-clear', clearButton);
 
@@ -199,11 +199,10 @@ function activateLogConsole(
     }
   });
 
-  app.commands.addCommand(CommandIDs.addTimestamp, {
-    label: 'Add Timestamp',
+  app.commands.addCommand(CommandIDs.addCheckpoint, {
+    label: 'Add Checkpoint',
     execute: () => {
-      const logger = loggerRegistry.getLogger(logConsolePanel.source);
-      logger.log({ type: 'html', data: '<hr>', level: 'critical' });
+      logConsolePanel.logger.checkpoint();
     },
     isEnabled: () => logConsolePanel && logConsolePanel.source !== null,
     iconClass: 'jp-AddIcon'
@@ -212,8 +211,7 @@ function activateLogConsole(
   app.commands.addCommand(CommandIDs.clear, {
     label: 'Clear Log',
     execute: () => {
-      const logger = loggerRegistry.getLogger(logConsolePanel.source);
-      logger.clear();
+      logConsolePanel.logger.clear();
     },
     isEnabled: () => logConsolePanel && logConsolePanel.source !== null,
     // TODO: figure out how this jp-clearIcon class should work, analagous to jp-AddIcon
@@ -227,8 +225,7 @@ function activateLogConsole(
   app.commands.addCommand(CommandIDs.setLevel, {
     label: args => `Set Log Level to ${toTitleCase(args.level as string)}`,
     execute: (args: { level: LogLevel }) => {
-      const logger = loggerRegistry.getLogger(logConsolePanel.source);
-      logger.level = args.level;
+      logConsolePanel.logger.level = args.level;
     },
     isEnabled: () => logConsolePanel && logConsolePanel.source !== null
     // TODO: find good icon class
