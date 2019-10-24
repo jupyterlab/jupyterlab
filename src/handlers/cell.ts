@@ -57,7 +57,7 @@ export class CellManager implements IDisposable {
     }
   }
 
-  // will be used addtioanly when dubber Stop
+  // TODO: call when the debugger stops
   private cleanupHighlight() {
     if (this.activeCell) {
       const editor = this.activeCell.editor as CodeMirrorEditor;
