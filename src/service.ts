@@ -14,6 +14,11 @@ export class DebugService {
   constructor(session: DebugSession | null, debuggerModel: Debugger.Model) {
     this.session = session;
     this._model = debuggerModel;
+    this.session.eventMessage.connect(
+      (sender: DebugSession, event: IDebugger.ISession.Event) => {
+        console.log({ event });
+      }
+    );
   }
 
   private _session: DebugSession;

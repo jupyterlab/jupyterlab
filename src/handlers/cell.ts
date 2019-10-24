@@ -43,7 +43,20 @@ export class CellManager implements IDisposable {
   private _activeCell: CodeCell;
   isDisposed: boolean;
 
-  showCurrentLine(lineNumber: number) {
+  private showCurrentLine(lineNumber: number) {
+    if (this.activeCell) {
+      const editor = this.activeCell.editor as CodeMirrorEditor;
+      this.cleanupHighlight();
+      editor.editor.addLineClass(
+        lineNumber - 1,
+        'wrap',
+        'jp-breakpoint-line-highlight'
+      );
+    }
+  }
+
+  // will be used addtioanly when dubber Stop
+  private cleanupHighlight() {
     if (this.activeCell) {
       const editor = this.activeCell.editor as CodeMirrorEditor;
       editor.doc.eachLine(line => {
@@ -53,11 +66,6 @@ export class CellManager implements IDisposable {
           'jp-breakpoint-line-highlight'
         );
       });
-      editor.editor.addLineClass(
-        lineNumber - 1,
-        'wrap',
-        'jp-breakpoint-line-highlight'
-      );
     }
   }
 
