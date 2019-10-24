@@ -3,7 +3,7 @@
 
 import { Variables } from '../index';
 
-import { ObjectInspector, ObjectLabel } from 'react-inspector';
+import { ObjectInspector, ObjectLabel, ITheme } from 'react-inspector';
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
@@ -29,13 +29,15 @@ const defaultNodeRenderer = ({
   name,
   data,
   isNonenumerable,
-  expanded
+  expanded,
+  theme
 }: {
   depth: number;
   name: string;
   data: any;
   isNonenumerable: boolean;
   expanded: boolean;
+  theme?: string | Partial<ITheme>;
 }) => {
   const label = data.name === '' || data.name == null ? name : data.name;
   const value = data.value;
@@ -83,10 +85,39 @@ const VariableComponent = ({ model }: { model: Variables.IModel }) => {
           data={scopes.variables}
           name={scopes.name}
           nodeRenderer={defaultNodeRenderer}
+          theme={theme}
         />
       ))}
     </>
   );
 
   return <>{List()}</>;
+};
+
+const theme = {
+  BASE_FONT_FAMILY: 'var(--jp-code-font-family)',
+  BASE_FONT_SIZE: 'var(--jp-code-font-size)',
+  BASE_LINE_HEIGHT: 'var(--jp-code-line-height)',
+
+  BASE_BACKGROUND_COLOR: 'var(--jp-layout-color0)',
+  BASE_COLOR: 'var(--jp-content-font-color1)',
+
+  OBJECT_NAME_COLOR: 'var(--jp-mirror-editor-attribute-color)',
+  OBJECT_VALUE_NULL_COLOR: 'var(--jp-mirror-editor-builtin-color)',
+  OBJECT_VALUE_UNDEFINED_COLOR: 'var(--jp-mirror-editor-builtin-color)',
+  OBJECT_VALUE_REGEXP_COLOR: 'var(--jp-mirror-editor-string-color)',
+  OBJECT_VALUE_STRING_COLOR: 'var(--jp-mirror-editor-string-color)',
+  OBJECT_VALUE_SYMBOL_COLOR: 'var(--jp-mirror-editor-operator-color)',
+  OBJECT_VALUE_NUMBER_COLOR: 'var(--jp-mirror-editor-number-color)',
+  OBJECT_VALUE_BOOLEAN_COLOR: 'var(--jp-mirror-editor-builtin-color))',
+  OBJECT_VALUE_FUNCTION_KEYWORD_COLOR: 'var(--jp-mirror-editor-def-color))',
+
+  ARROW_COLOR: 'var(--jp-content-font-color2)',
+  ARROW_MARGIN_RIGHT: 3,
+  ARROW_FONT_SIZE: 12,
+
+  TREENODE_FONT_FAMILY: 'var(--jp-code-font-family)',
+  TREENODE_FONT_SIZE: 'var(--jp-code-font-size)',
+  TREENODE_LINE_HEIGHT: 'var(--jp-code-line-height)',
+  TREENODE_PADDING_LEFT: 12
 };
