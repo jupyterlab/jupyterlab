@@ -9,14 +9,17 @@ import {
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
+import { Session } from '@jupyterlab/services';
+
 import { Token } from '@phosphor/coreutils';
 
 import { IObservableDisposable } from '@phosphor/disposable';
 
+import { ISignal } from '@phosphor/signaling';
+
 import { DebugProtocol } from 'vscode-debugprotocol';
 
 import { Debugger } from './debugger';
-import { Session } from '@jupyterlab/services';
 
 /**
  * An interface describing an application's visual debugger.
@@ -84,6 +87,40 @@ export namespace IDebugger {
      * Restore the state of a debug session.
      */
     restoreState(): Promise<void>;
+
+    /**
+     * Send a debug request to the kernel.
+     */
+    sendRequest<K extends keyof IDebugger.ISession.Request>(
+      command: K,
+      args: IDebugger.ISession.Request[K]
+    ): Promise<IDebugger.ISession.Response[K]>;
+
+    eventMessage: ISignal<IDebugger.ISession, IDebugger.ISession.Event>;
+  }
+
+  export interface IService {
+    /**
+     * The API debugger session to connect to a debugger
+     */
+    session: IDebugger.ISession;
+
+    /**
+     * Whether the debugger can start.
+     */
+    canStart(): boolean;
+
+    /**
+     * Whether the current debugger is started.
+     */
+    isStarted(): boolean;
+
+    /**
+     * For testing purpose only, to be removed.
+     */
+    launch(code: string): Promise<void>;
+
+    sessionChanged: ISignal<IDebugger.IService, IDebugger.ISession>;
   }
 
   export namespace ISession {
