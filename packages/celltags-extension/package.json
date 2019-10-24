@@ -1,0 +1,53 @@
+{
+  "name": "@jupyterlab/celltags-extension",
+  "version": "0.1.0",
+  "description": "An extension for manipulating tags in cell metadata",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension"
+  ],
+  "homepage": "https://github.com/my_name/myextension",
+  "bugs": {
+    "url": "https://github.com/my_name/myextension/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/my_name/myextension.git"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Markelle Kelly",
+  "files": [
+    "lib/*.{d.ts,js}",
+    "style/*.css"
+  ],
+  "sideEffects": [
+    "style/*.css"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "directories": {
+    "lib": "lib/"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "prepare": "npm run clean && npm run build",
+    "prepublishOnly": "npm run build",
+    "watch": "tsc -b --watch"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^2.0.0-alpha.1",
+    "@jupyterlab/celltags": "^0.1.0",
+    "@jupyterlab/notebook": "^2.0.0-alpha.1",
+    "@types/node": "^12.0.2"
+  },
+  "devDependencies": {
+    "rimraf": "~2.6.2",
+    "typescript": "~3.5.1"
+  },
+  "jupyterlab": {
+    "extension": true
+  }
+}
