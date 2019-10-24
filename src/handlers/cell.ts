@@ -77,6 +77,7 @@ export class CellManager implements IDisposable {
       this.removeListener(this.previousCell);
     }
     this.removeListener(this.activeCell);
+    this.cleanupHighlight();
     Signal.clearData(this);
   }
 
