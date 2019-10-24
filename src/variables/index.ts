@@ -13,7 +13,7 @@ export class Variables extends Panel {
   constructor(options: Variables.IOptions = {}) {
     super();
 
-    this.model = new Variables.IModel();
+    this.model = new Variables.IModel([]);
     this.addClass('jp-DebuggerVariables');
     this.title.label = 'Variables';
 
@@ -62,7 +62,7 @@ export namespace Variables {
   export interface IModel {}
 
   export class IModel implements IModel {
-    constructor(model?: IScope[] | null) {
+    constructor(model: IScope[] = []) {
       this._state = model;
     }
 
@@ -96,7 +96,7 @@ export namespace Variables {
     }
 
     get scopes(): IScope[] {
-      return this._state || [];
+      return this._state;
     }
 
     set scopes(scopes: IScope[]) {
