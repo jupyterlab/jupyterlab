@@ -9,6 +9,8 @@ import { CodeCell } from '@jupyterlab/cells';
 
 import { Breakpoints } from '../breakpoints';
 
+import { IDebugger } from '../tokens';
+
 import { Debugger } from '../debugger';
 import { IDisposable } from '@phosphor/disposable';
 import { Signal } from '@phosphor/signaling';
@@ -22,6 +24,7 @@ export class DebuggerConsoleHandler implements IDisposable {
       activeCell: this.consoleTracker.currentWidget.console.promptCell,
       breakpointsModel: this.breakpoints,
       debuggerModel: this.debuggerModel,
+      debuggerService: this.debuggerService,
       type: 'console'
     });
     this.consoleTracker.currentWidget.console.promptCellCreated.connect(
@@ -32,6 +35,7 @@ export class DebuggerConsoleHandler implements IDisposable {
 
   private consoleTracker: IConsoleTracker;
   private debuggerModel: Debugger.Model;
+  private debuggerService: IDebugger.IService;
   private breakpoints: Breakpoints.Model;
   private cellManager: CellManager;
   isDisposed: boolean;
@@ -54,6 +58,7 @@ export class DebuggerConsoleHandler implements IDisposable {
         activeCell: update,
         breakpointsModel: this.breakpoints,
         debuggerModel: this.debuggerModel,
+        debuggerService: this.debuggerService,
         type: 'console'
       });
     }
@@ -63,6 +68,7 @@ export class DebuggerConsoleHandler implements IDisposable {
 export namespace DebuggerConsoleHandler {
   export interface IOptions {
     debuggerModel: Debugger.Model;
+    debuggerService: IDebugger.IService;
     tracker: IConsoleTracker;
   }
 }

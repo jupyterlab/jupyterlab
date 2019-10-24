@@ -86,7 +86,8 @@ class HandlerTracker<
     if (debug.tracker.currentWidget && !this.handlers[widget.id]) {
       const handler = new this.builder({
         tracker: tracker,
-        debuggerModel: debug.tracker.currentWidget.content.model
+        debuggerModel: debug.tracker.currentWidget.content.model,
+        debuggerService: debug.tracker.currentWidget.content.service
       });
       this.handlers[widget.id] = handler;
       widget.disposed.connect(() => {
@@ -234,6 +235,12 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       return tracker.currentWidget ? tracker.currentWidget.content.model : null;
     };
 
+    const getService = () => {
+      return tracker.currentWidget
+        ? tracker.currentWidget.content.service
+        : null;
+    };
+
     commands.addCommand(CommandIDs.mount, {
       execute: args => {
         if (!widget) {
@@ -275,14 +282,11 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.stop, {
       label: 'Stop',
       isEnabled: () => {
-        const debuggerModel = getModel();
-        return (debuggerModel &&
-          debuggerModel.session !== null &&
-          debuggerModel.session.isStarted) as boolean;
+        const service = getService();
+        return service && service.isStarted();
       },
       execute: async () => {
-        const debuggerModel = getModel();
-        await debuggerModel.session.stop();
+        await getService().session.stop();
         commands.notifyCommandChanged();
       }
     });
@@ -290,14 +294,11 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.start, {
       label: 'Start',
       isEnabled: () => {
-        const debuggerModel = getModel();
-        return (debuggerModel &&
-          debuggerModel.session !== null &&
-          !debuggerModel.session.isStarted) as boolean;
+        const service = getService();
+        return service && service.canStart();
       },
       execute: async () => {
-        const debuggerModel = getModel();
-        await debuggerModel.session.start();
+        await getService().session.start();
         commands.notifyCommandChanged();
       }
     });
@@ -305,14 +306,13 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.debugNotebook, {
       label: 'Launch',
       isEnabled: () => {
-        const debuggerModel = getModel();
-        return (debuggerModel &&
-          debuggerModel.session !== null &&
-          debuggerModel.session.isStarted) as boolean;
+        const service = getService();
+        return service && service.isStarted();
       },
       execute: async () => {
-        const debuggerModel = getModel();
-        await debuggerModel.service.launch(debuggerModel.codeValue.text);
+        await tracker.currentWidget.content.service.launch(
+          getModel().codeValue.text
+        );
       }
     });
 
@@ -402,11 +402,11 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         },
         session: {
           get: (): IDebugger.ISession | null => {
-            return widget ? widget.content.model.session : null;
+            return widget ? widget.content.service.session : null;
           },
           set: (src: IDebugger.ISession | null) => {
             if (widget) {
-              widget.content.model.session = src;
+              widget.content.service.session = src;
             }
           }
         },

@@ -9,12 +9,14 @@ import { Editor, Doc } from 'codemirror';
 
 import { Breakpoints, SessionTypes } from '../breakpoints';
 import { Debugger } from '../debugger';
+import { IDebugger } from '../tokens';
 import { IDisposable } from '@phosphor/disposable';
 import { Signal } from '@phosphor/signaling';
 
 export class CellManager implements IDisposable {
   constructor(options: CellManager.IOptions) {
     this._debuggerModel = options.debuggerModel;
+    this._debuggerService = options.debuggerService;
     this.breakpointsModel = options.breakpointsModel;
     this.activeCell = options.activeCell;
     this._type = options.type;
@@ -31,6 +33,7 @@ export class CellManager implements IDisposable {
   private _previousCell: CodeCell;
   private previousLineCount: number;
   private _debuggerModel: Debugger.Model;
+  private _debuggerService: IDebugger.IService;
   private _type: SessionTypes;
   private breakpointsModel: Breakpoints.Model;
   private _activeCell: CodeCell;
@@ -81,8 +84,8 @@ export class CellManager implements IDisposable {
       this.activeCell &&
       this.activeCell.isAttached &&
       this.activeCell.editor &&
-      this._debuggerModel &&
-      this._debuggerModel.session
+      this._debuggerService &&
+      this._debuggerService.session
     ) {
       if (this.previousCell && !this.previousCell.isDisposed) {
         this.removeListener(this.previousCell);
@@ -135,7 +138,7 @@ export class CellManager implements IDisposable {
       this.breakpointsModel.removeBreakpoint(info as ILineInfo);
     } else {
       this.breakpointsModel.addBreakpoint(
-        this._debuggerModel.session.client.name,
+        this._debuggerService.session.client.name,
         this.getEditorId(),
         info as ILineInfo
       );
@@ -178,6 +181,7 @@ export class CellManager implements IDisposable {
 export namespace CellManager {
   export interface IOptions {
     debuggerModel: Debugger.Model;
+    debuggerService: IDebugger.IService;
     breakpointsModel: Breakpoints.Model;
     activeCell?: CodeCell;
     type: SessionTypes;
