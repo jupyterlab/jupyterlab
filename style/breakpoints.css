@@ -11,9 +11,9 @@
   position: absolute;
   left: -35px;
   top: -1px;
-  color: #f22;
+  color: var(--jp-error-color1);
 }
 
-.highlight {
-  background-color: orange;
+.jp-breakpoint-line-highlight {
+  background-color: var(--jp-warn-color0);
 }

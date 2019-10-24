@@ -152,8 +152,8 @@ export namespace Debugger {
       this._codeValue = observableString;
     }
 
-    get selectCurrentLine() {
-      return this._selectCurrentLine;
+    get currentLineChanged() {
+      return this._currentLineChanged;
     }
 
     dispose(): void {
@@ -176,7 +176,7 @@ export namespace Debugger {
     private _session: IDebugger.ISession | null;
     private _sessionChanged = new Signal<this, void>(this);
     private _service = new DebugService(null, this);
-    private _selectCurrentLine = new Signal<this, number>(this);
+    private _currentLineChanged = new Signal<this, number>(this);
   }
 
   export namespace Model {

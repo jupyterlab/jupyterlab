@@ -30,7 +30,7 @@ export class CellManager implements IDisposable {
       this.clearGutter(this.activeCell);
     });
 
-    this._debuggerModel.selectCurrentLine.connect((_, lineNumber) => {
+    this._debuggerModel.currentLineChanged.connect((_, lineNumber) => {
       this.showCurrentLine(lineNumber);
     });
   }
@@ -47,9 +47,17 @@ export class CellManager implements IDisposable {
     if (this.activeCell) {
       const editor = this.activeCell.editor as CodeMirrorEditor;
       editor.doc.eachLine(line => {
-        editor.editor.removeLineClass(line, 'wrap', 'highlight');
+        editor.editor.removeLineClass(
+          line,
+          'wrap',
+          'jp-breakpoint-line-highlight'
+        );
       });
-      editor.editor.addLineClass(lineNumber - 1, 'wrap', 'highlight');
+      editor.editor.addLineClass(
+        lineNumber - 1,
+        'wrap',
+        'jp-breakpoint-line-highlight'
+      );
     }
   }
 
