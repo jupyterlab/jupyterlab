@@ -35,12 +35,15 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { HTMLSelect } from '@jupyterlab/ui-components';
 
+import { UUID } from '@phosphor/coreutils';
+
 import { DockLayout, Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
+import { logNotebookOutput } from './nboutput';
+
 import { LogConsoleStatus } from './status';
-import { UUID } from '@phosphor/coreutils';
 
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
 
@@ -387,6 +390,4 @@ export class LogLevelSwitcher extends ReactWidget {
   private _id = `level-${UUID.uuid4()}`;
 }
 
-// TODO: delete the nboutput widget, or at least make it a non-default option?
-import { logNotebookOutput } from './nboutput';
 export default [logConsolePlugin, logNotebookOutput];
