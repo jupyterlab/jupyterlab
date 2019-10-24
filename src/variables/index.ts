@@ -13,7 +13,7 @@ export class Variables extends Panel {
   constructor(options: Variables.IOptions = {}) {
     super();
 
-    this.model = new Variables.IModel(demoDATA);
+    this.model = new Variables.IModel();
     this.addClass('jp-DebuggerVariables');
     this.title.label = 'Variables';
 
@@ -143,92 +143,3 @@ export namespace Variables {
 
   export interface IOptions extends Panel.IOptions {}
 }
-
-const demoDATA = [
-  {
-    name: 'Global',
-    variables: [
-      {
-        evaluateName: 'ptvsd',
-        name: 'ptvsd',
-        type: 'module',
-        value:
-          "<module 'ptvsd' from '/home/codete-bp/anaconda3/envs/jupyterlab-debugger/lib/python3.7/site-packages/ptvsd/__init__.py'>",
-        variablesReference: 5
-      }
-    ]
-  },
-  {
-    name: 'Locals',
-    variables: [
-      {
-        evaluateName: 'display',
-        name: 'display',
-        type: 'builtin_function_or_method',
-        value:
-          '<built-in method display of PyCapsule object at 0x7f1423490480>',
-        variablesReference: 4
-      },
-      {
-        evaluateName: 'ptvsd',
-        name: 'ptvsd',
-        type: 'module',
-        value:
-          "<module 'ptvsd' from '/home/codete-bp/anaconda3/envs/jupyterlab-debugger/lib/python3.7/site-packages/ptvsd/__init__.py'>",
-        variablesReference: 5
-      },
-      {
-        evaluateName: '__annotations__',
-        name: '__annotations__',
-        type: 'dict',
-        value: '{}',
-        variablesReference: 6
-      },
-      {
-        evaluateName: '__builtins__',
-        name: '__builtins__',
-        type: 'module',
-        value: "<module 'builtins' (built-in)>",
-        variablesReference: 7
-      },
-      {
-        evaluateName: '__doc__',
-        name: '__doc__',
-        type: 'NoneType',
-        value: 'None',
-        variablesReference: 0
-      },
-      {
-        evaluateName: '__loader__',
-        name: '__loader__',
-        type: 'type',
-        value: "<class '_frozen_importlib.BuiltinImporter'>",
-        variablesReference: 8
-      },
-      {
-        evaluateName: '__name__',
-        name: '__name__',
-        presentationHint: {
-          attributes: ['rawString']
-        },
-        type: 'str',
-        value: "'__main__'",
-        variablesReference: 0
-      },
-      {
-        evaluateName: '__package__',
-        name: '__package__',
-        type: 'NoneType',
-        value: 'None',
-        variablesReference: 0
-      },
-      {
-        evaluateName: '__spec__',
-        name: '__spec__',
-        type: 'NoneType',
-        value: 'None',
-        variablesReference: 0
-      }
-    ]
-  }
-];
