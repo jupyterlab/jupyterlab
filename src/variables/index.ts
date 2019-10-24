@@ -82,19 +82,6 @@ export namespace Variables {
       this._currentChanged.emit(variable);
     }
 
-    get filter() {
-      return this._filterState;
-    }
-    set filter(value) {
-      if (this._filterState === value) {
-        return;
-      }
-      this._filterState = value;
-      if (this._currentScope) {
-        this._variablesChanged.emit(this._filterVariables());
-      }
-    }
-
     get scopes(): IScope[] {
       return this._state;
     }
@@ -105,9 +92,6 @@ export namespace Variables {
     }
 
     get variables(): IVariable[] {
-      if (this._filterState) {
-        return this._filterVariables();
-      }
       return this._currentScope ? this._currentScope.variables : [];
     }
 
@@ -123,21 +107,13 @@ export namespace Variables {
       return this.variables;
     }
 
-    private _filterVariables(): IVariable[] {
-      return this._currentScope.variables.filter(
-        ele =>
-          ele.name
-            .toLocaleLowerCase()
-            .indexOf(this._filterState.toLocaleLowerCase()) !== -1
-      );
-    }
+    protected _state: IScope[];
 
     private _currentVariable: IVariable;
+    private _currentScope: IScope;
+
     private _currentChanged = new Signal<this, IVariable>(this);
     private _variablesChanged = new Signal<this, IVariable[]>(this);
-    private _filterState: string = '';
-    protected _state: IScope[];
-    private _currentScope: IScope;
     private _scopesChanged = new Signal<this, IScope[]>(this);
   }
 
