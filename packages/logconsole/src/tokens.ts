@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { nbformat } from '@jupyterlab/coreutils';
+import { nbformat, IChangedArgs } from '@jupyterlab/coreutils';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -118,7 +118,9 @@ export interface IOutputLog extends ILogPayloadBase {
  */
 export type ILogPayload = ITextLog | IHtmlLog | IOutputLog;
 
-export type ILoggerChange = 'append' | 'clear';
+export type IContentChange = 'append' | 'clear';
+
+export type IStateChange = IChangedArgs<IRenderMimeRegistry, 'rendermime'> | IChangedArgs<LogLevel, 'level'>;
 
 export interface ILoggerOutputAreaModel extends IOutputAreaModel {
   /**
@@ -150,11 +152,11 @@ export interface ILogger {
   /**
    * A signal emitted when the log model changes.
    */
-  readonly logChanged: ISignal<this, ILoggerChange>;
+  readonly contentChanged: ISignal<this, IContentChange>;
   /**
    * A signal emitted when the rendermime changes.
    */
-  readonly rendermimeChanged: ISignal<this, void>;
+  readonly stateChanged: ISignal<this, IStateChange>;
   /**
    * The name of the log source.
    */

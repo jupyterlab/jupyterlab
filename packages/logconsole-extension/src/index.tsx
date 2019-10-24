@@ -12,10 +12,11 @@ import {
   CommandToolbarButton,
   ICommandPalette,
   MainAreaWidget,
-  WidgetTracker
+  WidgetTracker,
+  ReactWidget
 } from '@jupyterlab/apputils';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { ISettingRegistry, IChangedArgs } from '@jupyterlab/coreutils';
 
 import {
   ILoggerRegistry,
@@ -33,6 +34,8 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { DockLayout, Widget } from '@phosphor/widgets';
+
+import * as React from 'react';
 
 import { LogConsoleStatus } from './status';
 
@@ -152,35 +155,9 @@ function activateLogConsole(
     );
     logConsoleWidget.toolbar.addItem('lab-log-console-clear', clearButton);
 
-    const logLevelInfoButton = new CommandToolbarButton({
-      commands: app.commands,
-      id: CommandIDs.setLevel,
-      args: { level: 'info' }
-    });
-
-    const logLevelWarningButton = new CommandToolbarButton({
-      commands: app.commands,
-      id: CommandIDs.setLevel,
-      args: { level: 'warning' }
-    });
-
-    const logLevelErrorButton = new CommandToolbarButton({
-      commands: app.commands,
-      id: CommandIDs.setLevel,
-      args: { level: 'error' }
-    });
-
     logConsoleWidget.toolbar.addItem(
-      'lab-log-console-info',
-      logLevelInfoButton
-    );
-    logConsoleWidget.toolbar.addItem(
-      'lab-log-console-warning',
-      logLevelWarningButton
-    );
-    logConsoleWidget.toolbar.addItem(
-      'lab-log-console-error',
-      logLevelErrorButton
+      'level',
+      new LogLevelSwitcher(logConsoleWidget.content)
     );
 
     logConsolePanel.sourceChanged.connect(() => {
@@ -322,6 +299,81 @@ function activateLogConsole(
   return loggerRegistry;
 }
 
+/**
+ * A toolbar widget that switches log levels.
+ */
+export class LogLevelSwitcher extends ReactWidget {
+  /**
+   * Construct a new cell type switcher.
+   */
+  constructor(widget: LogConsolePanel) {
+    super();
+    this.addClass('jp-LogConsole-toolbarLogLevel');
+    this._logConsole = widget;
+    if (widget.source) {
+      this.update();
+    }
+    widget.sourceChanged.connect(this._updateSource, this);
+  }
+
+  private _updateSource(
+    sender: LogConsolePanel,
+    { oldValue, newValue }: IChangedArgs<string | null>
+  ) {
+    // Transfer stateChanged handler to new source logger
+    if (oldValue !== null) {
+      const logger = sender.loggerRegistry.getLogger(oldValue);
+      logger.stateChanged.disconnect(this.update, this);
+    }
+    if (newValue !== null) {
+      const logger = sender.loggerRegistry.getLogger(newValue);
+      logger.stateChanged.connect(this.update, this);
+    }
+    this.update();
+  }
+
+  /**
+   * Handle `change` events for the HTMLSelect component.
+   */
+  handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+    this._logConsole.logger.level = event.target.value as LogLevel;
+  };
+
+  /**
+   * Handle `keydown` events for the HTMLSelect component.
+   */
+  handleKeyDown = (event: React.KeyboardEvent): void => {
+    if (event.keyCode === 13) {
+      this._logConsole.activate();
+    }
+  };
+
+  render() {
+    let logger = this._logConsole.logger;
+    return (
+      <HTMLSelect
+        className="jp-LogConsole-toolbarLogLevelDropdown"
+        onChange={this.handleChange}
+        onKeyDown={this.handleKeyDown}
+        value={logger !== null && logger.level}
+        iconProps={{
+          icon: <span className="jp-MaterialIcon jp-DownCaretIcon bp3-icon" />
+        }}
+        aria-label="Log level"
+        minimal
+        disabled={logger === null}
+      >
+        {logger !== null &&
+          ['Critical', 'Error', 'Warning', 'Info', 'Debug'].map(x => (
+            <option value={x.toLowerCase()}>{x}</option>
+          ))}
+      </HTMLSelect>
+    );
+  }
+  private _logConsole: LogConsolePanel = null;
+}
+
 // TODO: delete the nboutput widget, or at least make it a non-default option?
 import { logNotebookOutput } from './nboutput';
+import { HTMLSelect } from '@blueprintjs/core';
 export default [logConsolePlugin, logNotebookOutput];

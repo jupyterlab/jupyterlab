@@ -33,6 +33,7 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
+    "@blueprintjs/core": "^3.9.0",
     "@jupyterlab/application": "^2.0.0-alpha.1",
     "@jupyterlab/apputils": "^2.0.0-alpha.1",
     "@jupyterlab/coreutils": "^4.0.0-alpha.1",

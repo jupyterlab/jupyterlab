@@ -39,3 +39,17 @@
   transform: rotate(90deg);
   margin-top: -1px;
 }
+
+/* Copied from the notebook cell type dropdown styling */
+.jp-LogConsole-toolbarLogLevelDropdown select {
+  height: 24px;
+  font-size: var(--jp-ui-font-size1);
+  line-height: 14px;
+  border-radius: 0;
+  display: block;
+}
+
+/* Copied from the notebook cell type dropdown styling */
+.jp-LogConsole-toolbarLogLevelDropdown span {
+  top: 5px !important;
+}

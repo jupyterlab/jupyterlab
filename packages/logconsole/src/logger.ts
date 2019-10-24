@@ -15,7 +15,8 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import {
   ILogger,
-  ILoggerChange,
+  IContentChange,
+  IStateChange,
   ILoggerOutputAreaModel,
   ILogPayload,
   LogLevel
@@ -182,8 +183,15 @@ export class Logger implements ILogger {
   get level(): LogLevel {
     return Private.LogLevel[this._level] as keyof typeof Private.LogLevel;
   }
-  set level(value: LogLevel) {
-    this._level = Private.LogLevel[value];
+  set level(newValue: LogLevel) {
+    let oldValue = Private.LogLevel[
+      this._level
+    ] as keyof typeof Private.LogLevel;
+    if (oldValue === newValue) {
+      return;
+    }
+    this._level = Private.LogLevel[newValue];
+    this._stateChanged.emit({ name: 'level', oldValue, newValue });
   }
 
   /**
@@ -196,15 +204,15 @@ export class Logger implements ILogger {
   /**
    * A signal emitted when the list of log messages changes.
    */
-  get logChanged(): ISignal<this, ILoggerChange> {
-    return this._logChanged;
+  get contentChanged(): ISignal<this, IContentChange> {
+    return this._contentChanged;
   }
 
   /**
-   * A signal emitted when the rendermime changes.
+   * A signal emitted when the log state changes.
    */
-  get rendermimeChanged(): ISignal<this, void> {
-    return this._rendermimeChanged;
+  get stateChanged(): ISignal<this, IStateChange> {
+    return this._stateChanged;
   }
 
   /**
@@ -215,8 +223,9 @@ export class Logger implements ILogger {
   }
   set rendermime(value: IRenderMimeRegistry | null) {
     if (value !== this._rendermime) {
-      this._rendermime = value;
-      this._rendermimeChanged.emit();
+      let oldValue = this._rendermime;
+      let newValue = (this._rendermime = value);
+      this._stateChanged.emit({ name: 'rendermime', oldValue, newValue });
     }
   }
 
@@ -292,7 +301,7 @@ export class Logger implements ILogger {
 
       // Finally, tell people that the message was appended (and possibly
       // already displayed).
-      this._logChanged.emit('append');
+      this._contentChanged.emit('append');
     }
   }
 
@@ -301,12 +310,12 @@ export class Logger implements ILogger {
    */
   clear() {
     this.outputAreaModel.clear(false);
-    this._logChanged.emit('clear');
+    this._contentChanged.emit('clear');
   }
 
-  private _logChanged = new Signal<this, ILoggerChange>(this);
+  private _contentChanged = new Signal<this, IContentChange>(this);
+  private _stateChanged = new Signal<this, IStateChange>(this);
   private _rendermime: IRenderMimeRegistry | null = null;
-  private _rendermimeChanged = new Signal<this, void>(this);
   private _version = 0;
   private _level: Private.LogLevel = Private.LogLevel.warning;
 }
