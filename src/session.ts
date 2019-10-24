@@ -116,7 +116,7 @@ export class DebugSession implements IDebugger.ISession {
 
       await this.sendRequest('attach', {});
     } catch (err) {
-      console.error('Error: ', err.message);
+      console.error('Error:', err.message);
     }
   }
 
@@ -131,7 +131,7 @@ export class DebugSession implements IDebugger.ISession {
       });
       this._isStarted = false;
     } catch (err) {
-      console.error('Error: ', err.message);
+      console.error('Error:', err.message);
     }
   }
 
@@ -139,6 +139,7 @@ export class DebugSession implements IDebugger.ISession {
    * Restore the state of a debug session.
    */
   async restoreState(): Promise<void> {
+    await this.client.ready;
     try {
       const message = await this.sendRequest('debugInfo', {});
       this._isStarted = message.body.isStarted;
@@ -168,7 +169,7 @@ export class DebugSession implements IDebugger.ISession {
   /**
    * Signal emitted for debug event messages.
    */
-  get eventMessage(): ISignal<DebugSession, IDebugger.ISession.Event> {
+  get eventMessage(): ISignal<IDebugger.ISession, IDebugger.ISession.Event> {
     return this._eventMessage;
   }
 
@@ -194,8 +195,13 @@ export class DebugSession implements IDebugger.ISession {
   private async _sendDebugMessage(
     msg: KernelMessage.IDebugRequestMsg['content']
   ): Promise<KernelMessage.IDebugReplyMsg> {
-    const reply = new PromiseDelegate<KernelMessage.IDebugReplyMsg>();
     const kernel = this.client.kernel;
+    if (!kernel) {
+      return Promise.reject(
+        new Error('A kernel is required to send debug messages.')
+      );
+    }
+    const reply = new PromiseDelegate<KernelMessage.IDebugReplyMsg>();
     const future = kernel.requestDebug(msg);
     future.onReply = (msg: KernelMessage.IDebugReplyMsg) => {
       return reply.resolve(msg);
@@ -207,9 +213,10 @@ export class DebugSession implements IDebugger.ISession {
   private _disposed = new Signal<this, void>(this);
   private _isDisposed: boolean = false;
   private _isStarted: boolean = false;
-  private _eventMessage = new Signal<DebugSession, IDebugger.ISession.Event>(
-    this
-  );
+  private _eventMessage = new Signal<
+    IDebugger.ISession,
+    IDebugger.ISession.Event
+  >(this);
   private _seq: number = 0;
 }
 

@@ -8,7 +8,7 @@ import {
   ILabShell
 } from '@jupyterlab/application';
 
-import { ICommandPalette } from '@jupyterlab/apputils';
+import { IClientSession, ICommandPalette } from '@jupyterlab/apputils';
 
 import { WidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 
@@ -56,6 +56,51 @@ export namespace CommandIDs {
   export const changeMode = 'debugger:change-mode';
 }
 
+async function setDebugSession(
+  app: JupyterFrontEnd,
+  debug: IDebugger,
+  client: IClientSession
+) {
+  if (!debug.session) {
+    debug.session = new DebugSession({ client: client });
+  } else {
+    debug.session.client = client;
+  }
+  if (debug.session) {
+    await debug.session.restoreState();
+    app.commands.notifyCommandChanged();
+  }
+}
+
+class HandlerTracker<
+  H extends DebuggerConsoleHandler | DebuggerNotebookHandler
+> {
+  constructor(builder: new (option: any) => H) {
+    this.builder = builder;
+  }
+
+  update<
+    T extends IConsoleTracker | INotebookTracker,
+    W extends ConsolePanel | NotebookPanel
+  >(debug: IDebugger, tracker: T, widget: W): void {
+    if (debug.tracker.currentWidget && !this.handlers[widget.id]) {
+      const handler = new this.builder({
+        tracker: tracker,
+        debuggerModel: debug.tracker.currentWidget.content.model,
+        debuggerService: debug.tracker.currentWidget.content.service
+      });
+      this.handlers[widget.id] = handler;
+      widget.disposed.connect(() => {
+        delete this.handlers[widget.id];
+        handler.dispose();
+      });
+    }
+  }
+
+  private handlers: { [id: string]: H } = {};
+  private builder: new (option: any) => H;
+}
+
 /**
  * A plugin that provides visual debugging support for consoles.
  */
@@ -69,43 +114,17 @@ const consoles: JupyterFrontEndPlugin<void> = {
     tracker: IConsoleTracker,
     labShell: ILabShell
   ) => {
-    let oldhandler: {
-      id: string;
-      handler: DebuggerConsoleHandler;
-    };
+    const handlerTracker = new HandlerTracker<DebuggerConsoleHandler>(
+      DebuggerConsoleHandler
+    );
 
     labShell.currentChanged.connect(async (_, update) => {
       const widget = update.newValue;
-
       if (!(widget instanceof ConsolePanel)) {
         return;
       }
-
-      if (!debug.session) {
-        debug.session = new DebugSession({ client: widget.session });
-      } else {
-        debug.session.client = widget.session;
-      }
-      if (debug.session) {
-        await debug.session.restoreState();
-        app.commands.notifyCommandChanged();
-      }
-      if (debug.tracker.currentWidget) {
-        const handler = new DebuggerConsoleHandler({
-          consoleTracker: tracker,
-          debuggerModel: debug.tracker.currentWidget.content.model
-        });
-        if (!oldhandler) {
-          oldhandler = {
-            id: widget.id,
-            handler: handler
-          };
-        } else if (oldhandler.id !== widget.id) {
-          oldhandler.id = widget.id;
-          oldhandler.handler.dispose();
-          oldhandler.handler = handler;
-        }
-      }
+      await setDebugSession(app, debug, widget.session);
+      handlerTracker.update(debug, tracker, widget);
     });
   }
 };
@@ -172,43 +191,17 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     tracker: INotebookTracker,
     labShell: ILabShell
   ) => {
-    let oldhandler: {
-      id: string;
-      handler: DebuggerNotebookHandler;
-    };
+    const handlerTracker = new HandlerTracker<DebuggerNotebookHandler>(
+      DebuggerNotebookHandler
+    );
 
     labShell.currentChanged.connect(async (_, update) => {
       const widget = update.newValue;
       if (!(widget instanceof NotebookPanel)) {
         return;
       }
-      if (!debug.session) {
-        debug.session = new DebugSession({ client: widget.session });
-      } else {
-        debug.session.client = widget.session;
-      }
-      if (debug.session) {
-        await debug.session.restoreState();
-        app.commands.notifyCommandChanged();
-      }
-      if (debug.tracker.currentWidget) {
-        if (!oldhandler) {
-          oldhandler = {
-            id: widget.id,
-            handler: new DebuggerNotebookHandler({
-              notebookTracker: tracker,
-              debuggerModel: debug.tracker.currentWidget.content.model
-            })
-          };
-        } else if (oldhandler.id !== widget.id) {
-          oldhandler.id = widget.id;
-          oldhandler.handler.dispose();
-          oldhandler.handler = new DebuggerNotebookHandler({
-            notebookTracker: tracker,
-            debuggerModel: debug.tracker.currentWidget.content.model
-          });
-        }
-      }
+      await setDebugSession(app, debug, widget.session);
+      handlerTracker.update(debug, tracker, widget);
     });
   }
 };
@@ -240,6 +233,12 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
     const getModel = () => {
       return tracker.currentWidget ? tracker.currentWidget.content.model : null;
+    };
+
+    const getService = () => {
+      return tracker.currentWidget
+        ? tracker.currentWidget.content.service
+        : null;
     };
 
     commands.addCommand(CommandIDs.mount, {
@@ -283,14 +282,11 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.stop, {
       label: 'Stop',
       isEnabled: () => {
-        const debuggerModel = getModel();
-        return (debuggerModel &&
-          debuggerModel.session !== null &&
-          debuggerModel.session.isStarted) as boolean;
+        const service = getService();
+        return service && service.isStarted();
       },
       execute: async () => {
-        const debuggerModel = getModel();
-        await debuggerModel.session.stop();
+        await getService().session.stop();
         commands.notifyCommandChanged();
       }
     });
@@ -298,14 +294,11 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.start, {
       label: 'Start',
       isEnabled: () => {
-        const debuggerModel = getModel();
-        return (debuggerModel &&
-          debuggerModel.session !== null &&
-          !debuggerModel.session.isStarted) as boolean;
+        const service = getService();
+        return service && service.canStart();
       },
       execute: async () => {
-        const debuggerModel = getModel();
-        await debuggerModel.session.start();
+        await getService().session.start();
         commands.notifyCommandChanged();
       }
     });
@@ -313,14 +306,13 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.debugNotebook, {
       label: 'Launch',
       isEnabled: () => {
-        const debuggerModel = getModel();
-        return (debuggerModel &&
-          debuggerModel.session !== null &&
-          debuggerModel.session.isStarted) as boolean;
+        const service = getService();
+        return service && service.isStarted();
       },
       execute: async () => {
-        const debuggerModel = getModel();
-        await debuggerModel.service.launch(debuggerModel.codeValue.text);
+        await tracker.currentWidget.content.service.launch(
+          getModel().codeValue.text
+        );
       }
     });
 
@@ -410,11 +402,11 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         },
         session: {
           get: (): IDebugger.ISession | null => {
-            return widget ? widget.content.model.session : null;
+            return widget ? widget.content.service.session : null;
           },
           set: (src: IDebugger.ISession | null) => {
             if (widget) {
-              widget.content.model.session = src;
+              widget.content.service.session = src;
             }
           }
         },

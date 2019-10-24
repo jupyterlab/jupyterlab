@@ -5,16 +5,13 @@ import { SplitPanel } from '@phosphor/widgets';
 
 import { Breakpoints } from './breakpoints';
 
-import { Debugger } from './debugger';
-
 import { Callstack } from './callstack';
 
 import { Variables } from './variables';
 
 export class DebuggerSidebar extends SplitPanel {
-  constructor(model: Debugger.Model | null) {
+  constructor() {
     super();
-    this.model = model;
     this.orientation = 'vertical';
     this.addClass('jp-DebuggerSidebar');
 
@@ -28,21 +25,6 @@ export class DebuggerSidebar extends SplitPanel {
   }
 
   readonly variables: Variables;
-
   readonly callstack: Callstack;
-
   readonly breakpoints: Breakpoints;
-
-  get model(): Debugger.Model | null {
-    return this._model;
-  }
-  set model(model: Debugger.Model | null) {
-    if (this._model === model) {
-      return;
-    }
-    this._model = model;
-    this.update();
-  }
-
-  private _model: Debugger.Model | null = null;
 }
