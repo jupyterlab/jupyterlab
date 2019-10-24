@@ -286,5 +286,5 @@ class CollaborationHandler(WSBaseHandler):
 
 # The path for lab build.
 # TODO: Is this a reasonable path?
-collaboration_path = r"/lab/api/datastore/(?P<collaboration_id>(?:(?:[^/]+)+|/?))"
+collaboration_path = r"/lab/api/datastore/(?P<collaboration_id>.+)(?:[^/])/?"
 datastore_rest_path = r"/lab/api/datastore/?"
