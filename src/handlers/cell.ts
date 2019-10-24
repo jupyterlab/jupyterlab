@@ -48,21 +48,23 @@ export class CellManager implements IDisposable {
   isDisposed: boolean;
 
   private showCurrentLine(lineNumber: number) {
-    if (this.activeCell) {
-      const editor = this.activeCell.editor as CodeMirrorEditor;
-      this.cleanupHighlight();
-      editor.editor.addLineClass(lineNumber - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
+    if (!this.activeCell) {
+      return;
     }
+    const editor = this.activeCell.editor as CodeMirrorEditor;
+    this.cleanupHighlight();
+    editor.editor.addLineClass(lineNumber - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
   }
 
   // TODO: call when the debugger stops
   private cleanupHighlight() {
-    if (this.activeCell) {
-      const editor = this.activeCell.editor as CodeMirrorEditor;
-      editor.doc.eachLine(line => {
-        editor.editor.removeLineClass(line, 'wrap', LINE_HIGHLIGHT_CLASS);
-      });
+    if (!this.activeCell) {
+      return;
     }
+    const editor = this.activeCell.editor as CodeMirrorEditor;
+    editor.doc.eachLine(line => {
+      editor.editor.removeLineClass(line, 'wrap', LINE_HIGHLIGHT_CLASS);
+    });
   }
 
   dispose(): void {
