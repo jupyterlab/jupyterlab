@@ -15,6 +15,8 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { Signal } from '@phosphor/signaling';
 
+const LINE_HIGHLIGHT_CLASS = 'jp-breakpoint-line-highlight';
+
 export class CellManager implements IDisposable {
   constructor(options: CellManager.IOptions) {
     this._debuggerModel = options.debuggerModel;
@@ -49,11 +51,7 @@ export class CellManager implements IDisposable {
     if (this.activeCell) {
       const editor = this.activeCell.editor as CodeMirrorEditor;
       this.cleanupHighlight();
-      editor.editor.addLineClass(
-        lineNumber - 1,
-        'wrap',
-        'jp-breakpoint-line-highlight'
-      );
+      editor.editor.addLineClass(lineNumber - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
     }
   }
 
@@ -62,11 +60,7 @@ export class CellManager implements IDisposable {
     if (this.activeCell) {
       const editor = this.activeCell.editor as CodeMirrorEditor;
       editor.doc.eachLine(line => {
-        editor.editor.removeLineClass(
-          line,
-          'wrap',
-          'jp-breakpoint-line-highlight'
-        );
+        editor.editor.removeLineClass(line, 'wrap', LINE_HIGHLIGHT_CLASS);
       });
     }
   }
