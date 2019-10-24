@@ -33,11 +33,14 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
+import { HTMLSelect } from '@jupyterlab/ui-components';
+
 import { DockLayout, Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
 
 import { LogConsoleStatus } from './status';
+import { UUID } from '@phosphor/coreutils';
 
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
 
@@ -348,29 +351,42 @@ export class LogLevelSwitcher extends ReactWidget {
   render() {
     let logger = this._logConsole.logger;
     return (
-      <HTMLSelect
-        className="jp-LogConsole-toolbarLogLevelDropdown"
-        onChange={this.handleChange}
-        onKeyDown={this.handleKeyDown}
-        value={logger !== null && logger.level}
-        iconProps={{
-          icon: <span className="jp-MaterialIcon jp-DownCaretIcon bp3-icon" />
-        }}
-        aria-label="Log level"
-        minimal
-        disabled={logger === null}
-      >
-        {logger !== null &&
-          ['Critical', 'Error', 'Warning', 'Info', 'Debug'].map(x => (
-            <option value={x.toLowerCase()}>{x}</option>
-          ))}
-      </HTMLSelect>
+      <>
+        <label
+          htmlFor={this._id}
+          className={
+            logger === null && 'jp-LogConsole-toolbarLogLevel-disabled'
+          }
+        >
+          Log Level:
+        </label>
+        <HTMLSelect
+          id={this._id}
+          className="jp-LogConsole-toolbarLogLevelDropdown"
+          onChange={this.handleChange}
+          onKeyDown={this.handleKeyDown}
+          value={logger !== null && logger.level}
+          iconProps={{
+            icon: <span className="jp-MaterialIcon jp-DownCaretIcon bp3-icon" />
+          }}
+          aria-label="Log level"
+          minimal
+          disabled={logger === null}
+          options={
+            logger === null
+              ? []
+              : ['Critical', 'Error', 'Warning', 'Info', 'Debug'].map(
+                  label => ({ label, value: label.toLowerCase() })
+                )
+          }
+        />
+      </>
     );
   }
   private _logConsole: LogConsolePanel = null;
+  private _id = `level-${UUID.uuid4()}`;
 }
 
 // TODO: delete the nboutput widget, or at least make it a non-default option?
 import { logNotebookOutput } from './nboutput';
-import { HTMLSelect } from '@blueprintjs/core';
 export default [logConsolePlugin, logNotebookOutput];

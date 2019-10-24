@@ -40,6 +40,17 @@
   margin-top: -1px;
 }
 
+.jp-Toolbar-item.jp-LogConsole-toolbarLogLevel {
+  align-items: center;
+  padding: 0px 6px;
+}
+
+/* Matches the disabled style elsewhere in JupyterLab */
+.jp-LogConsole-toolbarLogLevel-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* Copied from the notebook cell type dropdown styling */
 .jp-LogConsole-toolbarLogLevelDropdown select {
   height: 24px;
