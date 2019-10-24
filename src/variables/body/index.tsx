@@ -24,41 +24,6 @@ export class Body extends ReactWidget {
   }
 }
 
-const defaultNodeRenderer = ({
-  depth,
-  name,
-  data,
-  isNonenumerable,
-  expanded,
-  theme
-}: {
-  depth: number;
-  name: string;
-  data: any;
-  isNonenumerable: boolean;
-  expanded: boolean;
-  theme?: string | Partial<ITheme>;
-}) => {
-  const label = data.name === '' || data.name == null ? name : data.name;
-  const value = data.value;
-
-  return depth === 0 ? (
-    <span>
-      <span>{label}</span>
-      <span>: </span>
-      <span>{data.length}</span>
-    </span>
-  ) : depth === 1 ? (
-    <span>
-      <span style={{ color: 'rgb(136, 19, 145)' }}>{label}</span>
-      <span>: </span>
-      <span>{value}</span>
-    </span>
-  ) : (
-    <ObjectLabel name={label} data={data} isNonenumerable={isNonenumerable} />
-  );
-};
-
 const VariableComponent = ({ model }: { model: Variables.IModel }) => {
   const [data, setData] = useState(model.scopes);
 
@@ -85,7 +50,7 @@ const VariableComponent = ({ model }: { model: Variables.IModel }) => {
           data={scopes.variables}
           name={scopes.name}
           nodeRenderer={defaultNodeRenderer}
-          theme={theme}
+          theme={THEME}
           expandLevel={1}
         />
       ))}
@@ -95,7 +60,42 @@ const VariableComponent = ({ model }: { model: Variables.IModel }) => {
   return <>{List()}</>;
 };
 
-const theme = {
+const defaultNodeRenderer = ({
+  depth,
+  name,
+  data,
+  isNonenumerable,
+  expanded,
+  theme
+}: {
+  depth: number;
+  name: string;
+  data: any;
+  isNonenumerable: boolean;
+  expanded: boolean;
+  theme?: string | Partial<ITheme>;
+}) => {
+  const label = data.name === '' || data.name == null ? name : data.name;
+  const value = data.value;
+
+  return depth === 0 ? (
+    <span>
+      <span>{label}</span>
+      <span>: </span>
+      <span>{data.length}</span>
+    </span>
+  ) : depth === 1 ? (
+    <span>
+      <span style={{ color: THEME.OBJECT_NAME_COLOR }}>{label}</span>
+      <span>: </span>
+      <span>{value}</span>
+    </span>
+  ) : (
+    <ObjectLabel name={label} data={data} isNonenumerable={isNonenumerable} />
+  );
+};
+
+const THEME = {
   BASE_FONT_FAMILY: 'var(--jp-code-font-family)',
   BASE_FONT_SIZE: 'var(--jp-code-font-size)',
   BASE_LINE_HEIGHT: 'var(--jp-code-line-height)',
