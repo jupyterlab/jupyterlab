@@ -13,7 +13,7 @@ import { Session } from '@jupyterlab/services';
 
 import { Token } from '@phosphor/coreutils';
 
-import { IObservableDisposable } from '@phosphor/disposable';
+import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
 
 import { ISignal } from '@phosphor/signaling';
 
@@ -96,10 +96,13 @@ export namespace IDebugger {
       args: IDebugger.ISession.Request[K]
     ): Promise<IDebugger.ISession.Response[K]>;
 
+    /**
+     * Signal emitted for debug event messages.
+     */
     eventMessage: ISignal<IDebugger.ISession, IDebugger.ISession.Event>;
   }
 
-  export interface IService {
+  export interface IService extends IDisposable {
     /**
      * The API debugger session to connect to a debugger
      */
@@ -116,11 +119,39 @@ export namespace IDebugger {
     isStarted(): boolean;
 
     /**
+     * Whether the current thread is stopped.
+     */
+    isThreadStopped(): boolean;
+
+    /**
+     * Continues the execution of the current thread.
+     */
+    continue(): Promise<void>;
+
+    /**
+     * Makes the current thread run again for one step.
+     */
+    next(): Promise<void>;
+
+    /**
+     * Makes the current thread step in a function / method if possible.
+     */
+    stepIn(): Promise<void>;
+
+    /**
      * For testing purpose only, to be removed.
      */
     launch(code: string): Promise<void>;
 
+    /**
+     * Signal emitted upon session changed.
+     */
     sessionChanged: ISignal<IDebugger.IService, IDebugger.ISession>;
+
+    /**
+     * Signal emitted for debug event messages.
+     */
+    eventMessage: ISignal<IDebugger.IService, IDebugger.ISession.Event>;
   }
 
   export namespace ISession {
