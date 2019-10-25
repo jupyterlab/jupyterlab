@@ -1361,31 +1361,38 @@ namespace Private {
    */
   export function delSpaceToPrevTabStop(cm: CodeMirror.Editor): void {
     let doc = cm.getDoc();
-    let from = doc.getCursor('from');
-    let to = doc.getCursor('to');
-    let sel = !posEq(from, to);
-    if (sel) {
-      let ranges = doc.listSelections();
-      for (let i = ranges.length - 1; i >= 0; i--) {
-        let head = ranges[i].head;
-        let anchor = ranges[i].anchor;
-        doc.replaceRange(
-          '',
-          CodeMirror.Pos(head.line, head.ch),
-          CodeMirror.Pos(anchor.line, anchor.ch)
-        );
+    let tabSize = cm.getOption('indentUnit');
+    let ranges = doc.listSelections(); // handle multicursor
+    for (let i = ranges.length - 1; i >= 0; i--) {
+      // iterate reverse so any deletions don't overlap
+      let head = ranges[i].head;
+      let anchor = ranges[i].anchor;
+      let isSelection = !posEq(head, anchor);
+      if (isSelection) {
+        doc.replaceRange('', anchor, head);
+      } else {
+        let line = doc.getLine(head.line).substring(0, head.ch);
+        if (line.match(/^\ +$/) !== null) {
+          // delete tabs
+          let prevTabStop = (Math.ceil(head.ch / tabSize) - 1) * tabSize;
+          let from = CodeMirror.Pos(head.line, prevTabStop);
+          doc.replaceRange('', from, head);
+        } else {
+          // delete non-tabs
+          if (head.ch === 0) {
+            if (head.line !== 0) {
+              let from = CodeMirror.Pos(
+                head.line - 1,
+                doc.getLine(head.line - 1).length
+              );
+              doc.replaceRange('', from, head);
+            }
+          } else {
+            let from = CodeMirror.Pos(head.line, head.ch - 1);
+            doc.replaceRange('', from, head);
+          }
+        }
       }
-      return;
-    }
-    let cur = doc.getCursor();
-    let tabsize = cm.getOption('indentUnit');
-    let chToPrevTabStop = cur.ch - (Math.ceil(cur.ch / tabsize) - 1) * tabsize;
-    from = { ch: cur.ch - chToPrevTabStop, line: cur.line };
-    let select = doc.getRange(from, cur);
-    if (select.match(/^\ +$/) !== null) {
-      doc.replaceRange('', from, cur);
-    } else {
-      CodeMirror.commands['delCharBefore'](cm);
     }
   }
 
