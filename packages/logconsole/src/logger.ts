@@ -42,11 +42,23 @@ type ILogOutput = nbformat.IOutput & {
   level: FullLogLevel;
 };
 
+export interface ILogOutputModel extends IOutputModel {
+  /**
+   * Date & time when output is logged.
+   */
+  readonly timestamp: Date;
+
+  /**
+   * Log level
+   */
+  readonly level: FullLogLevel;
+}
+
 /**
  * Log Output Model with timestamp which provides
  * item information for Output Area Model.
  */
-export class LogOutputModel extends OutputModel {
+export class LogOutputModel extends OutputModel implements ILogOutputModel {
   /**
    * Construct a LogOutputModel.
    *
@@ -55,19 +67,19 @@ export class LogOutputModel extends OutputModel {
   constructor(options: LogOutputModel.IOptions) {
     super(options);
 
-    this.timestamp = new Date(options.value.timestamp as number);
+    this.timestamp = new Date(options.value.timestamp);
     this.level = options.value.level;
   }
 
   /**
    * Date & time when output is logged.
    */
-  timestamp: Date = null;
+  readonly timestamp: Date = null;
 
   /**
    * Log level
    */
-  level: FullLogLevel;
+  readonly level: FullLogLevel;
 }
 
 /**
@@ -117,6 +129,13 @@ export class LoggerOutputAreaModel extends OutputAreaModel
     super.add(output);
     this._applyMaxLength();
     return this.length;
+  }
+
+  /**
+   * Get an item at the specified index.
+   */
+  get(index: number): ILogOutputModel {
+    return super.get(index) as ILogOutputModel;
   }
 
   /**
@@ -198,7 +217,7 @@ export class Logger implements ILogger {
       output: {
         output_type: 'display_data',
         data: {
-          'text/html': `Log level set to ${newValue}`
+          'text/plain': `Log level set to ${newValue}`
         }
       },
       level: 'metadata'

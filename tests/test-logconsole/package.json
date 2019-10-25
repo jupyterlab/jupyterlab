@@ -1,0 +1,30 @@
+{
+  "name": "@jupyterlab/test-logconsole",
+  "version": "2.0.0-alpha.1",
+  "private": true,
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf build && rimraf coverage",
+    "coverage": "python run.py --coverage",
+    "test": "python run.py",
+    "watch": "python run.py --debug",
+    "watch:all": "python run.py --debug --watchAll",
+    "watch:src": "tsc -b --watch"
+  },
+  "dependencies": {
+    "@jupyterlab/logconsole": "^1.0.0-alpha.1",
+    "@jupyterlab/testutils": "^2.0.0-alpha.1",
+    "@phosphor/coreutils": "^1.3.1",
+    "@phosphor/messaging": "^1.3.0",
+    "@phosphor/widgets": "^1.9.0",
+    "jest": "^24.7.1",
+    "jest-junit": "^6.3.0",
+    "ts-jest": "^24.0.2"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/jest": "^24.0.13",
+    "rimraf": "~2.6.2",
+    "typescript": "~3.5.1"
+  }
+}
