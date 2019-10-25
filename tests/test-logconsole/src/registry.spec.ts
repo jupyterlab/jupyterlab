@@ -3,11 +3,12 @@
 
 import { LoggerRegistry } from '@jupyterlab/logconsole';
 
-import { Signal, ISignal } from '@phosphor/signaling';
 import {
   RenderMimeRegistry,
   IRenderMimeRegistry
 } from '@jupyterlab/rendermime';
+
+import { Signal, ISignal } from '@phosphor/signaling';
 
 class SignalLogger<SENDER, ARGS> {
   constructor(signal: ISignal<SENDER, ARGS>) {

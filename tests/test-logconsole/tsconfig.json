@@ -2,24 +2,20 @@
   "extends": "../../tsconfigbase",
   "compilerOptions": {
     "outDir": "build",
-    "types": [
-      "jest"
-    ],
+    "types": ["jest"],
     "composite": false,
     "rootDir": "src"
   },
-  "include": [
-    "src/*"
-  ],
+  "include": ["src/*"],
   "references": [
     {
       "path": "../../packages/logconsole"
     },
     {
-      "path": "../../testutils"
+      "path": "../../packages/rendermime"
     },
     {
-      "path": "../../packages/rendermime"
+      "path": "../../testutils"
     }
   ]
 }
