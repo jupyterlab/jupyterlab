@@ -36,6 +36,10 @@ export class CellManager implements IDisposable {
     this._debuggerModel.currentLineChanged.connect((_, lineNumber) => {
       this.showCurrentLine(lineNumber);
     });
+
+    this._debuggerModel.clearLines.connect(() => {
+      this.cleanupHighlight();
+    });
   }
 
   private _previousCell: CodeCell;

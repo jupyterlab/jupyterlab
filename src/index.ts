@@ -33,6 +33,7 @@ import { DebuggerNotebookHandler } from './handlers/notebook';
 import { DebuggerConsoleHandler } from './handlers/console';
 
 import { Kernel } from '@jupyterlab/services';
+
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
 /**
@@ -217,7 +218,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
  */
 const main: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:main',
-  optional: [ILayoutRestorer, ICommandPalette],
+  optional: [ILayoutRestorer, ICommandPalette, ILabShell],
   requires: [IStateDB, IEditorServices],
   provides: IDebugger,
   autoStart: true,
@@ -226,7 +227,8 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     state: IStateDB,
     editorServices: IEditorServices,
     restorer: ILayoutRestorer | null,
-    palette: ICommandPalette | null
+    palette: ICommandPalette | null,
+    labShell: ILabShell
   ): IDebugger => {
     const tracker = new WidgetTracker<MainAreaWidget<Debugger>>({
       namespace: 'debugger'
@@ -268,7 +270,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
             sidebar.parent = null;
           }
 
-          // edge case when reload page after set condensed mode
           widget.title.label = 'Debugger';
           shell.add(widget, 'main');
           return;
@@ -281,7 +282,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
         sidebar.id = 'jp-debugger-sidebar';
         sidebar.title.label = 'Environment';
-        shell.add(sidebar, 'right', { activate: false });
+        shell.add(sidebar, 'right', { activate: true });
       }
     });
 
