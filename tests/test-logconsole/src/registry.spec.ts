@@ -36,6 +36,10 @@ describe('LoggerRegistry', () => {
     });
   });
 
+  afterEach(() => {
+    registry.dispose();
+  });
+
   describe('#constructor()', () => {
     it('should create a registry with initial parameters', () => {
       expect(registry).toBeInstanceOf(LoggerRegistry);
@@ -59,6 +63,7 @@ describe('LoggerRegistry', () => {
       const s = new SignalLogger(registry.registryChanged);
       registry.getLogger('A');
       expect(s.args).toEqual(['append']);
+      s.dispose();
     });
   });
 

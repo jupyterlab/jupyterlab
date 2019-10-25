@@ -60,6 +60,10 @@ describe('LogConsolePanel', () => {
     });
     logConsole = new LogConsolePanel(registry);
   });
+  afterEach(() => {
+    registry.dispose();
+    logConsole.dispose();
+  });
 
   describe('#constructor()', () => {
     it('should create a console with initial parameters', () => {

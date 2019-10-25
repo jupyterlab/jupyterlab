@@ -10,6 +10,7 @@ import { IOutputAreaModel } from '@jupyterlab/outputarea';
 import { Token } from '@phosphor/coreutils';
 
 import { ISignal } from '@phosphor/signaling';
+import { IDisposable } from '@phosphor/disposable';
 
 /* tslint:disable */
 /**
@@ -24,7 +25,7 @@ export type ILoggerRegistryChange = 'append';
 /**
  * A Logger Registry that registers and provides loggers by source.
  */
-export interface ILoggerRegistry {
+export interface ILoggerRegistry extends IDisposable {
   /**
    * Get the logger for the specified source.
    *
@@ -134,7 +135,7 @@ export interface ILoggerOutputAreaModel extends IOutputAreaModel {
 /**
  * A Logger that manages logs from a particular source.
  */
-export interface ILogger {
+export interface ILogger extends IDisposable {
   /**
    * Number of outputs logged.
    */

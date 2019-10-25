@@ -44,6 +44,7 @@ describe('LoggerOutputAreaModel', () => {
     it('should set the max length', async () => {
       const model = new LoggerOutputAreaModel({ maxLength: 10 });
       expect(model.maxLength).toEqual(10);
+      model.dispose();
     });
   });
 
@@ -84,6 +85,9 @@ describe('Logger', () => {
   let logger: Logger;
   beforeEach(() => {
     logger = new Logger({ source: 'test source', maxLength: 10 });
+  });
+  afterEach(() => {
+    logger.dispose();
   });
 
   describe('#constructor()', () => {
@@ -163,6 +167,7 @@ describe('Logger', () => {
           newValue: 'info'
         }
       ]);
+      s.dispose();
     });
 
     it('setting to its current value has no effect', () => {
@@ -170,6 +175,7 @@ describe('Logger', () => {
       logger.level = logger.level;
       expect(s.args.length).toBe(0);
       expect(logger.length).toBe(0);
+      s.dispose();
     });
   });
 
@@ -213,12 +219,14 @@ describe('Logger', () => {
       const s = new SignalLogger(logger.stateChanged);
       logger.rendermime = newValue;
       expect(s.args).toEqual([{ name: 'rendermime', oldValue, newValue }]);
+      s.dispose();
     });
     it('setting to current value has no effect', () => {
       logger.rendermime = new RenderMimeRegistry();
       const s = new SignalLogger(logger.stateChanged);
       logger.rendermime = logger.rendermime;
       expect(s.args).toEqual([]);
+      s.dispose();
     });
   });
 

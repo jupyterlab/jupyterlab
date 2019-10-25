@@ -350,6 +350,26 @@ export class Logger implements ILogger {
     });
   }
 
+  /**
+   * Whether the logger is disposed.
+   */
+  get isDisposed() {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose the logger.
+   */
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this.clear();
+    this._rendermime = null;
+    Signal.clearData(this);
+  }
+
   private _log(options: { output: nbformat.IOutput; level: FullLogLevel }) {
     // First, make sure our version reflects the new message so things
     // triggering from the signals below have the correct version.
@@ -367,6 +387,7 @@ export class Logger implements ILogger {
     this._contentChanged.emit('append');
   }
 
+  private _isDisposed = false;
   private _contentChanged = new Signal<this, IContentChange>(this);
   private _stateChanged = new Signal<this, IStateChange>(this);
   private _rendermime: IRenderMimeRegistry | null = null;

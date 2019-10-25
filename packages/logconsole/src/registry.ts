@@ -76,10 +76,30 @@ export class LoggerRegistry implements ILoggerRegistry {
     });
   }
 
+  /**
+   * Whether the register is disposed.
+   */
+  get isDisposed() {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose the registry and all loggers.
+   */
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._loggers.forEach(x => x.dispose());
+    Signal.clearData(this);
+  }
+
   private _defaultRendermime: IRenderMimeRegistry = null;
-  private _loggers = new Map<string, Logger>();
+  private _loggers = new Map<string, ILogger>();
   private _maxLength: number;
   private _registryChanged = new Signal<this, ILoggerRegistryChange>(this);
+  private _isDisposed = false;
 }
 
 export namespace LoggerRegistry {
