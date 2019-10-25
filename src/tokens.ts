@@ -116,11 +116,32 @@ export namespace IDebugger {
     isStarted(): boolean;
 
     /**
+     * Whether the current thread is stopped.
+     */
+    isThreadStopped(): boolean;
+
+    /**
+     * Continues the execution of the current thread.
+     */
+    continue(): Promise<void>;
+
+    /**
+     * Makes the current thread run again for one step.
+     */
+    next(): Promise<void>;
+
+    /**
+     * Makes the current thread step in a function / method if possible.
+     */
+    stepIn(): Promise<void>;
+
+    /**
      * For testing purpose only, to be removed.
      */
     launch(code: string): Promise<void>;
 
     sessionChanged: ISignal<IDebugger.IService, IDebugger.ISession>;
+    eventMessage: ISignal<IDebugger.IService, IDebugger.ISession.Event>;
   }
 
   export namespace ISession {
