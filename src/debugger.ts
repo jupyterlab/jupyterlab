@@ -123,6 +123,10 @@ export namespace Debugger {
       this._codeValue = observableString;
     }
 
+    get currentLineChanged() {
+      return this._currentLineChanged;
+    }
+
     dispose(): void {
       this._isDisposed = true;
     }
@@ -140,6 +144,7 @@ export namespace Debugger {
     private _isDisposed = false;
     private _mode: IDebugger.Mode;
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
+    private _currentLineChanged = new Signal<this, number>(this);
   }
 
   export namespace Model {
