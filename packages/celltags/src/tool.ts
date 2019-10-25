@@ -190,6 +190,10 @@ export class TagTool extends NotebookTools.Tool {
    * Get all tags once available.
    */
   protected onAfterAttach() {
+    const header = document.createElement('header');
+    header.textContent = 'Tags in Notebook';
+    header.className = 'tag-header';
+    this.parent.node.insertBefore(header, this.node);
     this.tracker.currentWidget.context.ready.then(() => {
       this.refreshTags();
       this.loadActiveTags();

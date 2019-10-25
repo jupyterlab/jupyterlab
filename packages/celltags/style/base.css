@@ -48,19 +48,32 @@
   min-width: 18px;
   background-image: url('../static/check-24px.svg');
   background-size: 18px;
-  margin-left: 8px;
+  margin-left: 5px;
+  margin-right: -3px;
 }
 
 .add-icon {
   display: inline-block;
   height: 18px;
-  min-width: 15px;
+  min-width: 18px;
   background-image: url('../static/add-24px.svg');
   background-size: 18px;
-  margin-left: 8px;
+  margin-left: 3px;
+  margin-right: -5px;
   fill: var(--jp-ui-font-color2);
 }
 
 .tag-hover {
   background-color: var(--jp-layout-color2);
+}
+
+.tag-header {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  flex: 0 0 auto;
+  font-size: var(--jp-ui-font-size0);
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin: 0px;
+  padding: 8px 12px;
+  text-transform: uppercase;
 }
