@@ -469,7 +469,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         }
       }
     );
-
     return proxy;
   }
 };

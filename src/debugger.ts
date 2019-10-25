@@ -58,6 +58,7 @@ export class Debugger extends SplitPanel {
       return;
     }
     this.model.dispose();
+    this.service.dispose();
     super.dispose();
   }
 

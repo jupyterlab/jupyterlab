@@ -21,6 +21,18 @@ export class DebugService implements IDebugger.IService {
     this._model = debuggerModel;
   }
 
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    Signal.clearData(this);
+  }
+
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
   set session(session: IDebugger.ISession) {
     if (this._session === session) {
       return;
@@ -210,6 +222,7 @@ export class DebugService implements IDebugger.IService {
     return 1;
   }
 
+  private _isDisposed: boolean = false;
   private _session: IDebugger.ISession;
   private _sessionChanged = new Signal<IDebugger.IService, IDebugger.ISession>(
     this
