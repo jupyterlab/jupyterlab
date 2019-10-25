@@ -29,8 +29,6 @@ function activateNBOutput(
   loggerRegistry: ILoggerRegistry,
   nbtracker: INotebookTracker
 ) {
-  let levels: LogLevel[] = ['critical', 'error', 'warning', 'info', 'debug'];
-  let currLevel = 0;
   function registerNB(nb: NotebookPanel) {
     function logOutput(
       msg: KernelMessage.IIOPubMessage,
@@ -56,7 +54,6 @@ function activateNBOutput(
         ) {
           level = levelError;
         }
-        level = levels[currLevel++ % levels.length];
         logger.log({ type: 'output', data, level });
       }
     }
