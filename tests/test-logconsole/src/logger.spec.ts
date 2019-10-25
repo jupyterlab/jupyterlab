@@ -213,6 +213,7 @@ describe('Logger', () => {
       logger.rendermime = value;
       expect(logger.rendermime).toBe(value);
     });
+
     it('emits a stateChanged signal when changed', () => {
       const oldValue = (logger.rendermime = new RenderMimeRegistry());
       const newValue = oldValue.clone();
@@ -221,6 +222,7 @@ describe('Logger', () => {
       expect(s.args).toEqual([{ name: 'rendermime', oldValue, newValue }]);
       s.dispose();
     });
+
     it('setting to current value has no effect', () => {
       logger.rendermime = new RenderMimeRegistry();
       const s = new SignalLogger(logger.stateChanged);
@@ -271,10 +273,12 @@ describe('Logger', () => {
       logger.log({ type: 'text', data: 'message', level: 'warning' });
       expect(logger.length).toBe(1);
     });
+
     it('logs html messages', () => {
       logger.log({ type: 'html', data: 'message', level: 'warning' });
       expect(logger.length).toBe(1);
     });
+
     it('logs output stream messages', () => {
       logger.log({
         type: 'output',
@@ -283,6 +287,7 @@ describe('Logger', () => {
       });
       expect(logger.length).toBe(1);
     });
+
     it('logs display_data messages', () => {
       logger.log({
         type: 'output',
@@ -294,6 +299,7 @@ describe('Logger', () => {
       });
       expect(logger.length).toBe(1);
     });
+
     it('logs execute_result messages', () => {
       logger.log({
         type: 'output',
@@ -305,6 +311,7 @@ describe('Logger', () => {
       });
       expect(logger.length).toBe(1);
     });
+
     it('logs error messages', () => {
       logger.log({
         type: 'output',
@@ -318,6 +325,7 @@ describe('Logger', () => {
       });
       expect(logger.length).toBe(1);
     });
+
     it('emits an "append" content changed signal', () => {
       const s = new SignalLogger(logger.contentChanged);
       logger.log({ type: 'text', data: 'message 1', level: 'warning' });
@@ -360,6 +368,7 @@ describe('Logger', () => {
       logger.clear();
       expect(logger.length).toBe(0);
     });
+
     it('emits a "clear" content changed signal', () => {
       const s = new SignalLogger(logger.contentChanged);
       logger.log({ type: 'text', data: 'message 1', level: 'warning' });
@@ -374,6 +383,7 @@ describe('Logger', () => {
       logger.checkpoint();
       expect(logger.outputAreaModel.get(0).level).toBe('metadata');
     });
+
     it('emits an "append" content changed signal', () => {
       const s = new SignalLogger(logger.contentChanged);
       logger.checkpoint();
