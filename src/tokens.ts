@@ -13,7 +13,7 @@ import { Session } from '@jupyterlab/services';
 
 import { Token } from '@phosphor/coreutils';
 
-import { IObservableDisposable } from '@phosphor/disposable';
+import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
 
 import { ISignal } from '@phosphor/signaling';
 
@@ -102,7 +102,7 @@ export namespace IDebugger {
     eventMessage: ISignal<IDebugger.ISession, IDebugger.ISession.Event>;
   }
 
-  export interface IService {
+  export interface IService extends IDisposable {
     /**
      * The API debugger session to connect to a debugger
      */
