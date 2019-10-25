@@ -45,6 +45,12 @@ export namespace CommandIDs {
 
   export const stop = 'debugger:stop';
 
+  export const debugContinue = 'debugger:continue';
+
+  export const next = 'debugger:next';
+
+  export const stepIn = 'debugger:stepIn';
+
   export const debugConsole = 'debugger:debug-console';
 
   export const debugFile = 'debugger:debug-file';
@@ -303,6 +309,40 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
+    commands.addCommand(CommandIDs.debugContinue, {
+      label: 'Continue',
+      isEnabled: () => {
+        const service = getService();
+        return service && service.isThreadStopped();
+      },
+      execute: async () => {
+        await getService().continue();
+        commands.notifyCommandChanged();
+      }
+    });
+
+    commands.addCommand(CommandIDs.next, {
+      label: 'Next',
+      isEnabled: () => {
+        const service = getService();
+        return service && service.isThreadStopped();
+      },
+      execute: async () => {
+        await getService().next();
+      }
+    });
+
+    commands.addCommand(CommandIDs.stepIn, {
+      label: 'StepIn',
+      isEnabled: () => {
+        const service = getService();
+        return service && service.isThreadStopped();
+      },
+      execute: async () => {
+        await getService().stepIn();
+      }
+    });
+
     commands.addCommand(CommandIDs.debugNotebook, {
       label: 'Launch',
       isEnabled: () => {
@@ -360,6 +400,14 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
           });
         }
 
+        widget.content.service.eventMessage.connect(_ => {
+          commands.notifyCommandChanged();
+        });
+
+        widget.content.service.sessionChanged.connect(_ => {
+          commands.notifyCommandChanged();
+        });
+
         await commands.execute(CommandIDs.mount, { mode });
         return widget;
       }
@@ -371,6 +419,9 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       palette.addItem({ command: CommandIDs.create, category });
       palette.addItem({ command: CommandIDs.start, category });
       palette.addItem({ command: CommandIDs.stop, category });
+      palette.addItem({ command: CommandIDs.debugContinue, category });
+      palette.addItem({ command: CommandIDs.next, category });
+      palette.addItem({ command: CommandIDs.stepIn, category });
       palette.addItem({ command: CommandIDs.debugNotebook, category });
     }
 
@@ -417,7 +468,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         }
       }
     );
-
     return proxy;
   }
 };

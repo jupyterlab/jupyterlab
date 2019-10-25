@@ -21,6 +21,18 @@ export class DebugService implements IDebugger.IService {
     this._model = debuggerModel;
   }
 
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    Signal.clearData(this);
+  }
+
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
   set session(session: IDebugger.ISession) {
     if (this._session === session) {
       return;
@@ -29,6 +41,15 @@ export class DebugService implements IDebugger.IService {
       this._session.dispose();
     }
     this._session = session;
+
+    this._session.eventMessage.connect((_, event) => {
+      if (event.event === 'stopped') {
+        this._threadStopped.add(event.body.threadId);
+      } else if (event.event === 'continued') {
+        this._threadStopped.delete(event.body.threadId);
+      }
+      this._eventMessage.emit(event);
+    });
     this._sessionChanged.emit(session);
   }
 
@@ -44,8 +65,47 @@ export class DebugService implements IDebugger.IService {
     return this._session !== null && this._session.isStarted;
   }
 
+  isThreadStopped(): boolean {
+    return this._threadStopped.has(this.currentThread());
+  }
+
+  async continue(): Promise<void> {
+    try {
+      await this.session.sendRequest('continue', {
+        threadId: this.currentThread()
+      });
+      this._threadStopped.delete(this.currentThread());
+    } catch (err) {
+      console.error('Error:', err.message);
+    }
+  }
+
+  async next(): Promise<void> {
+    try {
+      await this.session.sendRequest('next', {
+        threadId: this.currentThread()
+      });
+    } catch (err) {
+      console.error('Error:', err.message);
+    }
+  }
+
+  async stepIn(): Promise<void> {
+    try {
+      await this.session.sendRequest('stepIn', {
+        threadId: this.currentThread()
+      });
+    } catch (err) {
+      console.error('Error:', err.message);
+    }
+  }
+
   get sessionChanged(): ISignal<IDebugger.IService, IDebugger.ISession> {
     return this._sessionChanged;
+  }
+
+  get eventMessage(): ISignal<IDebugger.IService, IDebugger.ISession.Event> {
+    return this._eventMessage;
   }
 
   // this will change for after execute cell
@@ -159,10 +219,24 @@ export class DebugService implements IDebugger.IService {
     });
   };
 
+  private currentThread(): number {
+    // TODO: ask the model for the current thread ID
+    return 1;
+  }
+
+  private _isDisposed: boolean = false;
   private _session: IDebugger.ISession;
-  private _sessionChanged = new Signal<this, IDebugger.ISession>(this);
+  private _sessionChanged = new Signal<IDebugger.IService, IDebugger.ISession>(
+    this
+  );
+  private _eventMessage = new Signal<
+    IDebugger.IService,
+    IDebugger.ISession.Event
+  >(this);
   private _model: Debugger.Model;
   private frames: Frame[];
+  // TODO: move this in model
+  private _threadStopped = new Set();
 }
 
 export type Frame = {
