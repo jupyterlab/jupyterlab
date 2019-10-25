@@ -41,13 +41,8 @@ type FullLogLevel = LogLevel | 'metadata';
 class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
   constructor() {
     super();
-
     this._timestampNode = document.createElement('div');
     this.node.append(this._timestampNode);
-
-    // TODO: make a better level display
-    this._levelNode = document.createElement('div');
-    this.node.append(this._levelNode);
   }
 
   /**
@@ -71,7 +66,6 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
   executionCount: nbformat.ExecutionCount;
 
   private _timestampNode: HTMLDivElement;
-  private _levelNode: HTMLDivElement;
 }
 
 /**
@@ -93,6 +87,11 @@ class LogConsoleOutputArea extends OutputArea {
    */
   protected createOutputItem(model: LogOutputModel): Widget | null {
     const panel = super.createOutputItem(model) as Panel;
+    if (panel === null) {
+      // Could not render model
+      return null;
+    }
+
     // first widget in panel is prompt of type LoggerOutputPrompt
     let prompt = panel.widgets[0] as LogConsoleOutputPrompt;
     prompt.timestamp = model.timestamp;
@@ -162,17 +161,21 @@ export class ScrollingWidget<T extends Widget> extends Widget {
     });
 
     // Set up intersection observer for the sentinel
-    this._observer = new IntersectionObserver(
-      args => {
-        this._handleScroll(args);
-      },
-      { root: this.node, threshold: 1 }
-    );
-    this._observer.observe(this._sentinel);
+    if (typeof IntersectionObserver !== 'undefined') {
+      this._observer = new IntersectionObserver(
+        args => {
+          this._handleScroll(args);
+        },
+        { root: this.node, threshold: 1 }
+      );
+      this._observer.observe(this._sentinel);
+    }
   }
 
   protected onBeforeDetach(msg: Message) {
-    this._observer.disconnect();
+    if (this._observer) {
+      this._observer.disconnect();
+    }
   }
 
   protected onAfterShow(msg: Message) {
@@ -199,7 +202,7 @@ export class ScrollingWidget<T extends Widget> extends Widget {
   }
 
   private _content: T;
-  private _observer: IntersectionObserver;
+  private _observer: IntersectionObserver = null;
   private _scrollHeight: number;
   private _sentinel: HTMLDivElement;
   private _tracking: boolean;
