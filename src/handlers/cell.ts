@@ -8,10 +8,14 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { Editor, Doc } from 'codemirror';
 
 import { Breakpoints, SessionTypes } from '../breakpoints';
+
 import { Debugger } from '../debugger';
 import { IDebugger } from '../tokens';
 import { IDisposable } from '@phosphor/disposable';
+
 import { Signal } from '@phosphor/signaling';
+
+const LINE_HIGHLIGHT_CLASS = 'jp-breakpoint-line-highlight';
 
 export class CellManager implements IDisposable {
   constructor(options: CellManager.IOptions) {
@@ -28,6 +32,10 @@ export class CellManager implements IDisposable {
       }
       this.clearGutter(this.activeCell);
     });
+
+    this._debuggerModel.currentLineChanged.connect((_, lineNumber) => {
+      this.showCurrentLine(lineNumber);
+    });
   }
 
   private _previousCell: CodeCell;
@@ -39,6 +47,26 @@ export class CellManager implements IDisposable {
   private _activeCell: CodeCell;
   isDisposed: boolean;
 
+  private showCurrentLine(lineNumber: number) {
+    if (!this.activeCell) {
+      return;
+    }
+    const editor = this.activeCell.editor as CodeMirrorEditor;
+    this.cleanupHighlight();
+    editor.editor.addLineClass(lineNumber - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
+  }
+
+  // TODO: call when the debugger stops
+  private cleanupHighlight() {
+    if (!this.activeCell) {
+      return;
+    }
+    const editor = this.activeCell.editor as CodeMirrorEditor;
+    editor.doc.eachLine(line => {
+      editor.editor.removeLineClass(line, 'wrap', LINE_HIGHLIGHT_CLASS);
+    });
+  }
+
   dispose(): void {
     if (this.isDisposed) {
       return;
@@ -47,6 +75,7 @@ export class CellManager implements IDisposable {
       this.removeListener(this.previousCell);
     }
     this.removeListener(this.activeCell);
+    this.cleanupHighlight();
     Signal.clearData(this);
   }
 

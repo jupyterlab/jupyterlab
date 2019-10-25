@@ -86,6 +86,7 @@ export class DebugService implements IDebugger.IService {
       });
       if (index === 0) {
         this._model.sidebar.variables.model.scopes = values;
+        this._model.currentLineChanged.emit(frame.line);
       }
     });
 
