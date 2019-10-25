@@ -218,7 +218,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
  */
 const main: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:main',
-  optional: [ILayoutRestorer, ICommandPalette, ILabShell],
+  optional: [ILayoutRestorer, ICommandPalette],
   requires: [IStateDB, IEditorServices],
   provides: IDebugger,
   autoStart: true,
@@ -227,8 +227,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     state: IStateDB,
     editorServices: IEditorServices,
     restorer: ILayoutRestorer | null,
-    palette: ICommandPalette | null,
-    labShell: ILabShell
+    palette: ICommandPalette | null
   ): IDebugger => {
     const tracker = new WidgetTracker<MainAreaWidget<Debugger>>({
       namespace: 'debugger'

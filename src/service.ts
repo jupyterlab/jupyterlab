@@ -43,7 +43,6 @@ export class DebugService implements IDebugger.IService {
     this._session = session;
 
     this._session.eventMessage.connect((_, event) => {
-      console.log({ event });
       if (event.event === 'stopped') {
         this._threadStopped.add(event.body.threadId);
         void this.getFramesAllData();
@@ -232,7 +231,7 @@ export class DebugService implements IDebugger.IService {
     IDebugger.ISession.Event
   >(this);
   private _model: Debugger.Model;
-  private frames: Frame[];
+  private frames: Frame[] = [];
   // TODO: move this in model
   private _threadStopped = new Set();
 }
