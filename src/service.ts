@@ -48,7 +48,7 @@ export class DebugService implements IDebugger.IService {
         void this.getFramesAllData();
       } else if (event.event === 'continued') {
         this._threadStopped.delete(event.body.threadId);
-        this._model.clearLines.emit();
+        this._model.linesCleared.emit();
       }
       this._eventMessage.emit(event);
     });

@@ -281,7 +281,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
         sidebar.id = 'jp-debugger-sidebar';
         sidebar.title.label = 'Environment';
-        shell.add(sidebar, 'right', { activate: true });
+        shell.add(sidebar, 'right', { activate: false });
       }
     });
 
