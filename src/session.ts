@@ -169,7 +169,7 @@ export class DebugSession implements IDebugger.ISession {
   /**
    * Signal emitted for debug event messages.
    */
-  get eventMessage(): ISignal<DebugSession, IDebugger.ISession.Event> {
+  get eventMessage(): ISignal<IDebugger.ISession, IDebugger.ISession.Event> {
     return this._eventMessage;
   }
 
@@ -213,9 +213,10 @@ export class DebugSession implements IDebugger.ISession {
   private _disposed = new Signal<this, void>(this);
   private _isDisposed: boolean = false;
   private _isStarted: boolean = false;
-  private _eventMessage = new Signal<DebugSession, IDebugger.ISession.Event>(
-    this
-  );
+  private _eventMessage = new Signal<
+    IDebugger.ISession,
+    IDebugger.ISession.Event
+  >(this);
   private _seq: number = 0;
 }
 

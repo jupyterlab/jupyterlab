@@ -5,8 +5,6 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { DebugService } from './service';
 
-import { DebugSession } from './session';
-
 import { DebuggerEditors } from './editors';
 
 import { DebuggerSidebar } from './sidebar';
@@ -37,8 +35,10 @@ export class Debugger extends SplitPanel {
 
     this.model = new Debugger.Model(options);
 
-    this.sidebar = new DebuggerSidebar(this.model);
+    this.sidebar = new DebuggerSidebar();
     this.model.sidebar = this.sidebar;
+
+    this.service = new DebugService(this.model);
 
     const { editorFactory } = options;
     this.editors = new DebuggerEditors({ editorFactory });
@@ -50,6 +50,7 @@ export class Debugger extends SplitPanel {
   readonly editors: DebuggerEditors;
   readonly model: Debugger.Model;
   readonly sidebar: DebuggerSidebar;
+  readonly service: DebugService;
 
   dispose(): void {
     if (this.isDisposed) {
@@ -79,12 +80,6 @@ export namespace Debugger {
   export class Model implements IDisposable {
     constructor(options: Debugger.Model.IOptions) {
       this.connector = options.connector || null;
-      // Avoids setting session with invalid client
-      // session should be set only when a notebook or
-      // a console get the focus.
-      // TODO: also checks that the notebook or console
-      // runs a kernel with debugging ability
-      this.session = null;
       this.id = options.id;
       void this._populate();
     }
@@ -116,30 +111,6 @@ export namespace Debugger {
       return this._modeChanged;
     }
 
-    get session(): IDebugger.ISession {
-      return this._session;
-    }
-
-    set session(session: IDebugger.ISession | null) {
-      if (this._session === session) {
-        return;
-      }
-      if (this._session) {
-        this._session.dispose();
-      }
-      this._session = session;
-      this._service.session = session as DebugSession;
-      this._sessionChanged.emit(undefined);
-    }
-
-    get service(): DebugService {
-      return this._service;
-    }
-
-    get sessionChanged(): ISignal<this, void> {
-      return this._sessionChanged;
-    }
-
     get isDisposed(): boolean {
       return this._isDisposed;
     }
@@ -169,9 +140,6 @@ export namespace Debugger {
     private _isDisposed = false;
     private _mode: IDebugger.Mode;
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
-    private _session: IDebugger.ISession | null;
-    private _sessionChanged = new Signal<this, void>(this);
-    private _service = new DebugService(null, this);
   }
 
   export namespace Model {
