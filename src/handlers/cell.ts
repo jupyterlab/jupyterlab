@@ -213,7 +213,7 @@ export class CellManager implements IDisposable {
   private _type: SessionTypes;
   private breakpointsModel: Breakpoints.Model;
   private _activeCell: CodeCell;
-  private _debuggerService: IDebugger.IService;
+  private _debuggerService: IDebugger;
 }
 
 export namespace CellManager {

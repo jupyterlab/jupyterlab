@@ -1,6 +1,3 @@
-// temporary
-import { MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
-
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
@@ -14,18 +11,16 @@ import { Variables } from './variables';
 import { Callstack } from './callstack';
 
 export class DebugService implements IDebugger {
-  constructor(debuggerModel: Debugger.Model) {
+  constructor() {
     // Avoids setting session with invalid client
     // session should be set only when a notebook or
     // a console get the focus.
     // TODO: also checks that the notebook or console
     // runs a kernel with debugging ability
     this._session = null;
-    this._model = debuggerModel;
-  }
-
-  get tracker(): WidgetTracker<MainAreaWidget<Debugger>> {
-    return null;
+    // The model will be set by the UI which can be built
+    // after the service.
+    this._model = null;
   }
 
   dispose(): void {
@@ -48,6 +43,18 @@ export class DebugService implements IDebugger {
     this._model.mode = mode;
   }
 
+  get model(): Debugger.Model {
+    return this._model;
+  }
+
+  set model(model: Debugger.Model) {
+    this._model = model;
+  }
+
+  get session(): IDebugger.ISession {
+    return this._session;
+  }
+
   set session(session: IDebugger.ISession) {
     if (this._session === session) {
       return;
@@ -68,10 +75,6 @@ export class DebugService implements IDebugger {
       this._eventMessage.emit(event);
     });
     this._sessionChanged.emit(session);
-  }
-
-  get session() {
-    return this._session;
   }
 
   canStart(): boolean {
@@ -127,15 +130,7 @@ export class DebugService implements IDebugger {
 
   // this will change for after execute cell
   async launch(code: string): Promise<void> {
-    let threadId: number = 1;
     this.frames = [];
-    this.session.eventMessage.connect((_, event: IDebugger.ISession.Event) => {
-      const eventName = event.event;
-      if (eventName === 'thread') {
-        const msg = event as DebugProtocol.ThreadEvent;
-        threadId = msg.body.threadId;
-      }
-    });
 
     const breakpoints: DebugProtocol.SourceBreakpoint[] = this.getBreakpoints();
     const dumpedCell = await this.session.sendRequest('dumpCell', {

@@ -19,7 +19,7 @@ import { Signal } from '@phosphor/signaling';
 
 export class DebuggerNotebookHandler implements IDisposable {
   constructor(options: DebuggerNotebookHandler.IOptions) {
-    this.debuggerModel = options.debuggerModel;
+    this.debuggerModel = options.debuggerService.model;
     this.debuggerService = options.debuggerService;
     this.notebookTracker = options.tracker;
     this.breakpoints = this.debuggerModel.breakpointsModel;
@@ -67,7 +67,6 @@ export class DebuggerNotebookHandler implements IDisposable {
 
 export namespace DebuggerNotebookHandler {
   export interface IOptions {
-    debuggerModel: Debugger.Model;
     debuggerService: IDebugger;
     tracker: INotebookTracker;
   }

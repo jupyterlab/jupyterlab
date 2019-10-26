@@ -40,10 +40,12 @@ export class Debugger extends SplitPanel {
     });
 
     this.sidebar = new Debugger.Sidebar(this.model);
-    this.service = new DebugService(this.model);
+    this.service = options.debugService;
+    this.service.model = this.model;
 
-    const { editorFactory } = options;
-    this.editors = new DebuggerEditors({ editorFactory });
+    this.editors = new DebuggerEditors({
+      editorFactory: options.editorFactory
+    });
     this.addWidget(this.editors);
 
     this.addClass('jp-Debugger');
@@ -58,8 +60,8 @@ export class Debugger extends SplitPanel {
     if (this.isDisposed) {
       return;
     }
+    this.service.model = null;
     this.model.dispose();
-    this.service.dispose();
     super.dispose();
   }
 
@@ -74,6 +76,7 @@ export class Debugger extends SplitPanel {
  */
 export namespace Debugger {
   export interface IOptions {
+    debugService: DebugService;
     editorFactory: CodeEditor.Factory;
     connector?: IDataConnector<ReadonlyJSONValue>;
   }

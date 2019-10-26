@@ -1,11 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IClientSession,
-  MainAreaWidget,
-  WidgetTracker
-} from '@jupyterlab/apputils';
+import { IClientSession } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -19,6 +15,8 @@ import { ISignal } from '@phosphor/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
+// TODO: remove that import when an interface has
+// been created for Model class
 import { Debugger } from './debugger';
 
 /**
@@ -35,14 +33,14 @@ export interface IDebugger {
   mode: IDebugger.Mode;
 
   /**
+   * The model of the debugger.
+   */
+  readonly model: Debugger.Model;
+
+  /**
    * The current debugger session.
    */
   session: IDebugger.ISession;
-
-  /**
-   * tracker for get instance of debugger.
-   */
-  tracker: WidgetTracker<MainAreaWidget<Debugger>>;
 
   /**
    * Whether the debugger can start.
@@ -73,6 +71,11 @@ export interface IDebugger {
    * Makes the current thread step in a function / method if possible.
    */
   stepIn(): Promise<void>;
+
+  /**
+   * Update all breakpoints at once.
+   */
+  updateBreakpoints(): Promise<void>;
 
   /**
    * Signal emitted upon session changed.

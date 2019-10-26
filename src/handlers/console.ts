@@ -17,7 +17,8 @@ import { Signal } from '@phosphor/signaling';
 
 export class DebuggerConsoleHandler implements IDisposable {
   constructor(options: DebuggerConsoleHandler.IOptions) {
-    this.debuggerModel = options.debuggerModel;
+    this.debuggerModel = options.debuggerService.model;
+    this.debuggerService = options.debuggerService;
     this.consoleTracker = options.tracker;
     this.breakpoints = this.debuggerModel.breakpointsModel;
     this.cellManager = new CellManager({
@@ -67,7 +68,6 @@ export class DebuggerConsoleHandler implements IDisposable {
 
 export namespace DebuggerConsoleHandler {
   export interface IOptions {
-    debuggerModel: Debugger.Model;
     debuggerService: IDebugger;
     tracker: IConsoleTracker;
   }
