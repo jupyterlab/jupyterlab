@@ -358,7 +358,9 @@ export class LogLevelSwitcher extends ReactWidget {
         <label
           htmlFor={this._id}
           className={
-            logger === null && 'jp-LogConsole-toolbarLogLevel-disabled'
+            logger === null
+              ? 'jp-LogConsole-toolbarLogLevel-disabled'
+              : undefined
           }
         >
           Log Level:
