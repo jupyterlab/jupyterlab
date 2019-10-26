@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { nbformat } from '@jupyterlab/coreutils';
+import { nbformat, IChangedArgs } from '@jupyterlab/coreutils';
 
 import { OutputArea, IOutputPrompt } from '@jupyterlab/outputarea';
 
@@ -19,10 +19,21 @@ import { LogOutputModel, LoggerOutputAreaModel } from './logger';
 
 import {
   ILogger,
-  ILoggerChange,
+  IContentChange,
   ILoggerRegistry,
-  ILoggerRegistryChange
+  ILoggerRegistryChange,
+  LogLevel,
+  IStateChange
 } from './tokens';
+
+function toTitleCase(value: string) {
+  return value.length === 0 ? value : value[0].toUpperCase() + value.slice(1);
+}
+
+/**
+ * All severity levels, including an internal one for metadata.
+ */
+type FullLogLevel = LogLevel | 'metadata';
 
 /**
  * Log console output prompt implementation
@@ -30,7 +41,6 @@ import {
 class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
   constructor() {
     super();
-
     this._timestampNode = document.createElement('div');
     this.node.append(this._timestampNode);
   }
@@ -40,6 +50,14 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
    */
   set timestamp(value: Date) {
     this._timestampNode.innerHTML = value.toLocaleTimeString();
+  }
+
+  /**
+   * Log level
+   */
+  set level(value: FullLogLevel) {
+    this.node.dataset.logLevel = value;
+    this.node.title = `${toTitleCase(value)} message`;
   }
 
   /**
@@ -69,8 +87,15 @@ class LogConsoleOutputArea extends OutputArea {
    */
   protected createOutputItem(model: LogOutputModel): Widget | null {
     const panel = super.createOutputItem(model) as Panel;
+    if (panel === null) {
+      // Could not render model
+      return null;
+    }
+
     // first widget in panel is prompt of type LoggerOutputPrompt
-    (panel.widgets[0] as LogConsoleOutputPrompt).timestamp = model.timestamp;
+    let prompt = panel.widgets[0] as LogConsoleOutputPrompt;
+    prompt.timestamp = model.timestamp;
+    prompt.level = model.level;
     return panel;
   }
 
@@ -136,17 +161,21 @@ export class ScrollingWidget<T extends Widget> extends Widget {
     });
 
     // Set up intersection observer for the sentinel
-    this._observer = new IntersectionObserver(
-      args => {
-        this._handleScroll(args);
-      },
-      { root: this.node, threshold: 1 }
-    );
-    this._observer.observe(this._sentinel);
+    if (typeof IntersectionObserver !== 'undefined') {
+      this._observer = new IntersectionObserver(
+        args => {
+          this._handleScroll(args);
+        },
+        { root: this.node, threshold: 1 }
+      );
+      this._observer.observe(this._sentinel);
+    }
   }
 
   protected onBeforeDetach(msg: Message) {
-    this._observer.disconnect();
+    if (this._observer) {
+      this._observer.disconnect();
+    }
   }
 
   protected onAfterShow(msg: Message) {
@@ -173,7 +202,7 @@ export class ScrollingWidget<T extends Widget> extends Widget {
   }
 
   private _content: T;
-  private _observer: IntersectionObserver;
+  private _observer: IntersectionObserver = null;
   private _scrollHeight: number;
   private _sentinel: HTMLDivElement;
   private _tracking: boolean;
@@ -224,16 +253,30 @@ export class LogConsolePanel extends StackedPanel {
   }
 
   /**
+   * The current logger.
+   */
+  get logger(): ILogger | null {
+    if (this.source === null) {
+      return null;
+    }
+    return this.loggerRegistry.getLogger(this.source);
+  }
+
+  /**
    * The log source displayed
    */
   get source(): string | null {
     return this._source;
   }
   set source(name: string | null) {
-    this._source = name;
-    this._showOutputFromSource(this._source);
+    if (name === this._source) {
+      return;
+    }
+    const oldValue = this._source;
+    const newValue = (this._source = name);
+    this._showOutputFromSource(newValue);
     this._handlePlaceholder();
-    this._sourceChanged.emit(name);
+    this._sourceChanged.emit({ oldValue, newValue, name: 'source' });
   }
 
   /**
@@ -247,7 +290,7 @@ export class LogConsolePanel extends StackedPanel {
   /**
    * Signal for source changes
    */
-  get sourceChanged(): ISignal<this, string | null> {
+  get sourceChanged(): ISignal<this, IChangedArgs<string | null, 'source'>> {
     return this._sourceChanged;
   }
 
@@ -282,16 +325,19 @@ export class LogConsolePanel extends StackedPanel {
         continue;
       }
 
-      logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
+      logger.contentChanged.connect((sender: ILogger, args: IContentChange) => {
         this._updateOutputAreas();
         this._handlePlaceholder();
       }, this);
 
-      logger.rendermimeChanged.connect((sender: ILogger) => {
+      logger.stateChanged.connect((sender: ILogger, change: IStateChange) => {
+        if (change.name !== 'rendermime') {
+          return;
+        }
         const viewId = `source:${sender.source}`;
         const outputArea = this._outputAreas.get(viewId);
         if (outputArea) {
-          outputArea.rendermime = sender.rendermime;
+          outputArea.rendermime = change.newValue;
         }
       }, this);
 
@@ -403,7 +449,10 @@ export class LogConsolePanel extends StackedPanel {
   private _loggerRegistry: ILoggerRegistry;
   private _outputAreas = new Map<string, LogConsoleOutputArea>();
   private _source: string | null = null;
-  private _sourceChanged = new Signal<this, string | null>(this);
+  private _sourceChanged = new Signal<
+    this,
+    IChangedArgs<string | null, 'source'>
+  >(this);
   private _sourceDisplayed = new Signal<this, ISourceDisplayed>(this);
   private _placeholder: Widget;
   private _loggersWatched: Set<string> = new Set();

@@ -12,11 +12,11 @@ import { ISignal } from '@phosphor/signaling';
 /**
  * A generic interface for change emitter payloads.
  */
-export interface IChangedArgs<T> {
+export interface IChangedArgs<T, U extends string = string> {
   /**
    * The name of the changed attribute.
    */
-  name: string;
+  name: U;
 
   /**
    * The old value of the changed attribute.

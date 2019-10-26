@@ -420,6 +420,9 @@ export class OutputArea extends Widget {
 
   /**
    * Create an output item with a prompt and actual output
+   *
+   * @returns a rendered widget, or null if we cannot render
+   * #### Notes
    */
   protected createOutputItem(model: IOutputModel): Widget | null {
     let output = this.createRenderedMimetype(model);
