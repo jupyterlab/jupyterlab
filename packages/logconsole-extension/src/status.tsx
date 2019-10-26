@@ -5,8 +5,8 @@ import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
 import {
   ILogger,
-  ILoggerChange,
-  ILoggerRegistry
+  ILoggerRegistry,
+  IContentChange
 } from '@jupyterlab/logconsole';
 
 import { GroupItem, TextItem, interactiveItem } from '@jupyterlab/statusbar';
@@ -289,7 +289,7 @@ export namespace LogConsoleStatus {
       const loggers = this._loggerRegistry.getLoggers();
       for (let logger of loggers) {
         if (!this._sourceVersion.has(logger.source)) {
-          logger.logChanged.connect(this._handleLogChange, this);
+          logger.contentChanged.connect(this._handleLogContentChange, this);
           this._sourceVersion.set(logger.source, {
             lastDisplayed: 0,
             lastNotified: 0
@@ -298,7 +298,10 @@ export namespace LogConsoleStatus {
       }
     }
 
-    private _handleLogChange({ source }: ILogger, change: ILoggerChange) {
+    private _handleLogContentChange(
+      { source }: ILogger,
+      change: IContentChange
+    ) {
       if (source === this._source) {
         this.stateChanged.emit();
       }
