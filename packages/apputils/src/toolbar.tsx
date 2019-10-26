@@ -316,12 +316,30 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'click':
-        if (!this.node.contains(document.activeElement) && this.parent) {
-          this.parent.activate();
-        }
+        this.handleClick(event);
         break;
       default:
         break;
+    }
+  }
+
+  /**
+   * Handle a DOM click event.
+   */
+  protected handleClick(event: Event) {
+    // Clicking a label focuses the corresponding control, so let it be.
+    if (event.target instanceof HTMLLabelElement) {
+      return;
+    }
+
+    // If this click already focused a control, let it be.
+    if (this.node.contains(document.activeElement)) {
+      return;
+    }
+
+    // Otherwise, activate the parent widget, which may take focus if desired.
+    if (this.parent) {
+      this.parent.activate();
     }
   }
 
