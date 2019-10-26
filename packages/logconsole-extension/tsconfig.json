@@ -28,6 +28,9 @@
       "path": "../rendermime"
     },
     {
+      "path": "../services"
+    },
+    {
       "path": "../statusbar"
     },
     {

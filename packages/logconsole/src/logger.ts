@@ -15,31 +15,50 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import {
   ILogger,
-  ILoggerChange,
+  IContentChange,
+  IStateChange,
   ILoggerOutputAreaModel,
-  ILogPayload
+  ILogPayload,
+  LogLevel
 } from './tokens';
 
 /**
- * Custom Notebook Output with timestamp member.
+ * All severity levels, including an internal one for metadata.
  */
-interface ITimestampedOutput extends nbformat.IBaseOutput {
+type FullLogLevel = LogLevel | 'metadata';
+
+/**
+ * Custom Notebook Output with log info.
+ */
+type ILogOutput = nbformat.IOutput & {
   /**
    * Date & time when output is logged in integer representation.
    */
   timestamp: number;
-}
 
-/**
- * Custom Notebook Output with optional timestamp.
- */
-type IOutputWithTimestamp = nbformat.IOutput | ITimestampedOutput;
+  /**
+   * Log level
+   */
+  level: FullLogLevel;
+};
+
+export interface ILogOutputModel extends IOutputModel {
+  /**
+   * Date & time when output is logged.
+   */
+  readonly timestamp: Date;
+
+  /**
+   * Log level
+   */
+  readonly level: FullLogLevel;
+}
 
 /**
  * Log Output Model with timestamp which provides
  * item information for Output Area Model.
  */
-export class LogOutputModel extends OutputModel {
+export class LogOutputModel extends OutputModel implements ILogOutputModel {
   /**
    * Construct a LogOutputModel.
    *
@@ -48,13 +67,19 @@ export class LogOutputModel extends OutputModel {
   constructor(options: LogOutputModel.IOptions) {
     super(options);
 
-    this.timestamp = new Date(options.value.timestamp as number);
+    this.timestamp = new Date(options.value.timestamp);
+    this.level = options.value.level;
   }
 
   /**
    * Date & time when output is logged.
    */
-  timestamp: Date = null;
+  readonly timestamp: Date = null;
+
+  /**
+   * Log level
+   */
+  readonly level: FullLogLevel;
 }
 
 /**
@@ -62,7 +87,7 @@ export class LogOutputModel extends OutputModel {
  */
 namespace LogOutputModel {
   export interface IOptions extends IOutputModel.IOptions {
-    value: IOutputWithTimestamp;
+    value: ILogOutput;
   }
 }
 
@@ -74,7 +99,7 @@ class LogConsoleModelContentFactory extends OutputAreaModel.ContentFactory {
   /**
    * Create a rendermime output model from notebook output.
    */
-  createOutputModel(options: IOutputModel.IOptions): LogOutputModel {
+  createOutputModel(options: LogOutputModel.IOptions): LogOutputModel {
     return new LogOutputModel(options);
   }
 }
@@ -100,10 +125,17 @@ export class LoggerOutputAreaModel extends OutputAreaModel
    * are combined. The oldest outputs are possibly removed to ensure the total
    * number of outputs is at most `.maxLength`.
    */
-  add(output: nbformat.IOutput): number {
+  add(output: ILogOutput): number {
     super.add(output);
     this._applyMaxLength();
     return this.length;
+  }
+
+  /**
+   * Get an item at the specified index.
+   */
+  get(index: number): ILogOutputModel {
+    return super.get(index) as ILogOutputModel;
   }
 
   /**
@@ -170,6 +202,30 @@ export class Logger implements ILogger {
   }
 
   /**
+   * The level of outputs logged
+   */
+  get level(): LogLevel {
+    return this._level;
+  }
+  set level(newValue: LogLevel) {
+    let oldValue = this._level;
+    if (oldValue === newValue) {
+      return;
+    }
+    this._level = newValue;
+    this._log({
+      output: {
+        output_type: 'display_data',
+        data: {
+          'text/plain': `Log level set to ${newValue}`
+        }
+      },
+      level: 'metadata'
+    });
+    this._stateChanged.emit({ name: 'level', oldValue, newValue });
+  }
+
+  /**
    * Number of outputs logged.
    */
   get length(): number {
@@ -179,15 +235,15 @@ export class Logger implements ILogger {
   /**
    * A signal emitted when the list of log messages changes.
    */
-  get logChanged(): ISignal<this, ILoggerChange> {
-    return this._logChanged;
+  get contentChanged(): ISignal<this, IContentChange> {
+    return this._contentChanged;
   }
 
   /**
-   * A signal emitted when the rendermime changes.
+   * A signal emitted when the log state changes.
    */
-  get rendermimeChanged(): ISignal<this, void> {
-    return this._rendermimeChanged;
+  get stateChanged(): ISignal<this, IStateChange> {
+    return this._stateChanged;
   }
 
   /**
@@ -198,8 +254,9 @@ export class Logger implements ILogger {
   }
   set rendermime(value: IRenderMimeRegistry | null) {
     if (value !== this._rendermime) {
-      this._rendermime = value;
-      this._rendermimeChanged.emit();
+      let oldValue = this._rendermime;
+      let newValue = (this._rendermime = value);
+      this._stateChanged.emit({ name: 'rendermime', oldValue, newValue });
     }
   }
 
@@ -230,9 +287,14 @@ export class Logger implements ILogger {
    * @param log - The output to be logged.
    */
   log(log: ILogPayload) {
-    const timestamp = new Date();
+    // Filter by our current log level
+    if (
+      Private.LogLevel[log.level as keyof typeof Private.LogLevel] <
+      Private.LogLevel[this._level as keyof typeof Private.LogLevel]
+    ) {
+      return;
+    }
     let output: nbformat.IOutput = null;
-
     switch (log.type) {
       case 'text':
         output = {
@@ -258,16 +320,10 @@ export class Logger implements ILogger {
     }
 
     if (output) {
-      // First, make sure our version reflects the new message so things
-      // triggering from the signals below have the correct version.
-      this._version++;
-
-      // Next, trigger any displays of the message
-      this.outputAreaModel.add({ ...output, timestamp: timestamp.valueOf() });
-
-      // Finally, tell people that the message was appended (and possibly
-      // already displayed).
-      this._logChanged.emit('append');
+      this._log({
+        output,
+        level: log.level
+      });
     }
   }
 
@@ -276,13 +332,67 @@ export class Logger implements ILogger {
    */
   clear() {
     this.outputAreaModel.clear(false);
-    this._logChanged.emit('clear');
+    this._contentChanged.emit('clear');
   }
 
-  private _logChanged = new Signal<this, ILoggerChange>(this);
+  /**
+   * Add a checkpoint to the log.
+   */
+  checkpoint() {
+    this._log({
+      output: {
+        output_type: 'display_data',
+        data: {
+          'text/html': '<hr/>'
+        }
+      },
+      level: 'metadata'
+    });
+  }
+
+  /**
+   * Whether the logger is disposed.
+   */
+  get isDisposed() {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose the logger.
+   */
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this.clear();
+    this._rendermime = null;
+    Signal.clearData(this);
+  }
+
+  private _log(options: { output: nbformat.IOutput; level: FullLogLevel }) {
+    // First, make sure our version reflects the new message so things
+    // triggering from the signals below have the correct version.
+    this._version++;
+
+    // Next, trigger any displays of the message
+    this.outputAreaModel.add({
+      ...options.output,
+      timestamp: Date.now(),
+      level: options.level
+    });
+
+    // Finally, tell people that the message was appended (and possibly
+    // already displayed).
+    this._contentChanged.emit('append');
+  }
+
+  private _isDisposed = false;
+  private _contentChanged = new Signal<this, IContentChange>(this);
+  private _stateChanged = new Signal<this, IStateChange>(this);
   private _rendermime: IRenderMimeRegistry | null = null;
-  private _rendermimeChanged = new Signal<this, void>(this);
   private _version = 0;
+  private _level: LogLevel = 'warning';
 }
 
 export namespace Logger {
@@ -295,5 +405,16 @@ export namespace Logger {
      * The maximum number of messages to store.
      */
     maxLength: number;
+  }
+}
+
+namespace Private {
+  export enum LogLevel {
+    debug,
+    info,
+    warning,
+    error,
+    critical,
+    metadata
   }
 }

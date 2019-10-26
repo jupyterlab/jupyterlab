@@ -12,15 +12,17 @@ import {
   CommandToolbarButton,
   ICommandPalette,
   MainAreaWidget,
-  WidgetTracker
+  WidgetTracker,
+  ReactWidget
 } from '@jupyterlab/apputils';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { ISettingRegistry, IChangedArgs } from '@jupyterlab/coreutils';
 
 import {
   ILoggerRegistry,
   LogConsolePanel,
-  LoggerRegistry
+  LoggerRegistry,
+  LogLevel
 } from '@jupyterlab/logconsole';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -31,7 +33,15 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
+import { HTMLSelect } from '@jupyterlab/ui-components';
+
+import { UUID } from '@phosphor/coreutils';
+
 import { DockLayout, Widget } from '@phosphor/widgets';
+
+import * as React from 'react';
+
+import { logNotebookOutput } from './nboutput';
 
 import { LogConsoleStatus } from './status';
 
@@ -41,9 +51,10 @@ const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
  * The command IDs used by the plugin.
  */
 namespace CommandIDs {
-  export const addTimestamp = 'logconsole:add-timestamp';
+  export const addCheckpoint = 'logconsole:add-checkpoint';
   export const clear = 'logconsole:clear';
   export const open = 'logconsole:open';
+  export const setLevel = 'logconsole:set-level';
 }
 
 /**
@@ -134,9 +145,9 @@ function activateLogConsole(
     logConsoleWidget.title.label = 'Log Console';
     logConsoleWidget.title.iconClass = 'jp-LogConsoleIcon';
 
-    const addTimestampButton = new CommandToolbarButton({
+    const addCheckpointButton = new CommandToolbarButton({
       commands: app.commands,
-      id: CommandIDs.addTimestamp
+      id: CommandIDs.addCheckpoint
     });
 
     const clearButton = new CommandToolbarButton({
@@ -145,10 +156,15 @@ function activateLogConsole(
     });
 
     logConsoleWidget.toolbar.addItem(
-      'lab-output-console-add-timestamp',
-      addTimestampButton
+      'lab-log-console-add-checkpoint',
+      addCheckpointButton
     );
-    logConsoleWidget.toolbar.addItem('lab-output-console-clear', clearButton);
+    logConsoleWidget.toolbar.addItem('lab-log-console-clear', clearButton);
+
+    logConsoleWidget.toolbar.addItem(
+      'level',
+      new LogLevelSwitcher(logConsoleWidget.content)
+    );
 
     logConsolePanel.sourceChanged.connect(() => {
       app.commands.notifyCommandChanged();
@@ -189,11 +205,10 @@ function activateLogConsole(
     }
   });
 
-  app.commands.addCommand(CommandIDs.addTimestamp, {
-    label: 'Add Timestamp',
+  app.commands.addCommand(CommandIDs.addCheckpoint, {
+    label: 'Add Checkpoint',
     execute: () => {
-      const logger = loggerRegistry.getLogger(logConsolePanel.source);
-      logger.log({ type: 'html', data: '<hr>' });
+      logConsolePanel.logger.checkpoint();
     },
     isEnabled: () => logConsolePanel && logConsolePanel.source !== null,
     iconClass: 'jp-AddIcon'
@@ -202,11 +217,24 @@ function activateLogConsole(
   app.commands.addCommand(CommandIDs.clear, {
     label: 'Clear Log',
     execute: () => {
-      const logger = loggerRegistry.getLogger(logConsolePanel.source);
-      logger.clear();
+      logConsolePanel.logger.clear();
     },
     isEnabled: () => logConsolePanel && logConsolePanel.source !== null,
-    iconClass: 'fa fa-ban clear-icon'
+    // TODO: figure out how this jp-clearIcon class should work, analagous to jp-AddIcon
+    iconClass: 'fa fa-ban jp-ClearIcon'
+  });
+
+  function toTitleCase(value: string) {
+    return value.length === 0 ? value : value[0].toUpperCase() + value.slice(1);
+  }
+
+  app.commands.addCommand(CommandIDs.setLevel, {
+    label: args => `Set Log Level to ${toTitleCase(args.level as string)}`,
+    execute: (args: { level: LogLevel }) => {
+      logConsolePanel.logger.level = args.level;
+    },
+    isEnabled: () => logConsolePanel && logConsolePanel.source !== null
+    // TODO: find good icon class
   });
 
   app.contextMenu.addItem({
@@ -274,4 +302,94 @@ function activateLogConsole(
   return loggerRegistry;
 }
 
-export default [logConsolePlugin];
+/**
+ * A toolbar widget that switches log levels.
+ */
+export class LogLevelSwitcher extends ReactWidget {
+  /**
+   * Construct a new cell type switcher.
+   */
+  constructor(widget: LogConsolePanel) {
+    super();
+    this.addClass('jp-LogConsole-toolbarLogLevel');
+    this._logConsole = widget;
+    if (widget.source) {
+      this.update();
+    }
+    widget.sourceChanged.connect(this._updateSource, this);
+  }
+
+  private _updateSource(
+    sender: LogConsolePanel,
+    { oldValue, newValue }: IChangedArgs<string | null>
+  ) {
+    // Transfer stateChanged handler to new source logger
+    if (oldValue !== null) {
+      const logger = sender.loggerRegistry.getLogger(oldValue);
+      logger.stateChanged.disconnect(this.update, this);
+    }
+    if (newValue !== null) {
+      const logger = sender.loggerRegistry.getLogger(newValue);
+      logger.stateChanged.connect(this.update, this);
+    }
+    this.update();
+  }
+
+  /**
+   * Handle `change` events for the HTMLSelect component.
+   */
+  handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+    this._logConsole.logger.level = event.target.value as LogLevel;
+  };
+
+  /**
+   * Handle `keydown` events for the HTMLSelect component.
+   */
+  handleKeyDown = (event: React.KeyboardEvent): void => {
+    if (event.keyCode === 13) {
+      this._logConsole.activate();
+    }
+  };
+
+  render() {
+    let logger = this._logConsole.logger;
+    return (
+      <>
+        <label
+          htmlFor={this._id}
+          className={
+            logger === null
+              ? 'jp-LogConsole-toolbarLogLevel-disabled'
+              : undefined
+          }
+        >
+          Log Level:
+        </label>
+        <HTMLSelect
+          id={this._id}
+          className="jp-LogConsole-toolbarLogLevelDropdown"
+          onChange={this.handleChange}
+          onKeyDown={this.handleKeyDown}
+          value={logger !== null && logger.level}
+          iconProps={{
+            icon: <span className="jp-MaterialIcon jp-DownCaretIcon bp3-icon" />
+          }}
+          aria-label="Log level"
+          minimal
+          disabled={logger === null}
+          options={
+            logger === null
+              ? []
+              : ['Critical', 'Error', 'Warning', 'Info', 'Debug'].map(
+                  label => ({ label, value: label.toLowerCase() })
+                )
+          }
+        />
+      </>
+    );
+  }
+  private _logConsole: LogConsolePanel = null;
+  private _id = `level-${UUID.uuid4()}`;
+}
+
+export default [logConsolePlugin, logNotebookOutput];
