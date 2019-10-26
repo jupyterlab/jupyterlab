@@ -1,3 +1,6 @@
+// temporary
+import { MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
+
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
@@ -10,7 +13,7 @@ import { Variables } from './variables';
 
 import { Callstack } from './callstack';
 
-export class DebugService implements IDebugger.IService {
+export class DebugService implements IDebugger {
   constructor(debuggerModel: Debugger.Model) {
     // Avoids setting session with invalid client
     // session should be set only when a notebook or
@@ -19,6 +22,10 @@ export class DebugService implements IDebugger.IService {
     // runs a kernel with debugging ability
     this._session = null;
     this._model = debuggerModel;
+  }
+
+  get tracker(): WidgetTracker<MainAreaWidget<Debugger>> {
+    return null;
   }
 
   dispose(): void {
@@ -31,6 +38,14 @@ export class DebugService implements IDebugger.IService {
 
   get isDisposed(): boolean {
     return this._isDisposed;
+  }
+
+  get mode(): IDebugger.Mode {
+    return this._model.mode;
+  }
+
+  set mode(mode: IDebugger.Mode) {
+    this._model.mode = mode;
   }
 
   set session(session: IDebugger.ISession) {
@@ -102,11 +117,11 @@ export class DebugService implements IDebugger.IService {
     }
   }
 
-  get sessionChanged(): ISignal<IDebugger.IService, IDebugger.ISession> {
+  get sessionChanged(): ISignal<IDebugger, IDebugger.ISession> {
     return this._sessionChanged;
   }
 
-  get eventMessage(): ISignal<IDebugger.IService, IDebugger.ISession.Event> {
+  get eventMessage(): ISignal<IDebugger, IDebugger.ISession.Event> {
     return this._eventMessage;
   }
 
@@ -253,13 +268,8 @@ export class DebugService implements IDebugger.IService {
 
   private _isDisposed: boolean = false;
   private _session: IDebugger.ISession;
-  private _sessionChanged = new Signal<IDebugger.IService, IDebugger.ISession>(
-    this
-  );
-  private _eventMessage = new Signal<
-    IDebugger.IService,
-    IDebugger.ISession.Event
-  >(this);
+  private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
+  private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
   private _model: Debugger.Model;
   private frames: Frame[] = [];
   // TODO: move this in model

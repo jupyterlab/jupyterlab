@@ -13,7 +13,7 @@ import { Session } from '@jupyterlab/services';
 
 import { Token } from '@phosphor/coreutils';
 
-import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
+import { IObservableDisposable } from '@phosphor/disposable';
 
 import { ISignal } from '@phosphor/signaling';
 
@@ -43,6 +43,51 @@ export interface IDebugger {
    * tracker for get instance of debugger.
    */
   tracker: WidgetTracker<MainAreaWidget<Debugger>>;
+
+  /**
+   * Whether the debugger can start.
+   */
+  canStart(): boolean;
+
+  /**
+   * Whether the current debugger is started.
+   */
+  isStarted(): boolean;
+
+  /**
+   * Whether the current thread is stopped.
+   */
+  isThreadStopped(): boolean;
+
+  /**
+   * Continues the execution of the current thread.
+   */
+  continue(): Promise<void>;
+
+  /**
+   * Makes the current thread run again for one step.
+   */
+  next(): Promise<void>;
+
+  /**
+   * Makes the current thread step in a function / method if possible.
+   */
+  stepIn(): Promise<void>;
+
+  /**
+   * Signal emitted upon session changed.
+   */
+  sessionChanged: ISignal<IDebugger, IDebugger.ISession>;
+
+  /**
+   * Signal emitted for debug event messages.
+   */
+  eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
+
+  /**
+   * For testing purpose only, to be removed.
+   */
+  launch(code: string): Promise<void>;
 }
 
 /**
@@ -100,63 +145,6 @@ export namespace IDebugger {
      * Signal emitted for debug event messages.
      */
     eventMessage: ISignal<IDebugger.ISession, IDebugger.ISession.Event>;
-  }
-
-  export interface IService extends IDisposable {
-    /**
-     * The API debugger session to connect to a debugger
-     */
-    session: IDebugger.ISession;
-
-    /**
-     * Whether the debugger can start.
-     */
-    canStart(): boolean;
-
-    /**
-     * Whether the current debugger is started.
-     */
-    isStarted(): boolean;
-
-    /**
-     * Whether the current thread is stopped.
-     */
-    isThreadStopped(): boolean;
-
-    /**
-     * Update all breakpoints at once.
-     */
-    updateBreakpoints(): Promise<void>;
-
-    /**
-     * Continues the execution of the current thread.
-     */
-    continue(): Promise<void>;
-
-    /**
-     * Makes the current thread run again for one step.
-     */
-    next(): Promise<void>;
-
-    /**
-     * Makes the current thread step in a function / method if possible.
-     */
-    stepIn(): Promise<void>;
-
-    /**
-     * For testing purpose only, to be removed.
-     */
-    launch(code: string): Promise<void>;
-
-    /**
-     * Signal emitted upon session changed.
-     */
-    sessionChanged: ISignal<IDebugger.IService, IDebugger.ISession>;
-
-    /**
-     * Signal emitted for debug event messages.
-     */
-    eventMessage: ISignal<IDebugger.IService, IDebugger.ISession.Event>;
   }
 
   export namespace ISession {

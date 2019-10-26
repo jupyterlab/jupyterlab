@@ -219,7 +219,7 @@ export class CellManager implements IDisposable {
 export namespace CellManager {
   export interface IOptions {
     debuggerModel: Debugger.Model;
-    debuggerService: IDebugger.IService;
+    debuggerService: IDebugger;
     breakpointsModel: Breakpoints.Model;
     activeCell?: CodeCell;
     type: SessionTypes;

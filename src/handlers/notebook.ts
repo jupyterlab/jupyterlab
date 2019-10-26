@@ -35,7 +35,7 @@ export class DebuggerNotebookHandler implements IDisposable {
 
   private notebookTracker: INotebookTracker;
   private debuggerModel: Debugger.Model;
-  private debuggerService: IDebugger.IService;
+  private debuggerService: IDebugger;
   private breakpoints: Breakpoints.Model;
   private cellManager: CellManager;
   isDisposed: boolean;
@@ -68,7 +68,7 @@ export class DebuggerNotebookHandler implements IDisposable {
 export namespace DebuggerNotebookHandler {
   export interface IOptions {
     debuggerModel: Debugger.Model;
-    debuggerService: IDebugger.IService;
+    debuggerService: IDebugger;
     tracker: INotebookTracker;
   }
 }
