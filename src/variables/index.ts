@@ -24,7 +24,7 @@ export class Variables extends Panel {
     this.addWidget(this.body);
   }
 
-  readonly model: Variables.IModel;
+  readonly model: Variables.Model;
   readonly header: VariablesHeader;
   readonly body: Widget;
 
@@ -59,9 +59,7 @@ export namespace Variables {
     variables: IVariable[];
   }
 
-  export interface IModel {}
-
-  export class IModel implements IModel {
+  export class Model {
     constructor(model: IScope[] = []) {
       this._state = model;
     }
@@ -118,6 +116,6 @@ export namespace Variables {
   }
 
   export interface IOptions extends Panel.IOptions {
-    model: IModel;
+    model: Model;
   }
 }

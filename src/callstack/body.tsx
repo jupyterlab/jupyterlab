@@ -10,7 +10,7 @@ import { ReactWidget } from '@jupyterlab/apputils';
 import { ArrayExt } from '@phosphor/algorithm';
 
 export class Body extends ReactWidget {
-  constructor(model: Callstack.IModel) {
+  constructor(model: Callstack.Model) {
     super();
     this.model = model;
     this.addClass('jp-DebuggerCallstack-body');
@@ -20,10 +20,10 @@ export class Body extends ReactWidget {
     return <FramesComponent model={this.model} />;
   }
 
-  readonly model: Callstack.IModel;
+  readonly model: Callstack.Model;
 }
 
-const FramesComponent = ({ model }: { model: Callstack.IModel }) => {
+const FramesComponent = ({ model }: { model: Callstack.Model }) => {
   const [frames, setFrames] = useState(model.frames);
   const [selected, setSelected] = useState(model.frame);
 
@@ -33,7 +33,7 @@ const FramesComponent = ({ model }: { model: Callstack.IModel }) => {
   };
 
   useEffect(() => {
-    const updateFrames = (_: Callstack.IModel, updates: Callstack.IFrame[]) => {
+    const updateFrames = (_: Callstack.Model, updates: Callstack.IFrame[]) => {
       if (ArrayExt.shallowEqual(frames, updates)) {
         return;
       }

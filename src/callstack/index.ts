@@ -74,7 +74,7 @@ export class Callstack extends Panel {
     );
   }
 
-  readonly model: Callstack.IModel;
+  readonly model: Callstack.Model;
 }
 
 class CallstackHeader extends Widget {
@@ -96,9 +96,7 @@ class CallstackHeader extends Widget {
 export namespace Callstack {
   export interface IFrame extends DebugProtocol.StackFrame {}
 
-  export interface IModel {}
-
-  export class IModel implements IModel {
+  export class Model {
     constructor(model: IFrame[]) {
       this._state = model;
     }
@@ -136,6 +134,6 @@ export namespace Callstack {
   }
 
   export interface IOptions extends Panel.IOptions {
-    model: IModel;
+    model: Model;
   }
 }

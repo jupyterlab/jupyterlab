@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IClientSession } from '@jupyterlab/apputils';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IDataConnector } from '@jupyterlab/coreutils';
@@ -37,7 +35,9 @@ export class Debugger extends SplitPanel {
     this.title.label = 'Debugger';
     this.title.iconClass = 'jp-BugIcon';
 
-    this.model = new Debugger.Model(options);
+    this.model = new Debugger.Model({
+      connector: options.connector
+    });
 
     this.sidebar = new Debugger.Sidebar(this.model);
     this.service = new DebugService(this.model);
@@ -76,8 +76,6 @@ export namespace Debugger {
   export interface IOptions {
     editorFactory: CodeEditor.Factory;
     connector?: IDataConnector<ReadonlyJSONValue>;
-    id?: string;
-    session?: IClientSession;
   }
 
   export class Sidebar extends SplitPanel {
@@ -103,19 +101,16 @@ export namespace Debugger {
   export class Model implements IDisposable {
     constructor(options: Debugger.Model.IOptions) {
       this.breakpointsModel = new Breakpoints.Model([]);
-      this.callstackModel = new Callstack.IModel([]);
-      this.variablesModel = new Variables.IModel([]);
+      this.callstackModel = new Callstack.Model([]);
+      this.variablesModel = new Variables.Model([]);
       this.connector = options.connector || null;
-      this.id = options.id;
       void this._populate();
     }
 
     readonly breakpointsModel: Breakpoints.Model;
-    readonly callstackModel: Callstack.IModel;
-    readonly variablesModel: Variables.IModel;
-
+    readonly callstackModel: Callstack.Model;
+    readonly variablesModel: Variables.Model;
     readonly connector: IDataConnector<ReadonlyJSONValue> | null;
-    readonly id: string;
 
     get mode(): IDebugger.Mode {
       return this._mode;
@@ -174,6 +169,8 @@ export namespace Debugger {
   }
 
   export namespace Model {
-    export interface IOptions extends Debugger.IOptions {}
+    export interface IOptions {
+      connector?: IDataConnector<ReadonlyJSONValue>;
+    }
   }
 }

@@ -159,7 +159,7 @@ export class DebugService implements IDebugger.IService {
     this._model.callstackModel.currentFrameChanged.connect(this.onChangeFrame);
   };
 
-  onChangeFrame = (_: Callstack.IModel, update: Callstack.IFrame) => {
+  onChangeFrame = (_: Callstack.Model, update: Callstack.IFrame) => {
     const frame = this.frames.find(ele => ele.id === update.id);
     if (frame && frame.scopes) {
       this._model.variablesModel.scopes = frame.scopes;

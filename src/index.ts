@@ -386,10 +386,10 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
           widget = new MainAreaWidget({
             content: new Debugger({
               connector: state,
-              editorFactory,
-              id
+              editorFactory
             })
           });
+          widget.id = id;
 
           void tracker.add(widget);
 
@@ -430,9 +430,9 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       void restorer.restore(tracker, {
         command: CommandIDs.create,
         args: widget => ({
-          id: widget.content.model.id
+          id: widget.id
         }),
-        name: widget => widget.content.model.id
+        name: widget => widget.id
       });
     }
 
