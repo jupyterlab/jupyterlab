@@ -19,7 +19,7 @@ export class DebuggerConsoleHandler implements IDisposable {
   constructor(options: DebuggerConsoleHandler.IOptions) {
     this.debuggerModel = options.debuggerModel;
     this.consoleTracker = options.tracker;
-    this.breakpoints = this.debuggerModel.sidebar.breakpoints.model;
+    this.breakpoints = this.debuggerModel.breakpointsModel;
     this.cellManager = new CellManager({
       activeCell: this.consoleTracker.currentWidget.console.promptCell,
       breakpointsModel: this.breakpoints,

@@ -10,10 +10,10 @@ import { Signal, ISignal } from '@phosphor/signaling';
 import { DebugProtocol } from 'vscode-debugprotocol';
 
 export class Variables extends Panel {
-  constructor(options: Variables.IOptions = {}) {
+  constructor(options: Variables.IOptions) {
     super();
 
-    this.model = new Variables.IModel([]);
+    this.model = options.model;
     this.addClass('jp-DebuggerVariables');
     this.title.label = 'Variables';
 
@@ -117,5 +117,7 @@ export namespace Variables {
     private _scopesChanged = new Signal<this, IScope[]>(this);
   }
 
-  export interface IOptions extends Panel.IOptions {}
+  export interface IOptions extends Panel.IOptions {
+    model: IModel;
+  }
 }

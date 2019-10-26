@@ -12,7 +12,7 @@ import { ILineInfo } from '../handlers/cell';
 export class Breakpoints extends Panel {
   constructor(options: Breakpoints.IOptions) {
     super();
-    this.model = new Breakpoints.Model([]);
+    this.model = options.model;
     this.addClass('jp-DebuggerBreakpoints');
     this.title.label = 'Breakpoints';
 
@@ -169,7 +169,9 @@ export namespace Breakpoints {
   /**
    * Instantiation options for `Breakpoints`;
    */
-  export interface IOptions extends Panel.IOptions {}
+  export interface IOptions extends Panel.IOptions {
+    model: Model;
+  }
 }
 
 export type SessionTypes = 'console' | 'notebook';

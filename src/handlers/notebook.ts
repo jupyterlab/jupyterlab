@@ -22,7 +22,7 @@ export class DebuggerNotebookHandler implements IDisposable {
     this.debuggerModel = options.debuggerModel;
     this.debuggerService = options.debuggerService;
     this.notebookTracker = options.tracker;
-    this.breakpoints = this.debuggerModel.sidebar.breakpoints.model;
+    this.breakpoints = this.debuggerModel.breakpointsModel;
     this.notebookTracker.activeCellChanged.connect(this.onNewCell, this);
     this.cellManager = new CellManager({
       breakpointsModel: this.breakpoints,
