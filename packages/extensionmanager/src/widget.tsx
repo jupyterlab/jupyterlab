@@ -1009,13 +1009,13 @@ risks or contain malicious code that runs on your machine.`)}
   }
 
   /**
-   * Handle the DOM events for the command palette.
+   * Handle the DOM events for the extension manager search bar.
    *
-   * @param event - The DOM event sent to the command palette.
+   * @param event - The DOM event sent to the extension manager search bar.
    *
    * #### Notes
    * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the command palette's DOM node.
+   * called in response to events on the search bar's DOM node.
    * It should not be called directly by user code.
    */
   handleEvent(event: Event): void {
