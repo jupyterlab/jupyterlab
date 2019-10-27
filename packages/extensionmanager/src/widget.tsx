@@ -867,7 +867,13 @@ risks or contain malicious code that runs on your machine.`)}
             key="installed-items"
             listMode={model.listMode}
             viewType={'installed'}
-            entries={model.installed}
+            entries={
+              model.searchResult.length > 0
+                ? model.installed.filter(
+                    entry => model.searchResult.indexOf(entry) > -1
+                  )
+                : model.installed
+            }
             numPages={1}
             translator={this.translator}
             onPage={value => {
