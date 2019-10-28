@@ -70,7 +70,7 @@ export class DebugService implements IDebugger {
         void this.getAllFrames();
       } else if (event.event === 'continued') {
         this._threadStopped.delete(event.body.threadId);
-        this._model.linesCleared.emit();
+        this.onContinued();
       }
       this._eventMessage.emit(event);
     });
@@ -255,6 +255,12 @@ export class DebugService implements IDebugger {
       };
     });
   };
+
+  private onContinued() {
+    this._model.linesCleared.emit();
+    this._model.callstackModel.frames = [];
+    this._model.variablesModel.scopes = [];
+  }
 
   private currentThread(): number {
     // TODO: ask the model for the current thread ID
