@@ -36,6 +36,7 @@ export class Debugger extends SplitPanel {
     this.model = new Debugger.Model(options);
 
     this.sidebar = new DebuggerSidebar();
+
     this.model.sidebar = this.sidebar;
 
     this.service = new DebugService(this.model);
@@ -128,6 +129,10 @@ export namespace Debugger {
       return this._currentLineChanged;
     }
 
+    get linesCleared() {
+      return this._linesCleared;
+    }
+
     dispose(): void {
       this._isDisposed = true;
     }
@@ -146,6 +151,7 @@ export namespace Debugger {
     private _mode: IDebugger.Mode;
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
     private _currentLineChanged = new Signal<this, number>(this);
+    private _linesCleared = new Signal<this, void>(this);
   }
 
   export namespace Model {

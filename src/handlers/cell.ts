@@ -37,6 +37,10 @@ export class CellManager implements IDisposable {
       this.showCurrentLine(lineNumber);
     });
 
+    this._debuggerModel.linesCleared.connect(() => {
+      this.cleanupHighlight();
+    });
+
     this.breakpointsModel.breakpointsChanged.connect(async () => {
       await this._debuggerService.updateBreakpoints();
     });
