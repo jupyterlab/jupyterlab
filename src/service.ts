@@ -43,7 +43,6 @@ export class DebugService implements IDebugger.IService {
     this._session = session;
 
     this._session.eventMessage.connect((_, event) => {
-      console.log({ event });
       if (event.event === 'stopped') {
         this._threadStopped.add(event.body.threadId);
         void this.getAllFrames();
@@ -114,13 +113,6 @@ export class DebugService implements IDebugger.IService {
   // this will change for after execute cell
   async launch(code: string): Promise<void> {
     this.frames = [];
-
-    // for now we dont need that -> need develop that
-    // this.session.eventMessage.connect((_, event: IDebugger.ISession.Event) => {
-    //   const eventName = event.event;
-    //   if (eventName === 'thread') {
-    //   }
-    // });
 
     const breakpoints: DebugProtocol.SourceBreakpoint[] = this.getBreakpoints();
     const dumpedCell = await this.session.sendRequest('dumpCell', {
