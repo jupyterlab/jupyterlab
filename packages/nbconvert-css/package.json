@@ -53,7 +53,7 @@
     "mini-css-extract-plugin": "~0.6.0",
     "null-loader": "^2.0.0",
     "rimraf": "~2.6.2",
-    "typescript": "~3.5.1",
+    "typescript": "~3.7.1-rc",
     "url-loader": "~1.1.2",
     "webpack": "^4.32.2",
     "webpack-cli": "^3.3.0"
