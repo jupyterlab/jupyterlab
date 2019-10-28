@@ -43,6 +43,7 @@ export class DebugService implements IDebugger.IService {
     this._session = session;
 
     this._session.eventMessage.connect((_, event) => {
+      console.log({ event });
       if (event.event === 'stopped') {
         this._threadStopped.add(event.body.threadId);
         void this.getAllFrames();
@@ -203,7 +204,7 @@ export class DebugService implements IDebugger.IService {
   getBreakpoints = (): DebugProtocol.SourceBreakpoint[] => {
     return this._model.sidebar.breakpoints.model.breakpoints.map(breakpoint => {
       return {
-        line: breakpoint.line - 1
+        line: breakpoint.line
       };
     });
   };
