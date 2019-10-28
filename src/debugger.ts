@@ -3,15 +3,11 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { DebugService } from './service';
+import { IDataConnector } from '@jupyterlab/coreutils';
 
-import { DebuggerEditors } from './editors';
-
-import { DebuggerSidebar } from './sidebar';
+import { IObservableString } from '@jupyterlab/observables';
 
 import { ReadonlyJSONValue } from '@phosphor/coreutils';
-
-import { IClientSession } from '@jupyterlab/apputils';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -21,11 +17,17 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { SplitPanel } from '@phosphor/widgets';
 
-import { IObservableString } from '@jupyterlab/observables';
+import { Breakpoints } from './breakpoints';
+
+import { Callstack } from './callstack';
+
+import { DebuggerEditors } from './editors';
+
+import { DebugService } from './service';
 
 import { IDebugger } from './tokens';
 
-import { IDataConnector } from '@jupyterlab/coreutils';
+import { Variables } from './variables';
 
 export class Debugger extends SplitPanel {
   constructor(options: Debugger.IOptions) {
@@ -33,16 +35,17 @@ export class Debugger extends SplitPanel {
     this.title.label = 'Debugger';
     this.title.iconClass = 'jp-BugIcon';
 
-    this.model = new Debugger.Model(options);
+    this.model = new Debugger.Model({
+      connector: options.connector
+    });
 
-    this.sidebar = new DebuggerSidebar();
+    this.sidebar = new Debugger.Sidebar(this.model);
+    this.service = options.debugService;
+    this.service.model = this.model;
 
-    this.model.sidebar = this.sidebar;
-
-    this.service = new DebugService(this.model);
-
-    const { editorFactory } = options;
-    this.editors = new DebuggerEditors({ editorFactory });
+    this.editors = new DebuggerEditors({
+      editorFactory: options.editorFactory
+    });
     this.addWidget(this.editors);
 
     this.addClass('jp-Debugger');
@@ -50,15 +53,15 @@ export class Debugger extends SplitPanel {
 
   readonly editors: DebuggerEditors;
   readonly model: Debugger.Model;
-  readonly sidebar: DebuggerSidebar;
+  readonly sidebar: Debugger.Sidebar;
   readonly service: DebugService;
 
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
+    this.service.model = null;
     this.model.dispose();
-    this.service.dispose();
     super.dispose();
   }
 
@@ -73,21 +76,44 @@ export class Debugger extends SplitPanel {
  */
 export namespace Debugger {
   export interface IOptions {
+    debugService: DebugService;
     editorFactory: CodeEditor.Factory;
     connector?: IDataConnector<ReadonlyJSONValue>;
-    id?: string;
-    session?: IClientSession;
+  }
+
+  export class Sidebar extends SplitPanel {
+    constructor(model: Model) {
+      super();
+      this.orientation = 'vertical';
+      this.addClass('jp-DebuggerSidebar');
+
+      this.variables = new Variables({ model: model.variablesModel });
+      this.callstack = new Callstack({ model: model.callstackModel });
+      this.breakpoints = new Breakpoints({ model: model.breakpointsModel });
+
+      this.addWidget(this.variables);
+      this.addWidget(this.callstack);
+      this.addWidget(this.breakpoints);
+    }
+
+    readonly variables: Variables;
+    readonly callstack: Callstack;
+    readonly breakpoints: Breakpoints;
   }
 
   export class Model implements IDisposable {
     constructor(options: Debugger.Model.IOptions) {
+      this.breakpointsModel = new Breakpoints.Model([]);
+      this.callstackModel = new Callstack.Model([]);
+      this.variablesModel = new Variables.Model([]);
       this.connector = options.connector || null;
-      this.id = options.id;
       void this._populate();
     }
 
+    readonly breakpointsModel: Breakpoints.Model;
+    readonly callstackModel: Callstack.Model;
+    readonly variablesModel: Variables.Model;
     readonly connector: IDataConnector<ReadonlyJSONValue> | null;
-    readonly id: string;
 
     get mode(): IDebugger.Mode {
       return this._mode;
@@ -99,14 +125,6 @@ export namespace Debugger {
       }
       this._mode = mode;
       this._modeChanged.emit(mode);
-    }
-
-    get sidebar() {
-      return this._sidebar;
-    }
-
-    set sidebar(sidebar: DebuggerSidebar) {
-      this._sidebar = sidebar;
     }
 
     get modeChanged(): ISignal<this, IDebugger.Mode> {
@@ -146,7 +164,6 @@ export namespace Debugger {
     }
 
     private _codeValue: IObservableString;
-    private _sidebar: DebuggerSidebar;
     private _isDisposed = false;
     private _mode: IDebugger.Mode;
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
@@ -155,6 +172,8 @@ export namespace Debugger {
   }
 
   export namespace Model {
-    export interface IOptions extends Debugger.IOptions {}
+    export interface IOptions {
+      connector?: IDataConnector<ReadonlyJSONValue>;
+    }
   }
 }
