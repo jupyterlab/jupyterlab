@@ -45,8 +45,10 @@ export class DebugService implements IDebugger.IService {
     this._session.eventMessage.connect((_, event) => {
       if (event.event === 'stopped') {
         this._threadStopped.add(event.body.threadId);
+        void this.getAllFrames();
       } else if (event.event === 'continued') {
         this._threadStopped.delete(event.body.threadId);
+        this._model.linesCleared.emit();
       }
       this._eventMessage.emit(event);
     });
@@ -110,15 +112,7 @@ export class DebugService implements IDebugger.IService {
 
   // this will change for after execute cell
   async launch(code: string): Promise<void> {
-    let threadId: number = 1;
     this.frames = [];
-    this.session.eventMessage.connect((_, event: IDebugger.ISession.Event) => {
-      const eventName = event.event;
-      if (eventName === 'thread') {
-        const msg = event as DebugProtocol.ThreadEvent;
-        threadId = msg.body.threadId;
-      }
-    });
 
     const breakpoints: DebugProtocol.SourceBreakpoint[] = this.getBreakpoints();
     const dumpedCell = await this.session.sendRequest('dumpCell', {
@@ -130,7 +124,11 @@ export class DebugService implements IDebugger.IService {
 
     this.session.client.kernel.requestExecute({ code });
 
-    const stackFrames = await this.getFrames(threadId);
+    await this.getAllFrames();
+  }
+
+  getAllFrames = async () => {
+    const stackFrames = await this.getFrames(this.currentThread());
 
     stackFrames.forEach(async (frame, index) => {
       const scopes = await this.getScopes(frame);
@@ -153,7 +151,7 @@ export class DebugService implements IDebugger.IService {
     this._model.sidebar.callstack.model.currentFrameChanged.connect(
       this.onChangeFrame
     );
-  }
+  };
 
   onChangeFrame = (_: Callstack.IModel, update: Callstack.IFrame) => {
     const frame = this.frames.find(ele => ele.id === update.id);
@@ -257,7 +255,7 @@ export class DebugService implements IDebugger.IService {
     IDebugger.ISession.Event
   >(this);
   private _model: Debugger.Model;
-  private frames: Frame[];
+  private frames: Frame[] = [];
   // TODO: move this in model
   private _threadStopped = new Set();
 }

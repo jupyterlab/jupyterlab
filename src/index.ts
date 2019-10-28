@@ -33,6 +33,7 @@ import { DebuggerNotebookHandler } from './handlers/notebook';
 import { DebuggerConsoleHandler } from './handlers/console';
 
 import { Kernel } from '@jupyterlab/services';
+
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
 /**
@@ -268,7 +269,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
             sidebar.parent = null;
           }
 
-          // edge case when reload page after set condensed mode
           widget.title.label = 'Debugger';
           shell.add(widget, 'main');
           return;
