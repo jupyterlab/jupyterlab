@@ -251,8 +251,8 @@ export namespace OutputAreaData {
           );
           value.text = lastValue.text;
           OutputModel.fromJSON(outputData, value, trusted);
+          return;
         }
-        return;
       }
 
       if (nbformat.isStream(value)) {
