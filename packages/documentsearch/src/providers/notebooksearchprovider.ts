@@ -377,8 +377,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       const find = reverse ? ArrayExt.findLastValue : ArrayExt.findFirstValue;
       provider = find(
         this._searchProviders,
-        (provider: ICellSearchPair) =>
-          this._searchTarget.content.activeCell === provider.cell
+        provider => this._searchTarget.content.activeCell === provider.cell
       );
     } else {
       const currentProviderIndex = ArrayExt.firstIndexOf(
