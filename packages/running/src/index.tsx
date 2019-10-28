@@ -12,7 +12,7 @@ import {
   ToolbarButtonComponent
 } from '@jupyterlab/apputils';
 
-import { Token } from '@phosphor/coreutils';
+import { Token, ReadonlyJSONObject } from '@phosphor/coreutils';
 
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
@@ -277,5 +277,8 @@ export namespace IRunningSessions {
     label: () => string;
     // called to determine the `title` attribute for each item, which is revealed on hover
     labelTitle?: () => string;
+    // called to get the metadata for each item, which can be used
+    // in the rendering of the item.
+    metadata?: () => ReadonlyJSONObject;
   }
 }

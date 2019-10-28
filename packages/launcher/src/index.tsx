@@ -339,6 +339,12 @@ export namespace ILauncher {
      * spec.
      */
     kernelIconUrl?: string;
+
+    /**
+     * Additional metadata that could be used by the launcher to
+     * render the item (or choose whether to render the item).
+     */
+    metadata?: ReadonlyJSONObject;
   }
 }
 
