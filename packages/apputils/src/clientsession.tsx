@@ -343,7 +343,7 @@ export class ClientSession implements IClientSession {
     let kernel = this.kernel;
     if (!kernel) {
       if (this._pendingKernel) {
-        return this._pendingKernel;
+        return `Starting... ${this._pendingKernel}`;
       }
       return 'No Kernel!';
     }
