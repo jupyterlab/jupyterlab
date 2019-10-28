@@ -342,6 +342,9 @@ export class ClientSession implements IClientSession {
   get kernelDisplayName(): string {
     let kernel = this.kernel;
     if (!kernel) {
+      if (this._pendingKernel) {
+        return this._pendingKernel;
+      }
       return 'No Kernel!';
     }
     let specs = this.manager.specs;
@@ -586,6 +589,7 @@ export class ClientSession implements IClientSession {
     }
     let session = this._session;
     if (session && session.status !== 'dead') {
+      this._pendingKernel = options.name || '';
       return session.changeKernel(options).catch(err => {
         void this._handleSessionError(err);
         return Promise.reject(err);
@@ -644,6 +648,7 @@ export class ClientSession implements IClientSession {
     if (this.isDisposed) {
       return Promise.reject('Session is disposed.');
     }
+    this._pendingKernel = model ? model.name : '';
     return this.manager
       .startNew({
         path: this._path,
@@ -772,6 +777,7 @@ export class ClientSession implements IClientSession {
     args: Session.IKernelChangedArgs
   ): void {
     this._kernelChanged.emit(args);
+    this._pendingKernel = '';
   }
 
   /**
@@ -836,6 +842,7 @@ export class ClientSession implements IClientSession {
   private _dialog: Dialog<any> | null = null;
   private _setBusy: () => IDisposable | undefined;
   private _busyDisposable: IDisposable | null = null;
+  private _pendingKernel = '';
 }
 
 /**
