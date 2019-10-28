@@ -55,7 +55,6 @@
     "@jupyterlab/tooltip-extension": "~2.0.0-alpha.1",
     "@jupyterlab/ui-components-extension": "~2.0.0-alpha.1",
     "@jupyterlab/vdom-extension": "~2.0.0-alpha.1",
-    "@jupyterlab/vega4-extension": "~2.0.0-alpha.1",
     "@jupyterlab/vega5-extension": "~2.0.0-alpha.1"
   },
   "devDependencies": {
@@ -163,7 +162,6 @@
     "@jupyterlab/ui-components-extension": "~2.0.0-alpha.1",
     "@jupyterlab/vdom": "~2.0.0-alpha.1",
     "@jupyterlab/vdom-extension": "~2.0.0-alpha.1",
-    "@jupyterlab/vega4-extension": "~2.0.0-alpha.1",
     "@jupyterlab/vega5-extension": "~2.0.0-alpha.1",
     "@phosphor/algorithm": "^1.2.0",
     "@phosphor/application": "^1.7.0",
@@ -226,7 +224,6 @@
       "@jupyterlab/javascript-extension": "",
       "@jupyterlab/json-extension": "",
       "@jupyterlab/pdf-extension": "",
-      "@jupyterlab/vega4-extension": "",
       "@jupyterlab/vega5-extension": ""
     },
     "buildDir": "./static",
@@ -347,7 +344,6 @@
       "@jupyterlab/ui-components-extension": "../packages/ui-components-extension",
       "@jupyterlab/vdom": "../packages/vdom",
       "@jupyterlab/vdom-extension": "../packages/vdom-extension",
-      "@jupyterlab/vega4-extension": "../packages/vega4-extension",
       "@jupyterlab/vega5-extension": "../packages/vega5-extension",
       "node-example": "../packages/services/examples/node",
       "@jupyterlab/example-services-browser": "../packages/services/examples/browser",
