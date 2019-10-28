@@ -124,6 +124,11 @@ export namespace IDebugger {
     isThreadStopped(): boolean;
 
     /**
+     * Update all breakpoints at once.
+     */
+    updateBreakpoints(): Promise<void>;
+
+    /**
      * Continues the execution of the current thread.
      */
     continue(): Promise<void>;

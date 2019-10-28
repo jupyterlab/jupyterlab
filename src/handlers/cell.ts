@@ -40,15 +40,12 @@ export class CellManager implements IDisposable {
     this._debuggerModel.linesCleared.connect(() => {
       this.cleanupHighlight();
     });
+
+    this.breakpointsModel.breakpointsChanged.connect(async () => {
+      await this._debuggerService.updateBreakpoints();
+    });
   }
 
-  private _previousCell: CodeCell;
-  private previousLineCount: number;
-  private _debuggerModel: Debugger.Model;
-  private _debuggerService: IDebugger.IService;
-  private _type: SessionTypes;
-  private breakpointsModel: Breakpoints.Model;
-  private _activeCell: CodeCell;
   isDisposed: boolean;
 
   private showCurrentLine(lineNumber: number) {
@@ -209,6 +206,14 @@ export class CellManager implements IDisposable {
     marker.innerHTML = '●';
     return marker;
   }
+
+  private _previousCell: CodeCell;
+  private previousLineCount: number;
+  private _debuggerModel: Debugger.Model;
+  private _type: SessionTypes;
+  private breakpointsModel: Breakpoints.Model;
+  private _activeCell: CodeCell;
+  private _debuggerService: IDebugger.IService;
 }
 
 export namespace CellManager {

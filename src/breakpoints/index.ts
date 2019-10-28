@@ -80,6 +80,9 @@ export namespace Breakpoints {
       this._breakpoints = model;
     }
 
+    breakpointsChanged = new Signal<this, IBreakpoint[]>(this);
+    clearedBreakpoints = new Signal<this, SessionTypes | null>(this);
+
     get breakpoints(): IBreakpoint[] {
       return this._breakpoints;
     }
@@ -118,12 +121,12 @@ export namespace Breakpoints {
     }
 
     set type(newType: SessionTypes) {
-      if (newType === this.selectedType) {
+      if (newType === this._selectedType) {
         return;
       }
-      this.state[this.selectedType] = this.breakpoints;
-      this.selectedType = newType;
-      this.breakpoints = this.state[newType];
+      this._state[this._selectedType] = this.breakpoints;
+      this._selectedType = newType;
+      this.breakpoints = this._state[newType];
     }
 
     removeBreakpoint(lineInfo: any) {
@@ -135,7 +138,7 @@ export namespace Breakpoints {
 
     clearSelectedBreakpoints() {
       this.breakpoints = [];
-      this.clearedBreakpoints.emit(this.selectedType);
+      this.clearedBreakpoints.emit(this._selectedType);
     }
 
     changeLines(linesInfo: ILineInfo[]) {
@@ -154,12 +157,10 @@ export namespace Breakpoints {
       }
     }
 
-    private _breakpoints: IBreakpoint[];
-    breakpointsChanged = new Signal<this, IBreakpoint[]>(this);
-    clearedBreakpoints = new Signal<this, SessionTypes | null>(this);
-    private selectedType: SessionTypes;
+    private _selectedType: SessionTypes;
     private _breakpointChanged = new Signal<this, IBreakpoint>(this);
-    private state = {
+    private _breakpoints: IBreakpoint[];
+    private _state = {
       console: [] as Breakpoints.IBreakpoint[],
       notebook: [] as Breakpoints.IBreakpoint[]
     };
