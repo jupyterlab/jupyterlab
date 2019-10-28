@@ -45,7 +45,7 @@ export class DebugService implements IDebugger.IService {
     this._session.eventMessage.connect((_, event) => {
       if (event.event === 'stopped') {
         this._threadStopped.add(event.body.threadId);
-        void this.getFramesAllData();
+        void this.getAllFrames();
       } else if (event.event === 'continued') {
         this._threadStopped.delete(event.body.threadId);
         this._model.linesCleared.emit();
@@ -127,10 +127,10 @@ export class DebugService implements IDebugger.IService {
 
     this.session.client.kernel.requestExecute({ code });
 
-    await this.getFramesAllData();
+    await this.getAllFrames();
   }
 
-  getFramesAllData = async () => {
+  getAllFrames = async () => {
     const stackFrames = await this.getFrames(this.currentThread());
 
     stackFrames.forEach(async (frame, index) => {
@@ -194,7 +194,7 @@ export class DebugService implements IDebugger.IService {
   setBreakpoints = (): DebugProtocol.SourceBreakpoint[] => {
     return this._model.sidebar.breakpoints.model.breakpoints.map(breakpoint => {
       return {
-        line: breakpoint.line
+        line: breakpoint.line - 1
       };
     });
   };

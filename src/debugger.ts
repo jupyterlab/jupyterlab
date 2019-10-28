@@ -130,7 +130,7 @@ export namespace Debugger {
     }
 
     get linesCleared() {
-      return this._LinesCleared;
+      return this._linesCleared;
     }
 
     dispose(): void {
@@ -151,7 +151,7 @@ export namespace Debugger {
     private _mode: IDebugger.Mode;
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
     private _currentLineChanged = new Signal<this, number>(this);
-    private _LinesCleared = new Signal<this, void>(this);
+    private _linesCleared = new Signal<this, void>(this);
   }
 
   export namespace Model {
