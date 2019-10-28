@@ -43,9 +43,9 @@
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
     "typescript": "~3.7.1-rc",
-    "vega": "^5.4.0",
+    "vega": "^5.7.3",
     "vega-embed": "^4.2.0",
-    "vega-lite": "^3.3.0"
+    "vega-lite": "^3.4.0"
   },
   "publishConfig": {
     "access": "public"
