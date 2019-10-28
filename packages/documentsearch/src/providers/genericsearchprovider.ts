@@ -2,9 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISearchProvider, ISearchMatch } from '../interfaces';
+
 import { ISignal, Signal } from '@phosphor/signaling';
 import { Widget } from '@phosphor/widgets';
-import _ from 'lodash';
 
 const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
 const SELECTED_CLASSES = ['CodeMirror-selectedtext'];
@@ -289,7 +289,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
     if (this._currentMatch) {
       this._currentMatch.spanElement.classList.add(...SELECTED_CLASSES);
       // If not in view, scroll just enough to see it
-      if(!elementInViewport(this._currentMatch.spanElement)) {
+      if (!elementInViewport(this._currentMatch.spanElement)) {
         this._currentMatch.spanElement.scrollIntoView(reverse);
       }
       this._currentMatch.spanElement.focus();
@@ -329,7 +329,9 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
   get matches(): ISearchMatch[] {
     // Ensure that no other fn can overwrite matches index property
     // We shallow clone each node
-    return this._matches ? this._matches.map(m => _.clone(m)) : this._matches;
+    return this._matches
+      ? this._matches.map(m => Object.assign({}, m))
+      : this._matches;
   }
 
   /**
@@ -405,9 +407,11 @@ interface IGenericSearchMatch extends ISearchMatch {
 function elementInViewport(el: HTMLElement): boolean {
   const boundingClientRect = el.getBoundingClientRect();
   return (
-      boundingClientRect.top >= 0 &&
-      boundingClientRect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-      boundingClientRect.left >= 0 &&
-      boundingClientRect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    boundingClientRect.top >= 0 &&
+    boundingClientRect.bottom <=
+      (window.innerHeight || document.documentElement.clientHeight) &&
+    boundingClientRect.left >= 0 &&
+    boundingClientRect.right <=
+      (window.innerWidth || document.documentElement.clientWidth)
   );
 }

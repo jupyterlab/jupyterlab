@@ -1,17 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { ISearchProvider, ISearchMatch } from '../index';
 import { CodeMirrorSearchProvider } from './codemirrorsearchprovider';
+import { ISearchProvider, ISearchMatch } from '../index';
 import { GenericSearchProvider } from './genericsearchprovider';
 
-import { NotebookPanel } from '@jupyterlab/notebook';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { Cell, MarkdownCell, CodeCell } from '@jupyterlab/cells';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { NotebookPanel } from '@jupyterlab/notebook';
 
+import CodeMirror from 'codemirror';
+import { ArrayExt } from '@phosphor/algorithm';
 import { Signal, ISignal } from '@phosphor/signaling';
 import { Widget } from '@phosphor/widgets';
-import CodeMirror from 'codemirror';
-import _ from 'lodash';
 
 interface ICellSearchPair {
   cell: Cell;
@@ -144,7 +144,9 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     // and so that the next step will scroll correctly to the first match
     this._searchTarget.show();
 
-    this._currentMatch = await this._stepNext(this._updatedCurrentProvider(false));
+    this._currentMatch = await this._stepNext(
+      this._updatedCurrentProvider(false)
+    );
     this._refreshCurrentCellEditor();
 
     this._refreshCellsEditorsInBackground(this._cellsWithMatches);
@@ -263,7 +265,9 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    * @returns A promise that resolves once the action has completed.
    */
   async highlightNext(): Promise<ISearchMatch | undefined> {
-    this._currentMatch = await this._stepNext(this._updatedCurrentProvider(false));
+    this._currentMatch = await this._stepNext(
+      this._updatedCurrentProvider(false)
+    );
     return this._currentMatch;
   }
 
@@ -369,15 +373,22 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       return this._currentProvider;
     }
     let provider;
-    if(!this._currentProvider) {
-      const find = reverse ? _.findLast : _.find;
+    if (!this._currentProvider) {
+      const find = reverse ? ArrayExt.findLastValue : ArrayExt.findFirstValue;
       provider = find(
-          this._searchProviders,
-          provider => this._searchTarget.content.activeCell === provider.cell
+        this._searchProviders,
+        (provider: ICellSearchPair) =>
+          this._searchTarget.content.activeCell === provider.cell
       );
     } else {
-      const currentProviderIndex = _.findIndex(this._searchProviders, this._currentProvider);
-      const nextProviderIndex = ((reverse ? currentProviderIndex - 1 : currentProviderIndex + 1) + this._searchProviders.length) % this._searchProviders.length;
+      const currentProviderIndex = ArrayExt.firstIndexOf(
+        this._searchProviders,
+        this._currentProvider
+      );
+      const nextProviderIndex =
+        ((reverse ? currentProviderIndex - 1 : currentProviderIndex + 1) +
+          this._searchProviders.length) %
+        this._searchProviders.length;
       provider = this._searchProviders[nextProviderIndex];
     }
     this._currentProvider = provider;
