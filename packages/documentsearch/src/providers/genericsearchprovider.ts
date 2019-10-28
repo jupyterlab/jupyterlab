@@ -117,16 +117,24 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
       false
     );
     const nodes = [];
+    const originalNodes = [];
     // We MUST gather nodes first, otherwise the updates below will find each result twice
     let node = walker.nextNode();
     while (node) {
       nodes.push(node);
+      /* We store them here as we want to avoid saving a modified one
+       * This happens with something like this: <pre><span>Hello</span> world</pre> and looking for o
+       * The o in world is found after the o in hello which means the pre could have been modified already
+       * While there may be a better data structure to do this for performance, this was easy to reason about.
+       */
+      originalNodes.push(node.parentElement.cloneNode(true));
       node = walker.nextNode();
     }
     // We'll need to copy the regexp to ensure its 'g' and that we start the index count from 0
     const flags =
       this._query.flags.indexOf('g') === -1 ? query.flags + 'g' : query.flags;
-    nodes.forEach(node => {
+
+    nodes.forEach((node, nodeIndex) => {
       const q = new RegExp(query.source, flags);
       const subsections = [];
       let match = q.exec(node.textContent);
@@ -138,7 +146,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
         });
         match = q.exec(node.textContent);
       }
-      const originalNode = node.parentElement.cloneNode(true);
+      const originalNode = originalNodes[nodeIndex];
       const originalLength = node.textContent.length; // Node length will change below
       let lastNodeAdded = null;
       // Go backwards as index may change if we go forwards
