@@ -135,6 +135,15 @@ export class CellManager implements IDisposable {
 
     this.previousLineCount = editor.lineCount;
 
+    const editorBreakpoints = this.getBreakpointsInfo(cell);
+    editorBreakpoints.forEach(info => {
+      this.breakpointsModel.addBreakpoint(
+        this._debuggerService.session.client.name,
+        this.getEditorId(),
+        info
+      );
+    });
+
     editor.setOption('lineNumbers', true);
     editor.editor.setOption('gutters', [
       'CodeMirror-linenumbers',
@@ -168,7 +177,7 @@ export class CellManager implements IDisposable {
       this.breakpointsModel.addBreakpoint(
         this._debuggerService.session.client.name,
         this.getEditorId(),
-        info as ILineInfo
+        info
       );
     }
 
@@ -197,6 +206,18 @@ export class CellManager implements IDisposable {
       this.previousLineCount = linesNumber;
     }
   };
+
+  private getBreakpointsInfo(cell: CodeCell): ILineInfo[] {
+    const editor = cell.editor as CodeMirrorEditor;
+    let lines = [];
+    for (let i = 0; i < editor.doc.lineCount(); i++) {
+      const info = editor.editor.lineInfo(i);
+      if (info.gutterMarkers) {
+        lines.push(info);
+      }
+    }
+    return lines;
+  }
 
   private _previousCell: CodeCell;
   private previousLineCount: number;
