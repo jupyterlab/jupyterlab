@@ -119,7 +119,6 @@ export class CellManager implements IDisposable {
     ) {
       if (this.previousCell && !this.previousCell.isDisposed) {
         this.removeListener(this.previousCell);
-        this.clearGutter(this.previousCell);
         this.breakpointsModel.breakpoints = [];
       }
       this.previousCell = this.activeCell;
