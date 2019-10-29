@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Panel, Widget, PanelLayout } from '@phosphor/widgets';
+import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
 
 import { Body } from './body';
 
-import { Signal, ISignal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
@@ -52,7 +52,10 @@ class VariablesHeader extends Widget {
 }
 
 export namespace Variables {
-  export interface IVariable extends DebugProtocol.Variable {}
+  export interface IVariable extends DebugProtocol.Variable {
+    getMoreDetails?: any;
+    haveMoreDetails?: boolean;
+  }
 
   export interface IScope {
     name: string;
@@ -76,8 +79,19 @@ export namespace Variables {
       if (this._currentVariable === variable) {
         return;
       }
+
+      variable.haveMoreDetails = true;
       this._currentVariable = variable;
       this._currentChanged.emit(variable);
+
+      const newScope = this.scopes.map(scope => {
+        const findIndex = scope.variables.findIndex(
+          ele => ele.variablesReference === variable.variablesReference
+        );
+        scope.variables[findIndex] = variable;
+        return { ...scope };
+      });
+      this.scopes = [...newScope];
     }
 
     get scopes(): IScope[] {
@@ -101,8 +115,16 @@ export namespace Variables {
       return this._variablesChanged;
     }
 
+    get variableExapnded(): ISignal<this, IVariable> {
+      return this._variableExapnded;
+    }
+
     getCurrentVariables(): IVariable[] {
       return this.variables;
+    }
+
+    async getMoreDataOfVariable(variable: IVariable) {
+      this._variableExapnded.emit(variable);
     }
 
     protected _state: IScope[];
@@ -113,6 +135,7 @@ export namespace Variables {
     private _currentChanged = new Signal<this, IVariable>(this);
     private _variablesChanged = new Signal<this, IVariable[]>(this);
     private _scopesChanged = new Signal<this, IScope[]>(this);
+    private _variableExapnded = new Signal<this, IVariable>(this);
   }
 
   export interface IOptions extends Panel.IOptions {

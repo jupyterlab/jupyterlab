@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React, { useEffect, useState } from 'react';
-import { Breakpoints } from '.';
 import { ReactWidget } from '@jupyterlab/apputils';
 import { ArrayExt } from '@phosphor/algorithm';
 import { ISignal } from '@phosphor/signaling';
+import React, { useEffect, useState } from 'react';
+import { Breakpoints } from '.';
 
 export class Body extends ReactWidget {
   constructor(model: Breakpoints.Model) {

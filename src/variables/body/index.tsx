@@ -3,11 +3,12 @@
 
 import { Variables } from '../index';
 
-import { ObjectInspector, ObjectLabel, ITheme } from 'react-inspector';
+import { ITheme, ObjectInspector, ObjectLabel } from 'react-inspector';
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import { ArrayExt } from '@phosphor/algorithm';
 
 export class Body extends ReactWidget {
@@ -28,11 +29,29 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
   const [data, setData] = useState(model.scopes);
 
   useEffect(() => {
+    const convert = (scopes: Variables.IScope[]) => {
+      const convertet = scopes.map(scope => {
+        scope.variables = scope.variables.map(variable => {
+          const func = () => {
+            void model.getMoreDataOfVariable(variable);
+          };
+          if (variable.haveMoreDetails) {
+            return { ...variable };
+          } else {
+            return { getMoreDetails: func, ...variable };
+          }
+        });
+        return { ...scope };
+      });
+      return convertet;
+    };
+
     const updateScopes = (_: Variables.Model, update: Variables.IScope[]) => {
       if (ArrayExt.shallowEqual(data, update)) {
         return;
       }
-      setData(update);
+      const newData = convert(update);
+      setData(newData);
     };
 
     model.scopesChanged.connect(updateScopes);
@@ -77,8 +96,14 @@ const defaultNodeRenderer = ({
 }) => {
   const label = data.name === '' || data.name == null ? name : data.name;
   const value = data.value;
+  let dontDisplay = false;
 
-  return depth === 0 ? (
+  if (data instanceof Function) {
+    data();
+    dontDisplay = true;
+  }
+
+  return dontDisplay ? null : depth === 0 ? (
     <span>
       <span>{label}</span>
       <span>: </span>

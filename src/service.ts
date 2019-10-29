@@ -143,6 +143,7 @@ export class DebugService implements IDebugger {
     this.session.client.kernel.requestExecute({ code });
 
     await this.getAllFrames();
+    this._model.variablesModel.variableExapnded.connect(this.getVariable);
   }
 
   getAllFrames = async () => {
@@ -197,6 +198,23 @@ export class DebugService implements IDebugger {
       frameId: frame.id
     });
     return reply.body.scopes;
+  };
+
+  getVariable = async (_: any, variable: DebugProtocol.Variable) => {
+    if (!variable && variable.variablesReference !== 0) {
+      return;
+    }
+    const reply = await this.session.sendRequest('variables', {
+      variablesReference: variable.variablesReference
+    });
+    let newVariable = { ...variable };
+    reply.body.variables.forEach((ele: DebugProtocol.Variable) => {
+      newVariable = { [ele.evaluateName]: ele, ...newVariable };
+    });
+
+    this._model.variablesModel.currentVariable = newVariable;
+
+    return reply.body.variables;
   };
 
   getVariables = async (scopes: DebugProtocol.Scope[]) => {
