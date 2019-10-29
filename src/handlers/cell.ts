@@ -176,7 +176,7 @@ export class CellManager implements IDisposable {
     editor.setGutterMarker(
       lineNumber,
       'breakpoints',
-      isRemoveGutter ? null : this.createMarkerNode()
+      isRemoveGutter ? null : Private.createMarkerNode()
     );
   };
 
@@ -198,13 +198,6 @@ export class CellManager implements IDisposable {
       this.previousLineCount = linesNumber;
     }
   };
-
-  private createMarkerNode() {
-    let marker = document.createElement('div');
-    marker.className = 'jp-breakpoint-marker';
-    marker.innerHTML = '●';
-    return marker;
-  }
 
   private _previousCell: CodeCell;
   private previousLineCount: number;
@@ -236,4 +229,13 @@ export interface ILineInfo {
   wrapClass: string;
   /** Array of line widgets attached to this line. */
   widgets: any;
+}
+
+namespace Private {
+  export function createMarkerNode() {
+    let marker = document.createElement('div');
+    marker.className = 'jp-breakpoint-marker';
+    marker.innerHTML = '●';
+    return marker;
+  }
 }
