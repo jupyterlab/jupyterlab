@@ -128,23 +128,6 @@ export class DebugService implements IDebugger {
     return this._eventMessage;
   }
 
-  // this will change for after execute cell
-  async launch(code: string): Promise<void> {
-    this.frames = [];
-
-    const breakpoints: DebugProtocol.SourceBreakpoint[] = this.getBreakpoints();
-    const dumpedCell = await this.session.sendRequest('dumpCell', {
-      code
-    });
-
-    await this.setBreakpoints(breakpoints, dumpedCell.body.sourcePath);
-    await this.session.sendRequest('configurationDone', {});
-
-    this.session.client.kernel.requestExecute({ code });
-
-    await this.getAllFrames();
-  }
-
   getAllFrames = async () => {
     const stackFrames = await this.getFrames(this.currentThread());
 
