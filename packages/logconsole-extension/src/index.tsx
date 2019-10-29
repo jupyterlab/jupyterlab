@@ -143,7 +143,7 @@ function activateLogConsole(
     logConsoleWidget.addClass('jp-LogConsole');
     logConsoleWidget.title.closable = true;
     logConsoleWidget.title.label = 'Log Console';
-    logConsoleWidget.title.iconClass = 'jp-LogConsoleIcon';
+    logConsoleWidget.title.iconClass = 'jp-ListIcon';
 
     const addCheckpointButton = new CommandToolbarButton({
       commands: app.commands,
