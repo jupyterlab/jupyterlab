@@ -9,10 +9,10 @@ import { DebugProtocol } from 'vscode-debugprotocol';
 import { Signal, ISignal } from '@phosphor/signaling';
 
 export class Callstack extends Panel {
-  constructor(options: Callstack.IOptions = {}) {
+  constructor(options: Callstack.IOptions) {
     super();
 
-    this.model = new Callstack.IModel([]);
+    this.model = options.model;
     this.addClass('jp-DebuggerCallstack');
     this.title.label = 'Callstack';
 
@@ -74,7 +74,7 @@ export class Callstack extends Panel {
     );
   }
 
-  readonly model: Callstack.IModel;
+  readonly model: Callstack.Model;
 }
 
 class CallstackHeader extends Widget {
@@ -96,9 +96,7 @@ class CallstackHeader extends Widget {
 export namespace Callstack {
   export interface IFrame extends DebugProtocol.StackFrame {}
 
-  export interface IModel {}
-
-  export class IModel implements IModel {
+  export class Model {
     constructor(model: IFrame[]) {
       this._state = model;
     }
@@ -135,5 +133,7 @@ export namespace Callstack {
     private _currentFrameChanged = new Signal<this, IFrame>(this);
   }
 
-  export interface IOptions extends Panel.IOptions {}
+  export interface IOptions extends Panel.IOptions {
+    model: Model;
+  }
 }

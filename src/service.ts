@@ -10,15 +10,17 @@ import { Variables } from './variables';
 
 import { Callstack } from './callstack';
 
-export class DebugService implements IDebugger.IService {
-  constructor(debuggerModel: Debugger.Model) {
+export class DebugService implements IDebugger {
+  constructor() {
     // Avoids setting session with invalid client
     // session should be set only when a notebook or
     // a console get the focus.
     // TODO: also checks that the notebook or console
     // runs a kernel with debugging ability
     this._session = null;
-    this._model = debuggerModel;
+    // The model will be set by the UI which can be built
+    // after the service.
+    this._model = null;
   }
 
   dispose(): void {
@@ -31,6 +33,26 @@ export class DebugService implements IDebugger.IService {
 
   get isDisposed(): boolean {
     return this._isDisposed;
+  }
+
+  get mode(): IDebugger.Mode {
+    return this._model.mode;
+  }
+
+  set mode(mode: IDebugger.Mode) {
+    this._model.mode = mode;
+  }
+
+  get model(): Debugger.Model {
+    return this._model;
+  }
+
+  set model(model: Debugger.Model) {
+    this._model = model;
+  }
+
+  get session(): IDebugger.ISession {
+    return this._session;
   }
 
   set session(session: IDebugger.ISession) {
@@ -48,15 +70,11 @@ export class DebugService implements IDebugger.IService {
         void this.getAllFrames();
       } else if (event.event === 'continued') {
         this._threadStopped.delete(event.body.threadId);
-        this._model.linesCleared.emit();
+        this.onContinued();
       }
       this._eventMessage.emit(event);
     });
     this._sessionChanged.emit(session);
-  }
-
-  get session() {
-    return this._session;
   }
 
   canStart(): boolean {
@@ -102,11 +120,11 @@ export class DebugService implements IDebugger.IService {
     }
   }
 
-  get sessionChanged(): ISignal<IDebugger.IService, IDebugger.ISession> {
+  get sessionChanged(): ISignal<IDebugger, IDebugger.ISession> {
     return this._sessionChanged;
   }
 
-  get eventMessage(): ISignal<IDebugger.IService, IDebugger.ISession.Event> {
+  get eventMessage(): ISignal<IDebugger, IDebugger.ISession.Event> {
     return this._eventMessage;
   }
 
@@ -139,24 +157,22 @@ export class DebugService implements IDebugger.IService {
         scopes: values
       });
       if (index === 0) {
-        this._model.sidebar.variables.model.scopes = values;
+        this._model.variablesModel.scopes = values;
         this._model.currentLineChanged.emit(frame.line);
       }
     });
 
     if (stackFrames) {
-      this._model.sidebar.callstack.model.frames = stackFrames;
+      this._model.callstackModel.frames = stackFrames;
     }
 
-    this._model.sidebar.callstack.model.currentFrameChanged.connect(
-      this.onChangeFrame
-    );
+    this._model.callstackModel.currentFrameChanged.connect(this.onChangeFrame);
   };
 
-  onChangeFrame = (_: Callstack.IModel, update: Callstack.IFrame) => {
+  onChangeFrame = (_: Callstack.Model, update: Callstack.IFrame) => {
     const frame = this.frames.find(ele => ele.id === update.id);
     if (frame && frame.scopes) {
-      this._model.sidebar.variables.model.scopes = frame.scopes;
+      this._model.variablesModel.scopes = frame.scopes;
     }
   };
 
@@ -194,7 +210,7 @@ export class DebugService implements IDebugger.IService {
   };
 
   getBreakpoints = (): DebugProtocol.SourceBreakpoint[] => {
-    return this._model.sidebar.breakpoints.model.breakpoints.map(breakpoint => {
+    return this._model.breakpointsModel.breakpoints.map(breakpoint => {
       return {
         line: breakpoint.line
       };
@@ -240,6 +256,12 @@ export class DebugService implements IDebugger.IService {
     });
   };
 
+  private onContinued() {
+    this._model.linesCleared.emit();
+    this._model.callstackModel.frames = [];
+    this._model.variablesModel.scopes = [];
+  }
+
   private currentThread(): number {
     // TODO: ask the model for the current thread ID
     return 1;
@@ -247,13 +269,8 @@ export class DebugService implements IDebugger.IService {
 
   private _isDisposed: boolean = false;
   private _session: IDebugger.ISession;
-  private _sessionChanged = new Signal<IDebugger.IService, IDebugger.ISession>(
-    this
-  );
-  private _eventMessage = new Signal<
-    IDebugger.IService,
-    IDebugger.ISession.Event
-  >(this);
+  private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
+  private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
   private _model: Debugger.Model;
   private frames: Frame[] = [];
   // TODO: move this in model

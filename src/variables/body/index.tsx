@@ -11,24 +11,24 @@ import React, { useState, useEffect } from 'react';
 import { ArrayExt } from '@phosphor/algorithm';
 
 export class Body extends ReactWidget {
-  constructor(model: Variables.IModel) {
+  constructor(model: Variables.Model) {
     super();
     this.model = model;
     this.addClass('jp-DebuggerVariables-body');
   }
 
-  model: Variables.IModel;
+  model: Variables.Model;
 
   render() {
     return <VariableComponent model={this.model} />;
   }
 }
 
-const VariableComponent = ({ model }: { model: Variables.IModel }) => {
+const VariableComponent = ({ model }: { model: Variables.Model }) => {
   const [data, setData] = useState(model.scopes);
 
   useEffect(() => {
-    const updateScopes = (_: Variables.IModel, update: Variables.IScope[]) => {
+    const updateScopes = (_: Variables.Model, update: Variables.IScope[]) => {
       if (ArrayExt.shallowEqual(data, update)) {
         return;
       }
