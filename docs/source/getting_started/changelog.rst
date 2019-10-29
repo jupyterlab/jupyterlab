@@ -6,8 +6,8 @@ JupyterLab Changelog
 `v1.2.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v1.2.0>`__
 ---------------------------------------------------------------------------
 
-RELEASE DATE
-^^^^^^^^^^^^
+October 29, 2019
+^^^^^^^^^^^^^^^^
 
 Here are some highlights for this release. See the `JupyterLab
 1.2.0 <https://github.com/jupyterlab/jupyterlab/milestone/38?closed=1>`__
@@ -17,11 +17,12 @@ User-facing changes
 ^^^^^^^^^^^^^^^^^^^
 
 * Select cells from the current cell to the top of the notebook with ``Shift Home``, to the bottom of the notebook with ``Shift End`` (`#7336 <https://github.com/jupyterlab/jupyterlab/pull/7336>`__, `#6783 <https://github.com/jupyterlab/jupyterlab/pull/6783>`__)
-* Add a log console extension to display unhandled messages and other activity (`#7318 <https://github.com/jupyterlab/jupyterlab/pull/7318>`__, `#7319 <https://github.com/jupyterlab/jupyterlab/pull/7319>`__)
+* Add a log console extension to display unhandled messages and other activity (`#7318 <https://github.com/jupyterlab/jupyterlab/pull/7318>`__, `#7319 <https://github.com/jupyterlab/jupyterlab/pull/7319>`__,  `#7379 <https://github.com/jupyterlab/jupyterlab/pull/7379>`__, `#7399 <https://github.com/jupyterlab/jupyterlab/pull/7399>`__,  `#7406 <https://github.com/jupyterlab/jupyterlab/pull/7406>`__, `#7421 <https://github.com/jupyterlab/jupyterlab/pull/7421>`__)
 * Allow the npm ``max-old-space`` option to be specified outside of JupyterLab (`#7317 <https://github.com/jupyterlab/jupyterlab/pull/7317>`__)
 * Only display node structure in a JSON tree view for arrays and empty objects (`#7261 <https://github.com/jupyterlab/jupyterlab/pull/7261>`__)
 * Make much smaller distribution packages by not building JavaScript source maps for releases. (`#7150 <https://github.com/jupyterlab/jupyterlab/pull/7150>`__)
 * Add support for pasting cell attachments and dragging attachments from the file browser (`#5913 <https://github.com/jupyterlab/jupyterlab/pull/5913>`__, `#5744 <https://github.com/jupyterlab/jupyterlab/issues/5744>`__)
+* Add a new ``yarn_registry`` configuration parameter to override the default yarn repository when building (`#7363 <https://github.com/jupyterlab/jupyterlab/pull/7363>`__, `#7109 <https://github.com/jupyterlab/jupyterlab/pull/7109>`__)
 
 
 For developers
@@ -44,6 +45,8 @@ Bugfixes
 * Fix opening multiple browser tabs in Safari (`#7322 <https://github.com/jupyterlab/jupyterlab/pull/7322>`__)
 * Fix context menus on SVG icons (`#7263 <https://github.com/jupyterlab/jupyterlab/pull/7263>`__)
 * Fix overwriting of target attribute of anchors rendered by ``IPython.display`` (`#7231 <https://github.com/jupyterlab/jupyterlab/pull/7231>`__)
+* Fix multi-cursor backspacing (`#7205 <https://github.com/jupyterlab/jupyterlab/pull/7205>`__,  `#7401 <https://github.com/jupyterlab/jupyterlab/pull/7401>`__,  `#7413 <https://github.com/jupyterlab/jupyterlab/pull/7413>`__)
+* Fix mult-cursor cell splitting (`#7207 <https://github.com/jupyterlab/jupyterlab/pull/7207>`__, `#7417 <https://github.com/jupyterlab/jupyterlab/pull/7417>`__, `#7419 <https://github.com/jupyterlab/jupyterlab/pull/7419>`__)
 
 
 `v1.1.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v1.1.0>`__
