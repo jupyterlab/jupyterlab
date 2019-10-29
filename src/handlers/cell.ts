@@ -5,13 +5,13 @@ import { CodeCell } from '@jupyterlab/cells';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
-import { Editor, Doc } from 'codemirror';
+import { Doc, Editor } from 'codemirror';
 
 import { Breakpoints, SessionTypes } from '../breakpoints';
 
+import { IDisposable } from '@phosphor/disposable';
 import { Debugger } from '../debugger';
 import { IDebugger } from '../tokens';
-import { IDisposable } from '@phosphor/disposable';
 
 import { Signal } from '@phosphor/signaling';
 
@@ -148,7 +148,6 @@ export class CellManager implements IDisposable {
 
   protected removeListener(cell: CodeCell) {
     const editor = cell.editor as CodeMirrorEditor;
-    editor.setOption('lineNumbers', false);
     editor.editor.off('gutterClick', this.onGutterClick);
     editor.editor.off('renderLine', this.onNewRenderLine);
   }
