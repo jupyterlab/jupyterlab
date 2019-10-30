@@ -3,10 +3,10 @@
 
 import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
-import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
-import { Body } from './body';
+import { ISignal, Signal } from '@phosphor/signaling';
+import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
 import { DebugProtocol } from 'vscode-debugprotocol';
-import { Signal, ISignal } from '@phosphor/signaling';
+import { Body } from './body';
 
 export class Callstack extends Panel {
   constructor(options: Callstack.IOptions) {

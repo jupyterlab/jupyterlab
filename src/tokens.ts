@@ -58,6 +58,18 @@ export interface IDebugger {
   isThreadStopped(): boolean;
 
   /**
+   * Starts a debugger.
+   * Precondition: canStart() && !isStarted()
+   */
+  start(): Promise<void>;
+
+  /**
+   * Stops the debugger.
+   * Precondition: isStarted()
+   */
+  stop(): Promise<void>;
+
+  /**
    * Continues the execution of the current thread.
    */
   continue(): Promise<void>;

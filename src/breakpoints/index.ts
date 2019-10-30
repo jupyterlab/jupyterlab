@@ -3,11 +3,11 @@
 
 import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
-import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
-import { DebugProtocol } from 'vscode-debugprotocol';
-import { Body } from './body';
 import { Signal } from '@phosphor/signaling';
+import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
+import { DebugProtocol } from 'vscode-debugprotocol';
 import { ILineInfo } from '../handlers/cell';
+import { Body } from './body';
 
 export class Breakpoints extends Panel {
   constructor(options: Breakpoints.IOptions) {
