@@ -44,13 +44,17 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
 
   return (
     <div>
-      {breakpoints.map((breakpoint: Breakpoints.IBreakpoint) => (
-        <BreakpointComponent
-          key={breakpoint.line}
-          breakpoint={breakpoint}
-          breakpointChanged={model.breakpointChanged}
-        />
-      ))}
+      {breakpoints
+        .sort((a, b) => {
+          return a.line - b.line;
+        })
+        .map((breakpoint: Breakpoints.IBreakpoint) => (
+          <BreakpointComponent
+            key={breakpoint.line}
+            breakpoint={breakpoint}
+            breakpointChanged={model.breakpointChanged}
+          />
+        ))}
     </div>
   );
 };
