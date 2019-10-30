@@ -12,7 +12,7 @@ import sys
 
 from jupyter_core.application import JupyterApp, base_aliases
 from jupyterlab_server import slugify, WORKSPACE_EXTENSION
-from .notebookapp import NotebookApp, aliases, flags
+from nbclassic.notebookapp import NotebookApp, aliases, flags
 from jupyter_server.utils import url_path_join as ujoin
 from traitlets import Bool, Instance, Unicode
 

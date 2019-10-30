@@ -2,7 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 from jupyterlab_server import LabServerApp, LabConfig
-from notebook.utils import url_path_join as ujoin
+from jupyter_server.utils import url_path_join as ujoin
 import json
 import os
 from traitlets import Unicode
@@ -33,14 +33,6 @@ class ExampleApp(LabServerApp):
         user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
         workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),
     )
-
-    def start(self):
-        settings = self.web_app.settings
-
-        # By default, make terminals available.
-        settings.setdefault('terminals_available', True)
-
-        super().start()
 
 if __name__ == '__main__':
     ExampleApp.launch_instance()
