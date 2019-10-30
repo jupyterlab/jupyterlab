@@ -14,6 +14,14 @@
   color: var(--jp-error-color1);
 }
 
+.jp-breakpoint-hover {
+  position: absolute;
+  left: 3px;
+  top: -1px;
+  color: var(--jp-error-color1);
+  opacity: 0.5;
+}
+
 .jp-breakpoint-line-highlight {
   background-color: var(--jp-warn-color0);
 }

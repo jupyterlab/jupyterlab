@@ -10,12 +10,15 @@ import { Doc, Editor } from 'codemirror';
 import { Breakpoints, SessionTypes } from '../breakpoints';
 
 import { IDisposable } from '@phosphor/disposable';
+
 import { Debugger } from '../debugger';
+
 import { IDebugger } from '../tokens';
 
 import { Signal } from '@phosphor/signaling';
 
 const LINE_HIGHLIGHT_CLASS = 'jp-breakpoint-line-highlight';
+const GUTTER_HOVER_CLASS = 'jp-breakpoint-hover';
 
 export class CellManager implements IDisposable {
   constructor(options: CellManager.IOptions) {
@@ -152,6 +155,27 @@ export class CellManager implements IDisposable {
 
     editor.editor.on('gutterClick', this.onGutterClick);
     editor.editor.on('renderLine', this.onNewRenderLine);
+
+    this.setHover();
+  }
+
+  setHover() {
+    const elements = document.getElementsByClassName(
+      'CodeMirror-gutter-wrapper'
+    );
+    for (let element of elements) {
+      const check = element.getElementsByClassName(GUTTER_HOVER_CLASS);
+      if (check.length === 0) {
+        let hoverGutterElement = Private.createHoverNode();
+        element.appendChild(hoverGutterElement);
+        (element as HTMLElement).onmouseover = () => {
+          hoverGutterElement.hidden = false;
+        };
+        (element as HTMLElement).onmouseleave = () => {
+          hoverGutterElement.hidden = true;
+        };
+      }
+    }
   }
 
   protected removeListener(cell: CodeCell) {
@@ -186,6 +210,7 @@ export class CellManager implements IDisposable {
       'breakpoints',
       isRemoveGutter ? null : Private.createMarkerNode()
     );
+    setTimeout(this.setHover);
   };
 
   protected onNewRenderLine = (editor: Editor, line: any) => {
@@ -257,5 +282,12 @@ namespace Private {
     marker.className = 'jp-breakpoint-marker';
     marker.innerHTML = '●';
     return marker;
+  }
+  export function createHoverNode() {
+    let hoverGutterElement = document.createElement('div');
+    hoverGutterElement.innerHTML = '●';
+    hoverGutterElement.className = GUTTER_HOVER_CLASS;
+    hoverGutterElement.hidden = true;
+    return hoverGutterElement;
   }
 }
