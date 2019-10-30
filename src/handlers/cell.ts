@@ -42,6 +42,7 @@ export class CellManager implements IDisposable {
     });
 
     this.breakpointsModel.breakpointsChanged.connect(async () => {
+      this.addBreakpointsToEditor(this.activeCell);
       await this._debuggerService.updateBreakpoints();
     });
   }
@@ -180,12 +181,6 @@ export class CellManager implements IDisposable {
         info
       );
     }
-
-    editor.setGutterMarker(
-      lineNumber,
-      'breakpoints',
-      isRemoveGutter ? null : Private.createMarkerNode()
-    );
   };
 
   protected onNewRenderLine = (editor: Editor, line: any) => {
@@ -206,6 +201,19 @@ export class CellManager implements IDisposable {
       this.previousLineCount = linesNumber;
     }
   };
+
+  private addBreakpointsToEditor(cell: CodeCell) {
+    this.clearGutter(cell);
+    const editor = cell.editor as CodeMirrorEditor;
+    const breakpoints = this._debuggerModel.breakpointsModel.breakpoints;
+    breakpoints.forEach(breakpoint => {
+      editor.editor.setGutterMarker(
+        breakpoint.line - 1,
+        'breakpoints',
+        Private.createMarkerNode()
+      );
+    });
+  }
 
   private getBreakpointsInfo(cell: CodeCell): ILineInfo[] {
     const editor = cell.editor as CodeMirrorEditor;
