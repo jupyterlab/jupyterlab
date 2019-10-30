@@ -27,14 +27,15 @@ import React from 'react';
 function LogConsoleStatusComponent(
   props: LogConsoleStatusComponent.IProps
 ): React.ReactElement<LogConsoleStatusComponent.IProps> {
+  let title = '';
+  if (props.newMessages > 0) {
+    title = `${props.newMessages} new messages, `;
+  }
+  title += `${props.logEntries} log entries for ${props.source}`;
   return (
-    <GroupItem
-      spacing={0}
-      onClick={props.handleClick}
-      title={`${props.messages} messages in current log`}
-    >
+    <GroupItem spacing={0} onClick={props.handleClick} title={title}>
       <DefaultIconReact name={'list'} top={'2px'} kind={'statusBar'} />
-      <TextItem source={props.messages} />
+      {props.newMessages > 0 && <TextItem source={props.newMessages} />}
     </GroupItem>
   );
 }
@@ -54,9 +55,19 @@ namespace LogConsoleStatusComponent {
     handleClick: () => void;
 
     /**
-     * Number of log messages.
+     * Number of log entries.
      */
-    messages: number;
+    logEntries: number;
+
+    /**
+     * Number of new log messages.
+     */
+    newMessages: number;
+
+    /**
+     * Log source name
+     */
+    source: string;
   }
 }
 
@@ -106,7 +117,9 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
     return (
       <LogConsoleStatusComponent
         handleClick={this._handleClick}
-        messages={messages}
+        logEntries={messages}
+        newMessages={version - versionDisplayed}
+        source={this.model.source}
       />
     );
   }
