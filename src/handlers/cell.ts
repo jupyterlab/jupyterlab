@@ -172,7 +172,7 @@ export class CellManager implements IDisposable {
 
     const isRemoveGutter = !!info.gutterMarkers;
     if (isRemoveGutter) {
-      this.breakpointsModel.removeBreakpoint(info.line + 1);
+      this.breakpointsModel.removeBreakpointAtLine(info.line + 1);
     } else {
       this.breakpointsModel.addBreakpoint(
         Private.createBreakpoint(

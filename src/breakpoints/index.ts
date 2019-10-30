@@ -120,7 +120,7 @@ export namespace Breakpoints {
       this.breakpoints = this._state[newType];
     }
 
-    removeBreakpoint(line: number) {
+    removeBreakpointAtLine(line: number) {
       const breakpoints = this.breakpoints.filter(ele => ele.line !== line);
       this.breakpoints = breakpoints;
     }
