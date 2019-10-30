@@ -1,8 +1,12 @@
+#!/usr/bin/env bash
+
 # Test a release wheel in a fresh conda environment with and without installed
 # extensions
-set -x
-set -e
-old="${CONDA_DEFAULT_ENV}"
+
+# initialize the shell
+set -ex
+. $(conda info --base)/etc/profile.d/conda.sh
+
 JLAB_TEST_ENV="${CONDA_DEFAULT_ENV}_test"
 TEST_DIR=$(mktemp -d -t $JLAB_TEST_ENV)
 
@@ -27,5 +31,6 @@ jupyter lab clean
 conda install --override-channels --strict-channel-priority -c conda-forge -c anaconda -y ipywidgets altair matplotlib vega_datasets
 jupyter lab build && python -m jupyterlab.browser_check && jupyter lab
 
+# undo our environment changes just in case we are sourcing this script
 conda deactivate
 popd

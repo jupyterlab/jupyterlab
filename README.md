@@ -129,13 +129,13 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
   prolific contributions throughout the code base).
 - Jessica Forde, Project Jupyter (demo, documentation)
 - Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
-- Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
+- Brian Granger, AWS (co-creator, strategy, vision, management, UI/UX design,
   architecture).
 - Jason Grout, Bloomberg (co-creator, vision, general development).
 - Fernando Perez, UC Berkeley (co-creator, vision).
 - Ian Rose, Quansight/City of LA (general core development, extensions).
 - Saul Shanabrook, Quansight (general development, extensions)
-- Steven Silvester, JPMorgan Chase (co-creator, release management, packaging,
+- Steven Silvester, AWS (co-creator, release management, packaging,
   prolific contributions throughout the code base).
 - Vidar T. Fauske, JPMorgan Chase (general development, extensions).
 

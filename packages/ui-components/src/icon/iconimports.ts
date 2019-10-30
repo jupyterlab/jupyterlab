@@ -28,6 +28,7 @@ import tabSvg from '../../style/icons/sidebar/tab.svg';
 import jupyterFaviconSvg from '../../style/icons/splash/jupyter-favicon.svg';
 import kernelSvg from '../../style/icons/statusbar/kernel.svg';
 import lineFormSvg from '../../style/icons/statusbar/line-form.svg';
+import listSvg from '../../style/icons/statusbar/list.svg';
 import notTrustedSvg from '../../style/icons/statusbar/not-trusted.svg';
 import terminalSvg from '../../style/icons/statusbar/terminal.svg';
 import trustedSvg from '../../style/icons/statusbar/trusted.svg';
@@ -63,6 +64,7 @@ export namespace IconImports {
     { name: 'jupyter-favicon', svg: jupyterFaviconSvg },
     { name: 'kernel', svg: kernelSvg },
     { name: 'line-form', svg: lineFormSvg },
+    { name: 'list', svg: listSvg },
     { name: 'not-trusted', svg: notTrustedSvg },
     { name: 'terminal', svg: terminalSvg },
     { name: 'trusted', svg: trustedSvg },

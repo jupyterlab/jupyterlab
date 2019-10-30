@@ -495,7 +495,7 @@ Alternatively, you can install the documentation dependencies in an existing env
 conda env update -n <ENVIRONMENT> -f docs/environment.yml
 ```
 
-The Developer Documentation includes a [guide](http://jupyterlab.readthedocs.io/en/latest/developer/contributing.html) to writing documentation including writing style, naming conventions, keyboard shortcuts, and screenshots.
+The Developer Documentation includes a [guide](https://jupyterlab.readthedocs.io/en/latest/developer/contributing.html) to writing documentation including writing style, naming conventions, keyboard shortcuts, and screenshots.
 
 To test the docs run:
 
