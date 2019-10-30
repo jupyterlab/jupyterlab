@@ -79,6 +79,9 @@ async function setDebugSession(
     debug.session.client = client;
   }
   await debug.session.restoreState();
+  if (debug.canStart()) {
+    await debug.start();
+  }
   app.commands.notifyCommandChanged();
 }
 
@@ -243,7 +246,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     let widget: MainAreaWidget<Debugger>;
 
     commands.addCommand(CommandIDs.mount, {
-      execute: args => {
+      execute: async args => {
         if (!widget) {
           return;
         }
@@ -277,28 +280,10 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         sidebar.id = 'jp-debugger-sidebar';
         sidebar.title.label = 'Environment';
         shell.add(sidebar, 'right', { activate: false });
-      }
-    });
 
-    commands.addCommand(CommandIDs.stop, {
-      label: 'Stop',
-      isEnabled: () => {
-        return service.isStarted();
-      },
-      execute: async () => {
-        await service.session.stop();
-        commands.notifyCommandChanged();
-      }
-    });
-
-    commands.addCommand(CommandIDs.start, {
-      label: 'Start',
-      isEnabled: () => {
-        return widget && service.canStart();
-      },
-      execute: async () => {
-        await service.session.start();
-        commands.notifyCommandChanged();
+        if (service.canStart()) {
+          await service.start();
+        }
       }
     });
 
@@ -393,8 +378,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       const category = 'Debugger';
       palette.addItem({ command: CommandIDs.changeMode, category });
       palette.addItem({ command: CommandIDs.create, category });
-      palette.addItem({ command: CommandIDs.start, category });
-      palette.addItem({ command: CommandIDs.stop, category });
       palette.addItem({ command: CommandIDs.debugContinue, category });
       palette.addItem({ command: CommandIDs.next, category });
       palette.addItem({ command: CommandIDs.stepIn, category });

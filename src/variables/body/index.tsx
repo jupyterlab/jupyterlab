@@ -3,12 +3,12 @@
 
 import { Variables } from '../index';
 
-import { ObjectInspector, ObjectLabel, ITheme } from 'react-inspector';
+import { ITheme, ObjectInspector, ObjectLabel } from 'react-inspector';
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
-import React, { useState, useEffect } from 'react';
 import { ArrayExt } from '@phosphor/algorithm';
+import React, { useEffect, useState } from 'react';
 
 export class Body extends ReactWidget {
   constructor(model: Variables.Model) {
