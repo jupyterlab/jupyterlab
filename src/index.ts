@@ -2,10 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  ILabShell
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -17,11 +17,11 @@ import {
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { IConsoleTracker, ConsolePanel } from '@jupyterlab/console';
+import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
 import { IStateDB } from '@jupyterlab/coreutils';
 
-import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
+import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
@@ -242,10 +242,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
     let widget: MainAreaWidget<Debugger>;
 
-    const getModel = () => {
-      return tracker.currentWidget ? tracker.currentWidget.content.model : null;
-    };
-
     commands.addCommand(CommandIDs.mount, {
       execute: args => {
         if (!widget) {
@@ -334,18 +330,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       },
       execute: async () => {
         await service.stepIn();
-      }
-    });
-
-    commands.addCommand(CommandIDs.debugNotebook, {
-      label: 'Launch',
-      isEnabled: () => {
-        return service.isStarted();
-      },
-      execute: async () => {
-        await tracker.currentWidget.content.service.launch(
-          getModel().codeValue.text
-        );
       }
     });
 
