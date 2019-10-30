@@ -86,11 +86,6 @@ export interface IDebugger {
    * Signal emitted for debug event messages.
    */
   eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
-
-  /**
-   * For testing purpose only, to be removed.
-   */
-  launch(code: string): Promise<void>;
 }
 
 /**

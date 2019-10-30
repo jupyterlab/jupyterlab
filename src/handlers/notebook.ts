@@ -50,7 +50,7 @@ export class DebuggerNotebookHandler implements IDisposable {
     Signal.clearData(this);
   }
 
-  protected onNewCell(noteTracker: NotebookTracker, codeCell: CodeCell) {
+  protected onNewCell(notebookTracker: NotebookTracker, codeCell: CodeCell) {
     if (this.cellManager) {
       this.cellManager.activeCell = codeCell;
     } else {
