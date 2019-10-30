@@ -207,14 +207,6 @@ export class DebugService implements IDebugger {
     return reply.body.variables;
   };
 
-  getBreakpoints = (): DebugProtocol.SourceBreakpoint[] => {
-    return this._model.breakpointsModel.breakpoints.map(breakpoint => {
-      return {
-        line: breakpoint.line
-      };
-    });
-  };
-
   setBreakpoints = async (
     breakpoints: DebugProtocol.SourceBreakpoint[],
     path: string
@@ -222,21 +214,29 @@ export class DebugService implements IDebugger {
     // Workaround: this should not be called before the session has started
     const client = this.session.client as IClientSession;
     await client.ready;
-    await this.session.sendRequest('setBreakpoints', {
+    return await this.session.sendRequest('setBreakpoints', {
       breakpoints: breakpoints,
       source: { path },
       sourceModified: false
     });
   };
 
-  updateBreakpoints = async () => {
+  updateBreakpoints = async (breakpoints: DebugProtocol.SourceBreakpoint[]) => {
     if (!this.session.isStarted) {
       return;
     }
     const code = this._model.codeValue.text;
     const dumpedCell = await this.dumpCell(code);
-    const breakpoints = this.getBreakpoints();
-    await this.setBreakpoints(breakpoints, dumpedCell.sourcePath);
+    const reply = await this.setBreakpoints(breakpoints, dumpedCell.sourcePath);
+    this._model.breakpointsModel.breakpoints = reply.body.breakpoints.map(
+      breakpoint => {
+        return {
+          ...breakpoint,
+          active: true,
+          source: { path: this.session.client.name }
+        };
+      }
+    );
     await this.session.sendRequest('configurationDone', {});
   };
 

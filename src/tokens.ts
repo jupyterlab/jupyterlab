@@ -87,7 +87,9 @@ export interface IDebugger {
   /**
    * Update all breakpoints at once.
    */
-  updateBreakpoints(): Promise<void>;
+  updateBreakpoints(
+    breakpoints: DebugProtocol.SourceBreakpoint[]
+  ): Promise<void>;
 
   /**
    * Signal emitted upon session changed.
