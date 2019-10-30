@@ -115,8 +115,8 @@ export namespace Variables {
       return this._variablesChanged;
     }
 
-    get variableExapnded(): ISignal<this, IVariable> {
-      return this._variableExapnded;
+    get variableExpanded(): ISignal<this, IVariable> {
+      return this._variableExpanded;
     }
 
     getCurrentVariables(): IVariable[] {
@@ -124,7 +124,7 @@ export namespace Variables {
     }
 
     async getMoreDataOfVariable(variable: IVariable) {
-      this._variableExapnded.emit(variable);
+      this._variableExpanded.emit(variable);
     }
 
     protected _state: IScope[];
@@ -135,7 +135,7 @@ export namespace Variables {
     private _currentChanged = new Signal<this, IVariable>(this);
     private _variablesChanged = new Signal<this, IVariable[]>(this);
     private _scopesChanged = new Signal<this, IScope[]>(this);
-    private _variableExapnded = new Signal<this, IVariable>(this);
+    private _variableExpanded = new Signal<this, IVariable>(this);
   }
 
   export interface IOptions extends Panel.IOptions {

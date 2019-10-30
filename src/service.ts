@@ -150,7 +150,7 @@ export class DebugService implements IDebugger {
     }
 
     this._model.callstackModel.currentFrameChanged.connect(this.onChangeFrame);
-    this._model.variablesModel.variableExapnded.connect(this.getVariable);
+    this._model.variablesModel.variableExpanded.connect(this.getVariable);
   };
 
   onChangeFrame = (_: Callstack.Model, update: Callstack.IFrame) => {

@@ -30,7 +30,7 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
 
   useEffect(() => {
     const convert = (scopes: Variables.IScope[]) => {
-      const convertet = scopes.map(scope => {
+      const converted = scopes.map(scope => {
         scope.variables = scope.variables.map(variable => {
           const func = () => {
             void model.getMoreDataOfVariable(variable);
@@ -43,7 +43,7 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
         });
         return { ...scope };
       });
-      return convertet;
+      return converted;
     };
 
     const updateScopes = (_: Variables.Model, update: Variables.IScope[]) => {
