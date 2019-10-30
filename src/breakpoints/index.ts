@@ -41,7 +41,7 @@ export class Breakpoints extends Panel {
       new ToolbarButton({
         iconClassName: 'jp-CloseAllIcon',
         onClick: () => {
-          this.model.clearSelectedBreakpoints();
+          this.model.clearAllBreakpoints();
         },
         tooltip: 'Remove All Breakpoints'
       })
@@ -80,7 +80,6 @@ export namespace Breakpoints {
     }
 
     breakpointsChanged = new Signal<this, IBreakpoint[]>(this);
-    clearedBreakpoints = new Signal<this, SessionTypes | null>(this);
 
     get breakpoints(): IBreakpoint[] {
       return this._breakpoints;
@@ -125,9 +124,8 @@ export namespace Breakpoints {
       this.breakpoints = breakpoints;
     }
 
-    clearSelectedBreakpoints() {
+    clearAllBreakpoints() {
       this.breakpoints = [];
-      this.clearedBreakpoints.emit(this._selectedType);
     }
 
     changeLines(lines: number[]) {

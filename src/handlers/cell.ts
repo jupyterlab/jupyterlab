@@ -23,15 +23,7 @@ export class CellManager implements IDisposable {
     this._debuggerService = options.debuggerService;
     this.breakpointsModel = options.breakpointsModel;
     this.activeCell = options.activeCell;
-    this._type = options.type;
     this.onActiveCellChanged();
-
-    this.breakpointsModel.clearedBreakpoints.connect((_, type) => {
-      if (type !== this._type) {
-        return;
-      }
-      this.clearGutter(this.activeCell);
-    });
 
     this._debuggerModel.currentLineChanged.connect((_, lineNumber) => {
       this.showCurrentLine(lineNumber);
@@ -232,7 +224,6 @@ export class CellManager implements IDisposable {
   private _previousCell: CodeCell;
   private previousLineCount: number;
   private _debuggerModel: Debugger.Model;
-  private _type: SessionTypes;
   private breakpointsModel: Breakpoints.Model;
   private _activeCell: CodeCell;
   private _debuggerService: IDebugger;
