@@ -134,9 +134,7 @@ export class CellManager implements IDisposable {
       );
     });
 
-    void this._debuggerService.updateBreakpoints(
-      Private.toSourceBreakpoints(editorBreakpoints)
-    );
+    void this._debuggerService.updateBreakpoints(editorBreakpoints);
 
     editor.setOption('lineNumbers', true);
     editor.editor.setOption('gutters', [
@@ -178,9 +176,7 @@ export class CellManager implements IDisposable {
       );
     }
 
-    void this._debuggerService.updateBreakpoints(
-      Private.toSourceBreakpoints(breakpoints)
-    );
+    void this._debuggerService.updateBreakpoints(breakpoints);
   };
 
   protected onNewRenderLine = (editor: Editor, line: any) => {
@@ -260,14 +256,6 @@ export interface ILineInfo {
 }
 
 namespace Private {
-  export function toSourceBreakpoints(breakpoints: Breakpoints.IBreakpoint[]) {
-    return breakpoints.map(breakpoint => {
-      return {
-        line: breakpoint.line
-      };
-    });
-  }
-
   export function createMarkerNode() {
     let marker = document.createElement('div');
     marker.className = 'jp-breakpoint-marker';

@@ -13,6 +13,8 @@ import { IDebugger } from './tokens';
 
 import { Variables } from './variables';
 
+import { Breakpoints } from './breakpoints';
+
 import { Callstack } from './callstack';
 
 export class DebugService implements IDebugger {
@@ -221,13 +223,17 @@ export class DebugService implements IDebugger {
     });
   };
 
-  updateBreakpoints = async (breakpoints: DebugProtocol.SourceBreakpoint[]) => {
+  updateBreakpoints = async (breakpoints: Breakpoints.IBreakpoint[]) => {
     if (!this.session.isStarted) {
       return;
     }
     const code = this._model.codeValue.text;
     const dumpedCell = await this.dumpCell(code);
-    const reply = await this.setBreakpoints(breakpoints, dumpedCell.sourcePath);
+    const sourceBreakpoints = Private.toSourceBreakpoints(breakpoints);
+    const reply = await this.setBreakpoints(
+      sourceBreakpoints,
+      dumpedCell.sourcePath
+    );
     this._model.breakpointsModel.breakpoints = reply.body.breakpoints.map(
       breakpoint => {
         return {
@@ -282,3 +288,13 @@ export type Frame = {
   id: number;
   scopes: Variables.IScope[];
 };
+
+namespace Private {
+  export function toSourceBreakpoints(breakpoints: Breakpoints.IBreakpoint[]) {
+    return breakpoints.map(breakpoint => {
+      return {
+        line: breakpoint.line
+      };
+    });
+  }
+}
