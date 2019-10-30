@@ -234,15 +234,21 @@ export class DebugService implements IDebugger {
       sourceBreakpoints,
       dumpedCell.sourcePath
     );
-    this._model.breakpointsModel.breakpoints = reply.body.breakpoints.map(
-      breakpoint => {
-        return {
-          ...breakpoint,
-          active: true,
-          source: { path: this.session.client.name }
-        };
-      }
+    let kernelBreakpoints = reply.body.breakpoints.map(breakpoint => {
+      return {
+        ...breakpoint,
+        active: true,
+        source: { path: this.session.client.name }
+      };
+    });
+
+    // filter breakpoints with the same line number
+
+    kernelBreakpoints = kernelBreakpoints.filter(
+      (breakpoint, i, arr) =>
+        arr.findIndex(el => el.line === breakpoint.line) === i
     );
+    this._model.breakpointsModel.breakpoints = kernelBreakpoints;
     await this.session.sendRequest('configurationDone', {});
   };
 
