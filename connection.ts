@@ -8,7 +8,7 @@ import {
   IPosition,
   ITokenInfo,
   LspWsConnection
-} from 'lsp-editor-adapter';
+} from 'lsp-ws-connection';
 import { CompletionTriggerKind } from './lsp';
 import { until_ready } from './utils';
 

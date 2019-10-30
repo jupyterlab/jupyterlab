@@ -12,11 +12,11 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { FileEditorJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/fileeditor';
 import { NotebookJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/notebook';
 
-import 'codemirror/addon/hint/show-hint.css';
-import 'codemirror/addon/hint/show-hint';
+// TODO: make use of it for jump target selection (requires to be added to package.json)?
+// import 'codemirror/addon/hint/show-hint.css';
+// import 'codemirror/addon/hint/show-hint';
 import '../style/index.css';
 
-import 'lsp-editor-adapter/lib/codemirror-lsp.css';
 import { ICompletionManager } from '@jupyterlab/completer';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { NotebookAdapter } from './adapters/jupyterlab/notebook';
