@@ -98,8 +98,14 @@ const defaultNodeRenderer = ({
   const value = data.value;
   let dontDisplay = false;
 
-  if (data instanceof Function) {
-    data();
+  if (expanded) {
+    if (data.getMoreDetails) {
+      data.getMoreDetails();
+      dontDisplay = true;
+    }
+  }
+
+  if (typeof data === 'symbol') {
     dontDisplay = true;
   }
 

@@ -54,7 +54,7 @@ class VariablesHeader extends Widget {
 export namespace Variables {
   export interface IVariable extends DebugProtocol.Variable {
     getMoreDetails?: any;
-    haveMoreDetails?: boolean;
+    haveMoreDetails?: Symbol;
   }
 
   export interface IScope {
@@ -80,7 +80,7 @@ export namespace Variables {
         return;
       }
 
-      variable.haveMoreDetails = true;
+      variable.haveMoreDetails = Symbol('haveDetails');
       this._currentVariable = variable;
       this._currentChanged.emit(variable);
 
