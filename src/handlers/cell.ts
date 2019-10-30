@@ -120,7 +120,6 @@ export class CellManager implements IDisposable {
     ) {
       if (this.previousCell && !this.previousCell.isDisposed) {
         this.removeListener(this.previousCell);
-        this.breakpointsModel.breakpoints = [];
       }
       this.previousCell = this.activeCell;
       this.setEditor(this.activeCell);
@@ -136,14 +135,14 @@ export class CellManager implements IDisposable {
 
     this.previousLineCount = editor.lineCount;
 
-    const editorBreakpoints = this.getBreakpointsInfo(cell);
-    editorBreakpoints.forEach(info => {
-      this.breakpointsModel.addBreakpoint(
+    const editorBreakpoints = this.getBreakpointsInfo(cell).map(lineInfo => {
+      return Private.createBreakpoint(
         this._debuggerService.session.client.name,
         this.getEditorId(),
-        info
+        lineInfo.line + 1
       );
     });
+    this._debuggerModel.breakpointsModel.breakpoints = editorBreakpoints;
 
     editor.setOption('lineNumbers', true);
     editor.editor.setOption('gutters', [
@@ -173,12 +172,14 @@ export class CellManager implements IDisposable {
 
     const isRemoveGutter = !!info.gutterMarkers;
     if (isRemoveGutter) {
-      this.breakpointsModel.removeBreakpoint(info as ILineInfo);
+      this.breakpointsModel.removeBreakpoint(info.line + 1);
     } else {
       this.breakpointsModel.addBreakpoint(
-        this._debuggerService.session.client.name,
-        this.getEditorId(),
-        info
+        Private.createBreakpoint(
+          this._debuggerService.session.client.name,
+          this.getEditorId(),
+          info.line + 1
+        )
       );
     }
   };
@@ -191,10 +192,11 @@ export class CellManager implements IDisposable {
     const doc: Doc = editor.getDoc();
     const linesNumber = doc.lineCount();
     if (this.previousLineCount !== linesNumber) {
-      let lines: ILineInfo[] = [];
+      let lines: number[] = [];
       doc.eachLine(line => {
         if ((line as ILineInfo).gutterMarkers) {
-          lines.push(editor.lineInfo(line));
+          const lineInfo = editor.lineInfo(line);
+          lines.push(lineInfo.line + 1);
         }
       });
       this.breakpointsModel.changeLines(lines);
@@ -265,5 +267,20 @@ namespace Private {
     marker.className = 'jp-breakpoint-marker';
     marker.innerHTML = '●';
     return marker;
+  }
+
+  export function createBreakpoint(
+    session: string,
+    type: string,
+    line: number
+  ) {
+    return {
+      line,
+      active: true,
+      verified: true,
+      source: {
+        name: session
+      }
+    };
   }
 }

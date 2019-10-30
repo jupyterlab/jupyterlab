@@ -6,7 +6,6 @@ import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 import { Signal } from '@phosphor/signaling';
 import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
 import { DebugProtocol } from 'vscode-debugprotocol';
-import { ILineInfo } from '../handlers/cell';
 import { Body } from './body';
 
 export class Breakpoints extends Panel {
@@ -108,15 +107,7 @@ export namespace Breakpoints {
       }
     }
 
-    addBreakpoint(session: string, type: string, lineInfo: ILineInfo) {
-      const breakpoint: Breakpoints.IBreakpoint = {
-        line: lineInfo.line + 1,
-        active: true,
-        verified: true,
-        source: {
-          name: session
-        }
-      };
+    addBreakpoint(breakpoint: IBreakpoint) {
       this.breakpoints = [...this._breakpoints, breakpoint];
     }
 
@@ -129,10 +120,8 @@ export namespace Breakpoints {
       this.breakpoints = this._state[newType];
     }
 
-    removeBreakpoint(lineInfo: any) {
-      const breakpoints = this.breakpoints.filter(
-        ele => ele.line !== lineInfo.line + 1
-      );
+    removeBreakpoint(line: number) {
+      const breakpoints = this.breakpoints.filter(ele => ele.line !== line);
       this.breakpoints = breakpoints;
     }
 
@@ -141,17 +130,17 @@ export namespace Breakpoints {
       this.clearedBreakpoints.emit(this._selectedType);
     }
 
-    changeLines(linesInfo: ILineInfo[]) {
-      if (!linesInfo && this.breakpoints.length === 0) {
+    changeLines(lines: number[]) {
+      if (!lines && this.breakpoints.length === 0) {
         return;
       }
-      if (linesInfo.length === 0) {
+      if (lines.length === 0) {
         this.breakpoints = [];
       } else {
         const breakpoint = { ...this.breakpoints[0] };
         let breakpoints: Breakpoints.IBreakpoint[] = [];
-        linesInfo.forEach(ele => {
-          breakpoints.push({ ...breakpoint, line: ele.line + 1 });
+        lines.forEach(line => {
+          breakpoints.push({ ...breakpoint, line });
         });
         this.breakpoints = [...breakpoints];
       }
