@@ -142,6 +142,29 @@ If you ignore the rebuild notice by mistake, simply refresh your browser
 window to trigger a new rebuild check.
 
 
+Disabling Rebuild Checks
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+In some cases, such as automated testing, you may wish to disable the startup
+rebuild checks altogether. This can be achieved through setting ``buildCheck``
+and ``buildAvailable`` in ``jupyter_notebook_config.json`` (or ``.py`` equivalent)
+in any of the ``config`` locations returned by ``jupyter --paths``.
+
+
+.. code:: json
+
+    {
+      "LabApp": {
+        "tornado_settings": {
+          "page_config_data": {
+            "buildCheck": false,
+            "buildAvailable": false,
+          }
+        }
+      }
+    }
+
+
 Managing Installed Extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
