@@ -46,7 +46,7 @@ export class DebuggerNotebookHandler implements IDisposable {
     }
     this.isDisposed = true;
     this.cellManager.dispose();
-    this.notebookTracker.activeCellChanged.disconnect(this.onNewCell);
+    this.notebookTracker.activeCellChanged.disconnect(this.onNewCell, this);
     Signal.clearData(this);
   }
 
