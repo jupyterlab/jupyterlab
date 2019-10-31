@@ -36,6 +36,7 @@ interface ISocketConnectionOptions {
 export class DocumentConnectionManager {
   connections: Map<VirtualDocument.id_path, LSPConnection>;
   documents: Map<VirtualDocument.id_path, VirtualDocument>;
+  initialized: Signal<DocumentConnectionManager, IDocumentConnectionData>;
   connected: Signal<DocumentConnectionManager, IDocumentConnectionData>;
   /**
    * Connection temporarily lost or could not be fully established; a re-connection will be attempted;
@@ -48,6 +49,10 @@ export class DocumentConnectionManager {
    *  - re-connection attempts exceeded,
    */
   closed: Signal<DocumentConnectionManager, IDocumentConnectionData>;
+  documents_changed: Signal<
+    DocumentConnectionManager,
+    Map<VirtualDocument.id_path, VirtualDocument>
+  >;
   private ignored_languages: Set<string>;
 
   constructor() {
@@ -55,8 +60,10 @@ export class DocumentConnectionManager {
     this.documents = new Map();
     this.ignored_languages = new Set();
     this.connected = new Signal(this);
+    this.initialized = new Signal(this);
     this.disconnected = new Signal(this);
     this.closed = new Signal(this);
+    this.documents_changed = new Signal(this);
   }
 
   connect_document_signals(virtual_document: VirtualDocument) {
@@ -72,9 +79,11 @@ export class DocumentConnectionManager {
         this.connections.get(foreign_document.id_path).close();
         this.connections.delete(foreign_document.id_path);
         this.documents.delete(foreign_document.id_path);
+        this.documents_changed.emit(this.documents);
       }
     );
     this.documents.set(virtual_document.id_path, virtual_document);
+    this.documents_changed.emit(this.documents);
   }
 
   private connect_socket(options: ISocketConnectionOptions): LSPConnection {
@@ -98,7 +107,6 @@ export class DocumentConnectionManager {
         // NOTE: Update is async now and this is not really used, as an alternative method
         // which is compatible with async is used.
         // This should be only used in the initialization step.
-        // @ts-ignore
         // if (main_connection.isConnected) {
         //  console.warn('documentText is deprecated for use in JupyterLab LSP');
         // }
@@ -169,6 +177,10 @@ export class DocumentConnectionManager {
 
   async connect(options: ISocketConnectionOptions) {
     let connection = this.connect_socket(options);
+
+    connection.on('serverInitialized', capabilities => {
+      this.initialized.emit({ connection, virtual_document });
+    });
 
     let { virtual_document, document_path } = options;
 
