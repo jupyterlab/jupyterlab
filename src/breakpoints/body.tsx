@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React, { useEffect, useState } from 'react';
-import { Breakpoints } from '.';
 import { ReactWidget } from '@jupyterlab/apputils';
 import { ArrayExt } from '@phosphor/algorithm';
 import { ISignal } from '@phosphor/signaling';
+import React, { useEffect, useState } from 'react';
+import { Breakpoints } from '.';
 
 export class Body extends ReactWidget {
   constructor(model: Breakpoints.Model) {
@@ -44,13 +44,17 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
 
   return (
     <div>
-      {breakpoints.map((breakpoint: Breakpoints.IBreakpoint) => (
-        <BreakpointComponent
-          key={breakpoint.line}
-          breakpoint={breakpoint}
-          breakpointChanged={model.breakpointChanged}
-        />
-      ))}
+      {breakpoints
+        .sort((a, b) => {
+          return a.line - b.line;
+        })
+        .map((breakpoint: Breakpoints.IBreakpoint) => (
+          <BreakpointComponent
+            key={breakpoint.line}
+            breakpoint={breakpoint}
+            breakpointChanged={model.breakpointChanged}
+          />
+        ))}
     </div>
   );
 };

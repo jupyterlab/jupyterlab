@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Panel, Widget, PanelLayout } from '@phosphor/widgets';
+import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
 
 import { Body } from './body';
 
-import { Signal, ISignal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@phosphor/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 

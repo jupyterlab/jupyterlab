@@ -1,3 +1,8 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { IClientSession } from '@jupyterlab/apputils';
+
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
@@ -77,16 +82,26 @@ export class DebugService implements IDebugger {
     this._sessionChanged.emit(session);
   }
 
-  canStart(): boolean {
-    return this._session !== null && !this._session.isStarted;
-  }
-
   isStarted(): boolean {
     return this._session !== null && this._session.isStarted;
   }
 
   isThreadStopped(): boolean {
     return this._threadStopped.has(this.currentThread());
+  }
+
+  canStart(): boolean {
+    return (
+      this._model !== null && this._session !== null && !this._session.isStarted
+    );
+  }
+
+  async start(): Promise<void> {
+    await this.session.start();
+  }
+
+  async stop(): Promise<void> {
+    await this.session.stop();
   }
 
   async continue(): Promise<void> {
@@ -204,6 +219,9 @@ export class DebugService implements IDebugger {
     breakpoints: DebugProtocol.SourceBreakpoint[],
     path: string
   ) => {
+    // Workaround: this should not be called before the session has started
+    const client = this.session.client as IClientSession;
+    await client.ready;
     await this.session.sendRequest('setBreakpoints', {
       breakpoints: breakpoints,
       source: { path },
