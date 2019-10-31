@@ -1,7 +1,6 @@
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { Cell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { ShowHintOptions } from 'codemirror';
 import { IOverridesRegistry } from '../../magics/overrides';
 import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
 import { VirtualEditor } from '../editor';
@@ -138,7 +137,6 @@ export class VirtualEditorForNotebook extends VirtualEditor {
     return this.get_editor_at_root_line(position);
   }
 
-  showHint: (options: ShowHintOptions) => void;
   state: any;
 
   addKeyMap(map: string | CodeMirror.KeyMap, bottom?: boolean): void {
