@@ -30,24 +30,19 @@ export class LSPConnection extends LspWsConnection {
   }
 
   public isRenameSupported() {
-    // prettier-ignore
     return !!(
-      // @ts-ignore
       this.serverCapabilities && this.serverCapabilities.renameProvider
     );
   }
 
   public rename(location: IPosition, newName: string) {
-    // @ts-ignore
     if (!this.isConnected || !this.isRenameSupported()) {
       return;
     }
 
-    // @ts-ignore
     this.connection
       .sendRequest('textDocument/rename', {
         textDocument: {
-          // @ts-ignore
           uri: this.documentInfo.documentUri
         },
         position: {
@@ -65,14 +60,10 @@ export class LSPConnection extends LspWsConnection {
     super.connect(socket);
 
     until_ready(() => {
-      // @ts-ignore
       return this.isConnected;
     }, -1)
       .then(() => {
-        // @ts-ignore
-        let connection = this.connection;
-        connection.onClose(() => {
-          // @ts-ignore
+        this.connection.onClose(() => {
           this.isConnected = false;
           this.emit('close', this.closing_manually);
         });
@@ -97,26 +88,20 @@ export class LSPConnection extends LspWsConnection {
   private _sendChange(
     changeEvents: lsProtocol.TextDocumentContentChangeEvent[]
   ) {
-    // @ts-ignore
     if (!this.isConnected) {
       return;
     }
-    // @ts-ignore
-    let documentInfo = this.documentInfo;
     const textDocumentChange: lsProtocol.DidChangeTextDocumentParams = {
       textDocument: {
-        uri: documentInfo.documentUri,
-        // @ts-ignore
+        uri: this.documentInfo.documentUri,
         version: this.documentVersion
       } as lsProtocol.VersionedTextDocumentIdentifier,
       contentChanges: changeEvents
     };
-    // @ts-ignore
     this.connection.sendNotification(
       'textDocument/didChange',
       textDocumentChange
     );
-    // @ts-ignore
     this.documentVersion++;
   }
 
@@ -126,24 +111,19 @@ export class LSPConnection extends LspWsConnection {
     triggerCharacter: string,
     triggerKind: CompletionTriggerKind
   ): Promise<lsProtocol.CompletionItem[]> {
-    // @ts-ignore
     if (!this.isConnected) {
       return;
     }
     if (
-      // @ts-ignore
       !(this.serverCapabilities && this.serverCapabilities.completionProvider)
     ) {
       return;
     }
 
-    // @ts-ignore
-    let connection = this.connection;
     return new Promise<lsProtocol.CompletionItem[]>(resolve => {
-      connection
+      this.connection
         .sendRequest('textDocument/completion', {
           textDocument: {
-            // @ts-ignore
             uri: this.documentInfo.documentUri
           },
           position: {
