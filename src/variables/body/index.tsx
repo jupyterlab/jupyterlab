@@ -28,17 +28,17 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
   const [data, setData] = useState(model.scopes);
 
   useEffect(() => {
-    const updateScopes = (_: Variables.Model, update: Variables.IScope[]) => {
-      if (ArrayExt.shallowEqual(data, update)) {
+    const updateScopes = () => {
+      if (ArrayExt.shallowEqual(data, model.scopes)) {
         return;
       }
-      setData(update);
+      setData(model.scopes);
     };
 
-    model.scopesChanged.connect(updateScopes);
+    model.changed.connect(updateScopes);
 
     return () => {
-      model.scopesChanged.disconnect(updateScopes);
+      model.changed.disconnect(updateScopes);
     };
   });
 

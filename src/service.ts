@@ -158,7 +158,6 @@ export class DebugService implements IDebugger {
       });
       if (index === 0) {
         this._model.variablesModel.scopes = values;
-        this._model.currentLineChanged.emit(frame.line);
       }
     });
 
@@ -275,7 +274,6 @@ export class DebugService implements IDebugger {
   };
 
   private onContinued() {
-    this._model.linesCleared.emit();
     this._model.callstackModel.frames = [];
     this._model.variablesModel.scopes = [];
   }
@@ -290,7 +288,10 @@ export class DebugService implements IDebugger {
   private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
   private _model: Debugger.Model;
+
+  // TODO: remove frames from the service
   private frames: Frame[] = [];
+
   // TODO: move this in model
   private _threadStopped = new Set();
 }
