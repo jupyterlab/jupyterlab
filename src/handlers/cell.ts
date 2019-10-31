@@ -34,6 +34,9 @@ export class CellManager implements IDisposable {
     });
 
     this.breakpointsModel.breakpointsChanged.connect(async () => {
+      if (!this.activeCell || this.activeCell.isDisposed) {
+        return;
+      }
       this.addBreakpointsToEditor(this.activeCell);
     });
   }

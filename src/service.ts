@@ -214,8 +214,7 @@ export class DebugService implements IDebugger {
     path: string
   ) => {
     // Workaround: this should not be called before the session has started
-    const client = this.session.client as IClientSession;
-    await client.ready;
+    await this.ensureSessionReady();
     return await this.session.sendRequest('setBreakpoints', {
       breakpoints: breakpoints,
       source: { path },
@@ -227,6 +226,8 @@ export class DebugService implements IDebugger {
     if (!this.session.isStarted) {
       return;
     }
+    // Workaround: this should not be called before the session has started
+    await this.ensureSessionReady();
     const code = this._model.codeValue.text;
     const dumpedCell = await this.dumpCell(code);
     const sourceBreakpoints = Private.toSourceBreakpoints(breakpoints);
@@ -243,7 +244,6 @@ export class DebugService implements IDebugger {
     });
 
     // filter breakpoints with the same line number
-
     kernelBreakpoints = kernelBreakpoints.filter(
       (breakpoint, i, arr) =>
         arr.findIndex(el => el.line === breakpoint.line) === i
@@ -251,6 +251,11 @@ export class DebugService implements IDebugger {
     this._model.breakpointsModel.breakpoints = kernelBreakpoints;
     await this.session.sendRequest('configurationDone', {});
   };
+
+  private async ensureSessionReady(): Promise<void> {
+    const client = this.session.client as IClientSession;
+    return client.ready;
+  }
 
   protected convertScope = (
     scopes: DebugProtocol.Scope[],

@@ -103,8 +103,8 @@ class HandlerTracker<
       });
       this.handlers[widget.id] = handler;
       widget.disposed.connect(() => {
-        delete this.handlers[widget.id];
         handler.dispose();
+        delete this.handlers[widget.id];
       });
     }
   }
