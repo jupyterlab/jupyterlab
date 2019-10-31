@@ -14,14 +14,19 @@
   color: var(--jp-error-color1);
 }
 
-.jp-breakpoint-hover {
+.jp-breakpoint-line-highlight {
+  background-color: var(--jp-warn-color0);
+}
+
+.CodeMirror-gutter-wrapper::after {
+  content: '●';
+  color: var(--jp-error-color1);
+  opacity: 0;
   position: absolute;
   left: 3px;
   top: -1px;
-  color: var(--jp-error-color1);
-  opacity: 0.5;
 }
 
-.jp-breakpoint-line-highlight {
-  background-color: var(--jp-warn-color0);
+.CodeMirror-gutter-wrapper:hover::after {
+  opacity: 0.5;
 }
