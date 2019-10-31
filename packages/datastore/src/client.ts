@@ -118,7 +118,7 @@ export class CollaborationClient extends WSConnection<
       checkpointId: checkpointId === undefined ? null : checkpointId
     });
     const response = await this._requestMessageReply(msg);
-    if (response.content.transactions.length) {
+    if (!response.content.transactions.length) {
       return false;
     }
     this._handleTransactions(response.content.transactions);
