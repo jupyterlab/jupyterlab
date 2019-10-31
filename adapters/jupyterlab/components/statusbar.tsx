@@ -8,17 +8,42 @@ import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import {
   interactiveItem,
-  // Popup,
-  // showPopup,
-  TextItem
+  Popup,
+  showPopup,
+  TextItem,
+  GroupItem
 } from '@jupyterlab/statusbar';
 
+import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { JupyterLabWidgetAdapter } from '../jl_adapter';
+import { VirtualDocument } from '../../../virtual/document';
+import { LSPConnection } from '../../../connection';
+
+class LSPPopup extends VDomRenderer<LSPStatus.Model> {
+  constructor(model: LSPStatus.Model) {
+    super();
+    this.model = model;
+    // TODO: add proper, custom class?
+    this.addClass('p-Menu');
+  }
+  render() {
+    if (!this.model) {
+      return null;
+    }
+    return (
+      <GroupItem spacing={4} className={'p-Menu-item'}>
+        <TextItem source={this.model.lsp_servers} />
+        <TextItem source={this.model.long_message} />
+      </GroupItem>
+    );
+  }
+}
 
 /**
  * StatusBar item.
  */
 export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
+  protected _popup: Popup = null;
   /**
    * Construct a new VDomRenderer for the status item.
    */
@@ -36,12 +61,54 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
     if (!this.model) {
       return null;
     }
-    return <TextItem source={this.model.message} onClick={this.handleClick} />;
+    return (
+      <GroupItem
+        spacing={4}
+        title={'LSP Code Intelligence'}
+        onClick={this.handleClick}
+      >
+        <DefaultIconReact name={'file'} top={'2px'} kind={'statusBar'} />
+        <TextItem source={this.model.lsp_servers_truncated} />
+        <DefaultIconReact
+          name={this.model.status_icon}
+          top={'2px'}
+          kind={'statusBar'}
+        />
+        <TextItem source={this.model.short_message} />
+      </GroupItem>
+    );
   }
 
-  handleClick() {
-    console.log('Click;');
+  handleClick = () => {
+    if (this._popup) {
+      this._popup.dispose();
+    }
+    this._popup = showPopup({
+      body: new LSPPopup(this.model),
+      anchor: this,
+      align: 'left'
+    });
+  };
+}
+
+type StatusCode = 'waiting' | 'initializing' | 'initialized' | 'connecting';
+
+export interface IStatus {
+  connected_documents: Set<VirtualDocument>;
+  initialized_documents: Set<VirtualDocument>;
+  open_connections: Array<LSPConnection>;
+  detected_documents: Set<VirtualDocument>;
+  status: StatusCode;
+}
+
+function collect_languages(virtual_document: VirtualDocument): Set<string> {
+  let collected = new Set<string>();
+  collected.add(virtual_document.language);
+  for (let foreign of virtual_document.foreign_documents.values()) {
+    let foreign_languages = collect_languages(foreign);
+    foreign_languages.forEach(collected.add, collected);
   }
+  return collected;
 }
 
 export namespace LSPStatus {
@@ -49,68 +116,161 @@ export namespace LSPStatus {
    * A VDomModel for the LSP of current file editor/notebook.
    */
   export class Model extends VDomModel {
-    get message(): string {
-      return (
-        'LSP Code Intelligence: ' +
-        this.status +
-        (this._message ? this._message : '')
-      );
+    get lsp_servers(): string {
+      if (!this.adapter) {
+        return '';
+      }
+      let document = this.adapter.virtual_editor.virtual_document;
+      return `Languages detected: ${[...collect_languages(document)].join(
+        ', '
+      )}`;
     }
 
-    get status(): string {
+    get lsp_servers_truncated(): string {
+      if (!this.adapter) {
+        return '';
+      }
+      let document = this.adapter.virtual_editor.virtual_document;
+      let foreign_languages = collect_languages(document);
+      foreign_languages.delete(this.adapter.language);
+      if (foreign_languages.size) {
+        if (foreign_languages.size < 4) {
+          return `${this.adapter.language}, ${[...foreign_languages].join(
+            ', '
+          )}`;
+        }
+        return `${this.adapter.language} (+${foreign_languages.size} more)`;
+      }
+      return this.adapter.language;
+    }
+
+    get status(): IStatus {
+      let connection_manager = this.adapter.connection_manager;
+      const detected_documents = connection_manager.documents;
+      let connected_documents = new Set<VirtualDocument>();
+      let initialized_documents = new Set<VirtualDocument>();
+
+      detected_documents.forEach((document, id_path) => {
+        let connection = connection_manager.connections.get(id_path);
+        if (!connection) {
+          return;
+        }
+
+        if (connection.isConnected) {
+          connected_documents.add(document);
+        }
+        if (connection.isInitialized) {
+          initialized_documents.add(document);
+        }
+      });
+
+      // there may be more open connections than documents if a document was recently closed
+      // and the grace period has not passed yet
+      let open_connections = new Array<LSPConnection>();
+      connection_manager.connections.forEach((connection, path) => {
+        if (connection.isConnected) {
+          open_connections.push(connection);
+        }
+      });
+
+      let status: StatusCode;
+      if (detected_documents.size === 0) {
+        status = 'waiting';
+        // TODO: instead of detected documents, I should use "detected_documents_with_LSP_servers_available"
+      } else if (initialized_documents.size === detected_documents.size) {
+        status = 'initialized';
+      } else if (connected_documents.size === detected_documents.size) {
+        status = 'initializing';
+      } else {
+        status = 'connecting';
+      }
+
+      return {
+        open_connections,
+        connected_documents,
+        initialized_documents,
+        detected_documents: new Set([...detected_documents.values()]),
+        status
+      };
+    }
+
+    get status_icon(): string {
+      if (!this.adapter) {
+        return 'stop';
+      }
+      let status = this.status;
+
+      // TODO: associative array instead
+      if (status.status === 'waiting') {
+        return 'refresh';
+      } else if (status.status === 'initialized') {
+        return 'running';
+      } else if (status.status === 'initializing') {
+        return 'refresh';
+      } else if (status.status === 'connecting') {
+        return 'refresh';
+      }
+    }
+
+    get short_message(): string {
       if (!this.adapter) {
         return 'not initialized';
-      } else {
-        let connection_manager = this.adapter.connection_manager;
-        const documents = connection_manager.documents;
-        let connected_documents = 0;
-        let initialized_documents = 0;
-
-        documents.forEach((document, id_path) => {
-          let connection = connection_manager.connections.get(id_path);
-          if (!connection) {
-            return;
-          }
-
-          // @ts-ignore
-          if (connection.isConnected) {
-            connected_documents += 1;
-          }
-          // @ts-ignore
-          if (connection.isInitialized) {
-            initialized_documents += 1;
-          }
-        });
-
-        // there may be more open connections than documents if a document was recently closed
-        // and the grace period has not passed yet
-        let open_connections = 0;
-        connection_manager.connections.forEach((connection, path) => {
-          // @ts-ignore
-          if (connection.isConnected) {
-            open_connections += 1;
-            console.warn('Connected:', path);
-          } else {
-            console.warn(path);
-          }
-        });
-        let msg = '';
-        const plural = documents.size > 1 ? 's' : '';
-        if (documents.size === 0) {
-          msg = 'Waiting for documents initialization...';
-        } else if (initialized_documents === documents.size) {
-          msg = `Fully connected & initialized (${documents.size} virtual document${plural})`;
-        } else if (connected_documents === documents.size) {
-          const uninitialized = documents.size - initialized_documents;
-          // servers for n documents did not respond ot the initialization request
-          msg = `Fully connected, but ${uninitialized}/${documents.size} virtual document${plural} stuck uninitialized`;
-        } else if (open_connections === 0) {
-          msg = `No open connections (${documents.size} virtual document${plural})`;
-        } else {
-          msg = `${connected_documents}/${documents.size} virtual document${plural} connected (${open_connections})`;
-        }
-        return `${this.adapter.language} | ${msg}`;
       }
+      let status = this.status;
+
+      let msg = '';
+      // TODO: associative array instead
+      if (status.status === 'waiting') {
+        msg = 'Waiting...';
+      } else if (status.status === 'initialized') {
+        msg = `Fully initialized`;
+      } else if (status.status === 'initializing') {
+        msg = `Fully connected & partially initialized`;
+      } else {
+        msg = `Connecting...`;
+      }
+      return msg;
+    }
+
+    get long_message(): string {
+      if (!this.adapter) {
+        return 'not initialized';
+      }
+      let status = this.status;
+      let msg = '';
+      const plural = status.detected_documents.size > 1 ? 's' : '';
+      if (status.status === 'waiting') {
+        msg = 'Waiting for documents initialization...';
+      } else if (status.status === 'initialized') {
+        msg = `Fully connected & initialized (${status.detected_documents.size} virtual document${plural})`;
+      } else if (status.status === 'initializing') {
+        const uninitialized = new Set<VirtualDocument>(
+          status.detected_documents
+        );
+        for (let initialized of status.initialized_documents.values()) {
+          uninitialized.delete(initialized);
+        }
+        // servers for n documents did not respond ot the initialization request
+        msg = `Fully connected, but ${uninitialized.size}/${
+          status.detected_documents.size
+        } virtual document${plural} stuck uninitialized: ${[...uninitialized]
+          .map(document => document.id_path)
+          .join(', ')}`;
+      } else {
+        const unconnected = new Set<VirtualDocument>(status.detected_documents);
+        for (let connected of status.connected_documents.values()) {
+          unconnected.delete(connected);
+        }
+
+        msg = `${status.connected_documents.size}/${
+          status.detected_documents.size
+        } virtual document${plural} connected (${
+          status.open_connections.length
+        } connections; waiting for: ${[...unconnected]
+          .map(document => document.id_path)
+          .join(', ')})`;
+      }
+      return msg;
     }
 
     get adapter(): JupyterLabWidgetAdapter | null {
@@ -141,7 +301,6 @@ export namespace LSPStatus {
       this.stateChanged.emit(void 0);
     }
 
-    private _message: string = '';
     private _adapter: JupyterLabWidgetAdapter | null = null;
   }
 }

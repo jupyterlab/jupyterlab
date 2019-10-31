@@ -129,7 +129,7 @@ export class VirtualDocument {
   private cell_magics_overrides: CellMagicsMap;
   private line_magics_overrides: LineMagicsMap;
   private static instances_count = 0;
-  private foreign_documents: Map<VirtualDocument.virtual_id, VirtualDocument>;
+  public foreign_documents: Map<VirtualDocument.virtual_id, VirtualDocument>;
 
   // TODO: make this configurable, depending on the language used
   blank_lines_between_cells: number = 2;
