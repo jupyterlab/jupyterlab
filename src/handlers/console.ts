@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IConsoleTracker, CodeConsole } from '@jupyterlab/console';
+import { CodeConsole, IConsoleTracker } from '@jupyterlab/console';
 
 import { CellManager } from '../handlers/cell';
 
@@ -11,9 +11,9 @@ import { Breakpoints } from '../breakpoints';
 
 import { IDebugger } from '../tokens';
 
-import { Debugger } from '../debugger';
 import { IDisposable } from '@phosphor/disposable';
 import { Signal } from '@phosphor/signaling';
+import { Debugger } from '../debugger';
 
 export class DebuggerConsoleHandler implements IDisposable {
   constructor(options: DebuggerConsoleHandler.IOptions) {

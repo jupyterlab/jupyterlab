@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { CodeEditorWrapper, CodeEditor } from '@jupyterlab/codeeditor';
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
