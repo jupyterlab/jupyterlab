@@ -25,15 +25,16 @@ export class CellManager implements IDisposable {
     this.activeCell = options.activeCell;
     this.onActiveCellChanged();
 
-    this._debuggerModel.currentLineChanged.connect((_, lineNumber) => {
-      this.showCurrentLine(lineNumber);
-    });
-
-    this._debuggerModel.linesCleared.connect(() => {
+    this._debuggerModel.variablesModel.changed.connect(() => {
       this.cleanupHighlight();
+      const firstFrame = this._debuggerModel.callstackModel.frames[0];
+      if (!firstFrame) {
+        return;
+      }
+      this.showCurrentLine(firstFrame.line);
     });
 
-    this.breakpointsModel.breakpointsChanged.connect(async () => {
+    this.breakpointsModel.changed.connect(async () => {
       if (!this.activeCell || this.activeCell.isDisposed) {
         return;
       }

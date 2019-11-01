@@ -64,8 +64,8 @@ export namespace Variables {
       this._state = model;
     }
 
-    get scopesChanged(): ISignal<this, IScope[]> {
-      return this._scopesChanged;
+    get changed(): ISignal<this, void> {
+      return this._changed;
     }
 
     get currentVariable(): IVariable {
@@ -77,7 +77,7 @@ export namespace Variables {
         return;
       }
       this._currentVariable = variable;
-      this._currentChanged.emit(variable);
+      this._currentVariableChanged.emit(variable);
     }
 
     get scopes(): IScope[] {
@@ -86,7 +86,7 @@ export namespace Variables {
 
     set scopes(scopes: IScope[]) {
       this._state = scopes;
-      this._scopesChanged.emit(scopes);
+      this._changed.emit();
     }
 
     get variables(): IVariable[] {
@@ -95,10 +95,7 @@ export namespace Variables {
 
     set variables(variables: IVariable[]) {
       this._currentScope.variables = variables;
-    }
-
-    get variablesChanged(): ISignal<this, IVariable[]> {
-      return this._variablesChanged;
+      this._changed.emit();
     }
 
     getCurrentVariables(): IVariable[] {
@@ -110,9 +107,8 @@ export namespace Variables {
     private _currentVariable: IVariable;
     private _currentScope: IScope;
 
-    private _currentChanged = new Signal<this, IVariable>(this);
-    private _variablesChanged = new Signal<this, IVariable[]>(this);
-    private _scopesChanged = new Signal<this, IScope[]>(this);
+    private _changed = new Signal<this, void>(this);
+    private _currentVariableChanged = new Signal<this, IVariable>(this);
   }
 
   export interface IOptions extends Panel.IOptions {

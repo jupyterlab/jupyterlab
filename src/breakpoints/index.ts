@@ -82,7 +82,7 @@ export namespace Breakpoints {
       this._breakpoints = model;
     }
 
-    breakpointsChanged = new Signal<this, IBreakpoint[]>(this);
+    changed = new Signal<this, IBreakpoint[]>(this);
 
     get breakpoints(): IBreakpoint[] {
       return this._breakpoints;
@@ -94,7 +94,7 @@ export namespace Breakpoints {
 
     set breakpoints(breakpoints: IBreakpoint[]) {
       this._breakpoints = [...breakpoints];
-      this.breakpointsChanged.emit(this._breakpoints);
+      this.changed.emit(this._breakpoints);
     }
 
     set breakpoint(breakpoint: IBreakpoint) {
