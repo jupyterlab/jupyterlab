@@ -10,7 +10,9 @@ import { Doc, Editor } from 'codemirror';
 import { Breakpoints, SessionTypes } from '../breakpoints';
 
 import { IDisposable } from '@phosphor/disposable';
+
 import { Debugger } from '../debugger';
+
 import { IDebugger } from '../tokens';
 
 import { Signal } from '@phosphor/signaling';
@@ -266,7 +268,6 @@ namespace Private {
     marker.innerHTML = '●';
     return marker;
   }
-
   export function createBreakpoint(
     session: string,
     type: string,
