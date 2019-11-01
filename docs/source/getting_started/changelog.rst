@@ -22,7 +22,7 @@ User-facing changes
 * Only display node structure in a JSON tree view for arrays and empty objects (`#7261 <https://github.com/jupyterlab/jupyterlab/pull/7261>`__)
 * Make much smaller distribution packages by not building JavaScript source maps for releases. (`#7150 <https://github.com/jupyterlab/jupyterlab/pull/7150>`__)
 * Add support for pasting cell attachments and dragging attachments from the file browser (`#5913 <https://github.com/jupyterlab/jupyterlab/pull/5913>`__, `#5744 <https://github.com/jupyterlab/jupyterlab/issues/5744>`__)
-* Add a new ``yarn_registry`` configuration parameter to override the default yarn repository when building (`#7363 <https://github.com/jupyterlab/jupyterlab/pull/7363>`__, `#7109 <https://github.com/jupyterlab/jupyterlab/pull/7109>`__)
+* Add a new ``registry`` configuration parameter to override the default yarn repository when building (`#7363 <https://github.com/jupyterlab/jupyterlab/pull/7363>`__, `#7109 <https://github.com/jupyterlab/jupyterlab/pull/7109>`__)
 
 
 For developers
