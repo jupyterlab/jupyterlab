@@ -49,15 +49,26 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
    * Date & time when output is logged.
    */
   set timestamp(value: Date) {
-    this._timestampNode.innerHTML = value.toLocaleTimeString();
+    this._timestamp = value;
+    this._timestampNode.innerHTML = this._timestamp.toLocaleTimeString();
+    this.update();
   }
 
   /**
    * Log level
    */
   set level(value: FullLogLevel) {
+    this._level = value;
     this.node.dataset.logLevel = value;
-    this.node.title = `${toTitleCase(value)} message`;
+    this.update();
+  }
+
+  update() {
+    if (this._level !== undefined && this._timestamp !== undefined) {
+      this.node.title = `${this._timestamp.toLocaleString()}; ${toTitleCase(
+        this._level
+      )} level`;
+    }
   }
 
   /**
@@ -65,6 +76,8 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
    */
   executionCount: nbformat.ExecutionCount;
 
+  private _timestamp: Date;
+  private _level: FullLogLevel;
   private _timestampNode: HTMLDivElement;
 }
 
