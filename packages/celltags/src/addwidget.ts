@@ -9,14 +9,14 @@ export class AddWidget extends Widget {
   /**
    * Construct a new tag widget.
    */
-  constructor() {
+  constructor(darkTheme: boolean) {
     super();
     this.addClass('tag');
     this.editing = false;
-    this.buildTag();
+    this.buildTag(darkTheme);
   }
 
-  buildTag() {
+  buildTag(theme: boolean) {
     let text = document.createElement('input');
     text.value = 'Add Tag';
     text.contentEditable = 'true';
@@ -26,9 +26,11 @@ export class AddWidget extends Widget {
     tag.className = 'tag-holder';
     tag.appendChild(text);
     let img = document.createElement('span');
-    img.className = 'add-icon';
+    img.className = theme ? 'add-icon-dark' : 'add-icon';
+    img.classList.add('icon');
     this.addClass('unapplied-tag');
     tag.appendChild(img);
+    this.img = img;
     this.node.appendChild(tag);
   }
 
@@ -114,6 +116,15 @@ export class AddWidget extends Widget {
     }
   }
 
+  updateTheme() {
+    let darkTheme = this.parent.getTheme();
+    this.img.classList.remove('add-icon-dark');
+    this.img.classList.remove('add-icon');
+    let add = darkTheme ? 'add-icon-dark' : 'add-icon';
+    this.img.classList.add(add);
+  }
+
   public parent: TagTool;
+  private img: HTMLSpanElement;
   private editing: boolean;
 }

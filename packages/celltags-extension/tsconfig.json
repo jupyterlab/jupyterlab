@@ -26,6 +26,9 @@
       "path": "../application"
     },
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../celltags"
     },
     {

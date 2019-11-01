@@ -9,6 +9,7 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import { TagWidget } from './widget';
 
 import { AddWidget } from './addwidget';
+import { IThemeManager } from '@jupyterlab/apputils';
 
 /**
  * A Tool for tag operations.
@@ -19,17 +20,22 @@ export class TagTool extends NotebookTools.Tool {
    *
    * @param tracker - The notebook tracker.
    */
-  constructor(tracker: INotebookTracker, app: JupyterFrontEnd) {
+  constructor(
+    tracker: INotebookTracker,
+    app: JupyterFrontEnd,
+    manager: IThemeManager
+  ) {
     super();
     app;
     this.tracker = tracker;
+    this.manager = manager;
     this.layout = new PanelLayout();
     this.createTagInput();
   }
 
   createTagInput() {
     let layout = this.layout as PanelLayout;
-    let input = new AddWidget();
+    let input = new AddWidget(this.getTheme());
     input.id = 'add-tag';
     layout.insertWidget(0, input);
   }
@@ -135,7 +141,7 @@ export class TagTool extends NotebookTools.Tool {
       }
     }
     for (let i = 0; i < tags.length; i++) {
-      let widget = new TagWidget(tags[i]);
+      let widget = new TagWidget(tags[i], this.getTheme());
       let idx = layout.widgets.length - 1;
       layout.insertWidget(idx, widget);
     }
@@ -217,6 +223,23 @@ export class TagTool extends NotebookTools.Tool {
     this.loadActiveTags();
   }
 
+  getTheme() {
+    if (this.manager.theme == 'JupyterLab Dark') {
+      return true;
+    }
+    return false;
+  }
+
+  updateTheme() {
+    let layout = this.layout as PanelLayout;
+    let nWidgets = layout.widgets.length;
+    for (let i = 0; i < nWidgets - 1; i++) {
+      (layout.widgets[i] as TagWidget).updateTheme();
+    }
+    (layout.widgets[nWidgets - 1] as AddWidget).updateTheme();
+  }
+
   private tagList: string[] = [];
+  private manager: IThemeManager;
   public tracker: INotebookTracker = null;
 }

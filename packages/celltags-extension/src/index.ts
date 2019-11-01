@@ -6,14 +6,19 @@ import {
 import { INotebookTools, INotebookTracker } from '@jupyterlab/notebook';
 
 import { TagTool } from '@jupyterlab/celltags';
+import { IThemeManager } from '@jupyterlab/apputils';
 
 function activate(
   app: JupyterFrontEnd,
   tools: INotebookTools,
-  tracker: INotebookTracker
+  tracker: INotebookTracker,
+  manager: IThemeManager
 ) {
-  const tool = new TagTool(tracker, app);
+  const tool = new TagTool(tracker, app, manager);
   tools.addItem({ tool: tool, rank: 1.7 });
+  manager.themeChanged.connect(() => {
+    tool.updateTheme();
+  });
 }
 
 /**
@@ -22,7 +27,7 @@ function activate(
 const celltags: JupyterFrontEndPlugin<void> = {
   id: 'celltags',
   autoStart: true,
-  requires: [INotebookTools, INotebookTracker],
+  requires: [INotebookTools, INotebookTracker, IThemeManager],
   activate: activate
 };
 

@@ -26,10 +26,16 @@
       "path": "../application"
     },
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../cells"
     },
     {
       "path": "../notebook"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }
