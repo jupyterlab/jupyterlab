@@ -39,9 +39,13 @@ export class Debugger extends SplitPanel {
       connector: options.connector
     });
 
-    this.sidebar = new Debugger.Sidebar(this.model);
     this.service = options.debugService;
     this.service.model = this.model;
+
+    this.sidebar = new Debugger.Sidebar({
+      model: this.model,
+      service: this.service
+    });
 
     this.editors = new DebuggerEditors({
       editorFactory: options.editorFactory
@@ -82,14 +86,18 @@ export namespace Debugger {
   }
 
   export class Sidebar extends SplitPanel {
-    constructor(model: Model) {
+    constructor(options: Sidebar.IOptions) {
       super();
       this.orientation = 'vertical';
       this.addClass('jp-DebuggerSidebar');
 
+      const { service, model } = options;
       this.variables = new Variables({ model: model.variablesModel });
       this.callstack = new Callstack({ model: model.callstackModel });
-      this.breakpoints = new Breakpoints({ model: model.breakpointsModel });
+      this.breakpoints = new Breakpoints({
+        service,
+        model: model.breakpointsModel
+      });
 
       this.addWidget(this.variables);
       this.addWidget(this.callstack);
@@ -169,6 +177,13 @@ export namespace Debugger {
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
     private _currentLineChanged = new Signal<this, number>(this);
     private _linesCleared = new Signal<this, void>(this);
+  }
+
+  export namespace Sidebar {
+    export interface IOptions {
+      model: Debugger.Model;
+      service: IDebugger;
+    }
   }
 
   export namespace Model {

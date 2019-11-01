@@ -34,8 +34,10 @@ export class CellManager implements IDisposable {
     });
 
     this.breakpointsModel.breakpointsChanged.connect(async () => {
+      if (!this.activeCell || this.activeCell.isDisposed) {
+        return;
+      }
       this.addBreakpointsToEditor(this.activeCell);
-      await this._debuggerService.updateBreakpoints();
     });
   }
 
@@ -134,7 +136,8 @@ export class CellManager implements IDisposable {
         lineInfo.line + 1
       );
     });
-    this._debuggerModel.breakpointsModel.breakpoints = editorBreakpoints;
+
+    void this._debuggerService.updateBreakpoints(editorBreakpoints);
 
     editor.setOption('lineNumbers', true);
     editor.editor.setOption('gutters', [
@@ -163,10 +166,11 @@ export class CellManager implements IDisposable {
     }
 
     const isRemoveGutter = !!info.gutterMarkers;
+    let breakpoints = this.breakpointsModel.breakpoints;
     if (isRemoveGutter) {
-      this.breakpointsModel.removeBreakpointAtLine(info.line + 1);
+      breakpoints = breakpoints.filter(ele => ele.line !== info.line + 1);
     } else {
-      this.breakpointsModel.addBreakpoint(
+      breakpoints.push(
         Private.createBreakpoint(
           this._debuggerService.session.client.name,
           this.getEditorId(),
@@ -174,6 +178,8 @@ export class CellManager implements IDisposable {
         )
       );
     }
+
+    void this._debuggerService.updateBreakpoints(breakpoints);
   };
 
   protected onNewRenderLine = (editor: Editor, line: any) => {

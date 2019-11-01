@@ -17,6 +17,7 @@ import { DebugProtocol } from 'vscode-debugprotocol';
 
 // TODO: remove that import when an interface has
 // been created for Model class
+import { Breakpoints } from './breakpoints';
 import { Debugger } from './debugger';
 
 /**
@@ -87,7 +88,7 @@ export interface IDebugger {
   /**
    * Update all breakpoints at once.
    */
-  updateBreakpoints(): Promise<void>;
+  updateBreakpoints(breakpoints: Breakpoints.IBreakpoint[]): Promise<void>;
 
   /**
    * Signal emitted upon session changed.

@@ -23,21 +23,21 @@ export class DebuggerNotebookHandler implements IDisposable {
     this.debuggerService = options.debuggerService;
     this.notebookTracker = options.tracker;
     this.breakpoints = this.debuggerModel.breakpointsModel;
-    this.notebookTracker.activeCellChanged.connect(this.onNewCell, this);
+
     this.cellManager = new CellManager({
       breakpointsModel: this.breakpoints,
-      activeCell: this.notebookTracker.activeCell as CodeCell,
       debuggerModel: this.debuggerModel,
       debuggerService: this.debuggerService,
-      type: 'notebook'
+      type: 'notebook',
+      activeCell: this.notebookTracker.activeCell as CodeCell
     });
+
+    this.notebookTracker.activeCellChanged.connect(
+      this.onActiveCellChanged,
+      this
+    );
   }
 
-  private notebookTracker: INotebookTracker;
-  private debuggerModel: Debugger.Model;
-  private debuggerService: IDebugger;
-  private breakpoints: Breakpoints.Model;
-  private cellManager: CellManager;
   isDisposed: boolean;
 
   dispose(): void {
@@ -46,23 +46,25 @@ export class DebuggerNotebookHandler implements IDisposable {
     }
     this.isDisposed = true;
     this.cellManager.dispose();
-    this.notebookTracker.activeCellChanged.disconnect(this.onNewCell);
+    this.notebookTracker.activeCellChanged.disconnect(
+      this.onActiveCellChanged,
+      this
+    );
     Signal.clearData(this);
   }
 
-  protected onNewCell(notebookTracker: NotebookTracker, codeCell: CodeCell) {
-    if (this.cellManager) {
-      this.cellManager.activeCell = codeCell;
-    } else {
-      this.cellManager = new CellManager({
-        breakpointsModel: this.breakpoints,
-        activeCell: codeCell,
-        debuggerModel: this.debuggerModel,
-        debuggerService: this.debuggerService,
-        type: 'notebook'
-      });
-    }
+  protected onActiveCellChanged(
+    notebookTracker: NotebookTracker,
+    codeCell: CodeCell
+  ) {
+    this.cellManager.activeCell = codeCell;
   }
+
+  private notebookTracker: INotebookTracker;
+  private debuggerModel: Debugger.Model;
+  private debuggerService: IDebugger;
+  private breakpoints: Breakpoints.Model;
+  private cellManager: CellManager;
 }
 
 export namespace DebuggerNotebookHandler {
