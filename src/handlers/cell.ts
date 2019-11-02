@@ -21,30 +21,41 @@ const LINE_HIGHLIGHT_CLASS = 'jp-breakpoint-line-highlight';
 
 export class CellManager implements IDisposable {
   constructor(options: CellManager.IOptions) {
-    this._debuggerModel = options.debuggerModel;
     this._debuggerService = options.debuggerService;
-    this.breakpointsModel = options.breakpointsModel;
+    this.onModelChanged();
+    this._debuggerService.modelChanged.connect(() => this.onModelChanged());
     this.activeCell = options.activeCell;
     this.onActiveCellChanged();
-
-    this._debuggerModel.variablesModel.changed.connect(() => {
-      this.cleanupHighlight();
-      const firstFrame = this._debuggerModel.callstackModel.frames[0];
-      if (!firstFrame) {
-        return;
-      }
-      this.showCurrentLine(firstFrame.line);
-    });
-
-    this.breakpointsModel.changed.connect(async () => {
-      if (!this.activeCell || this.activeCell.isDisposed) {
-        return;
-      }
-      this.addBreakpointsToEditor(this.activeCell);
-    });
   }
 
   isDisposed: boolean;
+
+  private onModelChanged() {
+    this._debuggerModel = this._debuggerService.model;
+    if (this._debuggerModel) {
+      this.breakpointsModel = this._debuggerModel.breakpointsModel;
+
+      this._debuggerModel.variablesModel.changed.connect(() => {
+        this.cleanupHighlight();
+        const firstFrame = this._debuggerModel.callstackModel.frames[0];
+        if (!firstFrame) {
+          return;
+        }
+        this.showCurrentLine(firstFrame.line);
+      });
+
+      this.breakpointsModel.changed.connect(async () => {
+        if (!this.activeCell || this.activeCell.isDisposed) {
+          return;
+        }
+        this.addBreakpointsToEditor(this.activeCell);
+      });
+
+      if (this.activeCell) {
+        this._debuggerModel.codeValue = this.activeCell.model.value;
+      }
+    }
+  }
 
   private showCurrentLine(lineNumber: number) {
     if (!this.activeCell) {

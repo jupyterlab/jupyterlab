@@ -56,6 +56,7 @@ export class DebugService implements IDebugger {
 
   set model(model: Debugger.Model) {
     this._model = model;
+    this._modelChanged.emit(model);
   }
 
   get session(): IDebugger.ISession {
@@ -152,6 +153,10 @@ export class DebugService implements IDebugger {
 
   get sessionChanged(): ISignal<IDebugger, IDebugger.ISession> {
     return this._sessionChanged;
+  }
+
+  get modelChanged(): ISignal<IDebugger, Debugger.Model> {
+    return this._modelChanged;
   }
 
   get eventMessage(): ISignal<IDebugger, IDebugger.ISession.Event> {
@@ -299,6 +304,7 @@ export class DebugService implements IDebugger {
   private _isDisposed: boolean = false;
   private _session: IDebugger.ISession;
   private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
+  private _modelChanged = new Signal<IDebugger, Debugger.Model>(this);
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
   private _model: Debugger.Model;
 
