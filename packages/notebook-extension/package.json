@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/notebook-extension",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "JupyterLab - Notebook Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,14 +38,14 @@
   "dependencies": {
     "@jupyterlab/application": "^1.2.0",
     "@jupyterlab/apputils": "^1.2.0",
-    "@jupyterlab/cells": "^1.2.0",
+    "@jupyterlab/cells": "^1.2.1",
     "@jupyterlab/codeeditor": "^1.2.0",
     "@jupyterlab/coreutils": "^3.2.0",
     "@jupyterlab/docmanager": "^1.2.0",
     "@jupyterlab/filebrowser": "^1.2.0",
     "@jupyterlab/launcher": "^1.2.0",
     "@jupyterlab/mainmenu": "^1.2.0",
-    "@jupyterlab/notebook": "^1.2.0",
+    "@jupyterlab/notebook": "^1.2.1",
     "@jupyterlab/rendermime": "^1.2.0",
     "@jupyterlab/services": "^4.2.0",
     "@jupyterlab/statusbar": "^1.2.0",

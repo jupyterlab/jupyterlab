@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/cells",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "JupyterLab - Notebook Cells",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -42,7 +42,7 @@
     "@jupyterlab/coreutils": "^3.2.0",
     "@jupyterlab/filebrowser": "^1.2.0",
     "@jupyterlab/observables": "^2.4.0",
-    "@jupyterlab/outputarea": "^1.2.0",
+    "@jupyterlab/outputarea": "^1.2.1",
     "@jupyterlab/rendermime": "^1.2.0",
     "@jupyterlab/services": "^4.2.0",
     "@phosphor/algorithm": "^1.2.0",
