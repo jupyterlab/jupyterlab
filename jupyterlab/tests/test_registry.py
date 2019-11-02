@@ -19,6 +19,21 @@ from .test_jupyterlab import AppHandlerTest
 
 class TestAppHandlerRegistry(AppHandlerTest):
 
+    def test_node_not_available(self):
+        # patch should be applied on `jupyterlab.commands` and not on `jupyterlab_server.process`
+        # See https://docs.python.org/3/library/unittest.mock.html#where-to-patch
+        with patch("jupyterlab.commands.which") as which:
+            which.side_effect = ValueError("Command not found")
+
+            logger = logging.getLogger('jupyterlab')
+            config = commands._yarn_config(logger)
+
+            which.assert_called_once_with('node')
+            self.assertDictEqual(config, 
+                {"yarn config": {}, 
+                "npm config": {}}
+            )
+
     def test_yarn_config(self):
         with patch("subprocess.check_output") as check_output:
             yarn_registry = "https://private.yarn/manager"
