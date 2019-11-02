@@ -1766,6 +1766,7 @@ def _yarn_config(logger):
     try:
         node = which('node')
     except ValueError:  # Node not found == user with no need for building jupyterlab
+        logger.debug("NodeJS was not found. Yarn user configuration is ignored.")
         return configuration
 
     try:
