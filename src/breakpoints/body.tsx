@@ -98,7 +98,7 @@ const BreakpointComponent = ({
         checked={active}
       />
       <span>
-        {breakpoint.source.name} : {breakpoint.line}
+        {breakpoint.source.path} : {breakpoint.line}
       </span>
     </div>
   );
