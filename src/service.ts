@@ -137,6 +137,9 @@ export class DebugService implements IDebugger {
     }
   }
 
+  /**
+   * Makes the current thread step out a function / method if possible.
+   */
   async stepOut(): Promise<void> {
     try {
       await this.session.sendRequest('stepOut', {
