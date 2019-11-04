@@ -93,7 +93,7 @@ export namespace Debugger {
 
       const { service, model } = options;
       this.variables = new Variables({ model: model.variablesModel });
-      this.callstack = new Callstack({ model: model.callstackModel });
+      this.callstack = new Callstack({ service, model: model.callstackModel });
       this.breakpoints = new Breakpoints({
         service,
         model: model.breakpointsModel

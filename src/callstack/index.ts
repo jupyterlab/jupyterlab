@@ -6,13 +6,16 @@ import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 import { ISignal, Signal } from '@phosphor/signaling';
 import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
 import { DebugProtocol } from 'vscode-debugprotocol';
+import { IDebugger } from '../tokens';
 import { Body } from './body';
 
 export class Callstack extends Panel {
   constructor(options: Callstack.IOptions) {
     super();
 
-    this.model = options.model;
+    const { service, model } = options;
+
+    this.model = model;
     this.addClass('jp-DebuggerCallstack');
     this.title.label = 'Callstack';
 
@@ -27,7 +30,10 @@ export class Callstack extends Panel {
       new ToolbarButton({
         iconClassName: 'jp-RunIcon',
         onClick: () => {
-          console.log('`run` was clicked');
+          if (!service.isThreadStopped()) {
+            return;
+          }
+          void service.continue();
         },
         tooltip: 'Continue'
       })
@@ -47,7 +53,10 @@ export class Callstack extends Panel {
       new ToolbarButton({
         iconClassName: 'jp-StepOverIcon',
         onClick: () => {
-          console.log('`step over` was clicked');
+          if (!service.isThreadStopped()) {
+            return;
+          }
+          void service.next();
         },
         tooltip: 'Step Over'
       })
@@ -57,7 +66,10 @@ export class Callstack extends Panel {
       new ToolbarButton({
         iconClassName: 'jp-StepInIcon',
         onClick: () => {
-          console.log('`step in` was clicked');
+          if (!service.isThreadStopped()) {
+            return;
+          }
+          void service.stepIn();
         },
         tooltip: 'Step In'
       })
@@ -67,7 +79,10 @@ export class Callstack extends Panel {
       new ToolbarButton({
         iconClassName: 'jp-StepOutIcon',
         onClick: () => {
-          console.log('`step out` was clicked');
+          if (!service.isThreadStopped()) {
+            return;
+          }
+          void service.stepOut();
         },
         tooltip: 'Step Out'
       })
@@ -134,6 +149,7 @@ export namespace Callstack {
   }
 
   export interface IOptions extends Panel.IOptions {
+    service: IDebugger;
     model: Model;
   }
 }
