@@ -5,7 +5,7 @@
 
 import * as React from 'react';
 
-import { VDomRenderer } from '@jupyterlab/apputils';
+import { ReactWidget } from '@jupyterlab/apputils';
 
 /**
  * The CSS class added to placeholders.
@@ -44,7 +44,7 @@ const OUTPUT_PLACEHOLDER_CLASS = 'jp-OutputPlaceholder';
  * A placeholder is the element that is shown when input/output
  * is hidden.
  */
-export abstract class Placeholder extends VDomRenderer<null> {
+export abstract class Placeholder extends ReactWidget {
   /**
    * Construct a new placeholder.
    */

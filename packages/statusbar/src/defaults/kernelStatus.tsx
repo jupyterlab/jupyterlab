@@ -22,9 +22,7 @@ function KernelStatusComponent(
   return (
     <TextItem
       onClick={props.handleClick}
-      source={`${Text.titleCase(props.kernelName)} | ${Text.titleCase(
-        props.status
-      )}`}
+      source={`${props.kernelName} | ${Text.titleCase(props.status)}`}
       title={`Change kernel for ${props.activityName}`}
     />
   );
@@ -153,7 +151,7 @@ export namespace KernelStatus {
         this._kernelName = 'unknown';
       } else {
         this._kernelStatus = this._session.status;
-        this._kernelName = this._session.kernelDisplayName.toLowerCase();
+        this._kernelName = this._session.kernelDisplayName;
 
         this._session.statusChanged.connect(this._onKernelStatusChanged);
         this._session.kernelChanged.connect(this._onKernelChanged);
@@ -183,14 +181,22 @@ export namespace KernelStatus {
       const oldState = this._getAllState();
       const { newValue } = change;
       if (newValue !== null) {
-        this._kernelStatus = newValue.status;
-        this._kernelName = newValue.model.name.toLowerCase();
+        newValue
+          .getSpec()
+          .then(spec => {
+            // sync setting of status and display name
+            this._kernelStatus = newValue.status;
+            this._kernelName = spec.display_name;
+            this._triggerChange(oldState, this._getAllState());
+          })
+          .catch(err => {
+            throw err;
+          });
       } else {
         this._kernelStatus = 'unknown';
         this._kernelName = 'unknown';
+        this._triggerChange(oldState, this._getAllState());
       }
-
-      this._triggerChange(oldState, this._getAllState());
     };
 
     private _getAllState(): [string, string, string] {

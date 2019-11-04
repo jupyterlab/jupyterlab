@@ -7,6 +7,9 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
 
+// Run integrity to update the dev_mode package.json
+utils.run('jlpm integrity');
+
 // Get the dev mode package.json file.
 let data = utils.readJSONFile('./dev_mode/package.json');
 
@@ -24,6 +27,8 @@ utils.writePackageData(path.join(staging, 'package.json'), data);
   'index.js',
   'webpack.config.js',
   'webpack.prod.config.js',
+  'webpack.prod.minimize.config.js',
+  'webpack.prod.release.config.js',
   'templates'
 ].forEach(name => {
   fs.copySync(
@@ -35,6 +40,15 @@ utils.writePackageData(path.join(staging, 'package.json'), data);
 // Create a new yarn.lock file to ensure it is correct.
 fs.removeSync(path.join(staging, 'yarn.lock'));
 utils.run('jlpm', { cwd: staging });
+try {
+  utils.run('jlpm yarn-deduplicate -s fewer', { cwd: staging });
+} catch {
+  // re-run install if we deduped packages!
+  utils.run('jlpm', { cwd: staging });
+}
 
 // Build the core assets.
-utils.run('jlpm run build:prod', { cwd: staging });
+utils.run('jlpm run build:prod:release', { cwd: staging });
+
+// Run integrity
+utils.run('jlpm integrity');

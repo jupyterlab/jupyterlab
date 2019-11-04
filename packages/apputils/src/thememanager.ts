@@ -5,8 +5,6 @@ import { IChangedArgs, ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
 
 import { each } from '@phosphor/algorithm';
 
-import { Token } from '@phosphor/coreutils';
-
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { Widget } from '@phosphor/widgets';
@@ -17,19 +15,7 @@ import { Dialog, showDialog } from './dialog';
 
 import { ISplashScreen } from './splash';
 
-/* tslint:disable */
-/**
- * The theme manager token.
- */
-export const IThemeManager = new Token<IThemeManager>(
-  '@jupyterlab/apputils:IThemeManager'
-);
-/* tslint:enable */
-
-/**
- * An interface for a theme manager.
- */
-export interface IThemeManager extends ThemeManager {}
+import { IThemeManager } from './tokens';
 
 /**
  * The number of milliseconds between theme loading attempts.
@@ -41,10 +27,12 @@ const REQUEST_INTERVAL = 75;
  */
 const REQUEST_THRESHOLD = 20;
 
+type Dict<T> = { [key: string]: T };
+
 /**
  * A class that provides theme management.
  */
-export class ThemeManager {
+export class ThemeManager implements IThemeManager {
   /**
    * Construct a new theme manager.
    */
@@ -54,15 +42,13 @@ export class ThemeManager {
 
     this._base = url;
     this._host = host;
-    this._splash = splash;
+    this._splash = splash || null;
 
-    registry.load(key).then(settings => {
+    void registry.load(key).then(settings => {
       this._settings = settings;
-      this._settings.changed.connect(
-        this._loadSettings,
-        this
-      );
+      this._settings.changed.connect(this._loadSettings, this);
       this._loadSettings();
+      this._initOverrideProps();
     });
   }
 
@@ -85,6 +71,19 @@ export class ThemeManager {
    */
   get themeChanged(): ISignal<this, IChangedArgs<string>> {
     return this._themeChanged;
+  }
+
+  /**
+   * Get the value of a CSS variable from its key.
+   *
+   * @param key - A Jupyterlab CSS variable, without the leading '--jp-'.
+   *
+   * @return value - The current value of the Jupyterlab CSS variable
+   */
+  getCSS(key: string): string {
+    return getComputedStyle(document.documentElement).getPropertyValue(
+      `--jp-${key}`
+    );
   }
 
   /**
@@ -116,13 +115,69 @@ export class ThemeManager {
   }
 
   /**
+   * Loads all current CSS overrides from settings. If an override has been
+   * removed or is invalid, this function unloads it instead.
+   */
+  loadCSSOverrides(): void {
+    const newOverrides =
+      (this._settings.user['overrides'] as Dict<string>) || {};
+
+    // iterate over the union of current and new CSS override keys
+    Object.keys({ ...this._overrides, ...newOverrides }).forEach(key => {
+      const val = newOverrides[key];
+
+      if (val && this.validateCSS(key, val)) {
+        // validation succeeded, set the override
+        document.documentElement.style.setProperty(`--jp-${key}`, val);
+      } else {
+        // if key is not present or validation failed, the override will be removed
+        document.documentElement.style.removeProperty(`--jp-${key}`);
+      }
+    });
+
+    // replace the current overrides with the new ones
+    this._overrides = newOverrides;
+  }
+
+  /**
+   * Validate a CSS value w.r.t. a key
+   *
+   * @param key - A Jupyterlab CSS variable, without the leading '--jp-'.
+   *
+   * @param val - A candidate CSS value
+   */
+  validateCSS(key: string, val: string): boolean {
+    // determine the css property corresponding to the key
+    const prop = this._overrideProps[key];
+
+    if (!prop) {
+      console.warn(
+        'CSS validation failed: could not find property corresponding to key.\n' +
+          `key: '${key}', val: '${val}'`
+      );
+      return false;
+    }
+
+    // use built-in validation once we have the corresponding property
+    if (CSS.supports(prop, val)) {
+      return true;
+    } else {
+      console.warn(
+        'CSS validation failed: invalid value.\n' +
+          `key: '${key}', val: '${val}', prop: '${prop}'`
+      );
+      return false;
+    }
+  }
+
+  /**
    * Register a theme with the theme manager.
    *
    * @param theme - The theme to register.
    *
    * @returns A disposable that can be used to unregister the theme.
    */
-  register(theme: ThemeManager.ITheme): IDisposable {
+  register(theme: IThemeManager.ITheme): IDisposable {
     const { name } = theme;
     const themes = this._themes;
 
@@ -138,6 +193,14 @@ export class ThemeManager {
   }
 
   /**
+   * Add a CSS override to the settings.
+   */
+  setCSSOverride(key: string, value: string): Promise<void> {
+    this._overrides[key] = value;
+    return this._settings.set('overrides', this._overrides);
+  }
+
+  /**
    * Set the current theme.
    */
   setTheme(name: string): Promise<void> {
@@ -149,6 +212,86 @@ export class ThemeManager {
    */
   isLight(name: string): boolean {
     return this._themes[name].isLight;
+  }
+
+  /**
+   * Increase a font size w.r.t. its current setting or its value in the
+   * current theme.
+   *
+   * @param key - A Jupyterlab font size CSS variable, without the leading '--jp-'.
+   */
+  incrFontSize(key: string): Promise<void> {
+    return this._incrFontSize(key, true);
+  }
+
+  /**
+   * Decrease a font size w.r.t. its current setting or its value in the
+   * current theme.
+   *
+   * @param key - A Jupyterlab font size CSS variable, without the leading '--jp-'.
+   */
+  decrFontSize(key: string): Promise<void> {
+    return this._incrFontSize(key, false);
+  }
+
+  /**
+   * Test whether a given theme styles scrollbars,
+   * and if the user has scrollbar styling enabled.
+   */
+  themeScrollbars(name: string): boolean {
+    return (
+      !!this._settings.composite['theme-scrollbars'] &&
+      !!this._themes[name].themeScrollbars
+    );
+  }
+
+  /**
+   * Test if the user has scrollbar styling enabled.
+   */
+  isToggledThemeScrollbars(): boolean {
+    return !!this._settings.composite['theme-scrollbars'];
+  }
+
+  /**
+   * Toggle the `theme-scrollbbars` setting.
+   */
+  toggleThemeScrollbars(): Promise<void> {
+    return this._settings.set(
+      'theme-scrollbars',
+      !this._settings.composite['theme-scrollbars']
+    );
+  }
+
+  /**
+   * Change a font size by a positive or negative increment.
+   */
+  private _incrFontSize(key: string, add: boolean = true): Promise<void> {
+    // get the numeric and unit parts of the current font size
+    const parts = (this.getCSS(key) || '13px').split(/([a-zA-Z]+)/);
+
+    // determine the increment
+    const incr = (add ? 1 : -1) * (parts[1] === 'em' ? 0.1 : 1);
+
+    // increment the font size and set it as an override
+    return this.setCSSOverride(key, `${Number(parts[0]) + incr}${parts[1]}`);
+  }
+
+  /**
+   * Initialize the key -> property dict for the overrides
+   */
+  private _initOverrideProps(): void {
+    const definitions = this._settings.schema.definitions as any;
+
+    // workaround for 1.0.x versions of Jlab pulling in 1.1.x versions of apputils
+    // TODO: delete workaround in v2.0.0
+    if (definitions && definitions.cssOverrides) {
+      const oSchema = definitions.cssOverrides.properties;
+      // the description field of each item in the overrides schema stores a
+      // CSS property that will be used to validate that override's values
+      Object.keys(oSchema).forEach(key => {
+        this._overrideProps[key] = oSchema[key].description;
+      });
+    }
   }
 
   /**
@@ -227,7 +370,9 @@ export class ThemeManager {
     const current = this._current;
     const links = this._links;
     const themes = this._themes;
-    const splash = this._splash.show(themes[theme].isLight);
+    const splash = this._splash
+      ? this._splash.show(themes[theme].isLight)
+      : new DisposableDelegate(() => undefined);
 
     // Unload any CSS files that have been loaded.
     links.forEach(link => {
@@ -243,12 +388,22 @@ export class ThemeManager {
     return Promise.all([old, themes[theme].load()])
       .then(() => {
         this._current = theme;
-        Private.fitAll(this._host);
-        splash.dispose();
         this._themeChanged.emit({
           name: 'theme',
           oldValue: current,
           newValue: theme
+        });
+
+        // Need to force a redraw of the app here to avoid a Chrome rendering
+        // bug that can leave the scrollbars in an invalid state
+        this._host.hide();
+
+        // If we hide/show the widget too quickly, no redraw will happen.
+        // requestAnimationFrame delays until after the next frame render.
+        requestAnimationFrame(() => {
+          this._host.show();
+          Private.fitAll(this._host);
+          splash.dispose();
         });
       })
       .catch(reason => {
@@ -261,7 +416,7 @@ export class ThemeManager {
    * Handle a theme error.
    */
   private _onError(reason: any): void {
-    showDialog({
+    void showDialog({
       title: 'Error Loading Theme',
       body: String(reason),
       buttons: [Dialog.okButton({ label: 'OK' })]
@@ -272,18 +427,17 @@ export class ThemeManager {
   private _current: string | null = null;
   private _host: Widget;
   private _links: HTMLLinkElement[] = [];
+  private _overrides: Dict<string> = {};
+  private _overrideProps: Dict<string> = {};
   private _outstanding: Promise<void> | null = null;
   private _pending = 0;
   private _requests: { [theme: string]: number } = {};
   private _settings: ISettingRegistry.ISettings;
-  private _splash: ISplashScreen;
-  private _themes: { [key: string]: ThemeManager.ITheme } = {};
+  private _splash: ISplashScreen | null;
+  private _themes: { [key: string]: IThemeManager.ITheme } = {};
   private _themeChanged = new Signal<this, IChangedArgs<string>>(this);
 }
 
-/**
- * A namespace for `ThemeManager` statics.
- */
 export namespace ThemeManager {
   /**
    * The options used to create a theme manager.
@@ -307,43 +461,12 @@ export namespace ThemeManager {
     /**
      * The splash screen to show when loading themes.
      */
-    splash: ISplashScreen;
+    splash?: ISplashScreen;
 
     /**
      * The url for local theme loading.
      */
     url: string;
-  }
-
-  /**
-   * An interface for a theme.
-   */
-  export interface ITheme {
-    /**
-     * The display name of the theme.
-     */
-    name: string;
-
-    /**
-     * Whether the theme is light or dark. Downstream authors
-     * of extensions can use this information to customize their
-     * UI depending upon the current theme.
-     */
-    isLight: boolean;
-
-    /**
-     * Load the theme.
-     *
-     * @returns A promise that resolves when the theme has loaded.
-     */
-    load(): Promise<void>;
-
-    /**
-     * Unload the theme.
-     *
-     * @returns A promise that resolves when the theme has unloaded.
-     */
-    unload(): Promise<void>;
   }
 }
 

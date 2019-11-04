@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IInstanceTracker, InstanceTracker } from '@jupyterlab/apputils';
+import { IWidgetTracker, WidgetTracker } from '@jupyterlab/apputils';
 
 import {
   MimeDocumentFactory,
@@ -17,14 +17,14 @@ import { Token } from '@phosphor/coreutils';
 
 import { AttachedProperty } from '@phosphor/properties';
 
-import { JupyterLab, JupyterLabPlugin } from './index';
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from './index';
 
 import { ILayoutRestorer } from './layoutrestorer';
 
 /**
  * A class that tracks mime documents.
  */
-export interface IMimeDocumentTracker extends IInstanceTracker<MimeDocument> {}
+export interface IMimeDocumentTracker extends IWidgetTracker<MimeDocument> {}
 
 /* tslint:disable */
 /**
@@ -40,11 +40,11 @@ export const IMimeDocumentTracker = new Token<IMimeDocumentTracker>(
  */
 export function createRendermimePlugins(
   extensions: IRenderMime.IExtensionModule[]
-): JupyterLabPlugin<void | IMimeDocumentTracker>[] {
-  const plugins: JupyterLabPlugin<void | IMimeDocumentTracker>[] = [];
+): JupyterFrontEndPlugin<void | IMimeDocumentTracker>[] {
+  const plugins: JupyterFrontEndPlugin<void | IMimeDocumentTracker>[] = [];
 
   const namespace = 'application-mimedocuments';
-  const tracker = new InstanceTracker<MimeDocument>({ namespace });
+  const tracker = new WidgetTracker<MimeDocument>({ namespace });
 
   extensions.forEach(mod => {
     let data = mod.default;
@@ -62,22 +62,24 @@ export function createRendermimePlugins(
   });
 
   // Also add a meta-plugin handling state restoration
-  // and exposing the mime document instance tracker.
+  // and exposing the mime document widget tracker.
   plugins.push({
     id: '@jupyterlab/application:mimedocument',
-    requires: [ILayoutRestorer],
+    optional: [ILayoutRestorer],
     provides: IMimeDocumentTracker,
     autoStart: true,
-    activate: (app: JupyterLab, restorer: ILayoutRestorer) => {
-      restorer.restore(tracker, {
-        command: 'docmanager:open',
-        args: widget => ({
-          path: widget.context.path,
-          factory: Private.factoryNameProperty.get(widget)
-        }),
-        name: widget =>
-          `${widget.context.path}:${Private.factoryNameProperty.get(widget)}`
-      });
+    activate: (app: JupyterFrontEnd, restorer: ILayoutRestorer | null) => {
+      if (restorer) {
+        void restorer.restore(tracker, {
+          command: 'docmanager:open',
+          args: widget => ({
+            path: widget.context.path,
+            factory: Private.factoryNameProperty.get(widget)
+          }),
+          name: widget =>
+            `${widget.context.path}:${Private.factoryNameProperty.get(widget)}`
+        });
+      }
       return tracker;
     }
   });
@@ -89,18 +91,14 @@ export function createRendermimePlugins(
  * Create rendermime plugins for rendermime extension modules.
  */
 export function createRendermimePlugin(
-  tracker: InstanceTracker<MimeDocument>,
+  tracker: WidgetTracker<MimeDocument>,
   item: IRenderMime.IExtension
-): JupyterLabPlugin<void> {
+): JupyterFrontEndPlugin<void> {
   return {
     id: item.id,
-    requires: [ILayoutRestorer, IRenderMimeRegistry],
+    requires: [IRenderMimeRegistry],
     autoStart: true,
-    activate: (
-      app: JupyterLab,
-      restorer: ILayoutRestorer,
-      rendermime: IRenderMimeRegistry
-    ) => {
+    activate: (app: JupyterFrontEnd, rendermime: IRenderMimeRegistry) => {
       // Add the mime renderer.
       if (item.rank !== undefined) {
         rendermime.addFactory(item.rendererFactory, item.rank);
@@ -149,11 +147,11 @@ export function createRendermimePlugin(
 
         factory.widgetCreated.connect((sender, widget) => {
           Private.factoryNameProperty.set(widget, factory.name);
-          // Notify the instance tracker if restore data needs to update.
+          // Notify the widget tracker if restore data needs to update.
           widget.context.pathChanged.connect(() => {
-            tracker.save(widget);
+            void tracker.save(widget);
           });
-          tracker.add(widget);
+          void tracker.add(widget);
         });
       });
     }

@@ -11,6 +11,8 @@ import {
 
 import { Message } from '@phosphor/messaging';
 
+import { AttachedProperty } from '@phosphor/properties';
+
 import { Signal } from '@phosphor/signaling';
 
 import { Panel, PanelLayout } from '@phosphor/widgets';
@@ -21,7 +23,7 @@ import { IClientSession } from '@jupyterlab/apputils';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { IOutputModel, RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
@@ -108,14 +110,8 @@ export class OutputArea extends Widget {
       let output = model.get(i);
       this._insertOutput(i, output);
     }
-    model.changed.connect(
-      this.onModelChanged,
-      this
-    );
-    model.stateChanged.connect(
-      this.onStateChanged,
-      this
-    );
+    model.changed.connect(this.onModelChanged, this);
+    model.stateChanged.connect(this.onStateChanged, this);
   }
 
   /**
@@ -131,7 +127,7 @@ export class OutputArea extends Widget {
   /**
    * The rendermime instance used by the widget.
    */
-  readonly rendermime: RenderMimeRegistry;
+  readonly rendermime: IRenderMimeRegistry;
 
   /**
    * A read-only sequence of the chidren widgets in the output area.
@@ -152,11 +148,19 @@ export class OutputArea extends Widget {
   /**
    * The kernel future associated with the output area.
    */
-  get future(): Kernel.IFuture {
+  get future(): Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  > | null {
     return this._future;
   }
 
-  set future(value: Kernel.IFuture) {
+  set future(
+    value: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    > | null
+  ) {
     // Bail if the model is disposed.
     if (this.model.isDisposed) {
       throw Error('Model is disposed');
@@ -216,9 +220,30 @@ export class OutputArea extends Widget {
         this.outputLengthChanged.emit(this.model.length);
         break;
       case 'remove':
-        // Only clear is supported by the model.
         if (this.widgets.length) {
-          this._clear();
+          // all items removed from model
+          if (this.model.length === 0) {
+            this._clear();
+          } else {
+            // range of items removed from model
+            // remove widgets corresponding to removed model items
+            const startIndex = args.oldIndex;
+            for (
+              let i = 0;
+              i < args.oldValues.length && startIndex < this.widgets.length;
+              ++i
+            ) {
+              let widget = this.widgets[startIndex];
+              widget.parent = null;
+              widget.dispose();
+            }
+
+            // apply item offset to target model item indices in _displayIdMap
+            this._moveDisplayIdIndices(startIndex, args.oldValues.length);
+
+            // prevent jitter caused by immediate height change
+            this._preventHeightChangeJitter();
+          }
           this.outputLengthChanged.emit(this.model.length);
         }
         break;
@@ -229,6 +254,32 @@ export class OutputArea extends Widget {
       default:
         break;
     }
+  }
+
+  /**
+   * Update indices in _displayIdMap in response to element remove from model items
+   * *
+   * @param startIndex - The index of first element removed
+   *
+   * @param count - The number of elements removed from model items
+   *
+   */
+  private _moveDisplayIdIndices(startIndex: number, count: number) {
+    this._displayIdMap.forEach((indices: number[]) => {
+      const rangeEnd = startIndex + count;
+      const numIndices = indices.length;
+      // reverse loop in order to prevent removing element affecting the index
+      for (let i = numIndices - 1; i >= 0; --i) {
+        const index = indices[i];
+        // remove model item indices in removed range
+        if (index >= startIndex && index < rangeEnd) {
+          indices.splice(i, 1);
+        } else if (index >= rangeEnd) {
+          // move model item indices that were larger than range end
+          indices[i] -= count;
+        }
+      }
+    });
   }
 
   /**
@@ -261,6 +312,11 @@ export class OutputArea extends Widget {
     // Clear the display id map.
     this._displayIdMap.clear();
 
+    // prevent jitter caused by immediate height change
+    this._preventHeightChangeJitter();
+  }
+
+  private _preventHeightChangeJitter() {
     // When an output area is cleared and then quickly replaced with new
     // content (as happens with @interact in widgets, for example), the
     // quickly changing height can make the page jitter.
@@ -284,7 +340,7 @@ export class OutputArea extends Widget {
    */
   protected onInputRequest(
     msg: KernelMessage.IInputRequestMsg,
-    future: Kernel.IFuture
+    future: Kernel.IShellFuture
   ): void {
     // Add an output widget to the end.
     let factory = this.contentFactory;
@@ -310,7 +366,7 @@ export class OutputArea extends Widget {
      * Wait for the stdin to complete, add it to the model (so it persists)
      * and remove the stdin widget.
      */
-    input.value.then(value => {
+    void input.value.then(value => {
       // Use stdin as the stream so it does not get combined with stdout.
       this.model.add({
         output_type: 'stream',
@@ -330,8 +386,20 @@ export class OutputArea extends Widget {
     let renderer = (panel.widgets
       ? panel.widgets[1]
       : panel) as IRenderMime.IRenderer;
-    if (renderer.renderModel) {
-      renderer.renderModel(model);
+    // Check whether it is safe to reuse renderer:
+    // - Preferred mime type has not changed
+    // - Isolation has not changed
+    let mimeType = this.rendermime.preferredMimeType(
+      model.data,
+      model.trusted ? 'any' : 'ensure'
+    );
+    if (
+      renderer.renderModel &&
+      Private.currentPreferredMimetype.get(renderer) === mimeType &&
+      OutputArea.isIsolated(mimeType, model.metadata) ===
+        renderer instanceof Private.IsolatedRenderer
+    ) {
+      void renderer.renderModel(model);
     } else {
       layout.widgets[index].dispose();
       this._insertOutput(index, model);
@@ -343,16 +411,30 @@ export class OutputArea extends Widget {
    */
   private _insertOutput(index: number, model: IOutputModel): void {
     let output = this.createOutputItem(model);
-    output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
+    if (output) {
+      output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
+    } else {
+      output = new Widget();
+    }
     let layout = this.layout as PanelLayout;
     layout.insertWidget(index, output);
   }
 
   /**
    * Create an output item with a prompt and actual output
+   *
+   * @returns a rendered widget, or null if we cannot render
+   * #### Notes
    */
-  protected createOutputItem(model: IOutputModel): Widget {
+  protected createOutputItem(model: IOutputModel): Widget | null {
+    let output = this.createRenderedMimetype(model);
+
+    if (!output) {
+      return null;
+    }
+
     let panel = new Panel();
+
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
     let prompt = this.contentFactory.createOutputPrompt();
@@ -360,57 +442,43 @@ export class OutputArea extends Widget {
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
-    let output = this.createRenderedMimetype(model);
     output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(output);
-
     return panel;
   }
 
   /**
    * Render a mimetype
    */
-  protected createRenderedMimetype(model: IOutputModel): Widget {
-    let widget: Widget;
+  protected createRenderedMimetype(model: IOutputModel): Widget | null {
     let mimeType = this.rendermime.preferredMimeType(
       model.data,
       model.trusted ? 'any' : 'ensure'
     );
-    if (mimeType) {
-      let metadata = model.metadata;
-      let mimeMd = metadata[mimeType] as ReadonlyJSONObject;
-      let isolated = false;
-      // mime-specific higher priority
-      if (mimeMd && mimeMd['isolated'] !== undefined) {
-        isolated = mimeMd['isolated'] as boolean;
-      } else {
-        // fallback on global
-        isolated = metadata['isolated'] as boolean;
-      }
 
-      let output = this.rendermime.createRenderer(mimeType);
-      if (isolated === true) {
-        output = new Private.IsolatedRenderer(output);
-      }
-      output.renderModel(model).catch(error => {
-        // Manually append error message to output
-        output.node.innerHTML = `<pre>Javascript Error: ${error.message}</pre>`;
-        // Remove mime-type-specific CSS classes
-        output.node.className = 'p-Widget jp-RenderedText';
-        output.node.setAttribute(
-          'data-mime-type',
-          'application/vnd.jupyter.stderr'
-        );
-      });
-      widget = output;
-    } else {
-      widget = new Widget();
-      widget.node.innerHTML =
-        `No ${model.trusted ? '' : '(safe) '}renderer could be ` +
-        'found for output. It has the following MIME types: ' +
-        Object.keys(model.data).join(', ');
+    if (!mimeType) {
+      return null;
     }
-    return widget;
+    let output = this.rendermime.createRenderer(mimeType);
+    let isolated = OutputArea.isIsolated(mimeType, model.metadata);
+    if (isolated === true) {
+      output = new Private.IsolatedRenderer(output);
+    }
+    Private.currentPreferredMimetype.set(output, mimeType);
+    output.renderModel(model).catch(error => {
+      // Manually append error message to output
+      const pre = document.createElement('pre');
+      pre.textContent = `Javascript Error: ${error.message}`;
+      output.node.appendChild(pre);
+
+      // Remove mime-type-specific CSS classes
+      output.node.className = 'p-Widget jp-RenderedText';
+      output.node.setAttribute(
+        'data-mime-type',
+        'application/vnd.jupyter.stderr'
+      );
+    });
+    return output;
   }
 
   /**
@@ -420,7 +488,7 @@ export class OutputArea extends Widget {
     let model = this.model;
     let msgType = msg.header.msg_type;
     let output: nbformat.IOutput;
-    let transient = (msg.content.transient || {}) as JSONObject;
+    let transient = ((msg.content as any).transient || {}) as JSONObject;
     let displayId = transient['display_id'] as string;
     let targets: number[];
 
@@ -429,8 +497,7 @@ export class OutputArea extends Widget {
       case 'display_data':
       case 'stream':
       case 'error':
-        output = msg.content as nbformat.IOutput;
-        output.output_type = msgType as nbformat.OutputType;
+        output = { ...msg.content, output_type: msgType };
         model.add(output);
         break;
       case 'clear_output':
@@ -438,8 +505,7 @@ export class OutputArea extends Widget {
         model.clear(wait);
         break;
       case 'update_display_data':
-        output = msg.content as nbformat.IOutput;
-        output.output_type = 'display_data';
+        output = { ...msg.content, output_type: 'display_data' };
         targets = this._displayIdMap.get(displayId);
         if (targets) {
           for (let index of targets) {
@@ -465,7 +531,10 @@ export class OutputArea extends Widget {
     // is overridden from 'execute_reply' to 'display_data' in order to
     // render output.
     let model = this.model;
-    let content = msg.content as KernelMessage.IExecuteOkReply;
+    let content = msg.content;
+    if (content.status !== 'ok') {
+      return;
+    }
     let payload = content && content.payload;
     if (!payload || !payload.length) {
       return;
@@ -484,7 +553,10 @@ export class OutputArea extends Widget {
   };
 
   private _minHeightTimeout: number = null;
-  private _future: Kernel.IFuture = null;
+  private _future: Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  > | null = null;
   private _displayIdMap = new Map<string, number[]>();
 }
 
@@ -494,7 +566,7 @@ export class SimplifiedOutputArea extends OutputArea {
    */
   protected onInputRequest(
     msg: KernelMessage.IInputRequestMsg,
-    future: Kernel.IFuture
+    future: Kernel.IShellFuture
   ): void {
     return;
   }
@@ -502,9 +574,11 @@ export class SimplifiedOutputArea extends OutputArea {
   /**
    * Create an output item without a prompt, just the output widgets
    */
-  protected createOutputItem(model: IOutputModel): Widget {
+  protected createOutputItem(model: IOutputModel): Widget | null {
     let output = this.createRenderedMimetype(model);
-    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    if (output) {
+      output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    }
     return output;
   }
 }
@@ -530,30 +604,52 @@ export namespace OutputArea {
     /**
      * The rendermime instance used by the widget.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
   }
 
   /**
    * Execute code on an output area.
    */
-  export function execute(
+  export async function execute(
     code: string,
     output: OutputArea,
     session: IClientSession,
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg> {
     // Override the default for `stop_on_error`.
-    let content: KernelMessage.IExecuteRequest = {
+    let stopOnError = true;
+    if (
+      metadata &&
+      Array.isArray(metadata.tags) &&
+      metadata.tags.indexOf('raises-exception') !== -1
+    ) {
+      stopOnError = false;
+    }
+    let content: KernelMessage.IExecuteRequestMsg['content'] = {
       code,
-      stop_on_error: true
+      stop_on_error: stopOnError
     };
 
     if (!session.kernel) {
-      return Promise.reject('Session has no kernel.');
+      throw new Error('Session has no kernel.');
     }
     let future = session.kernel.requestExecute(content, false, metadata);
     output.future = future;
-    return future.done as Promise<KernelMessage.IExecuteReplyMsg>;
+    return future.done;
+  }
+
+  export function isIsolated(
+    mimeType: string,
+    metadata: ReadonlyJSONObject
+  ): boolean {
+    let mimeMd = metadata[mimeType] as ReadonlyJSONObject | undefined;
+    // mime-specific higher priority
+    if (mimeMd && mimeMd['isolated'] !== undefined) {
+      return !!mimeMd['isolated'];
+    } else {
+      // fallback on global
+      return !!metadata['isolated'];
+    }
   }
 
   /**
@@ -618,8 +714,8 @@ export interface IOutputPrompt extends Widget {
  */
 export class OutputPrompt extends Widget implements IOutputPrompt {
   /*
-    * Create an output prompt widget.
-    */
+   * Create an output prompt widget.
+   */
   constructor() {
     super();
     this.addClass(OUTPUT_PROMPT_CLASS);
@@ -698,6 +794,7 @@ export class Stdin extends Widget implements IStdin {
       if ((event as KeyboardEvent).keyCode === 13) {
         // Enter
         this._future.sendInputReply({
+          status: 'ok',
           value: input.value
         });
         if (input.type === 'password') {
@@ -732,7 +829,7 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
-  private _future: Kernel.IFuture = null;
+  private _future: Kernel.IShellFuture = null;
   private _input: HTMLInputElement = null;
   private _value: string;
   private _promise = new PromiseDelegate<void>();
@@ -756,7 +853,7 @@ export namespace Stdin {
     /**
      * The kernel future associated with the request.
      */
-    future: Kernel.IFuture;
+    future: Kernel.IShellFuture;
   }
 }
 
@@ -857,4 +954,12 @@ namespace Private {
 
     private _wrapped: IRenderMime.IRenderer;
   }
+
+  export const currentPreferredMimetype = new AttachedProperty<
+    IRenderMime.IRenderer,
+    string
+  >({
+    name: 'preferredMimetype',
+    create: owner => ''
+  });
 }

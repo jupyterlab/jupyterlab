@@ -3,6 +3,7 @@ const inspect = require('util').inspect;
 const URL = process.argv[2];
 
 async function main() {
+  /* eslint-disable no-console */
   console.info('Starting Chrome Headless');
 
   const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
@@ -11,6 +12,9 @@ async function main() {
   console.info('Navigating to page:', URL);
   await page.goto(URL);
   console.info('Waiting for page to load...');
+
+  // Wait for the local file to redirect on notebook >= 6.0
+  await page.waitForNavigation();
 
   const html = await page.content();
   if (inspect(html).indexOf('jupyter-config-data') === -1) {

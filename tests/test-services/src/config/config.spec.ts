@@ -7,17 +7,11 @@ import { UUID } from '@phosphor/coreutils';
 
 import { JSONObject } from '@phosphor/coreutils';
 
-import {
-  ConfigSection,
-  ConfigWithDefaults
-} from '@jupyterlab/services/src/config';
+import { ConfigSection, ConfigWithDefaults } from '@jupyterlab/services';
 
-import {
-  expectFailure,
-  handleRequest,
-  makeSettings,
-  getRequestHandler
-} from '../utils';
+import { expectFailure } from '@jupyterlab/testutils';
+
+import { handleRequest, makeSettings, getRequestHandler } from '../utils';
 
 /**
  * Generate a random config section name.
@@ -33,11 +27,6 @@ function randomName() {
 
 describe('config', () => {
   describe('ConfigSection.create()', () => {
-    it('should load a config', async () => {
-      const config = await ConfigSection.create({ name: randomName() });
-      expect(Object.keys(config.data).length).to.equal(0);
-    });
-
     it('should load a config', async () => {
       const config = await ConfigSection.create({ name: randomName() });
       expect(Object.keys(config.data).length).to.equal(0);

@@ -2,10 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterLab,
-  JupyterLabPlugin,
+  IConnectionLost,
+  ILabShell,
+  ILabStatus,
   ILayoutRestorer,
   IRouter,
+  ConnectionLost,
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin,
+  JupyterLab,
+  LabShell,
   LayoutRestorer,
   Router
 } from '@jupyterlab/application';
@@ -19,14 +25,15 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  PageConfig,
   PathExt,
   IStateDB,
   ISettingRegistry,
   URLExt
 } from '@jupyterlab/coreutils';
 
-import { each } from '@phosphor/algorithm';
+import { each, iter, toArray } from '@phosphor/algorithm';
+
+import { Widget, DockLayout } from '@phosphor/widgets';
 
 import * as React from 'react';
 
@@ -38,6 +45,12 @@ namespace CommandIDs {
 
   export const activatePreviousTab: string =
     'application:activate-previous-tab';
+
+  export const close = 'application:close';
+
+  export const closeOtherTabs = 'application:close-other-tabs';
+
+  export const closeRightTabs = 'application:close-right-tabs';
 
   export const closeAll: string = 'application:close-all';
 
@@ -58,34 +71,29 @@ namespace CommandIDs {
 }
 
 /**
- * The routing regular expressions used by the application plugin.
- */
-namespace Patterns {
-  export const tree = new RegExp(`^${PageConfig.getOption('treeUrl')}([^?]+)`);
-
-  export const workspace = new RegExp(
-    `^${PageConfig.getOption('workspacesUrl')}[^?\/]+/tree/([^?]+)`
-  );
-}
-
-/**
  * The main extension.
  */
-const main: JupyterLabPlugin<void> = {
+const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
   requires: [ICommandPalette, IRouter, IWindowResolver],
+  optional: [IConnectionLost],
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
     palette: ICommandPalette,
     router: IRouter,
-    resolver: IWindowResolver
+    resolver: IWindowResolver,
+    connectionLost: IConnectionLost | undefined
   ) => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${main.id} must be activated in JupyterLab.`);
+    }
+
     // Requiring the window resolver guarantees that the application extension
     // only loads if there is a viable window name. Otherwise, the application
     // will short-circuit and ask the user to navigate away.
     const workspace = resolver.name;
 
-    console.log(`Starting application in workspace: ${workspace}`);
+    console.log(`Starting application in workspace: "${workspace}"`);
 
     // If there were errors registering plugins, tell the user.
     if (app.registerPluginErrors.length !== 0) {
@@ -93,7 +101,7 @@ const main: JupyterLabPlugin<void> = {
         <pre>{app.registerPluginErrors.map(e => e.message).join('\n')}</pre>
       );
 
-      showErrorMessage('Error Registering Plugins', { message: body });
+      void showErrorMessage('Error Registering Plugins', { message: body });
     }
 
     addCommands(app, palette);
@@ -103,6 +111,11 @@ const main: JupyterLabPlugin<void> = {
     app.shell.layoutModified.connect(() => {
       app.commands.notifyCommandChanged();
     });
+
+    // If the connection to the server is lost, handle it with the
+    // connection lost handler.
+    connectionLost = connectionLost || ConnectionLost;
+    app.serviceManager.connectionFailure.connect(connectionLost);
 
     const builder = app.serviceManager.builder;
     const build = () => {
@@ -114,7 +127,7 @@ const main: JupyterLabPlugin<void> = {
             body: 'Build successfully completed, reload page?',
             buttons: [
               Dialog.cancelButton(),
-              Dialog.warnButton({ label: 'RELOAD' })
+              Dialog.warnButton({ label: 'Reload' })
             ]
           });
         })
@@ -124,14 +137,14 @@ const main: JupyterLabPlugin<void> = {
           }
         })
         .catch(err => {
-          showErrorMessage('Build Failed', {
+          void showErrorMessage('Build Failed', {
             message: <pre>{err.message}</pre>
           });
         });
     };
 
     if (builder.isAvailable && builder.shouldCheck) {
-      builder.getStatus().then(response => {
+      void builder.getStatus().then(response => {
         if (response.status === 'building') {
           return build();
         }
@@ -148,10 +161,10 @@ const main: JupyterLabPlugin<void> = {
           </div>
         );
 
-        showDialog({
+        void showDialog({
           title: 'Build Recommended',
           body,
-          buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'BUILD' })]
+          buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Build' })]
         }).then(result => (result.button.accept ? build() : undefined));
       });
     }
@@ -166,7 +179,7 @@ const main: JupyterLabPlugin<void> = {
     // For more information, see:
     // https://developer.mozilla.org/en/docs/Web/Events/beforeunload
     window.addEventListener('beforeunload', event => {
-      if (app.isDirty) {
+      if (app.status.isDirty) {
         return ((event as any).returnValue = message);
       }
     });
@@ -177,18 +190,18 @@ const main: JupyterLabPlugin<void> = {
 /**
  * The default layout restorer provider.
  */
-const layout: JupyterLabPlugin<ILayoutRestorer> = {
+const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
-  requires: [IStateDB],
-  activate: (app: JupyterLab, state: IStateDB) => {
+  requires: [IStateDB, ILabShell],
+  activate: (app: JupyterFrontEnd, state: IStateDB, labShell: ILabShell) => {
     const first = app.started;
     const registry = app.commands;
-    const restorer = new LayoutRestorer({ first, registry, state });
+    const restorer = new LayoutRestorer({ connector: state, first, registry });
 
-    restorer.fetch().then(saved => {
-      app.shell.restoreLayout(saved);
-      app.shell.layoutModified.connect(() => {
-        restorer.save(app.shell.saveLayout());
+    void restorer.fetch().then(saved => {
+      labShell.restoreLayout(saved);
+      labShell.layoutModified.connect(() => {
+        void restorer.save(labShell.saveLayout());
       });
     });
 
@@ -201,20 +214,21 @@ const layout: JupyterLabPlugin<ILayoutRestorer> = {
 /**
  * The default URL router provider.
  */
-const router: JupyterLabPlugin<IRouter> = {
+const router: JupyterFrontEndPlugin<IRouter> = {
   id: '@jupyterlab/application-extension:router',
-  activate: (app: JupyterLab) => {
+  requires: [JupyterFrontEnd.IPaths],
+  activate: (app: JupyterFrontEnd, paths: JupyterFrontEnd.IPaths) => {
     const { commands } = app;
-    const base = PageConfig.getOption('baseUrl');
+    const base = paths.urls.base;
     const router = new Router({ base, commands });
 
-    app.started.then(() => {
+    void app.started.then(() => {
       // Route the very first request on load.
-      router.route();
+      void router.route();
 
       // Route all pop state events.
       window.addEventListener('popstate', () => {
-        router.route();
+        void router.route();
       });
     });
 
@@ -227,78 +241,102 @@ const router: JupyterLabPlugin<IRouter> = {
 /**
  * The tree route handler provider.
  */
-const tree: JupyterLabPlugin<void> = {
+const tree: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:tree',
   autoStart: true,
-  requires: [IRouter],
-  activate: (app: JupyterLab, router: IRouter) => {
+  requires: [JupyterFrontEnd.IPaths, IRouter, IWindowResolver],
+  activate: (
+    app: JupyterFrontEnd,
+    paths: JupyterFrontEnd.IPaths,
+    router: IRouter,
+    resolver: IWindowResolver
+  ) => {
     const { commands } = app;
+    const treePattern = new RegExp(`^${paths.urls.tree}([^?]+)`);
+    const workspacePattern = new RegExp(
+      `^${paths.urls.workspaces}/[^?/]+/tree/([^?]+)`
+    );
 
     commands.addCommand(CommandIDs.tree, {
       execute: async (args: IRouter.ILocation) => {
-        const treeMatch = args.path.match(Patterns.tree);
-        const workspaceMatch = args.path.match(Patterns.workspace);
+        const treeMatch = args.path.match(treePattern);
+        const workspaceMatch = args.path.match(workspacePattern);
         const match = treeMatch || workspaceMatch;
         const path = decodeURI(match[1]);
-        const { page, workspaces } = app.info.urls;
-        const workspace = PathExt.basename(app.info.workspace);
-        const url =
-          (workspaceMatch ? URLExt.join(workspaces, workspace) : page) +
-          args.search +
-          args.hash;
-        const immediate = true;
-        const silent = true;
+        const workspace = PathExt.basename(resolver.name);
+        const query = URLExt.queryStringToObject(args.search);
+        const fileBrowserPath = query['file-browser-path'];
 
-        // Silently remove the tree portion of the URL leaving the rest intact.
-        router.navigate(url, { silent });
+        // Remove the file browser path from the query string.
+        delete query['file-browser-path'];
+
+        // Remove the tree portion of the URL.
+        const url =
+          (workspaceMatch
+            ? URLExt.join(paths.urls.workspaces, workspace)
+            : paths.urls.app) +
+          URLExt.objectToQueryString(query) +
+          args.hash;
+
+        router.navigate(url);
 
         try {
-          await commands.execute('filebrowser:navigate', { path });
-          await commands.execute('apputils:save-statedb', { immediate });
+          await commands.execute('filebrowser:open-path', { path });
+
+          if (fileBrowserPath) {
+            await commands.execute('filebrowser:open-path', {
+              path: fileBrowserPath
+            });
+          }
         } catch (error) {
           console.warn('Tree routing failed.', error);
         }
       }
     });
 
-    router.register({ command: CommandIDs.tree, pattern: Patterns.tree });
-    router.register({ command: CommandIDs.tree, pattern: Patterns.workspace });
+    router.register({ command: CommandIDs.tree, pattern: treePattern });
+    router.register({ command: CommandIDs.tree, pattern: workspacePattern });
   }
 };
 
 /**
  * The default URL not found extension.
  */
-const notfound: JupyterLabPlugin<void> = {
+const notfound: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:notfound',
-  activate: (app: JupyterLab, router: IRouter) => {
-    const bad = PageConfig.getOption('notFoundUrl');
-    const base = router.base;
-    const message = `
-      The path: ${bad} was not found. JupyterLab redirected to: ${base}
-    `;
+  requires: [JupyterFrontEnd.IPaths, IRouter],
+  activate: (
+    _: JupyterFrontEnd,
+    paths: JupyterFrontEnd.IPaths,
+    router: IRouter
+  ) => {
+    const bad = paths.urls.notFound;
 
     if (!bad) {
       return;
     }
 
-    // Change the URL back to the base application URL without adding the
-    // URL change to the browser history.
-    router.navigate('', { silent: true });
+    const base = router.base;
+    const message = `
+      The path: ${bad} was not found. JupyterLab redirected to: ${base}
+    `;
 
-    showErrorMessage('Path Not Found', { message });
+    // Change the URL back to the base application URL.
+    router.navigate('');
+
+    void showErrorMessage('Path Not Found', { message });
   },
-  requires: [IRouter],
   autoStart: true
 };
 
 /**
  * Change the favicon changing based on the busy status;
  */
-const busy: JupyterLabPlugin<void> = {
+const busy: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:faviconbusy',
-  activate: async (app: JupyterLab) => {
-    app.busySignal.connect((_, isBusy) => {
+  requires: [ILabStatus],
+  activate: async (_: JupyterFrontEnd, status: ILabStatus) => {
+    status.busySignal.connect((_, isBusy) => {
       const favicon = document.querySelector(
         `link[rel="icon"]${isBusy ? '.idle.favicon' : '.busy.favicon'}`
       ) as HTMLLinkElement;
@@ -322,7 +360,6 @@ const busy: JupyterLabPlugin<void> = {
       }
     });
   },
-  requires: [],
   autoStart: true
 };
 
@@ -331,26 +368,30 @@ const SIDEBAR_ID = '@jupyterlab/application-extension:sidebar';
 /**
  * Keep user settings for where to show the side panels.
  */
-const sidebar: JupyterLabPlugin<void> = {
+const sidebar: JupyterFrontEndPlugin<void> = {
   id: SIDEBAR_ID,
-  activate: (app: JupyterLab, settingRegistry: ISettingRegistry) => {
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry,
+    labShell: ILabShell
+  ) => {
     type overrideMap = { [id: string]: 'left' | 'right' };
     let overrides: overrideMap = {};
     const handleLayoutOverrides = () => {
-      each(app.shell.widgets('left'), widget => {
+      each(labShell.widgets('left'), widget => {
         if (overrides[widget.id] && overrides[widget.id] === 'right') {
-          app.shell.addToRightArea(widget);
+          labShell.add(widget, 'right');
         }
       });
-      each(app.shell.widgets('right'), widget => {
+      each(labShell.widgets('right'), widget => {
         if (overrides[widget.id] && overrides[widget.id] === 'left') {
-          app.shell.addToLeftArea(widget);
+          labShell.add(widget, 'left');
         }
       });
     };
-    app.shell.layoutModified.connect(handleLayoutOverrides);
+    labShell.layoutModified.connect(handleLayoutOverrides);
     // Fetch overrides from the settings system.
-    Promise.all([settingRegistry.load(SIDEBAR_ID), app.restored]).then(
+    void Promise.all([settingRegistry.load(SIDEBAR_ID), app.restored]).then(
       ([settings]) => {
         overrides = (settings.get('overrides').composite as overrideMap) || {};
         settings.changed.connect(settings => {
@@ -365,11 +406,9 @@ const sidebar: JupyterLabPlugin<void> = {
     app.commands.addCommand(CommandIDs.switchSidebar, {
       label: 'Switch Sidebar Side',
       execute: () => {
-        // First, try to find the right panel based on the
-        // application context menu click,
-        // If we can't find it there, look for use the active
-        // left/right widgets.
-        const contextNode: HTMLElement = app.contextMenuFirst(
+        // First, try to find the correct panel based on the
+        // application context menu click.
+        const contextNode: HTMLElement = app.contextMenuHitTest(
           node => !!node.dataset.id
         );
         let id: string;
@@ -383,18 +422,14 @@ const sidebar: JupyterLabPlugin<void> = {
           } else {
             side = 'left';
           }
-        } else if (document.body.dataset.leftSidebarWidget) {
-          id = document.body.dataset.leftSidebarWidget;
-          side = 'right';
-        } else if (document.body.dataset.rightSidebarWidget) {
-          id = document.body.dataset.rightSidebarWidget;
-          side = 'left';
+        } else {
+          // Bail if we don't find a sidebar for the widget.
+          return;
         }
-
         // Move the panel to the other side.
         const newOverrides = { ...overrides };
         newOverrides[id] = side;
-        settingRegistry.set(SIDEBAR_ID, 'overrides', newOverrides);
+        return settingRegistry.set(SIDEBAR_ID, 'overrides', newOverrides);
       }
     });
 
@@ -405,7 +440,7 @@ const sidebar: JupyterLabPlugin<void> = {
       rank: 500
     });
   },
-  requires: [ISettingRegistry],
+  requires: [ISettingRegistry, ILabShell],
   autoStart: true
 };
 
@@ -413,84 +448,222 @@ const sidebar: JupyterLabPlugin<void> = {
  * Add the main application commands.
  */
 function addCommands(app: JupyterLab, palette: ICommandPalette): void {
+  const { commands, contextMenu, shell } = app;
   const category = 'Main Area';
-  let command = CommandIDs.activateNextTab;
 
-  app.commands.addCommand(command, {
+  // Returns the widget associated with the most recent contextmenu event.
+  const contextMenuWidget = (): Widget => {
+    const test = (node: HTMLElement) => !!node.dataset.id;
+    const node = app.contextMenuHitTest(test);
+
+    if (!node) {
+      // Fall back to active widget if path cannot be obtained from event.
+      return shell.currentWidget;
+    }
+
+    const matches = toArray(shell.widgets('main')).filter(
+      widget => widget.id === node.dataset.id
+    );
+
+    if (matches.length < 1) {
+      return shell.currentWidget;
+    }
+
+    return matches[0];
+  };
+
+  // Closes an array of widgets.
+  const closeWidgets = (widgets: Array<Widget>): void => {
+    widgets.forEach(widget => widget.close());
+  };
+
+  // Find the tab area for a widget within a specific dock area.
+  const findTab = (
+    area: DockLayout.AreaConfig,
+    widget: Widget
+  ): DockLayout.ITabAreaConfig | null => {
+    switch (area.type) {
+      case 'split-area':
+        const iterator = iter(area.children);
+        let tab: DockLayout.ITabAreaConfig | null = null;
+        let value: DockLayout.AreaConfig | null = null;
+        do {
+          value = iterator.next();
+          if (value) {
+            tab = findTab(value, widget);
+          }
+        } while (!tab && value);
+        return tab;
+      case 'tab-area':
+        const { id } = widget;
+        return area.widgets.some(widget => widget.id === id) ? area : null;
+      default:
+        return null;
+    }
+  };
+
+  // Find the tab area for a widget within the main dock area.
+  const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
+    const { mainArea } = shell.saveLayout();
+    if (mainArea.mode !== 'multiple-document') {
+      return null;
+    }
+    let area = mainArea.dock.main;
+    if (!area) {
+      return null;
+    }
+    return findTab(area, widget);
+  };
+
+  // Returns an array of all widgets to the right of a widget in a tab area.
+  const widgetsRightOf = (widget: Widget): Array<Widget> => {
+    const { id } = widget;
+    const tabArea = tabAreaFor(widget);
+    const widgets = tabArea ? tabArea.widgets || [] : [];
+    const index = widgets.findIndex(widget => widget.id === id);
+    if (index < 0) {
+      return [];
+    }
+    return widgets.slice(index + 1);
+  };
+
+  commands.addCommand(CommandIDs.activateNextTab, {
     label: 'Activate Next Tab',
     execute: () => {
-      app.shell.activateNextTab();
+      shell.activateNextTab();
     }
   });
-  palette.addItem({ command, category });
+  palette.addItem({ command: CommandIDs.activateNextTab, category });
 
-  command = CommandIDs.activatePreviousTab;
-  app.commands.addCommand(command, {
+  commands.addCommand(CommandIDs.activatePreviousTab, {
     label: 'Activate Previous Tab',
     execute: () => {
-      app.shell.activatePreviousTab();
+      shell.activatePreviousTab();
     }
   });
-  palette.addItem({ command, category });
+  palette.addItem({ command: CommandIDs.activatePreviousTab, category });
 
-  command = CommandIDs.closeAll;
-  app.commands.addCommand(command, {
-    label: 'Close All Widgets',
+  // A CSS selector targeting tabs in the main area. This is a very
+  // specific selector since we really only want tabs that are
+  // in the main area, as opposed to those in sidebars, ipywidgets, etc.
+  const tabSelector =
+    '#jp-main-dock-panel .p-DockPanel-tabBar.jp-Activity .p-TabBar-tab';
+
+  commands.addCommand(CommandIDs.close, {
+    label: () => 'Close Tab',
+    isEnabled: () =>
+      !!shell.currentWidget && !!shell.currentWidget.title.closable,
     execute: () => {
-      app.shell.closeAll();
+      if (shell.currentWidget) {
+        shell.currentWidget.close();
+      }
     }
   });
-  palette.addItem({ command, category });
+  palette.addItem({ command: CommandIDs.close, category });
+  contextMenu.addItem({
+    command: CommandIDs.close,
+    selector: tabSelector,
+    rank: 4
+  });
 
-  command = CommandIDs.toggleLeftArea;
-  app.commands.addCommand(command, {
+  commands.addCommand(CommandIDs.closeAll, {
+    label: 'Close All Tabs',
+    execute: () => {
+      shell.closeAll();
+    }
+  });
+  palette.addItem({ command: CommandIDs.closeAll, category });
+
+  commands.addCommand(CommandIDs.closeOtherTabs, {
+    label: () => `Close All Other Tabs`,
+    isEnabled: () => {
+      // Ensure there are at least two widgets.
+      const iterator = shell.widgets('main');
+      return !!iterator.next() && !!iterator.next();
+    },
+    execute: () => {
+      const widget = contextMenuWidget();
+      if (!widget) {
+        return;
+      }
+      const { id } = widget;
+      const otherWidgets = toArray(shell.widgets('main')).filter(
+        widget => widget.id !== id
+      );
+      closeWidgets(otherWidgets);
+    }
+  });
+  palette.addItem({ command: CommandIDs.closeOtherTabs, category });
+  contextMenu.addItem({
+    command: CommandIDs.closeOtherTabs,
+    selector: tabSelector,
+    rank: 4
+  });
+
+  commands.addCommand(CommandIDs.closeRightTabs, {
+    label: () => `Close Tabs to Right`,
+    isEnabled: () =>
+      contextMenuWidget() && widgetsRightOf(contextMenuWidget()).length > 0,
+    execute: () => {
+      const widget = contextMenuWidget();
+      if (!widget) {
+        return;
+      }
+      closeWidgets(widgetsRightOf(widget));
+    }
+  });
+  palette.addItem({ command: CommandIDs.closeRightTabs, category });
+  contextMenu.addItem({
+    command: CommandIDs.closeRightTabs,
+    selector: tabSelector,
+    rank: 5
+  });
+
+  app.commands.addCommand(CommandIDs.toggleLeftArea, {
     label: args => 'Show Left Sidebar',
     execute: () => {
-      if (app.shell.leftCollapsed) {
-        app.shell.expandLeft();
+      if (shell.leftCollapsed) {
+        shell.expandLeft();
       } else {
-        app.shell.collapseLeft();
-        if (app.shell.currentWidget) {
-          app.shell.activateById(app.shell.currentWidget.id);
+        shell.collapseLeft();
+        if (shell.currentWidget) {
+          shell.activateById(shell.currentWidget.id);
         }
       }
     },
-    isToggled: () => !app.shell.leftCollapsed,
-    isVisible: () => !app.shell.isEmpty('left')
+    isToggled: () => !shell.leftCollapsed,
+    isVisible: () => !shell.isEmpty('left')
   });
-  palette.addItem({ command, category });
+  palette.addItem({ command: CommandIDs.toggleLeftArea, category });
 
-  command = CommandIDs.toggleRightArea;
-  app.commands.addCommand(command, {
+  app.commands.addCommand(CommandIDs.toggleRightArea, {
     label: args => 'Show Right Sidebar',
     execute: () => {
-      if (app.shell.rightCollapsed) {
-        app.shell.expandRight();
+      if (shell.rightCollapsed) {
+        shell.expandRight();
       } else {
-        app.shell.collapseRight();
-        if (app.shell.currentWidget) {
-          app.shell.activateById(app.shell.currentWidget.id);
+        shell.collapseRight();
+        if (shell.currentWidget) {
+          shell.activateById(shell.currentWidget.id);
         }
       }
     },
-    isToggled: () => !app.shell.rightCollapsed,
-    isVisible: () => !app.shell.isEmpty('right')
+    isToggled: () => !shell.rightCollapsed,
+    isVisible: () => !shell.isEmpty('right')
   });
-  palette.addItem({ command, category });
+  palette.addItem({ command: CommandIDs.toggleRightArea, category });
 
-  command = CommandIDs.togglePresentationMode;
-  app.commands.addCommand(command, {
+  app.commands.addCommand(CommandIDs.togglePresentationMode, {
     label: args => 'Presentation Mode',
     execute: () => {
-      app.shell.presentationMode = !app.shell.presentationMode;
+      shell.presentationMode = !shell.presentationMode;
     },
-    isToggled: () => app.shell.presentationMode,
+    isToggled: () => shell.presentationMode,
     isVisible: () => true
   });
-  palette.addItem({ command, category });
+  palette.addItem({ command: CommandIDs.togglePresentationMode, category });
 
-  command = CommandIDs.setMode;
-  app.commands.addCommand(command, {
+  app.commands.addCommand(CommandIDs.setMode, {
     isVisible: args => {
       const mode = args['mode'] as string;
       return mode === 'single-document' || mode === 'multiple-document';
@@ -498,39 +671,107 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     execute: args => {
       const mode = args['mode'] as string;
       if (mode === 'single-document' || mode === 'multiple-document') {
-        app.shell.mode = mode;
+        shell.mode = mode;
         return;
       }
       throw new Error(`Unsupported application shell mode: ${mode}`);
     }
   });
 
-  command = CommandIDs.toggleMode;
-  app.commands.addCommand(command, {
+  app.commands.addCommand(CommandIDs.toggleMode, {
     label: 'Single-Document Mode',
-    isToggled: () => app.shell.mode === 'single-document',
+    isToggled: () => shell.mode === 'single-document',
     execute: () => {
       const args =
-        app.shell.mode === 'multiple-document'
+        shell.mode === 'multiple-document'
           ? { mode: 'single-document' }
           : { mode: 'multiple-document' };
       return app.commands.execute(CommandIDs.setMode, args);
     }
   });
-  palette.addItem({ command, category });
+  palette.addItem({ command: CommandIDs.toggleMode, category });
 }
+
+/**
+ * The default JupyterLab application shell.
+ */
+const shell: JupyterFrontEndPlugin<ILabShell> = {
+  id: '@jupyterlab/application-extension:shell',
+  activate: (app: JupyterFrontEnd) => {
+    if (!(app.shell instanceof LabShell)) {
+      throw new Error(`${shell.id} did not find a LabShell instance.`);
+    }
+    return app.shell;
+  },
+  autoStart: true,
+  provides: ILabShell
+};
+
+/**
+ * The default JupyterLab application status provider.
+ */
+const status: JupyterFrontEndPlugin<ILabStatus> = {
+  id: '@jupyterlab/application-extension:status',
+  activate: (app: JupyterFrontEnd) => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${status.id} must be activated in JupyterLab.`);
+    }
+    return app.status;
+  },
+  autoStart: true,
+  provides: ILabStatus
+};
+
+/**
+ * The default JupyterLab application-specific information provider.
+ *
+ * #### Notes
+ * This plugin should only be used by plugins that specifically need to access
+ * JupyterLab application information, e.g., listing extensions that have been
+ * loaded or deferred within JupyterLab.
+ */
+const info: JupyterFrontEndPlugin<JupyterLab.IInfo> = {
+  id: '@jupyterlab/application-extension:info',
+  activate: (app: JupyterFrontEnd) => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${info.id} must be activated in JupyterLab.`);
+    }
+    return app.info;
+  },
+  autoStart: true,
+  provides: JupyterLab.IInfo
+};
+
+/**
+ * The default JupyterLab paths dictionary provider.
+ */
+const paths: JupyterFrontEndPlugin<JupyterFrontEnd.IPaths> = {
+  id: '@jupyterlab/apputils-extension:paths',
+  activate: (app: JupyterFrontEnd): JupyterFrontEnd.IPaths => {
+    if (!(app instanceof JupyterLab)) {
+      throw new Error(`${paths.id} must be activated in JupyterLab.`);
+    }
+    return app.paths;
+  },
+  autoStart: true,
+  provides: JupyterFrontEnd.IPaths
+};
 
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   main,
   layout,
   router,
   tree,
   notfound,
   busy,
-  sidebar
+  sidebar,
+  shell,
+  status,
+  info,
+  paths
 ];
 
 export default plugins;

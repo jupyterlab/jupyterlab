@@ -12,7 +12,7 @@ import semver from 'semver';
 /**
  * Handle an individual package on the path - update the dependency.
  */
-async function handlePackage(packagePath: string): Promise<string[]> {
+export async function handlePackage(packagePath: string): Promise<string[]> {
   const cmds: string[] = [];
 
   // Read in the package.json.
@@ -82,4 +82,6 @@ points to the latest prerelease after it.`
     }
   });
 
-commander.parse(process.argv);
+if (require.main === module) {
+  commander.parse(process.argv);
+}

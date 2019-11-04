@@ -10,34 +10,38 @@ import {
 
 import { PathExt, Time } from '@jupyterlab/coreutils';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import {
   IDocumentManager,
   isValidFileName,
   renameFile
 } from '@jupyterlab/docmanager';
 
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
 import { Contents } from '@jupyterlab/services';
+
+import { IIconRegistry } from '@jupyterlab/ui-components';
 
 import {
   ArrayExt,
   ArrayIterator,
-  IIterator,
   each,
   filter,
   find,
+  IIterator,
   map,
   toArray
 } from '@phosphor/algorithm';
 
 import { MimeData, PromiseDelegate } from '@phosphor/coreutils';
 
-import { Drag, IDragEvent } from '@phosphor/dragdrop';
-
 import { ElementExt } from '@phosphor/domutils';
 
+import { Drag, IDragEvent } from '@phosphor/dragdrop';
+
 import { Message, MessageLoop } from '@phosphor/messaging';
+
+import { ISignal, Signal } from '@phosphor/signaling';
 
 import { Widget } from '@phosphor/widgets';
 
@@ -109,9 +113,14 @@ const NAME_ID_CLASS = 'jp-id-name';
 const MODIFIED_ID_CLASS = 'jp-id-modified';
 
 /**
- * The mime type for a con tents drag object.
+ * The mime type for a contents drag object.
  */
 const CONTENTS_MIME = 'application/x-jupyter-icontents';
+
+/**
+ * The mime type for a rich contents drag object.
+ */
+const CONTENTS_MIME_RICH = 'application/x-jupyter-icontentsrich';
 
 /**
  * The class name added to drop targets.
@@ -184,33 +193,23 @@ export class DirListing extends Widget {
    */
   constructor(options: DirListing.IOptions) {
     super({
-      node: (options.renderer || DirListing.defaultRenderer).createNode()
+      node: (options.renderer =
+        options.renderer ||
+        new DirListing.Renderer(options.model.iconRegistry)).createNode()
     });
     this.addClass(DIR_LISTING_CLASS);
     this._model = options.model;
-    this._model.fileChanged.connect(
-      this._onFileChanged,
-      this
-    );
-    this._model.refreshed.connect(
-      this._onModelRefreshed,
-      this
-    );
-    this._model.pathChanged.connect(
-      this._onPathChanged,
-      this
-    );
+    this._model.fileChanged.connect(this._onFileChanged, this);
+    this._model.refreshed.connect(this._onModelRefreshed, this);
+    this._model.pathChanged.connect(this._onPathChanged, this);
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
     this._manager = this._model.manager;
-    this._renderer = options.renderer || DirListing.defaultRenderer;
+    this._renderer = options.renderer;
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
-    this._manager.activateRequested.connect(
-      this._onActivateRequested,
-      this
-    );
+    this._manager.activateRequested.connect(this._onActivateRequested, this);
   }
 
   /**
@@ -266,6 +265,13 @@ export class DirListing extends Widget {
    */
   get sortState(): DirListing.ISortState {
     return this._sortState;
+  }
+
+  /**
+   * A signal fired when an item is opened.
+   */
+  get onItemOpened(): ISignal<DirListing, Contents.IModel> {
+    return this._onItemOpened;
   }
 
   /**
@@ -359,7 +365,7 @@ export class DirListing extends Widget {
         return undefined;
       })
       .catch(error => {
-        showErrorMessage('Paste Error', error);
+        void showErrorMessage('Paste Error', error);
       });
   }
 
@@ -368,31 +374,27 @@ export class DirListing extends Widget {
    *
    * @returns A promise that resolves when the operation is complete.
    */
-  delete(): Promise<void> {
-    let names: string[] = [];
-    each(this._sortedItems, item => {
-      if (this._selection[item.name]) {
-        names.push(item.name);
-      }
+  async delete(): Promise<void> {
+    const items = this._sortedItems.filter(item => this._selection[item.name]);
+
+    if (!items.length) {
+      return;
+    }
+
+    const message =
+      items.length === 1
+        ? `Are you sure you want to permanently delete: ${items[0].name}?`
+        : `Are you sure you want to permanently delete the ${items.length} ` +
+          `files/folders selected?`;
+    const result = await showDialog({
+      title: 'Delete',
+      body: message,
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
     });
-    let message = `Are you sure you want to permanently delete the ${
-      names.length
-    } files/folders selected?`;
-    if (names.length === 1) {
-      message = `Are you sure you want to permanently delete: ${names[0]}?`;
+
+    if (!this.isDisposed && result.button.accept) {
+      await this._delete(items.map(item => item.path));
     }
-    if (names.length) {
-      return showDialog({
-        title: 'Delete',
-        body: message,
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'DELETE' })]
-      }).then(result => {
-        if (!this.isDisposed && result.button.accept) {
-          return this._delete(names);
-        }
-      });
-    }
-    return Promise.resolve(void 0);
   }
 
   /**
@@ -415,19 +417,19 @@ export class DirListing extends Widget {
         return undefined;
       })
       .catch(error => {
-        showErrorMessage('Duplicate file', error);
+        void showErrorMessage('Duplicate file', error);
       });
   }
 
   /**
    * Download the currently selected item(s).
    */
-  download(): void {
-    each(this.selectedItems(), item => {
-      if (item.type !== 'directory') {
-        this._model.download(item.path);
-      }
-    });
+  async download(): Promise<void> {
+    await Promise.all(
+      toArray(this.selectedItems())
+        .filter(item => item.type !== 'directory')
+        .map(item => this._model.download(item.path))
+    );
   }
 
   /**
@@ -452,7 +454,7 @@ export class DirListing extends Widget {
         return undefined;
       })
       .catch(error => {
-        showErrorMessage('Shutdown kernel', error);
+        void showErrorMessage('Shut down kernel', error);
       });
   }
 
@@ -563,27 +565,34 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Clear the selected items.
+   */
+  clearSelectedItems() {
+    this._selection = Object.create(null);
+  }
+
+  /**
    * Select an item by name.
    *
-   * @parem name - The name of the item to select.
+   * @param name - The name of the item to select.
    *
    * @returns A promise that resolves when the name is selected.
    */
-  selectItemByName(name: string): Promise<void> {
+  async selectItemByName(name: string): Promise<void> {
     // Make sure the file is available.
-    return this.model.refresh().then(() => {
-      if (this.isDisposed) {
-        throw new Error('File browser is disposed.');
-      }
-      let items = this._sortedItems;
-      let index = ArrayExt.findFirstIndex(items, value => value.name === name);
-      if (index === -1) {
-        throw new Error('Item does not exist.');
-      }
-      this._selectItem(index, false);
-      MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
-      ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
-    });
+    await this.model.refresh();
+
+    if (this.isDisposed) {
+      throw new Error('File browser is disposed.');
+    }
+    let items = this._sortedItems;
+    let index = ArrayExt.findFirstIndex(items, value => value.name === name);
+    if (index === -1) {
+      throw new Error('Item does not exist.');
+    }
+    this._selectItem(index, false);
+    MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
+    ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
   }
 
   /**
@@ -781,12 +790,19 @@ export class DirListing extends Widget {
 
       node.classList.add(RUNNING_CLASS);
       if (specs) {
-        name = specs.kernelspecs[name].display_name;
+        const spec = specs.kernelspecs[name];
+        name = spec ? spec.display_name : 'unknown';
       }
       node.title = `${node.title}\nKernel: ${name}`;
     });
 
     this._prevPath = this._model.path;
+  }
+
+  onResize(msg: Widget.ResizeMessage) {
+    const { width } =
+      msg.width === -1 ? this.node.getBoundingClientRect() : msg;
+    this.toggleClass('jp-DirListing-narrow', width < 250);
   }
 
   /**
@@ -869,7 +885,7 @@ export class DirListing extends Widget {
       let altered = event.metaKey || event.shiftKey || event.ctrlKey;
       // See if we need to clear the other selection.
       if (!altered && event.button === 0) {
-        this._selection = Object.create(null);
+        this.clearSelectedItems();
         this._selection[this._softSelection] = true;
         this.update();
       }
@@ -909,6 +925,21 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Handle the opening of an item.
+   */
+  private _handleOpen(item: Contents.IModel): void {
+    this._onItemOpened.emit(item);
+    if (item.type === 'directory') {
+      const localPath = this._manager.services.contents.localPath(item.path);
+      this._model
+        .cd(`/${localPath}`)
+        .catch(error => showErrorMessage('Open directory', error));
+    } else {
+      let path = item.path;
+      this._manager.openOrReveal(path);
+    }
+  }
+  /**
    * Handle the `'keydown'` event for the widget.
    */
   private _evtKeydown(event: KeyboardEvent): void {
@@ -929,17 +960,8 @@ export class DirListing extends Widget {
           return;
         }
 
-        let model = this._model;
         let item = this._sortedItems[i];
-        if (item.type === 'directory') {
-          model
-            .cd(item.name)
-            .catch(error => showErrorMessage('Open directory', error));
-        } else {
-          let path = item.path;
-          this._manager.openOrReveal(path);
-        }
-
+        this._handleOpen(item);
         break;
       case 38: // Up arrow
         this.selectPrevious(event.shiftKey);
@@ -1000,16 +1022,8 @@ export class DirListing extends Widget {
       return;
     }
 
-    let model = this._model;
     let item = this._sortedItems[i];
-    if (item.type === 'directory') {
-      model
-        .cd(item.name)
-        .catch(error => showErrorMessage('Open directory', error));
-    } else {
-      let path = item.path;
-      this._manager.openOrReveal(path);
-    }
+    this._handleOpen(item);
   }
 
   /**
@@ -1022,7 +1036,7 @@ export class DirListing extends Widget {
     }
     event.preventDefault();
     for (let i = 0; i < files.length; i++) {
-      this._model.upload(files[i]);
+      void this._model.upload(files[i]);
     }
   }
 
@@ -1135,7 +1149,7 @@ export class DirListing extends Widget {
       }
     }
     Promise.all(promises).catch(error => {
-      showErrorMessage('Error while copying/moving files', error);
+      void showErrorMessage('Error while copying/moving files', error);
     });
   }
 
@@ -1146,15 +1160,18 @@ export class DirListing extends Widget {
     let selectedNames = Object.keys(this._selection);
     let source = this._items[index];
     let items = this._sortedItems;
+    let selectedItems: Contents.IModel[];
     let item: Contents.IModel | undefined;
 
     // If the source node is not selected, use just that node.
     if (!source.classList.contains(SELECTED_CLASS)) {
       item = items[index];
       selectedNames = [item.name];
+      selectedItems = [item];
     } else {
       let name = selectedNames[0];
       item = find(items, value => value.name === name);
+      selectedItems = toArray(this.selectedItems());
     }
 
     if (!item) {
@@ -1177,12 +1194,28 @@ export class DirListing extends Widget {
       proposedAction: 'move'
     });
     let basePath = this._model.path;
+
     let paths = toArray(
       map(selectedNames, name => {
         return PathExt.join(basePath, name);
       })
     );
     this._drag.mimeData.setData(CONTENTS_MIME, paths);
+
+    // Add thunks for getting mime data content.
+    // We thunk the content so we don't try to make a network call
+    // when it's not needed. E.g. just moving files around
+    // in a filebrowser
+    let services = this.model.manager.services;
+    for (const item of selectedItems) {
+      this._drag.mimeData.setData(CONTENTS_MIME_RICH, {
+        model: item,
+        withContent: async () => {
+          return await services.contents.get(item.path);
+        }
+      } as DirListing.IContentsThunk);
+    }
+
     if (item && item.type !== 'directory') {
       const otherPaths = paths.slice(1).reverse();
       this._drag.mimeData.setData(FACTORY_MIME, () => {
@@ -1196,7 +1229,7 @@ export class DirListing extends Widget {
         }
         if (otherPaths.length) {
           const firstWidgetPlaced = new PromiseDelegate<void>();
-          firstWidgetPlaced.promise.then(() => {
+          void firstWidgetPlaced.promise.then(() => {
             let prevWidget = widget;
             otherPaths.forEach(path => {
               const options: DocumentRegistry.IOpenOptions = {
@@ -1222,7 +1255,7 @@ export class DirListing extends Widget {
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
     clearTimeout(this._selectTimer);
-    this._drag.start(clientX, clientY).then(action => {
+    void this._drag.start(clientX, clientY).then(action => {
       this._drag = null;
       clearTimeout(this._selectTimer);
     });
@@ -1267,7 +1300,7 @@ export class DirListing extends Widget {
       // Default to selecting the only the item.
     } else {
       // Select only the given item.
-      this._selection = Object.create(null);
+      this.clearSelectedItems();
       this._selection[name] = true;
     }
     this.update();
@@ -1323,19 +1356,16 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Delete the files with the given names.
+   * Delete the files with the given paths.
    */
-  private _delete(names: string[]): Promise<void> {
-    const promises: Promise<void>[] = [];
-    const basePath = this._model.path;
-    for (let name of names) {
-      let newPath = PathExt.join(basePath, name);
-      let promise = this._model.manager.deleteFile(newPath).catch(err => {
-        showErrorMessage('Delete Failed', err);
-      });
-      promises.push(promise);
-    }
-    return Promise.all(promises).then(() => undefined);
+  private async _delete(paths: string[]): Promise<void> {
+    await Promise.all(
+      paths.map(path =>
+        this._model.manager.deleteFile(path).catch(err => {
+          void showErrorMessage('Delete Failed', err);
+        })
+      )
+    );
   }
 
   /**
@@ -1354,12 +1384,13 @@ export class DirListing extends Widget {
     this._selectItem(index, false);
 
     return Private.doRename(nameNode, this._editNode).then(newName => {
+      this.node.focus();
       if (!newName || newName === original) {
         this._inRename = false;
         return original;
       }
       if (!isValidFileName(newName)) {
-        showErrorMessage(
+        void showErrorMessage(
           'Rename Error',
           Error(
             `"${newName}" is not a valid name for a file. ` +
@@ -1383,7 +1414,7 @@ export class DirListing extends Widget {
       return promise
         .catch(error => {
           if (error !== 'File not renamed') {
-            showErrorMessage('Rename Error', error);
+            void showErrorMessage('Rename Error', error);
           }
           this._inRename = false;
           return original;
@@ -1395,7 +1426,7 @@ export class DirListing extends Widget {
           }
           if (this._inRename) {
             // No need to catch because `newName` will always exit.
-            this.selectItemByName(newName);
+            void this.selectItemByName(newName);
           }
           this._inRename = false;
           return newName;
@@ -1410,7 +1441,7 @@ export class DirListing extends Widget {
     // Selected the given row(s)
     let items = this._sortedItems;
     if (!keepExisting) {
-      this._selection = Object.create(null);
+      this.clearSelectedItems();
     }
     let name = items[index].name;
     this._selection[name] = true;
@@ -1423,7 +1454,7 @@ export class DirListing extends Widget {
   private _onModelRefreshed(): void {
     // Update the selection.
     let existing = Object.keys(this._selection);
-    this._selection = Object.create(null);
+    this.clearSelectedItems();
     each(this._model.items(), item => {
       let name = item.name;
       if (existing.indexOf(name) !== -1) {
@@ -1443,7 +1474,7 @@ export class DirListing extends Widget {
    */
   private _onPathChanged(): void {
     // Reset the selection.
-    this._selection = Object.create(null);
+    this.clearSelectedItems();
     // Update the sorted items.
     this.sort(this.sortState);
   }
@@ -1465,10 +1496,10 @@ export class DirListing extends Widget {
       return;
     }
 
-    this.selectItemByName(name)
+    void this.selectItemByName(name)
       .then(() => {
         if (!this.isDisposed && newValue.type === 'directory') {
-          this._doRename();
+          return this._doRename();
         }
       })
       .catch(() => {
@@ -1498,6 +1529,7 @@ export class DirListing extends Widget {
     direction: 'ascending',
     key: 'name'
   };
+  private _onItemOpened = new Signal<DirListing, Contents.IModel>(this);
   private _drag: Drag | null = null;
   private _dragData: {
     pressX: number;
@@ -1552,6 +1584,25 @@ export namespace DirListing {
      * The sort key.
      */
     key: 'name' | 'last_modified';
+  }
+
+  /**
+   * A file contents model thunk.
+   *
+   * Note: The content of the model will be empty.
+   * To get the contents, call and await the `withContent`
+   * method.
+   */
+  export interface IContentsThunk {
+    /**
+     * The contents model.
+     */
+    model: Contents.IModel;
+
+    /**
+     * Fetches the model with contents.
+     */
+    withContent: () => Promise<Contents.IModel>;
   }
 
   /**
@@ -1634,6 +1685,10 @@ export namespace DirListing {
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
+    constructor(icoReg: IIconRegistry) {
+      this._iconRegistry = icoReg;
+    }
+
     /**
      * Create the DOM node for a dir listing.
      */
@@ -1753,16 +1808,35 @@ export namespace DirListing {
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       if (fileType) {
-        icon.textContent = fileType.iconLabel || '';
-        icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
+        // TODO: remove workaround if...else/code in else clause in v2.0.0
+        // workaround for 1.0.x versions of Jlab pulling in 1.1.x versions of filebrowser
+        if (this._iconRegistry) {
+          // add icon as svg node. Can be styled using CSS
+          this._iconRegistry.icon({
+            name: fileType.iconClass,
+            className: ITEM_ICON_CLASS,
+            title: fileType.iconLabel,
+            fallback: true,
+            container: icon,
+            center: true,
+            kind: 'listing'
+          });
+        } else {
+          // add icon as CSS background image. Can't be styled using CSS
+          icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
+          icon.textContent = fileType.iconLabel || '';
+        }
       } else {
-        icon.textContent = '';
+        // use default icon as CSS background image
         icon.className = ITEM_ICON_CLASS;
+        icon.textContent = '';
+        // clean up the svg icon annotation, if any
+        delete icon.dataset.icon;
       }
 
       node.title = model.name;
       // If an item is being edited currently, its text node is unavailable.
-      if (text) {
+      if (text && text.textContent !== model.name) {
         text.textContent = model.name;
       }
 
@@ -1839,12 +1913,8 @@ export namespace DirListing {
       node.appendChild(icon);
       return node;
     }
+    _iconRegistry: IIconRegistry;
   }
-
-  /**
-   * The default `IRenderer` instance.
-   */
-  export const defaultRenderer = new Renderer();
 }
 
 /**

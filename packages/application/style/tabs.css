@@ -46,7 +46,7 @@
   min-height: calc(
     var(--jp-private-horizontal-tab-height) + var(--jp-border-width)
   );
-  min-width: 36px;
+  min-width: 0px;
   margin-left: calc(-1 * var(--jp-border-width));
   line-height: var(--jp-private-horizontal-tab-height);
   padding: 0px 8px;
@@ -54,7 +54,6 @@
   border: var(--jp-border-width) solid var(--jp-border-color1);
   border-bottom: none;
   position: relative;
-  overflow: visible;
 }
 
 .p-DockPanel-tabBar .p-TabBar-tab:hover:not(.p-mod-current) {
@@ -137,6 +136,7 @@
   width: 14px;
   background-position: left center;
   background-repeat: no-repeat;
+  background-size: 14px;
   margin-right: 4px;
 }
 

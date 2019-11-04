@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONExt, JSONValue } from '@phosphor/coreutils';
+import { JSONExt, JSONObject, JSONValue } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -19,7 +19,8 @@ import {
   IObservableJSON,
   IModelDB,
   IObservableValue,
-  ObservableValue
+  ObservableValue,
+  IObservableMap
 } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
@@ -158,26 +159,17 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
 
     this.id = options.id || UUID.uuid4();
 
-    this.value.changed.connect(
-      this.onGenericChange,
-      this
-    );
+    this.value.changed.connect(this.onGenericChange, this);
 
     let cellType = this.modelDB.createValue('type');
     cellType.set(this.type);
 
     let observableMetadata = this.modelDB.createMap('metadata');
-    observableMetadata.changed.connect(
-      this.onGenericChange,
-      this
-    );
+    observableMetadata.changed.connect(this.onGenericChange, this);
 
     let cell = options.cell;
     let trusted = this.modelDB.createValue('trusted');
-    trusted.changed.connect(
-      this.onTrustedChanged,
-      this
-    );
+    trusted.changed.connect(this.onTrustedChanged, this);
 
     if (!cell) {
       trusted.set(false);
@@ -336,10 +328,7 @@ export class AttachmentsCellModel extends CellModel {
       values: attachments,
       modelDB: this.modelDB
     });
-    this._attachments.stateChanged.connect(
-      this.onGenericChange,
-      this
-    );
+    this._attachments.stateChanged.connect(this.onGenericChange, this);
   }
 
   /**
@@ -478,20 +467,37 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         executionCount.set(null);
       }
     }
-    executionCount.changed.connect(
-      this._onExecutionCountChanged,
-      this
-    );
+    executionCount.changed.connect(this._onExecutionCountChanged, this);
 
-    this._outputs = factory.createOutputArea({
-      trusted,
-      values: outputs,
-      modelDB: this.modelDB
-    });
-    this._outputs.changed.connect(
-      this.onGenericChange,
-      this
-    );
+    this._outputs = factory.createOutputArea({ trusted, values: outputs });
+    this._outputs.changed.connect(this.onGenericChange, this);
+
+    // We keep `collapsed` and `jupyter.outputs_hidden` metadata in sync, since
+    // they are redundant in nbformat 4.4. See
+    // https://github.com/jupyter/nbformat/issues/137
+    this.metadata.changed.connect(Private.collapseChanged, this);
+
+    // Sync `collapsed` and `jupyter.outputs_hidden` for the first time, giving
+    // preference to `collapsed`.
+    if (this.metadata.has('collapsed')) {
+      let collapsed = this.metadata.get('collapsed');
+      Private.collapseChanged(this.metadata, {
+        type: 'change',
+        key: 'collapsed',
+        oldValue: collapsed,
+        newValue: collapsed
+      });
+    } else if (this.metadata.has('jupyter')) {
+      let jupyter = this.metadata.get('jupyter') as JSONObject;
+      if (jupyter.hasOwnProperty('outputs_hidden')) {
+        Private.collapseChanged(this.metadata, {
+          type: 'change',
+          key: 'jupyter',
+          oldValue: jupyter,
+          newValue: jupyter
+        });
+      }
+    }
   }
 
   /**
@@ -619,4 +625,34 @@ export namespace CodeCellModel {
    * The shared `ContentFactory` instance.
    */
   export const defaultContentFactory = new ContentFactory();
+}
+
+namespace Private {
+  export function collapseChanged(
+    metadata: IObservableJSON,
+    args: IObservableMap.IChangedArgs<JSONValue>
+  ) {
+    if (args.key === 'collapsed') {
+      const jupyter = (metadata.get('jupyter') || {}) as JSONObject;
+      const { outputs_hidden, ...newJupyter } = jupyter;
+
+      if (outputs_hidden !== args.newValue) {
+        if (args.newValue !== undefined) {
+          newJupyter['outputs_hidden'] = args.newValue;
+        }
+        if (Object.keys(newJupyter).length === 0) {
+          metadata.delete('jupyter');
+        } else {
+          metadata.set('jupyter', newJupyter);
+        }
+      }
+    } else if (args.key === 'jupyter') {
+      const jupyter = (args.newValue || {}) as JSONObject;
+      if (jupyter.hasOwnProperty('outputs_hidden')) {
+        metadata.set('collapsed', jupyter.outputs_hidden);
+      } else {
+        metadata.delete('collapsed');
+      }
+    }
+  }
 }

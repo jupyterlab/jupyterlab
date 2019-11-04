@@ -41,7 +41,7 @@ export class KernelConnector extends DataConnector<
       return Promise.reject(new Error('Inspection fetch requires a kernel.'));
     }
 
-    const contents: KernelMessage.IInspectRequest = {
+    const contents: KernelMessage.IInspectRequestMsg['content'] = {
       code: request.text,
       cursor_pos: request.offset,
       detail_level: 0

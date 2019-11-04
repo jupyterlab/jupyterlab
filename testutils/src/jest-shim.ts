@@ -42,7 +42,12 @@ window.focus = () => {
 
 process.on('unhandledRejection', (error, promise) => {
   console.error('Unhandled promise rejection somewhere in tests');
-  console.error(error);
-  console.error(error.stack);
+  if (error) {
+    console.error(error);
+    const stack = (error as any).stack;
+    if (stack) {
+      console.error(stack);
+    }
+  }
   promise.catch(err => console.error('promise rejected', err));
 });

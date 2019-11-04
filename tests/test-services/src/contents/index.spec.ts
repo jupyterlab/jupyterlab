@@ -8,14 +8,11 @@ import {
   ContentsManager,
   Drive,
   ServerConnection
-} from '@jupyterlab/services/src';
+} from '@jupyterlab/services';
 
-import {
-  DEFAULT_FILE,
-  makeSettings,
-  expectFailure,
-  handleRequest
-} from '../utils';
+import { expectFailure } from '@jupyterlab/testutils';
+
+import { DEFAULT_FILE, makeSettings, handleRequest } from '../utils';
 
 const DEFAULT_DIR: Contents.IModel = {
   name: 'bar',
@@ -782,7 +779,7 @@ describe('drive', () => {
     });
   });
 
-  describe('#newUntitled()', async () => {
+  describe('#newUntitled()', () => {
     it('should create a file', async () => {
       const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);

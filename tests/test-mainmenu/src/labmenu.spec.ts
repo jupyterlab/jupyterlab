@@ -7,7 +7,7 @@ import { ArrayExt } from '@phosphor/algorithm';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { JupyterLabMenu } from '@jupyterlab/mainmenu/src';
+import { JupyterLabMenu } from '@jupyterlab/mainmenu';
 
 describe('@jupyterlab/mainmenu', () => {
   describe('JupyterLabMenu', () => {

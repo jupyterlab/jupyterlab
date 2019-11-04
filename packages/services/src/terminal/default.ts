@@ -121,7 +121,7 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
       return;
     }
 
-    this.ready.then(() => {
+    void this.ready.then(() => {
       const socket = this._ws;
 
       if (socket) {
@@ -197,6 +197,11 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
 
         const data = JSON.parse(event.data) as JSONPrimitive[];
 
+        // Handle a disconnect message.
+        if (data[0] === 'disconnect') {
+          this._disconnected = true;
+        }
+
         if (this._reconnectAttempt > 0) {
           // After reconnection, ignore all messages until a 'setup' message.
           if (data[0] === 'setup') {
@@ -214,6 +219,7 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
       socket.onopen = (event: MessageEvent) => {
         if (!this._isDisposed) {
           this._isReady = true;
+          this._disconnected = false;
           resolve(undefined);
         }
       };
@@ -226,13 +232,16 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
 
       socket.onclose = (event: CloseEvent) => {
         console.warn(`Terminal websocket closed: ${event.code}`);
+        if (this._disconnected) {
+          this.dispose();
+        }
         this._reconnectSocket();
       };
     });
   }
 
   private _reconnectSocket(): void {
-    if (this._isDisposed || !this._ws) {
+    if (this._isDisposed || !this._ws || this._disconnected) {
       return;
     }
 
@@ -277,6 +286,7 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
   };
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
+  private _disconnected = false;
 }
 
 /**
@@ -433,13 +443,11 @@ export namespace DefaultTerminalSession {
       if (response.status === 404) {
         return response.json().then(data => {
           console.warn(data['message']);
-          Private.killTerminal(url);
         });
       }
       if (response.status !== 204) {
         throw new ServerConnection.ResponseError(response);
       }
-      Private.killTerminal(url);
     });
   }
 
@@ -450,15 +458,12 @@ export namespace DefaultTerminalSession {
    *
    * @returns A promise that resolves when all the sessions are shut down.
    */
-  export function shutdownAll(
+  export async function shutdownAll(
     settings?: ServerConnection.ISettings
   ): Promise<void> {
     settings = settings || ServerConnection.makeSettings();
-    return listRunning(settings).then(running => {
-      each(running, s => {
-        shutdown(s.name, settings);
-      });
-    });
+    const running = await listRunning(settings);
+    await Promise.all(running.map(s => shutdown(s.name, settings)));
   }
 }
 
@@ -490,16 +495,5 @@ namespace Private {
    */
   export function getServiceUrl(baseUrl: string): string {
     return URLExt.join(baseUrl, TERMINAL_SERVICE_URL);
-  }
-
-  /**
-   * Kill a terminal by url.
-   */
-  export function killTerminal(url: string): void {
-    // Update the local data store.
-    if (Private.running[url]) {
-      let session = Private.running[url];
-      session.dispose();
-    }
   }
 }

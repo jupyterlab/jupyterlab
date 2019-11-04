@@ -1,5 +1,4 @@
 {
-  "jupyter.lab.setting-icon-class": "jp-FileIcon",
   "jupyter.lab.setting-icon-label": "Sidebar",
   "title": "Sidebar",
   "description": "Sidebar layout settings.",
@@ -7,7 +6,8 @@
     "overrides": {
       "type": "object",
       "title": "Overrides",
-      "description": "Overrides for where to show sidebar items",
+      "default": {},
+      "description": "Overrides for where to show sidebar items\ne.g., {\"tab-manager\": \"right\"}",
       "properties": {},
       "additionalProperties": {
         "type": "string",

@@ -19,10 +19,16 @@
       "path": "../console"
     },
     {
+      "path": "../coreutils"
+    },
+    {
       "path": "../docregistry"
     },
     {
       "path": "../fileeditor"
+    },
+    {
+      "path": "../mainmenu"
     },
     {
       "path": "../notebook"

@@ -3,6 +3,10 @@
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
+import { Printing } from '@jupyterlab/apputils';
+
+import { Message } from '@phosphor/messaging';
+
 import { Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
@@ -10,8 +14,6 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import { Component } from './component';
-
-import '../style/index.css';
 
 /**
  * The CSS class to add to the JSON Widget.
@@ -26,14 +28,21 @@ export const MIME_TYPE = 'application/json';
 /**
  * A renderer for JSON data.
  */
-export class RenderedJSON extends Widget implements IRenderMime.IRenderer {
+export class RenderedJSON extends Widget
+  implements IRenderMime.IRenderer, Printing.IPrintable {
   /**
    * Create a new widget for rendering JSON.
    */
   constructor(options: IRenderMime.IRendererOptions) {
     super();
     this.addClass(CSS_CLASS);
+    this.addClass('CodeMirror');
+    this.addClass('cm-s-jupyter');
     this._mimeType = options.mimeType;
+  }
+
+  [Printing.symbol]() {
+    return () => Printing.printWidget(this);
   }
 
   /**
@@ -42,15 +51,23 @@ export class RenderedJSON extends Widget implements IRenderMime.IRenderer {
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     const data = model.data[this._mimeType] as any;
     const metadata = (model.metadata[this._mimeType] as any) || {};
-    const props = { data, metadata, theme: 'cm-s-jupyter' };
-
     return new Promise<void>((resolve, reject) => {
-      const component = <Component {...props} />;
-
-      ReactDOM.render(component, this.node, () => {
-        resolve();
-      });
+      ReactDOM.render(
+        <Component data={data} metadata={metadata} />,
+        this.node,
+        () => {
+          resolve();
+        }
+      );
     });
+  }
+
+  /**
+   * Called before the widget is detached from the DOM.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    // Unmount the component so it can tear down.
+    ReactDOM.unmountComponentAtNode(this.node);
   }
 
   private _mimeType: string;
@@ -74,7 +91,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     documentWidgetFactoryOptions: {
       name: 'JSON',
       primaryFileType: 'json',
-      fileTypes: ['json', 'notebook'],
+      fileTypes: ['json', 'notebook', 'geojson'],
       defaultFor: ['json']
     }
   }

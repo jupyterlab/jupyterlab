@@ -1,0 +1,28 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-FolderIcon",
+  "jupyter.lab.setting-icon-label": "File Browser",
+  "title": "File Browser",
+  "description": "File Browser settings.",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "filebrowser:create-main-launcher",
+      "keys": ["Accel Shift L"],
+      "selector": "body"
+    },
+    {
+      "command": "filebrowser:toggle-main",
+      "keys": ["Accel Shift F"],
+      "selector": "body"
+    }
+  ],
+  "properties": {
+    "navigateToCurrentDirectory": {
+      "type": "boolean",
+      "title": "Navigate to current directory",
+      "description": "Whether to automatically navigate to a document's current directory",
+      "default": false
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

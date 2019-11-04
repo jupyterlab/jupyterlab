@@ -3,16 +3,17 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { InstanceTracker } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
 
-import { IStateDB } from '@jupyterlab/coreutils';
+import { IDataConnector, IRestorer } from '@jupyterlab/coreutils';
 
 import { CommandRegistry } from '@phosphor/commands';
 
 import {
+  JSONExt,
   JSONObject,
   PromiseDelegate,
-  ReadonlyJSONObject,
+  ReadonlyJSONValue,
   Token
 } from '@phosphor/coreutils';
 
@@ -20,7 +21,7 @@ import { AttachedProperty } from '@phosphor/properties';
 
 import { DockPanel, Widget } from '@phosphor/widgets';
 
-import { ApplicationShell } from './shell';
+import { ILabShell } from './shell';
 
 /* tslint:disable */
 /**
@@ -34,7 +35,7 @@ export const ILayoutRestorer = new Token<ILayoutRestorer>(
 /**
  * A static class that restores the widgets of the application when it reloads.
  */
-export interface ILayoutRestorer {
+export interface ILayoutRestorer extends IRestorer {
   /**
    * A promise resolved when the layout restorer is ready to receive signals.
    */
@@ -46,54 +47,20 @@ export interface ILayoutRestorer {
   add(widget: Widget, name: string): void;
 
   /**
-   * Restore the widgets of a particular instance tracker.
+   * Restore the widgets of a particular widget tracker.
    *
-   * @param tracker - The instance tracker whose widgets will be restored.
+   * @param tracker - The widget tracker whose widgets will be restored.
    *
    * @param options - The restoration options.
    */
-  restore(
-    tracker: InstanceTracker<any>,
-    options: ILayoutRestorer.IRestoreOptions<any>
-  ): void;
+  restore<T extends Widget>(
+    tracker: WidgetTracker<T>,
+    options: IRestorer.IOptions<T>
+  ): Promise<any>;
 }
 
 /**
- * A namespace for the layout restorer.
- */
-export namespace ILayoutRestorer {
-  /**
-   * The state restoration configuration options.
-   */
-  export interface IRestoreOptions<T extends Widget> {
-    /**
-     * The command to execute when restoring instances.
-     */
-    command: string;
-
-    /**
-     * A function that returns the args needed to restore an instance.
-     */
-    args: (widget: T) => ReadonlyJSONObject;
-
-    /**
-     * A function that returns a unique persistent name for this instance.
-     */
-    name: (widget: T) => string;
-
-    /**
-     * The point after which it is safe to restore state.
-     *
-     * #### Notes
-     * By definition, this promise or promises will happen after the application
-     * has `started`.
-     */
-    when?: Promise<any> | Array<Promise<any>>;
-  }
-}
-
-/**
- * The state database key for restorer data.
+ * The data connector key for restorer data.
  */
 const KEY = 'layout-restorer:data';
 
@@ -104,57 +71,58 @@ const KEY = 'layout-restorer:data';
  * The lifecycle for state restoration is subtle. The sequence of events is:
  *
  * 1. The layout restorer plugin is instantiated and makes a `fetch` call to
- *    the database that stores the layout restoration data. The `fetch` call
- *    returns a promise that resolves in step 6, below.
+ *    the data connector that stores the layout restoration data. The `fetch`
+ *    call returns a promise that resolves in step 6, below.
  *
  * 2. Other plugins that care about state restoration require the layout
  *    restorer as a dependency.
  *
- * 3. As each load-time plugin initializes (which happens before the lab
+ * 3. As each load-time plugin initializes (which happens before the front-end
  *    application has `started`), it instructs the layout restorer whether
- *    the restorer ought to `restore` its state by passing in its tracker.
- *    Alternatively, a plugin that does not require its own instance tracker
+ *    the restorer ought to `restore` its widgets by passing in its widget
+ *    tracker.
+ *    Alternatively, a plugin that does not require its own widget tracker
  *    (because perhaps it only creates a single widget, like a command palette),
  *    can simply `add` its widget along with a persistent unique name to the
  *    layout restorer so that its layout state can be restored when the lab
  *    application restores.
  *
- * 4. After all the load-time plugins have finished initializing, the lab
+ * 4. After all the load-time plugins have finished initializing, the front-end
  *    application `started` promise will resolve. This is the `first`
  *    promise that the layout restorer waits for. By this point, all of the
  *    plugins that care about restoration will have instructed the layout
- *    restorer to `restore` their state.
+ *    restorer to `restore` their widget trackers.
  *
- * 5. The layout restorer will then instruct each plugin's instance tracker
+ * 5. The layout restorer will then instruct each plugin's widget tracker
  *    to restore its state and reinstantiate whichever widgets it wants. The
  *    tracker returns a promise to the layout restorer that resolves when it
  *    has completed restoring the tracked widgets it cares about.
  *
- * 6. As each instance tracker finishes restoring the widget instances it cares
- *    about, it resolves the promise that was made to the layout restorer
+ * 6. As each widget tracker finishes restoring the widget instances it cares
+ *    about, it resolves the promise that was returned to the layout restorer
  *    (in step 5). After all of the promises that the restorer is awaiting have
- *    resolved, the restorer then resolves the outstanding `fetch` promise
+ *    settled, the restorer then resolves the outstanding `fetch` promise
  *    (from step 1) and hands off a layout state object to the application
  *    shell's `restoreLayout` method for restoration.
  *
  * 7. Once the application shell has finished restoring the layout, the
  *    JupyterLab application's `restored` promise is resolved.
  *
- * Of particular note are steps 5 and 6: since state restoration of plugins
+ * Of particular note are steps 5 and 6: since data restoration of plugins
  * is accomplished by executing commands, the command that is used to restore
- * the state of each plugin must return a promise that only resolves when the
- * widget has been created and added to the plugin's instance tracker.
+ * the data of each plugin must return a promise that only resolves when the
+ * widget has been created and added to the plugin's widget tracker.
  */
 export class LayoutRestorer implements ILayoutRestorer {
   /**
    * Create a layout restorer.
    */
   constructor(options: LayoutRestorer.IOptions) {
-    this._registry = options.registry;
-    this._state = options.state;
+    this._connector = options.connector;
     this._first = options.first;
+    this._registry = options.registry;
 
-    this._first
+    void this._first
       .then(() => {
         this._firstDone = true;
       })
@@ -183,10 +151,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   add(widget: Widget, name: string): void {
     Private.nameProperty.set(widget, name);
     this._widgets.set(name, widget);
-    widget.disposed.connect(
-      this._onWidgetDisposed,
-      this
-    );
+    widget.disposed.connect(this._onWidgetDisposed, this);
   }
 
   /**
@@ -196,50 +161,52 @@ export class LayoutRestorer implements ILayoutRestorer {
    * Fetching the layout relies on all widget restoration to be complete, so
    * calls to `fetch` are guaranteed to return after restoration is complete.
    */
-  fetch(): Promise<ApplicationShell.ILayout> {
-    const blank: ApplicationShell.ILayout = {
+  async fetch(): Promise<ILabShell.ILayout> {
+    const blank: ILabShell.ILayout = {
       fresh: true,
       mainArea: null,
       leftArea: null,
       rightArea: null
     };
-    let layout = this._state.fetch(KEY);
+    const layout = this._connector.fetch(KEY);
 
-    return Promise.all([layout, this.restored])
-      .then(([data]) => {
-        if (!data) {
-          return blank;
-        }
+    try {
+      const [data] = await Promise.all([layout, this.restored]);
 
-        const { main, left, right } = data as Private.ILayout;
+      if (!data) {
+        return blank;
+      }
 
-        // If any data exists, then this is not a fresh session.
-        const fresh = false;
+      const { main, left, right } = data as Private.ILayout;
 
-        // Rehydrate main area.
-        const mainArea = this._rehydrateMainArea(main);
+      // If any data exists, then this is not a fresh session.
+      const fresh = false;
 
-        // Rehydrate left area.
-        const leftArea = this._rehydrateSideArea(left);
+      // Rehydrate main area.
+      const mainArea = this._rehydrateMainArea(main);
 
-        // Rehydrate right area.
-        const rightArea = this._rehydrateSideArea(right);
+      // Rehydrate left area.
+      const leftArea = this._rehydrateSideArea(left);
 
-        return { fresh, mainArea, leftArea, rightArea };
-      })
-      .catch(() => blank); // Let fetch fail gracefully; return blank slate.
+      // Rehydrate right area.
+      const rightArea = this._rehydrateSideArea(right);
+
+      return { fresh, mainArea, leftArea, rightArea };
+    } catch (error) {
+      return blank;
+    }
   }
 
   /**
-   * Restore the widgets of a particular instance tracker.
+   * Restore the widgets of a particular widget tracker.
    *
-   * @param tracker - The instance tracker whose widgets will be restored.
+   * @param tracker - The widget tracker whose widgets will be restored.
    *
    * @param options - The restoration options.
    */
   restore(
-    tracker: InstanceTracker<Widget>,
-    options: ILayoutRestorer.IRestoreOptions<Widget>
+    tracker: WidgetTracker,
+    options: IRestorer.IOptions<Widget>
   ): Promise<any> {
     const warning = 'restore() can only be called before `first` has resolved.';
 
@@ -250,7 +217,7 @@ export class LayoutRestorer implements ILayoutRestorer {
 
     const { namespace } = tracker;
     if (this._trackers.has(namespace)) {
-      let warning = `A tracker namespaced ${namespace} was already restored.`;
+      const warning = `A tracker namespaced ${namespace} was already restored.`;
       console.warn(warning);
       return Promise.reject(warning);
     }
@@ -261,21 +228,18 @@ export class LayoutRestorer implements ILayoutRestorer {
     this._trackers.add(namespace);
 
     // Whenever a new widget is added to the tracker, record its name.
-    tracker.widgetAdded.connect(
-      (sender: any, widget: Widget) => {
-        const widgetName = name(widget);
-        if (widgetName) {
-          this.add(widget, `${namespace}:${widgetName}`);
-        }
-      },
-      this
-    );
-
-    // Whenever a widget is updated, get its new name.
-    tracker.widgetUpdated.connect((sender, widget) => {
+    tracker.widgetAdded.connect((_, widget) => {
       const widgetName = name(widget);
       if (widgetName) {
-        let name = `${namespace}:${widgetName}`;
+        this.add(widget, `${namespace}:${widgetName}`);
+      }
+    }, this);
+
+    // Whenever a widget is updated, get its new name.
+    tracker.widgetUpdated.connect((_, widget) => {
+      const widgetName = name(widget);
+      if (widgetName) {
+        const name = `${namespace}:${widgetName}`;
         Private.nameProperty.set(widget, name);
         this._widgets.set(name, widget);
       }
@@ -284,11 +248,11 @@ export class LayoutRestorer implements ILayoutRestorer {
     const first = this._first;
     const promise = tracker
       .restore({
-        args,
+        args: args || (() => JSONExt.emptyObject),
         command,
+        connector: this._connector,
         name,
         registry: this._registry,
-        state: this._state,
         when: when ? [first].concat(when) : first
       })
       .catch(error => {
@@ -302,7 +266,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   /**
    * Save the layout state for the application.
    */
-  save(data: ApplicationShell.ILayout): Promise<void> {
+  save(data: ILabShell.ILayout): Promise<void> {
     // If there are promises that are unresolved, bail.
     if (!this._promisesDone) {
       let warning = 'save() was called prematurely.';
@@ -321,14 +285,14 @@ export class LayoutRestorer implements ILayoutRestorer {
     // Dehydrate right area.
     dehydrated.right = this._dehydrateSideArea(data.rightArea);
 
-    return this._state.save(KEY, dehydrated);
+    return this._connector.save(KEY, dehydrated);
   }
 
   /**
    * Dehydrate a main area description into a serializable object.
    */
   private _dehydrateMainArea(
-    area: ApplicationShell.IMainArea | null
+    area: ILabShell.IMainArea | null
   ): Private.IMainArea | null {
     if (!area) {
       return null;
@@ -345,7 +309,7 @@ export class LayoutRestorer implements ILayoutRestorer {
    */
   private _rehydrateMainArea(
     area?: Private.IMainArea | null
-  ): ApplicationShell.IMainArea | null {
+  ): ILabShell.IMainArea | null {
     if (!area) {
       return null;
     }
@@ -356,7 +320,7 @@ export class LayoutRestorer implements ILayoutRestorer {
    * Dehydrate a side area description into a serializable object.
    */
   private _dehydrateSideArea(
-    area?: ApplicationShell.ISideArea | null
+    area?: ILabShell.ISideArea | null
   ): Private.ISideArea | null {
     if (!area) {
       return null;
@@ -385,7 +349,7 @@ export class LayoutRestorer implements ILayoutRestorer {
    */
   private _rehydrateSideArea(
     area?: Private.ISideArea | null
-  ): ApplicationShell.ISideArea {
+  ): ILabShell.ISideArea {
     if (!area) {
       return { collapsed: true, currentWidget: null, widgets: null };
     }
@@ -400,8 +364,8 @@ export class LayoutRestorer implements ILayoutRestorer {
     const widgets = !Array.isArray(area.widgets)
       ? null
       : area.widgets
-          .map(
-            name => (internal.has(`${name}`) ? internal.get(`${name}`) : null)
+          .map(name =>
+            internal.has(`${name}`) ? internal.get(`${name}`) : null
           )
           .filter(widget => !!widget);
     return {
@@ -419,13 +383,13 @@ export class LayoutRestorer implements ILayoutRestorer {
     this._widgets.delete(name);
   }
 
+  private _connector: IDataConnector<ReadonlyJSONValue>;
   private _first: Promise<any>;
   private _firstDone = false;
   private _promisesDone = false;
   private _promises: Promise<any>[] = [];
   private _restored = new PromiseDelegate<void>();
   private _registry: CommandRegistry;
-  private _state: IStateDB;
   private _trackers = new Set<string>();
   private _widgets = new Map<string, Widget>();
 }
@@ -439,6 +403,11 @@ export namespace LayoutRestorer {
    */
   export interface IOptions {
     /**
+     * The data connector used for layout saving and fetching.
+     */
+    connector: IDataConnector<ReadonlyJSONValue>;
+
+    /**
      * The initial promise that has to be resolved before restoration.
      *
      * #### Notes
@@ -450,11 +419,6 @@ export namespace LayoutRestorer {
      * The application command registry.
      */
     registry: CommandRegistry;
-
-    /**
-     * The state database instance.
-     */
-    state: IStateDB;
   }
 }
 
@@ -466,10 +430,9 @@ namespace Private {
    * The dehydrated state of the application layout.
    *
    * #### Notes
-   * This format is JSON serializable and saved in the state database.
-   * It is meant to be a data structure can translate into an
-   * `ApplicationShell.ILayout` data structure for consumption by
-   * the application shell.
+   * This format is JSON serializable and saved with the data connector.
+   * It is meant to be a data structure can translate into a `LabShell.ILayout`
+   * data structure for consumption by the application shell.
    */
   export interface ILayout extends JSONObject {
     /**
@@ -574,7 +537,7 @@ namespace Private {
   }
 
   /**
-   * An attached property for a widget's ID in the state database.
+   * An attached property for a widget's ID in the serialized restore data.
    */
   export const nameProperty = new AttachedProperty<Widget, string>({
     name: 'name',
@@ -585,7 +548,7 @@ namespace Private {
    * Serialize individual areas within the main area.
    */
   function serializeArea(
-    area: ApplicationShell.AreaConfig | null
+    area: ILabShell.AreaConfig | null
   ): ITabArea | ISplitArea | null {
     if (!area || !area.type) {
       return null;
@@ -612,7 +575,7 @@ namespace Private {
   /**
    * Return a dehydrated, serializable version of the main dock panel.
    */
-  export function serializeMain(area: ApplicationShell.IMainArea): IMainArea {
+  export function serializeMain(area: ILabShell.IMainArea): IMainArea {
     let dehydrated: IMainArea = {
       dock: (area && area.dock && serializeArea(area.dock.main)) || null
     };
@@ -641,7 +604,7 @@ namespace Private {
   function deserializeArea(
     area: JSONObject,
     names: Map<string, Widget>
-  ): ApplicationShell.AreaConfig | null {
+  ): ILabShell.AreaConfig | null {
     if (!area) {
       return null;
     }
@@ -656,7 +619,7 @@ namespace Private {
 
     if (type === 'tab-area') {
       const { currentIndex, widgets } = area as ITabArea;
-      let hydrated: ApplicationShell.AreaConfig = {
+      let hydrated: ILabShell.AreaConfig = {
         type: 'tab-area',
         currentIndex: currentIndex || 0,
         widgets:
@@ -676,7 +639,7 @@ namespace Private {
     }
 
     const { orientation, sizes, children } = area as ISplitArea;
-    let hydrated: ApplicationShell.AreaConfig = {
+    let hydrated: ILabShell.AreaConfig = {
       type: 'split-area',
       orientation: orientation,
       sizes: sizes || [],
@@ -684,7 +647,7 @@ namespace Private {
         (children &&
           (children
             .map(child => deserializeArea(child, names))
-            .filter(widget => !!widget) as ApplicationShell.AreaConfig[])) ||
+            .filter(widget => !!widget) as ILabShell.AreaConfig[])) ||
         []
     };
 
@@ -703,7 +666,7 @@ namespace Private {
   export function deserializeMain(
     area: JSONObject,
     names: Map<string, Widget>
-  ): ApplicationShell.IMainArea | null {
+  ): ILabShell.IMainArea | null {
     if (!area) {
       return null;
     }

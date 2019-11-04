@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/template-for-tests",
-  "version": "0.5.1",
+  "version": "1.2.0-alpha.1",
   "private": true,
   "scripts": {
     "build": "tsc",
@@ -15,8 +15,8 @@
     "watch:src": "tsc -w --listEmittedFiles"
   },
   "devDependencies": {
-    "karma": "~2.0.4",
+    "karma": "^4.1.0",
     "rimraf": "~2.6.2",
-    "typescript": "~3.1.1"
+    "typescript": "~3.5.1"
   }
 }

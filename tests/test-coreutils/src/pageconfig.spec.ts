@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { PageConfig } from '@jupyterlab/coreutils/src';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 describe('@jupyterlab/coreutils', () => {
   describe('PageConfig', () => {

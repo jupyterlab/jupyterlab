@@ -7,7 +7,22 @@
   "include": ["src/*"],
   "references": [
     {
-      "path": "../rendermime-interfaces"
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../vdom"
     }
   ]
 }

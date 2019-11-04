@@ -211,6 +211,11 @@ export namespace TerminalSession {
     runningChanged: ISignal<IManager, IModel[]>;
 
     /**
+     * A signal emitted when there is a connection failure.
+     */
+    connectionFailure: ISignal<IManager, ServerConnection.NetworkError>;
+
+    /**
      * The server settings for the manager.
      */
     readonly serverSettings: ServerConnection.ISettings;

@@ -48,7 +48,7 @@ export { defaultRenderMime } from './rendermime';
  * The reason this function is asynchronous is so that the thing causing the
  * signal emission (such as a websocket message) can be asynchronous.
  */
-export function testEmission<T, U, V>(
+export async function testEmission<T, U, V>(
   signal: ISignal<T, U>,
   options: {
     find?: (a: T, b: U) => boolean;
@@ -58,23 +58,49 @@ export function testEmission<T, U, V>(
 ): Promise<V> {
   const done = new PromiseDelegate<V>();
   const object = {};
-  signal.connect(
-    (sender: T, args: U) => {
-      if (!options.find || options.find(sender, args)) {
-        try {
-          Signal.disconnectReceiver(object);
-          if (options.test) {
-            options.test(sender, args);
-          }
-        } catch (e) {
-          done.reject(e);
+  signal.connect((sender: T, args: U) => {
+    if (!options.find || options.find(sender, args)) {
+      try {
+        Signal.disconnectReceiver(object);
+        if (options.test) {
+          options.test(sender, args);
         }
-        done.resolve(options.value || undefined);
+      } catch (e) {
+        done.reject(e);
       }
-    },
-    object
-  );
+      done.resolve(options.value || undefined);
+    }
+  }, object);
   return done.promise;
+}
+
+/**
+ * Expect a failure on a promise with the given message.
+ */
+export async function expectFailure(
+  promise: Promise<any>,
+  message?: string
+): Promise<void> {
+  let called = false;
+  try {
+    await promise;
+    called = true;
+  } catch (err) {
+    if (message && err.message.indexOf(message) === -1) {
+      throw Error(`Error "${message}" not in: "${err.message}"`);
+    }
+  }
+  if (called) {
+    throw Error(`Failure was not triggered, message was: ${message}`);
+  }
+}
+
+/**
+ * Do something in the future ensuring total ordering with respect to promises.
+ */
+export async function doLater(cb: () => void): Promise<void> {
+  await Promise.resolve(void 0);
+  cb();
 }
 
 /**
@@ -90,7 +116,7 @@ export function signalToPromises<T, U>(
   numberValues: number
 ): Promise<[T, U]>[] {
   const values: Promise<[T, U]>[] = new Array(numberValues);
-  const resolvers: Array<((value: [T, U]) => void)> = new Array(numberValues);
+  const resolvers: Array<(value: [T, U]) => void> = new Array(numberValues);
 
   for (let i = 0; i < numberValues; i++) {
     values[i] = new Promise<[T, U]>(resolve => {
@@ -127,12 +153,22 @@ export function signalToPromise<T, U>(signal: ISignal<T, U>): Promise<[T, U]> {
 /**
  * Test to see if a promise is fulfilled.
  *
+ * @param delay - optional delay in milliseconds before checking
  * @returns true if the promise is fulfilled (either resolved or rejected), and
  * false if the promise is still pending.
  */
-export async function isFulfilled<T>(p: PromiseLike<T>): Promise<boolean> {
+export async function isFulfilled<T>(
+  p: PromiseLike<T>,
+  delay = 0
+): Promise<boolean> {
   let x = Object.create(null);
-  let result = await Promise.race([p, x]).catch(() => false);
+  let race: any;
+  if (delay > 0) {
+    race = sleep(delay, x);
+  } else {
+    race = x;
+  }
+  let result = await Promise.race([p, race]).catch(() => false);
   return result !== x;
 }
 
@@ -196,63 +232,69 @@ export function createFileContext(
 }
 
 /**
- * Create a context for a notebook.
+ * Create and initialize context for a notebook.
  */
-export async function createNotebookContext(
-  path?: string,
-  manager?: ServiceManager.IManager
+export async function initNotebookContext(
+  options: {
+    path?: string;
+    manager?: ServiceManager.IManager;
+    startKernel?: boolean;
+  } = {}
 ): Promise<Context<INotebookModel>> {
   const factory = Private.notebookFactory;
 
-  manager = manager || Private.getManager();
-  path = path || UUID.uuid4() + '.ipynb';
+  const manager = options.manager || Private.getManager();
+  const path = options.path || UUID.uuid4() + '.ipynb';
+  const startKernel =
+    options.startKernel === undefined ? false : options.startKernel;
   await manager.ready;
 
-  return new Context({
+  let context = new Context({
     manager,
     factory,
     path,
-    kernelPreference: { name: manager.specs.default }
+    kernelPreference: {
+      shouldStart: startKernel,
+      canStart: startKernel,
+      shutdownOnClose: true,
+      name: manager.specs.default
+    }
   });
+  await context.initialize(true);
+
+  if (startKernel) {
+    await context.session.initialize();
+    await context.session.kernel.ready;
+  }
+
+  return context;
 }
 
 /**
  * Wait for a dialog to be attached to an element.
  */
-export function waitForDialog(
-  host?: HTMLElement,
-  timeout?: number
+export async function waitForDialog(
+  host: HTMLElement = document.body,
+  timeout: number = 250
 ): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    let counter = 0;
-    const interval = 25;
-    const limit = Math.floor((timeout || 250) / interval);
-    const seek = () => {
-      if (++counter === limit) {
-        reject(new Error('Dialog not found'));
-        return;
-      }
-
-      if ((host || document.body).getElementsByClassName('jp-Dialog')[0]) {
-        resolve(undefined);
-        return;
-      }
-
-      setTimeout(seek, interval);
-    };
-
-    seek();
-  });
+  const interval = 25;
+  const limit = Math.floor(timeout / interval);
+  for (let counter = 0; counter < limit; counter++) {
+    if (host.getElementsByClassName('jp-Dialog')[0]) {
+      return;
+    }
+    await sleep(interval);
+  }
+  throw new Error('Dialog not found');
 }
 
 /**
  * Accept a dialog after it is attached by accepting the default button.
  */
 export async function acceptDialog(
-  host?: HTMLElement,
-  timeout?: number
+  host: HTMLElement = document.body,
+  timeout: number = 250
 ): Promise<void> {
-  host = host || document.body;
   await waitForDialog(host, timeout);
 
   const node = host.getElementsByClassName('jp-Dialog')[0];
@@ -269,11 +311,9 @@ export async function acceptDialog(
  * This promise will always resolve successfully.
  */
 export async function dismissDialog(
-  host?: HTMLElement,
-  timeout?: number
+  host: HTMLElement = document.body,
+  timeout: number = 250
 ): Promise<void> {
-  host = host || document.body;
-
   try {
     await waitForDialog(host, timeout);
   } catch (error) {
@@ -302,7 +342,7 @@ namespace Private {
    */
   export function getManager(): ServiceManager {
     if (!manager) {
-      manager = new ServiceManager();
+      manager = new ServiceManager({ standby: 'never' });
     }
     return manager;
   }

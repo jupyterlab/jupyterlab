@@ -1,0 +1,24 @@
+{
+  "title": "Document Search",
+  "description": "Document search plugin.",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "documentsearch:start",
+      "keys": ["Accel F"],
+      "selector": ".jp-mod-searchable"
+    },
+    {
+      "command": "documentsearch:highlightNext",
+      "keys": ["Accel G"],
+      "selector": ".jp-mod-searchable"
+    },
+    {
+      "command": "documentsearch:highlightPrevious",
+      "keys": ["Accel Shift G"],
+      "selector": ".jp-mod-searchable"
+    }
+  ],
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}

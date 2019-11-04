@@ -96,7 +96,7 @@ export class CompleterModel implements Completer.IModel {
 
     // If the text change means that the original start point has been preceded,
     // then the completion is no longer valid and should be reset.
-    if (currentLine.length < originalLine.length) {
+    if (!this._subsetMatch && currentLine.length < originalLine.length) {
       this.reset(true);
       return;
     }
@@ -233,7 +233,6 @@ export class CompleterModel implements Completer.IModel {
       this._options = values;
       this._typeMap = types;
       this._orderedTypes = Private.findOrderedTypes(types);
-      this._subsetMatch = true;
     } else {
       this._options = [];
       this._typeMap = {};
@@ -252,7 +251,7 @@ export class CompleterModel implements Completer.IModel {
     }
 
     const { column, line } = change;
-    const { original } = this;
+    const { current, original } = this;
 
     if (!original) {
       return;
@@ -266,13 +265,13 @@ export class CompleterModel implements Completer.IModel {
     }
 
     // If a cursor change results in the cursor being set to a position that
-    // precedes the original request, cancel.
+    // precedes the original column, cancel.
     if (column < original.column) {
       this.reset(true);
       return;
     }
 
-    const { cursor, current } = this;
+    const { cursor } = this;
 
     if (!cursor || !current) {
       return;
@@ -302,13 +301,6 @@ export class CompleterModel implements Completer.IModel {
       return;
     }
 
-    // When the completer detects a common subset prefix for all options,
-    // it updates the model and sets the model source to that value, but this
-    // text change should be ignored.
-    if (this._subsetMatch) {
-      return;
-    }
-
     const { text, column, line } = change;
     const last = text.split('\n')[line][column - 1];
 
@@ -320,7 +312,7 @@ export class CompleterModel implements Completer.IModel {
     }
 
     // If final character is whitespace, reset completion.
-    this.reset(true);
+    this.reset(false);
   }
 
   /**
@@ -338,12 +330,12 @@ export class CompleterModel implements Completer.IModel {
       return undefined;
     }
 
-    const { start, end } = cursor;
-    const { text } = original;
-    const prefix = text.substring(0, start);
-    const suffix = text.substring(end);
+    let { start, end } = cursor;
+    // Also include any filtering/additional-typing that has occurred
+    // since the completion request in the patched length.
+    end = end + (this.current.text.length - this.original.text.length);
 
-    return { offset: (prefix + patch).length, text: prefix + patch + suffix };
+    return { start, end, value: patch };
   }
 
   /**
@@ -358,7 +350,6 @@ export class CompleterModel implements Completer.IModel {
     if (!hard && this._subsetMatch) {
       return;
     }
-    this._subsetMatch = false;
     this._reset();
     this._stateChanged.emit(undefined);
   }

@@ -9,7 +9,10 @@ import { PathExt, Time } from '@jupyterlab/coreutils';
 
 import { UUID } from '@phosphor/coreutils';
 
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import {
+  IRenderMimeRegistry,
+  RenderMimeRegistry
+} from '@jupyterlab/rendermime';
 
 import { ServiceManager } from '@jupyterlab/services';
 
@@ -79,24 +82,15 @@ export class ConsolePanel extends Panel {
     });
     this.addWidget(this.console);
 
-    session.initialize().then(() => {
+    void session.initialize().then(() => {
       this._connected = new Date();
       this._updateTitle();
     });
 
-    this.console.executed.connect(
-      this._onExecuted,
-      this
-    );
+    this.console.executed.connect(this._onExecuted, this);
     this._updateTitle();
-    session.kernelChanged.connect(
-      this._updateTitle,
-      this
-    );
-    session.propertyChanged.connect(
-      this._updateTitle,
-      this
-    );
+    session.kernelChanged.connect(this._updateTitle, this);
+    session.propertyChanged.connect(this._updateTitle, this);
 
     this.title.icon = CONSOLE_ICON_CLASS;
     this.title.closable = true;
@@ -178,7 +172,7 @@ export namespace ConsolePanel {
     /**
      * The rendermime instance used by the panel.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
 
     /**
      * The content factory for the panel.

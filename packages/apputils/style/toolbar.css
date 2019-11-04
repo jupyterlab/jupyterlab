@@ -77,18 +77,10 @@ button.jp-ToolbarButtonComponent {
   border-radius: var(--jp-border-radius);
   display: flex;
   align-items: center;
-}
-
-button.jp-ToolbarButtonComponent:focus {
-  background: var(--jp-layout-color2);
-}
-
-button.jp-ToolbarButtonComponent:enabled:hover {
-  background: var(--jp-layout-color2);
-}
-
-button.jp-ToolbarButtonComponent:enabled:active {
-  background: var(--jp-layout-color3);
+  text-align: center;
+  font-size: 14px;
+  min-width: unset;
+  min-height: unset;
 }
 
 button.jp-ToolbarButtonComponent:disabled {

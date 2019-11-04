@@ -7,6 +7,18 @@
   "include": ["src/*"],
   "references": [
     {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../markdownviewer"
+    },
+    {
       "path": "../rendermime"
     }
   ]

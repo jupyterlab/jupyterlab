@@ -6,18 +6,15 @@ import { expect } from 'chai';
 import {
   ClientSession,
   Toolbar,
-  ToolbarButton
-  // CommandToolbarButton,
-  // ToolbarButtonComponent
-} from '@jupyterlab/apputils/src';
+  ToolbarButton,
+  CommandToolbarButton
+} from '@jupyterlab/apputils';
 
 import { toArray } from '@phosphor/algorithm';
 
-// import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@phosphor/commands';
 
-// import { ReadonlyJSONObject } from '@phosphor/coreutils';
-
-// import { Message } from '@phosphor/messaging';
+import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
 import { Widget } from '@phosphor/widgets';
 
@@ -27,17 +24,13 @@ import { createClientSession, framePromise } from '@jupyterlab/testutils';
 
 describe('@jupyterlab/apputils', () => {
   let widget: Toolbar<Widget>;
-  let session: ClientSession;
 
   beforeEach(async () => {
     widget = new Toolbar();
-    session = await createClientSession();
   });
 
   afterEach(async () => {
     widget.dispose();
-    await session.shutdown();
-    session.dispose();
   });
 
   describe('Toolbar', () => {
@@ -97,229 +90,286 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    // describe('.createFromCommand', () => {
-    //   const commands = new CommandRegistry();
-    //   const testLogCommandId = 'test:toolbar-log';
-    //   const logArgs: ReadonlyJSONObject[] = [];
-    //   let enabled = false;
-    //   let toggled = true;
-    //   let visible = false;
-    //   commands.addCommand(testLogCommandId, {
-    //     execute: args => {
-    //       logArgs.push(args);
-    //     },
-    //     label: 'Test log command label',
-    //     caption: 'Test log command caption',
-    //     usage: 'Test log command usage',
-    //     iconClass: 'test-icon-class',
-    //     iconLabel: 'Test log icon label',
-    //     className: 'test-log-class',
-    //     isEnabled: () => enabled,
-    //     isToggled: () => toggled,
-    //     isVisible: () => visible
-    //   });
+    describe('#insertAfter()', () => {
+      it('should insert an item into the toolbar after `c`', () => {
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        widget.insertItem(1, 'c', new Widget());
+        widget.insertAfter('c', 'd', new Widget());
+        expect(toArray(widget.names())).to.deep.equal(['a', 'c', 'd', 'b']);
+      });
 
-    //   it('should create a button', () => {
-    //     const button = new CommandToolbarButton({
-    //       commands,
-    //       id: testLogCommandId
-    //     });
-    //     expect(button).to.be.an.instanceof(CommandToolbarButton);
-    //     button.dispose();
-    //   });
-
-    //   it('should add main class', () => {
-    //     const button = new CommandToolbarButton({
-    //       commands,
-    //       id: testLogCommandId
-    //     });
-    //     expect(
-    //       (button.node as HTMLElement).classList.contains('test-log-class')
-    //     ).to.equal(true);
-    //     button.dispose();
-    //   });
-
-    //   it('should add an icon with icon class and label', () => {
-    //     const button = new CommandToolbarButton({
-    //       commands,
-    //       id: testLogCommandId
-    //     });
-    //     const iconNode = button.node.firstChild as HTMLElement;
-    //     expect(iconNode.classList.contains('test-icon-class')).to.equal(true);
-    //     expect(iconNode.title).to.equal('Test log icon label');
-    //     button.dispose();
-    //   });
-
-    //   it('should apply state classes', () => {
-    //     enabled = false;
-    //     toggled = true;
-    //     visible = false;
-    //     const button = new CommandToolbarButton({
-    //       commands,
-    //       id: testLogCommandId
-    //     });
-    //     expect((button.node as HTMLButtonElement).disabled).to.equal(true);
-    //     expect(button.hasClass('p-mod-toggled')).to.equal(true);
-    //     expect(button.hasClass('p-mod-hidden')).to.equal(true);
-    //     button.dispose();
-    //   });
-
-    //   it('should update state classes', () => {
-    //     enabled = false;
-    //     toggled = true;
-    //     visible = false;
-    //     const button = new CommandToolbarButton({
-    //       commands,
-    //       id: testLogCommandId
-    //     });
-    //     expect((button.node as HTMLButtonElement).disabled).to.equal(true);
-    //     expect(button.hasClass('p-mod-toggled')).to.equal(true);
-    //     expect(button.hasClass('p-mod-hidden')).to.equal(true);
-    //     enabled = true;
-    //     visible = true;
-    //     commands.notifyCommandChanged(testLogCommandId);
-    //     expect((button.node as HTMLButtonElement).disabled).to.equal(false);
-    //     expect(button.hasClass('p-mod-toggled')).to.equal(true);
-    //     expect(button.hasClass('p-mod-hidden')).to.equal(false);
-    //     enabled = false;
-    //     visible = false;
-    //     button.dispose();
-    //   });
-
-    //   it('should add use the command label if no icon class/label', () => {
-    //     const id = 'to-be-removed';
-    //     const cmd = commands.addCommand(id, {
-    //       execute: () => {
-    //         return;
-    //       },
-    //       label: 'Label-only button'
-    //     });
-    //     const button = new CommandToolbarButton({
-    //       commands,
-    //       id: testLogCommandId
-    //     });
-    //     expect(button.node.childElementCount).to.equal(0);
-    //     expect(button.node.innerText).to.equal('Label-only button');
-    //     cmd.dispose();
-    //   });
-
-    //   it('should update the node content on command change event', () => {
-    //     const id = 'to-be-removed';
-    //     let iconClassValue: string | null = null;
-    //     const cmd = commands.addCommand(id, {
-    //       execute: () => {
-    //         /* no op */
-    //       },
-    //       label: 'Label-only button',
-    //       iconClass: () => iconClassValue
-    //     });
-    //     const button = new CommandToolbarButton({
-    //       commands,
-    //       id: testLogCommandId
-    //     });
-    //     expect(button.node.childElementCount).to.equal(0);
-    //     expect(button.node.innerText).to.equal('Label-only button');
-
-    //     iconClassValue = 'updated-icon-class';
-    //     commands.notifyCommandChanged(id);
-
-    //     expect(button.node.innerText).to.equal('');
-    //     const iconNode = button.node as HTMLElement;
-    //     expect(iconNode.classList.contains(iconClassValue)).to.equal(true);
-
-    //     cmd.dispose();
-    //   });
-    // });
-
-    describe('.createInterruptButton()', () => {
-      it("should have the `'jp-StopIcon'` class", async () => {
-        const button = Toolbar.createInterruptButton(session);
-        Widget.attach(button, document.body);
-        await framePromise();
-        expect(
-          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
-            'jp-StopIcon'
-          )
-        ).to.equal(true);
+      it('should return false if the target item does not exist', () => {
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        let value = widget.insertAfter('c', 'd', new Widget());
+        expect(value).to.be.false;
       });
     });
 
-    describe('.createRestartButton()', () => {
-      it("should have the `'jp-RefreshIcon'` class", async () => {
-        const button = Toolbar.createRestartButton(session);
-        Widget.attach(button, document.body);
-        await framePromise();
-        expect(
-          (button.node.firstChild.firstChild as HTMLElement).classList.contains(
-            'jp-RefreshIcon'
-          )
-        ).to.equal(true);
+    describe('#insertBefore()', () => {
+      it('should insert an item into the toolbar before `c`', () => {
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        widget.insertItem(1, 'c', new Widget());
+        widget.insertBefore('c', 'd', new Widget());
+        expect(toArray(widget.names())).to.deep.equal(['a', 'd', 'c', 'b']);
+      });
+
+      it('should return false if the target item does not exist', () => {
+        widget.addItem('a', new Widget());
+        widget.addItem('b', new Widget());
+        let value = widget.insertBefore('c', 'd', new Widget());
+        expect(value).to.be.false;
       });
     });
 
-    describe('.createKernelNameItem()', () => {
-      it("should display the `'display_name'` of the kernel", async () => {
-        const item = Toolbar.createKernelNameItem(session);
-        await session.initialize();
-        Widget.attach(item, document.body);
-        await framePromise();
-        expect(
-          (item.node.firstChild.lastChild as HTMLElement).textContent
-        ).to.equal(session.kernelDisplayName);
+    describe('.createFromCommand', () => {
+      const commands = new CommandRegistry();
+      const testLogCommandId = 'test:toolbar-log';
+      const logArgs: ReadonlyJSONObject[] = [];
+      let enabled = false;
+      let toggled = true;
+      let visible = false;
+      commands.addCommand(testLogCommandId, {
+        execute: args => {
+          logArgs.push(args);
+        },
+        label: 'Test log command label',
+        caption: 'Test log command caption',
+        usage: 'Test log command usage',
+        iconClass: 'test-icon-class',
+        className: 'test-log-class',
+        isEnabled: () => enabled,
+        isToggled: () => toggled,
+        isVisible: () => visible
       });
 
-      it("should display `'No Kernel!'` if there is no kernel", async () => {
-        const item = Toolbar.createKernelNameItem(session);
-        Widget.attach(item, document.body);
+      async function render(button: CommandToolbarButton) {
+        button.update();
         await framePromise();
-        expect(
-          (item.node.firstChild.lastChild as HTMLElement).textContent
-        ).to.equal('No Kernel!');
+        expect(button.renderPromise).to.exist;
+        await button.renderPromise;
+      }
+
+      it('should create a button', () => {
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        expect(button).to.be.an.instanceof(CommandToolbarButton);
+        button.dispose();
+      });
+
+      it('should add main class', async () => {
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        await render(button);
+        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        expect(buttonNode.classList.contains('test-log-class')).to.equal(true);
+        button.dispose();
+      });
+
+      it('should add an icon with icon class and label', async () => {
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        await render(button);
+        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        expect(buttonNode.title).to.equal('Test log command caption');
+        const wrapperNode = buttonNode.firstChild as HTMLElement;
+        const iconNode = wrapperNode.firstChild as HTMLElement;
+        expect(iconNode.classList.contains('test-icon-class')).to.equal(true);
+        button.dispose();
+      });
+
+      it('should apply state classes', async () => {
+        enabled = false;
+        toggled = true;
+        visible = false;
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        await render(button);
+        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        expect(buttonNode.disabled).to.equal(true);
+        expect(buttonNode.classList.contains('p-mod-toggled')).to.equal(true);
+        expect(buttonNode.classList.contains('p-mod-hidden')).to.equal(true);
+        button.dispose();
+      });
+
+      it('should update state classes', async () => {
+        enabled = false;
+        toggled = true;
+        visible = false;
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        await render(button);
+        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        expect(buttonNode.disabled).to.equal(true);
+        expect(buttonNode.classList.contains('p-mod-toggled')).to.equal(true);
+        expect(buttonNode.classList.contains('p-mod-hidden')).to.equal(true);
+        enabled = true;
+        visible = true;
+        commands.notifyCommandChanged(testLogCommandId);
+        expect(buttonNode.disabled).to.equal(false);
+        expect(buttonNode.classList.contains('p-mod-toggled')).to.equal(true);
+        expect(buttonNode.classList.contains('p-mod-hidden')).to.equal(false);
+        enabled = false;
+        visible = false;
+        button.dispose();
+      });
+
+      it('should use the command label if no icon class/label', async () => {
+        const id = 'to-be-removed';
+        const cmd = commands.addCommand(id, {
+          execute: () => {
+            return;
+          },
+          label: 'Label-only button'
+        });
+        const button = new CommandToolbarButton({
+          commands,
+          id
+        });
+        await render(button);
+        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        expect(buttonNode.textContent).to.equal('Label-only button');
+        cmd.dispose();
+      });
+
+      it('should update the node content on command change event', async () => {
+        const id = 'to-be-removed';
+        let iconClassValue: string | null = null;
+        const cmd = commands.addCommand(id, {
+          execute: () => {
+            /* no op */
+          },
+          label: 'Label-only button',
+          iconClass: () => iconClassValue
+        });
+        const button = new CommandToolbarButton({
+          commands,
+          id
+        });
+        await render(button);
+        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        expect(buttonNode.textContent).to.equal('Label-only button');
+        expect(buttonNode.classList.contains(iconClassValue)).to.equal(false);
+
+        iconClassValue = 'updated-icon-class';
+        commands.notifyCommandChanged(id);
+        await render(button);
+        const wrapperNode = buttonNode.firstChild as HTMLElement;
+        const iconNode = wrapperNode.firstChild as HTMLElement;
+        expect(iconNode.classList.contains(iconClassValue)).to.equal(true);
+
+        cmd.dispose();
       });
     });
 
-    describe('.createKernelStatusItem()', () => {
+    describe('Kernel buttons', () => {
+      let session: ClientSession;
       beforeEach(async () => {
-        await session.initialize();
-        await session.kernel.ready;
-      });
-
-      it('should display a busy status if the kernel status is not idle', async () => {
-        const item = Toolbar.createKernelStatusItem(session);
-        let called = false;
-        const future = session.kernel.requestExecute({ code: 'a = 1' });
-        future.onIOPub = msg => {
-          if (session.status === 'busy') {
-            expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
-            called = true;
-          }
-        };
-        await future.done;
-        expect(called).to.equal(true);
-      });
-
-      it('should show the current status in the node title', async () => {
-        const item = Toolbar.createKernelStatusItem(session);
-        const status = session.status;
-        expect(item.node.title.toLowerCase()).to.contain(status);
-        let called = false;
-        const future = session.kernel.requestExecute({ code: 'a = 1' });
-        future.onIOPub = msg => {
-          if (session.status === 'busy') {
-            expect(item.node.title.toLowerCase()).to.contain('busy');
-            called = true;
-          }
-        };
-        await future.done;
-        expect(called).to.equal(true);
-      });
-
-      it('should handle a starting session', async () => {
-        await session.shutdown();
         session = await createClientSession();
-        const item = Toolbar.createKernelStatusItem(session);
-        expect(item.node.title).to.equal('Kernel Starting');
-        expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
+      });
+
+      afterEach(async () => {
+        await session.shutdown();
+        session.dispose();
+      });
+
+      describe('.createInterruptButton()', () => {
+        it("should add an inline svg node with the 'stop' icon", async () => {
+          const button = Toolbar.createInterruptButton(session);
+          Widget.attach(button, document.body);
+          await framePromise();
+          expect(button.node.querySelector("[data-icon='stop']")).to.exist;
+        });
+      });
+
+      describe('.createRestartButton()', () => {
+        it("should add an inline svg node with the 'refresh' icon", async () => {
+          const button = Toolbar.createRestartButton(session);
+          Widget.attach(button, document.body);
+          await framePromise();
+          expect(button.node.querySelector("[data-icon='refresh']")).to.exist;
+        });
+      });
+
+      describe('.createKernelNameItem()', () => {
+        it("should display the `'display_name'` of the kernel", async () => {
+          const item = Toolbar.createKernelNameItem(session);
+          await session.initialize();
+          Widget.attach(item, document.body);
+          await framePromise();
+          expect(
+            (item.node.firstChild.lastChild as HTMLElement).textContent
+          ).to.equal(session.kernelDisplayName);
+        });
+
+        it("should display `'No Kernel!'` if there is no kernel", async () => {
+          const item = Toolbar.createKernelNameItem(session);
+          Widget.attach(item, document.body);
+          await framePromise();
+          expect(
+            (item.node.firstChild.lastChild as HTMLElement).textContent
+          ).to.equal('No Kernel!');
+        });
+      });
+
+      describe('.createKernelStatusItem()', () => {
+        beforeEach(async () => {
+          await session.initialize();
+          await session.kernel.ready;
+        });
+
+        it('should display a busy status if the kernel status is busy', async () => {
+          const item = Toolbar.createKernelStatusItem(session);
+          let called = false;
+          session.statusChanged.connect((_, status) => {
+            if (status === 'busy') {
+              expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
+              called = true;
+            }
+          });
+          const future = session.kernel.requestExecute({ code: 'a = 109\na' });
+          await future.done;
+          expect(called).to.equal(true);
+        });
+
+        it('should show the current status in the node title', async () => {
+          const item = Toolbar.createKernelStatusItem(session);
+          const status = session.status;
+          expect(item.node.title.toLowerCase()).to.contain(status);
+          let called = false;
+          const future = session.kernel.requestExecute({ code: 'a = 1' });
+          future.onIOPub = msg => {
+            if (session.status === 'busy') {
+              expect(item.node.title.toLowerCase()).to.contain('busy');
+              called = true;
+            }
+          };
+          await future.done;
+          expect(called).to.equal(true);
+        });
+
+        it('should handle a starting session', async () => {
+          await session.kernel.ready;
+          await session.shutdown();
+          session = await createClientSession();
+          const item = Toolbar.createKernelStatusItem(session);
+          expect(item.node.title).to.equal('Kernel Starting');
+          expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
+          await session.initialize();
+          await session.kernel.ready;
+        });
       });
     });
   });
@@ -344,9 +394,7 @@ describe('@jupyterlab/apputils', () => {
         await framePromise();
         const button = widget.node.firstChild as HTMLElement;
         expect(button.classList.contains('foo')).to.equal(true);
-        expect(
-          (button.firstChild as HTMLElement).classList.contains('iconFoo')
-        ).to.equal(true);
+        expect(button.querySelector('.iconFoo')).to.exist;
         expect(button.title).to.equal('bar');
       });
     });
@@ -382,30 +430,62 @@ describe('@jupyterlab/apputils', () => {
           button.dispose();
         });
       });
+      describe('keydown', () => {
+        it('Enter should activate the callback', async () => {
+          let called = false;
+          const button = new ToolbarButton({
+            onClick: () => {
+              called = true;
+            }
+          });
+          Widget.attach(button, document.body);
+          await framePromise();
+          simulate(button.node.firstChild as HTMLElement, 'keydown', {
+            key: 'Enter'
+          });
+          expect(called).to.equal(true);
+          button.dispose();
+        });
+        it('Space should activate the callback', async () => {
+          let called = false;
+          const button = new ToolbarButton({
+            onClick: () => {
+              called = true;
+            }
+          });
+          Widget.attach(button, document.body);
+          await framePromise();
+          simulate(button.node.firstChild as HTMLElement, 'keydown', {
+            key: ' '
+          });
+          expect(called).to.equal(true);
+          button.dispose();
+        });
+      });
     });
 
-    // describe('#onAfterAttach()', () => {
-    //   it('should add event listeners to the node', () => {
-    //     const button = new LogToolbarButton();
-    //     Widget.attach(button, document.body);
-    //     expect(button.methods).to.contain('onAfterAttach');
-    //     simulate(button.node, 'click');
-    //     expect(button.events).to.contain('click');
-    //     button.dispose();
+    //   describe('#onAfterAttach()', () => {
+    //     it('should add event listeners to the node', () => {
+    //       const button = new LogToolbarButton();
+    //       Widget.attach(button, document.body);
+    //       expect(button.methods).to.contain('onAfterAttach');
+    //       simulate(button.node, 'click');
+    //       expect(button.events).to.contain('click');
+    //       button.dispose();
+    //     });
     //   });
-    // });
 
-    // describe('#onBeforeDetach()', () => {
-    //   it('should remove event listeners from the node', async () => {
-    //     const button = new LogToolbarButton();
-    //     Widget.attach(button, document.body);
-    //     await framePromise();
-    //     Widget.detach(button);
-    //     expect(button.methods).to.contain('onBeforeDetach');
-    //     simulate(button.node, 'click');
-    //     expect(button.events).to.not.contain('click');
-    //     button.dispose();
+    //   describe('#onBeforeDetach()', () => {
+    //     it('should remove event listeners from the node', async () => {
+    //       const button = new LogToolbarButton();
+    //       Widget.attach(button, document.body);
+    //       await framePromise();
+    //       Widget.detach(button);
+    //       expect(button.methods).to.contain('onBeforeDetach');
+    //       simulate(button.node, 'click');
+    //       expect(button.events).to.not.contain('click');
+    //       button.dispose();
+    //     });
     //   });
-    // });
   });
 });

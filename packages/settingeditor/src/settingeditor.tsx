@@ -7,7 +7,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
 
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -89,18 +89,9 @@ export class SettingEditor extends Widget {
     SplitPanel.setStretch(instructions, 1);
     SplitPanel.setStretch(editor, 1);
 
-    editor.stateChanged.connect(
-      this._onStateChanged,
-      this
-    );
-    list.changed.connect(
-      this._onStateChanged,
-      this
-    );
-    panel.handleMoved.connect(
-      this._onStateChanged,
-      this
-    );
+    editor.stateChanged.connect(this._onStateChanged, this);
+    list.changed.connect(this._onStateChanged, this);
+    panel.handleMoved.connect(this._onStateChanged, this);
   }
 
   /**
@@ -137,13 +128,6 @@ export class SettingEditor extends Widget {
    */
   get commandsChanged(): ISignal<any, string[]> {
     return this._editor.raw.commandsChanged;
-  }
-
-  /**
-   * Whether the debug panel is visible.
-   */
-  get isDebugVisible(): boolean {
-    return this._editor.raw.isDebugVisible;
   }
 
   /**
@@ -190,13 +174,6 @@ export class SettingEditor extends Widget {
   }
 
   /**
-   * Toggle the debug functionality.
-   */
-  toggleDebug(): void {
-    this._editor.raw.toggleDebug();
-  }
-
-  /**
    * Handle `'after-attach'` messages.
    */
   protected onAfterAttach(msg: Message): void {
@@ -240,52 +217,47 @@ export class SettingEditor extends Widget {
     const { key, state } = this;
     const promises = [state.fetch(key), this._when];
 
-    return (this._fetching = Promise.all(promises).then(([saved]) => {
+    return (this._fetching = Promise.all(promises).then(([value]) => {
       this._fetching = null;
 
       if (this._saving) {
         return;
       }
 
-      this._state = Private.normalizeState(saved, this._state);
+      this._state = Private.normalizeState(value, this._state);
     }));
   }
 
   /**
    * Handle root level layout state changes.
    */
-  private _onStateChanged(): void {
+  private async _onStateChanged(): Promise<void> {
     this._state.sizes = this._panel.relativeSizes();
     this._state.container = this._editor.state;
-    this._state.container.editor = this._list.editor;
     this._state.container.plugin = this._list.selection;
-    this._saveState()
-      .then(() => {
-        this._setState();
-      })
-      .catch(reason => {
-        console.error('Saving setting editor state failed', reason);
-        this._setState();
-      });
+    try {
+      await this._saveState();
+    } catch (error) {
+      console.error('Saving setting editor state failed', error);
+    }
+    this._setState();
   }
 
   /**
    * Set the state of the setting editor.
    */
-  private _saveState(): Promise<void> {
+  private async _saveState(): Promise<void> {
     const { key, state } = this;
     const value = this._state;
 
     this._saving = true;
-    return state
-      .save(key, value)
-      .then(() => {
-        this._saving = false;
-      })
-      .catch((reason: any) => {
-        this._saving = false;
-        throw reason;
-      });
+    try {
+      await state.save(key, value);
+      this._saving = false;
+    } catch (error) {
+      this._saving = false;
+      throw error;
+    }
   }
 
   /**
@@ -321,7 +293,7 @@ export class SettingEditor extends Widget {
       return;
     }
 
-    if (editor.settings && editor.settings.plugin === container.plugin) {
+    if (editor.settings && editor.settings.id === container.plugin) {
       this._setLayout();
       return;
     }
@@ -338,12 +310,11 @@ export class SettingEditor extends Widget {
           panel.addWidget(editor);
         }
         editor.settings = settings;
-        list.editor = container.editor;
         list.selection = container.plugin;
         this._setLayout();
       })
-      .catch((reason: Error) => {
-        console.error(`Loading settings failed: ${reason.message}`);
+      .catch(reason => {
+        console.error(`Loading ${container.plugin} settings failed.`, reason);
         list.selection = this._state.container.plugin = '';
         editor.settings = null;
         this._setLayout();
@@ -378,11 +349,6 @@ export namespace SettingEditor {
       registry: CommandRegistry;
 
       /**
-       * The debug command ID.
-       */
-      debug: string;
-
-      /**
        * The revert command ID.
        */
       revert: string;
@@ -411,7 +377,7 @@ export namespace SettingEditor {
     /**
      * The optional MIME renderer to use for rendering debug messages.
      */
-    rendermime?: RenderMimeRegistry;
+    rendermime?: IRenderMimeRegistry;
 
     /**
      * The state database used to store layout.
@@ -447,9 +413,6 @@ export namespace SettingEditor {
      * The current plugin being displayed.
      */
     plugin: string;
-
-    editor: 'raw' | 'table';
-
     sizes: number[];
   }
 }
@@ -505,10 +468,6 @@ namespace Private {
         : {};
 
     saved.container = {
-      editor:
-        container.editor === 'raw' || container.editor === 'table'
-          ? container.editor
-          : DEFAULT_LAYOUT.container.editor,
       plugin:
         typeof container.plugin === 'string'
           ? container.plugin

@@ -1,24 +1,12 @@
-var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 var merge = require('webpack-merge');
-var common = require('./webpack.config');
+var config = require('./webpack.config');
 
-module.exports = merge(common, {
+config[0] = merge(config[0], {
   mode: 'production',
   devtool: 'source-map',
   optimization: {
-    minimizer: [
-      new UglifyJsPlugin({
-        parallel: true,
-        sourceMap: true,
-        uglifyOptions: {
-          beautify: false,
-          comments: false,
-          compress: false,
-          ecma: 6,
-          mangle: true
-        },
-        cache: process.platform !== 'win32'
-      })
-    ]
+    minimize: false
   }
 });
+
+module.exports = config;

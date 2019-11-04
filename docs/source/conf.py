@@ -22,7 +22,6 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 # For conversion from markdown to html
-import recommonmark.parser
 from recommonmark.transform import AutoStructify
 
 
@@ -35,22 +34,23 @@ from recommonmark.transform import AutoStructify
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.intersphinx',
-    'sphinx.ext.mathjax']
+extensions = [
+    'recommonmark',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.mathjax',
+    'sphinx_copybutton'
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
-# The suffix(es) of source filenames.
-# You can specify multiple suffix as a list of string:
-#
-# source_suffix = ['.rst', '.md']
-
-source_parsers = {
-    '.md': 'recommonmark.parser.CommonMarkParser',
+# The file extensions of source files.
+# Sphinx considers the files with this suffix as sources.
+# The value can be a dictionary mapping file extensions to file types.
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown'
 }
-
-source_suffix = ['.rst', '.md']
 
 # The master toctree document.
 master_doc = 'index'

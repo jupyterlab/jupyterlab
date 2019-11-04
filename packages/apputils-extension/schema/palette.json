@@ -1,0 +1,14 @@
+{
+  "title": "Command Palette",
+  "description": "Command palette settings.",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "apputils:activate-command-palette",
+      "keys": ["Accel Shift C"],
+      "selector": "body"
+    }
+  ],
+  "additionalProperties": false,
+  "properties": {},
+  "type": "object"
+}

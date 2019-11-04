@@ -2,68 +2,121 @@
 
 This document guides a contributor through creating a release of JupyterLab.
 
-## Check installed tools
-
 Review `CONTRIBUTING.md`. Make sure all the tools needed to generate the
 built JavaScript files are properly installed.
 
 ## Creating a full release
 
-We publish the npm packages, a Python source package, and a Python universal binary wheel. We also publish a conda package on conda-forge (see below).
-See the Python docs on [package uploading](https://packaging.python.org/guides/tool-recommendations/)
-for twine setup instructions and for why twine is the recommended method.
+We publish the npm packages, a Python source package, and a Python universal
+binary wheel. We also publish a conda package on conda-forge (see below). See
+the Python docs on [package
+uploading](https://packaging.python.org/guides/tool-recommendations/) for twine
+setup instructions and for why twine is the recommended method.
 
 ## Getting a clean environment
 
-For convenience, here are commands for getting a completely clean repo. This makes sure that we don't have any extra tags or commits in our repo (especially since we will push our tags later in the process), and that we are on the master branch.
+### Using Docker
+
+If desired, you can use Docker to create a new container with a fresh clone of JupyterLab.
+
+First, build a Docker base image. This container is customized with your git commit information. The build is cached so rebuilding it is fast and easy.
 
 ```bash
-cd release
-conda deactivate
-conda remove --all -y -n jlabrelease
-rm -rf jupyterlab
-
-conda create -c conda-forge -y -n jlabrelease notebook nodejs twine
-conda activate jlabrelease
-git clone git@github.com:jupyterlab/jupyterlab.git
-cd jupyterlab
-pip install -ve .
+docker build -t jlabreleaseimage release/ --build-arg "GIT_AUTHOR_NAME=`git config user.name`" --build-arg "GIT_AUTHOR_EMAIL=`git config user.email`"
 ```
 
-### Publish the npm packages
+Note: if you must rebuild your Docker image from scratch without the cache, you can run the same build command above with `--no-cache --pull`.
 
-The command below ensures the latest dependencies and built files,
-then prompts you to select package versions. When one package has an
-effective major release, the packages that depend on it should also get a
-major release, to prevent consumers that are using the `^` semver
-requirement from getting a conflict. Note that we publish the
-JavaScript packages using the `next` tag until we are ready for the
-final release.
+Then run a new instance of this container:
 
 ```bash
-jlpm run publish:next
+docker rm jlabrelease # delete any old container
+docker run -it --name jlabrelease -w /usr/src/app jlabreleaseimage bash
 ```
 
-### Publish the Python package
+Now you should be at a shell prompt as root inside the docker container (the prompt should be something like `root@20dcc0cdc0b4:/usr/src/app`).
 
-- Update `jupyterlab/_version.py` with an `rc` version
-- Prep the static assets for release:
+### Clean environment
+
+For convenience, here is a script for getting a completely clean repo. This
+makes sure that we don't have any extra tags or commits in our repo (especially
+since we will push our tags later in the process), and that we are on the correct branch. The script creates a conda env, pulls down a git checkout with the
+appropriate branch, and installs JupyterLab with `pip install -e .`.
+
+`source scripts/release_prep.sh <branch_name>`
+
+## Bump version
+
+The next step is to bump the appropriate version numbers. We use
+[bump2version](https://github.com/c4urself/bump2version) to manage the Python
+version, and we keep the JS versions and tags in sync with the release cycle.
+
+Here is an example of how version numbers progress through a release process.
+Choose and run an appropriate command to bump version numbers for this release.
+
+| Command                            | Python Version Change | NPM Version change                 |
+| ---------------------------------- | --------------------- | ---------------------------------- |
+| `jlpm bumpversion minor`           | x.y.z-> x.(y+1).0.a0  | All a.b.c -> a.(b+1).0-alpha.0     |
+| `jlpm bumpversion build`           | x.y.z.a0-> x.y.z.a1   | All a.b.c-alpha.0 -> a.b.c-alpha.1 |
+| `jlpm bumpversion release`         | x.y.z.a1-> x.y.z.rc0  | All a.b.c-alpha.1 -> a.b.c-rc.0    |
+| `jlpm bumpversion release`         | x.y.z.rc0-> x.y.z     | All a.b.c-rc0 -> a.b.c             |
+| `jlpm patch:release [...packages]` | x.y.z -> x.y.(z+1)    | Selected a.b.c -> a.b.(c+1)        |
+
+Note: if you are making a patch release, and want to update whatever JS packages changed, just do `jlpm patch:release js` (in fact, _any_ argument, not just `js`, forces all JS packages to be examined).
+
+### JS major release(s)
+
+In a major Python release, we can have one or more JavaScript packages also have
+a major bump. During the prerelease stage of a major release, if there is a
+backwards-incompatible change to a JS package, bump the major version number for
+that JS package:
+
+`jlpm bump:js:major [...packages]`
+
+Results:
+
+- Python package is not affected.
+- JS dependencies are also bumped a major version.
+- Packages that have already had a major bump in this prerelease cycle are not affected.
+- All affected packages changed to match the current release type of the Python package (`alpha` or `rc`).
+
+## Publishing Packages
+
+Currently we end up with some uncommitted changes at this step. We'll need to commit them before running the publish.
 
 ```bash
-jlpm run build:update
+git commit -am "bump version"
 ```
 
-- Commit and tag and push the tag
-- Create the Python release artifacts:
+Now publish the JS packages and build the python packages
 
 ```bash
-rm -rf dist build
-python setup.py sdist
-python setup.py bdist_wheel --universal
-twine upload dist/*
+npm run publish:all
 ```
 
-### Post prerelease checklist
+If there is a network error during JS publish, run `npm run publish:all --skip-build` to resume publish without requiring another clean and build phase of the JS packages.
+
+Note that the use of `npm` instead of `jlpm` is [significant on Windows](https://github.com/jupyterlab/jupyterlab/issues/6733).
+
+At this point, run the `./scripts/release_test.sh` to test the wheel in
+a fresh conda environment with and without extensions installed. Open and run
+the Outputs notebook and verify everything runs properly. Also add a cell with the following code and make sure the widget renders:
+
+```python
+from ipywidgets import IntSlider
+IntSlider()
+```
+
+## Finish
+
+Follow instructions printed at the end of the publish step above, including:
+
+- committing changes
+- tagging the release
+- and uploading to pypi with twine
+- double-check what branch you are on, then push changes to the correct upstream branch with the `--tags` option.
+
+## Post release candidate checklist
 
 - [ ] Modify and run `python scripts/milestone_check.py` to check the issues assigned to this milestone
 - [ ] Write [release highlights](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/getting_started/changelog.rst), starting with:
@@ -82,40 +135,39 @@ twine upload dist/*
   - [ ] https://github.com/jupyterlab/extension-cookiecutter-ts
   - [ ] https://github.com/jupyterlab/mimerender-cookiecutter
   - [ ] https://github.com/jupyterlab/mimerender-cookiecutter-ts
+  - [ ] https://github.com/jupyterlab/theme-cookiecutter
   - [ ] https://github.com/jupyterlab/jupyter-renderers
-  - [ ] https://github.com/jupyterhub/jupyterlab-hub
 - [ ] Add a tag to [ts cookiecutter](https://github.com/jupyterlab/extension-cookiecutter-ts) with the new JupyterLab version
 - [ ] Update the extension examples:
   - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/developer/notebook.rst#adding-a-button-to-the-toolbar)
-- [ ] Update the [xkcd tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-xkcd-tutorial)
+- [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-extension-tutorial)
 - [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
-- [ ] Publish the final (not prerelease) JavaScript packages using `jlpm run publish:next` at some point.
 
 Now do the actual final release:
 
-- [ ] Update `jupyterlab/_version.py` with a final version
-- [ ] Make a final Python release
+- [ ] Run `jlpm run bumpversion release` to switch to final release
+- [ ] Push the commit and tags to master
+- [ ] Run `npm run publish:all` to publish the packages
 - [ ] Create a branch for the release and push to GitHub
 - [ ] Merge the PRs on the other repos and set the default branch of the
       xckd repo
-- [ ] Update the `latest` npm tags by running `jlpm run update:dist-tags` and running the commands it prints out
 - [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#publishing-to-conda-forge).
 
 After a few days (to allow for possible patch releases), set up development for
 the next release:
 
-- [ ] Update `jupyterlab/_version.py` with a `dev` version
-- [ ] Run `jlpm integrity` to update the `dev_mode` version
-- [ ] Commit and push the version update to master
+- [ ] Run `jlpm run bumpversion minor` to bump to alpha for the next alpha release
+- [ ] Put the commit and tags to master
+- [ ] Run `npm run publish:all` to publish the packages
 - [ ] Release the other repos as appropriate
 - [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#update-version-for-binder)
 
-### Updating the xkcd tutorial
+### Updating the extension tutorial
 
 - Clone the repo if you don't have it
 
 ```bash
-git clone git@github.com:jupyterlab/jupyterlab_xkcd.git
+git clone git@github.com:jupyterlab/jupyterlab_apod.git
 ```
 
 #### Simple updates by rebasing
@@ -133,12 +185,12 @@ git rebase -i --root
 "Edit" the commits that involve installing packages, so you can update the
 `package.json`. Amend the last commit to bump the version number in package.json
 in preparation for publishing to npm. Then skip down to the step below about
-publishing the xkcd tutorial. If the edits are more substantial than just
+publishing the extension tutorial. If the edits are more substantial than just
 updating package versions, then do the next steps instead.
 
 #### Creating the tutorial from scratch
 
-- Create a new empty branch in the xkcd repo.
+- Create a new empty branch in the extension repo.
 
 ```bash
 git checkout --orphan name-of-branch
@@ -146,8 +198,8 @@ git rm -rf .
 git clean -dfx
 cookiecutter path-to-local-extension-cookiecutter-ts
 # Fill in the values from the previous branch package.json initial commit
-cp -r jupyterlab_xkcd/ .
-rm -rf jupyterlab_xkcd
+cp -r jupyterlab_apod/ .
+rm -rf jupyterlab_apod
 ```
 
 - Create a new PR in JupyterLab.
@@ -157,14 +209,14 @@ rm -rf jupyterlab_xkcd
   file from the previous branch, as well as the `package.json` fields up to
   `license`. Bump the version number in preparation for publishing to npm.
 
-#### Publishing xkcd tutorial changes
+#### Publishing extension tutorial changes
 
 - Replace the tag references in the tutorial with the new branch number, e.g.
-  replace `0.28-` with `0.29-`. Prefix the new tags with the branch name, e.g.
-  `0.28-01-show-a-panel`
+  replace `1.0-` with `1.1-`. Prefix the new tags with the branch name, e.g.
+  `1.0-01-show-a-panel`
   ```bash
   git tag 0.XX-01-show-a-panel HEAD~5
-  git tag 0.XX-02-show-a-comic HEAD~4
+  git tag 0.XX-02-show-an-image HEAD~4
   git tag 0.XX-03-style-and-attribute HEAD~3
   git tag 0.XX-04-refactor-and-refresh HEAD~2
   git tag 0.XX-05-restore-panel-state HEAD~1
@@ -174,9 +226,9 @@ rm -rf jupyterlab_xkcd
   ```bash
   git push origin 0.XX --tags
   ```
-  Set the branch as the default branch (see `github.com/jupyterlab/jupyterlab_xkcd/settings/branches`).
+  Set the branch as the default branch (see `github.com/jupyterlab/jupyterlab_apod/settings/branches`).
 - If there were changes to the example in the documentation, submit a PR to JupyterLab
-- Publish the new `@jupyterlab/xkcd` npm package. Make sure to update the version
+- Publish the new `@jupyterlab/apod` npm package. Make sure to update the version
   number in the last commit of the branch.
   ```bash
   npm publish
@@ -203,21 +255,16 @@ shasum -a 256 dist/*.tar.gz
 - Create a PR with the version bump
 - Update `recipe/meta.yaml` with the new version and md5 and reset the build number to 0.
 
-## Making a patch release JavaScript package(s)
+## Making a patch release
 
 - Backport the change to the previous release branch
-- Make a new PR against the previous branch
-- Run the following script, where the package is in `/packages/package-folder-name` (note that multiple packages can be given):
+- Run the following script, where the package is in `/packages/package-folder-name` (note that multiple packages can be given, or no packages for a Python-only patch release):
 
 ```bash
 jlpm run patch:release package-folder-name
 ```
 
-- Push the resulting commit and tag.
-- Create a new Python release on the previous branch
-- Cherry pick the patch commit to the master branch
-- Update the dev version of the master branch in `_version.py`
-- Update the `package.json` file in `dev_mode` with the new JupyterLab version in the `jupyterlab` metadata section.
+- Push the resulting commit and tag
 
 ## Update version for binder
 

@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { VDomRenderer } from '@jupyterlab/apputils';
+import { ReactWidget } from '@jupyterlab/apputils';
 
 import * as React from 'react';
 
@@ -30,11 +30,6 @@ const INPUT_COLLAPSER = 'jp-InputCollapser';
 const OUTPUT_COLLAPSER = 'jp-OutputCollapser';
 
 /**
- * The CSS class added the collapser child when collapsed.
- */
-const MOD_COLLAPSED_CLASS = 'jp-mod-collapsed';
-
-/**
  * Abstract collapser base class.
  *
  * ### Notes
@@ -42,7 +37,7 @@ const MOD_COLLAPSED_CLASS = 'jp-mod-collapsed';
  * input/output that a user can click on to collapse the
  * input/output.
  */
-export abstract class Collapser extends VDomRenderer<null> {
+export abstract class Collapser extends ReactWidget {
   /**
    * Construct a new collapser.
    */
@@ -63,9 +58,6 @@ export abstract class Collapser extends VDomRenderer<null> {
    */
   protected render(): React.ReactElement<any> {
     let childClass = COLLAPSER_CHILD_CLASS;
-    if (this.collapsed) {
-      childClass += ` ${MOD_COLLAPSED_CLASS}`;
-    }
     return <div className={childClass} onClick={e => this.handleClick(e)} />;
   }
 

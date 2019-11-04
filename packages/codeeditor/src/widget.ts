@@ -48,10 +48,8 @@ export class CodeEditorWrapper extends Widget {
       config: options.config,
       selectionStyle: options.selectionStyle
     }));
-    editor.model.selections.changed.connect(
-      this._onSelectionsChanged,
-      this
-    );
+    editor.model.selections.changed.connect(this._onSelectionsChanged, this);
+    this._updateOnShow = options.updateOnShow !== false;
   }
 
   /**
@@ -143,7 +141,9 @@ export class CodeEditorWrapper extends Widget {
    * A message handler invoked on an `'after-show'` message.
    */
   protected onAfterShow(msg: Message): void {
-    this.update();
+    if (this._updateOnShow) {
+      this.update();
+    }
   }
 
   /**
@@ -273,6 +273,8 @@ export class CodeEditorWrapper extends Widget {
     const offset = this.editor.getOffsetAt(position);
     this.model.value.insert(offset, data);
   }
+
+  private _updateOnShow: boolean;
 }
 
 /**
@@ -311,6 +313,11 @@ export namespace CodeEditorWrapper {
      * The default selection style for the editor.
      */
     selectionStyle?: CodeEditor.ISelectionStyle;
+
+    /**
+     * Whether to send an update request to the editor when it is shown.
+     */
+    updateOnShow?: boolean;
   }
 }
 

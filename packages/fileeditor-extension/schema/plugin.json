@@ -41,6 +41,15 @@
         },
         "wordWrapColumn": {
           "type": "integer"
+        },
+        "rulers": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "codeFolding": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -50,7 +59,7 @@
   "properties": {
     "editorConfig": {
       "title": "Editor Configuration",
-      "description": "The configuration for all text editors.\nIf `fontFamily`, `fontSize` or `lineHeight` are `null`, values from\ncurrent theme are used.",
+      "description": "The configuration for all text editors.\nIf `fontFamily`, `fontSize` or `lineHeight` are `null`,\nvalues from current theme are used.",
       "$ref": "#/definitions/editorConfig",
       "default": {
         "autoClosingBrackets": true,
@@ -63,7 +72,9 @@
         "readOnly": false,
         "insertSpaces": true,
         "tabSize": 4,
-        "wordWrapColumn": 80
+        "wordWrapColumn": 80,
+        "rulers": [],
+        "codeFolding": false
       }
     }
   },

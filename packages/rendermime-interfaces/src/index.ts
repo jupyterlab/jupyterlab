@@ -26,6 +26,9 @@ export namespace IRenderMime {
 
     /**
      * The metadata associated with the model.
+     *
+     * Among others, it can include an attribute named `fragment`
+     * that stores a URI fragment identifier for the MIME resource.
      */
     readonly metadata: ReadonlyJSONObject;
 
@@ -317,7 +320,7 @@ export namespace IRenderMime {
     /**
      * Add the link handler to the node.
      *
-     * @param node: the node for which to handle the link.
+     * @param node: the anchor node for which to handle the link.
      *
      * @param path: the path to open when the link is clicked.
      *
@@ -337,6 +340,9 @@ export namespace IRenderMime {
 
     /**
      * Get the download url for a given absolute url path.
+     *
+     * #### Notes
+     * This URL may include a query parameter.
      */
     getDownloadUrl(url: string): Promise<string>;
 

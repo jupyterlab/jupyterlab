@@ -13,7 +13,7 @@ import {
   Context,
   DocumentRegistry,
   TextModelFactory
-} from '@jupyterlab/docregistry/src';
+} from '@jupyterlab/docregistry';
 
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -21,7 +21,7 @@ import {
   waitForDialog,
   acceptDialog,
   dismissDialog,
-  createNotebookContext,
+  initNotebookContext,
   NBTestUtils
 } from '@jupyterlab/testutils';
 
@@ -30,7 +30,7 @@ describe('docregistry/context', () => {
   const factory = new TextModelFactory();
 
   beforeAll(() => {
-    manager = new ServiceManager();
+    manager = new ServiceManager({ standby: 'never' });
     return manager.ready;
   });
 
@@ -189,17 +189,16 @@ describe('docregistry/context', () => {
       });
 
       it('should initialize the model when the file is saved for the first time', async () => {
-        const context = await createNotebookContext();
+        const context = await initNotebookContext();
         context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(context.model.cells.canUndo).to.equal(true);
         await context.initialize(true);
         await context.ready;
         expect(context.model.cells.canUndo).to.equal(false);
-        await dismissDialog();
       });
 
       it('should initialize the model when the file is reverted for the first time', async () => {
-        const context = await createNotebookContext();
+        const context = await initNotebookContext();
         await manager.contents.save(context.path, {
           type: 'notebook',
           format: 'json',
@@ -252,7 +251,7 @@ describe('docregistry/context', () => {
       it('should be set after population', async () => {
         const { path } = context;
 
-        context.initialize(true);
+        void context.initialize(true);
         await context.ready;
         expect(context.contentsModel.path).to.equal(path);
       });
@@ -295,7 +294,6 @@ describe('docregistry/context', () => {
         const model = await manager.contents.get(context.path, opts);
 
         expect(model.content).to.equal('foo');
-        await dismissDialog();
       });
 
       it('should should preserve LF line endings upon save', async () => {
@@ -364,19 +362,19 @@ describe('docregistry/context', () => {
           const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
           const input = dialog.getElementsByTagName('input')[0];
           input.value = newPath;
-          await acceptDialog();
-          await acceptDialog();
+          await acceptDialog(); // Accept rename dialog
+          await acceptDialog(); // Accept conflict dialog
         };
-        const promise = func();
         await manager.contents.save(newPath, {
           type: factory.contentType,
           format: factory.fileFormat,
           content: 'foo'
         });
         await context.initialize(true);
+        const promise = func();
         await context.saveAs();
-        expect(context.path).to.equal(newPath);
         await promise;
+        expect(context.path).to.equal(newPath);
       });
 
       it('should keep the file if overwrite is aborted', async () => {
@@ -387,20 +385,19 @@ describe('docregistry/context', () => {
           const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
           const input = dialog.getElementsByTagName('input')[0];
           input.value = newPath;
-          await acceptDialog();
-          await dismissDialog();
+          await acceptDialog(); // Accept rename dialog
+          await dismissDialog(); // Reject conflict dialog
         };
-        const promise = func();
         await manager.contents.save(newPath, {
           type: factory.contentType,
           format: factory.fileFormat,
           content: 'foo'
         });
         await context.initialize(true);
+        const promise = func();
         await context.saveAs();
-        expect(context.path).to.equal(oldPath);
         await promise;
-        await dismissDialog();
+        expect(context.path).to.equal(oldPath);
       });
 
       it('should just save if the file name does not change', async () => {
@@ -448,7 +445,7 @@ describe('docregistry/context', () => {
       it('should delete the given checkpoint', async () => {
         await context.initialize(true);
         const model = await context.createCheckpoint();
-        context.deleteCheckpoint(model.id);
+        await context.deleteCheckpoint(model.id);
         const models = await context.listCheckpoints();
         expect(models.length).to.equal(0);
       });

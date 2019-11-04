@@ -5,7 +5,7 @@ Documents
 
 JupyterLab can be extended in several ways:
 
--  Extensions (top level): Application extensions extend the
+-  **Extensions (top level)**: Application extensions extend the
    functionality of JupyterLab itself, and we cover them in the
    :ref:`developer_extensions`.
 -  **Document widget extensions (lower level):** Document widget
@@ -16,7 +16,7 @@ For this section, the term 'document' refers to any visual thing that
 is backed by a file stored on disk (i.e. uses Contents API).
 
 Overview of document architecture
----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A 'document' in JupyterLab is represented by a model instance implementing the `IModel <https://jupyterlab.github.io/jupyterlab/docregistry/interfaces/documentregistry.imodel.html>`__ interface. The model interface is intentionally fairly small, and concentrates on representing the data in the document and signaling changes to that data. Each model has an associated `context <https://jupyterlab.github.io/jupyterlab/docregistry/interfaces/documentregistry.icontext.html>`__ instance as well. The context for a model is the bridge between the internal data of the document, stored in the model, and the file metadata and operations possible on the file, such as save and revert. Since many objects will need both the context and the model, the context contains a reference to the model as its `.model` attribute.
 
@@ -34,8 +34,7 @@ and providers.
 The `Document
 Manager <https://jupyterlab.github.io/jupyterlab/docmanager/classes/documentmanager.html>`__
 uses the Document Registry to create models and widgets for documents.
-The Document Manager is only meant to be accessed by the File Browser
-itself.
+The Document Manager handles the lifecycle of documents for the application.
 
 Document Registry
 ~~~~~~~~~~~~~~~~~
@@ -46,7 +45,6 @@ Document Registry
 -  model factories for specific file types
 -  widget factories for specific model factories
 -  widget extension factories
--  file creators
 
 `Widget Factories <https://jupyterlab.github.io/jupyterlab/docregistry/classes/documentregistry.html#addwidgetfactory>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -80,18 +78,6 @@ functionality to each widget or observe the widget and/or its context.
 `File Types <https://jupyterlab.github.io/jupyterlab/docregistry/classes/documentregistry.html#addfiletype>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Intended to be used in a "Create New" dialog, providing a list of known
-file types.
-
-`File Creators <https://jupyterlab.github.io/jupyterlab/docregistry/classes/documentregistry.html>`__
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Intended for create quick launch file creators.
-
-The default use will be for the "create new" dropdown in the file
-browser, giving list of items that can be created with default options
-(e.g. "Python 3 Notebook").
-
 `Document Models <https://jupyterlab.github.io/jupyterlab/docregistry/interfaces/documentregistry.imodel.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -109,7 +95,7 @@ widget extensions. The context contains the model as one of its
 properties so that we can pass a single object around.
 
 They are used to provide an abstracted interface to the session and
-contents API from ``@jupyterlab/services`` for the given model. They can
+Contents API from ``@jupyterlab/services`` for the given model. They can
 be shared between widgets.
 
 The reason for a separate context and model is so that it is easy to

@@ -99,10 +99,7 @@ export class TabSpaceStatus extends VDomRenderer<TabSpaceStatus.Model> {
       this._popup.dispose();
     }
 
-    menu.aboutToClose.connect(
-      this._menuClosed,
-      this
-    );
+    menu.aboutToClose.connect(this._menuClosed, this);
 
     this._popup = showPopup({
       body: menu,

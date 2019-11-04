@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { UUID } from '@phosphor/coreutils';
+import { PromiseDelegate, UUID } from '@phosphor/coreutils';
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
@@ -24,9 +24,29 @@ import {
 } from '@jupyterlab/testutils';
 
 class TestParent extends Panel implements ForeignHandler.IReceiver {
-  addCell(cell: CodeCell): void {
+  addCell(cell: CodeCell, msgId?: string): void {
     this.addWidget(cell);
+    if (msgId) {
+      this._cells.set(msgId, cell);
+    }
   }
+
+  createCodeCell(): CodeCell {
+    const contentFactory = NBTestUtils.createCodeCellFactory();
+    const model = new CodeCellModel({});
+    const cell = new CodeCell({
+      model,
+      rendermime,
+      contentFactory
+    }).initializeState();
+    return cell;
+  }
+
+  getCell(msgId: string) {
+    return this._cells.get(msgId);
+  }
+
+  private _cells = new Map<string, CodeCell>();
 }
 
 class TestHandler extends ForeignHandler {
@@ -64,12 +84,6 @@ class TestHandler extends ForeignHandler {
 
 const rendermime = defaultRenderMime();
 
-function cellFactory(): CodeCell {
-  const contentFactory = NBTestUtils.createCodeCellFactory();
-  const model = new CodeCellModel({});
-  const cell = new CodeCell({ model, rendermime, contentFactory });
-  return cell;
-}
 const relevantTypes = [
   'execute_input',
   'execute_result',
@@ -95,11 +109,12 @@ describe('@jupyterlab/console', () => {
       [local, foreign] = await Promise.all(sessions);
       session = await createClientSession({ path: local.path });
       await (session as ClientSession).initialize();
+      await session.kernel.ready;
     });
 
     beforeEach(() => {
       const parent = new TestParent();
-      handler = new TestHandler({ session, parent, cellFactory });
+      handler = new TestHandler({ session, parent });
     });
 
     afterEach(() => {
@@ -166,8 +181,7 @@ describe('@jupyterlab/console', () => {
         const parent = new TestParent();
         handler = new TestHandler({
           session: handler.session,
-          parent,
-          cellFactory
+          parent
         });
         expect(handler.parent).to.equal(parent);
       });
@@ -191,17 +205,21 @@ describe('@jupyterlab/console', () => {
     describe('#onIOPubMessage()', () => {
       it('should be called when messages come through', async () => {
         const code = 'print("onIOPubMessage:disabled")';
+        const promise = new PromiseDelegate<void>();
         handler.enabled = false;
         let called = false;
         handler.received.connect(() => {
           called = true;
+          promise.resolve(void 0);
         });
         await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
+        await promise.promise;
         expect(called).to.equal(true);
       });
 
       it('should inject relevant cells into the parent', async () => {
         const code = 'print("#onIOPubMessage:enabled")';
+        const promise = new PromiseDelegate<void>();
         handler.enabled = true;
         const parent = handler.parent as TestParent;
         expect(parent.widgets.length).to.equal(0);
@@ -209,28 +227,29 @@ describe('@jupyterlab/console', () => {
         handler.injected.connect(() => {
           expect(parent.widgets.length).to.be.greaterThan(0);
           called = true;
+          promise.resolve(void 0);
         });
         await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
+        await promise.promise;
         expect(called).to.equal(true);
       });
 
       it('should not reject relevant iopub messages', async () => {
         const code = 'print("#onIOPubMessage:relevant")';
+        const promise = new PromiseDelegate<void>();
         let called = false;
         handler.enabled = true;
-        let errored = false;
         handler.rejected.connect(() => {
-          errored = true;
+          promise.reject('rejected relevant iopub message');
         });
         handler.injected.connect((sender, msg) => {
           if (KernelMessage.isStreamMsg(msg)) {
             called = true;
+            promise.resolve(void 0);
           }
         });
         await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
-        if (errored) {
-          throw new Error('rejected relevant iopub message');
-        }
+        await promise.promise;
         expect(called).to.equal(true);
       });
     });

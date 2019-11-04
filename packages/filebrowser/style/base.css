@@ -1,0 +1,310 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-filebrowser-button-height: 28px;
+  --jp-private-filebrowser-button-width: 48px;
+}
+
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-FileBrowser {
+  display: flex;
+  flex-direction: column;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar {
+  border-bottom: none;
+  height: auto;
+  margin: var(--jp-toolbar-header-margin);
+  box-shadow: none;
+}
+
+.jp-BreadCrumbs {
+  flex: 0 0 auto;
+  margin: 4px 12px;
+}
+
+.jp-BreadCrumbs-item {
+  margin: 0px 2px;
+  padding: 0px 2px;
+  border-radius: var(--jp-border-radius);
+  cursor: pointer;
+}
+
+.jp-BreadCrumbs-item:hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-BreadCrumbs-item:first-child {
+  margin-left: 0px;
+}
+
+.jp-BreadCrumbs-item.jp-mod-dropTarget {
+  background-color: var(--jp-brand-color2);
+  opacity: 0.7;
+}
+
+/*-----------------------------------------------------------------------------
+| Buttons
+|----------------------------------------------------------------------------*/
+
+.jp-FileBrowser-toolbar.jp-Toolbar {
+  padding: 0px;
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar {
+  justify-content: space-evenly;
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar .jp-Toolbar-item {
+  flex: 1;
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar .jp-ToolbarButtonComponent {
+  width: 100%;
+}
+
+/*-----------------------------------------------------------------------------
+| DirListing
+|----------------------------------------------------------------------------*/
+
+.jp-DirListing {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  outline: 0;
+}
+
+.jp-DirListing-header {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  z-index: 2;
+}
+
+.jp-DirListing-headerItem {
+  padding: 4px 12px;
+  font-weight: 500;
+}
+
+.jp-DirListing-headerItem:hover {
+  background: var(--jp-layout-color2);
+}
+
+.jp-DirListing-headerItem.jp-id-name {
+  flex: 1 0 84px;
+}
+
+.jp-DirListing-headerItem.jp-id-modified {
+  flex: 0 0 112px;
+  border-left: var(--jp-border-width) solid var(--jp-border-color2);
+  text-align: right;
+}
+
+.jp-DirListing-narrow .jp-id-modified,
+.jp-DirListing-narrow .jp-DirListing-itemModified {
+  display: none;
+}
+
+.jp-DirListing-headerItem.jp-mod-selected {
+  font-weight: 600;
+}
+
+.jp-DirListing-headerItemIcon {
+  height: 16px;
+  width: 16px;
+  background-size: 18px;
+  background-image: 18px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.jp-DirListing-headerItem.jp-mod-selected .jp-DirListing-headerItemIcon {
+  background-image: var(--jp-icon-caretup);
+}
+
+.jp-DirListing-headerItem.jp-mod-selected.jp-mod-descending
+  .jp-DirListing-headerItemIcon {
+  background-image: var(--jp-icon-caretdown);
+}
+
+.jp-DirListing-headerItem.jp-mod-selected.jp-id-name
+  .jp-DirListing-headerItemIcon {
+  float: right;
+}
+
+.jp-DirListing-headerItem.jp-mod-selected.jp-id-modified
+  .jp-DirListing-headerItemIcon {
+  float: left;
+}
+
+/* increase specificity to override bundled default */
+.jp-DirListing-content {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  overflow: auto;
+  background-color: var(--jp-layout-color1);
+}
+
+/* Style the directory listing content when a user drops a file to upload */
+.jp-DirListing.jp-mod-native-drop .jp-DirListing-content {
+  outline: 5px dashed rgba(128, 128, 128, 0.5);
+  outline-offset: -10px;
+  cursor: copy;
+}
+
+.jp-DirListing-item {
+  display: flex;
+  flex-direction: row;
+  padding: 4px 12px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.jp-DirListing-item.jp-mod-selected {
+  color: white;
+  background: var(--jp-brand-color1);
+}
+
+.jp-DirListing-item.jp-mod-dropTarget {
+  background: var(--jp-brand-color3);
+}
+
+.jp-DirListing-item:hover:not(.jp-mod-selected) {
+  background: var(--jp-layout-color2);
+}
+
+.jp-DirListing-itemIcon {
+  flex: 0 0 20px;
+  margin-right: 4px;
+}
+
+.jp-DirListing-itemText {
+  flex: 1 0 64px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+
+.jp-DirListing-itemModified {
+  flex: 0 0 125px;
+  text-align: right;
+}
+
+.jp-DirListing-editor {
+  flex: 1 0 64px;
+  outline: none;
+  border: none;
+}
+
+.jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon:before {
+  color: limegreen;
+  content: '\25CF';
+  font-size: 8px;
+  position: absolute;
+  left: -8px;
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-FileIcon {
+  background-image: var(--jp-icon-file-selected);
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-TextEditorIcon {
+  background-image: var(--jp-icon-text-editor-selected);
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-NotebookIcon {
+  background-image: var(--jp-icon-notebook-selected);
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-FolderIcon {
+  background-image: var(--jp-icon-folder-selected);
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-MarkdownIcon {
+  background-image: var(--jp-icon-markdown-selected);
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-PythonIcon {
+  background-image: var(--jp-icon-python-selected);
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-JsonIcon {
+  background-image: var(--jp-icon-json-selected);
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-SpreadsheetIcon {
+  background-image: var(--jp-icon-spreadsheet-selected);
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-RKernelIcon {
+  background-image: var(--jp-icon-r-selected);
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-YamlIcon {
+  background-image: var(--jp-icon-yaml-selected);
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemIcon.jp-ImageIcon {
+  background-image: var(--jp-icon-image-selected);
+}
+
+.jp-DirListing-item.p-mod-drag-image,
+.jp-DirListing-item.jp-mod-selected.p-mod-drag-image {
+  font-size: var(--jp-ui-font-size1);
+  padding-left: 4px;
+  margin-left: 4px;
+  width: 160px;
+  background-color: var(--jp-ui-inverse-font-color2);
+  box-shadow: var(--jp-elevation-z2);
+  border-radius: 0px;
+  color: var(--jp-ui-font-color1);
+  transform: translateX(-40%) translateY(-58%);
+}
+
+.jp-DirListing-deadSpace {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  overflow: auto;
+  background-color: var(--jp-layout-color1);
+}
+
+.jp-Document {
+  min-width: 120px;
+  min-height: 120px;
+  outline: none;
+}
+
+.jp-FileDialog.jp-mod-conflict input {
+  color: red;
+}
+
+.jp-FileDialog .jp-new-name-title {
+  margin-top: 12px;
+}

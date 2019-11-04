@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>{{page_config['appName']}}</title>
+  <title>{{page_config['appName'] | e}}</title>
 </head>
 <body>
-  <script id='jupyter-config-data' type="application/json">{
-  {% for key, value in page_config.items() -%}
-  "{{ key }}": "{{ value }}",
-  {% endfor -%}
-  "baseUrl": "{{base_url}}",
-  "wsUrl": "{{ws_url}}"
- }</script>
-  <script src="{{page_config['publicUrl']}}bundle.js" main="index"></script>
+    {# Copy so we do not modify the page_config with updates. #}
+    {% set page_config_full = page_config.copy() %}
+    
+    {# Set a dummy variable - we just want the side effect of the update. #}
+    {% set _ = page_config_full.update(baseUrl=base_url, wsUrl=ws_url) %}
+    
+      <script id="jupyter-config-data" type="application/json">
+        {{ page_config_full | tojson }}
+      </script>
+  <script src="{{page_config['fullStaticUrl'] | e}}/bundle.js" main="index"></script>
 
   <script type="text/javascript">
     /* Remove token from URL. */

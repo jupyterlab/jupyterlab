@@ -1,98 +1,28 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ReadonlyJSONObject,
-  ReadonlyJSONValue,
-  Token
-} from '@phosphor/coreutils';
+import { ReadonlyJSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { IDataConnector } from './interfaces';
 
-/* tslint:disable */
-/**
- * The default state database token.
- */
-export const IStateDB = new Token<IStateDB>('@jupyterlab/coreutils:IStateDB');
-/* tslint:enable */
-
-/**
- * An object which holds an id/value pair.
- */
-export interface IStateItem {
-  /**
-   * The identifier key for a state item.
-   */
-  id: string;
-
-  /**
-   * The data value for a state item.
-   */
-  value: ReadonlyJSONValue;
-}
-
-/**
- * The description of a state database.
- */
-export interface IStateDB extends IDataConnector<ReadonlyJSONValue> {
-  /**
-   * The maximum allowed length of the data after it has been serialized.
-   */
-  readonly maxLength: number;
-
-  /**
-   * The namespace prefix for all state database entries.
-   *
-   * #### Notes
-   * This value should be set at instantiation and will only be used
-   * internally by a state database. That means, for example, that an
-   * app could have multiple, mutually exclusive state databases.
-   */
-  readonly namespace: string;
-
-  /**
-   * Retrieve all the saved bundles for a namespace.
-   *
-   * @param namespace - The namespace to retrieve.
-   *
-   * @returns A promise that bears a collection data payloads for a namespace.
-   *
-   * #### Notes
-   * Namespaces are entirely conventional entities. The `id` values of stored
-   * items in the state database are formatted: `'namespace:identifier'`, which
-   * is the same convention that command identifiers in JupyterLab use as well.
-   *
-   * If there are any errors in retrieving the data, they will be logged to the
-   * console in order to optimistically return any extant data without failing.
-   * This promise will always succeed.
-   */
-  fetchNamespace(namespace: string): Promise<IStateItem[]>;
-
-  /**
-   * Return a serialized copy of the state database's entire contents.
-   *
-   * @returns A promise that bears the database contents as JSON.
-   */
-  toJSON(): Promise<ReadonlyJSONObject>;
-}
+import { IStateDB } from './tokens';
 
 /**
  * The default concrete implementation of a state database.
  */
-export class StateDB implements IStateDB {
+export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
+  implements IStateDB<T> {
   /**
    * Create a new state database.
    *
    * @param options - The instantiation options for a state database.
    */
-  constructor(options: StateDB.IOptions) {
-    const { namespace, transform, windowName } = options;
+  constructor(options: StateDB.IOptions = {}) {
+    const { connector, transform } = options;
 
-    this.namespace = namespace;
-
-    this._window = windowName || '';
+    this._connector = connector || new StateDB.Connector();
     this._ready = (transform || Promise.resolve(null)).then(transformation => {
       if (!transformation) {
         return;
@@ -104,14 +34,11 @@ export class StateDB implements IStateDB {
         case 'cancel':
           return;
         case 'clear':
-          this._clear();
-          return;
+          return this._clear();
         case 'merge':
-          this._merge(contents || {});
-          return;
+          return this._merge(contents || {});
         case 'overwrite':
-          this._overwrite(contents || {});
-          return;
+          return this._overwrite(contents || {});
         default:
           return;
       }
@@ -126,33 +53,11 @@ export class StateDB implements IStateDB {
   }
 
   /**
-   * The maximum allowed length of the data after it has been serialized.
-   */
-  readonly maxLength: number = 2000;
-
-  /**
-   * The namespace prefix for all state database entries.
-   *
-   * #### Notes
-   * This value should be set at instantiation and will only be used internally
-   * by a state database. That means, for example, that an app could have
-   * multiple, mutually exclusive state databases.
-   */
-  readonly namespace: string;
-
-  /**
    * Clear the entire database.
    */
-  clear(silent = false): Promise<void> {
-    return this._ready.then(() => {
-      this._clear();
-
-      if (silent) {
-        return;
-      }
-
-      this._changed.emit({ id: null, type: 'clear' });
-    });
+  async clear(): Promise<void> {
+    await this._ready;
+    await this._clear();
   }
 
   /**
@@ -167,19 +72,21 @@ export class StateDB implements IStateDB {
    * `'namespace:identifier'`, which is the same convention that command
    * identifiers in JupyterLab use as well. While this is not a technical
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `fetchNamespace()` method.
+   * using the `list(namespace: string)` method.
    *
    * The promise returned by this method may be rejected if an error occurs in
-   * retrieving the data. Non-existence of an `id` will succeed with `null`.
+   * retrieving the data. Non-existence of an `id` will succeed with the `value`
+   * `undefined`.
    */
-  fetch(id: string): Promise<ReadonlyJSONValue | undefined> {
-    return this._ready.then(() => this._fetch(id));
+  async fetch(id: string): Promise<T> {
+    await this._ready;
+    return this._fetch(id);
   }
 
   /**
    * Retrieve all the saved bundles for a namespace.
    *
-   * @param namespace - The namespace to retrieve.
+   * @param filter - The namespace prefix to retrieve.
    *
    * @returns A promise that bears a collection of payloads for a namespace.
    *
@@ -192,13 +99,9 @@ export class StateDB implements IStateDB {
    * console in order to optimistically return any extant data without failing.
    * This promise will always succeed.
    */
-  fetchNamespace(namespace: string): Promise<IStateItem[]> {
-    return this._ready.then(() => {
-      const prefix = `${this._window}:${this.namespace}:`;
-      const mask = (key: string) => key.replace(prefix, '');
-
-      return StateDB.fetchNamespace(`${prefix}${namespace}:`, mask);
-    });
+  async list(namespace: string): Promise<{ ids: string[]; values: T[] }> {
+    await this._ready;
+    return this._list(namespace);
   }
 
   /**
@@ -208,11 +111,10 @@ export class StateDB implements IStateDB {
    *
    * @returns A promise that is rejected if remove fails and succeeds otherwise.
    */
-  remove(id: string): Promise<void> {
-    return this._ready.then(() => {
-      this._remove(id);
-      this._changed.emit({ id, type: 'remove' });
-    });
+  async remove(id: string): Promise<void> {
+    await this._ready;
+    await this._remove(id);
+    this._changed.emit({ id, type: 'remove' });
   }
 
   /**
@@ -229,120 +131,97 @@ export class StateDB implements IStateDB {
    * `'namespace:identifier'`, which is the same convention that command
    * identifiers in JupyterLab use as well. While this is not a technical
    * requirement for `fetch()`, `remove()`, and `save()`, it *is* necessary for
-   * using the `fetchNamespace()` method.
+   * using the `list(namespace: string)` method.
    */
-  save(id: string, value: ReadonlyJSONValue): Promise<void> {
-    return this._ready.then(() => {
-      this._save(id, value);
-      this._changed.emit({ id, type: 'save' });
-    });
+  async save(id: string, value: T): Promise<void> {
+    await this._ready;
+    await this._save(id, value);
+    this._changed.emit({ id, type: 'save' });
   }
 
   /**
    * Return a serialized copy of the state database's entire contents.
    *
-   * @returns A promise that bears the database contents as JSON.
+   * @returns A promise that resolves with the database contents as JSON.
    */
-  toJSON(): Promise<ReadonlyJSONObject> {
-    return this._ready.then(() => {
-      const prefix = `${this._window}:${this.namespace}:`;
-      const mask = (key: string) => key.replace(prefix, '');
+  async toJSON(): Promise<{ readonly [id: string]: T }> {
+    await this._ready;
 
-      return StateDB.toJSON(prefix, mask);
-    });
+    const { ids, values } = await this._list();
+
+    return values.reduce(
+      (acc, val, idx) => {
+        acc[ids[idx]] = val;
+        return acc;
+      },
+      {} as { [id: string]: T }
+    );
   }
 
   /**
    * Clear the entire database.
-   *
-   * #### Notes
-   * Unlike the public `clear` method, this method is synchronous.
    */
-  private _clear(): void {
-    const { localStorage } = window;
-    const prefix = `${this._window}:${this.namespace}:`;
-    let i = localStorage.length;
-
-    while (i) {
-      let key = localStorage.key(--i);
-
-      if (key && key.indexOf(prefix) === 0) {
-        localStorage.removeItem(key);
-      }
-    }
+  private async _clear(): Promise<void> {
+    await Promise.all((await this._list()).ids.map(id => this._remove(id)));
   }
 
   /**
    * Fetch a value from the database.
-   *
-   * #### Notes
-   * Unlike the public `fetch` method, this method is synchronous.
    */
-  private _fetch(id: string): ReadonlyJSONValue | undefined {
-    const key = `${this._window}:${this.namespace}:${id}`;
-    const value = window.localStorage.getItem(key);
+  private async _fetch(id: string): Promise<T | undefined> {
+    const value = await this._connector.fetch(id);
 
     if (value) {
-      const envelope = JSON.parse(value) as Private.Envelope;
-
-      return envelope.v;
+      return (JSON.parse(value) as Private.Envelope).v as T;
     }
+  }
 
-    return undefined;
+  /**
+   * Fetch a list from the database.
+   */
+  private async _list(query?: string): Promise<{ ids: string[]; values: T[] }> {
+    const { ids, values } = await this._connector.list(query);
+
+    return {
+      ids,
+      values: values.map(val => (JSON.parse(val) as Private.Envelope).v as T)
+    };
   }
 
   /**
    * Merge data into the state database.
    */
-  private _merge(contents: ReadonlyJSONObject): void {
-    Object.keys(contents).forEach(key => {
-      this._save(key, contents[key]);
-    });
+  private async _merge(contents: { [id: string]: T }): Promise<void> {
+    await Promise.all(
+      Object.keys(contents).map(key => this._save(key, contents[key]))
+    );
   }
 
   /**
    * Overwrite the entire database with new contents.
    */
-  private _overwrite(contents: ReadonlyJSONObject): void {
-    this._clear();
-    this._merge(contents);
+  private async _overwrite(contents: { [id: string]: T }): Promise<void> {
+    await this._clear();
+    await this._merge(contents);
   }
 
   /**
    * Remove a key in the database.
-   *
-   * #### Notes
-   * Unlike the public `remove` method, this method is synchronous.
    */
-  private _remove(id: string): void {
-    const key = `${this._window}:${this.namespace}:${id}`;
-
-    window.localStorage.removeItem(key);
+  private async _remove(id: string): Promise<void> {
+    return this._connector.remove(id);
   }
 
   /**
    * Save a key and its value in the database.
-   *
-   * #### Notes
-   * Unlike the public `save` method, this method is synchronous.
    */
-  private _save(id: string, value: ReadonlyJSONValue): void {
-    const key = `${this._window}:${this.namespace}:${id}`;
-    const envelope: Private.Envelope = { v: value };
-    const serialized = JSON.stringify(envelope);
-    const length = serialized.length;
-    const max = this.maxLength;
-
-    if (length > max) {
-      throw new Error(`Data length (${length}) exceeds maximum (${max})`);
-    }
-
-    window.localStorage.setItem(key, serialized);
+  private async _save(id: string, value: T): Promise<void> {
+    return this._connector.save(id, JSON.stringify({ v: value }));
   }
 
   private _changed = new Signal<this, StateDB.Change>(this);
+  private _connector: IDataConnector<string>;
   private _ready: Promise<void>;
-  private _window: string;
 }
 
 /**
@@ -387,9 +266,9 @@ export namespace StateDB {
    */
   export interface IOptions {
     /**
-     * The namespace prefix for all state database entries.
+     * Optional string key/value connector. Defaults to in-memory connector.
      */
-    namespace: string;
+    connector?: IDataConnector<string>;
 
     /**
      * An optional promise that resolves with a data transformation that is
@@ -397,80 +276,50 @@ export namespace StateDB {
      * client requests.
      */
     transform?: Promise<DataTransform>;
-
-    /**
-     * An optional name for the application window.
-     *
-     * #### Notes
-     * In environments where multiple windows can instantiate a state database,
-     * a window name is necessary to prefix all keys that are stored within the
-     * local storage that is shared by all windows. In JupyterLab, this window
-     * name is generated by the `IWindowResolver` extension.
-     */
-    windowName?: string;
   }
 
   /**
-   * Retrieve all the saved bundles for a given namespace in local storage.
-   *
-   * @param prefix - The namespace to retrieve.
-   *
-   * @param mask - Optional mask function to transform each key retrieved.
-   *
-   * @returns A collection of data payloads for a given prefix.
-   *
-   * #### Notes
-   * If there are any errors in retrieving the data, they will be logged to the
-   * console in order to optimistically return any extant data without failing.
+   * An in-memory string key/value data connector.
    */
-  export function fetchNamespace(
-    namespace: string,
-    mask: (key: string) => string = key => key
-  ): IStateItem[] {
-    const { localStorage } = window;
-
-    let items: IStateItem[] = [];
-    let i = localStorage.length;
-
-    while (i) {
-      let key = localStorage.key(--i);
-
-      if (key && key.indexOf(namespace) === 0) {
-        let value = localStorage.getItem(key);
-
-        try {
-          let envelope = JSON.parse(value) as Private.Envelope;
-
-          items.push({
-            id: mask(key),
-            value: envelope ? envelope.v : undefined
-          });
-        } catch (error) {
-          console.warn(error);
-          localStorage.removeItem(key);
-        }
-      }
+  export class Connector implements IDataConnector<string> {
+    /**
+     * Retrieve an item from the data connector.
+     */
+    async fetch(id: string): Promise<string> {
+      return this._storage[id];
     }
 
-    return items;
-  }
+    /**
+     * Retrieve the list of items available from the data connector.
+     */
+    async list(query = ''): Promise<{ ids: string[]; values: string[] }> {
+      return Object.keys(this._storage).reduce(
+        (acc, val) => {
+          if (val && val.indexOf(query) === 0) {
+            acc.ids.push(val);
+            acc.values.push(this._storage[val]);
+          }
+          return acc;
+        },
+        { ids: [], values: [] }
+      );
+    }
 
-  /**
-   * Return a serialized copy of a namespace's contents from local storage.
-   *
-   * @returns The namespace contents as JSON.
-   */
-  export function toJSON(
-    namespace: string,
-    mask: (key: string) => string = key => key
-  ): ReadonlyJSONObject {
-    return fetchNamespace(namespace, mask).reduce(
-      (acc, val) => {
-        acc[val.id] = val.value;
-        return acc;
-      },
-      {} as Partial<ReadonlyJSONObject>
-    );
+    /**
+     * Remove a value using the data connector.
+     */
+    async remove(id: string): Promise<void> {
+      delete this._storage[id];
+    }
+
+    /**
+     * Save a value using the data connector.
+     */
+    async save(id: string, value: string): Promise<void> {
+      this._storage[id] = value;
+    }
+
+    private _storage: { [key: string]: string } = {};
   }
 }
 

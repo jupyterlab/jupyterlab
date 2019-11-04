@@ -39,9 +39,7 @@ export class CompletionConnector extends DataConnector<
     return Promise.all([
       this._kernel.fetch(request),
       this._context.fetch(request)
-    ]).then(([kernelReply, contextReply]) => {
-      return Private.mergeReplies(kernelReply, contextReply);
-    });
+    ]).then(([kernel, context]) => Private.mergeReplies(kernel, context));
   }
 
   private _kernel: KernelConnector;
@@ -64,6 +62,18 @@ export namespace CompletionConnector {
 namespace Private {
   /**
    * Merge results from kernel and context completions.
+   *
+   * @param kernel - The kernel reply being merged.
+   *
+   * @param context - The context reply being merged.
+   *
+   * @returns A reply with a superset of kernel and context matches.
+   *
+   * #### Notes
+   * The kernel and context matches are merged with a preference for kernel
+   * results. Both lists are known to contain unique, non-repeating items;
+   * so this function returns a non-repeating superset by filtering out
+   * duplicates from the context list that appear in the kernel list.
    */
   export function mergeReplies(
     kernel: CompletionHandler.IReply,
@@ -76,11 +86,21 @@ namespace Private {
       return kernel;
     }
 
-    // They both have matches, so merge them, with a preference for the
-    // kernel result.
-    let matches = kernel.matches.slice();
+    // Populate the result with a copy of the kernel matches.
+    const matches = kernel.matches.slice();
+
+    // Cache all the kernel matches in a memo.
+    const memo = matches.reduce(
+      (acc, val) => {
+        acc[val] = null;
+        return acc;
+      },
+      {} as { [key: string]: string }
+    );
+
+    // Add each context match that is not in the memo to the result.
     context.matches.forEach(match => {
-      if (matches.indexOf(match) === -1) {
+      if (!(match in memo)) {
         matches.push(match);
       }
     });

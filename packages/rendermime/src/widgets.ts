@@ -63,15 +63,32 @@ export abstract class RenderedCommon extends Widget
    * @param model - The mime model to render.
    *
    * @returns A promise which resolves when rendering is complete.
+   *
+   * #### Notes
+   * If the DOM node for this widget already has content, it is emptied
+   * before rendering. Subclasses that do not want this behavior
+   * (if, for instance, they are using DOM diffing), should override
+   * this method and not call `super.renderModel()`.
    */
-  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+  async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     // TODO compare model against old model for early bail?
+
+    // Empty any existing content in the node from previous renders
+    while (this.node.firstChild) {
+      this.node.removeChild(this.node.firstChild);
+    }
 
     // Toggle the trusted class on the widget.
     this.toggleClass('jp-mod-trusted', model.trusted);
 
     // Render the actual content.
-    return this.render(model);
+    await this.render(model);
+
+    // Handle the fragment identifier if given.
+    const { fragment } = model.metadata;
+    if (fragment) {
+      this.setFragment(fragment as string);
+    }
   }
 
   /**
@@ -82,6 +99,15 @@ export abstract class RenderedCommon extends Widget
    * @returns A promise which resolves when rendering is complete.
    */
   abstract render(model: IRenderMime.IMimeModel): Promise<void>;
+
+  /**
+   * Set the URI fragment identifier.
+   *
+   * @param fragment - The URI fragment identifier.
+   */
+  protected setFragment(fragment: string) {
+    /* no-op */
+  }
 }
 
 /**
@@ -96,6 +122,18 @@ export abstract class RenderedHTMLCommon extends RenderedCommon {
   constructor(options: IRenderMime.IRendererOptions) {
     super(options);
     this.addClass('jp-RenderedHTMLCommon');
+  }
+
+  setFragment(fragment: string) {
+    let el;
+    try {
+      el = this.node.querySelector(fragment);
+    } catch (error) {
+      console.warn('Unable to set URI fragment identifier.', error);
+    }
+    if (el) {
+      el.scrollIntoView();
+    }
   }
 }
 
@@ -327,6 +365,7 @@ export class RenderedText extends RenderedCommon {
   render(model: IRenderMime.IMimeModel): Promise<void> {
     return renderers.renderText({
       host: this.node,
+      sanitizer: this.sanitizer,
       source: String(model.data[this.mimeType])
     });
   }
@@ -356,6 +395,7 @@ export class RenderedJavaScript extends RenderedCommon {
   render(model: IRenderMime.IMimeModel): Promise<void> {
     return renderers.renderText({
       host: this.node,
+      sanitizer: this.sanitizer,
       source: 'JavaScript output is disabled in JupyterLab'
     });
   }

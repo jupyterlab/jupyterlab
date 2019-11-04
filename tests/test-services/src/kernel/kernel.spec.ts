@@ -7,15 +7,15 @@ import { UUID } from '@phosphor/coreutils';
 
 import { toArray } from '@phosphor/algorithm';
 
-import { Kernel } from '@jupyterlab/services/src/kernel';
+import { Kernel } from '@jupyterlab/services';
+
+import { expectFailure, testEmission } from '@jupyterlab/testutils';
 
 import {
-  expectFailure,
   KernelTester,
   makeSettings,
   PYTHON_SPEC,
-  getRequestHandler,
-  testEmission
+  getRequestHandler
 } from '../utils';
 
 const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
@@ -144,7 +144,7 @@ describe('kernel', () => {
       const emission = testEmission(kernel.statusChanged, {
         find: (k, status) => status === 'reconnecting'
       });
-      tester.close();
+      await tester.close();
       await emission;
     });
   });
@@ -163,6 +163,24 @@ describe('kernel', () => {
       const kernel = Kernel.connectTo(defaultKernel.model, serverSettings);
       expect(kernel.id).to.equal(id);
       kernel.dispose();
+    });
+
+    it('should turn off comm handling in the new connection if it was enabled in first kernel', async () => {
+      const kernel = await Kernel.startNew();
+      expect(kernel.handleComms).to.be.true;
+      const kernel2 = Kernel.connectTo(kernel.model);
+      expect(kernel2.handleComms).to.be.false;
+      kernel.dispose();
+      kernel2.dispose();
+    });
+
+    it('should turn on comm handling in the new connection if it was disabled in all other connections', async () => {
+      const kernel = await Kernel.startNew({ handleComms: false });
+      expect(kernel.handleComms).to.be.false;
+      const kernel2 = Kernel.connectTo(defaultKernel.model);
+      expect(kernel2.handleComms).to.be.true;
+      kernel.dispose();
+      kernel2.dispose();
     });
   });
 
@@ -279,6 +297,42 @@ describe('kernel', () => {
       const serverSettings = getRequestHandler(201, {});
       const promise = Kernel.getSpecs(serverSettings);
       await expectFailure(promise, 'Invalid response: 201 Created');
+    });
+
+    it('should handle metadata', async () => {
+      const PYTHON_SPEC_W_MD = JSON.parse(JSON.stringify(PYTHON_SPEC));
+      PYTHON_SPEC_W_MD.spec.metadata = { some_application: { key: 'value' } };
+      const serverSettings = getRequestHandler(200, {
+        default: 'python',
+        kernelspecs: { python: PYTHON_SPEC_W_MD }
+      });
+      const specs = await Kernel.getSpecs(serverSettings);
+
+      expect(specs.kernelspecs['python']).to.have.property('metadata');
+      const metadata = specs.kernelspecs['python'].metadata;
+      expect(metadata).to.have.property('some_application');
+      expect((metadata as any).some_application).to.have.property(
+        'key',
+        'value'
+      );
+    });
+
+    it('should handle env values', async () => {
+      const PYTHON_SPEC_W_ENV = JSON.parse(JSON.stringify(PYTHON_SPEC));
+      PYTHON_SPEC_W_ENV.spec.env = {
+        SOME_ENV: 'some_value',
+        LANG: 'en_US.UTF-8'
+      };
+      const serverSettings = getRequestHandler(200, {
+        default: 'python',
+        kernelspecs: { python: PYTHON_SPEC_W_ENV }
+      });
+      const specs = await Kernel.getSpecs(serverSettings);
+
+      expect(specs.kernelspecs['python']).to.have.property('env');
+      const env = specs.kernelspecs['python'].env;
+      expect(env).to.have.property('SOME_ENV', 'some_value');
+      expect(env).to.have.property('LANG', 'en_US.UTF-8');
     });
   });
 });

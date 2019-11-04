@@ -1,5 +1,5 @@
 jobs:
-  - job: 'Travis'
+  - job: 'Linux'
     pool:
       vmImage: 'ubuntu-16.04'
     variables:
@@ -15,9 +15,8 @@ jobs:
         Python:
           group: 'python'
           testResultsFiles: 'junit.xml'
-        CLI:
-          group: 'cli'
-          python.version: '3.5'
+        Usage:
+          group: 'usage'
         Docs:
           group: 'docs'
 
@@ -31,13 +30,13 @@ jobs:
         displayName: 'install'
         inputs:
           targetType: 'filePath'
-          filePath: ./scripts/travis_install.sh
+          filePath: ./scripts/ci_install.sh
       - script: python -m pip install virtualenv
       - task: Bash@3
         displayName: 'script'
         inputs:
           targetType: 'filePath'
-          filePath: ./scripts/travis_script.sh
+          filePath: ./scripts/ci_script.sh
       - task: PublishTestResults@2
         displayName: 'publish test results'
         condition: variables['testResultsFiles']
@@ -45,13 +44,8 @@ jobs:
           testResultsFiles: '$(testResultsFiles)'
           testRunTitle: 'Linux - $(group)'
           mergeTestResults: true
-      - task: Bash@3
-        displayName: 'after_success'
-        inputs:
-          targetType: 'filePath'
-          filePath: ./scripts/travis_after_success.sh
 
-  - job: 'Appveyor'
+  - job: 'Windows'
     pool:
       vmImage: 'vs2017-win2016'
     variables:
@@ -74,6 +68,8 @@ jobs:
           versionSpec: '$(python.version)'
           architecture: 'x64'
 
+      - script: powershell Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem -Name LongPathsEnabled -Value 1
+        displayName: 'set long path'
       - script: 'python -m pip install -U pip'
         displayName: 'upgrade pip'
       - script: 'pip install --upgrade -e ".[test]"'

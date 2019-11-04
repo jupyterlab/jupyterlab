@@ -36,10 +36,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
     this._cellOrder = modelDB.createList<string>('cellOrder');
     this._cellMap = new ObservableMap<ICellModel>();
 
-    this._cellOrder.changed.connect(
-      this._onOrderChanged,
-      this
-    );
+    this._cellOrder.changed.connect(this._onOrderChanged, this);
   }
 
   type: 'List';

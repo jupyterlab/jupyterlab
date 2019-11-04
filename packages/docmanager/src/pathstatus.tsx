@@ -7,7 +7,7 @@ import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
-import { IDocumentManager } from './manager';
+import { IDocumentManager } from './tokens';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 

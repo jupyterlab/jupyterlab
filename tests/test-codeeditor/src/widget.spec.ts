@@ -9,7 +9,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { simulate } from 'simulate-event';
 
-import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor/src';
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 

@@ -1,15 +1,113 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { ISettingRegistry, SettingRegistry } from '@jupyterlab/coreutils';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { JSONObject, JSONValue } from '@phosphor/coreutils';
+import {
+  JSONExt,
+  ReadonlyJSONObject,
+  ReadonlyJSONValue
+} from '@phosphor/coreutils';
 
 import { DisposableSet, IDisposable } from '@phosphor/disposable';
+
+/**
+ * The ASCII record separator character.
+ */
+const RECORD_SEPARATOR = String.fromCharCode(30);
+
+/**
+ * This plugin and its schema are deprecated and will be removed in a future
+ * version of JupyterLab. This plugin will load old keyboard shortcuts and add
+ * them to the new keyboard shortcuts plugin below before removing the old
+ * shortcuts.
+ */
+const plugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/shortcuts-extension:plugin',
+  requires: [ISettingRegistry],
+  activate: async (app: JupyterFrontEnd, registry: ISettingRegistry) => {
+    try {
+      const old = await registry.load(plugin.id);
+      const settings = await registry.load(shortcuts.id);
+      const keys = Object.keys(old.user);
+      const deprecated: ISettingRegistry.IShortcut[] = [];
+      const port = (deprecated: ISettingRegistry.IShortcut[]) => {
+        if (!deprecated.length) {
+          return;
+        }
+
+        const memo: {
+          [keys: string]: { [selector: string]: null };
+        } = {};
+        const shortcuts = settings.user
+          .shortcuts as ISettingRegistry.IShortcut[];
+
+        // Add the current shortcuts into the memo.
+        shortcuts.forEach(shortcut => {
+          const keys = shortcut.keys.join(RECORD_SEPARATOR);
+          const { selector } = shortcut;
+
+          if (!keys) {
+            return;
+          }
+          if (!(keys in memo)) {
+            memo[keys] = {};
+          }
+          if (!(selector in memo[keys])) {
+            memo[keys][selector] = null;
+          }
+        });
+
+        // Add deprecated shortcuts that don't exist to the current list.
+        deprecated.forEach(shortcut => {
+          const { selector } = shortcut;
+          const keys = shortcut.keys.join(RECORD_SEPARATOR);
+
+          if (!(keys in memo)) {
+            memo[keys] = {};
+          }
+          if (!(selector in memo[keys])) {
+            memo[keys][selector] = null;
+            shortcuts.push(shortcut);
+          }
+        });
+
+        // Save the reconciled list.
+        void settings.set('shortcuts', shortcuts);
+      };
+
+      if (!keys.length) {
+        return;
+      }
+      keys.forEach(key => {
+        const { command, keys, selector } = old.user[
+          key
+        ] as ISettingRegistry.IShortcut;
+
+        // Only port shortcuts over if they are valid.
+        if (command && selector && keys && keys.length) {
+          deprecated.push({ command, keys, selector });
+        }
+      });
+
+      // Port the deprecated shortcuts to the new plugin.
+      port(deprecated);
+
+      // Remove all old shortcuts;
+      void old.save('{}');
+    } catch (error) {
+      console.error(`Loading ${plugin.id} failed.`, error);
+    }
+  },
+  autoStart: true
+};
 
 /**
  * The default shortcuts extension.
@@ -40,31 +138,132 @@ import { DisposableSet, IDisposable } from '@phosphor/disposable';
  * (`'*'`) selector. For almost any use case where a global keyboard shortcut is
  * required, using the `'body'` selector is more appropriate.
  */
-const plugin: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/shortcuts-extension:plugin',
+const shortcuts: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/shortcuts-extension:shortcuts',
   requires: [ISettingRegistry],
-  activate: (app: JupyterLab, settingRegistry: ISettingRegistry): void => {
+  activate: async (app: JupyterFrontEnd, registry: ISettingRegistry) => {
     const { commands } = app;
+    let canonical: ISettingRegistry.ISchema;
+    let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
 
-    settingRegistry
-      .load(plugin.id)
-      .then(settings => {
+    /**
+     * Populate the plugin's schema defaults.
+     */
+    function populate(schema: ISettingRegistry.ISchema) {
+      const commands = app.commands.listCommands().join('\n');
+
+      loaded = {};
+      schema.properties.shortcuts.default = Object.keys(registry.plugins)
+        .map(plugin => {
+          let shortcuts =
+            registry.plugins[plugin].schema['jupyter.lab.shortcuts'] || [];
+          loaded[plugin] = shortcuts;
+          return shortcuts;
+        })
+        .reduce((acc, val) => acc.concat(val), [])
+        .sort((a, b) => a.command.localeCompare(b.command));
+      schema.properties.shortcuts.title =
+        'List of Commands (followed by shortcuts)';
+
+      const disableShortcutInstructions = `Note: To disable a system default shortcut,
+copy it to User Preferences and add the
+"disabled" key, for example:
+{
+    "command": "application:activate-next-tab",
+    "keys": [
+        "Ctrl Shift ]"
+    ],
+    "selector": "body",
+    "disabled": true
+}`;
+      schema.properties.shortcuts.description = `${commands}
+
+${disableShortcutInstructions}
+
+List of Keyboard Shortcuts`;
+    }
+
+    registry.pluginChanged.connect(async (sender, plugin) => {
+      if (plugin !== shortcuts.id) {
+        // If the plugin changed its shortcuts, reload everything.
+        let oldShortcuts = loaded[plugin];
+        let newShortcuts =
+          registry.plugins[plugin].schema['jupyter.lab.shortcuts'] || [];
+        if (
+          oldShortcuts === undefined ||
+          !JSONExt.deepEqual(oldShortcuts, newShortcuts)
+        ) {
+          canonical = null;
+          await registry.reload(shortcuts.id);
+        }
+      }
+    });
+
+    // Transform the plugin object to return different schema than the default.
+    registry.transform(shortcuts.id, {
+      compose: plugin => {
+        // Only override the canonical schema the first time.
+        if (!canonical) {
+          canonical = JSONExt.deepCopy(plugin.schema);
+          populate(canonical);
+        }
+
+        const defaults = canonical.properties.shortcuts.default;
+        const user = {
+          shortcuts: ((plugin.data && plugin.data.user) || {}).shortcuts || []
+        };
+        const composite = {
+          shortcuts: SettingRegistry.reconcileShortcuts(
+            defaults,
+            user.shortcuts as ISettingRegistry.IShortcut[]
+          )
+        };
+
+        plugin.data = { composite, user };
+
+        return plugin;
+      },
+      fetch: plugin => {
+        // Only override the canonical schema the first time.
+        if (!canonical) {
+          canonical = JSONExt.deepCopy(plugin.schema);
+          populate(canonical);
+        }
+
+        return {
+          data: plugin.data,
+          id: plugin.id,
+          raw: plugin.raw,
+          schema: canonical,
+          version: plugin.version
+        };
+      }
+    });
+
+    try {
+      // Repopulate the canonical variable after the setting registry has
+      // preloaded all initial plugins.
+      canonical = null;
+
+      const settings = await registry.load(shortcuts.id);
+
+      Private.loadShortcuts(commands, settings.composite);
+      settings.changed.connect(() => {
         Private.loadShortcuts(commands, settings.composite);
-        settings.changed.connect(() => {
-          Private.loadShortcuts(commands, settings.composite);
-        });
-      })
-      .catch((reason: Error) => {
-        console.error('Loading shortcut settings failed.', reason.message);
       });
+    } catch (error) {
+      console.error(`Loading ${shortcuts.id} failed.`, error);
+    }
   },
   autoStart: true
 };
 
 /**
- * Export the plugin as default.
+ * Export the plugins as default.
  */
-export default plugin;
+const plugins: JupyterFrontEndPlugin<any>[] = [plugin, shortcuts];
+
+export default plugins;
 
 /**
  * A namespace for private module data.
@@ -80,13 +279,15 @@ namespace Private {
    */
   export function loadShortcuts(
     commands: CommandRegistry,
-    composite: JSONObject
+    composite: ReadonlyJSONObject
   ): void {
+    const shortcuts = composite.shortcuts as ISettingRegistry.IShortcut[];
+
     if (disposables) {
       disposables.dispose();
     }
-    disposables = Object.keys(composite).reduce((acc, val): DisposableSet => {
-      const options = normalizeOptions(composite[val]);
+    disposables = shortcuts.reduce((acc, val): DisposableSet => {
+      const options = normalizeOptions(val);
 
       if (options) {
         acc.add(commands.addKeyBinding(options));
@@ -100,7 +301,7 @@ namespace Private {
    * Normalize potential keyboard shortcut options.
    */
   function normalizeOptions(
-    value: JSONValue | Partial<CommandRegistry.IKeyBindingOptions>
+    value: ReadonlyJSONValue | Partial<CommandRegistry.IKeyBindingOptions>
   ): CommandRegistry.IKeyBindingOptions | undefined {
     if (!value || typeof value !== 'object') {
       return undefined;

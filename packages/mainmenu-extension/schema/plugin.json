@@ -1,0 +1,84 @@
+{
+  "title": "Main Menu",
+  "description": "Main JupyterLab menu settings.",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "editmenu:clear-all",
+      "keys": [""],
+      "selector": "[data-jp-undoer]"
+    },
+    {
+      "command": "editmenu:clear-current",
+      "keys": [""],
+      "selector": "[data-jp-undoer]"
+    },
+    {
+      "command": "editmenu:find",
+      "keys": [""],
+      "selector": "[data-jp-undoer]"
+    },
+    {
+      "command": "editmenu:find-and-replace",
+      "keys": [""],
+      "selector": "[data-jp-undoer]"
+    },
+    {
+      "command": "editmenu:redo",
+      "keys": ["Accel Shift Z"],
+      "selector": "[data-jp-undoer]"
+    },
+    {
+      "command": "editmenu:undo",
+      "keys": ["Accel Z"],
+      "selector": "[data-jp-undoer]"
+    },
+    {
+      "command": "filemenu:close-and-cleanup",
+      "keys": ["Ctrl Shift Q"],
+      "selector": ".jp-Activity"
+    },
+    {
+      "command": "kernelmenu:interrupt",
+      "keys": ["I", "I"],
+      "selector": "[data-jp-kernel-user]:focus"
+    },
+    {
+      "command": "kernelmenu:restart",
+      "keys": ["0", "0"],
+      "selector": "[data-jp-kernel-user]:focus"
+    },
+    {
+      "command": "kernelmenu:restart-and-clear",
+      "keys": [""],
+      "selector": "[data-jp-kernel-user]:focus"
+    },
+    {
+      "command": "kernelmenu:shutdown",
+      "keys": [""],
+      "selector": "[data-jp-kernel-user]:focus"
+    },
+    {
+      "command": "runmenu:restart-and-run-all",
+      "keys": [""],
+      "selector": "[data-jp-code-runner]"
+    },
+    {
+      "command": "runmenu:run",
+      "keys": ["Shift Enter"],
+      "selector": "[data-jp-code-runner]"
+    },
+    {
+      "command": "runmenu:run-all",
+      "keys": [""],
+      "selector": "[data-jp-code-runner]"
+    },
+    {
+      "command": "tabsmenu:activate-previously-used-tab",
+      "keys": ["Accel Shift '"],
+      "selector": "body"
+    }
+  ],
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}

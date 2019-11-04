@@ -91,6 +91,18 @@ export namespace Kernel {
     readonly ready: Promise<void>;
 
     /**
+     * Whether the kernel connection handles comm messages.
+     *
+     * #### Notes
+     * The comm message protocol currently has implicit assumptions that only
+     * one kernel connection is handling comm messages. This option allows a
+     * kernel connection to opt out of handling comms.
+     *
+     * See https://github.com/jupyter/jupyter_client/issues/263
+     */
+    handleComms: boolean;
+
+    /**
      * Get the kernel spec.
      *
      * @returns A promise that resolves with the kernel spec for this kernel.
@@ -126,12 +138,17 @@ export namespace Kernel {
      *
      * If the kernel status is `'dead'`, this will throw an error.
      */
-    sendShellMessage(
-      msg: KernelMessage.IShellMessage,
+    sendShellMessage<T extends KernelMessage.ShellMessageType>(
+      msg: KernelMessage.IShellMessage<T>,
       expectReply?: boolean,
       disposeOnDone?: boolean
-    ): Kernel.IFuture;
+    ): Kernel.IShellFuture<KernelMessage.IShellMessage<T>>;
 
+    sendControlMessage<T extends KernelMessage.ControlMessageType>(
+      msg: KernelMessage.IControlMessage<T>,
+      expectReply?: boolean,
+      disposeOnDone?: boolean
+    ): Kernel.IControlFuture<KernelMessage.IControlMessage<T>>;
     /**
      * Reconnect to a disconnected kernel.
      *
@@ -206,7 +223,7 @@ export namespace Kernel {
      * received and validated.
      */
     requestComplete(
-      content: KernelMessage.ICompleteRequest
+      content: KernelMessage.ICompleteRequestMsg['content']
     ): Promise<KernelMessage.ICompleteReplyMsg>;
 
     /**
@@ -223,7 +240,7 @@ export namespace Kernel {
      * received and validated.
      */
     requestInspect(
-      content: KernelMessage.IInspectRequest
+      content: KernelMessage.IInspectRequestMsg['content']
     ): Promise<KernelMessage.IInspectReplyMsg>;
 
     /**
@@ -240,7 +257,7 @@ export namespace Kernel {
      * received and validated.
      */
     requestHistory(
-      content: KernelMessage.IHistoryRequest
+      content: KernelMessage.IHistoryRequestMsg['content']
     ): Promise<KernelMessage.IHistoryReplyMsg>;
 
     /**
@@ -265,10 +282,37 @@ export namespace Kernel {
      * **See also:** [[IExecuteReply]]
      */
     requestExecute(
-      content: KernelMessage.IExecuteRequest,
+      content: KernelMessage.IExecuteRequestMsg['content'],
       disposeOnDone?: boolean,
       metadata?: JSONObject
-    ): Kernel.IFuture;
+    ): Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >;
+
+    /**
+     * Send an experimental `debug_request` message.
+     *
+     * @hidden
+     *
+     * @param content - The content of the request.
+     *
+     * @param disposeOnDone - Whether to dispose of the future when done.
+     *
+     * @returns A kernel future.
+     *
+     * #### Notes
+     * Debug messages are experimental messages that are not in the official
+     * kernel message specification. As such, this function is *NOT* considered
+     * part of the public API, and may change without notice.
+     */
+    requestDebug(
+      content: KernelMessage.IDebugRequestMsg['content'],
+      disposeOnDone?: boolean
+    ): Kernel.IControlFuture<
+      KernelMessage.IDebugRequestMsg,
+      KernelMessage.IDebugReplyMsg
+    >;
 
     /**
      * Send an `is_complete_request` message.
@@ -284,7 +328,7 @@ export namespace Kernel {
      * received and validated.
      */
     requestIsComplete(
-      content: KernelMessage.IIsCompleteRequest
+      content: KernelMessage.IIsCompleteRequestMsg['content']
     ): Promise<KernelMessage.IIsCompleteReplyMsg>;
 
     /**
@@ -301,7 +345,7 @@ export namespace Kernel {
      * received and validated.
      */
     requestCommInfo(
-      content: KernelMessage.ICommInfoRequest
+      content: KernelMessage.ICommInfoRequestMsg['content']
     ): Promise<KernelMessage.ICommInfoReplyMsg>;
 
     /**
@@ -312,7 +356,7 @@ export namespace Kernel {
      * #### Notes
      * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
      */
-    sendInputReply(content: KernelMessage.IInputReply): void;
+    sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
 
     /**
      * Connect to a comm, or create a new one.
@@ -606,6 +650,18 @@ export namespace Kernel {
     username?: string;
 
     /**
+     * Whether the kernel connection should handle comm messages
+     *
+     * #### Notes
+     * The comm message protocol currently has implicit assumptions that only
+     * one kernel connection is handling comm messages. This option allows a
+     * kernel connection to opt out of handling comms.
+     *
+     * See https://github.com/jupyter/jupyter_client/issues/263
+     */
+    handleComms?: boolean;
+
+    /**
      * The unique identifier for the kernel client.
      */
     clientId?: string;
@@ -628,6 +684,11 @@ export namespace Kernel {
      * A signal emitted when the running kernels change.
      */
     runningChanged: ISignal<IManager, IModel[]>;
+
+    /**
+     * A signal emitted when there is a connection failure.
+     */
+    connectionFailure: ISignal<IManager, ServerConnection.NetworkError>;
 
     /**
      * The server settings for the manager.
@@ -734,11 +795,14 @@ export namespace Kernel {
    * When a message is sent to a kernel, a Future is created to handle any
    * responses that may come from the kernel.
    */
-  export interface IFuture extends IDisposable {
+  export interface IFuture<
+    REQUEST extends KernelMessage.IShellControlMessage,
+    REPLY extends KernelMessage.IShellControlMessage
+  > extends IDisposable {
     /**
      * The original outgoing message.
      */
-    readonly msg: KernelMessage.IShellMessage;
+    readonly msg: REQUEST;
 
     /**
      * A promise that resolves when the future is done.
@@ -750,7 +814,7 @@ export namespace Kernel {
      * The `done` promise resolves to the reply message if there is one,
      * otherwise it resolves to `undefined`.
      */
-    readonly done: Promise<KernelMessage.IShellMessage | undefined>;
+    readonly done: Promise<REPLY | undefined>;
 
     /**
      * The reply handler for the kernel future.
@@ -761,16 +825,7 @@ export namespace Kernel {
      * `done` promise also resolves to the reply message after this handler has
      * been called.
      */
-    onReply: (msg: KernelMessage.IShellMessage) => void | PromiseLike<void>;
-
-    /**
-     * The stdin handler for the kernel future.
-     *
-     * #### Notes
-     * If the handler returns a promise, all kernel message processing pauses
-     * until the promise is resolved.
-     */
-    onStdin: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void>;
+    onReply: (msg: REPLY) => void | PromiseLike<void>;
 
     /**
      * The iopub handler for the kernel future.
@@ -780,6 +835,15 @@ export namespace Kernel {
      * until the promise is resolved.
      */
     onIOPub: (msg: KernelMessage.IIOPubMessage) => void | PromiseLike<void>;
+
+    /**
+     * The stdin handler for the kernel future.
+     *
+     * #### Notes
+     * If the handler returns a promise, all kernel message processing pauses
+     * until the promise is resolved.
+     */
+    onStdin: (msg: KernelMessage.IStdinMessage) => void | PromiseLike<void>;
 
     /**
      * Register hook for IOPub messages.
@@ -819,8 +883,18 @@ export namespace Kernel {
     /**
      * Send an `input_reply` message.
      */
-    sendInputReply(content: KernelMessage.IInputReply): void;
+    sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
   }
+
+  export interface IShellFuture<
+    REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
+    REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
+  > extends IFuture<REQUEST, REPLY> {}
+
+  export interface IControlFuture<
+    REQUEST extends KernelMessage.IControlMessage = KernelMessage.IControlMessage,
+    REPLY extends KernelMessage.IControlMessage = KernelMessage.IControlMessage
+  > extends IFuture<REQUEST, REPLY> {}
 
   /**
    * A client side Comm interface.
@@ -872,7 +946,7 @@ export namespace Kernel {
       data?: JSONValue,
       metadata?: JSONObject,
       buffers?: (ArrayBuffer | ArrayBufferView)[]
-    ): IFuture;
+    ): IShellFuture;
 
     /**
      * Send a `comm_msg` message to the kernel.
@@ -895,7 +969,7 @@ export namespace Kernel {
       metadata?: JSONObject,
       buffers?: (ArrayBuffer | ArrayBufferView)[],
       disposeOnDone?: boolean
-    ): IFuture;
+    ): IShellFuture;
 
     /**
      * Close the comm.
@@ -916,7 +990,7 @@ export namespace Kernel {
       data?: JSONValue,
       metadata?: JSONObject,
       buffers?: (ArrayBuffer | ArrayBufferView)[]
-    ): IFuture;
+    ): IShellFuture;
   }
 
   /**
@@ -929,6 +1003,7 @@ export namespace Kernel {
     | 'idle'
     | 'busy'
     | 'restarting'
+    | 'autorestarting'
     | 'dead'
     | 'connected';
 
@@ -986,6 +1061,11 @@ export namespace Kernel {
      * A mapping of resource file name to download path.
      */
     readonly resources: { [key: string]: string };
+
+    /**
+     * A dictionary of additional attributes about this kernel; used by clients to aid in kernel selection.
+     */
+    readonly metadata?: JSONObject;
   }
 
   /**

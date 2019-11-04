@@ -7,6 +7,8 @@ import { ServiceManager } from '@jupyterlab/services';
 
 import { Message } from '@phosphor/messaging';
 
+import { Button, InputGroup, Collapse } from '@jupyterlab/ui-components';
+
 import * as React from 'react';
 
 import ReactPaginate from 'react-paginate';
@@ -37,15 +39,14 @@ export class SearchBar extends React.Component<
   render(): React.ReactNode {
     return (
       <div className="jp-extensionmanager-search-bar">
-        <div className="jp-extensionmanager-search-wrapper">
-          <input
-            type="text"
-            className="jp-extensionmanager-input"
-            placeholder={this.props.placeholder}
-            onChange={this.handleChange.bind(this)}
-            value={this.state.value}
-          />
-        </div>
+        <InputGroup
+          className="jp-extensionmanager-search-wrapper"
+          type="text"
+          placeholder={this.props.placeholder}
+          onChange={this.handleChange}
+          value={this.state.value}
+          rightIcon="search"
+        />
       </div>
     );
   }
@@ -53,12 +54,12 @@ export class SearchBar extends React.Component<
   /**
    * Handler for search input changes.
    */
-  handleChange(e: KeyboardEvent) {
+  handleChange = (e: React.FormEvent<HTMLElement>) => {
     let target = e.target as HTMLInputElement;
     this.setState({
       value: target.value
     });
-  }
+  };
 }
 
 /**
@@ -97,18 +98,12 @@ function BuildPrompt(props: BuildPrompt.IProperties): React.ReactElement<any> {
       <div className="jp-extensionmanager-buildmessage">
         A build is needed to include the latest changes
       </div>
-      <button
-        className="jp-extensionmanager-rebuild"
-        onClick={props.performBuild}
-      >
+      <Button onClick={props.performBuild} minimal small>
         Rebuild
-      </button>
-      <button
-        className="jp-extensionmanager-ignorebuild"
-        onClick={props.ignoreBuild}
-      >
+      </Button>
+      <Button onClick={props.ignoreBuild} minimal small>
         Ignore
-      </button>
+      </Button>
     </div>
   );
 }
@@ -139,15 +134,6 @@ namespace BuildPrompt {
 function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   const { entry } = props;
   const flagClasses = [];
-  if (entry.installed) {
-    flagClasses.push('jp-extensionmanager-entry-installed');
-  }
-  if (entry.enabled) {
-    flagClasses.push('jp-extensionmanager-entry-enabled');
-  }
-  if (ListModel.entryHasUpdate(entry)) {
-    flagClasses.push('jp-extensionmanager-entry-update');
-  }
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
@@ -174,37 +160,51 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           {entry.description}
         </div>
         <div className="jp-extensionmanager-entry-buttons">
-          <button
-            className="jp-extensionmanager-install"
-            onClick={() => props.performAction('install', entry)}
-          >
-            Install
-          </button>
-          <button
-            className="jp-extensionmanager-update"
-            // An install action will update the extension:
-            onClick={() => props.performAction('install', entry)}
-          >
-            Update
-          </button>
-          <button
-            className="jp-extensionmanager-uninstall"
-            onClick={() => props.performAction('uninstall', entry)}
-          >
-            Uninstall
-          </button>
-          <button
-            className="jp-extensionmanager-enable"
-            onClick={() => props.performAction('enable', entry)}
-          >
-            Enable
-          </button>
-          <button
-            className="jp-extensionmanager-disable"
-            onClick={() => props.performAction('disable', entry)}
-          >
-            Disable
-          </button>
+          {!entry.installed && (
+            <Button
+              onClick={() => props.performAction('install', entry)}
+              minimal
+              small
+            >
+              Install
+            </Button>
+          )}
+          {ListModel.entryHasUpdate(entry) && (
+            <Button
+              onClick={() => props.performAction('install', entry)}
+              minimal
+              small
+            >
+              Update
+            </Button>
+          )}
+          {entry.installed && (
+            <Button
+              onClick={() => props.performAction('uninstall', entry)}
+              minimal
+              small
+            >
+              Uninstall
+            </Button>
+          )}
+          {entry.enabled && (
+            <Button
+              onClick={() => props.performAction('disable', entry)}
+              minimal
+              small
+            >
+              Disable
+            </Button>
+          )}
+          {!entry.enabled && (
+            <Button
+              onClick={() => props.performAction('enable', entry)}
+              minimal
+              small
+            >
+              Enable
+            </Button>
+          )}
         </div>
       </div>
     </li>
@@ -307,32 +307,6 @@ export namespace ListView {
   }
 }
 
-/**
- *
- *
- * @param {RefreshButton.IProperties} props
- * @returns {React.ReactElement<any>}
- */
-function RefreshButton(
-  props: RefreshButton.IProperties
-): React.ReactElement<any> {
-  return (
-    <ToolbarButtonComponent
-      key="refreshButton"
-      className="jp-extensionmanager-refresh"
-      iconClassName="jp-RefreshIcon jp-Icon jp-Icon-16"
-      onClick={props.onClick}
-      tooltip="Refresh extension list"
-    />
-  );
-}
-
-namespace RefreshButton {
-  export interface IProperties {
-    onClick: () => void;
-  }
-}
-
 function ErrorMessage(props: ErrorMessage.IProperties) {
   return (
     <div key="error-msg" className="jp-extensionmanager-error">
@@ -357,7 +331,7 @@ export class CollapsibleSection extends React.Component<
   constructor(props: CollapsibleSection.IProperties) {
     super(props);
     this.state = {
-      collapsed: props.startCollapsed
+      isOpen: props.isOpen || true
     };
   }
 
@@ -365,49 +339,43 @@ export class CollapsibleSection extends React.Component<
    * Render the collapsible section using the virtual DOM.
    */
   render(): React.ReactNode {
-    const elements: Array<React.ReactNode> = [
-      <header key="header">
-        <ToolbarButtonComponent
-          key="collapser"
-          iconClassName={
-            'jp-Icon jp-Icon-16 ' +
-            (this.state.collapsed
-              ? 'jp-extensionmanager-collapseIcon'
-              : 'jp-extensionmanager-expandIcon')
-          }
-          className={'jp-collapser-button'}
-          onClick={() => {
-            this.onCollapse();
-          }}
-        />
-        <span className="jp-extensionmanager-headerText">
-          {this.props.header}
-        </span>
-        {this.props.headerElements}
-      </header>
-    ];
-
-    if (!this.state.collapsed) {
-      if (Array.isArray(this.props.children)) {
-        elements.push(...this.props.children);
-      } else {
-        elements.push(this.props.children);
-      }
-    }
-
-    return elements;
+    return (
+      <>
+        <header>
+          <ToolbarButtonComponent
+            iconClassName={
+              this.state.isOpen
+                ? 'jp-extensionmanager-expandIcon'
+                : 'jp-extensionmanager-collapseIcon'
+            }
+            onClick={() => {
+              this.handleCollapse();
+            }}
+          />
+          <span className="jp-extensionmanager-headerText">
+            {this.props.header}
+          </span>
+          {this.props.headerElements}
+        </header>
+        <Collapse isOpen={this.state.isOpen}>{this.props.children}</Collapse>
+      </>
+    );
   }
 
   /**
    * Handler for search input changes.
    */
-  onCollapse() {
-    if (this.props.onCollapse !== undefined) {
-      this.props.onCollapse(!this.state.collapsed);
-    }
-    this.setState({
-      collapsed: !this.state.collapsed
-    });
+  handleCollapse() {
+    this.setState(
+      {
+        isOpen: !this.state.isOpen
+      },
+      () => {
+        if (this.props.onCollapse) {
+          this.props.onCollapse(this.state.isOpen);
+        }
+      }
+    );
   }
 }
 
@@ -425,14 +393,14 @@ export namespace CollapsibleSection {
     header: string;
 
     /**
-     * Whether the view will be collapsed initially or not.
+     * Whether the view will be expanded or collapsed initially, defaults to open.
      */
-    startCollapsed: boolean;
+    isOpen?: boolean;
 
     /**
-     * Callback for collapse action.
+     * Handle collapse event.
      */
-    onCollapse?: (collapsed: boolean) => void;
+    onCollapse?: (isOpen: boolean) => void;
 
     /**
      * Any additional elements to add to the header.
@@ -450,9 +418,9 @@ export namespace CollapsibleSection {
    */
   export interface IState {
     /**
-     * Whther the section is collapsed or not.
+     * Whether the section is expanded or collapsed.
      */
-    collapsed: boolean;
+    isOpen: boolean;
   }
 }
 
@@ -470,9 +438,9 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    * The search input node.
    */
   get inputNode(): HTMLInputElement {
-    return this.node.getElementsByClassName(
-      'jp-extensionmanager-input'
-    )[0] as HTMLInputElement;
+    return this.node.querySelector(
+      '.jp-extensionmanager-search-wrapper input'
+    ) as HTMLInputElement;
   }
 
   /**
@@ -506,7 +474,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
     );
     const content = [];
     if (!model.initialized) {
-      model.initialize();
+      void model.initialize();
       content.push(
         <div key="loading-placeholder" className="jp-extensionmanager-loader">
           Updating extensions list
@@ -526,7 +494,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       );
     } else if (model.serverRequirementsError !== null) {
       content.push(
-        <ErrorMessage key="error-msg">
+        <ErrorMessage key="server-requirements-error">
           <p>
             The server has some missing requirements for installing extensions.
           </p>
@@ -541,7 +509,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       let installedContent = [];
       if (model.installedError !== null) {
         installedContent.push(
-          <ErrorMessage>
+          <ErrorMessage key="install-error">
             {`Error querying installed extensions${
               model.installedError ? `: ${model.installedError}` : '.'
             }`}
@@ -550,7 +518,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       } else {
         installedContent.push(
           <ListView
-            key="list-view"
+            key="installed-items"
             entries={model.installed}
             numPages={1}
             onPage={value => {
@@ -563,14 +531,18 @@ export class ExtensionView extends VDomRenderer<ListModel> {
 
       content.push(
         <CollapsibleSection
-          header="Installed"
           key="installed-section"
-          startCollapsed={false}
+          isOpen={true}
+          header="Installed"
           headerElements={
-            <RefreshButton
+            <ToolbarButtonComponent
+              key="refresh-button"
+              className="jp-extensionmanager-refresh"
+              iconClassName="jp-RefreshIcon"
               onClick={() => {
                 model.refreshInstalled();
               }}
+              tooltip="Refresh extension list"
             />
           }
         >
@@ -581,7 +553,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       let searchContent = [];
       if (model.searchError !== null) {
         searchContent.push(
-          <ErrorMessage>
+          <ErrorMessage key="search-error">
             {`Error searching for extensions${
               model.searchError ? `: ${model.searchError}` : '.'
             }`}
@@ -590,7 +562,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       } else {
         searchContent.push(
           <ListView
-            key="list-view"
+            key="search-items"
             // Filter out installed extensions:
             entries={model.searchResult.filter(
               entry => model.installed.indexOf(entry) === -1
@@ -606,11 +578,11 @@ export class ExtensionView extends VDomRenderer<ListModel> {
 
       content.push(
         <CollapsibleSection
-          header={model.query ? 'Search Results' : 'Discover'}
           key="search-section"
-          startCollapsed={true}
-          onCollapse={(collapsed: boolean) => {
-            if (!collapsed && model.query === null) {
+          isOpen={false}
+          header={model.query ? 'Search Results' : 'Discover'}
+          onCollapse={(isOpen: boolean) => {
+            if (isOpen && model.query === null) {
               model.query = '';
             }
           }}

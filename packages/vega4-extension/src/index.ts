@@ -11,8 +11,6 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import * as VegaModuleType from 'vega-embed';
 
-import '../style/index.css';
-
 /**
  * The CSS class to add to the Vega and Vega-Lite widget.
  */
@@ -78,24 +76,37 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
 
     const vega =
       Private.vega != null ? Private.vega : await Private.ensureVega();
-    const path = await this._resolver.resolveUrl('');
-    const baseURL = await this._resolver.getDownloadUrl(path);
 
     const el = document.createElement('div');
 
     // clear the output before attaching a chart
-    this.node.innerHTML = '';
+    this.node.textContent = '';
     this.node.appendChild(el);
+
+    if (this._result) {
+      this._result.view.finalize();
+    }
+
+    const loader = vega.vega.loader({
+      http: { credentials: 'same-origin' }
+    });
+
+    const sanitize = async (uri: string, options: any) => {
+      // Use the resolver for any URIs it wants to handle
+      const resolver = this._resolver;
+      if (resolver.isLocal(uri)) {
+        const absPath = await resolver.resolveUrl(uri);
+        uri = await resolver.getDownloadUrl(absPath);
+      }
+      return loader.sanitize(uri, options);
+    };
 
     this._result = await vega.default(el, spec, {
       actions: true,
       defaultStyle: true,
       ...embedOptions,
       mode,
-      loader: {
-        baseURL,
-        http: { credentials: 'same-origin' }
-      }
+      loader: { ...loader, sanitize }
     });
 
     if (model.data['image/png']) {
@@ -130,19 +141,19 @@ export const rendererFactory: IRenderMime.IRendererFactory = {
 };
 
 const extension: IRenderMime.IExtension = {
-  id: '@jupyterlab/vega-extension:factory',
+  id: '@jupyterlab/vega4-extension:factory',
   rendererFactory,
-  rank: 50, // prefer over vega 2 extension
+  rank: 58,
   dataType: 'json',
   documentWidgetFactoryOptions: [
     {
-      name: 'Vega',
+      name: 'Vega4',
       primaryFileType: 'vega4',
       fileTypes: ['vega4', 'json'],
       defaultFor: ['vega4']
     },
     {
-      name: 'Vega-Lite',
+      name: 'Vega-Lite2',
       primaryFileType: 'vega-lite2',
       fileTypes: ['vega-lite2', 'json'],
       defaultFor: ['vega-lite2']
@@ -188,22 +199,7 @@ namespace Private {
       return vegaReady;
     }
 
-    vegaReady = new Promise((resolve, reject) => {
-      require.ensure(
-        ['vega-embed'],
-        // see https://webpack.js.org/api/module-methods/#require-ensure
-        // this argument MUST be named `require` for the WebPack parser
-        require => {
-          vega = require('vega-embed') as typeof VegaModuleType;
-          resolve(vega);
-        },
-        (error: any) => {
-          console.error(error);
-          reject();
-        },
-        'vega'
-      );
-    });
+    vegaReady = import('./built-vega-embed') as any;
 
     return vegaReady;
   }

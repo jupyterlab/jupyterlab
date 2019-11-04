@@ -7,9 +7,9 @@ import { CommandRegistry } from '@phosphor/commands';
 
 import { Widget } from '@phosphor/widgets';
 
-import { InstanceTracker } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
 
-import { FileMenu, IFileMenu } from '@jupyterlab/mainmenu/src';
+import { FileMenu, IFileMenu } from '@jupyterlab/mainmenu';
 
 import { delegateExecute } from './util';
 
@@ -21,17 +21,18 @@ describe('@jupyterlab/mainmenu', () => {
   describe('FileMenu', () => {
     let commands: CommandRegistry;
     let menu: FileMenu;
-    let tracker: InstanceTracker<Wodget>;
-    const wodget = new Wodget();
+    let tracker: WidgetTracker<Wodget>;
+    let wodget: Wodget;
 
     beforeAll(() => {
       commands = new CommandRegistry();
     });
 
     beforeEach(() => {
+      wodget = new Wodget();
       menu = new FileMenu({ commands });
-      tracker = new InstanceTracker<Wodget>({ namespace: 'wodget' });
-      tracker.add(wodget);
+      tracker = new WidgetTracker<Wodget>({ namespace: 'wodget' });
+      void tracker.add(wodget);
     });
 
     afterEach(() => {
@@ -65,25 +66,8 @@ describe('@jupyterlab/mainmenu', () => {
           }
         };
         menu.closeAndCleaners.add(cleaner);
-        delegateExecute(wodget, menu.closeAndCleaners, 'closeAndCleanup');
+        void delegateExecute(wodget, menu.closeAndCleaners, 'closeAndCleanup');
         expect(wodget.state).to.equal('clean');
-      });
-    });
-
-    describe('#persistAndSavers', () => {
-      it('should allow setting of an IPersistAndSave', () => {
-        const persistAndSaver: IFileMenu.IPersistAndSave<Wodget> = {
-          tracker,
-          name: 'Wodget',
-          action: 'with Save',
-          persistAndSave: widget => {
-            widget.state = 'saved';
-            return Promise.resolve(void 0);
-          }
-        };
-        menu.persistAndSavers.add(persistAndSaver);
-        delegateExecute(wodget, menu.persistAndSavers, 'persistAndSave');
-        expect(wodget.state).to.equal('saved');
       });
     });
 
@@ -98,7 +82,7 @@ describe('@jupyterlab/mainmenu', () => {
           }
         };
         menu.consoleCreators.add(creator);
-        delegateExecute(wodget, menu.consoleCreators, 'createConsole');
+        void delegateExecute(wodget, menu.consoleCreators, 'createConsole');
         expect(wodget.state).to.equal('create');
       });
     });

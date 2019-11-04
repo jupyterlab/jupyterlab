@@ -7,154 +7,13 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { ReadonlyJSONObject, Token } from '@phosphor/coreutils';
+import { PromiseDelegate, Token } from '@phosphor/coreutils';
 
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-/* tslint:disable */
-/**
- * The URL Router token.
- */
-export const IRouter = new Token<IRouter>('@jupyterlab/application:IRouter');
-/* tslint:enable */
-
-/**
- * A static class that routes URLs within the application.
- */
-export interface IRouter {
-  /**
-   * The base URL for the router.
-   */
-  readonly base: string;
-
-  /**
-   * The command registry used by the router.
-   */
-  readonly commands: CommandRegistry;
-
-  /**
-   * The parsed current URL of the application.
-   */
-  readonly current: IRouter.ILocation;
-
-  /**
-   * A signal emitted when the router routes a route.
-   */
-  readonly routed: ISignal<IRouter, IRouter.ILocation>;
-
-  /**
-   * If a matching rule's command resolves with the `stop` token during routing,
-   * no further matches will execute.
-   */
-  readonly stop: Token<void>;
-
-  /**
-   * Navigate to a new path within the application.
-   *
-   * @param path - The new path or empty string if redirecting to root.
-   *
-   * @param options - The navigation options.
-   */
-  navigate(path: string, options?: IRouter.INavOptions): void;
-
-  /**
-   * Register a rule that maps a path pattern to a command.
-   *
-   * @param options - The route registration options.
-   *
-   * @returns A disposable that removes the registered rule from the router.
-   */
-  register(options: IRouter.IRegisterOptions): IDisposable;
-
-  /**
-   * Cause a hard reload of the document.
-   */
-  reload(): void;
-
-  /**
-   * Route a specific path to an action.
-   *
-   * @param url - The URL string that will be routed.
-   *
-   * #### Notes
-   * If a pattern is matched, its command will be invoked with arguments that
-   * match the `IRouter.ILocation` interface.
-   */
-  route(url: string): void;
-}
-
-/**
- * A namespace for the `IRouter` specification.
- */
-export namespace IRouter {
-  /**
-   * The parsed location currently being routed.
-   */
-  export interface ILocation extends ReadonlyJSONObject {
-    /**
-     * The location hash.
-     */
-    hash: string;
-
-    /**
-     * The path that matched a routing pattern.
-     */
-    path: string;
-
-    /**
-     * The request being routed with the router `base` omitted.
-     *
-     * #### Notes
-     * This field includes the query string and hash, if they exist.
-     */
-    request: string;
-
-    /**
-     * The search element, including leading question mark (`'?'`), if any,
-     * of the path.
-     */
-    search: string;
-  }
-
-  /**
-   * The options passed into a navigation request.
-   */
-  export interface INavOptions {
-    /**
-     * Whether the navigation should be hard URL change instead of an HTML
-     * history API change.
-     */
-    hard?: boolean;
-
-    /**
-     * Whether the navigation should be added to the browser's history.
-     */
-    silent?: boolean;
-  }
-
-  /**
-   * The specification for registering a route with the router.
-   */
-  export interface IRegisterOptions {
-    /**
-     * The command string that will be invoked upon matching.
-     */
-    command: string;
-
-    /**
-     * The regular expression that will be matched against URLs.
-     */
-    pattern: RegExp;
-
-    /**
-     * The rank order of the registered rule. A lower rank denotes a higher
-     * priority. The default rank is `100`.
-     */
-    rank?: number;
-  }
-}
+import { IRouter } from './tokens';
 
 /**
  * A static class that routes URLs within the application.
@@ -214,15 +73,16 @@ export class Router implements IRouter {
   navigate(path: string, options: IRouter.INavOptions = {}): void {
     const { base } = this;
     const { history } = window;
-    const { hard, silent } = options;
+    const { hard } = options;
+    const old = document.location.href;
     const url =
       path && path.indexOf(base) === 0 ? path : URLExt.join(base, path);
 
-    if (silent) {
-      history.replaceState({}, '', url);
-    } else {
-      history.pushState({}, '', url);
+    if (url === old) {
+      return hard ? this.reload() : undefined;
     }
+
+    history.pushState({}, '', url);
 
     if (hard) {
       return this.reload();
@@ -231,7 +91,7 @@ export class Router implements IRouter {
     // Because a `route()` call may still be in the stack after having received
     // a `stop` token, wait for the next stack frame before calling `route()`.
     requestAnimationFrame(() => {
-      this.route();
+      void this.route();
     });
   }
 
@@ -268,7 +128,7 @@ export class Router implements IRouter {
    * If a pattern is matched, its command will be invoked with arguments that
    * match the `IRouter.ILocation` interface.
    */
-  route(): void {
+  route(): Promise<void> {
     const { commands, current, stop } = this;
     const { request } = current;
     const routed = this._routed;
@@ -284,31 +144,34 @@ export class Router implements IRouter {
 
     // Order the matching rules by rank and enqueue them.
     const queue = matches.sort((a, b) => b.rank - a.rank);
+    const done = new PromiseDelegate<void>();
 
     // Process each enqueued command sequentially and short-circuit if a promise
     // resolves with the `stop` token.
-    (function next() {
+    const next = async () => {
       if (!queue.length) {
         routed.emit(current);
+        done.resolve(undefined);
         return;
       }
 
       const { command } = queue.pop();
 
-      commands
-        .execute(command, current)
-        .then(result => {
-          if (result === stop) {
-            queue.length = 0;
-            console.log(`Routing ${request} was short-circuited by ${command}`);
-          }
-          next();
-        })
-        .catch(reason => {
-          console.warn(`Routing ${request} to ${command} failed`, reason);
-          next();
-        });
-    })();
+      try {
+        const request = this.current.request;
+        const result = await commands.execute(command, current);
+        if (result === stop) {
+          queue.length = 0;
+          console.log(`Routing ${request} was short-circuited by ${command}`);
+        }
+      } catch (reason) {
+        console.warn(`Routing ${request} to ${command} failed`, reason);
+      }
+      void next();
+    };
+    void next();
+
+    return done.promise;
   }
 
   private _routed = new Signal<this, IRouter.ILocation>(this);

@@ -19,7 +19,7 @@ import {
   SettingsMenu,
   TabsMenu,
   ViewMenu
-} from '@jupyterlab/mainmenu/src';
+} from '@jupyterlab/mainmenu';
 
 describe('@jupyterlab/mainmenu', () => {
   describe('MainMenu', () => {

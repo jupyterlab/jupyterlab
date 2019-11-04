@@ -1,15 +1,15 @@
 {
   "name": "node-example",
-  "version": "0.15.1",
+  "version": "2.0.0-alpha.1",
   "private": true,
   "scripts": {
     "clean": "rimraf node_modules",
     "update": "rimraf node_modules/@jupyterlab/services && npm install"
   },
   "dependencies": {
-    "@jupyterlab/services": "^3.2.1",
-    "node-fetch": "~2.2.0",
-    "ws": "~6.0.0"
+    "@jupyterlab/services": "^5.0.0-alpha.1",
+    "node-fetch": "^2.6.0",
+    "ws": "^7.0.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2"

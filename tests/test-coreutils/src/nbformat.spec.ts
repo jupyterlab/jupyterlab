@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { nbformat } from '@jupyterlab/coreutils/src';
+import { nbformat } from '@jupyterlab/coreutils';
 
 const VALIDATE = nbformat.validateMimeValue;
 

@@ -2,6 +2,8 @@
 # Distributed under the terms of the Modified BSD License.
 
 from jupyterlab_server import LabServerApp, LabConfig
+from notebook.utils import url_path_join as ujoin
+import json
 import os
 from traitlets import Unicode
 
@@ -11,17 +13,20 @@ HERE = os.path.dirname(__file__)
 # not affect this app. This helps this app to truly be standalone.
 os.environ["JUPYTER_NO_CONFIG"]="1"
 
-class ExampleApp(LabServerApp):
+with open(os.path.join(HERE, 'package.json')) as fid:
+    version = json.load(fid)['version']
 
-    default_url = Unicode('/exampleapp',
+class ExampleApp(LabServerApp):
+    base_url = '/foo'
+    default_url = Unicode('/example',
                           help='The default URL to redirect to from `/`')
 
     lab_config = LabConfig(
         app_name = 'JupyterLab Example App',
         app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
-        page_url = '/exampleapp',
+        app_version = version,
+        app_url = '/example',
         schemas_dir = os.path.join(HERE, 'build', 'schemas'),
-        settings_dir = os.path.join(HERE, 'build', 'settings'),
         static_dir = os.path.join(HERE, 'build'),
         templates_dir = os.path.join(HERE, 'templates'),
         themes_dir = os.path.join(HERE, 'build', 'themes'),

@@ -9,15 +9,10 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import {
-  IObservableList,
-  ObservableList,
-  IObservableValue,
-  ObservableValue,
-  IModelDB
-} from '@jupyterlab/observables';
+import { IObservableList, ObservableList } from '@jupyterlab/observables';
 
 import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
+import { JSONExt } from '@phosphor/coreutils';
 
 /**
  * The model for an output area.
@@ -55,6 +50,8 @@ export interface IOutputAreaModel extends IDisposable {
 
   /**
    * Add an output, which may be combined with previous output.
+   *
+   * @returns The total number of outputs.
    *
    * #### Notes
    * The output bundle is copied.
@@ -112,11 +109,6 @@ export namespace IOutputAreaModel {
      * If not given, a default factory will be used.
      */
     contentFactory?: IContentFactory;
-
-    /**
-     * An optional IModelDB to store the output area model.
-     */
-    modelDB?: IModelDB;
   }
 
   /**
@@ -152,26 +144,7 @@ export class OutputAreaModel implements IOutputAreaModel {
         this._add(value);
       });
     }
-    this.list.changed.connect(
-      this._onListChanged,
-      this
-    );
-
-    // If we are given a IModelDB, keep an up-to-date
-    // serialized copy of the OutputAreaModel in it.
-    if (options.modelDB) {
-      this._modelDB = options.modelDB;
-      this._serialized = this._modelDB.createValue('outputs');
-      if (this._serialized.get()) {
-        this.fromJSON(this._serialized.get() as nbformat.IOutput[]);
-      } else {
-        this._serialized.set(this.toJSON());
-      }
-      this._serialized.changed.connect(
-        this._onSerializedChanged,
-        this
-      );
-    }
+    this.list.changed.connect(this._onListChanged, this);
   }
 
   /**
@@ -257,14 +230,17 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Set the value at the specified index.
    */
   set(index: number, value: nbformat.IOutput): void {
+    value = JSONExt.deepCopy(value);
     // Normalize stream data.
-    this._normalize(value);
+    Private.normalize(value);
     let item = this._createItem({ value, trusted: this._trusted });
     this.list.set(index, item);
   }
 
   /**
    * Add an output, which may be combined with previous output.
+   *
+   * @returns The total number of outputs.
    *
    * #### Notes
    * The output bundle is copied.
@@ -318,26 +294,31 @@ export class OutputAreaModel implements IOutputAreaModel {
   }
 
   /**
-   * Add an item to the list.
+   * Add a copy of the item to the list.
    */
   private _add(value: nbformat.IOutput): number {
     let trusted = this._trusted;
+    value = JSONExt.deepCopy(value);
 
     // Normalize the value.
-    this._normalize(value);
+    Private.normalize(value);
 
     // Consolidate outputs if they are stream outputs of the same kind.
     if (
       nbformat.isStream(value) &&
       this._lastStream &&
-      value.name === this._lastName
+      value.name === this._lastName &&
+      this.shouldCombine({
+        value,
+        lastModel: this.list.get(this.length - 1)
+      })
     ) {
       // In order to get a list change event, we add the previous
       // text to the current item and replace the previous item.
       // This also replaces the metadata of the last item.
       this._lastStream += value.text as string;
+      this._lastStream = Private.removeOverwrittenChars(this._lastStream);
       value.text = this._lastStream;
-      this._removeOverwrittenChars(value);
       let item = this._createItem({ value, trusted });
       let index = this.length - 1;
       let prev = this.list.get(index);
@@ -347,7 +328,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     }
 
     if (nbformat.isStream(value)) {
-      this._removeOverwrittenChars(value);
+      value.text = Private.removeOverwrittenChars(value.text as string);
     }
 
     // Create the new item.
@@ -366,59 +347,28 @@ export class OutputAreaModel implements IOutputAreaModel {
   }
 
   /**
-   * Normalize an output.
+   * Whether a new value should be consolidated with the previous output.
+   *
+   * This will only be called if the minimal criteria of both being stream
+   * messages of the same type.
    */
-  private _normalize(value: nbformat.IOutput): void {
-    if (nbformat.isStream(value)) {
-      if (Array.isArray(value.text)) {
-        value.text = (value.text as string[]).join('\n');
-      }
-    }
+  protected shouldCombine(options: {
+    value: nbformat.IOutput;
+    lastModel: IOutputModel;
+  }) {
+    return true;
   }
 
   /**
-   * Remove characters that are overridden by backspace characters.
+   * A flag that is set when we want to clear the output area
+   * *after* the next addition to it.
    */
-  private _fixBackspace(txt: string): string {
-    let tmp = txt;
-    do {
-      txt = tmp;
-      // Cancel out anything-but-newline followed by backspace
-      tmp = txt.replace(/[^\n]\x08/gm, '');
-    } while (tmp.length < txt.length);
-    return txt;
-  }
-
-  /**
-   * Remove chunks that should be overridden by the effect of
-   * carriage return characters.
-   */
-  private _fixCarriageReturn(txt: string): string {
-    let tmp = txt;
-    // Handle multiple carriage returns before a newline
-    tmp = tmp.replace(/\r\r+\n/gm, '\r\n');
-    // Remove chunks that should be overridden by carriage returns
-    do {
-      // Remove any chunks preceding a carriage return unless carriage
-      // return followed by a newline
-      tmp = tmp.replace(/^[^\n]*(?:\r(?!\n))+/gm, '');
-    } while (tmp.search(/\r(?!\n)/) > -1);
-    do {
-      // Replace remaining \r\n characters with a newline
-      tmp = tmp.replace(/\r\n/gm, '\n');
-    } while (tmp.indexOf('\r\n') > -1);
-    return tmp;
-  }
-
-  /*
-   * Remove characters overridden by backspaces and carriage returns
-   */
-  private _removeOverwrittenChars(value: nbformat.IOutput): void {
-    let tmp = value.text as string;
-    value.text = this._fixCarriageReturn(this._fixBackspace(tmp));
-  }
-
   protected clearNext = false;
+
+  /**
+   * An observable list containing the output models
+   * for this output area.
+   */
   protected list: IObservableList<IOutputModel> = null;
 
   /**
@@ -427,10 +377,7 @@ export class OutputAreaModel implements IOutputAreaModel {
   private _createItem(options: IOutputModel.IOptions): IOutputModel {
     let factory = this.contentFactory;
     let item = factory.createOutputModel(options);
-    item.changed.connect(
-      this._onGenericChange,
-      this
-    );
+    item.changed.connect(this._onGenericChange, this);
     return item;
   }
 
@@ -441,27 +388,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     sender: IObservableList<IOutputModel>,
     args: IObservableList.IChangedArgs<IOutputModel>
   ) {
-    if (this._serialized && !this._changeGuard) {
-      this._changeGuard = true;
-      this._serialized.set(this.toJSON());
-      this._changeGuard = false;
-    }
     this._changed.emit(args);
-  }
-
-  /**
-   * If the serialized version of the outputs have changed due to a remote
-   * action, then update the model accordingly.
-   */
-  private _onSerializedChanged(
-    sender: IObservableValue,
-    args: ObservableValue.IChangedArgs
-  ) {
-    if (!this._changeGuard) {
-      this._changeGuard = true;
-      this.fromJSON(args.newValue as nbformat.IOutput[]);
-      this._changeGuard = false;
-    }
   }
 
   /**
@@ -477,9 +404,6 @@ export class OutputAreaModel implements IOutputAreaModel {
   private _isDisposed = false;
   private _stateChanged = new Signal<IOutputAreaModel, void>(this);
   private _changed = new Signal<this, IOutputAreaModel.ChangedArgs>(this);
-  private _modelDB: IModelDB = null;
-  private _serialized: IObservableValue = null;
-  private _changeGuard = false;
 }
 
 /**
@@ -502,4 +426,55 @@ export namespace OutputAreaModel {
    * The default output model factory.
    */
   export const defaultContentFactory = new ContentFactory();
+}
+
+/**
+ * A namespace for module-private functionality.
+ */
+namespace Private {
+  /**
+   * Normalize an output.
+   */
+  export function normalize(value: nbformat.IOutput): void {
+    if (nbformat.isStream(value)) {
+      if (Array.isArray(value.text)) {
+        value.text = (value.text as string[]).join('\n');
+      }
+    }
+  }
+
+  /**
+   * Remove characters that are overridden by backspace characters.
+   */
+  function fixBackspace(txt: string): string {
+    let tmp = txt;
+    do {
+      txt = tmp;
+      // Cancel out anything-but-newline followed by backspace
+      tmp = txt.replace(/[^\n]\x08/gm, '');
+    } while (tmp.length < txt.length);
+    return txt;
+  }
+
+  /**
+   * Remove chunks that should be overridden by the effect of
+   * carriage return characters.
+   */
+  function fixCarriageReturn(txt: string): string {
+    txt = txt.replace(/\r+\n/gm, '\n'); // \r followed by \n --> newline
+    while (txt.search(/\r[^$]/g) > -1) {
+      const base = txt.match(/^(.*)\r+/m)[1];
+      let insert = txt.match(/\r+(.*)$/m)[1];
+      insert = insert + base.slice(insert.length, base.length);
+      txt = txt.replace(/\r+.*$/m, '\r').replace(/^.*\r/m, insert);
+    }
+    return txt;
+  }
+
+  /*
+   * Remove characters overridden by backspaces and carriage returns
+   */
+  export function removeOverwrittenChars(text: string): string {
+    return fixCarriageReturn(fixBackspace(text));
+  }
 }

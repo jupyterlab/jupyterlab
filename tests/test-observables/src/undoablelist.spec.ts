@@ -5,10 +5,7 @@ import { expect } from 'chai';
 
 import { JSONObject } from '@phosphor/coreutils';
 
-import {
-  ObservableUndoableList,
-  ISerializer
-} from '@jupyterlab/observables/src';
+import { ObservableUndoableList, ISerializer } from '@jupyterlab/observables';
 
 class Test {
   constructor(value: JSONObject) {

@@ -2,11 +2,10 @@ module.exports = {
   entry: ['whatwg-fetch', './build/index.js'],
   output: {
     path: __dirname + '/build',
-    filename: 'bundle.js',
-    publicPath: './example/'
+    filename: 'bundle.js'
   },
   bail: true,
-  devtool: 'cheap-source-map',
+  devtool: 'source-map',
   mode: 'production',
   module: {
     rules: [

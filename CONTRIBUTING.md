@@ -4,20 +4,22 @@ If you're reading this section, you're probably interested in contributing to
 JupyterLab. Welcome and thanks for your interest in contributing!
 
 Please take a look at the Contributor documentation, familiarize yourself with
-using JupyterLab, and introduce yourself on the mailing list and share
-what area of the project you are interested in working on. Please see also the
-Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
+using JupyterLab, and introduce yourself to the community (on the mailing list
+or discourse) and share what area of the project you are interested in working
+on. Please also see the Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
 
 We have labeled some issues as [good first issue](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) or [help wanted](https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
 that we believe are good examples of small, self-contained changes.
 We encourage those that are new to the code base to implement and/or ask
 questions about these issues.
 
-## Tag Issues with Labels
+If you believe you’ve found a security vulnerability in JupyterLab or any
+Jupyter project, please report it to
+[security@ipython.org](mailto:security@ipython.org). If you prefer to encrypt your
+security reports, you can use [this PGP public
+key](https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipython_security.asc).
 
-Users without the commit rights to the jupyterlab repository can also tag the issues with labels. For example: To apply the label `foo` and `bar baz` to an issue, comment `@meeseeksdev tag foo "bar baz"` on the issue.
-
-## General Guidelines
+## General Guidelines for Contributing
 
 For general documentation about contributing to Jupyter projects, see the
 [Project Jupyter Contributor Documentation](https://jupyter.readthedocs.io/en/latest/contributor/content-contributor.html) and [Code of Conduct](https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md).
@@ -39,7 +41,31 @@ installing a prettier
 extension for your code editor and configuring it to format your code with
 a keyboard shortcut or automatically on save.
 
+## Submitting a Pull Request Contribution
+
+Generally, an issue should be opened describing a piece of proposed work and the
+issues it solves before a pull request is opened.
+
+### Issue Management
+
+Opening an issue lets community members participate in the design discussion,
+makes others aware of work being done, and sets the stage for a fruitful community
+interaction. A pull request should reference the issue it is addressing. Once the
+pull request is merged, the issue related to it will also be closed. If there is
+additional discussion around implemementation the issue may be re-opened. Once 30 days
+have passed with no additional discussion, the [lock bot](https://github.com/apps/lock) will lock the issue. If
+additional discussion is desired, or if the pull request doesn't fully address the
+locked issue, please open a new issue referencing the locked issue.
+
+### Tag Issues with Labels
+
+Users without the commit rights to the JupyterLab repository can tag issues with
+labels using the `@meeseeksdev` bot. For example: To apply the label `foo` and
+`bar baz` to an issue, comment `@meeseeksdev tag foo "bar baz"` on the issue.
+
 ## Setting Up a Development Environment
+
+You can launch a binder with the latest JupyterLab master to test something (this may take a few minutes to load): [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/)
 
 ### Installing Node.js and jlpm
 
@@ -69,7 +95,7 @@ If you use `conda`, you can install notebook using:
 conda install -c conda-forge notebook
 ```
 
-You may also want to install `nb_conda_kernels` to have a kernel option for different [conda environments](http://conda.pydata.org/docs/using/envs.html)
+You may also want to install `nb_conda_kernels` to have a kernel option for different [conda environments](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)
 
 ```bash
 conda install -c conda-forge nb_conda_kernels
@@ -136,9 +162,11 @@ jupyter lab --dev-mode
 ```
 
 Development mode ensures that you are running the JavaScript assets that are
-built in the dev-installed Python package. When running in dev mode, a red
-stripe will appear at the top of the page; this is to indicate running
-an unreleased version.
+built in the dev-installed Python package. Note that when running in dev mode,
+extensions will not be activated by default.
+
+When running in dev mode, a red stripe will appear at the top of the page;
+this is to indicate running an unreleased version.
 
 ### Build and Run the Tests
 
@@ -155,10 +183,13 @@ cd tests/test-notebook
 jlpm test
 ```
 
+Note: We are in the process of changing our test suite over to use `jest`. For folders
+that have a `jest.conf.js` file, please see the `jest` specific instructions below.
+
 You can also select specific test file(s) to run using a pattern:
 
 ```bash
-cd tests/test-console
+cd tests/test-notebook
 jlpm test --pattern=src/*.spec.ts
 jlpm test --pattern=src/history.spec.ts
 ```
@@ -185,6 +216,203 @@ command, where `<package-directory-name>` is the name of the folder in
 ```bash
 jlpm create:test <package-directory-name>
 ```
+
+#### Running Jest Tests
+
+For those test folders that use `jest`, they can be run as `jlpm test` to run the files
+directly. You can also use `jlpm test --testNamePattern=<regex>` to specify specific test
+suite names, and `jlpm test --testPathPattern=<regex>` to specify specific test module names. In order to watch the code, add a `debugger` line in your code and run `jlpm watch`. This will start a node V8 debugger, which can be debugged
+in Chrome by browsing to `chrome://inspect/` and launching the remote session.
+
+## Performance Testing
+
+If you are making a change that might affect how long it takes to load JupyterLab in the browser,
+we recommend doing some performance testing using [Lighthouse](https://github.com/GoogleChrome/lighthouse).
+It let's you easily compute a number of metrics, like page load time, for the site.
+
+To use it, first build JupyterLab in dev mode:
+
+```bash
+jlpm run build:dev
+```
+
+Then, start JupyterLab using the dev build:
+
+```bash
+jupyter lab --dev --NotebookApp.token=''  --no-browser
+```
+
+Now run Lighthouse against this local server and show the results:
+
+```bash
+jlpm run lighthouse --view
+```
+
+![](./docs/source/images/lighthouse.png)
+
+### Using throttling
+
+Lighthouse recommends using the system level [`comcast`](https://github.com/tylertreat/comcast) tool to throttle your network connection
+and emulate different scenarios. To use it, first install that tool using `go`:
+
+```bash
+go get github.com/tylertreat/comcast
+```
+
+Then, before you run Lighthouse, enable the throttling (this requires sudo):
+
+```bash
+jlpm run lighthouse:throttling:start
+```
+
+This enables the "WIFI (good)" preset of comcast, which should emulate
+loading JupyterLab over a local network.
+
+Then run the lighthouse tests:
+
+```bash
+jlpm run lighthouse [...]
+```
+
+Then disable the throttling after you are done:
+
+```bash
+jlpm run lighthouse:throttling:stop
+```
+
+### Comparing results
+
+Performance results are usually only useful in comparison to other results.
+For that reason, we have included a comparison script that can take two
+lighthouse results and show the changes between them.
+
+Let's say we want to compare the results of the production build of JupyterLab with the normal build. The production build minifies all the JavaScript, so should load a bit faster.
+
+First, we build JupyterLab normally, start it up, profile it and save the results:
+
+```bash
+jlpm build:dev
+jupyter lab --dev --NotebookApp.token='' --no-browser
+
+# in new window
+jlpm run lighthouse --output json --output-path normal.json
+```
+
+Then rebuild with the production build and retest:
+
+```bash
+jlpm run build:dev:prod
+jupyter lab --dev --NotebookApp.token='' --no-browser
+
+# in new window
+jlpm run lighthouse --output json --output-path prod.json
+```
+
+Now we can use compare the two outputs:
+
+```bash
+jlpm run lighthouse:compare normal.json prod.json
+```
+
+This gives us a report of the relative differences between the audits in the two reports:
+
+> `normal.json` -> `prod.json`
+>
+> **First Contentful Paint**
+>
+> - -62% Δ
+> - 1.9 s -> 0.7 s
+> - First Contentful Paint marks the time at which the first text or image is painted. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/first-contentful-paint).
+>
+> **First Meaningful Paint**
+>
+> - -50% Δ
+> - 2.5 s -> 1.3 s
+> - First Meaningful Paint measures when the primary content of a page is visible. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/first-meaningful-paint).
+>
+> **Speed Index**
+>
+> - -48% Δ
+> - 2.6 s -> 1.3 s
+> - Speed Index shows how quickly the contents of a page are visibly populated. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/speed-index).
+>
+> **Estimated Input Latency**
+>
+> - 0% Δ
+> - 20 ms -> 20 ms
+> - Estimated Input Latency is an estimate of how long your app takes to respond to user input, in milliseconds, during the busiest 5s window of page load. If your latency is higher than 50 ms, users may perceive your app as laggy. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/estimated-input-latency).
+>
+> **Max Potential First Input Delay**
+>
+> - 9% Δ
+> - 200 ms -> 210 ms
+> - The maximum potential First Input Delay that your users could experience is the duration, in milliseconds, of the longest task. [Learn more](https://developers.google.com/web/updates/2018/05/first-input-delay).
+>
+> **First CPU Idle**
+>
+> - -50% Δ
+> - 2.5 s -> 1.3 s
+> - First CPU Idle marks the first time at which the page's main thread is quiet enough to handle input. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/first-interactive).
+>
+> **Time to Interactive**
+>
+> - -52% Δ
+> - 2.5 s -> 1.2 s
+> - Time to interactive is the amount of time it takes for the page to become fully interactive. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/consistently-interactive).
+>
+> **Avoid multiple page redirects**
+>
+> - -2% Δ
+> - Potential savings of 10 ms -> Potential savings of 10 ms
+> - Redirects introduce additional delays before the page can be loaded. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/redirects).
+>
+> **Minimize main-thread work**
+>
+> - -54% Δ
+> - 2.1 s -> 1.0 s
+> - Consider reducing the time spent parsing, compiling and executing JS. You may find delivering smaller JS payloads helps with this.
+>
+> **JavaScript execution time**
+>
+> - -49% Δ
+> - 1.1 s -> 0.6 s
+> - Consider reducing the time spent parsing, compiling, and executing JS. You may find delivering smaller JS payloads helps with this. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/bootup).
+>
+> **Preload key requests**
+>
+> - -100% Δ
+> - Potential savings of 240 ms ->
+> - Consider using <link rel=preload> to prioritize fetching resources that are currently requested later in page load. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/preload).
+>
+> **Uses efficient cache policy on static assets**
+>
+> - 0% Δ
+> - 1 resource found -> 1 resource found
+> - A long cache lifetime can speed up repeat visits to your page. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/cache-policy).
+>
+> **Avoid enormous network payloads**
+>
+> - -86% Δ
+> - Total size was 30,131 KB -> Total size was 4,294 KB
+> - Large network payloads cost users real money and are highly correlated with long load times. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/network-payloads).
+>
+> **Minify JavaScript**
+>
+> - -100% Δ
+> - Potential savings of 23,041 KB ->
+> - Minifying JavaScript files can reduce payload sizes and script parse time. [Learn more](https://developers.google.com/speed/docs/insights/MinifyResources).
+>
+> **Enable text compression**
+>
+> - -86% Δ
+> - Potential savings of 23,088 KB -> Potential savings of 3,112 KB
+> - Text-based resources should be served with compression (gzip, deflate or brotli) to minimize total network bytes. [Learn more](https://developers.google.com/web/tools/lighthouse/audits/text-compression).
+>
+> **Avoid an excessive DOM size**
+>
+> - 0% Δ
+> - 1,268 elements -> 1,268 elements
+> - Browser engineers recommend pages contain fewer than ~1,500 DOM elements. The sweet spot is a tree depth < 32 elements and fewer than 60 children/parent element. A large DOM can increase memory usage, cause longer [style calculations](https://developers.google.com/web/fundamentals/performance/rendering/reduce-the-scope-and-complexity-of-style-calculations), and produce costly [layout reflows](https://developers.google.com/speed/articles/reflow). [Learn more](https://developers.google.com/web/tools/lighthouse/audits/dom-size).
 
 ### Build and run the stand-alone examples
 
@@ -267,7 +495,7 @@ Alternatively, you can install the documentation dependencies in an existing env
 conda env update -n <ENVIRONMENT> -f docs/environment.yml
 ```
 
-The Developer Documentation includes a [guide](http://jupyterlab.readthedocs.io/en/latest/developer/documentation.html) to writing documentation including writing style, naming conventions, keyboard shortcuts, and screenshots.
+The Developer Documentation includes a [guide](https://jupyterlab.readthedocs.io/en/latest/developer/contributing.html) to writing documentation including writing style, naming conventions, keyboard shortcuts, and screenshots.
 
 To test the docs run:
 
@@ -333,7 +561,10 @@ a package by importing from it in the TypeScript file, and then running:
 `jlpm run integrity` from the repo root.
 
 We also have scripts for creating and removing packages in `packages/`,
-`jlpm run create:package` and `jlpm run remove:package`.
+`jlpm run create:package` and `jlpm run remove:package`. When creating a package,
+if it is meant to be included in the core bundle, add the `jupyterlab: { coreDependency: true }`
+metadata to the `package.json`. Packages with `extension` or `mimeExtension` metadata
+are considered to be a core dependency unless they are explicitly marked otherwise.
 
 ## Testing Changes to External Packages
 

@@ -29,7 +29,7 @@ describe('docregistry/savehandler', () => {
   let handler: SaveHandler;
 
   before(() => {
-    manager = new ServiceManager();
+    manager = new ServiceManager({ standby: 'never' });
     return manager.ready;
   });
 
@@ -168,7 +168,7 @@ describe('docregistry/savehandler', () => {
           const buttons = dialog.getElementsByTagName('button');
 
           for (let i = 0; i < buttons.length; i++) {
-            if (buttons[i].textContent === 'REVERT') {
+            if (buttons[i].textContent === 'Revert') {
               buttons[i].click();
               return;
             }

@@ -1,6 +1,223 @@
 {
   "jupyter.lab.setting-icon-class": "jp-NotebookIcon",
   "jupyter.lab.setting-icon-label": "Notebook",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "notebook:change-cell-to-code",
+      "keys": ["Y"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:change-cell-to-heading-1",
+      "keys": ["1"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:change-cell-to-heading-2",
+      "keys": ["2"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:change-cell-to-heading-3",
+      "keys": ["3"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:change-cell-to-heading-4",
+      "keys": ["4"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:change-cell-to-heading-5",
+      "keys": ["5"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:change-cell-to-heading-6",
+      "keys": ["6"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:change-cell-to-markdown",
+      "keys": ["M"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:change-cell-to-raw",
+      "keys": ["R"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:copy-cell",
+      "keys": ["C"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:cut-cell",
+      "keys": ["X"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:delete-cell",
+      "keys": ["D", "D"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:enter-command-mode",
+      "keys": ["Escape"],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "notebook:enter-command-mode",
+      "keys": ["Ctrl M"],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "notebook:enter-edit-mode",
+      "keys": ["Enter"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:extend-marked-cells-above",
+      "keys": ["Shift ArrowUp"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:extend-marked-cells-above",
+      "keys": ["Shift K"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:extend-marked-cells-top",
+      "keys": ["Shift Home"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:extend-marked-cells-below",
+      "keys": ["Shift ArrowDown"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:extend-marked-cells-bottom",
+      "keys": ["Shift End"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:extend-marked-cells-below",
+      "keys": ["Shift J"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:insert-cell-above",
+      "keys": ["A"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:insert-cell-below",
+      "keys": ["B"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:merge-cells",
+      "keys": ["Shift M"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:move-cursor-down",
+      "keys": ["ArrowDown"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:move-cursor-down",
+      "keys": ["J"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:move-cursor-up",
+      "keys": ["ArrowUp"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:move-cursor-up",
+      "keys": ["K"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:paste-cell-below",
+      "keys": ["V"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:redo-cell-action",
+      "keys": ["Shift Z"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:run-cell",
+      "keys": ["Ctrl Enter"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:run-cell",
+      "keys": ["Ctrl Enter"],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "notebook:run-cell-and-insert-below",
+      "keys": ["Alt Enter"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:run-cell-and-insert-below",
+      "keys": ["Alt Enter"],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "notebook:run-in-console",
+      "keys": [""],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "notebook:run-cell-and-select-next",
+      "keys": ["Shift Enter"],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "viewmenu:line-numbering",
+      "keys": [""],
+      "selector": ".jp-Notebook.jp-mod-commandMode"
+    },
+    {
+      "command": "viewmenu:match-brackets",
+      "keys": [""],
+      "selector": ".jp-Notebook.jp-mod-commandMode"
+    },
+    {
+      "command": "notebook:select-all",
+      "keys": ["Accel A"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:split-cell-at-cursor",
+      "keys": ["Ctrl Shift -"],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "notebook:toggle-all-cell-line-numbers",
+      "keys": ["Shift L"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:toggle-cell-line-numbers",
+      "keys": ["L"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:undo-cell-action",
+      "keys": ["Z"],
+      "selector": ".jp-Notebook:focus"
+    }
+  ],
   "title": "Notebook",
   "description": "Notebook settings.",
   "definitions": {
@@ -41,6 +258,15 @@
         },
         "wordWrapColumn": {
           "type": "integer"
+        },
+        "rulers": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "codeFolding": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -63,8 +289,23 @@
         "readOnly": false,
         "insertSpaces": true,
         "tabSize": 4,
-        "wordWrapColumn": 80
+        "wordWrapColumn": 80,
+        "rulers": [],
+        "codeFolding": false
       }
+    },
+    "defaultCell": {
+      "title": "Default cell type",
+      "description": "The default type (markdown, code, or raw) for new cells",
+      "type": "string",
+      "enum": ["code", "markdown", "raw"],
+      "default": "code"
+    },
+    "kernelShutdown": {
+      "title": "Shut down kernel",
+      "description": "Whether to shut down or not the kernel when closing a notebook.",
+      "type": "boolean",
+      "default": false
     },
     "markdownCellConfig": {
       "title": "Markdown Cell Configuration",
@@ -81,7 +322,9 @@
         "readOnly": false,
         "insertSpaces": true,
         "tabSize": 4,
-        "wordWrapColumn": 80
+        "wordWrapColumn": 80,
+        "rulers": [],
+        "codeFolding": false
       }
     },
     "rawCellConfig": {
@@ -99,7 +342,9 @@
         "readOnly": false,
         "insertSpaces": true,
         "tabSize": 4,
-        "wordWrapColumn": 80
+        "wordWrapColumn": 80,
+        "rulers": [],
+        "codeFolding": false
       }
     },
     "scrollPastEnd": {

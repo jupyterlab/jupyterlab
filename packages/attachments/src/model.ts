@@ -67,6 +67,14 @@ export interface IAttachmentsModel extends IDisposable {
    */
   set(key: string, attachment: nbformat.IMimeBundle): void;
 
+  // TODO: This is marked optional so as to be non-breaking for 1.x
+  // Make this property mandatory for 2.0
+  /**
+   * Remove the attachment whose name is the specified key.
+   * Note that this is optional only until Jupyterlab 2.0 release.
+   */
+  remove?: (key: string) => void;
+
   /**
    * Clear all of the attachments.
    */
@@ -143,10 +151,7 @@ export class AttachmentsModel implements IAttachmentsModel {
         this.set(key, options.values[key]);
       }
     }
-    this._map.changed.connect(
-      this._onMapChanged,
-      this
-    );
+    this._map.changed.connect(this._onMapChanged, this);
 
     // If we are given a IModelDB, keep an up-to-date
     // serialized copy of the AttachmentsModel in it.
@@ -158,10 +163,7 @@ export class AttachmentsModel implements IAttachmentsModel {
       } else {
         this._serialized.set(this.toJSON());
       }
-      this._serialized.changed.connect(
-        this._onSerializedChanged,
-        this
-      );
+      this._serialized.changed.connect(this._onSerializedChanged, this);
     }
   }
 
@@ -241,6 +243,13 @@ export class AttachmentsModel implements IAttachmentsModel {
   }
 
   /**
+   * Remove the attachment whose name is the specified key
+   */
+  remove(key: string): void {
+    this._map.delete(key);
+  }
+
+  /**
    * Clear all of the attachments.
    */
   clear(): void {
@@ -280,10 +289,7 @@ export class AttachmentsModel implements IAttachmentsModel {
   private _createItem(options: IAttachmentModel.IOptions): IAttachmentModel {
     let factory = this.contentFactory;
     let item = factory.createAttachmentModel(options);
-    item.changed.connect(
-      this._onGenericChange,
-      this
-    );
+    item.changed.connect(this._onGenericChange, this);
     return item;
   }
 
@@ -383,6 +389,9 @@ export class AttachmentsResolver implements IRenderMime.IResolver {
 
   /**
    * Get the download url of a given absolute server path.
+   *
+   * #### Notes
+   * The returned URL may include a query parameter.
    */
   getDownloadUrl(path: string): Promise<string> {
     if (this._parent && !path.startsWith('attachment:')) {

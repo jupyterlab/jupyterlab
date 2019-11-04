@@ -8,6 +8,12 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
+  combineClasses,
+  DefaultIconReact,
+  defaultIconRegistry
+} from '@jupyterlab/ui-components';
+
+import {
   ArrayExt,
   ArrayIterator,
   IIterator,
@@ -27,8 +33,6 @@ import { AttachedProperty } from '@phosphor/properties';
 import { Widget } from '@phosphor/widgets';
 
 import * as React from 'react';
-
-import '../style/index.css';
 
 /**
  * The class name added to Launcher instances.
@@ -75,13 +79,6 @@ export interface ILauncher {
  * LauncherItems, which the Launcher will render.
  */
 export class LauncherModel extends VDomModel implements ILauncher {
-  /**
-   * Create a new launcher model.
-   */
-  constructor() {
-    super();
-  }
-
   /**
    * Add a command item to the launcher, and trigger re-render event for parent
    * widget.
@@ -197,17 +194,31 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     // Now create the sections for each category
     orderedCategories.forEach(cat => {
       const item = categories[cat][0] as ILauncher.IItemOptions;
-      let iconClass =
-        `${this._commands.iconClass(item.command, {
-          ...item.args,
-          cwd: this.cwd
-        })} ` + 'jp-Launcher-sectionIcon jp-Launcher-icon';
+      let iconClass = this._commands.iconClass(item.command, {
+        ...item.args,
+        cwd: this.cwd
+      });
       let kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
       if (cat in categories) {
         section = (
           <div className="jp-Launcher-section" key={cat}>
             <div className="jp-Launcher-sectionHeader">
-              {kernel && <div className={iconClass} />}
+              {kernel && defaultIconRegistry.contains(iconClass) ? (
+                <DefaultIconReact
+                  name={iconClass}
+                  className={''}
+                  center={true}
+                  kind={'launcherSection'}
+                />
+              ) : (
+                <div
+                  className={combineClasses(
+                    iconClass,
+                    'jp-Launcher-sectionIcon',
+                    'jp-Launcher-icon'
+                  )}
+                />
+              )}
               <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
             </div>
             <div className="jp-Launcher-cardContainer">
@@ -354,7 +365,9 @@ function Card(
   // Get some properties of the command
   const command = item.command;
   const args = { ...item.args, cwd: launcher.cwd };
+  const caption = commands.caption(command, args);
   const label = commands.label(command, args);
+  const title = kernel ? label : caption || label;
 
   // Build the onclick handler.
   let onclick = () => {
@@ -364,7 +377,7 @@ function Card(
       return;
     }
     launcher.pending = true;
-    commands
+    void commands
       .execute(command, {
         ...item.args,
         cwd: launcher.cwd
@@ -378,42 +391,53 @@ function Card(
       })
       .catch(err => {
         launcher.pending = false;
-        showErrorMessage('Launcher Error', err);
+        void showErrorMessage('Launcher Error', err);
       });
   };
 
+  // With tabindex working, you can now pick a kernel by tabbing around and
+  // pressing Enter.
+  let onkeypress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      onclick();
+    }
+  };
+
   // Return the VDOM element.
+  const iconClass = kernel ? '' : commands.iconClass(command, args);
   return (
     <div
       className="jp-LauncherCard"
-      title={label}
+      title={title}
       onClick={onclick}
+      onKeyPress={onkeypress}
+      tabIndex={100}
       data-category={item.category || 'Other'}
       key={Private.keyProperty.get(item)}
     >
-      <div className="jp-LauncherCard-icon">
-        {item.kernelIconUrl &&
-          kernel && (
+      {kernel ? (
+        <div className="jp-LauncherCard-icon">
+          {item.kernelIconUrl ? (
             <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
-          )}
-        {!item.kernelIconUrl &&
-          !kernel && (
-            <div
-              className={`${commands.iconClass(
-                command,
-                args
-              )} jp-Launcher-icon`}
-            />
-          )}
-        {!item.kernelIconUrl &&
-          kernel && (
+          ) : (
             <div className="jp-LauncherCard-noKernelIcon">
               {label[0].toUpperCase()}
             </div>
           )}
-      </div>
-      <div className="jp-LauncherCard-label" title={label}>
-        {label}
+        </div>
+      ) : (
+        <div className="jp-LauncherCard-icon">
+          <DefaultIconReact
+            name={`${iconClass} jp-Launcher-icon`}
+            className={''}
+            fallback={true}
+            center={true}
+            kind={'launcherCard'}
+          />
+        </div>
+      )}
+      <div className="jp-LauncherCard-label" title={title}>
+        <p>{label}</p>
       </div>
     </div>
   );

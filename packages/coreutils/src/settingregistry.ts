@@ -3,38 +3,42 @@
 
 import Ajv from 'ajv';
 
-import * as json from 'comment-json';
-
-import { find } from '@phosphor/algorithm';
+import * as json from 'json5';
 
 import {
   JSONExt,
   JSONObject,
   JSONValue,
   ReadonlyJSONObject,
-  Token
+  ReadonlyJSONValue
 } from '@phosphor/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { IDataConnector } from './interfaces';
 
-/**
- * The key in the schema for setting editor icon class hints.
- */
-export const ICON_CLASS_KEY = 'jupyter.lab.setting-icon-class';
+import { ISettingRegistry } from './tokens';
 
-/**
- * The key in the schema for setting editor icon label hints.
- */
-export const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
+import SCHEMA from './plugin-schema.json';
 
 /**
  * An alias for the JSON deep copy function.
  */
 const copy = JSONExt.deepCopy;
+
+/**
+ * The default number of milliseconds before a `load()` call to the registry
+ * will wait before timing out if it requires a transformation that has not been
+ * registered.
+ */
+const DEFAULT_TRANSFORM_TIMEOUT = 7000;
+
+/**
+ * The ASCII record separator character.
+ */
+const RECORD_SEPARATOR = String.fromCharCode(30);
 
 /**
  * An implementation of a schema validator.
@@ -93,226 +97,6 @@ export namespace ISchemaValidator {
   }
 }
 
-/* tslint:disable */
-/**
- * The setting registry token.
- */
-export const ISettingRegistry = new Token<ISettingRegistry>(
-  '@jupyterlab/coreutils:ISettingRegistry'
-);
-/* tslint:enable */
-
-/**
- * A namespace for setting registry interfaces.
- */
-export namespace ISettingRegistry {
-  /**
-   * The settings for a specific plugin.
-   */
-  export interface IPlugin extends JSONObject {
-    /**
-     * The name of the plugin.
-     */
-    id: string;
-
-    /**
-     * The collection of values for a specified setting.
-     */
-    data: ISettingBundle;
-
-    /**
-     * The raw user settings data as a string containing JSON with comments.
-     */
-    raw: string;
-
-    /**
-     * The JSON schema for the plugin.
-     */
-    schema: ISchema;
-  }
-
-  /**
-   * A schema type that is a minimal subset of the formal JSON Schema along with
-   * optional JupyterLab rendering hints.
-   */
-  export interface ISchema extends JSONObject {
-    /**
-     * The JupyterLab icon class hint for a plugin can be overridden by user
-     * settings. It can also be root level and therefore "private".
-     */
-    'jupyter.lab.setting-icon-class'?: string;
-
-    /**
-     * The JupyterLab icon label hint for a plugin can be overridden by user
-     * settings. It can also be root level and therefore "private".
-     */
-    'jupyter.lab.setting-icon-label'?: string;
-
-    /**
-     * The default value, if any.
-     */
-    default?: any;
-
-    /**
-     * The schema description.
-     */
-    description?: string;
-
-    /**
-     * The schema's child properties.
-     */
-    properties?: {
-      /**
-       * The JupyterLab icon class hint for a plugin can be overridden by user
-       * settings. It can also be root level and therefore "private".
-       */
-      'jupyter.lab.setting-icon-class'?: ISchema;
-
-      /**
-       * The JupyterLab icon label hint for a plugin can be overridden by user
-       * settings. It can also be root level and therefore "private".
-       */
-      'jupyter.lab.setting-icon-label'?: ISchema;
-
-      /**
-       * Arbitrary setting keys can be added.
-       */
-      [key: string]: ISchema;
-    };
-
-    /**
-     * The title of the schema.
-     */
-    title?: string;
-
-    /**
-     * The type or types of the data.
-     */
-    type?: string | string[];
-  }
-
-  /**
-   * The setting values for a plugin.
-   */
-  export interface ISettingBundle extends JSONObject {
-    /**
-     * A composite of the user setting values and the plugin schema defaults.
-     *
-     * #### Notes
-     * The `composite` values will always be a superset of the `user` values.
-     */
-    composite: JSONObject;
-
-    /**
-     * The user setting values.
-     */
-    user: JSONObject;
-  }
-
-  /**
-   * An interface for manipulating the settings of a specific plugin.
-   */
-  export interface ISettings extends IDisposable {
-    /**
-     * A signal that emits when the plugin's settings have changed.
-     */
-    readonly changed: ISignal<this, void>;
-
-    /**
-     * Get the composite of user settings and extension defaults.
-     */
-    readonly composite: JSONObject;
-
-    /*
-     * The plugin name.
-     */
-    readonly plugin: string;
-
-    /**
-     * The plugin settings raw text value.
-     */
-    readonly raw: string;
-
-    /**
-     * Get the plugin settings schema.
-     */
-    readonly schema: ISettingRegistry.ISchema;
-
-    /**
-     * Get the user settings.
-     */
-    readonly user: JSONObject;
-
-    /**
-     * Return the defaults in a commented JSON format.
-     */
-    annotatedDefaults(): string;
-
-    /**
-     * Calculate the default value of a setting by iterating through the schema.
-     *
-     * @param key - The name of the setting whose default value is calculated.
-     *
-     * @returns A calculated default JSON value for a specific setting.
-     */
-    default(key: string): JSONValue | undefined;
-
-    /**
-     * Get an individual setting.
-     *
-     * @param key - The name of the setting being retrieved.
-     *
-     * @returns The setting value.
-     */
-    get(key: string): { composite: JSONValue; user: JSONValue };
-
-    /**
-     * Remove a single setting.
-     *
-     * @param key - The name of the setting being removed.
-     *
-     * @returns A promise that resolves when the setting is removed.
-     *
-     * #### Notes
-     * This function is asynchronous because it writes to the setting registry.
-     */
-    remove(key: string): Promise<void>;
-
-    /**
-     * Save all of the plugin's user settings at once.
-     */
-    save(raw: string): Promise<void>;
-
-    /**
-     * Set a single setting.
-     *
-     * @param key - The name of the setting being set.
-     *
-     * @param value - The value of the setting.
-     *
-     * @returns A promise that resolves when the setting has been saved.
-     *
-     * #### Notes
-     * This function is asynchronous because it writes to the setting registry.
-     */
-    set(key: string, value: JSONValue): Promise<void>;
-
-    /**
-     * Validates raw settings with comments.
-     *
-     * @param raw - The JSON with comments string being validated.
-     *
-     * @returns A list of errors or `null` if valid.
-     */
-    validate(raw: string): ISchemaValidator.IError[] | null;
-  }
-}
-
-/**
- * An implementation of a setting registry.
- */
-export interface ISettingRegistry extends SettingRegistry {}
-
 /**
  * The default implementation of a schema validator.
  */
@@ -321,8 +105,8 @@ export class DefaultSchemaValidator implements ISchemaValidator {
    * Instantiate a schema validator.
    */
   constructor() {
-    this._composer.addSchema(Private.SCHEMA, 'main');
-    this._validator.addSchema(Private.SCHEMA, 'main');
+    this._composer.addSchema(SCHEMA, 'jupyterlab-plugin-schema');
+    this._validator.addSchema(SCHEMA, 'jupyterlab-plugin-schema');
   }
 
   /**
@@ -346,21 +130,24 @@ export class DefaultSchemaValidator implements ISchemaValidator {
 
     // If the schemas do not exist, add them to the validator and continue.
     if (!validate || !compose) {
-      const errors = this._addSchema(plugin.id, plugin.schema);
+      if (plugin.schema.type !== 'object') {
+        const keyword = 'schema';
+        const message =
+          `Setting registry schemas' root-level type must be ` +
+          `'object', rejecting type: ${plugin.schema.type}`;
 
-      if (errors) {
-        return errors;
+        return [{ dataPath: 'type', keyword, schemaPath: '', message }];
       }
 
-      return this.validateData(plugin);
+      const errors = this._addSchema(plugin.id, plugin.schema);
+
+      return errors || this.validateData(plugin);
     }
 
     // Parse the raw commented JSON into a user map.
     let user: JSONObject;
     try {
-      const strip = true;
-
-      user = json.parse(plugin.raw, null, strip) as JSONObject;
+      user = json.parse(plugin.raw, null) as JSONObject;
     } catch (error) {
       if (error instanceof SyntaxError) {
         return [
@@ -423,7 +210,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
   ): ISchemaValidator.IError[] | null {
     const composer = this._composer;
     const validator = this._validator;
-    const validate = validator.getSchema('main');
+    const validate = validator.getSchema('jupyterlab-plugin-schema');
 
     // Validate against the main schema.
     if (!(validate(schema) as boolean)) {
@@ -453,19 +240,30 @@ export class DefaultSchemaValidator implements ISchemaValidator {
 /**
  * The default concrete implementation of a setting registry.
  */
-export class SettingRegistry {
+export class SettingRegistry implements ISettingRegistry {
   /**
    * Create a new setting registry.
    */
   constructor(options: SettingRegistry.IOptions) {
-    this._connector = options.connector;
+    this.connector = options.connector;
     this.validator = options.validator || new DefaultSchemaValidator();
+    this._timeout = options.timeout || DEFAULT_TRANSFORM_TIMEOUT;
+
+    // Preload with any available data at instantiation-time.
+    if (options.plugins) {
+      this._ready = this._preload(options.plugins);
+    }
   }
+
+  /**
+   * The data connector used by the setting registry.
+   */
+  readonly connector: IDataConnector<ISettingRegistry.IPlugin, string, string>;
 
   /**
    * The schema of the setting registry.
    */
-  readonly schema = Private.SCHEMA;
+  readonly schema = SCHEMA as ISettingRegistry.ISchema;
 
   /**
    * The schema validator used by the setting registry.
@@ -480,15 +278,11 @@ export class SettingRegistry {
   }
 
   /**
-   * Returns a list of plugin settings held in the registry.
+   * The collection of setting registry plugins.
    */
-  get plugins(): ISettingRegistry.IPlugin[] {
-    const plugins = this._plugins;
-
-    return Object.keys(plugins).map(
-      p => copy(plugins[p]) as ISettingRegistry.IPlugin
-    );
-  }
+  readonly plugins: {
+    [name: string]: ISettingRegistry.IPlugin;
+  } = Object.create(null);
 
   /**
    * Get an individual setting.
@@ -499,20 +293,22 @@ export class SettingRegistry {
    *
    * @returns A promise that resolves when the setting is retrieved.
    */
-  get(
+  async get(
     plugin: string,
     key: string
   ): Promise<{ composite: JSONValue; user: JSONValue }> {
-    const plugins = this._plugins;
+    // Wait for data preload before allowing normal operation.
+    await this._ready;
+
+    const plugins = this.plugins;
 
     if (plugin in plugins) {
       const { composite, user } = plugins[plugin].data;
-      const result = {
+
+      return {
         composite: key in composite ? copy(composite[key]) : undefined,
         user: key in user ? copy(user[key]) : undefined
       };
-
-      return Promise.resolve(result);
     }
 
     return this.load(plugin).then(() => this.get(plugin, key));
@@ -526,15 +322,16 @@ export class SettingRegistry {
    * @returns A promise that resolves with a plugin settings object or rejects
    * if the plugin is not found.
    */
-  load(plugin: string): Promise<ISettingRegistry.ISettings> {
-    const plugins = this._plugins;
+  async load(plugin: string): Promise<ISettingRegistry.ISettings> {
+    // Wait for data preload before allowing normal operation.
+    await this._ready;
+
+    const plugins = this.plugins;
     const registry = this;
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
-      const settings = new Settings({ plugin: plugins[plugin], registry });
-
-      return Promise.resolve(settings);
+      return new Settings({ plugin: plugins[plugin], registry });
     }
 
     // If the plugin needs to be loaded from the data connector, fetch.
@@ -549,35 +346,18 @@ export class SettingRegistry {
    * @returns A promise that resolves with a plugin settings object or rejects
    * with a list of `ISchemaValidator.IError` objects if it fails.
    */
-  reload(plugin: string): Promise<ISettingRegistry.ISettings> {
-    const connector = this._connector;
-    const plugins = this._plugins;
+  async reload(plugin: string): Promise<ISettingRegistry.ISettings> {
+    // Wait for data preload before allowing normal operation.
+    await this._ready;
+
+    const fetched = await this.connector.fetch(plugin);
+    const plugins = this.plugins;
     const registry = this;
 
-    // If the plugin needs to be loaded from the connector, fetch.
-    return connector.fetch(plugin).then(data => {
-      // Validate the response from the connector; populate `composite` field.
-      try {
-        this._validate(data);
-      } catch (errors) {
-        const output = [`Validating ${plugin} failed:`];
+    await this._load(await this._transform('fetch', fetched));
+    this._pluginChanged.emit(plugin);
 
-        (errors as ISchemaValidator.IError[]).forEach((error, index) => {
-          const { dataPath, schemaPath, keyword, message } = error;
-
-          output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
-          output.push(`\t${keyword} ${message}`);
-        });
-        console.error(output.join('\n'));
-
-        throw new Error(`Failed validating ${plugin}`);
-      }
-
-      // Emit that a plugin has changed.
-      this._pluginChanged.emit(plugin);
-
-      return new Settings({ plugin: plugins[plugin], registry });
-    });
+    return new Settings({ plugin: plugins[plugin], registry });
   }
 
   /**
@@ -589,14 +369,17 @@ export class SettingRegistry {
    *
    * @returns A promise that resolves when the setting is removed.
    */
-  remove(plugin: string, key: string): Promise<void> {
-    const plugins = this._plugins;
+  async remove(plugin: string, key: string): Promise<void> {
+    // Wait for data preload before allowing normal operation.
+    await this._ready;
+
+    const plugins = this.plugins;
 
     if (!(plugin in plugins)) {
-      return Promise.resolve(undefined);
+      return;
     }
 
-    const raw = json.parse(plugins[plugin].raw, null, true);
+    const raw = json.parse(plugins[plugin].raw, null);
 
     // Delete both the value and any associated comment.
     delete raw[key];
@@ -618,14 +401,18 @@ export class SettingRegistry {
    * @returns A promise that resolves when the setting has been saved.
    *
    */
-  set(plugin: string, key: string, value: JSONValue): Promise<void> {
-    const plugins = this._plugins;
+  async set(plugin: string, key: string, value: JSONValue): Promise<void> {
+    // Wait for data preload before allowing normal operation.
+    await this._ready;
+
+    const plugins = this.plugins;
 
     if (!(plugin in plugins)) {
       return this.load(plugin).then(() => this.set(plugin, key, value));
     }
 
-    const raw = json.parse(plugins[plugin].raw, null, true);
+    // Parse the raw JSON string removing all comments and return an object.
+    const raw = json.parse(plugins[plugin].raw, null);
 
     plugins[plugin].raw = Private.annotatedPlugin(plugins[plugin], {
       ...raw,
@@ -633,6 +420,46 @@ export class SettingRegistry {
     });
 
     return this._save(plugin);
+  }
+
+  /**
+   * Register a plugin transform function to act on a specific plugin.
+   *
+   * @param plugin - The name of the plugin whose settings are transformed.
+   *
+   * @param transforms - The transform functions applied to the plugin.
+   *
+   * @returns A disposable that removes the transforms from the registry.
+   *
+   * #### Notes
+   * - `compose` transformations: The registry automatically overwrites a
+   * plugin's default values with user overrides, but a plugin may instead wish
+   * to merge values. This behavior can be accomplished in a `compose`
+   * transformation.
+   * - `fetch` transformations: The registry uses the plugin data that is
+   * fetched from its connector. If a plugin wants to override, e.g. to update
+   * its schema with dynamic defaults, a `fetch` transformation can be applied.
+   */
+  transform(
+    plugin: string,
+    transforms: {
+      [phase in ISettingRegistry.IPlugin.Phase]?: ISettingRegistry.IPlugin.Transform;
+    }
+  ): IDisposable {
+    const transformers = this._transformers;
+
+    if (plugin in transformers) {
+      throw new Error(`${plugin} already has a transformer.`);
+    }
+
+    transformers[plugin] = {
+      fetch: transforms.fetch || (plugin => plugin),
+      compose: transforms.compose || (plugin => plugin)
+    };
+
+    return new DisposableDelegate(() => {
+      delete transformers[plugin];
+    });
   }
 
   /**
@@ -644,8 +471,11 @@ export class SettingRegistry {
    *
    * @returns A promise that resolves when the settings have been saved.
    */
-  upload(plugin: string, raw: string): Promise<void> {
-    const plugins = this._plugins;
+  async upload(plugin: string, raw: string): Promise<void> {
+    // Wait for data preload before allowing normal operation.
+    await this._ready;
+
+    const plugins = this.plugins;
 
     if (!(plugin in plugins)) {
       return this.load(plugin).then(() => this.upload(plugin, raw));
@@ -658,35 +488,130 @@ export class SettingRegistry {
   }
 
   /**
-   * Save a plugin in the registry.
+   * Load a plugin into the registry.
    */
-  private _save(plugin: string): Promise<void> {
-    const plugins = this._plugins;
+  private async _load(data: ISettingRegistry.IPlugin): Promise<void> {
+    const plugin = data.id;
 
-    if (!(plugin in plugins)) {
-      const message = `${plugin} does not exist in setting registry.`;
-
-      return Promise.reject(new Error(message));
-    }
-
+    // Validate and preload the item.
     try {
-      this._validate(plugins[plugin]);
+      await this._validate(data);
     } catch (errors) {
-      const message = `${plugin} failed to validate; check console for errors.`;
+      const output = [`Validating ${plugin} failed:`];
 
-      console.warn(`${plugin} validation errors:`, errors);
-      return Promise.reject(new Error(message));
+      (errors as ISchemaValidator.IError[]).forEach((error, index) => {
+        const { dataPath, schemaPath, keyword, message } = error;
+
+        if (dataPath || schemaPath) {
+          output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
+        }
+        output.push(`{${keyword}} ${message}`);
+      });
+      console.warn(output.join('\n'));
+
+      throw errors;
     }
-
-    return this._connector.save(plugin, plugins[plugin].raw).then(() => {
-      this._pluginChanged.emit(plugin);
-    });
   }
 
   /**
-   * Validate a plugin's data and schema, compose the `composite` data.
+   * Preload a list of plugins and fail gracefully.
    */
-  private _validate(plugin: ISettingRegistry.IPlugin): void {
+  private async _preload(plugins: ISettingRegistry.IPlugin[]): Promise<void> {
+    await Promise.all(
+      plugins.map(async plugin => {
+        try {
+          // Apply a transformation to the plugin if necessary.
+          await this._load(await this._transform('fetch', plugin));
+        } catch (errors) {
+          /* Ignore preload errors. */
+          console.log('Ignored setting registry preload errors.', errors);
+        }
+      })
+    );
+  }
+
+  /**
+   * Save a plugin in the registry.
+   */
+  private async _save(plugin: string): Promise<void> {
+    const plugins = this.plugins;
+
+    if (!(plugin in plugins)) {
+      throw new Error(`${plugin} does not exist in setting registry.`);
+    }
+
+    try {
+      await this._validate(plugins[plugin]);
+    } catch (errors) {
+      console.warn(`${plugin} validation errors:`, errors);
+      throw new Error(`${plugin} failed to validate; check console.`);
+    }
+    await this.connector.save(plugin, plugins[plugin].raw);
+
+    // Fetch and reload the data to guarantee server and client are in sync.
+    const fetched = await this.connector.fetch(plugin);
+    await this._load(await this._transform('fetch', fetched));
+    this._pluginChanged.emit(plugin);
+  }
+
+  /**
+   * Transform the plugin if necessary.
+   */
+  private async _transform(
+    phase: ISettingRegistry.IPlugin.Phase,
+    plugin: ISettingRegistry.IPlugin,
+    started = new Date().getTime()
+  ): Promise<ISettingRegistry.IPlugin> {
+    const elapsed = new Date().getTime() - started;
+    const id = plugin.id;
+    const transformers = this._transformers;
+    const timeout = this._timeout;
+
+    if (!plugin.schema['jupyter.lab.transform']) {
+      return plugin;
+    }
+
+    if (id in transformers) {
+      const transformed = transformers[id][phase].call(null, plugin);
+
+      if (transformed.id !== id) {
+        throw [
+          {
+            dataPath: '',
+            keyword: 'id',
+            message: 'Plugin transformations cannot change plugin IDs.',
+            schemaPath: ''
+          } as ISchemaValidator.IError
+        ];
+      }
+
+      return transformed;
+    }
+
+    // If the timeout has not been exceeded, stall and try again in 250ms.
+    if (elapsed < timeout) {
+      await new Promise(resolve => {
+        setTimeout(() => {
+          resolve();
+        }, 250);
+      });
+      return this._transform(phase, plugin, started);
+    }
+
+    throw [
+      {
+        dataPath: '',
+        keyword: 'timeout',
+        message: `Transforming ${plugin.id} timed out.`,
+        schemaPath: ''
+      } as ISchemaValidator.IError
+    ];
+  }
+
+  /**
+   * Validate and preload a plugin, compose the `composite` data.
+   */
+  private async _validate(plugin: ISettingRegistry.IPlugin): Promise<void> {
     // Validate the user data and create the composite data.
     const errors = this.validator.validateData(plugin);
 
@@ -694,14 +619,17 @@ export class SettingRegistry {
       throw errors;
     }
 
-    // Set the local copy.
-    this._plugins[plugin.id] = plugin;
+    // Apply a transformation if necessary and set the local copy.
+    this.plugins[plugin.id] = await this._transform('compose', plugin);
   }
 
-  private _connector: IDataConnector<ISettingRegistry.IPlugin, string>;
   private _pluginChanged = new Signal<this, string>(this);
-  private _plugins: {
-    [name: string]: ISettingRegistry.IPlugin;
+  private _ready = Promise.resolve();
+  private _timeout: number;
+  private _transformers: {
+    [plugin: string]: {
+      [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform;
+    };
   } = Object.create(null);
 }
 
@@ -713,21 +641,20 @@ export class Settings implements ISettingRegistry.ISettings {
    * Instantiate a new plugin settings manager.
    */
   constructor(options: Settings.IOptions) {
-    const { plugin } = options;
-
-    this.plugin = plugin.id;
+    this.id = options.plugin.id;
     this.registry = options.registry;
-
-    this._composite = plugin.data.composite || {};
-    this._raw = plugin.raw || '{ }';
-    this._schema = plugin.schema || { type: 'object' };
-    this._user = plugin.data.user || {};
-
-    this.registry.pluginChanged.connect(
-      this._onPluginChanged,
-      this
-    );
+    this.registry.pluginChanged.connect(this._onPluginChanged, this);
   }
+
+  /**
+   * The plugin name.
+   */
+  readonly id: string;
+
+  /**
+   * The setting registry instance used as a back-end for these settings.
+   */
+  readonly registry: ISettingRegistry;
 
   /**
    * A signal that emits when the plugin's settings have changed.
@@ -737,10 +664,10 @@ export class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
-   * Get the composite of user settings and extension defaults.
+   * The composite of user settings and extension defaults.
    */
-  get composite(): JSONObject {
-    return this._composite;
+  get composite(): ReadonlyJSONObject {
+    return this.plugin.data.composite;
   }
 
   /**
@@ -750,42 +677,43 @@ export class Settings implements ISettingRegistry.ISettings {
     return this._isDisposed;
   }
 
+  get plugin(): ISettingRegistry.IPlugin {
+    return this.registry.plugins[this.id];
+  }
+
   /**
-   * Get the plugin settings schema.
+   * The plugin's schema.
    */
   get schema(): ISettingRegistry.ISchema {
-    return this._schema;
+    return this.plugin.schema;
   }
 
   /**
-   * Get the plugin settings raw text value.
+   * The plugin settings raw text value.
    */
   get raw(): string {
-    return this._raw;
+    return this.plugin.raw;
   }
 
   /**
-   * Get the user settings.
+   * The user settings.
    */
-  get user(): JSONObject {
-    return this._user;
+  get user(): ReadonlyJSONObject {
+    return this.plugin.data.user;
   }
 
-  /*
-   * The plugin name.
-   */
-  readonly plugin: string;
-
   /**
-   * The system registry instance used by the settings manager.
+   * The published version of the NPM package containing these settings.
    */
-  readonly registry: SettingRegistry;
+  get version(): string {
+    return this.plugin.version;
+  }
 
   /**
    * Return the defaults in a commented JSON format.
    */
   annotatedDefaults(): string {
-    return Private.annotatedDefaults(this._schema, this.plugin);
+    return Private.annotatedDefaults(this.schema, this.id);
   }
 
   /**
@@ -822,7 +750,7 @@ export class Settings implements ISettingRegistry.ISettings {
    * This method returns synchronously because it uses a cached copy of the
    * plugin settings that is synchronized with the registry.
    */
-  get(key: string): { composite: JSONValue; user: JSONValue } {
+  get(key: string): { composite: ReadonlyJSONValue; user: ReadonlyJSONValue } {
     const { composite, user } = this;
 
     return {
@@ -842,14 +770,14 @@ export class Settings implements ISettingRegistry.ISettings {
    * This function is asynchronous because it writes to the setting registry.
    */
   remove(key: string): Promise<void> {
-    return this.registry.remove(this.plugin, key);
+    return this.registry.remove(this.plugin.id, key);
   }
 
   /**
    * Save all of the plugin's user settings at once.
    */
   save(raw: string): Promise<void> {
-    return this.registry.upload(this.plugin, raw);
+    return this.registry.upload(this.plugin.id, raw);
   }
 
   /**
@@ -865,7 +793,7 @@ export class Settings implements ISettingRegistry.ISettings {
    * This function is asynchronous because it writes to the setting registry.
    */
   set(key: string, value: JSONValue): Promise<void> {
-    return this.registry.set(this.plugin, key, value);
+    return this.registry.set(this.plugin.id, key, value);
   }
 
   /**
@@ -877,41 +805,24 @@ export class Settings implements ISettingRegistry.ISettings {
    */
   validate(raw: string): ISchemaValidator.IError[] | null {
     const data = { composite: {}, user: {} };
-    const id = this.plugin;
-    const schema = this._schema;
+    const { id, schema } = this.plugin;
     const validator = this.registry.validator;
+    const version = this.version;
 
-    return validator.validateData({ data, id, raw, schema }, false);
+    return validator.validateData({ data, id, raw, schema, version }, false);
   }
 
   /**
    * Handle plugin changes in the setting registry.
    */
   private _onPluginChanged(sender: any, plugin: string): void {
-    if (plugin === this.plugin) {
-      const found = find(this.registry.plugins, p => p.id === plugin);
-
-      if (!found) {
-        return;
-      }
-
-      const { composite, user } = found.data;
-      const { raw, schema } = found;
-
-      this._composite = composite || {};
-      this._raw = raw;
-      this._schema = schema || { type: 'object' };
-      this._user = user || {};
+    if (plugin === this.plugin.id) {
       this._changed.emit(undefined);
     }
   }
 
   private _changed = new Signal<this, void>(this);
-  private _composite: JSONObject = Object.create(null);
   private _isDisposed = false;
-  private _raw = '{ }';
-  private _schema: ISettingRegistry.ISchema = Object.create(null);
-  private _user: JSONObject = Object.create(null);
 }
 
 /**
@@ -928,9 +839,97 @@ export namespace SettingRegistry {
     connector: IDataConnector<ISettingRegistry.IPlugin, string>;
 
     /**
+     * Preloaded plugin data to populate the setting registry.
+     */
+    plugins?: ISettingRegistry.IPlugin[];
+
+    /**
+     * The number of milliseconds before a `load()` call to the registry waits
+     * before timing out if it requires a transformation that has not been
+     * registered.
+     *
+     * #### Notes
+     * The default value is 7000.
+     */
+    timeout?: number;
+
+    /**
      * The validator used to enforce the settings JSON schema.
      */
     validator?: ISchemaValidator;
+  }
+
+  /**
+   * Reconcile default and user shortcuts and return the composite list.
+   *
+   * @param defaults - The list of default shortcuts.
+   *
+   * @param user - The list of user shortcut overrides and additions.
+   *
+   * @returns A loadable list of shortcuts (omitting disabled and overridden).
+   */
+  export function reconcileShortcuts(
+    defaults: ISettingRegistry.IShortcut[],
+    user: ISettingRegistry.IShortcut[]
+  ): ISettingRegistry.IShortcut[] {
+    const memo: {
+      [keys: string]: {
+        [selector: string]: boolean; // If `true`, this is a default shortcut.
+      };
+    } = {};
+
+    // If a user shortcut collides with another user shortcut warn and filter.
+    user = user.filter(shortcut => {
+      const keys = shortcut.keys.join(RECORD_SEPARATOR);
+      const { selector } = shortcut;
+
+      if (!keys) {
+        console.warn('Shortcut skipped because `keys` are [""].', shortcut);
+        return false;
+      }
+      if (!(keys in memo)) {
+        memo[keys] = {};
+      }
+      if (!(selector in memo[keys])) {
+        memo[keys][selector] = false; // User shortcuts are `false`.
+        return true;
+      }
+
+      console.warn('Shortcut skipped due to collision.', shortcut);
+      return false;
+    });
+
+    // If a default shortcut collides with another default, warn and filter.
+    // If a shortcut has already been added by the user preferences, filter it
+    // out too (this includes shortcuts that are disabled by user preferences).
+    defaults = defaults.filter(shortcut => {
+      const { disabled } = shortcut;
+      const keys = shortcut.keys.join(RECORD_SEPARATOR);
+
+      if (disabled || !keys) {
+        return false;
+      }
+      if (!(keys in memo)) {
+        memo[keys] = {};
+      }
+
+      const { selector } = shortcut;
+
+      if (!(selector in memo[keys])) {
+        memo[keys][selector] = true; // Default shortcuts are `true`.
+        return true;
+      }
+
+      // Only warn if a default shortcut collides with another default shortcut.
+      if (memo[keys][selector]) {
+        console.warn('Shortcut skipped due to collision.', shortcut);
+      }
+
+      return false;
+    });
+
+    // Filter out disabled user shortcuts and concat defaults before returning.
+    return user.filter(shortcut => !shortcut.disabled).concat(defaults);
   }
 }
 
@@ -950,31 +949,14 @@ export namespace Settings {
     /**
      * The system registry instance used by the settings manager.
      */
-    registry: SettingRegistry;
+    registry: ISettingRegistry;
   }
 }
 
 /**
  * A namespace for private module data.
  */
-export namespace Private {
-  /* tslint:disable */
-  /**
-   * The schema for settings.
-   */
-  export const SCHEMA: ISettingRegistry.ISchema = {
-    $schema: 'http://json-schema.org/draft-06/schema',
-    title: 'Jupyter Settings/Preferences Schema',
-    description: 'Jupyter settings/preferences schema v0.1.0',
-    type: 'object',
-    additionalProperties: true,
-    properties: {
-      [ICON_CLASS_KEY]: { type: 'string', default: 'jp-FileIcon' },
-      [ICON_LABEL_KEY]: { type: 'string', default: 'Plugin' }
-    }
-  };
-  /* tslint:enable */
-
+namespace Private {
   /**
    * The default indentation level, uses spaces instead of tabs.
    */
@@ -984,11 +966,6 @@ export namespace Private {
    * Replacement text for schema properties missing a `description` field.
    */
   const nondescript = '[missing schema description]';
-
-  /**
-   * Replacement text for schema properties missing a `default` field.
-   */
-  const undefaulted = '[missing schema default]';
 
   /**
    * Replacement text for schema properties missing a `title` field.
@@ -1011,9 +988,9 @@ export namespace Private {
       prefix(`${title || untitled}`),
       prefix(plugin),
       prefix(description || nondescript),
-      prefix(line(length)),
+      prefix('*'.repeat(length)),
       '',
-      keys.map(key => defaultDocumentedValue(schema, key)).join(',\n\n'),
+      join(keys.map(key => defaultDocumentedValue(schema, key))),
       '}'
     ].join('\n');
   }
@@ -1038,11 +1015,9 @@ export namespace Private {
       prefix(`${title || untitled}`),
       prefix(plugin.id),
       prefix(description || nondescript),
-      prefix(line(length)),
+      prefix('*'.repeat(length)),
       '',
-      keys
-        .map(key => documentedValue(plugin.schema, key, data[key]))
-        .join(',\n\n'),
+      join(keys.map(key => documentedValue(plugin.schema, key, data[key]))),
       '}'
     ].join('\n');
   }
@@ -1055,20 +1030,20 @@ export namespace Private {
     schema: ISettingRegistry.ISchema,
     key: string
   ): string {
-    const props = schema.properties && schema.properties[key];
-    const description = (props && props['description']) || nondescript;
-    const title = (props && props['title']) || untitled;
+    const props = (schema.properties && schema.properties[key]) || {};
+    const type = props['type'];
+    const description = props['description'] || nondescript;
+    const title = props['title'] || '';
     const reified = reifyDefault(schema, key);
+    const spaces = indent.length;
     const defaults =
-      reified === undefined
-        ? prefix(`"${key}": ${undefaulted}`)
-        : prefix(`"${key}": ${JSON.stringify(reified, null, 2)}`, indent);
+      reified !== undefined
+        ? prefix(`"${key}": ${JSON.stringify(reified, null, spaces)}`, indent)
+        : prefix(`"${key}": ${type}`);
 
-    return [
-      prefix(`${title || untitled}`),
-      prefix(description || nondescript),
-      defaults
-    ].join('\n');
+    return [prefix(title), prefix(description), defaults]
+      .filter(str => str.length)
+      .join('\n');
   }
 
   /**
@@ -1082,24 +1057,34 @@ export namespace Private {
     const props = schema.properties && schema.properties[key];
     const description = (props && props['description']) || nondescript;
     const title = (props && props['title']) || untitled;
+    const spaces = indent.length;
     const attribute = prefix(
-      `"${key}": ${JSON.stringify(value, null, 2)}`,
+      `"${key}": ${JSON.stringify(value, null, spaces)}`,
       indent
     );
 
     return [prefix(title), prefix(description), attribute].join('\n');
   }
+
   /**
-   * Returns a line of a specified length.
+   * Returns a joined string with line breaks and commas where appropriate.
    */
-  function line(length: number, ch = '*'): string {
-    return new Array(length + 1).join(ch);
+  function join(body: string[]): string {
+    return body.reduce((acc, val, idx) => {
+      const rows = val.split('\n');
+      const last = rows[rows.length - 1];
+      const comment = last.trim().indexOf('//') === 0;
+      const comma = comment || idx === body.length - 1 ? '' : ',';
+      const separator = idx === body.length - 1 ? '' : '\n\n';
+
+      return acc + val + comma + separator;
+    }, '');
   }
 
   /**
    * Returns a documentation string with a comment prefix added on every line.
    */
-  function prefix(source: string, pre = `${indent}\/\/ `): string {
+  function prefix(source: string, pre = `${indent}// `): string {
     return pre + source.split('\n').join(`\n${pre}`);
   }
 
@@ -1107,7 +1092,7 @@ export namespace Private {
    * Create a fully extrapolated default value for a root key in a schema.
    */
   export function reifyDefault(
-    schema: ISettingRegistry.ISchema,
+    schema: ISettingRegistry.IProperty,
     root?: string
   ): JSONValue | undefined {
     // If the property is at the root level, traverse its schema.

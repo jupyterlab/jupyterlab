@@ -3,20 +3,22 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
   Dialog,
   ICommandPalette,
   IFrame,
-  InstanceTracker,
   MainAreaWidget,
-  showDialog
+  showDialog,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+
+import { IInspector } from '@jupyterlab/inspector';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
@@ -25,8 +27,6 @@ import { KernelMessage } from '@jupyterlab/services';
 import { Menu } from '@phosphor/widgets';
 
 import * as React from 'react';
-
-import '../style/index.css';
 
 /**
  * The command IDs used by the help plugin.
@@ -43,8 +43,6 @@ namespace CommandIDs {
   export const show = 'help:show';
 
   export const hide = 'help:hide';
-
-  export const toggle = 'help:toggle';
 
   export const launchClassic = 'help:launch-classic-notebook';
 }
@@ -69,14 +67,16 @@ const RESOURCES = [
     url: 'https://jupyterlab.readthedocs.io/en/stable/'
   },
   {
-    text: 'Notebook Reference',
-    url: 'https://jupyter-notebook.readthedocs.io/en/latest/'
+    text: 'JupyterLab FAQ',
+    url: 'https://jupyterlab.readthedocs.io/en/stable/getting_started/faq.html'
+  },
+  {
+    text: 'Jupyter Reference',
+    url: 'https://jupyter.org/documentation'
   },
   {
     text: 'Markdown Reference',
-    url:
-      'https://help.github.com/articles/' +
-      'getting-started-with-writing-and-formatting-on-github/'
+    url: 'https://commonmark.org/help/'
   }
 ];
 
@@ -87,10 +87,11 @@ RESOURCES.sort((a: any, b: any) => {
 /**
  * The help handler extension.
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<void> = {
   activate,
   id: '@jupyterlab/help-extension:plugin',
-  requires: [IMainMenu, ICommandPalette, ILayoutRestorer],
+  requires: [IMainMenu],
+  optional: [ICommandPalette, ILayoutRestorer, IInspector],
   autoStart: true
 };
 
@@ -107,33 +108,43 @@ export default plugin;
  * returns A promise that resolves when the extension is activated.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   mainMenu: IMainMenu,
-  palette: ICommandPalette,
-  restorer: ILayoutRestorer
+  palette: ICommandPalette | null,
+  restorer: ILayoutRestorer | null,
+  inspector: IInspector | null
 ): void {
   let counter = 0;
   const category = 'Help';
   const namespace = 'help-doc';
   const baseUrl = PageConfig.getBaseUrl();
-  const { commands, shell, info, serviceManager } = app;
-  const tracker = new InstanceTracker<MainAreaWidget>({ namespace });
+  const { commands, shell, serviceManager } = app;
+  const tracker = new WidgetTracker<MainAreaWidget<IFrame>>({ namespace });
 
   // Handle state restoration.
-  restorer.restore(tracker, {
-    command: CommandIDs.open,
-    args: widget => ({
-      url: widget.content.url,
-      text: widget.content.title.label
-    }),
-    name: widget => widget.content.url
-  });
+  if (restorer) {
+    void restorer.restore(tracker, {
+      command: CommandIDs.open,
+      args: widget => ({
+        url: widget.content.url,
+        text: widget.content.title.label
+      }),
+      name: widget => widget.content.url
+    });
+  }
 
   /**
    * Create a new HelpWidget widget.
    */
-  function newHelpWidget(url: string, text: string): MainAreaWidget {
-    let content = new IFrame();
+  function newHelpWidget(url: string, text: string): MainAreaWidget<IFrame> {
+    // Allow scripts and forms so that things like
+    // readthedocs can use their search functionality.
+    // We *don't* allow same origin requests, which
+    // can prevent some content from being loaded onto the
+    // help pages.
+    let content = new IFrame({
+      sandbox: ['allow-scripts', 'allow-forms']
+    });
     content.url = url;
     content.addClass(HELP_CLASS);
     content.title.label = text;
@@ -145,14 +156,17 @@ function activate(
 
   // Populate the Help menu.
   const helpMenu = mainMenu.helpMenu;
-  const labGroup = [
-    CommandIDs.about,
-    'faq-jupyterlab:open',
-    CommandIDs.launchClassic
-  ].map(command => {
-    return { command };
-  });
+  const labGroup = [CommandIDs.about, CommandIDs.launchClassic].map(
+    command => ({ command })
+  );
   helpMenu.addGroup(labGroup, 0);
+
+  // Contextual help in its own group
+  const contextualHelpGroup = [inspector ? 'inspector:open' : null].map(
+    command => ({ command })
+  );
+  helpMenu.addGroup(contextualHelpGroup, 0);
+
   const resourcesGroup = RESOURCES.map(args => ({
     args,
     command: CommandIDs.open
@@ -160,7 +174,10 @@ function activate(
   helpMenu.addGroup(resourcesGroup, 10);
 
   // Generate a cache of the kernel help links.
-  const kernelInfoCache = new Map<string, KernelMessage.IInfoReply>();
+  const kernelInfoCache = new Map<
+    string,
+    KernelMessage.IInfoReplyMsg['content']
+  >();
   serviceManager.sessions.runningChanged.connect((m, sessions) => {
     // If a new session has been added, it is at the back
     // of the session list. If one has changed or stopped,
@@ -173,7 +190,7 @@ function activate(
       return;
     }
     const session = serviceManager.sessions.connectTo(sessionModel);
-    session.kernel.ready.then(() => {
+    void session.kernel.ready.then(() => {
       // Check the cache second time so that, if two callbacks get scheduled,
       // they don't try to add the same commands.
       if (kernelInfoCache.has(sessionModel.kernel.name)) {
@@ -207,6 +224,9 @@ function activate(
       // Add the kernel banner to the Help Menu.
       const bannerCommand = `help-menu-${name}:banner`;
       const spec = serviceManager.specs.kernelspecs[name];
+      if (!spec) {
+        return;
+      }
       const kernelName = spec.display_name;
       let kernelIconUrl = spec.resources['logo-64x64'];
       if (kernelIconUrl) {
@@ -229,12 +249,12 @@ function activate(
           const banner = <pre>{kernelInfo.banner}</pre>;
           let body = <div className="jp-About-body">{banner}</div>;
 
-          showDialog({
+          return showDialog({
             title,
             body,
             buttons: [
               Dialog.createButton({
-                label: 'DISMISS',
+                label: 'Dismiss',
                 className: 'jp-About-button jp-mod-reject jp-mod-styled'
               })
             ]
@@ -252,7 +272,7 @@ function activate(
           isVisible: usesKernel,
           isEnabled: usesKernel,
           execute: () => {
-            commands.execute(CommandIDs.open, link);
+            return commands.execute(CommandIDs.open, link);
           }
         });
         kernelGroup.push({ command: commandId });
@@ -265,12 +285,12 @@ function activate(
   });
 
   commands.addCommand(CommandIDs.about, {
-    label: `About ${info.name}`,
+    label: `About ${app.name}`,
     execute: () => {
       // Create the header of the about dialog
       let headerLogo = <div className="jp-About-header-logo" />;
       let headerWordmark = <div className="jp-About-header-wordmark" />;
-      let versionNumber = `Version ${info.version}`;
+      let versionNumber = `Version ${app.version}`;
       let versionInfo = (
         <span className="jp-About-version-info">
           <span className="jp-About-version">{versionNumber}</span>
@@ -322,12 +342,12 @@ function activate(
         </div>
       );
 
-      showDialog({
+      return showDialog({
         title,
         body,
         buttons: [
           Dialog.createButton({
-            label: 'DISMISS',
+            label: 'Dismiss',
             className: 'jp-About-button jp-mod-reject jp-mod-styled'
           })
         ]
@@ -348,8 +368,9 @@ function activate(
       }
 
       let widget = newHelpWidget(url, text);
-      tracker.add(widget);
-      shell.addToMainArea(widget);
+      void tracker.add(widget);
+      shell.add(widget, 'main');
+      return widget;
     }
   });
 
@@ -360,9 +381,11 @@ function activate(
     }
   });
 
-  RESOURCES.forEach(args => {
-    palette.addItem({ args, command: CommandIDs.open, category });
-  });
-  palette.addItem({ command: 'apputils:reset', category });
-  palette.addItem({ command: CommandIDs.launchClassic, category });
+  if (palette) {
+    RESOURCES.forEach(args => {
+      palette.addItem({ args, command: CommandIDs.open, category });
+    });
+    palette.addItem({ command: 'apputils:reset', category });
+    palette.addItem({ command: CommandIDs.launchClassic, category });
+  }
 }

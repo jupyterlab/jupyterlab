@@ -6,54 +6,39 @@
 import {
   ILayoutRestorer,
   IRouter,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
   Dialog,
   ICommandPalette,
   ISplashScreen,
-  IThemeManager,
   IWindowResolver,
-  ThemeManager,
-  WindowResolver
+  WindowResolver,
+  Printing
 } from '@jupyterlab/apputils';
 
 import {
-  DataConnector,
+  Debouncer,
+  IRateLimiter,
   ISettingRegistry,
   IStateDB,
-  PageConfig,
   SettingRegistry,
   StateDB,
+  Throttler,
   URLExt
 } from '@jupyterlab/coreutils';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
-import { ServiceManager } from '@jupyterlab/services';
-
-import { CommandRegistry } from '@phosphor/commands';
+import { defaultIconRegistry } from '@jupyterlab/ui-components';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import { DisposableDelegate } from '@phosphor/disposable';
 
-import { Menu } from '@phosphor/widgets';
+import { Palette } from './palette';
 
-import { activatePalette, restorePalette } from './palette';
-
-import { createRedirectForm } from './redirect';
-
-import '../style/index.css';
-
-/**
- * The interval in milliseconds that calls to save a workspace are debounced
- * to allow for multiple quickly executed state changes to result in a single
- * workspace save operation.
- */
-const WORKSPACE_SAVE_DEBOUNCE_INTERVAL = 750;
+import { themesPlugin, themesPaletteMenuPlugin } from './themeplugins';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -64,72 +49,20 @@ const SPLASH_RECOVER_TIMEOUT = 12000;
  * The command IDs used by the apputils plugin.
  */
 namespace CommandIDs {
-  export const changeTheme = 'apputils:change-theme';
-
   export const loadState = 'apputils:load-statedb';
 
-  export const recoverState = 'apputils:recover-statedb';
+  export const print = 'apputils:print';
 
   export const reset = 'apputils:reset';
 
   export const resetOnLoad = 'apputils:reset-on-load';
-
-  export const saveState = 'apputils:save-statedb';
-}
-
-/**
- * The routing regular expressions used by the apputils plugin.
- */
-namespace Patterns {
-  export const resetOnLoad = /(\?reset|\&reset)($|&)/;
-
-  export const workspace = new RegExp(
-    `^${PageConfig.getOption('workspacesUrl')}([^?\/]+)`
-  );
-}
-
-/**
- * A data connector to access plugin settings.
- */
-class SettingsConnector extends DataConnector<
-  ISettingRegistry.IPlugin,
-  string
-> {
-  /**
-   * Create a new settings connector.
-   */
-  constructor(manager: ServiceManager) {
-    super();
-    this._manager = manager;
-  }
-
-  /**
-   * Retrieve a saved bundle from the data connector.
-   */
-  fetch(id: string): Promise<ISettingRegistry.IPlugin> {
-    return this._manager.settings.fetch(id).then(data => {
-      // Replace the server ID with the original unmodified version.
-      data.id = id;
-
-      return data;
-    });
-  }
-
-  /**
-   * Save the user setting data in the data connector.
-   */
-  save(id: string, raw: string): Promise<void> {
-    return this._manager.settings.save(id, raw);
-  }
-
-  private _manager: ServiceManager;
 }
 
 /**
  * The default command palette extension.
  */
-const palette: JupyterLabPlugin<ICommandPalette> = {
-  activate: activatePalette,
+const palette: JupyterFrontEndPlugin<ICommandPalette> = {
+  activate: Palette.activate,
   id: '@jupyterlab/apputils-extension:palette',
   provides: ICommandPalette,
   autoStart: true
@@ -144,8 +77,8 @@ const palette: JupyterLabPlugin<ICommandPalette> = {
  * causes the command palette to be unavailable to other extensions earlier
  * in the application load cycle.
  */
-const paletteRestorer: JupyterLabPlugin<void> = {
-  activate: restorePalette,
+const paletteRestorer: JupyterFrontEndPlugin<void> = {
+  activate: Palette.restore,
   id: '@jupyterlab/apputils-extension:palette-restorer',
   requires: [ILayoutRestorer],
   autoStart: true
@@ -154,449 +87,76 @@ const paletteRestorer: JupyterLabPlugin<void> = {
 /**
  * The default setting registry provider.
  */
-const settings: JupyterLabPlugin<ISettingRegistry> = {
+const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
-  activate: (app: JupyterLab): ISettingRegistry => {
-    const connector = new SettingsConnector(app.serviceManager);
+  activate: async (app: JupyterFrontEnd): Promise<ISettingRegistry> => {
+    const connector = app.serviceManager.settings;
+    const plugins = (await connector.list()).values;
 
-    return new SettingRegistry({ connector });
+    return new SettingRegistry({ connector, plugins });
   },
   autoStart: true,
   provides: ISettingRegistry
 };
 
 /**
- * The default theme manager provider.
- */
-const themes: JupyterLabPlugin<IThemeManager> = {
-  id: '@jupyterlab/apputils-extension:themes',
-  requires: [ISettingRegistry, ISplashScreen],
-  optional: [ICommandPalette, IMainMenu],
-  activate: (
-    app: JupyterLab,
-    settings: ISettingRegistry,
-    splash: ISplashScreen,
-    palette: ICommandPalette | null,
-    mainMenu: IMainMenu | null
-  ): IThemeManager => {
-    const host = app.shell;
-    const commands = app.commands;
-    const url = URLExt.join(app.info.urls.base, app.info.urls.themes);
-    const key = themes.id;
-    const manager = new ThemeManager({ key, host, settings, splash, url });
-
-    // Keep a synchronously set reference to the current theme,
-    // since the asynchronous setting of the theme in `changeTheme`
-    // can lead to an incorrect toggle on the currently used theme.
-    let currentTheme: string;
-
-    // Set data attributes on the application shell for the current theme.
-    manager.themeChanged.connect((sender, args) => {
-      currentTheme = args.newValue;
-      app.shell.dataset.themeLight = String(manager.isLight(currentTheme));
-      app.shell.dataset.themeName = currentTheme;
-      commands.notifyCommandChanged(CommandIDs.changeTheme);
-    });
-
-    commands.addCommand(CommandIDs.changeTheme, {
-      label: args => {
-        const theme = args['theme'] as string;
-        return args['isPalette'] ? `Use ${theme} Theme` : theme;
-      },
-      isToggled: args => args['theme'] === currentTheme,
-      execute: args => {
-        const theme = args['theme'] as string;
-        if (theme === manager.theme) {
-          return;
-        }
-        manager.setTheme(theme);
-      }
-    });
-
-    // If we have a main menu, add the theme manager to the settings menu.
-    if (mainMenu) {
-      const themeMenu = new Menu({ commands });
-      themeMenu.title.label = 'JupyterLab Theme';
-      app.restored.then(() => {
-        const command = CommandIDs.changeTheme;
-        const isPalette = false;
-
-        manager.themes.forEach(theme => {
-          themeMenu.addItem({ command, args: { isPalette, theme } });
-        });
-      });
-      mainMenu.settingsMenu.addGroup(
-        [
-          {
-            type: 'submenu' as Menu.ItemType,
-            submenu: themeMenu
-          }
-        ],
-        0
-      );
-    }
-
-    // If we have a command palette, add theme switching options to it.
-    if (palette) {
-      app.restored.then(() => {
-        const category = 'Settings';
-        const command = CommandIDs.changeTheme;
-        const isPalette = true;
-        currentTheme = manager.theme;
-
-        manager.themes.forEach(theme => {
-          palette.addItem({ command, args: { isPalette, theme }, category });
-        });
-      });
-    }
-
-    return manager;
-  },
-  autoStart: true,
-  provides: IThemeManager
-};
-
-/**
  * The default window name resolver provider.
  */
-const resolver: JupyterLabPlugin<IWindowResolver> = {
+const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
   id: '@jupyterlab/apputils-extension:resolver',
   autoStart: true,
   provides: IWindowResolver,
-  requires: [IRouter],
-  activate: async (app: JupyterLab, router: IRouter) => {
-    const resolver = new WindowResolver();
-    const match = router.current.path.match(Patterns.workspace);
+  requires: [JupyterFrontEnd.IPaths, IRouter],
+  activate: async (
+    _: JupyterFrontEnd,
+    paths: JupyterFrontEnd.IPaths,
+    router: IRouter
+  ) => {
+    const { hash, path, search } = router.current;
+    const query = URLExt.queryStringToObject(search || '');
+    const solver = new WindowResolver();
+    const { urls } = paths;
+    const match = path.match(new RegExp(`^${urls.workspaces}\/([^?\/]+)`));
     const workspace = (match && decodeURIComponent(match[1])) || '';
-    const candidate = workspace
-      ? URLExt.join(
-          PageConfig.getOption('baseUrl'),
-          PageConfig.getOption('workspacesUrl'),
-          workspace
-        )
-      : app.info.defaultWorkspace;
-
+    const candidate = Private.candidate(paths, workspace);
+    const rest = workspace
+      ? path.replace(new RegExp(`^${urls.workspaces}\/${workspace}`), '')
+      : path.replace(new RegExp(`^${urls.app}\/?`), '');
     try {
-      await resolver.resolve(candidate);
+      await solver.resolve(candidate);
+      return solver;
     } catch (error) {
-      console.warn('Window resolution failed:', error);
-
-      // Return a promise that never resolves.
+      // Window resolution has failed so the URL must change. Return a promise
+      // that never resolves to prevent the application from loading plugins
+      // that rely on `IWindowResolver`.
       return new Promise<IWindowResolver>(() => {
-        Private.redirect(router);
+        const { base, workspaces } = paths.urls;
+        const pool =
+          'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const random = pool[Math.floor(Math.random() * pool.length)];
+        const path = URLExt.join(base, workspaces, `auto-${random}`, rest);
+
+        // Clone the originally requested workspace after redirecting.
+        query['clone'] = workspace;
+
+        const url = path + URLExt.objectToQueryString(query) + (hash || '');
+        router.navigate(url, { hard: true });
       });
     }
-
-    PageConfig.setOption('workspace', resolver.name);
-
-    return resolver;
   }
 };
 
 /**
  * The default splash screen provider.
  */
-const splash: JupyterLabPlugin<ISplashScreen> = {
+const splash: JupyterFrontEndPlugin<ISplashScreen> = {
   id: '@jupyterlab/apputils-extension:splash',
   autoStart: true,
   provides: ISplashScreen,
   activate: app => {
-    return {
-      show: (light = true) => {
-        const { commands, restored } = app;
+    const { commands, restored } = app;
 
-        return Private.showSplash(restored, commands, CommandIDs.reset, light);
-      }
-    };
-  }
-};
-
-/**
- * The default state database for storing application state.
- */
-const state: JupyterLabPlugin<IStateDB> = {
-  id: '@jupyterlab/apputils-extension:state',
-  autoStart: true,
-  provides: IStateDB,
-  requires: [IRouter, IWindowResolver, ISplashScreen],
-  activate: (
-    app: JupyterLab,
-    router: IRouter,
-    resolver: IWindowResolver,
-    splash: ISplashScreen
-  ) => {
-    let debouncer: number;
-    let resolved = false;
-
-    const { commands, info, serviceManager } = app;
-    const { workspaces } = serviceManager;
-    const transform = new PromiseDelegate<StateDB.DataTransform>();
-    const state = new StateDB({
-      namespace: info.namespace,
-      transform: transform.promise,
-      windowName: resolver.name
-    });
-
-    commands.addCommand(CommandIDs.recoverState, {
-      execute: async ({ global }) => {
-        const immediate = true;
-        const silent = true;
-
-        // Clear the state silently so that the state changed signal listener
-        // will not be triggered as it causes a save state.
-        await state.clear(silent);
-
-        // If the user explictly chooses to recover state, all of local storage
-        // should be cleared.
-        if (global) {
-          try {
-            window.localStorage.clear();
-            console.log('Cleared local storage');
-          } catch (error) {
-            console.warn('Clearing local storage failed.', error);
-
-            // To give the user time to see the console warning before redirect,
-            // do not set the `immediate` flag.
-            return commands.execute(CommandIDs.saveState);
-          }
-        }
-
-        return commands.execute(CommandIDs.saveState, { immediate });
-      }
-    });
-
-    // Conflate all outstanding requests to the save state command that happen
-    // within the `WORKSPACE_SAVE_DEBOUNCE_INTERVAL` into a single promise.
-    let conflated: PromiseDelegate<void> | null = null;
-
-    commands.addCommand(CommandIDs.saveState, {
-      label: () => `Save Workspace (${app.info.workspace})`,
-      execute: ({ immediate }) => {
-        const { workspace } = app.info;
-        const timeout = immediate ? 0 : WORKSPACE_SAVE_DEBOUNCE_INTERVAL;
-        const id = workspace;
-        const metadata = { id };
-
-        // Only instantiate a new conflated promise if one is not outstanding.
-        if (!conflated) {
-          conflated = new PromiseDelegate<void>();
-        }
-
-        if (debouncer) {
-          window.clearTimeout(debouncer);
-        }
-
-        debouncer = window.setTimeout(async () => {
-          // Prevent a race condition between the timeout and saving.
-          if (!conflated) {
-            return;
-          }
-
-          const data = await state.toJSON();
-
-          try {
-            await workspaces.save(id, { data, metadata });
-            conflated.resolve(undefined);
-          } catch (error) {
-            conflated.reject(error);
-          }
-          conflated = null;
-        }, timeout);
-
-        return conflated.promise;
-      }
-    });
-
-    const listener = (sender: any, change: StateDB.Change) => {
-      commands.execute(CommandIDs.saveState);
-    };
-
-    commands.addCommand(CommandIDs.loadState, {
-      execute: async (args: IRouter.ILocation) => {
-        // Since the command can be executed an arbitrary number of times, make
-        // sure it is safe to call multiple times.
-        if (resolved) {
-          return;
-        }
-
-        const { hash, path, search } = args;
-        const { defaultWorkspace, workspace } = app.info;
-        const query = URLExt.queryStringToObject(search || '');
-        const clone =
-          typeof query['clone'] === 'string'
-            ? query['clone'] === ''
-              ? defaultWorkspace
-              : URLExt.join(
-                  PageConfig.getOption('baseUrl'),
-                  PageConfig.getOption('workspacesUrl'),
-                  query['clone']
-                )
-            : null;
-        const source = clone || workspace;
-
-        try {
-          const saved = await workspaces.fetch(source);
-
-          // If this command is called after a reset, the state database
-          // will already be resolved.
-          if (!resolved) {
-            resolved = true;
-            transform.resolve({ type: 'overwrite', contents: saved.data });
-          }
-        } catch (error) {
-          console.warn(`Fetching workspace (${workspace}) failed:`, error);
-
-          // If the workspace does not exist, cancel the data transformation
-          // and save a workspace with the current user state data.
-          if (!resolved) {
-            resolved = true;
-            transform.resolve({ type: 'cancel', contents: null });
-          }
-        }
-
-        // Any time the local state database changes, save the workspace.
-        if (workspace) {
-          state.changed.connect(
-            listener,
-            state
-          );
-        }
-
-        const immediate = true;
-
-        if (source === clone) {
-          // Maintain the query string parameters but remove `clone`.
-          delete query['clone'];
-
-          const url = path + URLExt.objectToQueryString(query) + hash;
-          const cloned = commands
-            .execute(CommandIDs.saveState, { immediate })
-            .then(() => router.stop);
-
-          // After the state has been cloned, navigate to the URL.
-          cloned.then(() => {
-            console.log(`HERE: ${url}`);
-            router.navigate(url, { silent: true });
-          });
-
-          return cloned;
-        }
-
-        // After the state database has finished loading, save it.
-        return commands.execute(CommandIDs.saveState, { immediate });
-      }
-    });
-
-    router.register({
-      command: CommandIDs.loadState,
-      pattern: /.?/,
-      rank: 20 // Very high priority: 20/100.
-    });
-
-    commands.addCommand(CommandIDs.reset, {
-      label: 'Reset Application State',
-      execute: async () => {
-        const global = true;
-
-        try {
-          await commands.execute(CommandIDs.recoverState, { global });
-        } catch (error) {
-          /* Ignore failures and redirect. */
-        }
-        router.reload();
-      }
-    });
-
-    commands.addCommand(CommandIDs.resetOnLoad, {
-      execute: (args: IRouter.ILocation) => {
-        const { hash, path, search } = args;
-        const query = URLExt.queryStringToObject(search || '');
-        const reset = 'reset' in query;
-        const clone = 'clone' in query;
-
-        if (!reset) {
-          return;
-        }
-
-        const loading = splash.show();
-
-        // If the state database has already been resolved, resetting is
-        // impossible without reloading.
-        if (resolved) {
-          return router.reload();
-        }
-
-        // Empty the state database.
-        resolved = true;
-        transform.resolve({ type: 'clear', contents: null });
-
-        // Maintain the query string parameters but remove `reset`.
-        delete query['reset'];
-
-        const silent = true;
-        const hard = true;
-        const url = path + URLExt.objectToQueryString(query) + hash;
-        const cleared = commands
-          .execute(CommandIDs.recoverState)
-          .then(() => router.stop); // Stop routing before new route navigation.
-
-        // After the state has been reset, navigate to the URL.
-        if (clone) {
-          cleared.then(() => {
-            router.navigate(url, { silent, hard });
-          });
-        } else {
-          cleared.then(() => {
-            router.navigate(url, { silent });
-            loading.dispose();
-          });
-        }
-
-        return cleared;
-      }
-    });
-
-    router.register({
-      command: CommandIDs.resetOnLoad,
-      pattern: Patterns.resetOnLoad,
-      rank: 10 // Set reset rank at a higher priority than the default 100.
-    });
-
-    // Clean up state database when the window unloads.
-    window.addEventListener('beforeunload', () => {
-      const silent = true;
-
-      state.clear(silent).catch(() => {
-        /* no-op */
-      });
-    });
-
-    return state;
-  }
-};
-
-/**
- * Export the plugins as default.
- */
-const plugins: JupyterLabPlugin<any>[] = [
-  palette,
-  paletteRestorer,
-  resolver,
-  settings,
-  state,
-  splash,
-  themes
-];
-export default plugins;
-
-/**
- * The namespace for module private data.
- */
-namespace Private {
-  /**
-   * Create a splash element.
-   */
-  function createSplash(): HTMLElement {
+    // Create splash element and populate it.
     const splash = document.createElement('div');
     const galaxy = document.createElement('div');
     const logo = document.createElement('div');
@@ -604,6 +164,13 @@ namespace Private {
     splash.id = 'jupyterlab-splash';
     galaxy.id = 'galaxy';
     logo.id = 'main-logo';
+
+    defaultIconRegistry.icon({
+      name: 'jupyter-favicon',
+      container: logo,
+      center: true,
+      kind: 'splash'
+    });
 
     galaxy.appendChild(logo);
     ['1', '2', '3'].forEach(id => {
@@ -621,147 +188,310 @@ namespace Private {
 
     splash.appendChild(galaxy);
 
-    return splash;
-  }
+    // Create debounced recovery dialog function.
+    let dialog: Dialog<any>;
+    const recovery: IRateLimiter = new Throttler(async () => {
+      if (dialog) {
+        return;
+      }
 
-  /**
-   * A debouncer for recovery attempts.
-   */
-  let debouncer = 0;
+      dialog = new Dialog({
+        title: 'Loading...',
+        body: `The loading screen is taking a long time.
+          Would you like to clear the workspace or keep waiting?`,
+        buttons: [
+          Dialog.cancelButton({ label: 'Keep Waiting' }),
+          Dialog.warnButton({ label: 'Clear Workspace' })
+        ]
+      });
 
-  /**
-   * The recovery dialog.
-   */
-  let dialog: Dialog<any>;
-
-  /**
-   * Allows the user to clear state if splash screen takes too long.
-   */
-  function recover(fn: () => void): void {
-    if (dialog) {
-      return;
-    }
-
-    dialog = new Dialog({
-      title: 'Loading...',
-      body: `The loading screen is taking a long time.
-        Would you like to clear the workspace or keep waiting?`,
-      buttons: [
-        Dialog.cancelButton({ label: 'Keep Waiting' }),
-        Dialog.warnButton({ label: 'Clear Workspace' })
-      ]
-    });
-
-    dialog
-      .launch()
-      .then(result => {
-        if (result.button.accept) {
-          return fn();
-        }
-
+      try {
+        const result = await dialog.launch();
         dialog.dispose();
         dialog = null;
+        if (result.button.accept && commands.hasCommand(CommandIDs.reset)) {
+          return commands.execute(CommandIDs.reset);
+        }
 
-        debouncer = window.setTimeout(() => {
-          recover(fn);
-        }, SPLASH_RECOVER_TIMEOUT);
-      })
-      .catch(() => {
-        /* no-op */
-      });
-  }
-
-  /**
-   * Allows the user to clear state if splash screen takes too long.
-   */
-  export async function redirect(router: IRouter, warn = false): Promise<void> {
-    const form = createRedirectForm(warn);
-    const dialog = new Dialog({
-      title: 'Please use a different workspace.',
-      body: form,
-      focusNodeSelector: 'input',
-      buttons: [Dialog.okButton({ label: 'Switch Workspace' })]
-    });
-
-    const result = await dialog.launch();
-
-    dialog.dispose();
-    if (!result.value) {
-      return redirect(router, true);
-    }
-
-    // Navigate to a new workspace URL and abandon this session altogether.
-    const workspaces = PageConfig.getOption('workspacesUrl');
-    const url = URLExt.join(workspaces, result.value);
-
-    router.navigate(url, { hard: true, silent: true });
-
-    // This promise will never resolve because the application navigates
-    // away to a new location. It only exists to satisfy the return type
-    // of the `redirect` function.
-    return new Promise<void>(() => undefined);
-  }
-
-  /**
-   * The splash element.
-   */
-  const splash = createSplash();
-
-  /**
-   * The splash screen counter.
-   */
-  let splashCount = 0;
-
-  /**
-   * Show the splash element.
-   *
-   * @param ready - A promise that must be resolved before splash disappears.
-   *
-   * @param recovery - A command that recovers from a hanging splash.
-   */
-  export function showSplash(
-    ready: Promise<any>,
-    commands: CommandRegistry,
-    recovery: string,
-    light: boolean
-  ): IDisposable {
-    splash.classList.remove('splash-fade');
-    splash.classList.toggle('light', light);
-    splash.classList.toggle('dark', !light);
-    splashCount++;
-
-    if (debouncer) {
-      window.clearTimeout(debouncer);
-    }
-    debouncer = window.setTimeout(() => {
-      if (commands.hasCommand(recovery)) {
-        recover(() => {
-          commands.execute(recovery);
+        // Re-invoke the recovery timer in the next frame.
+        requestAnimationFrame(() => {
+          // Because recovery can be stopped, handle invocation rejection.
+          void recovery.invoke().catch(_ => undefined);
         });
+      } catch (error) {
+        /* no-op */
       }
     }, SPLASH_RECOVER_TIMEOUT);
 
-    document.body.appendChild(splash);
+    // Return ISplashScreen.
+    let splashCount = 0;
+    return {
+      show: (light = true) => {
+        splash.classList.remove('splash-fade');
+        splash.classList.toggle('light', light);
+        splash.classList.toggle('dark', !light);
+        splashCount++;
+        document.body.appendChild(splash);
 
-    return new DisposableDelegate(() => {
-      ready.then(() => {
-        if (--splashCount === 0) {
-          if (debouncer) {
-            window.clearTimeout(debouncer);
-            debouncer = 0;
+        // Because recovery can be stopped, handle invocation rejection.
+        void recovery.invoke().catch(_ => undefined);
+
+        return new DisposableDelegate(async () => {
+          await restored;
+          if (--splashCount === 0) {
+            void recovery.stop();
+
+            if (dialog) {
+              dialog.dispose();
+              dialog = null;
+            }
+
+            splash.classList.add('splash-fade');
+            window.setTimeout(() => {
+              document.body.removeChild(splash);
+            }, 200);
           }
+        });
+      }
+    };
+  }
+};
 
-          if (dialog) {
-            dialog.dispose();
-            dialog = null;
-          }
-
-          splash.classList.add('splash-fade');
-          window.setTimeout(() => {
-            document.body.removeChild(splash);
-          }, 500);
+const print: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:print',
+  autoStart: true,
+  activate: (app: JupyterFrontEnd) => {
+    app.commands.addCommand(CommandIDs.print, {
+      label: 'Print...',
+      isEnabled: () => {
+        const widget = app.shell.currentWidget;
+        return Printing.getPrintFunction(widget) !== null;
+      },
+      execute: async () => {
+        const widget = app.shell.currentWidget;
+        const printFunction = Printing.getPrintFunction(widget);
+        if (printFunction) {
+          await printFunction();
         }
-      });
+      }
     });
+  }
+};
+
+/**
+ * The default state database for storing application state.
+ *
+ * #### Notes
+ * If this extension is loaded with a window resolver, it will automatically add
+ * state management commands, URL support for `clone` and `reset`, and workspace
+ * auto-saving. Otherwise, it will return a simple in-memory state database.
+ */
+const state: JupyterFrontEndPlugin<IStateDB> = {
+  id: '@jupyterlab/apputils-extension:state',
+  autoStart: true,
+  provides: IStateDB,
+  requires: [JupyterFrontEnd.IPaths, IRouter],
+  optional: [ISplashScreen, IWindowResolver],
+  activate: (
+    app: JupyterFrontEnd,
+    paths: JupyterFrontEnd.IPaths,
+    router: IRouter,
+    splash: ISplashScreen | null,
+    resolver: IWindowResolver | null
+  ) => {
+    if (resolver === null) {
+      return new StateDB();
+    }
+
+    let resolved = false;
+    const { commands, serviceManager } = app;
+    const { workspaces } = serviceManager;
+    const workspace = resolver.name;
+    const transform = new PromiseDelegate<StateDB.DataTransform>();
+    const db = new StateDB({ transform: transform.promise });
+    const save = new Debouncer(async () => {
+      const id = workspace;
+      const metadata = { id };
+      const data = await db.toJSON();
+      await workspaces.save(id, { data, metadata });
+    });
+
+    // Any time the local state database changes, save the workspace.
+    db.changed.connect(() => void save.invoke(), db);
+
+    commands.addCommand(CommandIDs.loadState, {
+      execute: async (args: IRouter.ILocation) => {
+        // Since the command can be executed an arbitrary number of times, make
+        // sure it is safe to call multiple times.
+        if (resolved) {
+          return;
+        }
+
+        const { hash, path, search } = args;
+        const { urls } = paths;
+        const query = URLExt.queryStringToObject(search || '');
+        const clone =
+          typeof query['clone'] === 'string'
+            ? query['clone'] === ''
+              ? URLExt.join(urls.base, urls.app)
+              : URLExt.join(urls.base, urls.workspaces, query['clone'])
+            : null;
+        const source = clone || workspace || null;
+
+        if (source === null) {
+          console.error(`${CommandIDs.loadState} cannot load null workspace.`);
+          return;
+        }
+
+        try {
+          const saved = await workspaces.fetch(source);
+
+          // If this command is called after a reset, the state database
+          // will already be resolved.
+          if (!resolved) {
+            resolved = true;
+            transform.resolve({ type: 'overwrite', contents: saved.data });
+          }
+        } catch ({ message }) {
+          console.log(`Fetching workspace "${workspace}" failed.`, message);
+
+          // If the workspace does not exist, cancel the data transformation
+          // and save a workspace with the current user state data.
+          if (!resolved) {
+            resolved = true;
+            transform.resolve({ type: 'cancel', contents: null });
+          }
+        }
+
+        if (source === clone) {
+          // Maintain the query string parameters but remove `clone`.
+          delete query['clone'];
+
+          const url = path + URLExt.objectToQueryString(query) + hash;
+          const cloned = save.invoke().then(() => router.stop);
+
+          // After the state has been cloned, navigate to the URL.
+          void cloned.then(() => {
+            router.navigate(url);
+          });
+
+          return cloned;
+        }
+
+        // After the state database has finished loading, save it.
+        await save.invoke();
+      }
+    });
+
+    commands.addCommand(CommandIDs.reset, {
+      label: 'Reset Application State',
+      execute: async () => {
+        await db.clear();
+        await save.invoke();
+        router.reload();
+      }
+    });
+
+    commands.addCommand(CommandIDs.resetOnLoad, {
+      execute: (args: IRouter.ILocation) => {
+        const { hash, path, search } = args;
+        const query = URLExt.queryStringToObject(search || '');
+        const reset = 'reset' in query;
+        const clone = 'clone' in query;
+
+        if (!reset) {
+          return;
+        }
+
+        // If a splash provider exists, launch the splash screen.
+        const loading = splash
+          ? splash.show()
+          : new DisposableDelegate(() => undefined);
+
+        // If the state database has already been resolved, resetting is
+        // impossible without reloading.
+        if (resolved) {
+          return router.reload();
+        }
+
+        // Empty the state database.
+        resolved = true;
+        transform.resolve({ type: 'clear', contents: null });
+
+        // Maintain the query string parameters but remove `reset`.
+        delete query['reset'];
+
+        const url = path + URLExt.objectToQueryString(query) + hash;
+        const cleared = db
+          .clear()
+          .then(() => save.invoke())
+          .then(() => router.stop);
+
+        // After the state has been reset, navigate to the URL.
+        if (clone) {
+          void cleared.then(() => {
+            router.navigate(url, { hard: true });
+          });
+        } else {
+          void cleared.then(() => {
+            router.navigate(url);
+            loading.dispose();
+          });
+        }
+
+        return cleared;
+      }
+    });
+
+    router.register({
+      command: CommandIDs.loadState,
+      pattern: /.?/,
+      rank: 30 // High priority: 30:100.
+    });
+
+    router.register({
+      command: CommandIDs.resetOnLoad,
+      pattern: /(\?reset|\&reset)($|&)/,
+      rank: 20 // High priority: 20:100.
+    });
+
+    return db;
+  }
+};
+
+/**
+ * Export the plugins as default.
+ */
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  palette,
+  paletteRestorer,
+  resolver,
+  settings,
+  state,
+  splash,
+  themesPlugin,
+  themesPaletteMenuPlugin,
+  print
+];
+export default plugins;
+
+/**
+ * The namespace for module private data.
+ */
+namespace Private {
+  /**
+   * Generate a workspace name candidate.
+   *
+   * @param workspace - A potential workspace name parsed from the URL.
+   *
+   * @returns A workspace name candidate.
+   */
+  export function candidate(
+    { urls }: JupyterFrontEnd.IPaths,
+    workspace = ''
+  ): string {
+    return workspace
+      ? URLExt.join(urls.workspaces, workspace)
+      : URLExt.join(urls.app);
   }
 }

@@ -5,9 +5,13 @@ import CodeMirror from 'codemirror';
 
 import { Menu } from '@phosphor/widgets';
 
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  ILabShell,
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 
-import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
+import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
@@ -18,7 +22,7 @@ import {
   Mode
 } from '@jupyterlab/codemirror';
 
-import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
@@ -38,15 +42,13 @@ namespace CommandIDs {
 
   export const find = 'codemirror:find';
 
-  export const findAndReplace = 'codemirror:find-and-replace';
-
   export const goToLine = 'codemirror:go-to-line';
 }
 
 /**
  * The editor services.
  */
-const services: JupyterLabPlugin<IEditorServices> = {
+const services: JupyterFrontEndPlugin<IEditorServices> = {
   id: '@jupyterlab/codemirror-extension:services',
   provides: IEditorServices,
   activate: activateEditorServices
@@ -55,9 +57,10 @@ const services: JupyterLabPlugin<IEditorServices> = {
 /**
  * The editor commands.
  */
-const commands: JupyterLabPlugin<void> = {
+const commands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:commands',
-  requires: [IEditorTracker, IMainMenu, IStateDB, ISettingRegistry],
+  requires: [IEditorTracker, ISettingRegistry],
+  optional: [IMainMenu],
   activate: activateEditorCommands,
   autoStart: true
 };
@@ -65,18 +68,24 @@ const commands: JupyterLabPlugin<void> = {
 /**
  * The JupyterLab plugin for the EditorSyntax status item.
  */
-export const editorSyntaxStatus: JupyterLabPlugin<void> = {
+export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:editor-syntax-status',
   autoStart: true,
-  requires: [IStatusBar, IEditorTracker],
+  requires: [IEditorTracker, ILabShell],
+  optional: [IStatusBar],
   activate: (
-    app: JupyterLab,
-    statusBar: IStatusBar,
-    tracker: IEditorTracker
+    app: JupyterFrontEnd,
+    tracker: IEditorTracker,
+    labShell: ILabShell,
+    statusBar: IStatusBar | null
   ) => {
+    if (!statusBar) {
+      // Automatically disable if statusbar missing
+      return;
+    }
     let item = new EditorSyntaxStatus({ commands: app.commands });
-    app.shell.currentChanged.connect(() => {
-      const current = app.shell.currentWidget;
+    labShell.currentChanged.connect(() => {
+      const current = labShell.currentWidget;
       if (current && tracker.has(current)) {
         item.model.editor = (current as IDocumentWidget<
           FileEditor
@@ -90,9 +99,9 @@ export const editorSyntaxStatus: JupyterLabPlugin<void> = {
         align: 'left',
         rank: 0,
         isActive: () =>
-          app.shell.currentWidget &&
+          labShell.currentWidget &&
           tracker.currentWidget &&
-          app.shell.currentWidget === tracker.currentWidget
+          labShell.currentWidget === tracker.currentWidget
       }
     );
   }
@@ -101,7 +110,7 @@ export const editorSyntaxStatus: JupyterLabPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<any>[] = [
   commands,
   services,
   editorSyntaxStatus
@@ -116,9 +125,9 @@ const id = commands.id;
 /**
  * Set up the editor services.
  */
-function activateEditorServices(app: JupyterLab): IEditorServices {
+function activateEditorServices(app: JupyterFrontEnd): IEditorServices {
   CodeMirror.prototype.save = () => {
-    app.commands.execute('docmanager:save');
+    void app.commands.execute('docmanager:save');
   };
   return editorServices;
 }
@@ -127,11 +136,10 @@ function activateEditorServices(app: JupyterLab): IEditorServices {
  * Set up the editor widget menu and commands.
  */
 function activateEditorCommands(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   tracker: IEditorTracker,
-  mainMenu: IMainMenu,
-  state: IStateDB,
-  settingRegistry: ISettingRegistry
+  settingRegistry: ISettingRegistry,
+  mainMenu: IMainMenu | null
 ): void {
   const { commands, restored } = app;
   let {
@@ -146,13 +154,23 @@ function activateEditorCommands(
   /**
    * Update the setting values.
    */
-  function updateSettings(settings: ISettingRegistry.ISettings): void {
+  async function updateSettings(
+    settings: ISettingRegistry.ISettings
+  ): Promise<void> {
     keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
+
+    // Lazy loading of vim mode
+    if (keyMap === 'vim') {
+      // @ts-ignore
+      await import('codemirror/keymap/vim.js');
+    }
+
     theme = (settings.get('theme').composite as string | null) || theme;
     scrollPastEnd = settings.get('scrollPastEnd').composite as boolean | null;
     styleActiveLine =
-      (settings.get('styleActiveLine').composite as boolean | object) ||
-      styleActiveLine;
+      (settings.get('styleActiveLine').composite as
+        | boolean
+        | CodeMirror.StyleActiveLine) || styleActiveLine;
     styleSelectedText =
       (settings.get('styleSelectedText').composite as boolean) ||
       styleSelectedText;
@@ -180,11 +198,11 @@ function activateEditorCommands(
 
   // Fetch the initial state of the settings.
   Promise.all([settingRegistry.load(id), restored])
-    .then(([settings]) => {
-      updateSettings(settings);
+    .then(async ([settings]) => {
+      await updateSettings(settings);
       updateTracker();
-      settings.changed.connect(() => {
-        updateSettings(settings);
+      settings.changed.connect(async () => {
+        await updateSettings(settings);
         updateTracker();
       });
     })
@@ -241,7 +259,6 @@ function activateEditorCommands(
       const key = 'theme';
       const value = (theme = (args['theme'] as string) || theme);
 
-      updateTracker();
       return settingRegistry.set(id, key, value).catch((reason: Error) => {
         console.error(`Failed to set ${id}:${key} - ${reason.message}`);
       });
@@ -258,7 +275,6 @@ function activateEditorCommands(
       const key = 'keyMap';
       const value = (keyMap = (args['keyMap'] as string) || keyMap);
 
-      updateTracker();
       return settingRegistry.set(id, key, value).catch((reason: Error) => {
         console.error(`Failed to set ${id}:${key} - ${reason.message}`);
       });
@@ -275,19 +291,6 @@ function activateEditorCommands(
       }
       let editor = widget.content.editor as CodeMirrorEditor;
       editor.execCommand('find');
-    },
-    isEnabled
-  });
-
-  commands.addCommand(CommandIDs.findAndReplace, {
-    label: 'Find and Replace...',
-    execute: () => {
-      let widget = tracker.currentWidget;
-      if (!widget) {
-        return;
-      }
-      let editor = widget.content.editor as CodeMirrorEditor;
-      editor.execCommand('replace');
     },
     isEnabled
   });
@@ -377,37 +380,26 @@ function activateEditorCommands(
     });
   });
 
-  // Add some of the editor settings to the settings menu.
-  mainMenu.settingsMenu.addGroup(
-    [
-      { type: 'submenu' as Menu.ItemType, submenu: keyMapMenu },
-      { type: 'submenu' as Menu.ItemType, submenu: themeMenu }
-    ],
-    10
-  );
+  if (mainMenu) {
+    // Add some of the editor settings to the settings menu.
+    mainMenu.settingsMenu.addGroup(
+      [
+        { type: 'submenu' as Menu.ItemType, submenu: keyMapMenu },
+        { type: 'submenu' as Menu.ItemType, submenu: themeMenu }
+      ],
+      10
+    );
 
-  // Add the syntax highlighting submenu to the `View` menu.
-  mainMenu.viewMenu.addGroup([{ type: 'submenu', submenu: modeMenu }], 40);
+    // Add the syntax highlighting submenu to the `View` menu.
+    mainMenu.viewMenu.addGroup([{ type: 'submenu', submenu: modeMenu }], 40);
 
-  // Add find-replace capabilities to the edit menu.
-  mainMenu.editMenu.findReplacers.add({
-    tracker,
-    find: (widget: IDocumentWidget<FileEditor>) => {
-      let editor = widget.content.editor as CodeMirrorEditor;
-      editor.execCommand('find');
-    },
-    findAndReplace: (widget: IDocumentWidget<FileEditor>) => {
-      let editor = widget.content.editor as CodeMirrorEditor;
-      editor.execCommand('replace');
-    }
-  } as IEditMenu.IFindReplacer<IDocumentWidget<FileEditor>>);
-
-  // Add go to line capabilities to the edit menu.
-  mainMenu.editMenu.goToLiners.add({
-    tracker,
-    goToLine: (widget: IDocumentWidget<FileEditor>) => {
-      let editor = widget.content.editor as CodeMirrorEditor;
-      editor.execCommand('jumpToLine');
-    }
-  } as IEditMenu.IGoToLiner<IDocumentWidget<FileEditor>>);
+    // Add go to line capabilities to the edit menu.
+    mainMenu.editMenu.goToLiners.add({
+      tracker,
+      goToLine: (widget: IDocumentWidget<FileEditor>) => {
+        let editor = widget.content.editor as CodeMirrorEditor;
+        editor.execCommand('jumpToLine');
+      }
+    } as IEditMenu.IGoToLiner<IDocumentWidget<FileEditor>>);
+  }
 }

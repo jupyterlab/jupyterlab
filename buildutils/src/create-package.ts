@@ -8,7 +8,7 @@ import * as inquirer from 'inquirer';
 import * as path from 'path';
 import * as utils from './utils';
 
-let questions = [
+let questions: inquirer.Question[] = [
   {
     type: 'input',
     name: 'name',
@@ -21,7 +21,7 @@ let questions = [
   }
 ];
 
-inquirer.prompt(questions).then(answers => {
+void inquirer.prompt(questions).then(answers => {
   let { name, description } = answers;
   let dest = path.resolve(path.join('.', 'packages', name));
   if (fs.existsSync(dest)) {

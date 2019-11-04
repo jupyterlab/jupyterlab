@@ -304,7 +304,7 @@ describe('rendermime/registry', () => {
       const urlParent = encodeURI(pathParent);
 
       before(async () => {
-        const manager = new ServiceManager();
+        const manager = new ServiceManager({ standby: 'never' });
         const drive = new Drive({ name: 'extra' });
         const path = pathParent + '/pr%25 ' + UUID.uuid4();
         contents = manager.contents;

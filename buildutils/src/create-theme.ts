@@ -8,7 +8,7 @@ import * as inquirer from 'inquirer';
 import * as path from 'path';
 import * as utils from './utils';
 
-let questions = [
+let questions: inquirer.Question[] = [
   {
     type: 'input',
     name: 'name',
@@ -28,7 +28,7 @@ let questions = [
 
 const template = `
 import {
-  JupyterLab, JupyterLabPlugin
+  JupyterFrontEnd, JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -39,19 +39,15 @@ import {
 /**
  * A plugin for the {{title}}
  */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<void> = {
   id: '{{name}}:plugin',
   requires: [IThemeManager],
-  activate: function(app: JupyterLab, manager: IThemeManager) {
+  activate: (app: JupyterFrontEnd, manager: IThemeManager) => {
     manager.register({
       name: '{{title}}',
       isLight: true,
-      load: function() {
-        return manager.loadCSS('{{name}}/index.css');
-      },
-      unload: function() {
-        return Promise.resolve(void 0);
-      }
+      load: () => manager.loadCSS('{{name}}/index.css'),
+      unload: () => Promise.resolve(undefined)
     });
   },
   autoStart: true
@@ -61,7 +57,7 @@ const plugin: JupyterLabPlugin<void> = {
 export default plugin;
 `;
 
-inquirer.prompt(questions).then(answers => {
+void inquirer.prompt(questions).then(answers => {
   let { name, title, description } = answers;
   let dest = path.resolve(path.join('.', name));
   if (fs.existsSync(dest)) {
@@ -85,7 +81,7 @@ inquirer.prompt(questions).then(answers => {
   ['lib', 'node_modules', 'static'].forEach(folder => {
     let folderPath = path.join('.', name, folder);
     if (fs.existsSync(folderPath)) {
-      fs.remove(folderPath);
+      fs.removeSync(folderPath);
     }
   });
 

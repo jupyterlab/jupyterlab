@@ -19,7 +19,7 @@
       "path": "../mainmenu"
     },
     {
-      "path": "../services"
+      "path": "../ui-components"
     }
   ]
 }

@@ -1,0 +1,10 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+@import './collapser.css';
+@import './headerfooter.css';
+@import './inputarea.css';
+@import './placeholder.css';
+@import './widget.css';

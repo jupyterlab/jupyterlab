@@ -5,14 +5,14 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
   ICommandPalette,
-  InstanceTracker,
-  MainAreaWidget
+  MainAreaWidget,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
@@ -30,8 +30,6 @@ import {
  * The command IDs used by the setting editor.
  */
 namespace CommandIDs {
-  export const debug = 'settingeditor:debug';
-
   export const open = 'settingeditor:open';
 
   export const revert = 'settingeditor:revert';
@@ -42,7 +40,7 @@ namespace CommandIDs {
 /**
  * The default setting editor extension.
  */
-const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
+const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:plugin',
   requires: [
     ILayoutRestorer,
@@ -61,7 +59,7 @@ const plugin: JupyterLabPlugin<ISettingEditorTracker> = {
  * Activate the setting editor extension.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
   registry: ISettingRegistry,
   editorServices: IEditorServices,
@@ -73,25 +71,16 @@ function activate(
   const namespace = 'setting-editor';
   const factoryService = editorServices.factoryService;
   const editorFactory = factoryService.newInlineEditor;
-  const tracker = new InstanceTracker<MainAreaWidget<SettingEditor>>({
+  const tracker = new WidgetTracker<MainAreaWidget<SettingEditor>>({
     namespace
   });
   let editor: SettingEditor;
 
   // Handle state restoration.
-  restorer.restore(tracker, {
+  void restorer.restore(tracker, {
     command: CommandIDs.open,
     args: widget => ({}),
     name: widget => namespace
-  });
-
-  commands.addCommand(CommandIDs.debug, {
-    execute: () => {
-      tracker.currentWidget.content.toggleDebug();
-    },
-    iconClass: 'jp-MaterialIcon jp-BugIcon',
-    label: 'Debug User Settings In Inspector',
-    isToggled: () => tracker.currentWidget.content.isDebugVisible
   });
 
   commands.addCommand(CommandIDs.open, {
@@ -107,7 +96,6 @@ function activate(
       editor = new SettingEditor({
         commands: {
           registry: commands,
-          debug: CommandIDs.debug,
           revert: CommandIDs.revert,
           save: CommandIDs.save
         },
@@ -133,8 +121,8 @@ function activate(
       editor.title.iconClass = 'jp-SettingsIcon';
 
       let main = new MainAreaWidget({ content: editor });
-      tracker.add(main);
-      shell.addToMainArea(main);
+      void tracker.add(main);
+      shell.add(main);
     },
     label: 'Advanced Settings Editor'
   });

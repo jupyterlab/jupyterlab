@@ -1,0 +1,25 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/**
+ * This file contains support for deprecated CSS not covered in the
+ * auto-generated `deprecated.css`.
+ */
+
+/* vars for consuming "selected" icons as CSS background images */
+
+:root {
+  --jp-icon-file-selected: url('deprecated/selected/file_selected.svg');
+  --jp-icon-folder-selected: url('deprecated/selected/ic_folder_24px_selected.svg');
+  --jp-icon-image-selected: url('deprecated/selected/image_selected.svg');
+  --jp-icon-json-selected: url('deprecated/selected/json_selected.svg');
+  --jp-icon-kernel-selected: url('deprecated/selected/ic_memory_24px_selected.svg');
+  --jp-icon-markdown-selected: url('deprecated/selected/markdown_selected.svg');
+  --jp-icon-notebook-selected: url('deprecated/selected/notebook_selected.svg');
+  --jp-icon-python-selected: url('deprecated/selected/python_selected.svg');
+  --jp-icon-r-selected: url('deprecated/selected/r_selected.svg');
+  --jp-icon-spreadsheet-selected: url('deprecated/selected/csv_selected.svg');
+  --jp-icon-yaml-selected: url('deprecated/selected/yml_selected.svg');
+}

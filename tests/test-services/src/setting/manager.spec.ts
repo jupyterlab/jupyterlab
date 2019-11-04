@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { ServerConnection, SettingManager } from '@jupyterlab/services/src';
+import { ServerConnection, SettingManager } from '@jupyterlab/services';
 
 import { init } from '../utils';
 
@@ -13,7 +13,7 @@ init();
 describe('setting', () => {
   describe('SettingManager', () => {
     const manager = new SettingManager({
-      serverSettings: ServerConnection.makeSettings({ pageUrl: 'lab' })
+      serverSettings: ServerConnection.makeSettings({ appUrl: 'lab' })
     });
 
     describe('#constructor()', () => {

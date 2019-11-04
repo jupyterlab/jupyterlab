@@ -7,9 +7,9 @@ import { CommandRegistry } from '@phosphor/commands';
 
 import { Widget } from '@phosphor/widgets';
 
-import { InstanceTracker } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
 
-import { KernelMenu, IKernelMenu } from '@jupyterlab/mainmenu/src';
+import { KernelMenu, IKernelMenu } from '@jupyterlab/mainmenu';
 
 import { delegateExecute } from './util';
 
@@ -21,17 +21,18 @@ describe('@jupyterlab/mainmenu', () => {
   describe('KernelMenu', () => {
     let commands: CommandRegistry;
     let menu: KernelMenu;
-    let tracker: InstanceTracker<Wodget>;
-    const wodget = new Wodget();
+    let tracker: WidgetTracker<Wodget>;
+    let wodget: Wodget;
 
     beforeAll(() => {
       commands = new CommandRegistry();
     });
 
     beforeEach(() => {
+      wodget = new Wodget();
       menu = new KernelMenu({ commands });
-      tracker = new InstanceTracker<Wodget>({ namespace: 'wodget' });
-      tracker.add(wodget);
+      tracker = new WidgetTracker<Wodget>({ namespace: 'wodget' });
+      void tracker.add(wodget);
     });
 
     afterEach(() => {
@@ -74,15 +75,15 @@ describe('@jupyterlab/mainmenu', () => {
           }
         };
         menu.kernelUsers.add(user);
-        delegateExecute(wodget, menu.kernelUsers, 'interruptKernel');
+        void delegateExecute(wodget, menu.kernelUsers, 'interruptKernel');
         expect(wodget.state).to.equal('interrupt');
-        delegateExecute(wodget, menu.kernelUsers, 'restartKernel');
+        void delegateExecute(wodget, menu.kernelUsers, 'restartKernel');
         expect(wodget.state).to.equal('restart');
-        delegateExecute(wodget, menu.kernelUsers, 'restartKernelAndClear');
+        void delegateExecute(wodget, menu.kernelUsers, 'restartKernelAndClear');
         expect(wodget.state).to.equal('restartAndClear');
-        delegateExecute(wodget, menu.kernelUsers, 'changeKernel');
+        void delegateExecute(wodget, menu.kernelUsers, 'changeKernel');
         expect(wodget.state).to.equal('change');
-        delegateExecute(wodget, menu.kernelUsers, 'shutdownKernel');
+        void delegateExecute(wodget, menu.kernelUsers, 'shutdownKernel');
         expect(wodget.state).to.equal('shutdown');
       });
     });

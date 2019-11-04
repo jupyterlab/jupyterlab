@@ -1,26 +1,32 @@
 {
   "name": "@jupyterlab/inspector-extension",
-  "version": "0.19.1",
+  "version": "2.0.0-alpha.1",
   "description": "JupyterLab - Code Inspector Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "files": [
     "lib/*.d.ts",
     "lib/*.js.map",
-    "lib/*.js"
+    "lib/*.js",
+    "schema/*.json",
+    "style/**/*.css"
+  ],
+  "sideEffects": [
+    "style/**/*.css"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc -b",
@@ -30,22 +36,23 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.19.1",
-    "@jupyterlab/apputils": "^0.19.1",
-    "@jupyterlab/console": "^0.19.1",
-    "@jupyterlab/inspector": "^0.19.1",
-    "@jupyterlab/notebook": "^0.19.2",
-    "@phosphor/disposable": "^1.1.2"
+    "@jupyterlab/application": "^2.0.0-alpha.1",
+    "@jupyterlab/apputils": "^2.0.0-alpha.1",
+    "@jupyterlab/console": "^2.0.0-alpha.1",
+    "@jupyterlab/inspector": "^2.0.0-alpha.1",
+    "@jupyterlab/launcher": "^2.0.0-alpha.1",
+    "@jupyterlab/notebook": "^2.0.0-alpha.1"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typedoc": "~0.12.0",
-    "typescript": "~3.1.1"
+    "typedoc": "^0.14.2",
+    "typescript": "~3.5.1"
   },
   "publishConfig": {
     "access": "public"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "schema"
   }
 }

@@ -106,5 +106,5 @@
 }
 
 .jp-MarkdownOutput.jp-RenderedHTMLCommon {
-  overflow: visible;
+  overflow: auto;
 }

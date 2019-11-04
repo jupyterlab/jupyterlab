@@ -3,6 +3,92 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+/*
+ * Mozilla scrollbar styling
+ */
+
+/* use standard opaque scrollbars for most nodes */
+[data-jp-theme-scrollbars='true'] {
+  scrollbar-color: rgb(var(--jp-scrollbar-thumb-color))
+    var(--jp-scrollbar-background-color);
+}
+
+/* for code nodes, use a transparent style of scrollbar. These selectors
+ * will match lower in the tree, and so will override the above */
+[data-jp-theme-scrollbars='true'] .CodeMirror-hscrollbar,
+[data-jp-theme-scrollbars='true'] .CodeMirror-vscrollbar {
+  scrollbar-color: rgba(var(--jp-scrollbar-thumb-color), 0.5) transparent;
+}
+
+/*
+ * Webkit scrollbar styling
+ */
+
+/* use standard opaque scrollbars for most nodes */
+
+[data-jp-theme-scrollbars='true'] ::-webkit-scrollbar,
+[data-jp-theme-scrollbars='true'] ::-webkit-scrollbar-corner {
+  background: var(--jp-scrollbar-background-color);
+}
+
+[data-jp-theme-scrollbars='true'] ::-webkit-scrollbar-thumb {
+  background: rgb(var(--jp-scrollbar-thumb-color));
+  border: var(--jp-scrollbar-thumb-margin) solid transparent;
+  background-clip: content-box;
+  border-radius: var(--jp-scrollbar-thumb-radius);
+}
+
+[data-jp-theme-scrollbars='true'] ::-webkit-scrollbar-track:horizontal {
+  border-left: var(--jp-scrollbar-endpad) solid
+    var(--jp-scrollbar-background-color);
+  border-right: var(--jp-scrollbar-endpad) solid
+    var(--jp-scrollbar-background-color);
+}
+
+[data-jp-theme-scrollbars='true'] ::-webkit-scrollbar-track:vertical {
+  border-top: var(--jp-scrollbar-endpad) solid
+    var(--jp-scrollbar-background-color);
+  border-bottom: var(--jp-scrollbar-endpad) solid
+    var(--jp-scrollbar-background-color);
+}
+
+/* for code nodes, use a transparent style of scrollbar */
+
+[data-jp-theme-scrollbars='true'] .CodeMirror-hscrollbar::-webkit-scrollbar,
+[data-jp-theme-scrollbars='true'] .CodeMirror-vscrollbar::-webkit-scrollbar,
+[data-jp-theme-scrollbars='true']
+  .CodeMirror-hscrollbar::-webkit-scrollbar-corner,
+[data-jp-theme-scrollbars='true']
+  .CodeMirror-vscrollbar::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+[data-jp-theme-scrollbars='true']
+  .CodeMirror-hscrollbar::-webkit-scrollbar-thumb,
+[data-jp-theme-scrollbars='true']
+  .CodeMirror-vscrollbar::-webkit-scrollbar-thumb {
+  background: rgba(var(--jp-scrollbar-thumb-color), 0.5);
+  border: var(--jp-scrollbar-thumb-margin) solid transparent;
+  background-clip: content-box;
+  border-radius: var(--jp-scrollbar-thumb-radius);
+}
+
+[data-jp-theme-scrollbars='true']
+  .CodeMirror-hscrollbar::-webkit-scrollbar-track:horizontal {
+  border-left: var(--jp-scrollbar-endpad) solid transparent;
+  border-right: var(--jp-scrollbar-endpad) solid transparent;
+}
+
+[data-jp-theme-scrollbars='true']
+  .CodeMirror-vscrollbar::-webkit-scrollbar-track:vertical {
+  border-top: var(--jp-scrollbar-endpad) solid transparent;
+  border-bottom: var(--jp-scrollbar-endpad) solid transparent;
+}
+
+/*
+ * Phosphor
+ */
+
 .p-ScrollBar[data-orientation='horizontal'] {
   min-height: 16px;
   max-height: 16px;

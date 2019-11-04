@@ -232,6 +232,17 @@ export namespace Contents {
     localPath(path: string): string;
 
     /**
+     * Normalize a global path. Reduces '..' and '.' parts, and removes
+     * leading slashes from the local part of the path, while retaining
+     * the drive name if it exists.
+     *
+     * @param path: the path.
+     *
+     * @returns The normalized path.
+     */
+    normalize(path: string): string;
+
+    /**
      * Given a path of the form `drive:local/portion/of/it.txt`
      * get the name of the drive. If the path is missing
      * a drive portion, returns an empty string.
@@ -265,6 +276,9 @@ export namespace Contents {
      *
      * @param A promise which resolves with the absolute POSIX
      *   file path on the server.
+     *
+     * #### Notes
+     * The returned URL may include a query parameter.
      */
     getDownloadUrl(path: string): Promise<string>;
 
@@ -409,6 +423,9 @@ export namespace Contents {
      *
      * @param A promise which resolves with the absolute POSIX
      *   file path on the server.
+     *
+     * #### Notes
+     * The returned URL may include a query parameter.
      */
     getDownloadUrl(localPath: string): Promise<string>;
 
@@ -529,10 +546,7 @@ export class ContentsManager implements Contents.IManager {
     let serverSettings = (this.serverSettings =
       options.serverSettings || ServerConnection.makeSettings());
     this._defaultDrive = options.defaultDrive || new Drive({ serverSettings });
-    this._defaultDrive.fileChanged.connect(
-      this._onFileChanged,
-      this
-    );
+    this._defaultDrive.fileChanged.connect(this._onFileChanged, this);
   }
 
   /**
@@ -570,10 +584,7 @@ export class ContentsManager implements Contents.IManager {
    */
   addDrive(drive: Contents.IDrive): void {
     this._additionalDrives.set(drive.name, drive);
-    drive.fileChanged.connect(
-      this._onFileChanged,
-      this
-    );
+    drive.fileChanged.connect(this._onFileChanged, this);
   }
 
   /**
@@ -601,6 +612,23 @@ export class ContentsManager implements Contents.IManager {
       return PathExt.removeSlash(path);
     }
     return PathExt.join(firstParts.slice(1).join(':'), ...parts.slice(1));
+  }
+
+  /**
+   * Normalize a global path. Reduces '..' and '.' parts, and removes
+   * leading slashes from the local part of the path, while retaining
+   * the drive name if it exists.
+   *
+   * @param path: the path.
+   *
+   * @returns The normalized path.
+   */
+  normalize(path: string): string {
+    const parts = path.split(':');
+    if (parts.length === 1) {
+      return PathExt.normalize(path);
+    }
+    return `${parts[0]}:${PathExt.normalize(parts.slice(1).join(':'))}`;
   }
 
   /**
@@ -668,6 +696,8 @@ export class ContentsManager implements Contents.IManager {
    *
    * #### Notes
    * It is expected that the path contains no relative paths.
+   *
+   * The returned URL may include a query parameter.
    */
   getDownloadUrl(path: string): Promise<string> {
     let [drive, localPath] = this._driveForPath(path);
@@ -684,7 +714,7 @@ export class ContentsManager implements Contents.IManager {
    */
   newUntitled(options: Contents.ICreateOptions = {}): Promise<Contents.IModel> {
     if (options.path) {
-      let globalPath = Private.normalize(options.path);
+      let globalPath = this.normalize(options.path);
       let [drive, localPath] = this._driveForPath(globalPath);
       return drive
         .newUntitled({ ...options, path: localPath })
@@ -752,7 +782,7 @@ export class ContentsManager implements Contents.IManager {
     path: string,
     options: Partial<Contents.IModel> = {}
   ): Promise<Contents.IModel> {
-    const globalPath = Private.normalize(path);
+    const globalPath = this.normalize(path);
     const [drive, localPath] = this._driveForPath(path);
     return drive
       .save(localPath, { ...options, path: localPath })
@@ -1019,12 +1049,19 @@ export class Drive implements Contents.IDrive {
    *
    * #### Notes
    * It is expected that the path contains no relative paths.
+   *
+   * The returned URL may include a query parameter.
    */
   getDownloadUrl(localPath: string): Promise<string> {
     let baseUrl = this.serverSettings.baseUrl;
-    return Promise.resolve(
-      URLExt.join(baseUrl, FILES_URL, URLExt.encodeParts(localPath))
-    );
+    let url = URLExt.join(baseUrl, FILES_URL, URLExt.encodeParts(localPath));
+    const xsrfTokenMatch = document.cookie.match('\\b_xsrf=([^;]*)\\b');
+    if (xsrfTokenMatch) {
+      const fullurl = new URL(url);
+      fullurl.searchParams.append('_xsrf', xsrfTokenMatch[1]);
+      url = fullurl.toString();
+    }
+    return Promise.resolve(url);
   }
 
   /**
@@ -1409,18 +1446,5 @@ namespace Private {
       extension = `.${extension}`;
     }
     return extension;
-  }
-
-  /**
-   * Normalize a global path. Reduces '..' and '.' parts, and removes
-   * leading slashes from the local part of the path, while retaining
-   * the drive name if it exists.
-   */
-  export function normalize(path: string): string {
-    const parts = path.split(':');
-    if (parts.length === 1) {
-      return PathExt.normalize(path);
-    }
-    return `${parts[0]}:${PathExt.normalize(parts.slice(1).join(':'))}`;
   }
 }

@@ -15,7 +15,7 @@ import {
   IOutputAreaModel,
   OutputAreaModel,
   OutputArea
-} from '@jupyterlab/outputarea/src';
+} from '@jupyterlab/outputarea';
 
 import {
   createClientSession,
@@ -50,6 +50,10 @@ class LogOutputArea extends OutputArea {
 describe('outputarea/widget', () => {
   let widget: LogOutputArea;
   let model: OutputAreaModel;
+
+  beforeAll(async () => {
+    jest.setTimeout(60000);
+  });
 
   beforeEach(() => {
     model = new OutputAreaModel({
@@ -118,6 +122,7 @@ describe('outputarea/widget', () => {
       beforeEach(async () => {
         session = await createClientSession();
         await session.initialize();
+        await session.kernel.ready;
       });
 
       afterEach(async () => {
@@ -126,7 +131,6 @@ describe('outputarea/widget', () => {
       });
 
       it('should execute code on a kernel and send outputs to the model', async () => {
-        await session.kernel.ready;
         const future = session.kernel.requestExecute({ code: CODE });
         widget.future = future;
         const reply = await future.done;
@@ -137,7 +141,6 @@ describe('outputarea/widget', () => {
 
       it('should clear existing outputs', async () => {
         widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
-        await session.kernel.ready;
         const future = session.kernel.requestExecute({ code: CODE });
         widget.future = future;
         const reply = await future.done;
@@ -171,6 +174,60 @@ describe('outputarea/widget', () => {
         expect(widget.methods).to.contain('onModelChanged');
         expect(widget.widgets.length).to.equal(1);
       });
+
+      it('should rerender when preferred mimetype changes', () => {
+        // Add output with both safe and unsafe types
+        widget.model.clear();
+        widget.model.add({
+          output_type: 'display_data',
+          data: {
+            'image/svg+xml':
+              '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve"></svg>',
+            'text/plain': 'hello, world'
+          },
+          metadata: {}
+        });
+        expect(widget.node.innerHTML).to.contain(
+          '<img src="data:image/svg+xml'
+        );
+        widget.model.trusted = !widget.model.trusted;
+        expect(widget.node.innerHTML).to.not.contain(
+          '<img src="data:image/svg+xml'
+        );
+        widget.model.trusted = !widget.model.trusted;
+        expect(widget.node.innerHTML).to.contain(
+          '<img src="data:image/svg+xml'
+        );
+      });
+
+      it('should rerender when isolation changes', () => {
+        // Add output with both safe and unsafe types
+        widget.model.clear();
+        widget.model.add({
+          output_type: 'display_data',
+          data: {
+            'text/plain': 'hello, world'
+          }
+        });
+        expect(widget.node.innerHTML).to.not.contain('<iframe');
+        widget.model.set(0, {
+          output_type: 'display_data',
+          data: {
+            'text/plain': 'hello, world'
+          },
+          metadata: {
+            isolated: true
+          }
+        });
+        expect(widget.node.innerHTML).to.contain('<iframe');
+        widget.model.set(0, {
+          output_type: 'display_data',
+          data: {
+            'text/plain': 'hello, world'
+          }
+        });
+        expect(widget.node.innerHTML).to.not.contain('<iframe');
+      });
     });
 
     describe('.execute()', () => {
@@ -179,6 +236,7 @@ describe('outputarea/widget', () => {
       beforeEach(async () => {
         session = await createClientSession();
         await session.initialize();
+        await session.kernel.ready;
       });
 
       afterEach(async () => {
@@ -187,7 +245,6 @@ describe('outputarea/widget', () => {
       });
 
       it('should execute code on a kernel and send outputs to the model', async () => {
-        await session.kernel.ready;
         const reply = await OutputArea.execute(CODE, widget, session);
         expect(reply.content.execution_count).to.be.ok;
         expect(reply.content.status).to.equal('ok');
@@ -237,6 +294,7 @@ describe('outputarea/widget', () => {
           kernelPreference: { name: 'ipython' }
         });
         await ipySession.initialize();
+        await ipySession.kernel.ready;
         const promise0 = OutputArea.execute(code0, widget0, ipySession);
         const promise1 = OutputArea.execute(code1, widget1, ipySession);
         await Promise.all([promise0, promise1]);
@@ -253,6 +311,49 @@ describe('outputarea/widget', () => {
         expect(outputs[2].data).to.deep.equal({ 'text/plain': '4' });
         await ipySession.shutdown();
       });
+
+      it('should stop on an error', async () => {
+        let ipySession: ClientSession;
+        ipySession = await createClientSession({
+          kernelPreference: { name: 'ipython' }
+        });
+        await ipySession.initialize();
+        await ipySession.kernel.ready;
+        const widget1 = new LogOutputArea({ rendermime, model });
+        const future1 = OutputArea.execute('a++1', widget, ipySession);
+        const future2 = OutputArea.execute('a=1', widget1, ipySession);
+        const reply = await future1;
+        const reply2 = await future2;
+        expect(reply.content.status).to.equal('error');
+        expect(reply2.content.status).to.equal('aborted');
+        expect(model.length).to.equal(1);
+        widget1.dispose();
+        await ipySession.shutdown();
+      });
+
+      it('should allow an error given "raises-exception" metadata tag', async () => {
+        let ipySession: ClientSession;
+        ipySession = await createClientSession({
+          kernelPreference: { name: 'ipython' }
+        });
+        await ipySession.initialize();
+        await ipySession.kernel.ready;
+        const widget1 = new LogOutputArea({ rendermime, model });
+        const metadata = { tags: ['raises-exception'] };
+        const future1 = OutputArea.execute(
+          'a++1',
+          widget,
+          ipySession,
+          metadata
+        );
+        const future2 = OutputArea.execute('a=1', widget1, ipySession);
+        const reply = await future1;
+        const reply2 = await future2;
+        expect(reply.content.status).to.equal('error');
+        expect(reply2.content.status).to.equal('ok');
+        widget1.dispose();
+        await ipySession.shutdown();
+      });
     });
 
     describe('.ContentFactory', () => {
@@ -266,6 +367,7 @@ describe('outputarea/widget', () => {
       describe('#createStdin()', () => {
         it('should create a stdin widget', async () => {
           const kernel = await Kernel.startNew();
+          await kernel.ready;
           const factory = new OutputArea.ContentFactory();
           const future = kernel.requestExecute({ code: CODE });
           const options = {

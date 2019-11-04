@@ -19,6 +19,9 @@
       "path": "../inspector"
     },
     {
+      "path": "../launcher"
+    },
+    {
       "path": "../notebook"
     }
   ]

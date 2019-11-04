@@ -1,0 +1,547 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| RenderedText
+|----------------------------------------------------------------------------*/
+
+.jp-RenderedText {
+  text-align: left;
+  padding-left: var(--jp-code-padding);
+  line-height: var(--jp-code-line-height);
+  font-family: var(--jp-code-font-family);
+}
+
+.jp-RenderedText pre,
+.jp-RenderedJavaScript pre,
+.jp-RenderedHTMLCommon pre {
+  color: var(--jp-content-font-color1);
+  font-size: var(--jp-code-font-size);
+  border: none;
+  margin: 0px;
+  padding: 0px;
+}
+
+/* console foregrounds and backgrounds */
+.jp-RenderedText pre .ansi-black-fg {
+  color: #3e424d;
+}
+.jp-RenderedText pre .ansi-red-fg {
+  color: #e75c58;
+}
+.jp-RenderedText pre .ansi-green-fg {
+  color: #00a250;
+}
+.jp-RenderedText pre .ansi-yellow-fg {
+  color: #ddb62b;
+}
+.jp-RenderedText pre .ansi-blue-fg {
+  color: #208ffb;
+}
+.jp-RenderedText pre .ansi-magenta-fg {
+  color: #d160c4;
+}
+.jp-RenderedText pre .ansi-cyan-fg {
+  color: #60c6c8;
+}
+.jp-RenderedText pre .ansi-white-fg {
+  color: #c5c1b4;
+}
+
+.jp-RenderedText pre .ansi-black-bg {
+  background-color: #3e424d;
+}
+.jp-RenderedText pre .ansi-red-bg {
+  background-color: #e75c58;
+}
+.jp-RenderedText pre .ansi-green-bg {
+  background-color: #00a250;
+}
+.jp-RenderedText pre .ansi-yellow-bg {
+  background-color: #ddb62b;
+}
+.jp-RenderedText pre .ansi-blue-bg {
+  background-color: #208ffb;
+}
+.jp-RenderedText pre .ansi-magenta-bg {
+  background-color: #d160c4;
+}
+.jp-RenderedText pre .ansi-cyan-bg {
+  background-color: #60c6c8;
+}
+.jp-RenderedText pre .ansi-white-bg {
+  background-color: #c5c1b4;
+}
+
+.jp-RenderedText pre .ansi-black-intense-fg {
+  color: #282c36;
+}
+.jp-RenderedText pre .ansi-red-intense-fg {
+  color: #b22b31;
+}
+.jp-RenderedText pre .ansi-green-intense-fg {
+  color: #007427;
+}
+.jp-RenderedText pre .ansi-yellow-intense-fg {
+  color: #b27d12;
+}
+.jp-RenderedText pre .ansi-blue-intense-fg {
+  color: #0065ca;
+}
+.jp-RenderedText pre .ansi-magenta-intense-fg {
+  color: #a03196;
+}
+.jp-RenderedText pre .ansi-cyan-intense-fg {
+  color: #258f8f;
+}
+.jp-RenderedText pre .ansi-white-intense-fg {
+  color: #a1a6b2;
+}
+
+.jp-RenderedText pre .ansi-black-intense-bg {
+  background-color: #282c36;
+}
+.jp-RenderedText pre .ansi-red-intense-bg {
+  background-color: #b22b31;
+}
+.jp-RenderedText pre .ansi-green-intense-bg {
+  background-color: #007427;
+}
+.jp-RenderedText pre .ansi-yellow-intense-bg {
+  background-color: #b27d12;
+}
+.jp-RenderedText pre .ansi-blue-intense-bg {
+  background-color: #0065ca;
+}
+.jp-RenderedText pre .ansi-magenta-intense-bg {
+  background-color: #a03196;
+}
+.jp-RenderedText pre .ansi-cyan-intense-bg {
+  background-color: #258f8f;
+}
+.jp-RenderedText pre .ansi-white-intense-bg {
+  background-color: #a1a6b2;
+}
+
+.jp-RenderedText pre .ansi-default-inverse-fg {
+  color: var(--jp-ui-inverse-font-color0);
+}
+.jp-RenderedText pre .ansi-default-inverse-bg {
+  background-color: var(--jp-inverse-layout-color0);
+}
+
+.jp-RenderedText pre .ansi-bold {
+  font-weight: bold;
+}
+.jp-RenderedText pre .ansi-underline {
+  text-decoration: underline;
+}
+
+.jp-RenderedText[data-mime-type='application/vnd.jupyter.stderr'] {
+  background: var(--jp-rendermime-error-background);
+  padding-top: var(--jp-code-padding);
+}
+
+/*-----------------------------------------------------------------------------
+| RenderedLatex
+|----------------------------------------------------------------------------*/
+
+.jp-RenderedLatex {
+  color: var(--jp-content-font-color1);
+  font-size: var(--jp-content-font-size1);
+  line-height: var(--jp-content-line-height);
+}
+
+/* Left-justify outputs.*/
+.jp-OutputArea-output.jp-RenderedLatex {
+  padding: var(--jp-code-padding);
+  text-align: left;
+}
+
+/*-----------------------------------------------------------------------------
+| RenderedHTML
+|----------------------------------------------------------------------------*/
+
+.jp-RenderedHTMLCommon {
+  color: var(--jp-content-font-color1);
+  font-family: var(--jp-content-font-family);
+  font-size: var(--jp-content-font-size1);
+  line-height: var(--jp-content-line-height);
+  /* Give a bit more R padding on Markdown text to keep line lengths reasonable */
+  padding-right: 20px;
+}
+
+.jp-RenderedHTMLCommon em {
+  font-style: italic;
+}
+
+.jp-RenderedHTMLCommon strong {
+  font-weight: bold;
+}
+
+.jp-RenderedHTMLCommon u {
+  text-decoration: underline;
+}
+
+.jp-RenderedHTMLCommon a:link {
+  text-decoration: none;
+  color: var(--jp-content-link-color);
+}
+
+.jp-RenderedHTMLCommon a:hover {
+  text-decoration: underline;
+  color: var(--jp-content-link-color);
+}
+
+.jp-RenderedHTMLCommon a:visited {
+  text-decoration: none;
+  color: var(--jp-content-link-color);
+}
+
+/* Headings */
+
+.jp-RenderedHTMLCommon h1,
+.jp-RenderedHTMLCommon h2,
+.jp-RenderedHTMLCommon h3,
+.jp-RenderedHTMLCommon h4,
+.jp-RenderedHTMLCommon h5,
+.jp-RenderedHTMLCommon h6 {
+  line-height: var(--jp-content-heading-line-height);
+  font-weight: var(--jp-content-heading-font-weight);
+  font-style: normal;
+  margin: var(--jp-content-heading-margin-top) 0
+    var(--jp-content-heading-margin-bottom) 0;
+}
+
+.jp-RenderedHTMLCommon h1:first-child,
+.jp-RenderedHTMLCommon h2:first-child,
+.jp-RenderedHTMLCommon h3:first-child,
+.jp-RenderedHTMLCommon h4:first-child,
+.jp-RenderedHTMLCommon h5:first-child,
+.jp-RenderedHTMLCommon h6:first-child {
+  margin-top: calc(0.5 * var(--jp-content-heading-margin-top));
+}
+
+.jp-RenderedHTMLCommon h1:last-child,
+.jp-RenderedHTMLCommon h2:last-child,
+.jp-RenderedHTMLCommon h3:last-child,
+.jp-RenderedHTMLCommon h4:last-child,
+.jp-RenderedHTMLCommon h5:last-child,
+.jp-RenderedHTMLCommon h6:last-child {
+  margin-bottom: calc(0.5 * var(--jp-content-heading-margin-bottom));
+}
+
+.jp-RenderedHTMLCommon h1 {
+  font-size: var(--jp-content-font-size5);
+}
+
+.jp-RenderedHTMLCommon h2 {
+  font-size: var(--jp-content-font-size4);
+}
+
+.jp-RenderedHTMLCommon h3 {
+  font-size: var(--jp-content-font-size3);
+}
+
+.jp-RenderedHTMLCommon h4 {
+  font-size: var(--jp-content-font-size2);
+}
+
+.jp-RenderedHTMLCommon h5 {
+  font-size: var(--jp-content-font-size1);
+}
+
+.jp-RenderedHTMLCommon h6 {
+  font-size: var(--jp-content-font-size0);
+}
+
+/* Lists */
+
+.jp-RenderedHTMLCommon ul:not(.list-inline),
+.jp-RenderedHTMLCommon ol:not(.list-inline) {
+  padding-left: 2em;
+}
+
+.jp-RenderedHTMLCommon ul {
+  list-style: disc;
+}
+
+.jp-RenderedHTMLCommon ul ul {
+  list-style: square;
+}
+
+.jp-RenderedHTMLCommon ul ul ul {
+  list-style: circle;
+}
+
+.jp-RenderedHTMLCommon ol {
+  list-style: decimal;
+}
+
+.jp-RenderedHTMLCommon ol ol {
+  list-style: upper-alpha;
+}
+
+.jp-RenderedHTMLCommon ol ol ol {
+  list-style: lower-alpha;
+}
+
+.jp-RenderedHTMLCommon ol ol ol ol {
+  list-style: lower-roman;
+}
+
+.jp-RenderedHTMLCommon ol ol ol ol ol {
+  list-style: decimal;
+}
+
+.jp-RenderedHTMLCommon ol,
+.jp-RenderedHTMLCommon ul {
+  margin-bottom: 1em;
+}
+
+.jp-RenderedHTMLCommon ul ul,
+.jp-RenderedHTMLCommon ul ol,
+.jp-RenderedHTMLCommon ol ul,
+.jp-RenderedHTMLCommon ol ol {
+  margin-bottom: 0em;
+}
+
+.jp-RenderedHTMLCommon hr {
+  color: var(--jp-border-color2);
+  background-color: var(--jp-border-color1);
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.jp-RenderedHTMLCommon > pre {
+  margin: 1.5em 2em;
+}
+
+.jp-RenderedHTMLCommon pre,
+.jp-RenderedHTMLCommon code {
+  border: 0;
+  background-color: var(--jp-layout-color0);
+  color: var(--jp-content-font-color1);
+  font-family: var(--jp-code-font-family);
+  font-size: inherit;
+  line-height: var(--jp-code-line-height);
+  padding: 0;
+  white-space: pre-wrap;
+}
+
+.jp-RenderedHTMLCommon :not(pre) > code {
+  background-color: var(--jp-layout-color2);
+  padding: 1px 5px;
+}
+
+/* Tables */
+
+.jp-RenderedHTMLCommon table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: none;
+  color: var(--jp-ui-font-color1);
+  font-size: 12px;
+  table-layout: fixed;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.jp-RenderedHTMLCommon thead {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+  vertical-align: bottom;
+}
+
+.jp-RenderedHTMLCommon td,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon tr {
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+
+.jp-RenderedMarkdown.jp-RenderedHTMLCommon td,
+.jp-RenderedMarkdown.jp-RenderedHTMLCommon th {
+  max-width: none;
+}
+
+:not(.jp-RenderedMarkdown).jp-RenderedHTMLCommon td,
+:not(.jp-RenderedMarkdown).jp-RenderedHTMLCommon th,
+:not(.jp-RenderedMarkdown).jp-RenderedHTMLCommon tr {
+  text-align: right;
+}
+
+.jp-RenderedHTMLCommon th {
+  font-weight: bold;
+}
+
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd) {
+  background: var(--jp-layout-color0);
+}
+
+.jp-RenderedHTMLCommon tbody tr:nth-child(even) {
+  background: var(--jp-rendermime-table-row-background);
+}
+
+.jp-RenderedHTMLCommon tbody tr:hover {
+  background: var(--jp-rendermime-table-row-hover-background);
+}
+
+.jp-RenderedHTMLCommon table {
+  margin-bottom: 1em;
+}
+
+.jp-RenderedHTMLCommon p {
+  text-align: left;
+  margin: 0px;
+}
+
+.jp-RenderedHTMLCommon p {
+  margin-bottom: 1em;
+}
+
+.jp-RenderedHTMLCommon img {
+  -moz-force-broken-image-icon: 1;
+}
+
+/* Restrict to direct children as other images could be nested in other content. */
+.jp-RenderedHTMLCommon > img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 1em;
+}
+
+/* Change color behind transparent images if they need it... */
+[data-jp-theme-light='false'] .jp-RenderedImage img.jp-needs-light-background {
+  background-color: var(--jp-inverse-layout-color1);
+}
+[data-jp-theme-light='true'] .jp-RenderedImage img.jp-needs-dark-background {
+  background-color: var(--jp-inverse-layout-color1);
+}
+/* ...or leave it untouched if they don't */
+[data-jp-theme-light='false'] .jp-RenderedImage img.jp-needs-dark-background {
+}
+[data-jp-theme-light='true'] .jp-RenderedImage img.jp-needs-light-background {
+}
+
+.jp-RenderedHTMLCommon img,
+.jp-RenderedImage img,
+.jp-RenderedHTMLCommon svg,
+.jp-RenderedSVG svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.jp-RenderedHTMLCommon img.jp-mod-unconfined,
+.jp-RenderedImage img.jp-mod-unconfined,
+.jp-RenderedHTMLCommon svg.jp-mod-unconfined,
+.jp-RenderedSVG svg.jp-mod-unconfined {
+  max-width: none;
+}
+
+.jp-RenderedHTMLCommon .alert {
+  padding: var(--jp-notebook-padding);
+  border: var(--jp-border-width) solid transparent;
+  border-radius: var(--jp-border-radius);
+  margin-bottom: 1em;
+}
+
+.jp-RenderedHTMLCommon .alert-info {
+  color: var(--jp-info-color0);
+  background-color: var(--jp-info-color3);
+  border-color: var(--jp-info-color2);
+}
+.jp-RenderedHTMLCommon .alert-info hr {
+  border-color: var(--jp-info-color3);
+}
+.jp-RenderedHTMLCommon .alert-info > p:last-child,
+.jp-RenderedHTMLCommon .alert-info > ul:last-child {
+  margin-bottom: 0;
+}
+
+.jp-RenderedHTMLCommon .alert-warning {
+  color: var(--jp-warn-color0);
+  background-color: var(--jp-warn-color3);
+  border-color: var(--jp-warn-color2);
+}
+.jp-RenderedHTMLCommon .alert-warning hr {
+  border-color: var(--jp-warn-color3);
+}
+.jp-RenderedHTMLCommon .alert-warning > p:last-child,
+.jp-RenderedHTMLCommon .alert-warning > ul:last-child {
+  margin-bottom: 0;
+}
+
+.jp-RenderedHTMLCommon .alert-success {
+  color: var(--jp-success-color0);
+  background-color: var(--jp-success-color3);
+  border-color: var(--jp-success-color2);
+}
+.jp-RenderedHTMLCommon .alert-success hr {
+  border-color: var(--jp-success-color3);
+}
+.jp-RenderedHTMLCommon .alert-success > p:last-child,
+.jp-RenderedHTMLCommon .alert-success > ul:last-child {
+  margin-bottom: 0;
+}
+
+.jp-RenderedHTMLCommon .alert-danger {
+  color: var(--jp-error-color0);
+  background-color: var(--jp-error-color3);
+  border-color: var(--jp-error-color2);
+}
+.jp-RenderedHTMLCommon .alert-danger hr {
+  border-color: var(--jp-error-color3);
+}
+.jp-RenderedHTMLCommon .alert-danger > p:last-child,
+.jp-RenderedHTMLCommon .alert-danger > ul:last-child {
+  margin-bottom: 0;
+}
+
+.jp-RenderedHTMLCommon blockquote {
+  margin: 1em 2em;
+  padding: 0 1em;
+  border-left: 5px solid var(--jp-border-color2);
+}
+
+a.jp-InternalAnchorLink {
+  visibility: hidden;
+  margin-left: 8px;
+  color: var(--md-blue-800);
+}
+
+h1:hover .jp-InternalAnchorLink,
+h2:hover .jp-InternalAnchorLink,
+h3:hover .jp-InternalAnchorLink,
+h4:hover .jp-InternalAnchorLink,
+h5:hover .jp-InternalAnchorLink,
+h6:hover .jp-InternalAnchorLink {
+  visibility: visible;
+}
+
+.jp-RenderedHTMLCommon kbd {
+  background-color: var(--jp-rendermime-table-row-background);
+  border: 1px solid var(--jp-border-color0);
+  border-bottom-color: var(--jp-border-color2);
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+  display: inline-block;
+  font-size: 0.8em;
+  line-height: 1em;
+  padding: 0.2em 0.5em;
+}
+
+/* Most direct children of .jp-RenderedHTMLCommon have a margin-bottom of 1.0.
+ * At the bottom of cells this is a bit too much as there is also spacing
+ * between cells. Going all the way to 0 gets too tight between markdown and
+ * code cells.
+ */
+.jp-RenderedHTMLCommon > *:last-child {
+  margin-bottom: 0.5em;
+}

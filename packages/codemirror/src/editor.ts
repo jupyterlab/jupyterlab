@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/// <reference types="codemirror"/>
+/// <reference types="codemirror/searchcursor"/>
 
 import CodeMirror from 'codemirror';
 
@@ -12,6 +14,8 @@ import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
 import { Signal } from '@phosphor/signaling';
 
 import { showDialog } from '@jupyterlab/apputils';
+
+import { Poll } from '@jupyterlab/coreutils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -26,8 +30,16 @@ import {
 import { Mode } from './mode';
 
 import 'codemirror/addon/comment/comment.js';
+import 'codemirror/addon/display/rulers.js';
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/closebrackets.js';
+import 'codemirror/addon/fold/foldcode.js';
+import 'codemirror/addon/fold/foldgutter.js';
+import 'codemirror/addon/fold/brace-fold.js';
+import 'codemirror/addon/fold/indent-fold.js';
+import 'codemirror/addon/fold/markdown-fold.js';
+import 'codemirror/addon/fold/xml-fold.js';
+import 'codemirror/addon/fold/comment-fold.js';
 import 'codemirror/addon/scroll/scrollpastend.js';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/search/search';
@@ -37,7 +49,7 @@ import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/addon/selection/selection-pointer';
 import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
-import 'codemirror/keymap/vim.js';
+// import 'codemirror/keymap/vim.js';  lazy loading of vim mode is available in ../codemirror-extension/index.ts
 
 /**
  * The class name added to CodeMirrorWidget instances.
@@ -113,23 +125,21 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.clearHistory();
     this._onMimeTypeChanged();
     this._onCursorActivity();
-    this._timer = window.setInterval(() => {
-      this._checkSync();
-    }, 3000);
+    this._poll = new Poll({
+      factory: async () => {
+        this._checkSync();
+      },
+      frequency: { interval: 3000, backoff: false },
+      standby: () => {
+        // If changed, only stand by when hidden, otherwise always stand by.
+        return this._lastChange ? 'when-hidden' : true;
+      }
+    });
 
     // Connect to changes.
-    model.value.changed.connect(
-      this._onValueChanged,
-      this
-    );
-    model.mimeTypeChanged.connect(
-      this._onMimeTypeChanged,
-      this
-    );
-    model.selections.changed.connect(
-      this._onSelectionsChanged,
-      this
-    );
+    model.value.changed.connect(this._onValueChanged, this);
+    model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
+    model.selections.changed.connect(this._onSelectionsChanged, this);
 
     CodeMirror.on(editor, 'keydown', (editor: CodeMirror.Editor, event) => {
       let index = ArrayExt.findFirstIndex(this._keydownHandlers, handler => {
@@ -254,7 +264,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
     this._keydownHandlers.length = 0;
-    window.clearInterval(this._timer);
+    this._poll.dispose();
     Signal.clearData(this);
   }
 
@@ -369,6 +379,65 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._clearHover();
   }
 
+  // todo: docs, maybe define overlay options as a type?
+  addOverlay(mode: string | object, options?: object): void {
+    this._editor.addOverlay(mode, options);
+  }
+
+  removeOverlay(mode: string | object): void {
+    this._editor.removeOverlay(mode);
+  }
+
+  getSearchCursor(
+    query: string | RegExp,
+    start?: CodeMirror.Position,
+    caseFold?: boolean
+  ): CodeMirror.SearchCursor {
+    return this._editor.getDoc().getSearchCursor(query, start, caseFold);
+  }
+
+  getCursor(start?: string): CodeMirror.Position {
+    return this._editor.getDoc().getCursor(start);
+  }
+
+  get state(): any {
+    return this._editor.state;
+  }
+
+  operation<T>(fn: () => T): T {
+    return this._editor.operation(fn);
+  }
+
+  firstLine(): number {
+    return this._editor.getDoc().firstLine();
+  }
+
+  lastLine(): number {
+    return this._editor.getDoc().lastLine();
+  }
+
+  scrollIntoView(
+    pos: { from: CodeMirror.Position; to: CodeMirror.Position },
+    margin: number
+  ): void {
+    this._editor.scrollIntoView(pos, margin);
+  }
+
+  cursorCoords(
+    where: boolean,
+    mode?: 'window' | 'page' | 'local'
+  ): { left: number; top: number; bottom: number } {
+    return this._editor.cursorCoords(where, mode);
+  }
+
+  getRange(
+    from: CodeMirror.Position,
+    to: CodeMirror.Position,
+    seperator?: string
+  ): string {
+    return this._editor.getDoc().getRange(from, to, seperator);
+  }
+
   /**
    * Add a keydown handler to the editor.
    *
@@ -407,7 +476,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Reveal the given selection in the editor.
    */
   revealSelection(selection: CodeEditor.IRange): void {
-    const range = this._toCodeMirrorRange(selection);
+    const range = {
+      from: this._toCodeMirrorPosition(selection.start),
+      to: this._toCodeMirrorPosition(selection.end)
+    };
     this._editor.scrollIntoView(range);
   }
 
@@ -450,9 +522,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * #### Notes
    * This will remove any secondary cursors.
    */
-  setCursorPosition(position: CodeEditor.IPosition): void {
+  setCursorPosition(
+    position: CodeEditor.IPosition,
+    options?: { bias?: number; origin?: string; scroll?: boolean }
+  ): void {
     const cursor = this._toCodeMirrorPosition(position);
-    this.doc.setCursor(cursor);
+    this.doc.setCursor(cursor, undefined, options);
     // If the editor does not have focus, this cursor change
     // will get screened out in _onCursorsChanged(). Make an
     // exception for this method.
@@ -600,7 +675,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _onMimeTypeChanged(): void {
     const mime = this._model.mimeType;
     let editor = this._editor;
-    Mode.ensure(mime).then(spec => {
+    // TODO: should we provide a hook for when the
+    // mode is done being set?
+    void Mode.ensure(mime).then(spec => {
       editor.setOption('mode', spec.mime);
     });
     let extraKeys = editor.getOption('extraKeys') || {};
@@ -668,7 +745,19 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       // Only render selections if the start is not equal to the end.
       // In that case, we don't need to render the cursor.
       if (!JSONExt.deepEqual(selection.start, selection.end)) {
-        const { anchor, head } = this._toCodeMirrorSelection(selection);
+        // Selections only appear to render correctly if the anchor
+        // is before the head in the document. That is, reverse selections
+        // do not appear as intended.
+        let forward: boolean =
+          selection.start.line < selection.end.line ||
+          (selection.start.line === selection.end.line &&
+            selection.start.column <= selection.end.column);
+        let anchor = this._toCodeMirrorPosition(
+          forward ? selection.start : selection.end
+        );
+        let head = this._toCodeMirrorPosition(
+          forward ? selection.end : selection.start
+        );
         let markerOptions: CodeMirror.TextMarkerOptions;
         if (collaborator) {
           markerOptions = this._toTextMarkerOptions({
@@ -740,28 +829,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _toCodeMirrorSelection(
     selection: CodeEditor.IRange
   ): CodeMirror.Selection {
-    // Selections only appear to render correctly if the anchor
-    // is before the head in the document. That is, reverse selections
-    // do not appear as intended.
-    let forward: boolean =
-      selection.start.line < selection.end.line ||
-      (selection.start.line === selection.end.line &&
-        selection.start.column <= selection.end.column);
-    let anchor = forward ? selection.start : selection.end;
-    let head = forward ? selection.end : selection.start;
     return {
-      anchor: this._toCodeMirrorPosition(anchor),
-      head: this._toCodeMirrorPosition(head)
-    };
-  }
-
-  /**
-   * Converts an editor selection to a code mirror selection.
-   */
-  private _toCodeMirrorRange(range: CodeEditor.IRange): CodeMirror.Range {
-    return {
-      from: this._toCodeMirrorPosition(range.start),
-      to: this._toCodeMirrorPosition(range.end)
+      anchor: this._toCodeMirrorPosition(selection.start),
+      head: this._toCodeMirrorPosition(selection.end)
     };
   }
 
@@ -800,12 +870,18 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     switch (args.type) {
       case 'insert':
         let pos = doc.posFromIndex(args.start);
-        doc.replaceRange(args.value, pos, pos);
+        // Replace the range, including a '+input' orign,
+        // which indicates that CodeMirror may merge changes
+        // for undo/redo purposes.
+        doc.replaceRange(args.value, pos, pos, '+input');
         break;
       case 'remove':
         let from = doc.posFromIndex(args.start);
         let to = doc.posFromIndex(args.end);
-        doc.replaceRange('', from, to);
+        // Replace the range, including a '+input' orign,
+        // which indicates that CodeMirror may merge changes
+        // for undo/redo purposes.
+        doc.replaceRange('', from, to, '+input');
         break;
       case 'set':
         doc.setValue(args.value);
@@ -967,7 +1043,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       return;
     }
 
-    showDialog({
+    void showDialog({
       title: 'Code Editor out of Sync',
       body:
         'Please open your browser JavaScript console for bug report instructions'
@@ -1004,7 +1080,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _needsRefresh = false;
   private _isDisposed = false;
   private _lastChange: CodeMirror.EditorChange | null = null;
-  private _timer = -1;
+  private _poll: Poll;
 }
 
 /**
@@ -1085,6 +1161,11 @@ export namespace CodeMirrorEditor {
     fixedGutter?: boolean;
 
     /**
+     * Whether the folding gutter should be drawn
+     */
+    foldGutter?: boolean;
+
+    /**
      * Whether the cursor should be drawn when a selection is active.
      */
     showCursorWhenSelecting?: boolean;
@@ -1137,7 +1218,7 @@ export namespace CodeMirrorEditor {
      * CodeMirror-activeline-background, and adds the class
      * CodeMirror-activeline-gutter to the line's gutter space is enabled.
      */
-    styleActiveLine: boolean | object;
+    styleActiveLine: boolean | CodeMirror.StyleActiveLine;
 
     /**
      * Whether to causes the selected text to be marked with the CSS class
@@ -1175,8 +1256,10 @@ export namespace CodeMirrorEditor {
     lineWiseCopyCut: true,
     scrollPastEnd: false,
     styleActiveLine: false,
-    styleSelectedText: false,
-    selectionPointer: false
+    styleSelectedText: true,
+    selectionPointer: false,
+    rulers: [],
+    foldGutter: false
   };
 
   /**
@@ -1190,7 +1273,7 @@ export namespace CodeMirrorEditor {
     name: string,
     command: (cm: CodeMirror.Editor) => void
   ) {
-    CodeMirror.commands[name] = command;
+    (CodeMirror.commands as any)[name] = command;
   }
 }
 
@@ -1215,7 +1298,7 @@ namespace Private {
       ...otherOptions
     } = config;
     let bareConfig = {
-      autoCloseBrackets: autoClosingBrackets,
+      autoCloseBrackets: autoClosingBrackets ? {} : false,
       indentUnit: tabSize,
       indentWithTabs: !insertSpaces,
       lineWrapping: lineWrap === 'off' ? false : true,
@@ -1278,31 +1361,38 @@ namespace Private {
    */
   export function delSpaceToPrevTabStop(cm: CodeMirror.Editor): void {
     let doc = cm.getDoc();
-    let from = doc.getCursor('from');
-    let to = doc.getCursor('to');
-    let sel = !posEq(from, to);
-    if (sel) {
-      let ranges = doc.listSelections();
-      for (let i = ranges.length - 1; i >= 0; i--) {
-        let head = ranges[i].head;
-        let anchor = ranges[i].anchor;
-        doc.replaceRange(
-          '',
-          CodeMirror.Pos(head.line, head.ch),
-          CodeMirror.Pos(anchor.line, anchor.ch)
-        );
+    let tabSize = cm.getOption('indentUnit');
+    let ranges = doc.listSelections(); // handle multicursor
+    for (let i = ranges.length - 1; i >= 0; i--) {
+      // iterate reverse so any deletions don't overlap
+      let head = ranges[i].head;
+      let anchor = ranges[i].anchor;
+      let isSelection = !posEq(head, anchor);
+      if (isSelection) {
+        doc.replaceRange('', anchor, head);
+      } else {
+        let line = doc.getLine(head.line).substring(0, head.ch);
+        if (line.match(/^\ +$/) !== null) {
+          // delete tabs
+          let prevTabStop = (Math.ceil(head.ch / tabSize) - 1) * tabSize;
+          let from = CodeMirror.Pos(head.line, prevTabStop);
+          doc.replaceRange('', from, head);
+        } else {
+          // delete non-tabs
+          if (head.ch === 0) {
+            if (head.line !== 0) {
+              let from = CodeMirror.Pos(
+                head.line - 1,
+                doc.getLine(head.line - 1).length
+              );
+              doc.replaceRange('', from, head);
+            }
+          } else {
+            let from = CodeMirror.Pos(head.line, head.ch - 1);
+            doc.replaceRange('', from, head);
+          }
+        }
       }
-      return;
-    }
-    let cur = doc.getCursor();
-    let tabsize = cm.getOption('tabSize');
-    let chToPrevTabStop = cur.ch - (Math.ceil(cur.ch / tabsize) - 1) * tabsize;
-    from = { ch: cur.ch - chToPrevTabStop, line: cur.line };
-    let select = doc.getRange(from, cur);
-    if (select.match(/^\ +$/) !== null) {
-      doc.replaceRange('', from, cur);
-    } else {
-      CodeMirror.commands['delCharBefore'](cm);
     }
   }
 
@@ -1314,6 +1404,22 @@ namespace Private {
     b: CodeMirror.Position
   ): boolean {
     return a.line === b.line && a.ch === b.ch;
+  }
+
+  /**
+   * Get the list of active gutters
+   *
+   * @param config Editor configuration
+   */
+  function getActiveGutters(config: CodeMirrorEditor.IConfig): string[] {
+    // The order of the classes will be the gutters order
+    let classToSwitch: { [val: string]: keyof CodeMirrorEditor.IConfig } = {
+      'CodeMirror-linenumbers': 'lineNumbers',
+      'CodeMirror-foldgutter': 'codeFolding'
+    };
+    return Object.keys(classToSwitch).filter(
+      gutter => config[classToSwitch[gutter]]
+    );
   }
 
   /**
@@ -1355,6 +1461,18 @@ namespace Private {
       case 'autoClosingBrackets':
         editor.setOption('autoCloseBrackets', value);
         break;
+      case 'rulers':
+        let rulers = value as Array<number>;
+        editor.setOption(
+          'rulers',
+          rulers.map(column => {
+            return {
+              column,
+              className: 'jp-CodeMirror-ruler'
+            };
+          })
+        );
+        break;
       case 'readOnly':
         el.classList.toggle(READ_ONLY_CLASS, value);
         editor.setOption(option, value);
@@ -1367,6 +1485,17 @@ namespace Private {
         break;
       case 'lineHeight':
         el.style.lineHeight = value ? value.toString() : null;
+        break;
+      case 'gutters':
+        editor.setOption(option, getActiveGutters(config));
+        break;
+      case 'lineNumbers':
+        editor.setOption(option, value);
+        editor.setOption('gutters', getActiveGutters(config));
+        break;
+      case 'codeFolding':
+        editor.setOption('foldGutter', value);
+        editor.setOption('gutters', getActiveGutters(config));
         break;
       default:
         editor.setOption(option, value);

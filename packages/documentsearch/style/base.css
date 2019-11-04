@@ -1,0 +1,230 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+.jp-DocumentSearch-input {
+  border: none;
+  outline: none;
+  font-size: var(--jp-ui-font-size1);
+  background-color: var(--jp-layout-color0);
+}
+
+.jp-DocumentSearch-overlay {
+  position: absolute;
+  background-color: var(--jp-toolbar-background);
+  border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
+  border-left: var(--jp-border-width) solid var(--jp-toolbar-border-color);
+  top: 0;
+  right: 0;
+  z-index: 7;
+  min-width: 300px;
+  padding: 2px;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-DocumentSearch-overlay button {
+  background-color: var(--jp-toolbar-background);
+  outline: 0;
+}
+
+.jp-DocumentSearch-overlay-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.jp-DocumentSearch-overlay * {
+  color: var(--jp-ui-font-color0);
+  background-position: center;
+}
+
+.jp-DocumentSearch-button-content {
+  display: inline-block;
+  cursor: pointer;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+}
+
+.jp-DocumentSearch-input-wrapper {
+  border: var(--jp-border-width) solid var(--jp-border-color0);
+  display: flex;
+  background-color: var(--jp-layout-color0);
+  margin: 2px;
+}
+
+.jp-DocumentSearch-focused-input {
+  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
+}
+
+.jp-DocumentSearch-input-wrapper * {
+  background-color: var(--jp-layout-color0);
+}
+
+.jp-DocumentSearch-toggle-wrapper,
+.jp-DocumentSearch-button-wrapper {
+  all: initial;
+  overflow: hidden;
+  display: inline-block;
+  border: none;
+  box-sizing: border-box;
+  background-repeat: no-repeat;
+}
+
+.jp-DocumentSearch-toggle-wrapper {
+  width: 14px;
+  height: 14px;
+}
+
+.jp-DocumentSearch-button-wrapper {
+  width: 20px;
+  height: 20px;
+}
+
+.jp-DocumentSearch-toggle-wrapper:focus,
+.jp-DocumentSearch-button-wrapper:focus {
+  outline: var(--jp-border-width) solid
+    var(--jp-cell-editor-active-border-color);
+  outline-offset: -1px;
+}
+
+.jp-DocumentSearch-toggle-wrapper,
+.jp-DocumentSearch-button-wrapper,
+.jp-DocumentSearch-button-content:focus {
+  outline: none;
+}
+
+.jp-DocumentSearch-toggle-placeholder {
+  width: 5px;
+}
+
+.jp-DocumentSearch-regex-button {
+  background-image: var(--jp-icon-search-regex);
+}
+
+.jp-DocumentSearch-case-button {
+  background-image: var(--jp-icon-search-case-sensitive);
+}
+
+.jp-DocumentSearch-input-button:before {
+  display: block;
+  padding-top: 100%;
+}
+
+.jp-DocumentSearch-input-button-off {
+  opacity: var(--jp-search-toggle-off-opacity);
+}
+
+.jp-DocumentSearch-input-button-off:hover {
+  opacity: var(--jp-search-toggle-hover-opacity);
+}
+
+.jp-DocumentSearch-input-button-on {
+  opacity: var(--jp-search-toggle-on-opacity);
+}
+
+.jp-DocumentSearch-index-counter {
+  padding-left: 10px;
+  padding-right: 10px;
+  user-select: none;
+  min-width: 43px;
+  display: inline-block;
+}
+
+.jp-DocumentSearch-up-down-wrapper {
+  display: inline-block;
+  padding-right: 2px;
+}
+
+.jp-DocumentSearch-up-down-wrapper button {
+  outline: 0;
+  border: none;
+  width: 20px;
+  height: 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  vertical-align: middle;
+  margin: 1px 7px 2px;
+}
+
+.jp-DocumentSearch-up-button {
+  background-image: var(--jp-icon-search-arrow-up);
+}
+
+.jp-DocumentSearch-down-button {
+  background-image: var(--jp-icon-search-arrow-down);
+}
+
+.jp-DocumentSearch-close-button {
+  display: inline-block;
+  background-size: 16px;
+  background-image: var(--jp-icon-close);
+  background-repeat: no-repeat;
+  background-position: center;
+  vertical-align: middle;
+}
+
+.jp-DocumentSearch-close-button:hover {
+  background-size: 16px;
+  background-image: var(--jp-icon-close-circle);
+}
+
+.jp-DocumentSearch-regex-error {
+  color: var(--jp-error-color0);
+}
+
+.jp-DocumentSearch-replace-entry {
+  border: var(--jp-border-width) solid var(--jp-border-color0);
+  display: flex;
+  background-color: var(--jp-layout-color0);
+  font-size: var(--jp-ui-font-size1);
+  width: 186px;
+  margin: 2px;
+}
+
+.jp-DocumentSearch-replace-button-wrapper {
+  overflow: hidden;
+  display: inline-block;
+  box-sizing: border-box;
+  border: var(--jp-border-width) solid var(--jp-border-color0);
+  margin: 2px;
+}
+
+.jp-DocumentSearch-replace-entry:focus,
+.jp-DocumentSearch-replace-button-wrapper:focus {
+  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
+}
+
+.jp-DocumentSearch-replace-button {
+  display: inline-block;
+  text-align: center;
+  cursor: pointer;
+  box-sizing: border-box;
+  background-color: var(--jp-toolbar-background);
+  color: var(--jp-font-color1);
+  width: 100%;
+  height: 100%;
+}
+
+.jp-DocumentSearch-replace-button:focus {
+  outline: none;
+}
+
+.jp-DocumentSearch-replace-wrapper-class {
+  margin-left: 14px;
+  display: flex;
+}
+
+.jp-DocumentSearch-replace-toggle-collapsed,
+.jp-DocumentSearch-replace-toggle-expanded {
+  border: none;
+  background-color: var(--jp-toolbar-background);
+}
+
+.jp-DocumentSearch-replace-toggle-collapsed {
+  background-image: var(--jp-image-caretright);
+}
+
+.jp-DocumentSearch-replace-toggle-expanded {
+  background-image: var(--jp-image-caretdown);
+}

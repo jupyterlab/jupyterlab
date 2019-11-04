@@ -11,7 +11,7 @@ module.exports = function(config) {
     client: {
       captureConsole: true,
       mocha: {
-        timeout: 10000, // 10 seconds - upped from 2 seconds
+        timeout: 30000, // 30 seconds - upped from 2 seconds
         retries: 3 // Allow for slow server on CI.
       }
     },
@@ -31,8 +31,8 @@ module.exports = function(config) {
       noInfo: true,
       stats: 'errors-only'
     },
-    browserNoActivityTimeout: 31000, // 31 seconds - upped from 10 seconds
-    browserDisconnectTimeout: 31000, // 31 seconds - upped from 2 seconds
+    browserNoActivityTimeout: 61000, // 61 seconds - upped from 10 seconds
+    browserDisconnectTimeout: 61000, // 61 seconds - upped from 2 seconds
     browserDisconnectTolerance: 2,
     port: 9876,
     colors: true,

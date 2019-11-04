@@ -1,0 +1,44 @@
+{
+  "title": "Code Console",
+  "description": "Code Console settings.",
+  "jupyter.lab.setting-icon-class": "jp-CodeConsoleIcon",
+  "jupyter.lab.setting-icon-label": "Code Console Settings",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "console:linebreak",
+      "keys": ["Enter"],
+      "selector": ".jp-CodeConsole[data-jp-interaction-mode='notebook'] .jp-CodeConsole-promptCell"
+    },
+    {
+      "command": "console:run-forced",
+      "keys": ["Shift Enter"],
+      "selector": ".jp-CodeConsole[data-jp-interaction-mode='notebook'] .jp-CodeConsole-promptCell"
+    },
+    {
+      "command": "console:linebreak",
+      "keys": ["Accel Enter"],
+      "selector": ".jp-CodeConsole[data-jp-interaction-mode='terminal'] .jp-CodeConsole-promptCell"
+    },
+    {
+      "command": "console:run-forced",
+      "keys": ["Shift Enter"],
+      "selector": ".jp-CodeConsole[data-jp-interaction-mode='terminal'] .jp-CodeConsole-promptCell"
+    },
+    {
+      "command": "console:run-unforced",
+      "keys": ["Enter"],
+      "selector": ".jp-CodeConsole[data-jp-interaction-mode='terminal'] .jp-CodeConsole-promptCell"
+    }
+  ],
+  "properties": {
+    "interactionMode": {
+      "title": "Interaction mode",
+      "description": "Whether the console interaction mimics the notebook\nor terminal keyboard shortcuts.",
+      "type": "string",
+      "enum": ["notebook", "terminal"],
+      "default": "notebook"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

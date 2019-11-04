@@ -33,5 +33,5 @@ if (require.main === module) {
   }
   data.name = name;
   utils.writePackageData(jsonPath, data);
-  fs.ensureDir(path.join(dest, 'src'));
+  fs.ensureDirSync(path.join(dest, 'src'));
 }

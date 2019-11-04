@@ -1,9 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Debouncer } from '@jupyterlab/coreutils';
+
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+
+import { DockPanelSvg, TabBarSvg } from '@jupyterlab/ui-components';
+
 import { ArrayExt, find, IIterator, iter, toArray } from '@phosphor/algorithm';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate, Token } from '@phosphor/coreutils';
 
 import { Message, MessageLoop, IMessageHandler } from '@phosphor/messaging';
 
@@ -23,12 +29,12 @@ import {
   Widget
 } from '@phosphor/widgets';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { JupyterFrontEnd } from './frontend';
 
 /**
  * The class name added to AppShell instances.
  */
-const APPLICATION_SHELL_CLASS = 'jp-ApplicationShell';
+const APPLICATION_SHELL_CLASS = 'jp-LabShell';
 
 /**
  * The class name added to side bar instances.
@@ -50,787 +56,30 @@ const ACTIVE_CLASS = 'jp-mod-active';
  */
 const DEFAULT_RANK = 500;
 
-/**
- * The data attribute added to the document body indicating shell's mode.
- */
-const MODE_ATTRIBUTE = 'data-shell-mode';
-
 const ACTIVITY_CLASS = 'jp-Activity';
 
+/* tslint:disable */
 /**
- * The application shell for JupyterLab.
+ * The JupyterLab application shell token.
  */
-export class ApplicationShell extends Widget {
-  /**
-   * Construct a new application shell.
-   */
-  constructor() {
-    super();
-    this.addClass(APPLICATION_SHELL_CLASS);
-    this.id = 'main';
-
-    let bottomPanel = (this._bottomPanel = new BoxPanel());
-    let topPanel = (this._topPanel = new Panel());
-    let hboxPanel = new BoxPanel();
-    let dockPanel = (this._dockPanel = new DockPanel());
-    MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
-
-    let hsplitPanel = new SplitPanel();
-    let leftHandler = (this._leftHandler = new Private.SideBarHandler('left'));
-    let rightHandler = (this._rightHandler = new Private.SideBarHandler(
-      'right'
-    ));
-    let rootLayout = new BoxLayout();
-
-    bottomPanel.id = 'jp-bottom-panel';
-    topPanel.id = 'jp-top-panel';
-    hboxPanel.id = 'jp-main-content-panel';
-    dockPanel.id = 'jp-main-dock-panel';
-    hsplitPanel.id = 'jp-main-split-panel';
-
-    leftHandler.sideBar.addClass(SIDEBAR_CLASS);
-    leftHandler.sideBar.addClass('jp-mod-left');
-    leftHandler.stackedPanel.id = 'jp-left-stack';
-
-    rightHandler.sideBar.addClass(SIDEBAR_CLASS);
-    rightHandler.sideBar.addClass('jp-mod-right');
-    rightHandler.stackedPanel.id = 'jp-right-stack';
-
-    bottomPanel.direction = 'bottom-to-top';
-    hboxPanel.spacing = 0;
-    dockPanel.spacing = 5;
-    hsplitPanel.spacing = 1;
-
-    hboxPanel.direction = 'left-to-right';
-    hsplitPanel.orientation = 'horizontal';
-
-    SplitPanel.setStretch(leftHandler.stackedPanel, 0);
-    SplitPanel.setStretch(dockPanel, 1);
-    SplitPanel.setStretch(rightHandler.stackedPanel, 0);
-
-    BoxPanel.setStretch(leftHandler.sideBar, 0);
-    BoxPanel.setStretch(hsplitPanel, 1);
-    BoxPanel.setStretch(rightHandler.sideBar, 0);
-
-    hsplitPanel.addWidget(leftHandler.stackedPanel);
-    hsplitPanel.addWidget(dockPanel);
-    hsplitPanel.addWidget(rightHandler.stackedPanel);
-
-    hboxPanel.addWidget(leftHandler.sideBar);
-    hboxPanel.addWidget(hsplitPanel);
-    hboxPanel.addWidget(rightHandler.sideBar);
-
-    rootLayout.direction = 'top-to-bottom';
-    rootLayout.spacing = 0; // TODO make this configurable?
-    // Use relative sizing to set the width of the side panels.
-    // This will still respect the min-size of children widget in the stacked panel.
-    hsplitPanel.setRelativeSizes([1, 2.5, 1]);
-
-    BoxLayout.setStretch(topPanel, 0);
-    BoxLayout.setStretch(hboxPanel, 1);
-    BoxLayout.setStretch(bottomPanel, 0);
-
-    rootLayout.addWidget(topPanel);
-    rootLayout.addWidget(hboxPanel);
-    rootLayout.addWidget(bottomPanel);
-
-    // initially hiding bottom panel when no elements inside
-    this._bottomPanel.hide();
-
-    this.layout = rootLayout;
-
-    // Connect change listeners.
-    this._tracker.currentChanged.connect(
-      this._onCurrentChanged,
-      this
-    );
-    this._tracker.activeChanged.connect(
-      this._onActiveChanged,
-      this
-    );
-
-    // Connect main layout change listener.
-    this._dockPanel.layoutModified.connect(
-      this._onLayoutModified,
-      this
-    );
-
-    // Catch current changed events on the side handlers.
-    this._leftHandler.sideBar.currentChanged.connect(
-      this._onLayoutModified,
-      this
-    );
-    this._rightHandler.sideBar.currentChanged.connect(
-      this._onLayoutModified,
-      this
-    );
-  }
-
-  /**
-   * A signal emitted when main area's active focus changes.
-   */
-  get activeChanged(): ISignal<this, ApplicationShell.IChangedArgs> {
-    return this._activeChanged;
-  }
-
-  /**
-   * The active widget in the shell's main area.
-   */
-  get activeWidget(): Widget | null {
-    return this._tracker.activeWidget;
-  }
-
-  /**
-   * A signal emitted when main area's current focus changes.
-   */
-  get currentChanged(): ISignal<this, ApplicationShell.IChangedArgs> {
-    return this._currentChanged;
-  }
-
-  /**
-   * The current widget in the shell's main area.
-   */
-  get currentWidget(): Widget | null {
-    return this._tracker.currentWidget;
-  }
-
-  /**
-   * A signal emitted when the main area's layout is modified.
-   */
-  get layoutModified(): ISignal<this, void> {
-    return this._layoutModified;
-  }
-
-  /**
-   * Whether the left area is collapsed.
-   */
-  get leftCollapsed(): boolean {
-    return !this._leftHandler.sideBar.currentTitle;
-  }
-
-  /**
-   * Whether the left area is collapsed.
-   */
-  get rightCollapsed(): boolean {
-    return !this._rightHandler.sideBar.currentTitle;
-  }
-
-  /**
-   * Whether JupyterLab is in presentation mode with the `jp-mod-presentationMode` CSS class.
-   */
-  get presentationMode(): boolean {
-    return this.hasClass('jp-mod-presentationMode');
-  }
-
-  /**
-   * Enable/disable presentation mode (`jp-mod-presentationMode` CSS class) with a boolean.
-   */
-  set presentationMode(value: boolean) {
-    this.toggleClass('jp-mod-presentationMode', value);
-  }
-
-  /**
-   * The main dock area's user interface mode.
-   */
-  get mode(): DockPanel.Mode {
-    return this._dockPanel.mode;
-  }
-  set mode(mode: DockPanel.Mode) {
-    const dock = this._dockPanel;
-    if (mode === dock.mode) {
-      return;
-    }
-
-    const applicationCurrentWidget = this.currentWidget;
-
-    if (mode === 'single-document') {
-      this._cachedLayout = dock.saveLayout();
-      dock.mode = mode;
-
-      // In case the active widget in the dock panel is *not* the active widget
-      // of the application, defer to the application.
-      if (this.currentWidget) {
-        dock.activateWidget(this.currentWidget);
-      }
-
-      // Set the mode data attribute on the document body.
-      document.body.setAttribute(MODE_ATTRIBUTE, mode);
-      return;
-    }
-
-    // Cache a reference to every widget currently in the dock panel.
-    const widgets = toArray(dock.widgets());
-
-    // Toggle back to multiple document mode.
-    dock.mode = mode;
-
-    // Restore the original layout.
-    if (this._cachedLayout) {
-      // Remove any disposed widgets in the cached layout and restore.
-      Private.normalizeAreaConfig(dock, this._cachedLayout.main);
-      dock.restoreLayout(this._cachedLayout);
-      this._cachedLayout = null;
-    }
-
-    // Add any widgets created during single document mode, which have
-    // subsequently been removed from the dock panel after the multiple document
-    // layout has been restored. If the widget has add options cached for
-    // it (i.e., if it has been placed with respect to another widget),
-    // then take that into account.
-    widgets.forEach(widget => {
-      if (!widget.parent) {
-        this.addToMainArea(widget, {
-          ...this._addOptionsCache.get(widget),
-          activate: false
-        });
-      }
-    });
-    this._addOptionsCache.clear();
-
-    // In case the active widget in the dock panel is *not* the active widget
-    // of the application, defer to the application.
-    if (applicationCurrentWidget) {
-      dock.activateWidget(applicationCurrentWidget);
-    }
-
-    // Set the mode data attribute on the document body.
-    document.body.setAttribute(MODE_ATTRIBUTE, mode);
-  }
-
-  /**
-   * Promise that resolves when state is first restored, returning layout
-   * description.
-   */
-  get restored(): Promise<ApplicationShell.ILayout> {
-    return this._restored.promise;
-  }
-
-  /**
-   * Activate a widget in its area.
-   */
-  activateById(id: string): void {
-    if (this._leftHandler.has(id)) {
-      this._leftHandler.activate(id);
-      return;
-    }
-
-    if (this._rightHandler.has(id)) {
-      this._rightHandler.activate(id);
-      return;
-    }
-
-    const dock = this._dockPanel;
-    const widget = find(dock.widgets(), value => value.id === id);
-
-    if (widget) {
-      dock.activateWidget(widget);
-    }
-  }
-
-  /*
-   * Activate the next Tab in the active TabBar.
-  */
-  activateNextTab(): void {
-    let current = this._currentTabBar();
-    if (!current) {
-      return;
-    }
-
-    let ci = current.currentIndex;
-    if (ci === -1) {
-      return;
-    }
-
-    if (ci < current.titles.length - 1) {
-      current.currentIndex += 1;
-      if (current.currentTitle) {
-        current.currentTitle.owner.activate();
-      }
-      return;
-    }
-
-    if (ci === current.titles.length - 1) {
-      let nextBar = this._adjacentBar('next');
-      if (nextBar) {
-        nextBar.currentIndex = 0;
-        if (nextBar.currentTitle) {
-          nextBar.currentTitle.owner.activate();
-        }
-      }
-    }
-  }
-
-  /*
-   * Activate the previous Tab in the active TabBar.
-  */
-  activatePreviousTab(): void {
-    let current = this._currentTabBar();
-    if (!current) {
-      return;
-    }
-
-    let ci = current.currentIndex;
-    if (ci === -1) {
-      return;
-    }
-
-    if (ci > 0) {
-      current.currentIndex -= 1;
-      if (current.currentTitle) {
-        current.currentTitle.owner.activate();
-      }
-      return;
-    }
-
-    if (ci === 0) {
-      let prevBar = this._adjacentBar('previous');
-      if (prevBar) {
-        let len = prevBar.titles.length;
-        prevBar.currentIndex = len - 1;
-        if (prevBar.currentTitle) {
-          prevBar.currentTitle.owner.activate();
-        }
-      }
-    }
-  }
-
-  /**
-   * Add a widget to the left content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-  addToLeftArea(
-    widget: Widget,
-    options?: ApplicationShell.ISideAreaOptions
-  ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    options = options || this._sideOptionsCache.get(widget) || {};
-    this._sideOptionsCache.set(widget, options);
-    let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
-    this._leftHandler.addWidget(widget, rank!);
-    this._onLayoutModified();
-  }
-
-  /**
-   * Add a widget to the main content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   * All widgets added to the main area should be disposed after removal
-   * (disposal before removal will remove the widget automatically).
-   *
-   * In the options, `ref` defaults to `null`, `mode` defaults to `'tab-after'`,
-   * and `activate` defaults to `true`.
-   */
-  addToMainArea(
-    widget: Widget,
-    options: ApplicationShell.IMainAreaOptions = {}
-  ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-
-    let dock = this._dockPanel;
-
-    let ref: Widget | null = null;
-    if (options.ref) {
-      ref = find(dock.widgets(), value => value.id === options.ref!) || null;
-    }
-
-    let mode = options.mode || 'tab-after';
-
-    dock.addWidget(widget, { mode, ref });
-
-    // The dock panel doesn't account for placement information while
-    // in single document mode, so upon rehydrating any widgets that were
-    // added will not be in the correct place. Cache the placement information
-    // here so that we can later rehydrate correctly.
-    if (dock.mode === 'single-document') {
-      this._addOptionsCache.set(widget, options);
-    }
-
-    if (options.activate !== false) {
-      dock.activateWidget(widget);
-    }
-  }
-
-  /**
-   * Add a widget to the right content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-  addToRightArea(
-    widget: Widget,
-    options?: ApplicationShell.ISideAreaOptions
-  ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    options = options || this._sideOptionsCache.get(widget) || {};
-    this._sideOptionsCache.set(widget, options);
-    let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
-    this._rightHandler.addWidget(widget, rank!);
-    this._onLayoutModified();
-  }
-
-  /**
-   * Add a widget to the top content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-  addToTopArea(
-    widget: Widget,
-    options: ApplicationShell.ISideAreaOptions = {}
-  ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    // Temporary: widgets are added to the panel in order of insertion.
-    this._topPanel.addWidget(widget);
-    this._onLayoutModified();
-  }
-
-  /**
-   * Add a widget to the bottom content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-
-  addToBottomArea(
-    widget: Widget,
-    options: ApplicationShell.ISideAreaOptions = {}
-  ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    // Temporary: widgets are added to the panel in order of insertion.
-    this._bottomPanel.addWidget(widget);
-    this._onLayoutModified();
-
-    if (this._bottomPanel.isHidden) {
-      this._bottomPanel.show();
-    }
-  }
-
-  /**
-   * Collapse the left area.
-   */
-  collapseLeft(): void {
-    this._leftHandler.collapse();
-    this._onLayoutModified();
-  }
-
-  /**
-   * Collapse the right area.
-   */
-  collapseRight(): void {
-    this._rightHandler.collapse();
-    this._onLayoutModified();
-  }
-
-  /**
-   * Expand the left area.
-   *
-   * #### Notes
-   * This will open the most recently used tab,
-   * or the first tab if there is no most recently used.
-   */
-  expandLeft(): void {
-    this._leftHandler.expand();
-    this._onLayoutModified();
-  }
-
-  /**
-   * Expand the right area.
-   *
-   * #### Notes
-   * This will open the most recently used tab,
-   * or the first tab if there is no most recently used.
-   */
-  expandRight(): void {
-    this._rightHandler.expand();
-    this._onLayoutModified();
-  }
-
-  /**
-   * Close all widgets in the main area.
-   */
-  closeAll(): void {
-    // Make a copy of all the widget in the dock panel (using `toArray()`)
-    // before removing them because removing them while iterating through them
-    // modifies the underlying data of the iterator.
-    toArray(this._dockPanel.widgets()).forEach(widget => widget.close());
-  }
-
-  /**
-   * True if the given area is empty.
-   */
-  isEmpty(area: ApplicationShell.Area): boolean {
-    switch (area) {
-      case 'left':
-        return this._leftHandler.stackedPanel.widgets.length === 0;
-      case 'main':
-        return this._dockPanel.isEmpty;
-      case 'top':
-        return this._topPanel.widgets.length === 0;
-      case 'bottom':
-        return this._bottomPanel.widgets.length === 0;
-      case 'right':
-        return this._rightHandler.stackedPanel.widgets.length === 0;
-      default:
-        return true;
-    }
-  }
-
-  /**
-   * Restore the layout state for the application shell.
-   */
-  restoreLayout(layout: ApplicationShell.ILayout): void {
-    const { mainArea, leftArea, rightArea } = layout;
-
-    // Rehydrate the main area.
-    if (mainArea) {
-      const { currentWidget, dock, mode } = mainArea;
-
-      if (dock) {
-        this._dockPanel.restoreLayout(dock);
-      }
-      if (mode) {
-        this.mode = mode;
-      }
-      if (currentWidget) {
-        this.activateById(currentWidget.id);
-      }
-    }
-
-    // Rehydrate the left area.
-    if (leftArea) {
-      this._leftHandler.rehydrate(leftArea);
-    }
-
-    // Rehydrate the right area.
-    if (rightArea) {
-      this._rightHandler.rehydrate(rightArea);
-    }
-
-    if (!this._isRestored) {
-      // Make sure all messages in the queue are finished before notifying
-      // any extensions that are waiting for the promise that guarantees the
-      // application state has been restored.
-      MessageLoop.flush();
-      this._restored.resolve(layout);
-    }
-  }
-
-  /**
-   * Save the dehydrated state of the application shell.
-   */
-  saveLayout(): ApplicationShell.ILayout {
-    // If the application is in single document mode, use the cached layout if
-    // available. Otherwise, default to querying the dock panel for layout.
-    return {
-      mainArea: {
-        currentWidget: this._tracker.currentWidget,
-        dock:
-          this.mode === 'single-document'
-            ? this._cachedLayout || this._dockPanel.saveLayout()
-            : this._dockPanel.saveLayout(),
-        mode: this._dockPanel.mode
-      },
-      leftArea: this._leftHandler.dehydrate(),
-      rightArea: this._rightHandler.dehydrate()
-    };
-  }
-
-  /**
-   * Returns the widgets for an application area.
-   */
-  widgets(area: ApplicationShell.Area): IIterator<Widget> {
-    switch (area) {
-      case 'main':
-        return this._dockPanel.widgets();
-      case 'left':
-        return iter(this._leftHandler.sideBar.titles.map(t => t.owner));
-      case 'right':
-        return iter(this._rightHandler.sideBar.titles.map(t => t.owner));
-      case 'top':
-        return this._topPanel.children();
-      case 'bottom':
-        return this._bottomPanel.children();
-      default:
-        throw new Error('Invalid area');
-    }
-  }
-
-  /**
-   * Handle `after-attach` messages for the application shell.
-   */
-  protected onAfterAttach(msg: Message): void {
-    document.body.setAttribute(MODE_ATTRIBUTE, this.mode);
-  }
-
-  /*
-   * Return the tab bar adjacent to the current TabBar or `null`.
-   */
-  private _adjacentBar(direction: 'next' | 'previous'): TabBar<Widget> | null {
-    const current = this._currentTabBar();
-    if (!current) {
-      return null;
-    }
-
-    const bars = toArray(this._dockPanel.tabBars());
-    const len = bars.length;
-    const index = bars.indexOf(current);
-
-    if (direction === 'previous') {
-      return index > 0 ? bars[index - 1] : index === 0 ? bars[len - 1] : null;
-    }
-
-    // Otherwise, direction is 'next'.
-    return index < len - 1
-      ? bars[index + 1]
-      : index === len - 1
-        ? bars[0]
-        : null;
-  }
-
-  /*
-   * Return the TabBar that has the currently active Widget or null.
-   */
-  private _currentTabBar(): TabBar<Widget> | null {
-    const current = this._tracker.currentWidget;
-    if (!current) {
-      return null;
-    }
-
-    const title = current.title;
-    const bars = this._dockPanel.tabBars();
-    return find(bars, bar => bar.titles.indexOf(title) > -1) || null;
-  }
-
-  /**
-   * Handle a change to the dock area active widget.
-   */
-  private _onActiveChanged(
-    sender: any,
-    args: FocusTracker.IChangedArgs<Widget>
-  ): void {
-    if (args.newValue) {
-      args.newValue.title.className += ` ${ACTIVE_CLASS}`;
-    }
-    if (args.oldValue) {
-      args.oldValue.title.className = args.oldValue.title.className.replace(
-        ACTIVE_CLASS,
-        ''
-      );
-    }
-    this._activeChanged.emit(args);
-  }
-
-  /**
-   * Handle a change to the dock area current widget.
-   */
-  private _onCurrentChanged(
-    sender: any,
-    args: FocusTracker.IChangedArgs<Widget>
-  ): void {
-    if (args.newValue) {
-      args.newValue.title.className += ` ${CURRENT_CLASS}`;
-    }
-    if (args.oldValue) {
-      args.oldValue.title.className = args.oldValue.title.className.replace(
-        CURRENT_CLASS,
-        ''
-      );
-    }
-    this._currentChanged.emit(args);
-    this._onLayoutModified();
-  }
-
-  /**
-   * Handle a change to the layout.
-   */
-  private _onLayoutModified(): void {
-    // The dock can emit layout modified signals while in transient
-    // states (for instance, when switching from single-document to
-    // multiple-document mode). In those states, it can be unreliable
-    // for the signal consumers to query layout properties.
-    // We fix this by debouncing the layout modified signal so that it
-    // is only emitted after rearranging is done.
-    window.clearTimeout(this._debouncer);
-    this._debouncer = window.setTimeout(() => {
-      this._layoutModified.emit(undefined);
-    }, 0);
-  }
-
-  /**
-   * A message hook for child add/remove messages on the main area dock panel.
-   */
-  private _dockChildHook = (
-    handler: IMessageHandler,
-    msg: Message
-  ): boolean => {
-    switch (msg.type) {
-      case 'child-added':
-        (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS);
-        this._tracker.add((msg as Widget.ChildMessage).child);
-        break;
-      case 'child-removed':
-        (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS);
-        this._tracker.remove((msg as Widget.ChildMessage).child);
-        break;
-      default:
-        break;
-    }
-    return true;
-  };
-
-  private _activeChanged = new Signal<this, ApplicationShell.IChangedArgs>(
-    this
-  );
-  private _cachedLayout: DockLayout.ILayoutConfig | null = null;
-  private _currentChanged = new Signal<this, ApplicationShell.IChangedArgs>(
-    this
-  );
-  private _dockPanel: DockPanel;
-  private _isRestored = false;
-  private _layoutModified = new Signal<this, void>(this);
-  private _leftHandler: Private.SideBarHandler;
-  private _restored = new PromiseDelegate<ApplicationShell.ILayout>();
-  private _rightHandler: Private.SideBarHandler;
-  private _tracker = new FocusTracker<Widget>();
-  private _topPanel: Panel;
-  private _bottomPanel: Panel;
-  private _debouncer = 0;
-  private _addOptionsCache = new Map<
-    Widget,
-    ApplicationShell.IMainAreaOptions
-  >();
-  private _sideOptionsCache = new Map<
-    Widget,
-    ApplicationShell.ISideAreaOptions
-  >();
-}
+export const ILabShell = new Token<ILabShell>(
+  '@jupyterlab/application:ILabShell'
+);
+/* tslint:enable */
 
 /**
- * The namespace for `ApplicationShell` class statics.
+ * The JupyterLab application shell interface.
  */
-export namespace ApplicationShell {
+export interface ILabShell extends LabShell {}
+
+/**
+ * The namespace for `ILabShell` type information.
+ */
+export namespace ILabShell {
   /**
    * The areas of the application shell where widgets can reside.
    */
-  export type Area = 'main' | 'top' | 'left' | 'right' | 'bottom';
+  export type Area = 'main' | 'header' | 'top' | 'left' | 'right' | 'bottom';
 
   /**
    * The restorable description of an area within the main dock panel.
@@ -912,21 +161,825 @@ export namespace ApplicationShell {
      */
     readonly widgets: Array<Widget> | null;
   }
+}
 
+/**
+ * The application shell for JupyterLab.
+ */
+export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
-   * The options for adding a widget to a side area of the shell.
+   * Construct a new application shell.
    */
-  export interface ISideAreaOptions {
-    /**
-     * The rank order of the widget among its siblings.
-     */
-    rank?: number;
+  constructor() {
+    super();
+    this.addClass(APPLICATION_SHELL_CLASS);
+    this.id = 'main';
+
+    let headerPanel = (this._headerPanel = new Panel());
+    let topHandler = (this._topHandler = new Private.PanelHandler());
+    let bottomPanel = (this._bottomPanel = new BoxPanel());
+    let hboxPanel = new BoxPanel();
+    let dockPanel = (this._dockPanel = new DockPanelSvg({
+      kind: 'dockPanelBar'
+    }));
+    MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
+
+    let hsplitPanel = new SplitPanel();
+    let leftHandler = (this._leftHandler = new Private.SideBarHandler());
+    let rightHandler = (this._rightHandler = new Private.SideBarHandler());
+    let rootLayout = new BoxLayout();
+
+    headerPanel.id = 'jp-header-panel';
+    topHandler.panel.id = 'jp-top-panel';
+    bottomPanel.id = 'jp-bottom-panel';
+    hboxPanel.id = 'jp-main-content-panel';
+    dockPanel.id = 'jp-main-dock-panel';
+    hsplitPanel.id = 'jp-main-split-panel';
+
+    leftHandler.sideBar.addClass(SIDEBAR_CLASS);
+    leftHandler.sideBar.addClass('jp-mod-left');
+    leftHandler.stackedPanel.id = 'jp-left-stack';
+
+    rightHandler.sideBar.addClass(SIDEBAR_CLASS);
+    rightHandler.sideBar.addClass('jp-mod-right');
+    rightHandler.stackedPanel.id = 'jp-right-stack';
+
+    hboxPanel.spacing = 0;
+    dockPanel.spacing = 5;
+    hsplitPanel.spacing = 1;
+
+    hboxPanel.direction = 'left-to-right';
+    hsplitPanel.orientation = 'horizontal';
+    bottomPanel.direction = 'bottom-to-top';
+
+    SplitPanel.setStretch(leftHandler.stackedPanel, 0);
+    SplitPanel.setStretch(dockPanel, 1);
+    SplitPanel.setStretch(rightHandler.stackedPanel, 0);
+
+    BoxPanel.setStretch(leftHandler.sideBar, 0);
+    BoxPanel.setStretch(hsplitPanel, 1);
+    BoxPanel.setStretch(rightHandler.sideBar, 0);
+
+    hsplitPanel.addWidget(leftHandler.stackedPanel);
+    hsplitPanel.addWidget(dockPanel);
+    hsplitPanel.addWidget(rightHandler.stackedPanel);
+
+    hboxPanel.addWidget(leftHandler.sideBar);
+    hboxPanel.addWidget(hsplitPanel);
+    hboxPanel.addWidget(rightHandler.sideBar);
+
+    rootLayout.direction = 'top-to-bottom';
+    rootLayout.spacing = 0; // TODO make this configurable?
+    // Use relative sizing to set the width of the side panels.
+    // This will still respect the min-size of children widget in the stacked
+    // panel.
+    hsplitPanel.setRelativeSizes([1, 2.5, 1]);
+
+    BoxLayout.setStretch(headerPanel, 0);
+    BoxLayout.setStretch(topHandler.panel, 0);
+    BoxLayout.setStretch(hboxPanel, 1);
+    BoxLayout.setStretch(bottomPanel, 0);
+
+    rootLayout.addWidget(headerPanel);
+    rootLayout.addWidget(topHandler.panel);
+    rootLayout.addWidget(hboxPanel);
+    rootLayout.addWidget(bottomPanel);
+
+    // initially hiding header and bottom panel when no elements inside
+    this._headerPanel.hide();
+    this._bottomPanel.hide();
+
+    this.layout = rootLayout;
+
+    // Connect change listeners.
+    this._tracker.currentChanged.connect(this._onCurrentChanged, this);
+    this._tracker.activeChanged.connect(this._onActiveChanged, this);
+
+    // Connect main layout change listener.
+    this._dockPanel.layoutModified.connect(this._onLayoutModified, this);
+
+    // Catch current changed events on the side handlers.
+    this._leftHandler.sideBar.currentChanged.connect(
+      this._onLayoutModified,
+      this
+    );
+    this._rightHandler.sideBar.currentChanged.connect(
+      this._onLayoutModified,
+      this
+    );
   }
 
   /**
-   * The options for adding a widget to a side area of the shell.
+   * A signal emitted when main area's active focus changes.
    */
-  export interface IMainAreaOptions extends DocumentRegistry.IOpenOptions {}
+  get activeChanged(): ISignal<this, ILabShell.IChangedArgs> {
+    return this._activeChanged;
+  }
+
+  /**
+   * The active widget in the shell's main area.
+   */
+  get activeWidget(): Widget | null {
+    return this._tracker.activeWidget;
+  }
+
+  /**
+   * A signal emitted when main area's current focus changes.
+   */
+  get currentChanged(): ISignal<this, ILabShell.IChangedArgs> {
+    return this._currentChanged;
+  }
+
+  /**
+   * The current widget in the shell's main area.
+   */
+  get currentWidget(): Widget | null {
+    return this._tracker.currentWidget;
+  }
+
+  /**
+   * A signal emitted when the main area's layout is modified.
+   */
+  get layoutModified(): ISignal<this, void> {
+    return this._layoutModified;
+  }
+
+  /**
+   * Whether the left area is collapsed.
+   */
+  get leftCollapsed(): boolean {
+    return !this._leftHandler.sideBar.currentTitle;
+  }
+
+  /**
+   * Whether the left area is collapsed.
+   */
+  get rightCollapsed(): boolean {
+    return !this._rightHandler.sideBar.currentTitle;
+  }
+
+  /**
+   * Whether JupyterLab is in presentation mode with the
+   * `jp-mod-presentationMode` CSS class.
+   */
+  get presentationMode(): boolean {
+    return this.hasClass('jp-mod-presentationMode');
+  }
+
+  /**
+   * Enable/disable presentation mode (`jp-mod-presentationMode` CSS class) with
+   * a boolean.
+   */
+  set presentationMode(value: boolean) {
+    this.toggleClass('jp-mod-presentationMode', value);
+  }
+
+  /**
+   * The main dock area's user interface mode.
+   */
+  get mode(): DockPanel.Mode {
+    return this._dockPanel.mode;
+  }
+  set mode(mode: DockPanel.Mode) {
+    const dock = this._dockPanel;
+    if (mode === dock.mode) {
+      return;
+    }
+
+    const applicationCurrentWidget = this.currentWidget;
+
+    if (mode === 'single-document') {
+      this._cachedLayout = dock.saveLayout();
+      dock.mode = mode;
+
+      // In case the active widget in the dock panel is *not* the active widget
+      // of the application, defer to the application.
+      if (this.currentWidget) {
+        dock.activateWidget(this.currentWidget);
+      }
+
+      // Set the mode data attribute on the application shell node.
+      this.node.dataset.shellMode = mode;
+      return;
+    }
+
+    // Cache a reference to every widget currently in the dock panel.
+    const widgets = toArray(dock.widgets());
+
+    // Toggle back to multiple document mode.
+    dock.mode = mode;
+
+    // Restore the original layout.
+    if (this._cachedLayout) {
+      // Remove any disposed widgets in the cached layout and restore.
+      Private.normalizeAreaConfig(dock, this._cachedLayout.main);
+      dock.restoreLayout(this._cachedLayout);
+      this._cachedLayout = null;
+    }
+
+    // Add any widgets created during single document mode, which have
+    // subsequently been removed from the dock panel after the multiple document
+    // layout has been restored. If the widget has add options cached for
+    // it (i.e., if it has been placed with respect to another widget),
+    // then take that into account.
+    widgets.forEach(widget => {
+      if (!widget.parent) {
+        this._addToMainArea(widget, {
+          ...this._mainOptionsCache.get(widget),
+          activate: false
+        });
+      }
+    });
+    this._mainOptionsCache.clear();
+
+    // In case the active widget in the dock panel is *not* the active widget
+    // of the application, defer to the application.
+    if (applicationCurrentWidget) {
+      dock.activateWidget(applicationCurrentWidget);
+    }
+
+    // Set the mode data attribute on the applications shell node.
+    this.node.dataset.shellMode = mode;
+  }
+
+  /**
+   * Promise that resolves when state is first restored, returning layout
+   * description.
+   */
+  get restored(): Promise<ILabShell.ILayout> {
+    return this._restored.promise;
+  }
+
+  /**
+   * Activate a widget in its area.
+   */
+  activateById(id: string): void {
+    if (this._leftHandler.has(id)) {
+      this._leftHandler.activate(id);
+      return;
+    }
+
+    if (this._rightHandler.has(id)) {
+      this._rightHandler.activate(id);
+      return;
+    }
+
+    const dock = this._dockPanel;
+    const widget = find(dock.widgets(), value => value.id === id);
+
+    if (widget) {
+      dock.activateWidget(widget);
+    }
+  }
+
+  /*
+   * Activate the next Tab in the active TabBar.
+   */
+  activateNextTab(): void {
+    let current = this._currentTabBar();
+    if (!current) {
+      return;
+    }
+
+    let ci = current.currentIndex;
+    if (ci === -1) {
+      return;
+    }
+
+    if (ci < current.titles.length - 1) {
+      current.currentIndex += 1;
+      if (current.currentTitle) {
+        current.currentTitle.owner.activate();
+      }
+      return;
+    }
+
+    if (ci === current.titles.length - 1) {
+      let nextBar = this._adjacentBar('next');
+      if (nextBar) {
+        nextBar.currentIndex = 0;
+        if (nextBar.currentTitle) {
+          nextBar.currentTitle.owner.activate();
+        }
+      }
+    }
+  }
+
+  /*
+   * Activate the previous Tab in the active TabBar.
+   */
+  activatePreviousTab(): void {
+    let current = this._currentTabBar();
+    if (!current) {
+      return;
+    }
+
+    let ci = current.currentIndex;
+    if (ci === -1) {
+      return;
+    }
+
+    if (ci > 0) {
+      current.currentIndex -= 1;
+      if (current.currentTitle) {
+        current.currentTitle.owner.activate();
+      }
+      return;
+    }
+
+    if (ci === 0) {
+      let prevBar = this._adjacentBar('previous');
+      if (prevBar) {
+        let len = prevBar.titles.length;
+        prevBar.currentIndex = len - 1;
+        if (prevBar.currentTitle) {
+          prevBar.currentTitle.owner.activate();
+        }
+      }
+    }
+  }
+
+  add(
+    widget: Widget,
+    area: ILabShell.Area = 'main',
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    switch (area || 'main') {
+      case 'main':
+        return this._addToMainArea(widget, options);
+      case 'left':
+        return this._addToLeftArea(widget, options);
+      case 'right':
+        return this._addToRightArea(widget, options);
+      case 'header':
+        return this._addToHeaderArea(widget, options);
+      case 'top':
+        return this._addToTopArea(widget, options);
+      case 'bottom':
+        return this._addToBottomArea(widget, options);
+      default:
+        throw new Error(`Invalid area: ${area}`);
+    }
+  }
+
+  /**
+   * Collapse the left area.
+   */
+  collapseLeft(): void {
+    this._leftHandler.collapse();
+    this._onLayoutModified();
+  }
+
+  /**
+   * Collapse the right area.
+   */
+  collapseRight(): void {
+    this._rightHandler.collapse();
+    this._onLayoutModified();
+  }
+
+  /**
+   * Dispose the shell.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._layoutDebouncer.dispose();
+    super.dispose();
+  }
+
+  /**
+   * Expand the left area.
+   *
+   * #### Notes
+   * This will open the most recently used tab,
+   * or the first tab if there is no most recently used.
+   */
+  expandLeft(): void {
+    this._leftHandler.expand();
+    this._onLayoutModified();
+  }
+
+  /**
+   * Expand the right area.
+   *
+   * #### Notes
+   * This will open the most recently used tab,
+   * or the first tab if there is no most recently used.
+   */
+  expandRight(): void {
+    this._rightHandler.expand();
+    this._onLayoutModified();
+  }
+
+  /**
+   * Close all widgets in the main area.
+   */
+  closeAll(): void {
+    // Make a copy of all the widget in the dock panel (using `toArray()`)
+    // before removing them because removing them while iterating through them
+    // modifies the underlying data of the iterator.
+    toArray(this._dockPanel.widgets()).forEach(widget => widget.close());
+  }
+
+  /**
+   * True if the given area is empty.
+   */
+  isEmpty(area: ILabShell.Area): boolean {
+    switch (area) {
+      case 'left':
+        return this._leftHandler.stackedPanel.widgets.length === 0;
+      case 'main':
+        return this._dockPanel.isEmpty;
+      case 'header':
+        return this._headerPanel.widgets.length === 0;
+      case 'top':
+        return this._topHandler.panel.widgets.length === 0;
+      case 'bottom':
+        return this._bottomPanel.widgets.length === 0;
+      case 'right':
+        return this._rightHandler.stackedPanel.widgets.length === 0;
+      default:
+        return true;
+    }
+  }
+
+  /**
+   * Restore the layout state for the application shell.
+   */
+  restoreLayout(layout: ILabShell.ILayout): void {
+    const { mainArea, leftArea, rightArea } = layout;
+
+    // Rehydrate the main area.
+    if (mainArea) {
+      const { currentWidget, dock, mode } = mainArea;
+
+      if (dock) {
+        this._dockPanel.restoreLayout(dock);
+      }
+      if (mode) {
+        this.mode = mode;
+      }
+      if (currentWidget) {
+        this.activateById(currentWidget.id);
+      }
+    }
+
+    // Rehydrate the left area.
+    if (leftArea) {
+      this._leftHandler.rehydrate(leftArea);
+    }
+
+    // Rehydrate the right area.
+    if (rightArea) {
+      this._rightHandler.rehydrate(rightArea);
+    }
+
+    if (!this._isRestored) {
+      // Make sure all messages in the queue are finished before notifying
+      // any extensions that are waiting for the promise that guarantees the
+      // application state has been restored.
+      MessageLoop.flush();
+      this._restored.resolve(layout);
+    }
+  }
+
+  /**
+   * Save the dehydrated state of the application shell.
+   */
+  saveLayout(): ILabShell.ILayout {
+    // If the application is in single document mode, use the cached layout if
+    // available. Otherwise, default to querying the dock panel for layout.
+    return {
+      mainArea: {
+        currentWidget: this._tracker.currentWidget,
+        dock:
+          this.mode === 'single-document'
+            ? this._cachedLayout || this._dockPanel.saveLayout()
+            : this._dockPanel.saveLayout(),
+        mode: this._dockPanel.mode
+      },
+      leftArea: this._leftHandler.dehydrate(),
+      rightArea: this._rightHandler.dehydrate()
+    };
+  }
+
+  /**
+   * Returns the widgets for an application area.
+   */
+  widgets(area?: ILabShell.Area): IIterator<Widget> {
+    switch (area || 'main') {
+      case 'main':
+        return this._dockPanel.widgets();
+      case 'left':
+        return iter(this._leftHandler.sideBar.titles.map(t => t.owner));
+      case 'right':
+        return iter(this._rightHandler.sideBar.titles.map(t => t.owner));
+      case 'header':
+        return this._headerPanel.children();
+      case 'top':
+        return this._topHandler.panel.children();
+      case 'bottom':
+        return this._bottomPanel.children();
+      default:
+        throw new Error(`Invalid area: ${area}`);
+    }
+  }
+
+  /**
+   * Handle `after-attach` messages for the application shell.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this.node.dataset.shellMode = this.mode;
+  }
+
+  /**
+   * Add a widget to the left content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  private _addToLeftArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    options = options || this._sideOptionsCache.get(widget) || {};
+    this._sideOptionsCache.set(widget, options);
+    let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
+    this._leftHandler.addWidget(widget, rank!);
+    this._onLayoutModified();
+  }
+
+  /**
+   * Add a widget to the main content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   * All widgets added to the main area should be disposed after removal
+   * (disposal before removal will remove the widget automatically).
+   *
+   * In the options, `ref` defaults to `null`, `mode` defaults to `'tab-after'`,
+   * and `activate` defaults to `true`.
+   */
+  private _addToMainArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+
+    options = options || {};
+
+    const dock = this._dockPanel;
+    const mode = options.mode || 'tab-after';
+    let ref: Widget | null = this.currentWidget;
+
+    if (options.ref) {
+      ref = find(dock.widgets(), value => value.id === options.ref!) || null;
+    }
+
+    // Add widget ID to tab so that we can get a handle on the tab's widget
+    // (for context menu support)
+    widget.title.dataset = { ...widget.title.dataset, id: widget.id };
+
+    dock.addWidget(widget, { mode, ref });
+
+    // The dock panel doesn't account for placement information while
+    // in single document mode, so upon rehydrating any widgets that were
+    // added will not be in the correct place. Cache the placement information
+    // here so that we can later rehydrate correctly.
+    if (dock.mode === 'single-document') {
+      this._mainOptionsCache.set(widget, options);
+    }
+
+    if (options.activate !== false) {
+      dock.activateWidget(widget);
+    }
+  }
+
+  /**
+   * Add a widget to the right content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  private _addToRightArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    options = options || this._sideOptionsCache.get(widget) || {};
+
+    const rank = 'rank' in options ? options.rank : DEFAULT_RANK;
+
+    this._sideOptionsCache.set(widget, options);
+    this._rightHandler.addWidget(widget, rank!);
+    this._onLayoutModified();
+  }
+
+  /**
+   * Add a widget to the top content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  private _addToTopArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    options = options || {};
+    const rank = 'rank' in options ? options.rank : DEFAULT_RANK;
+    this._topHandler.addWidget(widget, rank);
+    this._onLayoutModified();
+    if (this._topHandler.panel.isHidden) {
+      this._topHandler.panel.show();
+    }
+  }
+
+  /**
+   * Add a widget to the header content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  private _addToHeaderArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    // Temporary: widgets are added to the panel in order of insertion.
+    this._headerPanel.addWidget(widget);
+    this._onLayoutModified();
+
+    if (this._headerPanel.isHidden) {
+      this._headerPanel.show();
+    }
+  }
+  /**
+   * Add a widget to the bottom content area.
+   *
+   * #### Notes
+   * Widgets must have a unique `id` property, which will be used as the DOM id.
+   */
+  private _addToBottomArea(
+    widget: Widget,
+    options?: DocumentRegistry.IOpenOptions
+  ): void {
+    if (!widget.id) {
+      console.error('Widgets added to app shell must have unique id property.');
+      return;
+    }
+    // Temporary: widgets are added to the panel in order of insertion.
+    this._bottomPanel.addWidget(widget);
+    this._onLayoutModified();
+
+    if (this._bottomPanel.isHidden) {
+      this._bottomPanel.show();
+    }
+  }
+
+  /*
+   * Return the tab bar adjacent to the current TabBar or `null`.
+   */
+  private _adjacentBar(direction: 'next' | 'previous'): TabBar<Widget> | null {
+    const current = this._currentTabBar();
+    if (!current) {
+      return null;
+    }
+
+    const bars = toArray(this._dockPanel.tabBars());
+    const len = bars.length;
+    const index = bars.indexOf(current);
+
+    if (direction === 'previous') {
+      return index > 0 ? bars[index - 1] : index === 0 ? bars[len - 1] : null;
+    }
+
+    // Otherwise, direction is 'next'.
+    return index < len - 1
+      ? bars[index + 1]
+      : index === len - 1
+      ? bars[0]
+      : null;
+  }
+
+  /*
+   * Return the TabBar that has the currently active Widget or null.
+   */
+  private _currentTabBar(): TabBar<Widget> | null {
+    const current = this._tracker.currentWidget;
+    if (!current) {
+      return null;
+    }
+
+    const title = current.title;
+    const bars = this._dockPanel.tabBars();
+    return find(bars, bar => bar.titles.indexOf(title) > -1) || null;
+  }
+
+  /**
+   * Handle a change to the dock area active widget.
+   */
+  private _onActiveChanged(
+    sender: any,
+    args: FocusTracker.IChangedArgs<Widget>
+  ): void {
+    if (args.newValue) {
+      args.newValue.title.className += ` ${ACTIVE_CLASS}`;
+    }
+    if (args.oldValue) {
+      args.oldValue.title.className = args.oldValue.title.className.replace(
+        ACTIVE_CLASS,
+        ''
+      );
+    }
+    this._activeChanged.emit(args);
+  }
+
+  /**
+   * Handle a change to the dock area current widget.
+   */
+  private _onCurrentChanged(
+    sender: any,
+    args: FocusTracker.IChangedArgs<Widget>
+  ): void {
+    if (args.newValue) {
+      args.newValue.title.className += ` ${CURRENT_CLASS}`;
+    }
+    if (args.oldValue) {
+      args.oldValue.title.className = args.oldValue.title.className.replace(
+        CURRENT_CLASS,
+        ''
+      );
+    }
+    this._currentChanged.emit(args);
+    this._onLayoutModified();
+  }
+
+  /**
+   * Handle a change to the layout.
+   */
+  private _onLayoutModified(): void {
+    void this._layoutDebouncer.invoke();
+  }
+
+  /**
+   * A message hook for child add/remove messages on the main area dock panel.
+   */
+  private _dockChildHook = (
+    handler: IMessageHandler,
+    msg: Message
+  ): boolean => {
+    switch (msg.type) {
+      case 'child-added':
+        (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS);
+        this._tracker.add((msg as Widget.ChildMessage).child);
+        break;
+      case 'child-removed':
+        (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS);
+        this._tracker.remove((msg as Widget.ChildMessage).child);
+        break;
+      default:
+        break;
+    }
+    return true;
+  };
+
+  private _activeChanged = new Signal<this, ILabShell.IChangedArgs>(this);
+  private _cachedLayout: DockLayout.ILayoutConfig | null = null;
+  private _currentChanged = new Signal<this, ILabShell.IChangedArgs>(this);
+  private _dockPanel: DockPanel;
+  private _isRestored = false;
+  private _layoutModified = new Signal<this, void>(this);
+  private _layoutDebouncer = new Debouncer(() => {
+    this._layoutModified.emit(undefined);
+  }, 0);
+  private _leftHandler: Private.SideBarHandler;
+  private _restored = new PromiseDelegate<ILabShell.ILayout>();
+  private _rightHandler: Private.SideBarHandler;
+  private _tracker = new FocusTracker<Widget>();
+  private _headerPanel: Panel;
+  private _topHandler: Private.PanelHandler;
+  private _bottomPanel: Panel;
+  private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
+  private _sideOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
 }
 
 namespace Private {
@@ -974,15 +1027,43 @@ namespace Private {
   }
 
   /**
+   * A class which manages a panel and sorts its widgets by rank.
+   */
+  export class PanelHandler {
+    /**
+     * Get the panel managed by the handler.
+     */
+    get panel() {
+      return this._panel;
+    }
+
+    /**
+     * Add a widget to the panel.
+     *
+     * If the widget is already added, it will be moved.
+     */
+    addWidget(widget: Widget, rank: number): void {
+      widget.parent = null;
+      const item = { widget, rank };
+      const index = ArrayExt.upperBound(this._items, item, Private.itemCmp);
+      ArrayExt.insert(this._items, index, item);
+      this._panel.insertWidget(index, widget);
+    }
+
+    private _items = new Array<Private.IRankItem>();
+    private _panel = new Panel();
+  }
+
+  /**
    * A class which manages a side bar and related stacked panel.
    */
   export class SideBarHandler {
     /**
      * Construct a new side bar handler.
      */
-    constructor(side: string) {
-      this._side = side;
-      this._sideBar = new TabBar<Widget>({
+    constructor() {
+      this._sideBar = new TabBarSvg<Widget>({
+        kind: 'sideBar',
         insertBehavior: 'none',
         removeBehavior: 'none',
         allowDeselect: true
@@ -991,18 +1072,12 @@ namespace Private {
       this._sideBar.hide();
       this._stackedPanel.hide();
       this._lastCurrent = null;
-      this._sideBar.currentChanged.connect(
-        this._onCurrentChanged,
-        this
-      );
+      this._sideBar.currentChanged.connect(this._onCurrentChanged, this);
       this._sideBar.tabActivateRequested.connect(
         this._onTabActivateRequested,
         this
       );
-      this._stackedPanel.widgetRemoved.connect(
-        this._onWidgetRemoved,
-        this
-      );
+      this._stackedPanel.widgetRemoved.connect(this._onWidgetRemoved, this);
     }
 
     /**
@@ -1083,7 +1158,7 @@ namespace Private {
     /**
      * Dehydrate the side bar data.
      */
-    dehydrate(): ApplicationShell.ISideArea {
+    dehydrate(): ILabShell.ISideArea {
       let collapsed = this._sideBar.currentTitle === null;
       let widgets = toArray(this._stackedPanel.widgets);
       let currentWidget = widgets[this._sideBar.currentIndex];
@@ -1093,7 +1168,7 @@ namespace Private {
     /**
      * Rehydrate the side bar.
      */
-    rehydrate(data: ApplicationShell.ISideArea): void {
+    rehydrate(data: ILabShell.ISideArea): void {
       if (data.currentWidget) {
         this.activate(data.currentWidget.id);
       } else if (data.collapsed) {
@@ -1159,12 +1234,6 @@ namespace Private {
         newWidget.show();
       }
       this._lastCurrent = newWidget || oldWidget;
-      if (newWidget) {
-        const id = newWidget.id;
-        document.body.setAttribute(`data-${this._side}-sidebar-widget`, id);
-      } else {
-        document.body.removeAttribute(`data-${this._side}-sidebar-widget`);
-      }
       this._refreshVisibility();
     }
 
@@ -1191,7 +1260,6 @@ namespace Private {
     }
 
     private _items = new Array<Private.IRankItem>();
-    private _side: string;
     private _sideBar: TabBar<Widget>;
     private _stackedPanel: StackedPanel;
     private _lastCurrent: Widget | null;

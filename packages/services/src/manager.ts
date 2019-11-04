@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Poll } from '@jupyterlab/coreutils';
+
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -31,26 +33,37 @@ export class ServiceManager implements ServiceManager.IManager {
    * Construct a new services provider.
    */
   constructor(options: ServiceManager.IOptions = {}) {
-    this.serverSettings =
+    const defaultDrive = options.defaultDrive;
+    const serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
+    const standby = options.standby || 'when-hidden';
+    const normalized = { defaultDrive, serverSettings, standby };
 
-    this.contents = new ContentsManager(options);
-    this.sessions = new SessionManager(options);
-    this.settings = new SettingManager(options);
-    this.terminals = new TerminalManager(options);
-    this.builder = new BuildManager(options);
-    this.workspaces = new WorkspaceManager(options);
-    this.nbconvert = new NbConvertManager(options);
+    this.serverSettings = serverSettings;
+    this.contents = new ContentsManager(normalized);
+    this.sessions = new SessionManager(normalized);
+    this.settings = new SettingManager(normalized);
+    this.terminals = new TerminalManager(normalized);
+    this.builder = new BuildManager(normalized);
+    this.workspaces = new WorkspaceManager(normalized);
+    this.nbconvert = new NbConvertManager(normalized);
 
-    this.sessions.specsChanged.connect((sender, specs) => {
+    this.sessions.specsChanged.connect((_, specs) => {
       this._specsChanged.emit(specs);
     });
+
+    // Relay connection failures from the service managers that poll
+    // the server for running sessions.
+    // TODO: should we also relay connection failures from other managers?
+    this.sessions.connectionFailure.connect(this._onConnectionFailure, this);
+    this.terminals.connectionFailure.connect(this._onConnectionFailure, this);
+
     this._readyPromise = this.sessions.ready.then(() => {
       if (this.terminals.isAvailable()) {
         return this.terminals.ready;
       }
     });
-    this._readyPromise.then(() => {
+    void this._readyPromise.then(() => {
       this._isReady = true;
     });
   }
@@ -60,6 +73,13 @@ export class ServiceManager implements ServiceManager.IManager {
    */
   get specsChanged(): ISignal<this, Kernel.ISpecModels> {
     return this._specsChanged;
+  }
+
+  /**
+   * A signal emitted when there is a connection failure with the kernel.
+   */
+  get connectionFailure(): ISignal<this, Error> {
+    return this._connectionFailure;
   }
 
   /**
@@ -146,9 +166,14 @@ export class ServiceManager implements ServiceManager.IManager {
     return this._readyPromise;
   }
 
+  private _onConnectionFailure(sender: any, err: Error): void {
+    this._connectionFailure.emit(err);
+  }
+
   private _isDisposed = false;
   private _readyPromise: Promise<void>;
   private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
+  private _connectionFailure = new Signal<this, Error>(this);
   private _isReady = false;
 }
 
@@ -219,6 +244,11 @@ export namespace ServiceManager {
      * The nbconvert manager for the manager.
      */
     readonly nbconvert: NbConvert.IManager;
+
+    /**
+     * A signal emitted when there is a connection failure with the server.
+     */
+    readonly connectionFailure: ISignal<IManager, Error>;
   }
 
   /**
@@ -234,5 +264,10 @@ export namespace ServiceManager {
      * The default drive for the contents manager.
      */
     readonly defaultDrive?: Contents.IDrive;
+
+    /**
+     * When the manager stops polling the API. Defaults to `when-hidden`.
+     */
+    standby?: Poll.Standby;
   }
 }

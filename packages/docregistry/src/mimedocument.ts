@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { showErrorMessage } from '@jupyterlab/apputils';
+import { showErrorMessage, Printing } from '@jupyterlab/apputils';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 
 import {
   IRenderMime,
-  RenderMimeRegistry,
+  IRenderMimeRegistry,
   MimeModel
 } from '@jupyterlab/rendermime';
 
@@ -57,10 +57,7 @@ export class MimeContent extends Widget {
           signal: this._context.model.contentChanged,
           timeout: options.renderTimeout
         });
-        this._monitor.activityStopped.connect(
-          this.update,
-          this
-        );
+        this._monitor.activityStopped.connect(this.update, this);
 
         this._ready.resolve(undefined);
       })
@@ -69,7 +66,10 @@ export class MimeContent extends Widget {
         requestAnimationFrame(() => {
           this.dispose();
         });
-        showErrorMessage(`Renderer Failure: ${this._context.path}`, reason);
+        void showErrorMessage(
+          `Renderer Failure: ${this._context.path}`,
+          reason
+        );
       });
   }
 
@@ -79,10 +79,25 @@ export class MimeContent extends Widget {
   readonly mimeType: string;
 
   /**
+   * Print method. Defered to the renderer.
+   */
+  [Printing.symbol]() {
+    return Printing.getPrintFunction(this.renderer);
+  }
+
+  /**
    * A promise that resolves when the widget is ready.
    */
   get ready(): Promise<void> {
     return this._ready.promise;
+  }
+
+  /**
+   * Set URI fragment identifier.
+   */
+  setFragment(fragment: string) {
+    this._fragment = fragment;
+    this.update();
   }
 
   /**
@@ -104,7 +119,8 @@ export class MimeContent extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     if (this._context.isReady) {
-      this._render();
+      void this._render();
+      this._fragment = '';
     }
   }
 
@@ -133,7 +149,11 @@ export class MimeContent extends Widget {
     } else {
       data[this.mimeType] = model.toJSON();
     }
-    let mimeModel = new MimeModel({ data, callback: this._changeCallback });
+    let mimeModel = new MimeModel({
+      data,
+      callback: this._changeCallback,
+      metadata: { fragment: this._fragment }
+    });
 
     try {
       // Do the rendering asynchronously.
@@ -150,7 +170,7 @@ export class MimeContent extends Widget {
       requestAnimationFrame(() => {
         this.dispose();
       });
-      showErrorMessage(`Renderer Failure: ${context.path}`, reason);
+      void showErrorMessage(`Renderer Failure: ${context.path}`, reason);
     }
   }
 
@@ -178,6 +198,7 @@ export class MimeContent extends Widget {
   readonly renderer: IRenderMime.IRenderer;
 
   private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
+  private _fragment = '';
   private _monitor: ActivityMonitor<any, any> | null;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
@@ -223,7 +244,11 @@ export namespace MimeContent {
 /**
  * A document widget for mime content.
  */
-export class MimeDocument extends DocumentWidget<MimeContent> {}
+export class MimeDocument extends DocumentWidget<MimeContent> {
+  setFragment(fragment: string): void {
+    this.content.setFragment(fragment);
+  }
+}
 
 /**
  * An implementation of a widget factory for a rendered mimetype document.
@@ -268,7 +293,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
     return widget;
   }
 
-  private _rendermime: RenderMimeRegistry;
+  private _rendermime: IRenderMimeRegistry;
   private _renderTimeout: number;
   private _dataType: 'string' | 'json';
   private _fileType: DocumentRegistry.IFileType;
@@ -291,7 +316,7 @@ export namespace MimeDocumentFactory {
     /**
      * The rendermime instance.
      */
-    rendermime: RenderMimeRegistry;
+    rendermime: IRenderMimeRegistry;
 
     /**
      * The render timeout.

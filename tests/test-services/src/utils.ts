@@ -15,22 +15,20 @@ import {
 
 import { Response } from 'node-fetch';
 
-import { ISignal, Signal } from '@phosphor/signaling';
-
 import {
   Contents,
   TerminalSession,
   ServerConnection
-} from '@jupyterlab/services/src';
+} from '@jupyterlab/services';
 
-import { Kernel, KernelMessage } from '@jupyterlab/services/src/kernel';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 
 import {
   deserialize,
   serialize
-} from '@jupyterlab/services/src/kernel/serialize';
+} from '@jupyterlab/services/lib/kernel/serialize';
 
-import { Session } from '@jupyterlab/services/src/session';
+import { Session } from '@jupyterlab/services';
 
 // stub for node global
 declare var global: any;
@@ -58,7 +56,8 @@ export function makeSettings(
   return ServerConnection.makeSettings(settings);
 }
 
-const EXAMPLE_KERNEL_INFO: KernelMessage.IInfoReply = {
+const EXAMPLE_KERNEL_INFO: KernelMessage.IInfoReplyMsg['content'] = {
+  status: 'ok',
   protocol_version: '1',
   implementation: 'a',
   implementation_version: '1',
@@ -126,23 +125,6 @@ export const KERNELSPECS: JSONObject = {
 };
 
 /**
- * Create a message from an existing message.
- */
-export function createMsg(
-  channel: KernelMessage.Channel,
-  parentHeader: JSONObject
-): KernelMessage.IMessage {
-  return {
-    channel: channel,
-    parent_header: JSON.parse(JSON.stringify(parentHeader)),
-    content: {},
-    header: JSON.parse(JSON.stringify(parentHeader)),
-    metadata: {},
-    buffers: []
-  };
-}
-
-/**
  * Get a single handler for a request.
  */
 export function getRequestHandler(
@@ -191,35 +173,6 @@ export function handleRequest(item: IService, status: number, body: any) {
 
   // Override the fetch function.
   (item.serverSettings as any).fetch = temp;
-}
-
-/**
- * Expect a failure on a promise with the given message.
- */
-export async function expectFailure(
-  promise: Promise<any>,
-  message?: string
-): Promise<void> {
-  let called = false;
-  try {
-    await promise;
-    called = true;
-  } catch (err) {
-    if (message && err.message.indexOf(message) === -1) {
-      throw Error(`Error "${message}" not in: "${err.message}"`);
-    }
-  }
-  if (called) {
-    throw Error(`Failure was not triggered, message was: ${message}`);
-  }
-}
-
-/**
- * Do something in the future ensuring total ordering wrt to Promises.
- */
-export async function doLater(cb: () => void): Promise<void> {
-  await Promise.resolve(void 0);
-  cb();
 }
 
 /**
@@ -332,20 +285,24 @@ export class KernelTester extends SocketTester {
    * Send the status from the server to the client.
    */
   sendStatus(msgId: string, status: Kernel.Status) {
-    return this.sendMessage(
-      { msgId, msgType: 'status', channel: 'iopub' },
-      { execution_state: status }
-    );
+    return this.sendMessage({
+      msgId,
+      msgType: 'status',
+      channel: 'iopub',
+      content: { execution_state: status }
+    });
   }
 
   /**
    * Send an iopub stream message.
    */
   sendStream(msgId: string, content: KernelMessage.IStreamMsg['content']) {
-    return this.sendMessage(
-      { msgId, msgType: 'stream', channel: 'iopub' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'stream',
+      channel: 'iopub',
       content
-    );
+    });
   }
 
   /**
@@ -355,10 +312,12 @@ export class KernelTester extends SocketTester {
     msgId: string,
     content: KernelMessage.IDisplayDataMsg['content']
   ) {
-    return this.sendMessage(
-      { msgId, msgType: 'display_data', channel: 'iopub' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'display_data',
+      channel: 'iopub',
       content
-    );
+    });
   }
 
   /**
@@ -368,19 +327,23 @@ export class KernelTester extends SocketTester {
     msgId: string,
     content: KernelMessage.IUpdateDisplayDataMsg['content']
   ) {
-    return this.sendMessage(
-      { msgId, msgType: 'update_display_data', channel: 'iopub' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'update_display_data',
+      channel: 'iopub',
       content
-    );
+    });
   }
   /**
    * Send an iopub comm open message.
    */
   sendCommOpen(msgId: string, content: KernelMessage.ICommOpenMsg['content']) {
-    return this.sendMessage(
-      { msgId, msgType: 'comm_open', channel: 'iopub' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'comm_open',
+      channel: 'iopub',
       content
-    );
+    });
   }
 
   /**
@@ -390,74 +353,84 @@ export class KernelTester extends SocketTester {
     msgId: string,
     content: KernelMessage.ICommCloseMsg['content']
   ) {
-    return this.sendMessage(
-      { msgId, msgType: 'comm_close', channel: 'iopub' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'comm_close',
+      channel: 'iopub',
       content
-    );
+    });
   }
 
   /**
    * Send an iopub comm message.
    */
   sendCommMsg(msgId: string, content: KernelMessage.ICommMsgMsg['content']) {
-    return this.sendMessage(
-      { msgId, msgType: 'comm_msg', channel: 'iopub' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'comm_msg',
+      channel: 'iopub',
       content
-    );
+    });
   }
 
   sendExecuteResult(
     msgId: string,
     content: KernelMessage.IExecuteResultMsg['content']
   ) {
-    return this.sendMessage(
-      { msgId, msgType: 'execute_result', channel: 'iopub' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'execute_result',
+      channel: 'iopub',
       content
-    );
+    });
   }
 
   sendExecuteReply(
     msgId: string,
-    content: KernelMessage.IExecuteReply['content']
+    content: KernelMessage.IExecuteReplyMsg['content']
   ) {
-    return this.sendMessage(
-      { msgId, msgType: 'execute_reply', channel: 'shell' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'execute_reply',
+      channel: 'shell',
       content
-    );
+    });
   }
 
   sendKernelInfoReply(
     msgId: string,
     content: KernelMessage.IInfoReplyMsg['content']
   ) {
-    return this.sendMessage(
-      { msgId, msgType: 'kernel_info_reply', channel: 'shell' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'kernel_info_reply',
+      channel: 'shell',
       content
-    );
+    });
   }
 
   sendInputRequest(
     msgId: string,
     content: KernelMessage.IInputRequestMsg['content']
   ) {
-    return this.sendMessage(
-      { msgId, msgType: 'input_request', channel: 'stdin' },
+    return this.sendMessage({
+      msgId,
+      msgType: 'input_request',
+      channel: 'stdin',
       content
-    );
+    });
   }
 
   /**
    * Send a kernel message with sensible defaults.
    */
-  sendMessage(
-    options: MakeOptional<KernelMessage.IOptions, 'session'>,
-    content: any
+  sendMessage<T extends KernelMessage.Message>(
+    options: MakeOptional<KernelMessage.IOptions<T>, 'session'>
   ) {
-    options.session = this.serverSessionId;
-    const msg = KernelMessage.createMessage(
-      options as KernelMessage.IOptions,
-      content
-    );
+    const msg = KernelMessage.createMessage<any>({
+      session: this.serverSessionId,
+      ...options
+    });
     msg.parent_header = this.parentHeader;
     this.send(msg);
     return msg.header.msg_id;
@@ -466,7 +439,7 @@ export class KernelTester extends SocketTester {
   /**
    * Send a kernel message from the server to the client.
    */
-  send(msg: KernelMessage.IMessage): void {
+  send(msg: KernelMessage.Message): void {
     this.sendRaw(serialize(msg));
   }
 
@@ -614,14 +587,14 @@ export class SessionTester extends SocketTester {
   /**
    * Send the status from the server to the client.
    */
-  sendStatus(status: string, parentHeader?: KernelMessage.IHeader) {
-    const options: KernelMessage.IOptions = {
+  sendStatus(status: Kernel.Status, parentHeader?: KernelMessage.IHeader) {
+    const msg = KernelMessage.createMessage({
       msgType: 'status',
       channel: 'iopub',
-      session: this.serverSessionId
-    };
-    const msg = KernelMessage.createMessage(options, {
-      execution_state: status
+      session: this.serverSessionId,
+      content: {
+        execution_state: status
+      }
     });
     if (parentHeader) {
       msg.parent_header = parentHeader;
@@ -653,19 +626,19 @@ export class SessionTester extends SocketTester {
         msg = new Uint8Array(msg).buffer;
       }
       const data = deserialize(msg);
-      if (data.header.msg_type === 'kernel_info_request') {
+      if (KernelMessage.isInfoRequestMsg(data)) {
         // First send status busy message.
         this.sendStatus('busy', data.header);
 
         // Then send the kernel_info_reply message.
-        const options: KernelMessage.IOptions = {
+        const reply = KernelMessage.createMessage({
           msgType: 'kernel_info_reply',
           channel: 'shell',
-          session: this.serverSessionId
-        };
-        const msg = KernelMessage.createMessage(options, EXAMPLE_KERNEL_INFO);
-        msg.parent_header = data.header;
-        this.send(msg);
+          session: this.serverSessionId,
+          content: EXAMPLE_KERNEL_INFO
+        });
+        reply.parent_header = data.header;
+        this.send(reply);
 
         // Then send status idle message.
         this.sendStatus('idle', data.header);
@@ -711,73 +684,6 @@ export class TerminalTester extends SocketTester {
   }
 
   private _onMessage: (msg: TerminalSession.IMessage) => void = null;
-}
-
-/**
- * Test a single emission from a signal.
- *
- * @param signal - The signal we are listening to.
- * @param find - An optional function to determine which emission to test,
- * defaulting to the first emission.
- * @param test - An optional function which contains the tests for the emission.
- * @param value - An optional value that the promise resolves to if it is
- * successful.
- *
- * @returns a promise that rejects if the function throws an error (e.g., if an
- * expect test doesn't pass), and resolves otherwise.
- *
- * #### Notes
- * The first emission for which the find function returns true will be tested in
- * the test function. If the find function is not given, the first signal
- * emission will be tested.
- *
- * You can test to see if any signal comes which matches a criteria by just
- * giving a find function. You can test the very first signal by just giving a
- * test function. And you can test the first signal matching the find criteria
- * by giving both.
- *
- * The reason this function is asynchronous is so that the thing causing the
- * signal emission (such as a websocket message) can be asynchronous.
- */
-export async function testEmission<T, U, V>(
-  signal: ISignal<T, U>,
-  options: {
-    find?: (a: T, b: U) => boolean;
-    test?: (a: T, b: U) => void;
-    value?: V;
-  }
-): Promise<V> {
-  const done = new PromiseDelegate<V>();
-  const object = {};
-  signal.connect(
-    (sender: T, args: U) => {
-      if (!options.find || options.find(sender, args)) {
-        try {
-          Signal.disconnectReceiver(object);
-          if (options.test) {
-            options.test(sender, args);
-          }
-        } catch (e) {
-          done.reject(e);
-        }
-        done.resolve(options.value || undefined);
-      }
-    },
-    object
-  );
-  return done.promise;
-}
-
-/**
- * Test to see if a promise is fulfilled.
- *
- * @returns true if the promise is fulfilled (either resolved or rejected), and
- * false if the promise is still pending.
- */
-export async function isFulfilled<T>(p: PromiseLike<T>): Promise<boolean> {
-  const x = Object.create(null);
-  const result = await Promise.race([p, x]).catch(() => false);
-  return result !== x;
 }
 
 /**

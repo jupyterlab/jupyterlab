@@ -3,24 +3,25 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
-import { InstanceTracker, IThemeManager, Dialog } from '@jupyterlab/apputils';
-
+import {
+  IThemeManager,
+  InputDialog,
+  WidgetTracker
+} from '@jupyterlab/apputils';
 import {
   CSVViewer,
   TextRenderConfig,
   CSVViewerFactory,
   TSVViewerFactory
 } from '@jupyterlab/csvviewer';
-
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
+import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
 import { DataGrid } from '@phosphor/datagrid';
-
-import { IMainMenu, IEditMenu } from '@jupyterlab/mainmenu';
+import { CSVSearchProvider } from './searchprovider';
 
 /**
  * The name of the factories that creates widgets.
@@ -31,20 +32,32 @@ const FACTORY_TSV = 'TSVTable';
 /**
  * The CSV file handler extension.
  */
-const csv: JupyterLabPlugin<void> = {
+const csv: JupyterFrontEndPlugin<void> = {
   activate: activateCsv,
   id: '@jupyterlab/csvviewer-extension:csv',
-  requires: [ILayoutRestorer, IThemeManager, IMainMenu],
+  requires: [],
+  optional: [
+    ILayoutRestorer,
+    IThemeManager,
+    IMainMenu,
+    ISearchProviderRegistry
+  ],
   autoStart: true
 };
 
 /**
  * The TSV file handler extension.
  */
-const tsv: JupyterLabPlugin<void> = {
+const tsv: JupyterFrontEndPlugin<void> = {
   activate: activateTsv,
   id: '@jupyterlab/csvviewer-extension:tsv',
-  requires: [ILayoutRestorer, IThemeManager, IMainMenu],
+  requires: [],
+  optional: [
+    ILayoutRestorer,
+    IThemeManager,
+    IMainMenu,
+    ISearchProviderRegistry
+  ],
   autoStart: true
 };
 
@@ -53,29 +66,17 @@ const tsv: JupyterLabPlugin<void> = {
  */
 function addMenuEntries(
   mainMenu: IMainMenu,
-  tracker: InstanceTracker<IDocumentWidget<CSVViewer>>
+  tracker: WidgetTracker<IDocumentWidget<CSVViewer>>
 ) {
-  // Add find capability to the edit menu.
-  mainMenu.editMenu.findReplacers.add({
-    tracker,
-    find: (widget: IDocumentWidget<CSVViewer>) => {
-      return Dialog.prompt<string>(
-        'Search Text',
-        widget.content.searchService.searchText
-      ).then(value => {
-        if (value.button.accept) {
-          widget.content.searchService.find(value.value);
-        }
-      });
-    }
-  } as IEditMenu.IFindReplacer<IDocumentWidget<CSVViewer>>);
-
   // Add go to line capability to the edit menu.
   mainMenu.editMenu.goToLiners.add({
     tracker,
     goToLine: (widget: IDocumentWidget<CSVViewer>) => {
-      return Dialog.prompt<number>('Go to Line', 0).then(value => {
-        if (value.button.accept) {
+      return InputDialog.getNumber({
+        title: 'Go to Line',
+        value: 0
+      }).then(value => {
+        if (value.button.accept && value.value !== null) {
           widget.content.goToLine(value.value);
         }
       });
@@ -87,10 +88,11 @@ function addMenuEntries(
  * Activate cssviewer extension for CSV files
  */
 function activateCsv(
-  app: JupyterLab,
-  restorer: ILayoutRestorer,
-  themeManager: IThemeManager,
-  mainMenu: IMainMenu
+  app: JupyterFrontEnd,
+  restorer: ILayoutRestorer | null,
+  themeManager: IThemeManager | null,
+  mainMenu: IMainMenu | null,
+  searchregistry: ISearchProviderRegistry | null
 ): void {
   const factory = new CSVViewerFactory({
     name: FACTORY_CSV,
@@ -98,7 +100,7 @@ function activateCsv(
     defaultFor: ['csv'],
     readOnly: true
   });
-  const tracker = new InstanceTracker<IDocumentWidget<CSVViewer>>({
+  const tracker = new WidgetTracker<IDocumentWidget<CSVViewer>>({
     namespace: 'csvviewer'
   });
 
@@ -106,26 +108,28 @@ function activateCsv(
   let style: DataGrid.IStyle = Private.LIGHT_STYLE;
   let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
 
-  // Handle state restoration.
-  restorer.restore(tracker, {
-    command: 'docmanager:open',
-    args: widget => ({ path: widget.context.path, factory: FACTORY_CSV }),
-    name: widget => widget.context.path
-  });
+  if (restorer) {
+    // Handle state restoration.
+    void restorer.restore(tracker, {
+      command: 'docmanager:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY_CSV }),
+      name: widget => widget.context.path
+    });
+  }
 
   app.docRegistry.addWidgetFactory(factory);
   let ft = app.docRegistry.getFileType('csv');
   factory.widgetCreated.connect((sender, widget) => {
     // Track the widget.
-    tracker.add(widget);
-    // Notify the instance tracker if restore data needs to update.
+    void tracker.add(widget);
+    // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
-      tracker.save(widget);
+      void tracker.save(widget);
     });
 
     if (ft) {
-      widget.title.iconClass = ft.iconClass;
-      widget.title.iconLabel = ft.iconLabel;
+      widget.title.iconClass = ft.iconClass!;
+      widget.title.iconLabel = ft.iconLabel!;
     }
     // Set the theme for the new widget.
     widget.content.style = style;
@@ -134,7 +138,10 @@ function activateCsv(
 
   // Keep the themes up-to-date.
   const updateThemes = () => {
-    const isLight = themeManager.isLight(themeManager.theme);
+    const isLight =
+      themeManager && themeManager.theme
+        ? themeManager.isLight(themeManager.theme)
+        : true;
     style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
     rendererConfig = isLight
       ? Private.LIGHT_TEXT_CONFIG
@@ -144,19 +151,27 @@ function activateCsv(
       grid.content.rendererConfig = rendererConfig;
     });
   };
-  themeManager.themeChanged.connect(updateThemes);
+  if (themeManager) {
+    themeManager.themeChanged.connect(updateThemes);
+  }
 
-  addMenuEntries(mainMenu, tracker);
+  if (mainMenu) {
+    addMenuEntries(mainMenu, tracker);
+  }
+  if (searchregistry) {
+    searchregistry.register('csv', CSVSearchProvider);
+  }
 }
 
 /**
  * Activate cssviewer extension for TSV files
  */
 function activateTsv(
-  app: JupyterLab,
-  restorer: ILayoutRestorer,
-  themeManager: IThemeManager,
-  mainMenu: IMainMenu
+  app: JupyterFrontEnd,
+  restorer: ILayoutRestorer | null,
+  themeManager: IThemeManager | null,
+  mainMenu: IMainMenu | null,
+  searchregistry: ISearchProviderRegistry | null
 ): void {
   const factory = new TSVViewerFactory({
     name: FACTORY_TSV,
@@ -164,7 +179,7 @@ function activateTsv(
     defaultFor: ['tsv'],
     readOnly: true
   });
-  const tracker = new InstanceTracker<IDocumentWidget<CSVViewer>>({
+  const tracker = new WidgetTracker<IDocumentWidget<CSVViewer>>({
     namespace: 'tsvviewer'
   });
 
@@ -172,26 +187,28 @@ function activateTsv(
   let style: DataGrid.IStyle = Private.LIGHT_STYLE;
   let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
 
-  // Handle state restoration.
-  restorer.restore(tracker, {
-    command: 'docmanager:open',
-    args: widget => ({ path: widget.context.path, factory: FACTORY_TSV }),
-    name: widget => widget.context.path
-  });
+  if (restorer) {
+    // Handle state restoration.
+    void restorer.restore(tracker, {
+      command: 'docmanager:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY_TSV }),
+      name: widget => widget.context.path
+    });
+  }
 
   app.docRegistry.addWidgetFactory(factory);
   let ft = app.docRegistry.getFileType('tsv');
   factory.widgetCreated.connect((sender, widget) => {
     // Track the widget.
-    tracker.add(widget);
-    // Notify the instance tracker if restore data needs to update.
+    void tracker.add(widget);
+    // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
-      tracker.save(widget);
+      void tracker.save(widget);
     });
 
     if (ft) {
-      widget.title.iconClass = ft.iconClass;
-      widget.title.iconLabel = ft.iconLabel;
+      widget.title.iconClass = ft.iconClass!;
+      widget.title.iconLabel = ft.iconLabel!;
     }
     // Set the theme for the new widget.
     widget.content.style = style;
@@ -200,7 +217,10 @@ function activateTsv(
 
   // Keep the themes up-to-date.
   const updateThemes = () => {
-    const isLight = themeManager.isLight(themeManager.theme);
+    const isLight =
+      themeManager && themeManager.theme
+        ? themeManager.isLight(themeManager.theme)
+        : true;
     style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
     rendererConfig = isLight
       ? Private.LIGHT_TEXT_CONFIG
@@ -210,15 +230,22 @@ function activateTsv(
       grid.content.rendererConfig = rendererConfig;
     });
   };
-  themeManager.themeChanged.connect(updateThemes);
+  if (themeManager) {
+    themeManager.themeChanged.connect(updateThemes);
+  }
 
-  addMenuEntries(mainMenu, tracker);
+  if (mainMenu) {
+    addMenuEntries(mainMenu, tracker);
+  }
+  if (searchregistry) {
+    searchregistry.register('tsv', CSVSearchProvider);
+  }
 }
 
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterLabPlugin<any>[] = [csv, tsv];
+const plugins: JupyterFrontEndPlugin<any>[] = [csv, tsv];
 export default plugins;
 
 /**

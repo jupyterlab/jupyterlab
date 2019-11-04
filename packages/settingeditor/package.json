@@ -1,10 +1,14 @@
 {
   "name": "@jupyterlab/settingeditor",
-  "version": "0.8.1",
+  "version": "2.0.0-alpha.1",
   "description": "The JupyterLab default setting editor interface",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
@@ -14,41 +18,43 @@
     "lib/*.js",
     "style/*.css"
   ],
+  "sideEffects": [
+    "style/*.css"
+  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib",
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
+    "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^0.19.1",
-    "@jupyterlab/codeeditor": "^0.19.1",
-    "@jupyterlab/coreutils": "^2.2.1",
-    "@jupyterlab/inspector": "^0.19.1",
-    "@jupyterlab/rendermime": "^0.19.1",
-    "@phosphor/commands": "^1.6.1",
-    "@phosphor/coreutils": "^1.3.0",
-    "@phosphor/messaging": "^1.2.2",
-    "@phosphor/signaling": "^1.2.2",
-    "@phosphor/widgets": "^1.6.0",
-    "react": "~16.4.2",
-    "react-dom": "~16.4.2"
+    "@jupyterlab/apputils": "^2.0.0-alpha.1",
+    "@jupyterlab/codeeditor": "^2.0.0-alpha.1",
+    "@jupyterlab/coreutils": "^4.0.0-alpha.1",
+    "@jupyterlab/inspector": "^2.0.0-alpha.1",
+    "@jupyterlab/rendermime": "^2.0.0-alpha.1",
+    "@jupyterlab/ui-components": "^2.0.0-alpha.1",
+    "@phosphor/commands": "^1.7.0",
+    "@phosphor/coreutils": "^1.3.1",
+    "@phosphor/messaging": "^1.3.0",
+    "@phosphor/signaling": "^1.3.0",
+    "@phosphor/widgets": "^1.9.0",
+    "react": "~16.8.4",
+    "react-dom": "~16.8.4"
   },
   "devDependencies": {
-    "@types/react": "~16.4.13",
-    "@types/react-dom": "~16.0.7",
+    "@types/react": "~16.8.18",
+    "@types/react-dom": "^16.8.4",
     "rimraf": "~2.6.2",
-    "typedoc": "~0.12.0",
-    "typescript": "~3.1.1"
+    "typedoc": "^0.14.2",
+    "typescript": "~3.5.1"
   },
   "publishConfig": {
     "access": "public"

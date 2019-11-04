@@ -1,0 +1,9 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2017, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+@import url('~@jupyterlab/application/style/index.css');
+@import url('~@jupyterlab/apputils/style/index.css');
+@import url('~@jupyterlab/mainmenu/style/index.css');

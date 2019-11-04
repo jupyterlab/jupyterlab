@@ -5,8 +5,6 @@ import { JSONExt } from '@phosphor/coreutils';
 
 import minimist from 'minimist';
 
-import { PathExt } from './path';
-
 import { URLExt } from './url';
 
 /**
@@ -16,19 +14,9 @@ declare var process: any;
 declare var require: any;
 
 /**
- * The namespace for Page Config functions.
+ * The namespace for `PageConfig` functions.
  */
 export namespace PageConfig {
-  /**
-   * The tree URL construction options.
-   */
-  export interface ITreeOptions {
-    /**
-     * If `true`, the tree URL will include the current workspace, if any.
-     */
-    workspace?: boolean;
-  }
-
   /**
    * Get global configuration data for the Jupyter application.
    *
@@ -49,13 +37,13 @@ export namespace PageConfig {
    */
   export function getOption(name: string): string {
     if (configData) {
-      return configData[name] || Private.getBodyData(name);
+      return configData[name] || getBodyData(name);
     }
     configData = Object.create(null);
     let found = false;
 
     // Use script tag if available.
-    if (typeof document !== 'undefined') {
+    if (typeof document !== 'undefined' && document) {
       const el = document.getElementById('jupyter-config-data');
 
       if (el) {
@@ -91,13 +79,13 @@ export namespace PageConfig {
       configData = Object.create(null);
     } else {
       for (let key in configData) {
-        // Quote characters are escaped, unescape them.
-        configData[key] = String(configData[key])
-          .split('&#39;')
-          .join('"');
+        // PageConfig expects strings
+        if (typeof configData[key] !== 'string') {
+          configData[key] = JSON.stringify(configData[key]);
+        }
       }
     }
-    return configData![name] || '';
+    return configData![name] || getBodyData(name);
   }
 
   /**
@@ -124,19 +112,9 @@ export namespace PageConfig {
 
   /**
    * Get the tree url for a JupyterLab application.
-   *
-   * @param options - The tree URL construction options.
    */
-  export function getTreeUrl(options: ITreeOptions = {}): string {
-    const base = getBaseUrl();
-    const tree = getOption('treeUrl');
-    const defaultWorkspace = getOption('defaultWorkspace');
-    const workspaces = getOption('workspacesUrl');
-    const workspace = getOption('workspace');
-
-    return !!options.workspace && workspace && workspace !== defaultWorkspace
-      ? URLExt.join(base, workspaces, PathExt.basename(workspace), 'tree')
-      : URLExt.join(base, tree);
+  export function getTreeUrl(): string {
+    return URLExt.join(getBaseUrl(), getOption('treeUrl'));
   }
 
   /**
@@ -155,10 +133,31 @@ export namespace PageConfig {
   }
 
   /**
+   * Returns the URL converting this notebook to a certain
+   * format with nbconvert.
+   */
+  export function getNBConvertURL({
+    path,
+    format,
+    download
+  }: {
+    path: string;
+    format: string;
+    download: boolean;
+  }): string {
+    const notebookPath = URLExt.encodeParts(path);
+    const url = URLExt.join(getBaseUrl(), 'nbconvert', format, notebookPath);
+    if (download) {
+      return url + '?download=true';
+    }
+    return url;
+  }
+
+  /**
    * Get the authorization token for a Jupyter application.
    */
   export function getToken(): string {
-    return getOption('token') || Private.getBodyData('jupyterApiToken');
+    return getOption('token') || getBodyData('jupyterApiToken');
   }
 
   /**
@@ -176,18 +175,13 @@ export namespace PageConfig {
    * Private page config data for the Jupyter application.
    */
   let configData: { [key: string]: string } | null = null;
-}
 
-/**
- * A namespace for module private data.
- */
-namespace Private {
   /**
    * Get a url-encoded item from `body.data` and decode it
    * We should never have any encoded URLs anywhere else in code
    * until we are building an actual request.
    */
-  export function getBodyData(key: string): string {
+  function getBodyData(key: string): string {
     if (typeof document === 'undefined' || !document.body) {
       return '';
     }
@@ -196,5 +190,60 @@ namespace Private {
       return '';
     }
     return decodeURIComponent(val);
+  }
+
+  /**
+   * The namespace for page config `Extension` functions.
+   */
+  export namespace Extension {
+    /**
+     * Populate an array from page config.
+     *
+     * @param key - The page config key (e.g., `deferredExtensions`).
+     *
+     * #### Notes
+     * This is intended for `deferredExtensions` and `disabledExtensions`.
+     */
+    function populate(key: string): { raw: string; rule: RegExp }[] {
+      try {
+        const raw = getOption(key);
+        if (raw) {
+          return JSON.parse(raw).map((pattern: string) => {
+            return { raw: pattern, rule: new RegExp(pattern) };
+          });
+        }
+      } catch (error) {
+        console.warn(`Unable to parse ${key}.`, error);
+      }
+      return [];
+    }
+
+    /**
+     * The collection of deferred extensions in page config.
+     */
+    export const deferred = populate('deferredExtensions');
+
+    /**
+     * The collection of disabled extensions in page config.
+     */
+    export const disabled = populate('disabledExtensions');
+
+    /**
+     * Returns whether a plugin is deferred.
+     *
+     * @param id - The plugin ID.
+     */
+    export function isDeferred(id: string): boolean {
+      return deferred.some(val => val.raw === id || val.rule.test(id));
+    }
+
+    /**
+     * Returns whether a plugin is disabled.
+     *
+     * @param id - The plugin ID.
+     */
+    export function isDisabled(id: string): boolean {
+      return disabled.some(val => val.raw === id || val.rule.test(id));
+    }
   }
 }

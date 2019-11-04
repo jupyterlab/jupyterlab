@@ -3,11 +3,11 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { ICommandPalette, InstanceTracker } from '@jupyterlab/apputils';
+import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
@@ -51,11 +51,11 @@ const FACTORY = 'Image';
 /**
  * The image file handler extension.
  */
-const plugin: JupyterLabPlugin<IImageTracker> = {
+const plugin: JupyterFrontEndPlugin<IImageTracker> = {
   activate,
   id: '@jupyterlab/imageviewer-extension:plugin',
   provides: IImageTracker,
-  requires: [ICommandPalette, ILayoutRestorer],
+  optional: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
 
@@ -68,9 +68,9 @@ export default plugin;
  * Activate the image widget extension.
  */
 function activate(
-  app: JupyterLab,
-  palette: ICommandPalette,
-  restorer: ILayoutRestorer
+  app: JupyterFrontEnd,
+  palette: ICommandPalette | null,
+  restorer: ILayoutRestorer | null
 ): IImageTracker {
   const namespace = 'image-widget';
   const factory = new ImageViewerFactory({
@@ -80,25 +80,27 @@ function activate(
     defaultFor: FILE_TYPES,
     readOnly: true
   });
-  const tracker = new InstanceTracker<IDocumentWidget<ImageViewer>>({
+  const tracker = new WidgetTracker<IDocumentWidget<ImageViewer>>({
     namespace
   });
 
-  // Handle state restoration.
-  restorer.restore(tracker, {
-    command: 'docmanager:open',
-    args: widget => ({ path: widget.context.path, factory: FACTORY }),
-    name: widget => widget.context.path
-  });
+  if (restorer) {
+    // Handle state restoration.
+    void restorer.restore(tracker, {
+      command: 'docmanager:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY }),
+      name: widget => widget.context.path
+    });
+  }
 
   app.docRegistry.addWidgetFactory(factory);
 
   factory.widgetCreated.connect((sender, widget) => {
-    // Notify the instance tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
-      tracker.save(widget);
+      void tracker.save(widget);
     });
-    tracker.add(widget);
+    void tracker.add(widget);
 
     const types = app.docRegistry.getFileTypesForPath(widget.context.path);
 
@@ -110,20 +112,21 @@ function activate(
 
   addCommands(app, tracker);
 
-  const category = 'Image Viewer';
-
-  [
-    CommandIDs.zoomIn,
-    CommandIDs.zoomOut,
-    CommandIDs.resetImage,
-    CommandIDs.rotateClockwise,
-    CommandIDs.rotateCounterclockwise,
-    CommandIDs.flipHorizontal,
-    CommandIDs.flipVertical,
-    CommandIDs.invertColors
-  ].forEach(command => {
-    palette.addItem({ command, category });
-  });
+  if (palette) {
+    const category = 'Image Viewer';
+    [
+      CommandIDs.zoomIn,
+      CommandIDs.zoomOut,
+      CommandIDs.resetImage,
+      CommandIDs.rotateClockwise,
+      CommandIDs.rotateCounterclockwise,
+      CommandIDs.flipHorizontal,
+      CommandIDs.flipVertical,
+      CommandIDs.invertColors
+    ].forEach(command => {
+      palette.addItem({ command, category });
+    });
+  }
 
   return tracker;
 }
@@ -131,8 +134,8 @@ function activate(
 /**
  * Add the commands for the image widget.
  */
-export function addCommands(app: JupyterLab, tracker: IImageTracker) {
-  const { commands } = app;
+export function addCommands(app: JupyterFrontEnd, tracker: IImageTracker) {
+  const { commands, shell } = app;
 
   /**
    * Whether there is an active image viewer.
@@ -140,7 +143,7 @@ export function addCommands(app: JupyterLab, tracker: IImageTracker) {
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === app.shell.currentWidget
+      tracker.currentWidget === shell.currentWidget
     );
   }
 

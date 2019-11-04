@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { PathExt } from '@jupyterlab/coreutils/src';
+import { PathExt } from '@jupyterlab/coreutils';
 
 const TESTPATH = 'foo/test/simple/test-path.js';
 

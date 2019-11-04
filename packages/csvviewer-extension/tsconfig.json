@@ -19,6 +19,9 @@
       "path": "../docregistry"
     },
     {
+      "path": "../documentsearch"
+    },
+    {
       "path": "../mainmenu"
     }
   ]

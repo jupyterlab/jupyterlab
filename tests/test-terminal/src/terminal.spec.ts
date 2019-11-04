@@ -57,7 +57,7 @@ describe('terminal/index', () => {
     });
 
     beforeEach(() => {
-      widget = new LogTerminal();
+      widget = new LogTerminal(session);
       Widget.attach(widget, document.body);
       return framePromise();
     });
@@ -73,13 +73,11 @@ describe('terminal/index', () => {
     });
 
     describe('#session', () => {
-      it('should be `null` by default', () => {
-        expect(widget.session).to.be.null;
+      it('should be the constructor value', () => {
+        expect(widget.session).to.equal(session);
       });
 
       it('should set the title when ready', async () => {
-        widget.session = session;
-        expect(widget.session).to.equal(session);
         await session.ready;
         expect(widget.title.label).to.contain(session.name);
       });
@@ -105,8 +103,8 @@ describe('terminal/index', () => {
     });
 
     describe('#theme', () => {
-      it('should be dark by default', () => {
-        expect(widget.getOption('theme')).to.equal('dark');
+      it('should be set to inherit by default', () => {
+        expect(widget.getOption('theme')).to.equal('inherit');
       });
 
       it('should be light if we change it', () => {
@@ -127,7 +125,6 @@ describe('terminal/index', () => {
 
     describe('#refresh()', () => {
       it('should refresh the widget', () => {
-        widget.session = session;
         return widget.refresh();
       });
     });
@@ -141,7 +138,6 @@ describe('terminal/index', () => {
 
     describe('#onAfterAttach()', () => {
       it('should post an update request', async () => {
-        widget.session = session;
         Widget.detach(widget);
         Widget.attach(widget, document.body);
         await framePromise();
@@ -151,7 +147,6 @@ describe('terminal/index', () => {
 
     describe('#onAfterShow()', () => {
       it('should post an update request', async () => {
-        widget.session = session;
         widget.hide();
         Widget.detach(widget);
         Widget.attach(widget, document.body);
@@ -180,7 +175,7 @@ describe('terminal/index', () => {
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(widget.methods).to.contain('onUpdateRequest');
         const style = window.getComputedStyle(widget.node);
-        expect(style.backgroundColor).to.equal('rgb(0, 0, 0)');
+        expect(style.backgroundColor).to.equal('rgba(0, 0, 0, 0)');
       });
     });
 

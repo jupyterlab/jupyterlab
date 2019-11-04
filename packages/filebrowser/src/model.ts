@@ -1,16 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { showDialog, Dialog } from '@jupyterlab/apputils';
+
 import {
   IChangedArgs,
   IStateDB,
   PathExt,
-  PageConfig
+  PageConfig,
+  Poll
 } from '@jupyterlab/coreutils';
 
 import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
 
 import { Contents, Kernel, Session } from '@jupyterlab/services';
+
+import { IIconRegistry } from '@jupyterlab/ui-components';
 
 import {
   ArrayIterator,
@@ -18,7 +23,8 @@ import {
   find,
   IIterator,
   IterableOrArrayLike,
-  ArrayExt
+  ArrayExt,
+  filter
 } from '@phosphor/algorithm';
 
 import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
@@ -27,17 +33,10 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
-import { showDialog, Dialog } from '@jupyterlab/apputils';
-
 /**
  * The default duration of the auto-refresh in ms
  */
 const DEFAULT_REFRESH_INTERVAL = 10000;
-
-/**
- * The enforced time between refreshes in ms.
- */
-const MIN_REFRESH = 1000;
 
 /**
  * The maximum upload size (in bytes) for notebook version < 5.1.0
@@ -72,6 +71,7 @@ export class FileBrowserModel implements IDisposable {
    * Construct a new file browser model.
    */
   constructor(options: FileBrowserModel.IOptions) {
+    this.iconRegistry = options.iconRegistry;
     this.manager = options.manager;
     this._driveName = options.driveName || '';
     let rootPath = this._driveName ? this._driveName + ':' : '';
@@ -87,18 +87,11 @@ export class FileBrowserModel implements IDisposable {
       format: 'text'
     };
     this._state = options.state || null;
-    this._baseRefreshDuration =
-      options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
+    const refreshInterval = options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
 
     const { services } = options.manager;
-    services.contents.fileChanged.connect(
-      this._onFileChanged,
-      this
-    );
-    services.sessions.runningChanged.connect(
-      this._onRunningChanged,
-      this
-    );
+    services.contents.fileChanged.connect(this._onFileChanged, this);
+    services.sessions.runningChanged.connect(this._onRunningChanged, this);
 
     this._unloadEventListener = (e: Event) => {
       if (this._uploads.length > 0) {
@@ -109,9 +102,21 @@ export class FileBrowserModel implements IDisposable {
       }
     };
     window.addEventListener('beforeunload', this._unloadEventListener);
-    this._scheduleUpdate();
-    this._startTimer();
+    this._poll = new Poll({
+      factory: () => this.cd('.'),
+      frequency: {
+        interval: refreshInterval,
+        backoff: true,
+        max: 300 * 1000
+      },
+      standby: 'when-hidden'
+    });
   }
+
+  /**
+   * The icon registry instance used by the file browser model.
+   */
+  readonly iconRegistry: IIconRegistry;
 
   /**
    * The document manager instance used by the file browser model.
@@ -204,7 +209,7 @@ export class FileBrowserModel implements IDisposable {
     }
     window.removeEventListener('beforeunload', this._unloadEventListener);
     this._isDisposed = true;
-    clearTimeout(this._timeoutId);
+    this._poll.dispose();
     this._sessions.length = 0;
     this._items.length = 0;
     Signal.clearData(this);
@@ -231,10 +236,9 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Force a refresh of the directory contents.
    */
-  refresh(): Promise<void> {
-    this._lastRefresh = new Date().getTime();
-    this._requested = false;
-    return this.cd('.');
+  async refresh(): Promise<void> {
+    await this._poll.refresh();
+    await this._poll.tick;
   }
 
   /**
@@ -275,13 +279,14 @@ export class FileBrowserModel implements IDisposable {
         if (this.isDisposed) {
           return;
         }
-        this._refreshDuration = this._baseRefreshDuration;
         this._handleContents(contents);
         this._pendingPath = null;
+        this._pending = null;
         if (oldValue !== newValue) {
           // If there is a state database and a unique key, save the new path.
+          // We don't need to wait on the save to continue.
           if (this._state && this._key) {
-            this._state.save(this._key, { path: newValue });
+            void this._state.save(this._key, { path: newValue });
           }
 
           this._pathChanged.emit({
@@ -295,13 +300,13 @@ export class FileBrowserModel implements IDisposable {
       })
       .catch(error => {
         this._pendingPath = null;
-        if (error.message === 'Not Found') {
+        this._pending = null;
+        if (error.response && error.response.status === 404) {
           error.message = `Directory not found: "${this._model.path}"`;
           console.error(error);
           this._connectionFailure.emit(error);
           return this.cd('/');
         } else {
-          this._refreshDuration = this._baseRefreshDuration * 10;
           this._connectionFailure.emit(error);
         }
       });
@@ -316,16 +321,15 @@ export class FileBrowserModel implements IDisposable {
    * @returns A promise which resolves when the file has begun
    *   downloading.
    */
-  download(path: string): Promise<void> {
-    return this.manager.services.contents.getDownloadUrl(path).then(url => {
-      let element = document.createElement('a');
-      document.body.appendChild(element);
-      element.setAttribute('href', url);
-      element.setAttribute('download', '');
-      element.click();
-      document.body.removeChild(element);
-      return void 0;
-    });
+  async download(path: string): Promise<void> {
+    const url = await this.manager.services.contents.getDownloadUrl(path);
+    let element = document.createElement('a');
+    element.href = url;
+    element.download = '';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    return void 0;
   }
 
   /**
@@ -350,13 +354,13 @@ export class FileBrowserModel implements IDisposable {
     const key = `file-browser-${id}:cwd`;
     const ready = manager.services.ready;
     return Promise.all([state.fetch(key), ready])
-      .then(([cwd]) => {
-        if (!cwd) {
-          this._restored.resolve(void 0);
+      .then(([value]) => {
+        if (!value) {
+          this._restored.resolve(undefined);
           return;
         }
 
-        const path = (cwd as ReadonlyJSONObject)['path'] as string;
+        const path = (value as ReadonlyJSONObject)['path'] as string;
         const localPath = manager.services.contents.localPath(path);
         return manager.services.contents
           .get(path)
@@ -366,7 +370,7 @@ export class FileBrowserModel implements IDisposable {
       .catch(() => state.remove(key))
       .then(() => {
         this._key = key;
-        this._restored.resolve(void 0);
+        this._restored.resolve(undefined);
       }); // Set key after restoration is done.
   }
 
@@ -418,7 +422,7 @@ export class FileBrowserModel implements IDisposable {
       body: `The file size is ${Math.round(
         file.size / (1024 * 1024)
       )} MB. Do you still want to upload it?`,
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'UPLOAD' })]
+      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Upload' })]
     });
     return button.accept;
   }
@@ -586,12 +590,12 @@ export class FileBrowserModel implements IDisposable {
       oldValue && oldValue.path && PathExt.dirname(oldValue.path) === path
         ? oldValue
         : newValue && newValue.path && PathExt.dirname(newValue.path) === path
-          ? newValue
-          : undefined;
+        ? newValue
+        : undefined;
 
     // If either the old value or the new value is in the current path, update.
     if (value) {
-      this._scheduleUpdate();
+      void this._poll.refresh();
       this._populateSessions(sessions.running());
       this._fileChanged.emit(change);
       return;
@@ -610,38 +614,6 @@ export class FileBrowserModel implements IDisposable {
     });
   }
 
-  /**
-   * Start the internal refresh timer.
-   */
-  private _startTimer(): void {
-    this._timeoutId = window.setInterval(() => {
-      if (this._requested) {
-        this.refresh();
-        return;
-      }
-      if (document.hidden) {
-        // Don't poll when nobody's looking.
-        return;
-      }
-      let date = new Date().getTime();
-      if (date - this._lastRefresh > this._refreshDuration) {
-        this.refresh();
-      }
-    }, MIN_REFRESH);
-  }
-
-  /**
-   * Handle internal model refresh logic.
-   */
-  private _scheduleUpdate(): void {
-    let date = new Date().getTime();
-    if (date - this._lastRefresh > MIN_REFRESH) {
-      this.refresh();
-    } else {
-      this._requested = true;
-    }
-  }
-
   private _connectionFailure = new Signal<this, Error>(this);
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _items: Contents.IModel[] = [];
@@ -652,19 +624,15 @@ export class FileBrowserModel implements IDisposable {
   private _pending: Promise<void> | null = null;
   private _pendingPath: string | null = null;
   private _refreshed = new Signal<this, void>(this);
-  private _lastRefresh = -1;
-  private _requested = false;
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;
-  private _timeoutId = -1;
-  private _refreshDuration: number;
-  private _baseRefreshDuration: number;
   private _driveName: string;
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();
   private _uploads: IUploadModel[] = [];
   private _uploadChanged = new Signal<this, IChangedArgs<IUploadModel>>(this);
   private _unloadEventListener: (e: Event) => string;
+  private _poll: Poll;
 }
 
 /**
@@ -675,6 +643,11 @@ export namespace FileBrowserModel {
    * An options object for initializing a file browser.
    */
   export interface IOptions {
+    /**
+     * An icon registry instance.
+     */
+    iconRegistry: IIconRegistry;
+
     /**
      * A document manager instance.
      */
@@ -688,15 +661,58 @@ export namespace FileBrowserModel {
     driveName?: string;
 
     /**
+     * The time interval for browser refreshing, in ms.
+     */
+    refreshInterval?: number;
+
+    /**
      * An optional state database. If provided, the model will restore which
      * folder was last opened when it is restored.
      */
     state?: IStateDB;
+  }
+}
 
+/**
+ * File browser model with optional filter on element.
+ */
+export class FilterFileBrowserModel extends FileBrowserModel {
+  constructor(options: FilterFileBrowserModel.IOptions) {
+    super(options);
+
+    this._filter = options.filter ? options.filter : model => true;
+  }
+
+  /**
+   * Create an iterator over the filtered model's items.
+   *
+   * @returns A new iterator over the model's items.
+   */
+  items(): IIterator<Contents.IModel> {
+    return filter(super.items(), (value, index) => {
+      if (value.type === 'directory') {
+        return true;
+      } else {
+        return this._filter(value);
+      }
+    });
+  }
+
+  private _filter: (value: Contents.IModel) => boolean;
+}
+
+/**
+ * Namespace for the filtered file browser model
+ */
+export namespace FilterFileBrowserModel {
+  /**
+   * Constructor options
+   */
+  export interface IOptions extends FileBrowserModel.IOptions {
     /**
-     * The time interval for browser refreshing, in ms.
+     * Filter function on file browser item model
      */
-    refreshInterval?: number;
+    filter?: (value: Contents.IModel) => boolean;
   }
 }
 

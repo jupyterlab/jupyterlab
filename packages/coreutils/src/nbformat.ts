@@ -19,7 +19,7 @@ export namespace nbformat {
   /**
    * The minor version of the notebook format.
    */
-  export const MINOR_VERSION: number = 2;
+  export const MINOR_VERSION: number = 4;
 
   /**
    * The kernelspec metadata.
@@ -144,6 +144,16 @@ export namespace nbformat {
   export type CellType = 'code' | 'markdown' | 'raw';
 
   /**
+   * The Jupyter metadata namespace.
+   */
+  export interface IBaseCellJupyterMetadata extends JSONObject {
+    /**
+     * Whether the source is hidden.
+     */
+    source_hidden: boolean;
+  }
+
+  /**
    * Cell-level metadata.
    */
   export interface IBaseCellMetadata extends JSONObject {
@@ -162,6 +172,11 @@ export namespace nbformat {
      * The cell's name. If present, must be a non-empty string.
      */
     name: string;
+
+    /**
+     * The Jupyter metadata namespace
+     */
+    jupyter: Partial<IBaseCellJupyterMetadata>;
 
     /**
      * The cell's tags. Tags must be unique, and must not contain commas.
@@ -235,6 +250,16 @@ export namespace nbformat {
   }
 
   /**
+   * The Jupyter metadata namespace for code cells.
+   */
+  export interface ICodeCellJupyterMetadata extends IBaseCellJupyterMetadata {
+    /**
+     * Whether the outputs are hidden. See https://github.com/jupyter/nbformat/issues/137.
+     */
+    outputs_hidden: boolean;
+  }
+
+  /**
    * Metadata for a code cell.
    */
   export interface ICodeCellMetadata extends IBaseCellMetadata {
@@ -242,6 +267,11 @@ export namespace nbformat {
      * Whether the cell is collapsed/expanded.
      */
     collapsed: boolean;
+
+    /**
+     * The Jupyter metadata namespace
+     */
+    jupyter: Partial<ICodeCellJupyterMetadata>;
 
     /**
      * Whether the cell's output is scrolled, unscrolled, or autoscrolled.
@@ -482,7 +512,7 @@ export namespace nbformat {
   }
 
   /**
-   * Test whether an output is from a stream.
+   * Test whether an output is an error.
    */
   export function isError(output: IOutput): output is IError {
     return output.output_type === 'error';

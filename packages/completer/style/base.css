@@ -1,0 +1,142 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2016, Jupyter Development Team.
+|
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-completer-item-height: 22px;
+  /* Shift the baseline of the type character to align with the match text */
+  --jp-private-completer-type-offset: 2px;
+}
+
+.jp-Completer {
+  box-shadow: var(--jp-elevation-z6);
+  background: var(--jp-layout-color1);
+  color: var(--jp-content-font-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  list-style-type: none;
+  overflow-y: scroll;
+  overflow-x: auto;
+  padding: 0;
+  /* Position the completer relative to the text editor, align the '.' */
+  margin: 4px 0 0 -30px;
+  max-height: calc(
+    (10 * var(--jp-private-completer-item-height)) +
+      (2 * var(--jp-border-width))
+  );
+  min-height: calc(
+    var(--jp-private-completer-item-height) + (2 * var(--jp-border-width))
+  );
+  z-index: 10001;
+}
+
+.jp-Completer-item {
+  display: table-row;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  height: var(--jp-private-completer-item-height);
+  min-width: 150px;
+}
+
+.jp-Completer-item .jp-Completer-match {
+  display: table-cell;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0 8px 0 6px;
+  height: var(--jp-private-completer-item-height);
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-private-completer-item-height);
+}
+
+.jp-Completer-item .jp-Completer-type {
+  display: table-cell;
+  box-sizing: border-box;
+  height: var(--jp-private-completer-item-height);
+  text-align: center;
+  background: transparent;
+  color: white;
+  width: var(--jp-private-completer-item-height);
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size1);
+  line-height: calc(
+    var(--jp-private-completer-item-height) -
+      var(--jp-private-completer-type-offset)
+  );
+  padding-bottom: var(--jp-private-completer-type-offset);
+}
+
+.jp-Completer-item .jp-Completer-typeExtended {
+  display: table-cell;
+  box-sizing: border-box;
+  height: var(--jp-private-completer-item-height);
+  text-align: right;
+  background: transparent;
+  color: var(--jp-ui-font-color2);
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-private-completer-item-height);
+  padding-right: 8px;
+}
+
+.jp-Completer-item:hover {
+  background: var(--jp-layout-color2);
+  opacity: 0.8;
+}
+
+.jp-Completer-item.jp-mod-active {
+  background: var(--jp-brand-color1);
+  color: white;
+}
+
+.jp-Completer-item .jp-Completer-match mark {
+  font-weight: bold;
+  background: inherit;
+  color: inherit;
+}
+
+.jp-Completer-type[data-color-index='0'] {
+  background: transparent;
+}
+
+.jp-Completer-type[data-color-index='1'] {
+  background: #1f77b4;
+}
+
+.jp-Completer-type[data-color-index='2'] {
+  background: #ff7f0e;
+}
+
+.jp-Completer-type[data-color-index='3'] {
+  background: #2ca02c;
+}
+
+.jp-Completer-type[data-color-index='4'] {
+  background: #d62728;
+}
+
+.jp-Completer-type[data-color-index='5'] {
+  background: #9467bd;
+}
+
+.jp-Completer-type[data-color-index='6'] {
+  background: #8c564b;
+}
+
+.jp-Completer-type[data-color-index='7'] {
+  background: #e377c2;
+}
+
+.jp-Completer-type[data-color-index='8'] {
+  background: #7f7f7f;
+}
+
+.jp-Completer-type[data-color-index='9'] {
+  background: #bcbd22;
+}
+
+.jp-Completer-type[data-color-index='10'] {
+  background: #17becf;
+}

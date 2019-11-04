@@ -2,7 +2,10 @@
   "extends": "../../tsconfigbase",
   "compilerOptions": {
     "outDir": "lib",
-    "rootDir": "src"
+    "rootDir": "src",
+    "module": "commonjs",
+    "types": ["node"]
   },
+  "files": ["src/plugin-schema.json"],
   "include": ["src/*"]
 }

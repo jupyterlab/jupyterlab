@@ -1,0 +1,22 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-ListIcon",
+  "jupyter.lab.setting-icon-label": "Log Console",
+  "title": "Log Console",
+  "description": "Log Console settings.",
+  "properties": {
+    "maxLogEntries": {
+      "type": "number",
+      "title": "Log entry count limit",
+      "description": "Maximum number of log entries to store in memory",
+      "default": 1000
+    },
+    "flash": {
+      "type": "boolean",
+      "title": "Status Bar Item flash",
+      "description": "Whether to flash on new log message or not",
+      "default": true
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

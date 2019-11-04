@@ -29,11 +29,13 @@ let basePath = path.resolve('.');
 // Get the package.json of the extension.
 let packagePath = path.join(basePath, 'packages', target, 'package.json');
 if (!fs.existsSync(packagePath)) {
-  packagePath = require.resolve(path.join(target, 'package.json'));
+  let msg = '** Absolute paths for packages are not allowed.';
+  process.stderr.write(msg);
+  process.exit(1);
 }
 
 // Remove the package from the local tree.
 fs.removeSync(path.dirname(packagePath));
 
-// Update the core jupyterlab build dependencies.
-utils.run('npm run integrity');
+// Remove any dependencies on the package (will also run `jlpm integrity`)
+utils.run(`jlpm remove:dependency ${target}`);

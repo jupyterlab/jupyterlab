@@ -8,16 +8,19 @@
 # [JupyterLab](http://jupyterlab.github.io/jupyterlab/)
 
 [![PyPI version](https://badge.fury.io/py/jupyterlab.svg)](https://badge.fury.io/py/jupyterlab)
-[![Build Status](https://travis-ci.org/jupyterlab/jupyterlab.svg?branch=master)](https://travis-ci.org/jupyterlab/jupyterlab)
+[![Downloads](https://pepy.tech/badge/jupyterlab/month)](https://pepy.tech/project/jupyterlab/month)
+[![Build Status](https://dev.azure.com/jupyterlab/jupyterlab/_apis/build/status/jupyterlab.jupyterlab?branchName=master)](https://dev.azure.com/jupyterlab/jupyterlab/_build/latest?definitionId=1&branchName=master)
 [![Documentation Status](https://readthedocs.org/projects/jupyterlab/badge/?version=stable)](http://jupyterlab.readthedocs.io/en/stable/)
-[![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
-[![Join the Gitter Chat](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/jupyterlab/jupyterlab)
-[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/0b0bb42e3e43ee2ebe1c0424d3a88a9b9edcd055?urlpath=lab%2Ftree%2Fdemo%2FLorenz.ipynb)
+[![GitHub](https://img.shields.io/badge/issue_tracking-github-blue.svg)](https://github.com/jupyterlab/jupyterlab/issues)
+[![Discourse](https://img.shields.io/badge/help_forum-discourse-blue.svg)](https://discourse.jupyter.org/c/jupyterlab)
+[![Gitter](https://img.shields.io/badge/social_chat-gitter-blue.svg)](https://gitter.im/jupyterlab/jupyterlab)
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/master?urlpath=lab/tree/demo)
 
 An extensible environment for interactive and reproducible computing, based on the
 Jupyter Notebook and Architecture. [Currently ready for users.](https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906)
 
-[JupyterLab](http://jupyterlab.readthedocs.io/en/stable/) is the next-generation user interface for [Project Jupyter](https://jupyter.org)offering
+[JupyterLab](http://jupyterlab.readthedocs.io/en/stable/) is the next-generation user interface for [Project Jupyter](https://jupyter.org) offering
 all the familiar building blocks of the classic Jupyter Notebook (notebook,
 terminal, text editor, file browser, rich outputs, etc.) in a flexible and
 powerful user interface.
@@ -38,67 +41,27 @@ Read the latest version's documentation on [ReadTheDocs](http://jupyterlab.readt
 
 ### Installation
 
-[install](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html) JupyterLab using `conda`, `pip`, or `pipenv`. Conda is recommended if you have no installation preference.
+JupyterLab can be installed using `conda` or `pip`. For more detailed instructions, consult the [installation guide](http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html).
 
 Project installation instructions from the git sources are available in the [contributor documentation](CONTRIBUTING.md).
 
-#### conda
+### conda
 
-Conda is an open source package management system and environment management system that runs on Windows, macOS, and Linux. Conda packages and distributes software for any language, and by default uses the Anaconda repository managed by Anaconda Inc. To install conda, please [see the conda installation instructions](https://conda.io/docs/user-guide/install/index.html).
+If you use `conda`, you can install it with:
 
-Install the [JupyterLab `conda` package](https://anaconda.org/conda-forge/jupyterlab) with:
-
-```bash
+```shell
 conda install -c conda-forge jupyterlab
 ```
 
-#### pip
+### pip
 
-pip is a package management system for installing and updating Python packages, and comes with any Python installation. On Ubuntu and Fedora Linux, use the system package manager to install the `python3-pip` package. [\_The Hitchhiker's Guide to Python_provides guidance on how to install Python](https://docs.python-guide.org/starting/installation/); Another option is to [install Python directly from python.org](https://www.python.org/getit/). We suggest you [upgrade pip](https://pip.pypa.io/en/stable/installing/) before using it to install other programs.
+If you use `pip`, you can install it with:
 
-JupyterLab requires Python 3.5 or higher.
-
-1.  When using Windows with Python version 3.5 or higher, use the [Python Launcher for Windows](https://docs.python.org/3/using/windows.html?highlight=shebang#python-launcher-for-windows) to use `pip` with Python version 3:
-    ```bash
-    py -3 -m pip install jupyterlab
-    ```
-2.  If the system has a `python3` command (standard on Unix-like systems), install with the comand:
-    ```bash
-    python3 -m pip install jupyterlab
-    ```
-3.  Using the `python` command directly is another option, but this will use the _current_ version of Python (which may be Python version 2 or version 3 if both are installed):
-    ```bash
-    python -m pip install jupyterlab
-    ```
-
-Some systems have a `pip3` command that has the same effect as `python3 -m pip` and/or a `pip` command that behaves the same as `python -m pip`.
-
-Adding `--user` after `pip install` will install the files to a local user install directory (typically `~/.local/` or `%APPDATA%\Python` on Windows) instead of the system-wide directory. This can be helpful, especially if writing to the system-wide directory is not permitted. However, the user-level `bin` directory must be added to the `PATH` environment variable in order to launch `jupyter lab`.
-
-#### pipenv
-
-`Pipenv` provides users and developers of applications with an easy method to setup a working environment, however Python must be installed first. See the [pipenv installation documentation](https://docs.pipenv.org/install) to use Pipenv if it is not installed.
-
-`pipenv` can be installed as:
-
-```bash
-pipenv install jupyterlab
-pipenv shell
+```shell
+pip install jupyterlab
 ```
 
-or from a git checkout:
-
-```bash
-pipenv install git+git://github.com/jupyterlab/jupyterlab.git#egg=jupyterlab
-pipenv shell
-```
-
-When using `pipenv`, in order to launch `jupyter lab`, activate the project's virtualenv. For example, in the directory where `pipenv`'s `Pipfile` and `Pipfile.lock` live (i.e., where the above commands were run):
-
-```bash
-pipenv shell
-jupyter lab
-```
+If installing using `pip install --user`, you must add the user-level `bin` directory to your `PATH` environment variable in order to launch `jupyter lab`.
 
 #### Installing with Previous Versions of Jupyter Notebook
 
@@ -166,14 +129,15 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
   prolific contributions throughout the code base).
 - Jessica Forde, Project Jupyter (demo, documentation)
 - Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
-- Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
+- Brian Granger, AWS (co-creator, strategy, vision, management, UI/UX design,
   architecture).
 - Jason Grout, Bloomberg (co-creator, vision, general development).
 - Fernando Perez, UC Berkeley (co-creator, vision).
-- Ian Rose, UC Berkeley (Real-time collaboration, document architecture).
+- Ian Rose, Quansight/City of LA (general core development, extensions).
 - Saul Shanabrook, Quansight (general development, extensions)
-- Steven Silvester, JPMorgan Chase (co-creator, release management, packaging,
+- Steven Silvester, AWS (co-creator, release management, packaging,
   prolific contributions throughout the code base).
+- Vidar T. Fauske, JPMorgan Chase (general development, extensions).
 
 Maintainer emeritus:
 
@@ -186,5 +150,16 @@ To be listed, please submit a pull request with your information.
 
 ## Getting help
 
-We encourage you to ask questions on the [mailing list](https://groups.google.com/forum/#!forum/jupyter),
-and participate in development discussions or get live help on [Gitter](https://gitter.im/jupyterlab/jupyterlab). Please use the [issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report.
+We encourage you to ask questions on the [Discourse forum](https://discourse.jupyter.org/c/jupyterlab). A question answered there can become a useful resource for others.
+
+Please use the [GitHub issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report. To keep resolved issues self-contained, the [lock bot](https://github.com/apps/lock) will lock closed issues as resolved after a period of inactivity. If related discussion is still needed after an issue is locked, please open a new issue and reference the old issue.
+
+### Weekly Dev Meeting
+
+We have videoconference meetings every week where we discuss what we have been working on and get feedback from one another.
+
+Anyone is welcome to attend, if they would like to discuss a topic or just to listen in.
+
+- When: Wednesdays [9AM Pacific Time](https://www.thetimezoneconverter.com/?t=9%3A00%20am&tz=San%20Francisco&)
+- Where: [`calpoly/jupyter` Zoom](https://calpoly.zoom.us/my/jupyter)
+- What: [Meeting notes](https://hackmd.io/Uscrk0N1RhCtX-p6ZHUuWQ?both)

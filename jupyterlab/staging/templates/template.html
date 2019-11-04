@@ -28,6 +28,10 @@
     var url = location.origin + location.pathname +
       (query !== '?' ? query : '') + location.hash;
 
+    if (url === location.href) {
+      return;
+    }
+
     window.history.replaceState({ }, '', url);
   })();
 </script>

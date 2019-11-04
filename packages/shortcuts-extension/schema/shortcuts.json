@@ -1,0 +1,34 @@
+{
+  "jupyter.lab.setting-icon-class": "jp-KeyboardIcon",
+  "jupyter.lab.setting-icon-label": "Keyboard Shortcuts",
+  "jupyter.lab.transform": true,
+  "title": "Keyboard Shortcuts",
+  "description": "Keyboard shortcut settings.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "shortcuts": {
+      "title": "Keyboard Shortcuts",
+      "description": "The list of keyboard shortcuts.",
+      "items": { "$ref": "#/definitions/shortcut" },
+      "type": "array",
+      "default": []
+    }
+  },
+  "definitions": {
+    "shortcut": {
+      "properties": {
+        "args": { "type": "object" },
+        "command": { "type": "string" },
+        "keys": {
+          "items": { "type": "string" },
+          "minItems": 1,
+          "type": "array"
+        },
+        "selector": { "type": "string" }
+      },
+      "required": ["command", "keys", "selector"],
+      "type": "object"
+    }
+  }
+}

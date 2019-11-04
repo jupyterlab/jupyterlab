@@ -25,11 +25,6 @@ export interface IFileMenu extends IJupyterLabMenu {
   readonly closeAndCleaners: Set<IFileMenu.ICloseAndCleaner<Widget>>;
 
   /**
-   * The persist and save extension point.
-   */
-  readonly persistAndSavers: Set<IFileMenu.IPersistAndSave<Widget>>;
-
-  /**
    * A set storing IConsoleCreators for the File menu.
    */
   readonly consoleCreators: Set<IFileMenu.IConsoleCreator<Widget>>;
@@ -50,7 +45,6 @@ export class FileMenu extends JupyterLabMenu implements IFileMenu {
     this.newMenu = new JupyterLabMenu(options, false);
     this.newMenu.menu.title.label = 'New';
     this.closeAndCleaners = new Set<IFileMenu.ICloseAndCleaner<Widget>>();
-    this.persistAndSavers = new Set<IFileMenu.IPersistAndSave<Widget>>();
     this.consoleCreators = new Set<IFileMenu.IConsoleCreator<Widget>>();
   }
 
@@ -63,11 +57,6 @@ export class FileMenu extends JupyterLabMenu implements IFileMenu {
    * The close and cleanup extension point.
    */
   readonly closeAndCleaners: Set<IFileMenu.ICloseAndCleaner<Widget>>;
-
-  /**
-   * The persist and save extension point.
-   */
-  readonly persistAndSavers: Set<IFileMenu.IPersistAndSave<Widget>>;
 
   /**
    * A set storing IConsoleCreators for the Kernel menu.
@@ -112,27 +101,6 @@ export namespace IFileMenu {
      * A function to perform the close and cleanup action.
      */
     closeAndCleanup: (widget: T) => Promise<void>;
-  }
-
-  /**
-   * Interface for an activity that has some persistence action
-   * before saving.
-   */
-  export interface IPersistAndSave<T extends Widget> extends IMenuExtender<T> {
-    /**
-     * A label to use for the activity that is being saved.
-     */
-    name: string;
-
-    /**
-     * A label to describe what is being persisted before saving.
-     */
-    action: string;
-
-    /**
-     * A function to perform the persistence.
-     */
-    persistAndSave: (widget: T) => Promise<void>;
   }
 
   /**

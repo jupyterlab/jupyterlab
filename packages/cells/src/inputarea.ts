@@ -56,7 +56,11 @@ export class InputArea extends Widget {
     prompt.addClass(INPUT_AREA_PROMPT_CLASS);
 
     // Editor
-    let editorOptions = { model, factory: contentFactory.editorFactory };
+    let editorOptions = {
+      model,
+      factory: contentFactory.editorFactory,
+      updateOnShow: options.updateOnShow
+    };
     let editor = (this._editor = new CodeEditorWrapper(editorOptions));
     editor.addClass(INPUT_AREA_EDITOR_CLASS);
 
@@ -164,6 +168,11 @@ export namespace InputArea {
      * Defaults to one that uses CodeMirror.
      */
     contentFactory?: IContentFactory;
+
+    /**
+     * Whether to send an update request to the editor when it is shown.
+     */
+    updateOnShow?: boolean;
   }
 
   /**

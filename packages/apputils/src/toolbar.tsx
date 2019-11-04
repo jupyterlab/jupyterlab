@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReactElementWidget } from './vdom';
+import { UseSignal, ReactWidget } from './vdom';
+
+import { Kernel } from '@jupyterlab/services';
+
+import { Button, DefaultIconReact } from '@jupyterlab/ui-components';
 
 import { IIterator, find, map, some } from '@phosphor/algorithm';
 
@@ -16,6 +20,7 @@ import { PanelLayout, Widget } from '@phosphor/widgets';
 import { IClientSession } from './clientsession';
 
 import * as React from 'react';
+import { ReadonlyJSONObject } from '@phosphor/coreutils';
 
 /**
  * The class name added to toolbars.
@@ -243,6 +248,62 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   }
 
   /**
+   * Insert an item into the toolbar at the after a target item.
+   *
+   * @param at - The target item to insert after.
+   *
+   * @param name - The name of the item.
+   *
+   * @param widget - The widget to add.
+   *
+   * @returns Whether the item was added to the toolbar. Returns false if
+   *   an item of the same name is already in the toolbar.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   * The item can be removed from the toolbar by setting its parent to `null`.
+   */
+  insertAfter(at: string, name: string, widget: T): boolean {
+    return this._insertRelative(at, 1, name, widget);
+  }
+
+  /**
+   * Insert an item into the toolbar at the before a target item.
+   *
+   * @param at - The target item to insert before.
+   *
+   * @param name - The name of the item.
+   *
+   * @param widget - The widget to add.
+   *
+   * @returns Whether the item was added to the toolbar. Returns false if
+   *   an item of the same name is already in the toolbar.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   * The item can be removed from the toolbar by setting its parent to `null`.
+   */
+  insertBefore(at: string, name: string, widget: T): boolean {
+    return this._insertRelative(at, 0, name, widget);
+  }
+
+  private _insertRelative(
+    at: string,
+    offset: number,
+    name: string,
+    widget: T
+  ): boolean {
+    let nameWithIndex = map(this.names(), (name, i) => {
+      return { name: name, index: i };
+    });
+    let target = find(nameWithIndex, x => x.name === at);
+    if (target) {
+      return this.insertItem(target.index + offset, name, widget);
+    }
+    return false;
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -255,12 +316,30 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'click':
-        if (!this.node.contains(document.activeElement) && this.parent) {
-          this.parent.activate();
-        }
+        this.handleClick(event);
         break;
       default:
         break;
+    }
+  }
+
+  /**
+   * Handle a DOM click event.
+   */
+  protected handleClick(event: Event) {
+    // Clicking a label focuses the corresponding control, so let it be.
+    if (event.target instanceof HTMLLabelElement) {
+      return;
+    }
+
+    // If this click already focused a control, let it be.
+    if (this.node.contains(document.activeElement)) {
+      return;
+    }
+
+    // Otherwise, activate the parent widget, which may take focus if desired.
+    if (this.parent) {
+      this.parent.activate();
     }
   }
 
@@ -286,14 +365,12 @@ export namespace Toolbar {
   /**
    * Create an interrupt toolbar item.
    */
-  export function createInterruptButton(
-    session: IClientSession
-  ): ToolbarButton {
+  export function createInterruptButton(session: IClientSession): Widget {
     return new ToolbarButton({
-      iconClassName: 'jp-StopIcon jp-Icon jp-Icon-16',
+      iconClassName: 'jp-StopIcon',
       onClick: () => {
         if (session.kernel) {
-          session.kernel.interrupt();
+          void session.kernel.interrupt();
         }
       },
       tooltip: 'Interrupt the kernel'
@@ -303,11 +380,11 @@ export namespace Toolbar {
   /**
    * Create a restart toolbar item.
    */
-  export function createRestartButton(session: IClientSession): ToolbarButton {
+  export function createRestartButton(session: IClientSession): Widget {
     return new ToolbarButton({
-      iconClassName: 'jp-RefreshIcon jp-Icon jp-Icon-16',
+      iconClassName: 'jp-RefreshIcon',
       onClick: () => {
-        session.restart();
+        void session.restart();
       },
       tooltip: 'Restart the kernel'
     });
@@ -332,16 +409,19 @@ export namespace Toolbar {
    * or `'No Kernel!'` if there is no kernel.
    * It can handle a change in context or kernel.
    */
-  export function createKernelNameItem(session: IClientSession): ToolbarButton {
-    return new Private.KernelName({ session });
+  export function createKernelNameItem(session: IClientSession): Widget {
+    const el = ReactWidget.create(
+      <Private.KernelNameComponent session={session} />
+    );
+    el.addClass('jp-KernelName');
+    return el;
   }
 
   /**
    * Create a kernel status indicator item.
    *
    * #### Notes
-   * It show display a busy status if the kernel status is
-   * not idle.
+   * It will show a busy status if the kernel status is busy.
    * It will show the current status in the node title.
    * It can handle a change to the context or the kernel.
    */
@@ -374,13 +454,27 @@ export namespace ToolbarButtonComponent {
  * @param props - The props for ToolbarButtonComponent.
  */
 export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
+  // In some browsers, a button click event moves the focus from the main
+  // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
+  // We avoid a click event by calling preventDefault in mousedown, and
+  // we bind the button action to `mousedown`.
   const handleMouseDown = (event: React.MouseEvent) => {
-    event.preventDefault();
-    props.onClick();
+    // Fire action only when left button is pressed.
+    if (event.button === 0) {
+      event.preventDefault();
+      props.onClick();
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    const { key } = event;
+    if (key === 'Enter' || key === ' ') {
+      props.onClick();
+    }
   };
 
   return (
-    <button
+    <Button
       className={
         props.className
           ? props.className + ' jp-ToolbarButtonComponent'
@@ -388,32 +482,50 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
       }
       disabled={props.enabled === false}
       onMouseDown={handleMouseDown}
+      onKeyDown={handleKeyDown}
       title={props.tooltip || props.iconLabel}
+      minimal
     >
       {props.iconClassName && (
-        <span
-          className={props.iconClassName + ' jp-ToolbarButtonComponent-icon'}
+        <DefaultIconReact
+          name={`${props.iconClassName} jp-Icon jp-Icon-16`}
+          className={'jp-ToolbarButtonComponent-icon'}
+          fallback={true}
+          center={true}
+          kind={'toolbarButton'}
+          tag={'span'}
         />
       )}
       {props.label && (
         <span className="jp-ToolbarButtonComponent-label">{props.label}</span>
       )}
-    </button>
+    </Button>
   );
 }
 
 /**
- * Phosphor Widget version of ToolbarButtonComponent.
+ * Adds the toolbar button class to the toolbar widget.
+ * @param w Toolbar button widget.
  */
-export class ToolbarButton extends ReactElementWidget {
+export function addToolbarButtonClass(w: Widget): Widget {
+  w.addClass('jp-ToolbarButton');
+  return w;
+}
+
+/**
+ * Phosphor Widget version of static ToolbarButtonComponent.
+ */
+export class ToolbarButton extends ReactWidget {
   /**
-   * Create a ToolbarButton.
-   *
-   * @param props - Props for ToolbarButtonComponent.
+   * Creates a toolbar button
+   * @param props props for underlying `ToolbarButton` componenent
    */
-  constructor(props: ToolbarButtonComponent.IProps = {}) {
-    super(<ToolbarButtonComponent {...props} />);
-    this.addClass('jp-ToolbarButton');
+  constructor(private props: ToolbarButtonComponent.IProps = {}) {
+    super();
+    addToolbarButtonClass(this);
+  }
+  render() {
+    return <ToolbarButtonComponent {...this.props} />;
   }
 }
 
@@ -427,6 +539,7 @@ export namespace CommandToolbarButtonComponent {
   export interface IProps {
     commands: CommandRegistry;
     id: string;
+    args?: ReadonlyJSONObject;
   }
 }
 
@@ -436,48 +549,45 @@ export namespace CommandToolbarButtonComponent {
  * This wraps the ToolbarButtonComponent and watches the command registry
  * for changes to the command.
  */
-export class CommandToolbarButtonComponent extends React.Component<
-  CommandToolbarButtonComponent.IProps
-> {
-  constructor(props: CommandToolbarButtonComponent.IProps) {
-    super(props);
-    props.commands.commandChanged.connect(
-      this._onChange,
-      this
-    );
-    this._childProps = Private.propsFromCommand(this.props);
-  }
+export function CommandToolbarButtonComponent(
+  props: CommandToolbarButtonComponent.IProps
+) {
+  return (
+    <UseSignal
+      signal={props.commands.commandChanged}
+      shouldUpdate={(sender, args) =>
+        (args.id === props.id && args.type === 'changed') ||
+        args.type === 'many-changed'
+      }
+    >
+      {() => <ToolbarButtonComponent {...Private.propsFromCommand(props)} />}
+    </UseSignal>
+  );
+}
 
-  public render() {
-    return <ToolbarButtonComponent {...this._childProps} />;
-  }
-
-  private _onChange(
-    sender: CommandRegistry,
-    args: CommandRegistry.ICommandChangedArgs
-  ) {
-    if (args.id !== this.props.id) {
-      return; // Not our command
-    }
-
-    if (args.type !== 'changed') {
-      return; // Not a change
-    }
-
-    this._childProps = Private.propsFromCommand(this.props);
-    this.forceUpdate();
-  }
-
-  private _childProps: ToolbarButtonComponent.IProps;
+/*
+ * Adds the command toolbar button class to the command toolbar widget.
+ * @param w Command toolbar button widget.
+ */
+export function addCommandToolbarButtonClass(w: Widget): Widget {
+  w.addClass('jp-CommandToolbarButton');
+  return w;
 }
 
 /**
- * Phosphor Widget version of ToolbarButtonComponent.
+ * Phosphor Widget version of CommandToolbarButtonComponent.
  */
-export class CommandToolbarButton extends ReactElementWidget {
-  constructor(props: CommandToolbarButtonComponent.IProps) {
-    super(<CommandToolbarButtonComponent {...props} />);
-    this.addClass('jp-CommandToolbarButton');
+export class CommandToolbarButton extends ReactWidget {
+  /**
+   * Creates a command toolbar button
+   * @param props props for underlying `CommandToolbarButtonComponent` componenent
+   */
+  constructor(private props: CommandToolbarButtonComponent.IProps) {
+    super();
+    addCommandToolbarButtonClass(this);
+  }
+  render() {
+    return <CommandToolbarButtonComponent {...this.props} />;
   }
 }
 
@@ -488,24 +598,24 @@ namespace Private {
   export function propsFromCommand(
     options: CommandToolbarButtonComponent.IProps
   ): ToolbarButtonComponent.IProps {
-    let { commands, id } = options;
-    const iconClassName = commands.iconClass(id);
-    const iconLabel = commands.iconLabel(id);
-    const label = commands.label(id);
-    let className = commands.className(id);
+    let { commands, id, args } = options;
+    const iconClassName = commands.iconClass(id, args);
+    const iconLabel = commands.iconLabel(id, args);
+    const label = commands.label(id, args);
+    let className = commands.className(id, args);
     // Add the boolean state classes.
-    if (commands.isToggled(id)) {
+    if (commands.isToggled(id, args)) {
       className += ' p-mod-toggled';
     }
-    if (!commands.isVisible(id)) {
+    if (!commands.isVisible(id, args)) {
       className += ' p-mod-hidden';
     }
-    const tooltip = commands.caption(id) || label || iconLabel;
+    const tooltip = commands.caption(id, args) || label || iconLabel;
     const onClick = () => {
-      commands.execute(id);
+      void commands.execute(id, args);
     };
-    const enabled = commands.isEnabled(id);
-    return { className, iconClassName, tooltip, onClick, enabled };
+    const enabled = commands.isEnabled(id, args);
+    return { className, iconClassName, tooltip, onClick, enabled, label };
   }
 
   /**
@@ -554,48 +664,23 @@ namespace Private {
    * This wraps the ToolbarButtonComponent and watches the kernel
    * session for changes.
    */
-  export class KernelNameComponent extends React.Component<
-    KernelNameComponent.IProps
-  > {
-    constructor(props: KernelNameComponent.IProps) {
-      super(props);
-      props.session.kernelChanged.connect(
-        this._onKernelChanged,
-        this
-      );
-      this._childProps = {
-        className: TOOLBAR_KERNEL_NAME_CLASS,
-        onClick: () => {
-          this.props.session.selectKernel();
-        },
-        tooltip: 'Switch kernel',
-        label: props.session.kernelDisplayName
-      };
-    }
 
-    public render() {
-      return <ToolbarButtonComponent {...this._childProps} />;
-    }
-
-    /**
-     * Update the text of the kernel name item.
-     */
-    private _onKernelChanged(session: IClientSession): void {
-      this._childProps.label = session.kernelDisplayName;
-      this.forceUpdate();
-    }
-
-    private _childProps: ToolbarButtonComponent.IProps;
-  }
-
-  /**
-   * Phosphor Widget version of ToolbarButtonComponent.
-   */
-  export class KernelName extends ReactElementWidget {
-    constructor(props: KernelNameComponent.IProps) {
-      super(<KernelNameComponent {...props} />);
-      this.addClass('jp-KernelName');
-    }
+  export function KernelNameComponent(props: KernelNameComponent.IProps) {
+    return (
+      <UseSignal
+        signal={props.session.kernelChanged}
+        initialSender={props.session}
+      >
+        {session => (
+          <ToolbarButtonComponent
+            className={TOOLBAR_KERNEL_NAME_CLASS}
+            onClick={props.session.selectKernel.bind(props.session)}
+            tooltip={'Switch kernel'}
+            label={session.kernelDisplayName}
+          />
+        )}
+      </UseSignal>
+    );
   }
 
   /**
@@ -609,10 +694,7 @@ namespace Private {
       super();
       this.addClass(TOOLBAR_KERNEL_STATUS_CLASS);
       this._onStatusChanged(session);
-      session.statusChanged.connect(
-        this._onStatusChanged,
-        this
-      );
+      session.statusChanged.connect(this._onStatusChanged, this);
     }
 
     /**
@@ -623,10 +705,20 @@ namespace Private {
         return;
       }
       let status = session.status;
-      this.toggleClass(TOOLBAR_IDLE_CLASS, status === 'idle');
-      this.toggleClass(TOOLBAR_BUSY_CLASS, status !== 'idle');
+      const busy = this._isBusy(status);
+      this.toggleClass(TOOLBAR_BUSY_CLASS, busy);
+      this.toggleClass(TOOLBAR_IDLE_CLASS, !busy);
       let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
       this.node.title = title;
+    }
+
+    /**
+     * Check if status should be shown as busy.
+     */
+    private _isBusy(status: Kernel.Status): boolean {
+      return (
+        status === 'busy' || status === 'starting' || status === 'restarting'
+      );
     }
   }
 }
