@@ -54,6 +54,38 @@ export interface IJupyterLabComponentsManager {
   jumper: CodeJumper;
 }
 
+export class StatusMessage {
+  /**
+   * The text message to be shown on the statusbar
+   */
+  message: string;
+  changed: Signal<StatusMessage, string>;
+
+  constructor() {
+    this.message = '';
+    this.changed = new Signal(this);
+  }
+
+  /**
+   * Set the text message and (optionally) the timeout to remove it.
+   * @param message
+   * @param timeout - number of ms to until the message is cleaned;
+   *        -1 if the message should stay up indefinitely
+   */
+  set(message: string, timeout?: number) {
+    this.message = message;
+    this.changed.emit('');
+    if (typeof timeout !== 'undefined' && timeout !== -1) {
+      setTimeout(this.cleanup.bind(this), timeout);
+    }
+  }
+
+  cleanup() {
+    this.message = '';
+    this.changed.emit('');
+  }
+}
+
 /**
  * The values should follow the https://microsoft.github.io/language-server-protocol/specification guidelines
  */
@@ -82,6 +114,7 @@ export abstract class JupyterLabWidgetAdapter
   protected abstract current_completion_connector: LSPConnector;
   private _tooltip: FreeTooltip;
   public connection_manager: DocumentConnectionManager;
+  public status_message: StatusMessage;
 
   protected constructor(
     protected app: JupyterFrontEnd,
@@ -90,6 +123,7 @@ export abstract class JupyterLabWidgetAdapter
     invoke: string,
     private server_root: string
   ) {
+    this.status_message = new StatusMessage();
     this.widget.context.pathChanged.connect(this.reload_connection.bind(this));
     this.invoke_command = invoke;
     this.document_connected = new Signal(this);
@@ -299,7 +333,8 @@ export abstract class JupyterLabWidgetAdapter
         this.virtual_editor,
         virtual_document,
         connection,
-        this
+        this,
+        this.status_message
       );
       adapter_features.push(feature);
     }

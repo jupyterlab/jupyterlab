@@ -1,7 +1,10 @@
 import { expect } from 'chai';
 import { CodeMirrorAdapter } from './cm_adapter';
 import { LSPConnection } from '../../connection';
-import { IJupyterLabComponentsManager } from '../jupyterlab/jl_adapter';
+import {
+  IJupyterLabComponentsManager,
+  StatusMessage
+} from '../jupyterlab/jl_adapter';
 import { IRootPosition } from '../../positioning';
 import * as CodeMirror from 'codemirror';
 import { CodeMirrorLSPFeature } from './feature';
@@ -41,7 +44,8 @@ describe('CodeMirrorAdapter', () => {
         virtual_editor,
         virtual_editor.virtual_document,
         connection,
-        dummy_components_manager
+        dummy_components_manager,
+        new StatusMessage()
       );
 
       let adapter = new CodeMirrorAdapter(

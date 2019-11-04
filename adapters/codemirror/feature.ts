@@ -6,7 +6,10 @@ import {
   IRootPosition,
   IVirtualPosition
 } from '../../positioning';
-import { IJupyterLabComponentsManager } from '../jupyterlab/jl_adapter';
+import {
+  IJupyterLabComponentsManager,
+  StatusMessage
+} from '../jupyterlab/jl_adapter';
 
 /// <reference path="../../../node_modules/@types/events/index.d.ts"/>
 // this appears to break when @types/node is around
@@ -100,7 +103,8 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
     public virtual_editor: VirtualEditor,
     public virtual_document: VirtualDocument,
     public connection: LSPConnection,
-    public jupyterlab_components: IJupyterLabComponentsManager
+    public jupyterlab_components: IJupyterLabComponentsManager,
+    protected status_message: StatusMessage
   ) {
     this.editor_handlers = new Map();
     this.connection_handlers = new Map();
@@ -235,7 +239,9 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
       .markText(range.start, range.end, { className: class_name });
   }
 
-  protected apply_edit(workspaceEdit: lsProtocol.WorkspaceEdit) {
+  protected async apply_edit(
+    workspaceEdit: lsProtocol.WorkspaceEdit
+  ): Promise<number> {
     console.log(workspaceEdit);
     let current_uri = this.connection.getDocumentUri();
     // Specs: documentChanges are preferred over changes
@@ -244,12 +250,12 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
           change => change as lsProtocol.TextDocumentEdit
         )
       : toDocumentChanges(workspaceEdit.changes);
+    let applied_changes = 0;
     for (let change of changes) {
       let uri = change.textDocument.uri;
-      if (uri !== current_uri) {
-        console.warn('Workspace-wide edits not implemented yet');
+      if (uri !== current_uri && uri !== '/' + current_uri) {
+        throw new Error('Workspace-wide edits not implemented yet');
       } else {
-        // TODO: show "Renamed X to Y in {change.edits.length} places" in statusbar;
         for (let edit of change.edits) {
           let start = PositionConverter.lsp_to_cm(edit.range.start);
           let end = PositionConverter.lsp_to_cm(edit.range.end);
@@ -261,13 +267,15 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
             end as IVirtualPosition
           );
           if (start_editor !== end_editor) {
-            console.log('Edits not implemented for notebooks yet');
+            throw new Error('Edits not implemented for notebooks yet');
           } else {
+            applied_changes += 1;
             let doc = start_editor.getDoc();
             doc.replaceRange(edit.newText, start, end);
           }
         }
       }
     }
+    return applied_changes;
   }
 }

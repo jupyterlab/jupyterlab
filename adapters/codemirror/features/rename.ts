@@ -37,6 +37,16 @@ export class Rename extends CodeMirrorLSPFeature {
   }
 
   protected handleRename(workspaceEdit: lsProtocol.WorkspaceEdit) {
-    this.apply_edit(workspaceEdit);
+    this.apply_edit(workspaceEdit)
+      .catch(error => {
+        console.log(error);
+        this.status_message.set(`Rename failed: ${error}`);
+      })
+      .then(applied_changes => {
+        this.status_message.set(
+          `Renamed a variable in ${applied_changes} places`,
+          5 * 1000
+        );
+      });
   }
 }

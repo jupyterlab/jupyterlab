@@ -8,7 +8,10 @@ import { LSPConnection } from '../../connection';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualFileEditor } from '../../virtual/editors/file_editor';
 import { FreeTooltip } from '../jupyterlab/components/free_tooltip';
-import { IJupyterLabComponentsManager } from '../jupyterlab/jl_adapter';
+import {
+  IJupyterLabComponentsManager,
+  StatusMessage
+} from '../jupyterlab/jl_adapter';
 
 interface IFeatureTestEnvironment {
   host: HTMLElement;
@@ -58,7 +61,8 @@ export class FeatureTestEnvironment implements IFeatureTestEnvironment {
       this.virtual_editor,
       this.virtual_editor.virtual_document,
       connection,
-      dummy_components_manager
+      dummy_components_manager,
+      new StatusMessage()
     );
     this.connections.set(feature, connection);
 

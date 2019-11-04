@@ -75,6 +75,7 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
           kind={'statusBar'}
         />
         <TextItem source={this.model.short_message} />
+        <TextItem source={this.model.feature_message} />
       </GroupItem>
     );
   }
@@ -110,6 +111,22 @@ function collect_languages(virtual_document: VirtualDocument): Set<string> {
   }
   return collected;
 }
+
+type StatusMap = Record<StatusCode, string>;
+
+const iconByStatus: StatusMap = {
+  waiting: 'refresh',
+  initialized: 'running',
+  initializing: 'refresh',
+  connecting: 'refresh'
+};
+
+const shortMessageByStatus: StatusMap = {
+  waiting: 'Waiting...',
+  initialized: 'Fully initialized',
+  initializing: 'Fully connected & partially initialized',
+  connecting: 'Connecting...'
+};
 
 export namespace LSPStatus {
   /**
@@ -198,38 +215,18 @@ export namespace LSPStatus {
       if (!this.adapter) {
         return 'stop';
       }
-      let status = this.status;
-
-      // TODO: associative array instead
-      if (status.status === 'waiting') {
-        return 'refresh';
-      } else if (status.status === 'initialized') {
-        return 'running';
-      } else if (status.status === 'initializing') {
-        return 'refresh';
-      } else if (status.status === 'connecting') {
-        return 'refresh';
-      }
+      return iconByStatus[this.status.status];
     }
 
     get short_message(): string {
       if (!this.adapter) {
         return 'not initialized';
       }
-      let status = this.status;
+      return shortMessageByStatus[this.status.status];
+    }
 
-      let msg = '';
-      // TODO: associative array instead
-      if (status.status === 'waiting') {
-        msg = 'Waiting...';
-      } else if (status.status === 'initialized') {
-        msg = `Fully initialized`;
-      } else if (status.status === 'initializing') {
-        msg = `Fully connected & partially initialized`;
-      } else {
-        msg = `Connecting...`;
-      }
-      return msg;
+    get feature_message(): string {
+      return this.adapter ? this.adapter.status_message.message : '';
     }
 
     get long_message(): string {
@@ -276,6 +273,7 @@ export namespace LSPStatus {
     get adapter(): JupyterLabWidgetAdapter | null {
       return this._adapter;
     }
+
     set adapter(adapter: JupyterLabWidgetAdapter | null) {
       const oldAdapter = this._adapter;
       if (oldAdapter !== null) {
@@ -286,6 +284,7 @@ export namespace LSPStatus {
         oldAdapter.connection_manager.documents_changed.disconnect(
           this._onChange
         );
+        oldAdapter.status_message.changed.connect(this._onChange);
       }
 
       let onChange = this._onChange.bind(this);
@@ -294,6 +293,7 @@ export namespace LSPStatus {
       adapter.connection_manager.disconnected.connect(onChange);
       adapter.connection_manager.closed.connect(onChange);
       adapter.connection_manager.documents_changed.connect(onChange);
+      adapter.status_message.changed.connect(onChange);
       this._adapter = adapter;
     }
 
