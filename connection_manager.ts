@@ -87,17 +87,15 @@ export class DocumentConnectionManager {
   }
 
   private connect_socket(options: ISocketConnectionOptions): LSPConnection {
-    let { virtual_document, language, root_path } = options;
-    console.log(root_path);
+    let { virtual_document, language } = options;
 
-    // capture just the s?://*
-    const wsBase = PageConfig.getBaseUrl().replace(/^http/, '');
+    const wsBase = PageConfig.getBaseUrl().replace(/^http/, 'ws');
     const rootUri = PageConfig.getOption('rootUri');
-    const wsUrl = `ws${wsBase}lsp/${language}`;
+    const wsUrl = PathExt.join(wsBase, 'lsp', language);
     let socket = new WebSocket(wsUrl);
 
     let connection = new LSPConnection({
-      serverUri: 'ws://jupyter-lsp/' + language,
+      serverUri: PathExt.join('ws://jupyter-lsp', language),
       languageId: language,
       rootUri: rootUri,
       documentUri: PathExt.join(rootUri, virtual_document.uri),
