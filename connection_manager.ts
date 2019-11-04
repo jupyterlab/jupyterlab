@@ -91,13 +91,12 @@ export class DocumentConnectionManager {
 
     const wsBase = PageConfig.getBaseUrl().replace(/^http/, 'ws');
     const rootUri = PageConfig.getOption('rootUri');
-    const wsUrl = PathExt.join(wsBase, 'lsp', language);
-    let socket = new WebSocket(wsUrl);
+    let socket = new WebSocket(PathExt.join(wsBase, 'lsp', language));
 
     let connection = new LSPConnection({
       serverUri: PathExt.join('ws://jupyter-lsp', language),
       languageId: language,
-      rootUri: rootUri,
+      rootUri,
       documentUri: PathExt.join(rootUri, virtual_document.uri),
       documentText: () => {
         // NOTE: Update is async now and this is not really used, as an alternative method
