@@ -1,5 +1,7 @@
 import { Widget } from '@phosphor/widgets';
 
+import { defaultIconRegistry } from '@jupyterlab/ui-components';
+
 import { TagTool } from './tool';
 
 /**
@@ -9,15 +11,15 @@ export class TagWidget extends Widget {
   /**
    * Construct a new tag widget.
    */
-  constructor(name: string, darkTheme: boolean) {
+  constructor(name: string) {
     super();
     this.applied = true;
     this.name = name;
     this.addClass('tag');
-    this.buildTag(darkTheme);
+    this.buildTag();
   }
 
-  buildTag(theme: boolean) {
+  buildTag() {
     let text = document.createElement('span');
     text.textContent = this.name;
     text.style.textOverflow = 'ellipsis';
@@ -25,8 +27,15 @@ export class TagWidget extends Widget {
     tag.className = 'tag-holder';
     tag.appendChild(text);
     let img = document.createElement('span');
-    img.className = theme ? 'check-icon-dark' : 'check-icon';
-    img.classList.add('icon');
+    defaultIconRegistry.icon({
+      name: 'check',
+      container: img,
+      center: true,
+      height: '18px',
+      width: '18px',
+      marginLeft: '5px',
+      marginRight: '-3px'
+    });
     if (this.applied) {
       this.addClass('applied-tag');
     } else {
@@ -34,7 +43,6 @@ export class TagWidget extends Widget {
       img.style.display = 'none';
     }
     tag.appendChild(img);
-    this.img = img;
     this.node.appendChild(tag);
   }
 
@@ -105,16 +113,7 @@ export class TagWidget extends Widget {
     (this.node as HTMLElement).classList.remove('tag-hover');
   }
 
-  updateTheme() {
-    let darkTheme = this.parent.getTheme();
-    this.img.classList.remove('check-icon-dark');
-    this.img.classList.remove('check-icon-dark');
-    let add = darkTheme ? 'check-icon-dark' : 'check-icon';
-    this.img.classList.add(add);
-  }
-
   public name: string;
   private applied: boolean;
-  private img: HTMLSpanElement;
   public parent: TagTool;
 }

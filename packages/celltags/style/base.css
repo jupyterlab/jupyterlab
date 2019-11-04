@@ -42,37 +42,6 @@
   align-items: center;
 }
 
-.icon {
-  display: inline-block;
-  height: 18px;
-  min-width: 18px;
-  background-size: 18px;
-}
-
-.check-icon {
-  background-image: url('../static/check-24px.svg');
-  margin-left: 5px;
-  margin-right: -3px;
-}
-
-.add-icon {
-  background-image: url('../static/add-24px.svg');
-  margin-left: 3px;
-  margin-right: -5px;
-}
-
-.check-icon-dark {
-  background-image: url('../static/check-24px-dark.svg');
-  margin-left: 5px;
-  margin-right: -3px;
-}
-
-.add-icon-dark {
-  background-image: url('../static/add-24px-dark.svg');
-  margin-left: 3px;
-  margin-right: -5px;
-}
-
 .tag-hover {
   background-color: var(--jp-layout-color2);
 }

@@ -33,6 +33,7 @@ import notTrustedSvg from '../../style/icons/statusbar/not-trusted.svg';
 import terminalSvg from '../../style/icons/statusbar/terminal.svg';
 import trustedSvg from '../../style/icons/statusbar/trusted.svg';
 import addSvg from '../../style/icons/toolbar/add.svg';
+import checkSvg from '../../style/icons/toolbar/check.svg';
 import copySvg from '../../style/icons/toolbar/copy.svg';
 import cutSvg from '../../style/icons/toolbar/cut.svg';
 import pasteSvg from '../../style/icons/toolbar/paste.svg';
@@ -69,6 +70,7 @@ export namespace IconImports {
     { name: 'terminal', svg: terminalSvg },
     { name: 'trusted', svg: trustedSvg },
     { name: 'add', svg: addSvg },
+    { name: 'check', svg: checkSvg },
     { name: 'copy', svg: copySvg },
     { name: 'cut', svg: cutSvg },
     { name: 'paste', svg: pasteSvg },

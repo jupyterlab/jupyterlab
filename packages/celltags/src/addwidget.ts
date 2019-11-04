@@ -1,5 +1,7 @@
 import { Widget } from '@phosphor/widgets';
 
+import { defaultIconRegistry } from '@jupyterlab/ui-components';
+
 import { TagTool } from './tool';
 
 /**
@@ -9,14 +11,14 @@ export class AddWidget extends Widget {
   /**
    * Construct a new tag widget.
    */
-  constructor(darkTheme: boolean) {
+  constructor() {
     super();
     this.addClass('tag');
     this.editing = false;
-    this.buildTag(darkTheme);
+    this.buildTag();
   }
 
-  buildTag(theme: boolean) {
+  buildTag() {
     let text = document.createElement('input');
     text.value = 'Add Tag';
     text.contentEditable = 'true';
@@ -26,26 +28,28 @@ export class AddWidget extends Widget {
     tag.className = 'tag-holder';
     tag.appendChild(text);
     let img = document.createElement('span');
-    img.className = theme ? 'add-icon-dark' : 'add-icon';
-    img.classList.add('icon');
+    defaultIconRegistry.icon({
+      name: 'add',
+      container: img,
+      center: true,
+      height: '18px',
+      width: '18px',
+      marginLeft: '3px',
+      marginRight: '-5px'
+    });
     this.addClass('unapplied-tag');
     tag.appendChild(img);
-    this.img = img;
     this.node.appendChild(tag);
   }
 
   onAfterAttach() {
     this.node.addEventListener('mousedown', this);
-    this.node.addEventListener('mouseover', this);
-    this.node.addEventListener('mouseout', this);
     this.node.addEventListener('keypress', this);
     this.node.addEventListener('focusout', this);
   }
 
   onBeforeDetach() {
     this.node.removeEventListener('mousedown', this);
-    this.node.removeEventListener('mouseover', this);
-    this.node.removeEventListener('mouseout', this);
     this.node.removeEventListener('keypress', this);
     this.node.removeEventListener('focusout', this);
   }
@@ -54,12 +58,6 @@ export class AddWidget extends Widget {
     switch (event.type) {
       case 'mousedown':
         this._evtClick(event as MouseEvent);
-        break;
-      case 'mouseover':
-        this._evtHover(event as MouseEvent);
-        break;
-      case 'mouseout':
-        this._evtOffHover(event as MouseEvent);
         break;
       case 'keypress':
         this._evtKeyPress(event as KeyboardEvent);
@@ -79,14 +77,6 @@ export class AddWidget extends Widget {
       target.value = '';
       target.autofocus = true;
     }
-  }
-
-  private _evtHover(event: MouseEvent) {
-    //(this.node as HTMLElement).classList.add("tag-hover");
-  }
-
-  private _evtOffHover(event: MouseEvent) {
-    //(this.node as HTMLElement).classList.remove("tag-hover");
   }
 
   private _evtKeyPress(event: KeyboardEvent) {
@@ -116,15 +106,6 @@ export class AddWidget extends Widget {
     }
   }
 
-  updateTheme() {
-    let darkTheme = this.parent.getTheme();
-    this.img.classList.remove('add-icon-dark');
-    this.img.classList.remove('add-icon');
-    let add = darkTheme ? 'add-icon-dark' : 'add-icon';
-    this.img.classList.add(add);
-  }
-
   public parent: TagTool;
-  private img: HTMLSpanElement;
   private editing: boolean;
 }

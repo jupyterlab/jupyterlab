@@ -37,6 +37,7 @@
   --jp-icon-terminal: url('icons/statusbar/terminal.svg');
   --jp-icon-trusted: url('icons/statusbar/trusted.svg');
   --jp-icon-add: url('icons/toolbar/add.svg');
+  --jp-icon-check: url('icons/toolbar/check.svg');
   --jp-icon-copy: url('icons/toolbar/copy.svg');
   --jp-icon-cut: url('icons/toolbar/cut.svg');
   --jp-icon-paste: url('icons/toolbar/paste.svg');
@@ -122,6 +123,9 @@
 }
 .jp-AddIcon {
   background-image: var(--jp-icon-add);
+}
+.jp-CheckIcon {
+  background-image: var(--jp-icon-check);
 }
 .jp-CopyIcon {
   background-image: var(--jp-icon-copy);
