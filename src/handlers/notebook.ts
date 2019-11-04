@@ -5,20 +5,20 @@ import { INotebookTracker, NotebookTracker } from '@jupyterlab/notebook';
 
 import { CodeCell } from '@jupyterlab/cells';
 
-import { CellManager } from './cell';
+import { IDisposable } from '@phosphor/disposable';
+
+import { Signal } from '@phosphor/signaling';
+
+import { Breakpoints } from '../breakpoints';
 
 import { Debugger } from '../debugger';
 
 import { IDebugger } from '../tokens';
 
-import { Breakpoints } from '../breakpoints';
+import { CellManager } from './cell';
 
-import { IDisposable } from '@phosphor/disposable';
-
-import { Signal } from '@phosphor/signaling';
-
-export class DebuggerNotebookHandler implements IDisposable {
-  constructor(options: DebuggerNotebookHandler.IOptions) {
+export class NotebookHandler implements IDisposable {
+  constructor(options: NotebookHandler.IOptions) {
     this.debuggerModel = options.debuggerService.model;
     this.debuggerService = options.debuggerService;
     this.notebookTracker = options.tracker;
@@ -67,7 +67,7 @@ export class DebuggerNotebookHandler implements IDisposable {
   private cellManager: CellManager;
 }
 
-export namespace DebuggerNotebookHandler {
+export namespace NotebookHandler {
   export interface IOptions {
     debuggerService: IDebugger;
     tracker: INotebookTracker;

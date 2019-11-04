@@ -31,9 +31,9 @@ import { UUID } from '@phosphor/coreutils';
 
 import { Debugger } from './debugger';
 
-import { DebuggerNotebookHandler } from './handlers/notebook';
+import { ConsoleHandler } from './handlers/console';
 
-import { DebuggerConsoleHandler } from './handlers/console';
+import { NotebookHandler } from './handlers/notebook';
 
 import { DebugService } from './service';
 
@@ -85,9 +85,7 @@ async function setDebugSession(
   app.commands.notifyCommandChanged();
 }
 
-class HandlerTracker<
-  H extends DebuggerConsoleHandler | DebuggerNotebookHandler
-> {
+class DebuggerHandler<H extends ConsoleHandler | NotebookHandler> {
   constructor(builder: new (option: any) => H) {
     this.builder = builder;
   }
@@ -126,9 +124,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
     tracker: IConsoleTracker,
     labShell: ILabShell
   ) => {
-    const handlerTracker = new HandlerTracker<DebuggerConsoleHandler>(
-      DebuggerConsoleHandler
-    );
+    const handler = new DebuggerHandler<ConsoleHandler>(ConsoleHandler);
 
     labShell.currentChanged.connect(async (_, update) => {
       const widget = update.newValue;
@@ -136,7 +132,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
         return;
       }
       await setDebugSession(app, debug, widget.session);
-      handlerTracker.update(debug, tracker, widget);
+      handler.update(debug, tracker, widget);
     });
   }
 };
@@ -203,9 +199,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     tracker: INotebookTracker,
     labShell: ILabShell
   ) => {
-    const handlerTracker = new HandlerTracker<DebuggerNotebookHandler>(
-      DebuggerNotebookHandler
-    );
+    const handler = new DebuggerHandler<NotebookHandler>(NotebookHandler);
 
     labShell.currentChanged.connect(async (_, update) => {
       const widget = update.newValue;
@@ -213,7 +207,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         return;
       }
       await setDebugSession(app, debug, widget.session);
-      handlerTracker.update(debug, tracker, widget);
+      handler.update(debug, tracker, widget);
     });
   }
 };
