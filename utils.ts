@@ -89,19 +89,7 @@ export class DefaultMap<K, V> extends Map<K, V> {
 }
 
 export function server_root_uri() {
-  const server_root = PageConfig.getOption('serverRoot');
-  const user_settings = PageConfig.getOption('userSettingsDir');
-  if (server_root.startsWith('~') && user_settings.startsWith('/home/')) {
-    return (
-      'file://' +
-      server_root.replace(
-        '~',
-        user_settings.substring(0, user_settings.indexOf('/', 6))
-      )
-    );
-  } else {
-    return 'file://' + server_root;
-  }
+  return PageConfig.getOption('rootUri');
 }
 
 /**
