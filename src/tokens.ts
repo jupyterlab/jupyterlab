@@ -86,6 +86,11 @@ export interface IDebugger {
   stepIn(): Promise<void>;
 
   /**
+   * Makes the current thread step out a function / method if possible.
+   */
+  stepOut(): Promise<void>;
+
+  /**
    * Update all breakpoints at once.
    */
   updateBreakpoints(breakpoints: Breakpoints.IBreakpoint[]): Promise<void>;

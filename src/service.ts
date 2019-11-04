@@ -137,6 +137,16 @@ export class DebugService implements IDebugger {
     }
   }
 
+  async stepOut(): Promise<void> {
+    try {
+      await this.session.sendRequest('stepOut', {
+        threadId: this.currentThread()
+      });
+    } catch (err) {
+      console.error('Error:', err.message);
+    }
+  }
+
   get sessionChanged(): ISignal<IDebugger, IDebugger.ISession> {
     return this._sessionChanged;
   }
