@@ -57,6 +57,8 @@ export namespace CommandIDs {
 
   export const stepIn = 'debugger:stepIn';
 
+  export const stepOut = 'debugger:stepOut';
+
   export const debugConsole = 'debugger:debug-console';
 
   export const debugFile = 'debugger:debug-file';
@@ -318,6 +320,16 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
+    commands.addCommand(CommandIDs.stepOut, {
+      label: 'StepOut',
+      isEnabled: () => {
+        return service.isThreadStopped();
+      },
+      execute: async () => {
+        await service.stepOut();
+      }
+    });
+
     commands.addCommand(CommandIDs.changeMode, {
       label: 'Change Mode',
       isEnabled: () => {
@@ -381,6 +393,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       palette.addItem({ command: CommandIDs.debugContinue, category });
       palette.addItem({ command: CommandIDs.next, category });
       palette.addItem({ command: CommandIDs.stepIn, category });
+      palette.addItem({ command: CommandIDs.stepOut, category });
       palette.addItem({ command: CommandIDs.debugNotebook, category });
     }
 
