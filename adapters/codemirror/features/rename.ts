@@ -47,6 +47,7 @@ export class Rename extends CodeMirrorLSPFeature {
           `Renamed a variable in ${applied_changes} places`,
           5 * 1000
         );
-      });
+      })
+      .catch(console.warn);
   }
 }
