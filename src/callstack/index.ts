@@ -34,14 +34,6 @@ export class Callstack extends Panel {
     );
 
     header.toolbar.addItem(
-      'stop',
-      new CommandToolbarButton({
-        commands: commands.registry,
-        id: ''
-      })
-    );
-
-    header.toolbar.addItem(
       'step-over',
       new CommandToolbarButton({
         commands: commands.registry,
