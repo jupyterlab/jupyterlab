@@ -427,14 +427,10 @@ class LabApp(ExtensionApp):
 
         The extension API is experimental, and may change in future releases.
         """
-        # TODO ECH
-#        self.serverapp.init_server_extensions()
         c = load_config(self)
         self.static_paths = [c.static_dir]
         self.template_paths = [c.templates_dir]
-        # TODO ECH
-#        if not self.serverapp.jpserver_extensions.get('jupyterlab', False):
-        if True:
+        if not self.serverapp.jpserver_extensions.get('jupyterlab', False):
             msg = 'JupyterLab server extension not enabled, manually loading...'
             self.log.warning(msg)
             load_jupyter_server_extension(self)
