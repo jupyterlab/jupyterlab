@@ -32,28 +32,29 @@ export class CellManager implements IDisposable {
 
   private onModelChanged() {
     this._debuggerModel = this._debuggerService.model;
-    if (this._debuggerModel) {
-      this.breakpointsModel = this._debuggerModel.breakpointsModel;
+    if (!this._debuggerModel) {
+      return;
+    }
+    this.breakpointsModel = this._debuggerModel.breakpointsModel;
 
-      this._debuggerModel.variablesModel.changed.connect(() => {
-        this.cleanupHighlight();
-        const firstFrame = this._debuggerModel.callstackModel.frames[0];
-        if (!firstFrame) {
-          return;
-        }
-        this.showCurrentLine(firstFrame.line);
-      });
-
-      this.breakpointsModel.changed.connect(async () => {
-        if (!this.activeCell || this.activeCell.isDisposed) {
-          return;
-        }
-        this.addBreakpointsToEditor(this.activeCell);
-      });
-
-      if (this.activeCell) {
-        this._debuggerModel.codeValue = this.activeCell.model.value;
+    this._debuggerModel.variablesModel.changed.connect(() => {
+      this.cleanupHighlight();
+      const firstFrame = this._debuggerModel.callstackModel.frames[0];
+      if (!firstFrame) {
+        return;
       }
+      this.showCurrentLine(firstFrame.line);
+    });
+
+    this.breakpointsModel.changed.connect(async () => {
+      if (!this.activeCell || this.activeCell.isDisposed) {
+        return;
+      }
+      this.addBreakpointsToEditor(this.activeCell);
+    });
+
+    if (this.activeCell) {
+      this._debuggerModel.codeValue = this.activeCell.model.value;
     }
   }
 

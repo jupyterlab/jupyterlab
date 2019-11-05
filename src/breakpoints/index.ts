@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
-
+import { IDisposable } from '@phosphor/disposable';
 import { Signal } from '@phosphor/signaling';
 import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
 import { DebugProtocol } from 'vscode-debugprotocol';
@@ -77,7 +77,7 @@ export namespace Breakpoints {
     active: boolean;
   }
 
-  export class Model {
+  export class Model implements IDisposable {
     constructor(model: IBreakpoint[]) {
       this._breakpoints = model;
     }
@@ -134,6 +134,18 @@ export namespace Breakpoints {
       }
     }
 
+    get isDisposed(): boolean {
+      return this._isDisposed;
+    }
+
+    dispose(): void {
+      if (this._isDisposed) {
+        return;
+      }
+      this._isDisposed = true;
+      Signal.clearData(this);
+    }
+
     private _selectedType: SessionTypes;
     private _breakpointChanged = new Signal<this, IBreakpoint>(this);
     private _breakpoints: IBreakpoint[];
@@ -141,6 +153,7 @@ export namespace Breakpoints {
       console: [] as Breakpoints.IBreakpoint[],
       notebook: [] as Breakpoints.IBreakpoint[]
     };
+    private _isDisposed: boolean = false;
   }
 
   /**
