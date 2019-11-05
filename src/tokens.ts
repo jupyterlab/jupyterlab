@@ -57,11 +57,6 @@ export interface IDebugger extends IDisposable {
   readonly eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
 
   /**
-   * Whether the debugger can start.
-   */
-  canStart(): boolean;
-
-  /**
    * Whether the current debugger is started.
    */
   isStarted(): boolean;
@@ -82,6 +77,13 @@ export interface IDebugger extends IDisposable {
    * Precondition: isStarted()
    */
   stop(): Promise<void>;
+
+  /**
+   * Restore the state of a debug session.
+   * @param autoStart - when true, starts the debugger
+   * if it has not been started yet.
+   */
+  restoreState(autoStart: boolean): Promise<void>;
 
   /**
    * Continues the execution of the current thread.
@@ -152,7 +154,7 @@ export namespace IDebugger {
     /**
      * Restore the state of a debug session.
      */
-    restoreState(): Promise<void>;
+    restoreState(): Promise<IDebugger.ISession.Response['debugInfo']>;
 
     /**
      * Send a debug request to the kernel.

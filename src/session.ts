@@ -97,54 +97,43 @@ export class DebugSession implements IDebugger.ISession {
    * Start a new debug session
    */
   async start(): Promise<void> {
-    try {
-      await this.sendRequest('initialize', {
-        clientID: 'jupyterlab',
-        clientName: 'JupyterLab',
-        adapterID: 'python',
-        pathFormat: 'path',
-        linesStartAt1: true,
-        columnsStartAt1: true,
-        supportsVariableType: true,
-        supportsVariablePaging: true,
-        supportsRunInTerminalRequest: true,
-        locale: 'en-us'
-      });
+    await this.sendRequest('initialize', {
+      clientID: 'jupyterlab',
+      clientName: 'JupyterLab',
+      adapterID: 'python',
+      pathFormat: 'path',
+      linesStartAt1: true,
+      columnsStartAt1: true,
+      supportsVariableType: true,
+      supportsVariablePaging: true,
+      supportsRunInTerminalRequest: true,
+      locale: 'en-us'
+    });
 
-      this._isStarted = true;
+    this._isStarted = true;
 
-      await this.sendRequest('attach', {});
-    } catch (err) {
-      console.error('Error:', err.message);
-    }
+    await this.sendRequest('attach', {});
   }
 
   /**
    * Stop the running debug session.
    */
   async stop(): Promise<void> {
-    try {
-      await this.sendRequest('disconnect', {
-        restart: false,
-        terminateDebuggee: true
-      });
-      this._isStarted = false;
-    } catch (err) {
-      console.error('Error:', err.message);
-    }
+    await this.sendRequest('disconnect', {
+      restart: false,
+      terminateDebuggee: true
+    });
+    this._isStarted = false;
   }
 
   /**
    * Restore the state of a debug session.
    */
-  async restoreState(): Promise<void> {
+  async restoreState(): Promise<IDebugger.ISession.Response['debugInfo']> {
     await this.client.ready;
-    try {
-      const message = await this.sendRequest('debugInfo', {});
-      this._isStarted = message.body.isStarted;
-    } catch (err) {
-      console.error('Error: ', err.message);
-    }
+    const message = await this.sendRequest('debugInfo', {});
+    this._isStarted = message.body.isStarted;
+    return message;
   }
 
   /**

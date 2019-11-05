@@ -141,15 +141,6 @@ export class DebugService implements IDebugger {
   }
 
   /**
-   * Whether the debugger can start.
-   */
-  canStart(): boolean {
-    return (
-      this._model !== null && this._session !== null && !this._session.isStarted
-    );
-  }
-
-  /**
    * Whether the current debugger is started.
    */
   isStarted(): boolean {
@@ -177,6 +168,25 @@ export class DebugService implements IDebugger {
    */
   async stop(): Promise<void> {
     await this.session.stop();
+  }
+
+  /**
+   * Restore the state of a debug session.
+   * @param autoStart - when true, starts the debugger
+   * if it has not been started yet.
+   */
+
+  async restoreState(autoStart: boolean): Promise<void> {
+    if (!this.model || !this.session) {
+      return;
+    }
+
+    await this.session.restoreState();
+    // TODO: restore breakpoints when the model is updated
+
+    if (!this.isStarted() && autoStart) {
+      await this.start();
+    }
   }
 
   /**
