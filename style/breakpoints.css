@@ -9,7 +9,7 @@
 
 .jp-breakpoint-marker {
   position: absolute;
-  left: -35px;
+  left: -34px;
   top: -1px;
   color: var(--jp-error-color1);
 }
@@ -27,6 +27,7 @@
   top: -1px;
 }
 
-.CodeMirror-gutter-wrapper:hover::after {
+.jp-CodeCell.jp-mod-selected .CodeMirror-gutter-wrapper:hover::after,
+.jp-Editor.jp-mod-focused .CodeMirror-gutter-wrapper:hover::after {
   opacity: 0.5;
 }
