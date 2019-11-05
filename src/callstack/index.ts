@@ -1,19 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
+import { CommandToolbarButton, Toolbar } from '@jupyterlab/apputils';
 
+import { CommandRegistry } from '@phosphor/commands';
 import { ISignal, Signal } from '@phosphor/signaling';
 import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
 import { DebugProtocol } from 'vscode-debugprotocol';
-import { IDebugger } from '../tokens';
 import { Body } from './body';
 
 export class Callstack extends Panel {
   constructor(options: Callstack.IOptions) {
     super();
 
-    const { service, model } = options;
+    const { commands, model } = options;
 
     this.model = model;
     this.addClass('jp-DebuggerCallstack');
@@ -27,64 +27,41 @@ export class Callstack extends Panel {
 
     header.toolbar.addItem(
       'continue',
-      new ToolbarButton({
-        iconClassName: 'jp-RunIcon',
-        onClick: () => {
-          if (!service.isThreadStopped()) {
-            return;
-          }
-          void service.continue();
-        },
-        tooltip: 'Continue'
+      new CommandToolbarButton({
+        commands: commands.registry,
+        id: commands.continue
       })
     );
+
     header.toolbar.addItem(
       'stop',
-      new ToolbarButton({
-        iconClassName: 'jp-StopIcon',
-        onClick: () => {
-          console.log('`stop` was clicked');
-        },
-        tooltip: 'Stop'
+      new CommandToolbarButton({
+        commands: commands.registry,
+        id: ''
       })
     );
+
     header.toolbar.addItem(
       'step-over',
-      new ToolbarButton({
-        iconClassName: 'jp-StepOverIcon',
-        onClick: () => {
-          if (!service.isThreadStopped()) {
-            return;
-          }
-          void service.next();
-        },
-        tooltip: 'Step Over'
+      new CommandToolbarButton({
+        commands: commands.registry,
+        id: commands.next
       })
     );
+
     header.toolbar.addItem(
       'step-in',
-      new ToolbarButton({
-        iconClassName: 'jp-StepInIcon',
-        onClick: () => {
-          if (!service.isThreadStopped()) {
-            return;
-          }
-          void service.stepIn();
-        },
-        tooltip: 'Step In'
+      new CommandToolbarButton({
+        commands: commands.registry,
+        id: commands.stepIn
       })
     );
+
     header.toolbar.addItem(
       'step-out',
-      new ToolbarButton({
-        iconClassName: 'jp-StepOutIcon',
-        onClick: () => {
-          if (!service.isThreadStopped()) {
-            return;
-          }
-          void service.stepOut();
-        },
-        tooltip: 'Step Out'
+      new CommandToolbarButton({
+        commands: commands.registry,
+        id: commands.stepOut
       })
     );
   }
@@ -148,8 +125,39 @@ export namespace Callstack {
     private _currentFrameChanged = new Signal<this, IFrame>(this);
   }
 
+  export interface ICommands {
+    /**
+     * The command registry.
+     */
+    registry: CommandRegistry;
+
+    /**
+     * The continue command ID.
+     */
+    continue: string;
+
+    /**
+     * The next / stepOver command ID.
+     */
+    next: string;
+
+    /**
+     * The stepIn command ID.
+     */
+    stepIn: string;
+
+    /**
+     * The stepOut command ID.
+     */
+    stepOut: string;
+  }
+
   export interface IOptions extends Panel.IOptions {
-    service: IDebugger;
+    /**
+     * The toolbar commands interface for the callstack.
+     */
+    commands: ICommands;
+
     model: Model;
   }
 }
