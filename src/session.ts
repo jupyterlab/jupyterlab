@@ -3,8 +3,6 @@
 
 import { IClientSession } from '@jupyterlab/apputils';
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { KernelMessage } from '@jupyterlab/services';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
@@ -13,6 +11,9 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { IDebugger } from './tokens';
 
+/**
+ * A concrete implementation of IDebugger.ISession.
+ */
 export class DebugSession implements IDebugger.ISession {
   /**
    * Instantiate a new debug session
@@ -24,29 +25,39 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   /**
-   * The client session to connect to a debugger.
+   * Whether the debug session is disposed.
    */
-  private _client: IClientSession;
-
-  get id() {
-    return this.client.name;
+  get isDisposed(): boolean {
+    return this._isDisposed;
   }
 
-  get type() {
-    return this.client.type;
+  /**
+   * A signal emitted when the debug session is disposed.
+   */
+  get disposed(): ISignal<this, void> {
+    return this._disposed;
   }
 
+  /**
+   * Returns the API client session to connect to a debugger.
+   */
   get client(): IClientSession {
     return this._client;
   }
 
+  /**
+   * Sets the API client session to connect to a debugger to
+   * the given parameter.
+   *
+   * @param client - The new API client session.
+   */
   set client(client: IClientSession | null) {
     if (this._client === client) {
       return;
     }
 
     if (this._client) {
-      Signal.clearData(this._client);
+      this._client.iopubMessage.disconnect(this._handleEvent, this);
     }
 
     this._client = client;
@@ -57,9 +68,18 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   /**
-   * The code editors in a debugger session.
+   * Whether the debug session is started
    */
-  editors: CodeEditor.IEditor[];
+  get isStarted(): boolean {
+    return this._isStarted;
+  }
+
+  /**
+   * Signal emitted for debug event messages.
+   */
+  get eventMessage(): ISignal<IDebugger.ISession, IDebugger.ISession.Event> {
+    return this._eventMessage;
+  }
 
   /**
    * Dispose the debug session.
@@ -71,27 +91,6 @@ export class DebugSession implements IDebugger.ISession {
     this._isDisposed = true;
     this._disposed.emit();
     Signal.clearData(this);
-  }
-
-  /**
-   * A signal emitted when the debug session is disposed.
-   */
-  get disposed(): ISignal<this, void> {
-    return this._disposed;
-  }
-
-  /**
-   * Whether the debug session is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
-   * Whether the debug session is started
-   */
-  get isStarted(): boolean {
-    return this._isStarted;
   }
 
   /**
@@ -167,14 +166,9 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   /**
-   * Signal emitted for debug event messages.
-   */
-  get eventMessage(): ISignal<IDebugger.ISession, IDebugger.ISession.Event> {
-    return this._eventMessage;
-  }
-
-  /**
    * Handle debug events sent on the 'iopub' channel.
+   * @param sender - the emitter of the event.
+   * @param message - the event message.
    */
   private _handleEvent(
     sender: IClientSession,
@@ -210,6 +204,7 @@ export class DebugSession implements IDebugger.ISession {
     return reply.promise;
   }
 
+  private _client: IClientSession;
   private _disposed = new Signal<this, void>(this);
   private _isDisposed: boolean = false;
   private _isStarted: boolean = false;

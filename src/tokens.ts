@@ -3,13 +3,11 @@
 
 import { IClientSession } from '@jupyterlab/apputils';
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { Session } from '@jupyterlab/services';
 
 import { Token } from '@phosphor/coreutils';
 
-import { IObservableDisposable } from '@phosphor/disposable';
+import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
 
 import { ISignal } from '@phosphor/signaling';
 
@@ -23,7 +21,7 @@ import { Debugger } from './debugger';
 /**
  * An interface describing an application's visual debugger.
  */
-export interface IDebugger {
+export interface IDebugger extends IDisposable {
   /**
    * The mode of the debugger UI.
    *
@@ -34,14 +32,29 @@ export interface IDebugger {
   mode: IDebugger.Mode;
 
   /**
-   * The model of the debugger.
-   */
-  readonly model: Debugger.Model;
-
-  /**
    * The current debugger session.
    */
   session: IDebugger.ISession;
+
+  /**
+   * The model of the debugger.
+   */
+  model: Debugger.Model;
+
+  /**
+   * Signal emitted upon session changed.
+   */
+  readonly sessionChanged: ISignal<IDebugger, IDebugger.ISession>;
+
+  /**
+   * Signal emitted upon model changed.
+   */
+  readonly modelChanged: ISignal<IDebugger, Debugger.Model>;
+
+  /**
+   * Signal emitted for debug event messages.
+   */
+  readonly eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
 
   /**
    * Whether the debugger can start.
@@ -94,21 +107,6 @@ export interface IDebugger {
    * Update all breakpoints at once.
    */
   updateBreakpoints(breakpoints: Breakpoints.IBreakpoint[]): Promise<void>;
-
-  /**
-   * Signal emitted upon session changed.
-   */
-  sessionChanged: ISignal<IDebugger, IDebugger.ISession>;
-
-  /**
-   * Signal emitted upon model changed.
-   */
-  modelChanged: ISignal<IDebugger, Debugger.Model>;
-
-  /**
-   * Signal emitted for debug event messages.
-   */
-  eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
 }
 
 /**
@@ -130,14 +128,16 @@ export namespace IDebugger {
     client: IClientSession | Session.ISession;
 
     /**
-     * The code editors in a debugger session.
-     */
-    editors: CodeEditor.IEditor[];
-
-    /**
      * Whether the debug session is started
      */
-    isStarted: boolean;
+    readonly isStarted: boolean;
+    /**
+     * Signal emitted for debug event messages.
+     */
+    readonly eventMessage: ISignal<
+      IDebugger.ISession,
+      IDebugger.ISession.Event
+    >;
 
     /**
      * Start a new debug session.
@@ -161,11 +161,6 @@ export namespace IDebugger {
       command: K,
       args: IDebugger.ISession.Request[K]
     ): Promise<IDebugger.ISession.Response[K]>;
-
-    /**
-     * Signal emitted for debug event messages.
-     */
-    eventMessage: ISignal<IDebugger.ISession, IDebugger.ISession.Event>;
   }
 
   export namespace ISession {

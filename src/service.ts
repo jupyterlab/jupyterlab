@@ -17,6 +17,9 @@ import { Breakpoints } from './breakpoints';
 
 import { Callstack } from './callstack';
 
+/**
+ * A concrete implementation of IDebugger.
+ */
 export class DebugService implements IDebugger {
   constructor() {
     // Avoids setting session with invalid client
@@ -30,39 +33,43 @@ export class DebugService implements IDebugger {
     this._model = null;
   }
 
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
-    Signal.clearData(this);
-  }
-
+  /**
+   * Whether the debug service is disposed.
+   */
   get isDisposed(): boolean {
     return this._isDisposed;
   }
 
+  /**
+   * Returns the mode of the debugger UI.
+   *
+   * #### Notes
+   * There is only ever one debugger instance. If it is `expanded`, it exists
+   * as a `MainAreaWidget`, otherwise it is a sidebar.
+   */
   get mode(): IDebugger.Mode {
     return this._model.mode;
   }
 
+  /**
+   * Sets the mode of the debugger UI to the given parameter.
+   * @param mode - the new mode of the debugger UI.
+   */
   set mode(mode: IDebugger.Mode) {
     this._model.mode = mode;
   }
 
-  get model(): Debugger.Model {
-    return this._model;
-  }
-
-  set model(model: Debugger.Model) {
-    this._model = model;
-    this._modelChanged.emit(model);
-  }
-
+  /**
+   * Returns the current debug session.
+   */
   get session(): IDebugger.ISession {
     return this._session;
   }
 
+  /**
+   * Sets the current debug session to the given parameter.
+   * @param session - the new debugger session.
+   */
   set session(session: IDebugger.ISession) {
     if (this._session === session) {
       return;
@@ -85,28 +92,96 @@ export class DebugService implements IDebugger {
     this._sessionChanged.emit(session);
   }
 
-  isStarted(): boolean {
-    return this._session !== null && this._session.isStarted;
+  /**
+   * Returns the debugger model.
+   */
+  get model(): Debugger.Model {
+    return this._model;
   }
 
-  isThreadStopped(): boolean {
-    return this._threadStopped.has(this.currentThread());
+  /**
+   * Sets the debugger model to the given parameter.
+   * @param model - The new debugger model.
+   */
+  set model(model: Debugger.Model) {
+    this._model = model;
+    this._modelChanged.emit(model);
   }
 
+  /**
+   * Signal emitted upon session changed.
+   */
+  get sessionChanged(): ISignal<IDebugger, IDebugger.ISession> {
+    return this._sessionChanged;
+  }
+
+  /**
+   * Signal emitted upon model changed.
+   */
+  get modelChanged(): ISignal<IDebugger, Debugger.Model> {
+    return this._modelChanged;
+  }
+
+  /**
+   * Signal emitted for debug event messages.
+   */
+  get eventMessage(): ISignal<IDebugger, IDebugger.ISession.Event> {
+    return this._eventMessage;
+  }
+
+  /**
+   * Dispose the debug service.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    Signal.clearData(this);
+  }
+
+  /**
+   * Whether the debugger can start.
+   */
   canStart(): boolean {
     return (
       this._model !== null && this._session !== null && !this._session.isStarted
     );
   }
 
+  /**
+   * Whether the current debugger is started.
+   */
+  isStarted(): boolean {
+    return this._session !== null && this._session.isStarted;
+  }
+
+  /**
+   * Whether the current thread is stopped.
+   */
+  isThreadStopped(): boolean {
+    return this._threadStopped.has(this.currentThread());
+  }
+
+  /**
+   * Starts a debugger.
+   * Precondition: canStart() && !isStarted()
+   */
   async start(): Promise<void> {
     await this.session.start();
   }
 
+  /**
+   * Stops the debugger.
+   * Precondition: isStarted()
+   */
   async stop(): Promise<void> {
     await this.session.stop();
   }
 
+  /**
+   * Continues the execution of the current thread.
+   */
   async continue(): Promise<void> {
     try {
       await this.session.sendRequest('continue', {
@@ -118,6 +193,9 @@ export class DebugService implements IDebugger {
     }
   }
 
+  /**
+   * Makes the current thread run again for one step.
+   */
   async next(): Promise<void> {
     try {
       await this.session.sendRequest('next', {
@@ -128,6 +206,9 @@ export class DebugService implements IDebugger {
     }
   }
 
+  /**
+   * Makes the current thread step in a function / method if possible.
+   */
   async stepIn(): Promise<void> {
     try {
       await this.session.sendRequest('stepIn', {
@@ -151,17 +232,38 @@ export class DebugService implements IDebugger {
     }
   }
 
-  get sessionChanged(): ISignal<IDebugger, IDebugger.ISession> {
-    return this._sessionChanged;
-  }
+  /**
+   * Update all breakpoints at once.
+   */
+  updateBreakpoints = async (breakpoints: Breakpoints.IBreakpoint[]) => {
+    if (!this.session.isStarted) {
+      return;
+    }
+    // Workaround: this should not be called before the session has started
+    await this.ensureSessionReady();
+    const code = this._model.codeValue.text;
+    const dumpedCell = await this.dumpCell(code);
+    const sourceBreakpoints = Private.toSourceBreakpoints(breakpoints);
+    const reply = await this.setBreakpoints(
+      sourceBreakpoints,
+      dumpedCell.sourcePath
+    );
+    let kernelBreakpoints = reply.body.breakpoints.map(breakpoint => {
+      return {
+        ...breakpoint,
+        active: true,
+        source: { path: this.session.client.name }
+      };
+    });
 
-  get modelChanged(): ISignal<IDebugger, Debugger.Model> {
-    return this._modelChanged;
-  }
-
-  get eventMessage(): ISignal<IDebugger, IDebugger.ISession.Event> {
-    return this._eventMessage;
-  }
+    // filter breakpoints with the same line number
+    kernelBreakpoints = kernelBreakpoints.filter(
+      (breakpoint, i, arr) =>
+        arr.findIndex(el => el.line === breakpoint.line) === i
+    );
+    this._model.breakpointsModel.breakpoints = kernelBreakpoints;
+    await this.session.sendRequest('configurationDone', {});
+  };
 
   getAllFrames = async () => {
     const stackFrames = await this.getFrames(this.currentThread());
@@ -239,41 +341,6 @@ export class DebugService implements IDebugger {
     });
   };
 
-  updateBreakpoints = async (breakpoints: Breakpoints.IBreakpoint[]) => {
-    if (!this.session.isStarted) {
-      return;
-    }
-    // Workaround: this should not be called before the session has started
-    await this.ensureSessionReady();
-    const code = this._model.codeValue.text;
-    const dumpedCell = await this.dumpCell(code);
-    const sourceBreakpoints = Private.toSourceBreakpoints(breakpoints);
-    const reply = await this.setBreakpoints(
-      sourceBreakpoints,
-      dumpedCell.sourcePath
-    );
-    let kernelBreakpoints = reply.body.breakpoints.map(breakpoint => {
-      return {
-        ...breakpoint,
-        active: true,
-        source: { path: this.session.client.name }
-      };
-    });
-
-    // filter breakpoints with the same line number
-    kernelBreakpoints = kernelBreakpoints.filter(
-      (breakpoint, i, arr) =>
-        arr.findIndex(el => el.line === breakpoint.line) === i
-    );
-    this._model.breakpointsModel.breakpoints = kernelBreakpoints;
-    await this.session.sendRequest('configurationDone', {});
-  };
-
-  private async ensureSessionReady(): Promise<void> {
-    const client = this.session.client as IClientSession;
-    return client.ready;
-  }
-
   protected convertScope = (
     scopes: DebugProtocol.Scope[],
     variables: DebugProtocol.Variable[]
@@ -290,6 +357,11 @@ export class DebugService implements IDebugger {
       };
     });
   };
+
+  private async ensureSessionReady(): Promise<void> {
+    const client = this.session.client as IClientSession;
+    return client.ready;
+  }
 
   private onContinued() {
     this._model.callstackModel.frames = [];
