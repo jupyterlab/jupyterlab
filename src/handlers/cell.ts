@@ -21,11 +21,21 @@ const LINE_HIGHLIGHT_CLASS = 'jp-breakpoint-line-highlight';
 
 export class CellManager implements IDisposable {
   constructor(options: CellManager.IOptions) {
-    this._debuggerModel = options.debuggerModel;
     this._debuggerService = options.debuggerService;
-    this.breakpointsModel = options.breakpointsModel;
+    this.onModelChanged();
+    this._debuggerService.modelChanged.connect(() => this.onModelChanged());
     this.activeCell = options.activeCell;
     this.onActiveCellChanged();
+  }
+
+  isDisposed: boolean;
+
+  private onModelChanged() {
+    this._debuggerModel = this._debuggerService.model;
+    if (!this._debuggerModel) {
+      return;
+    }
+    this.breakpointsModel = this._debuggerModel.breakpointsModel;
 
     this._debuggerModel.variablesModel.changed.connect(() => {
       this.cleanupHighlight();
@@ -42,9 +52,11 @@ export class CellManager implements IDisposable {
       }
       this.addBreakpointsToEditor(this.activeCell);
     });
-  }
 
-  isDisposed: boolean;
+    if (this.activeCell) {
+      this._debuggerModel.codeValue = this.activeCell.model.value;
+    }
+  }
 
   private showCurrentLine(lineNumber: number) {
     if (!this.activeCell) {

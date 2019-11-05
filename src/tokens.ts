@@ -101,6 +101,11 @@ export interface IDebugger {
   sessionChanged: ISignal<IDebugger, IDebugger.ISession>;
 
   /**
+   * Signal emitted upon model changed.
+   */
+  modelChanged: ISignal<IDebugger, Debugger.Model>;
+
+  /**
    * Signal emitted for debug event messages.
    */
   eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
