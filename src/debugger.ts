@@ -44,7 +44,8 @@ export class Debugger extends SplitPanel {
 
     this.sidebar = new Debugger.Sidebar({
       model: this.model,
-      service: this.service
+      service: this.service,
+      callstackCommands: options.callstackCommands
     });
 
     this.editors = new DebuggerEditors({
@@ -82,6 +83,7 @@ export namespace Debugger {
   export interface IOptions {
     debugService: DebugService;
     editorFactory: CodeEditor.Factory;
+    callstackCommands: Callstack.ICommands;
     connector?: IDataConnector<ReadonlyJSONValue>;
   }
 
@@ -91,9 +93,12 @@ export namespace Debugger {
       this.orientation = 'vertical';
       this.addClass('jp-DebuggerSidebar');
 
-      const { service, model } = options;
+      const { callstackCommands, service, model } = options;
       this.variables = new Variables({ model: model.variablesModel });
-      this.callstack = new Callstack({ model: model.callstackModel });
+      this.callstack = new Callstack({
+        commands: callstackCommands,
+        model: model.callstackModel
+      });
       this.breakpoints = new Breakpoints({
         service,
         model: model.breakpointsModel
@@ -173,6 +178,7 @@ export namespace Debugger {
     export interface IOptions {
       model: Debugger.Model;
       service: IDebugger;
+      callstackCommands: Callstack.ICommands;
     }
   }
 

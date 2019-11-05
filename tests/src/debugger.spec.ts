@@ -2,6 +2,8 @@ import { expect } from 'chai';
 
 import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
 
+import { CommandRegistry } from '@phosphor/commands';
+
 import { Debugger } from '../../lib/debugger';
 
 import { DebugService } from '../../lib/service';
@@ -10,6 +12,7 @@ class TestPanel extends Debugger {}
 
 describe('Debugger', () => {
   const service = new DebugService();
+  const registry = new CommandRegistry();
   const editorServices = new CodeMirrorEditorFactory();
   const editorFactory = editorServices.newInlineEditor;
 
@@ -18,6 +21,13 @@ describe('Debugger', () => {
   beforeEach(() => {
     panel = new TestPanel({
       debugService: service,
+      callstackCommands: {
+        registry,
+        continue: '',
+        next: '',
+        stepIn: '',
+        stepOut: ''
+      },
       editorFactory: editorFactory
     });
   });

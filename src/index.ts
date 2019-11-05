@@ -280,6 +280,8 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
     commands.addCommand(CommandIDs.debugContinue, {
       label: 'Continue',
+      caption: 'Continue',
+      iconClass: 'jp-MaterialIcon jp-RunIcon',
       isEnabled: () => {
         return service.isThreadStopped();
       },
@@ -291,6 +293,8 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
     commands.addCommand(CommandIDs.next, {
       label: 'Next',
+      caption: 'Next',
+      iconClass: 'jp-MaterialIcon jp-StepOverIcon',
       isEnabled: () => {
         return service.isThreadStopped();
       },
@@ -301,6 +305,8 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
     commands.addCommand(CommandIDs.stepIn, {
       label: 'StepIn',
+      caption: 'Step In',
+      iconClass: 'jp-MaterialIcon jp-StepInIcon',
       isEnabled: () => {
         return service.isThreadStopped();
       },
@@ -311,6 +317,8 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
     commands.addCommand(CommandIDs.stepOut, {
       label: 'StepOut',
+      caption: 'Step Out',
+      iconClass: 'jp-MaterialIcon jp-StepOutIcon',
       isEnabled: () => {
         return service.isThreadStopped();
       },
@@ -339,6 +347,14 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         const savedMode = (await state.fetch('mode')) as IDebugger.Mode;
         const mode = savedMode ? savedMode : 'expanded';
 
+        const callstackCommands = {
+          registry: commands,
+          continue: CommandIDs.debugContinue,
+          next: CommandIDs.next,
+          stepIn: CommandIDs.stepIn,
+          stepOut: CommandIDs.stepOut
+        };
+
         if (tracker.currentWidget) {
           widget = tracker.currentWidget;
         } else {
@@ -346,6 +362,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
             content: new Debugger({
               debugService: service,
               connector: state,
+              callstackCommands,
               editorFactory
             })
           });
