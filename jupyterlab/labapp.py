@@ -416,6 +416,16 @@ class LabApp(ExtensionApp):
     # Local path to templates directory.
     template_paths = []
 
+    def initialize_settings(self):
+        notebookapp_config = self.settings.get('config').get('NotebookApp', None)
+        if notebookapp_config:
+            confs = list(notebookapp_config.keys())
+            self.log.warn("=========================================================================================")
+            self.log.warn("You are using NotebookApp settings that be deprecated at the next major notebook release.")
+            self.log.warn("Please migrate following settings from NotebookApp to ServerApp: {}".format(confs))
+            self.log.warn("Read more on https://...")
+            self.log.warn("=========================================================================================")
+
     def initialize_handlers(self):
         """Load any extensions specified by config.
 
@@ -434,7 +444,6 @@ class LabApp(ExtensionApp):
             msg = 'JupyterLab server extension not enabled, manually loading...'
             self.log.warning(msg)
             load_jupyter_server_extension(self)
-
 
 #-----------------------------------------------------------------------------
 # Main entry point
