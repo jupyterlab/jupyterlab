@@ -168,8 +168,6 @@ export class DebugService implements IDebugger {
    */
   async stop(): Promise<void> {
     await this.session.stop();
-    this.clearModel();
-    this._stoppedThreads.clear();
   }
 
   /**
