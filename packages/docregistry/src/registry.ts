@@ -883,6 +883,11 @@ export namespace DocumentRegistry {
     saveAs(): Promise<void>;
 
     /**
+     * Save the document to a different path chosen by the user.
+     */
+    download(): Promise<void>;
+
+    /**
      * Revert the document contents to disk contents.
      */
     revert(): Promise<void>;

@@ -271,6 +271,28 @@ export class Context<T extends DocumentRegistry.IModel>
   }
 
   /**
+   * Download a file.
+   *
+   * @param path - The path of the file to be downloaded.
+   *
+   * @returns A promise which resolves when the file has begun
+   *   downloading.
+   */
+  async download(): Promise<void> {
+    console.log({ path: this._path });
+    console.log(this._manager);
+    const url = await this._manager.contents.getDownloadUrl(this._path);
+    console.log({ url });
+    let element = document.createElement('a');
+    element.href = url;
+    element.download = '';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    return void 0;
+  }
+
+  /**
    * Revert the document contents to disk contents.
    */
   revert(): Promise<void> {
