@@ -196,7 +196,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
               Disable
             </Button>
           )}
-          {!entry.enabled && (
+          {entry.installed && !entry.enabled && (
             <Button
               onClick={() => props.performAction('enable', entry)}
               minimal
