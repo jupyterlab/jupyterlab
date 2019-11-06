@@ -7,16 +7,16 @@
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/my_name/myextension",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
-    "url": "https://github.com/my_name/myextension/issues"
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/my_name/myextension.git"
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "license": "BSD-3-Clause",
-  "author": "Markelle Kelly",
+  "author": "Project Jupyter",
   "files": [
     "lib/*.{d.ts,js}",
     "style/*.css"

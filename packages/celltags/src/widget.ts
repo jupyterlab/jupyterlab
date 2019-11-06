@@ -19,6 +19,9 @@ export class TagWidget extends Widget {
     this.buildTag();
   }
 
+  /**
+   * Create tag div with icon and attach to this.node.
+   */
   buildTag() {
     let text = document.createElement('span');
     text.textContent = this.name;
@@ -46,34 +49,53 @@ export class TagWidget extends Widget {
     this.node.appendChild(tag);
   }
 
+  /**
+   * Handle `after-attach` messages for the widget.
+   */
   onAfterAttach() {
     this.node.addEventListener('mousedown', this);
     this.node.addEventListener('mouseover', this);
     this.node.addEventListener('mouseout', this);
   }
 
+  /**
+   * Handle `before-detach` messages for the widget.
+   */
   onBeforeDetach() {
     this.node.removeEventListener('mousedown', this);
     this.node.removeEventListener('mouseover', this);
     this.node.removeEventListener('mouseout', this);
   }
 
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'mousedown':
         this._evtClick();
         break;
       case 'mouseover':
-        this._evtHover(event as MouseEvent);
+        this._evtMouseOver(event as MouseEvent);
         break;
       case 'mouseout':
-        this._evtOffHover(event as MouseEvent);
+        this._evtMouseOut(event as MouseEvent);
         break;
       default:
         break;
     }
   }
 
+  /**
+   * Handle `update-request` messages. Check if applied to current active cell.
+   */
   onUpdateRequest() {
     let applied = this.parent.checkApplied(this.name);
     if (applied != this.applied) {
@@ -81,6 +103,9 @@ export class TagWidget extends Widget {
     }
   }
 
+  /**
+   * Update styling to reflect whether tag is applied to current active cell.
+   */
   toggleApplied() {
     if (this.applied) {
       this.removeClass('applied-tag');
@@ -96,6 +121,11 @@ export class TagWidget extends Widget {
     this.applied = !this.applied;
   }
 
+  /**
+   * Handle the `'click'` event for the widget.
+   *
+   * @param event - The DOM event sent to the widget
+   */
   private _evtClick() {
     if (this.applied) {
       this.parent.removeTag(this.name);
@@ -105,11 +135,21 @@ export class TagWidget extends Widget {
     this.toggleApplied();
   }
 
-  private _evtHover(event: MouseEvent) {
+  /**
+   * Handle the `'mouseover'` event for the widget.
+   *
+   * @param event - The DOM event sent to the widget
+   */
+  private _evtMouseOver(event: MouseEvent) {
     (this.node as HTMLElement).classList.add('tag-hover');
   }
 
-  private _evtOffHover(event: MouseEvent) {
+  /**
+   * Handle the `'mouseout'` event for the widget.
+   *
+   * @param event - The DOM event sent to the widget
+   */
+  private _evtMouseOut(event: MouseEvent) {
     (this.node as HTMLElement).classList.remove('tag-hover');
   }
 

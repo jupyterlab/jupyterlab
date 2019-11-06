@@ -27,6 +27,9 @@ export class TagTool extends NotebookTools.Tool {
     this.createTagInput();
   }
 
+  /**
+   * Add an AddWidget input box to the layout.
+   */
   createTagInput() {
     let layout = this.layout as PanelLayout;
     let input = new AddWidget();
@@ -34,6 +37,13 @@ export class TagTool extends NotebookTools.Tool {
     layout.insertWidget(0, input);
   }
 
+  /**
+   * Check whether a tag is applied to the current active cell
+   *
+   * @param name - The name of the tag.
+   *
+   * @returns A boolean representing whether it is applied.
+   */
   checkApplied(name: string): boolean {
     if (this.tracker.activeCell) {
       let tags = this.tracker.activeCell.model.metadata.get('tags') as string[];
@@ -48,6 +58,11 @@ export class TagTool extends NotebookTools.Tool {
     return false;
   }
 
+  /**
+   * Add a tag to the current active cell.
+   *
+   * @param name - The name of the tag.
+   */
   addTag(name: string) {
     let cell = this.tracker.activeCell;
     let tags = cell.model.metadata.get('tags') as string[];
@@ -61,6 +76,7 @@ export class TagTool extends NotebookTools.Tool {
         toAdd.push(newTags[i]);
       }
     }
+    // todo: can this be combined into one for loop?
     for (let j = 0; j < toAdd.length; j++) {
       if (tags.indexOf(toAdd[j]) < 0) {
         tags.push(toAdd[j]);
@@ -72,6 +88,11 @@ export class TagTool extends NotebookTools.Tool {
     console.log(this.tracker.activeCell.model.metadata.get('tags'));
   }
 
+  /**
+   * Remove a tag from the current active cell.
+   *
+   * @param name - The name of the tag.
+   */
   removeTag(name: string) {
     let cell = this.tracker.activeCell;
     let tags = cell.model.metadata.get('tags') as string[];
@@ -88,6 +109,10 @@ export class TagTool extends NotebookTools.Tool {
     console.log(this.tracker.activeCell.model.metadata.get('tags'));
   }
 
+  /**
+   * Update each tag widget to represent whether it is applied to the current
+   * active cell.
+   */
   loadActiveTags() {
     let layout = this.layout as PanelLayout;
     for (let i = 0; i < layout.widgets.length; i++) {
@@ -96,7 +121,8 @@ export class TagTool extends NotebookTools.Tool {
   }
 
   /**
-   * Pull from cell metadata all the tags assigned to notebook cells,
+   * Pull from cell metadata all the tags used in the notebook and update the
+   * stored tag list.
    */
   pullTags() {
     let notebook = this.tracker.currentWidget;
@@ -121,6 +147,10 @@ export class TagTool extends NotebookTools.Tool {
     }
   }
 
+  /**
+   * Pull the most recent list of tags and update the tag widgets - dispose if
+   * the tag no longer exists, and create new widgets for new tags.
+   */
   refreshTags() {
     this.pullTags();
     let layout = this.layout as PanelLayout;
@@ -141,6 +171,10 @@ export class TagTool extends NotebookTools.Tool {
     }
   }
 
+  /**
+   * Validate the 'tags' of cell metadata, ensuring it is a list of strings and
+   * that each string doesn't include spaces.
+   */
   validateTags(cell: Cell) {
     let tags = cell.model.metadata.get('tags');
     var results: string[] = [];
@@ -187,7 +221,8 @@ export class TagTool extends NotebookTools.Tool {
   }
 
   /**
-   * Get all tags once available.
+   * Upon attach, add header if it doesn't already exist and listen for changes
+   * from the notebook tracker.
    */
   protected onAfterAttach() {
     if (!this.header) {
