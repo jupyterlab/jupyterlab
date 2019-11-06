@@ -65,8 +65,6 @@ export namespace CommandIDs {
 
   export const debugFile = 'debugger:debug-file';
 
-  export const debugNotebook = 'debugger:debug-notebook';
-
   export const mount = 'debugger:mount';
 
   export const changeMode = 'debugger:change-mode';
@@ -411,13 +409,17 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
     if (palette) {
       const category = 'Debugger';
-      palette.addItem({ command: CommandIDs.changeMode, category });
-      palette.addItem({ command: CommandIDs.create, category });
-      palette.addItem({ command: CommandIDs.debugContinue, category });
-      palette.addItem({ command: CommandIDs.next, category });
-      palette.addItem({ command: CommandIDs.stepIn, category });
-      palette.addItem({ command: CommandIDs.stepOut, category });
-      palette.addItem({ command: CommandIDs.debugNotebook, category });
+      [
+        CommandIDs.changeMode,
+        CommandIDs.create,
+        CommandIDs.debugContinue,
+        CommandIDs.terminate,
+        CommandIDs.next,
+        CommandIDs.stepIn,
+        CommandIDs.stepOut
+      ].forEach(command => {
+        palette.addItem({ command, category });
+      });
     }
 
     if (restorer) {
