@@ -111,9 +111,23 @@ class TableOfContents extends Widget {
   }
 
   /**
-   * Updates a table of contents.
+   * Current table of contents generator.
+   *
+   * @returns table of contents generator
    */
-  update() {
+  get generator() {
+    if (this._current) {
+      return this._current.generator;
+    }
+    return null;
+  }
+
+  /**
+   * Callback invoked upon an update request.
+   *
+   * @param msg - message
+   */
+  protected onUpdateRequest(msg: Message): void {
     let toc: IHeading[] = [];
     let title = 'Table of Contents';
     if (this._current) {
@@ -156,27 +170,6 @@ class TableOfContents extends Widget {
         this._rendermime.latexTypesetter.typeset(this.node);
       }
     });
-  }
-
-  /**
-   * Current table of contents generator.
-   *
-   * @returns table of contents generator
-   */
-  get generator() {
-    if (this._current) {
-      return this._current.generator;
-    }
-    return null;
-  }
-
-  /**
-   * Callback invoked upon an update request.
-   *
-   * @param msg - message
-   */
-  protected onUpdateRequest(msg: Message): void {
-    this.update();
   }
 
   /**
