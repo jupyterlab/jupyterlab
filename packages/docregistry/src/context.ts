@@ -279,10 +279,7 @@ export class Context<T extends DocumentRegistry.IModel>
    *   downloading.
    */
   async download(): Promise<void> {
-    console.log({ path: this._path });
-    console.log(this._manager);
     const url = await this._manager.contents.getDownloadUrl(this._path);
-    console.log({ url });
     let element = document.createElement('a');
     element.href = url;
     element.download = '';
