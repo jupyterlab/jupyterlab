@@ -176,10 +176,6 @@ class TableOfContents extends Widget {
    * @param msg - message
    */
   protected onUpdateRequest(msg: Message): void {
-    // Don't bother if the ToC is not visible...
-    /* if (!this.isVisible) {
-      return;
-    } */
     this.update();
   }
 
