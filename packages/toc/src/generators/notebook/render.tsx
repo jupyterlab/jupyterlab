@@ -48,8 +48,12 @@ function render(
         let collapsed = item.cellRef!.model.metadata.get(
           'toc-hr-collapsed'
         ) as boolean;
+
         // Render the twist button:
         let button = twistButton(item.cellRef, collapsed || false, onClick);
+
+        // Update the collapsed state of the corresponding notebook cell:
+        setCollapsedState(tracker, item.cellRef, collapsed);
 
         // Render the heading item:
         jsx = (
@@ -73,6 +77,7 @@ function render(
           'toc-hr-collapsed'
         ) as boolean;
         let button = twistButton(item.cellRef, collapsed || false, onClick);
+        setCollapsedState(tracker, item.cellRef, collapsed);
         jsx = (
           <div className="toc-entry-holder">
             {button}

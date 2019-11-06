@@ -86,7 +86,7 @@ function createNotebookGenerator(
       let cell: Cell = panel.content.widgets[i];
       let model = cell.model;
 
-      let collapsed = cell.model.metadata.get('toc-hr-collapsed') as boolean;
+      let collapsed = model.metadata.get('toc-hr-collapsed') as boolean;
       collapsed = collapsed || false;
 
       if (model.type === 'code') {
