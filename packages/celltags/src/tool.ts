@@ -70,16 +70,9 @@ export class TagTool extends NotebookTools.Tool {
     if (tags === undefined) {
       tags = [];
     }
-    const toAdd: string[] = [];
     for (let i = 0; i < newTags.length; i++) {
-      if (newTags[i] !== '' && toAdd.indexOf(newTags[i]) < 0) {
-        toAdd.push(newTags[i]);
-      }
-    }
-    // todo: can this be combined into one for loop?
-    for (let j = 0; j < toAdd.length; j++) {
-      if (tags.indexOf(toAdd[j]) < 0) {
-        tags.push(toAdd[j]);
+      if (newTags[i] !== '' && tags.indexOf(newTags[i]) < 0) {
+        tags.push(newTags[i]);
       }
     }
     cell.model.metadata.set('tags', tags);
