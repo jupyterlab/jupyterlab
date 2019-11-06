@@ -81,10 +81,10 @@ export class DebugService implements IDebugger {
 
     this._session.eventMessage.connect((_, event) => {
       if (event.event === 'stopped') {
-        this._threadStopped.add(event.body.threadId);
+        this._stoppedThreads.add(event.body.threadId);
         void this.getAllFrames();
       } else if (event.event === 'continued') {
-        this._threadStopped.delete(event.body.threadId);
+        this._stoppedThreads.delete(event.body.threadId);
         this.clearModel();
       }
       this._eventMessage.emit(event);
@@ -151,7 +151,7 @@ export class DebugService implements IDebugger {
    * Whether the current thread is stopped.
    */
   isThreadStopped(): boolean {
-    return this._threadStopped.has(this.currentThread());
+    return this._stoppedThreads.has(this.currentThread());
   }
 
   /**
@@ -169,7 +169,7 @@ export class DebugService implements IDebugger {
   async stop(): Promise<void> {
     await this.session.stop();
     this.clearModel();
-    this._threadStopped.clear();
+    this._stoppedThreads.clear();
   }
 
   /**
@@ -199,7 +199,7 @@ export class DebugService implements IDebugger {
       await this.session.sendRequest('continue', {
         threadId: this.currentThread()
       });
-      this._threadStopped.delete(this.currentThread());
+      this._stoppedThreads.delete(this.currentThread());
     } catch (err) {
       console.error('Error:', err.message);
     }
@@ -396,7 +396,7 @@ export class DebugService implements IDebugger {
   private frames: Frame[] = [];
 
   // TODO: move this in model
-  private _threadStopped = new Set();
+  private _stoppedThreads = new Set();
 }
 
 export type Frame = {
