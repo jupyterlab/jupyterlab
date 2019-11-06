@@ -53,6 +53,8 @@ export namespace CommandIDs {
 
   export const debugContinue = 'debugger:continue';
 
+  export const terminate = 'debugger:terminate';
+
   export const next = 'debugger:next';
 
   export const stepIn = 'debugger:stepIn';
@@ -291,6 +293,20 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
+    commands.addCommand(CommandIDs.terminate, {
+      label: 'Terminate',
+      caption: 'Terminate',
+      iconClass: 'jp-MaterialIcon jp-StopIcon',
+      isEnabled: () => {
+        return service.isThreadStopped();
+      },
+      execute: async () => {
+        await service.stop();
+        await service.start();
+        commands.notifyCommandChanged();
+      }
+    });
+
     commands.addCommand(CommandIDs.next, {
       label: 'Next',
       caption: 'Next',
@@ -350,6 +366,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         const callstackCommands = {
           registry: commands,
           continue: CommandIDs.debugContinue,
+          terminate: CommandIDs.terminate,
           next: CommandIDs.next,
           stepIn: CommandIDs.stepIn,
           stepOut: CommandIDs.stepOut

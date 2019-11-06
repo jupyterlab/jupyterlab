@@ -34,6 +34,14 @@ export class Callstack extends Panel {
     );
 
     header.toolbar.addItem(
+      'terminate',
+      new CommandToolbarButton({
+        commands: commands.registry,
+        id: commands.terminate
+      })
+    );
+
+    header.toolbar.addItem(
       'step-over',
       new CommandToolbarButton({
         commands: commands.registry,
@@ -127,6 +135,11 @@ export namespace Callstack {
      * The continue command ID.
      */
     continue: string;
+
+    /**
+     * The terminate command ID.
+     */
+    terminate: string;
 
     /**
      * The next / stepOver command ID.

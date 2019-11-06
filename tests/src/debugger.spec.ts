@@ -24,6 +24,7 @@ describe('Debugger', () => {
       callstackCommands: {
         registry,
         continue: '',
+        terminate: '',
         next: '',
         stepIn: '',
         stepOut: ''
