@@ -14,8 +14,6 @@ import { TOCTree } from './toc_tree';
 
 /**
  * Interface describing table of contents widget options.
- *
- * @private
  */
 interface IOptions {
   /**
@@ -31,8 +29,6 @@ interface IOptions {
 
 /**
  * Interface describing the current widget.
- *
- * @private
  */
 interface ICurrentWidget<W extends Widget = Widget> {
   /**
