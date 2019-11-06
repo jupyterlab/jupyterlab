@@ -1833,8 +1833,13 @@ export namespace DirListing {
         // clean up the svg icon annotation, if any
         delete icon.dataset.icon;
       }
+      // add file size to pop up if its available
+      if (model.size !== null && model.size !== undefined) {
+        node.title = model.name + ' - ' + Private.formatFileSize(model.size, 1);
+      } else {
+        node.title = model.name;
+      }
 
-      node.title = model.name;
       // If an item is being edited currently, its text node is unavailable.
       if (text && text.textContent !== model.name) {
         text.textContent = model.name;
@@ -2022,5 +2027,24 @@ namespace Private {
     return ArrayExt.findFirstIndex(nodes, node =>
       ElementExt.hitTest(node, x, y)
     );
+  }
+
+  /**
+   * Format bytes to human readable string.
+   */
+  export function formatFileSize(bytes: number, decimalPoint: number): string {
+    // https://www.codexworld.com/how-to/convert-file-size-bytes-kb-mb-gb-javascript/
+    if (bytes === 0) {
+      return '0 Bytes';
+    }
+    const k = 1000;
+    const dm = decimalPoint || 2;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    if (i >= 0 && i < sizes.length) {
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    } else {
+      return String(bytes);
+    }
   }
 }
