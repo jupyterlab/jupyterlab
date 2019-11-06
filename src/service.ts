@@ -173,6 +173,17 @@ export class DebugService implements IDebugger {
   }
 
   /**
+   * Restarts the debugger.
+   * Precondition: isStarted() and stopped.
+   */
+  async restart(): Promise<void> {
+    await this.stop();
+    this.clearModel();
+    this._stoppedThreads.clear();
+    await this.start();
+  }
+
+  /**
    * Restore the state of a debug session.
    * @param autoStart - when true, starts the debugger
    * if it has not been started yet.

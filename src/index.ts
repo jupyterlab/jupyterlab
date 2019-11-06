@@ -299,8 +299,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         return service.isThreadStopped();
       },
       execute: async () => {
-        await service.stop();
-        await service.start();
+        await service.restart();
         commands.notifyCommandChanged();
       }
     });
