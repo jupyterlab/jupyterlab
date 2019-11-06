@@ -39,9 +39,14 @@ export class Debugger extends SplitPanel {
       connector: options.connector
     });
 
-    this.sidebar = new Debugger.Sidebar(this.model);
     this.service = options.debugService;
     this.service.model = this.model;
+
+    this.sidebar = new Debugger.Sidebar({
+      model: this.model,
+      service: this.service,
+      callstackCommands: options.callstackCommands
+    });
 
     this.editors = new DebuggerEditors({
       editorFactory: options.editorFactory
@@ -78,18 +83,26 @@ export namespace Debugger {
   export interface IOptions {
     debugService: DebugService;
     editorFactory: CodeEditor.Factory;
+    callstackCommands: Callstack.ICommands;
     connector?: IDataConnector<ReadonlyJSONValue>;
   }
 
   export class Sidebar extends SplitPanel {
-    constructor(model: Model) {
+    constructor(options: Sidebar.IOptions) {
       super();
       this.orientation = 'vertical';
       this.addClass('jp-DebuggerSidebar');
 
+      const { callstackCommands, service, model } = options;
       this.variables = new Variables({ model: model.variablesModel });
-      this.callstack = new Callstack({ model: model.callstackModel });
-      this.breakpoints = new Breakpoints({ model: model.breakpointsModel });
+      this.callstack = new Callstack({
+        commands: callstackCommands,
+        model: model.callstackModel
+      });
+      this.breakpoints = new Breakpoints({
+        service,
+        model: model.breakpointsModel
+      });
 
       this.addWidget(this.variables);
       this.addWidget(this.callstack);
@@ -143,14 +156,6 @@ export namespace Debugger {
       this._codeValue = observableString;
     }
 
-    get currentLineChanged() {
-      return this._currentLineChanged;
-    }
-
-    get linesCleared() {
-      return this._linesCleared;
-    }
-
     dispose(): void {
       this._isDisposed = true;
     }
@@ -167,8 +172,14 @@ export namespace Debugger {
     private _isDisposed = false;
     private _mode: IDebugger.Mode;
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
-    private _currentLineChanged = new Signal<this, number>(this);
-    private _linesCleared = new Signal<this, void>(this);
+  }
+
+  export namespace Sidebar {
+    export interface IOptions {
+      model: Debugger.Model;
+      service: IDebugger;
+      callstackCommands: Callstack.ICommands;
+    }
   }
 
   export namespace Model {

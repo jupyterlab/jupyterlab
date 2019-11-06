@@ -64,11 +64,11 @@ export namespace Variables {
 
   export class Model {
     constructor(model: IScope[] = []) {
-      this._state = model;
+      this._state = DEMO_DATA;
     }
 
-    get scopesChanged(): ISignal<this, IScope[]> {
-      return this._scopesChanged;
+    get changed(): ISignal<this, void> {
+      return this._changed;
     }
 
     get currentVariable(): IVariable {
@@ -100,7 +100,7 @@ export namespace Variables {
 
     set scopes(scopes: IScope[]) {
       this._state = scopes;
-      this._scopesChanged.emit(scopes);
+      this._changed.emit();
     }
 
     get variables(): IVariable[] {
@@ -109,10 +109,7 @@ export namespace Variables {
 
     set variables(variables: IVariable[]) {
       this._currentScope.variables = variables;
-    }
-
-    get variablesChanged(): ISignal<this, IVariable[]> {
-      return this._variablesChanged;
+      this._changed.emit();
     }
 
     get variableExpanded(): ISignal<this, IVariable> {
@@ -123,7 +120,7 @@ export namespace Variables {
       return this.variables;
     }
 
-    async getMoreDataOfVariable(variable: IVariable) {
+    getMoreDataOfVariable(variable: IVariable) {
       this._variableExpanded.emit(variable);
     }
 
@@ -133,12 +130,128 @@ export namespace Variables {
     private _currentScope: IScope;
 
     private _currentChanged = new Signal<this, IVariable>(this);
-    private _variablesChanged = new Signal<this, IVariable[]>(this);
-    private _scopesChanged = new Signal<this, IScope[]>(this);
     private _variableExpanded = new Signal<this, IVariable>(this);
+    private _changed = new Signal<this, void>(this);
   }
 
   export interface IOptions extends Panel.IOptions {
     model: Model;
   }
 }
+
+const DEMO_DATA = [
+  {
+    name: 'Locals',
+    variables: [
+      {
+        evaluateName: 'Person',
+        name: 'Person',
+        type: 'type',
+        value: "<class '__main__.Person'>",
+        variablesReference: 11
+      },
+      {
+        evaluateName: 'display',
+        name: 'display',
+        type: 'builtin_function_or_method',
+        value:
+          '<built-in method display of PyCapsule object at 0x7f5678c0f4b0>',
+        variablesReference: 4
+      },
+      {
+        evaluateName: 'p1',
+        name: 'p1',
+        type: 'Person',
+        value: '<__main__.Person object at 0x7f565c73b0b8>',
+        variablesReference: 13,
+        'p1.name': {
+          evaluateName: 'p1.name',
+          name: 'name',
+          type: 'str',
+          presentationHint: {
+            attributes: ['rawString']
+          },
+          value: 'John',
+          variablesReference: 0
+        },
+        'p1.age': {
+          evaluateName: 'p1.age',
+          name: 'age',
+          type: 'int',
+          presentationHint: {
+            attributes: ['rawString']
+          },
+          value: 35,
+          variablesReference: 0
+        }
+      },
+      {
+        evaluateName: 'ptvsd',
+        name: 'ptvsd',
+        type: 'module',
+        value:
+          "<module 'ptvsd' from '/home/codete-bp/anaconda3/envs/jupyterlab-debugger/lib/python3.7/site-packages/ptvsd/__init__.py'>",
+        variablesReference: 5
+      },
+      {
+        evaluateName: '_pydev_stop_at_break',
+        name: '_pydev_stop_at_break',
+        type: 'function',
+        value: '<function _pydev_stop_at_break at 0x7f5674c37c80>',
+        variablesReference: 12
+      },
+      {
+        evaluateName: '__annotations__',
+        name: '__annotations__',
+        type: 'dict',
+        value: '{}',
+        variablesReference: 6
+      },
+      {
+        evaluateName: '__builtins__',
+        name: '__builtins__',
+        type: 'module',
+        value: "<module 'builtins' (built-in)>",
+        variablesReference: 7
+      },
+      {
+        evaluateName: '__doc__',
+        name: '__doc__',
+        type: 'NoneType',
+        value: 'None',
+        variablesReference: 0
+      },
+      {
+        evaluateName: '__loader__',
+        name: '__loader__',
+        type: 'type',
+        value: "<class '_frozen_importlib.BuiltinImporter'>",
+        variablesReference: 8
+      },
+      {
+        evaluateName: '__name__',
+        name: '__name__',
+        presentationHint: {
+          attributes: ['rawString']
+        },
+        type: 'str',
+        value: "'__main__'",
+        variablesReference: 0
+      },
+      {
+        evaluateName: '__package__',
+        name: '__package__',
+        type: 'NoneType',
+        value: 'None',
+        variablesReference: 0
+      },
+      {
+        evaluateName: '__spec__',
+        name: '__spec__',
+        type: 'NoneType',
+        value: 'None',
+        variablesReference: 0
+      }
+    ]
+  }
+];

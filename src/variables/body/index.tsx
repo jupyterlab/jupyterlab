@@ -28,46 +28,63 @@ export class Body extends ReactWidget {
 const VariableComponent = ({ model }: { model: Variables.Model }) => {
   const [data, setData] = useState(model.scopes);
 
-  useEffect(() => {
-    const convert = (scopes: Variables.IScope[]) => {
-      const converted = scopes.map(scope => {
-        scope.variables = scope.variables.map(variable => {
-          const func = () => {
-            void model.getMoreDataOfVariable(variable);
-          };
-          if (variable.haveMoreDetails) {
-            return { ...variable };
-          } else {
-            return { getMoreDetails: func, ...variable };
-          }
-        });
-        return { ...scope };
-      });
-      return converted;
-    };
+  const filterVariable = (variable: any) => {
+    const tableKey = ['name', 'value'];
+    const filteredObj = Object.keys(variable)
+      .filter(
+        k =>
+          tableKey.includes(k) ||
+          (k !== 'presentationHint' && typeof (variable as any)[k] === 'object')
+      )
+      .reduce((res, key) => {
+        if (typeof variable[key] === 'object') {
+          variable[key] = filterVariable(variable[key]);
+        }
+        return Object.assign(res, { [key]: variable[key] });
+      }, {});
 
-    const updateScopes = (_: Variables.Model, update: Variables.IScope[]) => {
-      if (ArrayExt.shallowEqual(data, update)) {
+    return filteredObj;
+  };
+
+  const convert = (scopes: Variables.IScope[]) => {
+    const converted = scopes.map(scope => {
+      const newVariable = scope.variables.map(variable => {
+        const func = () => {
+          model.getMoreDataOfVariable(variable);
+        };
+
+        if (variable.haveMoreDetails || variable.variablesReference === 0) {
+          return { ...filterVariable(variable) };
+        } else {
+          return { getMoreDetails: func, ...filterVariable(variable) };
+        }
+      });
+      return { name: scope.name, variables: newVariable };
+    });
+    return converted;
+  };
+  useEffect(() => {
+    const updateScopes = (self: Variables.Model) => {
+      if (ArrayExt.shallowEqual(data, self.scopes)) {
         return;
       }
-      const newData = convert(update);
-      setData(newData);
+      setData(self.scopes);
     };
 
-    model.scopesChanged.connect(updateScopes);
+    model.changed.connect(updateScopes);
 
     return () => {
-      model.scopesChanged.disconnect(updateScopes);
+      model.changed.disconnect(updateScopes);
     };
   });
 
   const List = () => (
     <>
-      {data.map(scopes => (
+      {convert(data).map(scope => (
         <ObjectInspector
-          key={scopes.name}
-          data={scopes.variables}
-          name={scopes.name}
+          key={scope.name}
+          data={scope.variables}
+          name={scope.name}
           nodeRenderer={defaultNodeRenderer}
           theme={THEME}
           expandLevel={1}
@@ -101,12 +118,7 @@ const defaultNodeRenderer = ({
   if (expanded) {
     if (data.getMoreDetails) {
       data.getMoreDetails();
-      dontDisplay = true;
     }
-  }
-
-  if (typeof data === 'symbol') {
-    dontDisplay = true;
   }
 
   return dontDisplay ? null : depth === 0 ? (

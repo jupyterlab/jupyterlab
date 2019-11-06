@@ -5,41 +5,58 @@ import { CodeCell } from '@jupyterlab/cells';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
+import { IDisposable } from '@phosphor/disposable';
+
+import { Signal } from '@phosphor/signaling';
+
 import { Doc, Editor } from 'codemirror';
 
 import { Breakpoints, SessionTypes } from '../breakpoints';
 
-import { IDisposable } from '@phosphor/disposable';
 import { Debugger } from '../debugger';
-import { IDebugger } from '../tokens';
 
-import { Signal } from '@phosphor/signaling';
+import { IDebugger } from '../tokens';
 
 const LINE_HIGHLIGHT_CLASS = 'jp-breakpoint-line-highlight';
 
 export class CellManager implements IDisposable {
   constructor(options: CellManager.IOptions) {
-    this._debuggerModel = options.debuggerModel;
     this._debuggerService = options.debuggerService;
-    this.breakpointsModel = options.breakpointsModel;
+    this.onModelChanged();
+    this._debuggerService.modelChanged.connect(() => this.onModelChanged());
     this.activeCell = options.activeCell;
     this.onActiveCellChanged();
-
-    this._debuggerModel.currentLineChanged.connect((_, lineNumber) => {
-      this.showCurrentLine(lineNumber);
-    });
-
-    this._debuggerModel.linesCleared.connect(() => {
-      this.cleanupHighlight();
-    });
-
-    this.breakpointsModel.breakpointsChanged.connect(async () => {
-      this.addBreakpointsToEditor(this.activeCell);
-      await this._debuggerService.updateBreakpoints();
-    });
   }
 
   isDisposed: boolean;
+
+  private onModelChanged() {
+    this._debuggerModel = this._debuggerService.model;
+    if (!this._debuggerModel) {
+      return;
+    }
+    this.breakpointsModel = this._debuggerModel.breakpointsModel;
+
+    this._debuggerModel.variablesModel.changed.connect(() => {
+      this.cleanupHighlight();
+      const firstFrame = this._debuggerModel.callstackModel.frames[0];
+      if (!firstFrame) {
+        return;
+      }
+      this.showCurrentLine(firstFrame.line);
+    });
+
+    this.breakpointsModel.changed.connect(async () => {
+      if (!this.activeCell || this.activeCell.isDisposed) {
+        return;
+      }
+      this.addBreakpointsToEditor(this.activeCell);
+    });
+
+    if (this.activeCell) {
+      this._debuggerModel.codeValue = this.activeCell.model.value;
+    }
+  }
 
   private showCurrentLine(lineNumber: number) {
     if (!this.activeCell) {
@@ -134,7 +151,8 @@ export class CellManager implements IDisposable {
         lineInfo.line + 1
       );
     });
-    this._debuggerModel.breakpointsModel.breakpoints = editorBreakpoints;
+
+    void this._debuggerService.updateBreakpoints(editorBreakpoints);
 
     editor.setOption('lineNumbers', true);
     editor.editor.setOption('gutters', [
@@ -163,10 +181,11 @@ export class CellManager implements IDisposable {
     }
 
     const isRemoveGutter = !!info.gutterMarkers;
+    let breakpoints = this.breakpointsModel.breakpoints;
     if (isRemoveGutter) {
-      this.breakpointsModel.removeBreakpointAtLine(info.line + 1);
+      breakpoints = breakpoints.filter(ele => ele.line !== info.line + 1);
     } else {
-      this.breakpointsModel.addBreakpoint(
+      breakpoints.push(
         Private.createBreakpoint(
           this._debuggerService.session.client.name,
           this.getEditorId(),
@@ -174,6 +193,8 @@ export class CellManager implements IDisposable {
         )
       );
     }
+
+    void this._debuggerService.updateBreakpoints(breakpoints);
   };
 
   protected onNewRenderLine = (editor: Editor, line: any) => {
@@ -259,7 +280,6 @@ namespace Private {
     marker.innerHTML = '●';
     return marker;
   }
-
   export function createBreakpoint(
     session: string,
     type: string,

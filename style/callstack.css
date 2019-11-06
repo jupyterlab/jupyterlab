@@ -21,3 +21,7 @@
   color: white;
   background: var(--jp-brand-color1);
 }
+
+.jp-DebuggerCallstack .jp-ToolbarButtonComponent-label {
+  display: none;
+}

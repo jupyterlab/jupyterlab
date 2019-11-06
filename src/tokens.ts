@@ -3,13 +3,11 @@
 
 import { IClientSession } from '@jupyterlab/apputils';
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import { Session } from '@jupyterlab/services';
 
 import { Token } from '@phosphor/coreutils';
 
-import { IObservableDisposable } from '@phosphor/disposable';
+import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
 
 import { ISignal } from '@phosphor/signaling';
 
@@ -17,12 +15,13 @@ import { DebugProtocol } from 'vscode-debugprotocol';
 
 // TODO: remove that import when an interface has
 // been created for Model class
+import { Breakpoints } from './breakpoints';
 import { Debugger } from './debugger';
 
 /**
  * An interface describing an application's visual debugger.
  */
-export interface IDebugger {
+export interface IDebugger extends IDisposable {
   /**
    * The mode of the debugger UI.
    *
@@ -33,19 +32,29 @@ export interface IDebugger {
   mode: IDebugger.Mode;
 
   /**
-   * The model of the debugger.
-   */
-  readonly model: Debugger.Model;
-
-  /**
    * The current debugger session.
    */
   session: IDebugger.ISession;
 
   /**
-   * Whether the debugger can start.
+   * The model of the debugger.
    */
-  canStart(): boolean;
+  model: Debugger.Model;
+
+  /**
+   * Signal emitted upon session changed.
+   */
+  readonly sessionChanged: ISignal<IDebugger, IDebugger.ISession>;
+
+  /**
+   * Signal emitted upon model changed.
+   */
+  readonly modelChanged: ISignal<IDebugger, Debugger.Model>;
+
+  /**
+   * Signal emitted for debug event messages.
+   */
+  readonly eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
 
   /**
    * Whether the current debugger is started.
@@ -70,6 +79,13 @@ export interface IDebugger {
   stop(): Promise<void>;
 
   /**
+   * Restore the state of a debug session.
+   * @param autoStart - when true, starts the debugger
+   * if it has not been started yet.
+   */
+  restoreState(autoStart: boolean): Promise<void>;
+
+  /**
    * Continues the execution of the current thread.
    */
   continue(): Promise<void>;
@@ -85,19 +101,14 @@ export interface IDebugger {
   stepIn(): Promise<void>;
 
   /**
+   * Makes the current thread step out a function / method if possible.
+   */
+  stepOut(): Promise<void>;
+
+  /**
    * Update all breakpoints at once.
    */
-  updateBreakpoints(): Promise<void>;
-
-  /**
-   * Signal emitted upon session changed.
-   */
-  sessionChanged: ISignal<IDebugger, IDebugger.ISession>;
-
-  /**
-   * Signal emitted for debug event messages.
-   */
-  eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
+  updateBreakpoints(breakpoints: Breakpoints.IBreakpoint[]): Promise<void>;
 }
 
 /**
@@ -119,14 +130,16 @@ export namespace IDebugger {
     client: IClientSession | Session.ISession;
 
     /**
-     * The code editors in a debugger session.
-     */
-    editors: CodeEditor.IEditor[];
-
-    /**
      * Whether the debug session is started
      */
-    isStarted: boolean;
+    readonly isStarted: boolean;
+    /**
+     * Signal emitted for debug event messages.
+     */
+    readonly eventMessage: ISignal<
+      IDebugger.ISession,
+      IDebugger.ISession.Event
+    >;
 
     /**
      * Start a new debug session.
@@ -141,7 +154,7 @@ export namespace IDebugger {
     /**
      * Restore the state of a debug session.
      */
-    restoreState(): Promise<void>;
+    restoreState(): Promise<IDebugger.ISession.Response['debugInfo']>;
 
     /**
      * Send a debug request to the kernel.
@@ -150,11 +163,6 @@ export namespace IDebugger {
       command: K,
       args: IDebugger.ISession.Request[K]
     ): Promise<IDebugger.ISession.Response[K]>;
-
-    /**
-     * Signal emitted for debug event messages.
-     */
-    eventMessage: ISignal<IDebugger.ISession, IDebugger.ISession.Event>;
   }
 
   export namespace ISession {

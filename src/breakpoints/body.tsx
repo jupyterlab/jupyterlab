@@ -35,10 +35,10 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
       setBreakpoints(updates);
     };
 
-    model.breakpointsChanged.connect(updateBreakpoints);
+    model.changed.connect(updateBreakpoints);
 
     return () => {
-      model.breakpointsChanged.disconnect(updateBreakpoints);
+      model.changed.disconnect(updateBreakpoints);
     };
   });
 
@@ -98,7 +98,7 @@ const BreakpointComponent = ({
         checked={active}
       />
       <span>
-        {breakpoint.source.name} : {breakpoint.line}
+        {breakpoint.source.path} : {breakpoint.line}
       </span>
     </div>
   );
