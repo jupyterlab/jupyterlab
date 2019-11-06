@@ -177,10 +177,12 @@ export class DebugService implements IDebugger {
    * Precondition: isStarted() and stopped.
    */
   async restart(): Promise<void> {
+    const breakpoints = this.model.breakpointsModel.breakpoints;
     await this.stop();
     this.clearModel();
     this._stoppedThreads.clear();
     await this.start();
+    await this.updateBreakpoints(breakpoints);
   }
 
   /**
@@ -258,7 +260,7 @@ export class DebugService implements IDebugger {
   /**
    * Update all breakpoints at once.
    */
-  updateBreakpoints = async (breakpoints: Breakpoints.IBreakpoint[]) => {
+  async updateBreakpoints(breakpoints: Breakpoints.IBreakpoint[]) {
     if (!this.session.isStarted) {
       return;
     }
@@ -286,7 +288,7 @@ export class DebugService implements IDebugger {
     );
     this._model.breakpointsModel.breakpoints = kernelBreakpoints;
     await this.session.sendRequest('configurationDone', {});
-  };
+  }
 
   getAllFrames = async () => {
     const stackFrames = await this.getFrames(this.currentThread());
