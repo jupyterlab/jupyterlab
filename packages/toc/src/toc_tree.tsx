@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { Widget } from '@phosphor/widgets';
 import { IHeading } from './utils/headings';
-import { Registry } from './registry';
+import { TableOfContentsRegistry as Registry } from './registry';
 import { TOCItem } from './toc_item';
 
 /**

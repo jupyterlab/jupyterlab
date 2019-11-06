@@ -11,13 +11,13 @@ import { IHeading } from './utils/headings';
  *
  * @private
  */
-export interface ITableOfContentsRegistry extends Registry {}
+export interface ITableOfContentsRegistry extends TableOfContentsRegistry {}
 
 /* tslint:disable */
 /**
  * Table of contents registry token.
  */
-export const ITableOfContentsRegistry = new Token<Registry>(
+export const ITableOfContentsRegistry = new Token<TableOfContentsRegistry>(
   'jupyterlab-toc:ITableOfContentsRegistry'
 );
 /* tslint:enable */
@@ -25,7 +25,7 @@ export const ITableOfContentsRegistry = new Token<Registry>(
 /**
  * Class for registering widgets for which we can generate a table of contents.
  */
-export class Registry {
+export class TableOfContentsRegistry {
   /**
    * Finds a table of contents generator for a widget.
    *
@@ -36,7 +36,7 @@ export class Registry {
    * @param widget - widget
    * @returns table of contents generator
    */
-  find(widget: Widget): Registry.IGenerator | undefined {
+  find(widget: Widget): TableOfContentsRegistry.IGenerator | undefined {
     for (let i = 0; i < this._generators.length; i++) {
       const gen = this._generators[i];
       if (gen.tracker.has(widget)) {
@@ -53,17 +53,17 @@ export class Registry {
    *
    * @param generator - table of contents generator
    */
-  add(generator: Registry.IGenerator): void {
+  add(generator: TableOfContentsRegistry.IGenerator): void {
     this._generators.push(generator);
   }
 
-  private _generators: Registry.IGenerator[] = [];
+  private _generators: TableOfContentsRegistry.IGenerator[] = [];
 }
 
 /**
  * Static registry methods.
  */
-export namespace Registry {
+export namespace TableOfContentsRegistry {
   /**
    * Abstract class for managing options affecting how a table of contents is generated for a particular widget type.
    */

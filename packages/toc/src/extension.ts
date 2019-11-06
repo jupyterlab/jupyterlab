@@ -19,7 +19,10 @@ import {
   createMarkdownGenerator,
   createRenderedMarkdownGenerator
 } from './generators';
-import { ITableOfContentsRegistry, Registry } from './registry';
+import {
+  ITableOfContentsRegistry,
+  TableOfContentsRegistry as Registry
+} from './registry';
 import '../style/index.css';
 
 /**

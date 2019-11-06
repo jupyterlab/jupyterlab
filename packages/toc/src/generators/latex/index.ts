@@ -3,7 +3,7 @@
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-import { Registry } from '../../registry';
+import { TableOfContentsRegistry as Registry } from '../../registry';
 import { IHeading } from '../../utils/headings';
 
 /**

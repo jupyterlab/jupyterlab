@@ -9,7 +9,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { Message } from '@phosphor/messaging';
 import { Widget } from '@phosphor/widgets';
 import { IHeading } from './utils/headings';
-import { Registry } from './registry';
+import { TableOfContentsRegistry as Registry } from './registry';
 import { TOCTree } from './toc_tree';
 
 /**

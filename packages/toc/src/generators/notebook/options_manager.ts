@@ -3,7 +3,7 @@
 
 import { ISanitizer } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
-import { Registry } from '../../registry';
+import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
 import { TagsToolComponent } from './tagstool';
 

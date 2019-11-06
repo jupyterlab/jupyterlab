@@ -4,7 +4,7 @@
 import { ISanitizer } from '@jupyterlab/apputils';
 import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { Registry } from '../../registry';
+import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
 import { isMarkdown } from '../../utils/is_markdown';
 import { isDOM } from '../../utils/is_dom';
