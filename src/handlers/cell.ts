@@ -9,7 +9,7 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { Signal } from '@phosphor/signaling';
 
-import { Doc, Editor } from 'codemirror';
+import { Editor } from 'codemirror';
 
 import { Breakpoints, SessionTypes } from '../breakpoints';
 
@@ -142,8 +142,6 @@ export class CellManager implements IDisposable {
 
     const editor = cell.editor as CodeMirrorEditor;
 
-    this.previousLineCount = editor.lineCount;
-
     const editorBreakpoints = this.getBreakpointsInfo(cell).map(lineInfo => {
       return Private.createBreakpoint(
         this._debuggerService.session.client.name,
@@ -161,13 +159,11 @@ export class CellManager implements IDisposable {
     ]);
 
     editor.editor.on('gutterClick', this.onGutterClick);
-    editor.editor.on('renderLine', this.onNewRenderLine);
   }
 
   protected removeListener(cell: CodeCell) {
     const editor = cell.editor as CodeMirrorEditor;
     editor.editor.off('gutterClick', this.onGutterClick);
-    editor.editor.off('renderLine', this.onNewRenderLine);
   }
 
   protected getEditorId(): string {
@@ -197,26 +193,6 @@ export class CellManager implements IDisposable {
     void this._debuggerService.updateBreakpoints(breakpoints);
   };
 
-  protected onNewRenderLine = (editor: Editor, line: any) => {
-    const lineInfo = editor.lineInfo(line);
-    if (lineInfo.handle && lineInfo.handle.order === false) {
-      return;
-    }
-    const doc: Doc = editor.getDoc();
-    const linesNumber = doc.lineCount();
-    if (this.previousLineCount !== linesNumber) {
-      let lines: number[] = [];
-      doc.eachLine(line => {
-        if ((line as ILineInfo).gutterMarkers) {
-          const lineInfo = editor.lineInfo(line);
-          lines.push(lineInfo.line + 1);
-        }
-      });
-      this.breakpointsModel.changeLines(lines);
-      this.previousLineCount = linesNumber;
-    }
-  };
-
   private addBreakpointsToEditor(cell: CodeCell) {
     this.clearGutter(cell);
     const editor = cell.editor as CodeMirrorEditor;
@@ -243,7 +219,6 @@ export class CellManager implements IDisposable {
   }
 
   private _previousCell: CodeCell;
-  private previousLineCount: number;
   private _debuggerModel: Debugger.Model;
   private breakpointsModel: Breakpoints.Model;
   private _activeCell: CodeCell;
