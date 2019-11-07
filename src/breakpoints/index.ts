@@ -118,22 +118,6 @@ export namespace Breakpoints {
       this.breakpoints = this._state[newType];
     }
 
-    changeLines(lines: number[]) {
-      if (!lines && this.breakpoints.length === 0) {
-        return;
-      }
-      if (lines.length === 0) {
-        this.breakpoints = [];
-      } else {
-        const breakpoint = { ...this.breakpoints[0] };
-        let breakpoints: Breakpoints.IBreakpoint[] = [];
-        lines.forEach(line => {
-          breakpoints.push({ ...breakpoint, line });
-        });
-        this.breakpoints = [...breakpoints];
-      }
-    }
-
     get isDisposed(): boolean {
       return this._isDisposed;
     }
