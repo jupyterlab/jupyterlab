@@ -63,4 +63,16 @@ describe('DebugService', () => {
       expect(service.isStarted()).to.equal(false);
     });
   });
+
+  describe('#session', () => {
+    it('should emit the sessionChanged event setting the session', () => {
+      let sessionChangedEvents: IDebugger.ISession[] = [];
+      service.sessionChanged.connect((_, newSession) => {
+        sessionChangedEvents.push(newSession);
+      });
+      service.session = session;
+      expect(sessionChangedEvents.length).to.equal(1);
+      expect(sessionChangedEvents[0]).to.eq(session);
+    });
+  });
 });
