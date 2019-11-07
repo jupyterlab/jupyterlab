@@ -1,7 +1,7 @@
 import { VirtualDocument } from './virtual/document';
 import { LSPConnection } from './connection';
 import { Signal } from '@phosphor/signaling';
-import { PageConfig, PathExt } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { sleep, until_ready } from './utils';
 
 export interface IDocumentConnectionData {
@@ -91,13 +91,15 @@ export class DocumentConnectionManager {
 
     const wsBase = PageConfig.getBaseUrl().replace(/^http/, 'ws');
     const rootUri = PageConfig.getOption('rootUri');
-    let socket = new WebSocket(PathExt.join(wsBase, 'lsp', language));
+    const documentUri = URLExt.join(rootUri, virtual_document.uri);
+    const serverUri = URLExt.join('ws://jupyter-lsp', language);
+    let socket = new WebSocket(URLExt.join(wsBase, 'lsp', language));
 
     let connection = new LSPConnection({
-      serverUri: PathExt.join('ws://jupyter-lsp', language),
       languageId: language,
+      serverUri,
       rootUri,
-      documentUri: PathExt.join(rootUri, virtual_document.uri),
+      documentUri,
       documentText: () => {
         // NOTE: Update is async now and this is not really used, as an alternative method
         // which is compatible with async is used.
