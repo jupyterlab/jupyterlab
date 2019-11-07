@@ -3,7 +3,7 @@
 
 import { Variables } from '../index';
 
-import { ITheme, ObjectInspector, ObjectLabel } from 'react-inspector';
+import { ITheme, ObjectInspector, ObjectRootLabel } from 'react-inspector';
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
@@ -28,25 +28,44 @@ export class Body extends ReactWidget {
 const VariableComponent = ({ model }: { model: Variables.Model }) => {
   const [data, setData] = useState(model.scopes);
 
-  const filterVariable = (variable: any) => {
-    const tableKey = ['name', 'value'];
+  const filterVariable = (
+    variable: Variables.IVariable,
+    isObject?: boolean,
+    v?: any
+  ): Object => {
+    const tableKey = ['name', 'value', 'type'];
     const filteredObj = Object.keys(variable)
       .filter(
-        k =>
-          tableKey.includes(k) ||
-          (k !== 'presentationHint' && typeof (variable as any)[k] === 'object')
+        key =>
+          (isObject ? key === 'value' : tableKey.includes(key)) ||
+          (key !== 'presentationHint' &&
+            typeof (variable as any)[key] === 'object')
       )
       .reduce((res, key) => {
-        if (typeof variable[key] === 'object') {
-          variable[key] = filterVariable(variable[key]);
+        let valueOfKey =
+          key === 'value' ? convertType(variable) : (variable as any)[key];
+        if (typeof valueOfKey === 'object') {
+          return Object.assign(res, filterVariable(
+            valueOfKey,
+            true,
+            key
+          ) as Object);
         }
-        return Object.assign(res, { [key]: variable[key] });
+        if (isObject) {
+          return Object.assign(res, {
+            [v]: valueOfKey
+          });
+        }
+
+        return Object.assign(res, {
+          [key]: valueOfKey
+        });
       }, {});
 
     return filteredObj;
   };
 
-  const convert = (scopes: Variables.IScope[]) => {
+  const convertForObjectInspector = (scopes: Variables.IScope[]) => {
     const converted = scopes.map(scope => {
       const newVariable = scope.variables.map(variable => {
         const func = () => {
@@ -63,6 +82,7 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
     });
     return converted;
   };
+
   useEffect(() => {
     const updateScopes = (self: Variables.Model) => {
       if (ArrayExt.shallowEqual(data, self.scopes)) {
@@ -80,7 +100,7 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
 
   const List = () => (
     <>
-      {convert(data).map(scope => (
+      {convertForObjectInspector(data).map(scope => (
         <ObjectInspector
           key={scope.name}
           data={scope.variables}
@@ -94,6 +114,24 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
   );
 
   return <>{List()}</>;
+};
+
+const convertType = (variable: Variables.IVariable) => {
+  const type = variable.type;
+  let value: any = variable.value;
+  if (type === 'int' || type === 'float') {
+    return value * 1;
+  }
+  if (type === 'bool') {
+    return value === 'False' ? false : true;
+  }
+  if (type === 'str') {
+    return (value as string)
+      .split('')
+      .slice(1, value.length - 1)
+      .join('');
+  }
+  return value;
 };
 
 const defaultNodeRenderer = ({
@@ -111,13 +149,19 @@ const defaultNodeRenderer = ({
   expanded: boolean;
   theme?: string | Partial<ITheme>;
 }) => {
-  const label = data.name === '' || data.name == null ? name : data.name;
-  const value = data.value;
   let dontDisplay = false;
+  const types = ['bool', 'str', 'int', 'float'];
+  const label = data.name === '' || data.name == null ? name : data.name;
+  const value = types.includes(data.type)
+    ? data.value
+    : data.type === 'type'
+    ? 'class'
+    : data.type;
 
   if (expanded) {
     if (data.getMoreDetails) {
       data.getMoreDetails();
+      dontDisplay = true;
     }
   }
 
@@ -131,10 +175,10 @@ const defaultNodeRenderer = ({
     <span>
       <span style={{ color: THEME.OBJECT_NAME_COLOR }}>{label}</span>
       <span>: </span>
-      <span>{value}</span>
+      <span style={{ color: THEME.OBJECT_VALUE_STRING_COLOR }}>{value}</span>
     </span>
   ) : (
-    <ObjectLabel name={label} data={data} isNonenumerable={isNonenumerable} />
+    <ObjectRootLabel name={name} data={data} />
   );
 };
 
