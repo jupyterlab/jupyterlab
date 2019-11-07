@@ -89,6 +89,7 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
         return;
       }
       setData(self.scopes);
+
     };
 
     model.changed.connect(updateScopes);

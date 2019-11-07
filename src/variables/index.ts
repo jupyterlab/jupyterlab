@@ -92,6 +92,8 @@ export namespace Variables {
         return { ...scope };
       });
       this.scopes = [...newScope];
+      this._currentVariableChanged.emit(variable);
+
     }
 
     get scopes(): IScope[] {
@@ -110,6 +112,7 @@ export namespace Variables {
     set variables(variables: IVariable[]) {
       this._currentScope.variables = variables;
       this._changed.emit();
+
     }
 
     get variableExpanded(): ISignal<this, IVariable> {
@@ -129,9 +132,11 @@ export namespace Variables {
     private _currentVariable: IVariable;
     private _currentScope: IScope;
 
+
     private _currentChanged = new Signal<this, IVariable>(this);
     private _variableExpanded = new Signal<this, IVariable>(this);
     private _changed = new Signal<this, void>(this);
+    private _currentVariableChanged = new Signal<this, IVariable>(this);
   }
 
   export interface IOptions extends Panel.IOptions {
