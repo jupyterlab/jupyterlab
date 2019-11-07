@@ -51,6 +51,18 @@ export XEUS_LOG=1
 jlpm run test
 ```
 
+To run tests for a specific test suite name:
+
+```bash
+jlpm run test --testNamePattern=<regex>
+```
+
+To run tests for a specific test module name:
+
+```bash
+jlpm run test --testPathPattern=<regex>
+```
+
 ### Inspecting debug messages
 
 The [kernelspy extension for JupyterLab](https://github.com/vidartf/jupyterlab-kernelspy) can be used to inspect the debug messages sent between the debugger UI and the kernel.
