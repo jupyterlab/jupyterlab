@@ -4,6 +4,8 @@ import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
 import { createClientSession } from '@jupyterlab/testutils';
 
+import { Debugger } from '../../lib/debugger';
+
 import { DebugService } from '../../lib/service';
 
 import { DebugSession } from '../../lib/session';
@@ -12,6 +14,7 @@ import { IDebugger } from '../../lib/tokens';
 
 describe('DebugService', () => {
   let client: IClientSession;
+  let model: Debugger.Model;
   let session: IDebugger.ISession;
   let service: IDebugger;
 
@@ -24,6 +27,7 @@ describe('DebugService', () => {
     await (client as ClientSession).initialize();
     await client.kernel.ready;
     session = new DebugSession({ client });
+    model = new Debugger.Model({});
     service = new DebugService();
   });
 
@@ -65,7 +69,7 @@ describe('DebugService', () => {
   });
 
   describe('#session', () => {
-    it('should emit the sessionChanged event setting the session', () => {
+    it('should emit the sessionChanged signal when setting the session', () => {
       let sessionChangedEvents: IDebugger.ISession[] = [];
       service.sessionChanged.connect((_, newSession) => {
         sessionChangedEvents.push(newSession);
@@ -73,6 +77,18 @@ describe('DebugService', () => {
       service.session = session;
       expect(sessionChangedEvents.length).to.equal(1);
       expect(sessionChangedEvents[0]).to.eq(session);
+    });
+  });
+
+  describe('#model', () => {
+    it('should emit the modelChanged signal when setting the model', () => {
+      let modelChangedEvents: Debugger.Model[] = [];
+      service.modelChanged.connect((_, newModel) => {
+        modelChangedEvents.push(newModel);
+      });
+      service.model = model;
+      expect(modelChangedEvents.length).to.equal(1);
+      expect(modelChangedEvents[0]).to.eq(model);
     });
   });
 });
