@@ -340,6 +340,7 @@ export class LogLevelSwitcher extends ReactWidget {
    */
   handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
     this._logConsole.logger.level = event.target.value as LogLevel;
+    this.update();
   };
 
   /**
