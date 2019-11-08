@@ -17,6 +17,7 @@
  * node ensure-max-old-space.js real-cli.js arg1 arg2
  */
 import { execFileSync } from 'child_process';
+import * as which from 'which';
 
 const MAX_OLD_SPACE = '--max_old_space_size=4096';
 
@@ -26,6 +27,6 @@ if (!process.env.NODE_OPTIONS) {
   process.env.NODE_OPTIONS += ` ${MAX_OLD_SPACE}`;
 }
 
-const program = process.argv[2];
+const program = which.sync(process.argv[2]);
 const args = process.argv.slice(3);
 execFileSync(program, args, { env: process.env, stdio: 'inherit' });
