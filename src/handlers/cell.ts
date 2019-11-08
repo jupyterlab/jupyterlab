@@ -73,7 +73,7 @@ export class CellManager implements IDisposable {
 
   // TODO: call when the debugger stops
   private cleanupHighlight() {
-    if (!this.activeCell) {
+    if (!this.activeCell || this.activeCell.disposed) {
       return;
     }
     const editor = this.activeCell.editor as CodeMirrorEditor;
@@ -169,6 +169,9 @@ export class CellManager implements IDisposable {
   }
 
   protected removeListener(cell: CodeCell) {
+    if (cell.disposed) {
+      return;
+    }
     const editor = cell.editor as CodeMirrorEditor;
     editor.editor.off('gutterClick', this.onGutterClick);
     editor.editor.off('renderLine', this.onNewRenderLine);
