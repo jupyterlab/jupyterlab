@@ -53,6 +53,8 @@ export namespace CommandIDs {
 
   export const debugContinue = 'debugger:continue';
 
+  export const terminate = 'debugger:terminate';
+
   export const next = 'debugger:next';
 
   export const stepIn = 'debugger:stepIn';
@@ -62,8 +64,6 @@ export namespace CommandIDs {
   export const debugConsole = 'debugger:debug-console';
 
   export const debugFile = 'debugger:debug-file';
-
-  export const debugNotebook = 'debugger:debug-notebook';
 
   export const mount = 'debugger:mount';
 
@@ -291,6 +291,19 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
+    commands.addCommand(CommandIDs.terminate, {
+      label: 'Terminate',
+      caption: 'Terminate',
+      iconClass: 'jp-MaterialIcon jp-StopIcon',
+      isEnabled: () => {
+        return service.isThreadStopped();
+      },
+      execute: async () => {
+        await service.restart();
+        commands.notifyCommandChanged();
+      }
+    });
+
     commands.addCommand(CommandIDs.next, {
       label: 'Next',
       caption: 'Next',
@@ -350,6 +363,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         const callstackCommands = {
           registry: commands,
           continue: CommandIDs.debugContinue,
+          terminate: CommandIDs.terminate,
           next: CommandIDs.next,
           stepIn: CommandIDs.stepIn,
           stepOut: CommandIDs.stepOut
@@ -394,13 +408,17 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
     if (palette) {
       const category = 'Debugger';
-      palette.addItem({ command: CommandIDs.changeMode, category });
-      palette.addItem({ command: CommandIDs.create, category });
-      palette.addItem({ command: CommandIDs.debugContinue, category });
-      palette.addItem({ command: CommandIDs.next, category });
-      palette.addItem({ command: CommandIDs.stepIn, category });
-      palette.addItem({ command: CommandIDs.stepOut, category });
-      palette.addItem({ command: CommandIDs.debugNotebook, category });
+      [
+        CommandIDs.changeMode,
+        CommandIDs.create,
+        CommandIDs.debugContinue,
+        CommandIDs.terminate,
+        CommandIDs.next,
+        CommandIDs.stepIn,
+        CommandIDs.stepOut
+      ].forEach(command => {
+        palette.addItem({ command, category });
+      });
     }
 
     if (restorer) {

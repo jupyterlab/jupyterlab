@@ -81,11 +81,11 @@ export class DebugService implements IDebugger {
 
     this._session.eventMessage.connect((_, event) => {
       if (event.event === 'stopped') {
-        this._threadStopped.add(event.body.threadId);
+        this._stoppedThreads.add(event.body.threadId);
         void this.getAllFrames();
       } else if (event.event === 'continued') {
-        this._threadStopped.delete(event.body.threadId);
-        this.onContinued();
+        this._stoppedThreads.delete(event.body.threadId);
+        this.clearModel();
       }
       this._eventMessage.emit(event);
     });
@@ -151,7 +151,7 @@ export class DebugService implements IDebugger {
    * Whether the current thread is stopped.
    */
   isThreadStopped(): boolean {
-    return this._threadStopped.has(this.currentThread());
+    return this._stoppedThreads.has(this.currentThread());
   }
 
   /**
@@ -168,6 +168,19 @@ export class DebugService implements IDebugger {
    */
   async stop(): Promise<void> {
     await this.session.stop();
+  }
+
+  /**
+   * Restarts the debugger.
+   * Precondition: isStarted() and stopped.
+   */
+  async restart(): Promise<void> {
+    const breakpoints = this.model.breakpointsModel.breakpoints;
+    await this.stop();
+    this.clearModel();
+    this._stoppedThreads.clear();
+    await this.start();
+    await this.updateBreakpoints(breakpoints);
   }
 
   /**
@@ -197,7 +210,7 @@ export class DebugService implements IDebugger {
       await this.session.sendRequest('continue', {
         threadId: this.currentThread()
       });
-      this._threadStopped.delete(this.currentThread());
+      this._stoppedThreads.delete(this.currentThread());
     } catch (err) {
       console.error('Error:', err.message);
     }
@@ -245,7 +258,7 @@ export class DebugService implements IDebugger {
   /**
    * Update all breakpoints at once.
    */
-  updateBreakpoints = async (breakpoints: Breakpoints.IBreakpoint[]) => {
+  async updateBreakpoints(breakpoints: Breakpoints.IBreakpoint[]) {
     if (!this.session.isStarted) {
       return;
     }
@@ -273,7 +286,7 @@ export class DebugService implements IDebugger {
     );
     this._model.breakpointsModel.breakpoints = kernelBreakpoints;
     await this.session.sendRequest('configurationDone', {});
-  };
+  }
 
   getAllFrames = async () => {
     const stackFrames = await this.getFrames(this.currentThread());
@@ -373,7 +386,7 @@ export class DebugService implements IDebugger {
     return client.ready;
   }
 
-  private onContinued() {
+  private clearModel() {
     this._model.callstackModel.frames = [];
     this._model.variablesModel.scopes = [];
   }
@@ -394,7 +407,7 @@ export class DebugService implements IDebugger {
   private frames: Frame[] = [];
 
   // TODO: move this in model
-  private _threadStopped = new Set();
+  private _stoppedThreads = new Set();
 }
 
 export type Frame = {

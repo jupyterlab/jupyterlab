@@ -79,6 +79,12 @@ export interface IDebugger extends IDisposable {
   stop(): Promise<void>;
 
   /**
+   * Restart the debugger.
+   * Precondition: isStarted()
+   */
+  restart(): Promise<void>;
+
+  /**
    * Restore the state of a debug session.
    * @param autoStart - when true, starts the debugger
    * if it has not been started yet.
