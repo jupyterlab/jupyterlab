@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeCell } from '@jupyterlab/cells';
+import { CodeCell, ICellModel } from '@jupyterlab/cells';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+
+import { ActivityMonitor } from '@jupyterlab/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -18,6 +20,8 @@ import { Debugger } from '../debugger';
 import { IDebugger } from '../tokens';
 
 const LINE_HIGHLIGHT_CLASS = 'jp-breakpoint-line-highlight';
+
+const CELL_CHANGED_TIMEOUT = 1000;
 
 export class CellManager implements IDisposable {
   constructor(options: CellManager.IOptions) {
@@ -96,6 +100,9 @@ export class CellManager implements IDisposable {
     if (this.previousCell) {
       this.removeListener(this.previousCell);
     }
+    if (this._cellMonitor) {
+      this._cellMonitor.dispose();
+    }
     this.removeListener(this.activeCell);
     this.cleanupHighlight();
     Signal.clearData(this);
@@ -139,16 +146,21 @@ export class CellManager implements IDisposable {
       this._debuggerService.session
     ) {
       if (this.previousCell && !this.previousCell.isDisposed) {
-        this.previousCell.model.contentChanged.disconnect(
-          this.sendEditorBreakpoints,
-          this
-        );
+        if (this._cellMonitor) {
+          this._cellMonitor.dispose();
+        }
         this.removeListener(this.previousCell);
       }
-      this.activeCell.model.contentChanged.connect(
-        this.sendEditorBreakpoints,
-        this
-      );
+
+      this._cellMonitor = new ActivityMonitor({
+        signal: this.activeCell.model.contentChanged,
+        timeout: CELL_CHANGED_TIMEOUT
+      });
+
+      this._cellMonitor.activityStopped.connect(() => {
+        this.sendEditorBreakpoints();
+      }, this);
+
       this.previousCell = this.activeCell;
       this.setEditor(this.activeCell);
     }
@@ -268,6 +280,7 @@ export class CellManager implements IDisposable {
   private breakpointsModel: Breakpoints.Model;
   private _activeCell: CodeCell;
   private _debuggerService: IDebugger;
+  private _cellMonitor: ActivityMonitor<ICellModel, void> = null;
 }
 
 export namespace CellManager {
