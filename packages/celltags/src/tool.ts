@@ -122,11 +122,11 @@ export class TagTool extends NotebookTools.Tool {
     if (this.tracker && this.tracker.currentWidget) {
       let cells = notebook.model.cells;
       let allTags: string[] = [];
-      for (var i = 0; i < cells.length; i++) {
+      for (let i = 0; i < cells.length; i++) {
         let metadata = cells.get(i).metadata;
         let tags = metadata.get('tags') as string[];
         if (tags) {
-          for (var j = 0; j < tags.length; j++) {
+          for (let j = 0; j < tags.length; j++) {
             let name = tags[j] as string;
             if (name !== '') {
               if (allTags.indexOf(name) < 0) {
@@ -152,7 +152,7 @@ export class TagTool extends NotebookTools.Tool {
     let nWidgets = layout.widgets.length;
     for (let i = 0; i < nWidgets; i++) {
       let idx = tags.indexOf((layout.widgets[i] as TagWidget).name);
-      if (idx < 0 && layout.widgets[i].id != 'add-tag') {
+      if (idx < 0 && layout.widgets[i].id !== 'add-tag') {
         toDispose.push(layout.widgets[i] as TagWidget);
       } else {
         tags.splice(idx, 1);
@@ -173,12 +173,12 @@ export class TagTool extends NotebookTools.Tool {
    * that each string doesn't include spaces.
    */
   validateTags(cell: Cell, taglist: string[]) {
-    var results: string[] = [];
+    let results: string[] = [];
     for (let i = 0; i < taglist.length; i++) {
-      if (taglist[i] != '' && typeof taglist[i] === 'string') {
+      if (taglist[i] !== '' && typeof taglist[i] === 'string') {
         let spl = taglist[i].split(/[,\s]+/);
         for (let j = 0; j < spl.length; j++) {
-          if (spl[j] != '' && results.indexOf(spl[j]) < 0) {
+          if (spl[j] !== '' && results.indexOf(spl[j]) < 0) {
             results.push(spl[j]);
           }
         }
@@ -195,11 +195,6 @@ export class TagTool extends NotebookTools.Tool {
   protected onActiveCellChanged(): void {
     this.loadActiveTags();
   }
-
-  /**
-   * Handle a change to cell selection in the notebook.
-   */
-  protected onSelectionChanged(): void {}
 
   /**
    * Get all tags once available.
@@ -240,14 +235,14 @@ export class TagTool extends NotebookTools.Tool {
    */
   protected onActiveCellMetadataChanged(): void {
     let tags = this.tracker.activeCell.model.metadata.get('tags');
-    var taglist: string[] = [];
+    let taglist: string[] = [];
     if (tags === undefined) {
       return;
     }
     if (typeof tags === 'string') {
       taglist.push(tags);
     } else {
-      taglist = <string[]>tags;
+      taglist = tags as string[];
     }
     this.validateTags(this.tracker.activeCell, taglist);
   }

@@ -98,7 +98,7 @@ export class TagWidget extends Widget {
    */
   onUpdateRequest() {
     let applied = this.parent.checkApplied(this.name);
-    if (applied != this.applied) {
+    if (applied !== this.applied) {
       this.toggleApplied();
     }
   }

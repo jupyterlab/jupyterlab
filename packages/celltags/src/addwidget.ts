@@ -118,7 +118,7 @@ export class AddWidget extends Widget {
     inputElement.style.width = tmp.getBoundingClientRect().width + 8 + 'px';
     document.body.removeChild(tmp);
     // if they hit Enter, add the tag and reset state
-    if (event.keyCode == 13) {
+    if (event.keyCode === 13) {
       let value = inputElement.value;
       (this.parent as TagTool).addTag(value);
       inputElement.blur();
