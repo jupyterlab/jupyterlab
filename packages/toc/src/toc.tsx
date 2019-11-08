@@ -13,36 +13,6 @@ import { TableOfContentsRegistry as Registry } from './registry';
 import { TOCTree } from './toc_tree';
 
 /**
- * Interface describing table of contents widget options.
- */
-interface IOptions {
-  /**
-   * Application document manager.
-   */
-  docmanager: IDocumentManager;
-
-  /**
-   * Application rendered MIME type.
-   */
-  rendermime: IRenderMimeRegistry;
-}
-
-/**
- * Interface describing the current widget.
- */
-interface ICurrentWidget<W extends Widget = Widget> {
-  /**
-   * Current widget.
-   */
-  widget: W;
-
-  /**
-   * Table of contents generator for the current widget.
-   */
-  generator: Registry.IGenerator<W>;
-}
-
-/**
  * Timeout for throttling ToC rendering.
  *
  * @private
@@ -52,14 +22,14 @@ const RENDER_TIMEOUT = 1000;
 /**
  * Widget for hosting a notebook table of contents.
  */
-class TableOfContents extends Widget {
+export class TableOfContents extends Widget {
   /**
    * Returns a new table of contents.
    *
    * @param options - options
    * @returns widget
    */
-  constructor(options: IOptions) {
+  constructor(options: TableOfContents.IOptions) {
     super();
     this._docmanager = options.docmanager;
     this._rendermime = options.rendermime;
@@ -68,10 +38,10 @@ class TableOfContents extends Widget {
   /**
    * Current widget-generator tuple for the ToC.
    */
-  get current(): ICurrentWidget | null {
+  get current(): TableOfContents.ICurrentWidget | null {
     return this._current;
   }
-  set current(value: ICurrentWidget | null) {
+  set current(value: TableOfContents.ICurrentWidget | null) {
     // If they are the same as previously, do nothing...
     if (
       value &&
@@ -184,11 +154,41 @@ class TableOfContents extends Widget {
   private _toolbar: any;
   private _rendermime: IRenderMimeRegistry;
   private _docmanager: IDocumentManager;
-  private _current: ICurrentWidget | null;
+  private _current: TableOfContents.ICurrentWidget | null;
   private _monitor: ActivityMonitor<any, any> | null;
 }
 
 /**
- * Exports.
+ * A namespace for TableOfContents statics.
  */
-export { TableOfContents };
+export namespace TableOfContents {
+  /**
+   * Interface describing table of contents widget options.
+   */
+  export interface IOptions {
+    /**
+     * Application document manager.
+     */
+    docmanager: IDocumentManager;
+
+    /**
+     * Application rendered MIME type.
+     */
+    rendermime: IRenderMimeRegistry;
+  }
+
+  /**
+   * Interface describing the current widget.
+   */
+  export interface ICurrentWidget<W extends Widget = Widget> {
+    /**
+     * Current widget.
+     */
+    widget: W;
+
+    /**
+     * Table of contents generator for the current widget.
+     */
+    generator: Registry.IGenerator<W>;
+  }
+}
