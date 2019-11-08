@@ -37,8 +37,8 @@ data that changes over time in JupyterLab.
 To have your React element change in response to a signal event, use the ``UseSignal`` component,
 which implements the `"render props" <https://reactjs.org/docs/render-props.html>`__.
 
-The `running component <https://github.com/jupyterlab/jupyterlab/blob/master/packages/running/src/index.tsx>`__
-and the ``createSearchOverlay`` function in the `search overlay <https://github.com/jupyterlab/jupyterlab/blob/master/packages/documentsearch/src/searchoverlay.tsx>`__
+The `running component <https://github.com/jupyterlab/jupyterlab/blob/f2e0cde0e7c960dc82fd9b010fcd3dbd9e9b43d0/packages/running/src/index.tsx#L157-L159>`__
+and the ``createSearchOverlay`` function in the `search overlay <https://github.com/jupyterlab/jupyterlab/blob/f2e0cde0e7c960dc82fd9b010fcd3dbd9e9b43d0/packages/documentsearch/src/searchoverlay.tsx#L440-L457>`__
 use both of these features and serve as a good reference for best practices.
 
 We currently do not have a way of embedding Phosphor widgets inside of React components. If you find yourself trying to do this, we would recommend either converting the Phosphor widget to a React component or using a Phosphor widget for the outer layer component.
