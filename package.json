@@ -56,6 +56,7 @@
     "@phosphor/coreutils": "^1.3.1",
     "@phosphor/disposable": "^1.2.0",
     "@phosphor/widgets": "^1.8.0",
+    "murmurhash-js": "^1.0.0",
     "vscode-debugprotocol": "1.35.0",
     "react-inspector": "^2.0.0"
   },
@@ -66,6 +67,7 @@
     "@types/chai": "^4.1.3",
     "@types/codemirror": "0.0.76",
     "@types/jest": "^24.0.17",
+    "@types/murmurhash-js": "1.0.3",
     "chai": "^4.2.0",
     "husky": "^3.0.2",
     "jest": "^24.8.0",

@@ -197,7 +197,7 @@ export namespace IDebugger {
      */
     export interface IDebugInfoBreakpoints {
       source: string;
-      lines: number[];
+      breakpoints: DebugProtocol.Breakpoint[];
     }
 
     /**
@@ -211,6 +211,8 @@ export namespace IDebugger {
         hashMethod: string;
         hashSeed: number;
         breakpoints: IDebugInfoBreakpoints[];
+        tmp_file_prefix: string;
+        tmp_file_suffix: string;
       };
     }
 

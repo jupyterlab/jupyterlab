@@ -5,6 +5,7 @@ import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';
 import { Signal } from '@phosphor/signaling';
 import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
+import { murmur2 } from 'murmurhash-js';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { IDebugger } from '../tokens';
 import { Body } from './body';
@@ -30,10 +31,14 @@ export class Breakpoints extends Panel {
         tooltip: `${this.isAllActive ? 'Deactivate' : 'Activate'} Breakpoints`,
         onClick: () => {
           this.isAllActive = !this.isAllActive;
-          this.model.breakpoints.map((breakpoint: Breakpoints.IBreakpoint) => {
-            breakpoint.active = this.isAllActive;
-            this.model.breakpoint = breakpoint;
-          });
+
+          // TODO: this requires a set breakpoint(bp: Breakpoints.IBreakpoint[]) method in the model
+          /*Array.from(this.model.breakpoints.values()).map((breakpoints: Breakpoints.IBreakpoint[]) => {
+            breakpoints.map((breakpoint: Breakpoints.IBreakpoint) => {
+              breakpoint.active = this.isAllActive;
+              this.model.breakpoint = breakpoint;
+            });
+          });*/
         }
       })
     );
@@ -78,44 +83,31 @@ export namespace Breakpoints {
   }
 
   export class Model implements IDisposable {
-    constructor(model: IBreakpoint[]) {
-      this._breakpoints = model;
+    setHashParameters(method: string, seed: number) {
+      if (method === 'Murmur2') {
+        this._hashMethod = (code: string) => {
+          return murmur2(code, seed).toString();
+        };
+      } else {
+        throw new Error('hash method not supported ' + method);
+      }
     }
 
-    changed = new Signal<this, IBreakpoint[]>(this);
+    get changed(): Signal<this, IBreakpoint[]> {
+      return this._changed;
+    }
 
-    get breakpoints(): IBreakpoint[] {
+    get restored(): Signal<this, void> {
+      return this._restored;
+    }
+
+    get breakpoints(): Map<string, IBreakpoint[]> {
       return this._breakpoints;
     }
 
+    // kept for react component
     get breakpointChanged(): Signal<this, IBreakpoint> {
       return this._breakpointChanged;
-    }
-
-    set breakpoints(breakpoints: IBreakpoint[]) {
-      this._breakpoints = [...breakpoints];
-      this.changed.emit(this._breakpoints);
-    }
-
-    set breakpoint(breakpoint: IBreakpoint) {
-      const index = this._breakpoints.findIndex(
-        ele => ele.line === breakpoint.line
-      );
-      if (index !== -1) {
-        this._breakpoints[index] = breakpoint;
-        this._breakpointChanged.emit(breakpoint);
-      } else {
-        this.breakpoints = [...this.breakpoints, breakpoint];
-      }
-    }
-
-    set type(newType: SessionTypes) {
-      if (newType === this._selectedType) {
-        return;
-      }
-      this._state[this._selectedType] = this.breakpoints;
-      this._selectedType = newType;
-      this.breakpoints = this._state[newType];
     }
 
     get isDisposed(): boolean {
@@ -130,13 +122,37 @@ export namespace Breakpoints {
       Signal.clearData(this);
     }
 
-    private _selectedType: SessionTypes;
+    hash(code: string): string {
+      return this._hashMethod(code);
+    }
+
+    setBreakpoints(code: string, breakpoints: IBreakpoint[]) {
+      this._breakpoints.set(this.hash(code), breakpoints);
+      this.changed.emit(breakpoints);
+    }
+
+    getBreakpoints(code: string): IBreakpoint[] {
+      return this._breakpoints.get(this.hash(code)) || [];
+    }
+
+    restoreBreakpoints(breakpoints: Map<string, IBreakpoint[]>) {
+      this._breakpoints = breakpoints;
+      this._restored.emit();
+    }
+
+    /*private printMap() {
+      this._breakpoints.forEach((value, key, map) => {
+        console.log(key);
+        value.forEach((bp) => console.log(bp.line));
+      });
+    }*/
+
+    private _hashMethod: (code: string) => string;
+    private _breakpoints = new Map<string, IBreakpoint[]>();
+    private _changed = new Signal<this, IBreakpoint[]>(this);
+    private _restored = new Signal<this, void>(this);
+    // kept for react component
     private _breakpointChanged = new Signal<this, IBreakpoint>(this);
-    private _breakpoints: IBreakpoint[];
-    private _state = {
-      console: [] as Breakpoints.IBreakpoint[],
-      notebook: [] as Breakpoints.IBreakpoint[]
-    };
     private _isDisposed: boolean = false;
   }
 

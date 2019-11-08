@@ -53,6 +53,13 @@ export class CellManager implements IDisposable {
       this.addBreakpointsToEditor(this.activeCell);
     });
 
+    this.breakpointsModel.restored.connect(async () => {
+      if (!this.activeCell || this.activeCell.isDisposed) {
+        return;
+      }
+      this.addBreakpointsToEditor(this.activeCell);
+    });
+
     if (this.activeCell) {
       this._debuggerModel.codeValue = this.activeCell.model.value;
     }
@@ -141,16 +148,7 @@ export class CellManager implements IDisposable {
     }
 
     const editor = cell.editor as CodeMirrorEditor;
-
-    const editorBreakpoints = this.getBreakpointsInfo(cell).map(lineInfo => {
-      return Private.createBreakpoint(
-        this._debuggerService.session.client.name,
-        this.getEditorId(),
-        lineInfo.line + 1
-      );
-    });
-
-    void this._debuggerService.updateBreakpoints(editorBreakpoints);
+    this.addBreakpointsToEditor(cell);
 
     editor.setOption('lineNumbers', true);
     editor.editor.setOption('gutters', [
@@ -177,7 +175,9 @@ export class CellManager implements IDisposable {
     }
 
     const isRemoveGutter = !!info.gutterMarkers;
-    let breakpoints = this.breakpointsModel.breakpoints;
+    let breakpoints: Breakpoints.IBreakpoint[] = this.breakpointsModel.getBreakpoints(
+      this._activeCell.model.value.text
+    );
     if (isRemoveGutter) {
       breakpoints = breakpoints.filter(ele => ele.line !== info.line + 1);
     } else {
@@ -196,7 +196,9 @@ export class CellManager implements IDisposable {
   private addBreakpointsToEditor(cell: CodeCell) {
     this.clearGutter(cell);
     const editor = cell.editor as CodeMirrorEditor;
-    const breakpoints = this._debuggerModel.breakpointsModel.breakpoints;
+    const breakpoints = this._debuggerModel.breakpointsModel.getBreakpoints(
+      cell.model.value.text
+    );
     breakpoints.forEach(breakpoint => {
       editor.editor.setGutterMarker(
         breakpoint.line - 1,
@@ -204,18 +206,6 @@ export class CellManager implements IDisposable {
         Private.createMarkerNode()
       );
     });
-  }
-
-  private getBreakpointsInfo(cell: CodeCell): ILineInfo[] {
-    const editor = cell.editor as CodeMirrorEditor;
-    let lines = [];
-    for (let i = 0; i < editor.doc.lineCount(); i++) {
-      const info = editor.editor.lineInfo(i);
-      if (info.gutterMarkers) {
-        lines.push(info);
-      }
-    }
-    return lines;
   }
 
   private _previousCell: CodeCell;

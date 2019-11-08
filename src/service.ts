@@ -175,12 +175,12 @@ export class DebugService implements IDebugger {
    * Precondition: isStarted() and stopped.
    */
   async restart(): Promise<void> {
-    const breakpoints = this.model.breakpointsModel.breakpoints;
+    // const breakpoints = this.model.breakpointsModel.breakpoints;
     await this.stop();
     this.clearModel();
     this._stoppedThreads.clear();
     await this.start();
-    await this.updateBreakpoints(breakpoints);
+    // await this.updateBreakpoints(breakpoints);
   }
 
   /**
@@ -194,8 +194,32 @@ export class DebugService implements IDebugger {
       return;
     }
 
-    await this.session.restoreState();
-    // TODO: restore breakpoints when the model is updated
+    const reply = await this.session.restoreState();
+
+    this._model.breakpointsModel.setHashParameters(
+      reply.body.hashMethod,
+      reply.body.hashSeed
+    );
+
+    const breakpoints = reply.body.breakpoints;
+    let bpMap = new Map<string, Breakpoints.IBreakpoint[]>();
+    if (breakpoints.length !== 0) {
+      const prefix = reply.body.tmp_file_prefix;
+      const suffix = reply.body.tmp_file_suffix;
+      breakpoints.forEach((bp: IDebugger.ISession.IDebugInfoBreakpoints) => {
+        let id = bp.source.replace(prefix, '').replace(suffix, '');
+        bpMap.set(
+          id,
+          bp.breakpoints.map(breakpoint => {
+            return {
+              ...breakpoint,
+              active: true
+            };
+          })
+        );
+      });
+    }
+    this._model.breakpointsModel.restoreBreakpoints(bpMap);
 
     if (!this.isStarted() && autoStart) {
       await this.start();
@@ -284,7 +308,7 @@ export class DebugService implements IDebugger {
       (breakpoint, i, arr) =>
         arr.findIndex(el => el.line === breakpoint.line) === i
     );
-    this._model.breakpointsModel.breakpoints = kernelBreakpoints;
+    this._model.breakpointsModel.setBreakpoints(code, kernelBreakpoints);
     await this.session.sendRequest('configurationDone', {});
   }
 

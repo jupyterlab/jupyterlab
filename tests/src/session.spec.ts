@@ -169,7 +169,10 @@ describe('protocol', () => {
       expect(breakpoints.length).to.equal(1);
 
       const breakpointsInfo = breakpoints[0];
-      expect(breakpointsInfo.lines).to.deep.equal([3, 5]);
+      const breakpointLines = breakpointsInfo.breakpoints.map(bp => {
+        return bp.line;
+      });
+      expect(breakpointLines).to.deep.equal([3, 5]);
     });
   });
 
