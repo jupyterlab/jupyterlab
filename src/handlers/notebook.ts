@@ -57,7 +57,9 @@ export class NotebookHandler implements IDisposable {
     notebookTracker: NotebookTracker,
     codeCell: CodeCell
   ) {
-    this.cellManager.activeCell = codeCell;
+    requestAnimationFrame(() => {
+      this.cellManager.activeCell = codeCell;
+    });
   }
 
   private notebookTracker: INotebookTracker;
