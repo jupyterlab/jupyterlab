@@ -28,7 +28,13 @@
       "path": "../rendermime"
     },
     {
+      "path": "../services"
+    },
+    {
       "path": "../statusbar"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

@@ -190,6 +190,15 @@
   fill: var(--jp-brand-color1);
 }
 
+/* CSS for icons in status bar */
+#jp-main-statusbar .jp-mod-selected .jp-icon-selectable[fill] {
+  fill: white;
+}
+
+#jp-main-statusbar .jp-mod-selected .jp-icon-selectable-inverse[fill] {
+  fill: var(--jp-brand-color1);
+}
+
 /* special handling for splash icon CSS. While the theme CSS reloads during
    splash, the splash icon can loose theming. To prevent that, we set a
    default for its color variable */

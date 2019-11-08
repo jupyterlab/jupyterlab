@@ -81,6 +81,8 @@ export const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
  */
 export const FACTORY = 'Editor';
 
+let config: CodeEditor.IConfig = { ...CodeEditor.defaultConfig };
+
 /**
  * A utility class for adding commands and menu items,
  * for use by the File Editor extension or other Editor extensions.
@@ -117,11 +119,47 @@ export namespace Commands {
   }
 
   /**
+   * Update the setting values.
+   */
+  export function updateSettings(
+    settings: ISettingRegistry.ISettings,
+    commands: CommandRegistry
+  ): void {
+    config = {
+      ...CodeEditor.defaultConfig,
+      ...(settings.get('editorConfig').composite as JSONObject)
+    };
+
+    // Trigger a refresh of the rendered commands
+    commands.notifyCommandChanged();
+  }
+
+  /**
+   * Update the settings of the current tracker instances.
+   */
+  export function updateTracker(
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>
+  ): void {
+    tracker.forEach(widget => {
+      updateWidget(widget.content);
+    });
+  }
+
+  /**
+   * Update the settings of a widget.
+   */
+  export function updateWidget(widget: FileEditor): void {
+    const editor = widget.editor;
+    Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
+      editor.setOption(key, config[key]);
+    });
+  }
+
+  /**
    * Wrapper function for adding the default File Editor commands
    */
   export function addCommands(
     commands: CommandRegistry,
-    config: CodeEditor.IConfig,
     settingRegistry: ISettingRegistry,
     id: string,
     isEnabled: () => boolean,
@@ -129,17 +167,17 @@ export namespace Commands {
     browserFactory: IFileBrowserFactory
   ) {
     // Add a command to change font size.
-    addChangeFontSizeCommand(commands, config, settingRegistry, id);
+    addChangeFontSizeCommand(commands, settingRegistry, id);
 
-    addLineNumbersCommand(commands, config, settingRegistry, id, isEnabled);
+    addLineNumbersCommand(commands, settingRegistry, id, isEnabled);
 
-    addWordWrapCommand(commands, config, settingRegistry, id, isEnabled);
+    addWordWrapCommand(commands, settingRegistry, id, isEnabled);
 
-    addChangeTabsCommand(commands, config, settingRegistry, id);
+    addChangeTabsCommand(commands, settingRegistry, id);
 
-    addMatchBracketsCommand(commands, config, settingRegistry, id, isEnabled);
+    addMatchBracketsCommand(commands, settingRegistry, id, isEnabled);
 
-    addAutoClosingBracketsCommand(commands, config, settingRegistry, id);
+    addAutoClosingBracketsCommand(commands, settingRegistry, id);
 
     addCreateConsoleCommand(commands, tracker, isEnabled);
 
@@ -161,7 +199,6 @@ export namespace Commands {
    */
   export function addChangeFontSizeCommand(
     commands: CommandRegistry,
-    config: CodeEditor.IConfig,
     settingRegistry: ISettingRegistry,
     id: string
   ) {
@@ -196,7 +233,6 @@ export namespace Commands {
    */
   export function addLineNumbersCommand(
     commands: CommandRegistry,
-    config: CodeEditor.IConfig,
     settingRegistry: ISettingRegistry,
     id: string,
     isEnabled: () => boolean
@@ -221,7 +257,6 @@ export namespace Commands {
    */
   export function addWordWrapCommand(
     commands: CommandRegistry,
-    config: CodeEditor.IConfig,
     settingRegistry: ISettingRegistry,
     id: string,
     isEnabled: () => boolean
@@ -251,7 +286,6 @@ export namespace Commands {
    */
   export function addChangeTabsCommand(
     commands: CommandRegistry,
-    config: CodeEditor.IConfig,
     settingRegistry: ISettingRegistry,
     id: string
   ) {
@@ -279,7 +313,6 @@ export namespace Commands {
    */
   export function addMatchBracketsCommand(
     commands: CommandRegistry,
-    config: CodeEditor.IConfig,
     settingRegistry: ISettingRegistry,
     id: string,
     isEnabled: () => boolean
@@ -304,7 +337,6 @@ export namespace Commands {
    */
   export function addAutoClosingBracketsCommand(
     commands: CommandRegistry,
-    config: CodeEditor.IConfig,
     settingRegistry: ISettingRegistry,
     id: string
   ) {

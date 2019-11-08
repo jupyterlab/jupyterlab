@@ -1,259 +1,39 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { StackedPanel, Widget, Panel } from '@phosphor/widgets';
+import { nbformat, IChangedArgs } from '@jupyterlab/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { OutputArea, IOutputPrompt } from '@jupyterlab/outputarea';
+
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import { nbformat } from '@jupyterlab/coreutils';
-
-import {
-  OutputArea,
-  IOutputAreaModel,
-  OutputAreaModel,
-  IOutputPrompt
-} from '@jupyterlab/outputarea';
-
-import {
-  IRenderMimeRegistry,
-  IOutputModel,
-  OutputModel
-} from '@jupyterlab/rendermime';
-
 import { Message } from '@phosphor/messaging';
+
+import { ISignal, Signal } from '@phosphor/signaling';
+
+import { Widget, Panel, PanelLayout, StackedPanel } from '@phosphor/widgets';
+
+import { LogOutputModel, LoggerOutputAreaModel } from './logger';
 
 import {
   ILogger,
-  ILoggerChange,
-  ILogPayload,
+  IContentChange,
   ILoggerRegistry,
-  ILoggerRegistryChange
+  ILoggerRegistryChange,
+  LogLevel,
+  IStateChange
 } from './tokens';
 
-/**
- * Custom Notebook Output with timestamp member.
- */
-interface ITimestampedOutput extends nbformat.IBaseOutput {
-  /**
-   * Date & time when output is logged in integer representation.
-   */
-  timestamp: number;
-}
-
-export const DEFAULT_LOG_ENTRY_LIMIT: number = 1000;
-
-/**
- * Custom Notebook Output with optional timestamp.
- */
-type IOutputWithTimestamp = nbformat.IOutput | ITimestampedOutput;
-
-/**
- * Log Output Model with timestamp which provides
- * item information for Output Area Model.
- */
-class LogOutputModel extends OutputModel {
-  /**
-   * Construct a LogOutputModel.
-   *
-   * @param options - The model initialization options.
-   */
-  constructor(options: LogOutputModel.IOptions) {
-    super(options);
-
-    this.timestamp = new Date(options.value.timestamp as number);
-  }
-
-  /**
-   * Date & time when output is logged.
-   */
-  timestamp: Date = null;
+function toTitleCase(value: string) {
+  return value.length === 0 ? value : value[0].toUpperCase() + value.slice(1);
 }
 
 /**
- * Log Output Model namespace that defines initialization options.
+ * All severity levels, including an internal one for metadata.
  */
-namespace LogOutputModel {
-  export interface IOptions extends IOutputModel.IOptions {
-    value: IOutputWithTimestamp;
-  }
-}
-
-/**
- * Implementation of `IContentFactory` for Output Area Model
- * which creates LogOutputModel instances.
- */
-class LogConsoleModelContentFactory extends OutputAreaModel.ContentFactory {
-  /**
-   * Create a rendermime output model from notebook output.
-   */
-  createOutputModel(options: IOutputModel.IOptions): LogOutputModel {
-    return new LogOutputModel(options);
-  }
-}
-
-/**
- * A concrete implementation of ILogger.
- */
-export class Logger implements ILogger {
-  /**
-   * Construct a Logger.
-   *
-   * @param source - The name of the log source.
-   */
-  constructor(source: string) {
-    this.source = source;
-  }
-
-  /**
-   * Number of outputs logged.
-   */
-  get length(): number {
-    return this.outputAreaModel.length;
-  }
-
-  /**
-   * A signal emitted when the log model changes.
-   */
-  get logChanged(): ISignal<this, ILoggerChange> {
-    return this._logChanged;
-  }
-
-  /**
-   * A signal emitted when the rendermime changes.
-   */
-  get rendermimeChanged(): ISignal<this, void> {
-    return this._rendermimeChanged;
-  }
-
-  /**
-   * Log an output to logger.
-   *
-   * @param log - The output to be logged.
-   */
-  log(log: ILogPayload) {
-    const timestamp = new Date();
-    let output: nbformat.IOutput = null;
-
-    switch (log.type) {
-      case 'text':
-        output = {
-          output_type: 'display_data',
-          data: {
-            'text/plain': log.data
-          }
-        };
-        break;
-      case 'html':
-        output = {
-          output_type: 'display_data',
-          data: {
-            'text/html': log.data
-          }
-        };
-        break;
-      case 'output':
-        output = log.data;
-        break;
-      default:
-        break;
-    }
-
-    if (output) {
-      this.outputAreaModel.add({ ...output, timestamp: timestamp.valueOf() });
-      this._logChanged.emit('append');
-    }
-  }
-
-  /**
-   * Clear all outputs logged.
-   */
-  clear() {
-    this.outputAreaModel.clear(false);
-    this._logChanged.emit('clear');
-  }
-
-  set rendermime(value: IRenderMimeRegistry | null) {
-    if (value !== this._rendermime) {
-      this._rendermime = value;
-      this._rendermimeChanged.emit();
-    }
-  }
-
-  /**
-   * Rendermime to use when rendering outputs logged.
-   */
-  get rendermime(): IRenderMimeRegistry | null {
-    return this._rendermime;
-  }
-
-  readonly source: string;
-  readonly outputAreaModel = new LoggerOutputAreaModel({
-    contentFactory: new LogConsoleModelContentFactory()
-  });
-  private _logChanged = new Signal<this, ILoggerChange>(this);
-  private _rendermimeChanged = new Signal<this, void>(this);
-  private _rendermime: IRenderMimeRegistry | null = null;
-}
-
-/**
- * A concrete implementation of ILoggerRegistry.
- */
-export class LoggerRegistry implements ILoggerRegistry {
-  /**
-   * Construct a LoggerRegistry.
-   *
-   * @param defaultRendermime - Default rendermime to render outputs
-   * with when logger is not supplied with one.
-   */
-  constructor(defaultRendermime: IRenderMimeRegistry) {
-    this._defaultRendermime = defaultRendermime;
-  }
-
-  /**
-   * Get the logger for the specified source.
-   *
-   * @param source - The name of the log source.
-   *
-   * @returns The logger for the specified source.
-   */
-  getLogger(source: string): ILogger {
-    const loggers = this._loggers;
-    let logger = loggers.get(source);
-    if (logger) {
-      return logger;
-    }
-
-    logger = new Logger(source);
-    logger.rendermime = this._defaultRendermime;
-    loggers.set(source, logger);
-
-    this._registryChanged.emit('append');
-
-    return logger;
-  }
-
-  /**
-   * Get all loggers registered.
-   *
-   * @returns The array containing all registered loggers.
-   */
-  getLoggers(): ILogger[] {
-    return Array.from(this._loggers.values());
-  }
-
-  /**
-   * A signal emitted when the logger registry changes.
-   */
-  get registryChanged(): ISignal<this, ILoggerRegistryChange> {
-    return this._registryChanged;
-  }
-
-  private _loggers = new Map<string, Logger>();
-  private _registryChanged = new Signal<this, ILoggerRegistryChange>(this);
-  private _defaultRendermime: IRenderMimeRegistry = null;
-}
+type FullLogLevel = LogLevel | 'metadata';
 
 /**
  * Log console output prompt implementation
@@ -261,7 +41,6 @@ export class LoggerRegistry implements ILoggerRegistry {
 class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
   constructor() {
     super();
-
     this._timestampNode = document.createElement('div');
     this.node.append(this._timestampNode);
   }
@@ -270,7 +49,26 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
    * Date & time when output is logged.
    */
   set timestamp(value: Date) {
-    this._timestampNode.innerHTML = value.toLocaleTimeString();
+    this._timestamp = value;
+    this._timestampNode.innerHTML = this._timestamp.toLocaleTimeString();
+    this.update();
+  }
+
+  /**
+   * Log level
+   */
+  set level(value: FullLogLevel) {
+    this._level = value;
+    this.node.dataset.logLevel = value;
+    this.update();
+  }
+
+  update() {
+    if (this._level !== undefined && this._timestamp !== undefined) {
+      this.node.title = `${this._timestamp.toLocaleString()}; ${toTitleCase(
+        this._level
+      )} level`;
+    }
   }
 
   /**
@@ -278,6 +76,8 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
    */
   executionCount: nbformat.ExecutionCount;
 
+  private _timestamp: Date;
+  private _level: FullLogLevel;
   private _timestampNode: HTMLDivElement;
 }
 
@@ -287,6 +87,32 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
  */
 class LogConsoleOutputArea extends OutputArea {
   /**
+   * The rendermime instance used by the widget.
+   */
+  rendermime: IRenderMimeRegistry;
+  /**
+   * Output area model used by the widget.
+   */
+  readonly model: LoggerOutputAreaModel;
+
+  /**
+   * Create an output item with a prompt and actual output
+   */
+  protected createOutputItem(model: LogOutputModel): Widget | null {
+    const panel = super.createOutputItem(model) as Panel;
+    if (panel === null) {
+      // Could not render model
+      return null;
+    }
+
+    // first widget in panel is prompt of type LoggerOutputPrompt
+    let prompt = panel.widgets[0] as LogConsoleOutputPrompt;
+    prompt.timestamp = model.timestamp;
+    prompt.level = model.level;
+    return panel;
+  }
+
+  /**
    * Handle an input request from a kernel by doing nothing.
    */
   protected onInputRequest(
@@ -295,55 +121,6 @@ class LogConsoleOutputArea extends OutputArea {
   ): void {
     return;
   }
-
-  /**
-   * Create an output item with a prompt and actual output
-   */
-  protected createOutputItem(model: LogOutputModel): Widget | null {
-    const panel = super.createOutputItem(model) as Panel;
-    // first widget in panel is prompt of type LoggerOutputPrompt
-    (panel.widgets[0] as LogConsoleOutputPrompt).timestamp = model.timestamp;
-    return panel;
-  }
-
-  /**
-   * The rendermime instance used by the widget.
-   */
-  rendermime: IRenderMimeRegistry;
-  /**
-   * Output area model used by the widget.
-   */
-  readonly model: LoggerOutputAreaModel;
-}
-
-/**
- * Output Area Model implementation which is able to
- * limit number of outputs stored.
- */
-class LoggerOutputAreaModel extends OutputAreaModel {
-  constructor(options?: IOutputAreaModel.IOptions) {
-    super(options);
-  }
-
-  /**
-   * Maximum number of log entries to store in the model.
-   */
-  set entryLimit(limit: number) {
-    this._entryLimit = limit;
-    this.applyLimit();
-  }
-
-  /**
-   * Manually apply entry limit.
-   */
-  applyLimit() {
-    if (this.list.length > this._entryLimit) {
-      const diff = this.list.length - this._entryLimit;
-      this.list.removeRange(0, diff);
-    }
-  }
-
-  private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
 }
 
 /**
@@ -356,6 +133,97 @@ class LogConsoleContentFactory extends OutputArea.ContentFactory {
    */
   createOutputPrompt(): LogConsoleOutputPrompt {
     return new LogConsoleOutputPrompt();
+  }
+}
+
+/**
+ * Implements a panel which supports pinning the position to the end if it is
+ * scrolled to the end.
+ *
+ * #### Notes
+ * This is useful for log viewing components or chat components that append
+ * elements at the end. We would like to automatically scroll when the user
+ * has scrolled to the bottom, but not change the scrolling when the user has
+ * changed the scroll position.
+ */
+export class ScrollingWidget<T extends Widget> extends Widget {
+  constructor({ content, ...options }: ScrollingWidget.IOptions<T>) {
+    super(options);
+    this.addClass('jp-Scrolling');
+    const layout = (this.layout = new PanelLayout());
+    layout.addWidget(content);
+
+    this._content = content;
+    this._sentinel = document.createElement('div');
+    this.node.appendChild(this._sentinel);
+  }
+
+  /**
+   * The content widget.
+   */
+  get content(): T {
+    return this._content;
+  }
+
+  protected onAfterAttach(msg: Message) {
+    super.onAfterAttach(msg);
+    // defer so content gets a chance to attach first
+    requestAnimationFrame(() => {
+      this._sentinel.scrollIntoView();
+      this._scrollHeight = this.node.scrollHeight;
+    });
+
+    // Set up intersection observer for the sentinel
+    if (typeof IntersectionObserver !== 'undefined') {
+      this._observer = new IntersectionObserver(
+        args => {
+          this._handleScroll(args);
+        },
+        { root: this.node, threshold: 1 }
+      );
+      this._observer.observe(this._sentinel);
+    }
+  }
+
+  protected onBeforeDetach(msg: Message) {
+    if (this._observer) {
+      this._observer.disconnect();
+    }
+  }
+
+  protected onAfterShow(msg: Message) {
+    if (this._tracking) {
+      this._sentinel.scrollIntoView();
+    }
+  }
+
+  private _handleScroll([entry]: IntersectionObserverEntry[]) {
+    if (entry.isIntersecting) {
+      this._tracking = true;
+    } else if (this.isVisible) {
+      const currentHeight = this.node.scrollHeight;
+      if (currentHeight === this._scrollHeight) {
+        // Likely the user scrolled manually
+        this._tracking = false;
+      } else {
+        // We assume we scrolled because our size changed, so scroll to the end.
+        this._sentinel.scrollIntoView();
+        this._scrollHeight = currentHeight;
+        this._tracking = true;
+      }
+    }
+  }
+
+  private _content: T;
+  private _observer: IntersectionObserver = null;
+  private _scrollHeight: number;
+  private _sentinel: HTMLDivElement;
+  private _tracking: boolean;
+}
+
+export namespace ScrollingWidget {
+  export interface IOptions<T extends Widget> extends Widget.IOptions {
+    content: T;
   }
 }
 
@@ -387,40 +255,7 @@ export class LogConsolePanel extends StackedPanel {
 
     this._placeholder = new Widget();
     this._placeholder.addClass('jp-LogConsoleListPlaceholder');
-    this._placeholder.node.innerHTML = 'No log messages.';
-
     this.addWidget(this._placeholder);
-  }
-
-  protected onAfterAttach(msg: Message): void {
-    this._updateOutputAreas();
-    this._showOutputFromSource(this._activeSource);
-    this._showPlaceholderIfNoMessage();
-    this.attached.emit();
-  }
-
-  private _bindLoggerSignals() {
-    const loggers = this._loggerRegistry.getLoggers();
-    for (let logger of loggers) {
-      if (this._loggersWatched.has(logger.source)) {
-        continue;
-      }
-
-      logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
-        this._updateOutputAreas();
-        this._showPlaceholderIfNoMessage();
-      }, this);
-
-      logger.rendermimeChanged.connect((sender: ILogger) => {
-        const viewId = `source:${sender.source}`;
-        const outputArea = this._outputAreas.get(viewId);
-        if (outputArea) {
-          outputArea.rendermime = sender.rendermime;
-        }
-      }, this);
-
-      this._loggersWatched.add(logger.source);
-    }
   }
 
   /**
@@ -430,61 +265,136 @@ export class LogConsolePanel extends StackedPanel {
     return this._loggerRegistry;
   }
 
-  private _showOutputFromSource(source: string) {
-    const viewId = `source:${source}`;
+  /**
+   * The current logger.
+   */
+  get logger(): ILogger | null {
+    if (this.source === null) {
+      return null;
+    }
+    return this.loggerRegistry.getLogger(this.source);
+  }
+
+  /**
+   * The log source displayed
+   */
+  get source(): string | null {
+    return this._source;
+  }
+  set source(name: string | null) {
+    if (name === this._source) {
+      return;
+    }
+    const oldValue = this._source;
+    const newValue = (this._source = name);
+    this._showOutputFromSource(newValue);
+    this._handlePlaceholder();
+    this._sourceChanged.emit({ oldValue, newValue, name: 'source' });
+  }
+
+  /**
+   * The source version displayed.
+   */
+  get sourceVersion(): number | null {
+    const source = this.source;
+    return source && this._loggerRegistry.getLogger(source).version;
+  }
+
+  /**
+   * Signal for source changes
+   */
+  get sourceChanged(): ISignal<this, IChangedArgs<string | null, 'source'>> {
+    return this._sourceChanged;
+  }
+
+  /**
+   * Signal for source changes
+   */
+  get sourceDisplayed(): ISignal<this, ISourceDisplayed> {
+    return this._sourceDisplayed;
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this._updateOutputAreas();
+    this._showOutputFromSource(this._source);
+    this._handlePlaceholder();
+  }
+
+  protected onAfterShow(msg: Message) {
+    super.onAfterShow(msg);
+    if (this.source !== null) {
+      this._sourceDisplayed.emit({
+        source: this.source,
+        version: this.sourceVersion
+      });
+    }
+  }
+
+  private _bindLoggerSignals() {
+    const loggers = this._loggerRegistry.getLoggers();
+    for (let logger of loggers) {
+      if (this._loggersWatched.has(logger.source)) {
+        continue;
+      }
+
+      logger.contentChanged.connect((sender: ILogger, args: IContentChange) => {
+        this._updateOutputAreas();
+        this._handlePlaceholder();
+      }, this);
+
+      logger.stateChanged.connect((sender: ILogger, change: IStateChange) => {
+        if (change.name !== 'rendermime') {
+          return;
+        }
+        const viewId = `source:${sender.source}`;
+        const outputArea = this._outputAreas.get(viewId);
+        if (outputArea) {
+          outputArea.rendermime = change.newValue;
+        }
+      }, this);
+
+      this._loggersWatched.add(logger.source);
+    }
+  }
+
+  private _showOutputFromSource(source: string | null) {
+    // If the source is null, pick a unique name so all output areas hide.
+    const viewId = source === null ? 'null source' : `source:${source}`;
 
     this._outputAreas.forEach(
       (outputArea: LogConsoleOutputArea, name: string) => {
+        // Show/hide the output area parents, the scrolling windows.
         if (outputArea.id === viewId) {
-          outputArea.show();
-          setTimeout(() => {
-            this._scrollOuputAreaToBottom(outputArea, false);
-          }, 50);
+          outputArea.parent.show();
+          if (outputArea.isVisible) {
+            this._sourceDisplayed.emit({
+              source: this.source,
+              version: this.sourceVersion
+            });
+          }
         } else {
-          outputArea.hide();
+          outputArea.parent.hide();
         }
       }
     );
 
-    const title = source ? `Log: ${source}` : 'Log Console';
+    const title = source === null ? 'Log Console' : `Log: ${source}`;
     this.title.label = title;
     this.title.caption = title;
   }
 
-  set activeSource(name: string) {
-    this._activeSource = name;
-    this._showOutputFromSource(this._activeSource);
-    this._showPlaceholderIfNoMessage();
-  }
-
-  /**
-   * The name of the active log source
-   */
-  get activeSource(): string {
-    return this._activeSource;
-  }
-
-  private _showPlaceholderIfNoMessage() {
-    const noMessage =
-      !this.activeSource ||
-      this._loggerRegistry.getLogger(this.activeSource).length === 0;
-
-    if (noMessage) {
+  private _handlePlaceholder() {
+    if (this.source === null) {
+      this._placeholder.node.textContent = 'No source selected.';
+      this._placeholder.show();
+    } else if (this._loggerRegistry.getLogger(this.source).length === 0) {
+      this._placeholder.node.textContent = 'No log messages.';
       this._placeholder.show();
     } else {
       this._placeholder.hide();
+      this._placeholder.node.textContent = '';
     }
-  }
-
-  private _scrollOuputAreaToBottom(
-    outputArea: LogConsoleOutputArea,
-    animate: boolean = true
-  ) {
-    outputArea.node.scrollTo({
-      left: 0,
-      top: outputArea.node.scrollHeight,
-      behavior: animate ? 'smooth' : 'auto'
-    });
   }
 
   private _updateOutputAreas() {
@@ -492,7 +402,8 @@ export class LogConsolePanel extends StackedPanel {
     const loggers = this._loggerRegistry.getLoggers();
 
     for (let logger of loggers) {
-      const viewId = `source:${logger.source}`;
+      const source = logger.source;
+      const viewId = `source:${source}`;
       loggerIds.add(viewId);
 
       // add view for logger if not exist
@@ -503,25 +414,36 @@ export class LogConsolePanel extends StackedPanel {
           model: logger.outputAreaModel
         });
         outputArea.id = viewId;
-        outputArea.model.entryLimit = this.entryLimit;
 
-        logger.logChanged.connect((sender: ILogger, args: ILoggerChange) => {
-          this._scrollOuputAreaToBottom(outputArea);
-        }, this);
-
-        outputArea.outputLengthChanged.connect(
-          (sender: LogConsoleOutputArea, args: number) => {
-            outputArea.model.applyLimit();
-            clearTimeout(this._scrollTimer);
-            this._scrollTimer = setTimeout(() => {
-              this._scrollOuputAreaToBottom(outputArea);
-            }, 50);
-          },
-          this
-        );
-
-        this.addWidget(outputArea);
+        // Attach the output area so it is visible, so the accounting
+        // functions below record the outputs actually displayed.
+        let w = new ScrollingWidget({
+          content: outputArea
+        });
+        this.addWidget(w);
         this._outputAreas.set(viewId, outputArea);
+
+        // This is where the source object is associated with the output area.
+        // We capture the source from this environment in the closure.
+        const outputUpdate = (sender: LogConsoleOutputArea) => {
+          // If the current log console panel source is the source associated
+          // with this output area, and the output area is visible, then emit
+          // the logConsolePanel source displayed signal.
+          if (this.source === source && sender.isVisible) {
+            // We assume that the output area has been updated to the current
+            // version of the source.
+            this._sourceDisplayed.emit({
+              source: this.source,
+              version: this.sourceVersion
+            });
+          }
+        };
+        // Notify messages were displayed any time the output area is updated
+        // and update for any outputs rendered on construction.
+        outputArea.outputLengthChanged.connect(outputUpdate, this);
+        // Since the output area was attached above, we can rely on its
+        // visibility to account for the messages displayed.
+        outputUpdate(outputArea);
       }
     }
 
@@ -537,29 +459,19 @@ export class LogConsolePanel extends StackedPanel {
     }
   }
 
-  /**
-   * Log output entry limit.
-   */
-  get entryLimit(): number {
-    return this._entryLimit;
-  }
-
-  set entryLimit(limit: number) {
-    if (limit > 0) {
-      this._outputAreas.forEach((outputView: LogConsoleOutputArea) => {
-        outputView.model.entryLimit = limit;
-      });
-
-      this._entryLimit = limit;
-    }
-  }
-
-  readonly attached = new Signal<this, void>(this);
   private _loggerRegistry: ILoggerRegistry;
   private _outputAreas = new Map<string, LogConsoleOutputArea>();
-  private _activeSource: string = null;
-  private _entryLimit: number = DEFAULT_LOG_ENTRY_LIMIT;
-  private _scrollTimer: number = null;
+  private _source: string | null = null;
+  private _sourceChanged = new Signal<
+    this,
+    IChangedArgs<string | null, 'source'>
+  >(this);
+  private _sourceDisplayed = new Signal<this, ISourceDisplayed>(this);
   private _placeholder: Widget;
   private _loggersWatched: Set<string> = new Set();
+}
+
+export interface ISourceDisplayed {
+  source: string;
+  version: number;
 }

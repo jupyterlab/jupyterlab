@@ -129,13 +129,13 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
   prolific contributions throughout the code base).
 - Jessica Forde, Project Jupyter (demo, documentation)
 - Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
-- Brian Granger, Cal Poly (co-creator, strategy, vision, management, UI/UX design,
+- Brian Granger, AWS (co-creator, strategy, vision, management, UI/UX design,
   architecture).
 - Jason Grout, Bloomberg (co-creator, vision, general development).
 - Fernando Perez, UC Berkeley (co-creator, vision).
 - Ian Rose, Quansight/City of LA (general core development, extensions).
 - Saul Shanabrook, Quansight (general development, extensions)
-- Steven Silvester, JPMorgan Chase (co-creator, release management, packaging,
+- Steven Silvester, AWS (co-creator, release management, packaging,
   prolific contributions throughout the code base).
 - Vidar T. Fauske, JPMorgan Chase (general development, extensions).
 
@@ -162,4 +162,4 @@ Anyone is welcome to attend, if they would like to discuss a topic or just to li
 
 - When: Wednesdays [9AM Pacific Time](https://www.thetimezoneconverter.com/?t=9%3A00%20am&tz=San%20Francisco&)
 - Where: [`calpoly/jupyter` Zoom](https://calpoly.zoom.us/my/jupyter)
-- What: [Meeting notes on Dropbox Paper](https://paper.dropbox.com/doc/JLab-Dev-Meeting-Minutes-2019--AZlv6L3jnv8ntl6kJK88y5M5Ag-Lj0P4kI2JrbA0eXHZSdY5)
+- What: [Meeting notes](https://hackmd.io/Uscrk0N1RhCtX-p6ZHUuWQ?both)

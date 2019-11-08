@@ -51,6 +51,8 @@ export interface IOutputAreaModel extends IDisposable {
   /**
    * Add an output, which may be combined with previous output.
    *
+   * @returns The total number of outputs.
+   *
    * #### Notes
    * The output bundle is copied.
    * Contiguous stream outputs of the same `name` are combined.
@@ -238,6 +240,8 @@ export class OutputAreaModel implements IOutputAreaModel {
   /**
    * Add an output, which may be combined with previous output.
    *
+   * @returns The total number of outputs.
+   *
    * #### Notes
    * The output bundle is copied.
    * Contiguous stream outputs of the same `name` are combined.
@@ -303,7 +307,11 @@ export class OutputAreaModel implements IOutputAreaModel {
     if (
       nbformat.isStream(value) &&
       this._lastStream &&
-      value.name === this._lastName
+      value.name === this._lastName &&
+      this.shouldCombine({
+        value,
+        lastModel: this.list.get(this.length - 1)
+      })
     ) {
       // In order to get a list change event, we add the previous
       // text to the current item and replace the previous item.
@@ -336,6 +344,19 @@ export class OutputAreaModel implements IOutputAreaModel {
 
     // Add the item to our list and return the new length.
     return this.list.push(item);
+  }
+
+  /**
+   * Whether a new value should be consolidated with the previous output.
+   *
+   * This will only be called if the minimal criteria of both being stream
+   * messages of the same type.
+   */
+  protected shouldCombine(options: {
+    value: nbformat.IOutput;
+    lastModel: IOutputModel;
+  }) {
+    return true;
   }
 
   /**
