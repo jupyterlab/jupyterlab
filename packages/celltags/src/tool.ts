@@ -148,14 +148,18 @@ export class TagTool extends NotebookTools.Tool {
     this.pullTags();
     let layout = this.layout as PanelLayout;
     let tags: string[] = this.tagList;
+    let toDispose: TagWidget[] = [];
     let nWidgets = layout.widgets.length;
-    for (let i = 0; i < nWidgets - 1; i++) {
+    for (let i = 0; i < nWidgets; i++) {
       let idx = tags.indexOf((layout.widgets[i] as TagWidget).name);
       if (idx < 0 && layout.widgets[i].id != 'add-tag') {
-        layout.widgets[i].dispose();
+        toDispose.push(layout.widgets[i] as TagWidget);
       } else {
         tags.splice(idx, 1);
       }
+    }
+    for (let i = 0; i < toDispose.length; i++) {
+      toDispose[i].dispose();
     }
     for (let i = 0; i < tags.length; i++) {
       let widget = new TagWidget(tags[i]);
@@ -168,21 +172,11 @@ export class TagTool extends NotebookTools.Tool {
    * Validate the 'tags' of cell metadata, ensuring it is a list of strings and
    * that each string doesn't include spaces.
    */
-  validateTags(cell: Cell) {
-    let tags = cell.model.metadata.get('tags');
+  validateTags(cell: Cell, taglist: string[]) {
     var results: string[] = [];
-    var taglist: string[] = [];
-    if (tags === undefined) {
-      return;
-    }
-    if (typeof tags === 'string') {
-      taglist.push(tags);
-    } else {
-      taglist = <string[]>tags;
-    }
     for (let i = 0; i < taglist.length; i++) {
       if (taglist[i] != '' && typeof taglist[i] === 'string') {
-        let spl = taglist[i].split(' ');
+        let spl = taglist[i].split(/[,\s]+/);
         for (let j = 0; j < spl.length; j++) {
           if (spl[j] != '' && results.indexOf(spl[j]) < 0) {
             results.push(spl[j]);
@@ -191,6 +185,8 @@ export class TagTool extends NotebookTools.Tool {
       }
     }
     cell.model.metadata.set('tags', results);
+    this.refreshTags();
+    this.loadActiveTags();
   }
 
   /**
@@ -243,9 +239,17 @@ export class TagTool extends NotebookTools.Tool {
    * Handle a change to active cell metadata.
    */
   protected onActiveCellMetadataChanged(): void {
-    this.validateTags(this.tracker.activeCell);
-    this.refreshTags();
-    this.loadActiveTags();
+    let tags = this.tracker.activeCell.model.metadata.get('tags');
+    var taglist: string[] = [];
+    if (tags === undefined) {
+      return;
+    }
+    if (typeof tags === 'string') {
+      taglist.push(tags);
+    } else {
+      taglist = <string[]>tags;
+    }
+    this.validateTags(this.tracker.activeCell, taglist);
   }
 
   private tagList: string[] = [];
