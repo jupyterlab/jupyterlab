@@ -1,35 +1,63 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { INotebookTracker } from '@jupyterlab/notebook';
-
-import { JSONValue } from '@phosphor/coreutils';
-
-import { NotebookGeneratorOptionsManager } from './optionsmanager';
-
 import * as React from 'react';
-
+import { INotebookTracker } from '@jupyterlab/notebook';
+import { JSONValue } from '@phosphor/coreutils';
+import { OptionsManager } from './options_manager';
 import { TagsToolComponent } from './tagstool';
 
-interface INotebookGeneratorToolbarProps {}
+/**
+ * Interface describing toolbar properties.
+ *
+ * @private
+ */
+interface IProperties {}
 
-interface INotebookGeneratorToolbarState {
+/**
+ * Interface describing toolbar state.
+ *
+ * @private
+ */
+interface IState {
+  /**
+   * Boolean indicating whether to show code previews.
+   */
   showCode: boolean;
+
+  /**
+   * Boolean indicating whether to show Markdown previews.
+   */
   showMarkdown: boolean;
+
+  /**
+   * Boolean indicating whether to show tags.
+   */
   showTags: boolean;
+
+  /**
+   * Boolean indicating whether to show numbering.
+   */
   numbering: boolean;
 }
 
-export function notebookGeneratorToolbar(
-  options: NotebookGeneratorOptionsManager,
-  tracker: INotebookTracker
-) {
-  // Render the toolbar
-  return class extends React.Component<
-    INotebookGeneratorToolbarProps,
-    INotebookGeneratorToolbarState
-  > {
-    constructor(props: INotebookGeneratorToolbarProps) {
+/**
+ * Returns a component for rendering a notebook table of contents toolbar.
+ *
+ * @private
+ * @param options - generator options
+ * @param tracker - notebook tracker
+ * @returns toolbar component
+ */
+function toolbar(options: OptionsManager, tracker: INotebookTracker) {
+  return class Toolbar extends React.Component<IProperties, IState> {
+    /**
+     * Returns a component for rendering a notebook table of contents toolbar.
+     *
+     * @param props - toolbar properties
+     * @returns toolbar component
+     */
+    constructor(props: IProperties) {
       super(props);
       this.tagTool = null;
       this.state = {
@@ -39,38 +67,29 @@ export function notebookGeneratorToolbar(
         numbering: false
       };
       if (tracker.currentWidget) {
-        // Read saved user settings in notebook metadata
+        // Read saved user settings in notebook meta data:
         tracker.currentWidget.context.ready.then(() => {
           if (tracker.currentWidget) {
             tracker.currentWidget.content.activeCellChanged.connect(() => {
               options.updateWidget();
             });
-            let _numbering = tracker.currentWidget.model.metadata.get(
+            const numbering = tracker.currentWidget.model.metadata.get(
               'toc-autonumbering'
             ) as boolean;
-            let numbering =
-              _numbering != undefined ? _numbering : options.numbering;
-            let _showCode = tracker.currentWidget.model.metadata.get(
+            const showCode = tracker.currentWidget.model.metadata.get(
               'toc-showcode'
             ) as boolean;
-            let showCode =
-              _showCode != undefined ? _showCode : options.showCode;
-            let _showMarkdown = tracker.currentWidget.model.metadata.get(
+            const showMarkdown = tracker.currentWidget.model.metadata.get(
               'toc-showmarkdowntxt'
             ) as boolean;
-            let showMarkdown =
-              _showMarkdown != undefined ? _showMarkdown : options.showMarkdown;
-            let _showTags = tracker.currentWidget.model.metadata.get(
+            const showTags = tracker.currentWidget.model.metadata.get(
               'toc-showtags'
             ) as boolean;
-            let showTags =
-              _showTags != undefined ? _showTags : options.showTags;
-            this.allTags = [];
             options.initializeOptions(
-              numbering,
-              showCode,
-              showMarkdown,
-              showTags
+              numbering || options.numbering,
+              showCode || options.showCode,
+              showMarkdown || options.showMarkdown,
+              showTags || options.showTags
             );
             this.setState({
               showCode: options.showCode,
@@ -78,57 +97,77 @@ export function notebookGeneratorToolbar(
               showTags: options.showTags,
               numbering: options.numbering
             });
+            this.tags = [];
           }
         });
       }
     }
 
-    toggleCode = (component: React.Component) => {
+    /**
+     * Toggle whether to show code previews.
+     */
+    toggleCode() {
       options.showCode = !options.showCode;
       this.setState({ showCode: options.showCode });
-    };
+    }
 
-    toggleMarkdown = (component: React.Component) => {
+    /**
+     * Toggle whether to show Markdown previews.
+     */
+    toggleMarkdown() {
       options.showMarkdown = !options.showMarkdown;
       this.setState({ showMarkdown: options.showMarkdown });
-    };
+    }
 
-    toggleAutoNumbering = () => {
+    /**
+     * Toggle whether to number headings.
+     */
+    toggleNumbering() {
       options.numbering = !options.numbering;
       this.setState({ numbering: options.numbering });
-    };
+    }
 
-    toggleTagDropdown = () => {
+    /**
+     * Toggle tag dropdown.
+     */
+    toggleTagDropdown() {
       if (options.showTags && this.tagTool) {
         options.storeTags = this.tagTool.state.selected;
       }
       options.showTags = !options.showTags;
       this.setState({ showTags: options.showTags });
-    };
+    }
 
-    // Load all tags in the document
-    getTags = () => {
-      let notebook = tracker.currentWidget;
+    /**
+     * Loads all document tags.
+     */
+    loadTags() {
+      const notebook = tracker.currentWidget;
       if (notebook) {
         const cells = notebook.model.cells;
-        const tagSet = new Set<string>();
-        this.allTags = [];
+        const tags = new Set<string>();
+        this.tags = [];
         for (let i = 0; i < cells.length; i++) {
           const cell = cells.get(i)!;
-          const tagData = cell.metadata.get('tags') as JSONValue;
-          if (Array.isArray(tagData)) {
-            tagData.forEach((tag: string) => tag && tagSet.add(tag));
+          const list = cell.metadata.get('tags') as JSONValue;
+          if (Array.isArray(list)) {
+            list.forEach((tag: string) => tag && tags.add(tag));
           }
         }
-        this.allTags = Array.from(tagSet);
+        this.tags = Array.from(tags);
       }
-    };
+    }
 
+    /**
+     * Renders a toolbar.
+     *
+     * @returns rendered toolbar
+     */
     render() {
-      let codeIcon = this.state.showCode ? (
+      const codeIcon = this.state.showCode ? (
         <div
           className="toc-toolbar-code-button toc-toolbar-button"
-          onClick={event => this.toggleCode.bind(this)()}
+          onClick={event => this.toggleCode()}
         >
           <div
             role="text"
@@ -140,7 +179,7 @@ export function notebookGeneratorToolbar(
       ) : (
         <div
           className="toc-toolbar-code-button toc-toolbar-button"
-          onClick={event => this.toggleCode.bind(this)()}
+          onClick={event => this.toggleCode()}
         >
           <div
             role="text"
@@ -151,10 +190,10 @@ export function notebookGeneratorToolbar(
         </div>
       );
 
-      let markdownIcon = this.state.showMarkdown ? (
+      const markdownIcon = this.state.showMarkdown ? (
         <div
           className="toc-toolbar-markdown-button toc-toolbar-button"
-          onClick={event => this.toggleMarkdown.bind(this)()}
+          onClick={event => this.toggleMarkdown()}
         >
           <div
             role="text"
@@ -166,7 +205,7 @@ export function notebookGeneratorToolbar(
       ) : (
         <div
           className="toc-toolbar-markdown-button toc-toolbar-button"
-          onClick={event => this.toggleMarkdown.bind(this)()}
+          onClick={event => this.toggleMarkdown()}
         >
           <div
             role="text"
@@ -177,10 +216,10 @@ export function notebookGeneratorToolbar(
         </div>
       );
 
-      let numberingIcon = this.state.numbering ? (
+      const numberingIcon = this.state.numbering ? (
         <div
           className="toc-toolbar-auto-numbering-button toc-toolbar-button"
-          onClick={event => this.toggleAutoNumbering()}
+          onClick={event => this.toggleNumbering()}
         >
           <div
             role="text"
@@ -192,7 +231,7 @@ export function notebookGeneratorToolbar(
       ) : (
         <div
           className="toc-toolbar-auto-numbering-button toc-toolbar-button"
-          onClick={event => this.toggleAutoNumbering()}
+          onClick={event => this.toggleNumbering()}
         >
           <div
             role="text"
@@ -215,17 +254,17 @@ export function notebookGeneratorToolbar(
         </div>
       );
       if (this.state.showTags) {
-        this.getTags();
-        let tagTool = (
+        this.loadTags();
+        const tagTool = (
           <TagsToolComponent
-            allTagsList={this.allTags}
+            tags={this.tags}
             tracker={tracker}
-            generatorOptionsRef={options}
+            options={options}
             inputFilter={options.storeTags}
             ref={tagTool => (this.tagTool = tagTool)}
           />
         );
-        options.setTagTool(this.tagTool);
+        options.tagTool = this.tagTool;
         tagDropdown = <div className={'toc-tag-dropdown'}> {tagTool} </div>;
         tagIcon = (
           <div
@@ -255,7 +294,19 @@ export function notebookGeneratorToolbar(
       );
     }
 
-    allTags: string[];
+    /**
+     * List of tags.
+     */
+    tags: string[];
+
+    /**
+     * Tag tool component.
+     */
     tagTool: TagsToolComponent | null;
   };
 }
+
+/**
+ * Exports.
+ */
+export { toolbar };
