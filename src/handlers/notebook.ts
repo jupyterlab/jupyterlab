@@ -22,6 +22,7 @@ export class NotebookHandler implements IDisposable {
     this.debuggerModel = options.debuggerService.model;
     this.debuggerService = options.debuggerService;
     this.notebookTracker = options.tracker;
+    this.id = options.id;
     this.breakpoints = this.debuggerModel.breakpointsModel;
 
     this.cellManager = new CellManager({
@@ -46,10 +47,6 @@ export class NotebookHandler implements IDisposable {
     }
     this.isDisposed = true;
     this.cellManager.dispose();
-    this.notebookTracker.activeCellChanged.disconnect(
-      this.onActiveCellChanged,
-      this
-    );
     Signal.clearData(this);
   }
 
@@ -57,9 +54,11 @@ export class NotebookHandler implements IDisposable {
     notebookTracker: NotebookTracker,
     codeCell: CodeCell
   ) {
-    requestAnimationFrame(() => {
-      this.cellManager.activeCell = codeCell;
-    });
+    if (notebookTracker.currentWidget.id === this.id) {
+      requestAnimationFrame(() => {
+        this.cellManager.activeCell = codeCell;
+      });
+    }
   }
 
   private notebookTracker: INotebookTracker;
@@ -67,11 +66,13 @@ export class NotebookHandler implements IDisposable {
   private debuggerService: IDebugger;
   private breakpoints: Breakpoints.Model;
   private cellManager: CellManager;
+  private id: string;
 }
 
 export namespace NotebookHandler {
   export interface IOptions {
     debuggerService: IDebugger;
     tracker: INotebookTracker;
+    id?: string;
   }
 }
