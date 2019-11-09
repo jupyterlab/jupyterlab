@@ -175,8 +175,8 @@ export class CellManager implements IDisposable {
     }
 
     const isRemoveGutter = !!info.gutterMarkers;
-    let breakpoints: Breakpoints.IBreakpoint[] = this.breakpointsModel.getBreakpoints(
-      this._activeCell.model.value.text
+    let breakpoints: Breakpoints.IBreakpoint[] = this.getBreakpoints(
+      this._activeCell
     );
     if (isRemoveGutter) {
       breakpoints = breakpoints.filter(ele => ele.line !== info.line + 1);
@@ -190,15 +190,16 @@ export class CellManager implements IDisposable {
       );
     }
 
-    void this._debuggerService.updateBreakpoints(breakpoints);
+    void this._debuggerService.updateBreakpoints(
+      this._activeCell.model.value.text,
+      breakpoints
+    );
   };
 
   private addBreakpointsToEditor(cell: CodeCell) {
     this.clearGutter(cell);
     const editor = cell.editor as CodeMirrorEditor;
-    const breakpoints = this._debuggerModel.breakpointsModel.getBreakpoints(
-      cell.model.value.text
-    );
+    const breakpoints = this.getBreakpoints(cell);
     breakpoints.forEach(breakpoint => {
       editor.editor.setGutterMarker(
         breakpoint.line - 1,
@@ -206,6 +207,12 @@ export class CellManager implements IDisposable {
         Private.createMarkerNode()
       );
     });
+  }
+
+  private getBreakpoints(cell: CodeCell): Breakpoints.IBreakpoint[] {
+    return this._debuggerModel.breakpointsModel.getBreakpoints(
+      this._debuggerService.getCellId(cell.model.value.text)
+    );
   }
 
   private _previousCell: CodeCell;

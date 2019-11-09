@@ -5,6 +5,8 @@ import { IClientSession } from '@jupyterlab/apputils';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
+import { murmur2 } from 'murmurhash-js';
+
 import { DebugProtocol } from 'vscode-debugprotocol';
 
 import { Debugger } from './debugger';
@@ -141,6 +143,13 @@ export class DebugService implements IDebugger {
   }
 
   /**
+   * Computes an id based on the given code.
+   */
+  getCellId(code: string): string {
+    return this._tmpFilePrefix + this._hashMethod(code) + this._tmpFileSuffix;
+  }
+
+  /**
    * Whether the current debugger is started.
    */
   isStarted(): boolean {
@@ -175,12 +184,21 @@ export class DebugService implements IDebugger {
    * Precondition: isStarted() and stopped.
    */
   async restart(): Promise<void> {
-    // const breakpoints = this.model.breakpointsModel.breakpoints;
+    const breakpoints = this.model.breakpointsModel.breakpoints;
     await this.stop();
     this.clearModel();
     this._stoppedThreads.clear();
     await this.start();
-    // await this.updateBreakpoints(breakpoints);
+
+    // No need to dump the cells again, we can simply
+    // resend the breakpoints to the kernel and update
+    // the model.
+    breakpoints.forEach(async (bp, path, _) => {
+      const sourceBreakpoints = Private.toSourceBreakpoints(bp);
+      await this.setBreakpoints(sourceBreakpoints, path);
+    });
+
+    this.model.breakpointsModel.restoreBreakpoints(breakpoints);
   }
 
   /**
@@ -196,20 +214,18 @@ export class DebugService implements IDebugger {
 
     const reply = await this.session.restoreState();
 
-    this._model.breakpointsModel.setHashParameters(
-      reply.body.hashMethod,
-      reply.body.hashSeed
+    this.setHashParameters(reply.body.hashMethod, reply.body.hashSeed);
+    this.setTmpFileParameters(
+      reply.body.tmp_file_prefix,
+      reply.body.tmp_file_suffix
     );
 
     const breakpoints = reply.body.breakpoints;
     let bpMap = new Map<string, Breakpoints.IBreakpoint[]>();
     if (breakpoints.length !== 0) {
-      const prefix = reply.body.tmp_file_prefix;
-      const suffix = reply.body.tmp_file_suffix;
       breakpoints.forEach((bp: IDebugger.ISession.IDebugInfoBreakpoints) => {
-        let id = bp.source.replace(prefix, '').replace(suffix, '');
         bpMap.set(
-          id,
+          bp.source,
           bp.breakpoints.map(breakpoint => {
             return {
               ...breakpoint,
@@ -281,14 +297,18 @@ export class DebugService implements IDebugger {
 
   /**
    * Update all breakpoints at once.
+   * @param code - The code in the cell where the breakpoints are set.
+   * @param breakpoints - The list of breakpoints to set.
    */
-  async updateBreakpoints(breakpoints: Breakpoints.IBreakpoint[]) {
+  async updateBreakpoints(
+    code: string,
+    breakpoints: Breakpoints.IBreakpoint[]
+  ) {
     if (!this.session.isStarted) {
       return;
     }
     // Workaround: this should not be called before the session has started
     await this.ensureSessionReady();
-    const code = this._model.codeValue.text;
     const dumpedCell = await this.dumpCell(code);
     const sourceBreakpoints = Private.toSourceBreakpoints(breakpoints);
     const reply = await this.setBreakpoints(
@@ -298,8 +318,7 @@ export class DebugService implements IDebugger {
     let kernelBreakpoints = reply.body.breakpoints.map(breakpoint => {
       return {
         ...breakpoint,
-        active: true,
-        source: { path: this.session.client.name }
+        active: true
       };
     });
 
@@ -308,8 +327,26 @@ export class DebugService implements IDebugger {
       (breakpoint, i, arr) =>
         arr.findIndex(el => el.line === breakpoint.line) === i
     );
-    this._model.breakpointsModel.setBreakpoints(code, kernelBreakpoints);
+    this._model.breakpointsModel.setBreakpoints(
+      dumpedCell.sourcePath,
+      kernelBreakpoints
+    );
     await this.session.sendRequest('configurationDone', {});
+  }
+
+  async clearBreakpoints() {
+    if (!this.session.isStarted) {
+      return;
+    }
+
+    this._model.breakpointsModel.breakpoints.forEach(
+      async (breakpoints, path, _) => {
+        await this.setBreakpoints([], path);
+      }
+    );
+
+    let bpMap = new Map<string, Breakpoints.IBreakpoint[]>();
+    this._model.breakpointsModel.restoreBreakpoints(bpMap);
   }
 
   getAllFrames = async () => {
@@ -420,12 +457,31 @@ export class DebugService implements IDebugger {
     return 1;
   }
 
+  private setHashParameters(method: string, seed: number) {
+    if (method === 'Murmur2') {
+      this._hashMethod = (code: string) => {
+        return murmur2(code, seed).toString();
+      };
+    } else {
+      throw new Error('hash method not supported ' + method);
+    }
+  }
+
+  private setTmpFileParameters(prefix: string, suffix: string) {
+    this._tmpFilePrefix = prefix;
+    this._tmpFileSuffix = suffix;
+  }
+
   private _isDisposed: boolean = false;
   private _session: IDebugger.ISession;
   private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
   private _modelChanged = new Signal<IDebugger, Debugger.Model>(this);
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
   private _model: Debugger.Model;
+
+  private _hashMethod: (code: string) => string;
+  private _tmpFilePrefix: string;
+  private _tmpFileSuffix: string;
 
   // TODO: remove frames from the service
   private frames: Frame[] = [];

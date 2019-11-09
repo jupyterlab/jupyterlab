@@ -5,7 +5,6 @@ import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';
 import { Signal } from '@phosphor/signaling';
 import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
-import { murmur2 } from 'murmurhash-js';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { IDebugger } from '../tokens';
 import { Body } from './body';
@@ -48,7 +47,7 @@ export class Breakpoints extends Panel {
       new ToolbarButton({
         iconClassName: 'jp-CloseAllIcon',
         onClick: () => {
-          void this.service.updateBreakpoints([]);
+          void this.service.clearBreakpoints();
         },
         tooltip: 'Remove All Breakpoints'
       })
@@ -83,16 +82,6 @@ export namespace Breakpoints {
   }
 
   export class Model implements IDisposable {
-    setHashParameters(method: string, seed: number) {
-      if (method === 'Murmur2') {
-        this._hashMethod = (code: string) => {
-          return murmur2(code, seed).toString();
-        };
-      } else {
-        throw new Error('hash method not supported ' + method);
-      }
-    }
-
     get changed(): Signal<this, IBreakpoint[]> {
       return this._changed;
     }
@@ -122,17 +111,13 @@ export namespace Breakpoints {
       Signal.clearData(this);
     }
 
-    hash(code: string): string {
-      return this._hashMethod(code);
-    }
-
-    setBreakpoints(code: string, breakpoints: IBreakpoint[]) {
-      this._breakpoints.set(this.hash(code), breakpoints);
+    setBreakpoints(id: string, breakpoints: IBreakpoint[]) {
+      this._breakpoints.set(id, breakpoints);
       this.changed.emit(breakpoints);
     }
 
-    getBreakpoints(code: string): IBreakpoint[] {
-      return this._breakpoints.get(this.hash(code)) || [];
+    getBreakpoints(id: string): IBreakpoint[] {
+      return this._breakpoints.get(id) || [];
     }
 
     restoreBreakpoints(breakpoints: Map<string, IBreakpoint[]>) {
@@ -140,14 +125,6 @@ export namespace Breakpoints {
       this._restored.emit();
     }
 
-    /*private printMap() {
-      this._breakpoints.forEach((value, key, map) => {
-        console.log(key);
-        value.forEach((bp) => console.log(bp.line));
-      });
-    }*/
-
-    private _hashMethod: (code: string) => string;
     private _breakpoints = new Map<string, IBreakpoint[]>();
     private _changed = new Signal<this, IBreakpoint[]>(this);
     private _restored = new Signal<this, void>(this);
