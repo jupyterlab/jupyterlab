@@ -1481,7 +1481,7 @@ export class MarkdownCell extends AttachmentsCell {
     });
   }
 
-  private _monitor: ActivityMonitor<any, any> = null;
+  private _monitor: ActivityMonitor<ICellModel, void> = null;
   private _renderer: IRenderMime.IRenderer = null;
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
