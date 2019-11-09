@@ -75,6 +75,8 @@
     "sort-package-json": "~1.22.1",
     "source-map-loader": "~0.2.1",
     "style-loader": "~0.23.1",
+    "sass-loader": "~8.0.0",
+    "sass": "~1.23.3",
     "svg-url-loader": "~2.3.2",
     "svgo": "~1.2.1",
     "svgo-loader": "~2.2.0",
