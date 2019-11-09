@@ -640,6 +640,13 @@ export namespace Kernel {
     name?: string;
 
     /**
+     * Environment variables passed to the kernelspec (used in Enterprise Gateway)
+     */
+    env?: {
+      [key: string]: string;
+    };
+
+    /**
      * The server settings for the kernel.
      */
     serverSettings?: ServerConnection.ISettings;
