@@ -1833,12 +1833,27 @@ export namespace DirListing {
         // clean up the svg icon annotation, if any
         delete icon.dataset.icon;
       }
+
+      let hoverText = 'Name: ' + model.name;
       // add file size to pop up if its available
       if (model.size !== null && model.size !== undefined) {
-        node.title = model.name + ' - ' + Private.formatFileSize(model.size, 1);
-      } else {
-        node.title = model.name;
+        hoverText += '\nSize: ' + Private.formatFileSize(model.size, 1, 1024);
       }
+      if (model.path) {
+        hoverText += '\nPath: ' + model.path.substr(0, 50);
+        if (model.path.length > 50) {
+          hoverText += '...';
+        }
+      }
+      if (model.created) {
+        hoverText += '\nCreated: ' + Time.formatHuman(new Date(model.created));
+      }
+      if (model.last_modified) {
+        hoverText +=
+          '\nModified: ' + Time.formatHuman(new Date(model.last_modified));
+      }
+
+      node.title = hoverText;
 
       // If an item is being edited currently, its text node is unavailable.
       if (text && text.textContent !== model.name) {
@@ -2032,12 +2047,15 @@ namespace Private {
   /**
    * Format bytes to human readable string.
    */
-  export function formatFileSize(bytes: number, decimalPoint: number): string {
+  export function formatFileSize(
+    bytes: number,
+    decimalPoint: number,
+    k: number
+  ): string {
     // https://www.codexworld.com/how-to/convert-file-size-bytes-kb-mb-gb-javascript/
     if (bytes === 0) {
       return '0 Bytes';
     }
-    const k = 1000;
     const dm = decimalPoint || 2;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
