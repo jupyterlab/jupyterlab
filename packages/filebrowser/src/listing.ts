@@ -1840,17 +1840,23 @@ export namespace DirListing {
         hoverText += '\nSize: ' + Private.formatFileSize(model.size, 1, 1024);
       }
       if (model.path) {
-        hoverText += '\nPath: ' + model.path.substr(0, 50);
-        if (model.path.length > 50) {
-          hoverText += '...';
+        let dirname = PathExt.dirname(model.path);
+        if (dirname) {
+          hoverText += '\nPath: ' + dirname.substr(0, 50);
+          if (dirname.length > 50) {
+            hoverText += '...';
+          }
         }
       }
       if (model.created) {
-        hoverText += '\nCreated: ' + Time.formatHuman(new Date(model.created));
+        hoverText +=
+          '\nCreated: ' +
+          Time.format(new Date(model.created), 'YYYY-MM-DD HH:mm:ss');
       }
       if (model.last_modified) {
         hoverText +=
-          '\nModified: ' + Time.formatHuman(new Date(model.last_modified));
+          '\nModified: ' +
+          Time.format(new Date(model.last_modified), 'YYYY-MM-DD HH:mm:ss');
       }
 
       node.title = hoverText;
