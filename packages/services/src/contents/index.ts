@@ -96,6 +96,11 @@ export namespace Contents {
      * Only relevant for type: 'file'
      */
     readonly format: FileFormat;
+
+    /**
+     * The size of then file in bytes.
+     */
+    readonly size?: number;
   }
 
   /**
