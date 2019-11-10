@@ -9,6 +9,7 @@ import os
 import os.path as osp
 from os.path import join as pjoin
 import sys
+import warnings
 
 from jupyter_core.application import JupyterApp, base_aliases
 from jupyterlab_server import slugify, WORKSPACE_EXTENSION
@@ -425,6 +426,10 @@ class LabApp(ExtensionApp):
             self.log.warn("Please migrate following settings from NotebookApp to ServerApp: {}".format(confs))
             self.log.warn("Read more on https://...")
             self.log.warn("=========================================================================================")
+            warnings.warn(
+                "NotebookApp configuration is deprecated. Migrate them to ServerApp",
+                DeprecationWarning, stacklevel=2,
+            )
 
     def initialize_handlers(self):
         """Load any extensions specified by config.
