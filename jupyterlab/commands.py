@@ -1762,8 +1762,13 @@ def _yarn_config(logger):
     -------
     {"yarn config": dict, "npm config": dict} if unsuccessfull the subdictionary are empty
     """
-    node = which('node')
     configuration = {"yarn config": {}, "npm config": {}}
+    try:
+        node = which('node')
+    except ValueError:  # Node not found == user with no need for building jupyterlab
+        logger.debug("NodeJS was not found. Yarn user configuration is ignored.")
+        return configuration
+
     try:
         output_binary = subprocess.check_output([node, YARN_PATH, 'config', 'list', '--json'], stderr=subprocess.PIPE, cwd=HERE)
         output = output_binary.decode('utf-8')

@@ -203,7 +203,10 @@ export class HTMLViewer extends DocumentWidget<IFrame>
 
   private _renderPending = false;
   private _parser = new DOMParser();
-  private _monitor: ActivityMonitor<any, any> | null = null;
+  private _monitor: ActivityMonitor<
+    DocumentRegistry.IModel,
+    void
+  > | null = null;
   private _objectUrl: string = '';
   private _trustedChanged = new Signal<this, boolean>(this);
 }

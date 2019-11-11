@@ -1,4 +1,4 @@
-# Read Time Collaboration Design
+# Real Time Collaboration Design
 
 This purpose of this document is to describe the design of the real-time collaboration (RTC)
 features we are building for JupyterLab. The focus here is primarily on the user experience

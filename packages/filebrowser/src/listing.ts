@@ -1834,7 +1834,33 @@ export namespace DirListing {
         delete icon.dataset.icon;
       }
 
-      node.title = model.name;
+      let hoverText = 'Name: ' + model.name;
+      // add file size to pop up if its available
+      if (model.size !== null && model.size !== undefined) {
+        hoverText += '\nSize: ' + Private.formatFileSize(model.size, 1, 1024);
+      }
+      if (model.path) {
+        let dirname = PathExt.dirname(model.path);
+        if (dirname) {
+          hoverText += '\nPath: ' + dirname.substr(0, 50);
+          if (dirname.length > 50) {
+            hoverText += '...';
+          }
+        }
+      }
+      if (model.created) {
+        hoverText +=
+          '\nCreated: ' +
+          Time.format(new Date(model.created), 'YYYY-MM-DD HH:mm:ss');
+      }
+      if (model.last_modified) {
+        hoverText +=
+          '\nModified: ' +
+          Time.format(new Date(model.last_modified), 'YYYY-MM-DD HH:mm:ss');
+      }
+
+      node.title = hoverText;
+
       // If an item is being edited currently, its text node is unavailable.
       if (text && text.textContent !== model.name) {
         text.textContent = model.name;
@@ -2022,5 +2048,27 @@ namespace Private {
     return ArrayExt.findFirstIndex(nodes, node =>
       ElementExt.hitTest(node, x, y)
     );
+  }
+
+  /**
+   * Format bytes to human readable string.
+   */
+  export function formatFileSize(
+    bytes: number,
+    decimalPoint: number,
+    k: number
+  ): string {
+    // https://www.codexworld.com/how-to/convert-file-size-bytes-kb-mb-gb-javascript/
+    if (bytes === 0) {
+      return '0 Bytes';
+    }
+    const dm = decimalPoint || 2;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    if (i >= 0 && i < sizes.length) {
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    } else {
+      return String(bytes);
+    }
   }
 }

@@ -965,6 +965,6 @@ learning, here are some suggestions about what to try next:
 -  Make the image a link to the picture on the NASA website (URLs are of the form ``https://apod.nasa.gov/apod/apYYMMDD.html``).
 -  Make the image title and description update after the image loads so that the picture and description are always synced.
 -  Give users the ability to pin pictures in separate, permanent panels.
--  Add a setting for the user to put in their `API key <https://api.nasa.gov/>`__ so they can make many more requests per hour than the demo key allows.
+-  Add a setting for the user to put in their `API key <https://api.nasa.gov/#authentication>`__ so they can make many more requests per hour than the demo key allows.
 -  Push your extension git repository to GitHub.
 -  Learn how to write :ref:`other kinds of extensions <developer_extensions>`.
