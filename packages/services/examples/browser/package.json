@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typescript": "~3.7.1-rc",
+    "typescript": "~3.7.2",
     "webpack": "^4.32.2",
     "webpack-cli": "^3.3.0"
   }

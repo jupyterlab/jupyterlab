@@ -51,7 +51,7 @@
     "@types/codemirror": "^0.0.74",
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
-    "typescript": "~3.7.1-rc"
+    "typescript": "~3.7.2"
   },
   "publishConfig": {
     "access": "public"
