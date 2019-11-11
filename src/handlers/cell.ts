@@ -167,7 +167,6 @@ export class CellManager implements IDisposable {
   }
 
   protected sendEditorBreakpoints() {
-    // TODO: put behind a Debouncer / ActivityMonitor
     const cell = this.activeCell;
     if (!cell || !cell.editor) {
       return;
