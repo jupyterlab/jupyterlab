@@ -27,7 +27,7 @@
     "lib": "lib/"
   },
   "scripts": {
-    "build": "tsc -b && cd ../../prebuild/vega5 && jlpm && jlpm run build",
+    "build": "tsc -b",
     "clean": "rimraf lib",
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "prepublishOnly": "npm run build",
