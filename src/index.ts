@@ -96,7 +96,8 @@ class DebuggerHandler<H extends ConsoleHandler | NotebookHandler> {
     if (debug.model && !this.handlers[widget.id]) {
       const handler = new this.builder({
         tracker: tracker,
-        debuggerService: debug
+        debuggerService: debug,
+        id: widget.id
       });
       this.handlers[widget.id] = handler;
       widget.disposed.connect(() => {

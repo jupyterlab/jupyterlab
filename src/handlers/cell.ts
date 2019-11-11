@@ -47,7 +47,11 @@ export class CellManager implements IDisposable {
     });
 
     this.breakpointsModel.changed.connect(async () => {
-      if (!this.activeCell || this.activeCell.isDisposed) {
+      if (
+        !this.activeCell ||
+        !this.activeCell.isVisible ||
+        this.activeCell.isDisposed
+      ) {
         return;
       }
       this.addBreakpointsToEditor(this.activeCell);
@@ -69,7 +73,7 @@ export class CellManager implements IDisposable {
 
   // TODO: call when the debugger stops
   private cleanupHighlight() {
-    if (!this.activeCell) {
+    if (!this.activeCell || this.activeCell.isDisposed) {
       return;
     }
     const editor = this.activeCell.editor as CodeMirrorEditor;
@@ -162,6 +166,9 @@ export class CellManager implements IDisposable {
   }
 
   protected removeListener(cell: CodeCell) {
+    if (cell.isDisposed) {
+      return;
+    }
     const editor = cell.editor as CodeMirrorEditor;
     editor.editor.off('gutterClick', this.onGutterClick);
   }
