@@ -132,6 +132,24 @@ export class LoggerOutputAreaModel extends OutputAreaModel
   }
 
   /**
+   * Whether an output should combine with the previous output.
+   *
+   * We combine if the two outputs are in the same second, which is the
+   * resolution for our time display.
+   */
+  protected shouldCombine(options: {
+    value: ILogOutput;
+    lastModel: ILogOutputModel;
+  }): boolean {
+    const { value, lastModel } = options;
+
+    let oldSeconds = Math.trunc(lastModel.timestamp.getTime() / 1000);
+    let newSeconds = Math.trunc(value.timestamp / 1000);
+
+    return oldSeconds === newSeconds;
+  }
+
+  /**
    * Get an item at the specified index.
    */
   get(index: number): ILogOutputModel {

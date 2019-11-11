@@ -87,6 +87,10 @@ namespace CommandIDs {
 
   export const createNewDirectory = 'filebrowser:create-new-directory';
 
+  export const createNewFile = 'filebrowser:create-new-file';
+
+  export const createNewMarkdownFile = 'filebrowser:create-new-markdown-file';
+
   export const rename = 'filebrowser:rename';
 
   // For main browser only.
@@ -640,6 +644,36 @@ function addCommands(
     label: 'New Folder'
   });
 
+  commands.addCommand(CommandIDs.createNewFile, {
+    execute: () => {
+      const {
+        model: { path }
+      } = browser;
+      commands.execute('docmanager:new-untitled', {
+        path,
+        type: 'file',
+        ext: 'txt'
+      });
+    },
+    iconClass: 'jp-MaterialIcon jp-TextEditorIcon',
+    label: 'New File'
+  });
+
+  commands.addCommand(CommandIDs.createNewMarkdownFile, {
+    execute: () => {
+      const {
+        model: { path }
+      } = browser;
+      commands.execute('docmanager:new-untitled', {
+        path,
+        type: 'file',
+        ext: 'md'
+      });
+    },
+    iconClass: 'jp-MaterialIcon jp-MarkdownIcon',
+    label: 'New Markdown File'
+  });
+
   commands.addCommand(CommandIDs.rename, {
     execute: args => {
       const widget = tracker.currentWidget;
@@ -842,9 +876,21 @@ function addCommands(
   });
 
   app.contextMenu.addItem({
-    command: CommandIDs.paste,
+    command: CommandIDs.createNewFile,
     selector: selectorContent,
     rank: 2
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.createNewMarkdownFile,
+    selector: selectorContent,
+    rank: 3
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.paste,
+    selector: selectorContent,
+    rank: 4
   });
 
   app.contextMenu.addItem({

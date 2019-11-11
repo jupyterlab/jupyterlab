@@ -199,7 +199,7 @@ export class MimeContent extends Widget {
 
   private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
   private _fragment = '';
-  private _monitor: ActivityMonitor<any, any> | null;
+  private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
   private _isRendering = false;

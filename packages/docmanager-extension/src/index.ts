@@ -67,6 +67,8 @@ namespace CommandIDs {
 
   export const saveAs = 'docmanager:save-as';
 
+  export const download = 'docmanager:download';
+
   export const toggleAutosave = 'docmanager:toggle-autosave';
 
   export const showInFileBrowser = 'docmanager:show-in-file-browser';
@@ -576,6 +578,18 @@ function addCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.download, {
+    label: 'Download',
+    caption: 'Download the file to your computer',
+    isEnabled,
+    execute: () => {
+      if (isEnabled()) {
+        let context = docManager.contextForWidget(shell.currentWidget);
+        return context.download();
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.toggleAutosave, {
     label: 'Autosave Documents',
     isToggled: () => docManager.autosave,
@@ -605,6 +619,7 @@ function addCommands(
       CommandIDs.restoreCheckpoint,
       CommandIDs.save,
       CommandIDs.saveAs,
+      CommandIDs.download,
       CommandIDs.toggleAutosave
     ].forEach(command => {
       palette.addItem({ command, category });
@@ -613,6 +628,7 @@ function addCommands(
 
   if (mainMenu) {
     mainMenu.settingsMenu.addGroup([{ command: CommandIDs.toggleAutosave }], 5);
+    mainMenu.fileMenu.addGroup([{ command: CommandIDs.download }], 6);
   }
 }
 

@@ -366,7 +366,10 @@ export class CSVViewer extends Widget {
   private _context: DocumentRegistry.Context;
   private _grid: DataGrid;
   private _searchService: GridSearchService;
-  private _monitor: ActivityMonitor<any, any> | null = null;
+  private _monitor: ActivityMonitor<
+    DocumentRegistry.IModel,
+    void
+  > | null = null;
   private _delimiter = ',';
   private _revealed = new PromiseDelegate<void>();
 }

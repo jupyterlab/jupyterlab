@@ -143,7 +143,7 @@ function activateLogConsole(
     logConsoleWidget.addClass('jp-LogConsole');
     logConsoleWidget.title.closable = true;
     logConsoleWidget.title.label = 'Log Console';
-    logConsoleWidget.title.iconClass = 'jp-LogConsoleIcon';
+    logConsoleWidget.title.iconClass = 'jp-ListIcon';
 
     const addCheckpointButton = new CommandToolbarButton({
       commands: app.commands,
@@ -340,6 +340,7 @@ export class LogLevelSwitcher extends ReactWidget {
    */
   handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
     this._logConsole.logger.level = event.target.value as LogLevel;
+    this.update();
   };
 
   /**
