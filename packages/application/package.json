@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "JupyterLab - Application",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,13 +36,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^1.2.0",
+    "@jupyterlab/apputils": "^1.2.1",
     "@jupyterlab/coreutils": "^3.2.0",
-    "@jupyterlab/docregistry": "^1.2.0",
-    "@jupyterlab/rendermime": "^1.2.0",
+    "@jupyterlab/docregistry": "^1.2.1",
+    "@jupyterlab/rendermime": "^1.2.1",
     "@jupyterlab/rendermime-interfaces": "^1.5.0",
     "@jupyterlab/services": "^4.2.0",
-    "@jupyterlab/ui-components": "^1.2.0",
+    "@jupyterlab/ui-components": "^1.2.1",
     "@phosphor/algorithm": "^1.2.0",
     "@phosphor/application": "^1.7.0",
     "@phosphor/commands": "^1.7.0",
