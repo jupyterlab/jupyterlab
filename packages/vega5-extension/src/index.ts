@@ -152,9 +152,9 @@ const extension: IRenderMime.IExtension = {
       defaultFor: ['vega5']
     },
     {
-      name: 'Vega-Lite3',
-      primaryFileType: 'vega-lite3',
-      fileTypes: ['vega-lite3', 'json'],
+      name: 'Vega-Lite4',
+      primaryFileType: 'vega-lite4',
+      fileTypes: ['vega-lite3', 'vega-lite4', 'json'],
       defaultFor: ['vega-lite3']
     }
   ],
@@ -167,7 +167,7 @@ const extension: IRenderMime.IExtension = {
     },
     {
       mimeTypes: [VEGALITE_MIME_TYPE],
-      name: 'vega-lite3',
+      name: 'vega-lite4',
       extensions: ['.vl', '.vl.json', '.vegalite'],
       iconClass: 'jp-MaterialIcon jp-VegaIcon'
     }
