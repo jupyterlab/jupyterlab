@@ -262,4 +262,31 @@ describe('protocol', () => {
       expect(j.value).to.equal('4');
     });
   });
+
+  describe('#loadedSources', () => {
+    it('should retrieve the list of loaded sources', async () => {
+      const loadedSourcesReply = await debugSession.sendRequest(
+        'loadedSources',
+        {}
+      );
+      const sources = loadedSourcesReply.body.sources;
+      expect(sources).to.exist;
+      expect(sources.length).to.be.above(0);
+    });
+  });
+
+  describe('#source', () => {
+    it('should retrieve the source of the dumped code cell', async () => {
+      const stackFramesReply = await debugSession.sendRequest('stackTrace', {
+        threadId
+      });
+      const frame = stackFramesReply.body.stackFrames[0];
+      const source = frame.source;
+      const reply = await debugSession.sendRequest('source', {
+        sourceReference: source.sourceReference
+      });
+      const sourceCode = reply.body.content;
+      expect(sourceCode).to.equal(code);
+    });
+  });
 });
