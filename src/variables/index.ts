@@ -71,29 +71,6 @@ export namespace Variables {
       return this._changed;
     }
 
-    get currentVariable(): IVariable {
-      return this._currentVariable;
-    }
-
-    set currentVariable(variable: IVariable) {
-      if (this._currentVariable === variable) {
-        return;
-      }
-
-      variable.haveMoreDetails = Symbol('haveDetails');
-      this._currentVariable = variable;
-      this._currentChanged.emit(variable);
-
-      const newScope = this.scopes.map(scope => {
-        const findIndex = scope.variables.findIndex(
-          ele => ele.variablesReference === variable.variablesReference
-        );
-        scope.variables[findIndex] = variable;
-        return { ...scope };
-      });
-      this.scopes = [...newScope];
-    }
-
     get scopes(): IScope[] {
       return this._state;
     }
@@ -103,33 +80,15 @@ export namespace Variables {
       this._changed.emit();
     }
 
-    get variables(): IVariable[] {
-      return this._currentScope ? this._currentScope.variables : [];
-    }
-
-    set variables(variables: IVariable[]) {
-      this._currentScope.variables = variables;
-      this._changed.emit();
-    }
-
     get variableExpanded(): ISignal<this, IVariable> {
       return this._variableExpanded;
     }
 
-    getCurrentVariables(): IVariable[] {
-      return this.variables;
-    }
-
-    getMoreDataOfVariable(variable: IVariable) {
+    expandVariable(variable: IVariable) {
       this._variableExpanded.emit(variable);
     }
 
     protected _state: IScope[];
-
-    private _currentVariable: IVariable;
-    private _currentScope: IScope;
-
-    private _currentChanged = new Signal<this, IVariable>(this);
     private _variableExpanded = new Signal<this, IVariable>(this);
     private _changed = new Signal<this, void>(this);
   }

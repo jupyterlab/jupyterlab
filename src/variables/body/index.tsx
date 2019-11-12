@@ -69,7 +69,7 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
     const converted = scopes.map(scope => {
       const newVariable = scope.variables.map(variable => {
         const func = () => {
-          model.getMoreDataOfVariable(variable);
+          model.expandVariable(variable);
         };
 
         if (variable.haveMoreDetails || variable.variablesReference === 0) {

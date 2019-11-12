@@ -333,12 +333,21 @@ export class DebugService implements IDebugger {
     const reply = await this.session.sendRequest('variables', {
       variablesReference: variable.variablesReference
     });
-    let newVariable = { ...variable };
-    reply.body.variables.forEach((ele: DebugProtocol.Variable) => {
-      newVariable = { [ele.evaluateName]: ele, ...newVariable };
+    let newVariable = { ...variable, haveMoreDetails: Symbol('haveDetails') };
+
+    reply.body.variables.forEach((variable: DebugProtocol.Variable) => {
+      newVariable = { [variable.name]: variable, ...newVariable };
     });
 
-    this._model.variablesModel.currentVariable = newVariable;
+    const newScope = this._model.variablesModel.scopes.map(scope => {
+      const findIndex = scope.variables.findIndex(
+        ele => ele.variablesReference === variable.variablesReference
+      );
+      scope.variables[findIndex] = newVariable;
+      return { ...scope };
+    });
+
+    this._model.variablesModel.scopes = [...newScope];
 
     return reply.body.variables;
   };
