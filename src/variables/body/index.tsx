@@ -31,7 +31,7 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
   const filterVariable = (
     variable: Variables.IVariable,
     isObject?: boolean,
-    v?: any
+    keyObj?: string
   ): Object => {
     const tableKey = ['name', 'value', 'type'];
     const filteredObj = Object.keys(variable)
@@ -53,7 +53,7 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
         }
         if (isObject) {
           return Object.assign(res, {
-            [v]: valueOfKey
+            [keyObj]: valueOfKey
           });
         }
 
