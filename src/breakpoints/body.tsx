@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ReactWidget } from '@jupyterlab/apputils';
-import { ArrayExt } from '@phosphor/algorithm';
 import { ISignal } from '@phosphor/signaling';
 import React, { useEffect, useState } from 'react';
 import { Breakpoints } from '.';
@@ -22,26 +21,52 @@ export class Body extends ReactWidget {
 }
 
 const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
-  const [breakpoints, setBreakpoints] = useState(model.breakpoints);
+  const [breakpoints, setBreakpoints] = useState(
+    Array.from(model.breakpoints.entries())
+  );
 
   useEffect(() => {
     const updateBreakpoints = (
       _: Breakpoints.Model,
       updates: Breakpoints.IBreakpoint[]
     ) => {
-      if (ArrayExt.shallowEqual(breakpoints, updates)) {
-        return;
-      }
-      setBreakpoints(updates);
+      setBreakpoints(Array.from(model.breakpoints.entries()));
+    };
+
+    const restoreBreakpoints = (_: Breakpoints.Model) => {
+      setBreakpoints(Array.from(model.breakpoints.entries()));
     };
 
     model.changed.connect(updateBreakpoints);
+    model.restored.connect(restoreBreakpoints);
 
     return () => {
       model.changed.disconnect(updateBreakpoints);
+      model.restored.disconnect(restoreBreakpoints);
     };
   });
 
+  return (
+    <div>
+      {breakpoints.map(entry => (
+        // Array.from(breakpoints.entries()).map((entry) => (
+        <BreakpointCellComponent
+          key={entry[0]}
+          breakpoints={entry[1]}
+          model={model}
+        />
+      ))}
+    </div>
+  );
+};
+
+const BreakpointCellComponent = ({
+  breakpoints,
+  model
+}: {
+  breakpoints: Breakpoints.IBreakpoint[];
+  model: Breakpoints.Model;
+}) => {
   return (
     <div>
       {breakpoints
@@ -50,7 +75,7 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
         })
         .map((breakpoint: Breakpoints.IBreakpoint) => (
           <BreakpointComponent
-            key={breakpoint.line}
+            key={breakpoint.source.path + breakpoint.line}
             breakpoint={breakpoint}
             breakpointChanged={model.breakpointChanged}
           />

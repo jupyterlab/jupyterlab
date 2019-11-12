@@ -30,10 +30,14 @@ export class Breakpoints extends Panel {
         tooltip: `${this.isAllActive ? 'Deactivate' : 'Activate'} Breakpoints`,
         onClick: () => {
           this.isAllActive = !this.isAllActive;
-          this.model.breakpoints.map((breakpoint: Breakpoints.IBreakpoint) => {
-            breakpoint.active = this.isAllActive;
-            this.model.breakpoint = breakpoint;
-          });
+
+          // TODO: this requires a set breakpoint(bp: Breakpoints.IBreakpoint[]) method in the model
+          /*Array.from(this.model.breakpoints.values()).map((breakpoints: Breakpoints.IBreakpoint[]) => {
+            breakpoints.map((breakpoint: Breakpoints.IBreakpoint) => {
+              breakpoint.active = this.isAllActive;
+              this.model.breakpoint = breakpoint;
+            });
+          });*/
         }
       })
     );
@@ -43,7 +47,7 @@ export class Breakpoints extends Panel {
       new ToolbarButton({
         iconClassName: 'jp-CloseAllIcon',
         onClick: () => {
-          void this.service.updateBreakpoints([]);
+          void this.service.clearBreakpoints();
         },
         tooltip: 'Remove All Breakpoints'
       })
@@ -78,44 +82,21 @@ export namespace Breakpoints {
   }
 
   export class Model implements IDisposable {
-    constructor(model: IBreakpoint[]) {
-      this._breakpoints = model;
+    get changed(): Signal<this, IBreakpoint[]> {
+      return this._changed;
     }
 
-    changed = new Signal<this, IBreakpoint[]>(this);
+    get restored(): Signal<this, void> {
+      return this._restored;
+    }
 
-    get breakpoints(): IBreakpoint[] {
+    get breakpoints(): Map<string, IBreakpoint[]> {
       return this._breakpoints;
     }
 
+    // kept for react component
     get breakpointChanged(): Signal<this, IBreakpoint> {
       return this._breakpointChanged;
-    }
-
-    set breakpoints(breakpoints: IBreakpoint[]) {
-      this._breakpoints = [...breakpoints];
-      this.changed.emit(this._breakpoints);
-    }
-
-    set breakpoint(breakpoint: IBreakpoint) {
-      const index = this._breakpoints.findIndex(
-        ele => ele.line === breakpoint.line
-      );
-      if (index !== -1) {
-        this._breakpoints[index] = breakpoint;
-        this._breakpointChanged.emit(breakpoint);
-      } else {
-        this.breakpoints = [...this.breakpoints, breakpoint];
-      }
-    }
-
-    set type(newType: SessionTypes) {
-      if (newType === this._selectedType) {
-        return;
-      }
-      this._state[this._selectedType] = this.breakpoints;
-      this._selectedType = newType;
-      this.breakpoints = this._state[newType];
     }
 
     get isDisposed(): boolean {
@@ -130,13 +111,25 @@ export namespace Breakpoints {
       Signal.clearData(this);
     }
 
-    private _selectedType: SessionTypes;
+    setBreakpoints(id: string, breakpoints: IBreakpoint[]) {
+      this._breakpoints.set(id, breakpoints);
+      this.changed.emit(breakpoints);
+    }
+
+    getBreakpoints(id: string): IBreakpoint[] {
+      return this._breakpoints.get(id) || [];
+    }
+
+    restoreBreakpoints(breakpoints: Map<string, IBreakpoint[]>) {
+      this._breakpoints = breakpoints;
+      this._restored.emit();
+    }
+
+    private _breakpoints = new Map<string, IBreakpoint[]>();
+    private _changed = new Signal<this, IBreakpoint[]>(this);
+    private _restored = new Signal<this, void>(this);
+    // kept for react component
     private _breakpointChanged = new Signal<this, IBreakpoint>(this);
-    private _breakpoints: IBreakpoint[];
-    private _state = {
-      console: [] as Breakpoints.IBreakpoint[],
-      notebook: [] as Breakpoints.IBreakpoint[]
-    };
     private _isDisposed: boolean = false;
   }
 

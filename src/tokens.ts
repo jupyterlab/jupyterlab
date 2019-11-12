@@ -57,6 +57,11 @@ export interface IDebugger extends IDisposable {
   readonly eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
 
   /**
+   * Computes an id based on the given code.
+   */
+  getCellId(code: string): string;
+
+  /**
    * Whether the current debugger is started.
    */
   isStarted(): boolean;
@@ -112,9 +117,19 @@ export interface IDebugger extends IDisposable {
   stepOut(): Promise<void>;
 
   /**
-   * Update all breakpoints at once.
+   * Update all breakpoints of a cell at once.
+   * @param code - The code in the cell where the breakpoints are set.
+   * @param breakpoints - The list of breakpoints to set.
    */
-  updateBreakpoints(breakpoints: Breakpoints.IBreakpoint[]): Promise<void>;
+  updateBreakpoints(
+    code: string,
+    breakpoints: Breakpoints.IBreakpoint[]
+  ): Promise<void>;
+
+  /**
+   * Removes all the breakpoints from the current notebook or console
+   */
+  clearBreakpoints(): Promise<void>;
 }
 
 /**
@@ -197,7 +212,7 @@ export namespace IDebugger {
      */
     export interface IDebugInfoBreakpoints {
       source: string;
-      lines: number[];
+      breakpoints: DebugProtocol.Breakpoint[];
     }
 
     /**
@@ -211,6 +226,8 @@ export namespace IDebugger {
         hashMethod: string;
         hashSeed: number;
         breakpoints: IDebugInfoBreakpoints[];
+        tmp_file_prefix: string;
+        tmp_file_suffix: string;
       };
     }
 

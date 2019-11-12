@@ -116,7 +116,7 @@ export namespace Debugger {
 
   export class Model implements IDisposable {
     constructor(options: Debugger.Model.IOptions) {
-      this.breakpointsModel = new Breakpoints.Model([]);
+      this.breakpointsModel = new Breakpoints.Model();
       this.callstackModel = new Callstack.Model([]);
       this.variablesModel = new Variables.Model([]);
       this.connector = options.connector || null;
