@@ -68,14 +68,13 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
   const convertForObjectInspector = (scopes: Variables.IScope[]) => {
     const converted = scopes.map(scope => {
       const newVariable = scope.variables.map(variable => {
-        const func = () => {
-          model.expandVariable(variable);
-        };
-
         if (variable.haveMoreDetails || variable.variablesReference === 0) {
           return { ...filterVariable(variable) };
         } else {
-          return { getMoreDetails: func, ...filterVariable(variable) };
+          return {
+            expandVariable: model.expandVariable(variable),
+            ...filterVariable(variable)
+          };
         }
       });
       return { name: scope.name, variables: newVariable };
@@ -149,7 +148,6 @@ const defaultNodeRenderer = ({
   expanded: boolean;
   theme?: string | Partial<ITheme>;
 }) => {
-  let dontDisplay = false;
   const types = ['bool', 'str', 'int', 'float'];
   const label = data.name === '' || data.name == null ? name : data.name;
   const value = types.includes(data.type)
@@ -158,14 +156,20 @@ const defaultNodeRenderer = ({
     ? 'class'
     : data.type;
 
-  if (expanded) {
-    if (data.getMoreDetails) {
-      data.getMoreDetails();
-      dontDisplay = true;
+  useEffect(() => {
+    if (expanded) {
+      if (data.expandVariable) {
+        data.expandVariable();
+        // for not node without rest variables,props
+        void requestAnimationFrame(() => {
+          return;
+        });
+        return;
+      }
     }
-  }
+  });
 
-  return dontDisplay ? null : depth === 0 ? (
+  return depth === 0 ? (
     <span>
       <span>{label}</span>
       <span>: </span>
