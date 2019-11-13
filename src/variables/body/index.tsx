@@ -114,21 +114,19 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
 };
 
 const convertType = (variable: Variables.IVariable) => {
-  const type = variable.type;
-  let value: any = variable.value;
-  if (type === 'int' || type === 'float') {
-    return value * 1;
+  const { type, value } = variable;
+  switch (type) {
+    case 'int':
+      return parseInt(value, 10);
+    case 'float':
+      return parseFloat(value);
+    case 'bool':
+      return value === 'False' ? false : true;
+    case 'str':
+      return value.slice(1, value.length - 1);
+    default:
+      return value;
   }
-  if (type === 'bool') {
-    return value === 'False' ? false : true;
-  }
-  if (type === 'str') {
-    return (value as string)
-      .split('')
-      .slice(1, value.length - 1)
-      .join('');
-  }
-  return value;
 };
 
 const defaultNodeRenderer = ({
