@@ -142,11 +142,7 @@ const defaultNodeRenderer = ({
 }) => {
   const types = ['bool', 'str', 'int', 'float'];
   const label = data.name === '' || data.name == null ? name : data.name;
-  const value = types.includes(data.type)
-    ? data.value
-    : data.type === 'type'
-    ? 'class'
-    : data.type;
+  const value = types.includes(data.type) ? data.value : data.type;
 
   useEffect(() => {
     if (!expanded || !data.expandVariable) {
