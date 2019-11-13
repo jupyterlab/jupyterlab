@@ -28,6 +28,7 @@ export class Body extends ReactWidget {
 const VariableComponent = ({ model }: { model: Variables.Model }) => {
   const [data, setData] = useState(model.scopes);
 
+  // TODO: this should be simplified and extracted from the component
   const filterVariable = (
     variable: Variables.IVariable,
     isObject?: boolean,
@@ -35,12 +36,21 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
   ): Object => {
     const tableKey = ['name', 'value', 'type'];
     const filteredObj = Object.keys(variable)
-      .filter(
-        key =>
-          (isObject ? key === 'value' : tableKey.includes(key)) ||
-          (key !== 'presentationHint' &&
-            typeof (variable as any)[key] === 'object')
-      )
+      .filter(key => {
+        if (isObject && key === 'value') {
+          return true;
+        }
+        if (tableKey.includes(key)) {
+          return true;
+        }
+        if (
+          typeof (variable as any)[key] === 'object' &&
+          key !== 'presentationHint'
+        ) {
+          return true;
+        }
+        return false;
+      })
       .reduce((res, key) => {
         let valueOfKey =
           key === 'value' ? convertType(variable) : (variable as any)[key];
