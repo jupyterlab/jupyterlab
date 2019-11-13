@@ -45,20 +45,16 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
         let valueOfKey =
           key === 'value' ? convertType(variable) : (variable as any)[key];
         if (typeof valueOfKey === 'object') {
-          return Object.assign(
-            res,
-            filterVariable(valueOfKey, true, key) as Object
-          );
+          return { ...res, ...filterVariable(valueOfKey, true, key) };
         }
         if (isObject) {
-          return Object.assign(res, {
-            [keyObj]: valueOfKey
-          });
+          return { ...res, [keyObj]: valueOfKey };
         }
 
-        return Object.assign(res, {
+        return {
+          ...res,
           [key]: valueOfKey
-        });
+        };
       }, {});
 
     return filteredObj;
