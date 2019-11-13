@@ -45,11 +45,10 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
         let valueOfKey =
           key === 'value' ? convertType(variable) : (variable as any)[key];
         if (typeof valueOfKey === 'object') {
-          return Object.assign(res, filterVariable(
-            valueOfKey,
-            true,
-            key
-          ) as Object);
+          return Object.assign(
+            res,
+            filterVariable(valueOfKey, true, key) as Object
+          );
         }
         if (isObject) {
           return Object.assign(res, {
@@ -66,20 +65,19 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
   };
 
   const convertForObjectInspector = (scopes: Variables.IScope[]) => {
-    const converted = scopes.map(scope => {
+    return scopes.map(scope => {
       const newVariable = scope.variables.map(variable => {
         if (variable.haveMoreDetails || variable.variablesReference === 0) {
           return { ...filterVariable(variable) };
         } else {
           return {
-            expandVariable: model.expandVariable(variable),
+            expandVariable: () => model.expandVariable(variable),
             ...filterVariable(variable)
           };
         }
       });
       return { name: scope.name, variables: newVariable };
     });
-    return converted;
   };
 
   useEffect(() => {

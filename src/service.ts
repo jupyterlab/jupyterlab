@@ -339,7 +339,7 @@ export class DebugService implements IDebugger {
       newVariable = { [variable.name]: variable, ...newVariable };
     });
 
-    const newScope = this._model.variablesModel.scopes.map(scope => {
+    const newScopes = this._model.variablesModel.scopes.map(scope => {
       const findIndex = scope.variables.findIndex(
         ele => ele.variablesReference === variable.variablesReference
       );
@@ -347,7 +347,7 @@ export class DebugService implements IDebugger {
       return { ...scope };
     });
 
-    this._model.variablesModel.scopes = [...newScope];
+    this._model.variablesModel.scopes = [...newScopes];
 
     return reply.body.variables;
   };
