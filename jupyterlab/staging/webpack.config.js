@@ -60,6 +60,12 @@ Object.keys(jlab.linkedPackages).forEach(function(name) {
   watched[name] = plib.dirname(localPkgPath);
 });
 
+// Set up source-map-loader to look in watched lib dirs
+let sourceMapRes = Object.values(watched).reduce((res, name) => {
+  res.push(new RegExp(name + '/lib'));
+  return res;
+}, []);
+
 /**
  * Sync a local path to a linked package path if they are files and differ.
  */
@@ -165,10 +171,9 @@ module.exports = [
         { test: /\.txt$/, use: 'raw-loader' },
         {
           test: /\.js$/,
+          include: sourceMapRes,
           use: ['source-map-loader'],
-          enforce: 'pre',
-          // eslint-disable-next-line no-undef
-          exclude: /node_modules/
+          enforce: 'pre'
         },
         { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
         { test: /\.js.map$/, use: 'file-loader' },
