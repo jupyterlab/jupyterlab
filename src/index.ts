@@ -237,6 +237,8 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       namespace: 'debugger'
     });
 
+    const defaultMode = 'condensed';
+
     let widget: MainAreaWidget<Debugger>;
 
     commands.addCommand(CommandIDs.mount, {
@@ -245,7 +247,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
           return;
         }
 
-        const mode = (args.mode as IDebugger.Mode) || 'expanded';
+        const mode = (args.mode as IDebugger.Mode) || defaultMode;
 
         const { sidebar } = widget.content;
         if (!mode) {
@@ -359,7 +361,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       execute: async args => {
         const id = (args.id as string) || UUID.uuid4();
         const savedMode = (await state.fetch('mode')) as IDebugger.Mode;
-        const mode = savedMode ? savedMode : 'expanded';
+        const mode = savedMode ? savedMode : defaultMode;
 
         const callstackCommands = {
           registry: commands,
