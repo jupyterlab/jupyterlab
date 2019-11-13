@@ -116,8 +116,8 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
       },
       false
     );
-    const nodes = [];
-    const originalNodes = [];
+    const nodes: (Node | null)[] = [];
+    const originalNodes: Node[] = [];
     // We MUST gather nodes first, otherwise the updates below will find each result twice
     let node = walker.nextNode();
     while (node) {
