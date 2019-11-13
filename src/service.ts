@@ -333,7 +333,7 @@ export class DebugService implements IDebugger {
     const reply = await this.session.sendRequest('variables', {
       variablesReference: variable.variablesReference
     });
-    let newVariable = { ...variable, haveMoreDetails: Symbol('haveDetails') };
+    let newVariable = { ...variable, expanded: true };
 
     reply.body.variables.forEach((variable: DebugProtocol.Variable) => {
       newVariable = { [variable.name]: variable, ...newVariable };

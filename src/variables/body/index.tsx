@@ -73,7 +73,7 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
   const convertForObjectInspector = (scopes: Variables.IScope[]) => {
     return scopes.map(scope => {
       const newVariable = scope.variables.map(variable => {
-        if (variable.haveMoreDetails || variable.variablesReference === 0) {
+        if (variable.expanded || variable.variablesReference === 0) {
           return { ...filterVariable(variable) };
         } else {
           return {

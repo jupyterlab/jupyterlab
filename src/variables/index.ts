@@ -53,8 +53,7 @@ class VariablesHeader extends Widget {
 
 export namespace Variables {
   export interface IVariable extends DebugProtocol.Variable {
-    getMoreDetails?: any;
-    haveMoreDetails?: Symbol;
+    expanded?: boolean;
   }
 
   export interface IScope {
