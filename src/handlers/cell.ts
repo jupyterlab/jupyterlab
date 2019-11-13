@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeCell } from '@jupyterlab/cells';
+import { CodeCell, ICellModel } from '@jupyterlab/cells';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+
+import { ActivityMonitor } from '@jupyterlab/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -18,6 +20,8 @@ import { Debugger } from '../debugger';
 import { IDebugger } from '../tokens';
 
 const LINE_HIGHLIGHT_CLASS = 'jp-breakpoint-line-highlight';
+
+const CELL_CHANGED_TIMEOUT = 1000;
 
 export class CellManager implements IDisposable {
   constructor(options: CellManager.IOptions) {
@@ -96,6 +100,9 @@ export class CellManager implements IDisposable {
     if (this.previousCell) {
       this.removeListener(this.previousCell);
     }
+    if (this._cellMonitor) {
+      this._cellMonitor.dispose();
+    }
     this.removeListener(this.activeCell);
     this.cleanupHighlight();
     Signal.clearData(this);
@@ -139,11 +146,44 @@ export class CellManager implements IDisposable {
       this._debuggerService.session
     ) {
       if (this.previousCell && !this.previousCell.isDisposed) {
+        if (this._cellMonitor) {
+          this._cellMonitor.dispose();
+        }
         this.removeListener(this.previousCell);
       }
+
+      this._cellMonitor = new ActivityMonitor({
+        signal: this.activeCell.model.contentChanged,
+        timeout: CELL_CHANGED_TIMEOUT
+      });
+
+      this._cellMonitor.activityStopped.connect(() => {
+        this.sendEditorBreakpoints();
+      }, this);
+
       this.previousCell = this.activeCell;
       this.setEditor(this.activeCell);
     }
+  }
+
+  protected sendEditorBreakpoints() {
+    const cell = this.activeCell;
+    if (!cell || !cell.editor) {
+      return;
+    }
+
+    const breakpoints = this.getBreakpointsFromEditor(cell).map(lineInfo => {
+      return Private.createBreakpoint(
+        this._debuggerService.session.client.name,
+        this.getEditorId(),
+        lineInfo.line + 1
+      );
+    });
+
+    void this._debuggerService.updateBreakpoints(
+      cell.editor.model.value.text,
+      breakpoints
+    );
   }
 
   protected setEditor(cell: CodeCell) {
@@ -216,6 +256,18 @@ export class CellManager implements IDisposable {
     });
   }
 
+  private getBreakpointsFromEditor(cell: CodeCell): ILineInfo[] {
+    const editor = cell.editor as CodeMirrorEditor;
+    let lines = [];
+    for (let i = 0; i < editor.doc.lineCount(); i++) {
+      const info = editor.editor.lineInfo(i);
+      if (info.gutterMarkers) {
+        lines.push(info);
+      }
+    }
+    return lines;
+  }
+
   private getBreakpoints(cell: CodeCell): Breakpoints.IBreakpoint[] {
     return this._debuggerModel.breakpointsModel.getBreakpoints(
       this._debuggerService.getCellId(cell.model.value.text)
@@ -227,6 +279,7 @@ export class CellManager implements IDisposable {
   private breakpointsModel: Breakpoints.Model;
   private _activeCell: CodeCell;
   private _debuggerService: IDebugger;
+  private _cellMonitor: ActivityMonitor<ICellModel, void> = null;
 }
 
 export namespace CellManager {
