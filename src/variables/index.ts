@@ -52,7 +52,9 @@ class VariablesHeader extends Widget {
 }
 
 export namespace Variables {
-  export interface IVariable extends DebugProtocol.Variable {}
+  export interface IVariable extends DebugProtocol.Variable {
+    expanded?: boolean;
+  }
 
   export interface IScope {
     name: string;
@@ -68,18 +70,6 @@ export namespace Variables {
       return this._changed;
     }
 
-    get currentVariable(): IVariable {
-      return this._currentVariable;
-    }
-
-    set currentVariable(variable: IVariable) {
-      if (this._currentVariable === variable) {
-        return;
-      }
-      this._currentVariable = variable;
-      this._currentVariableChanged.emit(variable);
-    }
-
     get scopes(): IScope[] {
       return this._state;
     }
@@ -89,26 +79,17 @@ export namespace Variables {
       this._changed.emit();
     }
 
-    get variables(): IVariable[] {
-      return this._currentScope ? this._currentScope.variables : [];
+    get variableExpanded(): ISignal<this, IVariable> {
+      return this._variableExpanded;
     }
 
-    set variables(variables: IVariable[]) {
-      this._currentScope.variables = variables;
-      this._changed.emit();
-    }
-
-    getCurrentVariables(): IVariable[] {
-      return this.variables;
+    expandVariable(variable: IVariable) {
+      this._variableExpanded.emit(variable);
     }
 
     protected _state: IScope[];
-
-    private _currentVariable: IVariable;
-    private _currentScope: IScope;
-
+    private _variableExpanded = new Signal<this, IVariable>(this);
     private _changed = new Signal<this, void>(this);
-    private _currentVariableChanged = new Signal<this, IVariable>(this);
   }
 
   export interface IOptions extends Panel.IOptions {

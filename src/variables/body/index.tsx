@@ -3,11 +3,12 @@
 
 import { Variables } from '../index';
 
-import { ITheme, ObjectInspector, ObjectLabel } from 'react-inspector';
+import { ITheme, ObjectInspector, ObjectRootLabel } from 'react-inspector';
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
 import { ArrayExt } from '@phosphor/algorithm';
+
 import React, { useEffect, useState } from 'react';
 
 export class Body extends ReactWidget {
@@ -27,12 +28,70 @@ export class Body extends ReactWidget {
 const VariableComponent = ({ model }: { model: Variables.Model }) => {
   const [data, setData] = useState(model.scopes);
 
+  // TODO: this should be simplified and extracted from the component
+  const filterVariable = (
+    variable: Variables.IVariable,
+    isObject?: boolean,
+    keyObj?: string
+  ): Object => {
+    const tableKey = ['name', 'value', 'type'];
+    const filteredObj = Object.keys(variable)
+      .filter(key => {
+        if (isObject && key === 'value') {
+          return true;
+        }
+        if (tableKey.includes(key)) {
+          return true;
+        }
+        if (
+          typeof (variable as any)[key] === 'object' &&
+          key !== 'presentationHint'
+        ) {
+          return true;
+        }
+        return false;
+      })
+      .reduce((res, key) => {
+        let valueOfKey =
+          key === 'value' ? convertType(variable) : (variable as any)[key];
+        if (typeof valueOfKey === 'object') {
+          return { ...res, ...filterVariable(valueOfKey, true, key) };
+        }
+        if (isObject) {
+          return { ...res, [keyObj]: valueOfKey };
+        }
+
+        return {
+          ...res,
+          [key]: valueOfKey
+        };
+      }, {});
+
+    return filteredObj;
+  };
+
+  const convertForObjectInspector = (scopes: Variables.IScope[]) => {
+    return scopes.map(scope => {
+      const newVariable = scope.variables.map(variable => {
+        if (variable.expanded || variable.variablesReference === 0) {
+          return { ...filterVariable(variable) };
+        } else {
+          return {
+            expandVariable: () => model.expandVariable(variable),
+            ...filterVariable(variable)
+          };
+        }
+      });
+      return { name: scope.name, variables: newVariable };
+    });
+  };
+
   useEffect(() => {
-    const updateScopes = () => {
-      if (ArrayExt.shallowEqual(data, model.scopes)) {
+    const updateScopes = (self: Variables.Model) => {
+      if (ArrayExt.shallowEqual(data, self.scopes)) {
         return;
       }
-      setData(model.scopes);
+      setData(self.scopes);
     };
 
     model.changed.connect(updateScopes);
@@ -44,11 +103,11 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
 
   const List = () => (
     <>
-      {data.map(scopes => (
+      {convertForObjectInspector(data).map(scope => (
         <ObjectInspector
-          key={scopes.name}
-          data={scopes.variables}
-          name={scopes.name}
+          key={scope.name}
+          data={scope.variables}
+          name={scope.name}
           nodeRenderer={defaultNodeRenderer}
           theme={THEME}
           expandLevel={1}
@@ -58,6 +117,22 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
   );
 
   return <>{List()}</>;
+};
+
+const convertType = (variable: Variables.IVariable) => {
+  const { type, value } = variable;
+  switch (type) {
+    case 'int':
+      return parseInt(value, 10);
+    case 'float':
+      return parseFloat(value);
+    case 'bool':
+      return value === 'False' ? false : true;
+    case 'str':
+      return value.slice(1, value.length - 1);
+    default:
+      return value;
+  }
 };
 
 const defaultNodeRenderer = ({
@@ -75,8 +150,16 @@ const defaultNodeRenderer = ({
   expanded: boolean;
   theme?: string | Partial<ITheme>;
 }) => {
+  const types = ['bool', 'str', 'int', 'float'];
   const label = data.name === '' || data.name == null ? name : data.name;
-  const value = data.value;
+  const value = types.includes(data.type) ? data.value : data.type;
+
+  useEffect(() => {
+    if (!expanded || !data.expandVariable) {
+      return;
+    }
+    data.expandVariable();
+  });
 
   return depth === 0 ? (
     <span>
@@ -88,10 +171,10 @@ const defaultNodeRenderer = ({
     <span>
       <span style={{ color: THEME.OBJECT_NAME_COLOR }}>{label}</span>
       <span>: </span>
-      <span>{value}</span>
+      <span style={{ color: THEME.OBJECT_VALUE_STRING_COLOR }}>{value}</span>
     </span>
   ) : (
-    <ObjectLabel name={label} data={data} isNonenumerable={isNonenumerable} />
+    <ObjectRootLabel name={name} data={data} />
   );
 };
 

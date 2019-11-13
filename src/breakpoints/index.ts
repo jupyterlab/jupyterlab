@@ -4,9 +4,13 @@
 import { Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 import { IDisposable } from '@phosphor/disposable';
 import { Signal } from '@phosphor/signaling';
+
 import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
+
 import { DebugProtocol } from 'vscode-debugprotocol';
+
 import { IDebugger } from '../tokens';
+
 import { Body } from './body';
 
 export class Breakpoints extends Panel {

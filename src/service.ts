@@ -370,6 +370,7 @@ export class DebugService implements IDebugger {
     }
 
     this._model.callstackModel.currentFrameChanged.connect(this.onChangeFrame);
+    this._model.variablesModel.variableExpanded.connect(this.getVariable);
   };
 
   onChangeFrame = (_: Callstack.Model, update: Callstack.IFrame) => {
@@ -400,6 +401,29 @@ export class DebugService implements IDebugger {
       frameId: frame.id
     });
     return reply.body.scopes;
+  };
+
+  getVariable = async (_: any, variable: DebugProtocol.Variable) => {
+    const reply = await this.session.sendRequest('variables', {
+      variablesReference: variable.variablesReference
+    });
+    let newVariable = { ...variable, expanded: true };
+
+    reply.body.variables.forEach((variable: DebugProtocol.Variable) => {
+      newVariable = { [variable.name]: variable, ...newVariable };
+    });
+
+    const newScopes = this._model.variablesModel.scopes.map(scope => {
+      const findIndex = scope.variables.findIndex(
+        ele => ele.variablesReference === variable.variablesReference
+      );
+      scope.variables[findIndex] = newVariable;
+      return { ...scope };
+    });
+
+    this._model.variablesModel.scopes = [...newScopes];
+
+    return reply.body.variables;
   };
 
   getVariables = async (scopes: DebugProtocol.Scope[]) => {
