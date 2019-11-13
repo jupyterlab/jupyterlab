@@ -155,16 +155,10 @@ const defaultNodeRenderer = ({
     : data.type;
 
   useEffect(() => {
-    if (expanded) {
-      if (data.expandVariable) {
-        data.expandVariable();
-        // for not node without rest variables,props
-        void requestAnimationFrame(() => {
-          return;
-        });
-        return;
-      }
+    if (!expanded || !data.expandVariable) {
+      return;
     }
+    data.expandVariable();
   });
 
   return depth === 0 ? (
