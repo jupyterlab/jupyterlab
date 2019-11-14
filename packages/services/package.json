@@ -56,7 +56,7 @@
     "rimraf": "~2.6.2",
     "text-encoding": "^0.7.0",
     "typedoc": "^0.14.2",
-    "typescript": "~3.5.1",
+    "typescript": "~3.7.2",
     "webpack": "^4.32.2",
     "webpack-cli": "^3.3.0"
   },

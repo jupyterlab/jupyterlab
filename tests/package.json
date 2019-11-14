@@ -68,7 +68,7 @@
     "style-loader": "~0.23.1",
     "thread-loader": "^2.1.2",
     "ts-loader": "^6.0.2",
-    "typescript": "~3.5.1",
+    "typescript": "~3.7.2",
     "url-loader": "~1.1.2",
     "webpack": "^4.32.2"
   }
