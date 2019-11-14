@@ -74,7 +74,7 @@ export class CellManager implements IDisposable {
   }
 
   private showCurrentLine(lineNumber: number) {
-    if (!this.activeCell) {
+    if (!this.activeCell || !this.activeCell.inputArea) {
       return;
     }
     const editor = this.activeCell.editor as CodeMirrorEditor;
