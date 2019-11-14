@@ -10,7 +10,7 @@ This extension is under active development and is not yet available.
 ## Prerequisites
 
 - JupyterLab 1.1+
-- xeus-python 0.5+
+- xeus-python 0.6.5+
 
 ## Development
 
@@ -24,19 +24,19 @@ conda activate jupyterlab-debugger
 # Install dependencies
 jlpm
 
-# Build Typescript source
+# Build TypeScript source
 jlpm build
 
 # Link your development version of the extension with JupyterLab
 jupyter labextension link .
 
-# Rebuild Typescript source after making changes
+# Rebuild TypeScript source after making changes
 jlpm build
 
 # Rebuild JupyterLab after making any changes
 jupyter lab build
 
-# Start JupyterLab with the kernel logs enabled and watch move enabled
+# Start JupyterLab with the kernel logs enabled and watch mode enabled
 XEUS_LOG=1 jupyter lab --no-browser --watch
 ```
 
