@@ -26,6 +26,7 @@ const CELL_CHANGED_TIMEOUT = 1000;
 export class CellManager implements IDisposable {
   constructor(options: CellManager.IOptions) {
     this._debuggerService = options.debuggerService;
+    this._id = options.debuggerService.session.client.name;
     this.onModelChanged();
     this._debuggerService.modelChanged.connect(() => this.onModelChanged());
     this.activeCell = options.activeCell;
@@ -129,6 +130,9 @@ export class CellManager implements IDisposable {
   }
 
   protected clearGutter(cell: CodeCell) {
+    if (this._id !== this._debuggerService.session.client.name) {
+      return;
+    }
     const editor = cell.editor as CodeMirrorEditor;
     editor.doc.eachLine(line => {
       if ((line as ILineInfo).gutterMarkers) {
@@ -280,6 +284,7 @@ export class CellManager implements IDisposable {
   private _activeCell: CodeCell;
   private _debuggerService: IDebugger;
   private _cellMonitor: ActivityMonitor<ICellModel, void> = null;
+  private _id: string;
 }
 
 export namespace CellManager {
