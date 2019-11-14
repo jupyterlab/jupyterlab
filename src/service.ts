@@ -374,6 +374,9 @@ export class DebugService implements IDebugger {
   };
 
   onChangeFrame = (_: Callstack.Model, update: Callstack.IFrame) => {
+    if (!update) {
+      return;
+    }
     const frame = this.frames.find(ele => ele.id === update.id);
     if (frame && frame.scopes) {
       this._model.variablesModel.scopes = frame.scopes;

@@ -96,6 +96,7 @@ export namespace Callstack {
     set frames(newFrames: IFrame[]) {
       this._state = newFrames;
       this._framesChanged.emit(newFrames);
+      this.frame = newFrames[0];
     }
 
     get frames(): IFrame[] {
