@@ -24,7 +24,7 @@ const VEGA_CLASS = 'jp-RenderedVega5';
 /**
  * The CSS class to add to the Vega-Lite.
  */
-const VEGALITE_CLASS = 'jp-RenderedVegaLite3';
+const VEGALITE_CLASS = 'jp-RenderedVegaLite';
 
 /**
  * The MIME type for Vega.
@@ -40,7 +40,15 @@ export const VEGA_MIME_TYPE = 'application/vnd.vega.v5+json';
  * #### Notes
  * The version of this follows the major version of Vega-Lite.
  */
-export const VEGALITE_MIME_TYPE = 'application/vnd.vegalite.v3+json';
+export const VEGALITE3_MIME_TYPE = 'application/vnd.vegalite.v3+json';
+
+/**
+ * The MIME type for Vega-Lite.
+ *
+ * #### Notes
+ * The version of this follows the major version of Vega-Lite.
+ */
+export const VEGALITE4_MIME_TYPE = 'application/vnd.vegalite.v4+json';
 
 /**
  * A widget for rendering Vega or Vega-Lite data, for usage with rendermime.
@@ -135,7 +143,7 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
  */
 export const rendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
-  mimeTypes: [VEGA_MIME_TYPE, VEGALITE_MIME_TYPE],
+  mimeTypes: [VEGA_MIME_TYPE, VEGALITE3_MIME_TYPE, VEGALITE4_MIME_TYPE],
   createRenderer: options => new RenderedVega(options)
 };
 
@@ -155,7 +163,7 @@ const extension: IRenderMime.IExtension = {
       name: 'Vega-Lite4',
       primaryFileType: 'vega-lite4',
       fileTypes: ['vega-lite3', 'vega-lite4', 'json'],
-      defaultFor: ['vega-lite3']
+      defaultFor: ['vega-lite3', 'vega-lite4']
     }
   ],
   fileTypes: [
@@ -166,9 +174,15 @@ const extension: IRenderMime.IExtension = {
       iconClass: 'jp-MaterialIcon jp-VegaIcon'
     },
     {
-      mimeTypes: [VEGALITE_MIME_TYPE],
+      mimeTypes: [VEGALITE4_MIME_TYPE],
       name: 'vega-lite4',
       extensions: ['.vl', '.vl.json', '.vegalite'],
+      iconClass: 'jp-MaterialIcon jp-VegaIcon'
+    },
+    {
+      mimeTypes: [VEGALITE3_MIME_TYPE],
+      name: 'vega-lite3',
+      extensions: [],
       iconClass: 'jp-MaterialIcon jp-VegaIcon'
     }
   ]
