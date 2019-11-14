@@ -43,8 +43,8 @@
     "rimraf": "~2.6.2",
     "typedoc": "^0.14.2",
     "typescript": "~3.7.2",
-    "vega": "^5.7.3",
-    "vega-embed": "^4.2.0",
+    "vega": "^5.8.0",
+    "vega-embed": "^6.0.0",
     "vega-lite": "^4.0.0-beta.11"
   },
   "publishConfig": {
