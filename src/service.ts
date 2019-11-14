@@ -88,6 +88,7 @@ export class DebugService implements IDebugger {
       } else if (event.event === 'continued') {
         this._stoppedThreads.delete(event.body.threadId);
         this.clearModel();
+        this.clearSignals();
       }
       this._eventMessage.emit(event);
     });
@@ -350,37 +351,21 @@ export class DebugService implements IDebugger {
   }
 
   getAllFrames = async () => {
-    const stackFrames = await this.getFrames(this.currentThread());
-
-    stackFrames.forEach(async (frame, index) => {
-      const scopes = await this.getScopes(frame);
-      const variables = await this.getVariables(scopes);
-      const values = this.convertScope(scopes, variables);
-      this.frames.push({
-        id: frame.id,
-        scopes: values
-      });
-      if (index === 0) {
-        this._model.variablesModel.scopes = values;
-      }
-    });
-
-    if (stackFrames) {
-      this._model.callstackModel.frames = stackFrames;
-    }
-
     this._model.callstackModel.currentFrameChanged.connect(this.onChangeFrame);
     this._model.variablesModel.variableExpanded.connect(this.getVariable);
+
+    const stackFrames = await this.getFrames(this.currentThread());
+    this._model.callstackModel.frames = stackFrames;
   };
 
-  onChangeFrame = (_: Callstack.Model, update: Callstack.IFrame) => {
-    if (!update) {
+  onChangeFrame = async (_: Callstack.Model, frame: Callstack.IFrame) => {
+    if (!frame) {
       return;
     }
-    const frame = this.frames.find(ele => ele.id === update.id);
-    if (frame && frame.scopes) {
-      this._model.variablesModel.scopes = frame.scopes;
-    }
+    const scopes = await this.getScopes(frame);
+    const variables = await this.getVariables(scopes);
+    const variableScopes = this.convertScope(scopes, variables);
+    this._model.variablesModel.scopes = variableScopes;
   };
 
   dumpCell = async (code: string) => {
@@ -479,6 +464,13 @@ export class DebugService implements IDebugger {
     this._model.variablesModel.scopes = [];
   }
 
+  private clearSignals() {
+    this._model.callstackModel.currentFrameChanged.disconnect(
+      this.onChangeFrame
+    );
+    this._model.variablesModel.variableExpanded.disconnect(this.getVariable);
+  }
+
   private currentThread(): number {
     // TODO: ask the model for the current thread ID
     return 1;
@@ -510,17 +502,9 @@ export class DebugService implements IDebugger {
   private _tmpFilePrefix: string;
   private _tmpFileSuffix: string;
 
-  // TODO: remove frames from the service
-  private frames: Frame[] = [];
-
   // TODO: move this in model
   private _stoppedThreads = new Set();
 }
-
-export type Frame = {
-  id: number;
-  scopes: Variables.IScope[];
-};
 
 namespace Private {
   export function toSourceBreakpoints(breakpoints: Breakpoints.IBreakpoint[]) {
