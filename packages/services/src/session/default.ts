@@ -36,7 +36,7 @@ export class SessionConnection implements Session.ISessionConnection {
     this._clientId = options.clientId;
     this._connectToKernel = options.connectToKernel;
     this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+      options.serverSettings ?? ServerConnection.makeSettings();
     this.setupKernel(options.model.kernel);
   }
 

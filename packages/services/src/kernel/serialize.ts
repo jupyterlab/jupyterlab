@@ -30,7 +30,7 @@ export function deserialize(
  */
 export function serialize(msg: KernelMessage.IMessage): string | ArrayBuffer {
   let value: string | ArrayBuffer;
-  if (msg.buffers && msg.buffers.length) {
+  if (msg.buffers?.length) {
     value = serializeBinary(msg);
   } else {
     value = JSON.stringify(msg);

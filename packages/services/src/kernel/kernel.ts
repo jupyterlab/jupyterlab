@@ -575,8 +575,9 @@ export namespace Kernel {
   export async function startNew(
     options: Kernel.IOptions
   ): Promise<Kernel.IKernelConnection> {
+    // TODO: settings should be second argument?
     options.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+      options.serverSettings ?? ServerConnection.makeSettings();
     const model = await restapi.startNew(options.model);
     return new KernelConnection({ ...options, model });
   }

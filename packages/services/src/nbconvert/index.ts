@@ -19,7 +19,7 @@ export class NbConvertManager {
    */
   constructor(options: NbConvertManager.IOptions = {}) {
     this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+      options.serverSettings ?? ServerConnection.makeSettings();
   }
 
   /**

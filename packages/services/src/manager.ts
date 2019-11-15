@@ -36,8 +36,8 @@ export class ServiceManager implements ServiceManager.IManager {
   constructor(options: ServiceManager.IOptions = {}) {
     const defaultDrive = options.defaultDrive;
     const serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
-    const standby = options.standby || 'when-hidden';
+      options.serverSettings ?? ServerConnection.makeSettings();
+    const standby = options.standby ?? 'when-hidden';
     const normalized = { defaultDrive, serverSettings, standby };
 
     const kernelManager = new KernelManager(normalized);

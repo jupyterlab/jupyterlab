@@ -68,12 +68,11 @@ export async function startNew(
  */
 export async function restartKernel(
   kernel: Kernel.IKernelConnection,
-  settings?: ServerConnection.ISettings
+  settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<void> {
   if (kernel.status === 'dead') {
     throw new Error('Kernel is dead');
   }
-  settings = settings || ServerConnection.makeSettings();
   let url = URLExt.join(
     settings.baseUrl,
     KERNEL_SERVICE_URL,
@@ -157,7 +156,6 @@ export async function getKernelModel(
   id: string,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Kernel.IModel | undefined> {
-  settings = settings || ServerConnection.makeSettings();
   let url = URLExt.join(
     settings.baseUrl,
     KERNEL_SERVICE_URL,

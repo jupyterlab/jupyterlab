@@ -42,7 +42,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
         max: 300 * 1000
       },
       name: `@jupyterlab/services:KernelManager#models`,
-      standby: options.standby || 'when-hidden'
+      standby: options.standby ?? 'when-hidden'
     });
 
     // Initialize internal data.
@@ -227,7 +227,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
       // by a JupyterHub when a server is shut down.
       if (
         err instanceof ServerConnection.NetworkError ||
-        (err.response && err.response.status === 503)
+        err.response?.status === 503
       ) {
         this._connectionFailure.emit(err);
         models = [];

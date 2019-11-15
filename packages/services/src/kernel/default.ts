@@ -49,9 +49,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._name = options.model.name;
     this._id = options.model.id;
     this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
-    this._clientId = options.clientId || UUID.uuid4();
-    this._username = options.username || '';
+      options.serverSettings ?? ServerConnection.makeSettings();
+    this._clientId = options.clientId ?? UUID.uuid4();
+    this._username = options.username ?? '';
     this.handleComms =
       options.handleComms === undefined ? true : options.handleComms;
 
@@ -919,7 +919,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     msgId: string,
     hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>
   ): void {
-    let future = this._futures && this._futures.get(msgId);
+    let future = this._futures?.get(msgId);
     if (future) {
       future.registerMessageHook(hook);
     }
@@ -937,7 +937,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     msgId: string,
     hook: (msg: KernelMessage.IIOPubMessage) => boolean | PromiseLike<boolean>
   ): void {
-    let future = this._futures && this._futures.get(msgId);
+    let future = this._futures?.get(msgId);
     if (future) {
       future.removeMessageHook(hook);
     }
@@ -989,14 +989,14 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     // Regular display_data with id, record it for future updating
     // in _displayIdToParentIds for future lookup.
-    parentIds = this._displayIdToParentIds.get(displayId) || [];
+    parentIds = this._displayIdToParentIds.get(displayId) ?? [];
     if (parentIds.indexOf(msgId) === -1) {
       parentIds.push(msgId);
     }
     this._displayIdToParentIds.set(displayId, parentIds);
 
     // Add to our map of display ids for this message.
-    let displayIds = this._msgIdToDisplayIds.get(msgId) || [];
+    let displayIds = this._msgIdToDisplayIds.get(msgId) ?? [];
     if (displayIds.indexOf(msgId) === -1) {
       displayIds.push(msgId);
     }
@@ -1314,7 +1314,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         KernelMessage.isExecuteResultMsg(msg))
     ) {
       // display_data messages may re-route based on their display_id.
-      let transient = (msg.content.transient || {}) as JSONObject;
+      let transient = (msg.content.transient ?? {}) as JSONObject;
       let displayId = transient['display_id'] as string;
       if (displayId) {
         handled = await this._handleDisplayId(displayId, msg);
@@ -1325,7 +1325,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     if (!handled && msg.parent_header) {
       let parentHeader = msg.parent_header as KernelMessage.IHeader;
-      let future = this._futures && this._futures.get(parentHeader.msg_id);
+      let future = this._futures?.get(parentHeader.msg_id);
       if (future) {
         await future.handleMsg(msg);
         this._assertCurrentMessage(msg);
@@ -1540,7 +1540,7 @@ namespace Private {
           reject
         );
       } else {
-        if (registry && registry[name]) {
+        if (registry?.[name]) {
           resolve(registry[name]);
         } else {
           reject(new Error(`Object '${name}' not found in registry`));

@@ -156,19 +156,19 @@ export namespace KernelMessage {
     }
 
     return {
-      buffers: options.buffers || [],
+      buffers: options.buffers ?? [],
       channel: options.channel,
       content: options.content,
       header: {
         date: new Date().toISOString(),
-        msg_id: options.msgId || UUID.uuid4(),
+        msg_id: options.msgId ?? UUID.uuid4(),
         msg_type: options.msgType,
         session: options.session,
-        username: options.username || '',
+        username: options.username ?? '',
         version: '5.2'
       },
-      metadata: options.metadata || {},
-      parent_header: options.parentHeader || {}
+      metadata: options.metadata ?? {},
+      parent_header: options.parentHeader ?? {}
     } as T;
   }
 

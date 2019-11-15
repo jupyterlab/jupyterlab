@@ -115,7 +115,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       content: {
         comm_id: this._id,
         target_name: this._target,
-        data: data || {}
+        data: data ?? {}
       },
       metadata,
       buffers
@@ -181,7 +181,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       session: this._kernel.clientId,
       content: {
         comm_id: this._id,
-        data: data || {}
+        data: data ?? {}
       },
       metadata,
       buffers
@@ -196,7 +196,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
         session: this._kernel.clientId,
         content: {
           comm_id: this._id,
-          data: data || {}
+          data: data ?? {}
         },
         metadata,
         buffers

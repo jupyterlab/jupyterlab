@@ -40,7 +40,7 @@ export class KernelSpecManager extends BaseManager
         max: 300 * 1000
       },
       name: `@jupyterlab/services:KernelSpecManager#specs`,
-      standby: options.standby || 'when-hidden'
+      standby: options.standby ?? 'when-hidden'
     });
     void this.ready.then(() => {
       void this._pollSpecs.start();

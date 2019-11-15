@@ -53,7 +53,7 @@ export class TerminalManager extends BaseManager
         max: 300 * 1000
       },
       name: `@jupyterlab/services:TerminalManager#models`,
-      standby: options.standby || 'when-hidden'
+      standby: options.standby ?? 'when-hidden'
     });
     void this.ready.then(() => {
       void this._pollModels.start();
@@ -240,7 +240,7 @@ export class TerminalManager extends BaseManager
         // by a JupyterHub when a server is shut down.
         if (
           err instanceof ServerConnection.NetworkError ||
-          (err.response && err.response.status === 503)
+          err.response?.status === 503
         ) {
           this._connectionFailure.emit(err);
           return [] as TerminalSession.IModel[];

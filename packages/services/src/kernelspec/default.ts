@@ -24,10 +24,9 @@ export namespace DefaultKernelSpec {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
    */
   export function getSpecs(
-    settings?: ServerConnection.ISettings,
+    settings: ServerConnection.ISettings = ServerConnection.makeSettings(),
     useCache = true
   ): Promise<KernelSpec.ISpecModels> {
-    settings = settings || ServerConnection.makeSettings();
     if (useCache && Private.specs[settings.baseUrl]) {
       return Private.specs[settings.baseUrl];
     }

@@ -37,7 +37,7 @@ export interface IManager extends IObservableDisposable {
 export abstract class BaseManager implements IManager {
   constructor(options: BaseManager.IOptions) {
     this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+      options.serverSettings ?? ServerConnection.makeSettings();
   }
   /**
    * A signal emitted when the delegate is disposed.

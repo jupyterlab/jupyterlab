@@ -2,7 +2,7 @@ import { ServerConnection } from '../serverconnection';
 import { Session } from '.';
 import { URLExt } from '@jupyterlab/coreutils';
 import { validateModel } from './validate';
-import { Kernel } from '../kernel'
+import { Kernel } from '../kernel';
 
 /**
  * The url for the session service.
@@ -56,7 +56,7 @@ export async function shutdownSession(
   if (response.status === 404) {
     let data = await response.json();
     let msg =
-      data.message || `The session "${id}"" does not exist on the server`;
+      data.message ?? `The session "${id}"" does not exist on the server`;
     console.warn(msg);
   } else if (response.status === 410) {
     throw new ServerConnection.ResponseError(
