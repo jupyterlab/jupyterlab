@@ -530,13 +530,3 @@ export namespace Session {
     // TODO: express the idea that you can have an id, or a name, but not both
   }
 }
-
-export type not<T, K extends keyof T> = {
-  [P in keyof T]: P extends K ? never : T[P];
-};
-
-let x: not<Kernel.IModel, 'name'> = { id: 4, name: 'asdf' };
-
-export type DeepPartial<T> = {
-  [P in keyof T]?: DeepPartial<T[P]>;
-};

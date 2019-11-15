@@ -175,10 +175,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
       };
     }
   ): Promise<Session.ISessionConnection> {
-    const model = await startSession({
-      ...options,
-      serverSettings: this.serverSettings
-    });
+    const model = await startSession(options.model, this.serverSettings);
     await this.refreshRunning();
     return this.connectTo(model);
   }

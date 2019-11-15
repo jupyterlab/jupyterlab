@@ -381,8 +381,7 @@ export class SessionConnection implements Session.ISessionConnection {
     body: restapi.DeepPartial<Session.IModel>
   ): Promise<Session.IModel> {
     let model = await restapi.updateSession(
-      this._id,
-      body,
+      { ...body, id: this._id },
       this.serverSettings
     );
     this.update(model);

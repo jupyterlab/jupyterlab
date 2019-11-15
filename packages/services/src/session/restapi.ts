@@ -2,6 +2,7 @@ import { ServerConnection } from '../serverconnection';
 import { Session } from '.';
 import { URLExt } from '@jupyterlab/coreutils';
 import { validateModel } from './validate';
+import { Kernel } from '../kernel'
 
 /**
  * The url for the session service.
@@ -100,13 +101,13 @@ export interface IModel {
  * the session path already exists
  */
 export async function startSession(
-  options: Session.IModel
+  model: DeepPartial<Session.IModel>,
+  settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Session.IModel> {
-  let settings = options.serverSettings || ServerConnection.makeSettings();
   let url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
   let init = {
     method: 'POST',
-    body: JSON.stringify(options.model)
+    body: JSON.stringify(model)
   };
   let response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 201) {
