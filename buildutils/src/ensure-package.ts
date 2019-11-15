@@ -117,6 +117,17 @@ export async function ensurePackage(
     return messages;
   }
 
+  // Make sure typedoc config files are consistent
+  if (fs.existsSync(path.join(pkgPath, 'typedoc.json'))) {
+    let name = data.name.split('/');
+    utils.writeJSONFile(path.join(pkgPath, 'typedoc.json'), {
+      excludeNotExported: true,
+      mode: 'file',
+      out: `../../docs/api/${name[name.length - 1]}`,
+      theme: '../../typedoc-theme'
+    });
+  }
+
   let imports: string[] = [];
 
   // Extract all of the imports from the TypeScript files.

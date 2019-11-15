@@ -30,7 +30,7 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib",
-    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
+    "docs": "typedoc src",
     "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
@@ -53,8 +53,8 @@
     "@types/react": "~16.8.18",
     "@types/react-dom": "^16.8.4",
     "rimraf": "~2.6.2",
-    "typedoc": "^0.14.2",
-    "typescript": "~3.5.1"
+    "typedoc": "^0.15.2",
+    "typescript": "~3.7.2"
   },
   "publishConfig": {
     "access": "public"

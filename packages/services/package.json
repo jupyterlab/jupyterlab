@@ -36,7 +36,7 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
-    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
+    "docs": "typedoc src",
     "prepublishOnly": "jlpm run build && webpack",
     "watch": "tsc -b --watch"
   },
@@ -55,8 +55,8 @@
     "@types/text-encoding": "^0.0.35",
     "rimraf": "~2.6.2",
     "text-encoding": "^0.7.0",
-    "typedoc": "^0.14.2",
-    "typescript": "~3.5.1",
+    "typedoc": "^0.15.2",
+    "typescript": "~3.7.2",
     "webpack": "^4.32.2",
     "webpack-cli": "^3.3.0"
   },

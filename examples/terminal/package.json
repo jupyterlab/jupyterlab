@@ -24,7 +24,7 @@
     "svg-url-loader": "~2.3.2",
     "svgo": "~1.2.1",
     "svgo-loader": "~2.2.0",
-    "typescript": "~3.5.1",
+    "typescript": "~3.7.2",
     "url-loader": "~1.1.2",
     "watch": "~1.0.2",
     "webpack": "^4.32.2",

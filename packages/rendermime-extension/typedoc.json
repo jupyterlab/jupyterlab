@@ -1,0 +1,6 @@
+{
+  "excludeNotExported": true,
+  "mode": "file",
+  "out": "../../docs/api/rendermime-extension",
+  "theme": "../../typedoc-theme"
+}
