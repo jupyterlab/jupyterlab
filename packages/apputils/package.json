@@ -57,7 +57,7 @@
     "@types/react-dom": "^16.8.4",
     "@types/sanitize-html": "^1.18.3",
     "rimraf": "~2.6.2",
-    "typedoc": "^0.14.2",
+    "typedoc": "^0.15.2",
     "typescript": "~3.7.2"
   },
   "publishConfig": {

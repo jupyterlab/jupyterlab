@@ -41,7 +41,7 @@
   "devDependencies": {
     "@types/webpack-env": "^1.13.9",
     "rimraf": "~2.6.2",
-    "typedoc": "^0.14.2",
+    "typedoc": "^0.15.2",
     "typescript": "~3.7.2",
     "vega": "^5.4.0",
     "vega-embed": "^4.2.0",
