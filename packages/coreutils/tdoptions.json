@@ -1,6 +1,0 @@
-{
-  "excludeNotExported": true,
-  "mode": "file",
-  "out": "../../docs/api/coreutils",
-  "tsconfig": "tsconfig.json"
-}
