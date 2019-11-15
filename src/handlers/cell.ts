@@ -30,7 +30,6 @@ export class CellManager implements IDisposable {
     this.onModelChanged();
     this._debuggerService.modelChanged.connect(() => this.onModelChanged());
     this.activeCell = options.activeCell;
-    this.onActiveCellChanged();
   }
 
   isDisposed: boolean;
@@ -130,9 +129,6 @@ export class CellManager implements IDisposable {
   }
 
   protected clearGutter(cell: CodeCell) {
-    if (this._id !== this._debuggerService.session.client.name) {
-      return;
-    }
     const editor = cell.editor as CodeMirrorEditor;
     editor.doc.eachLine(line => {
       if ((line as ILineInfo).gutterMarkers) {
@@ -165,8 +161,11 @@ export class CellManager implements IDisposable {
         this.sendEditorBreakpoints();
       }, this);
 
+      requestAnimationFrame(() => {
+        this.setEditor(this.activeCell);
+      });
+
       this.previousCell = this.activeCell;
-      this.setEditor(this.activeCell);
     }
   }
 
@@ -221,9 +220,12 @@ export class CellManager implements IDisposable {
 
   protected onGutterClick = (editor: Editor, lineNumber: number) => {
     const info = editor.lineInfo(lineNumber);
-    if (!info) {
+
+    if (!info || this._id !== this._debuggerService.session.client.name) {
       return;
     }
+
+    this.clearGutter(this.activeCell);
 
     const isRemoveGutter = !!info.gutterMarkers;
     let breakpoints: Breakpoints.IBreakpoint[] = this.getBreakpoints(
@@ -248,16 +250,22 @@ export class CellManager implements IDisposable {
   };
 
   private addBreakpointsToEditor(cell: CodeCell) {
-    this.clearGutter(cell);
     const editor = cell.editor as CodeMirrorEditor;
     const breakpoints = this.getBreakpoints(cell);
-    breakpoints.forEach(breakpoint => {
-      editor.editor.setGutterMarker(
-        breakpoint.line - 1,
-        'breakpoints',
-        Private.createMarkerNode()
-      );
-    });
+    if (
+      breakpoints.length === 0 &&
+      this._id === this._debuggerService.session.client.name
+    ) {
+      this.clearGutter(cell);
+    } else {
+      breakpoints.forEach(breakpoint => {
+        editor.editor.setGutterMarker(
+          breakpoint.line - 1,
+          'breakpoints',
+          Private.createMarkerNode()
+        );
+      });
+    }
   }
 
   private getBreakpointsFromEditor(cell: CodeCell): ILineInfo[] {
