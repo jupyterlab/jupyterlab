@@ -24,3 +24,13 @@ jupyter serverextension enable --py jupyterlab
 if [[ $GROUP == integrity ]]; then
     pip install notebook==4.3.1
 fi
+
+if [[ $GROUP == nonode ]]; then
+    # Build the wheel
+    pip install wheel
+    python setup.py bdist_wheel
+
+    # Remove NodeJS
+    sudo rm -rf $(which node)
+    ! node
+fi

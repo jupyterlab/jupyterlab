@@ -103,25 +103,6 @@ def run_test(app, func):
     IOLoop.current().add_future(future, finished)
 
 
-class BrowserApp(LabApp):
-    """An app the launches JupyterLab and waits for it to start up, checking for
-    JS console errors, JS errors, and Python logged errors.
-    """
-    open_browser = Bool(False)
-    base_url = '/foo/'
-    ip = '127.0.0.1'
-    flags = test_flags
-    aliases = test_aliases
-
-    def start(self):
-        web_app = self.web_app
-        web_app.settings.setdefault('page_config_data', dict())
-        web_app.settings['page_config_data']['browserTest'] = True
-        web_app.settings['page_config_data']['buildAvailable'] = False
-        run_test(self, run_browser)
-        super().start()
-
-
 def run_browser(url):
     """Run the browser test and return an exit code.
     """
@@ -134,5 +115,29 @@ def run_browser(url):
     return subprocess.check_call(["node", "chrome-test.js", url], cwd=target)
 
 
+class BrowserApp(LabApp):
+    """An app the launches JupyterLab and waits for it to start up, checking for
+    JS console errors, JS errors, and Python logged errors.
+    """
+    open_browser = Bool(False)
+    base_url = '/foo/'
+    ip = '127.0.0.1'
+    flags = test_flags
+    aliases = test_aliases
+    test_browser = True
+
+    def start(self):
+        web_app = self.web_app
+        web_app.settings.setdefault('page_config_data', dict())
+        web_app.settings['page_config_data']['browserTest'] = True
+        web_app.settings['page_config_data']['buildAvailable'] = False
+        run_test(self, run_browser if self.test_browser else lambda url: 0)
+        super().start()
+
+
 if __name__ == '__main__':
+    skip_option = "--no-chrome-test"
+    if skip_option in sys.argv:
+        BrowserApp.test_browser = False
+        sys.argv.remove(skip_option)
     BrowserApp.launch_instance()
