@@ -34,8 +34,13 @@ override the ``render`` method to return a React element:
 
 We use Phosphor `Signals <https://phosphorjs.github.io/phosphor/api/signaling/interfaces/isignal.html>`__ to represent
 data that changes over time in JupyterLab.
-To have your React element change in response to a signal event, use the ``UseSignal`` component,
-which implements the `"render props" <https://reactjs.org/docs/render-props.html>`__.
+To have your React element change in response to a signal event, use the ``UseSignal`` component from ``@jupyterlab/apputils``,
+which implements the `"render props" <https://reactjs.org/docs/render-props.html>`__:
+
+
+.. literalinclude:: virtualdom.usesignal.tsx
+   :force:
+
 
 The `running component <https://github.com/jupyterlab/jupyterlab/blob/f2e0cde0e7c960dc82fd9b010fcd3dbd9e9b43d0/packages/running/src/index.tsx#L157-L159>`__
 and the ``createSearchOverlay`` function in the `search overlay <https://github.com/jupyterlab/jupyterlab/blob/f2e0cde0e7c960dc82fd9b010fcd3dbd9e9b43d0/packages/documentsearch/src/searchoverlay.tsx#L440-L457>`__
