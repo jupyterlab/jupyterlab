@@ -277,6 +277,10 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         sidebar.title.label = 'Environment';
         shell.add(sidebar, 'right', { activate: false });
 
+        if (restorer) {
+          restorer.add(sidebar, 'debugger-sidebar');
+        }
+
         await service.restoreState(true);
       }
     });
