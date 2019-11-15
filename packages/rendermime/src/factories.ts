@@ -83,9 +83,7 @@ export const javaScriptRendererFactory: IRenderMime.IRendererFactory = {
 /**
  * The standard factories provided by the rendermime package.
  */
-export const standardRendererFactories: ReadonlyArray<
-  IRenderMime.IRendererFactory
-> = [
+export const standardRendererFactories: ReadonlyArray<IRenderMime.IRendererFactory> = [
   htmlRendererFactory,
   markdownRendererFactory,
   latexRendererFactory,

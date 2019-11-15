@@ -1702,9 +1702,11 @@ function addCommands(
         return;
       }
 
-      return Private.createConsole(commands, current, args[
-        'activate'
-      ] as boolean);
+      return Private.createConsole(
+        commands,
+        current,
+        args['activate'] as boolean
+      );
     },
     isEnabled
   });

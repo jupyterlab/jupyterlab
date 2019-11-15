@@ -84,9 +84,9 @@ describe('csvviewer/model', () => {
         expect(d.rowCount('body')).to.equal(1);
         expect(d.columnCount('row-header')).to.equal(1);
         expect(d.columnCount('body')).to.equal(3);
-        expect([0, 1, 2].map(i => d.data('column-header', 0, i))).to.deep.equal(
-          ['a', 'b', 'c']
-        );
+        expect(
+          [0, 1, 2].map(i => d.data('column-header', 0, i))
+        ).to.deep.equal(['a', 'b', 'c']);
         expect([0, 1, 2].map(i => d.data('body', 0, i))).to.deep.equal([
           'd',
           'e',

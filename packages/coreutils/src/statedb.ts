@@ -149,13 +149,10 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
 
     const { ids, values } = await this._list();
 
-    return values.reduce(
-      (acc, val, idx) => {
-        acc[ids[idx]] = val;
-        return acc;
-      },
-      {} as { [id: string]: T }
-    );
+    return values.reduce((acc, val, idx) => {
+      acc[ids[idx]] = val;
+      return acc;
+    }, {} as { [id: string]: T });
   }
 
   /**

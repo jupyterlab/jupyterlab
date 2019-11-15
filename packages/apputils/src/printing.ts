@@ -70,11 +70,9 @@ export namespace Printing {
    * @param url URL to load into an iframe.
    */
   export async function printURL(url: string): Promise<void> {
-    const text = await (await ServerConnection.makeRequest(
-      url,
-      {},
-      settings
-    )).text();
+    const text = await (
+      await ServerConnection.makeRequest(url, {}, settings)
+    ).text();
     return printContent(text);
   }
 
