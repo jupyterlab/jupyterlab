@@ -41,14 +41,15 @@ export class CellManager implements IDisposable {
     }
     this.breakpointsModel = this._debuggerModel.breakpointsModel;
 
-    this._debuggerModel.variablesModel.changed.connect(() => {
-      this.cleanupHighlight();
-      const firstFrame = this._debuggerModel.callstackModel.frames[0];
-      if (!firstFrame) {
-        return;
+    this._debuggerModel.callstackModel.currentFrameChanged.connect(
+      (_, frame) => {
+        this.cleanupHighlight();
+        if (!frame) {
+          return;
+        }
+        this.showCurrentLine(frame.line);
       }
-      this.showCurrentLine(firstFrame.line);
-    });
+    );
 
     this.breakpointsModel.changed.connect(async () => {
       if (
