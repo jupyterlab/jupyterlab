@@ -169,7 +169,11 @@ export class SessionManager extends BaseManager implements Session.IManager {
    * @param options - Overrides for the default options, must include a `path`.
    */
   async startNew(
-    options: Session.IOptions
+    options: Omit<Session.IOptions, 'model' | 'connectToKernel'> & {
+      model: Omit<Session.IModel, 'kernel'> & {
+        kernel: Partial<Kernel.IModel> | null;
+      };
+    }
   ): Promise<Session.ISessionConnection> {
     const model = await startSession({
       ...options,
@@ -343,7 +347,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
     void this.refreshRunning();
   };
 
-  private readonly _connectToKernel = (options: Session.IConnectOptions) => {
+  private readonly _connectToKernel = (options: Kernel.IOptions) => {
     return this._kernelManager.connectTo(options);
   };
 

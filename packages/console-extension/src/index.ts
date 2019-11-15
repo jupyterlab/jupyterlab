@@ -250,6 +250,66 @@ async function activateConsole(
     await tracker.add(panel);
     panel.session.propertyChanged.connect(() => tracker.save(panel));
 
+    // TODO: experiment in having convenience functions to hook things up, to make it clearer to users what is really going on (that sessions do not have an iopub signal, for example).
+    // I think the complexity here is greater than just having proxied signals.
+
+    // Perhaps the proxied signals should be namespaced somehow to
+
+    // const session = panel.session;
+
+    // void function hookup(
+    //   options: {
+    //     kernel?: {
+    //       ioPubMessage?: number;
+    //     };
+    //     session?: {
+    //       kernelChanged?: number;
+    //     };
+    //   },
+    //   thisArg: any
+    // ): void {}
+
+    // function onSessionChanged(
+    //   sender,
+    //   {
+    //     oldValue: oldSession,
+    //     newValue: newSession
+    //   }: IChangedArgs<Session.ISession | null>
+    // ) {
+    //   // disconnect and reconnect kernel handlers
+    //   onKernelChanged({
+    //     name: 'kernel',
+    //     oldValue: oldSession && oldSession.kernel,
+    //     newValue: newSession && newSession.kernel
+    //   });
+    //   // hook up new session signal handlers
+    //   if (oldSession) {
+    //     oldSession.propertyChanged.disconnect(onPropertyChanged);
+    //     oldSession.kernelChanged.disconnect(onKernelChanged);
+    //   }
+    //   if (newSession) {
+    //     newSession.propertyChanged.connect(onPropertyChanged);
+    //     newSession.kernelChanged.connect(onKernelChanged);
+    //   }
+    // }
+
+    // function onKernelChanged(
+    //   sender,
+    //   {
+    //     oldValue: oldKernel,
+    //     newValue: newKernel
+    //   }: IChangedArgs<Kernel.IKernel | null>
+    // ) {
+    //   if (oldKernel) {
+    //     oldKernel.ioPubMessage.disconnect(onIOPubMessage);
+    //   }
+    //   if (newKernel) {
+    //     newKernel.ioPubMessage.connect(onIOPubMessage);
+    //   }
+    // }
+
+    // session.sessionChanged.connect(onSessionChanged);
+
     shell.add(panel, 'main', {
       ref: options.ref,
       mode: options.insertMode,

@@ -3,8 +3,6 @@
 
 import { IIterator } from '@phosphor/algorithm';
 
-import { JSONObject } from '@phosphor/coreutils';
-
 import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
 
 import { ISignal } from '@phosphor/signaling';
@@ -432,7 +430,13 @@ export namespace Session {
      * #### Notes
      * The `serverSettings` of the manager will be used.
      */
-    startNew(options: IOptions): Promise<ISessionConnection>;
+    startNew(
+      options: Omit<Session.IOptions, 'model' | 'connectToKernel'> & {
+        model: Omit<Session.IModel, 'kernel'> & {
+          kernel: Partial<Kernel.IModel> | null;
+        };
+      }
+    ): Promise<ISessionConnection>;
 
     /**
      * Find a session by id.
@@ -502,19 +506,37 @@ export namespace Session {
   }
 
   /**
-   * The session model used by the server.
+   * The session model returned by the server.
    *
    * #### Notes
    * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/sessions).
    */
-  export interface IModel extends JSONObject {
-    /**
-     * The unique identifier for the session client.
-     */
+  export interface IModel extends IModelPartialKernel {
+    readonly kernel: Kernel.IModel | null;
+  }
+
+  /**
+   * The session model to start a new session.
+   *
+   * #### Notes
+   * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/sessions).
+   */
+  export interface IModelPartialKernel {
     readonly id: string;
     readonly name: string;
     readonly path: string;
     readonly type: string;
-    readonly kernel: Kernel.IModel | null;
+    readonly kernel: Partial<Kernel.IModel> | null;
+    // TODO: express the idea that you can have an id, or a name, but not both
   }
 }
+
+export type not<T, K extends keyof T> = {
+  [P in keyof T]: P extends K ? never : T[P];
+};
+
+let x: not<Kernel.IModel, 'name'> = { id: 4, name: 'asdf' };
+
+export type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};

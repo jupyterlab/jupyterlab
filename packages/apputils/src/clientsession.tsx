@@ -16,7 +16,7 @@ import { IterableOrArrayLike, each, find } from '@phosphor/algorithm';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
 
@@ -25,33 +25,102 @@ import { Widget } from '@phosphor/widgets';
 import * as React from 'react';
 
 import { showDialog, Dialog } from './dialog';
+import {
+  KernelSpecManager,
+  KernelSpec
+} from '@jupyterlab/services/lib/kernelspec';
 
 /**
  * The interface of client session object.
  *
- * The client session represents the link between
- * a path and its kernel for the duration of the lifetime
- * of the session object.  The session can have no current
- * kernel, and can start a new kernel at any time.
+ * OLD: The client session represents the link between a path and its kernel
+ * for the duration of the lifetime of the session object.  The session can
+ * have no current kernel, and can start a new kernel at any time.
+ *
+ * NEW: A client session represents a single object that proxies the session
+ * information for the session an object is connected to. This is a
+ * convenience object that points to a specific session (which in turn points
+ * to a specific kernel). The signals here are proxied from the current
+ * kernel.
+ *
+ * For any session-specific operations, use the .session attribute. For any
+ * kernel-specific things, use .session.kernel. For convenience, we proxy the
+ * current kernel and session signals to the client session (so you don't have
+ * to handle session or kernel changes in your slots).
+ *
+ * A session represents a persistent resource to address a kernel. The kernel
+ * can be restarted or changed.
+ *
+ * A clientSession represents a client-side handle to a single session.
+ * Essentially, the main thing it adds is a sessionChanged signal, which
+ * represents pointing your clientSession to a different session.
+ *
+ * For example, a variable explorer contains a clientSession. That points the
+ * current session the variable explorer is hooked to, and gives notifications
+ * when changing sessions. The clientSession object on the variable explorer
+ * is a single object whose lifecycle matches the variable explorer widget.
+ * The session object matches the persistent
+ *
+ * A kernel represents a computational process. Its lifecycle is determined by
+ * explicit restarts and shutdowns, computational conditions (such as OOM
+ * errors), etc.
+ *
+ * A session represents a connection to semantic kernel. It is initiated
+ * explicitly, and persists beyond kernel shutdowns, and provides a single
+ * handle for multiple activities talking to the same computational resource
+ * kernel (even if that kernel is restarted or changed). For example, a
+ * console and a notebook can point to the same session, which means they will
+ * continue pointing to the same kernel even if the session's kernel is
+ * switched. Sessions are stored on the server side in the rest API.
+ *
+ * A clientSession represents a mapping of a widget to a session. Its
+ * lifecycle is the widget lifecycle.
+ *
+ * A plugin for a widget would grab the widget's clientSession to have a
+ * persistent handle on whatever computation resource was tied to the widget.
+ * The session a clientSession points to may be restored as part of the widget
+ * restoration process (so refreshing a page will point the widget to the
+ * right session). The Running tab UI should provide a way to point a widget's
+ * clientSession to a new session. It should also provide a way to explicitly
+ * manage the kernel associated with the session (restart, change, interrupt,
+ * etc.).
+ *
+ * For many things, we only care about kernel signals from the current kernel,
+ * no matter how many times the session or kernel changes. Since it is
+ * inconvenient to disconnect and connect handlers every time a session or
+ * kernel changes, we proxy the kernel signals to the session, and the session
+ * signals to the clientSession. So to act on whatever the current kernel's
+ * iopubmessage signal, just hook up to the clientSession's iopubmessage
+ * signal.
+ *
+ * Another possibility would be to offer a utility function to
+ * connect/disconnect a specific function on a signal. Use one signal to
+ * affect the connection/disconnection of another signal. For example, given a
+ * change signal and a slot and an initial object, on any change signal, it
+ * would disconnect the slot from the old value and connect it to the new value.
+ *
+ *
  */
-export interface IClientSession extends IDisposable {
+export interface IClientSession extends IObservableDisposable {
   /**
    * A signal emitted when the session is shut down.
+   *
+   * TODO: distinguish between this and disposed? Is this the session we are hooked to?
    */
   readonly terminated: ISignal<this, void>;
 
   /**
-   * A signal emitted when the kernel changes.
+   * A signal emitted when the session changes.
    */
   readonly sessionChanged: ISignal<
     this,
-    IChangedArgs<Session.ISession | null, 'session'>
+    IChangedArgs<Session.ISessionConnection | null, 'session'>
   >;
 
-  session: Session.ISession | null;
+  session: Session.ISessionConnection | null;
 
   /**
-   * A signal emitted when the kernel changes.
+   * A signal emitted when the kernel changes, proxied from the session.
    */
   readonly kernelChanged: ISignal<
     this,
@@ -59,54 +128,24 @@ export interface IClientSession extends IDisposable {
   >;
 
   /**
-   * A signal emitted when the kernel status changes.
+   * A signal emitted when the kernel status changes, proxied from the session.
    */
   readonly statusChanged: ISignal<this, Kernel.Status>;
 
   /**
-   * A signal emitted for a kernel messages.
+   * A signal emitted for a kernel messages, proxied from the session.
    */
   readonly iopubMessage: ISignal<this, KernelMessage.IMessage>;
 
   /**
-   * A signal emitted for an unhandled kernel message.
+   * A signal emitted for an unhandled kernel message, proxied from the session.
    */
   readonly unhandledMessage: ISignal<this, KernelMessage.IMessage>;
 
   /**
-   * A signal emitted when a session property changes.
+   * A signal emitted when a session property changes, proxied from the session.
    */
   readonly propertyChanged: ISignal<this, 'path' | 'name' | 'type'>;
-
-  /**
-   * The current kernel associated with the document.
-   */
-  readonly kernel: Kernel.IKernelConnection | null;
-
-  /**
-   * The current path associated with the client session.
-   */
-  readonly path: string;
-
-  /**
-   * The current name associated with the client session.
-   */
-  readonly name: string;
-
-  /**
-   * The type of the client session.
-   */
-  readonly type: string;
-
-  /**
-   * Whether the session is ready.
-   */
-  readonly isReady: boolean;
-
-  /**
-   * A promise that is fulfilled when the session is ready.
-   */
-  readonly ready: Promise<void>;
 
   /**
    * The kernel preference.
@@ -114,7 +153,7 @@ export interface IClientSession extends IDisposable {
   kernelPreference: IClientSession.IKernelPreference;
 
   /**
-   * The display name of the kernel.
+   * The display name of the kernel, proxied from the kernel spec.
    */
   readonly kernelDisplayName: string;
 
@@ -149,29 +188,6 @@ export interface IClientSession extends IDisposable {
    * this is a no-op, and resolves with `false`.
    */
   restart(): Promise<boolean>;
-
-  /**
-   * Change the session path.
-   *
-   * @param path - The new session path.
-   *
-   * @returns A promise that resolves when the session has renamed.
-   *
-   * #### Notes
-   * This uses the Jupyter REST API, and the response is validated.
-   * The promise is fulfilled on a valid response and rejected otherwise.
-   */
-  setPath(path: string): Promise<void>;
-
-  /**
-   * Change the session name.
-   */
-  setName(name: string): Promise<void>;
-
-  /**
-   * Change the session type.
-   */
-  setType(type: string): Promise<void>;
 }
 
 /**
@@ -228,6 +244,7 @@ export class ClientSession implements IClientSession {
    */
   constructor(options: ClientSession.IOptions) {
     this.manager = options.manager;
+    this.specsManager = options.specsManager;
     this._path = options.path || UUID.uuid4();
     this._type = options.type || '';
     this._name = options.name || '';
@@ -236,77 +253,57 @@ export class ClientSession implements IClientSession {
   }
 
   /**
-   * A signal emitted when the session is shut down.
-   */
-  get terminated(): ISignal<this, void> {
-    return this._terminated;
-  }
-
-  /**
-   * A signal emitted when the kernel changes.
+   * A signal emitted when the kernel connection changes, proxied from the session.
    */
   get kernelChanged(): ISignal<this, Session.IKernelChangedArgs> {
     return this._kernelChanged;
   }
 
   /**
-   * A signal emitted when the status changes.
+   * A signal emitted when the session connection changes.
+   */
+  get sessionChanged(): ISignal<
+    this,
+    IChangedArgs<Session.ISessionConnection | null, 'session'>
+  > {
+    return this._sessionChanged;
+  }
+
+  readonly session: Session.ISessionConnection | null;
+
+  /**
+   * A signal emitted when the kernel status changes, proxied from the kernel.
    */
   get statusChanged(): ISignal<this, Kernel.Status> {
     return this._statusChanged;
   }
 
   /**
-   * A signal emitted for iopub kernel messages.
+   * A signal emitted for iopub kernel messages, proxied from the kernel.
    */
   get iopubMessage(): ISignal<this, KernelMessage.IIOPubMessage> {
     return this._iopubMessage;
   }
 
   /**
-   * A signal emitted for an unhandled kernel message.
+   * A signal emitted for an unhandled kernel message, proxied from the kernel.
    */
   get unhandledMessage(): ISignal<this, KernelMessage.IMessage> {
     return this._unhandledMessage;
   }
 
   /**
-   * A signal emitted when a session property changes.
+   * A signal emitted when a session property changes, proxied from the current session.
    */
   get propertyChanged(): ISignal<this, 'path' | 'name' | 'type'> {
     return this._propertyChanged;
   }
 
   /**
-   * The current kernel of the session.
-   */
-  get kernel(): Kernel.IKernelConnection | null {
-    return this._session ? this._session.kernel : null;
-  }
-
-  /**
-   * The current path of the session.
-   */
-  get path(): string {
-    return this._path;
-  }
-
-  /**
-   * The current name of the session.
-   */
-  get name(): string {
-    return this._name;
-  }
-
-  /**
-   * The type of the client session.
-   */
-  get type(): string {
-    return this._type;
-  }
-
-  /**
-   * The kernel preference of the session.
+   * The kernel preference of this client session.
+   *
+   * This is used when selecting a new kernel, and should reflect the sort of
+   * kernel the activity prefers.
    */
   get kernelPreference(): IClientSession.IKernelPreference {
     return this._kernelPreference;
@@ -321,28 +318,23 @@ export class ClientSession implements IClientSession {
   readonly manager: Session.IManager;
 
   /**
-   * Whether the session is ready.
+   * The kernel spec manager
    */
-  get isReady(): boolean {
-    return this._isReady;
-  }
-
-  /**
-   * A promise that is fulfilled when the session is ready.
-   */
-  get ready(): Promise<void> {
-    return this._ready.promise;
-  }
+  readonly specsManager: KernelSpecManager;
 
   /**
    * The display name of the current kernel.
+   *
+   * This is a convenience function to look up the current kernel display name
+   * from its spec. TODO: Perhaps we don't need it, as it is not used enough
+   * to warrant api surface here?
    */
   get kernelDisplayName(): string {
-    let kernel = this.kernel;
+    let kernel = this.session.kernel;
     if (!kernel) {
       return 'No Kernel!';
     }
-    let specs = this.manager.specs;
+    let specs = this.specsManager.specs;
     if (!specs) {
       return 'Unknown!';
     }
@@ -351,10 +343,17 @@ export class ClientSession implements IClientSession {
   }
 
   /**
-   * Test whether the context is disposed.
+   * Test whether the client session is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
+  }
+
+  /**
+   * A signal emitted when the poll is disposed.
+   */
+  get disposed(): ISignal<this, void> {
+    return this._disposed;
   }
 
   /**
@@ -367,10 +366,13 @@ export class ClientSession implements IClientSession {
     this._isDisposed = true;
     if (this._session) {
       if (this.kernelPreference.shutdownOnClose) {
+        // Fire and forget the session shutdown request
         this._session.shutdown().catch(reason => {
           console.error(`Kernel not shut down ${reason}`);
         });
       }
+
+      // Dispose the session connection
       this._session.dispose();
       this._session = null;
     }
@@ -381,11 +383,12 @@ export class ClientSession implements IClientSession {
       this._busyDisposable.dispose();
       this._busyDisposable = null;
     }
+    this._disposed.emit();
     Signal.clearData(this);
   }
 
   /**
-   * Change the current kernel associated with the document.
+   * Change the current kernel associated with the session.
    */
   changeKernel(
     options: Partial<Kernel.IModel>
@@ -401,10 +404,10 @@ export class ClientSession implements IClientSession {
   /**
    * Select a kernel for the session.
    */
-  selectKernel(): Promise<void> {
+  async selectKernel(): Promise<void> {
     return this.initialize().then(() => {
       if (this.isDisposed) {
-        return Promise.reject('Disposed');
+        throw new Error('Disposed');
       }
       return this._selectKernel(true);
     });
@@ -451,59 +454,6 @@ export class ClientSession implements IClientSession {
       }
       return ClientSession.restartKernel(kernel);
     });
-  }
-
-  /**
-   * Change the session path.
-   *
-   * @param path - The new session path.
-   *
-   * @returns A promise that resolves when the session has renamed.
-   *
-   * #### Notes
-   * This uses the Jupyter REST API, and the response is validated.
-   * The promise is fulfilled on a valid response and rejected otherwise.
-   */
-  setPath(path: string): Promise<void> {
-    if (this.isDisposed || this._path === path) {
-      return Promise.resolve();
-    }
-    this._path = path;
-    if (this._session) {
-      return this._session.setPath(path);
-    }
-    this._propertyChanged.emit('path');
-    return Promise.resolve();
-  }
-
-  /**
-   * Change the session name.
-   */
-  setName(name: string): Promise<void> {
-    if (this.isDisposed || this._name === name) {
-      return Promise.resolve();
-    }
-    this._name = name;
-    if (this._session) {
-      return this._session.setName(name);
-    }
-    this._propertyChanged.emit('name');
-    return Promise.resolve();
-  }
-
-  /**
-   * Change the session type.
-   */
-  setType(type: string): Promise<void> {
-    if (this.isDisposed || this._type === type) {
-      return Promise.resolve();
-    }
-    this._type = type;
-    if (this._session) {
-      return this._session.setType(name);
-    }
-    this._propertyChanged.emit('type');
-    return Promise.resolve();
   }
 
   /**
@@ -561,7 +511,7 @@ export class ClientSession implements IClientSession {
         .catch(() => this._selectKernel(false));
     }
     let name = ClientSession.getDefaultKernel({
-      specs: this.manager.specs,
+      specs: this.specsManager.specs,
       sessions: this.manager.running(),
       preference
     });
@@ -621,7 +571,11 @@ export class ClientSession implements IClientSession {
         let model = result.value;
         if (model === null && this._session) {
           return this.shutdown().then(() => {
-            this._kernelChanged.emit({ oldValue: null, newValue: null });
+            this._kernelChanged.emit({
+              oldValue: null,
+              newValue: null,
+              name: 'kernel'
+            });
           });
         }
         if (model) {
@@ -636,7 +590,7 @@ export class ClientSession implements IClientSession {
   /**
    * Start a session and set up its signals.
    */
-  private _startSession(
+  private async _startSession(
     model: Partial<Kernel.IModel>
   ): Promise<Kernel.IKernelConnection> {
     if (this.isDisposed) {
@@ -644,11 +598,12 @@ export class ClientSession implements IClientSession {
     }
     return this.manager
       .startNew({
-        path: this._path,
-        type: this._type,
-        name: this._name,
-        kernelName: model ? model.name : undefined,
-        kernelId: model ? model.id : undefined
+        model: {
+          path: this._path,
+          type: this._type,
+          name: this._name,
+          kernel: model
+        }
       })
       .then(session => {
         return this._handleNewSession(session);
@@ -663,7 +618,7 @@ export class ClientSession implements IClientSession {
    * Handle a new session object.
    */
   private _handleNewSession(
-    session: Session.ISession
+    session: Session.ISessionConnection
   ): Kernel.IKernelConnection {
     if (this.isDisposed) {
       throw Error('Disposed');
@@ -695,7 +650,11 @@ export class ClientSession implements IClientSession {
 
     // The session kernel was disposed above when the session was disposed, so
     // the oldValue should be null.
-    this._kernelChanged.emit({ oldValue: null, newValue: session.kernel });
+    this._kernelChanged.emit({
+      oldValue: null,
+      newValue: session.kernel,
+      name: 'kernel'
+    });
     return session.kernel;
   }
 
@@ -730,14 +689,18 @@ export class ClientSession implements IClientSession {
    * Handle a session termination.
    */
   private _onTerminated(): void {
-    let kernel = this.kernel;
+    let kernel = this.session.kernel;
     if (this._session) {
       this._session.dispose();
     }
     this._session = null;
     this._terminated.emit(undefined);
     if (kernel) {
-      this._kernelChanged.emit({ oldValue: null, newValue: null });
+      this._kernelChanged.emit({
+        oldValue: null,
+        newValue: null,
+        name: 'kernel'
+      });
     }
   }
 
@@ -745,7 +708,7 @@ export class ClientSession implements IClientSession {
    * Handle a change to a session property.
    */
   private _onPropertyChanged(
-    sender: Session.ISession,
+    sender: Session.ISessionConnection,
     property: 'path' | 'name' | 'type'
   ) {
     switch (property) {
@@ -766,7 +729,7 @@ export class ClientSession implements IClientSession {
    * Handle a change to the kernel.
    */
   private _onKernelChanged(
-    sender: Session.ISession,
+    sender: Session.ISessionConnection,
     args: Session.IKernelChangedArgs
   ): void {
     this._kernelChanged.emit(args);
@@ -775,12 +738,15 @@ export class ClientSession implements IClientSession {
   /**
    * Handle a change to the session status.
    */
-  private _onStatusChanged(): void {
+  private _onStatusChanged(
+    sender: Kernel.IKernelConnection,
+    status: Kernel.Status
+  ): void {
     // Set that this kernel is busy, if we haven't already
     // If we have already, and now we aren't busy, dispose
     // of the busy disposable.
     if (this._setBusy) {
-      if (this.kernel && this.kernel.status === 'busy') {
+      if (this.session.kernel && this.session.kernel.status === 'busy') {
         if (!this._busyDisposable) {
           this._busyDisposable = this._setBusy();
         }
@@ -792,14 +758,15 @@ export class ClientSession implements IClientSession {
       }
     }
 
-    this._statusChanged.emit(this.kernel.status);
+    // Proxy the signal
+    this._statusChanged.emit(status);
   }
 
   /**
    * Handle an iopub message.
    */
   private _onIopubMessage(
-    sender: Session.ISession,
+    sender: Session.ISessionConnection,
     message: KernelMessage.IIOPubMessage
   ): void {
     this._iopubMessage.emit(message);
@@ -809,7 +776,7 @@ export class ClientSession implements IClientSession {
    * Handle an unhandled message.
    */
   private _onUnhandledMessage(
-    sender: Session.ISession,
+    sender: Session.ISessionConnection,
     message: KernelMessage.IMessage
   ): void {
     this._unhandledMessage.emit(message);
@@ -821,12 +788,17 @@ export class ClientSession implements IClientSession {
   private _prevKernelName = '';
   private _kernelPreference: IClientSession.IKernelPreference;
   private _isDisposed = false;
-  private _session: Session.ISession | null = null;
+  private _disposed = new Signal<this, void>(this);
+  private _session: Session.ISessionConnection | null = null;
   private _ready = new PromiseDelegate<void>();
   private _initializing = false;
   private _isReady = false;
   private _terminated = new Signal<this, void>(this);
   private _kernelChanged = new Signal<this, Session.IKernelChangedArgs>(this);
+  private _sessionChanged = new Signal<
+    this,
+    IChangedArgs<Session.ISessionConnection | null, 'session'>
+  >(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
@@ -848,6 +820,11 @@ export namespace ClientSession {
      * A session manager instance.
      */
     manager: Session.IManager;
+
+    /**
+     * A manager for kernel specs
+     */
+    specsManager: KernelSpecManager;
 
     /**
      * The initial path of the file.
@@ -908,7 +885,7 @@ export namespace ClientSession {
     /**
      * The Kernel specs.
      */
-    specs: Kernel.ISpecModels | null;
+    specs: KernelSpec.ISpecModels | null;
 
     /**
      * The kernel preference.
@@ -1215,7 +1192,7 @@ namespace Private {
     session: ClientSession
   ): ClientSession.IKernelSearch {
     return {
-      specs: session.manager.specs,
+      specs: session.specsManager.specs,
       sessions: session.manager.running(),
       preference: session.kernelPreference
     };

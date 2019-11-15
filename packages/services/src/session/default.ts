@@ -314,7 +314,7 @@ export class SessionConnection implements Session.ISessionConnection {
       model,
       username: this._username,
       clientId: this._clientId,
-      settings: this.serverSettings
+      serverSettings: this.serverSettings
     });
     this._kernel = kc;
     kc.statusChanged.connect(this.onKernelStatus, this);
@@ -423,6 +423,6 @@ export class SessionConnection implements Session.ISessionConnection {
   private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
   private _connectToKernel: (
-    options: Session.IConnectOptions
+    options: Kernel.IOptions
   ) => Kernel.IKernelConnection;
 }

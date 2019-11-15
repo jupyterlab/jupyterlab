@@ -16,9 +16,8 @@ export type DeepPartial<T> = {
  * List the running sessions.
  */
 export async function listRunning(
-  settings?: ServerConnection.ISettings
+  settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Session.IModel[]> {
-  settings = settings || ServerConnection.makeSettings();
   let url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
   let response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
@@ -69,18 +68,6 @@ export async function shutdownSession(
 }
 
 /**
- * Shut down all sessions.
- *
- * TODO: Delete as too simple to keep around?
- */
-export async function shutdownAll(
-  settings?: ServerConnection.ISettings
-): Promise<void> {
-  const running = await listRunning(settings);
-  await Promise.all(running.map(s => shutdownSession(s.id, settings)));
-}
-
-/**
  * Get a full session model from the server by session id string.
  */
 export async function getSessionModel(
@@ -97,12 +84,23 @@ export async function getSessionModel(
   return data;
 }
 
+export interface IModel {
+  /**
+   * The unique identifier for the session client.
+   */
+  readonly id: string;
+  readonly name: string;
+  readonly path: string;
+  readonly type: string;
+  readonly kernel: Kernel.IModel | null;
+}
+
 /**
  * Create a new session, or return an existing session if
  * the session path already exists
  */
 export async function startSession(
-  options: Session.IOptions
+  options: Session.IModel
 ): Promise<Session.IModel> {
   let settings = options.serverSettings || ServerConnection.makeSettings();
   let url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
@@ -123,11 +121,10 @@ export async function startSession(
  * Send a PATCH to the server, updating the session path or the kernel.
  */
 export async function updateSession(
-  id: string,
-  model: DeepPartial<Session.IModel>,
+  model: DeepPartial<Session.IModel> & { id: string },
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Session.IModel> {
-  let url = getSessionUrl(settings.baseUrl, id);
+  let url = getSessionUrl(settings.baseUrl, model.id);
   let init = {
     method: 'PATCH',
     body: JSON.stringify(model)
@@ -144,7 +141,9 @@ export async function updateSession(
 /**
  * Find a session by path.
  *
- * TODO: delete as too simple to keep around?
+ * #### Notes
+ * TODO: This is a convenience function. Should we just delete it as too
+ * simple to keep around?
  */
 export async function findByPath(
   path: string,
@@ -152,4 +151,18 @@ export async function findByPath(
 ): Promise<Session.IModel | undefined> {
   const models = await listRunning(settings);
   return models.find(value => value.path === path);
+}
+
+/**
+ * Shut down all sessions.
+ *
+ * #### Notes
+ * TODO: This is a convenience function. Should we just delete it as too
+ * simple to keep around?
+ */
+export async function shutdownAll(
+  settings?: ServerConnection.ISettings
+): Promise<void> {
+  const running = await listRunning(settings);
+  await Promise.all(running.map(s => shutdownSession(s.id, settings)));
 }

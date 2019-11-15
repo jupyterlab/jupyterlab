@@ -573,7 +573,7 @@ export namespace Kernel {
    * default kernel will by started by the server.
    */
   export async function startNew(
-    options: Omit<Kernel.IOptions, 'model'> & { model: Partial<Kernel.IModel> }
+    options: Kernel.IOptions
   ): Promise<Kernel.IKernelConnection> {
     options.serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
@@ -605,9 +605,10 @@ export namespace Kernel {
    */
   export interface IOptions {
     /**
-     * The kernel model
+     * The kernel model, partial since we only need an id or a name, or
+     * neither to start the server default kernel.
      */
-    model: Kernel.IModel;
+    model: Partial<Kernel.IModel>;
 
     /**
      * Environment variables passed to the kernelspec (used in Enterprise Gateway)
@@ -702,7 +703,7 @@ export namespace Kernel {
      * #### Notes
      * The manager `serverSettings` will be always be used.
      */
-    startNew(options?: IOptions): Promise<IKernelConnection>;
+    startNew(options: IOptions): Promise<IKernelConnection>;
 
     /**
      * Find a kernel by id.
