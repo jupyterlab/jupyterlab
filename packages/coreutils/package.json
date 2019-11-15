@@ -26,8 +26,8 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf lib",
-    "docs": "typedoc src src/plugin-schema.json",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "docs": "typedoc src --tsconfig typedoc-tsconfig.json",
     "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
