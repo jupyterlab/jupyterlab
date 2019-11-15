@@ -252,8 +252,10 @@ export class CellTypeSwitcher extends ReactWidget {
    */
   handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
     if (event.target.value !== '-') {
-      NotebookActions.changeCellType(this._notebook, event.target
-        .value as nbformat.CellType);
+      NotebookActions.changeCellType(
+        this._notebook,
+        event.target.value as nbformat.CellType
+      );
       this._notebook.activate();
     }
   };

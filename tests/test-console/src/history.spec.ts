@@ -30,7 +30,12 @@ const mockHistory: KernelMessage.IHistoryReplyMsg = {
   channel: 'shell',
   content: {
     status: 'ok',
-    history: [[0, 0, 'foo'], [0, 0, 'bar'], [0, 0, 'baz'], [0, 0, 'qux']]
+    history: [
+      [0, 0, 'foo'],
+      [0, 0, 'bar'],
+      [0, 0, 'baz'],
+      [0, 0, 'qux']
+    ]
   }
 };
 

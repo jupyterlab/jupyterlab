@@ -90,13 +90,10 @@ namespace Private {
     const matches = kernel.matches.slice();
 
     // Cache all the kernel matches in a memo.
-    const memo = matches.reduce(
-      (acc, val) => {
-        acc[val] = null;
-        return acc;
-      },
-      {} as { [key: string]: string }
-    );
+    const memo = matches.reduce((acc, val) => {
+      acc[val] = null;
+      return acc;
+    }, {} as { [key: string]: string });
 
     // Add each context match that is not in the memo to the result.
     context.matches.forEach(match => {

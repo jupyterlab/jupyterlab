@@ -419,13 +419,10 @@ namespace Private {
   /**
    * The map of known type annotations of completer matches.
    */
-  const KNOWN_MAP = KNOWN_TYPES.reduce(
-    (acc, type) => {
-      acc[type] = null;
-      return acc;
-    },
-    {} as Completer.TypeMap
-  );
+  const KNOWN_MAP = KNOWN_TYPES.reduce((acc, type) => {
+    acc[type] = null;
+    return acc;
+  }, {} as Completer.TypeMap);
 
   /**
    * A filtered completion menu matching result.

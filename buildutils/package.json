@@ -51,7 +51,7 @@
     "mini-css-extract-plugin": "~0.6.0",
     "package-json": "^6.3.0",
     "path": "~0.12.7",
-    "prettier": "^1.18.2",
+    "prettier": "^1.19.1",
     "semver": "^6.1.0",
     "sort-package-json": "~1.22.1",
     "typescript": "~3.7.2",
