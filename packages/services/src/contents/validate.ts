@@ -7,7 +7,9 @@ import { validateProperty } from '../validate';
 /**
  * Validate an `Contents.IModel` object.
  */
-export function validateContentsModel(model: Contents.IModel): void {
+export function validateContentsModel(
+  model: Contents.IModel
+): asserts model is Contents.IModel {
   validateProperty(model, 'name', 'string');
   validateProperty(model, 'path', 'string');
   validateProperty(model, 'type', 'string');
@@ -23,7 +25,7 @@ export function validateContentsModel(model: Contents.IModel): void {
  */
 export function validateCheckpointModel(
   model: Contents.ICheckpointModel
-): void {
+): asserts model is Contents.ICheckpointModel {
   validateProperty(model, 'id', 'string');
   validateProperty(model, 'last_modified', 'string');
 }

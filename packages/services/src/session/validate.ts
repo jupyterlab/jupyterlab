@@ -36,7 +36,9 @@ export function validateModel(data: any): Session.IModel {
 /**
  * Validate an array of `Session.IModel` objects.
  */
-export function validateModels(models: Session.IModel[]): void {
+export function validateModels(
+  models: Session.IModel[]
+): asserts models is Session.IModel[] {
   if (!Array.isArray(models)) {
     throw new Error('Invalid session list');
   }

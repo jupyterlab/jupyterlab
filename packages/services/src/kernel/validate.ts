@@ -44,7 +44,9 @@ const IOPUB_CONTENT_FIELDS: { [key: string]: any } = {
 /**
  * Validate the header of a kernel message.
  */
-function validateHeader(header: KernelMessage.IHeader): void {
+function validateHeader(
+  header: KernelMessage.IHeader
+): asserts header is KernelMessage.IHeader {
   for (let i = 0; i < HEADER_FIELDS.length; i++) {
     validateProperty(header, HEADER_FIELDS[i], 'string');
   }
@@ -53,7 +55,9 @@ function validateHeader(header: KernelMessage.IHeader): void {
 /**
  * Validate a kernel message object.
  */
-export function validateMessage(msg: KernelMessage.IMessage): void {
+export function validateMessage(
+  msg: KernelMessage.IMessage
+): asserts msg is KernelMessage.IMessage {
   validateProperty(msg, 'metadata', 'object');
   validateProperty(msg, 'content', 'object');
   validateProperty(msg, 'channel', 'string');
@@ -66,7 +70,9 @@ export function validateMessage(msg: KernelMessage.IMessage): void {
 /**
  * Validate content an kernel message on the iopub channel.
  */
-function validateIOPubContent(msg: KernelMessage.IIOPubMessage): void {
+function validateIOPubContent(
+  msg: KernelMessage.IIOPubMessage
+): asserts msg is KernelMessage.IIOPubMessage {
   if (msg.channel === 'iopub') {
     let fields = IOPUB_CONTENT_FIELDS[msg.header.msg_type];
     // Check for unknown message type.
@@ -88,7 +94,9 @@ function validateIOPubContent(msg: KernelMessage.IIOPubMessage): void {
 /**
  * Validate a `Kernel.IModel` object.
  */
-export function validateModel(model: Kernel.IModel): void {
+export function validateModel(
+  model: Kernel.IModel
+): asserts model is Kernel.IModel {
   validateProperty(model, 'name', 'string');
   validateProperty(model, 'id', 'string');
 }
@@ -96,7 +104,9 @@ export function validateModel(model: Kernel.IModel): void {
 /**
  * Validate an array of `Kernel.IModel` objects.
  */
-export function validateModels(models: Kernel.IModel[]): void {
+export function validateModels(
+  models: Kernel.IModel[]
+): asserts models is Kernel.IModel[] {
   if (!Array.isArray(models)) {
     throw new Error('Invalid kernel list');
   }
