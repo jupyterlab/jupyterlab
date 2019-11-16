@@ -12,8 +12,9 @@ import sys
 import warnings
 
 from jupyter_core.application import JupyterApp, base_aliases
-from jupyterlab_server import slugify, WORKSPACE_EXTENSION
-from nbclassic.notebookapp import NotebookApp, aliases, flags
+# TODO ECH Flags are failing with nbclassic, but succeed with jupyter_sever
+# from jupyter_server.serverapp import aliases, flags
+from nbclassic.notebookapp import aliases, flags
 from jupyter_server.utils import url_path_join as ujoin
 from traitlets import Bool, Instance, Unicode
 
@@ -306,23 +307,6 @@ class LabWorkspaceApp(JupyterApp):
         self.exit(1)
 
 
-lab_aliases = dict(aliases)
-lab_aliases['app-dir'] = 'LabApp.app_dir'
-
-lab_flags = dict(flags)
-lab_flags['core-mode'] = (
-    {'LabApp': {'core_mode': True}},
-    "Start the app in core mode."
-)
-lab_flags['dev-mode'] = (
-    {'LabApp': {'dev_mode': True}},
-    "Start the app in dev mode for running from source."
-)
-lab_flags['watch'] = (
-    {'LabApp': {'watch': True}},
-    "Start the app in watch mode."
-)
-
 
 class LabApp(ExtensionApp):
     version = version
@@ -356,8 +340,25 @@ class LabApp(ExtensionApp):
         jupyter lab --certfile=mycert.pem # use SSL/TLS certificate
     """
 
-    aliases = lab_aliases
-    flags = lab_flags
+    aliases['app-dir'] = 'LabApp.app_dir'
+    aliases.update({
+        'watch': 'LabApp.watch',
+    })
+
+
+    flags['core-mode'] = (
+        {'LabApp': {'core_mode': True}},
+        "Start the app in core mode."
+    )
+    flags['dev-mode'] = (
+        {'LabApp': {'dev_mode': True}},
+        "Start the app in dev mode for running from source."
+    )
+    flags['watch'] = (
+        {'LabApp': {'watch': True}},
+        "Start the app in watch mode."
+    )
+
 
     subcommands = dict(
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
