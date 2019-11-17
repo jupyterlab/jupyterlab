@@ -183,7 +183,7 @@ describe('protocol', () => {
       });
       expect(reply.success).to.be.true;
       const stackFrames = reply.body.stackFrames;
-      expect(stackFrames.length).to.equal(2);
+      expect(stackFrames.length).to.equal(1);
       const frame = stackFrames[0];
       // first breakpoint
       expect(frame.line).to.equal(3);

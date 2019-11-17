@@ -226,8 +226,9 @@ export namespace IDebugger {
         hashMethod: string;
         hashSeed: number;
         breakpoints: IDebugInfoBreakpoints[];
-        tmp_file_prefix: string;
-        tmp_file_suffix: string;
+        tmpFilePrefix: string;
+        tmpFileSuffix: string;
+        stoppedThreads: number[];
       };
     }
 
