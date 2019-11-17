@@ -217,8 +217,8 @@ export class DebugService implements IDebugger {
 
     this.setHashParameters(reply.body.hashMethod, reply.body.hashSeed);
     this.setTmpFileParameters(
-      reply.body.tmp_file_prefix,
-      reply.body.tmp_file_suffix
+      reply.body.tmpFilePrefix,
+      reply.body.tmpFileSuffix
     );
 
     const breakpoints = reply.body.breakpoints;
