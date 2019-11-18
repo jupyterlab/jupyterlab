@@ -41,9 +41,8 @@ export class NotebookHandler implements IDisposable {
     );
 
     this.debuggerModel.callstackModel.currentFrameChanged.connect(
-      (_, frame) => {
-        this.showCurrentLine(frame);
-      }
+      this.onCurrentFrameChanged,
+      this
     );
   }
 
@@ -71,7 +70,10 @@ export class NotebookHandler implements IDisposable {
     });
   }
 
-  private showCurrentLine(frame: Callstack.IFrame) {
+  private onCurrentFrameChanged(
+    callstackModel: Callstack.Model,
+    frame: Callstack.IFrame
+  ) {
     const notebook = this.notebookTracker.currentWidget;
     if (!notebook) {
       return;
