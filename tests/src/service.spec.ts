@@ -4,6 +4,8 @@ import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
 import { createClientSession } from '@jupyterlab/testutils';
 
+import { Breakpoints } from '../../lib/breakpoints';
+
 import { Debugger } from '../../lib/debugger';
 
 import { DebugService } from '../../lib/service';
@@ -89,6 +91,60 @@ describe('DebugService', () => {
       service.model = model;
       expect(modelChangedEvents.length).to.equal(1);
       expect(modelChangedEvents[0]).to.eq(model);
+    });
+  });
+
+  describe('protocol', () => {
+    const code = [
+      'i = 0',
+      'i += 1',
+      'i += 1',
+      'j = i**2',
+      'j += 1',
+      'print(i, j)'
+    ].join('\n');
+
+    let breakpoints: Breakpoints.IBreakpoint[];
+    let source_id: string;
+
+    beforeEach(async () => {
+      service.session = session;
+      service.model = model;
+      await service.restoreState(true);
+      const breakpoint_lines: number[] = [3, 5];
+      source_id = service.getCellId(code);
+      breakpoints = breakpoint_lines.map((l: number, index: number) => {
+        return {
+          id: index,
+          line: l,
+          active: true,
+          verified: true,
+          source: {
+            path: source_id
+          }
+        };
+      });
+      await service.updateBreakpoints(code, breakpoints);
+    });
+
+    describe('#updateBreakpoints', () => {
+      it('should update the breakpoints', () => {
+        const bp_list = model.breakpointsModel.getBreakpoints(source_id);
+        expect(bp_list).to.deep.eq(breakpoints);
+      });
+    });
+
+    describe('#restoreState', () => {
+      it('should restore the breakpoints', async () => {
+        model.breakpointsModel.restoreBreakpoints(
+          new Map<string, Breakpoints.IBreakpoint[]>()
+        );
+        const bp_list1 = model.breakpointsModel.getBreakpoints(source_id);
+        expect(bp_list1.length).to.equal(0);
+        await service.restoreState(true);
+        const bp_list2 = model.breakpointsModel.getBreakpoints(source_id);
+        expect(bp_list2).to.deep.eq(breakpoints);
+      });
     });
   });
 });
