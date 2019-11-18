@@ -262,4 +262,28 @@ describe('protocol', () => {
       expect(j.value).to.equal('4');
     });
   });
+
+  describe('#loadedSources', () => {
+    it('should *not* retrieve the list of loaded sources', async () => {
+      // `loadedSources` is not supported at the moment "unknown command"
+      const reply = await debugSession.sendRequest('loadedSources', {});
+      expect(reply.success).to.be.false;
+    });
+  });
+
+  describe('#source', () => {
+    it('should retrieve the source of the dumped code cell', async () => {
+      const stackFramesReply = await debugSession.sendRequest('stackTrace', {
+        threadId
+      });
+      const frame = stackFramesReply.body.stackFrames[0];
+      const source = frame.source;
+      const reply = await debugSession.sendRequest('source', {
+        source: { path: source.path },
+        sourceReference: source.sourceReference
+      });
+      const sourceCode = reply.body.content;
+      expect(sourceCode).to.equal(code);
+    });
+  });
 });
