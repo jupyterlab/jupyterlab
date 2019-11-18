@@ -84,13 +84,14 @@ export class NotebookHandler implements IDisposable {
       return;
     }
 
-    cells.forEach(cell => {
+    cells.forEach((cell, i) => {
       // check the event is for the correct cell
       const code = cell.model.value.text;
       const cellId = this.debuggerService.getCellId(code);
       if (frame.source.path !== cellId) {
         return;
       }
+      notebook.content.activeCellIndex = i;
       CellManager.showCurrentLine(cell, frame);
     });
   }
