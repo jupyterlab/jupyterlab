@@ -15,6 +15,8 @@ import { Debugger } from '../debugger';
 
 import { IDebugger } from '../tokens';
 
+import { Callstack } from '../callstack';
+
 import { CellManager } from './cell';
 
 export class NotebookHandler implements IDisposable {
@@ -36,6 +38,12 @@ export class NotebookHandler implements IDisposable {
     this.notebookTracker.activeCellChanged.connect(
       this.onActiveCellChanged,
       this
+    );
+
+    this.debuggerModel.callstackModel.currentFrameChanged.connect(
+      (_, frame) => {
+        this.showCurrentLine(frame);
+      }
     );
   }
 
@@ -60,6 +68,29 @@ export class NotebookHandler implements IDisposable {
     // TODO: do we need this requestAnimationFrame?
     requestAnimationFrame(() => {
       this.cellManager.activeCell = codeCell;
+    });
+  }
+
+  private showCurrentLine(frame: Callstack.IFrame) {
+    if (!frame) {
+      return;
+    }
+
+    const notebook = this.notebookTracker.currentWidget;
+    if (!notebook) {
+      return;
+    }
+
+    const cells = notebook.content.widgets;
+
+    cells.forEach(cell => {
+      // check the event is for the correct cell
+      const code = cell.model.value.text;
+      const cellId = this.debuggerService.getCellId(code);
+      if (frame.source.path !== cellId) {
+        return;
+      }
+      CellManager.showCurrentLine(cell, frame);
     });
   }
 

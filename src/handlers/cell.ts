@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeCell, ICellModel } from '@jupyterlab/cells';
+import { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
@@ -14,6 +14,8 @@ import { Signal } from '@phosphor/signaling';
 import { Editor } from 'codemirror';
 
 import { Breakpoints, SessionTypes } from '../breakpoints';
+
+import { Callstack } from '../callstack';
 
 import { Debugger } from '../debugger';
 
@@ -43,11 +45,10 @@ export class CellManager implements IDisposable {
 
     this._debuggerModel.callstackModel.currentFrameChanged.connect(
       (_, frame) => {
-        this.cleanupHighlight();
+        CellManager.cleanupHighlight(this.activeCell);
         if (!frame) {
           return;
         }
-        this.showCurrentLine(frame.line);
       }
     );
 
@@ -74,26 +75,6 @@ export class CellManager implements IDisposable {
     }
   }
 
-  private showCurrentLine(lineNumber: number) {
-    if (!this.activeCell) {
-      return;
-    }
-    const editor = this.activeCell.editor as CodeMirrorEditor;
-    this.cleanupHighlight();
-    editor.editor.addLineClass(lineNumber - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
-  }
-
-  // TODO: call when the debugger stops
-  private cleanupHighlight() {
-    if (!this.activeCell || this.activeCell.isDisposed) {
-      return;
-    }
-    const editor = this.activeCell.editor as CodeMirrorEditor;
-    editor.doc.eachLine(line => {
-      editor.editor.removeLineClass(line, 'wrap', LINE_HIGHLIGHT_CLASS);
-    });
-  }
-
   dispose(): void {
     if (this.isDisposed) {
       return;
@@ -105,7 +86,7 @@ export class CellManager implements IDisposable {
       this._cellMonitor.dispose();
     }
     this.removeListener(this.activeCell);
-    this.cleanupHighlight();
+    CellManager.cleanupHighlight(this.activeCell);
     Signal.clearData(this);
   }
 
@@ -290,6 +271,22 @@ export namespace CellManager {
     breakpointsModel: Breakpoints.Model;
     activeCell?: CodeCell;
     type: SessionTypes;
+  }
+
+  export function showCurrentLine(cell: Cell, frame: Callstack.IFrame) {
+    const editor = cell.editor as CodeMirrorEditor;
+    cleanupHighlight(cell);
+    editor.editor.addLineClass(frame.line - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
+  }
+
+  export function cleanupHighlight(cell: Cell) {
+    if (!cell || cell.isDisposed) {
+      return;
+    }
+    const editor = cell.editor as CodeMirrorEditor;
+    editor.doc.eachLine(line => {
+      editor.editor.removeLineClass(line, 'wrap', LINE_HIGHLIGHT_CLASS);
+    });
   }
 }
 
