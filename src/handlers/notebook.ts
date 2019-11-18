@@ -72,16 +72,17 @@ export class NotebookHandler implements IDisposable {
   }
 
   private showCurrentLine(frame: Callstack.IFrame) {
-    if (!frame) {
-      return;
-    }
-
     const notebook = this.notebookTracker.currentWidget;
     if (!notebook) {
       return;
     }
 
     const cells = notebook.content.widgets;
+    cells.forEach(cell => CellManager.cleanupHighlight(cell));
+
+    if (!frame) {
+      return;
+    }
 
     cells.forEach(cell => {
       // check the event is for the correct cell
