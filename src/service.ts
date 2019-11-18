@@ -194,12 +194,10 @@ export class DebugService implements IDebugger {
     // No need to dump the cells again, we can simply
     // resend the breakpoints to the kernel and update
     // the model.
-    breakpoints.forEach(async (bp, path, _) => {
-      const sourceBreakpoints = Private.toSourceBreakpoints(bp);
-      await this.setBreakpoints(sourceBreakpoints, path);
-    });
-
-    this.model.breakpointsModel.restoreBreakpoints(breakpoints);
+    for (const [source, bps] of breakpoints) {
+      const sourceBreakpoints = Private.toSourceBreakpoints(bps);
+      await this.setBreakpoints(sourceBreakpoints, source);
+    }
   }
 
   /**

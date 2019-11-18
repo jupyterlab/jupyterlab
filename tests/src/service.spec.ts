@@ -105,22 +105,22 @@ describe('DebugService', () => {
     ].join('\n');
 
     let breakpoints: Breakpoints.IBreakpoint[];
-    let source_id: string;
+    let sourceId: string;
 
     beforeEach(async () => {
       service.session = session;
       service.model = model;
       await service.restoreState(true);
-      const breakpoint_lines: number[] = [3, 5];
-      source_id = service.getCellId(code);
-      breakpoints = breakpoint_lines.map((l: number, index: number) => {
+      const breakpointLines: number[] = [3, 5];
+      sourceId = service.getCellId(code);
+      breakpoints = breakpointLines.map((l: number, index: number) => {
         return {
           id: index,
           line: l,
           active: true,
           verified: true,
           source: {
-            path: source_id
+            path: sourceId
           }
         };
       });
@@ -129,8 +129,8 @@ describe('DebugService', () => {
 
     describe('#updateBreakpoints', () => {
       it('should update the breakpoints', () => {
-        const bp_list = model.breakpointsModel.getBreakpoints(source_id);
-        expect(bp_list).to.deep.eq(breakpoints);
+        const bpList = model.breakpointsModel.getBreakpoints(sourceId);
+        expect(bpList).to.deep.eq(breakpoints);
       });
     });
 
@@ -139,11 +139,25 @@ describe('DebugService', () => {
         model.breakpointsModel.restoreBreakpoints(
           new Map<string, Breakpoints.IBreakpoint[]>()
         );
-        const bp_list1 = model.breakpointsModel.getBreakpoints(source_id);
-        expect(bp_list1.length).to.equal(0);
+        const bpList1 = model.breakpointsModel.getBreakpoints(sourceId);
+        expect(bpList1.length).to.equal(0);
         await service.restoreState(true);
-        const bp_list2 = model.breakpointsModel.getBreakpoints(source_id);
-        expect(bp_list2).to.deep.eq(breakpoints);
+        const bpList2 = model.breakpointsModel.getBreakpoints(sourceId);
+        expect(bpList2).to.deep.eq(breakpoints);
+      });
+    });
+
+    describe('#restart', () => {
+      it('should restart the debugger and send the breakpoints again', async () => {
+        await service.restart();
+        model.breakpointsModel.restoreBreakpoints(
+          new Map<string, Breakpoints.IBreakpoint[]>()
+        );
+        await service.restoreState(true);
+        const bpList = model.breakpointsModel.getBreakpoints(sourceId);
+        breakpoints[0].id = 2;
+        breakpoints[1].id = 3;
+        expect(bpList).to.deep.eq(breakpoints);
       });
     });
   });
