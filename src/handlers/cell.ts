@@ -273,12 +273,21 @@ export namespace CellManager {
     type: SessionTypes;
   }
 
+  /**
+   * Highlight the current line of the frame in the given cell.
+   * @param cell The cell to highlight.
+   * @param frame The frame with the current line number.
+   */
   export function showCurrentLine(cell: Cell, frame: Callstack.IFrame) {
     const editor = cell.editor as CodeMirrorEditor;
     cleanupHighlight(cell);
     editor.editor.addLineClass(frame.line - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
   }
 
+  /**
+   * Remove all line highlighting indicators for the given cell.
+   * @param cell The cell to cleanup.
+   */
   export function cleanupHighlight(cell: Cell) {
     if (!cell || cell.isDisposed) {
       return;
