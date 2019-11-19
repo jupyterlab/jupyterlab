@@ -67,7 +67,8 @@ export class NotebookHandler implements IDisposable {
   protected cleanAllCells() {
     const cells = this.notebookPanel.content.widgets;
     cells.forEach(cell => {
-      this.cellManager.setOffOptions(cell);
+      CellManager.cleanupHighlight(cell);
+      CellManager.setOffOptions(cell);
     });
   }
 

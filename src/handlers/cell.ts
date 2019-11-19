@@ -84,7 +84,7 @@ export class CellManager implements IDisposable {
     if (this._cellMonitor) {
       this._cellMonitor.dispose();
     }
-    this.setOffOptions(this.activeCell);
+    CellManager.setOffOptions(this.activeCell);
     CellManager.cleanupHighlight(this.activeCell);
     Signal.clearData(this);
     this.isDisposed = true;
@@ -194,13 +194,6 @@ export class CellManager implements IDisposable {
     }
     const editor = cell.editor as CodeMirrorEditor;
     editor.editor.off('gutterClick', this.onGutterClick);
-  }
-
-  setOffOptions(cell: Cell) {
-    const editor = cell.editor as CodeMirrorEditor;
-    CellManager.cleanupHighlight(cell);
-    editor.editor.off('gutterClick', this.onGutterClick);
-    editor.setOption('lineNumbers', false);
   }
 
   protected getEditorId(): string {
@@ -313,13 +306,23 @@ export namespace CellManager {
    * @param cell The cell to cleanup.
    */
   export function cleanupHighlight(cell: Cell) {
-    if (!cell || cell.isDisposed) {
+    if (!cell || cell.isDisposed || !cell.inputArea) {
       return;
     }
     const editor = cell.editor as CodeMirrorEditor;
     editor.doc.eachLine(line => {
       editor.editor.removeLineClass(line, 'wrap', LINE_HIGHLIGHT_CLASS);
     });
+  }
+
+  /**
+   * Remove line numbers and all gutters from cell.
+   * @param cell The cell to cleanup.
+   */
+
+  export function setOffOptions(cell: Cell) {
+    const editor = cell.editor as CodeMirrorEditor;
+    editor.setOption('lineNumbers', false);
   }
 }
 
