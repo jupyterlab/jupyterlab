@@ -68,6 +68,17 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   /**
+   * Return the kernel info for the debug session.
+   */
+  get kernelInfo(): IDebugger.ISession.IInfoReply | null {
+    const kernel = this.client.kernel;
+    if (!kernel) {
+      return null;
+    }
+    return kernel.info as IDebugger.ISession.IInfoReply;
+  }
+
+  /**
    * Whether the debug session is started
    */
   get isStarted(): boolean {

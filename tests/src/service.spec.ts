@@ -14,6 +14,52 @@ import { DebugSession } from '../../lib/session';
 
 import { IDebugger } from '../../lib/tokens';
 
+describe('Debugging Support', () => {
+  let xpythonClient: IClientSession;
+  let ipykernelClient: IClientSession;
+
+  beforeAll(async () => {
+    xpythonClient = await createClientSession({
+      kernelPreference: {
+        name: 'xpython'
+      }
+    });
+    ipykernelClient = await createClientSession({
+      kernelPreference: {
+        name: 'python3'
+      }
+    });
+    await Promise.all([
+      (xpythonClient as ClientSession).initialize(),
+      (ipykernelClient as ClientSession).initialize()
+    ]);
+    await Promise.all([
+      xpythonClient.kernel.ready,
+      ipykernelClient.kernel.ready
+    ]);
+  });
+
+  afterAll(async () => {
+    await Promise.all([xpythonClient.shutdown(), ipykernelClient.shutdown()]);
+  });
+
+  describe('#isDebuggingEnabled', () => {
+    it('should return true for kernels that have support for debugging', () => {
+      const debugSession = new DebugSession({ client: xpythonClient });
+      let service = new DebugService();
+      service.session = debugSession;
+      expect(service.isDebuggingEnabled).to.be.true;
+    });
+
+    it('should return false for kernels that do not have support for debugging', () => {
+      const debugSession = new DebugSession({ client: ipykernelClient });
+      let service = new DebugService();
+      service.session = debugSession;
+      expect(service.isDebuggingEnabled).to.be.false;
+    });
+  });
+});
+
 describe('DebugService', () => {
   let client: IClientSession;
   let model: Debugger.Model;

@@ -43,6 +43,13 @@ export class DebugService implements IDebugger {
   }
 
   /**
+   * Whether debugging is enabled for the current session.
+   */
+  get isDebuggingEnabled(): boolean {
+    return this._session.kernelInfo.debugger || false;
+  }
+
+  /**
    * Returns the mode of the debugger UI.
    *
    * #### Notes
