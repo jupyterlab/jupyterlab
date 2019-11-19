@@ -1,11 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
+import { Cell, CodeCell } from '@jupyterlab/cells';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
+
+import { IObservableString } from '@jupyterlab/observables';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -133,7 +135,7 @@ export class CellManager implements IDisposable {
       }
 
       this._cellMonitor = new ActivityMonitor({
-        signal: this.activeCell.model.contentChanged,
+        signal: this.activeCell.model.value.changed,
         timeout: CELL_CHANGED_TIMEOUT
       });
 
@@ -279,8 +281,11 @@ export class CellManager implements IDisposable {
   private breakpointsModel: Breakpoints.Model;
   private _activeCell: CodeCell;
   private _debuggerService: IDebugger;
-  private _cellMonitor: ActivityMonitor<ICellModel, void> = null;
   private _id: string;
+  private _cellMonitor: ActivityMonitor<
+    IObservableString,
+    IObservableString.IChangedArgs
+  > = null;
 }
 
 export namespace CellManager {
