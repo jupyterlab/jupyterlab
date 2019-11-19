@@ -78,7 +78,7 @@ export interface IDebugger extends IDisposable {
 
   /**
    * Starts a debugger.
-   * Precondition: canStart() && !isStarted()
+   * Precondition: !isStarted()
    */
   start(): Promise<void>;
 
