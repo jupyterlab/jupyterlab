@@ -38,6 +38,7 @@ const TOGGLE_WRAPPER = 'jp-DocumentSearch-toggle-wrapper';
 const TOGGLE_PLACEHOLDER = 'jp-DocumentSearch-toggle-placeholder';
 const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
 const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
+const FILTER_CLASS = 'fa fa-filter';
 
 interface ISearchEntryProps {
   onCaseSensitiveToggled: Function;
@@ -222,6 +223,68 @@ function SearchIndices(props: ISearchIndexProps) {
   );
 }
 
+interface IFilterSelectionProps {
+  searchOutput: boolean;
+  searchInput: boolean;
+  toggleInput: () => void;
+  toggleOutput: () => void;
+}
+
+interface IFilterSelectionState {
+  expanded: boolean;
+}
+
+class FilterSelection extends React.Component<
+  IFilterSelectionProps,
+  IFilterSelectionState
+> {
+  constructor(props: IFilterSelectionProps) {
+    super(props);
+    this.state = {
+      expanded: false
+    };
+  }
+
+  _toggleExpanded() {
+    // @ts-ignore
+    this.setState({ expanded: !this.state.expanded });
+  }
+
+  render() {
+    return (
+      <div>
+        <button
+          className={BUTTON_WRAPPER_CLASS}
+          onClick={() => this._toggleExpanded()}
+          // style={{position: 'relative'}}
+        >
+          <span
+            className={`${FILTER_CLASS} ${BUTTON_CONTENT_CLASS}`}
+            tabIndex={-1}
+          />
+        </button>
+        {this.state.expanded ? (
+          <span>
+            <br />
+            <input
+              type="checkbox"
+              checked={this.props.searchInput}
+              onChange={this.props.toggleInput}
+            />
+            Input
+            <br />
+            <input
+              type="checkbox"
+              checked={this.props.searchOutput}
+              onChange={this.props.toggleOutput}
+            />
+            Output
+          </span>
+        ) : null}
+      </div>
+    );
+  }
+}
 interface ISearchOverlayProps {
   overlayState: IDisplayState;
   onCaseSensitiveToggled: Function;
@@ -242,6 +305,9 @@ class SearchOverlay extends React.Component<
   constructor(props: ISearchOverlayProps) {
     super(props);
     this.state = props.overlayState;
+
+    this._toggleSearchInput = this._toggleSearchInput.bind(this);
+    this._toggleSearchOutput = this._toggleSearchOutput.bind(this);
   }
 
   componentDidMount() {
@@ -280,7 +346,11 @@ class SearchOverlay extends React.Component<
     }
   }
 
-  private _executeSearch(goForward: boolean, searchText?: string) {
+  private _executeSearch(
+    goForward: boolean,
+    searchText?: string,
+    filterChanged = false
+  ) {
     // execute search!
     let query;
     const input = searchText ? searchText : this.state.searchText;
@@ -296,7 +366,10 @@ class SearchOverlay extends React.Component<
       return;
     }
 
-    if (Private.regexEqual(this.props.overlayState.query, query)) {
+    if (
+      Private.regexEqual(this.props.overlayState.query, query) &&
+      !filterChanged
+    ) {
       if (goForward) {
         this.props.onHightlightNext();
       } else {
@@ -305,7 +378,7 @@ class SearchOverlay extends React.Component<
       return;
     }
 
-    this.props.onStartQuery(query);
+    this.props.onStartQuery(query, this.state.filters);
   }
 
   private _onClose() {
@@ -330,6 +403,31 @@ class SearchOverlay extends React.Component<
     if (this.state.searchInputFocused) {
       this.setState({ searchInputFocused: false });
     }
+  }
+
+  private _toggleSearchInput() {
+    this.setState(
+      prevState => ({
+        ...prevState,
+        filters: {
+          ...prevState.filters,
+          input: !prevState.filters.input
+        }
+      }),
+      () => this._executeSearch(true, undefined, true)
+    );
+  }
+  private _toggleSearchOutput() {
+    this.setState(
+      prevState => ({
+        ...prevState,
+        filters: {
+          ...prevState.filters,
+          output: !prevState.filters.output
+        }
+      }),
+      () => this._executeSearch(true, undefined, true)
+    );
   }
 
   render() {
@@ -375,6 +473,12 @@ class SearchOverlay extends React.Component<
         <SearchIndices
           currentIndex={this.props.overlayState.currentIndex}
           totalMatches={this.props.overlayState.totalMatches}
+        />
+        <FilterSelection
+          searchOutput={this.state.filters.output}
+          searchInput={this.state.filters.input}
+          toggleInput={this._toggleSearchInput}
+          toggleOutput={this._toggleSearchOutput}
         />
         <UpDownButtons
           onHighlightPrevious={() => this._executeSearch(false)}

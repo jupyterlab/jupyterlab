@@ -76,12 +76,14 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
    *
    * @param query A RegExp to be use to perform the search
    * @param searchTarget The widget to be searched
+   * @param [filters={}] Filter parameters to pass to provider
    *
    * @returns A promise that resolves with a list of all matches
    */
   async startQuery(
     query: RegExp,
-    searchTarget: Widget
+    searchTarget: Widget,
+    filters = {}
   ): Promise<ISearchMatch[]> {
     const that = this;
     // No point in removing overlay in the middle of the search
