@@ -207,6 +207,7 @@ export class CellManager implements IDisposable {
       return;
     }
 
+    editor.focus();
     this.clearGutter(this.activeCell);
 
     const isRemoveGutter = !!info.gutterMarkers;
