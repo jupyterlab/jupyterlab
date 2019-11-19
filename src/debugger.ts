@@ -156,8 +156,13 @@ export namespace Debugger {
       this._codeValue = observableString;
     }
 
+    get disposed(): ISignal<this, void> {
+      return this._disposed;
+    }
+
     dispose(): void {
       this._isDisposed = true;
+      this._disposed.emit();
     }
 
     private async _populate(): Promise<void> {
@@ -172,6 +177,7 @@ export namespace Debugger {
     private _isDisposed = false;
     private _mode: IDebugger.Mode;
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
+    private _disposed = new Signal<this, void>(this);
   }
 
   export namespace Sidebar {

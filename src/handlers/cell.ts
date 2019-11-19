@@ -79,15 +79,13 @@ export class CellManager implements IDisposable {
     if (this.isDisposed) {
       return;
     }
-    if (this.previousCell) {
-      this.removeListener(this.previousCell);
-    }
     if (this._cellMonitor) {
       this._cellMonitor.dispose();
     }
-    this.removeListener(this.activeCell);
+    this.setOffOptions(this.activeCell);
     CellManager.cleanupHighlight(this.activeCell);
     Signal.clearData(this);
+    this.isDisposed = true;
   }
 
   set previousCell(cell: CodeCell) {
@@ -131,7 +129,7 @@ export class CellManager implements IDisposable {
         if (this._cellMonitor) {
           this._cellMonitor.dispose();
         }
-        this.removeListener(this.previousCell);
+        this.removeGutterClick(this.previousCell);
       }
 
       this._cellMonitor = new ActivityMonitor({
@@ -188,12 +186,19 @@ export class CellManager implements IDisposable {
     editor.editor.on('gutterClick', this.onGutterClick);
   }
 
-  protected removeListener(cell: CodeCell) {
+  protected removeGutterClick(cell: CodeCell) {
     if (cell.isDisposed) {
       return;
     }
     const editor = cell.editor as CodeMirrorEditor;
     editor.editor.off('gutterClick', this.onGutterClick);
+  }
+
+  setOffOptions(cell: Cell) {
+    const editor = cell.editor as CodeMirrorEditor;
+    CellManager.cleanupHighlight(cell);
+    editor.editor.off('gutterClick', this.onGutterClick);
+    editor.setOption('lineNumbers', false);
   }
 
   protected getEditorId(): string {

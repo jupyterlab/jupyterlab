@@ -178,6 +178,7 @@ export class DebugService implements IDebugger {
    */
   async stop(): Promise<void> {
     await this.session.stop();
+    this._stoppedThreads.clear();
   }
 
   /**
@@ -234,8 +235,10 @@ export class DebugService implements IDebugger {
         );
       });
     }
-    this._model.breakpointsModel.restoreBreakpoints(bpMap);
 
+    if (this._model) {
+      this._model.breakpointsModel.restoreBreakpoints(bpMap);
+    }
     if (!this.isStarted() && autoStart) {
       await this.start();
     }
