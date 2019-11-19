@@ -80,7 +80,9 @@ async function setDebugSession(
   } else {
     debug.session.client = client;
   }
-  await debug.restoreState(true);
+  if (debug.isDebuggingEnabled) {
+    await debug.restoreState(true);
+  }
   app.commands.notifyCommandChanged();
 }
 
