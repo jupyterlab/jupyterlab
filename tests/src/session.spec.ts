@@ -183,7 +183,7 @@ describe('protocol', () => {
       });
       expect(reply.success).to.be.true;
       const stackFrames = reply.body.stackFrames;
-      expect(stackFrames.length).to.equal(2);
+      expect(stackFrames.length).to.equal(1);
       const frame = stackFrames[0];
       // first breakpoint
       expect(frame.line).to.equal(3);
@@ -260,6 +260,30 @@ describe('protocol', () => {
       expect(j).to.exist;
       expect(j.type).to.equal('int');
       expect(j.value).to.equal('4');
+    });
+  });
+
+  describe('#loadedSources', () => {
+    it('should *not* retrieve the list of loaded sources', async () => {
+      // `loadedSources` is not supported at the moment "unknown command"
+      const reply = await debugSession.sendRequest('loadedSources', {});
+      expect(reply.success).to.be.false;
+    });
+  });
+
+  describe('#source', () => {
+    it('should retrieve the source of the dumped code cell', async () => {
+      const stackFramesReply = await debugSession.sendRequest('stackTrace', {
+        threadId
+      });
+      const frame = stackFramesReply.body.stackFrames[0];
+      const source = frame.source;
+      const reply = await debugSession.sendRequest('source', {
+        source: { path: source.path },
+        sourceReference: source.sourceReference
+      });
+      const sourceCode = reply.body.content;
+      expect(sourceCode).to.equal(code);
     });
   });
 });
