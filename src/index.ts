@@ -227,17 +227,17 @@ const notebooks: JupyterFrontEndPlugin<void> = {
  */
 const main: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:main',
-  optional: [ILayoutRestorer, ICommandPalette, ILabShell],
-  requires: [IStateDB, IEditorServices],
+  optional: [ILayoutRestorer, ICommandPalette],
+  requires: [IStateDB, IEditorServices, ILabShell],
   provides: IDebugger,
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     state: IStateDB,
     editorServices: IEditorServices,
+    labShell: ILabShell,
     restorer: ILayoutRestorer | null,
-    palette: ICommandPalette | null,
-    labShell: ILabShell
+    palette: ICommandPalette | null
   ): IDebugger => {
     const { commands, shell } = app;
     const editorFactory = editorServices.factoryService.newInlineEditor;

@@ -84,7 +84,6 @@ export class CellManager implements IDisposable {
     if (this._cellMonitor) {
       this._cellMonitor.dispose();
     }
-    CellManager.setOffOptions(this.activeCell);
     CellManager.cleanupHighlight(this.activeCell);
     Signal.clearData(this);
     this.isDisposed = true;
@@ -108,15 +107,6 @@ export class CellManager implements IDisposable {
 
   get activeCell(): CodeCell {
     return this._activeCell;
-  }
-
-  protected clearGutter(cell: CodeCell) {
-    const editor = cell.editor as CodeMirrorEditor;
-    editor.doc.eachLine(line => {
-      if ((line as ILineInfo).gutterMarkers) {
-        editor.editor.setGutterMarker(line, 'breakpoints', null);
-      }
-    });
   }
 
   onActiveCellChanged() {
@@ -208,7 +198,7 @@ export class CellManager implements IDisposable {
     }
 
     editor.focus();
-    this.clearGutter(this.activeCell);
+    CellManager.clearGutter(this.activeCell);
 
     const isRemoveGutter = !!info.gutterMarkers;
     let breakpoints: Breakpoints.IBreakpoint[] = this.getBreakpoints(
@@ -239,7 +229,7 @@ export class CellManager implements IDisposable {
       breakpoints.length === 0 &&
       this._id === this._debuggerService.session.client.name
     ) {
-      this.clearGutter(cell);
+      CellManager.clearGutter(cell);
     } else {
       breakpoints.forEach(breakpoint => {
         editor.editor.setGutterMarker(
@@ -320,9 +310,16 @@ export namespace CellManager {
    * @param cell The cell to cleanup.
    */
 
-  export function setOffOptions(cell: Cell) {
+  export function clearGutter(cell: Cell) {
+    if (!cell || !cell.inputArea) {
+      return;
+    }
     const editor = cell.editor as CodeMirrorEditor;
-    editor.setOption('lineNumbers', false);
+    editor.doc.eachLine(line => {
+      if ((line as ILineInfo).gutterMarkers) {
+        editor.editor.setGutterMarker(line, 'breakpoints', null);
+      }
+    });
   }
 }
 
