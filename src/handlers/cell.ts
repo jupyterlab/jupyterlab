@@ -72,7 +72,7 @@ export class CellManager implements IDisposable {
       this.addBreakpointsToEditor(this.activeCell);
     });
 
-    if (this.activeCell) {
+    if (this.activeCell && !this.activeCell.isDisposed) {
       this._debuggerModel.codeValue = this.activeCell.model.value;
     }
   }
