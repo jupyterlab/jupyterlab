@@ -11,7 +11,7 @@ import { Signal } from '@phosphor/signaling';
 
 import { Breakpoints } from '../breakpoints';
 
-import { CellManager } from '../handlers/editor';
+import { EditorHandler } from '../handlers/editor';
 
 import { IDebugger } from '../tokens';
 
@@ -23,12 +23,11 @@ export class ConsoleHandler implements IDisposable {
     this.debuggerService = options.debuggerService;
     this.consoleTracker = options.tracker;
     this.breakpoints = this.debuggerModel.breakpointsModel;
-    this.cellManager = new CellManager({
+    this.editorHandler = new EditorHandler({
       activeCell: this.consoleTracker.currentWidget.console.promptCell,
       breakpointsModel: this.breakpoints,
       debuggerModel: this.debuggerModel,
-      debuggerService: this.debuggerService,
-      type: 'console'
+      debuggerService: this.debuggerService
     });
     this.consoleTracker.currentWidget.console.promptCellCreated.connect(
       this.promptCellCreated,
@@ -36,11 +35,6 @@ export class ConsoleHandler implements IDisposable {
     );
   }
 
-  private consoleTracker: IConsoleTracker;
-  private debuggerModel: Debugger.Model;
-  private debuggerService: IDebugger;
-  private breakpoints: Breakpoints.Model;
-  private cellManager: CellManager;
   isDisposed: boolean;
 
   dispose(): void {
@@ -48,16 +42,20 @@ export class ConsoleHandler implements IDisposable {
       return;
     }
     this.isDisposed = true;
-    this.cellManager.dispose();
+    this.editorHandler.dispose();
     Signal.clearData(this);
   }
 
   protected promptCellCreated(sender: CodeConsole, update: CodeCell) {
-    if (this.cellManager) {
-      this.cellManager.previousCell = this.cellManager.activeCell;
-      this.cellManager.activeCell = update;
-    }
+    this.editorHandler.previousCell = this.editorHandler.activeCell;
+    this.editorHandler.activeCell = update;
   }
+
+  private consoleTracker: IConsoleTracker;
+  private debuggerModel: Debugger.Model;
+  private debuggerService: IDebugger;
+  private breakpoints: Breakpoints.Model;
+  private editorHandler: EditorHandler;
 }
 
 export namespace DebuggerConsoleHandler {

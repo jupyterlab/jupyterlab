@@ -21,7 +21,7 @@ import { IDebugger } from '../tokens';
 
 import { Callstack } from '../callstack';
 
-import { CellManager } from './editor';
+import { EditorHandler } from './editor';
 
 export class NotebookHandler implements IDisposable {
   constructor(options: NotebookHandler.IOptions) {
@@ -33,11 +33,10 @@ export class NotebookHandler implements IDisposable {
     this.id = options.id;
     this.breakpoints = this.debuggerModel.breakpointsModel;
 
-    this.cellManager = new CellManager({
+    this.editorHandler = new EditorHandler({
       breakpointsModel: this.breakpoints,
       debuggerModel: this.debuggerModel,
       debuggerService: this.debuggerService,
-      type: 'notebook',
       activeCell: this.notebookTracker.activeCell as CodeCell
     });
 
@@ -60,15 +59,15 @@ export class NotebookHandler implements IDisposable {
     }
     this.isDisposed = true;
     this.cleanAllCells();
-    this.cellManager.dispose();
+    this.editorHandler.dispose();
     Signal.clearData(this);
   }
 
   protected cleanAllCells() {
     const cells = this.notebookPanel.content.widgets;
     cells.forEach(cell => {
-      CellManager.clearHighlight(cell);
-      CellManager.clearGutter(cell);
+      EditorHandler.clearHighlight(cell);
+      EditorHandler.clearGutter(cell);
     });
   }
 
@@ -79,7 +78,7 @@ export class NotebookHandler implements IDisposable {
     if (notebookTracker.currentWidget.id !== this.id) {
       return;
     }
-    this.cellManager.activeCell = codeCell;
+    this.editorHandler.activeCell = codeCell;
   }
 
   private onCurrentFrameChanged(
@@ -92,7 +91,7 @@ export class NotebookHandler implements IDisposable {
     }
 
     const cells = notebook.content.widgets;
-    cells.forEach(cell => CellManager.clearHighlight(cell));
+    cells.forEach(cell => EditorHandler.clearHighlight(cell));
 
     if (!frame) {
       return;
@@ -106,7 +105,7 @@ export class NotebookHandler implements IDisposable {
         return;
       }
       notebook.content.activeCellIndex = i;
-      CellManager.showCurrentLine(cell, frame);
+      EditorHandler.showCurrentLine(cell, frame);
     });
   }
 
@@ -114,8 +113,8 @@ export class NotebookHandler implements IDisposable {
   private debuggerModel: Debugger.Model;
   private debuggerService: IDebugger;
   private breakpoints: Breakpoints.Model;
-  private cellManager: CellManager;
   private notebookPanel: NotebookPanel;
+  private editorHandler: EditorHandler;
   private id: string;
 }
 
