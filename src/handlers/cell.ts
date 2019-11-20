@@ -29,8 +29,9 @@ const CELL_CHANGED_TIMEOUT = 1000;
 
 export class CellManager implements IDisposable {
   constructor(options: CellManager.IOptions) {
-    this._debuggerService = options.debuggerService;
+    // TODO: should we use the client name or a debug session id?
     this._id = options.debuggerService.session.client.name;
+    this._debuggerService = options.debuggerService;
     this.onModelChanged();
     this._debuggerService.modelChanged.connect(() => this.onModelChanged());
     this.activeCell = options.activeCell;
