@@ -5,37 +5,41 @@
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
+import { find } from '@phosphor/algorithm';
+
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { TabPanel } from '@phosphor/widgets';
+
+import { Callstack } from '../callstack';
+
+import { Debugger } from '../debugger';
+
+import { IDebugger } from '../tokens';
 
 export class DebuggerEditors extends TabPanel {
   constructor(options: DebuggerEditors.IOptions) {
     super();
 
     this.tabsMovable = true;
+    this.tabBar.insertBehavior = 'select-tab';
 
     this.model = new DebuggerEditors.IModel();
+
+    this.debuggerModel = options.model;
+    this.debuggerService = options.service;
+    this.editorFactory = options.editorFactory;
+
+    this.debuggerModel.callstackModel.currentFrameChanged.connect(
+      this.onCurrentFrameChanged,
+      this
+    );
+
     this.model.editorAdded.connect((sender, data) => {
-      let editor = new CodeEditorWrapper({
-        model: new CodeEditor.Model({
-          value: data.code,
-          mimeType: data.mimeType
-        }),
-        factory: options.editorFactory,
-        config: {
-          readOnly: true,
-          lineNumbers: true
-        }
-      });
-
-      editor.title.label = data.title;
-      editor.title.closable = true;
-
-      this.addWidget(editor);
+      this.openEditor(data);
     });
 
-    MOCK_EDITORS.forEach(editor => this.model.addEditor(editor));
+    this.model.editors.forEach(editor => this.openEditor(editor));
 
     this.addClass('jp-DebuggerEditors');
   }
@@ -54,6 +58,65 @@ export class DebuggerEditors extends TabPanel {
     }
     Signal.clearData(this);
   }
+
+  private async onCurrentFrameChanged(
+    callstackModel: Callstack.Model,
+    frame: Callstack.IFrame
+  ) {
+    if (!frame) {
+      return;
+    }
+
+    const path = frame.source.path;
+    const content = await this.debuggerService.getSource({
+      sourceReference: 0,
+      path
+    });
+
+    this.model.addEditor({
+      path,
+      code: content,
+      mimeType: 'text/x-python'
+    });
+  }
+
+  private openEditor(data: DebuggerEditors.IEditor) {
+    const { path, mimeType, code } = data;
+
+    const tab = find(this.tabBar.titles, title => title.label === path);
+    if (tab) {
+      this.tabBar.currentTitle = tab;
+      return;
+    }
+
+    let editor = new CodeEditorWrapper({
+      model: new CodeEditor.Model({
+        value: code,
+        mimeType: mimeType
+      }),
+      factory: this.editorFactory,
+      config: {
+        readOnly: true,
+        lineNumbers: true
+      }
+    });
+
+    editor.title.label = path;
+    editor.title.caption = path;
+    editor.title.closable = true;
+
+    this.tabBar.tabCloseRequested.connect((_, tab) => {
+      const widget = tab.title.owner;
+      widget.dispose();
+      this.model.removeEditor(tab.title.label);
+    });
+
+    this.addWidget(editor);
+  }
+
+  private debuggerModel: Debugger.Model;
+  private debuggerService: IDebugger;
+  private editorFactory: CodeEditor.Factory;
 }
 
 /**
@@ -64,6 +127,8 @@ export namespace DebuggerEditors {
    * The options used to create a DebuggerEditors.
    */
   export interface IOptions {
+    service: IDebugger;
+    model: Debugger.Model;
     editorFactory: CodeEditor.Factory;
   }
 
@@ -71,7 +136,7 @@ export namespace DebuggerEditors {
    * An interface for read only editors.
    */
   export interface IEditor {
-    title: string;
+    path: string;
     code: string;
     mimeType: string;
   }
@@ -101,24 +166,19 @@ export namespace DebuggerEditors {
      * @param editor The read-only editor info to add.
      */
     addEditor(editor: DebuggerEditors.IEditor) {
-      this._state.push(editor);
+      this._state.set(editor.path, editor);
       this._editorAdded.emit(editor);
     }
 
-    private _state: DebuggerEditors.IEditor[] = [];
+    /**
+     * Remove an editor from the TabPanel.
+     * @param path The path for the editor.
+     */
+    removeEditor(path: string) {
+      this._state.delete(path);
+    }
+
+    private _state = new Map<string, DebuggerEditors.IEditor>();
     private _editorAdded = new Signal<this, DebuggerEditors.IEditor>(this);
   }
 }
-
-const MOCK_EDITORS = [
-  {
-    title: 'untitled.py',
-    mimeType: 'text/x-ipython',
-    code: 'import math\nprint(math.pi)'
-  },
-  {
-    title: 'test.py',
-    mimeType: 'text/x-ipython',
-    code: 'import sys\nprint(sys.version)'
-  }
-];

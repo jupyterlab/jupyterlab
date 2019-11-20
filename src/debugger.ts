@@ -49,6 +49,8 @@ export class Debugger extends SplitPanel {
     });
 
     this.editors = new DebuggerEditors({
+      model: this.model,
+      service: this.service,
       editorFactory: options.editorFactory
     });
     this.addWidget(this.editors);
