@@ -24,3 +24,9 @@ https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md
 ## Backwards-incompatible changes
 
 <!-- Describe any backwards-incompatible changes to JupyterLab public APIs. -->
+
+## Added Relevant tags
+
+<!-- If this PR changes any CSS Please add the "Design System CSS" tag so that design contributors can keep the Design System up to date. -->
+
+<!-- Please add any other relevant tags related to this issue -->
