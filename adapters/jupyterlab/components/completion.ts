@@ -316,9 +316,9 @@ export class LSPConnector extends DataConnector<
     let final_matches: Array<string> = Array.from(priority_matches).concat(
       matches
     );
-    let merged_types: Array<IItemType> = Array.from(memo_types.entries()).map(
-      ([key, value]) => ({ text: key, type: value })
-    );
+    let merged_types: Array<IItemType> = Array.from(
+      memo_types.entries()
+    ).map(([key, value]) => ({ text: key, type: value }));
 
     return {
       ...lsp,
