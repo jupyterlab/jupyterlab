@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { IDataConnector } from '@jupyterlab/coreutils';
 
@@ -51,7 +51,7 @@ export class Debugger extends SplitPanel {
     this.editors = new DebuggerEditors({
       model: this.model,
       service: this.service,
-      editorFactory: options.editorFactory
+      editorServices: options.editorServices
     });
     this.addWidget(this.editors);
 
@@ -84,7 +84,7 @@ export class Debugger extends SplitPanel {
 export namespace Debugger {
   export interface IOptions {
     debugService: DebugService;
-    editorFactory: CodeEditor.Factory;
+    editorServices: IEditorServices;
     callstackCommands: Callstack.ICommands;
     connector?: IDataConnector<ReadonlyJSONValue>;
   }

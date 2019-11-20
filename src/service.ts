@@ -361,12 +361,12 @@ export class DebugService implements IDebugger {
    * Retrieve the content of a source file.
    * @param source The source object containing the path to the file.
    */
-  async getSource(source: DebugProtocol.Source): Promise<string> {
+  async getSource(source: DebugProtocol.Source) {
     const reply = await this.session.sendRequest('source', {
       source,
       sourceReference: source.sourceReference
     });
-    return reply.body.content;
+    return reply;
   }
 
   getAllFrames = async () => {

@@ -1,6 +1,9 @@
 import { expect } from 'chai';
 
-import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService
+} from '@jupyterlab/codemirror';
 
 import { CommandRegistry } from '@phosphor/commands';
 
@@ -13,8 +16,8 @@ class TestPanel extends Debugger {}
 describe('Debugger', () => {
   const service = new DebugService();
   const registry = new CommandRegistry();
-  const editorServices = new CodeMirrorEditorFactory();
-  const editorFactory = editorServices.newInlineEditor;
+  const factoryService = new CodeMirrorEditorFactory();
+  const mimeTypeService = new CodeMirrorMimeTypeService();
 
   let panel: TestPanel;
 
@@ -29,7 +32,10 @@ describe('Debugger', () => {
         stepIn: '',
         stepOut: ''
       },
-      editorFactory: editorFactory
+      editorServices: {
+        factoryService,
+        mimeTypeService
+      }
     });
   });
 

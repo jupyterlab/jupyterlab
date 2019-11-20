@@ -140,7 +140,9 @@ export interface IDebugger extends IDisposable {
    * Retrieve the content of a source file.
    * @param source The source object containing the path to the file.
    */
-  getSource(source: DebugProtocol.Source): Promise<string>;
+  getSource(
+    source: DebugProtocol.Source
+  ): Promise<DebugProtocol.SourceResponse>;
 }
 
 /**

@@ -3,7 +3,12 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  CodeEditorWrapper,
+  IEditorMimeTypeService,
+  IEditorServices
+} from '@jupyterlab/codeeditor';
 
 import { find } from '@phosphor/algorithm';
 
@@ -28,7 +33,8 @@ export class DebuggerEditors extends TabPanel {
 
     this.debuggerModel = options.model;
     this.debuggerService = options.service;
-    this.editorFactory = options.editorFactory;
+    this.editorFactory = options.editorServices.factoryService.newInlineEditor;
+    this.mimeTypeService = options.editorServices.mimeTypeService;
 
     this.debuggerModel.callstackModel.currentFrameChanged.connect(
       this.onCurrentFrameChanged,
@@ -60,7 +66,7 @@ export class DebuggerEditors extends TabPanel {
   }
 
   private async onCurrentFrameChanged(
-    callstackModel: Callstack.Model,
+    _: Callstack.Model,
     frame: Callstack.IFrame
   ) {
     if (!frame) {
@@ -68,15 +74,20 @@ export class DebuggerEditors extends TabPanel {
     }
 
     const path = frame.source.path;
-    const content = await this.debuggerService.getSource({
+    const source = await this.debuggerService.getSource({
       sourceReference: 0,
       path
     });
 
+    if (!source.success) {
+      return;
+    }
+
+    const { content, mimeType } = source.body;
     this.model.addEditor({
       path,
       code: content,
-      mimeType: 'text/x-python'
+      mimeType: mimeType || this.mimeTypeService.getMimeTypeByFilePath(path)
     });
   }
 
@@ -117,6 +128,7 @@ export class DebuggerEditors extends TabPanel {
   private debuggerModel: Debugger.Model;
   private debuggerService: IDebugger;
   private editorFactory: CodeEditor.Factory;
+  private mimeTypeService: IEditorMimeTypeService;
 }
 
 /**
@@ -129,7 +141,7 @@ export namespace DebuggerEditors {
   export interface IOptions {
     service: IDebugger;
     model: Debugger.Model;
-    editorFactory: CodeEditor.Factory;
+    editorServices: IEditorServices;
   }
 
   /**
