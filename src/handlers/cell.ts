@@ -29,11 +29,12 @@ const CELL_CHANGED_TIMEOUT = 1000;
 
 export class CellManager implements IDisposable {
   constructor(options: CellManager.IOptions) {
+    // TODO: should we use the client name or a debug session id?
+    this._id = options.debuggerService.session.client.name;
     this._debuggerService = options.debuggerService;
     this.onModelChanged();
     this._debuggerService.modelChanged.connect(() => this.onModelChanged());
     this.activeCell = options.activeCell;
-    this.onActiveCellChanged();
   }
 
   isDisposed: boolean;
@@ -47,7 +48,7 @@ export class CellManager implements IDisposable {
 
     this._debuggerModel.callstackModel.currentFrameChanged.connect(
       (_, frame) => {
-        CellManager.cleanupHighlight(this.activeCell);
+        CellManager.clearHighlight(this.activeCell);
         if (!frame) {
           return;
         }
@@ -72,7 +73,7 @@ export class CellManager implements IDisposable {
       this.addBreakpointsToEditor(this.activeCell);
     });
 
-    if (this.activeCell) {
+    if (this.activeCell && !this.activeCell.isDisposed) {
       this._debuggerModel.codeValue = this.activeCell.model.value;
     }
   }
@@ -81,15 +82,14 @@ export class CellManager implements IDisposable {
     if (this.isDisposed) {
       return;
     }
-    if (this.previousCell) {
-      this.removeListener(this.previousCell);
-    }
     if (this._cellMonitor) {
       this._cellMonitor.dispose();
     }
-    this.removeListener(this.activeCell);
-    CellManager.cleanupHighlight(this.activeCell);
+    this.removeGutterClick(this.activeCell);
+    CellManager.clearHighlight(this.activeCell);
+    CellManager.clearGutter(this.activeCell);
     Signal.clearData(this);
+    this.isDisposed = true;
   }
 
   set previousCell(cell: CodeCell) {
@@ -112,15 +112,6 @@ export class CellManager implements IDisposable {
     return this._activeCell;
   }
 
-  protected clearGutter(cell: CodeCell) {
-    const editor = cell.editor as CodeMirrorEditor;
-    editor.doc.eachLine(line => {
-      if ((line as ILineInfo).gutterMarkers) {
-        editor.editor.setGutterMarker(line, 'breakpoints', null);
-      }
-    });
-  }
-
   onActiveCellChanged() {
     if (
       this.activeCell &&
@@ -133,7 +124,7 @@ export class CellManager implements IDisposable {
         if (this._cellMonitor) {
           this._cellMonitor.dispose();
         }
-        this.removeListener(this.previousCell);
+        this.removeGutterClick(this.previousCell);
       }
 
       this._cellMonitor = new ActivityMonitor({
@@ -145,8 +136,11 @@ export class CellManager implements IDisposable {
         this.sendEditorBreakpoints();
       }, this);
 
+      requestAnimationFrame(() => {
+        this.setEditor(this.activeCell);
+      });
+
       this.previousCell = this.activeCell;
-      this.setEditor(this.activeCell);
     }
   }
 
@@ -187,7 +181,7 @@ export class CellManager implements IDisposable {
     editor.editor.on('gutterClick', this.onGutterClick);
   }
 
-  protected removeListener(cell: CodeCell) {
+  protected removeGutterClick(cell: CodeCell) {
     if (cell.isDisposed) {
       return;
     }
@@ -201,9 +195,13 @@ export class CellManager implements IDisposable {
 
   protected onGutterClick = (editor: Editor, lineNumber: number) => {
     const info = editor.lineInfo(lineNumber);
-    if (!info) {
+
+    if (!info || this._id !== this._debuggerService.session.client.name) {
       return;
     }
+
+    editor.focus();
+    CellManager.clearGutter(this.activeCell);
 
     const isRemoveGutter = !!info.gutterMarkers;
     let breakpoints: Breakpoints.IBreakpoint[] = this.getBreakpoints(
@@ -228,16 +226,22 @@ export class CellManager implements IDisposable {
   };
 
   private addBreakpointsToEditor(cell: CodeCell) {
-    this.clearGutter(cell);
     const editor = cell.editor as CodeMirrorEditor;
     const breakpoints = this.getBreakpoints(cell);
-    breakpoints.forEach(breakpoint => {
-      editor.editor.setGutterMarker(
-        breakpoint.line - 1,
-        'breakpoints',
-        Private.createMarkerNode()
-      );
-    });
+    if (
+      breakpoints.length === 0 &&
+      this._id === this._debuggerService.session.client.name
+    ) {
+      CellManager.clearGutter(cell);
+    } else {
+      breakpoints.forEach(breakpoint => {
+        editor.editor.setGutterMarker(
+          breakpoint.line - 1,
+          'breakpoints',
+          Private.createMarkerNode()
+        );
+      });
+    }
   }
 
   private getBreakpointsFromEditor(cell: CodeCell): ILineInfo[] {
@@ -263,6 +267,7 @@ export class CellManager implements IDisposable {
   private breakpointsModel: Breakpoints.Model;
   private _activeCell: CodeCell;
   private _debuggerService: IDebugger;
+  private _id: string;
   private _cellMonitor: ActivityMonitor<
     IObservableString,
     IObservableString.IChangedArgs
@@ -285,7 +290,7 @@ export namespace CellManager {
    */
   export function showCurrentLine(cell: Cell, frame: Callstack.IFrame) {
     const editor = cell.editor as CodeMirrorEditor;
-    cleanupHighlight(cell);
+    clearHighlight(cell);
     editor.editor.addLineClass(frame.line - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
   }
 
@@ -293,13 +298,30 @@ export namespace CellManager {
    * Remove all line highlighting indicators for the given cell.
    * @param cell The cell to cleanup.
    */
-  export function cleanupHighlight(cell: Cell) {
-    if (!cell || cell.isDisposed) {
+  export function clearHighlight(cell: Cell) {
+    if (!cell || cell.isDisposed || !cell.inputArea) {
       return;
     }
     const editor = cell.editor as CodeMirrorEditor;
     editor.doc.eachLine(line => {
       editor.editor.removeLineClass(line, 'wrap', LINE_HIGHLIGHT_CLASS);
+    });
+  }
+
+  /**
+   * Remove line numbers and all gutters from cell.
+   * @param cell The cell to cleanup.
+   */
+
+  export function clearGutter(cell: Cell) {
+    if (!cell || !cell.inputArea) {
+      return;
+    }
+    const editor = cell.editor as CodeMirrorEditor;
+    editor.doc.eachLine(line => {
+      if ((line as ILineInfo).gutterMarkers) {
+        editor.editor.setGutterMarker(line, 'breakpoints', null);
+      }
     });
   }
 }

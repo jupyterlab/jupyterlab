@@ -128,6 +128,22 @@ export namespace Debugger {
     readonly variablesModel: Variables.Model;
     readonly connector: IDataConnector<ReadonlyJSONValue> | null;
 
+    dispose(): void {
+      this._isDisposed = true;
+      this._disposed.emit();
+    }
+
+    /**
+     * A signal emitted when the debugger widget is disposed.
+     */
+    get disposed(): ISignal<this, void> {
+      return this._disposed;
+    }
+
+    get isDisposed(): boolean {
+      return this._isDisposed;
+    }
+
     get mode(): IDebugger.Mode {
       return this._mode;
     }
@@ -144,20 +160,12 @@ export namespace Debugger {
       return this._modeChanged;
     }
 
-    get isDisposed(): boolean {
-      return this._isDisposed;
-    }
-
     get codeValue() {
       return this._codeValue;
     }
 
     set codeValue(observableString: IObservableString) {
       this._codeValue = observableString;
-    }
-
-    dispose(): void {
-      this._isDisposed = true;
     }
 
     private async _populate(): Promise<void> {
@@ -172,6 +180,7 @@ export namespace Debugger {
     private _isDisposed = false;
     private _mode: IDebugger.Mode;
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
+    private _disposed = new Signal<this, void>(this);
   }
 
   export namespace Sidebar {

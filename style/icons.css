@@ -15,6 +15,10 @@
   background-image: url('icons/activate-breakpoints.svg');
 }
 
+[data-jp-theme-light='false'] .jp-DebuggerDeactivateIcon {
+  background-image: url('icons/md-dark/activate-breakpoints.svg');
+}
+
 .expand-toggle-collapsed {
   display: inline-block;
   vertical-align: middle;
@@ -35,12 +39,24 @@
   background-image: url('icons/step-over.svg');
 }
 
+[data-jp-theme-light='false'] .jp-StepOverIcon {
+  background-image: url('icons/md-dark/step-over.svg');
+}
+
 .jp-StepInIcon {
   background-image: url('icons/step-into.svg');
 }
 
+[data-jp-theme-light='false'] .jp-StepInIcon {
+  background-image: url('icons/md-dark/step-into.svg');
+}
+
 .jp-StepOutIcon {
   background-image: url('icons/step-out.svg');
+}
+
+[data-jp-theme-light='false'] .jp-StepOutIcon {
+  background-image: url('icons/md-dark/step-out.svg');
 }
 
 .jp-ClassIcon {
@@ -57,4 +73,8 @@
 
 .jp-CloseAllIcon {
   background-image: url('icons/close-all.svg');
+}
+
+[data-jp-theme-light='false'] .jp-CloseAllIcon {
+  background-image: url('icons/md-dark/close-all.svg');
 }

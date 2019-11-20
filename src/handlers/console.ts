@@ -56,14 +56,6 @@ export class ConsoleHandler implements IDisposable {
     if (this.cellManager) {
       this.cellManager.previousCell = this.cellManager.activeCell;
       this.cellManager.activeCell = update;
-    } else if (!this.cellManager) {
-      this.cellManager = new CellManager({
-        activeCell: update,
-        breakpointsModel: this.breakpoints,
-        debuggerModel: this.debuggerModel,
-        debuggerService: this.debuggerService,
-        type: 'console'
-      });
     }
   }
 }

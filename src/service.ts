@@ -178,6 +178,7 @@ export class DebugService implements IDebugger {
    */
   async stop(): Promise<void> {
     await this.session.stop();
+    this._stoppedThreads.clear();
   }
 
   /**
@@ -188,7 +189,6 @@ export class DebugService implements IDebugger {
     const breakpoints = this.model.breakpointsModel.breakpoints;
     await this.stop();
     this.clearModel();
-    this._stoppedThreads.clear();
     await this.start();
 
     // No need to dump the cells again, we can simply
@@ -234,8 +234,10 @@ export class DebugService implements IDebugger {
         );
       });
     }
-    this._model.breakpointsModel.restoreBreakpoints(bpMap);
 
+    if (this._model) {
+      this._model.breakpointsModel.restoreBreakpoints(bpMap);
+    }
     if (!this.isStarted() && autoStart) {
       await this.start();
     }

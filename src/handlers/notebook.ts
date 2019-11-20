@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { INotebookTracker, NotebookTracker } from '@jupyterlab/notebook';
+import {
+  INotebookTracker,
+  NotebookPanel,
+  NotebookTracker
+} from '@jupyterlab/notebook';
 
 import { CodeCell } from '@jupyterlab/cells';
 
@@ -24,6 +28,8 @@ export class NotebookHandler implements IDisposable {
     this.debuggerModel = options.debuggerService.model;
     this.debuggerService = options.debuggerService;
     this.notebookTracker = options.tracker;
+    this.notebookPanel = this.notebookTracker.currentWidget;
+
     this.id = options.id;
     this.breakpoints = this.debuggerModel.breakpointsModel;
 
@@ -53,8 +59,17 @@ export class NotebookHandler implements IDisposable {
       return;
     }
     this.isDisposed = true;
+    this.cleanAllCells();
     this.cellManager.dispose();
     Signal.clearData(this);
+  }
+
+  protected cleanAllCells() {
+    const cells = this.notebookPanel.content.widgets;
+    cells.forEach(cell => {
+      CellManager.clearHighlight(cell);
+      CellManager.clearGutter(cell);
+    });
   }
 
   protected onActiveCellChanged(
@@ -64,10 +79,7 @@ export class NotebookHandler implements IDisposable {
     if (notebookTracker.currentWidget.id !== this.id) {
       return;
     }
-    // TODO: do we need this requestAnimationFrame?
-    requestAnimationFrame(() => {
-      this.cellManager.activeCell = codeCell;
-    });
+    this.cellManager.activeCell = codeCell;
   }
 
   private onCurrentFrameChanged(
@@ -80,7 +92,7 @@ export class NotebookHandler implements IDisposable {
     }
 
     const cells = notebook.content.widgets;
-    cells.forEach(cell => CellManager.cleanupHighlight(cell));
+    cells.forEach(cell => CellManager.clearHighlight(cell));
 
     if (!frame) {
       return;
@@ -103,6 +115,7 @@ export class NotebookHandler implements IDisposable {
   private debuggerService: IDebugger;
   private breakpoints: Breakpoints.Model;
   private cellManager: CellManager;
+  private notebookPanel: NotebookPanel;
   private id: string;
 }
 

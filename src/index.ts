@@ -68,6 +68,8 @@ export namespace CommandIDs {
   export const mount = 'debugger:mount';
 
   export const changeMode = 'debugger:change-mode';
+
+  export const closeDebugger = 'debugger:close';
 }
 
 async function setDebugSession(
@@ -103,6 +105,14 @@ class DebuggerHandler<H extends ConsoleHandler | NotebookHandler> {
       widget.disposed.connect(() => {
         handler.dispose();
         delete this.handlers[widget.id];
+      });
+
+      debug.model.disposed.connect(async () => {
+        await debug.stop();
+        Object.keys(this.handlers).forEach(id => {
+          this.handlers[id].dispose();
+        });
+        this.handlers = {};
       });
     }
   }
@@ -201,7 +211,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   ) => {
     const handler = new DebuggerHandler<NotebookHandler>(NotebookHandler);
 
-    labShell.currentChanged.connect(async (_, update) => {
+    labShell.activeChanged.connect(async (_, update) => {
       const widget = update.newValue;
       if (!(widget instanceof NotebookPanel)) {
         return;
@@ -218,13 +228,14 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 const main: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:main',
   optional: [ILayoutRestorer, ICommandPalette],
-  requires: [IStateDB, IEditorServices],
+  requires: [IStateDB, IEditorServices, ILabShell],
   provides: IDebugger,
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     state: IStateDB,
     editorServices: IEditorServices,
+    labShell: ILabShell,
     restorer: ILayoutRestorer | null,
     palette: ICommandPalette | null
   ): IDebugger => {
@@ -240,6 +251,22 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     const defaultMode = 'condensed';
 
     let widget: MainAreaWidget<Debugger>;
+
+    commands.addCommand(CommandIDs.closeDebugger, {
+      label: 'Close Debugger',
+      execute: args => {
+        if (!widget) {
+          return;
+        }
+        widget.content.sidebar.close();
+        widget.dispose();
+      }
+    });
+
+    app.contextMenu.addItem({
+      command: CommandIDs.closeDebugger,
+      selector: '.jp-DebuggerSidebar'
+    });
 
     commands.addCommand(CommandIDs.mount, {
       execute: async args => {
@@ -275,7 +302,11 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
         sidebar.id = 'jp-debugger-sidebar';
         sidebar.title.label = 'Environment';
+
         shell.add(sidebar, 'right', { activate: false });
+        if (labShell.currentWidget) {
+          labShell.currentWidget.activate();
+        }
 
         if (restorer) {
           restorer.add(sidebar, 'debugger-sidebar');

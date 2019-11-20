@@ -27,7 +27,10 @@
   top: -1px;
 }
 
-.jp-CodeCell.jp-mod-selected .CodeMirror-gutter-wrapper:hover::after,
+.jp-Notebook
+  .jp-mod-editMode
+  .jp-CodeCell.jp-mod-selected
+  .CodeMirror-gutter-wrapper:hover::after,
 .jp-Editor.jp-mod-focused
   .CodeMirror:not(.jp-mod-readOnly)
   .CodeMirror-gutter-wrapper:hover::after {
