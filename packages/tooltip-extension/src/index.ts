@@ -3,7 +3,7 @@
 
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 
-import { find } from '@phosphor/algorithm';
+import { find, toArray } from '@phosphor/algorithm';
 
 import { JSONObject } from '@phosphor/coreutils';
 
@@ -170,7 +170,7 @@ const files: JupyterFrontEndPlugin<void> = {
     // Keep a list of active ISessions so that we can
     // clean them up when they are no longer needed.
     const activeSessions: {
-      [id: string]: Session.ISession;
+      [id: string]: Session.ISessionConnection;
     } = {};
 
     const sessions = app.serviceManager.sessions;
@@ -207,9 +207,7 @@ const files: JupyterFrontEndPlugin<void> = {
         }
       });
     };
-    void Session.listRunning().then(models => {
-      onRunningChanged(sessions, models);
-    });
+    onRunningChanged(sessions, toArray(sessions.running()));
     sessions.runningChanged.connect(onRunningChanged);
 
     // Clean up after a widget when it is disposed

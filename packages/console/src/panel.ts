@@ -60,6 +60,7 @@ export class ConsolePanel extends Panel {
 
     let session = (this._session = new ClientSession({
       manager: manager.sessions,
+      specsManager: manager.kernelspecs,
       path,
       name: name || `Console ${count}`,
       type: 'console',
@@ -285,18 +286,23 @@ namespace Private {
     connected: Date | null,
     executed: Date | null
   ) {
-    let session = panel.console.session;
-    let caption =
-      `Name: ${session.name}\n` +
-      `Directory: ${PathExt.dirname(session.path)}\n` +
-      `Kernel: ${session.kernelDisplayName}`;
-    if (connected) {
-      caption += `\nConnected: ${Time.format(connected.toISOString())}`;
+    let session = panel.console.session.session;
+    if (session) {
+      let caption =
+        `Name: ${session.name}\n` +
+        `Directory: ${PathExt.dirname(session.path)}\n` +
+        `Kernel: ${panel.console.session.kernelDisplayName}`;
+      if (connected) {
+        caption += `\nConnected: ${Time.format(connected.toISOString())}`;
+      }
+      if (executed) {
+        caption += `\nLast Execution: ${Time.format(executed.toISOString())}`;
+      }
+      panel.title.caption = caption;
+      panel.title.label = session.name;
+    } else {
+      panel.title.label = 'Console';
+      panel.title.caption = '';
     }
-    if (executed) {
-      caption += `\nLast Execution: ${Time.format(executed.toISOString())}`;
-    }
-    panel.title.label = session.name || 'Console';
-    panel.title.caption = caption;
   }
 }

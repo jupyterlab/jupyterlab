@@ -432,7 +432,7 @@ export namespace Session {
      */
     startNew(
       options: Omit<Session.IOptions, 'model' | 'connectToKernel'> & {
-        model: Omit<Session.IModel, 'kernel'> & {
+        model: Omit<Session.IModel, 'kernel' | 'id'> & {
           kernel: Partial<Kernel.IModel> | null;
         };
       }

@@ -861,12 +861,14 @@ export namespace Commands {
       tracker,
       noun: 'Code',
       isEnabled: current =>
-        !!consoleTracker.find(c => c.session.path === current.context.path),
+        !!consoleTracker.find(
+          c => c.session.session?.path === current.context.path
+        ),
       run: () => commands.execute(CommandIDs.runCode),
       runAll: () => commands.execute(CommandIDs.runAllCode),
       restartAndRunAll: current => {
         const console = consoleTracker.find(
-          console => console.session.path === current.context.path
+          console => console.session.session?.path === current.context.path
         );
         if (console) {
           return console.session.restart().then(restarted => {

@@ -23,7 +23,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { Session } from '@jupyterlab/services';
 
-import { find } from '@phosphor/algorithm';
+import { find, toArray } from '@phosphor/algorithm';
 
 import { Widget } from '@phosphor/widgets';
 
@@ -139,7 +139,8 @@ const consoles: JupyterFrontEndPlugin<void> = {
       const anchor = panel.console;
       const cell = anchor.promptCell;
       const editor = cell && cell.editor;
-      const session = anchor.session;
+      // TODO: make sure the logic here is right as the client session switches to different sessions.
+      const session = anchor.session?.session;
       const parent = panel;
       const connector = new CompletionConnector({ session, editor });
       const handler = manager.register({ connector, editor, parent });
@@ -199,7 +200,8 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     notebooks.widgetAdded.connect((sender, panel) => {
       const cell = panel.content.activeCell;
       const editor = cell && cell.editor;
-      const session = panel.session;
+      // TODO: Make sure the logic here is right as the clientsession switches between sessions
+      const session = panel.session?.session;
       const parent = panel;
       const connector = new CompletionConnector({ session, editor });
       const handler = manager.register({ connector, editor, parent });
@@ -257,7 +259,7 @@ const files: JupyterFrontEndPlugin<void> = {
     // Keep a list of active ISessions so that we can
     // clean them up when they are no longer needed.
     const activeSessions: {
-      [id: string]: Session.ISession;
+      [id: string]: Session.ISessionConnection;
     } = {};
 
     // When a new file editor is created, make the completer for it.
@@ -302,9 +304,7 @@ const files: JupyterFrontEndPlugin<void> = {
           }
         }
       };
-      void Session.listRunning().then(models => {
-        onRunningChanged(sessions, models);
-      });
+      onRunningChanged(sessions, toArray(sessions.running()));
       sessions.runningChanged.connect(onRunningChanged);
 
       // Initially create the handler with the contextConnector.

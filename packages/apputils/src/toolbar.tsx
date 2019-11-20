@@ -369,9 +369,7 @@ export namespace Toolbar {
     return new ToolbarButton({
       iconClassName: 'jp-StopIcon',
       onClick: () => {
-        if (session.kernel) {
-          void session.kernel.interrupt();
-        }
+        void session.session?.kernel?.interrupt();
       },
       tooltip: 'Interrupt the kernel'
     });
@@ -704,7 +702,7 @@ namespace Private {
       if (this.isDisposed) {
         return;
       }
-      let status = session.kernel.status;
+      let status = session.session?.kernel?.status ?? 'unknown';
       const busy = this._isBusy(status);
       this.toggleClass(TOOLBAR_BUSY_CLASS, busy);
       this.toggleClass(TOOLBAR_IDLE_CLASS, !busy);

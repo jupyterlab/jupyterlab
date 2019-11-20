@@ -3,9 +3,8 @@
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 
-import { Kernel } from '@jupyterlab/services';
-
 import * as React from 'react';
+import { KernelSpec } from '@jupyterlab/services/src/kernelspec';
 
 /**
  * An object representing a companion installation info.
@@ -74,7 +73,7 @@ export type KernelCompanion = {
   /**
    * The kernels that match the install info.
    */
-  kernels: Kernel.ISpecModel[];
+  kernels: KernelSpec.ISpecModel[];
 };
 
 /**

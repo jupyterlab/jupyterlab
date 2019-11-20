@@ -152,7 +152,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       metadata,
       buffers
     });
-    return this._kernel.sendShellMessage(msg, false, true);
+    return this._kernel.sendShellMessage(msg, false, disposeOnDone);
   }
 
   /**

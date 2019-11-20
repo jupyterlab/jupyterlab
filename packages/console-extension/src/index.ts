@@ -148,14 +148,14 @@ async function activateConsole(
   void restorer.restore(tracker, {
     command: CommandIDs.create,
     args: panel => ({
-      path: panel.console.session.path,
-      name: panel.console.session.name,
+      path: panel.console.session.session?.path,
+      name: panel.console.session.session?.name,
       kernelPreference: {
         name: panel.console.session.kernelPreference.name,
         language: panel.console.session.kernelPreference.language
       }
     }),
-    name: panel => panel.console.session.path,
+    name: panel => panel.console.session.session?.path,
     when: manager.ready
   });
 
@@ -168,7 +168,7 @@ async function activateConsole(
           disposables.dispose();
           disposables = null;
         }
-        const specs = manager.specs;
+        const specs = manager.kernelspecs.specs;
         if (!specs) {
           return;
         }
@@ -193,7 +193,7 @@ async function activateConsole(
         }
       };
       onSpecsChanged();
-      manager.specsChanged.connect(onSpecsChanged);
+      manager.kernelspecs.specsChanged.connect(onSpecsChanged);
     });
   }
 
@@ -359,7 +359,7 @@ async function activateConsole(
     execute: (args: IOpenOptions) => {
       let path = args['path'];
       let widget = tracker.find(value => {
-        return value.console.session.path === path;
+        return value.console.session.session?.path === path;
       });
       if (widget) {
         if (args['activate'] !== false) {
@@ -389,7 +389,7 @@ async function activateConsole(
         const kernelPreference = args[
           'kernelPreference'
         ] as IClientSession.IKernelPreference;
-        return manager.specs.kernelspecs[kernelPreference.name].display_name;
+        return manager.kernelspecs.specs.kernelspecs[kernelPreference.name].display_name;
       }
       return 'Console';
     },
@@ -517,7 +517,7 @@ async function activateConsole(
     execute: args => {
       let path = args['path'];
       tracker.find(widget => {
-        if (widget.console.session.path === path) {
+        if (widget.console.session.session?.path === path) {
           if (args['activate'] !== false) {
             shell.activateById(widget.id);
           }

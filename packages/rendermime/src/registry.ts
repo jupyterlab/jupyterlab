@@ -2,7 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import { Contents, Session } from '@jupyterlab/services';
+import { Contents } from '@jupyterlab/services';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
@@ -320,7 +320,10 @@ export namespace RenderMimeRegistry {
      */
     resolveUrl(url: string): Promise<string> {
       if (this.isLocal(url)) {
-        const cwd = encodeURI(PathExt.dirname(this._session.path));
+        if (!this._session.session) {
+          throw new Error('Cannot resolve local url with no session');
+        }
+        const cwd = encodeURI(PathExt.dirname(this._session.session?.path));
         url = PathExt.resolve(cwd, url);
       }
       return Promise.resolve(url);
@@ -355,7 +358,7 @@ export namespace RenderMimeRegistry {
       return URLExt.isLocal(url) || !!this._contents.driveName(path);
     }
 
-    private _session: Session.ISession | IClientSession;
+    private _session: IClientSession;
     private _contents: Contents.IManager;
   }
 
@@ -366,7 +369,7 @@ export namespace RenderMimeRegistry {
     /**
      * The session used by the resolver.
      */
-    session: Session.ISession | IClientSession;
+    session: IClientSession;
 
     /**
      * The contents manager used by the resolver.

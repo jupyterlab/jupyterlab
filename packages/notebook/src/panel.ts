@@ -215,7 +215,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       // they know why their kernel state is gone.
       void showDialog({
         title: 'Kernel Restarting',
-        body: `The kernel for ${this.session.path} appears to have died. It will restart automatically.`,
+        body: `The kernel for ${this.session.session?.path} appears to have died. It will restart automatically.`,
         buttons: [Dialog.okButton()]
       });
       this._autorestarting = true;

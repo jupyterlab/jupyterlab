@@ -67,6 +67,7 @@ export class Context<T extends DocumentRegistry.IModel>
     let ext = PathExt.extname(this._path);
     this.session = new ClientSession({
       manager: manager.sessions,
+      specsManager: manager.kernelspecs,
       path: this._path,
       type: ext === '.ipynb' ? 'notebook' : 'file',
       name: PathExt.basename(localPath),
@@ -403,13 +404,13 @@ export class Context<T extends DocumentRegistry.IModel>
         };
       }
       this._path = newPath;
-      void this.session.setPath(newPath);
+      void this.session.session?.setPath(newPath);
       const updateModel = {
         ...this._contentsModel,
         ...changeModel
       };
       const localPath = this._manager.contents.localPath(newPath);
-      void this.session.setName(PathExt.basename(localPath));
+      void this.session.session?.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
       this._pathChanged.emit(this._path);
     }
@@ -422,7 +423,7 @@ export class Context<T extends DocumentRegistry.IModel>
     if (type !== 'path') {
       return;
     }
-    let path = this.session.path;
+    let path = this.session.session?.path;
     if (path !== this._path) {
       this._path = path;
       this._pathChanged.emit(path);
@@ -768,10 +769,10 @@ export class Context<T extends DocumentRegistry.IModel>
    */
   private _finishSaveAs(newPath: string): Promise<void> {
     this._path = newPath;
-    return this.session
-      .setPath(newPath)
+    return this.session.session
+      ?.setPath(newPath)
       .then(() => {
-        void this.session.setName(newPath.split('/').pop()!);
+        void this.session.session?.setName(newPath.split('/').pop()!);
         return this.save();
       })
       .then(() => {

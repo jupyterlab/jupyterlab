@@ -685,7 +685,7 @@ function activateNotebookHandler(
     label: args => {
       const kernelName = (args['kernelName'] as string) || '';
       if (args['isLauncher'] && args['kernelName']) {
-        return services.specs.kernelspecs[kernelName].display_name;
+        return services.kernelspecs.specs.kernelspecs[kernelName].display_name;
       }
       if (args['isPalette']) {
         return 'New Notebook';
@@ -712,7 +712,7 @@ function activateNotebookHandler(
           disposables.dispose();
           disposables = null;
         }
-        const specs = services.specs;
+        const specs = services.kernelspecs.specs;
         if (!specs) {
           return;
         }
@@ -738,7 +738,7 @@ function activateNotebookHandler(
         }
       };
       onSpecsChanged();
-      services.specsChanged.connect(onSpecsChanged);
+      services.kernelspecs.specsChanged.connect(onSpecsChanged);
     });
   }
 

@@ -223,6 +223,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Get the kernel spec.
    *
+   * TODO: much better if this isn't a promise, if we just cache it and have it available when needed.
+   *
    * @returns A promise that resolves with the kernel spec.
    */
   getSpec(): Promise<KernelSpec.ISpecModel> {

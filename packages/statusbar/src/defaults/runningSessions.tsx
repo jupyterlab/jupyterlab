@@ -7,10 +7,10 @@ import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import {
   ServiceManager,
-  Kernel,
   TerminalSession,
   TerminalManager,
-  SessionManager
+  SessionManager,
+  Session
 } from '@jupyterlab/services';
 
 import { DefaultIconReact } from '@jupyterlab/ui-components';
@@ -139,12 +139,14 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
 
   /**
    * Set the number of model kernels when the list changes.
+   * 
+   * TODO: this now records the number of sessions, not the number of kernels. Is that what we want?
    */
   private _onKernelsRunningChanged(
     manager: SessionManager,
-    kernels: Kernel.IModel[]
+    sessions: Session.IModel[]
   ): void {
-    this.model!.kernels = kernels.length;
+    this.model!.kernels = sessions.length;
   }
 
   /**
