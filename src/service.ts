@@ -43,6 +43,13 @@ export class DebugService implements IDebugger {
   }
 
   /**
+   * Whether debugging is enabled for the current session.
+   */
+  get isDebuggingEnabled(): boolean {
+    return this._session.kernelInfo.debugger || false;
+  }
+
+  /**
    * Returns the mode of the debugger UI.
    *
    * #### Notes
@@ -166,7 +173,7 @@ export class DebugService implements IDebugger {
 
   /**
    * Starts a debugger.
-   * Precondition: canStart() && !isStarted()
+   * Precondition: !isStarted()
    */
   async start(): Promise<void> {
     await this.session.start();

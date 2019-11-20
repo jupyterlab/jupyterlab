@@ -3,7 +3,7 @@
 
 import { IClientSession } from '@jupyterlab/apputils';
 
-import { Session } from '@jupyterlab/services';
+import { KernelMessage, Session } from '@jupyterlab/services';
 
 import { Token } from '@phosphor/coreutils';
 
@@ -22,6 +22,11 @@ import { Debugger } from './debugger';
  * An interface describing an application's visual debugger.
  */
 export interface IDebugger extends IDisposable {
+  /**
+   * Whether debugging is enabled for the current session.
+   */
+  readonly isDebuggingEnabled: boolean;
+
   /**
    * The mode of the debugger UI.
    *
@@ -73,7 +78,7 @@ export interface IDebugger extends IDisposable {
 
   /**
    * Starts a debugger.
-   * Precondition: canStart() && !isStarted()
+   * Precondition: !isStarted()
    */
   start(): Promise<void>;
 
@@ -151,9 +156,15 @@ export namespace IDebugger {
     client: IClientSession | Session.ISession;
 
     /**
+     * The kernel info for the debug session.
+     */
+    readonly kernelInfo: IDebugger.ISession.IInfoReply | null;
+
+    /**
      * Whether the debug session is started
      */
     readonly isStarted: boolean;
+
     /**
      * Signal emitted for debug event messages.
      */
@@ -187,6 +198,16 @@ export namespace IDebugger {
   }
 
   export namespace ISession {
+    /**
+     * Response to the 'kernel_info_request' request.
+     * This interface extends the IInfoReply by adding the `debugger` key
+     * that isn't part of the protocol yet.
+     * See this pull request for more info: https://github.com/jupyter/jupyter_client/pull/486
+     */
+    export interface IInfoReply extends KernelMessage.IInfoReply {
+      debugger: boolean;
+    }
+
     /**
      * Arguments for 'dumpCell' request.
      * This is an addition to the Debug Adapter Protocol to support
