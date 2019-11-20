@@ -84,7 +84,9 @@ export class CellManager implements IDisposable {
     if (this._cellMonitor) {
       this._cellMonitor.dispose();
     }
+    this.removeGutterClick(this.activeCell);
     CellManager.clearHighlight(this.activeCell);
+    CellManager.clearGutter(this.activeCell);
     Signal.clearData(this);
     this.isDisposed = true;
   }
