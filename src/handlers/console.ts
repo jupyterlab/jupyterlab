@@ -11,7 +11,7 @@ import { Signal } from '@phosphor/signaling';
 
 import { Breakpoints } from '../breakpoints';
 
-import { CellManager } from '../handlers/cell';
+import { CellManager } from '../handlers/editor';
 
 import { IDebugger } from '../tokens';
 

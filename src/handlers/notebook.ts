@@ -21,7 +21,7 @@ import { IDebugger } from '../tokens';
 
 import { Callstack } from '../callstack';
 
-import { CellManager } from './cell';
+import { CellManager } from './editor';
 
 export class NotebookHandler implements IDisposable {
   constructor(options: NotebookHandler.IOptions) {
