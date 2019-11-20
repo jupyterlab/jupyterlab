@@ -67,7 +67,7 @@ export class NotebookHandler implements IDisposable {
   protected cleanAllCells() {
     const cells = this.notebookPanel.content.widgets;
     cells.forEach(cell => {
-      CellManager.cleanupHighlight(cell);
+      CellManager.clearHighlight(cell);
       CellManager.clearGutter(cell);
     });
   }
@@ -92,7 +92,7 @@ export class NotebookHandler implements IDisposable {
     }
 
     const cells = notebook.content.widgets;
-    cells.forEach(cell => CellManager.cleanupHighlight(cell));
+    cells.forEach(cell => CellManager.clearHighlight(cell));
 
     if (!frame) {
       return;

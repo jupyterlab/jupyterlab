@@ -47,7 +47,7 @@ export class CellManager implements IDisposable {
 
     this._debuggerModel.callstackModel.currentFrameChanged.connect(
       (_, frame) => {
-        CellManager.cleanupHighlight(this.activeCell);
+        CellManager.clearHighlight(this.activeCell);
         if (!frame) {
           return;
         }
@@ -84,7 +84,7 @@ export class CellManager implements IDisposable {
     if (this._cellMonitor) {
       this._cellMonitor.dispose();
     }
-    CellManager.cleanupHighlight(this.activeCell);
+    CellManager.clearHighlight(this.activeCell);
     Signal.clearData(this);
     this.isDisposed = true;
   }
@@ -287,7 +287,7 @@ export namespace CellManager {
    */
   export function showCurrentLine(cell: Cell, frame: Callstack.IFrame) {
     const editor = cell.editor as CodeMirrorEditor;
-    cleanupHighlight(cell);
+    clearHighlight(cell);
     editor.editor.addLineClass(frame.line - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
   }
 
@@ -295,7 +295,7 @@ export namespace CellManager {
    * Remove all line highlighting indicators for the given cell.
    * @param cell The cell to cleanup.
    */
-  export function cleanupHighlight(cell: Cell) {
+  export function clearHighlight(cell: Cell) {
     if (!cell || cell.isDisposed || !cell.inputArea) {
       return;
     }
