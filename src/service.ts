@@ -189,7 +189,6 @@ export class DebugService implements IDebugger {
     const breakpoints = this.model.breakpointsModel.breakpoints;
     await this.stop();
     this.clearModel();
-    this._stoppedThreads.clear();
     await this.start();
 
     // No need to dump the cells again, we can simply
