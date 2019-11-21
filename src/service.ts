@@ -46,7 +46,8 @@ export class DebugService implements IDebugger {
    * Whether debugging is enabled for the current session.
    */
   get isDebuggingEnabled(): boolean {
-    return this._session.kernelInfo.debugger || false;
+    const kernelInfo = this._session.kernelInfo;
+    return (kernelInfo && kernelInfo.debugger) || false;
   }
 
   /**
