@@ -1289,6 +1289,43 @@ export namespace NotebookActions {
   }
 
   /**
+   * Go to the last cell that is run or current if it is running.
+   *
+   * Note: This requires execution timing to be toggled on or this will have
+   * no effect.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function selectLastRunCell(notebook: Notebook): void {
+    let latestTime: Date = null;
+    let latestCellIdx: number = null;
+    notebook.widgets.forEach((cell, cellIndx) => {
+      if (cell.model.type === 'code') {
+        const execution = (cell as CodeCell).model.metadata.get('execution');
+        if (
+          execution &&
+          typeof execution === 'object' &&
+          'iopub.status.busy' in execution
+        ) {
+          // The busy status is used as soon as a request is received:
+          // https://jupyter-client.readthedocs.io/en/stable/messaging.html
+          const timestamp = execution['iopub.status.busy'].toString();
+          if (timestamp) {
+            const startTime = new Date(timestamp);
+            if (!latestTime || startTime >= latestTime) {
+              latestTime = startTime;
+              latestCellIdx = cellIndx;
+            }
+          }
+        }
+      }
+    });
+    if (latestCellIdx) {
+      notebook.activeCellIndex = latestCellIdx;
+    }
+  }
+
+  /**
    * Set the markdown header level.
    *
    * @param notebook - The target notebook widget.

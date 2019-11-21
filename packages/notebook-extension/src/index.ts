@@ -214,6 +214,8 @@ namespace CommandIDs {
   export const enableOutputScrolling = 'notebook:enable-output-scrolling';
 
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
+
+  export const selectLastRunCell = 'notebook:select-last-run-cell';
 }
 
 /**
@@ -1702,11 +1704,9 @@ function addCommands(
         return;
       }
 
-      return Private.createConsole(
-        commands,
-        current,
-        args['activate'] as boolean
-      );
+      return Private.createConsole(commands, current, args[
+        'activate'
+      ] as boolean);
     },
     isEnabled
   });
@@ -1882,6 +1882,17 @@ function addCommands(
 
       if (current) {
         return NotebookActions.disableOutputScrolling(current.content);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.selectLastRunCell, {
+    label: 'Select current running or last run cell',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.selectLastRunCell(current.content);
       }
     },
     isEnabled
