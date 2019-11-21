@@ -25,24 +25,24 @@ export class Breakpoints extends Panel {
     this.addWidget(header);
     this.addWidget(this.body);
 
-    header.toolbar.addItem(
-      'deactivate',
-      new ToolbarButton({
-        iconClassName: 'jp-DebuggerDeactivateIcon',
-        tooltip: `${this.isAllActive ? 'Deactivate' : 'Activate'} Breakpoints`,
-        onClick: () => {
-          this.isAllActive = !this.isAllActive;
+    // header.toolbar.addItem(
+    //   'deactivate',
+    //   new ToolbarButton({
+    //     iconClassName: 'jp-DebuggerDeactivateIcon',
+    //     tooltip: `${this.isAllActive ? 'Deactivate' : 'Activate'} Breakpoints`,
+    //     onClick: () => {
+    //       this.isAllActive = !this.isAllActive;
 
-          // TODO: this requires a set breakpoint(bp: Breakpoints.IBreakpoint[]) method in the model
-          /*Array.from(this.model.breakpoints.values()).map((breakpoints: Breakpoints.IBreakpoint[]) => {
-            breakpoints.map((breakpoint: Breakpoints.IBreakpoint) => {
-              breakpoint.active = this.isAllActive;
-              this.model.breakpoint = breakpoint;
-            });
-          });*/
-        }
-      })
-    );
+    //       // TODO: this requires a set breakpoint(bp: Breakpoints.IBreakpoint[]) method in the model
+    //       /*Array.from(this.model.breakpoints.values()).map((breakpoints: Breakpoints.IBreakpoint[]) => {
+    //         breakpoints.map((breakpoint: Breakpoints.IBreakpoint) => {
+    //           breakpoint.active = this.isAllActive;
+    //           this.model.breakpoint = breakpoint;
+    //         });
+    //       });*/
+    //     }
+    //   })
+    // );
 
     header.toolbar.addItem(
       'closeAll',
@@ -56,7 +56,7 @@ export class Breakpoints extends Panel {
     );
   }
 
-  private isAllActive = true;
+  // private isAllActive = true;
   readonly body: Widget;
   readonly model: Breakpoints.Model;
   readonly service: IDebugger;

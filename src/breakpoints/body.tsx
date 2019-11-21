@@ -48,7 +48,7 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
   });
 
   return (
-    <div>
+    <>
       {breakpoints.map(entry => (
         // Array.from(breakpoints.entries()).map((entry) => (
         <BreakpointCellComponent
@@ -57,7 +57,7 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
           model={model}
         />
       ))}
-    </div>
+    </>
   );
 };
 
@@ -69,7 +69,7 @@ const BreakpointCellComponent = ({
   model: Breakpoints.Model;
 }) => {
   return (
-    <div>
+    <>
       {breakpoints
         .sort((a, b) => {
           return a.line - b.line;
@@ -81,7 +81,7 @@ const BreakpointCellComponent = ({
             breakpointChanged={model.breakpointChanged}
           />
         ))}
-    </div>
+    </>
   );
 };
 
@@ -116,13 +116,13 @@ const BreakpointComponent = ({
 
   return (
     <div className={`breakpoint`}>
-      <input
+      {/* <input
         onChange={() => {
           setBreakpointEnabled(!active);
         }}
         type="checkbox"
         checked={active}
-      />
+      /> */}
       <span>
         {breakpoint.source.path} : {breakpoint.line}
       </span>
