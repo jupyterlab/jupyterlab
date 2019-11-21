@@ -320,7 +320,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       caption: 'Continue',
       iconClass: 'jp-MaterialIcon jp-RunIcon',
       isEnabled: () => {
-        return service.isThreadStopped();
+        return service.hasStoppedThreads();
       },
       execute: async () => {
         await service.continue();
@@ -333,7 +333,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       caption: 'Terminate',
       iconClass: 'jp-MaterialIcon jp-StopIcon',
       isEnabled: () => {
-        return service.isThreadStopped();
+        return service.hasStoppedThreads();
       },
       execute: async () => {
         await service.restart();
@@ -346,7 +346,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       caption: 'Next',
       iconClass: 'jp-MaterialIcon jp-StepOverIcon',
       isEnabled: () => {
-        return service.isThreadStopped();
+        return service.hasStoppedThreads();
       },
       execute: async () => {
         await service.next();
@@ -358,7 +358,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       caption: 'Step In',
       iconClass: 'jp-MaterialIcon jp-StepInIcon',
       isEnabled: () => {
-        return service.isThreadStopped();
+        return service.hasStoppedThreads();
       },
       execute: async () => {
         await service.stepIn();
@@ -370,7 +370,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       caption: 'Step Out',
       iconClass: 'jp-MaterialIcon jp-StepOutIcon',
       isEnabled: () => {
-        return service.isThreadStopped();
+        return service.hasStoppedThreads();
       },
       execute: async () => {
         await service.stepOut();

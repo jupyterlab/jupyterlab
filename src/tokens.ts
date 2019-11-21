@@ -72,9 +72,9 @@ export interface IDebugger extends IDisposable {
   isStarted(): boolean;
 
   /**
-   * Whether the current thread is stopped.
+   * Whether there exist a thread in stopped state.
    */
-  isThreadStopped(): boolean;
+  hasStoppedThreads(): boolean;
 
   /**
    * Starts a debugger.

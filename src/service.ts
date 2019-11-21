@@ -91,10 +91,10 @@ export class DebugService implements IDebugger {
 
     this._session.eventMessage.connect((_, event) => {
       if (event.event === 'stopped') {
-        this._stoppedThreads.add(event.body.threadId);
+        this.model.stoppedThreads.add(event.body.threadId);
         void this.getAllFrames();
       } else if (event.event === 'continued') {
-        this._stoppedThreads.delete(event.body.threadId);
+        this.model.stoppedThreads.delete(event.body.threadId);
         this.clearModel();
         this.clearSignals();
       }
@@ -166,10 +166,10 @@ export class DebugService implements IDebugger {
   }
 
   /**
-   * Whether the current thread is stopped.
+   * Whether there exists a thread in stopped state.
    */
-  isThreadStopped(): boolean {
-    return this._stoppedThreads.has(this.currentThread());
+  hasStoppedThreads(): boolean {
+    return this._model && this._model.stoppedThreads.size !== 0;
   }
 
   /**
@@ -186,12 +186,14 @@ export class DebugService implements IDebugger {
    */
   async stop(): Promise<void> {
     await this.session.stop();
-    this._stoppedThreads.clear();
+    if (this.model) {
+      this.model.stoppedThreads.clear();
+    }
   }
 
   /**
    * Restarts the debugger.
-   * Precondition: isStarted() and stopped.
+   * Precondition: isStarted().
    */
   async restart(): Promise<void> {
     const breakpoints = this.model.breakpointsModel.breakpoints;
@@ -213,7 +215,6 @@ export class DebugService implements IDebugger {
    * @param autoStart - when true, starts the debugger
    * if it has not been started yet.
    */
-
   async restoreState(autoStart: boolean): Promise<void> {
     if (!this.model || !this.session) {
       return;
@@ -242,12 +243,20 @@ export class DebugService implements IDebugger {
         );
       });
     }
+    this._model.breakpointsModel.restoreBreakpoints(bpMap);
 
-    if (this._model) {
-      this._model.breakpointsModel.restoreBreakpoints(bpMap);
-    }
-    if (!this.isStarted() && autoStart) {
+    const stoppedThreads = new Set(reply.body.stoppedThreads);
+    this._model.stoppedThreads = stoppedThreads;
+
+    if (!this.isStarted() && (autoStart || stoppedThreads.size !== 0)) {
       await this.start();
+    }
+
+    if (stoppedThreads.size !== 0) {
+      await this.getAllFrames();
+    } else {
+      this.clearModel();
+      this.clearSignals();
     }
   }
 
@@ -259,7 +268,7 @@ export class DebugService implements IDebugger {
       await this.session.sendRequest('continue', {
         threadId: this.currentThread()
       });
-      this._stoppedThreads.delete(this.currentThread());
+      this.model.stoppedThreads.delete(this.currentThread());
     } catch (err) {
       console.error('Error:', err.message);
     }
@@ -370,13 +379,13 @@ export class DebugService implements IDebugger {
     return reply;
   }
 
-  getAllFrames = async () => {
+  async getAllFrames() {
     this._model.callstackModel.currentFrameChanged.connect(this.onChangeFrame);
     this._model.variablesModel.variableExpanded.connect(this.getVariable);
 
     const stackFrames = await this.getFrames(this.currentThread());
     this._model.callstackModel.frames = stackFrames;
-  };
+  }
 
   onChangeFrame = async (_: Callstack.Model, frame: Callstack.IFrame) => {
     if (!frame) {
@@ -521,9 +530,6 @@ export class DebugService implements IDebugger {
   private _hashMethod: (code: string) => string;
   private _tmpFilePrefix: string;
   private _tmpFileSuffix: string;
-
-  // TODO: move this in model
-  private _stoppedThreads = new Set();
 }
 
 namespace Private {
