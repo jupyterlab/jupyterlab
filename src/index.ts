@@ -242,7 +242,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     palette: ICommandPalette | null
   ): IDebugger => {
     const { commands, shell } = app;
-    const editorFactory = editorServices.factoryService.newInlineEditor;
 
     const service = new DebugService();
 
@@ -417,7 +416,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
               debugService: service,
               connector: state,
               callstackCommands,
-              editorFactory
+              editorServices
             })
           });
           widget.id = id;

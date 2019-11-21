@@ -15,7 +15,7 @@ import { Signal } from '@phosphor/signaling';
 
 import { Editor } from 'codemirror';
 
-import { Breakpoints, SessionTypes } from '../breakpoints';
+import { Breakpoints } from '../breakpoints';
 
 import { Callstack } from '../callstack';
 
@@ -27,8 +27,8 @@ const LINE_HIGHLIGHT_CLASS = 'jp-breakpoint-line-highlight';
 
 const CELL_CHANGED_TIMEOUT = 1000;
 
-export class CellManager implements IDisposable {
-  constructor(options: CellManager.IOptions) {
+export class EditorHandler implements IDisposable {
+  constructor(options: EditorHandler.IOptions) {
     // TODO: should we use the client name or a debug session id?
     this._id = options.debuggerService.session.client.name;
     this._debuggerService = options.debuggerService;
@@ -48,7 +48,7 @@ export class CellManager implements IDisposable {
 
     this._debuggerModel.callstackModel.currentFrameChanged.connect(
       (_, frame) => {
-        CellManager.clearHighlight(this.activeCell);
+        EditorHandler.clearHighlight(this.activeCell);
         if (!frame) {
           return;
         }
@@ -86,8 +86,8 @@ export class CellManager implements IDisposable {
       this._cellMonitor.dispose();
     }
     this.removeGutterClick(this.activeCell);
-    CellManager.clearHighlight(this.activeCell);
-    CellManager.clearGutter(this.activeCell);
+    EditorHandler.clearHighlight(this.activeCell);
+    EditorHandler.clearGutter(this.activeCell);
     Signal.clearData(this);
     this.isDisposed = true;
   }
@@ -201,7 +201,7 @@ export class CellManager implements IDisposable {
     }
 
     editor.focus();
-    CellManager.clearGutter(this.activeCell);
+    EditorHandler.clearGutter(this.activeCell);
 
     const isRemoveGutter = !!info.gutterMarkers;
     let breakpoints: Breakpoints.IBreakpoint[] = this.getBreakpoints(
@@ -232,7 +232,7 @@ export class CellManager implements IDisposable {
       breakpoints.length === 0 &&
       this._id === this._debuggerService.session.client.name
     ) {
-      CellManager.clearGutter(cell);
+      EditorHandler.clearGutter(cell);
     } else {
       breakpoints.forEach(breakpoint => {
         editor.editor.setGutterMarker(
@@ -274,13 +274,12 @@ export class CellManager implements IDisposable {
   > = null;
 }
 
-export namespace CellManager {
+export namespace EditorHandler {
   export interface IOptions {
     debuggerModel: Debugger.Model;
     debuggerService: IDebugger;
     breakpointsModel: Breakpoints.Model;
     activeCell?: CodeCell;
-    type: SessionTypes;
   }
 
   /**

@@ -135,6 +135,14 @@ export interface IDebugger extends IDisposable {
    * Removes all the breakpoints from the current notebook or console
    */
   clearBreakpoints(): Promise<void>;
+
+  /**
+   * Retrieve the content of a source file.
+   * @param source The source object containing the path to the file.
+   */
+  getSource(
+    source: DebugProtocol.Source
+  ): Promise<DebugProtocol.SourceResponse>;
 }
 
 /**

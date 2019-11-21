@@ -357,6 +357,18 @@ export class DebugService implements IDebugger {
     this._model.breakpointsModel.restoreBreakpoints(bpMap);
   }
 
+  /**
+   * Retrieve the content of a source file.
+   * @param source The source object containing the path to the file.
+   */
+  async getSource(source: DebugProtocol.Source) {
+    const reply = await this.session.sendRequest('source', {
+      source,
+      sourceReference: source.sourceReference
+    });
+    return reply;
+  }
+
   getAllFrames = async () => {
     this._model.callstackModel.currentFrameChanged.connect(this.onChangeFrame);
     this._model.variablesModel.variableExpanded.connect(this.getVariable);
