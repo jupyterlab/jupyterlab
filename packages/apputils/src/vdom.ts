@@ -220,6 +220,7 @@ export interface IUseSignalState<SENDER, ARGS> {
  *    />
  *  )
  * }
+ * ```
  */
 export class UseSignal<SENDER, ARGS> extends React.Component<
   IUseSignalProps<SENDER, ARGS>,
