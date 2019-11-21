@@ -3,7 +3,11 @@
 
 import { VDomModel } from '@jupyterlab/apputils';
 
-import { ServerConnection, ServiceManager } from '@jupyterlab/services';
+import {
+  KernelSpec,
+  ServerConnection,
+  ServiceManager
+} from '@jupyterlab/services';
 
 import * as semver from 'semver';
 
@@ -18,7 +22,6 @@ import {
 import { reportInstallError } from './dialog';
 
 import { Searcher, ISearchResult, isJupyterOrg } from './query';
-import { KernelSpec } from '@jupyterlab/services/src/kernelspec';
 
 /**
  * Information about an extension.

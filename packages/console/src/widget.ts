@@ -288,38 +288,38 @@ export class CodeConsole extends Widget {
    * should wait for the API to determine whether code being submitted is
    * incomplete before attempting submission anyway. The default value is `250`.
    */
-  execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
+  async execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
     if (this.session.kernel.status === 'dead') {
-      return Promise.resolve();
+      return;
     }
 
     const promptCell = this.promptCell;
     if (!promptCell) {
-      return Promise.reject('Cannot execute without a prompt cell');
+      throw new Error('Cannot execute without a prompt cell');
     }
     promptCell.model.trusted = true;
 
     if (force) {
       // Create a new prompt cell before kernel execution to allow typeahead.
       this.newPromptCell();
-      return this._execute(promptCell);
+      await this._execute(promptCell);
+      return;
     }
 
     // Check whether we should execute.
-    return this._shouldExecute(timeout).then(should => {
-      if (this.isDisposed) {
-        return;
-      }
-      if (should) {
-        // Create a new prompt cell before kernel execution to allow typeahead.
-        this.newPromptCell();
-        this.promptCell!.editor.focus();
-        return this._execute(promptCell);
-      } else {
-        // add a newline if we shouldn't execute
-        promptCell.editor.newIndentedLine();
-      }
-    });
+    let shouldExecute = await this._shouldExecute(timeout);
+    if (this.isDisposed) {
+      return;
+    }
+    if (shouldExecute) {
+      // Create a new prompt cell before kernel execution to allow typeahead.
+      this.newPromptCell();
+      this.promptCell!.editor.focus();
+      await this._execute(promptCell);
+    } else {
+      // add a newline if we shouldn't execute
+      promptCell.editor.newIndentedLine();
+    }
   }
 
   /**

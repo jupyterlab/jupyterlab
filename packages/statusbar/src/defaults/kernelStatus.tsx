@@ -138,25 +138,15 @@ export namespace KernelStatus {
       return this._session;
     }
     set session(session: IClientSession | null) {
-      const oldSession = this._session;
-      if (oldSession !== null) {
-        oldSession.statusChanged.disconnect(this._onKernelStatusChanged);
-        oldSession.kernelChanged.disconnect(this._onKernelChanged);
-      }
+      this._session?.statusChanged.disconnect(this._onKernelStatusChanged);
+      this._session?.kernelChanged.disconnect(this._onKernelChanged);
 
       const oldState = this._getAllState();
       this._session = session;
-      if (this._session === null) {
-        this._kernelStatus = 'unknown';
-        this._kernelName = 'unknown';
-      } else {
-        this._kernelStatus = this._session.session.kernel.status;
-        this._kernelName = this._session.kernelDisplayName;
-
-        this._session.statusChanged.connect(this._onKernelStatusChanged);
-        this._session.kernelChanged.connect(this._onKernelChanged);
-      }
-
+      this._kernelStatus = session?.session?.kernel?.status ?? 'unknown';
+      this._kernelName = session?.kernelDisplayName ?? 'unknown';
+      session?.statusChanged.connect(this._onKernelStatusChanged);
+      session?.kernelChanged.connect(this._onKernelChanged);
       this._triggerChange(oldState, this._getAllState());
     }
 

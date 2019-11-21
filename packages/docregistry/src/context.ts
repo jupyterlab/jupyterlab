@@ -767,7 +767,7 @@ export class Context<T extends DocumentRegistry.IModel>
   /**
    * Finish a saveAs operation given a new path.
    */
-  private _finishSaveAs(newPath: string): Promise<void> {
+  private async _finishSaveAs(newPath: string): Promise<void> {
     this._path = newPath;
     return this.session.session
       ?.setPath(newPath)

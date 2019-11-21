@@ -298,8 +298,8 @@ namespace Private {
       if (executed) {
         caption += `\nLast Execution: ${Time.format(executed.toISOString())}`;
       }
-      panel.title.caption = caption;
       panel.title.label = session.name;
+      panel.title.caption = caption;
     } else {
       panel.title.label = 'Console';
       panel.title.caption = '';

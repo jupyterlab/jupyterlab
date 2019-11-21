@@ -4,7 +4,8 @@
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 
 import * as React from 'react';
-import { KernelSpec } from '@jupyterlab/services/src/kernelspec';
+
+import { KernelSpec } from '@jupyterlab/services';
 
 /**
  * An object representing a companion installation info.
