@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Cell, CodeCell } from '@jupyterlab/cells';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
@@ -25,16 +25,24 @@ import { IDebugger } from '../tokens';
 
 const LINE_HIGHLIGHT_CLASS = 'jp-breakpoint-line-highlight';
 
-const CELL_CHANGED_TIMEOUT = 1000;
+const EDITOR_CHANGED_TIMEOUT = 1000;
 
 export class EditorHandler implements IDisposable {
   constructor(options: EditorHandler.IOptions) {
-    // TODO: should we use the client name or a debug session id?
-    this._id = options.debuggerService.session.client.name;
+    this._id = options.debuggerService.session.client.path;
     this._debuggerService = options.debuggerService;
     this.onModelChanged();
     this._debuggerService.modelChanged.connect(() => this.onModelChanged());
-    this.activeCell = options.activeCell;
+    this._editor = options.editor;
+
+    this._editorMonitor = new ActivityMonitor({
+      signal: this._editor.model.value.changed,
+      timeout: EDITOR_CHANGED_TIMEOUT
+    });
+
+    this._editorMonitor.activityStopped.connect(() => {
+      this.sendEditorBreakpoints();
+    }, this);
   }
 
   isDisposed: boolean;
@@ -48,7 +56,7 @@ export class EditorHandler implements IDisposable {
 
     this._debuggerModel.callstackModel.currentFrameChanged.connect(
       (_, frame) => {
-        EditorHandler.clearHighlight(this.activeCell);
+        EditorHandler.clearHighlight(this._editor);
         if (!frame) {
           return;
         }
@@ -56,101 +64,38 @@ export class EditorHandler implements IDisposable {
     );
 
     this.breakpointsModel.changed.connect(async () => {
-      if (
-        !this.activeCell ||
-        !this.activeCell.isVisible ||
-        this.activeCell.isDisposed
-      ) {
+      if (!this._editor || this._editor.isDisposed) {
         return;
       }
-      this.addBreakpointsToEditor(this.activeCell);
+      this.addBreakpointsToEditor();
     });
 
     this.breakpointsModel.restored.connect(async () => {
-      if (!this.activeCell || this.activeCell.isDisposed) {
+      if (!this._editor || this._editor.isDisposed) {
         return;
       }
-      this.addBreakpointsToEditor(this.activeCell);
+      this.addBreakpointsToEditor();
     });
-
-    if (this.activeCell && !this.activeCell.isDisposed) {
-      this._debuggerModel.codeValue = this.activeCell.model.value;
-    }
   }
 
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
-    if (this._cellMonitor) {
-      this._cellMonitor.dispose();
-    }
-    this.removeGutterClick(this.activeCell);
-    EditorHandler.clearHighlight(this.activeCell);
-    EditorHandler.clearGutter(this.activeCell);
+    this._editorMonitor.dispose();
+    this.removeGutterClick();
+    EditorHandler.clearHighlight(this._editor);
+    EditorHandler.clearGutter(this._editor);
     Signal.clearData(this);
     this.isDisposed = true;
   }
 
-  set previousCell(cell: CodeCell) {
-    this._previousCell = cell;
-  }
-
-  get previousCell() {
-    return this._previousCell;
-  }
-
-  set activeCell(cell: CodeCell) {
-    if (cell) {
-      this._activeCell = cell;
-      this._debuggerModel.codeValue = cell.model.value;
-      this.onActiveCellChanged();
-    }
-  }
-
-  get activeCell(): CodeCell {
-    return this._activeCell;
-  }
-
-  onActiveCellChanged() {
-    if (
-      this.activeCell &&
-      this.activeCell.isAttached &&
-      this.activeCell.editor &&
-      this._debuggerService &&
-      this._debuggerService.session
-    ) {
-      if (this.previousCell && !this.previousCell.isDisposed) {
-        if (this._cellMonitor) {
-          this._cellMonitor.dispose();
-        }
-        this.removeGutterClick(this.previousCell);
-      }
-
-      this._cellMonitor = new ActivityMonitor({
-        signal: this.activeCell.model.value.changed,
-        timeout: CELL_CHANGED_TIMEOUT
-      });
-
-      this._cellMonitor.activityStopped.connect(() => {
-        this.sendEditorBreakpoints();
-      }, this);
-
-      requestAnimationFrame(() => {
-        this.setEditor(this.activeCell);
-      });
-
-      this.previousCell = this.activeCell;
-    }
-  }
-
   protected sendEditorBreakpoints() {
-    const cell = this.activeCell;
-    if (!cell || !cell.editor) {
+    if (this._editor.isDisposed) {
       return;
     }
 
-    const breakpoints = this.getBreakpointsFromEditor(cell).map(lineInfo => {
+    const breakpoints = this.getBreakpointsFromEditor().map(lineInfo => {
       return Private.createBreakpoint(
         this._debuggerService.session.client.name,
         this.getEditorId(),
@@ -159,19 +104,19 @@ export class EditorHandler implements IDisposable {
     });
 
     void this._debuggerService.updateBreakpoints(
-      cell.editor.model.value.text,
+      this._editor.model.value.text,
       breakpoints
     );
   }
 
-  protected setEditor(cell: CodeCell) {
-    if (!cell || !cell.editor) {
+  protected setup() {
+    if (!this._editor || this._editor.isDisposed) {
       return;
     }
 
-    const editor = cell.editor as CodeMirrorEditor;
-    this.addBreakpointsToEditor(cell);
+    this.addBreakpointsToEditor();
 
+    const editor = this._editor as CodeMirrorEditor;
     editor.setOption('lineNumbers', true);
     editor.editor.setOption('gutters', [
       'CodeMirror-linenumbers',
@@ -181,32 +126,30 @@ export class EditorHandler implements IDisposable {
     editor.editor.on('gutterClick', this.onGutterClick);
   }
 
-  protected removeGutterClick(cell: CodeCell) {
-    if (cell.isDisposed) {
+  protected removeGutterClick() {
+    if (!this._editor || this._editor.isDisposed) {
       return;
     }
-    const editor = cell.editor as CodeMirrorEditor;
+    const editor = this._editor as CodeMirrorEditor;
     editor.editor.off('gutterClick', this.onGutterClick);
   }
 
   protected getEditorId(): string {
-    return this.activeCell.editor.uuid;
+    return this._editor.uuid;
   }
 
   protected onGutterClick = (editor: Editor, lineNumber: number) => {
     const info = editor.lineInfo(lineNumber);
 
-    if (!info || this._id !== this._debuggerService.session.client.name) {
+    if (!info || this._id !== this._debuggerService.session.client.path) {
       return;
     }
 
     editor.focus();
-    EditorHandler.clearGutter(this.activeCell);
+    EditorHandler.clearGutter(this._editor);
 
     const isRemoveGutter = !!info.gutterMarkers;
-    let breakpoints: IDebugger.IBreakpoint[] = this.getBreakpoints(
-      this._activeCell
-    );
+    let breakpoints: IDebugger.IBreakpoint[] = this.getBreakpoints();
     if (isRemoveGutter) {
       breakpoints = breakpoints.filter(ele => ele.line !== info.line + 1);
     } else {
@@ -220,19 +163,19 @@ export class EditorHandler implements IDisposable {
     }
 
     void this._debuggerService.updateBreakpoints(
-      this._activeCell.model.value.text,
+      this._editor.model.value.text,
       breakpoints
     );
   };
 
-  private addBreakpointsToEditor(cell: CodeCell) {
-    const editor = cell.editor as CodeMirrorEditor;
-    const breakpoints = this.getBreakpoints(cell);
+  private addBreakpointsToEditor() {
+    const editor = this._editor as CodeMirrorEditor;
+    const breakpoints = this.getBreakpoints();
     if (
       breakpoints.length === 0 &&
       this._id === this._debuggerService.session.client.name
     ) {
-      EditorHandler.clearGutter(cell);
+      EditorHandler.clearGutter(editor);
     } else {
       breakpoints.forEach(breakpoint => {
         editor.editor.setGutterMarker(
@@ -244,8 +187,8 @@ export class EditorHandler implements IDisposable {
     }
   }
 
-  private getBreakpointsFromEditor(cell: CodeCell): ILineInfo[] {
-    const editor = cell.editor as CodeMirrorEditor;
+  private getBreakpointsFromEditor(): ILineInfo[] {
+    const editor = this._editor as CodeMirrorEditor;
     let lines = [];
     for (let i = 0; i < editor.doc.lineCount(); i++) {
       const info = editor.editor.lineInfo(i);
@@ -256,19 +199,19 @@ export class EditorHandler implements IDisposable {
     return lines;
   }
 
-  private getBreakpoints(cell: CodeCell): IDebugger.IBreakpoint[] {
+  private getBreakpoints(): IDebugger.IBreakpoint[] {
+    const code = this._editor.model.value.text;
     return this._debuggerModel.breakpointsModel.getBreakpoints(
-      this._debuggerService.getCellId(cell.model.value.text)
+      this._debuggerService.getCellId(code)
     );
   }
 
-  private _previousCell: CodeCell;
+  private _editor: CodeEditor.IEditor;
   private _debuggerModel: Debugger.Model;
   private breakpointsModel: Breakpoints.Model;
-  private _activeCell: CodeCell;
   private _debuggerService: IDebugger;
   private _id: string;
-  private _cellMonitor: ActivityMonitor<
+  private _editorMonitor: ActivityMonitor<
     IObservableString,
     IObservableString.IChangedArgs
   > = null;
@@ -278,48 +221,50 @@ export namespace EditorHandler {
   export interface IOptions {
     debuggerModel: Debugger.Model;
     debuggerService: IDebugger;
-    breakpointsModel: Breakpoints.Model;
-    activeCell?: CodeCell;
+    editor: CodeEditor.IEditor;
   }
 
   /**
-   * Highlight the current line of the frame in the given cell.
-   * @param cell The cell to highlight.
+   * Highlight the current line of the frame in the given editor.
+   * @param editor The editor to highlight.
    * @param frame The frame with the current line number.
    */
-  export function showCurrentLine(cell: Cell, frame: Callstack.IFrame) {
-    const editor = cell.editor as CodeMirrorEditor;
-    clearHighlight(cell);
-    editor.editor.addLineClass(frame.line - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
+  export function showCurrentLine(
+    editor: CodeEditor.IEditor,
+    frame: Callstack.IFrame
+  ) {
+    clearHighlight(editor);
+    const cmEditor = editor as CodeMirrorEditor;
+    cmEditor.editor.addLineClass(frame.line - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
   }
 
   /**
-   * Remove all line highlighting indicators for the given cell.
-   * @param cell The cell to cleanup.
+   * Remove all line highlighting indicators for the given editor.
+   * @param editor The editor to cleanup.
    */
-  export function clearHighlight(cell: Cell) {
-    if (!cell || cell.isDisposed || !cell.inputArea) {
+  export function clearHighlight(editor: CodeEditor.IEditor) {
+    if (!editor || editor.isDisposed) {
       return;
     }
-    const editor = cell.editor as CodeMirrorEditor;
-    editor.doc.eachLine(line => {
-      editor.editor.removeLineClass(line, 'wrap', LINE_HIGHLIGHT_CLASS);
+    const cmEditor = editor as CodeMirrorEditor;
+    cmEditor.doc.eachLine(line => {
+      cmEditor.editor.removeLineClass(line, 'wrap', LINE_HIGHLIGHT_CLASS);
     });
   }
 
   /**
-   * Remove line numbers and all gutters from cell.
-   * @param cell The cell to cleanup.
+   * Remove line numbers and all gutters from editor.
+   * @param editor The editor to cleanup.
    */
 
-  export function clearGutter(cell: Cell) {
-    if (!cell || !cell.inputArea) {
+  export function clearGutter(editor: CodeEditor.IEditor) {
+    if (!editor) {
       return;
     }
-    const editor = cell.editor as CodeMirrorEditor;
-    editor.doc.eachLine(line => {
+    const cmEditor = editor as CodeMirrorEditor;
+    cmEditor.doc.eachLine(line => {
       if ((line as ILineInfo).gutterMarkers) {
-        editor.editor.setGutterMarker(line, 'breakpoints', null);
+        cmEditor.editor.setGutterMarker(line, 'breakpoints', null);
       }
     });
   }

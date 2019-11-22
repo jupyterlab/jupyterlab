@@ -1,27 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { CodeCell } from '@jupyterlab/cells';
+
 import {
   INotebookTracker,
   NotebookPanel,
   NotebookTracker
 } from '@jupyterlab/notebook';
 
-import { CodeCell } from '@jupyterlab/cells';
-
 import { IDisposable } from '@phosphor/disposable';
 
 import { Signal } from '@phosphor/signaling';
 
-import { Breakpoints } from '../breakpoints';
+import { Callstack } from '../callstack';
 
 import { Debugger } from '../debugger';
 
-import { IDebugger } from '../tokens';
-
-import { Callstack } from '../callstack';
-
 import { EditorHandler } from './editor';
+
+import { IDebugger } from '../tokens';
 
 export class NotebookHandler implements IDisposable {
   constructor(options: NotebookHandler.IOptions) {
@@ -31,13 +29,12 @@ export class NotebookHandler implements IDisposable {
     this.notebookPanel = this.notebookTracker.currentWidget;
 
     this.id = options.id;
-    this.breakpoints = this.debuggerModel.breakpointsModel;
 
+    const activeCell = this.notebookTracker.activeCell;
     this.editorHandler = new EditorHandler({
-      breakpointsModel: this.breakpoints,
       debuggerModel: this.debuggerModel,
       debuggerService: this.debuggerService,
-      activeCell: this.notebookTracker.activeCell as CodeCell
+      editor: activeCell.editor
     });
 
     this.notebookTracker.activeCellChanged.connect(
@@ -66,8 +63,8 @@ export class NotebookHandler implements IDisposable {
   protected cleanAllCells() {
     const cells = this.notebookPanel.content.widgets;
     cells.forEach(cell => {
-      EditorHandler.clearHighlight(cell);
-      EditorHandler.clearGutter(cell);
+      EditorHandler.clearHighlight(cell.editor);
+      EditorHandler.clearGutter(cell.editor);
     });
   }
 
@@ -78,7 +75,6 @@ export class NotebookHandler implements IDisposable {
     if (notebookTracker.currentWidget.id !== this.id) {
       return;
     }
-    this.editorHandler.activeCell = codeCell;
   }
 
   private onCurrentFrameChanged(
@@ -91,7 +87,7 @@ export class NotebookHandler implements IDisposable {
     }
 
     const cells = notebook.content.widgets;
-    cells.forEach(cell => EditorHandler.clearHighlight(cell));
+    cells.forEach(cell => EditorHandler.clearHighlight(cell.editor));
 
     if (!frame) {
       return;
@@ -105,14 +101,13 @@ export class NotebookHandler implements IDisposable {
         return;
       }
       notebook.content.activeCellIndex = i;
-      EditorHandler.showCurrentLine(cell, frame);
+      EditorHandler.showCurrentLine(cell.editor, frame);
     });
   }
 
   private notebookTracker: INotebookTracker;
   private debuggerModel: Debugger.Model;
   private debuggerService: IDebugger;
-  private breakpoints: Breakpoints.Model;
   private notebookPanel: NotebookPanel;
   private editorHandler: EditorHandler;
   private id: string;
