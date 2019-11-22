@@ -5,8 +5,6 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { IDataConnector } from '@jupyterlab/coreutils';
 
-import { IObservableString } from '@jupyterlab/observables';
-
 import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
 import { Message } from '@phosphor/messaging';
@@ -174,14 +172,6 @@ export namespace Debugger {
       return this._modeChanged;
     }
 
-    get codeValue() {
-      return this._codeValue;
-    }
-
-    set codeValue(observableString: IObservableString) {
-      this._codeValue = observableString;
-    }
-
     private async _populate(): Promise<void> {
       const { connector } = this;
 
@@ -190,7 +180,6 @@ export namespace Debugger {
       }
     }
 
-    private _codeValue: IObservableString;
     private _isDisposed = false;
     private _mode: IDebugger.Mode;
     private _stoppedThreads = new Set<number>();

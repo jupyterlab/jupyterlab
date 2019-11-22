@@ -20,6 +20,8 @@ import { Callstack } from '../callstack';
 
 import { Debugger } from '../debugger';
 
+import { EditorHandler } from '../handlers/editor';
+
 import { IDebugger } from '../tokens';
 
 export class DebuggerEditors extends TabPanel {
@@ -28,6 +30,10 @@ export class DebuggerEditors extends TabPanel {
 
     this.tabsMovable = true;
     this.tabBar.insertBehavior = 'select-tab';
+    this.tabBar.tabCloseRequested.connect((_, tab) => {
+      const widget = tab.title.owner;
+      widget.dispose();
+    });
 
     this.model = new DebuggerEditors.IModel();
 
@@ -37,8 +43,13 @@ export class DebuggerEditors extends TabPanel {
     this.mimeTypeService = options.editorServices.mimeTypeService;
 
     this.debuggerModel.callstackModel.currentFrameChanged.connect(
-      this.onCurrentFrameChanged,
-      this
+      async (_, frame) => {
+        if (!frame) {
+          return;
+        }
+        await this.fetchSource(frame);
+        this.showCurrentLine(frame);
+      }
     );
 
     this.model.editorAdded.connect((sender, data) => {
@@ -65,14 +76,22 @@ export class DebuggerEditors extends TabPanel {
     Signal.clearData(this);
   }
 
-  private async onCurrentFrameChanged(
-    _: Callstack.Model,
-    frame: Callstack.IFrame
-  ) {
-    if (!frame) {
+  private showCurrentLine(frame: Callstack.IFrame) {
+    const path = frame.source.path;
+    const tab = find(this.tabBar.titles, title => title.label === path);
+    if (!tab) {
       return;
     }
+    this.tabBar.currentTitle = tab;
+    const index = this.tabBar.currentIndex;
+    const widget = this.widgets[index];
+    const editor = (widget as CodeEditorWrapper).editor;
+    requestAnimationFrame(() => {
+      EditorHandler.showCurrentLine(editor, frame);
+    });
+  }
 
+  private async fetchSource(frame: Callstack.IFrame) {
     const path = frame.source.path;
     const source = await this.debuggerService.getSource({
       sourceReference: 0,
@@ -116,10 +135,15 @@ export class DebuggerEditors extends TabPanel {
     editor.title.caption = path;
     editor.title.closable = true;
 
-    this.tabBar.tabCloseRequested.connect((_, tab) => {
-      const widget = tab.title.owner;
-      widget.dispose();
-      this.model.removeEditor(tab.title.label);
+    const editorHandler = new EditorHandler({
+      debuggerModel: this.debuggerModel,
+      debuggerService: this.debuggerService,
+      editor: editor.editor
+    });
+
+    editor.disposed.connect(() => {
+      editorHandler.dispose();
+      this.model.removeEditor(editor.title.label);
     });
 
     this.addWidget(editor);

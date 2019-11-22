@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeConsole, IConsoleTracker } from '@jupyterlab/console';
+import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
 
 import { CodeCell } from '@jupyterlab/cells';
 
@@ -9,27 +9,26 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { Signal } from '@phosphor/signaling';
 
-import { Breakpoints } from '../breakpoints';
-
 import { EditorHandler } from '../handlers/editor';
 
-import { IDebugger } from '../tokens';
-
 import { Debugger } from '../debugger';
+
+import { IDebugger } from '../tokens';
 
 export class ConsoleHandler implements IDisposable {
   constructor(options: DebuggerConsoleHandler.IOptions) {
     this.debuggerModel = options.debuggerService.model as Debugger.Model;
     this.debuggerService = options.debuggerService;
-    this.consoleTracker = options.tracker;
-    this.breakpoints = this.debuggerModel.breakpointsModel;
+    this.consolePanel = options.widget;
+
+    const promptCell = this.consolePanel.console.promptCell;
     this.editorHandler = new EditorHandler({
-      activeCell: this.consoleTracker.currentWidget.console.promptCell,
-      breakpointsModel: this.breakpoints,
       debuggerModel: this.debuggerModel,
-      debuggerService: this.debuggerService
+      debuggerService: this.debuggerService,
+      editor: promptCell.editor
     });
-    this.consoleTracker.currentWidget.console.promptCellCreated.connect(
+
+    this.consolePanel.console.promptCellCreated.connect(
       this.promptCellCreated,
       this
     );
@@ -47,20 +46,19 @@ export class ConsoleHandler implements IDisposable {
   }
 
   protected promptCellCreated(sender: CodeConsole, update: CodeCell) {
-    this.editorHandler.previousCell = this.editorHandler.activeCell;
-    this.editorHandler.activeCell = update;
+    // TODO: check if the previous editor must be disposed
+    // for the console
   }
 
-  private consoleTracker: IConsoleTracker;
+  private consolePanel: ConsolePanel;
   private debuggerModel: Debugger.Model;
   private debuggerService: IDebugger;
-  private breakpoints: Breakpoints.Model;
   private editorHandler: EditorHandler;
 }
 
 export namespace DebuggerConsoleHandler {
   export interface IOptions {
     debuggerService: IDebugger;
-    tracker: IConsoleTracker;
+    widget: ConsolePanel;
   }
 }
