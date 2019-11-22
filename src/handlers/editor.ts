@@ -40,7 +40,7 @@ export class EditorHandler implements IDisposable {
   isDisposed: boolean;
 
   private onModelChanged() {
-    this._debuggerModel = this._debuggerService.model;
+    this._debuggerModel = this._debuggerService.model as Debugger.Model;
     if (!this._debuggerModel) {
       return;
     }

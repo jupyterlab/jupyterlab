@@ -25,7 +25,7 @@ import { EditorHandler } from './editor';
 
 export class NotebookHandler implements IDisposable {
   constructor(options: NotebookHandler.IOptions) {
-    this.debuggerModel = options.debuggerService.model;
+    this.debuggerModel = options.debuggerService.model as Debugger.Model;
     this.debuggerService = options.debuggerService;
     this.notebookTracker = options.tracker;
     this.notebookPanel = this.notebookTracker.currentWidget;

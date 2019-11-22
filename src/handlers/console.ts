@@ -19,7 +19,7 @@ import { Debugger } from '../debugger';
 
 export class ConsoleHandler implements IDisposable {
   constructor(options: DebuggerConsoleHandler.IOptions) {
-    this.debuggerModel = options.debuggerService.model;
+    this.debuggerModel = options.debuggerService.model as Debugger.Model;
     this.debuggerService = options.debuggerService;
     this.consoleTracker = options.tracker;
     this.breakpoints = this.debuggerModel.breakpointsModel;

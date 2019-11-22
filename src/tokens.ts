@@ -16,7 +16,6 @@ import { DebugProtocol } from 'vscode-debugprotocol';
 // TODO: remove that import when an interface has
 // been created for Model class
 import { Breakpoints } from './breakpoints';
-import { Debugger } from './debugger';
 
 /**
  * An interface describing an application's visual debugger.
@@ -44,7 +43,7 @@ export interface IDebugger extends IDisposable {
   /**
    * The model of the debugger.
    */
-  model: Debugger.Model;
+  model: IDebugger.IModel;
 
   /**
    * Signal emitted upon session changed.
@@ -54,7 +53,7 @@ export interface IDebugger extends IDisposable {
   /**
    * Signal emitted upon model changed.
    */
-  readonly modelChanged: ISignal<IDebugger, Debugger.Model>;
+  readonly modelChanged: ISignal<IDebugger, IDebugger.IModel>;
 
   /**
    * Signal emitted for debug event messages.
@@ -204,6 +203,11 @@ export namespace IDebugger {
       args: IDebugger.ISession.Request[K]
     ): Promise<IDebugger.ISession.Response[K]>;
   }
+
+  /**
+   * The model of a debugger session.
+   */
+  export interface IModel extends IObservableDisposable {}
 
   export namespace ISession {
     /**

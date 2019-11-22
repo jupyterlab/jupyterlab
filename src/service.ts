@@ -91,10 +91,10 @@ export class DebugService implements IDebugger {
 
     this._session.eventMessage.connect((_, event) => {
       if (event.event === 'stopped') {
-        this.model.stoppedThreads.add(event.body.threadId);
+        this._model.stoppedThreads.add(event.body.threadId);
         void this.getAllFrames();
       } else if (event.event === 'continued') {
-        this.model.stoppedThreads.delete(event.body.threadId);
+        this._model.stoppedThreads.delete(event.body.threadId);
         this.clearModel();
         this.clearSignals();
       }
@@ -106,7 +106,7 @@ export class DebugService implements IDebugger {
   /**
    * Returns the debugger model.
    */
-  get model(): Debugger.Model {
+  get model(): IDebugger.IModel {
     return this._model;
   }
 
@@ -114,8 +114,8 @@ export class DebugService implements IDebugger {
    * Sets the debugger model to the given parameter.
    * @param model - The new debugger model.
    */
-  set model(model: Debugger.Model) {
-    this._model = model;
+  set model(model: IDebugger.IModel) {
+    this._model = model as Debugger.Model;
     this._modelChanged.emit(model);
   }
 
@@ -129,7 +129,7 @@ export class DebugService implements IDebugger {
   /**
    * Signal emitted upon model changed.
    */
-  get modelChanged(): ISignal<IDebugger, Debugger.Model> {
+  get modelChanged(): ISignal<IDebugger, IDebugger.IModel> {
     return this._modelChanged;
   }
 
@@ -187,7 +187,7 @@ export class DebugService implements IDebugger {
   async stop(): Promise<void> {
     await this.session.stop();
     if (this.model) {
-      this.model.stoppedThreads.clear();
+      this._model.stoppedThreads.clear();
     }
   }
 
@@ -196,7 +196,7 @@ export class DebugService implements IDebugger {
    * Precondition: isStarted().
    */
   async restart(): Promise<void> {
-    const breakpoints = this.model.breakpointsModel.breakpoints;
+    const breakpoints = this._model.breakpointsModel.breakpoints;
     await this.stop();
     this.clearModel();
     await this.start();
@@ -268,7 +268,7 @@ export class DebugService implements IDebugger {
       await this.session.sendRequest('continue', {
         threadId: this.currentThread()
       });
-      this.model.stoppedThreads.delete(this.currentThread());
+      this._model.stoppedThreads.delete(this.currentThread());
     } catch (err) {
       console.error('Error:', err.message);
     }
@@ -523,7 +523,7 @@ export class DebugService implements IDebugger {
   private _isDisposed: boolean = false;
   private _session: IDebugger.ISession;
   private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
-  private _modelChanged = new Signal<IDebugger, Debugger.Model>(this);
+  private _modelChanged = new Signal<IDebugger, IDebugger.IModel>(this);
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
   private _model: Debugger.Model;
 
