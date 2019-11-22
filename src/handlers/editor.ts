@@ -43,6 +43,8 @@ export class EditorHandler implements IDisposable {
     this._editorMonitor.activityStopped.connect(() => {
       this.sendEditorBreakpoints();
     }, this);
+
+    this.setup();
   }
 
   isDisposed: boolean;
@@ -54,14 +56,9 @@ export class EditorHandler implements IDisposable {
     }
     this.breakpointsModel = this._debuggerModel.breakpointsModel;
 
-    this._debuggerModel.callstackModel.currentFrameChanged.connect(
-      (_, frame) => {
-        EditorHandler.clearHighlight(this._editor);
-        if (!frame) {
-          return;
-        }
-      }
-    );
+    this._debuggerModel.callstackModel.currentFrameChanged.connect(() => {
+      EditorHandler.clearHighlight(this._editor);
+    });
 
     this.breakpointsModel.changed.connect(async () => {
       if (!this._editor || this._editor.isDisposed) {
@@ -85,7 +82,7 @@ export class EditorHandler implements IDisposable {
     this._editorMonitor.dispose();
     this.removeGutterClick();
     EditorHandler.clearHighlight(this._editor);
-    EditorHandler.clearGutter(this._editor);
+    // EditorHandler.clearGutter(this._editor);
     Signal.clearData(this);
     this.isDisposed = true;
   }
@@ -173,7 +170,7 @@ export class EditorHandler implements IDisposable {
     const breakpoints = this.getBreakpoints();
     if (
       breakpoints.length === 0 &&
-      this._id === this._debuggerService.session.client.name
+      this._id === this._debuggerService.session.client.path
     ) {
       EditorHandler.clearGutter(editor);
     } else {

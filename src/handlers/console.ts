@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeConsole, IConsoleTracker } from '@jupyterlab/console';
+import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
 
 import { CodeCell } from '@jupyterlab/cells';
 
@@ -19,15 +19,16 @@ export class ConsoleHandler implements IDisposable {
   constructor(options: DebuggerConsoleHandler.IOptions) {
     this.debuggerModel = options.debuggerService.model as Debugger.Model;
     this.debuggerService = options.debuggerService;
-    this.consoleTracker = options.tracker;
+    this.consolePanel = options.widget;
 
-    const promptCell = this.consoleTracker.currentWidget.console.promptCell;
+    const promptCell = this.consolePanel.console.promptCell;
     this.editorHandler = new EditorHandler({
       debuggerModel: this.debuggerModel,
       debuggerService: this.debuggerService,
       editor: promptCell.editor
     });
-    this.consoleTracker.currentWidget.console.promptCellCreated.connect(
+
+    this.consolePanel.console.promptCellCreated.connect(
       this.promptCellCreated,
       this
     );
@@ -49,7 +50,7 @@ export class ConsoleHandler implements IDisposable {
     // for the console
   }
 
-  private consoleTracker: IConsoleTracker;
+  private consolePanel: ConsolePanel;
   private debuggerModel: Debugger.Model;
   private debuggerService: IDebugger;
   private editorHandler: EditorHandler;
@@ -58,6 +59,6 @@ export class ConsoleHandler implements IDisposable {
 export namespace DebuggerConsoleHandler {
   export interface IOptions {
     debuggerService: IDebugger;
-    tracker: IConsoleTracker;
+    widget: ConsolePanel;
   }
 }

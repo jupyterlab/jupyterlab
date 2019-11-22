@@ -3,11 +3,7 @@
 
 import { CodeCell } from '@jupyterlab/cells';
 
-import {
-  INotebookTracker,
-  NotebookPanel,
-  NotebookTracker
-} from '@jupyterlab/notebook';
+import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -25,22 +21,12 @@ export class NotebookHandler implements IDisposable {
   constructor(options: NotebookHandler.IOptions) {
     this.debuggerModel = options.debuggerService.model as Debugger.Model;
     this.debuggerService = options.debuggerService;
-    this.notebookTracker = options.tracker;
-    this.notebookPanel = this.notebookTracker.currentWidget;
+    this.notebookPanel = options.widget;
 
-    this.id = options.id;
+    this.createNewEditorHandler();
 
-    const activeCell = this.notebookTracker.activeCell;
-    this.editorHandler = new EditorHandler({
-      debuggerModel: this.debuggerModel,
-      debuggerService: this.debuggerService,
-      editor: activeCell.editor
-    });
-
-    this.notebookTracker.activeCellChanged.connect(
-      this.onActiveCellChanged,
-      this
-    );
+    const notebook = this.notebookPanel.content;
+    notebook.activeCellChanged.connect(this.onActiveCellChanged, this);
 
     this.debuggerModel.callstackModel.currentFrameChanged.connect(
       this.onCurrentFrameChanged,
@@ -68,25 +54,27 @@ export class NotebookHandler implements IDisposable {
     });
   }
 
-  protected onActiveCellChanged(
-    notebookTracker: NotebookTracker,
-    codeCell: CodeCell
-  ) {
-    if (notebookTracker.currentWidget.id !== this.id) {
+  protected createNewEditorHandler() {
+    this.editorHandler = new EditorHandler({
+      debuggerModel: this.debuggerModel,
+      debuggerService: this.debuggerService,
+      editor: this.notebookPanel.content.activeCell.editor
+    });
+  }
+
+  protected onActiveCellChanged(notebook: Notebook, codeCell: CodeCell) {
+    if (this.notebookPanel.content !== notebook) {
       return;
     }
+    this.editorHandler.dispose();
+    this.createNewEditorHandler();
   }
 
   private onCurrentFrameChanged(
     callstackModel: Callstack.Model,
     frame: Callstack.IFrame
   ) {
-    const notebook = this.notebookTracker.currentWidget;
-    if (!notebook) {
-      return;
-    }
-
-    const cells = notebook.content.widgets;
+    const cells = this.notebookPanel.content.widgets;
     cells.forEach(cell => EditorHandler.clearHighlight(cell.editor));
 
     if (!frame) {
@@ -100,23 +88,23 @@ export class NotebookHandler implements IDisposable {
       if (frame.source.path !== cellId) {
         return;
       }
-      notebook.content.activeCellIndex = i;
-      EditorHandler.showCurrentLine(cell.editor, frame);
+      this.notebookPanel.content.activeCellIndex = i;
+      // request drawing the line after the editor has been cleared above
+      requestAnimationFrame(() => {
+        EditorHandler.showCurrentLine(cell.editor, frame);
+      });
     });
   }
 
-  private notebookTracker: INotebookTracker;
   private debuggerModel: Debugger.Model;
   private debuggerService: IDebugger;
   private notebookPanel: NotebookPanel;
   private editorHandler: EditorHandler;
-  private id: string;
 }
 
 export namespace NotebookHandler {
   export interface IOptions {
     debuggerService: IDebugger;
-    tracker: INotebookTracker;
-    id?: string;
+    widget: NotebookPanel;
   }
 }

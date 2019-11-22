@@ -95,26 +95,26 @@ class DebuggerHandler<H extends ConsoleHandler | NotebookHandler> {
     T extends IConsoleTracker | INotebookTracker,
     W extends ConsolePanel | NotebookPanel
   >(debug: IDebugger, tracker: T, widget: W): void {
-    if (debug.model && !this.handlers[widget.id]) {
-      const handler = new this.builder({
-        tracker: tracker,
-        debuggerService: debug,
-        id: widget.id
-      });
-      this.handlers[widget.id] = handler;
-      widget.disposed.connect(() => {
-        handler.dispose();
-        delete this.handlers[widget.id];
-      });
-
-      debug.model.disposed.connect(async () => {
-        await debug.stop();
-        Object.keys(this.handlers).forEach(id => {
-          this.handlers[id].dispose();
-        });
-        this.handlers = {};
-      });
+    if (!debug.model || this.handlers[widget.id]) {
+      return;
     }
+    const handler = new this.builder({
+      debuggerService: debug,
+      widget
+    });
+    this.handlers[widget.id] = handler;
+    widget.disposed.connect(() => {
+      handler.dispose();
+      delete this.handlers[widget.id];
+    });
+
+    debug.model.disposed.connect(async () => {
+      await debug.stop();
+      Object.keys(this.handlers).forEach(id => {
+        this.handlers[id].dispose();
+      });
+      this.handlers = {};
+    });
   }
 
   private handlers: { [id: string]: H } = {};
