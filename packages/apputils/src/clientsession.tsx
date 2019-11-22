@@ -765,7 +765,7 @@ export class ClientSession implements IClientSession {
     // If we have already, and now we aren't busy, dispose
     // of the busy disposable.
     if (this._setBusy) {
-      if (this.session.kernel && this.session.kernel.status === 'busy') {
+      if (status === 'busy') {
         if (!this._busyDisposable) {
           this._busyDisposable = this._setBusy();
         }
