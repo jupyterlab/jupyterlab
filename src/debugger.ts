@@ -158,6 +158,20 @@ export namespace Debugger {
       this._modeChanged.emit(mode);
     }
 
+    /**
+     * The set of threads in stopped state.
+     */
+    get stoppedThreads(): Set<number> {
+      return this._stoppedThreads;
+    }
+
+    /**
+     * Assigns the parameters to the set of threads in stopped state.
+     */
+    set stoppedThreads(threads: Set<number>) {
+      this._stoppedThreads = threads;
+    }
+
     get modeChanged(): ISignal<this, IDebugger.Mode> {
       return this._modeChanged;
     }
@@ -181,6 +195,7 @@ export namespace Debugger {
     private _codeValue: IObservableString;
     private _isDisposed = false;
     private _mode: IDebugger.Mode;
+    private _stoppedThreads = new Set<number>();
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
     private _disposed = new Signal<this, void>(this);
   }

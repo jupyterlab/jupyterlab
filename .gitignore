@@ -19,6 +19,7 @@ __pycache__
 *.swp
 *.map
 .idea/
+*.orig
 
 lerna-debug.log
 yarn-error.log
