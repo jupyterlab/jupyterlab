@@ -81,8 +81,6 @@ export class EditorHandler implements IDisposable {
     }
     this._editorMonitor.dispose();
     this.removeGutterClick();
-    EditorHandler.clearHighlight(this._editor);
-    // EditorHandler.clearGutter(this._editor);
     Signal.clearData(this);
     this.isDisposed = true;
   }
