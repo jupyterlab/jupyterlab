@@ -1555,11 +1555,10 @@ namespace Private {
               }
             })
             .catch(reason => {
-              if (reason.message !== 'Canceled') {
-                throw reason;
+              if (cell.isDisposed || reason.message.startsWith('Canceled')) {
+                return false;
               }
-
-              return false;
+              throw reason;
             })
             .then(ran => {
               if (ran) {

@@ -1108,8 +1108,9 @@ export namespace CodeCell {
       }
       return msg;
     } catch (e) {
-      // If this is still the current execution, clear the prompt.
-      if (e.message === 'Canceled' && cell.outputArea.future === future) {
+      // If we started executing, and the cell is still indicating this
+      // execution, clear the prompt.
+      if (future && !cell.isDisposed && cell.outputArea.future === future) {
         cell.setPrompt('');
       }
       throw e;
