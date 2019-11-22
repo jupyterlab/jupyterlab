@@ -30,6 +30,10 @@ export class DebuggerEditors extends TabPanel {
 
     this.tabsMovable = true;
     this.tabBar.insertBehavior = 'select-tab';
+    this.tabBar.tabCloseRequested.connect((_, tab) => {
+      const widget = tab.title.owner;
+      widget.dispose();
+    });
 
     this.model = new DebuggerEditors.IModel();
 
@@ -137,12 +141,9 @@ export class DebuggerEditors extends TabPanel {
       editor: editor.editor
     });
 
-    // TODO: define the signal only once
-    this.tabBar.tabCloseRequested.connect((_, tab) => {
-      const widget = tab.title.owner;
-      widget.dispose();
+    editor.disposed.connect(() => {
       editorHandler.dispose();
-      this.model.removeEditor(tab.title.label);
+      this.model.removeEditor(editor.title.label);
     });
 
     this.addWidget(editor);
