@@ -168,20 +168,17 @@ export class EditorHandler implements IDisposable {
   private addBreakpointsToEditor() {
     const editor = this._editor as CodeMirrorEditor;
     const breakpoints = this.getBreakpoints();
-    if (
-      breakpoints.length === 0 &&
-      this._id === this._debuggerService.session.client.path
-    ) {
-      EditorHandler.clearGutter(editor);
-    } else {
-      breakpoints.forEach(breakpoint => {
-        editor.editor.setGutterMarker(
-          breakpoint.line - 1,
-          'breakpoints',
-          Private.createMarkerNode()
-        );
-      });
+    if (this._id !== this._debuggerService.session.client.path) {
+      return;
     }
+    EditorHandler.clearGutter(editor);
+    breakpoints.forEach(breakpoint => {
+      editor.editor.setGutterMarker(
+        breakpoint.line - 1,
+        'breakpoints',
+        Private.createMarkerNode()
+      );
+    });
   }
 
   private getBreakpointsFromEditor(): ILineInfo[] {
