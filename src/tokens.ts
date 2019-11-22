@@ -13,10 +13,6 @@ import { ISignal } from '@phosphor/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
-// TODO: remove that import when an interface has
-// been created for Model class
-import { Breakpoints } from './breakpoints';
-
 /**
  * An interface describing an application's visual debugger.
  */
@@ -127,7 +123,7 @@ export interface IDebugger extends IDisposable {
    */
   updateBreakpoints(
     code: string,
-    breakpoints: Breakpoints.IBreakpoint[]
+    breakpoints: IDebugger.IBreakpoint[]
   ): Promise<void>;
 
   /**
@@ -202,6 +198,13 @@ export namespace IDebugger {
       command: K,
       args: IDebugger.ISession.Request[K]
     ): Promise<IDebugger.ISession.Response[K]>;
+  }
+
+  /**
+   * Single breakpoint in an editor.
+   */
+  export interface IBreakpoint extends DebugProtocol.Breakpoint {
+    active: boolean;
   }
 
   /**

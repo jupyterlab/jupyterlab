@@ -15,8 +15,6 @@ import { IDebugger } from './tokens';
 
 import { Variables } from './variables';
 
-import { Breakpoints } from './breakpoints';
-
 import { Callstack } from './callstack';
 
 /**
@@ -229,7 +227,7 @@ export class DebugService implements IDebugger {
     );
 
     const breakpoints = reply.body.breakpoints;
-    let bpMap = new Map<string, Breakpoints.IBreakpoint[]>();
+    let bpMap = new Map<string, IDebugger.IBreakpoint[]>();
     if (breakpoints.length !== 0) {
       breakpoints.forEach((bp: IDebugger.ISession.IDebugInfoBreakpoints) => {
         bpMap.set(
@@ -318,10 +316,7 @@ export class DebugService implements IDebugger {
    * @param code - The code in the cell where the breakpoints are set.
    * @param breakpoints - The list of breakpoints to set.
    */
-  async updateBreakpoints(
-    code: string,
-    breakpoints: Breakpoints.IBreakpoint[]
-  ) {
+  async updateBreakpoints(code: string, breakpoints: IDebugger.IBreakpoint[]) {
     if (!this.session.isStarted) {
       return;
     }
@@ -363,7 +358,7 @@ export class DebugService implements IDebugger {
       }
     );
 
-    let bpMap = new Map<string, Breakpoints.IBreakpoint[]>();
+    let bpMap = new Map<string, IDebugger.IBreakpoint[]>();
     this._model.breakpointsModel.restoreBreakpoints(bpMap);
   }
 
@@ -533,7 +528,7 @@ export class DebugService implements IDebugger {
 }
 
 namespace Private {
-  export function toSourceBreakpoints(breakpoints: Breakpoints.IBreakpoint[]) {
+  export function toSourceBreakpoints(breakpoints: IDebugger.IBreakpoint[]) {
     return breakpoints.map(breakpoint => {
       return {
         line: breakpoint.line

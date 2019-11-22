@@ -7,8 +7,6 @@ import { Signal } from '@phosphor/signaling';
 
 import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
 
-import { DebugProtocol } from 'vscode-debugprotocol';
-
 import { IDebugger } from '../tokens';
 
 import { Body } from './body';
@@ -81,12 +79,8 @@ class BreakpointsHeader extends Widget {
 }
 
 export namespace Breakpoints {
-  export interface IBreakpoint extends DebugProtocol.Breakpoint {
-    active: boolean;
-  }
-
   export class Model implements IDisposable {
-    get changed(): Signal<this, IBreakpoint[]> {
+    get changed(): Signal<this, IDebugger.IBreakpoint[]> {
       return this._changed;
     }
 
@@ -94,12 +88,12 @@ export namespace Breakpoints {
       return this._restored;
     }
 
-    get breakpoints(): Map<string, IBreakpoint[]> {
+    get breakpoints(): Map<string, IDebugger.IBreakpoint[]> {
       return this._breakpoints;
     }
 
     // kept for react component
-    get breakpointChanged(): Signal<this, IBreakpoint> {
+    get breakpointChanged(): Signal<this, IDebugger.IBreakpoint> {
       return this._breakpointChanged;
     }
 
@@ -115,25 +109,25 @@ export namespace Breakpoints {
       Signal.clearData(this);
     }
 
-    setBreakpoints(id: string, breakpoints: IBreakpoint[]) {
+    setBreakpoints(id: string, breakpoints: IDebugger.IBreakpoint[]) {
       this._breakpoints.set(id, breakpoints);
       this.changed.emit(breakpoints);
     }
 
-    getBreakpoints(id: string): IBreakpoint[] {
+    getBreakpoints(id: string): IDebugger.IBreakpoint[] {
       return this._breakpoints.get(id) || [];
     }
 
-    restoreBreakpoints(breakpoints: Map<string, IBreakpoint[]>) {
+    restoreBreakpoints(breakpoints: Map<string, IDebugger.IBreakpoint[]>) {
       this._breakpoints = breakpoints;
       this._restored.emit();
     }
 
-    private _breakpoints = new Map<string, IBreakpoint[]>();
-    private _changed = new Signal<this, IBreakpoint[]>(this);
+    private _breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
+    private _changed = new Signal<this, IDebugger.IBreakpoint[]>(this);
     private _restored = new Signal<this, void>(this);
     // kept for react component
-    private _breakpointChanged = new Signal<this, IBreakpoint>(this);
+    private _breakpointChanged = new Signal<this, IDebugger.IBreakpoint>(this);
     private _isDisposed: boolean = false;
   }
 

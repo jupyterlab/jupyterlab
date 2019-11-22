@@ -4,8 +4,6 @@ import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
 import { createClientSession } from '@jupyterlab/testutils';
 
-import { Breakpoints } from '../../lib/breakpoints';
-
 import { Debugger } from '../../lib/debugger';
 
 import { DebugService } from '../../lib/service';
@@ -132,7 +130,7 @@ describe('DebugService', () => {
     it('should emit the modelChanged signal when setting the model', () => {
       let modelChangedEvents: Debugger.Model[] = [];
       service.modelChanged.connect((_, newModel) => {
-        modelChangedEvents.push(newModel);
+        modelChangedEvents.push(newModel as Debugger.Model);
       });
       service.model = model;
       expect(modelChangedEvents.length).to.equal(1);
@@ -150,7 +148,7 @@ describe('DebugService', () => {
       'print(i, j)'
     ].join('\n');
 
-    let breakpoints: Breakpoints.IBreakpoint[];
+    let breakpoints: IDebugger.IBreakpoint[];
     let sourceId: string;
 
     beforeEach(async () => {
@@ -183,7 +181,7 @@ describe('DebugService', () => {
     describe('#restoreState', () => {
       it('should restore the breakpoints', async () => {
         model.breakpointsModel.restoreBreakpoints(
-          new Map<string, Breakpoints.IBreakpoint[]>()
+          new Map<string, IDebugger.IBreakpoint[]>()
         );
         const bpList1 = model.breakpointsModel.getBreakpoints(sourceId);
         expect(bpList1.length).to.equal(0);
@@ -197,7 +195,7 @@ describe('DebugService', () => {
       it('should restart the debugger and send the breakpoints again', async () => {
         await service.restart();
         model.breakpointsModel.restoreBreakpoints(
-          new Map<string, Breakpoints.IBreakpoint[]>()
+          new Map<string, IDebugger.IBreakpoint[]>()
         );
         await service.restoreState(true);
         const bpList = model.breakpointsModel.getBreakpoints(sourceId);
