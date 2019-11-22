@@ -143,8 +143,6 @@ export class EditorHandler implements IDisposable {
     }
 
     editor.focus();
-    EditorHandler.clearGutter(this._editor);
-
     const isRemoveGutter = !!info.gutterMarkers;
     let breakpoints: IDebugger.IBreakpoint[] = this.getBreakpoints();
     if (isRemoveGutter) {
