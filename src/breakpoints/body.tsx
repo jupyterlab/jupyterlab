@@ -5,6 +5,7 @@ import { ReactWidget } from '@jupyterlab/apputils';
 import { ISignal } from '@phosphor/signaling';
 import React, { useEffect, useState } from 'react';
 import { Breakpoints } from '.';
+import { IDebugger } from '../tokens';
 
 export class Body extends ReactWidget {
   constructor(model: Breakpoints.Model) {
@@ -28,7 +29,7 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
   useEffect(() => {
     const updateBreakpoints = (
       _: Breakpoints.Model,
-      updates: Breakpoints.IBreakpoint[]
+      updates: IDebugger.IBreakpoint[]
     ) => {
       setBreakpoints(Array.from(model.breakpoints.entries()));
     };
@@ -64,7 +65,7 @@ const BreakpointCellComponent = ({
   breakpoints,
   model
 }: {
-  breakpoints: Breakpoints.IBreakpoint[];
+  breakpoints: IDebugger.IBreakpoint[];
   model: Breakpoints.Model;
 }) => {
   return (
@@ -73,7 +74,7 @@ const BreakpointCellComponent = ({
         .sort((a, b) => {
           return a.line - b.line;
         })
-        .map((breakpoint: Breakpoints.IBreakpoint) => (
+        .map((breakpoint: IDebugger.IBreakpoint) => (
           <BreakpointComponent
             key={breakpoint.source.path + breakpoint.line}
             breakpoint={breakpoint}
@@ -88,8 +89,8 @@ const BreakpointComponent = ({
   breakpoint,
   breakpointChanged
 }: {
-  breakpoint: Breakpoints.IBreakpoint;
-  breakpointChanged: ISignal<Breakpoints.Model, Breakpoints.IBreakpoint>;
+  breakpoint: IDebugger.IBreakpoint;
+  breakpointChanged: ISignal<Breakpoints.Model, IDebugger.IBreakpoint>;
 }) => {
   const [active, setActive] = useState(breakpoint.active);
   breakpoint.active = active;
@@ -101,7 +102,7 @@ const BreakpointComponent = ({
   useEffect(() => {
     const updateBreakpoints = (
       _: Breakpoints.Model,
-      updates: Breakpoints.IBreakpoint
+      updates: IDebugger.IBreakpoint
     ) => {
       setBreakpointEnabled(updates.active);
     };

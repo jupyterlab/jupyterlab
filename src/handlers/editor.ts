@@ -40,7 +40,7 @@ export class EditorHandler implements IDisposable {
   isDisposed: boolean;
 
   private onModelChanged() {
-    this._debuggerModel = this._debuggerService.model;
+    this._debuggerModel = this._debuggerService.model as Debugger.Model;
     if (!this._debuggerModel) {
       return;
     }
@@ -204,7 +204,7 @@ export class EditorHandler implements IDisposable {
     EditorHandler.clearGutter(this.activeCell);
 
     const isRemoveGutter = !!info.gutterMarkers;
-    let breakpoints: Breakpoints.IBreakpoint[] = this.getBreakpoints(
+    let breakpoints: IDebugger.IBreakpoint[] = this.getBreakpoints(
       this._activeCell
     );
     if (isRemoveGutter) {
@@ -256,7 +256,7 @@ export class EditorHandler implements IDisposable {
     return lines;
   }
 
-  private getBreakpoints(cell: CodeCell): Breakpoints.IBreakpoint[] {
+  private getBreakpoints(cell: CodeCell): IDebugger.IBreakpoint[] {
     return this._debuggerModel.breakpointsModel.getBreakpoints(
       this._debuggerService.getCellId(cell.model.value.text)
     );

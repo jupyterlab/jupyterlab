@@ -9,8 +9,6 @@ import { IObservableString } from '@jupyterlab/observables';
 
 import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
-
 import { Message } from '@phosphor/messaging';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -116,7 +114,7 @@ export namespace Debugger {
     readonly breakpoints: Breakpoints;
   }
 
-  export class Model implements IDisposable {
+  export class Model implements IDebugger.IModel {
     constructor(options: Debugger.Model.IOptions) {
       this.breakpointsModel = new Breakpoints.Model();
       this.callstackModel = new Callstack.Model([]);
