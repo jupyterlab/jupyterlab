@@ -16,7 +16,10 @@ describe('Kernel.IShellFuture', () => {
     }
   });
 
-  afterAll(() => Kernel.shutdownAll());
+  afterAll(async () => {
+    let models = await Kernel.listRunning();
+    await Promise.all(models.map(m => Kernel.shutdown(m.id)));
+  });
 
   it('should have a msg attribute', async () => {
     const kernel = await Kernel.startNew();
@@ -38,7 +41,7 @@ describe('Kernel.IShellFuture', () => {
       const calls: string[] = [];
       tester = new KernelTester();
       let future: Kernel.IShellFuture;
-      let kernel: Kernel.IKernel;
+      let kernel: Kernel.IKernelConnection;
 
       tester.onMessage(message => {
         // send a reply
@@ -131,7 +134,7 @@ describe('Kernel.IShellFuture', () => {
       const calls: string[] = [];
       tester = new KernelTester();
       let future: Kernel.IShellFuture;
-      let kernel: Kernel.IKernel;
+      let kernel: Kernel.IKernelConnection;
 
       tester.onMessage(message => {
         // send a reply

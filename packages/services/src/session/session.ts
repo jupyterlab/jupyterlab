@@ -13,6 +13,10 @@ import { ServerConnection } from '..';
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
+export type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
 /**
  * A namespace for session interfaces and factory functions.
  */
@@ -356,7 +360,9 @@ export namespace Session {
     /**
      * Connects to an existing kernel
      */
-    connectToKernel(options: Kernel.IOptions): Kernel.IKernelConnection;
+    connectToKernel(
+      options: Kernel.IKernelConnection.IOptions
+    ): Kernel.IKernelConnection;
   }
 
   /**
@@ -423,20 +429,14 @@ export namespace Session {
     /**
      * Start a new session.
      *
-     * @param options - The session options to use.
+     * @param options - The session request options to use.
      *
      * @returns A promise that resolves with the session instance.
      *
      * #### Notes
      * The `serverSettings` of the manager will be used.
      */
-    startNew(
-      options: Omit<Session.IOptions, 'model' | 'connectToKernel'> & {
-        model: Omit<Session.IModel, 'kernel' | 'id'> & {
-          kernel: Partial<Kernel.IModel> | null;
-        };
-      }
-    ): Promise<ISessionConnection>;
+    startNew(options: Session.IRequest): Promise<ISessionConnection>;
 
     /**
      * Find a session by id.
@@ -511,9 +511,25 @@ export namespace Session {
    * #### Notes
    * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/sessions).
    */
-  export interface IModel extends IModelPartialKernel {
+  export interface IModel {
+    /**
+     * The unique identifier for the session client.
+     */
+    readonly id: string;
+    readonly name: string;
+    readonly path: string;
+    readonly type: string;
     readonly kernel: Kernel.IModel | null;
   }
+
+  /**
+   * A session request.
+   *
+   * #### Notes
+   * The `path` and `type` session model parameters are required.
+   */
+  export type IRequest = Pick<IModel, 'path' | 'type'> &
+    DeepPartial<Omit<IModel, 'path' | 'type'>>;
 
   /**
    * The session model to start a new session.

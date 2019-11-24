@@ -155,11 +155,14 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        const session = await services.sessions.startNew({ path: model.path });
+        const session = await services.sessions.startNew({
+          path: model.path,
+          type: 'test'
+        });
         const id = session.kernel.id;
         widget = manager.open(session.path, 'default', { id });
         context = manager.contextForWidget(widget);
-        await context.session.ready;
+        await context.session.kernel.info;
         expect(context.session.kernel).to.be.ok;
         await context.session.shutdown();
       });
@@ -216,11 +219,14 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        const session = await services.sessions.startNew({ path: model.path });
+        const session = await services.sessions.startNew({
+          path: model.path,
+          type: 'test'
+        });
         const id = session.kernel.id;
         widget = manager.createNew(session.path, 'default', { id });
         context = manager.contextForWidget(widget);
-        await context.session.ready;
+        await context.session.kernel.info;
         expect(context.session.kernel.id).to.equal(id);
         await context.session.shutdown();
       });

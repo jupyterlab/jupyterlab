@@ -7,7 +7,7 @@ import { toArray } from '@phosphor/algorithm';
 
 import { JSONExt } from '@phosphor/coreutils';
 
-import { KernelManager, Kernel } from '@jupyterlab/services';
+import { KernelManager, Kernel, KernelSpec } from '@jupyterlab/services';
 
 import { testEmission } from '@jupyterlab/testutils';
 
@@ -19,7 +19,7 @@ import {
 } from '../utils';
 
 class TestManager extends KernelManager {
-  intercept: Kernel.ISpecModels | null = null;
+  intercept: KernelSpec.ISpecModels | null = null;
   protected async requestSpecs(): Promise<void> {
     if (this.intercept) {
       handleRequest(this, 200, this.intercept);
@@ -34,7 +34,7 @@ PYTHON3_SPEC.display_name = 'python3';
 
 describe('kernel/manager', () => {
   let manager: KernelManager;
-  let kernel: Kernel.IKernel;
+  let kernel: Kernel.IKernelConnection;
 
   beforeAll(async () => {
     kernel = await Kernel.startNew();
@@ -50,8 +50,9 @@ describe('kernel/manager', () => {
     manager.dispose();
   });
 
-  afterAll(() => {
-    return Kernel.shutdownAll();
+  afterAll(async () => {
+    let models = await Kernel.listRunning();
+    await Promise.all(models.map(m => Kernel.shutdown(m.id)));
   });
 
   describe('KernelManager', () => {

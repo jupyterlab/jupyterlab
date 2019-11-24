@@ -9,9 +9,7 @@ import { Kernel, KernelMessage } from '@jupyterlab/services';
 
 import {
   validateMessage,
-  validateModel,
-  validateSpecModel,
-  validateSpecModels
+  validateModel
 } from '@jupyterlab/services/lib/kernel/validate';
 
 import { PYTHON_SPEC } from '../utils';

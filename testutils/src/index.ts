@@ -3,7 +3,7 @@
 
 import { simulate } from 'simulate-event';
 
-import { ServiceManager } from '@jupyterlab/services';
+import { ServiceManager, Session } from '@jupyterlab/services';
 
 import { ClientSession } from '@jupyterlab/apputils';
 
@@ -200,20 +200,33 @@ export function sleep<T>(milliseconds: number = 0, value?: T): Promise<T> {
 export async function createClientSession(
   options: Partial<ClientSession.IOptions> = {}
 ): Promise<ClientSession> {
-  const manager = options.manager || Private.getManager().sessions;
+  const manager = options.manager ?? Private.getManager().sessions;
+  const specsManager = options.specsManager ?? Private.getManager().kernelspecs;
 
   await manager.ready;
   return new ClientSession({
     manager,
+    specsManager,
     path: options.path || UUID.uuid4(),
     name: options.name,
     type: options.type,
     kernelPreference: options.kernelPreference || {
       shouldStart: true,
       canStart: true,
-      name: manager.specs.default
+      name: specsManager.specs.default
     }
   });
+}
+
+/**
+ * Create a session and return a session connection.
+ */
+export async function createSession(
+  options: Session.IRequest
+): Promise<Session.ISessionConnection> {
+  const manager = Private.getManager().sessions;
+  await manager.ready;
+  return manager.startNew(options);
 }
 
 /**
@@ -257,7 +270,7 @@ export async function initNotebookContext(
       shouldStart: startKernel,
       canStart: startKernel,
       shutdownOnClose: true,
-      name: manager.specs.default
+      name: manager.kernelspecs.specs.default
     }
   });
   await context.initialize(true);

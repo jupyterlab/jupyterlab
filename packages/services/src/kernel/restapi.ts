@@ -41,7 +41,7 @@ export async function listRunning(
  * The promise is fulfilled on a valid response and rejected otherwise.
  */
 export async function startNew(
-  options: Partial<Kernel.IModel>,
+  options: IKernelOptions,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Kernel.IModel> {
   let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
@@ -56,6 +56,26 @@ export async function startNew(
   let data = await response.json();
   validateModel(data);
   return data;
+}
+
+/**
+ * The options object used to initialize a kernel.
+ */
+export interface IKernelOptions {
+  /**
+   * The kernel name to start.
+   *
+   * #### Notes
+   * If not given, the server default kernel is used.
+   */
+  name?: string;
+
+  /**
+   * Environment variables passed to the kernelspec (used in Enterprise Gateway)
+   */
+  env?: {
+    [key: string]: string;
+  };
 }
 
 /**

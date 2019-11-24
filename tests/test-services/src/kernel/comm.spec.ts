@@ -48,10 +48,10 @@ get_ipython().kernel.comm_manager.register_target("test", target_func)
 `;
 
 describe('jupyter.services - Comm', () => {
-  let kernel: Kernel.IKernel;
+  let kernel: Kernel.IKernelConnection;
 
   beforeAll(async () => {
-    kernel = await Kernel.startNew({ name: 'ipython' });
+    kernel = await Kernel.startNew({name: 'ipython' });
   });
 
   afterEach(() => {

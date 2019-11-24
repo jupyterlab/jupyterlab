@@ -11,17 +11,17 @@ import { Signal } from '@phosphor/signaling';
 
 import { Panel } from '@phosphor/widgets';
 
-import { ClientSession, IClientSession } from '@jupyterlab/apputils';
-
 import { ForeignHandler } from '@jupyterlab/console';
 
 import { CodeCellModel, CodeCell } from '@jupyterlab/cells';
 
 import {
   createClientSession,
+  createSession,
   defaultRenderMime,
   NBTestUtils
 } from '@jupyterlab/testutils';
+import { IClientSession } from '@jupyterlab/apputils/src';
 
 class TestParent extends Panel implements ForeignHandler.IReceiver {
   addCell(cell: CodeCell, msgId?: string): void {
@@ -98,17 +98,16 @@ const relevantTypes = [
 
 describe('@jupyterlab/console', () => {
   describe('ForeignHandler', () => {
-    let local: Session.ISession;
-    let foreign: Session.ISession;
+    let foreign: Session.ISessionConnection;
     let handler: TestHandler;
     let session: IClientSession;
 
     before(async () => {
       const path = UUID.uuid4();
-      const sessions = [Session.startNew({ path }), Session.startNew({ path })];
-      [local, foreign] = await Promise.all(sessions);
-      session = await createClientSession({ path: local.path });
-      await (session as ClientSession).initialize();
+      [session, foreign] = await Promise.all([
+        createClientSession({ path, type: 'test' }),
+        createSession({ path, type: 'test' })
+      ]);
       await session.kernel.info;
     });
 
@@ -122,7 +121,6 @@ describe('@jupyterlab/console', () => {
     });
 
     after(async () => {
-      local.dispose();
       foreign.dispose();
       await session.shutdown();
       session.dispose();
@@ -172,7 +170,7 @@ describe('@jupyterlab/console', () => {
 
     describe('#session', () => {
       it('should be a client session object', () => {
-        expect(handler.session.path).to.be.ok;
+        expect(handler.session.session.path).to.be.ok;
       });
     });
 

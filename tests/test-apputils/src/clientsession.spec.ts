@@ -3,7 +3,11 @@
 
 import { expect } from 'chai';
 
-import { SessionManager } from '@jupyterlab/services';
+import {
+  SessionManager,
+  KernelManager,
+  KernelSpecManager
+} from '@jupyterlab/services';
 
 import { ClientSession, Dialog, IClientSession } from '@jupyterlab/apputils';
 
@@ -17,16 +21,27 @@ import {
 
 describe('@jupyterlab/apputils', () => {
   describe('ClientSession', () => {
-    const manager = new SessionManager();
+    const kernelManager = new KernelManager();
+    const manager = new SessionManager({ kernelManager });
+    const specsManager = new KernelSpecManager();
+
     let session: ClientSession;
 
-    beforeAll(() => manager.ready);
+    beforeAll(
+      async () =>
+        await Promise.all([
+          manager.ready,
+          kernelManager.ready,
+          specsManager.ready
+        ])
+    );
 
     beforeEach(() => {
       Dialog.flush();
       session = new ClientSession({
         manager,
-        kernelPreference: { name: manager.specs.default }
+        specsManager,
+        kernelPreference: { name: specsManager.specs.default }
       });
     });
 
@@ -46,10 +61,10 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('#terminated', () => {
-      it('should be emitted when the session is terminated', async () => {
+    describe('#disposed', () => {
+      it('should be emitted when the session is disposed', async () => {
         await session.initialize();
-        session.terminated.connect((sender, args) => {
+        session.disposed.connect((sender, args) => {
           expect(sender).to.equal(session);
           expect(args).to.be.undefined;
         });
@@ -94,7 +109,7 @@ describe('@jupyterlab/apputils', () => {
           expect(sender).to.equal(session);
           expect(args).to.equal('path');
         });
-        await session.setPath('foo');
+        await session.session.setPath('foo');
       });
 
       it('should be emitted when a session name changes', async () => {
@@ -103,7 +118,7 @@ describe('@jupyterlab/apputils', () => {
           expect(sender).to.equal(session);
           expect(args).to.equal('name');
         });
-        await session.setName('foo');
+        await session.session.setName('foo');
       });
 
       it('should be emitted when a session type changes', async () => {
@@ -112,7 +127,7 @@ describe('@jupyterlab/apputils', () => {
           expect(sender).to.equal(session);
           expect(args).to.equal('type');
         });
-        await session.setType('foo');
+        await session.session.setType('foo');
       });
     });
 
@@ -121,33 +136,6 @@ describe('@jupyterlab/apputils', () => {
         expect(session.kernel).to.be.null;
         await session.initialize();
         expect(session.kernel).to.be.ok;
-      });
-    });
-
-    describe('#path', () => {
-      it('should current path of the the session', async () => {
-        session.kernelPreference = { canStart: false };
-        expect(typeof session.path).to.equal('string');
-        await session.setPath('foo');
-        expect(session.path).to.equal('foo');
-      });
-    });
-
-    describe('#name', () => {
-      it('should the current name of the the session', async () => {
-        session.kernelPreference = { canStart: false };
-        expect(typeof session.name).to.equal('string');
-        await session.setName('foo');
-        expect(session.name).to.equal('foo');
-      });
-    });
-
-    describe('#type', () => {
-      it('should the current type of the the session', async () => {
-        session.kernelPreference = { canStart: false };
-        expect(typeof session.type).to.equal('string');
-        await session.setType('foo');
-        expect(session.type).to.equal('foo');
       });
     });
 
@@ -171,22 +159,17 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('#isReady', () => {
-      it('should be false until ready', async () => {
-        expect(session.isReady).to.equal(false);
-        await session.initialize();
-        expect(session.isReady).to.equal(true);
-      });
-    });
-
     describe('#initialize()', () => {
       it('should start the default kernel', async () => {
         await session.initialize();
-        expect(session.kernel.name).to.equal(manager.specs.default);
+        expect(session.kernel.name).to.equal(specsManager.specs.default);
       });
 
       it('should connect to an existing session on the path', async () => {
-        const other = await manager.startNew({ path: session.path });
+        const other = await manager.startNew({
+          path: session.session.path,
+          type: 'test'
+        });
 
         await session.initialize();
         expect(other.kernel.id).to.equal(session.kernel.id);
@@ -199,10 +182,17 @@ describe('@jupyterlab/apputils', () => {
         await session.shutdown();
         session.dispose();
 
-        const other = await manager.startNew({ path: UUID.uuid4() });
+        const other = await manager.startNew({
+          path: UUID.uuid4(),
+          type: 'test'
+        });
         const kernelPreference = { id: other.kernel.id };
 
-        session = new ClientSession({ manager, kernelPreference });
+        session = new ClientSession({
+          manager,
+          specsManager,
+          kernelPreference
+        });
         await session.initialize();
         expect(session.kernel.id).to.equal(other.kernel.id);
         // We don't call other.shutdown() here because that
@@ -218,16 +208,16 @@ describe('@jupyterlab/apputils', () => {
 
         await session.initialize();
         await accept;
-        expect(session.kernel.name).to.equal(manager.specs.default);
+        expect(session.kernel.name).to.equal(specsManager.specs.default);
       });
 
-      it('should be a no-op if if the shouldStart kernelPreference is false', async () => {
+      it('should be a no-op if the shouldStart kernelPreference is false', async () => {
         session.kernelPreference = { shouldStart: false };
         await session.initialize();
         expect(session.kernel).to.not.be.ok;
       });
 
-      it('should be a no-op if if the canStart kernelPreference is false', async () => {
+      it('should be a no-op if the canStart kernelPreference is false', async () => {
         session.kernelPreference = { canStart: false };
         await session.initialize();
         expect(session.kernel).to.not.be.ok;
@@ -347,30 +337,6 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('#setPath()', () => {
-      it('should change the session path', async () => {
-        session.kernelPreference = { canStart: false };
-        await session.setPath('foo');
-        expect(session.path).to.equal('foo');
-      });
-    });
-
-    describe('#setName', () => {
-      it('should change the session name', async () => {
-        session.kernelPreference = { canStart: false };
-        await session.setName('foo');
-        expect(session.name).to.equal('foo');
-      });
-    });
-
-    describe('#setType()', () => {
-      it('should set the session type', async () => {
-        session.kernelPreference = { canStart: false };
-        await session.setType('foo');
-        expect(session.type).to.equal('foo');
-      });
-    });
-
     describe('#restartKernel()', () => {
       it('should restart if the user accepts the dialog', async () => {
         let called = false;
@@ -415,18 +381,18 @@ describe('@jupyterlab/apputils', () => {
       it('should return null if no options are given', () => {
         expect(
           ClientSession.getDefaultKernel({
-            specs: manager.specs,
+            specs: specsManager.specs,
             preference: {}
           })
         ).to.be.null;
       });
 
       it('should return a matching name', () => {
-        const spec = manager.specs.kernelspecs[manager.specs.default];
+        const spec = specsManager.specs.kernelspecs[specsManager.specs.default];
 
         expect(
           ClientSession.getDefaultKernel({
-            specs: manager.specs,
+            specs: specsManager.specs,
             preference: { name: spec.name }
           })
         ).to.equal(spec.name);
@@ -435,14 +401,14 @@ describe('@jupyterlab/apputils', () => {
       it('should return null if no match is found', () => {
         expect(
           ClientSession.getDefaultKernel({
-            specs: manager.specs,
+            specs: specsManager.specs,
             preference: { name: 'foo' }
           })
         ).to.be.null;
       });
 
       it('should return a matching language', () => {
-        const spec = manager.specs.kernelspecs[manager.specs.default];
+        const spec = specsManager.specs.kernelspecs[specsManager.specs.default];
         const kernelspecs: any = {};
 
         kernelspecs[spec.name] = spec;
@@ -458,7 +424,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return null if a language matches twice', () => {
-        const spec = manager.specs.kernelspecs[manager.specs.default];
+        const spec = specsManager.specs.kernelspecs[specsManager.specs.default];
         const kernelspecs: any = {};
 
         kernelspecs['foo'] = spec;
@@ -484,7 +450,7 @@ describe('@jupyterlab/apputils', () => {
         const div = document.createElement('select');
 
         ClientSession.populateKernelSelect(div, {
-          specs: manager.specs,
+          specs: specsManager.specs,
           preference: {}
         });
         expect(div.firstChild).to.be.ok;
@@ -495,7 +461,7 @@ describe('@jupyterlab/apputils', () => {
         const div = document.createElement('select');
 
         ClientSession.populateKernelSelect(div, {
-          specs: manager.specs,
+          specs: specsManager.specs,
           preference: { shouldStart: false }
         });
         expect(div.firstChild).to.be.ok;
@@ -506,7 +472,7 @@ describe('@jupyterlab/apputils', () => {
         const div = document.createElement('select');
 
         ClientSession.populateKernelSelect(div, {
-          specs: manager.specs,
+          specs: specsManager.specs,
           preference: { canStart: false }
         });
         expect(div.firstChild).to.be.ok;

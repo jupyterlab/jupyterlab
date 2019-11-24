@@ -233,7 +233,7 @@ describe('docregistry/context', () => {
 
     describe('#session', () => {
       it('should be a client session object', () => {
-        expect(context.session.path).to.equal(context.path);
+        expect(context.session.session.path).to.equal(context.path);
       });
     });
 

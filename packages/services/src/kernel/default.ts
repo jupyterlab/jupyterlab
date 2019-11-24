@@ -45,15 +45,14 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Construct a kernel object.
    */
-  constructor(options: Kernel.IOptions) {
+  constructor(options: Kernel.IKernelConnection.IOptions) {
     this._name = options.model.name;
     this._id = options.model.id;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
     this._clientId = options.clientId ?? UUID.uuid4();
     this._username = options.username ?? '';
-    this.handleComms =
-      options.handleComms === undefined ? true : options.handleComms;
+    this.handleComms = options.handleComms ?? true;
 
     this.connectionStatusChanged.connect((sender, connectionStatus) => {
       // Send pending messages and update status to be consistent.
@@ -241,7 +240,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Clone the current kernel with a new clientId.
    */
   clone(
-    options: Pick<Kernel.IOptions, 'clientId' | 'username' | 'handleComms'> = {}
+    options: Pick<
+      Kernel.IKernelConnection.IOptions,
+      'clientId' | 'username' | 'handleComms'
+    > = {}
   ): Kernel.IKernelConnection {
     return new KernelConnection({
       model: this.model,

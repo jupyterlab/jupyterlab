@@ -517,7 +517,59 @@ export namespace Kernel {
      * request fails, or the response is invalid.
      */
     shutdown(): Promise<void>;
+
+    /**
+     * Clone the current kernel with a new clientId.
+     */
+    clone(
+      options?: Pick<
+        IKernelConnection.IOptions,
+        'clientId' | 'username' | 'handleComms'
+      >
+    ): Kernel.IKernelConnection;
   }
+
+  export namespace IKernelConnection {
+    /**
+     * The options object used to initialize a kernel.
+     */
+    export interface IOptions {
+      /**
+       * The kernel model.
+       */
+      model: Kernel.IModel;
+
+      /**
+       * The server settings for the kernel.
+       */
+      serverSettings?: ServerConnection.ISettings;
+
+      /**
+       * The username of the kernel client.
+       */
+      username?: string;
+
+      /**
+       * Whether the kernel connection should handle comm messages
+       *
+       * #### Notes
+       * The comm message protocol currently has implicit assumptions that only
+       * one kernel connection is handling comm messages. This option allows a
+       * kernel connection to opt out of handling comms.
+       *
+       * See https://github.com/jupyter/jupyter_client/issues/263
+       */
+      handleComms?: boolean;
+
+      /**
+       * The unique identifier for the kernel client.
+       */
+      clientId?: string;
+    }
+  }
+
+  // TODO: Should we delete the findById, listRunning, startNew, and shutdown
+  // convenience functions, and point people to the rest api?
 
   /**
    * Find a kernel by id.
@@ -573,12 +625,13 @@ export namespace Kernel {
    * default kernel will by started by the server.
    */
   export async function startNew(
-    options: Kernel.IOptions
+    options: restapi.IKernelOptions &
+      Omit<IKernelConnection.IOptions, 'model'> = {}
   ): Promise<Kernel.IKernelConnection> {
-    // TODO: settings should be second argument?
-    options.serverSettings =
-      options.serverSettings ?? ServerConnection.makeSettings();
-    const model = await restapi.startNew(options.model);
+    const model = await restapi.startNew(
+      { name: options.name, env: options.env },
+      options.serverSettings
+    );
     return new KernelConnection({ ...options, model });
   }
 
@@ -599,51 +652,6 @@ export namespace Kernel {
     settings?: ServerConnection.ISettings
   ): Promise<void> {
     return restapi.shutdownKernel(id, settings);
-  }
-
-  /**
-   * The options object used to initialize a kernel.
-   */
-  export interface IOptions {
-    /**
-     * The kernel model, partial since we only need an id or a name, or
-     * neither to start the server default kernel.
-     */
-    model: Partial<Kernel.IModel>;
-
-    /**
-     * Environment variables passed to the kernelspec (used in Enterprise Gateway)
-     */
-    env?: {
-      [key: string]: string;
-    };
-
-    /**
-     * The server settings for the kernel.
-     */
-    serverSettings?: ServerConnection.ISettings;
-
-    /**
-     * The username of the kernel client.
-     */
-    username?: string;
-
-    /**
-     * Whether the kernel connection should handle comm messages
-     *
-     * #### Notes
-     * The comm message protocol currently has implicit assumptions that only
-     * one kernel connection is handling comm messages. This option allows a
-     * kernel connection to opt out of handling comms.
-     *
-     * See https://github.com/jupyter/jupyter_client/issues/263
-     */
-    handleComms?: boolean;
-
-    /**
-     * The unique identifier for the kernel client.
-     */
-    clientId?: string;
   }
 
   /**
@@ -704,7 +712,10 @@ export namespace Kernel {
      * #### Notes
      * The manager `serverSettings` will be always be used.
      */
-    startNew(options: IOptions): Promise<IKernelConnection>;
+    startNew(
+      options: restapi.IKernelOptions &
+        Omit<Kernel.IKernelConnection.IOptions, 'model' | 'serverSettings'>
+    ): Promise<Kernel.IKernelConnection>;
 
     /**
      * Find a kernel by id.
@@ -722,7 +733,7 @@ export namespace Kernel {
      *
      * @returns A promise that resolves with the new kernel instance.
      */
-    connectTo(options: Kernel.IOptions): Kernel.IKernelConnection;
+    connectTo(options: IKernelConnection.IOptions): Kernel.IKernelConnection;
 
     /**
      * Shut down a kernel by id.
@@ -997,7 +1008,7 @@ export namespace Kernel {
    * #### Notes
    * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
    */
-  export interface IModel extends JSONObject {
+  export interface IModel {
     /**
      * Unique identifier of the kernel server session.
      */

@@ -13,7 +13,12 @@ import { ServerConnection } from '..';
 
 import { Kernel } from './kernel';
 import { BaseManager } from '../basemanager';
-import { shutdownKernel, startNew, listRunning } from './restapi';
+import {
+  shutdownKernel,
+  startNew,
+  listRunning,
+  IKernelOptions
+} from './restapi';
 import { KernelConnection } from './default';
 
 // TODO: Migrate kernel connection status etc. up to session
@@ -103,7 +108,9 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    *
    * @returns A promise that resolves with the new kernel instance.
    */
-  connectTo(options: Kernel.IOptions): Kernel.IKernelConnection {
+  connectTo(
+    options: Kernel.IKernelConnection.IOptions
+  ): Kernel.IKernelConnection {
     const { id } = options.model;
     let handleComms = true;
     // By default, handle comms only if no other kernel connection is.
@@ -158,9 +165,14 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    * #### Notes
    * The manager `serverSettings` will be always be used.
    */
-  async startNew(options: Kernel.IOptions): Promise<Kernel.IKernelConnection> {
-    const model = await startNew(options.model, this.serverSettings);
-    await this.refreshRunning();
+  async startNew(
+    options: IKernelOptions &
+      Omit<Kernel.IKernelConnection.IOptions, 'model' | 'serverSettings'>
+  ): Promise<Kernel.IKernelConnection> {
+    const model = await startNew(
+      { name: options.name, env: options.env },
+      this.serverSettings
+    );
     return this.connectTo({
       ...options,
       model,

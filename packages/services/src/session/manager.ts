@@ -14,8 +14,10 @@ import { ServerConnection } from '../serverconnection';
 import { Session } from './session';
 import { BaseManager } from '../basemanager';
 import { SessionConnection } from './default';
-import { startSession, shutdownSession, listRunning } from './restapi';
+import { RestAPI } from './restapi';
 import { Kernel } from '../kernel';
+
+const { startSession, shutdownSession, listRunning } = RestAPI;
 
 /**
  * We have a session manager that maintains a list of models from the server.
@@ -169,13 +171,9 @@ export class SessionManager extends BaseManager implements Session.IManager {
    * @param options - Overrides for the default options, must include a `path`.
    */
   async startNew(
-    options: Omit<Session.IOptions, 'model' | 'connectToKernel'> & {
-      model: Omit<Session.IModel, 'kernel'> & {
-        kernel: Partial<Kernel.IModel> | null;
-      };
-    }
+    options: Session.IRequest
   ): Promise<Session.ISessionConnection> {
-    const model = await startSession(options.model, this.serverSettings);
+    const model = await startSession(options, this.serverSettings);
     await this.refreshRunning();
     return this.connectTo(model);
   }
@@ -344,7 +342,9 @@ export class SessionManager extends BaseManager implements Session.IManager {
     void this.refreshRunning();
   };
 
-  private readonly _connectToKernel = (options: Kernel.IOptions) => {
+  private readonly _connectToKernel = (
+    options: Kernel.IKernelConnection.IOptions
+  ) => {
     return this._kernelManager.connectTo(options);
   };
 

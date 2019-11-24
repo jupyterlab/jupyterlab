@@ -61,7 +61,7 @@ describe('@jupyterlab/completer', () => {
   beforeAll(async () => {
     session = await createClientSession();
     await (session as ClientSession).initialize();
-    connector = new KernelConnector({ session });
+    connector = new KernelConnector({ session: session.session });
   });
 
   afterAll(() => session.shutdown());

@@ -7,9 +7,9 @@ import { Kernel, KernelMessage } from '../kernel';
 
 import { ServerConnection } from '..';
 
-import { Session } from './session';
+import { Session, DeepPartial } from './session';
 
-import * as restapi from './restapi';
+import restapi from './restapi';
 
 /**
  * Session object for accessing the session REST api. The session
@@ -378,7 +378,7 @@ export class SessionConnection implements Session.ISessionConnection {
    * Send a PATCH to the server, updating the session path or the kernel.
    */
   private async _patch(
-    body: restapi.DeepPartial<Session.IModel>
+    body: DeepPartial<Session.IModel>
   ): Promise<Session.IModel> {
     let model = await restapi.updateSession(
       { ...body, id: this._id },
@@ -422,6 +422,6 @@ export class SessionConnection implements Session.ISessionConnection {
   private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
   private _connectToKernel: (
-    options: Kernel.IOptions
+    options: Kernel.IKernelConnection.IOptions
   ) => Kernel.IKernelConnection;
 }

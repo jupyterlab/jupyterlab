@@ -299,7 +299,7 @@ describe('rendermime/registry', () => {
     describe('.UrlResolver', () => {
       let resolver: RenderMimeRegistry.UrlResolver;
       let contents: Contents.IManager;
-      let session: Session.ISession;
+      let session: Session.ISessionConnection;
       const pathParent = 'has%20üni';
       const urlParent = encodeURI(pathParent);
 
@@ -310,7 +310,7 @@ describe('rendermime/registry', () => {
         contents = manager.contents;
         contents.addDrive(drive);
         await manager.ready;
-        session = await manager.sessions.startNew({ path: path });
+        session = await manager.sessions.startNew({ path: path, type: 'test' });
         resolver = new RenderMimeRegistry.UrlResolver({
           session,
           contents: manager.contents

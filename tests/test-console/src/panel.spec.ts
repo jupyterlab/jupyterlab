@@ -73,7 +73,7 @@ describe('console/panel', () => {
 
     describe('#session', () => {
       it('should be a client session object', () => {
-        expect(panel.session.path).to.be.ok;
+        expect(panel.session.sessionChanged).to.be.ok;
       });
     });
 
@@ -90,7 +90,7 @@ describe('console/panel', () => {
       it('should start the session', async () => {
         Widget.attach(panel, document.body);
         await dismissDialog();
-        return panel.session.ready;
+        return panel.session.session.kernel.info;
       });
     });
 

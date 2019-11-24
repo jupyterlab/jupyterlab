@@ -2,7 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import { Contents } from '@jupyterlab/services';
+import { Contents, Session } from '@jupyterlab/services';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
@@ -320,10 +320,11 @@ export namespace RenderMimeRegistry {
      */
     resolveUrl(url: string): Promise<string> {
       if (this.isLocal(url)) {
-        if (!this._session.session) {
+        const sc = Private.sessionConnection(this._session);
+        if (!sc) {
           throw new Error('Cannot resolve local url with no session');
         }
-        const cwd = encodeURI(PathExt.dirname(this._session.session?.path));
+        const cwd = encodeURI(PathExt.dirname(sc.path));
         url = PathExt.resolve(cwd, url);
       }
       return Promise.resolve(url);
@@ -358,7 +359,7 @@ export namespace RenderMimeRegistry {
       return URLExt.isLocal(url) || !!this._contents.driveName(path);
     }
 
-    private _session: IClientSession;
+    private _session: IClientSession | Session.ISessionConnection;
     private _contents: Contents.IManager;
   }
 
@@ -369,7 +370,7 @@ export namespace RenderMimeRegistry {
     /**
      * The session used by the resolver.
      */
-    session: IClientSession;
+    session: IClientSession | Session.ISessionConnection;
 
     /**
      * The contents manager used by the resolver.
@@ -409,5 +410,13 @@ namespace Private {
       }
       return p1.id - p2.id;
     });
+  }
+
+  export function sessionConnection(
+    s: Session.ISessionConnection | IClientSession
+  ): Session.ISessionConnection {
+    return (s as any).sessionChanged
+      ? (s as IClientSession).session
+      : (s as Session.ISessionConnection);
   }
 }

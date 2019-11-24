@@ -7,7 +7,7 @@ import { UUID } from '@phosphor/coreutils';
 
 import { toArray } from '@phosphor/algorithm';
 
-import { Kernel } from '@jupyterlab/services';
+import { Kernel, KernelSpecManager, KernelSpec } from '@jupyterlab/services';
 
 import { expectFailure, testEmission } from '@jupyterlab/testutils';
 
@@ -23,7 +23,7 @@ PYTHON3_SPEC.name = 'Python3';
 PYTHON3_SPEC.display_name = 'python3';
 
 describe('kernel', () => {
-  let defaultKernel: Kernel.IKernel;
+  let defaultKernel: Kernel.IKernelConnection;
   let tester: KernelTester;
 
   beforeAll(async () => {
@@ -36,8 +36,9 @@ describe('kernel', () => {
     }
   });
 
-  afterEach(() => {
-    return Kernel.shutdownAll();
+  afterEach(async () => {
+    let models = await Kernel.listRunning();
+    await Promise.all(models.map(m => Kernel.shutdown(m.id)));
   });
 
   describe('Kernel.listRunning()', () => {
@@ -146,41 +147,6 @@ describe('kernel', () => {
     });
   });
 
-  describe('Kernel.connectTo()', () => {
-    it('should connect to an existing kernel', async () => {
-      const id = defaultKernel.id;
-      const kernel = Kernel.connectTo(defaultKernel.model);
-      expect(kernel.id).to.equal(id);
-      kernel.dispose();
-    });
-
-    it('should accept server settings', async () => {
-      const id = defaultKernel.id;
-      const serverSettings = makeSettings();
-      const kernel = Kernel.connectTo(defaultKernel.model, serverSettings);
-      expect(kernel.id).to.equal(id);
-      kernel.dispose();
-    });
-
-    it('should turn off comm handling in the new connection if it was enabled in first kernel', async () => {
-      const kernel = await Kernel.startNew();
-      expect(kernel.handleComms).to.be.true;
-      const kernel2 = Kernel.connectTo(kernel.model);
-      expect(kernel2.handleComms).to.be.false;
-      kernel.dispose();
-      kernel2.dispose();
-    });
-
-    it('should turn on comm handling in the new connection if it was disabled in all other connections', async () => {
-      const kernel = await Kernel.startNew({ handleComms: false });
-      expect(kernel.handleComms).to.be.false;
-      const kernel2 = Kernel.connectTo(kernel.model);
-      expect(kernel2.handleComms).to.be.true;
-      kernel.dispose();
-      kernel2.dispose();
-    });
-  });
-
   describe('Kernel.shutdown()', () => {
     it('should shut down a kernel by id', async () => {
       const k = await Kernel.startNew();
@@ -194,13 +160,13 @@ describe('kernel', () => {
 
   describe('Kernel.getSpecs()', () => {
     it('should load the kernelspecs', async () => {
-      const specs = await Kernel.getSpecs();
+      const specs = await KernelSpec.getSpecs();
       expect(specs.default).to.be.ok;
     });
 
     it('should accept ajax options', async () => {
       const serverSettings = makeSettings();
-      const specs = await Kernel.getSpecs(serverSettings);
+      const specs = await KernelSpec.getSpecs(serverSettings);
       expect(specs.default).to.be.ok;
     });
 
@@ -208,7 +174,7 @@ describe('kernel', () => {
       const serverSettings = getRequestHandler(200, {
         kernelspecs: { python: PYTHON_SPEC }
       });
-      const specs = await Kernel.getSpecs(serverSettings);
+      const specs = await KernelSpec.getSpecs(serverSettings);
       expect(specs.default).to.be.ok;
     });
 
@@ -216,7 +182,7 @@ describe('kernel', () => {
       const serverSettings = getRequestHandler(200, {
         default: PYTHON_SPEC.name
       });
-      const promise = Kernel.getSpecs(serverSettings);
+      const promise = KernelSpec.getSpecs(serverSettings);
       await expectFailure(promise, 'No kernelspecs found');
     });
 
@@ -230,7 +196,7 @@ describe('kernel', () => {
           python: PYTHON_SPEC
         }
       });
-      const specs = await Kernel.getSpecs(serverSettings);
+      const specs = await KernelSpec.getSpecs(serverSettings);
       expect(specs.default).to.equal('python');
       expect(specs.kernelspecs['R']).to.be.undefined;
     });
@@ -242,7 +208,7 @@ describe('kernel', () => {
         default: 'R',
         kernelspecs: { R: R_SPEC }
       });
-      const promise = Kernel.getSpecs(serverSettings);
+      const promise = KernelSpec.getSpecs(serverSettings);
       await expectFailure(promise, 'No valid kernelspecs found');
     });
 
@@ -253,7 +219,7 @@ describe('kernel', () => {
         default: 'R',
         kernelspecs: { R: R_SPEC }
       });
-      const promise = Kernel.getSpecs(serverSettings);
+      const promise = KernelSpec.getSpecs(serverSettings);
       await expectFailure(promise, 'No valid kernelspecs found');
     });
 
@@ -264,7 +230,7 @@ describe('kernel', () => {
         default: 'R',
         kernelspecs: { R: R_SPEC }
       });
-      const promise = Kernel.getSpecs(serverSettings);
+      const promise = KernelSpec.getSpecs(serverSettings);
       await expectFailure(promise, 'No valid kernelspecs found');
     });
 
@@ -275,7 +241,7 @@ describe('kernel', () => {
         default: 'R',
         kernelspecs: { R: R_SPEC }
       });
-      const promise = Kernel.getSpecs(serverSettings);
+      const promise = KernelSpec.getSpecs(serverSettings);
       await expectFailure(promise, 'No valid kernelspecs found');
     });
 
@@ -286,13 +252,13 @@ describe('kernel', () => {
         default: 'R',
         kernelspecs: { R: R_SPEC }
       });
-      const promise = Kernel.getSpecs(serverSettings);
+      const promise = KernelSpec.getSpecs(serverSettings);
       await expectFailure(promise, 'No valid kernelspecs found');
     });
 
     it('should throw an error for an invalid response', async () => {
       const serverSettings = getRequestHandler(201, {});
-      const promise = Kernel.getSpecs(serverSettings);
+      const promise = KernelSpec.getSpecs(serverSettings);
       await expectFailure(promise, 'Invalid response: 201 Created');
     });
 
@@ -303,7 +269,7 @@ describe('kernel', () => {
         default: 'python',
         kernelspecs: { python: PYTHON_SPEC_W_MD }
       });
-      const specs = await Kernel.getSpecs(serverSettings);
+      const specs = await KernelSpec.getSpecs(serverSettings);
 
       expect(specs.kernelspecs['python']).to.have.property('metadata');
       const metadata = specs.kernelspecs['python'].metadata;
@@ -324,7 +290,7 @@ describe('kernel', () => {
         default: 'python',
         kernelspecs: { python: PYTHON_SPEC_W_ENV }
       });
-      const specs = await Kernel.getSpecs(serverSettings);
+      const specs = await KernelSpec.getSpecs(serverSettings);
 
       expect(specs.kernelspecs['python']).to.have.property('env');
       const env = specs.kernelspecs['python'].env;

@@ -9,19 +9,20 @@ import { UUID } from '@phosphor/coreutils';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
-import { Kernel, KernelMessage } from '@jupyterlab/services';
+import { Kernel, KernelMessage, KernelSpec } from '@jupyterlab/services';
 
 import { expectFailure, testEmission } from '@jupyterlab/testutils';
 
 import { KernelTester, handleRequest } from '../utils';
+import { KernelConnection } from '@jupyterlab/services/src/kernel/default';
 
 describe('Kernel.IKernel', () => {
-  let defaultKernel: Kernel.IKernel;
-  let specs: Kernel.ISpecModels;
+  let defaultKernel: Kernel.IKernelConnection;
+  let specs: KernelSpec.ISpecModels;
 
   beforeAll(async () => {
     jest.setTimeout(60000);
-    specs = await Kernel.getSpecs();
+    specs = await KernelSpec.getSpecs();
   });
 
   beforeEach(async () => {
@@ -34,7 +35,8 @@ describe('Kernel.IKernel', () => {
   });
 
   afterAll(async () => {
-    await Kernel.shutdownAll();
+    const models = await Kernel.listRunning();
+    await Promise.all(models.map(m => Kernel.shutdown(m.id)));
   });
 
   describe('#disposed', () => {
@@ -274,14 +276,6 @@ describe('Kernel.IKernel', () => {
     });
   });
 
-  describe('#model', () => {
-    it('should be an IModel', () => {
-      const model = defaultKernel.model;
-      expect(typeof model.name).to.equal('string');
-      expect(typeof model.id).to.equal('string');
-    });
-  });
-
   describe('#username', () => {
     it('should be a string', () => {
       expect(typeof defaultKernel.username).to.equal('string');
@@ -376,14 +370,14 @@ describe('Kernel.IKernel', () => {
 
   describe('#isDisposed', () => {
     it('should be true after we dispose of the kernel', async () => {
-      const kernel = Kernel.connectTo(defaultKernel.model);
+      const kernel = defaultKernel.clone();
       expect(kernel.isDisposed).to.equal(false);
       kernel.dispose();
       expect(kernel.isDisposed).to.equal(true);
     });
 
     it('should be safe to call multiple times', async () => {
-      const kernel = Kernel.connectTo(defaultKernel.model);
+      const kernel = defaultKernel.clone();
       expect(kernel.isDisposed).to.equal(false);
       expect(kernel.isDisposed).to.equal(false);
       kernel.dispose();
@@ -394,7 +388,7 @@ describe('Kernel.IKernel', () => {
 
   describe('#dispose()', () => {
     it('should dispose of the resources held by the kernel', async () => {
-      const kernel = Kernel.connectTo(defaultKernel.model);
+      const kernel = defaultKernel.clone();
       const future = kernel.requestExecute({ code: 'foo' });
       expect(future.isDisposed).to.equal(false);
       kernel.dispose();
@@ -402,7 +396,7 @@ describe('Kernel.IKernel', () => {
     });
 
     it('should be safe to call twice', async () => {
-      const kernel = Kernel.connectTo(defaultKernel.model);
+      const kernel = defaultKernel.clone();
       const future = kernel.requestExecute({ code: 'foo' });
       expect(future.isDisposed).to.equal(false);
       kernel.dispose();
@@ -416,7 +410,7 @@ describe('Kernel.IKernel', () => {
 
   describe('#sendShellMessage()', () => {
     let tester: KernelTester;
-    let kernel: Kernel.IKernel;
+    let kernel: Kernel.IKernelConnection;
 
     beforeEach(async () => {
       tester = new KernelTester();
@@ -701,7 +695,7 @@ describe('Kernel.IKernel', () => {
 
     it('should dispose of all kernel instances', async () => {
       const kernel0 = await Kernel.startNew();
-      const kernel1 = Kernel.connectTo(kernel0.model);
+      const kernel1 = kernel0.clone();
       await kernel0.info;
       await kernel1.info;
       await kernel0.shutdown();
@@ -976,7 +970,7 @@ describe('Kernel.IKernel', () => {
       const calls: string[] = [];
       let future: Kernel.IShellFuture;
 
-      let kernel: Kernel.IKernel;
+      let kernel: Kernel.IKernelConnection;
 
       const tester = new KernelTester();
       tester.onMessage(message => {
@@ -1063,7 +1057,7 @@ describe('Kernel.IKernel', () => {
 
       const tester = new KernelTester();
       let future: Kernel.IShellFuture;
-      let kernel: Kernel.IKernel;
+      let kernel: Kernel.IKernelConnection;
 
       tester.onMessage(message => {
         // send a reply
@@ -1139,7 +1133,7 @@ describe('Kernel.IKernel', () => {
       const calls: string[] = [];
       const tester = new KernelTester();
       let future: Kernel.IShellFuture;
-      let kernel: Kernel.IKernel;
+      let kernel: Kernel.IKernelConnection;
 
       tester.onMessage(message => {
         // send a reply
@@ -1212,7 +1206,7 @@ describe('Kernel.IKernel', () => {
       const calls: string[] = [];
       const tester = new KernelTester();
       let future: Kernel.IShellFuture;
-      let kernel: Kernel.IKernel;
+      let kernel: Kernel.IKernelConnection;
 
       tester.onMessage(message => {
         // send a reply

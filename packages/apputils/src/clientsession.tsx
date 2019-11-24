@@ -619,12 +619,10 @@ export class ClientSession implements IClientSession {
     }
     try {
       const session = await this.manager.startNew({
-        model: {
-          path: this._path,
-          type: this._type,
-          name: this._name,
-          kernel: model
-        }
+        path: this._path,
+        type: this._type,
+        name: this._name,
+        kernel: model
       });
       return this._handleNewSession(session);
     } catch (err) {

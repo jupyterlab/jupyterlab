@@ -133,7 +133,7 @@ describe('console/widget', () => {
 
     describe('#session', () => {
       it('should be a client session object', () => {
-        expect(widget.session.path).to.be.ok;
+        expect(widget.session.sessionChanged).to.be.ok;
       });
     });
 
