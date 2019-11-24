@@ -73,14 +73,14 @@
     "jest": "^24.8.0",
     "jest-junit": "^6.3.0",
     "lint-staged": "^9.2.1",
-    "prettier": "^1.18.2",
+    "prettier": "^1.19.1",
     "rimraf": "~2.6.2",
     "ts-jest": "^24",
     "tslint": "^5.18.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
     "typedoc": "^0.15.0",
-    "typescript": "~3.5.1"
+    "typescript": "~3.7.2"
   },
   "husky": {
     "hooks": {
