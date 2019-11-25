@@ -50,7 +50,6 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
   return (
     <>
       {breakpoints.map(entry => (
-        // Array.from(breakpoints.entries()).map((entry) => (
         <BreakpointCellComponent
           key={entry[0]}
           breakpoints={entry[1]}
