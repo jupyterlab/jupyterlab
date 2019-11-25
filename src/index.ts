@@ -263,6 +263,11 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     });
 
     app.contextMenu.addItem({
+      command: CommandIDs.changeMode,
+      selector: '.jp-DebuggerSidebar'
+    });
+
+    app.contextMenu.addItem({
       command: CommandIDs.closeDebugger,
       selector: '.jp-DebuggerSidebar'
     });
