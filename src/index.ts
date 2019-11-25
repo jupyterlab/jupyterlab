@@ -95,7 +95,7 @@ class DebuggerHandler<H extends ConsoleHandler | NotebookHandler> {
     T extends IConsoleTracker | INotebookTracker,
     W extends ConsolePanel | NotebookPanel
   >(debug: IDebugger, tracker: T, widget: W): void {
-    if (!debug.model || this.handlers[widget.id]) {
+    if (!debug.model || this.handlers[widget.id] || !debug.isDebuggingEnabled) {
       return;
     }
     const handler = new this.builder({
