@@ -1,10 +1,13 @@
-import { KernelSpec } from './kernelspec';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { ISpecModel, ISpecModels } from './restapi';
 import { validateProperty } from '../validate';
 
 /**
  * Validate a server kernelspec model to a client side model.
  */
-export function validateSpecModel(data: any): KernelSpec.ISpecModel {
+export function validateSpecModel(data: any): ISpecModel {
   let spec = data.spec;
   if (!spec) {
     throw new Error('Invalid kernel spec');
@@ -40,14 +43,12 @@ export function validateSpecModel(data: any): KernelSpec.ISpecModel {
 /**
  * Validate a `Kernel.ISpecModels` object.
  */
-export function validateSpecModels(data: any): KernelSpec.ISpecModels {
+export function validateSpecModels(data: any): ISpecModels {
   if (!data.hasOwnProperty('kernelspecs')) {
     throw new Error('No kernelspecs found');
   }
   let keys = Object.keys(data.kernelspecs);
-  let kernelspecs: { [key: string]: KernelSpec.ISpecModel } = Object.create(
-    null
-  );
+  let kernelspecs: { [key: string]: ISpecModel } = Object.create(null);
   let defaultSpec = data.default;
 
   for (let i = 0; i < keys.length; i++) {

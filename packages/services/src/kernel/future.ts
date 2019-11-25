@@ -5,9 +5,9 @@ import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { DisposableDelegate } from '@phosphor/disposable';
 
-import { Kernel } from './kernel';
+import * as Kernel from './kernel';
 
-import { KernelMessage } from './messages';
+import * as KernelMessage from './messages';
 
 declare var setImmediate: any;
 

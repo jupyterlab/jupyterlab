@@ -14,7 +14,6 @@ import { Kernel, KernelMessage, KernelSpec } from '@jupyterlab/services';
 import { expectFailure, testEmission } from '@jupyterlab/testutils';
 
 import { KernelTester, handleRequest } from '../utils';
-import { KernelConnection } from '@jupyterlab/services/src/kernel/default';
 
 describe('Kernel.IKernel', () => {
   let defaultKernel: Kernel.IKernelConnection;

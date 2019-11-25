@@ -81,13 +81,6 @@ const EXAMPLE_KERNEL_INFO: KernelMessage.IInfoReplyMsg['content'] = {
   ]
 };
 
-export const KERNEL_OPTIONS: Kernel.IOptions = {
-  model: {
-    name: 'python'
-  },
-  username: 'testUser'
-};
-
 export const PYTHON_SPEC: JSONObject = {
   name: 'Python',
   spec: {

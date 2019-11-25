@@ -5,32 +5,11 @@ import { expect } from 'chai';
 
 import { toArray } from '@phosphor/algorithm';
 
-import { JSONExt } from '@phosphor/coreutils';
-
-import { KernelManager, Kernel, KernelSpec } from '@jupyterlab/services';
+import { KernelManager, Kernel } from '@jupyterlab/services';
 
 import { testEmission } from '@jupyterlab/testutils';
 
-import {
-  PYTHON_SPEC,
-  KERNELSPECS,
-  handleRequest,
-  makeSettings
-} from '../utils';
-
-class TestManager extends KernelManager {
-  intercept: KernelSpec.ISpecModels | null = null;
-  protected async requestSpecs(): Promise<void> {
-    if (this.intercept) {
-      handleRequest(this, 200, this.intercept);
-    }
-    return super.requestSpecs();
-  }
-}
-
-const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
-PYTHON3_SPEC.name = 'Python3';
-PYTHON3_SPEC.display_name = 'python3';
+import { makeSettings } from '../utils';
 
 describe('kernel/manager', () => {
   let manager: KernelManager;
@@ -42,7 +21,6 @@ describe('kernel/manager', () => {
 
   beforeEach(() => {
     manager = new KernelManager({ standby: 'never' });
-    expect(manager.specs).to.be.null;
     return manager.ready;
   });
 
@@ -78,38 +56,12 @@ describe('kernel/manager', () => {
       });
     });
 
-    describe('#specs', () => {
-      it('should get the kernel specs', async () => {
-        await manager.ready;
-        expect(manager.specs.default).to.be.ok;
-      });
-    });
-
     describe('#running()', () => {
       it('should get the running sessions', async () => {
         await manager.refreshRunning();
         expect(toArray(manager.running()).length).to.be.greaterThan(0);
       });
     });
-
-    describe('#specsChanged', () => {
-      it('should be emitted when the specs change', async () => {
-        const manager = new TestManager({ standby: 'never' });
-        const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
-        let called = false;
-        manager.specsChanged.connect(() => {
-          called = true;
-        });
-        await manager.ready;
-        expect(manager.specs.default).to.equal('echo');
-        specs.default = 'shell';
-        manager.intercept = specs;
-        await manager.refreshSpecs();
-        expect(manager.specs.default).to.equal('shell');
-        expect(called).to.equal(true);
-      });
-    });
-
     describe('#runningChanged', () => {
       it('should be emitted in refreshRunning when the running kernels changed', async () => {
         let called = false;
@@ -150,19 +102,6 @@ describe('kernel/manager', () => {
       });
     });
 
-    describe('#refreshSpecs()', () => {
-      it('should update list of kernel specs', async () => {
-        const manager = new TestManager({ standby: 'never' });
-        const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
-        await manager.ready;
-        specs.default = 'shell';
-        manager.intercept = specs;
-        expect(manager.specs.default).not.to.equal('shell');
-        await manager.refreshSpecs();
-        expect(manager.specs.default).to.equal('shell');
-      });
-    });
-
     describe('#refreshRunning()', () => {
       it('should update the running kernels', async () => {
         await manager.refreshRunning();
@@ -196,7 +135,7 @@ describe('kernel/manager', () => {
     describe('#connectTo()', () => {
       it('should connect to an existing kernel', () => {
         const id = kernel.id;
-        const newConnection = manager.connectTo(kernel.model);
+        const newConnection = manager.connectTo({ model: kernel.model });
         expect(newConnection.model.id).to.equal(id);
       });
 
@@ -206,7 +145,7 @@ describe('kernel/manager', () => {
           called = true;
         });
         const k = await Kernel.startNew();
-        manager.connectTo(k.model);
+        manager.connectTo({ model: k.model });
         expect(called).to.equal(true);
       });
     });

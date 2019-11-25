@@ -13,9 +13,9 @@ import { ServerConnection } from '..';
 
 import { CommHandler } from './comm';
 
-import { Kernel } from './kernel';
+import * as Kernel from './kernel';
 
-import { KernelMessage } from './messages';
+import * as KernelMessage from './messages';
 
 import {
   KernelFutureHandler,
@@ -26,7 +26,7 @@ import {
 import * as serialize from './serialize';
 
 import * as validate from './validate';
-import { KernelSpec } from '../kernelspec/kernelspec';
+import { KernelSpec } from '../kernelspec';
 
 import * as restapi from './restapi';
 
@@ -100,7 +100,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * A signal emitted when the kernel status changes.
    */
-  get statusChanged(): ISignal<this, Kernel.Status> {
+  get statusChanged(): ISignal<this, KernelMessage.Status> {
     return this._statusChanged;
   }
 
@@ -194,7 +194,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * The current status of the kernel.
    */
-  get status(): Kernel.Status {
+  get status(): KernelMessage.Status {
     return this._status;
   }
 
@@ -429,7 +429,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * request fails or the response is invalid.
    */
   interrupt(): Promise<void> {
-    return restapi.interruptKernel(this, this.serverSettings);
+    if (this.status === 'dead') {
+      throw new Error('Kernel is dead');
+    }
+    return restapi.interruptKernel(this.id, this.serverSettings);
   }
 
   /**
@@ -457,7 +460,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // await Promise.all(
     //   runningKernels.filter(k => k.id === kernel.id).map(k => k.handleRestart())
     // );
-    return restapi.restartKernel(this, this.serverSettings);
+    if (this.status === 'dead') {
+      throw new Error('Kernel is dead');
+    }
+    return restapi.restartKernel(this.id, this.serverSettings);
   }
 
   /**
@@ -1035,7 +1041,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Handle status iopub messages from the kernel.
    */
-  private _updateStatus(status: Kernel.Status): void {
+  private _updateStatus(status: KernelMessage.Status): void {
     // "unknown" | "starting" | "idle" | "busy" | "restarting" | "autorestarting" | "dead"
 
     if (this._status === status || this._status === 'dead') {
@@ -1412,7 +1418,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
   private _id = '';
   private _name = '';
-  private _status: Kernel.Status = 'unknown';
+  private _status: KernelMessage.Status = 'unknown';
   private _connectionStatus: Kernel.ConnectionStatus = 'connecting';
   private _kernelSession = '';
   private _clientId = '';
@@ -1442,7 +1448,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _info = new PromiseDelegate<KernelMessage.IInfoReply>();
   private _pendingMessages: KernelMessage.IMessage[] = [];
   private _specPromise: Promise<KernelSpec.ISpecModel>;
-  private _statusChanged = new Signal<this, Kernel.Status>(this);
+  private _statusChanged = new Signal<this, KernelMessage.Status>(this);
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
     this
   );

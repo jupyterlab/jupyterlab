@@ -51,7 +51,7 @@ describe('jupyter.services - Comm', () => {
   let kernel: Kernel.IKernelConnection;
 
   beforeAll(async () => {
-    kernel = await Kernel.startNew({name: 'ipython' });
+    kernel = await Kernel.startNew({ name: 'ipython' });
   });
 
   afterEach(() => {

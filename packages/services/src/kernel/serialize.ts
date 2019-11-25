@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { KernelMessage } from './messages';
+import * as KernelMessage from './messages';
 
 /**
  * Deserialize and return the unpacked message.

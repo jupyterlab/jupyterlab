@@ -3,7 +3,8 @@
 
 import { Poll } from '@jupyterlab/coreutils';
 import { ServerConnection } from '../serverconnection';
-import { KernelSpec } from './kernelspec';
+import * as KernelSpec from './kernelspec';
+import * as restapi from './restapi';
 import { ISignal, Signal } from '@phosphor/signaling';
 import { JSONExt } from '@phosphor/coreutils';
 import { BaseManager } from '../basemanager';
@@ -69,14 +70,14 @@ export class KernelSpecManager extends BaseManager
   /**
    * Get the most recently fetched kernel specs.
    */
-  get specs(): KernelSpec.ISpecModels | null {
+  get specs(): restapi.ISpecModels | null {
     return this._specs;
   }
 
   /**
    * A signal emitted when the specs change.
    */
-  get specsChanged(): ISignal<this, KernelSpec.ISpecModels> {
+  get specsChanged(): ISignal<this, restapi.ISpecModels> {
     return this._specsChanged;
   }
 
@@ -129,8 +130,8 @@ export class KernelSpecManager extends BaseManager
   private _pollSpecs: Poll;
   private _ready: Promise<void>;
 
-  private _specs: KernelSpec.ISpecModels | null = null;
-  private _specsChanged = new Signal<this, KernelSpec.ISpecModels>(this);
+  private _specs: restapi.ISpecModels | null = null;
+  private _specsChanged = new Signal<this, restapi.ISpecModels>(this);
 }
 
 /**

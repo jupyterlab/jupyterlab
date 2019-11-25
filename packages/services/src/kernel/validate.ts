@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Kernel } from './kernel';
+import * as KernelMessage from './messages';
 
-import { KernelMessage } from './messages';
+import { IModel } from './restapi';
+
 import { validateProperty } from '../validate';
 
 /**
@@ -94,19 +95,15 @@ function validateIOPubContent(
 /**
  * Validate a `Kernel.IModel` object.
  */
-export function validateModel(
-  model: Kernel.IModel
-): asserts model is Kernel.IModel {
+export function validateModel(model: IModel): asserts model is IModel {
   validateProperty(model, 'name', 'string');
   validateProperty(model, 'id', 'string');
 }
 
 /**
- * Validate an array of `Kernel.IModel` objects.
+ * Validate an array of `IModel` objects.
  */
-export function validateModels(
-  models: Kernel.IModel[]
-): asserts models is Kernel.IModel[] {
+export function validateModels(models: IModel[]): asserts models is IModel[] {
   if (!Array.isArray(models)) {
     throw new Error('Invalid kernel list');
   }

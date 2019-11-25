@@ -3,16 +3,12 @@
 
 import { expect } from 'chai';
 
-import { JSONObject } from '@phosphor/coreutils';
-
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
 import {
   validateMessage,
   validateModel
 } from '@jupyterlab/services/lib/kernel/validate';
-
-import { PYTHON_SPEC } from '../utils';
 
 describe('kernel/validate', () => {
   describe('validateMessage', () => {
@@ -137,43 +133,6 @@ describe('kernel/validate', () => {
     it('should pass a valid id', () => {
       const id: Kernel.IModel = { name: 'foo', id: 'baz' };
       validateModel(id);
-    });
-  });
-
-  describe('#validateSpecModel', () => {
-    it('should pass with valid data', () => {
-      validateSpecModel(PYTHON_SPEC);
-    });
-
-    it('should fail on missing data', () => {
-      const spec = JSON.parse(JSON.stringify(PYTHON_SPEC));
-      delete spec['name'];
-      expect(() => validateSpecModel(spec)).to.throw();
-    });
-
-    it('should fail on incorrect data', () => {
-      const spec = JSON.parse(JSON.stringify(PYTHON_SPEC));
-      spec.spec.language = 1;
-      expect(() => validateSpecModel(spec)).to.throw();
-    });
-  });
-
-  describe('#validateSpecModel', () => {
-    it('should pass with valid data', () => {
-      const model: JSONObject = {
-        default: 'python',
-        kernelspecs: {
-          python: PYTHON_SPEC
-        }
-      };
-      validateSpecModels(model);
-    });
-
-    it('should fail on missing data', () => {
-      const model: any = {
-        default: 'python'
-      };
-      expect(() => validateSpecModels(model)).to.throw();
     });
   });
 });

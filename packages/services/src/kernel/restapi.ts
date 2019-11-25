@@ -2,10 +2,26 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ServerConnection } from '../serverconnection';
-import { Kernel } from './kernel';
 import { URLExt } from '@jupyterlab/coreutils';
 import { validateModel, validateModels } from './validate';
 
+/**
+ * The kernel model provided by the server.
+ *
+ * #### Notes
+ * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
+ */
+export interface IModel {
+  /**
+   * Unique identifier of the kernel server session.
+   */
+  readonly id: string;
+
+  /**
+   * The name of the kernel.
+   */
+  readonly name: string;
+}
 /**
  * The url for the kernel service.
  */
@@ -21,7 +37,7 @@ export const KERNEL_SERVICE_URL = 'api/kernels';
  */
 export async function listRunning(
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
-): Promise<Kernel.IModel[]> {
+): Promise<IModel[]> {
   let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
   const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
@@ -43,7 +59,7 @@ export async function listRunning(
 export async function startNew(
   options: IKernelOptions,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
-): Promise<Kernel.IModel> {
+): Promise<IModel> {
   let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
   let init = {
     method: 'POST',
@@ -87,16 +103,13 @@ export interface IKernelOptions {
  * The promise is fulfilled on a valid response and rejected otherwise.
  */
 export async function restartKernel(
-  kernel: Kernel.IKernelConnection,
+  id: string,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<void> {
-  if (kernel.status === 'dead') {
-    throw new Error('Kernel is dead');
-  }
   let url = URLExt.join(
     settings.baseUrl,
     KERNEL_SERVICE_URL,
-    encodeURIComponent(kernel.id),
+    encodeURIComponent(id),
     'restart'
   );
   let init = { method: 'POST' };
@@ -118,16 +131,13 @@ export async function restartKernel(
  * The promise is fulfilled on a valid response and rejected otherwise.
  */
 export async function interruptKernel(
-  kernel: Kernel.IKernelConnection,
+  id: string,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<void> {
-  if (kernel.status === 'dead') {
-    throw new Error('Kernel is dead');
-  }
   let url = URLExt.join(
     settings.baseUrl,
     KERNEL_SERVICE_URL,
-    encodeURIComponent(kernel.id),
+    encodeURIComponent(id),
     'interrupt'
   );
   let init = { method: 'POST' };
@@ -175,7 +185,7 @@ export async function shutdownKernel(
 export async function getKernelModel(
   id: string,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
-): Promise<Kernel.IModel | undefined> {
+): Promise<IModel | undefined> {
   let url = URLExt.join(
     settings.baseUrl,
     KERNEL_SERVICE_URL,

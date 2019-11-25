@@ -11,7 +11,7 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { ServerConnection } from '..';
 
-import { Kernel } from './kernel';
+import * as Kernel from './kernel';
 import { BaseManager } from '../basemanager';
 import {
   shutdownKernel,
@@ -158,7 +158,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   /**
    * Start a new kernel.
    *
-   * @param options - The kernel options to use.
+   * @param options - The kernel options and connection options to use.
    *
    * @returns A promise that resolves with the kernel connection.
    *
@@ -167,7 +167,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    */
   async startNew(
     options: IKernelOptions &
-      Omit<Kernel.IKernelConnection.IOptions, 'model' | 'serverSettings'>
+      Omit<Kernel.IKernelConnection.IOptions, 'model' | 'serverSettings'> = {}
   ): Promise<Kernel.IKernelConnection> {
     const model = await startNew(
       { name: options.name, env: options.env },
