@@ -11,8 +11,6 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { Signal } from '@phosphor/signaling';
 
-import { Callstack } from '../callstack';
-
 import { Debugger } from '../debugger';
 
 import { EditorHandler } from './editor';
@@ -29,11 +27,6 @@ export class NotebookHandler implements IDisposable {
     const notebook = this.notebookPanel.content;
     notebook.widgets.forEach(cell => this.addEditorHandler(cell));
     notebook.activeCellChanged.connect(this.onActiveCellChanged, this);
-
-    this.debuggerModel.callstackModel.currentFrameChanged.connect(
-      this.onCurrentFrameChanged,
-      this
-    );
   }
 
   isDisposed: boolean;
@@ -74,32 +67,6 @@ export class NotebookHandler implements IDisposable {
       return;
     }
     this.addEditorHandler(cell);
-  }
-
-  private onCurrentFrameChanged(
-    callstackModel: Callstack.Model,
-    frame: Callstack.IFrame
-  ) {
-    const cells = this.notebookPanel.content.widgets;
-    cells.forEach(cell => EditorHandler.clearHighlight(cell.editor));
-
-    if (!frame) {
-      return;
-    }
-
-    cells.forEach((cell, i) => {
-      // check the event is for the correct cell
-      const code = cell.model.value.text;
-      const codeId = this.debuggerService.getCodeId(code);
-      if (frame.source.path !== codeId) {
-        return;
-      }
-      this.notebookPanel.content.activeCellIndex = i;
-      // request drawing the line after the editor has been cleared above
-      requestAnimationFrame(() => {
-        EditorHandler.showCurrentLine(cell.editor, frame);
-      });
-    });
   }
 
   private debuggerModel: Debugger.Model;
