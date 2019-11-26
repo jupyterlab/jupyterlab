@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ReactWidget } from '@jupyterlab/apputils';
-import { ISignal } from '@phosphor/signaling';
 import React, { useEffect, useState } from 'react';
 import { Breakpoints } from '.';
 import { IDebugger } from '../tokens';
@@ -48,16 +47,15 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
   });
 
   return (
-    <div>
+    <>
       {breakpoints.map(entry => (
-        // Array.from(breakpoints.entries()).map((entry) => (
         <BreakpointCellComponent
           key={entry[0]}
           breakpoints={entry[1]}
           model={model}
         />
       ))}
-    </div>
+    </>
   );
 };
 
@@ -69,7 +67,7 @@ const BreakpointCellComponent = ({
   model: Breakpoints.Model;
 }) => {
   return (
-    <div>
+    <>
       {breakpoints
         .sort((a, b) => {
           return a.line - b.line;
@@ -78,51 +76,19 @@ const BreakpointCellComponent = ({
           <BreakpointComponent
             key={breakpoint.source.path + breakpoint.line}
             breakpoint={breakpoint}
-            breakpointChanged={model.breakpointChanged}
           />
         ))}
-    </div>
+    </>
   );
 };
 
 const BreakpointComponent = ({
-  breakpoint,
-  breakpointChanged
+  breakpoint
 }: {
   breakpoint: IDebugger.IBreakpoint;
-  breakpointChanged: ISignal<Breakpoints.Model, IDebugger.IBreakpoint>;
 }) => {
-  const [active, setActive] = useState(breakpoint.active);
-  breakpoint.active = active;
-
-  const setBreakpointEnabled = (state: boolean) => {
-    setActive(state);
-  };
-
-  useEffect(() => {
-    const updateBreakpoints = (
-      _: Breakpoints.Model,
-      updates: IDebugger.IBreakpoint
-    ) => {
-      setBreakpointEnabled(updates.active);
-    };
-
-    breakpointChanged.connect(updateBreakpoints);
-
-    return () => {
-      breakpointChanged.disconnect(updateBreakpoints);
-    };
-  });
-
   return (
     <div className={`breakpoint`}>
-      <input
-        onChange={() => {
-          setBreakpointEnabled(!active);
-        }}
-        type="checkbox"
-        checked={active}
-      />
       <span>
         {breakpoint.source.path} : {breakpoint.line}
       </span>

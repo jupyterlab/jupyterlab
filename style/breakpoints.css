@@ -7,6 +7,18 @@
   padding: 10px;
 }
 
+.jp-DebuggerBreakpoints-body .breakpoint span::before {
+  font-size: 20px;
+  padding-right: 5px;
+  content: '●';
+  color: var(--jp-error-color1);
+}
+
+.jp-DebuggerBreakpoints-body .breakpoint span {
+  display: flex;
+  align-items: center;
+}
+
 .jp-breakpoint-marker {
   position: absolute;
   left: -34px;

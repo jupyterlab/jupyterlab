@@ -26,25 +26,6 @@ export class Breakpoints extends Panel {
     this.addWidget(this.body);
 
     header.toolbar.addItem(
-      'deactivate',
-      new ToolbarButton({
-        iconClassName: 'jp-DebuggerDeactivateIcon',
-        tooltip: `${this.isAllActive ? 'Deactivate' : 'Activate'} Breakpoints`,
-        onClick: () => {
-          this.isAllActive = !this.isAllActive;
-
-          // TODO: this requires a set breakpoint(bp: Breakpoints.IBreakpoint[]) method in the model
-          /*Array.from(this.model.breakpoints.values()).map((breakpoints: Breakpoints.IBreakpoint[]) => {
-            breakpoints.map((breakpoint: Breakpoints.IBreakpoint) => {
-              breakpoint.active = this.isAllActive;
-              this.model.breakpoint = breakpoint;
-            });
-          });*/
-        }
-      })
-    );
-
-    header.toolbar.addItem(
       'closeAll',
       new ToolbarButton({
         iconClassName: 'jp-CloseAllIcon',
@@ -56,7 +37,6 @@ export class Breakpoints extends Panel {
     );
   }
 
-  private isAllActive = true;
   readonly body: Widget;
   readonly model: Breakpoints.Model;
   readonly service: IDebugger;
@@ -92,11 +72,6 @@ export namespace Breakpoints {
       return this._breakpoints;
     }
 
-    // kept for react component
-    get breakpointChanged(): Signal<this, IDebugger.IBreakpoint> {
-      return this._breakpointChanged;
-    }
-
     get isDisposed(): boolean {
       return this._isDisposed;
     }
@@ -126,8 +101,6 @@ export namespace Breakpoints {
     private _breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
     private _changed = new Signal<this, IDebugger.IBreakpoint[]>(this);
     private _restored = new Signal<this, void>(this);
-    // kept for react component
-    private _breakpointChanged = new Signal<this, IDebugger.IBreakpoint>(this);
     private _isDisposed: boolean = false;
   }
 
