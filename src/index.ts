@@ -180,10 +180,8 @@ const files: JupyterFrontEndPlugin<void> = {
         return;
       }
 
-      //  Finding if the file is backed by a kernel or attach it to one.
       const sessions = app.serviceManager.sessions;
       void sessions.findByPath(widget.context.path).then(async model => {
-        _model = model;
         const session = sessions.connectTo(model);
         await setDebugSession(app, debug, session);
         handler.update(debug, null, content);

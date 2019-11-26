@@ -56,7 +56,7 @@ export class FileHandler implements IDisposable {
     }
 
     const code = editor.model.value.text;
-    const cellId = this.debuggerService.getCellId(code);
+    const cellId = this.debuggerService.getCodeId(code);
     if (frame.source.path !== cellId) {
       return;
     }

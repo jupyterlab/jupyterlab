@@ -84,7 +84,7 @@ export class NotebookHandler implements IDisposable {
     cells.forEach((cell, i) => {
       // check the event is for the correct cell
       const code = cell.model.value.text;
-      const cellId = this.debuggerService.getCellId(code);
+      const cellId = this.debuggerService.getCodeId(code);
       if (frame.source.path !== cellId) {
         return;
       }
