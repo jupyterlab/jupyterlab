@@ -10,10 +10,11 @@ import { Signal } from '@phosphor/signaling';
 
 import { Callstack } from '../callstack';
 
+import { EditorHandler } from './editor';
+
 import { Debugger } from '../debugger';
 
 import { IDebugger } from '../tokens';
-import { EditorHandler } from './editor';
 
 export class WidgetHandler implements IDisposable {
   constructor(options: DebuggerWidgetHandler.IOptions) {
@@ -64,6 +65,8 @@ export class WidgetHandler implements IDisposable {
       }
 
       const cells = notebookPanel.content.widgets;
+      // TODO: we might reconsider clearing all cells, for example
+      // there could be more than 1 stopped thread, and in different cells
       cells.forEach(cell => EditorHandler.clearHighlight(cell.editor));
 
       if (!frame) {
