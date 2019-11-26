@@ -27,7 +27,7 @@ import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-import { Kernel, Session } from '@jupyterlab/services';
+import { Session } from '@jupyterlab/services';
 
 import { UUID } from '@phosphor/coreutils';
 
@@ -66,8 +66,6 @@ export namespace CommandIDs {
   export const stepOut = 'debugger:stepOut';
 
   export const debugConsole = 'debugger:debug-console';
-
-  export const debugFile = 'debugger:debug-file';
 
   export const mount = 'debugger:mount';
 
@@ -166,8 +164,10 @@ const files: JupyterFrontEndPlugin<void> = {
     tracker: IEditorTracker,
     labShell: ILabShell
   ) => {
-    let _model: any;
     const handler = new DebuggerHandler<FileHandler>(FileHandler);
+    const activeSessions: {
+      [id: string]: Session.ISession;
+    } = {};
 
     labShell.currentChanged.connect((_, update) => {
       const widget = update.newValue;
@@ -182,24 +182,18 @@ const files: JupyterFrontEndPlugin<void> = {
 
       const sessions = app.serviceManager.sessions;
       void sessions.findByPath(widget.context.path).then(async model => {
-        const session = sessions.connectTo(model);
+        let session = activeSessions[model.id];
+        if (!session) {
+          // Use `connectTo` only if the session does not exist.
+          // `connectTo` sends a kernel_info_request on the shell
+          // channel, which blocks the debug session restore when waiting
+          // for the kernel to be ready
+          session = sessions.connectTo(model);
+          activeSessions[model.id] = session;
+        }
         await setDebugSession(app, debug, session);
         handler.update(debug, null, content);
       });
-    });
-
-    app.commands.addCommand(CommandIDs.debugFile, {
-      execute: async _ => {
-        if (!tracker || !tracker.currentWidget) {
-          return;
-        }
-        const idKernel = debug.session.client.kernel.id;
-        void Kernel.findById(idKernel).catch(() => {
-          if (_model) {
-            Kernel.connectTo(_model);
-          }
-        });
-      }
     });
   }
 };
