@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
@@ -141,7 +141,11 @@ export class DebugSession implements IDebugger.ISession {
    * Restore the state of a debug session.
    */
   async restoreState(): Promise<IDebugger.ISession.Response['debugInfo']> {
-    await this.client.kernel.ready;
+    if (this.client instanceof ClientSession) {
+      await this.client.ready;
+    } else {
+      await this.client.kernel.ready;
+    }
     const message = await this.sendRequest('debugInfo', {});
     this._isStarted = message.body.isStarted;
     return message;

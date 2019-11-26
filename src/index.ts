@@ -21,6 +21,8 @@ import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
 import { IStateDB } from '@jupyterlab/coreutils';
 
+import { DocumentWidget } from '@jupyterlab/docregistry';
+
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
@@ -33,6 +35,8 @@ import { Debugger } from './debugger';
 
 import { ConsoleHandler } from './handlers/console';
 
+import { FileHandler } from './handlers/file';
+
 import { NotebookHandler } from './handlers/notebook';
 
 import { DebugService } from './service';
@@ -40,8 +44,6 @@ import { DebugService } from './service';
 import { DebugSession } from './session';
 
 import { IDebugger } from './tokens';
-
-import { FileHandler } from './handlers/file';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -165,22 +167,26 @@ const files: JupyterFrontEndPlugin<void> = {
     labShell: ILabShell
   ) => {
     let _model: any;
-    const handler = new DebuggerHandler<FileHandler>(null);
+    const handler = new DebuggerHandler<FileHandler>(FileHandler);
 
     labShell.currentChanged.connect((_, update) => {
       const widget = update.newValue;
-      if (!(widget instanceof FileEditor)) {
+      if (!(widget instanceof DocumentWidget)) {
+        return;
+      }
+
+      const content = widget.content;
+      if (!(content instanceof FileEditor)) {
         return;
       }
 
       //  Finding if the file is backed by a kernel or attach it to one.
       const sessions = app.serviceManager.sessions;
-
       void sessions.findByPath(widget.context.path).then(async model => {
         _model = model;
         const session = sessions.connectTo(model);
         await setDebugSession(app, debug, session);
-        handler.update(debug, null, widget);
+        handler.update(debug, null, content);
       });
     });
 
