@@ -16,7 +16,7 @@ import { Debugger } from '../debugger';
 
 import { IDebugger } from '../tokens';
 
-export class WidgetHandler implements IDisposable {
+export class TrackerHandler implements IDisposable {
   constructor(options: DebuggerWidgetHandler.IOptions) {
     this.debuggerService = options.debuggerService;
     this.notebookTracker = options.notebookTracker;

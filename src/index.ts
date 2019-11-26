@@ -39,7 +39,7 @@ import { FileHandler } from './handlers/file';
 
 import { NotebookHandler } from './handlers/notebook';
 
-import { WidgetHandler } from './handlers/tracker';
+import { TrackerHandler } from './handlers/tracker';
 
 import { DebugService } from './service';
 
@@ -239,7 +239,7 @@ const tracker: JupyterFrontEndPlugin<void> = {
     consoleTracker: IConsoleTracker,
     editorTracker: IEditorTracker
   ) => {
-    new WidgetHandler({
+    new TrackerHandler({
       debuggerService: debug,
       notebookTracker,
       consoleTracker,
