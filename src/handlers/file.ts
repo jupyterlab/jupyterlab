@@ -56,8 +56,8 @@ export class FileHandler implements IDisposable {
     }
 
     const code = editor.model.value.text;
-    const cellId = this.debuggerService.getCodeId(code);
-    if (frame.source.path !== cellId) {
+    const codeId = this.debuggerService.getCodeId(code);
+    if (frame.source.path !== codeId) {
       return;
     }
     // request drawing the line after the editor has been cleared above
