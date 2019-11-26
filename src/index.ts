@@ -169,7 +169,7 @@ const files: JupyterFrontEndPlugin<void> = {
       [id: string]: Session.ISession;
     } = {};
 
-    labShell.currentChanged.connect((_, update) => {
+    labShell.currentChanged.connect(async (_, update) => {
       const widget = update.newValue;
       if (!(widget instanceof DocumentWidget)) {
         return;
@@ -181,7 +181,8 @@ const files: JupyterFrontEndPlugin<void> = {
       }
 
       const sessions = app.serviceManager.sessions;
-      void sessions.findByPath(widget.context.path).then(async model => {
+      try {
+        const model = await sessions.findByPath(widget.context.path);
         let session = activeSessions[model.id];
         if (!session) {
           // Use `connectTo` only if the session does not exist.
@@ -193,7 +194,9 @@ const files: JupyterFrontEndPlugin<void> = {
         }
         await setDebugSession(app, debug, session);
         handler.update(debug, null, content);
-      });
+      } catch {
+        return;
+      }
     });
   }
 };
