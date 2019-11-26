@@ -117,7 +117,6 @@ export class EditorHandler implements IDisposable {
       'CodeMirror-linenumbers',
       'breakpoints'
     ]);
-
     editor.editor.on('gutterClick', this.onGutterClick);
   }
 

@@ -27,7 +27,6 @@ import { IDebugger } from '../tokens';
 export class DebuggerEditors extends TabPanel {
   constructor(options: DebuggerEditors.IOptions) {
     super();
-
     this.tabsMovable = true;
     this.tabBar.insertBehavior = 'select-tab';
     this.tabBar.tabCloseRequested.connect((_, tab) => {
@@ -41,6 +40,17 @@ export class DebuggerEditors extends TabPanel {
     this.debuggerService = options.service;
     this.editorFactory = options.editorServices.factoryService.newInlineEditor;
     this.mimeTypeService = options.editorServices.mimeTypeService;
+
+    this.tabBar.currentChanged.connect((_, updated) => {
+      if (
+        updated.currentTitle.owner.id ===
+        this.debuggerService.session.client.path
+      ) {
+        this.node.setAttribute('data-jp-debugger', 'true');
+      } else {
+        this.node.setAttribute('data-jp-debugger', 'false');
+      }
+    });
 
     this.debuggerModel.callstackModel.currentFrameChanged.connect(
       async (_, frame) => {
@@ -112,7 +122,6 @@ export class DebuggerEditors extends TabPanel {
 
   private openEditor(data: DebuggerEditors.IEditor) {
     const { path, mimeType, code } = data;
-
     const tab = find(this.tabBar.titles, title => title.label === path);
     if (tab) {
       this.tabBar.currentTitle = tab;
@@ -134,6 +143,7 @@ export class DebuggerEditors extends TabPanel {
     editor.title.label = path;
     editor.title.caption = path;
     editor.title.closable = true;
+    editor.id = this.debuggerService.session.client.path;
 
     const editorHandler = new EditorHandler({
       debuggerModel: this.debuggerModel,
