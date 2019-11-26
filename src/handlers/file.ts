@@ -9,8 +9,6 @@ import { Signal } from '@phosphor/signaling';
 
 import { EditorHandler } from '../handlers/editor';
 
-import { Callstack } from '../callstack';
-
 import { Debugger } from '../debugger';
 
 import { IDebugger } from '../tokens';
@@ -26,11 +24,6 @@ export class FileHandler implements IDisposable {
       debuggerService: this.debuggerService,
       editor: this.fileEditor.editor
     });
-
-    this.debuggerModel.callstackModel.currentFrameChanged.connect(
-      this.onCurrentFrameChanged,
-      this
-    );
   }
 
   isDisposed: boolean;
@@ -44,27 +37,6 @@ export class FileHandler implements IDisposable {
     Signal.clearData(this);
   }
 
-  private onCurrentFrameChanged(
-    callstackModel: Callstack.Model,
-    frame: Callstack.IFrame
-  ) {
-    const editor = this.fileEditor.editor;
-    EditorHandler.clearHighlight(editor);
-
-    if (!frame) {
-      return;
-    }
-
-    const code = editor.model.value.text;
-    const codeId = this.debuggerService.getCodeId(code);
-    if (frame.source.path !== codeId) {
-      return;
-    }
-    // request drawing the line after the editor has been cleared above
-    requestAnimationFrame(() => {
-      EditorHandler.showCurrentLine(editor, frame);
-    });
-  }
   private fileEditor: FileEditor;
   private debuggerModel: Debugger.Model;
   private debuggerService: IDebugger;

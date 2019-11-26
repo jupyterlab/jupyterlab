@@ -78,7 +78,6 @@ export class WidgetHandler implements IDisposable {
           return;
         }
         notebookPanel.content.activeCellIndex = i;
-        // request drawing the line after the editor has been cleared above
         requestAnimationFrame(() => {
           EditorHandler.showCurrentLine(cell.editor, frame);
         });
@@ -114,7 +113,32 @@ export class WidgetHandler implements IDisposable {
     if (!this.editorTracker) {
       return;
     }
-    // TODO
+    this.editorTracker.forEach(doc => {
+      const fileEditor = doc.content;
+      if (debugSessionPath !== fileEditor.context.path) {
+        return;
+      }
+
+      const editor = fileEditor.editor;
+      if (!editor) {
+        return;
+      }
+
+      EditorHandler.clearHighlight(editor);
+
+      if (!frame) {
+        return;
+      }
+
+      const code = editor.model.value.text;
+      const codeId = this.debuggerService.getCodeId(code);
+      if (frame.source.path !== codeId) {
+        return;
+      }
+      requestAnimationFrame(() => {
+        EditorHandler.showCurrentLine(editor, frame);
+      });
+    });
   }
 
   private debuggerService: IDebugger;
