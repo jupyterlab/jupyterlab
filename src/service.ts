@@ -44,8 +44,7 @@ export class DebugService implements IDebugger {
    * Whether debugging is enabled for the current session.
    */
   get isDebuggingEnabled(): boolean {
-    const kernelInfo = this._session.kernelInfo;
-    return (kernelInfo && kernelInfo.debugger) || false;
+    return this._session.kernelInfo?.debugger ?? false;
   }
 
   /**
@@ -160,14 +159,14 @@ export class DebugService implements IDebugger {
    * Whether the current debugger is started.
    */
   isStarted(): boolean {
-    return this._session !== null && this._session.isStarted;
+    return this._session?.isStarted ?? false;
   }
 
   /**
    * Whether there exists a thread in stopped state.
    */
   hasStoppedThreads(): boolean {
-    return this._model && this._model.stoppedThreads.size !== 0;
+    return this._model?.stoppedThreads.size !== 0 ?? false;
   }
 
   /**

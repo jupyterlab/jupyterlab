@@ -183,14 +183,12 @@ const files: JupyterFrontEndPlugin<void> = {
         if (!tracker || !tracker.currentWidget) {
           return;
         }
-        if (tracker.currentWidget) {
-          const idKernel = debug.session.client.kernel.id;
-          void Kernel.findById(idKernel).catch(() => {
-            if (_model) {
-              Kernel.connectTo(_model);
-            }
-          });
-        }
+        const idKernel = debug.session.client.kernel.id;
+        void Kernel.findById(idKernel).catch(() => {
+          if (_model) {
+            Kernel.connectTo(_model);
+          }
+        });
       }
     });
   }
