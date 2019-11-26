@@ -57,7 +57,7 @@ export async function listRunning(
  * The promise is fulfilled on a valid response and rejected otherwise.
  */
 export async function startNew(
-  options: IKernelOptions,
+  options: IKernelOptions = {},
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<IModel> {
   let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);

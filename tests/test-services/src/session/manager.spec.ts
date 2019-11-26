@@ -7,56 +7,48 @@ import { UUID } from '@phosphor/coreutils';
 
 import { toArray } from '@phosphor/algorithm';
 
-import { JSONExt } from '@phosphor/coreutils';
-
 import {
-  Kernel,
   ServerConnection,
   SessionManager,
-  Session
+  Session,
+  SessionAPI,
+  KernelManager
 } from '@jupyterlab/services';
 
 import { testEmission } from '@jupyterlab/testutils';
 
-import { KERNELSPECS, handleRequest } from '../utils';
-
-class TestManager extends SessionManager {
-  intercept: Kernel.ISpecModels | null = null;
-  protected async requestSpecs(): Promise<void> {
-    if (this.intercept) {
-      handleRequest(this, 200, this.intercept);
-    }
-    return super.requestSpecs();
-  }
-}
-
 /**
  * Start a new session on with a default name.
  */
-async function startNew(manager: SessionManager): Promise<Session.ISession> {
-  const session = await manager.startNew({ path: UUID.uuid4() });
+async function startNew(
+  manager: SessionManager
+): Promise<Session.ISessionConnection> {
+  const session = await manager.startNew({
+    path: UUID.uuid4(),
+    name: UUID.uuid4(),
+    type: 'MYTEST'
+  });
   return session;
 }
 
 describe('session/manager', () => {
+  let kernelManager: KernelManager = new KernelManager({ standby: 'never' });
   let manager: SessionManager;
-  let session: Session.ISession;
+  let session: Session.ISessionConnection;
 
-  beforeAll(async () => {
-    session = await Session.startNew({ path: UUID.uuid4() });
-  });
-
-  beforeEach(() => {
-    manager = new SessionManager();
-    expect(manager.specs).to.be.null;
+  beforeEach(async () => {
+    manager = new SessionManager({ kernelManager, standby: 'never' });
+    await manager.ready;
+    session = await startNew(manager);
+    await session.kernel.info;
   });
 
   afterEach(() => {
     manager.dispose();
   });
 
-  afterAll(() => {
-    return Session.shutdownAll();
+  afterAll(async () => {
+    await SessionAPI.shutdownAll();
   });
 
   describe('SessionManager', () => {
@@ -67,26 +59,20 @@ describe('session/manager', () => {
     });
 
     describe('#serverSettings', () => {
-      it('should get the server settings', () => {
+      it('should get the server settings', async () => {
         manager.dispose();
         const serverSettings = ServerConnection.makeSettings();
         const token = serverSettings.token;
-        manager = new SessionManager({ serverSettings });
-        expect(manager.serverSettings.token).to.equal(token);
-      });
-    });
-
-    describe('#specs', () => {
-      it('should be the kernel specs', async () => {
+        manager = new SessionManager({ kernelManager, serverSettings });
         await manager.ready;
-        expect(manager.specs.default).to.be.ok;
+        expect(manager.serverSettings.token).to.equal(token);
       });
     });
 
     describe('#isReady', () => {
       it('should test whether the manager is ready', async () => {
         manager.dispose();
-        manager = new SessionManager();
+        manager = new SessionManager({ kernelManager });
         expect(manager.isReady).to.equal(false);
         await manager.ready;
         expect(manager.isReady).to.equal(true);
@@ -94,8 +80,8 @@ describe('session/manager', () => {
     });
 
     describe('#ready', () => {
-      it('should resolve when the manager is ready', () => {
-        return manager.ready;
+      it('should resolve when the manager is ready', async () => {
+        await manager.ready;
       });
     });
 
@@ -104,24 +90,6 @@ describe('session/manager', () => {
         await manager.refreshRunning();
         const running = toArray(manager.running());
         expect(running.length).to.be.greaterThan(0);
-      });
-    });
-
-    describe('#specsChanged', () => {
-      it('should be emitted when the specs change', async () => {
-        const manager = new TestManager({ standby: 'never' });
-        const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
-        let called = false;
-        manager.specsChanged.connect(() => {
-          called = true;
-        });
-        await manager.ready;
-        expect(manager.specs.default).to.equal('echo');
-        specs.default = 'shell';
-        manager.intercept = specs;
-        await manager.refreshSpecs();
-        expect(manager.specs.default).to.equal('shell');
-        expect(called).to.equal(true);
       });
     });
 
@@ -179,22 +147,9 @@ describe('session/manager', () => {
       });
     });
 
-    describe('#refreshSpecs()', () => {
-      it('should update list of kernel specs', async () => {
-        const manager = new TestManager({ standby: 'never' });
-        const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
-        await manager.ready;
-        specs.default = 'shell';
-        manager.intercept = specs;
-        expect(manager.specs.default).not.to.equal('shell');
-        await manager.refreshSpecs();
-        expect(manager.specs.default).to.equal('shell');
-      });
-    });
-
     describe('#startNew()', () => {
       it('should start a session', async () => {
-        const session = await manager.startNew({ path: UUID.uuid4() });
+        const session = await startNew(manager);
         expect(session.id).to.be.ok;
         return session.shutdown();
       });
@@ -204,7 +159,7 @@ describe('session/manager', () => {
         manager.runningChanged.connect(() => {
           called = true;
         });
-        await manager.startNew({ path: UUID.uuid4() });
+        await startNew(manager);
         expect(called).to.equal(true);
       });
     });

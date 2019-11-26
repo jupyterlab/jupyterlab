@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { toArray } from '@phosphor/algorithm';
 
-import { KernelManager, Kernel } from '@jupyterlab/services';
+import { KernelManager, Kernel, KernelAPI } from '@jupyterlab/services';
 
 import { testEmission } from '@jupyterlab/testutils';
 
@@ -35,23 +35,25 @@ describe('kernel/manager', () => {
 
   describe('KernelManager', () => {
     describe('#constructor()', () => {
-      it('should take the options as an argument', () => {
+      it('should take the options as an argument', async () => {
         manager.dispose();
         manager = new KernelManager({
           serverSettings: makeSettings(),
           standby: 'never'
         });
         expect(manager instanceof KernelManager).to.equal(true);
+        await manager.ready;
       });
     });
 
     describe('#serverSettings', () => {
-      it('should get the server settings', () => {
+      it('should get the server settings', async () => {
         manager.dispose();
         const serverSettings = makeSettings();
         const standby = 'never';
         const token = serverSettings.token;
         manager = new KernelManager({ serverSettings, standby });
+        await manager.ready;
         expect(manager.serverSettings.token).to.equal(token);
       });
     });
@@ -77,11 +79,12 @@ describe('kernel/manager', () => {
 
       it('should be emitted when a kernel is shut down', async () => {
         const kernel = await manager.startNew();
+        await kernel.info;
         let called = false;
         manager.runningChanged.connect(() => {
           called = true;
         });
-        await kernel.shutdown();
+        await manager.shutdown(kernel.id);
         expect(called).to.equal(true);
       });
     });
@@ -107,6 +110,13 @@ describe('kernel/manager', () => {
         await manager.refreshRunning();
         expect(toArray(manager.running()).length).to.be.greaterThan(0);
       });
+
+      it('should update the running kernels when one is shut down', async () => {
+        const old = toArray(manager.running()).length;
+        await KernelAPI.startNew();
+        await manager.refreshRunning();
+        expect(toArray(manager.running()).length).to.be.greaterThan(old);
+      });
     });
 
     describe('#startNew()', () => {
@@ -119,7 +129,8 @@ describe('kernel/manager', () => {
         manager.runningChanged.connect(() => {
           called = true;
         });
-        await manager.startNew();
+        let kernel = await manager.startNew();
+        await kernel.info;
         expect(called).to.equal(true);
       });
     });
@@ -138,21 +149,12 @@ describe('kernel/manager', () => {
         const newConnection = manager.connectTo({ model: kernel.model });
         expect(newConnection.model.id).to.equal(id);
       });
-
-      it('should emit a runningChanged signal', async () => {
-        let called = false;
-        manager.runningChanged.connect(() => {
-          called = true;
-        });
-        const k = await Kernel.startNew();
-        manager.connectTo({ model: k.model });
-        expect(called).to.equal(true);
-      });
     });
 
     describe('shutdown()', () => {
       it('should shut down a kernel by id', async () => {
         const kernel = await manager.startNew();
+        await kernel.info;
         await manager.shutdown(kernel.id);
         expect(kernel.isDisposed).to.equal(true);
       });
@@ -164,6 +166,7 @@ describe('kernel/manager', () => {
             expect(kernel.isDisposed).to.equal(false);
           }
         });
+        await kernel.info;
         await manager.shutdown(kernel.id);
         await emission;
       });

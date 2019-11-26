@@ -11,7 +11,7 @@ import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { Kernel, KernelMessage, KernelSpec } from '@jupyterlab/services';
 
-import { expectFailure, testEmission } from '@jupyterlab/testutils';
+import { expectFailure, testEmission, sleep } from '@jupyterlab/testutils';
 
 import { KernelTester, handleRequest } from '../utils';
 
@@ -26,6 +26,7 @@ describe('Kernel.IKernel', () => {
 
   beforeEach(async () => {
     defaultKernel = await Kernel.startNew();
+    await defaultKernel.info;
   });
 
   afterEach(async () => {
@@ -40,6 +41,17 @@ describe('Kernel.IKernel', () => {
 
   describe('#disposed', () => {
     it('should be emitted when the kernel is disposed', async () => {
+      let called = false;
+      defaultKernel.disposed.connect((sender, args) => {
+        expect(sender).to.equal(defaultKernel);
+        expect(args).to.be.undefined;
+        called = true;
+      });
+      defaultKernel.dispose();
+      expect(called).to.equal(true);
+    });
+
+    it('should be emitted when the kernel is shut down', async () => {
       let called = false;
       defaultKernel.disposed.connect((sender, args) => {
         expect(sender).to.equal(defaultKernel);
@@ -329,7 +341,6 @@ describe('Kernel.IKernel', () => {
     it('should get an unknown status while disconnected', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
-      await kernel.info;
       const emission = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'unknown'
       });
@@ -342,7 +353,6 @@ describe('Kernel.IKernel', () => {
     it('should get a dead status', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
-      await kernel.info;
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
       });
@@ -624,6 +634,7 @@ describe('Kernel.IKernel', () => {
       const future = defaultKernel.requestExecute({ code: 'foo' });
       await defaultKernel.restart();
       expect(future.isDisposed).to.equal(true);
+      // TODO: sometimes this next test fails.
       expect(comm.isDisposed).to.equal(true);
     });
   });
@@ -692,12 +703,21 @@ describe('Kernel.IKernel', () => {
       tester.dispose();
     });
 
-    it('should dispose of all kernel instances', async () => {
+    it('should dispose of all kernel connection instances', async () => {
+      // TODO: for some reason, we don't seem to be getting the kernel status
+      // messages back when we shut down a kernel that will say the kernel is
+      // dead and we can dispose the connection. Perhaps it is just waiting in
+      // the correct way for the message?
       const kernel0 = await Kernel.startNew();
       const kernel1 = kernel0.clone();
       await kernel0.info;
       await kernel1.info;
       await kernel0.shutdown();
+      await sleep(1000);
+      expect(kernel0.status).to.equal('dead');
+      expect(kernel1.status).to.equal('dead');
+      console.log(kernel0.status);
+      console.log(kernel1.status);
       expect(kernel0.isDisposed).to.equal(true);
       expect(kernel1.isDisposed).to.equal(true);
     });
@@ -1295,7 +1315,6 @@ describe('Kernel.IKernel', () => {
 
       const tester = new KernelTester();
       const kernel = await tester.start();
-      await kernel.info;
       const future = kernel.requestExecute(options, false);
 
       // The list of emissions from the anyMessage signal.

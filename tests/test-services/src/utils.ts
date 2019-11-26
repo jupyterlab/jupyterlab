@@ -450,7 +450,13 @@ export class KernelTester extends SocketTester {
     // Construct a new kernel.
     const serverSettings = this.serverSettings;
     this._kernel = await Kernel.startNew({ serverSettings });
+
+    // Wait for the other side to signal it is connected
     await this.ready;
+
+    // Wait for the initial kernel info reply
+    await this._kernel.info;
+
     return this._kernel;
   }
 
@@ -560,6 +566,7 @@ export class SessionTester extends SocketTester {
     handleRequest(this, 201, createSessionModel());
     this._session = await this._sessionManager.startNew({
       path: UUID.uuid4(),
+      name: UUID.uuid4(),
       type: 'test'
     });
     await this.ready;

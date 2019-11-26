@@ -38,13 +38,17 @@ describe('kernel', () => {
 
   describe('Kernel.listRunning()', () => {
     it('should yield a list of valid kernel ids', async () => {
-      const response = await Kernel.listRunning();
-      expect(toArray(response).length).to.be.greaterThan(0);
+      expect(toArray(await Kernel.listRunning()).length).to.equal(0);
+      const kernel = await Kernel.startNew();
+      await kernel.info;
+      expect(toArray(await Kernel.listRunning()).length).to.be.greaterThan(0);
+      await kernel.shutdown();
     });
 
     it('should accept server settings', async () => {
       const serverSettings = makeSettings();
       const kernel = await Kernel.startNew({ serverSettings });
+      await kernel.info;
       const response = await Kernel.listRunning(serverSettings);
       expect(toArray(response).length).to.be.greaterThan(0);
       await kernel.shutdown();
@@ -74,6 +78,7 @@ describe('kernel', () => {
     it('should create an Kernel.IKernel object', async () => {
       const kernel = await Kernel.startNew({});
       expect(kernel.status).to.equal('unknown');
+      await kernel.info;
       await kernel.shutdown();
     });
 
@@ -81,6 +86,7 @@ describe('kernel', () => {
       const serverSettings = makeSettings();
       const kernel = await Kernel.startNew({ serverSettings });
       expect(kernel.status).to.equal('unknown');
+      await kernel.info;
       await kernel.shutdown();
     });
 
@@ -90,7 +96,7 @@ describe('kernel', () => {
     // kernel typically doesn't immediately send its status, does it? I suppose
     // it should - if we are connecting to an existing kernel, it would be nice
     // to know right off if it's busy/dead/etc.
-    it.skip('should still start if the kernel dies', async () => {
+    it('should still start if the kernel dies', async () => {
       tester = new KernelTester();
       tester.initialStatus = 'dead';
       const kernel = await tester.start();
@@ -133,6 +139,7 @@ describe('kernel', () => {
     it('should auto-reconnect on websocket error', async () => {
       tester = new KernelTester();
       const kernel = await tester.start();
+      await kernel.info;
 
       const emission = testEmission(kernel.connectionStatusChanged, {
         find: (k, status) => status === 'connecting'

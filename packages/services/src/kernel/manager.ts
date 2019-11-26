@@ -127,7 +127,9 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
     if (!this._models.has(id)) {
       // We trust the user to connect to an existing kernel, but we verify
       // asynchronously.
-      void this.refreshRunning();
+      void this.refreshRunning().catch(() => {
+        /* no-op */
+      });
     }
     return kernelConnection;
   }

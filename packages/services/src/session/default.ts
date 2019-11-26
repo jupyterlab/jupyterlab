@@ -7,9 +7,13 @@ import { Kernel, KernelMessage } from '../kernel';
 
 import { ServerConnection } from '..';
 
-import { Session, DeepPartial } from './session';
+import * as Session from './session';
 
-import restapi from './restapi';
+import { shutdownSession, updateSession } from './restapi';
+
+type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
 
 /**
  * Session object for accessing the session REST api. The session
@@ -296,7 +300,8 @@ export class SessionConnection implements Session.ISessionConnection {
     if (this.isDisposed) {
       throw new Error('Session is disposed');
     }
-    return restapi.shutdownSession(this.id, this.serverSettings);
+    await shutdownSession(this.id, this.serverSettings);
+    this.dispose();
   }
 
   /**
@@ -380,7 +385,7 @@ export class SessionConnection implements Session.ISessionConnection {
   private async _patch(
     body: DeepPartial<Session.IModel>
   ): Promise<Session.IModel> {
-    let model = await restapi.updateSession(
+    let model = await updateSession(
       { ...body, id: this._id },
       this.serverSettings
     );

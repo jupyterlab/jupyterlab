@@ -428,7 +428,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * The promise will be rejected if the kernel status is `Dead` or if the
    * request fails or the response is invalid.
    */
-  interrupt(): Promise<void> {
+  async interrupt(): Promise<void> {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
@@ -521,24 +521,17 @@ export class KernelConnection implements Kernel.IKernelConnection {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    *
-   * On a valid response, closes the websocket and disposes of the kernel
-   * object, and fulfills the promise.
+   * On a valid response, disposes this kernel connection.
    *
-   * If the kernel is already `dead`, it closes the websocket and returns
-   * without a server request.a
+   * If the kernel is already `dead`, disposes this kernel connection without
+   * a server request.
    */
   async shutdown(): Promise<void> {
-    // TODO: review the logic here. Why are the clear statements in different orders?
-    if (this.status === 'dead') {
-      this._updateConnectionStatus('disconnected');
-      this._clearSocket();
-      this._clearState();
-      return;
+    if (this.status !== 'dead') {
+      console.log(await restapi.shutdownKernel(this.id, this.serverSettings));
+    } else {
+      this.dispose();
     }
-    await restapi.shutdownKernel(this.id, this.serverSettings);
-    this._clearState();
-    this._updateConnectionStatus('disconnected');
-    this._clearSocket();
   }
 
   /**

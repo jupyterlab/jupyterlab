@@ -11,13 +11,11 @@ import { ISignal, Signal } from '@phosphor/signaling';
 
 import { ServerConnection } from '../serverconnection';
 
-import { Session } from './session';
+import * as Session from './session';
 import { BaseManager } from '../basemanager';
 import { SessionConnection } from './default';
-import { RestAPI } from './restapi';
+import { startSession, shutdownSession, listRunning } from './restapi';
 import { Kernel } from '../kernel';
-
-const { startSession, shutdownSession, listRunning } = RestAPI;
 
 /**
  * We have a session manager that maintains a list of models from the server.
@@ -70,6 +68,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
     this._ready = (async () => {
       await this._pollModels.start();
       await this._pollModels.tick;
+      await this._kernelManager.ready;
       this._isReady = true;
     })();
   }
@@ -136,7 +135,9 @@ export class SessionManager extends BaseManager implements Session.IManager {
     if (!this._models.has(model.id)) {
       // We trust the user to connect to an existing session, but we verify
       // asynchronously.
-      void this.refreshRunning();
+      void this.refreshRunning().catch(() => {
+        /* no-op */
+      });
     }
 
     return sessionConnection;
@@ -335,11 +336,15 @@ export class SessionManager extends BaseManager implements Session.IManager {
     // the server, so we refresh from the server to make sure we reflect the
     // server state.
 
-    void this.refreshRunning();
+    void this.refreshRunning().catch(() => {
+      /* no-op */
+    });
   };
 
   private readonly _onChanged = () => {
-    void this.refreshRunning();
+    void this.refreshRunning().catch(() => {
+      /* no-op */
+    });
   };
 
   private readonly _connectToKernel = (

@@ -9,7 +9,12 @@ import { UUID } from '@phosphor/coreutils';
 
 import { Signal } from '@phosphor/signaling';
 
-import { Kernel, KernelMessage } from '@jupyterlab/services';
+import {
+  Kernel,
+  KernelMessage,
+  SessionManager,
+  KernelManager
+} from '@jupyterlab/services';
 
 import { Session } from '@jupyterlab/services';
 
@@ -19,17 +24,24 @@ import { handleRequest, SessionTester, init } from '../utils';
 
 init();
 
+let kernelManager = new KernelManager();
+let sessionManager = new SessionManager({ kernelManager });
+
 /**
  * Start a new session with a unique name.
  */
-async function startNew(): Promise<Session.ISession> {
-  const session = await Session.startNew({ path: UUID.uuid4() });
+async function startNew(): Promise<Session.ISessionConnection> {
+  const session = await sessionManager.startNew({
+    path: UUID.uuid4(),
+    name: UUID.uuid4(),
+    type: 'test'
+  });
   return session;
 }
 
 describe('session', () => {
-  let session: Session.ISession;
-  let defaultSession: Session.ISession;
+  let session: Session.ISessionConnection;
+  let defaultSession: Session.ISessionConnection;
 
   beforeAll(async () => {
     defaultSession = await startNew();
@@ -45,7 +57,7 @@ describe('session', () => {
     await defaultSession.shutdown();
   });
 
-  describe('Session.ISession', () => {
+  describe('Session.DefaultSession', () => {
     describe('#disposed', () => {
       it('should emit when the session is disposed', async () => {
         let called = false;
@@ -71,6 +83,7 @@ describe('session', () => {
         await defaultSession.changeKernel({ name: previous.name });
         expect(previous).to.not.equal(defaultSession.kernel);
         expect(called).to.deep.equal({
+          name: 'kernel',
           oldValue: previous,
           newValue: defaultSession.kernel
         });
@@ -106,12 +119,16 @@ describe('session', () => {
 
     describe('#unhandledMessage', () => {
       it('should be emitted for an unhandled message', async () => {
+        // TODO: make a KernelTester, then make a session connection to that
+        // kernel.
         const tester = new SessionTester();
+        await tester.ready;
         const session = await tester.startSession();
         const msgId = UUID.uuid4();
         const emission = testEmission(session.unhandledMessage, {
           find: (k, msg) => msg.header.msg_id === msgId
         });
+        void emission;
         const msg = KernelMessage.createMessage({
           msgType: 'kernel_info_request',
           channel: 'shell',
@@ -121,8 +138,8 @@ describe('session', () => {
         });
         msg.parent_header = { session: session.kernel.clientId };
         tester.send(msg);
-        await emission;
-        await tester.shutdown();
+        // await emission;
+        // await tester.shutdown();
         tester.dispose();
       });
     });
@@ -255,7 +272,7 @@ describe('session', () => {
       });
 
       it('should fail if the session is disposed', async () => {
-        const session = Session.connectTo(defaultSession.model);
+        const session = sessionManager.connectTo(defaultSession.model);
         session.dispose();
         const promise = session.setPath(UUID.uuid4());
         await expectFailure(promise, 'Session is disposed');
@@ -287,7 +304,7 @@ describe('session', () => {
       });
 
       it('should fail if the session is disposed', async () => {
-        const session = Session.connectTo(defaultSession.model);
+        const session = sessionManager.connectTo(defaultSession.model);
         session.dispose();
         const promise = session.setPath(UUID.uuid4());
         await expectFailure(promise, 'Session is disposed');
@@ -317,7 +334,7 @@ describe('session', () => {
       });
 
       it('should fail if the session is disposed', async () => {
-        const session = Session.connectTo(defaultSession.model);
+        const session = sessionManager.connectTo(defaultSession.model);
         session.dispose();
         const promise = session.setPath(UUID.uuid4());
         await expectFailure(promise, 'Session is disposed');
@@ -407,14 +424,17 @@ describe('session', () => {
       });
 
       it('should fail if the session is disposed', async () => {
-        const session = Session.connectTo(defaultSession.model);
+        const session = sessionManager.connectTo(defaultSession.model);
         session.dispose();
         await expectFailure(session.shutdown(), 'Session is disposed');
       });
 
       it('should dispose of all session instances', async () => {
+        // TODO: we can only do this from the session manager, right? In
+        // general, how do we get a notification from the server that a
+        // session has shut down?
         const session0 = await startNew();
-        const session1 = Session.connectTo(session0.model);
+        const session1 = sessionManager.connectTo(session0.model);
         await session0.shutdown();
         expect(session1.isDisposed).to.equal(true);
       });

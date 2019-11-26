@@ -524,7 +524,6 @@ export function isErrorMsg(msg: IMessage): msg is IErrorMsg {
   return msg.header.msg_type === 'error';
 }
 
-
 /**
  * The valid Kernel status states.
  *

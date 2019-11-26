@@ -29,7 +29,7 @@ export function validateProperty(
         valid = typeof value === typeName;
     }
     if (!valid) {
-      throw new Error(`Property '${name}' is not of type '${typeName}`);
+      throw new Error(`Property '${name}' is not of type '${typeName}'`);
     }
 
     if (values.length > 0) {
