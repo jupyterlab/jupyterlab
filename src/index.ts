@@ -25,7 +25,7 @@ import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-import { Kernel } from '@jupyterlab/services';
+import { Kernel, Session } from '@jupyterlab/services';
 
 import { UUID } from '@phosphor/coreutils';
 
@@ -40,6 +40,8 @@ import { DebugService } from './service';
 import { DebugSession } from './session';
 
 import { IDebugger } from './tokens';
+
+import { FileHandler } from './handlers/file';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -75,7 +77,7 @@ export namespace CommandIDs {
 async function setDebugSession(
   app: JupyterFrontEnd,
   debug: IDebugger,
-  client: IClientSession
+  client: IClientSession | Session.ISession
 ) {
   if (!debug.session) {
     debug.session = new DebugSession({ client: client });
@@ -86,14 +88,16 @@ async function setDebugSession(
   app.commands.notifyCommandChanged();
 }
 
-class DebuggerHandler<H extends ConsoleHandler | NotebookHandler> {
+class DebuggerHandler<
+  H extends ConsoleHandler | NotebookHandler | FileHandler
+> {
   constructor(builder: new (option: any) => H) {
     this.builder = builder;
   }
 
   update<
-    T extends IConsoleTracker | INotebookTracker,
-    W extends ConsolePanel | NotebookPanel
+    T extends IConsoleTracker | INotebookTracker | null,
+    W extends ConsolePanel | NotebookPanel | FileEditor
   >(debug: IDebugger, tracker: T, widget: W): void {
     if (!debug.model || this.handlers[widget.id] || !debug.isDebuggingEnabled) {
       return;
@@ -161,6 +165,8 @@ const files: JupyterFrontEndPlugin<void> = {
     labShell: ILabShell
   ) => {
     let _model: any;
+    const handler = new DebuggerHandler<FileHandler>(null);
+
     labShell.currentChanged.connect((_, update) => {
       const widget = update.newValue;
       if (!(widget instanceof FileEditor)) {
@@ -168,13 +174,13 @@ const files: JupyterFrontEndPlugin<void> = {
       }
 
       //  Finding if the file is backed by a kernel or attach it to one.
-
       const sessions = app.serviceManager.sessions;
 
-      void sessions.findByPath(widget.context.path).then(model => {
+      void sessions.findByPath(widget.context.path).then(async model => {
         _model = model;
         const session = sessions.connectTo(model);
-        debug.session.client = session;
+        await setDebugSession(app, debug, session);
+        handler.update(debug, null, widget);
       });
     });
 
