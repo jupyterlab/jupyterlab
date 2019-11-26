@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ReactWidget } from '@jupyterlab/apputils';
-import { ISignal } from '@phosphor/signaling';
 import React, { useEffect, useState } from 'react';
 import { Breakpoints } from '.';
 import { IDebugger } from '../tokens';
@@ -77,7 +76,6 @@ const BreakpointCellComponent = ({
           <BreakpointComponent
             key={breakpoint.source.path + breakpoint.line}
             breakpoint={breakpoint}
-            breakpointChanged={model.breakpointChanged}
           />
         ))}
     </>
@@ -85,43 +83,12 @@ const BreakpointCellComponent = ({
 };
 
 const BreakpointComponent = ({
-  breakpoint,
-  breakpointChanged
+  breakpoint
 }: {
   breakpoint: IDebugger.IBreakpoint;
-  breakpointChanged: ISignal<Breakpoints.Model, IDebugger.IBreakpoint>;
 }) => {
-  const [active, setActive] = useState(breakpoint.active);
-  breakpoint.active = active;
-
-  const setBreakpointEnabled = (state: boolean) => {
-    setActive(state);
-  };
-
-  useEffect(() => {
-    const updateBreakpoints = (
-      _: Breakpoints.Model,
-      updates: IDebugger.IBreakpoint
-    ) => {
-      setBreakpointEnabled(updates.active);
-    };
-
-    breakpointChanged.connect(updateBreakpoints);
-
-    return () => {
-      breakpointChanged.disconnect(updateBreakpoints);
-    };
-  });
-
   return (
     <div className={`breakpoint`}>
-      {/* <input
-        onChange={() => {
-          setBreakpointEnabled(!active);
-        }}
-        type="checkbox"
-        checked={active}
-      /> */}
       <span>
         {breakpoint.source.path} : {breakpoint.line}
       </span>
