@@ -84,7 +84,7 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     this.node.appendChild(el);
 
     if (this._result) {
-      this._result.finalize();
+      this._result.view.finalize();
     }
 
     const loader = vega.vega.loader({
@@ -122,7 +122,7 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
 
   dispose(): void {
     if (this._result) {
-      this._result.finalize();
+      this._result.view.finalize();
     }
     super.dispose();
   }
