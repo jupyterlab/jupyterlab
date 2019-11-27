@@ -1301,12 +1301,10 @@ export namespace NotebookActions {
     let latestCellIdx: number = null;
     notebook.widgets.forEach((cell, cellIndx) => {
       if (cell.model.type === 'code') {
-        const execution = (cell as CodeCell).model.metadata.get('execution');
-        if (
-          execution &&
-          typeof execution === 'object' &&
-          'iopub.status.busy' in execution
-        ) {
+        const execution = (cell as CodeCell).model.metadata.get(
+          'execution'
+        ) as JSONObject;
+        if (execution && execution['iopub.status.busy'] !== undefined) {
           // The busy status is used as soon as a request is received:
           // https://jupyter-client.readthedocs.io/en/stable/messaging.html
           const timestamp = execution['iopub.status.busy'].toString();
@@ -1320,7 +1318,7 @@ export namespace NotebookActions {
         }
       }
     });
-    if (latestCellIdx) {
+    if (latestCellIdx !== null) {
       notebook.activeCellIndex = latestCellIdx;
     }
   }
