@@ -113,8 +113,12 @@ class DebuggerHandler<
     });
 
     debug.model.disposed.connect(async () => {
+      const handlerIds = Object.keys(this.handlers);
+      if (handlerIds.length === 0) {
+        return;
+      }
       await debug.stop();
-      Object.keys(this.handlers).forEach(id => {
+      handlerIds.forEach(id => {
         this.handlers[id].dispose();
       });
       this.handlers = {};
