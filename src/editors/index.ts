@@ -29,6 +29,7 @@ export class DebuggerEditors extends TabPanel {
     super();
     this.tabsMovable = true;
     this.tabBar.insertBehavior = 'select-tab';
+    this.node.setAttribute('data-jp-debugger', 'true');
     this.tabBar.tabCloseRequested.connect((_, tab) => {
       const widget = tab.title.owner;
       widget.dispose();
@@ -40,6 +41,14 @@ export class DebuggerEditors extends TabPanel {
     this.debuggerService = options.service;
     this.editorFactory = options.editorServices.factoryService.newInlineEditor;
     this.mimeTypeService = options.editorServices.mimeTypeService;
+
+    this.debuggerService.session?.clientChanged.connect((_, updated) => {
+      if (this.tabBar.currentTitle?.owner.id === updated.path) {
+        this.node.setAttribute('data-jp-debugger', 'true');
+      } else {
+        this.node.setAttribute('data-jp-debugger', 'false');
+      }
+    });
 
     this.tabBar.currentChanged.connect((_, updated) => {
       if (

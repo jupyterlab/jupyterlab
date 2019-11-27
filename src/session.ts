@@ -64,7 +64,12 @@ export class DebugSession implements IDebugger.ISession {
 
     if (client) {
       this._client.iopubMessage.connect(this._handleEvent, this);
+      this._clientChanged.emit(client);
     }
+  }
+
+  get clientChanged(): ISignal<this, IClientSession | Session.ISession | null> {
+    return this._clientChanged;
   }
 
   /**
@@ -215,6 +220,10 @@ export class DebugSession implements IDebugger.ISession {
   private _eventMessage = new Signal<
     IDebugger.ISession,
     IDebugger.ISession.Event
+  >(this);
+  private _clientChanged = new Signal<
+    this,
+    IClientSession | Session.ISession | null
   >(this);
   private _seq: number = 0;
 }

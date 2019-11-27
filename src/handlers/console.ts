@@ -42,6 +42,7 @@ export class ConsoleHandler implements IDisposable {
       return;
     }
     this.isDisposed = true;
+    this.consolePanel.node.setAttribute('data-jp-debugger', 'false');
     this.editorHandler.dispose();
     Signal.clearData(this);
   }
