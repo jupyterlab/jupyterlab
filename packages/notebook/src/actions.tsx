@@ -22,7 +22,7 @@ import {
 
 import { ArrayExt, each, toArray } from '@phosphor/algorithm';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject, JSONExt } from '@phosphor/coreutils';
 
 import { ElementExt } from '@phosphor/domutils';
 
@@ -1301,10 +1301,12 @@ export namespace NotebookActions {
     let latestCellIdx: number = null;
     notebook.widgets.forEach((cell, cellIndx) => {
       if (cell.model.type === 'code') {
-        const execution = (cell as CodeCell).model.metadata.get(
-          'execution'
-        ) as JSONObject;
-        if (execution && execution['iopub.status.busy'] !== undefined) {
+        const execution = (cell as CodeCell).model.metadata.get('execution');
+        if (
+          execution &&
+          JSONExt.isObject(execution) &&
+          execution['iopub.status.busy'] !== undefined
+        ) {
           // The busy status is used as soon as a request is received:
           // https://jupyter-client.readthedocs.io/en/stable/messaging.html
           const timestamp = execution['iopub.status.busy'].toString();
