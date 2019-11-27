@@ -44,7 +44,7 @@
     "typedoc": "^0.15.2",
     "typescript": "~3.7.2",
     "vega": "^5.4.0",
-    "vega-embed": "^4.2.0",
+    "vega-embed": "^6.2.0",
     "vega-lite": "^3.3.0"
   },
   "publishConfig": {
