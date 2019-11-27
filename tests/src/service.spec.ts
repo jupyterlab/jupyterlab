@@ -156,7 +156,7 @@ describe('DebugService', () => {
       service.model = model;
       await service.restoreState(true);
       const breakpointLines: number[] = [3, 5];
-      sourceId = service.getCellId(code);
+      sourceId = service.getCodeId(code);
       breakpoints = breakpointLines.map((l: number, index: number) => {
         return {
           id: index,

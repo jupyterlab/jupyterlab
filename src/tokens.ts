@@ -59,7 +59,7 @@ export interface IDebugger extends IDisposable {
   /**
    * Computes an id based on the given code.
    */
-  getCellId(code: string): string;
+  getCodeId(code: string): string;
 
   /**
    * Whether the current debugger is started.

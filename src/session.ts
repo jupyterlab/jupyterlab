@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
-import { KernelMessage } from '@jupyterlab/services';
+import { KernelMessage, Session } from '@jupyterlab/services';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
@@ -41,7 +41,7 @@ export class DebugSession implements IDebugger.ISession {
   /**
    * Returns the API client session to connect to a debugger.
    */
-  get client(): IClientSession {
+  get client(): IClientSession | Session.ISession {
     return this._client;
   }
 
@@ -51,7 +51,7 @@ export class DebugSession implements IDebugger.ISession {
    *
    * @param client - The new API client session.
    */
-  set client(client: IClientSession | null) {
+  set client(client: IClientSession | Session.ISession | null) {
     if (this._client === client) {
       return;
     }
@@ -141,7 +141,11 @@ export class DebugSession implements IDebugger.ISession {
    * Restore the state of a debug session.
    */
   async restoreState(): Promise<IDebugger.ISession.Response['debugInfo']> {
-    await this.client.ready;
+    if (this.client instanceof ClientSession) {
+      await this.client.ready;
+    } else {
+      await this.client.kernel.ready;
+    }
     const message = await this.sendRequest('debugInfo', {});
     this._isStarted = message.body.isStarted;
     return message;
@@ -171,7 +175,7 @@ export class DebugSession implements IDebugger.ISession {
    * @param message - the event message.
    */
   private _handleEvent(
-    sender: IClientSession,
+    sender: IClientSession | Session.ISession,
     message: KernelMessage.IIOPubMessage
   ): void {
     const msgType = message.header.msg_type;
@@ -204,7 +208,7 @@ export class DebugSession implements IDebugger.ISession {
     return reply.promise;
   }
 
-  private _client: IClientSession;
+  private _client: IClientSession | Session.ISession;
   private _disposed = new Signal<this, void>(this);
   private _isDisposed: boolean = false;
   private _isStarted: boolean = false;
@@ -223,6 +227,6 @@ export namespace DebugSession {
     /**
      * The client session used by the debug session.
      */
-    client: IClientSession;
+    client: IClientSession | Session.ISession;
   }
 }

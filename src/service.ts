@@ -151,7 +151,7 @@ export class DebugService implements IDebugger {
   /**
    * Computes an id based on the given code.
    */
-  getCellId(code: string): string {
+  getCodeId(code: string): string {
     return this._tmpFilePrefix + this._hashMethod(code) + this._tmpFileSuffix;
   }
 

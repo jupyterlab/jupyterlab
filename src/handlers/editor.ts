@@ -192,7 +192,7 @@ export class EditorHandler implements IDisposable {
   private getBreakpoints(): IDebugger.IBreakpoint[] {
     const code = this._editor.model.value.text;
     return this._debuggerModel.breakpointsModel.getBreakpoints(
-      this._debuggerService.getCellId(code)
+      this._debuggerService.getCodeId(code)
     );
   }
 

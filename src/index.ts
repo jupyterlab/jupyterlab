@@ -21,17 +21,21 @@ import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
 import { IStateDB } from '@jupyterlab/coreutils';
 
+import { DocumentWidget } from '@jupyterlab/docregistry';
+
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-import { Kernel } from '@jupyterlab/services';
+import { Session } from '@jupyterlab/services';
 
 import { UUID } from '@phosphor/coreutils';
 
 import { Debugger } from './debugger';
 
 import { ConsoleHandler } from './handlers/console';
+
+import { FileHandler } from './handlers/file';
 
 import { NotebookHandler } from './handlers/notebook';
 
@@ -63,8 +67,6 @@ export namespace CommandIDs {
 
   export const debugConsole = 'debugger:debug-console';
 
-  export const debugFile = 'debugger:debug-file';
-
   export const mount = 'debugger:mount';
 
   export const changeMode = 'debugger:change-mode';
@@ -75,7 +77,7 @@ export namespace CommandIDs {
 async function setDebugSession(
   app: JupyterFrontEnd,
   debug: IDebugger,
-  client: IClientSession
+  client: IClientSession | Session.ISession
 ) {
   if (!debug.session) {
     debug.session = new DebugSession({ client: client });
@@ -86,14 +88,16 @@ async function setDebugSession(
   app.commands.notifyCommandChanged();
 }
 
-class DebuggerHandler<H extends ConsoleHandler | NotebookHandler> {
+class DebuggerHandler<
+  H extends ConsoleHandler | NotebookHandler | FileHandler
+> {
   constructor(builder: new (option: any) => H) {
     this.builder = builder;
   }
 
   update<
-    T extends IConsoleTracker | INotebookTracker,
-    W extends ConsolePanel | NotebookPanel
+    T extends IConsoleTracker | INotebookTracker | null,
+    W extends ConsolePanel | NotebookPanel | FileEditor
   >(debug: IDebugger, tracker: T, widget: W): void {
     if (!debug.model || this.handlers[widget.id] || !debug.isDebuggingEnabled) {
       return;
@@ -160,35 +164,38 @@ const files: JupyterFrontEndPlugin<void> = {
     tracker: IEditorTracker,
     labShell: ILabShell
   ) => {
-    let _model: any;
-    labShell.currentChanged.connect((_, update) => {
+    const handler = new DebuggerHandler<FileHandler>(FileHandler);
+    const activeSessions: {
+      [id: string]: Session.ISession;
+    } = {};
+
+    labShell.currentChanged.connect(async (_, update) => {
       const widget = update.newValue;
-      if (!(widget instanceof FileEditor)) {
+      if (!(widget instanceof DocumentWidget)) {
         return;
       }
 
-      //  Finding if the file is backed by a kernel or attach it to one.
+      const content = widget.content;
+      if (!(content instanceof FileEditor)) {
+        return;
+      }
 
       const sessions = app.serviceManager.sessions;
-
-      void sessions.findByPath(widget.context.path).then(model => {
-        _model = model;
-        const session = sessions.connectTo(model);
-        debug.session.client = session;
-      });
-    });
-
-    app.commands.addCommand(CommandIDs.debugFile, {
-      execute: async _ => {
-        if (!tracker || !tracker.currentWidget) {
-          return;
+      try {
+        const model = await sessions.findByPath(widget.context.path);
+        let session = activeSessions[model.id];
+        if (!session) {
+          // Use `connectTo` only if the session does not exist.
+          // `connectTo` sends a kernel_info_request on the shell
+          // channel, which blocks the debug session restore when waiting
+          // for the kernel to be ready
+          session = sessions.connectTo(model);
+          activeSessions[model.id] = session;
         }
-        const idKernel = debug.session.client.kernel.id;
-        void Kernel.findById(idKernel).catch(() => {
-          if (_model) {
-            Kernel.connectTo(_model);
-          }
-        });
+        await setDebugSession(app, debug, session);
+        handler.update(debug, null, content);
+      } catch {
+        return;
       }
     });
   }
