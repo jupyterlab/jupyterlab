@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/debugger",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.1",
   "description": "JupyterLab - Debugger Extension",
   "homepage": "https://github.com/jupyterlab/debugger",
   "bugs": {
@@ -99,9 +99,9 @@
     ]
   },
   "publishConfig": {
-    "access": "private"
+    "access": "public"
   },
-  "private": true,
+  "private": false,
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema"
