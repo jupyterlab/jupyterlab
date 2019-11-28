@@ -29,12 +29,7 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
-  margin: var(--jp-toolbar-header-margin);
   justify-content: flex-end;
-}
-
-.jp-RunningSessions-header .jp-ToolbarButtonComponent {
-  padding: 0px 16px;
 }
 
 .jp-RunningSessions-shutdownAll {
@@ -65,6 +60,7 @@
 .jp-RunningSessions-sectionHeader {
   flex: 0 0 auto;
   align-items: center;
+  justify-content: space-between;
   height: 28px;
   display: flex;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
