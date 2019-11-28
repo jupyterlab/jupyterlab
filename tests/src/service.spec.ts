@@ -80,7 +80,7 @@ describe('DebugService', () => {
   afterEach(async () => {
     await client.shutdown();
     session.dispose();
-    service.dispose();
+    (service as DebugService).dispose();
   });
 
   describe('#constructor()', () => {

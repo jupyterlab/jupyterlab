@@ -7,7 +7,7 @@ import { KernelMessage, Session } from '@jupyterlab/services';
 
 import { Token } from '@phosphor/coreutils';
 
-import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
+import { IObservableDisposable } from '@phosphor/disposable';
 
 import { ISignal } from '@phosphor/signaling';
 
@@ -16,7 +16,7 @@ import { DebugProtocol } from 'vscode-debugprotocol';
 /**
  * An interface describing an application's visual debugger.
  */
-export interface IDebugger extends IDisposable {
+export interface IDebugger {
   /**
    * Whether debugging is enabled for the current session.
    */
