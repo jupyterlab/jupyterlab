@@ -3,6 +3,8 @@
 
 import { IClientSession } from '@jupyterlab/apputils';
 
+import { IDisposable } from '@phosphor/disposable';
+
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { murmur2 } from 'murmurhash-js';
@@ -20,7 +22,7 @@ import { Callstack } from './callstack';
 /**
  * A concrete implementation of IDebugger.
  */
-export class DebugService implements IDebugger {
+export class DebugService implements IDebugger, IDisposable {
   constructor() {
     // Avoids setting session with invalid client
     // session should be set only when a notebook or
