@@ -12,9 +12,9 @@ import sys
 import warnings
 
 from jupyter_core.application import JupyterApp, base_aliases
-# TODO ECH Flags are failing with nbclassic, but succeed with jupyter_sever
-# from jupyter_server.serverapp import aliases, flags
-from nbclassic.notebookapp import aliases, flags
+# TODO ECH Flags are failing with nbclassic, but succeed with jupyter_server
+from jupyter_server.serverapp import aliases, flags
+# from nbclassic.notebookapp import aliases, flags
 from jupyter_server.utils import url_path_join as ujoin
 from traitlets import Bool, Instance, Unicode
 
