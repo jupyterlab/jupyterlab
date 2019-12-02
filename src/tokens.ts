@@ -177,14 +177,6 @@ export namespace IDebugger {
     >;
 
     /**
-     * Signal emitted for changed client of session
-     */
-    readonly clientChanged: ISignal<
-      this,
-      IClientSession | Session.ISession | null
-    >;
-
-    /**
      * Start a new debug session.
      */
     start(): Promise<void>;

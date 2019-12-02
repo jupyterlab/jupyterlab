@@ -20,7 +20,6 @@ export class ConsoleHandler implements IDisposable {
     this.debuggerModel = options.debuggerService.model as Debugger.Model;
     this.debuggerService = options.debuggerService;
     this.consolePanel = options.widget;
-    this.consolePanel.node.setAttribute('data-jp-debugger', 'true');
 
     const promptCell = this.consolePanel.console.promptCell;
     this.editorHandler = new EditorHandler({
@@ -42,7 +41,6 @@ export class ConsoleHandler implements IDisposable {
       return;
     }
     this.isDisposed = true;
-    this.consolePanel.node.setAttribute('data-jp-debugger', 'false');
     this.editorHandler.dispose();
     Signal.clearData(this);
   }
