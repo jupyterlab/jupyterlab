@@ -51,6 +51,7 @@
     "@jupyterlab/docregistry": "^1.1.0",
     "@jupyterlab/fileeditor": "^1.1.0",
     "@jupyterlab/launcher": "^1.1.0",
+    "@jupyterlab/observables": "^2.4.0",
     "@jupyterlab/notebook": "^1.1.0",
     "@jupyterlab/services": "^4.1.0",
     "@phosphor/algorithm": "^1.2.0",
