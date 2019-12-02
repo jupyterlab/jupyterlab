@@ -20,7 +20,7 @@ const celltags: JupyterFrontEndPlugin<void> = {
     tracker: INotebookTracker
   ) => {
     const tool = new TagTool(tracker, app);
-    tools.addItem({ tool: tool, rank: 1.7 });
+    tools.addItem({ tool: tool, rank: 1.6 });
   }
 };
 

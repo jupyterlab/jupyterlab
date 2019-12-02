@@ -154,7 +154,7 @@ export class TagTool extends NotebookTools.Tool {
       let idx = tags.indexOf((layout.widgets[i] as TagWidget).name);
       if (idx < 0 && layout.widgets[i].id !== 'add-tag') {
         toDispose.push(layout.widgets[i] as TagWidget);
-      } else {
+      } else if (layout.widgets[i].id !== 'add-tag') {
         tags.splice(idx, 1);
       }
     }
