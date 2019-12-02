@@ -8,7 +8,12 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { IClientSession, ICommandPalette } from '@jupyterlab/apputils';
+import {
+  IClientSession,
+  ICommandPalette,
+  Toolbar,
+  ToolbarButton
+} from '@jupyterlab/apputils';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
@@ -83,6 +88,47 @@ async function setDebugSession(
   app.commands.notifyCommandChanged();
 }
 
+function updateToolbar(
+  widget: NotebookPanel | ConsolePanel | FileEditor
+): void {
+  console.log({ widget });
+
+  const isConsolePanel = widget instanceof ConsolePanel;
+  let toogleState = false;
+  const getToolbar = (): Toolbar => {
+    if (isConsolePanel) {
+      return (
+        ((widget as ConsolePanel).widgets.find(
+          widget => widget instanceof Toolbar
+        ) as Toolbar) || new Toolbar()
+      );
+    } else {
+      return (widget as NotebookPanel)?.toolbar;
+    }
+  };
+
+  const insertItemAndCheckIfExist = (toolbar: Toolbar) => {
+    return toolbar.addItem(
+      'debugger-lifeCycle-button',
+      new ToolbarButton({
+        className: 'jp-debugger-switch-button',
+        iconClassName: 'jp-toggle-switch',
+        onClick: () => {
+          toogleState = !toogleState;
+          widget.node.setAttribute('data-debugger-on', toogleState.toString());
+        },
+        tooltip: 'Enable / Disable Debugger'
+      })
+    );
+  };
+
+  const toolbar = getToolbar();
+
+  if (insertItemAndCheckIfExist(toolbar) && isConsolePanel) {
+    (widget as ConsolePanel).insertWidget(0, toolbar);
+  }
+}
+
 class DebuggerHandler<
   H extends ConsoleHandler | NotebookHandler | FileHandler
 > {
@@ -98,6 +144,7 @@ class DebuggerHandler<
     if (!debug.model || this.handlers[widget.id] || !debuggingEnabled) {
       return;
     }
+    updateToolbar(widget);
     const handler = new this.builder({
       debuggerService: debug,
       widget
@@ -108,7 +155,6 @@ class DebuggerHandler<
       handler.dispose();
       delete this.handlers[widget.id];
     });
-
     debug.model.disposed.connect(async () => {
       const handlerIds = Object.keys(this.handlers);
       if (handlerIds.length === 0) {
