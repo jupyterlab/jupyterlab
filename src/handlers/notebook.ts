@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeCell } from '@jupyterlab/cells';
+import { Cell, CodeCell } from '@jupyterlab/cells';
+
+import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
 
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 
@@ -23,9 +25,10 @@ export class NotebookHandler implements IDisposable {
     this.debuggerService = options.debuggerService;
     this.notebookPanel = options.widget;
 
-    this.createNewEditorHandler();
+    this._cellMap = new ObservableMap<EditorHandler>();
 
     const notebook = this.notebookPanel.content;
+    notebook.widgets.forEach(cell => this.addEditorHandler(cell));
     notebook.activeCellChanged.connect(this.onActiveCellChanged, this);
 
     this.debuggerModel.callstackModel.currentFrameChanged.connect(
@@ -42,8 +45,21 @@ export class NotebookHandler implements IDisposable {
     }
     this.isDisposed = true;
     this.cleanAllCells();
-    this.editorHandler.dispose();
+    this._cellMap.values().forEach(handler => handler.dispose());
     Signal.clearData(this);
+  }
+
+  protected addEditorHandler(cell: Cell) {
+    if (cell.model.type !== 'code' || this._cellMap.has(cell.model.id)) {
+      return;
+    }
+    const codeCell = cell as CodeCell;
+    const editorHandler = new EditorHandler({
+      debuggerModel: this.debuggerModel,
+      debuggerService: this.debuggerService,
+      editor: codeCell.editor
+    });
+    this._cellMap.set(cell.model.id, editorHandler);
   }
 
   protected cleanAllCells() {
@@ -54,20 +70,11 @@ export class NotebookHandler implements IDisposable {
     });
   }
 
-  protected createNewEditorHandler() {
-    this.editorHandler = new EditorHandler({
-      debuggerModel: this.debuggerModel,
-      debuggerService: this.debuggerService,
-      editor: this.notebookPanel.content.activeCell.editor
-    });
-  }
-
-  protected onActiveCellChanged(notebook: Notebook, codeCell: CodeCell) {
+  protected onActiveCellChanged(notebook: Notebook, cell: Cell) {
     if (this.notebookPanel.content !== notebook) {
       return;
     }
-    this.editorHandler.dispose();
-    this.createNewEditorHandler();
+    this.addEditorHandler(cell);
   }
 
   private onCurrentFrameChanged(
@@ -99,9 +106,12 @@ export class NotebookHandler implements IDisposable {
   private debuggerModel: Debugger.Model;
   private debuggerService: IDebugger;
   private notebookPanel: NotebookPanel;
-  private editorHandler: EditorHandler;
+  private _cellMap: IObservableMap<EditorHandler> = null;
 }
 
+/**
+ * A namespace for NotebookHandler statics.
+ */
 export namespace NotebookHandler {
   export interface IOptions {
     debuggerService: IDebugger;
