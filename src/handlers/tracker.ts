@@ -16,8 +16,14 @@ import { Debugger } from '../debugger';
 
 import { IDebugger } from '../tokens';
 
+/**
+ * A class which handles notebook, console and editor trackers.
+ */
 export class TrackerHandler implements IDisposable {
-  constructor(options: DebuggerWidgetHandler.IOptions) {
+  /**
+   * Constructs a new TrackerHandler.
+   */
+  constructor(options: DebuggerTrackerHandler.IOptions) {
     this.debuggerService = options.debuggerService;
     this.notebookTracker = options.notebookTracker;
     this.consoleTracker = options.consoleTracker;
@@ -153,7 +159,13 @@ export class TrackerHandler implements IDisposable {
   private editorTracker: IEditorTracker | null;
 }
 
-export namespace DebuggerWidgetHandler {
+/**
+ * A namespace for DebuggerTrackerHandler statics.
+ */
+export namespace DebuggerTrackerHandler {
+  /**
+   * The options used to initialize a DebuggerTrackerHandler object.
+   */
   export interface IOptions {
     debuggerService: IDebugger;
     notebookTracker?: INotebookTracker;
