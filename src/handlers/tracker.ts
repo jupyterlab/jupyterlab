@@ -48,12 +48,12 @@ export class TrackerHandler implements IDisposable {
     frame: Callstack.IFrame
   ) {
     const debugSessionPath = this.debuggerService.session.client.path;
-    this.handleNotebooks(debugSessionPath, frame);
-    this.handleConsoles(debugSessionPath, frame);
-    this.handleEditors(debugSessionPath, frame);
+    this.findInNotebooks(debugSessionPath, frame);
+    this.findInConsoles(debugSessionPath, frame);
+    this.findInEditors(debugSessionPath, frame);
   }
 
-  protected handleNotebooks(debugSessionPath: string, frame: Callstack.IFrame) {
+  protected findInNotebooks(debugSessionPath: string, frame: Callstack.IFrame) {
     if (!this.notebookTracker) {
       return;
     }
@@ -88,7 +88,7 @@ export class TrackerHandler implements IDisposable {
     });
   }
 
-  protected handleConsoles(debugSessionPath: string, frame: Callstack.IFrame) {
+  protected findInConsoles(debugSessionPath: string, frame: Callstack.IFrame) {
     if (!this.consoleTracker) {
       return;
     }
@@ -99,20 +99,23 @@ export class TrackerHandler implements IDisposable {
         return;
       }
 
-      const code = consoleWidget?.console.promptCell.model.value.text ?? null;
-      if (!code) {
+      const editor = consoleWidget?.console.promptCell?.editor ?? null;
+      if (!editor) {
         return;
       }
 
+      const code = editor.model.value.text;
       const codeId = this.debuggerService.getCodeId(code);
       if (frame.source.path !== codeId) {
         return;
       }
-      // TODO
+      requestAnimationFrame(() => {
+        EditorHandler.showCurrentLine(editor, frame);
+      });
     });
   }
 
-  protected handleEditors(debugSessionPath: string, frame: Callstack.IFrame) {
+  protected findInEditors(debugSessionPath: string, frame: Callstack.IFrame) {
     if (!this.editorTracker) {
       return;
     }
