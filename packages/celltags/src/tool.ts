@@ -216,15 +216,17 @@ export class TagTool extends NotebookTools.Tool {
       this.parent.node.insertBefore(header, this.node);
       this.header = true;
     }
-    this.tracker.currentWidget.context.ready.then(() => {
-      this.refreshTags();
-      this.loadActiveTags();
-    });
+    if (this.tracker.currentWidget) {
+      this.tracker.currentWidget.context.ready.then(() => {
+        this.refreshTags();
+        this.loadActiveTags();
+      });
+      this.tracker.currentWidget.model.cells.changed.connect(() => {
+        this.refreshTags();
+        this.loadActiveTags();
+      });
+    }
     this.tracker.currentChanged.connect(() => {
-      this.refreshTags();
-      this.loadActiveTags();
-    });
-    this.tracker.currentWidget.model.cells.changed.connect(() => {
       this.refreshTags();
       this.loadActiveTags();
     });
