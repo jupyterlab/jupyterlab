@@ -204,7 +204,7 @@ export class MarkdownViewer extends Widget {
 
   private _config = { ...MarkdownViewer.defaultConfig };
   private _fragment = '';
-  private _monitor: ActivityMonitor<any, any> | null;
+  private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null;
   private _ready = new PromiseDelegate<void>();
   private _isRendering = false;
   private _renderRequested = false;
