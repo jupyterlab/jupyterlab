@@ -19,6 +19,11 @@
   align-items: center;
 }
 
+.jp-DebuggerBreakpoints-body .breakpoint span:hover {
+  background: var(--jp-layout-color2);
+  cursor: pointer;
+}
+
 .jp-breakpoint-marker {
   position: absolute;
   left: -34px;
