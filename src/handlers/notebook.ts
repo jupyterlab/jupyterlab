@@ -24,7 +24,6 @@ export class NotebookHandler implements IDisposable {
     this.debuggerModel = options.debuggerService.model as Debugger.Model;
     this.debuggerService = options.debuggerService;
     this.notebookPanel = options.widget;
-
     this._cellMap = new ObservableMap<EditorHandler>();
 
     const notebook = this.notebookPanel.content;

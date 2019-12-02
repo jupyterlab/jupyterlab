@@ -27,7 +27,6 @@ import { IDebugger } from '../tokens';
 export class DebuggerEditors extends TabPanel {
   constructor(options: DebuggerEditors.IOptions) {
     super();
-
     this.tabsMovable = true;
     this.tabBar.insertBehavior = 'select-tab';
     this.tabBar.tabCloseRequested.connect((_, tab) => {
@@ -112,7 +111,6 @@ export class DebuggerEditors extends TabPanel {
 
   private openEditor(data: DebuggerEditors.IEditor) {
     const { path, mimeType, code } = data;
-
     const tab = find(this.tabBar.titles, title => title.label === path);
     if (tab) {
       this.tabBar.currentTitle = tab;

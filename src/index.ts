@@ -106,6 +106,7 @@ class DebuggerHandler<
       debuggerService: debug,
       widget
     });
+    widget.node.setAttribute('data-jp-debugger', 'true');
     this.handlers[widget.id] = handler;
     widget.disposed.connect(() => {
       handler.dispose();
