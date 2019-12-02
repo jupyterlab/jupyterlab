@@ -89,7 +89,7 @@ export class TrackerHandler implements IDisposable {
   }
 
   protected findInConsoles(debugSessionPath: string, frame: Callstack.IFrame) {
-    if (!this.consoleTracker) {
+    if (!this.consoleTracker || !frame) {
       return;
     }
     this.consoleTracker.forEach(consoleWidget => {
