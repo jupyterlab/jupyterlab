@@ -39,6 +39,8 @@ import { FileHandler } from './handlers/file';
 
 import { NotebookHandler } from './handlers/notebook';
 
+import { TrackerHandler } from './handlers/tracker';
+
 import { DebugService } from './service';
 
 import { DebugSession } from './session';
@@ -95,10 +97,10 @@ class DebuggerHandler<
     this.builder = builder;
   }
 
-  update<
-    T extends IConsoleTracker | INotebookTracker | null,
-    W extends ConsolePanel | NotebookPanel | FileEditor
-  >(debug: IDebugger, tracker: T, widget: W): void {
+  update<W extends ConsolePanel | NotebookPanel | FileEditor>(
+    debug: IDebugger,
+    widget: W
+  ): void {
     if (!debug.model || this.handlers[widget.id] || !debug.isDebuggingEnabled) {
       return;
     }
@@ -136,13 +138,8 @@ class DebuggerHandler<
 const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:consoles',
   autoStart: true,
-  requires: [IDebugger, IConsoleTracker, ILabShell],
-  activate: (
-    app: JupyterFrontEnd,
-    debug: IDebugger,
-    tracker: IConsoleTracker,
-    labShell: ILabShell
-  ) => {
+  requires: [IDebugger, ILabShell],
+  activate: (app: JupyterFrontEnd, debug: IDebugger, labShell: ILabShell) => {
     const handler = new DebuggerHandler<ConsoleHandler>(ConsoleHandler);
 
     labShell.currentChanged.connect(async (_, update) => {
@@ -151,7 +148,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
         return;
       }
       await setDebugSession(app, debug, widget.session);
-      handler.update(debug, tracker, widget);
+      handler.update(debug, widget);
     });
   }
 };
@@ -198,7 +195,7 @@ const files: JupyterFrontEndPlugin<void> = {
           activeSessions[model.id] = session;
         }
         await setDebugSession(app, debug, session);
-        handler.update(debug, null, content);
+        handler.update(debug, content);
       } catch {
         return;
       }
@@ -212,13 +209,8 @@ const files: JupyterFrontEndPlugin<void> = {
 const notebooks: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:notebooks',
   autoStart: true,
-  requires: [IDebugger, INotebookTracker, ILabShell],
-  activate: (
-    app: JupyterFrontEnd,
-    debug: IDebugger,
-    tracker: INotebookTracker,
-    labShell: ILabShell
-  ) => {
+  requires: [IDebugger, ILabShell],
+  activate: (app: JupyterFrontEnd, debug: IDebugger, labShell: ILabShell) => {
     const handler = new DebuggerHandler<NotebookHandler>(NotebookHandler);
 
     labShell.activeChanged.connect(async (_, update) => {
@@ -227,7 +219,31 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         return;
       }
       await setDebugSession(app, debug, widget.session);
-      handler.update(debug, tracker, widget);
+      handler.update(debug, widget);
+    });
+  }
+};
+
+/**
+ * A plugin that tracks notebook, console and file editors used for debugging.
+ */
+const tracker: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger:tracker',
+  autoStart: true,
+  requires: [IDebugger],
+  optional: [INotebookTracker, IConsoleTracker, IEditorTracker],
+  activate: (
+    app: JupyterFrontEnd,
+    debug: IDebugger,
+    notebookTracker: INotebookTracker,
+    consoleTracker: IConsoleTracker,
+    editorTracker: IEditorTracker
+  ) => {
+    new TrackerHandler({
+      debuggerService: debug,
+      notebookTracker,
+      consoleTracker,
+      editorTracker
     });
   }
 };
@@ -496,6 +512,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   consoles,
   files,
   notebooks,
+  tracker,
   main
 ];
 
