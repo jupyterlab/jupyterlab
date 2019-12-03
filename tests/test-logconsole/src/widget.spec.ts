@@ -9,8 +9,8 @@ import {
   standardRendererFactories as initialFactories
 } from '@jupyterlab/rendermime';
 
-import { Signal, ISignal } from '@phosphor/signaling';
-import { Widget } from '@phosphor/widgets';
+import { Signal, ISignal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 
 class SignalLogger<SENDER, ARGS> {
   constructor(signal: ISignal<SENDER, ARGS>) {

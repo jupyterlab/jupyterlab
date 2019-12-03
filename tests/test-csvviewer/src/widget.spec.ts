@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import { ServiceManager } from '@jupyterlab/services';
 
@@ -14,7 +14,7 @@ import {
   DocumentRegistry,
   TextModelFactory
 } from '@jupyterlab/docregistry';
-import { JSONModel, DataGrid, CellRenderer } from '@phosphor/datagrid';
+import { JSONModel, DataGrid, CellRenderer } from '@lumino/datagrid';
 
 function createContext(): Context<DocumentRegistry.IModel> {
   const factory = new TextModelFactory();

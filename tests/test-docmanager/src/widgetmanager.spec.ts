@@ -16,11 +16,11 @@ import {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 
-import { PromiseDelegate, UUID } from '@phosphor/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
-import { IMessageHandler, Message, MessageLoop } from '@phosphor/messaging';
+import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { acceptDialog, dismissDialog } from '@jupyterlab/testutils';
 

@@ -7,9 +7,9 @@ import { ClientSession } from '@jupyterlab/apputils';
 
 import { Kernel } from '@jupyterlab/services';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import {
   IOutputAreaModel,

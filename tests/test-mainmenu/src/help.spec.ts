@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
 import { HelpMenu } from '@jupyterlab/mainmenu';
 

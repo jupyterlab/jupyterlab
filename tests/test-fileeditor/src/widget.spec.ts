@@ -3,13 +3,13 @@
 
 import { expect } from 'chai';
 
-import { MessageLoop, Message } from '@phosphor/messaging';
+import { MessageLoop, Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { simulate } from 'simulate-event';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import { ServiceManager } from '@jupyterlab/services';
 

@@ -3,9 +3,9 @@
 
 import { expect } from 'chai';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
-import { JSONExt } from '@phosphor/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
 import { KernelManager, Kernel } from '@jupyterlab/services';
 

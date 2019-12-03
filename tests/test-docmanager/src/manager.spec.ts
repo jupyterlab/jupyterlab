@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { DocumentManager } from '@jupyterlab/docmanager';
 
