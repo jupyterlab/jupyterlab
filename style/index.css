@@ -8,7 +8,6 @@
 
 @import './icons.css';
 @import './sidebar.css';
-@import './editors.css';
 
 .jp-Debugger {
   background: var(--jp-layout-color1);

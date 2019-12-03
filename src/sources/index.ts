@@ -68,7 +68,6 @@ export class Sources extends Panel {
 
     this.addWidget(header);
     this.addWidget(this.editor);
-    this.addClass('jp-DebuggerEditors');
   }
 
   /**
@@ -141,11 +140,11 @@ class SourcesHeader extends Widget {
 }
 
 /**
- * A namespace for `DebuggerEditors` statics.
+ * A namespace for `Sources` statics.
  */
 export namespace Sources {
   /**
-   * The options used to create a DebuggerEditors.
+   * The options used to create a Sources.
    */
   export interface IOptions {
     service: IDebugger;
