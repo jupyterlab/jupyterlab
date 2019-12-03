@@ -346,6 +346,8 @@ class AppOptions(HasTraits):
 
 def _ensure_options(options, **kwargs):
     """Helper to use deprecated kwargs for AppOption"""
+    optClass = options.__class__ if issubclass(options.__class__, AppOptions) else AppOptions
+
     # Filter out default-value kwargs
     kwargs = dict(filter(lambda item: item[1] is not None, kwargs.items()))
     # Warn for deprecated kwargs usage
@@ -355,11 +357,11 @@ def _ensure_options(options, **kwargs):
             "deprecated, use the options argument instead: %r" % (kwargs,),
             DeprecationWarning)
     if options is None:
-        return AppOptions(**kwargs)
+        return optClass(**kwargs)
     # Also support mixed use of options and kwargs:
     opt_args = {name: getattr(options, name) for name in options.trait_names()}
     kwargs.update(**opt_args)
-    return AppOptions(**kwargs)
+    return optClass(**kwargs)
 
 
 def watch(app_dir=None, logger=None, core_config=None, app_options=None):
@@ -434,15 +436,28 @@ def clean(app_dir=None, logger=None, app_options=None):
     handler = _AppHandler(app_options)
     logger = app_options.logger
     app_dir = app_options.app_dir
+
     logger.info('Cleaning %s...', app_dir)
     if app_dir == pjoin(HERE, 'dev'):
         raise ValueError('Cannot clean the dev app')
     if app_dir == pjoin(HERE, 'core'):
         raise ValueError('Cannot clean the core app')
-    for name in ['staging']:
-        target = pjoin(app_dir, name)
-        if osp.exists(target):
-            _rmtree(target, logger)
+
+    if app_options.all:
+        logger.info('Removing everything in %s...', app_dir)
+        _rmtree_star(app_dir, logger)
+    else:
+        possibleTargets = ['extensions', 'settings', 'staging', 'static']
+        targets = [t for t in possibleTargets if getattr(app_options, t)]
+
+        for name in targets:
+            target = pjoin(app_dir, name)
+            if osp.exists(target):
+                logger.info('Removing %s...', name)
+                _rmtree(target, logger)
+            else:
+                logger.info('%s not present, skipping...', name)
+
     logger.info('Success!')
 
 
@@ -1809,9 +1824,27 @@ def _normalize_path(extension):
 def _rmtree(path, logger):
     """Remove a tree, logging errors"""
     def onerror(*exc_info):
-        logger.debug('Error in rmtree', exc_info=exc_info)
+        logger.debug('Error in shutil.rmtree', exc_info=exc_info)
 
     shutil.rmtree(path, onerror=onerror)
+
+
+def _unlink(path, logger):
+    """Remove a file, logging errors"""
+    try:
+        os.unlink(path)
+    except Exception:
+        logger.debug('Error in os.unlink', exc_info=sys.exc_info())
+
+
+def _rmtree_star(path, logger):
+    """Remove all files/trees within a dir, logging errors"""
+    for filename in os.listdir(path):
+        file_path = os.path.join(path, filename)
+        if os.path.isfile(file_path) or os.path.islink(file_path):
+            _unlink(file_path, logger)
+        elif os.path.isdir(file_path):
+            _rmtree(file_path, logger)
 
 
 def _validate_extension(data):
