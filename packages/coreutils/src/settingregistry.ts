@@ -11,11 +11,11 @@ import {
   JSONValue,
   ReadonlyJSONObject,
   ReadonlyJSONValue
-} from '@phosphor/coreutils';
+} from '@lumino/coreutils';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { IDataConnector } from './interfaces';
 

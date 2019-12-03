@@ -20,7 +20,7 @@ import {
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
-import { DataGrid } from '@phosphor/datagrid';
+import { DataGrid } from '@lumino/datagrid';
 import { CSVSearchProvider } from './searchprovider';
 
 /**

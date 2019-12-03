@@ -8,7 +8,7 @@ import { Cell } from '@jupyterlab/cells';
 
 import { DefaultIconReact } from '@jupyterlab/ui-components';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
 /**
  * Determine the notebook trust status message.

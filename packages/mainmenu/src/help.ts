@@ -3,7 +3,7 @@
 
 import { Kernel } from '@jupyterlab/services';
 
-import { Menu, Widget } from '@phosphor/widgets';
+import { Menu, Widget } from '@lumino/widgets';
 
 import { IJupyterLabMenu, IMenuExtender, JupyterLabMenu } from './labmenu';
 

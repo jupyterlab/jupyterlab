@@ -16,7 +16,7 @@ import {
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import {
   IObservableJSON,

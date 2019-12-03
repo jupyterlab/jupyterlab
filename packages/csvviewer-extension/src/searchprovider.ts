@@ -3,8 +3,8 @@
 import { ISearchProvider, ISearchMatch } from '@jupyterlab/documentsearch';
 import { CSVViewer } from '@jupyterlab/csvviewer';
 import { DocumentWidget } from '@jupyterlab/docregistry';
-import { Signal, ISignal } from '@phosphor/signaling';
-import { Widget } from '@phosphor/widgets';
+import { Signal, ISignal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 
 // The type for which canSearchFor returns true
 export type CSVDocumentWidget = DocumentWidget<CSVViewer>;

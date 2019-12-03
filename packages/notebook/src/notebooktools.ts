@@ -1,15 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each, chain } from '@phosphor/algorithm';
+import { ArrayExt, each, chain } from '@lumino/algorithm';
 
-import { JSONObject, JSONValue } from '@phosphor/coreutils';
+import { JSONObject, JSONValue } from '@lumino/coreutils';
 
-import { ConflatableMessage, Message, MessageLoop } from '@phosphor/messaging';
+import { ConflatableMessage, Message, MessageLoop } from '@lumino/messaging';
 
-import { h, VirtualDOM, VirtualNode } from '@phosphor/virtualdom';
+import { h, VirtualDOM, VirtualNode } from '@lumino/virtualdom';
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { Collapse, Styling } from '@jupyterlab/apputils';
 

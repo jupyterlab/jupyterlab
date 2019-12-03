@@ -45,13 +45,13 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { IIconRegistry } from '@jupyterlab/ui-components';
 
-import { IIterator, map, reduce, toArray } from '@phosphor/algorithm';
+import { IIterator, map, reduce, toArray } from '@lumino/algorithm';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 
 /**
  * The command IDs used by the file browser plugin.
@@ -487,14 +487,12 @@ function addCommands(
     caption: args => (args.path ? `Open ${args.path}` : 'Open from path'),
     execute: async ({ path }: { path?: string }) => {
       if (!path) {
-        path = (
-          await InputDialog.getText({
-            label: 'Path',
-            placeholder: '/path/relative/to/jlab/root',
-            title: 'Open Path',
-            okLabel: 'Open'
-          })
-        ).value;
+        path = (await InputDialog.getText({
+          label: 'Path',
+          placeholder: '/path/relative/to/jlab/root',
+          title: 'Open Path',
+          okLabel: 'Open'
+        })).value;
       }
       if (!path) {
         return;

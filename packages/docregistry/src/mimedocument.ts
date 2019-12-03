@@ -11,11 +11,11 @@ import {
   MimeModel
 } from '@jupyterlab/rendermime';
 
-import { JSONObject, PromiseDelegate, JSONExt } from '@phosphor/coreutils';
+import { JSONObject, PromiseDelegate, JSONExt } from '@lumino/coreutils';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { StackedLayout, Widget } from '@phosphor/widgets';
+import { StackedLayout, Widget } from '@lumino/widgets';
 
 import { ABCWidgetFactory, DocumentWidget } from './default';
 

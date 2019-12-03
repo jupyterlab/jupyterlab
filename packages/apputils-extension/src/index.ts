@@ -32,9 +32,9 @@ import {
 
 import { defaultIconRegistry } from '@jupyterlab/ui-components';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { DisposableDelegate } from '@phosphor/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 
 import { Palette } from './palette';
 

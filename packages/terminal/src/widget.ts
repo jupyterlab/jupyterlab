@@ -3,11 +3,11 @@
 
 import { TerminalSession } from '@jupyterlab/services';
 
-import { Platform } from '@phosphor/domutils';
+import { Platform } from '@lumino/domutils';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { Terminal as Xterm } from 'xterm';
 

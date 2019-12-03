@@ -10,13 +10,13 @@ import {
   DocumentWidget
 } from '@jupyterlab/docregistry';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { DataGrid, TextRenderer, CellRenderer } from '@phosphor/datagrid';
+import { DataGrid, TextRenderer, CellRenderer } from '@lumino/datagrid';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { CSVDelimiter } from './toolbar';
 

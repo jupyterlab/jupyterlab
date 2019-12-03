@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { DisposableDelegate } from '@phosphor/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 
 import { Kernel } from './kernel';
 
@@ -451,8 +451,7 @@ namespace Private {
 
     private _hooks: (
       | ((msg: T) => boolean | PromiseLike<boolean>)
-      | null
-    )[] = [];
+      | null)[] = [];
     private _compactScheduled: boolean;
     private _processing: Promise<void>;
   }

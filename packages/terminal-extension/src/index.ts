@@ -28,9 +28,9 @@ import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 // Name-only import so as to not trigger inclusion in main bundle
 import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
 /**
  * The command IDs used by the terminal plugin.

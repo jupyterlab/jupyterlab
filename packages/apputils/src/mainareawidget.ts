@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { BoxLayout, Widget } from '@phosphor/widgets';
+import { BoxLayout, Widget } from '@lumino/widgets';
 
 import { Spinner } from './spinner';
 

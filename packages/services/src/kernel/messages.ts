@@ -3,9 +3,9 @@
 
 import { nbformat } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
 import { Kernel } from './kernel';
 

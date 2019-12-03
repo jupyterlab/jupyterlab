@@ -44,8 +44,8 @@
     "@jupyterlab/running": "^2.0.0-alpha.1",
     "@jupyterlab/services": "^5.0.0-alpha.1",
     "@jupyterlab/terminal": "^2.0.0-alpha.1",
-    "@phosphor/algorithm": "^1.2.0",
-    "@phosphor/widgets": "^1.9.0"
+    "@lumino/algorithm": "^1.2.0",
+    "@lumino/widgets": "^1.9.0"
   },
   "devDependencies": {
     "@types/webpack-env": "^1.13.9",

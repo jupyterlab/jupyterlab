@@ -3,11 +3,11 @@
 
 import { IRestorable, RestorablePool } from '@jupyterlab/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { FocusTracker, Widget } from '@phosphor/widgets';
+import { FocusTracker, Widget } from '@lumino/widgets';
 
 /**
  * A tracker that tracks widgets.

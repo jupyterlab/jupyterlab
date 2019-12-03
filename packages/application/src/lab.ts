@@ -7,7 +7,7 @@ import { Base64ModelFactory } from '@jupyterlab/docregistry';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
 import { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
 
@@ -31,12 +31,15 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
       .catch(() => undefined);
 
     // Create an IInfo dictionary from the options to override the defaults.
-    const info = Object.keys(JupyterLab.defaultInfo).reduce((acc, val) => {
-      if (val in options) {
-        (acc as any)[val] = JSON.parse(JSON.stringify((options as any)[val]));
-      }
-      return acc;
-    }, {} as Partial<JupyterLab.IInfo>);
+    const info = Object.keys(JupyterLab.defaultInfo).reduce(
+      (acc, val) => {
+        if (val in options) {
+          (acc as any)[val] = JSON.parse(JSON.stringify((options as any)[val]));
+        }
+        return acc;
+      },
+      {} as Partial<JupyterLab.IInfo>
+    );
 
     // Populate application info.
     this._info = { ...JupyterLab.defaultInfo, ...info };

@@ -4,7 +4,7 @@
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { Cell } from '@jupyterlab/cells';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { INotebookTracker } from './tokens';
 import { NotebookPanel } from './panel';

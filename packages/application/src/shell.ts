@@ -7,13 +7,13 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { DockPanelSvg, TabBarSvg } from '@jupyterlab/ui-components';
 
-import { ArrayExt, find, IIterator, iter, toArray } from '@phosphor/algorithm';
+import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
 
-import { PromiseDelegate, Token } from '@phosphor/coreutils';
+import { PromiseDelegate, Token } from '@lumino/coreutils';
 
-import { Message, MessageLoop, IMessageHandler } from '@phosphor/messaging';
+import { Message, MessageLoop, IMessageHandler } from '@lumino/messaging';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import {
   BoxLayout,
@@ -27,7 +27,7 @@ import {
   TabBar,
   Title,
   Widget
-} from '@phosphor/widgets';
+} from '@lumino/widgets';
 
 import { JupyterFrontEnd } from './frontend';
 

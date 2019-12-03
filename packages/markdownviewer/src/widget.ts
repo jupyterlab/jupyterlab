@@ -17,13 +17,13 @@ import {
   MimeModel
 } from '@jupyterlab/rendermime';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
-import { StackedLayout, Widget } from '@phosphor/widgets';
+import { StackedLayout, Widget } from '@lumino/widgets';
 
 /**
  * The class name added to a markdown viewer.

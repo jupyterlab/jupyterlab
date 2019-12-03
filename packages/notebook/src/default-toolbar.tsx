@@ -5,7 +5,7 @@ import * as React from 'react';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { NotebookActions } from './actions';
 
@@ -252,10 +252,8 @@ export class CellTypeSwitcher extends ReactWidget {
    */
   handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
     if (event.target.value !== '-') {
-      NotebookActions.changeCellType(
-        this._notebook,
-        event.target.value as nbformat.CellType
-      );
+      NotebookActions.changeCellType(this._notebook, event.target
+        .value as nbformat.CellType);
       this._notebook.activate();
     }
   };

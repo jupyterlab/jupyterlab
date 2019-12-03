@@ -7,11 +7,11 @@ import {
   ReadonlyJSONObject,
   ReadonlyJSONValue,
   Token
-} from '@phosphor/coreutils';
+} from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@phosphor/signaling';
+import { ISignal } from '@lumino/signaling';
 
 import { ISchemaValidator } from './settingregistry';
 

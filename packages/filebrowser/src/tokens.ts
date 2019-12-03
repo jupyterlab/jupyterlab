@@ -5,7 +5,7 @@ import { WidgetTracker } from '@jupyterlab/apputils';
 
 import { IStateDB } from '@jupyterlab/coreutils';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
 import { FileBrowser } from './browser';
 

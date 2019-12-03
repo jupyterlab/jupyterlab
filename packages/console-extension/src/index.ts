@@ -37,13 +37,13 @@ import {
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { find } from '@phosphor/algorithm';
+import { find } from '@lumino/algorithm';
 
-import { ReadonlyJSONObject, JSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, JSONObject } from '@lumino/coreutils';
 
-import { DisposableSet } from '@phosphor/disposable';
+import { DisposableSet } from '@lumino/disposable';
 
-import { DockLayout, Menu } from '@phosphor/widgets';
+import { DockLayout, Menu } from '@lumino/widgets';
 
 import foreign from './foreign';
 
@@ -237,12 +237,10 @@ async function activateConsole(
       ...(options as Partial<ConsolePanel.IOptions>)
     });
 
-    const interactionMode: string = (
-      await settingRegistry.get(
-        '@jupyterlab/console-extension:tracker',
-        'interactionMode'
-      )
-    ).composite as string;
+    const interactionMode: string = (await settingRegistry.get(
+      '@jupyterlab/console-extension:tracker',
+      'interactionMode'
+    )).composite as string;
     panel.console.node.dataset.jpInteractionMode = interactionMode;
 
     // Add the console panel to the tracker. We want the panel to show up before
@@ -582,11 +580,9 @@ async function activateConsole(
     execute: async args => {
       const key = 'keyMap';
       try {
-        await settingRegistry.set(
-          pluginId,
-          'interactionMode',
-          args['interactionMode'] as string
-        );
+        await settingRegistry.set(pluginId, 'interactionMode', args[
+          'interactionMode'
+        ] as string);
       } catch (reason) {
         console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
       }

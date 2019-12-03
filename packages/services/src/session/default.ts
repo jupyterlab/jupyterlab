@@ -3,9 +3,9 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { ArrayExt, each, find } from '@phosphor/algorithm';
+import { ArrayExt, each, find } from '@lumino/algorithm';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { Kernel, KernelMessage } from '../kernel';
 

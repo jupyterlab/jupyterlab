@@ -11,7 +11,7 @@ import {
   OutputModel
 } from '@jupyterlab/rendermime';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import {
   ILogger,

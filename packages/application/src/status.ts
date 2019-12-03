@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { JupyterFrontEnd } from './frontend';
 

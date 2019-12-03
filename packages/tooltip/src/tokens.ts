@@ -3,9 +3,9 @@
 
 import { Kernel } from '@jupyterlab/services';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 

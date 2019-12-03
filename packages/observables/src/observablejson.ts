@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONExt, JSONObject, JSONValue } from '@phosphor/coreutils';
+import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
 import { IObservableMap, ObservableMap } from './observablemap';
 

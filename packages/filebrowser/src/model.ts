@@ -25,13 +25,13 @@ import {
   IterableOrArrayLike,
   ArrayExt,
   filter
-} from '@phosphor/algorithm';
+} from '@lumino/algorithm';
 
-import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
+import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * The default duration of the auto-refresh in ms

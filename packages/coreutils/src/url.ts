@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
 import urlparse from 'url-parse';
 
@@ -125,15 +125,18 @@ export namespace URLExt {
     return value
       .replace(/^\?/, '')
       .split('&')
-      .reduce((acc, val) => {
-        const [key, value] = val.split('=');
+      .reduce(
+        (acc, val) => {
+          const [key, value] = val.split('=');
 
-        if (key.length > 0) {
-          acc[key] = decodeURIComponent(value || '');
-        }
+          if (key.length > 0) {
+            acc[key] = decodeURIComponent(value || '');
+          }
 
-        return acc;
-      }, {} as { [key: string]: string });
+          return acc;
+        },
+        {} as { [key: string]: string }
+      );
   }
 
   /**

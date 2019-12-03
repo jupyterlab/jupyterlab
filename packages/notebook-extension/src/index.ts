@@ -30,11 +30,11 @@ import {
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
-import { ArrayExt } from '@phosphor/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 
-import { UUID, JSONObject } from '@phosphor/coreutils';
+import { UUID, JSONObject } from '@lumino/coreutils';
 
-import { DisposableSet } from '@phosphor/disposable';
+import { DisposableSet } from '@lumino/disposable';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -70,12 +70,12 @@ import { ServiceManager } from '@jupyterlab/services';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { ReadonlyJSONObject, JSONValue } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, JSONValue } from '@lumino/coreutils';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { Panel, Menu } from '@phosphor/widgets';
-import { CommandRegistry } from '@phosphor/commands';
+import { Panel, Menu } from '@lumino/widgets';
+import { CommandRegistry } from '@lumino/commands';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -1704,11 +1704,9 @@ function addCommands(
         return;
       }
 
-      return Private.createConsole(
-        commands,
-        current,
-        args['activate'] as boolean
-      );
+      return Private.createConsole(commands, current, args[
+        'activate'
+      ] as boolean);
     },
     isEnabled
   });

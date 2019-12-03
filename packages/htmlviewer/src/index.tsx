@@ -21,9 +21,9 @@ import {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import * as React from 'react';
 

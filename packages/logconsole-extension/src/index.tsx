@@ -35,9 +35,9 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { HTMLSelect } from '@jupyterlab/ui-components';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
-import { DockLayout, Widget } from '@phosphor/widgets';
+import { DockLayout, Widget } from '@lumino/widgets';
 
 import * as React from 'react';
 
@@ -381,13 +381,9 @@ export class LogLevelSwitcher extends ReactWidget {
           options={
             logger === null
               ? []
-              : [
-                  'Critical',
-                  'Error',
-                  'Warning',
-                  'Info',
-                  'Debug'
-                ].map(label => ({ label, value: label.toLowerCase() }))
+              : ['Critical', 'Error', 'Warning', 'Info', 'Debug'].map(
+                  label => ({ label, value: label.toLowerCase() })
+                )
           }
         />
       </>

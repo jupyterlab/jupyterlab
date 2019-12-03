@@ -7,13 +7,13 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { IIterator } from '@phosphor/algorithm';
+import { IIterator } from '@lumino/algorithm';
 
-import { Application, IPlugin } from '@phosphor/application';
+import { Application, IPlugin } from '@lumino/application';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The type for all JupyterFrontEnd application plugins.

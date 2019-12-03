@@ -39,7 +39,7 @@
     "@jupyterlab/coreutils": "^4.0.0-alpha.1",
     "@jupyterlab/running": "^2.0.0-alpha.1",
     "@jupyterlab/services": "^5.0.0-alpha.1",
-    "@phosphor/algorithm": "^1.2.0"
+    "@lumino/algorithm": "^1.2.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

@@ -43,15 +43,15 @@ import {
   PromiseDelegate,
   JSONObject,
   UUID
-} from '@phosphor/coreutils';
+} from '@lumino/coreutils';
 
-import { some, filter, toArray } from '@phosphor/algorithm';
+import { some, filter, toArray } from '@lumino/algorithm';
 
-import { IDragEvent } from '@phosphor/dragdrop';
+import { IDragEvent } from '@lumino/dragdrop';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { PanelLayout, Panel, Widget } from '@phosphor/widgets';
+import { PanelLayout, Panel, Widget } from '@lumino/widgets';
 
 import { InputCollapser, OutputCollapser } from './collapser';
 
