@@ -33,7 +33,7 @@ export class TrackerHandler implements IDisposable {
     this.consoleTracker = options.consoleTracker;
     this.editorTracker = options.editorTracker;
 
-    this.debuggerService.modelChanged.connect(() => {
+    const addSignals = () => {
       const debuggerModel = this.debuggerService.model as Debugger.Model;
 
       debuggerModel.callstackModel.currentFrameChanged.connect(
@@ -45,7 +45,13 @@ export class TrackerHandler implements IDisposable {
         const debugSessionPath = this.debuggerService.session.client.path;
         this.find(debugSessionPath, breakpoint.source.path);
       });
-    });
+    };
+
+    if (this.debuggerService.model) {
+      addSignals();
+    } else {
+      this.debuggerService.modelChanged.connect(addSignals);
+    }
   }
 
   isDisposed: boolean;

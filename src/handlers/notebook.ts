@@ -11,15 +11,12 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { Signal } from '@phosphor/signaling';
 
-import { Debugger } from '../debugger';
-
 import { EditorHandler } from './editor';
 
 import { IDebugger } from '../tokens';
 
 export class NotebookHandler implements IDisposable {
   constructor(options: NotebookHandler.IOptions) {
-    this.debuggerModel = options.debuggerService.model as Debugger.Model;
     this.debuggerService = options.debuggerService;
     this.notebookPanel = options.widget;
     this._cellMap = new ObservableMap<EditorHandler>();
@@ -47,7 +44,6 @@ export class NotebookHandler implements IDisposable {
     }
     const codeCell = cell as CodeCell;
     const editorHandler = new EditorHandler({
-      debuggerModel: this.debuggerModel,
       debuggerService: this.debuggerService,
       editor: codeCell.editor
     });
@@ -69,7 +65,6 @@ export class NotebookHandler implements IDisposable {
     this.addEditorHandler(cell);
   }
 
-  private debuggerModel: Debugger.Model;
   private debuggerService: IDebugger;
   private notebookPanel: NotebookPanel;
   private _cellMap: IObservableMap<EditorHandler> = null;

@@ -7,8 +7,6 @@ import { IDataConnector } from '@jupyterlab/coreutils';
 
 import { ReadonlyJSONValue } from '@phosphor/coreutils';
 
-import { Message } from '@phosphor/messaging';
-
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { SplitPanel } from '@phosphor/widgets';
@@ -25,61 +23,11 @@ import { IDebugger } from './tokens';
 
 import { Variables } from './variables';
 
-export class Debugger extends SplitPanel {
-  constructor(options: Debugger.IOptions) {
-    super({ orientation: 'horizontal' });
-    this.title.label = 'Debugger';
-    this.title.iconClass = 'jp-BugIcon';
-
-    this.model = new Debugger.Model({
-      connector: options.connector
-    });
-
-    this.service = options.debugService;
-    this.service.model = this.model;
-
-    this.sidebar = new Debugger.Sidebar({
-      model: this.model,
-      service: this.service,
-      callstackCommands: options.callstackCommands
-    });
-
-    this.editors = new Sources({
-      model: this.model,
-      service: this.service,
-      editorServices: options.editorServices
-    });
-    this.addWidget(this.editors);
-
-    this.addClass('jp-Debugger');
-  }
-
-  readonly editors: Sources;
-  readonly model: Debugger.Model;
-  readonly sidebar: Debugger.Sidebar;
-  readonly service: DebugService;
-
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this.service.model = null;
-    this.model.dispose();
-    super.dispose();
-  }
-
-  protected onAfterAttach(msg: Message) {
-    this.addWidget(this.sidebar);
-    this.sidebar.show();
-  }
-}
-
 /**
  * A namespace for `Debugger` statics.
  */
 export namespace Debugger {
   export interface IOptions {
-    debugService: DebugService;
     editorServices: IEditorServices;
     callstackCommands: Callstack.ICommands;
     connector?: IDataConnector<ReadonlyJSONValue>;
@@ -88,28 +36,56 @@ export namespace Debugger {
   export class Sidebar extends SplitPanel {
     constructor(options: Sidebar.IOptions) {
       super();
+      this.id = 'jp-debugger-sidebar';
+      this.title.label = 'Environment';
       this.orientation = 'vertical';
+
+      this.addClass('jp-Debugger');
       this.addClass('jp-DebuggerSidebar');
 
-      const { callstackCommands, service, model } = options;
-      this.variables = new Variables({ model: model.variablesModel });
+      const { callstackCommands, editorServices, service } = options;
+
+      this.model = new Debugger.Model({});
+      this.service = service as DebugService;
+      this.service.model = this.model;
+
+      this.variables = new Variables({ model: this.model.variablesModel });
       this.callstack = new Callstack({
         commands: callstackCommands,
-        model: model.callstackModel
+        model: this.model.callstackModel
       });
       this.breakpoints = new Breakpoints({
         service,
-        model: model.breakpointsModel
+        model: this.model.breakpointsModel
+      });
+      this.sources = new Sources({
+        model: this.model.sourcesModel,
+        service,
+        editorServices
       });
 
       this.addWidget(this.variables);
       this.addWidget(this.callstack);
       this.addWidget(this.breakpoints);
+      this.addWidget(this.sources);
     }
 
+    isDisposed: boolean;
+
+    dispose(): void {
+      if (this.isDisposed) {
+        return;
+      }
+      this.service.model = null;
+      this.model.dispose();
+    }
+
+    readonly model: Debugger.Model;
+    readonly service: DebugService;
     readonly variables: Variables;
     readonly callstack: Callstack;
     readonly breakpoints: Breakpoints;
+    readonly sources: Sources;
   }
 
   export class Model implements IDebugger.IModel {
@@ -117,14 +93,15 @@ export namespace Debugger {
       this.breakpointsModel = new Breakpoints.Model();
       this.callstackModel = new Callstack.Model([]);
       this.variablesModel = new Variables.Model([]);
-      this.connector = options.connector || null;
-      void this._populate();
+      this.sourcesModel = new Sources.Model({
+        currentFrameChanged: this.callstackModel.currentFrameChanged
+      });
     }
 
     readonly breakpointsModel: Breakpoints.Model;
     readonly callstackModel: Callstack.Model;
     readonly variablesModel: Variables.Model;
-    readonly connector: IDataConnector<ReadonlyJSONValue> | null;
+    readonly sourcesModel: Sources.Model;
 
     dispose(): void {
       this._isDisposed = true;
@@ -160,14 +137,6 @@ export namespace Debugger {
       return this._modeChanged;
     }
 
-    private async _populate(): Promise<void> {
-      const { connector } = this;
-
-      if (!connector) {
-        return;
-      }
-    }
-
     private _isDisposed = false;
     private _stoppedThreads = new Set<number>();
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
@@ -176,15 +145,13 @@ export namespace Debugger {
 
   export namespace Sidebar {
     export interface IOptions {
-      model: Debugger.Model;
       service: IDebugger;
       callstackCommands: Callstack.ICommands;
+      editorServices: IEditorServices;
     }
   }
 
   export namespace Model {
-    export interface IOptions {
-      connector?: IDataConnector<ReadonlyJSONValue>;
-    }
+    export interface IOptions {}
   }
 }

@@ -11,19 +11,15 @@ import { Signal } from '@phosphor/signaling';
 
 import { EditorHandler } from '../handlers/editor';
 
-import { Debugger } from '../debugger';
-
 import { IDebugger } from '../tokens';
 
 export class ConsoleHandler implements IDisposable {
   constructor(options: DebuggerConsoleHandler.IOptions) {
-    this.debuggerModel = options.debuggerService.model as Debugger.Model;
     this.debuggerService = options.debuggerService;
     this.consolePanel = options.widget;
 
     const promptCell = this.consolePanel.console.promptCell;
     this.editorHandler = new EditorHandler({
-      debuggerModel: this.debuggerModel,
       debuggerService: this.debuggerService,
       editor: promptCell.editor
     });
@@ -51,7 +47,6 @@ export class ConsoleHandler implements IDisposable {
   }
 
   private consolePanel: ConsolePanel;
-  private debuggerModel: Debugger.Model;
   private debuggerService: IDebugger;
   private editorHandler: EditorHandler;
 }
