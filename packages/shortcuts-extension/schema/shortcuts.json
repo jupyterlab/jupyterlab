@@ -8,7 +8,6 @@
   "additionalProperties": false,
   "properties": {
     "shortcuts": {
-      "title": "Keyboard Shortcuts",
       "description": "The list of keyboard shortcuts.",
       "items": { "$ref": "#/definitions/shortcut" },
       "type": "array",
