@@ -154,7 +154,7 @@ module.exports = [
     entry: {
       main: ['whatwg-fetch', plib.resolve(buildDir, 'index.out.js')]
     },
-    // Map Phosphor files to lumino files.
+    // Map Phosphor files to Lumino files.
     resolve: {
       alias: {
         '@phosphor/algorithm$': plib.resolve(
