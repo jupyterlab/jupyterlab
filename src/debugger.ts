@@ -17,7 +17,7 @@ import { Breakpoints } from './breakpoints';
 
 import { Callstack } from './callstack';
 
-import { Sources } from './editors';
+import { Sources } from './sources';
 
 import { DebugService } from './service';
 
