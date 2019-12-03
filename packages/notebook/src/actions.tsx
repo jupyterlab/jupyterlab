@@ -1562,9 +1562,15 @@ namespace Private {
         break;
       case 'code':
         if (session) {
+          let recordTiming = false;
+          if (notebook.model.metadata.get('record_timing') === true) {
+            recordTiming = true;
+          } else if (notebook.model.metadata.get('record_timing') !== false) {
+            recordTiming = notebook.notebookConfig.recordTiming;
+          }
           return CodeCell.execute(cell as CodeCell, session, {
             deletedCells: notebook.model.deletedCells,
-            recordTiming: notebook.model.metadata.get('record_timing') || false
+            recordTiming
           })
             .then(reply => {
               notebook.model.deletedCells.splice(

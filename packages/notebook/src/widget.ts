@@ -759,13 +759,19 @@ export namespace StaticNotebook {
      * The default type for new notebook cells.
      */
     defaultCell: nbformat.CellType;
+
+    /**
+     * Should timing be recorded in metadata
+     */
+    recordTiming: boolean;
   }
   /**
    * Default configuration options for notebooks.
    */
   export const defaultNotebookConfig: INotebookConfig = {
     scrollPastEnd: true,
-    defaultCell: 'code'
+    defaultCell: 'code',
+    recordTiming: false
   };
 
   /**

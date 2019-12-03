@@ -631,7 +631,8 @@ function activateNotebookHandler(
     factory.editorConfig = { code, markdown, raw };
     factory.notebookConfig = {
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
-      defaultCell: settings.get('defaultCell').composite as nbformat.CellType
+      defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
+      recordTiming: settings.get('recordTiming').composite as boolean
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
@@ -1561,7 +1562,7 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.toggleRecordTiming, {
-    label: 'Toggle Recording Cell Timing',
+    label: 'Toggle Recording Cell Timing for this Notebook',
     execute: args => {
       const current = getCurrent(args);
 
