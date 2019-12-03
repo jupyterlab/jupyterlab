@@ -11,6 +11,12 @@
   justify-content: center;
   align-items: center;
   max-width: calc(100% - 25px);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .unapplied-tag {
