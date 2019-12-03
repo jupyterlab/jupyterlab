@@ -11,7 +11,7 @@ import { Debugger } from '../../lib/debugger';
 
 import { DebugService } from '../../lib/service';
 
-class TestPanel extends Debugger {}
+class TestSidebar extends Debugger.Sidebar {}
 
 describe('Debugger', () => {
   const service = new DebugService();
@@ -19,11 +19,11 @@ describe('Debugger', () => {
   const factoryService = new CodeMirrorEditorFactory();
   const mimeTypeService = new CodeMirrorMimeTypeService();
 
-  let panel: TestPanel;
+  let sidebar: TestSidebar;
 
   beforeEach(() => {
-    panel = new TestPanel({
-      debugService: service,
+    sidebar = new TestSidebar({
+      service,
       callstackCommands: {
         registry,
         continue: '',
@@ -40,12 +40,12 @@ describe('Debugger', () => {
   });
 
   afterEach(() => {
-    panel.dispose();
+    sidebar.dispose();
   });
 
   describe('#constructor()', () => {
-    it('should create a new debugger panel', () => {
-      expect(panel).to.be.an.instanceOf(Debugger);
+    it('should create a new debugger sidebar', () => {
+      expect(sidebar).to.be.an.instanceOf(Debugger.Sidebar);
     });
   });
 });
