@@ -50,25 +50,6 @@ export class DebugService implements IDebugger, IDisposable {
   }
 
   /**
-   * Returns the mode of the debugger UI.
-   *
-   * #### Notes
-   * There is only ever one debugger instance. If it is `expanded`, it exists
-   * as a `MainAreaWidget`, otherwise it is a sidebar.
-   */
-  get mode(): IDebugger.Mode {
-    return this._model.mode;
-  }
-
-  /**
-   * Sets the mode of the debugger UI to the given parameter.
-   * @param mode - the new mode of the debugger UI.
-   */
-  set mode(mode: IDebugger.Mode) {
-    this._model.mode = mode;
-  }
-
-  /**
    * Returns the current debug session.
    */
   get session(): IDebugger.ISession {

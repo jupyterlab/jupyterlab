@@ -142,18 +142,6 @@ export namespace Debugger {
       return this._isDisposed;
     }
 
-    get mode(): IDebugger.Mode {
-      return this._mode;
-    }
-
-    set mode(mode: IDebugger.Mode) {
-      if (this._mode === mode) {
-        return;
-      }
-      this._mode = mode;
-      this._modeChanged.emit(mode);
-    }
-
     /**
      * The set of threads in stopped state.
      */
@@ -181,7 +169,6 @@ export namespace Debugger {
     }
 
     private _isDisposed = false;
-    private _mode: IDebugger.Mode;
     private _stoppedThreads = new Set<number>();
     private _modeChanged = new Signal<this, IDebugger.Mode>(this);
     private _disposed = new Signal<this, void>(this);

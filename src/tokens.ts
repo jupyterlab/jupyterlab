@@ -23,15 +23,6 @@ export interface IDebugger {
   readonly isDebuggingEnabled: boolean;
 
   /**
-   * The mode of the debugger UI.
-   *
-   * #### Notes
-   * There is only ever one debugger instance. If it is `expanded`, it exists
-   * as a `MainAreaWidget`, otherwise it is a sidebar.
-   */
-  mode: IDebugger.Mode;
-
-  /**
    * The current debugger session.
    */
   session: IDebugger.ISession;

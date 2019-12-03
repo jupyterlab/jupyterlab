@@ -71,8 +71,6 @@ export namespace CommandIDs {
 
   export const mount = 'debugger:mount';
 
-  export const changeMode = 'debugger:change-mode';
-
   export const closeDebugger = 'debugger:close';
 }
 
@@ -273,8 +271,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       namespace: 'debugger'
     });
 
-    const defaultMode = 'condensed';
-
     let widget: MainAreaWidget<Debugger>;
 
     commands.addCommand(CommandIDs.closeDebugger, {
@@ -289,11 +285,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     });
 
     app.contextMenu.addItem({
-      command: CommandIDs.changeMode,
-      selector: '.jp-DebuggerSidebar'
-    });
-
-    app.contextMenu.addItem({
       command: CommandIDs.closeDebugger,
       selector: '.jp-DebuggerSidebar'
     });
@@ -304,28 +295,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
           return;
         }
 
-        const mode = (args.mode as IDebugger.Mode) || defaultMode;
-
         const { sidebar } = widget.content;
-        if (!mode) {
-          throw new Error(`Could not mount debugger in mode: "${mode}"`);
-        }
-        if (mode === 'expanded') {
-          if (widget.isAttached) {
-            return;
-          }
-
-          if (sidebar.isAttached) {
-            sidebar.parent = null;
-          }
-
-          // edge case when reload page after set condensed mode
-          widget.title.label = 'Debugger';
-          shell.add(widget, 'main');
-          return;
-        }
-
-        // mode = 'condensed'
         if (widget.isAttached) {
           widget.parent = null;
         }
@@ -408,26 +378,10 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
-    commands.addCommand(CommandIDs.changeMode, {
-      label: 'Change Mode',
-      isEnabled: () => {
-        return !!tracker.currentWidget;
-      },
-      execute: () => {
-        const currentMode = tracker.currentWidget.content.model.mode;
-        const mode = currentMode === 'expanded' ? 'condensed' : 'expanded';
-        tracker.currentWidget.content.model.mode = mode;
-        void commands.execute(CommandIDs.mount, { mode });
-      }
-    });
-
     commands.addCommand(CommandIDs.create, {
       label: 'Debugger',
       execute: async args => {
         const id = (args.id as string) || UUID.uuid4();
-        const savedMode = (await state.fetch('mode')) as IDebugger.Mode;
-        const mode = savedMode ? savedMode : defaultMode;
-
         const callstackCommands = {
           registry: commands,
           continue: CommandIDs.debugContinue,
@@ -451,12 +405,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
           widget.id = id;
 
           void tracker.add(widget);
-
-          widget.content.model.mode = mode;
-
-          widget.content.model.modeChanged.connect((_, mode) => {
-            void state.save('mode', mode);
-          });
         }
 
         console.log('Debugger ID: ', widget.id);
@@ -469,7 +417,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
           commands.notifyCommandChanged();
         });
 
-        await commands.execute(CommandIDs.mount, { mode });
+        await commands.execute(CommandIDs.mount);
         return widget;
       }
     });
@@ -477,7 +425,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     if (palette) {
       const category = 'Debugger';
       [
-        CommandIDs.changeMode,
         CommandIDs.create,
         CommandIDs.debugContinue,
         CommandIDs.terminate,
