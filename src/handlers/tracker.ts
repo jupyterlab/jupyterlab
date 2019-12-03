@@ -91,7 +91,8 @@ export class TrackerHandler implements IDisposable {
         return;
       }
 
-      notebookPanel.content.mode = 'command';
+      const notebook = notebookPanel.content;
+      notebook.mode = 'command';
       const cells = notebookPanel.content.widgets;
       cells.forEach((cell, i) => {
         // check the event is for the correct cell
@@ -100,8 +101,9 @@ export class TrackerHandler implements IDisposable {
         if (source !== cellId) {
           return;
         }
-        notebookPanel.content.activeCellIndex = i;
-        // TODO: scroll to center on the active cell
+        notebook.activeCellIndex = i;
+        const rect = notebook.activeCell.inputArea.node.getBoundingClientRect();
+        notebook.scrollToPosition(rect.bottom, 45);
         editors.push(cell.editor);
       });
     });
