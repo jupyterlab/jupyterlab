@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-var Widget = require('@phosphor/widgets').Widget;
+var Widget = require('@lumino/widgets').Widget;
 
 var factory = {
   safe: true,
