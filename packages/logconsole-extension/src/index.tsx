@@ -381,9 +381,13 @@ export class LogLevelSwitcher extends ReactWidget {
           options={
             logger === null
               ? []
-              : ['Critical', 'Error', 'Warning', 'Info', 'Debug'].map(
-                  label => ({ label, value: label.toLowerCase() })
-                )
+              : [
+                  'Critical',
+                  'Error',
+                  'Warning',
+                  'Info',
+                  'Debug'
+                ].map(label => ({ label, value: label.toLowerCase() }))
           }
         />
       </>

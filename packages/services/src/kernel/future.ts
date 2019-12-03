@@ -451,7 +451,8 @@ namespace Private {
 
     private _hooks: (
       | ((msg: T) => boolean | PromiseLike<boolean>)
-      | null)[] = [];
+      | null
+    )[] = [];
     private _compactScheduled: boolean;
     private _processing: Promise<void>;
   }

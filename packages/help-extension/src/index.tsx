@@ -156,15 +156,16 @@ function activate(
 
   // Populate the Help menu.
   const helpMenu = mainMenu.helpMenu;
-  const labGroup = [CommandIDs.about, CommandIDs.launchClassic].map(
-    command => ({ command })
-  );
+  const labGroup = [
+    CommandIDs.about,
+    CommandIDs.launchClassic
+  ].map(command => ({ command }));
   helpMenu.addGroup(labGroup, 0);
 
   // Contextual help in its own group
-  const contextualHelpGroup = [inspector ? 'inspector:open' : null].map(
-    command => ({ command })
-  );
+  const contextualHelpGroup = [
+    inspector ? 'inspector:open' : null
+  ].map(command => ({ command }));
   helpMenu.addGroup(contextualHelpGroup, 0);
 
   const resourcesGroup = RESOURCES.map(args => ({

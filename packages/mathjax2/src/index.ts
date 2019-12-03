@@ -71,8 +71,14 @@ export class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
   private _onLoad(): void {
     MathJax.Hub.Config({
       tex2jax: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        inlineMath: [
+          ['$', '$'],
+          ['\\(', '\\)']
+        ],
+        displayMath: [
+          ['$$', '$$'],
+          ['\\[', '\\]']
+        ],
         processEscapes: true,
         processEnvironments: true
       },

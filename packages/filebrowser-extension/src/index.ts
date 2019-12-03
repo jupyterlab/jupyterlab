@@ -487,12 +487,14 @@ function addCommands(
     caption: args => (args.path ? `Open ${args.path}` : 'Open from path'),
     execute: async ({ path }: { path?: string }) => {
       if (!path) {
-        path = (await InputDialog.getText({
-          label: 'Path',
-          placeholder: '/path/relative/to/jlab/root',
-          title: 'Open Path',
-          okLabel: 'Open'
-        })).value;
+        path = (
+          await InputDialog.getText({
+            label: 'Path',
+            placeholder: '/path/relative/to/jlab/root',
+            title: 'Open Path',
+            okLabel: 'Open'
+          })
+        ).value;
       }
       if (!path) {
         return;
@@ -649,7 +651,7 @@ function addCommands(
       const {
         model: { path }
       } = browser;
-      commands.execute('docmanager:new-untitled', {
+      void commands.execute('docmanager:new-untitled', {
         path,
         type: 'file',
         ext: 'txt'
@@ -664,7 +666,7 @@ function addCommands(
       const {
         model: { path }
       } = browser;
-      commands.execute('docmanager:new-untitled', {
+      void commands.execute('docmanager:new-untitled', {
         path,
         type: 'file',
         ext: 'md'
