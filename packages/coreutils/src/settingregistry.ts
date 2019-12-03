@@ -883,10 +883,6 @@ export namespace SettingRegistry {
       const keys = shortcut.keys.join(RECORD_SEPARATOR);
       const { selector } = shortcut;
 
-      if (!keys) {
-        console.warn('Shortcut skipped because `keys` are [""].', shortcut);
-        return false;
-      }
       if (!(keys in memo)) {
         memo[keys] = {};
       }
@@ -906,7 +902,7 @@ export namespace SettingRegistry {
       const { disabled } = shortcut;
       const keys = shortcut.keys.join(RECORD_SEPARATOR);
 
-      if (disabled || !keys) {
+      if (disabled) {
         return false;
       }
       if (!(keys in memo)) {
