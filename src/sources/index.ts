@@ -30,6 +30,8 @@ export class Sources extends Panel {
     this.editorFactory = options.editorServices.factoryService.newInlineEditor;
     this.mimeTypeService = options.editorServices.mimeTypeService;
 
+    this.node.setAttribute('data-jp-debugger', 'true');
+
     const header = new SourcesHeader('Source');
     header.toolbar.addItem(
       'open',
