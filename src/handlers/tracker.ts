@@ -33,25 +33,8 @@ export class TrackerHandler implements IDisposable {
     this.consoleTracker = options.consoleTracker;
     this.editorTracker = options.editorTracker;
 
-    const addSignals = () => {
-      const debuggerModel = this.debuggerService.model as Debugger.Model;
-
-      debuggerModel.callstackModel.currentFrameChanged.connect(
-        this.onCurrentFrameChanged,
-        this
-      );
-
-      debuggerModel.breakpointsModel.clicked.connect((_, breakpoint) => {
-        const debugSessionPath = this.debuggerService.session.client.path;
-        this.find(debugSessionPath, breakpoint.source.path);
-      });
-    };
-
-    if (this.debuggerService.model) {
-      addSignals();
-    } else {
-      this.debuggerService.modelChanged.connect(addSignals);
-    }
+    this.onModelChanged();
+    this.debuggerService.modelChanged.connect(this.onModelChanged, this);
   }
 
   isDisposed: boolean;
@@ -62,6 +45,23 @@ export class TrackerHandler implements IDisposable {
     }
     this.isDisposed = true;
     Signal.clearData(this);
+  }
+
+  protected onModelChanged() {
+    const debuggerModel = this.debuggerService.model as Debugger.Model;
+    if (!debuggerModel) {
+      return;
+    }
+
+    debuggerModel.callstackModel.currentFrameChanged.connect(
+      this.onCurrentFrameChanged,
+      this
+    );
+
+    debuggerModel.breakpointsModel.clicked.connect((_, breakpoint) => {
+      const debugSessionPath = this.debuggerService.session.client.path;
+      this.find(debugSessionPath, breakpoint.source.path);
+    });
   }
 
   protected onCurrentFrameChanged(

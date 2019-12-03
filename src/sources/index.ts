@@ -54,21 +54,12 @@ export class Sources extends Panel {
       }
     });
 
-    this.debuggerService.modelChanged.connect(() => {
-      if (this.editorHandler) {
-        this.editorHandler.dispose();
-      }
-      this.editorHandler = new EditorHandler({
-        debuggerService: this.debuggerService,
-        editor: this.editor.editor
-      });
-    });
-
     this.model.currentFrameChanged.connect(async (_, frame) => {
       if (!frame) {
         this.editor.hide();
         return;
       }
+
       this.editor.show();
       void this.showSource(frame);
     });
@@ -90,6 +81,7 @@ export class Sources extends Panel {
     if (this.isDisposed) {
       return;
     }
+    this.editorHandler.dispose();
     Signal.clearData(this);
   }
 
@@ -104,10 +96,20 @@ export class Sources extends Panel {
       return;
     }
 
+    if (this.editorHandler) {
+      this.editorHandler.dispose();
+    }
+
     const { content, mimeType } = source.body;
     this.editor.model.value.text = content;
     this.editor.model.mimeType =
       mimeType || this.mimeTypeService.getMimeTypeByFilePath(path);
+
+    this.editorHandler = new EditorHandler({
+      debuggerService: this.debuggerService,
+      editor: this.editor.editor
+    });
+
     requestAnimationFrame(() => {
       EditorHandler.showCurrentLine(this.editor.editor, frame.line);
     });
