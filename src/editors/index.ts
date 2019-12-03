@@ -24,8 +24,8 @@ import { EditorHandler } from '../handlers/editor';
 
 import { IDebugger } from '../tokens';
 
-export class DebuggerEditors extends TabPanel {
-  constructor(options: DebuggerEditors.IOptions) {
+export class Sources extends TabPanel {
+  constructor(options: Sources.IOptions) {
     super();
     this.tabsMovable = true;
     this.tabBar.insertBehavior = 'select-tab';
@@ -34,7 +34,7 @@ export class DebuggerEditors extends TabPanel {
       widget.dispose();
     });
 
-    this.model = new DebuggerEditors.IModel();
+    this.model = new Sources.IModel();
 
     this.debuggerModel = options.model;
     this.debuggerService = options.service;
@@ -63,7 +63,7 @@ export class DebuggerEditors extends TabPanel {
   /**
    * The debugger editors model.
    */
-  model: DebuggerEditors.IModel;
+  model: Sources.IModel;
 
   /**
    * Dispose the debug editors.
@@ -109,7 +109,7 @@ export class DebuggerEditors extends TabPanel {
     });
   }
 
-  private openEditor(data: DebuggerEditors.IEditor) {
+  private openEditor(data: Sources.IEditor) {
     const { path, mimeType, code } = data;
     const tab = find(this.tabBar.titles, title => title.label === path);
     if (tab) {
@@ -156,7 +156,7 @@ export class DebuggerEditors extends TabPanel {
 /**
  * A namespace for `DebuggerEditors` statics.
  */
-export namespace DebuggerEditors {
+export namespace Sources {
   /**
    * The options used to create a DebuggerEditors.
    */
@@ -181,10 +181,7 @@ export namespace DebuggerEditors {
     /**
      * A signal emitted when a new editor is added.
      */
-    get editorAdded(): ISignal<
-      DebuggerEditors.IModel,
-      DebuggerEditors.IEditor
-    > {
+    get editorAdded(): ISignal<Sources.IModel, Sources.IEditor> {
       return this._editorAdded;
     }
 
@@ -199,7 +196,7 @@ export namespace DebuggerEditors {
      * Add a new editor to the editor TabPanel.
      * @param editor The read-only editor info to add.
      */
-    addEditor(editor: DebuggerEditors.IEditor) {
+    addEditor(editor: Sources.IEditor) {
       this._state.set(editor.path, editor);
       this._editorAdded.emit(editor);
     }
@@ -212,7 +209,7 @@ export namespace DebuggerEditors {
       this._state.delete(path);
     }
 
-    private _state = new Map<string, DebuggerEditors.IEditor>();
-    private _editorAdded = new Signal<this, DebuggerEditors.IEditor>(this);
+    private _state = new Map<string, Sources.IEditor>();
+    private _editorAdded = new Signal<this, Sources.IEditor>(this);
   }
 }

@@ -17,7 +17,7 @@ import { Breakpoints } from './breakpoints';
 
 import { Callstack } from './callstack';
 
-import { DebuggerEditors } from './editors';
+import { Sources } from './editors';
 
 import { DebugService } from './service';
 
@@ -44,7 +44,7 @@ export class Debugger extends SplitPanel {
       callstackCommands: options.callstackCommands
     });
 
-    this.editors = new DebuggerEditors({
+    this.editors = new Sources({
       model: this.model,
       service: this.service,
       editorServices: options.editorServices
@@ -54,7 +54,7 @@ export class Debugger extends SplitPanel {
     this.addClass('jp-Debugger');
   }
 
-  readonly editors: DebuggerEditors;
+  readonly editors: Sources;
   readonly model: Debugger.Model;
   readonly sidebar: Debugger.Sidebar;
   readonly service: DebugService;
