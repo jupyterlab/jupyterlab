@@ -44,7 +44,7 @@ function anyAncestor(el: Element, test: (el: Element) => boolean) {
   return false;
 }
 
-function isHiddenPhosphor(el: Element) {
+function isHiddenLumino(el: Element) {
   return el.classList.contains('p-mod-hidden');
 }
 
@@ -103,13 +103,13 @@ describe('LogConsolePanel', () => {
       const nodeA = logConsole.node.querySelector('#A');
       const nodeB = logConsole.node.querySelector('#B');
       expect(nodeA).not.toBeNull();
-      expect(anyAncestor(nodeA, isHiddenPhosphor)).toBe(false);
+      expect(anyAncestor(nodeA, isHiddenLumino)).toBe(false);
       expect(nodeB).not.toBeNull();
-      expect(anyAncestor(nodeB, isHiddenPhosphor)).toBe(true);
+      expect(anyAncestor(nodeB, isHiddenLumino)).toBe(true);
 
       logConsole.source = 'B';
-      expect(anyAncestor(nodeA, isHiddenPhosphor)).toBe(true);
-      expect(anyAncestor(nodeB, isHiddenPhosphor)).toBe(false);
+      expect(anyAncestor(nodeA, isHiddenLumino)).toBe(true);
+      expect(anyAncestor(nodeB, isHiddenLumino)).toBe(false);
     });
 
     it('emits a source changed signal if changed', () => {
