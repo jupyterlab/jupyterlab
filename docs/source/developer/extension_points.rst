@@ -57,12 +57,12 @@ Each of ``isEnabled``, ``isToggled``, and ``isVisible`` can be either
 a boolean value or a function that returns a boolean value, in case you want
 to do some logic in order to determine those conditions.
 
-Likewise, each of ``label`` and ``iconClass`` can be either 
+Likewise, each of ``label`` and ``iconClass`` can be either
 a string value or a function that returns a string value.
 
 There are several more options which can be passed into the command registry when
-adding new commands. These are documented 
-`here <http://phosphorjs.github.io/phosphor/api/commands/interfaces/commandregistry.icommandoptions.html>`__.
+adding new commands. These are documented
+`here <http://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.icommandoptions.html>`__.
 
 After a command has been added to the application command registry
 you can add them to various places in the application user interface,
@@ -110,7 +110,7 @@ Adding a New Menu
 ^^^^^^^^^^^^^^^^^
 
 To add a new menu to the menu bar, you need to create a new
-`Phosphor menu <https://phosphorjs.github.io/phosphor/api/widgets/classes/menu.html>`__.
+`Phosphor menu <https://jupyterlab.github.io/lumino/widgets/classes/menu.html>`__.
 
 You can then add commands to the menu in a similar way to the command palette,
 and add that menu to the main menu bar:
@@ -238,7 +238,7 @@ If you don't want the shortcuts to be user-configurable,
 you can add them directly to the application command registry:
 
 .. code:: typescript
-    
+
     app.commands.addKeyBinding({
       command: commandID,
       args: {},
@@ -254,7 +254,7 @@ the shortcut handler propagates up the DOM tree from the focused element
 and tests each element against the registered selectors. If a match is found,
 then that command is executed with the provided ``args``.
 Full documentation for the options for ``addKeyBinding`` can be found
-`here <http://phosphorjs.github.io/phosphor/api/commands/interfaces/commandregistry.ikeybindingoptions.html>`__.
+`here <http://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.ikeybindingoptions.html>`__.
 
 JupyterLab also provides integration with its settings system for keyboard shortcuts.
 Your extension can provide a settings schema with a ``jupyter.lab.shortcuts`` key,

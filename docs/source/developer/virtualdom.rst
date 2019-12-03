@@ -5,7 +5,7 @@ React
 
 
 Many JupyterLab APIs require `Phosphor <https://phosphorjs.github.io/>`__
-`Widgets <https://phosphorjs.github.io/phosphor/api/widgets/classes/widget.html>`__
+`Widgets <https://jupyterlab.github.io/lumino/widgets/classes/widget.html>`__
 which have some additional features over native DOM elements, including:
 
 -  Resize events that propagate down the Widget hierarchy.
@@ -32,7 +32,7 @@ override the ``render`` method to return a React element:
    :force:
 
 
-We use Phosphor `Signals <https://phosphorjs.github.io/phosphor/api/signaling/interfaces/isignal.html>`__ to represent
+We use Phosphor `Signals <https://jupyterlab.github.io/lumino/signaling/interfaces/isignal.html>`__ to represent
 data that changes over time in JupyterLab.
 To have your React element change in response to a signal event, use the ``UseSignal`` component from ``@jupyterlab/apputils``,
 which implements the `"render props" <https://reactjs.org/docs/render-props.html>`__:
