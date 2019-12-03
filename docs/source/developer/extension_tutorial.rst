@@ -216,15 +216,15 @@ you in JupyterLab. For your first addition, you're going to add a
 tab panel when invoked.
 
 Fire up your favorite text editor and open the ``src/index.ts`` file in
-your extension project. Change the import at the top of the file to get 
+your extension project. Change the import at the top of the file to get
 a reference to the command palette interface and the Jupyter front end.
 
 .. code:: typescript
-    
+
     import {
       JupyterFrontEnd, JupyterFrontEndPlugin
     } from '@jupyterlab/application';
-    
+
     import {
       ICommandPalette
     } from '@jupyterlab/apputils';
@@ -300,13 +300,13 @@ Now return to your editor. Modify the imports at the top of the file to add a fe
 
     import {
       Widget
-    } from '@phosphor/widgets';
+    } from '@lumino/widgets';
 
 Install this new dependency as well:
 
 .. code:: bash
 
-    jlpm add @phosphor/widgets
+    jlpm add @lumino/widgets
 
 
 Then modify the ``activate`` function again so that it has the following
@@ -346,7 +346,7 @@ The first new block of code creates a ``MainAreaWidget`` instance with an empty
 content ``Widget`` as its child. It also assigns the main area widget a unique
 ID, gives it a label that will appear as its tab title, and makes the tab
 closable by the user.
-The second block of code adds a new command with id ``apod:open`` and label *Random Astronomy Picture* 
+The second block of code adds a new command with id ``apod:open`` and label *Random Astronomy Picture*
 to JupyterLab. When the command executes,
 it attaches the widget to the main display area if it is not already
 present and then makes it the active tab. The last new line of code uses the command id to add
@@ -591,13 +591,13 @@ Add the following additional import to the top of the file.
 
     import {
       Message
-    } from '@phosphor/messaging';
+    } from '@lumino/messaging';
 
 Install this dependency:
 
 .. code:: bash
 
-    jlpm add @phosphor/messaging
+    jlpm add @lumino/messaging
 
 
 Then add the class just below the import statements in the ``index.ts``
@@ -777,17 +777,17 @@ entire list of import statements looks like the following:
 
     import {
       Message
-    } from '@phosphor/messaging';
+    } from '@lumino/messaging';
 
     import {
       Widget
-    } from '@phosphor/widgets';
+    } from '@lumino/widgets';
 
 Install this dependency:
 
 .. code:: bash
 
-    jlpm add @phosphor/coreutils
+    jlpm add @lumino/coreutils
 
 Then add the ``ILayoutRestorer`` interface to the ``JupyterFrontEndPlugin``
 definition. This addition passes the global ``LayoutRestorer`` as the

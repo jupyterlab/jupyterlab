@@ -15,7 +15,7 @@ Terms
    be used to extend JupyterLab's functionality.
 -  *Plugin* - An object that provides a service and or extends the
    application.
--  *Phosphor* - The JavaScript library that provides the foundation of
+-  *Lumino* - The JavaScript library that provides the foundation of
    JupyterLab, enabling desktop-like applications in the browser.
 -  *Standalone example* - An example in the ``examples/`` directory that
    demonstrates the usage of one or more components of JupyterLab.

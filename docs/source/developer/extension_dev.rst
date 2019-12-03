@@ -101,19 +101,19 @@ In JupyterLab, the application shell consists of:
 -  A ``bottom`` area for things like status bars.
 -  A ``header`` area for custom elements.
 
-Phosphor
+Lumino
 ~~~~~~~~
 
-The Phosphor library is used as the underlying architecture of
+The Lumino library is used as the underlying architecture of
 JupyterLab and provides many of the low level primitives and widget
-structure used in the application. Phosphor provides a rich set of
+structure used in the application. Lumino provides a rich set of
 widgets for developing desktop-like applications in the browser, as well
 as patterns and objects for writing clean, well-abstracted code. The
-widgets in the application are primarily **Phosphor widgets**, and
-Phosphor concepts, like message passing and signals, are used
-throughout. **Phosphor messages** are a *many-to-one* interaction that
+widgets in the application are primarily **Lumino widgets**, and
+Lumino concepts, like message passing and signals, are used
+throughout. **Lumino messages** are a *many-to-one* interaction that
 enables information like resize events to flow through the widget
-hierarchy in the application. **Phosphor signals** are a *one-to-many*
+hierarchy in the application. **Lumino signals** are a *one-to-many*
 interaction that enable listeners to react to changes in an observed
 object.
 
@@ -579,13 +579,13 @@ Context Menus
 ^^^^^^^^^^^^^
 
 JupyterLab has an application-wide context menu available as
-``app.contextMenu``. See the Phosphor
+``app.contextMenu``. See the Lumino
 `docs <https://jupyterlab.github.io/lumino/widgets/interfaces/contextmenu.iitemoptions.html>`__
 for the item creation options. If you wish to preempt the
 application context menu, you can use a 'contextmenu' event listener and
 call ``event.stopPropagation`` to prevent the application context menu
 handler from being called (it is listening in the bubble phase on the
-``document``). At this point you could show your own Phosphor
+``document``). At this point you could show your own Lumino
 `contextMenu <https://jupyterlab.github.io/lumino/widgets/classes/contextmenu.html>`__,
 or simply stop propagation and let the system context menu be shown.
 This would look something like the following in a ``Widget`` subclass:
