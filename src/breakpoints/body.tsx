@@ -76,6 +76,7 @@ const BreakpointCellComponent = ({
           <BreakpointComponent
             key={breakpoint.source.path + breakpoint.line}
             breakpoint={breakpoint}
+            model={model}
           />
         ))}
     </>
@@ -83,12 +84,17 @@ const BreakpointCellComponent = ({
 };
 
 const BreakpointComponent = ({
-  breakpoint
+  breakpoint,
+  model
 }: {
   breakpoint: IDebugger.IBreakpoint;
+  model: Breakpoints.Model;
 }) => {
   return (
-    <div className={`breakpoint`}>
+    <div
+      className={`breakpoint`}
+      onClick={() => model.clicked.emit(breakpoint)}
+    >
       <span>
         {breakpoint.source.path} : {breakpoint.line}
       </span>

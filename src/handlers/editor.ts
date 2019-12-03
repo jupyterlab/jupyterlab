@@ -17,8 +17,6 @@ import { Editor } from 'codemirror';
 
 import { Breakpoints } from '../breakpoints';
 
-import { Callstack } from '../callstack';
-
 import { Debugger } from '../debugger';
 
 import { IDebugger } from '../tokens';
@@ -215,15 +213,12 @@ export namespace EditorHandler {
   /**
    * Highlight the current line of the frame in the given editor.
    * @param editor The editor to highlight.
-   * @param frame The frame with the current line number.
+   * @param line The line number.
    */
-  export function showCurrentLine(
-    editor: CodeEditor.IEditor,
-    frame: Callstack.IFrame
-  ) {
+  export function showCurrentLine(editor: CodeEditor.IEditor, line: number) {
     clearHighlight(editor);
     const cmEditor = editor as CodeMirrorEditor;
-    cmEditor.editor.addLineClass(frame.line - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
+    cmEditor.editor.addLineClass(line - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
   }
 
   /**

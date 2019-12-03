@@ -68,6 +68,10 @@ export namespace Breakpoints {
       return this._restored;
     }
 
+    get clicked(): Signal<this, IDebugger.IBreakpoint> {
+      return this._clicked;
+    }
+
     get breakpoints(): Map<string, IDebugger.IBreakpoint[]> {
       return this._breakpoints;
     }
@@ -101,6 +105,7 @@ export namespace Breakpoints {
     private _breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
     private _changed = new Signal<this, IDebugger.IBreakpoint[]>(this);
     private _restored = new Signal<this, void>(this);
+    private _clicked = new Signal<this, IDebugger.IBreakpoint>(this);
     private _isDisposed: boolean = false;
   }
 
