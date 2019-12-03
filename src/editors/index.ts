@@ -86,7 +86,7 @@ export class DebuggerEditors extends TabPanel {
     const widget = this.widgets[index];
     const editor = (widget as CodeEditorWrapper).editor;
     requestAnimationFrame(() => {
-      EditorHandler.showCurrentLine(editor, frame);
+      EditorHandler.showCurrentLine(editor, frame.line);
     });
   }
 

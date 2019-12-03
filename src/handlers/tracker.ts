@@ -1,8 +1,12 @@
+import { CodeEditor } from '@jupyterlab/codeeditor';
+
+import { IConsoleTracker } from '@jupyterlab/console';
+
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
-import { IConsoleTracker } from '@jupyterlab/console';
+import { chain, each } from '@phosphor/algorithm';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -36,6 +40,11 @@ export class TrackerHandler implements IDisposable {
         this.onCurrentFrameChanged,
         this
       );
+
+      debuggerModel.breakpointsModel.clicked.connect((_, breakpoint) => {
+        const debugSessionPath = this.debuggerService.session.client.path;
+        this.find(debugSessionPath, breakpoint.source.path);
+      });
     });
   }
 
@@ -54,15 +63,27 @@ export class TrackerHandler implements IDisposable {
     frame: Callstack.IFrame
   ) {
     const debugSessionPath = this.debuggerService.session.client.path;
-    this.findInNotebooks(debugSessionPath, frame);
-    this.findInConsoles(debugSessionPath, frame);
-    this.findInEditors(debugSessionPath, frame);
+    const source = frame?.source.path ?? null;
+    each(this.find(debugSessionPath, source), editor => {
+      requestAnimationFrame(() => {
+        EditorHandler.showCurrentLine(editor, frame.line);
+      });
+    });
   }
 
-  protected findInNotebooks(debugSessionPath: string, frame: Callstack.IFrame) {
+  protected find(debugSessionPath: string, source: string) {
+    return chain(
+      this.findInNotebooks(debugSessionPath, source),
+      this.findInConsoles(debugSessionPath, source),
+      this.findInEditors(debugSessionPath, source)
+    );
+  }
+
+  protected findInNotebooks(debugSessionPath: string, source: string) {
     if (!this.notebookTracker) {
-      return;
+      return [];
     }
+    let editors: CodeEditor.IEditor[] = [];
     this.notebookTracker.forEach(notebookPanel => {
       const session = notebookPanel.session;
 
@@ -70,34 +91,28 @@ export class TrackerHandler implements IDisposable {
         return;
       }
 
+      notebookPanel.content.mode = 'command';
       const cells = notebookPanel.content.widgets;
-      // TODO: we might reconsider clearing all cells, for example
-      // there could be more than 1 stopped thread, and in different cells
-      cells.forEach(cell => EditorHandler.clearHighlight(cell.editor));
-
-      if (!frame) {
-        return;
-      }
-
       cells.forEach((cell, i) => {
         // check the event is for the correct cell
         const code = cell.model.value.text;
         const cellId = this.debuggerService.getCodeId(code);
-        if (frame.source.path !== cellId) {
+        if (source !== cellId) {
           return;
         }
         notebookPanel.content.activeCellIndex = i;
-        requestAnimationFrame(() => {
-          EditorHandler.showCurrentLine(cell.editor, frame);
-        });
+        // TODO: scroll to center on the active cell
+        editors.push(cell.editor);
       });
     });
+    return editors;
   }
 
-  protected findInConsoles(debugSessionPath: string, frame: Callstack.IFrame) {
-    if (!this.consoleTracker || !frame) {
-      return;
+  protected findInConsoles(debugSessionPath: string, source: string) {
+    if (!this.consoleTracker) {
+      return [];
     }
+    let editors: CodeEditor.IEditor[] = [];
     this.consoleTracker.forEach(consoleWidget => {
       const session = consoleWidget.session;
 
@@ -112,19 +127,19 @@ export class TrackerHandler implements IDisposable {
 
       const code = editor.model.value.text;
       const codeId = this.debuggerService.getCodeId(code);
-      if (frame.source.path !== codeId) {
+      if (source !== codeId) {
         return;
       }
-      requestAnimationFrame(() => {
-        EditorHandler.showCurrentLine(editor, frame);
-      });
+      editors.push(editor);
     });
+    return editors;
   }
 
-  protected findInEditors(debugSessionPath: string, frame: Callstack.IFrame) {
+  protected findInEditors(debugSessionPath: string, source: string) {
     if (!this.editorTracker) {
       return;
     }
+    let editors: CodeEditor.IEditor[] = [];
     this.editorTracker.forEach(doc => {
       const fileEditor = doc.content;
       if (debugSessionPath !== fileEditor.context.path) {
@@ -136,21 +151,14 @@ export class TrackerHandler implements IDisposable {
         return;
       }
 
-      EditorHandler.clearHighlight(editor);
-
-      if (!frame) {
-        return;
-      }
-
       const code = editor.model.value.text;
       const codeId = this.debuggerService.getCodeId(code);
-      if (frame.source.path !== codeId) {
+      if (source !== codeId) {
         return;
       }
-      requestAnimationFrame(() => {
-        EditorHandler.showCurrentLine(editor, frame);
-      });
+      editors.push(editor);
     });
+    return editors;
   }
 
   private debuggerService: IDebugger;
