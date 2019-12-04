@@ -10,16 +10,6 @@
 @import './sidebar.css';
 @import './sources.css';
 
-.jp-Debugger {
-  background: var(--jp-layout-color1);
-  top: 0;
-  bottom: 0;
-}
-
-.jp-Debugger .p-SplitPanel-handle {
-  background-color: var(--jp-border-color2);
-}
-
 /* font awesome */
 
 .fa {

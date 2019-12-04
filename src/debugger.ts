@@ -40,7 +40,6 @@ export namespace Debugger {
       this.title.label = 'Environment';
       this.orientation = 'vertical';
 
-      this.addClass('jp-Debugger');
       this.addClass('jp-DebuggerSidebar');
 
       const { callstackCommands, editorServices, service } = options;
