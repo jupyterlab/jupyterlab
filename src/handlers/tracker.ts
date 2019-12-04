@@ -5,7 +5,11 @@
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
-import { MainAreaWidget } from '@jupyterlab/apputils';
+import {
+  IWidgetTracker,
+  MainAreaWidget,
+  WidgetTracker
+} from '@jupyterlab/apputils';
 
 import {
   CodeEditor,
@@ -21,7 +25,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { chain, each } from '@phosphor/algorithm';
 
-import { UUID } from '@phosphor/coreutils';
+import { Token, UUID } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -55,6 +59,12 @@ export class TrackerHandler implements IDisposable {
       editorServices: options.editorServices
     });
 
+    this.readOnlyEditorTracker = new WidgetTracker<
+      MainAreaWidget<CodeEditorWrapper>
+    >({
+      namespace: '@jupyterlab/debugger'
+    });
+
     this.onModelChanged();
     this.debuggerService.modelChanged.connect(this.onModelChanged, this);
   }
@@ -70,22 +80,22 @@ export class TrackerHandler implements IDisposable {
   }
 
   protected onModelChanged() {
-    const debuggerModel = this.debuggerService.model as Debugger.Model;
-    if (!debuggerModel) {
+    this.debuggerModel = this.debuggerService.model as Debugger.Model;
+    if (!this.debuggerModel) {
       return;
     }
 
-    debuggerModel.callstackModel.currentFrameChanged.connect(
+    this.debuggerModel.callstackModel.currentFrameChanged.connect(
       this.onCurrentFrameChanged,
       this
     );
 
-    debuggerModel.sourcesModel.currentSourceOpened.connect(
+    this.debuggerModel.sourcesModel.currentSourceOpened.connect(
       this.onCurrentSourceOpened,
       this
     );
 
-    debuggerModel.breakpointsModel.clicked.connect((_, breakpoint) => {
+    this.debuggerModel.breakpointsModel.clicked.connect((_, breakpoint) => {
       const debugSessionPath = this.debuggerService.session.client.path;
       this.find(debugSessionPath, breakpoint.source.path);
     });
@@ -116,9 +126,10 @@ export class TrackerHandler implements IDisposable {
       mimeType,
       path
     });
+    const editor = editorWrapper.editor;
     const editorHandler = new EditorHandler({
       debuggerService: this.debuggerService,
-      editor: editorWrapper.editor
+      editor
     });
     const widget = new MainAreaWidget<CodeEditorWrapper>({
       content: editorWrapper
@@ -129,13 +140,20 @@ export class TrackerHandler implements IDisposable {
     widget.title.iconClass = 'jp-MaterialIcon jp-TextEditorIcon';
     widget.disposed.connect(() => editorHandler.dispose());
     this.shell.add(widget, 'main');
+    void this.readOnlyEditorTracker.add(widget);
+
+    const frame = this.debuggerModel?.callstackModel.frame;
+    if (frame) {
+      EditorHandler.showCurrentLine(editor, frame.line);
+    }
   }
 
   protected find(debugSessionPath: string, source: string) {
     return chain(
       this.findInNotebooks(debugSessionPath, source),
       this.findInConsoles(debugSessionPath, source),
-      this.findInEditors(debugSessionPath, source)
+      this.findInEditors(debugSessionPath, source),
+      this.findInReadOnlyEditors(debugSessionPath, source)
     );
   }
 
@@ -223,9 +241,31 @@ export class TrackerHandler implements IDisposable {
     return editors;
   }
 
+  protected findInReadOnlyEditors(_: string, source: string) {
+    let editors: CodeEditor.IEditor[] = [];
+    this.readOnlyEditorTracker.forEach(widget => {
+      const editor = widget.content?.editor;
+      if (!editor) {
+        return;
+      }
+
+      const code = editor.model.value.text;
+      const codeId = this.debuggerService.getCodeId(code);
+      if (source !== codeId) {
+        return;
+      }
+      editors.push(editor);
+    });
+    return editors;
+  }
+
   private debuggerService: IDebugger;
+  private debuggerModel: Debugger.Model;
   private shell: JupyterFrontEnd.IShell;
   private readOnlyEditorFactory: ReadOnlyEditorFactory;
+  private readOnlyEditorTracker: WidgetTracker<
+    MainAreaWidget<CodeEditorWrapper>
+  >;
   private notebookTracker: INotebookTracker | null;
   private consoleTracker: IConsoleTracker | null;
   private editorTracker: IEditorTracker | null;
@@ -246,4 +286,20 @@ export namespace DebuggerTrackerHandler {
     consoleTracker?: IConsoleTracker;
     editorTracker?: IEditorTracker;
   }
+
+  // TODO: move the interface and token below to token.ts?
+
+  /**
+   * A class that tracks read only editor widgets used for debugging.
+   */
+  export interface IDebuggerReadOnlyEditorTracker
+    extends IWidgetTracker<MainAreaWidget<CodeEditorWrapper>> {}
+
+  /**
+   * The Debugger Read Only Editor tracker token.
+   * TODO: provide the token for the tracker in the plugin?
+   */
+  export const IDebuggerReadOnlyEditorTracker = new Token<
+    IDebuggerReadOnlyEditorTracker
+  >('@jupyterlab/debugger:IDebuggerReadOnlyEditorTracker');
 }
