@@ -221,16 +221,19 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 const tracker: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:tracker',
   autoStart: true,
-  requires: [IDebugger],
+  requires: [IDebugger, IEditorServices],
   optional: [INotebookTracker, IConsoleTracker, IEditorTracker],
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
+    editorServices: IEditorServices,
     notebookTracker: INotebookTracker,
     consoleTracker: IConsoleTracker,
     editorTracker: IEditorTracker
   ) => {
     new TrackerHandler({
+      shell: app.shell,
+      editorServices,
       debuggerService: debug,
       notebookTracker,
       consoleTracker,

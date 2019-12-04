@@ -3,7 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import { JupyterFrontEnd } from '@jupyterlab/application';
+
+import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
@@ -13,15 +15,21 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { chain, each } from '@phosphor/algorithm';
 
+import { UUID } from '@phosphor/coreutils';
+
 import { IDisposable } from '@phosphor/disposable';
 
 import { Signal } from '@phosphor/signaling';
+
+import { Panel } from '@phosphor/widgets';
 
 import { Callstack } from '../callstack';
 
 import { EditorHandler } from './editor';
 
 import { Debugger } from '../debugger';
+
+import { ReadOnlyEditorFactory, Sources } from '../sources';
 
 import { IDebugger } from '../tokens';
 
@@ -34,9 +42,14 @@ export class TrackerHandler implements IDisposable {
    */
   constructor(options: DebuggerTrackerHandler.IOptions) {
     this.debuggerService = options.debuggerService;
+    this.shell = options.shell;
     this.notebookTracker = options.notebookTracker;
     this.consoleTracker = options.consoleTracker;
     this.editorTracker = options.editorTracker;
+
+    this.readOnlyEditorFactory = new ReadOnlyEditorFactory({
+      editorServices: options.editorServices
+    });
 
     this.onModelChanged();
     this.debuggerService.modelChanged.connect(this.onModelChanged, this);
@@ -63,16 +76,18 @@ export class TrackerHandler implements IDisposable {
       this
     );
 
+    debuggerModel.sourcesModel.currentSourceOpened.connect(
+      this.onCurrentSourceOpened,
+      this
+    );
+
     debuggerModel.breakpointsModel.clicked.connect((_, breakpoint) => {
       const debugSessionPath = this.debuggerService.session.client.path;
       this.find(debugSessionPath, breakpoint.source.path);
     });
   }
 
-  protected onCurrentFrameChanged(
-    callstackModel: Callstack.Model,
-    frame: Callstack.IFrame
-  ) {
+  protected onCurrentFrameChanged(_: Callstack.Model, frame: Callstack.IFrame) {
     const debugSessionPath = this.debuggerService.session.client.path;
     const source = frame?.source.path ?? null;
     each(this.find(debugSessionPath, source), editor => {
@@ -80,6 +95,34 @@ export class TrackerHandler implements IDisposable {
         EditorHandler.showCurrentLine(editor, frame.line);
       });
     });
+  }
+
+  protected onCurrentSourceOpened(_: Sources.Model, source: Sources.ISource) {
+    if (!source) {
+      return;
+    }
+    const debugSessionPath = this.debuggerService.session.client.path;
+    const { code, mimeType, path } = source;
+    const results = this.find(debugSessionPath, path);
+    if (results.next()) {
+      return;
+    }
+    const editorWrapper = this.readOnlyEditorFactory.createNewEditor({
+      code,
+      mimeType,
+      path
+    });
+    const editorHandler = new EditorHandler({
+      debuggerService: this.debuggerService,
+      editor: editorWrapper.editor
+    });
+    const widget = new Panel();
+    widget.addWidget(editorWrapper);
+    widget.id = UUID.uuid4();
+    widget.title.label = path;
+    widget.title.closable = true;
+    widget.disposed.connect(() => editorHandler.dispose());
+    this.shell.add(widget, 'main');
   }
 
   protected find(debugSessionPath: string, source: string) {
@@ -175,6 +218,8 @@ export class TrackerHandler implements IDisposable {
   }
 
   private debuggerService: IDebugger;
+  private shell: JupyterFrontEnd.IShell;
+  private readOnlyEditorFactory: ReadOnlyEditorFactory;
   private notebookTracker: INotebookTracker | null;
   private consoleTracker: IConsoleTracker | null;
   private editorTracker: IEditorTracker | null;
@@ -189,6 +234,8 @@ export namespace DebuggerTrackerHandler {
    */
   export interface IOptions {
     debuggerService: IDebugger;
+    editorServices: IEditorServices;
+    shell: JupyterFrontEnd.IShell;
     notebookTracker?: INotebookTracker;
     consoleTracker?: IConsoleTracker;
     editorTracker?: IEditorTracker;

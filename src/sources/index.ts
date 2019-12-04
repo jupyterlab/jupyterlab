@@ -27,38 +27,31 @@ export class Sources extends Panel {
     super();
     this.model = options.model;
     this.debuggerService = options.service;
-    this.editorFactory = options.editorServices.factoryService.newInlineEditor;
     this.mimeTypeService = options.editorServices.mimeTypeService;
-
-    this.node.setAttribute('data-jp-debugger', 'true');
 
     const header = new SourcesHeader('Source');
     header.toolbar.addItem(
       'open',
       new ToolbarButton({
         iconClassName: 'jp-LauncherIcon',
-        onClick: () => {
-          console.log('open file in the main area');
-        },
-        tooltip: 'Open File'
+        onClick: () => this.model.open(),
+        tooltip: 'Open in the Main Area'
       })
     );
 
-    this.editor = new CodeEditorWrapper({
-      model: new CodeEditor.Model({
-        value: '',
-        mimeType: ''
-      }),
-      factory: this.editorFactory,
-      config: {
-        readOnly: true,
-        lineNumbers: true
-      }
+    const factory = new ReadOnlyEditorFactory({
+      editorServices: options.editorServices
+    });
+    this.editor = factory.createNewEditor({
+      code: '',
+      mimeType: '',
+      path: ''
     });
     this.editor.hide();
 
     this.model.currentFrameChanged.connect(async (_, frame) => {
       if (!frame) {
+        this.model.currentSource = null;
         this.editor.hide();
         return;
       }
@@ -103,14 +96,22 @@ export class Sources extends Panel {
     }
 
     const { content, mimeType } = source.body;
-    this.editor.model.value.text = content;
-    this.editor.model.mimeType =
+    const editorMimeType =
       mimeType || this.mimeTypeService.getMimeTypeByFilePath(path);
+
+    this.editor.model.value.text = content;
+    this.editor.model.mimeType = editorMimeType;
 
     this.editorHandler = new EditorHandler({
       debuggerService: this.debuggerService,
       editor: this.editor.editor
     });
+
+    this.model.currentSource = {
+      path,
+      code: content,
+      mimeType: editorMimeType
+    };
 
     requestAnimationFrame(() => {
       EditorHandler.showCurrentLine(this.editor.editor, frame.line);
@@ -118,7 +119,6 @@ export class Sources extends Panel {
   }
 
   private debuggerService: IDebugger;
-  private editorFactory: CodeEditor.Factory;
   private mimeTypeService: IEditorMimeTypeService;
   private editor: CodeEditorWrapper;
   private editorHandler: EditorHandler;
@@ -154,9 +154,9 @@ export namespace Sources {
   }
 
   /**
-   * An interface for read only editors.
+   * An interface for a read only source.
    */
-  export interface IEditor {
+  export interface ISource {
     path: string;
     code: string;
     mimeType: string;
@@ -168,11 +168,81 @@ export namespace Sources {
     }
 
     currentFrameChanged: ISignal<Callstack.Model, Callstack.IFrame>;
+
+    get currentSourceOpened(): ISignal<Sources.Model, Sources.ISource> {
+      return this._currentSourceOpened;
+    }
+
+    get currentSource() {
+      return this._currentSource;
+    }
+
+    set currentSource(source: ISource | null) {
+      this._currentSource = source;
+    }
+
+    open() {
+      this._currentSourceOpened.emit(this._currentSource);
+    }
+
+    private _currentSource: ISource | null;
+    private _currentSourceOpened = new Signal<Sources.Model, Sources.ISource>(
+      this
+    );
   }
 
   export namespace Model {
     export interface IOptions {
       currentFrameChanged: ISignal<Callstack.Model, Callstack.IFrame>;
     }
+  }
+}
+
+/**
+ * A widget factory for read only editors.
+ */
+export class ReadOnlyEditorFactory {
+  /**
+   * Construct a new editor widget factory.
+   */
+  constructor(options: ReadOnlyEditorFactory.IOptions) {
+    this._services = options.editorServices;
+  }
+
+  /**
+   * Create a new CodeEditorWrapper given a Source.
+   */
+  createNewEditor(source: Sources.ISource): CodeEditorWrapper {
+    const factory = this._services.factoryService.newInlineEditor;
+    const editor = new CodeEditorWrapper({
+      model: new CodeEditor.Model({
+        value: source.code,
+        mimeType: source.mimeType
+      }),
+      factory,
+      config: {
+        readOnly: true,
+        lineNumbers: true
+      }
+    });
+    editor.node.setAttribute('data-jp-debugger', 'true');
+    return editor;
+  }
+
+  private _services: IEditorServices;
+}
+
+/**
+ * The namespace for `ReadOnlyEditorFactory` class statics.
+ */
+export namespace ReadOnlyEditorFactory {
+  /**
+   * The options used to create a read only editor widget factory.
+   */
+  export interface IOptions {
+    /**
+     * The editor services used by the factory.
+     */
+    editorServices: IEditorServices;
   }
 }
