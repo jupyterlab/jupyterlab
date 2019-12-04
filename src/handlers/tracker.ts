@@ -5,7 +5,13 @@
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
-import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
+import { MainAreaWidget } from '@jupyterlab/apputils';
+
+import {
+  CodeEditor,
+  CodeEditorWrapper,
+  IEditorServices
+} from '@jupyterlab/codeeditor';
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
@@ -20,8 +26,6 @@ import { UUID } from '@phosphor/coreutils';
 import { IDisposable } from '@phosphor/disposable';
 
 import { Signal } from '@phosphor/signaling';
-
-import { Panel } from '@phosphor/widgets';
 
 import { Callstack } from '../callstack';
 
@@ -116,11 +120,13 @@ export class TrackerHandler implements IDisposable {
       debuggerService: this.debuggerService,
       editor: editorWrapper.editor
     });
-    const widget = new Panel();
-    widget.addWidget(editorWrapper);
+    const widget = new MainAreaWidget<CodeEditorWrapper>({
+      content: editorWrapper
+    });
     widget.id = UUID.uuid4();
     widget.title.label = path;
     widget.title.closable = true;
+    widget.title.iconClass = 'jp-MaterialIcon jp-TextEditorIcon';
     widget.disposed.connect(() => editorHandler.dispose());
     this.shell.add(widget, 'main');
   }
