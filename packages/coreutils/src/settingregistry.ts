@@ -13,6 +13,8 @@ import {
   ReadonlyJSONValue
 } from '@phosphor/coreutils';
 
+import { normalizeKeys } from '@phosphor/commands';
+
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -880,11 +882,14 @@ export namespace SettingRegistry {
 
     // If a user shortcut collides with another user shortcut warn and filter.
     user = user.filter(shortcut => {
-      const keys = shortcut.keys.join(RECORD_SEPARATOR);
+      const keys = normalizeKeys(shortcut).join(RECORD_SEPARATOR);
       const { selector } = shortcut;
 
       if (!keys) {
-        console.warn('Shortcut skipped because `keys` are [""].', shortcut);
+        console.warn(
+          'Shortcut skipped because `keys` and platform keys are [""].',
+          shortcut
+        );
         return false;
       }
       if (!(keys in memo)) {
@@ -904,7 +909,7 @@ export namespace SettingRegistry {
     // out too (this includes shortcuts that are disabled by user preferences).
     defaults = defaults.filter(shortcut => {
       const { disabled } = shortcut;
-      const keys = shortcut.keys.join(RECORD_SEPARATOR);
+      const keys = normalizeKeys(shortcut).join(RECORD_SEPARATOR);
 
       if (disabled || !keys) {
         return false;
