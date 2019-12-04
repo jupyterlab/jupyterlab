@@ -19,6 +19,8 @@ import {
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
+import { PathExt } from '@jupyterlab/coreutils';
+
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
@@ -135,8 +137,9 @@ export class TrackerHandler implements IDisposable {
       content: editorWrapper
     });
     widget.id = UUID.uuid4();
-    widget.title.label = path;
+    widget.title.label = PathExt.basename(path);
     widget.title.closable = true;
+    widget.title.caption = path;
     widget.title.iconClass = 'jp-MaterialIcon jp-TextEditorIcon';
     widget.disposed.connect(() => editorHandler.dispose());
     this.shell.add(widget, 'main');
