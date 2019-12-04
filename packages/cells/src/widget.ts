@@ -1037,8 +1037,7 @@ export namespace CodeCell {
     let model = cell.model;
     let code = model.value.text;
     if (!code.trim() || !session.kernel) {
-      model.executionCount = null;
-      model.outputs.clear();
+      model.clearExecution();
       return;
     }
     let cellId = { cellId: model.id };
@@ -1048,7 +1047,7 @@ export namespace CodeCell {
       ...cellId
     };
     const { recordTiming } = metadata;
-    model.executionCount = null;
+    model.clearExecution();
     cell.outputHidden = false;
     cell.setPrompt('*');
     model.trusted = true;

@@ -1053,10 +1053,8 @@ export namespace NotebookActions {
       const child = notebook.widgets[index];
 
       if (notebook.isSelectedOrActive(child) && cell.type === 'code') {
-        cell.outputs.clear();
+        cell.clearExecution();
         (child as CodeCell).outputHidden = false;
-        cell.executionCount = null;
-        cell.metadata.delete('execution');
       }
     });
     Private.handleState(notebook, state);
@@ -1081,8 +1079,7 @@ export namespace NotebookActions {
       const child = notebook.widgets[index];
 
       if (cell.type === 'code') {
-        cell.outputs.clear();
-        cell.executionCount = null;
+        cell.clearExecution();
         (child as CodeCell).outputHidden = false;
       }
     });
@@ -1606,7 +1603,7 @@ namespace Private {
               return ran;
             });
         }
-        (cell.model as ICodeCellModel).executionCount = null;
+        (cell.model as ICodeCellModel).clearExecution();
         break;
       default:
         break;
