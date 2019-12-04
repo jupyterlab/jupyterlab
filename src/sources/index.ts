@@ -55,6 +55,7 @@ export class Sources extends Panel {
         lineNumbers: true
       }
     });
+    this.editor.hide();
 
     this.model.currentFrameChanged.connect(async (_, frame) => {
       if (!frame) {
