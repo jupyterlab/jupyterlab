@@ -12,7 +12,14 @@ import {
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import { DataGrid, TextRenderer, CellRenderer } from '@lumino/datagrid';
+import {
+  BasicKeyHandler,
+  BasicMouseHandler,
+  BasicSelectionModel,
+  DataGrid,
+  TextRenderer,
+  CellRenderer
+} from '@lumino/datagrid';
 
 import { Message } from '@lumino/messaging';
 
@@ -249,6 +256,15 @@ export class CSVViewer extends Widget {
     });
     this._grid.addClass(CSV_GRID_CLASS);
     this._grid.headerVisibility = 'all';
+    this._grid.keyHandler = new BasicKeyHandler();
+    this._grid.mouseHandler = new BasicMouseHandler();
+    this._grid.copyConfig = {
+      separator: '\t',
+      format: DataGrid.copyFormatGeneric,
+      headers: 'all',
+      warningThreshold: 1e6
+    };
+
     layout.addWidget(this._grid);
 
     this._searchService = new GridSearchService(this._grid);
@@ -351,7 +367,11 @@ export class CSVViewer extends Widget {
     let data: string = this._context.model.toString();
     let delimiter = this._delimiter;
     let oldModel = this._grid.dataModel as DSVModel;
-    this._grid.dataModel = new DSVModel({ data, delimiter });
+    const dataModel = (this._grid.dataModel = new DSVModel({
+      data,
+      delimiter
+    }));
+    this._grid.selectionModel = new BasicSelectionModel({ dataModel });
     if (oldModel) {
       oldModel.dispose();
     }
