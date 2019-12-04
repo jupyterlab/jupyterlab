@@ -9,7 +9,6 @@ import os
 import os.path as osp
 from os.path import join as pjoin
 import sys
-import warnings
 
 from jupyter_core.application import JupyterApp, base_aliases
 from jupyter_server.serverapp import aliases, flags
@@ -26,6 +25,7 @@ from .commands import (
 from .coreconfig import CoreConfig
 
 from jupyter_server.extension.application import ExtensionApp
+from nbclassic.shimconfig import shim_configs
 
 build_aliases = dict(base_aliases)
 build_aliases['app-dir'] = 'LabBuildApp.app_dir'
@@ -417,19 +417,14 @@ class LabApp(ExtensionApp):
     template_paths = []
 
     def initialize_settings(self):
-        notebookapp_config = self.settings.get('config').get('NotebookApp', None)
-        if notebookapp_config:
-            confs = list(notebookapp_config.keys())
-            self.log.warn("=========================================================================================")
-            self.log.warn("You are using NotebookApp settings that be deprecated at the next major notebook release.")
-            self.log.warn("Please migrate following settings from NotebookApp to ServerApp: {}".format(confs))
-            self.log.warn("Read more on https://...")
-            self.log.warn("=========================================================================================")
-            warnings.warn(
-                "NotebookApp configuration is deprecated. Migrate them to ServerApp",
-                DeprecationWarning, stacklevel=2,
+        merged_config = shim_configs(
+            notebook_config_name = 'jupyter_notebook', 
+            server_config_name = 'jupyter_nbclassic', 
+            extension_config_name = 'jupyter_lab', 
+            argv = sys.argv
             )
-
+        self.config = merged_config
+        
     def initialize_handlers(self):
         """Load any extensions specified by config.
 
