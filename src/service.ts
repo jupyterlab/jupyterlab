@@ -130,6 +130,13 @@ export class DebugService implements IDebugger, IDisposable {
   }
 
   /**
+   * Checking lifecycle state of debugger in current widget
+   */
+  isActualKernelState(): boolean {
+    return this.session.client.name === this.session.currentStateClient;
+  }
+
+  /**
    * Computes an id based on the given code.
    */
   getCodeId(code: string): string {
@@ -231,11 +238,13 @@ export class DebugService implements IDebugger, IDisposable {
       await this.start();
     }
 
-    if (stoppedThreads.size !== 0) {
-      await this._getAllFrames();
-    } else {
-      this._clearModel();
-      this._clearSignals();
+    if (this.isActualKernelState()) {
+      if (stoppedThreads.size !== 0) {
+        await this._getAllFrames();
+      } else {
+        this._clearModel();
+        this._clearSignals();
+      }
     }
   }
 

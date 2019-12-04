@@ -33,6 +33,8 @@ import { Debugger } from './debugger';
 
 import { ConsoleHandler } from './handlers/console';
 
+import { CommandRegistry } from '@phosphor/commands';
+
 import { FileHandler } from './handlers/file';
 
 import { NotebookHandler } from './handlers/notebook';
@@ -89,12 +91,17 @@ async function setDebugSession(
 }
 
 function updateToolbar(
-  widget: NotebookPanel | ConsolePanel | FileEditor
+  widget: NotebookPanel | ConsolePanel | FileEditor,
+  debug: IDebugger,
+  commands: CommandRegistry,
+  handler: any
 ): void {
-  console.log({ widget });
-
   const isConsolePanel = widget instanceof ConsolePanel;
-  let toogleState = false;
+  const checkState = () =>
+    debug.session.client.name === debug.session.currentStateClient;
+
+  widget.node.setAttribute('data-debugger-on', checkState().toString());
+
   const getToolbar = (): Toolbar => {
     if (isConsolePanel) {
       return (
@@ -113,9 +120,17 @@ function updateToolbar(
       new ToolbarButton({
         className: 'jp-debugger-switch-button',
         iconClassName: 'jp-toggle-switch',
-        onClick: () => {
-          toogleState = !toogleState;
-          widget.node.setAttribute('data-debugger-on', toogleState.toString());
+        onClick: async () => {
+          if (debug.model == null && !checkState()) {
+            await commands.execute(CommandIDs.create);
+            handler.update(debug, widget);
+          }
+          if (!checkState()) {
+            debug.session.currentStateClient = debug.session.client.name;
+          } else {
+            debug.session.currentStateClient = null;
+          }
+          widget.node.setAttribute('data-debugger-on', checkState().toString());
         },
         tooltip: 'Enable / Disable Debugger'
       })
@@ -144,13 +159,14 @@ class DebuggerHandler<
     if (!debug.model || this.handlers[widget.id] || !debuggingEnabled) {
       return;
     }
-    updateToolbar(widget);
+
     const handler = new this.builder({
       debuggerService: debug,
       widget
     });
     widget.node.setAttribute('data-jp-debugger', 'true');
     this.handlers[widget.id] = handler;
+
     widget.disposed.connect(() => {
       handler.dispose();
       delete this.handlers[widget.id];
@@ -260,8 +276,10 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       if (!(widget instanceof NotebookPanel)) {
         return;
       }
+
       await setDebugSession(app, debug, widget.session);
-      void handler.update(debug, widget);
+      handler.update(debug, widget);
+      updateToolbar(widget, debug, app.commands, handler);
     });
   }
 };

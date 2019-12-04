@@ -73,6 +73,14 @@ export class DebugSession implements IDebugger.ISession {
     }
   }
 
+  get currentStateClient() {
+    return this._statesClient;
+  }
+
+  set currentStateClient(state: string) {
+    this._statesClient = state;
+  }
+
   /**
    * Return the kernel info for the debug session, waiting for the
    * kernel to be ready.
@@ -221,6 +229,7 @@ export class DebugSession implements IDebugger.ISession {
     IDebugger.ISession.Event
   >(this);
   private _seq: number = 0;
+  private _statesClient: string;
 }
 
 /**

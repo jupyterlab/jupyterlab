@@ -145,6 +145,11 @@ export namespace IDebugger {
     client: IClientSession | Session.ISession;
 
     /**
+     * The current enabled debugger of client.
+     */
+    currentStateClient: string;
+
+    /**
      * Whether the debug session is started
      */
     readonly isStarted: boolean;
