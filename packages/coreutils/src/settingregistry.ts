@@ -13,8 +13,6 @@ import {
   ReadonlyJSONValue
 } from '@phosphor/coreutils';
 
-import { normalizeKeys } from '@phosphor/commands';
-
 import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -887,7 +885,7 @@ export namespace SettingRegistry {
 
       if (!keys) {
         console.warn(
-          'Shortcut skipped because `keys` and platform keys are [""].',
+          'Skipping this shortcut because there are no actionable keys on this platform',
           shortcut
         );
         return false;
@@ -900,7 +898,10 @@ export namespace SettingRegistry {
         return true;
       }
 
-      console.warn('Shortcut skipped due to collision.', shortcut);
+      console.warn(
+        'Skipping this shortcut because it collides with another shortcut.',
+        shortcut
+      );
       return false;
     });
 
@@ -927,7 +928,10 @@ export namespace SettingRegistry {
 
       // Only warn if a default shortcut collides with another default shortcut.
       if (memo[keys][selector]) {
-        console.warn('Shortcut skipped due to collision.', shortcut);
+        console.warn(
+          'Skipping this shortcut because it collides with another shortcut.',
+          shortcut
+        );
       }
 
       return false;
