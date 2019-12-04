@@ -515,9 +515,6 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
     let oldValue = this.executionCount;
-    if (!newValue) {
-      this.metadata.delete('execution');
-    }
     if (newValue === oldValue) {
       return;
     }

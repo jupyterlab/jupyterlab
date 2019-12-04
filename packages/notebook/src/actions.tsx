@@ -1056,6 +1056,7 @@ export namespace NotebookActions {
         cell.outputs.clear();
         (child as CodeCell).outputHidden = false;
         cell.executionCount = null;
+        cell.metadata.delete('execution');
       }
     });
     Private.handleState(notebook, state);
