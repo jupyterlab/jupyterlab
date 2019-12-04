@@ -132,13 +132,8 @@ export namespace Debugger {
       this._stoppedThreads = threads;
     }
 
-    get modeChanged(): ISignal<this, IDebugger.Mode> {
-      return this._modeChanged;
-    }
-
     private _isDisposed = false;
     private _stoppedThreads = new Set<number>();
-    private _modeChanged = new Signal<this, IDebugger.Mode>(this);
     private _disposed = new Signal<this, void>(this);
   }
 

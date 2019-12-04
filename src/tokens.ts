@@ -136,11 +136,6 @@ export interface IDebugger {
  */
 export namespace IDebugger {
   /**
-   * The mode of the debugger UI.
-   */
-  export type Mode = 'condensed' | 'expanded';
-
-  /**
    * A visual debugger session.
    */
   export interface ISession extends IObservableDisposable {
