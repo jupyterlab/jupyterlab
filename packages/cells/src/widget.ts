@@ -1037,8 +1037,7 @@ export namespace CodeCell {
     let model = cell.model;
     let code = model.value.text;
     if (!code.trim() || !session.kernel) {
-      model.executionCount = null;
-      model.outputs.clear();
+      model.clearExecution();
       return;
     }
     let cellId = { cellId: model.id };
@@ -1048,7 +1047,7 @@ export namespace CodeCell {
       ...cellId
     };
     const { recordTiming } = metadata;
-    model.executionCount = null;
+    model.clearExecution();
     cell.outputHidden = false;
     cell.setPrompt('*');
     model.trusted = true;
@@ -1083,7 +1082,10 @@ export namespace CodeCell {
           if (!value) {
             return;
           }
-          const timingInfo: any = model.metadata.get('execution') || {};
+          const timingInfo: any = Object.assign(
+            {},
+            model.metadata.get('execution')
+          );
           timingInfo[`iopub.${label}`] = value;
           model.metadata.set('execution', timingInfo);
           return true;
@@ -1098,7 +1100,10 @@ export namespace CodeCell {
       model.executionCount = msg.content.execution_count;
       const started = msg.metadata.started as string;
       if (recordTiming && started) {
-        const timingInfo = (model.metadata.get('execution') as any) || {};
+        const timingInfo = Object.assign(
+          {},
+          model.metadata.get('execution') as any
+        );
         if (started) {
           timingInfo['shell.execute_reply.started'] = started;
         }

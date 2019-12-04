@@ -101,6 +101,11 @@ export interface ICodeCellModel extends ICellModel {
    * The cell outputs.
    */
   readonly outputs: IOutputAreaModel;
+
+  /**
+   * Clear execution, outputs, and related metadata
+   */
+  clearExecution(): void;
 }
 
 /**
@@ -519,6 +524,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       return;
     }
     this.modelDB.setValue('executionCount', newValue || null);
+  }
+
+  clearExecution() {
+    this.outputs.clear();
+    this.executionCount = null;
+    this.metadata.delete('execution');
   }
 
   /**
