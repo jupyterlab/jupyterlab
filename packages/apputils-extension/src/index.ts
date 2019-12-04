@@ -20,7 +20,6 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  DataConnector,
   Debouncer,
   ISettingRegistry,
   IStateDB,
@@ -38,6 +37,8 @@ import { PromiseDelegate } from '@phosphor/coreutils';
 import { DisposableDelegate } from '@phosphor/disposable';
 
 import { Palette } from './palette';
+
+import { SettingConnector } from './settingconnector';
 
 import { themesPlugin, themesPaletteMenuPlugin } from './themeplugins';
 
@@ -91,30 +92,8 @@ const paletteRestorer: JupyterFrontEndPlugin<void> = {
 const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
   activate: async (app: JupyterFrontEnd): Promise<ISettingRegistry> => {
-    const { isDeferred, isDisabled } = PageConfig.Extension;
-    const connector = new (class SettingConnector extends DataConnector<
-      ISettingRegistry.IPlugin,
-      string
-    > {
-      fetch(id: string): Promise<ISettingRegistry.IPlugin> {
-        return app.serviceManager.settings.fetch(id);
-      }
-
-      async list(
-        query: 'active' | 'all' = 'all'
-      ): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }> {
-        let { ids, values } = await app.serviceManager.settings.list();
-
-        if (query === 'all') {
-          return { ids, values };
-        }
-
-        return {
-          ids: ids.filter(id => !isDeferred(id) && !isDisabled(id)),
-          values: values.filter(({ id }) => !isDeferred(id) && !isDisabled(id))
-        };
-      }
-    })();
+    const { isDisabled } = PageConfig.Extension;
+    const connector = new SettingConnector(app.serviceManager.settings);
 
     const registry = new SettingRegistry({
       connector,
@@ -122,7 +101,9 @@ const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
     });
 
     // If there are plugins that have schemas that are not in the setting
-    // registry after the application has restored, try to load them manually.
+    // registry after the application has restored, try to load them manually
+    // because otherwise, its settings will never become available in the
+    // setting registry.
     void app.restored.then(async () => {
       const plugins = await connector.list('all');
       plugins.ids.forEach(async (id, index) => {
