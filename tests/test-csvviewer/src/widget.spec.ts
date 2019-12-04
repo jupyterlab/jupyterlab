@@ -80,7 +80,7 @@ describe('csvviewer/widget', () => {
     }
     function createGridSearchService(model: JSONModel): GridSearchService {
       const grid = new DataGrid();
-      grid.model = model;
+      grid.dataModel = model;
       return new GridSearchService(grid);
     }
 
@@ -103,7 +103,7 @@ describe('csvviewer/widget', () => {
           value: model.data('body', row, column),
           row,
           column
-        } as CellRenderer.ICellConfig;
+        } as CellRenderer.CellConfig;
         return cellRenderer(cellConfig);
       }
 
