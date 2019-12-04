@@ -43,7 +43,7 @@ export class Sources extends Panel {
       editorServices: options.editorServices
     });
     this.editor = factory.createNewEditor({
-      code: '',
+      content: '',
       mimeType: '',
       path: ''
     });
@@ -87,7 +87,7 @@ export class Sources extends Panel {
       path
     });
 
-    if (!source.success) {
+    if (!source) {
       return;
     }
 
@@ -95,7 +95,7 @@ export class Sources extends Panel {
       this.editorHandler.dispose();
     }
 
-    const { content, mimeType } = source.body;
+    const { content, mimeType } = source;
     const editorMimeType =
       mimeType || this.mimeTypeService.getMimeTypeByFilePath(path);
 
@@ -108,9 +108,9 @@ export class Sources extends Panel {
     });
 
     this.model.currentSource = {
-      path,
-      code: content,
-      mimeType: editorMimeType
+      content,
+      mimeType: editorMimeType,
+      path
     };
 
     requestAnimationFrame(() => {
@@ -153,15 +153,6 @@ export namespace Sources {
     editorServices: IEditorServices;
   }
 
-  /**
-   * An interface for a read only source.
-   */
-  export interface ISource {
-    path: string;
-    code: string;
-    mimeType: string;
-  }
-
   export class Model {
     constructor(options: Sources.Model.IOptions) {
       this.currentFrameChanged = options.currentFrameChanged;
@@ -169,7 +160,7 @@ export namespace Sources {
 
     currentFrameChanged: ISignal<Callstack.Model, Callstack.IFrame>;
 
-    get currentSourceOpened(): ISignal<Sources.Model, Sources.ISource> {
+    get currentSourceOpened(): ISignal<Sources.Model, IDebugger.ISource> {
       return this._currentSourceOpened;
     }
 
@@ -177,7 +168,7 @@ export namespace Sources {
       return this._currentSource;
     }
 
-    set currentSource(source: ISource | null) {
+    set currentSource(source: IDebugger.ISource | null) {
       this._currentSource = source;
     }
 
@@ -185,8 +176,8 @@ export namespace Sources {
       this._currentSourceOpened.emit(this._currentSource);
     }
 
-    private _currentSource: ISource | null;
-    private _currentSourceOpened = new Signal<Sources.Model, Sources.ISource>(
+    private _currentSource: IDebugger.ISource | null;
+    private _currentSourceOpened = new Signal<Sources.Model, IDebugger.ISource>(
       this
     );
   }
@@ -212,11 +203,11 @@ export class ReadOnlyEditorFactory {
   /**
    * Create a new CodeEditorWrapper given a Source.
    */
-  createNewEditor(source: Sources.ISource): CodeEditorWrapper {
+  createNewEditor(source: IDebugger.ISource): CodeEditorWrapper {
     const factory = this._services.factoryService.newInlineEditor;
     const editor = new CodeEditorWrapper({
       model: new CodeEditor.Model({
-        value: source.code,
+        value: source.content,
         mimeType: source.mimeType
       }),
       factory,

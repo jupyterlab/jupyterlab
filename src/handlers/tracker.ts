@@ -113,18 +113,18 @@ export class TrackerHandler implements IDisposable {
     });
   }
 
-  protected onCurrentSourceOpened(_: Sources.Model, source: Sources.ISource) {
+  protected onCurrentSourceOpened(_: Sources.Model, source: IDebugger.ISource) {
     if (!source) {
       return;
     }
     const debugSessionPath = this.debuggerService.session.client.path;
-    const { code, mimeType, path } = source;
+    const { content, mimeType, path } = source;
     const results = this.find(debugSessionPath, path);
     if (results.next()) {
       return;
     }
     const editorWrapper = this.readOnlyEditorFactory.createNewEditor({
-      code,
+      content,
       mimeType,
       path
     });

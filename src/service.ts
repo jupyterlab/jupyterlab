@@ -353,7 +353,7 @@ export class DebugService implements IDebugger, IDisposable {
       source,
       sourceReference: source.sourceReference
     });
-    return reply;
+    return { ...reply.body, path: source.path };
   }
 
   async getAllFrames() {
