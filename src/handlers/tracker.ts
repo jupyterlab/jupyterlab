@@ -6,6 +6,7 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import {
+  DOMUtils,
   IWidgetTracker,
   MainAreaWidget,
   WidgetTracker
@@ -27,7 +28,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { chain, each } from '@phosphor/algorithm';
 
-import { Token, UUID } from '@phosphor/coreutils';
+import { Token } from '@phosphor/coreutils';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -136,7 +137,7 @@ export class TrackerHandler implements IDisposable {
     const widget = new MainAreaWidget<CodeEditorWrapper>({
       content: editorWrapper
     });
-    widget.id = UUID.uuid4();
+    widget.id = DOMUtils.createDomID();
     widget.title.label = PathExt.basename(path);
     widget.title.closable = true;
     widget.title.caption = path;
