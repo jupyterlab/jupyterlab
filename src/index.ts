@@ -205,7 +205,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   activate: (app: JupyterFrontEnd, debug: IDebugger, labShell: ILabShell) => {
     const handler = new DebuggerHandler<NotebookHandler>(NotebookHandler);
 
-    labShell.activeChanged.connect(async (_, update) => {
+    labShell.currentChanged.connect(async (_, update) => {
       const widget = update.newValue;
       if (!(widget instanceof NotebookPanel)) {
         return;

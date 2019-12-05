@@ -7,8 +7,6 @@ import { Callstack } from '.';
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
-import { ArrayExt } from '@phosphor/algorithm';
-
 export class Body extends ReactWidget {
   constructor(model: Callstack.Model) {
     super();
@@ -33,19 +31,16 @@ const FramesComponent = ({ model }: { model: Callstack.Model }) => {
   };
 
   useEffect(() => {
-    const updateFrames = (_: Callstack.Model, updates: Callstack.IFrame[]) => {
-      if (ArrayExt.shallowEqual(frames, updates)) {
-        return;
-      }
-      setFrames(updates);
-      setSelected(updates[0]);
+    const updateFrames = () => {
+      setSelected(model.frame);
+      setFrames(model.frames);
     };
     model.framesChanged.connect(updateFrames);
 
     return () => {
       model.framesChanged.disconnect(updateFrames);
     };
-  });
+  }, [model]);
 
   return (
     <ul>
@@ -53,7 +48,7 @@ const FramesComponent = ({ model }: { model: Callstack.Model }) => {
         <li
           key={ele.id}
           onClick={() => onSelected(ele)}
-          className={selected === ele ? 'selected' : ''}
+          className={selected?.id === ele.id ? 'selected' : ''}
         >
           {ele.name} at {ele.source.name}:{ele.line}
         </li>

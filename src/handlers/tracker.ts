@@ -98,10 +98,16 @@ export class TrackerHandler implements IDisposable {
       this
     );
 
-    this.debuggerModel.breakpointsModel.clicked.connect((_, breakpoint) => {
-      const debugSessionPath = this.debuggerService.session.client.path;
-      this.find(debugSessionPath, breakpoint.source.path);
-    });
+    this.debuggerModel.breakpointsModel.clicked.connect(
+      async (_, breakpoint) => {
+        const path = breakpoint.source.path;
+        let source = await this.debuggerService.getSource({
+          sourceReference: 0,
+          path
+        });
+        this.onCurrentSourceOpened(null, source);
+      }
+    );
   }
 
   protected onCurrentFrameChanged(_: Callstack.Model, frame: Callstack.IFrame) {
@@ -187,6 +193,7 @@ export class TrackerHandler implements IDisposable {
         const rect = notebook.activeCell.inputArea.node.getBoundingClientRect();
         notebook.scrollToPosition(rect.bottom, 45);
         editors.push(cell.editor);
+        this.shell.activateById(notebookPanel.id);
       });
     });
     return editors;
@@ -215,6 +222,7 @@ export class TrackerHandler implements IDisposable {
         return;
       }
       editors.push(editor);
+      this.shell.activateById(consoleWidget.id);
     });
     return editors;
   }
@@ -241,6 +249,7 @@ export class TrackerHandler implements IDisposable {
         return;
       }
       editors.push(editor);
+      this.shell.activateById(doc.id);
     });
     return editors;
   }
@@ -259,6 +268,7 @@ export class TrackerHandler implements IDisposable {
         return;
       }
       editors.push(editor);
+      this.shell.activateById(widget.id);
     });
     return editors;
   }
