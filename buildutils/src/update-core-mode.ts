@@ -23,6 +23,9 @@ let staging = './jupyterlab/staging';
 utils.writePackageData(path.join(staging, 'package.json'), data);
 
 // Update our staging files.
+const notice =
+  '// This file is auto-generated from the corresponding file in dev_mode\n';
+
 [
   'index.js',
   'webpack.config.js',
@@ -31,10 +34,14 @@ utils.writePackageData(path.join(staging, 'package.json'), data);
   'webpack.prod.release.config.js',
   'templates'
 ].forEach(name => {
-  fs.copySync(
-    path.join('.', 'dev_mode', name),
-    path.join('.', 'jupyterlab', 'staging', name)
-  );
+  const dest = path.join('.', 'jupyterlab', 'staging', name);
+  fs.copySync(path.join('.', 'dev_mode', name), dest);
+
+  if (path.extname(name) === 'js') {
+    const oldContent = fs.readFileSync(dest);
+    const newContent = notice + oldContent;
+    fs.writeFileSync(dest, newContent);
+  }
 });
 
 // Create a new yarn.lock file to ensure it is correct.
