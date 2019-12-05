@@ -123,8 +123,6 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
 
 JupyterLab's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
 
-- Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
-  technical leadership, vision, PhosphorJS)
 - Afshin Darian, Two Sigma (co-creator, application/high-level architecture,
   prolific contributions throughout the code base).
 - Jessica Forde, Project Jupyter (demo, documentation)
@@ -141,6 +139,8 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 
 Maintainer emeritus:
 
+- Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
+  technical leadership, vision, PhosphorJS)
 - Cameron Oelsen, Cal Poly (UI/UX design).
 
 This list is provided to give the reader context on who we are and how our team functions.

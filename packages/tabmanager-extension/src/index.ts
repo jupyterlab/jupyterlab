@@ -10,9 +10,9 @@ import {
 
 import { TabBarSvg } from '@jupyterlab/ui-components';
 
-import { each } from '@phosphor/algorithm';
+import { each } from '@lumino/algorithm';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The default tab manager extension.

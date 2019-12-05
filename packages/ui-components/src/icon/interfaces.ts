@@ -1,4 +1,4 @@
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
 import { IIconStyle } from '../style/icon';
 import React from 'react';

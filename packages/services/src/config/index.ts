@@ -3,7 +3,7 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { JSONObject, JSONValue } from '@phosphor/coreutils';
+import { JSONObject, JSONValue } from '@lumino/coreutils';
 
 import { ServerConnection } from '..';
 

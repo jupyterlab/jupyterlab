@@ -9,15 +9,15 @@ import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { JSONExt, JSONObject, JSONValue } from '@phosphor/coreutils';
+import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { ISignal } from '@phosphor/signaling';
+import { ISignal } from '@lumino/signaling';
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 import * as React from 'react';
 

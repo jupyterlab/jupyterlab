@@ -7,7 +7,7 @@ import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
 import { framePromise } from '@jupyterlab/testutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import * as React from 'react';
 

@@ -13,7 +13,7 @@ import { GroupItem, TextItem, interactiveItem } from '@jupyterlab/statusbar';
 
 import { DefaultIconReact } from '@jupyterlab/ui-components';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
 import React from 'react';
 

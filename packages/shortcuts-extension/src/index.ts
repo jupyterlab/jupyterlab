@@ -8,15 +8,15 @@ import {
 
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/coreutils';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
 import {
   JSONExt,
   ReadonlyJSONObject,
   ReadonlyJSONValue
-} from '@phosphor/coreutils';
+} from '@lumino/coreutils';
 
-import { DisposableSet, IDisposable } from '@phosphor/disposable';
+import { DisposableSet, IDisposable } from '@lumino/disposable';
 
 /**
  * The ASCII record separator character.

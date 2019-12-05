@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { JSONExt } from '@phosphor/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
 import {
   ModelDB,

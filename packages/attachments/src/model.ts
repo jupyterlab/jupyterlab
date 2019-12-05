@@ -19,9 +19,9 @@ import {
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * The model for attachments.

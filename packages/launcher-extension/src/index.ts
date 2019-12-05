@@ -11,11 +11,11 @@ import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
 
 import { ILauncher, LauncherModel, Launcher } from '@jupyterlab/launcher';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the launcher plugin.

@@ -9,11 +9,11 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget, Panel, PanelLayout, StackedPanel } from '@phosphor/widgets';
+import { Widget, Panel, PanelLayout, StackedPanel } from '@lumino/widgets';
 
 import { LogOutputModel, LoggerOutputAreaModel } from './logger';
 

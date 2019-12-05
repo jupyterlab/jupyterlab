@@ -3,6 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-@import url('~@phosphor/widgets/style/index.css');
+@import url('~@lumino/widgets/style/index.css');
 @import url('~@jupyterlab/ui-components/style/index.css');
 @import url('~@jupyterlab/apputils/style/index.css');

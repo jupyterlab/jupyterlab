@@ -7,20 +7,20 @@ import { Kernel } from '@jupyterlab/services';
 
 import { Button, DefaultIconReact } from '@jupyterlab/ui-components';
 
-import { IIterator, find, map, some } from '@phosphor/algorithm';
+import { IIterator, find, map, some } from '@lumino/algorithm';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { AttachedProperty } from '@phosphor/properties';
+import { AttachedProperty } from '@lumino/properties';
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { IClientSession } from './clientsession';
 
 import * as React from 'react';
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 
 /**
  * The class name added to toolbars.

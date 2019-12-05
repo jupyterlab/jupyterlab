@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONExt, PromiseDelegate } from '@phosphor/coreutils';
+import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 
-import { IObservableDisposable } from '@phosphor/disposable';
+import { IObservableDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { IPoll } from './interfaces';
 

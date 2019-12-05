@@ -11,15 +11,15 @@ import {
   empty,
   find,
   map
-} from '@phosphor/algorithm';
+} from '@lumino/algorithm';
 
-import { JSONValue } from '@phosphor/coreutils';
+import { JSONValue } from '@lumino/coreutils';
 
-import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { DockLayout, Widget } from '@phosphor/widgets';
+import { DockLayout, Widget } from '@lumino/widgets';
 
 import { IClientSession, Toolbar } from '@jupyterlab/apputils';
 

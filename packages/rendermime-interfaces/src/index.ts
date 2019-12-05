@@ -2,9 +2,9 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * A namespace for rendermime associated interfaces.

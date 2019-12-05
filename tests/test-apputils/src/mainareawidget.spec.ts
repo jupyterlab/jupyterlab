@@ -5,9 +5,9 @@ import { expect } from 'chai';
 
 import { MainAreaWidget, Toolbar } from '@jupyterlab/apputils';
 
-import { MessageLoop } from '@phosphor/messaging';
+import { MessageLoop } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 describe('@jupyterlab/apputils', () => {
   describe('MainAreaWidget', () => {

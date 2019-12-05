@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { each, find } from '@phosphor/algorithm';
+import { each, find } from '@lumino/algorithm';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { Menu, Widget } from '@phosphor/widgets';
+import { Menu, Widget } from '@lumino/widgets';
 
 import {
   ILabShell,

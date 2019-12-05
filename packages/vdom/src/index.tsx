@@ -15,11 +15,11 @@ import { Kernel } from '@jupyterlab/services';
 
 import VDOM, { SerializedEvent } from '@nteract/transform-vdom';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The CSS class to add to the VDOM Widget.

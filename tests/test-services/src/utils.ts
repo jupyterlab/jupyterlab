@@ -5,13 +5,9 @@ import encoding from 'text-encoding';
 
 import WebSocket from 'ws';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
-import {
-  JSONObject,
-  JSONPrimitive,
-  PromiseDelegate
-} from '@phosphor/coreutils';
+import { JSONObject, JSONPrimitive, PromiseDelegate } from '@lumino/coreutils';
 
 import { Response } from 'node-fetch';
 

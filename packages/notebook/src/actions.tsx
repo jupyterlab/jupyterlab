@@ -20,13 +20,13 @@ import {
   MarkdownCell
 } from '@jupyterlab/cells';
 
-import { ArrayExt, each, toArray } from '@phosphor/algorithm';
+import { ArrayExt, each, toArray } from '@lumino/algorithm';
 
-import { JSONObject, JSONExt } from '@phosphor/coreutils';
+import { JSONObject, JSONExt } from '@lumino/coreutils';
 
-import { ElementExt } from '@phosphor/domutils';
+import { ElementExt } from '@lumino/domutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import * as React from 'react';
 

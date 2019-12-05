@@ -10,13 +10,22 @@ import {
   DocumentWidget
 } from '@jupyterlab/docregistry';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { DataGrid, TextRenderer, CellRenderer } from '@phosphor/datagrid';
+import {
+  BasicKeyHandler,
+  BasicMouseHandler,
+  BasicSelectionModel,
+  DataGrid,
+  TextRenderer,
+  CellRenderer
+} from '@lumino/datagrid';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { ISignal, Signal } from '@lumino/signaling';
+
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { CSVDelimiter } from './toolbar';
 
@@ -74,6 +83,13 @@ export class GridSearchService {
   }
 
   /**
+   * A signal fired when the grid changes.
+   */
+  get changed(): ISignal<GridSearchService, void> {
+    return this._changed;
+  }
+
+  /**
    * Returns a cellrenderer config function to render each cell background.
    * If cell match, background is matchBackgroundColor, if it's the current
    * match, background is currentMatchBackgroundColor.
@@ -100,14 +116,14 @@ export class GridSearchService {
     this._query = null;
     this._row = 0;
     this._column = -1;
-    this._grid.repaint();
+    this._changed.emit(undefined);
   }
 
   /**
    * incrementally look for searchText.
    */
   find(query: RegExp, reverse = false): boolean {
-    const model = this._grid.model;
+    const model = this._grid.dataModel;
     const rowCount = model.rowCount('body');
     const columnCount = model.columnCount('body');
 
@@ -119,12 +135,16 @@ export class GridSearchService {
     this._query = query;
 
     // check if the match is in current viewport
-    const minRow = this._grid.scrollY / this._grid.baseRowSize;
+
+    const minRow = this._grid.scrollY / this._grid.defaultSizes.rowHeight;
     const maxRow =
-      (this._grid.scrollY + this._grid.pageHeight) / this._grid.baseRowSize;
-    const minColumn = this._grid.scrollX / this._grid.baseColumnSize;
+      (this._grid.scrollY + this._grid.pageHeight) /
+      this._grid.defaultSizes.rowHeight;
+    const minColumn =
+      this._grid.scrollX / this._grid.defaultSizes.columnHeaderHeight;
     const maxColumn =
-      (this._grid.scrollX + this._grid.pageWidth) / this._grid.baseColumnSize;
+      (this._grid.scrollX + this._grid.pageWidth) /
+      this._grid.defaultSizes.columnHeaderHeight;
     const isInViewport = (row: number, column: number) => {
       return (
         row >= minRow &&
@@ -152,20 +172,10 @@ export class GridSearchService {
 
           // TODO: we only really need to invalidate the previous and current
           // cell rects, not the entire grid.
-          this._grid.repaint();
+          this._changed.emit(undefined);
 
           if (!isInViewport(row, col)) {
-            // scroll the matching cell into view
-            let scrollX = 0;
-            let scrollY = 0;
-            /* see also https://github.com/jupyterlab/jupyterlab/pull/5523#issuecomment-432621391 */
-            for (let i = 0; i < row - 1; i++) {
-              scrollY += this._grid.sectionSize('row', i);
-            }
-            for (let j = 0; j < col - 1; j++) {
-              scrollX += this._grid.sectionSize('column', j);
-            }
-            this._grid.scrollTo(scrollX, scrollY);
+            this._grid.scrollToRow(row);
           }
           this._row = row;
           this._column = col;
@@ -194,7 +204,7 @@ export class GridSearchService {
    * Wrap indices if needed to just before the start or just after the end.
    */
   private _wrapRows(reverse = false) {
-    const model = this._grid.model;
+    const model = this._grid.dataModel;
     const rowCount = model.rowCount('body');
     const columnCount = model.columnCount('body');
 
@@ -218,6 +228,7 @@ export class GridSearchService {
   private _row: number;
   private _column: number;
   private _looping = true;
+  private _changed = new Signal<GridSearchService, void>(this);
 }
 
 /**
@@ -236,16 +247,28 @@ export class CSVViewer extends Widget {
     this.addClass(CSV_CLASS);
 
     this._grid = new DataGrid({
-      baseRowSize: 24,
-      baseColumnSize: 144,
-      baseColumnHeaderSize: 36,
-      baseRowHeaderSize: 64
+      defaultSizes: {
+        rowHeight: 24,
+        columnWidth: 144,
+        rowHeaderWidth: 64,
+        columnHeaderHeight: 36
+      }
     });
     this._grid.addClass(CSV_GRID_CLASS);
     this._grid.headerVisibility = 'all';
+    this._grid.keyHandler = new BasicKeyHandler();
+    this._grid.mouseHandler = new BasicMouseHandler();
+    this._grid.copyConfig = {
+      separator: '\t',
+      format: DataGrid.copyFormatGeneric,
+      headers: 'all',
+      warningThreshold: 1e6
+    };
+
     layout.addWidget(this._grid);
 
     this._searchService = new GridSearchService(this._grid);
+    this._searchService.changed.connect(this._updateRenderer, this);
 
     void this._context.ready.then(() => {
       this._updateGrid();
@@ -290,10 +313,10 @@ export class CSVViewer extends Widget {
   /**
    * The style used by the data grid.
    */
-  get style(): DataGrid.IStyle {
+  get style(): DataGrid.Style {
     return this._grid.style;
   }
-  set style(value: DataGrid.IStyle) {
+  set style(value: DataGrid.Style) {
     this._grid.style = value;
   }
 
@@ -301,13 +324,8 @@ export class CSVViewer extends Widget {
    * The config used to create text renderer.
    */
   set rendererConfig(rendererConfig: TextRenderConfig) {
-    this._grid.defaultRenderer = new TextRenderer({
-      textColor: rendererConfig.textColor,
-      horizontalAlignment: rendererConfig.horizontalAlignment,
-      backgroundColor: this._searchService.cellBackgroundColorRendererFunc(
-        rendererConfig
-      )
-    });
+    this._baseRenderer = rendererConfig;
+    this._updateRenderer();
   }
 
   /**
@@ -331,15 +349,7 @@ export class CSVViewer extends Widget {
    * Go to line
    */
   goToLine(lineNumber: number) {
-    let scrollY = 0;
-    /* The lines might not all have uniform height, so we can't just scroll to lineNumber * this._grid.baseRowSize
-    see https://github.com/jupyterlab/jupyterlab/pull/5523#issuecomment-432621391 for discussions around
-    this. It would be nice if DataGrid had a method to scroll to cell, which could be implemented more efficiently
-    because datagrid knows more about the shape of the cells. */
-    for (let i = 0; i < lineNumber - 1; i++) {
-      scrollY += this._grid.sectionSize('row', i);
-    }
-    this._grid.scrollTo(this._grid.scrollX, scrollY);
+    this._grid.scrollToRow(lineNumber);
   }
 
   /**
@@ -356,11 +366,34 @@ export class CSVViewer extends Widget {
   private _updateGrid(): void {
     let data: string = this._context.model.toString();
     let delimiter = this._delimiter;
-    let oldModel = this._grid.model as DSVModel;
-    this._grid.model = new DSVModel({ data, delimiter });
+    let oldModel = this._grid.dataModel as DSVModel;
+    const dataModel = (this._grid.dataModel = new DSVModel({
+      data,
+      delimiter
+    }));
+    this._grid.selectionModel = new BasicSelectionModel({ dataModel });
     if (oldModel) {
       oldModel.dispose();
     }
+  }
+
+  /**
+   * Update the renderer for the grid.
+   */
+  private _updateRenderer(): void {
+    if (this._baseRenderer === null) {
+      return;
+    }
+    const rendererConfig = this._baseRenderer;
+    this._grid.cellRenderers.update({
+      body: new TextRenderer({
+        textColor: rendererConfig.textColor,
+        horizontalAlignment: rendererConfig.horizontalAlignment,
+        backgroundColor: this._searchService.cellBackgroundColorRendererFunc(
+          rendererConfig
+        )
+      })
+    });
   }
 
   private _context: DocumentRegistry.Context;
@@ -372,6 +405,7 @@ export class CSVViewer extends Widget {
   > | null = null;
   private _delimiter = ',';
   private _revealed = new PromiseDelegate<void>();
+  private _baseRenderer: TextRenderConfig | null = null;
 }
 
 /**

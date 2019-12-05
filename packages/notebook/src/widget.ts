@@ -1,23 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each } from '@phosphor/algorithm';
+import { ArrayExt, each } from '@lumino/algorithm';
 
-import { JSONValue } from '@phosphor/coreutils';
+import { JSONValue } from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { MimeData } from '@phosphor/coreutils';
+import { MimeData } from '@lumino/coreutils';
 
-import { AttachedProperty } from '@phosphor/properties';
+import { AttachedProperty } from '@lumino/properties';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Drag, IDragEvent } from '@phosphor/dragdrop';
+import { Drag, IDragEvent } from '@lumino/dragdrop';
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
-import { h, VirtualDOM } from '@phosphor/virtualdom';
+import { h, VirtualDOM } from '@lumino/virtualdom';
 
 import {
   ICellModel,

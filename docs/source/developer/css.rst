@@ -112,7 +112,7 @@ CSS class naming conventions
 We have a fairly formal method for naming our CSS classes.
 
 First, CSS class names are associated with TypeScript classes that
-extend ``phosphor.Widget``:
+extend ``lumino.Widget``:
 
 The ``.node`` of each such widget should have a CSS class that matches
 the name of the TypeScript class:

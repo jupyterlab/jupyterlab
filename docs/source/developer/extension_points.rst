@@ -11,7 +11,7 @@ This is intended to be a guide for some of JupyterLab's most commonly-used exten
 However, it is not an exhaustive account of how to extend the application components,
 and more detailed descriptions of their public APIs may be found in the
 `JupyterLab <http://jupyterlab.github.io/jupyterlab/index.html>`__ and
-`Phosphor <http://phosphorjs.github.io/docs.html>`__ API documentation.
+`Lumino <http://jupyterlab.github.io/lumino/index.html>`__ API documentation.
 
 .. contents:: Table of contents
     :local:
@@ -57,12 +57,12 @@ Each of ``isEnabled``, ``isToggled``, and ``isVisible`` can be either
 a boolean value or a function that returns a boolean value, in case you want
 to do some logic in order to determine those conditions.
 
-Likewise, each of ``label`` and ``iconClass`` can be either 
+Likewise, each of ``label`` and ``iconClass`` can be either
 a string value or a function that returns a string value.
 
 There are several more options which can be passed into the command registry when
-adding new commands. These are documented 
-`here <http://phosphorjs.github.io/phosphor/api/commands/interfaces/commandregistry.icommandoptions.html>`__.
+adding new commands. These are documented
+`here <http://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.icommandoptions.html>`__.
 
 After a command has been added to the application command registry
 you can add them to various places in the application user interface,
@@ -110,7 +110,7 @@ Adding a New Menu
 ^^^^^^^^^^^^^^^^^
 
 To add a new menu to the menu bar, you need to create a new
-`Phosphor menu <https://phosphorjs.github.io/phosphor/api/widgets/classes/menu.html>`__.
+`Lumino menu <https://jupyterlab.github.io/lumino/widgets/classes/menu.html>`__.
 
 You can then add commands to the menu in a similar way to the command palette,
 and add that menu to the main menu bar:
@@ -238,7 +238,7 @@ If you don't want the shortcuts to be user-configurable,
 you can add them directly to the application command registry:
 
 .. code:: typescript
-    
+
     app.commands.addKeyBinding({
       command: commandID,
       args: {},
@@ -254,7 +254,7 @@ the shortcut handler propagates up the DOM tree from the focused element
 and tests each element against the registered selectors. If a match is found,
 then that command is executed with the provided ``args``.
 Full documentation for the options for ``addKeyBinding`` can be found
-`here <http://phosphorjs.github.io/phosphor/api/commands/interfaces/commandregistry.ikeybindingoptions.html>`__.
+`here <http://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.ikeybindingoptions.html>`__.
 
 JupyterLab also provides integration with its settings system for keyboard shortcuts.
 Your extension can provide a settings schema with a ``jupyter.lab.shortcuts`` key,
@@ -299,7 +299,7 @@ Left/Right Areas
 The left and right areas of JupyterLab are intended to host more persistent user interface
 elements than the main area. That being said, extension authors are free to add whatever
 components they like to these areas. The outermost-level of the object that you add is expected
-to be a Phosphor ``Widget``, but that can host any content you like (such as React components).
+to be a Lumino ``Widget``, but that can host any content you like (such as React components).
 
 As an example, the following code executes an application command to a terminal widget
 and then adds the terminal to the right area:
@@ -317,7 +317,7 @@ Status Bar
 ~~~~~~~~~~
 
 JupyterLab's status bar is intended to show small pieces of contextual information.
-Like the left and right areas, it only expects a Phosphor ``Widget``,
+Like the left and right areas, it only expects a Lumino ``Widget``,
 which might contain any kind of content. Since the status bar has limited space,
 you should endeavor to only add small widgets to it.
 

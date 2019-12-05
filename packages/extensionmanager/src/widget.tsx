@@ -5,7 +5,7 @@ import { VDomRenderer, ToolbarButtonComponent } from '@jupyterlab/apputils';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
 import { Button, InputGroup, Collapse } from '@jupyterlab/ui-components';
 

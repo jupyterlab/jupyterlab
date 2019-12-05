@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONExt } from '@phosphor/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
 import minimist from 'minimist';
 

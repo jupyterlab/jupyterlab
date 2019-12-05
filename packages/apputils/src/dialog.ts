@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each, map, toArray } from '@phosphor/algorithm';
+import { ArrayExt, each, map, toArray } from '@lumino/algorithm';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { PanelLayout, Panel, Widget } from '@phosphor/widgets';
+import { PanelLayout, Panel, Widget } from '@lumino/widgets';
 
 import * as React from 'react';
 

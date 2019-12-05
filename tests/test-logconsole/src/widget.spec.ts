@@ -9,8 +9,8 @@ import {
   standardRendererFactories as initialFactories
 } from '@jupyterlab/rendermime';
 
-import { Signal, ISignal } from '@phosphor/signaling';
-import { Widget } from '@phosphor/widgets';
+import { Signal, ISignal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 
 class SignalLogger<SENDER, ARGS> {
   constructor(signal: ISignal<SENDER, ARGS>) {
@@ -44,7 +44,7 @@ function anyAncestor(el: Element, test: (el: Element) => boolean) {
   return false;
 }
 
-function isHiddenPhosphor(el: Element) {
+function isHiddenLumino(el: Element) {
   return el.classList.contains('p-mod-hidden');
 }
 
@@ -103,13 +103,13 @@ describe('LogConsolePanel', () => {
       const nodeA = logConsole.node.querySelector('#A');
       const nodeB = logConsole.node.querySelector('#B');
       expect(nodeA).not.toBeNull();
-      expect(anyAncestor(nodeA, isHiddenPhosphor)).toBe(false);
+      expect(anyAncestor(nodeA, isHiddenLumino)).toBe(false);
       expect(nodeB).not.toBeNull();
-      expect(anyAncestor(nodeB, isHiddenPhosphor)).toBe(true);
+      expect(anyAncestor(nodeB, isHiddenLumino)).toBe(true);
 
       logConsole.source = 'B';
-      expect(anyAncestor(nodeA, isHiddenPhosphor)).toBe(true);
-      expect(anyAncestor(nodeB, isHiddenPhosphor)).toBe(false);
+      expect(anyAncestor(nodeA, isHiddenLumino)).toBe(true);
+      expect(anyAncestor(nodeB, isHiddenLumino)).toBe(false);
     });
 
     it('emits a source changed signal if changed', () => {

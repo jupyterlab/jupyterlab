@@ -8,7 +8,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import { GroupItem, ProgressBar, TextItem } from '@jupyterlab/statusbar';
 
-import { ArrayExt } from '@phosphor/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 
 import { IUploadModel, FileBrowserModel, FileBrowser } from '.';
 

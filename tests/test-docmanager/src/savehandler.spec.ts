@@ -13,7 +13,7 @@ import {
 
 import { SaveHandler } from '@jupyterlab/docmanager';
 
-import { PromiseDelegate, UUID } from '@phosphor/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import {
   acceptDialog,

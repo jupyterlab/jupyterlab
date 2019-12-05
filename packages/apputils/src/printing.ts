@@ -10,7 +10,7 @@
  * Another way to print is to use the `printURL` function, which takes a URL and prints that page.
  */
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 import { ServerConnection } from '@jupyterlab/services';
 
 export namespace Printing {

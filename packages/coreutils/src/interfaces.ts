@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { ReadonlyJSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
 
-import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
+import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@phosphor/signaling';
+import { ISignal } from '@lumino/signaling';
 
 /**
  * A generic interface for change emitter payloads.

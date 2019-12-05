@@ -5,11 +5,11 @@ import { Mode } from '@jupyterlab/codemirror';
 
 import { Contents } from '@jupyterlab/services';
 
-import { JSONValue } from '@phosphor/coreutils';
+import { JSONValue } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
 

@@ -3,13 +3,13 @@
 
 import { IChangedArgs, ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
 
-import { each } from '@phosphor/algorithm';
+import { each } from '@lumino/algorithm';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { Dialog, showDialog } from './dialog';
 

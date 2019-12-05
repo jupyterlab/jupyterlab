@@ -3,11 +3,11 @@
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
-import { ArrayExt, each, map, toArray } from '@phosphor/algorithm';
+import { ArrayExt, each, map, toArray } from '@lumino/algorithm';
 
-import { JSONPrimitive } from '@phosphor/coreutils';
+import { JSONPrimitive } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';
 

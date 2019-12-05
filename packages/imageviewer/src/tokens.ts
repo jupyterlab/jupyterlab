@@ -5,7 +5,7 @@ import { IWidgetTracker } from '@jupyterlab/apputils';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
 import { ImageViewer } from './widget';
 

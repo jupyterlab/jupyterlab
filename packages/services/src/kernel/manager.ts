@@ -3,11 +3,11 @@
 
 import { Poll } from '@jupyterlab/coreutils';
 
-import { ArrayExt, IIterator, iter } from '@phosphor/algorithm';
+import { ArrayExt, IIterator, iter } from '@lumino/algorithm';
 
-import { JSONExt } from '@phosphor/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';
 

@@ -7,8 +7,8 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { Cell, MarkdownCell } from '@jupyterlab/cells';
 
-import { Signal, ISignal } from '@phosphor/signaling';
-import { Widget } from '@phosphor/widgets';
+import { Signal, ISignal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 
 import CodeMirror from 'codemirror';
 

@@ -31,9 +31,9 @@ import {
   URLExt
 } from '@jupyterlab/coreutils';
 
-import { each, iter, toArray } from '@phosphor/algorithm';
+import { each, iter, toArray } from '@lumino/algorithm';
 
-import { Widget, DockLayout } from '@phosphor/widgets';
+import { Widget, DockLayout } from '@lumino/widgets';
 
 import * as React from 'react';
 

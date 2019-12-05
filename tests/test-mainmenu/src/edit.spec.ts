@@ -3,9 +3,9 @@
 
 import { expect } from 'chai';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 

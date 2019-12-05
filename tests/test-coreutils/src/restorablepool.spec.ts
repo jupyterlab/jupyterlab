@@ -7,9 +7,9 @@ import { RestorablePool } from '@jupyterlab/coreutils';
 
 import { signalToPromise } from '@jupyterlab/testutils';
 
-import { IObservableDisposable } from '@phosphor/disposable';
+import { IObservableDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 const namespace = 'restorable-pool-test';
 

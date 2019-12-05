@@ -32,9 +32,9 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 
 import { Commands, EDITOR_ICON_CLASS, FACTORY } from './commands';
 

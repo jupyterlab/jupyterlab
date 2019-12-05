@@ -7,13 +7,13 @@ import {
   iter,
   map,
   toArray
-} from '@phosphor/algorithm';
+} from '@lumino/algorithm';
 
-import { JSONExt } from '@phosphor/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
-import { StringExt } from '@phosphor/algorithm';
+import { StringExt } from '@lumino/algorithm';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { Completer } from './widget';
 

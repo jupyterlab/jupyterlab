@@ -3,11 +3,11 @@
 
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 
-import { find } from '@phosphor/algorithm';
+import { find } from '@lumino/algorithm';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { Text } from '@jupyterlab/coreutils';
 

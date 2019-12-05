@@ -4,7 +4,7 @@ import fs = require('fs-extra');
 import childProcess = require('child_process');
 import { DepGraph } from 'dependency-graph';
 import sortPackageJson = require('sort-package-json');
-import coreutils = require('@phosphor/coreutils');
+import coreutils = require('@lumino/coreutils');
 
 type Dict<T> = { [key: string]: T };
 

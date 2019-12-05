@@ -3,13 +3,13 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
-import { ArrayExt, each, find, some } from '@phosphor/algorithm';
+import { ArrayExt, each, find, some } from '@lumino/algorithm';
 
-import { JSONExt, JSONObject, PromiseDelegate } from '@phosphor/coreutils';
+import { JSONExt, JSONObject, PromiseDelegate } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';
 

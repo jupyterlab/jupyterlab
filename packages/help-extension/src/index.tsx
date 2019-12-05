@@ -24,7 +24,7 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { KernelMessage } from '@jupyterlab/services';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 
 import * as React from 'react';
 

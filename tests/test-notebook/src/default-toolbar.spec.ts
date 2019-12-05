@@ -5,9 +5,9 @@ import { expect } from 'chai';
 
 import { simulate } from 'simulate-event';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { Context } from '@jupyterlab/docregistry';
 

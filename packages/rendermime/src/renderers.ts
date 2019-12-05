@@ -13,7 +13,7 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
 import escape from 'lodash.escape';
 

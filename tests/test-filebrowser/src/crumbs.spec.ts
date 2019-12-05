@@ -15,9 +15,9 @@ import { framePromise, signalToPromise } from '@jupyterlab/testutils';
 
 import { defaultIconRegistry, IIconRegistry } from '@jupyterlab/ui-components';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { simulate } from 'simulate-event';
 

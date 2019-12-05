@@ -37,13 +37,13 @@ import {
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { find } from '@phosphor/algorithm';
+import { find } from '@lumino/algorithm';
 
-import { ReadonlyJSONObject, JSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, JSONObject } from '@lumino/coreutils';
 
-import { DisposableSet } from '@phosphor/disposable';
+import { DisposableSet } from '@lumino/disposable';
 
-import { DockLayout, Menu } from '@phosphor/widgets';
+import { DockLayout, Menu } from '@lumino/widgets';
 
 import foreign from './foreign';
 

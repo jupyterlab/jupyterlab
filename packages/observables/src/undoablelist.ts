@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONValue } from '@phosphor/coreutils';
+import { JSONValue } from '@lumino/coreutils';
 
-import { each } from '@phosphor/algorithm';
+import { each } from '@lumino/algorithm';
 
 import { IObservableList, ObservableList } from './observablelist';
 

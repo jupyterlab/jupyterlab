@@ -3,7 +3,7 @@
 
 import { IMenuExtender } from '@jupyterlab/mainmenu';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * Given a widget and a set containing IMenuExtenders,
