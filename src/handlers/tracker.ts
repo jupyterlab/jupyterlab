@@ -193,6 +193,7 @@ export class TrackerHandler implements IDisposable {
         const rect = notebook.activeCell.inputArea.node.getBoundingClientRect();
         notebook.scrollToPosition(rect.bottom, 45);
         editors.push(cell.editor);
+        this.shell.activateById(notebookPanel.id);
       });
     });
     return editors;
@@ -221,6 +222,7 @@ export class TrackerHandler implements IDisposable {
         return;
       }
       editors.push(editor);
+      this.shell.activateById(consoleWidget.id);
     });
     return editors;
   }
@@ -247,6 +249,7 @@ export class TrackerHandler implements IDisposable {
         return;
       }
       editors.push(editor);
+      this.shell.activateById(doc.id);
     });
     return editors;
   }
@@ -265,6 +268,7 @@ export class TrackerHandler implements IDisposable {
         return;
       }
       editors.push(editor);
+      this.shell.activateById(widget.id);
     });
     return editors;
   }

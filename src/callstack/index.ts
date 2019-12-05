@@ -95,8 +95,11 @@ export namespace Callstack {
 
     set frames(newFrames: IFrame[]) {
       this._state = newFrames;
+      // default to the new frame is the previous one can't be found
+      if (!this.frame || !newFrames.find(frame => frame.id === this.frame.id)) {
+        this.frame = newFrames[0];
+      }
       this._framesChanged.emit(newFrames);
-      this.frame = newFrames[0];
     }
 
     get frames(): IFrame[] {
