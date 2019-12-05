@@ -140,13 +140,10 @@ setup_args = dict(
 setup_args['install_requires'] = [
     'notebook>=4.3.1',
     'tornado!=6.0.0, !=6.0.1, !=6.0.2',
-    'jinja2>=2.10'
-]
-
-setup_args['dependency_links'] = [
-    'https://github.com/datalayer-contrib/jupyter-notebook-classic/tarball/master#egg=config-shim',
-    'https://github.com/datalayer-contrib/jupyterlab-server/tarball/master#egg=jupyter_server',
-    'https://github.com/jupyter/jupyter_server/tarball/master#egg=master',
+    'jinja2>=2.10',
+    'nbclassic@ git+https://github.com/datalayer-contrib/jupyter-notebook-classic@master',
+    'jupyterlab_server@ https://github.com/datalayer-contrib/jupyterlab-server@jupyter_server',
+    'jupyter_server@ git+https://github.com/jupyter/jupyter_server.git@master',
 ]
 
 setup_args['extras_require'] = {
