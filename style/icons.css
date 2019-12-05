@@ -78,3 +78,11 @@
 [data-jp-theme-light='false'] .jp-CloseAllIcon {
   background-image: url('icons/md-dark/close-all.svg');
 }
+
+.jp-ViewBreakpointIcon {
+  background-image: url('icons/view-breakpoint.svg');
+}
+
+[data-jp-theme-light='false'] .jp-ViewBreakpointIcon {
+  background-image: url('icons/md-dark/view-breakpoint.svg');
+}
