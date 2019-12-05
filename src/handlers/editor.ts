@@ -28,6 +28,7 @@ const EDITOR_CHANGED_TIMEOUT = 1000;
 export class EditorHandler implements IDisposable {
   constructor(options: EditorHandler.IOptions) {
     this._id = options.debuggerService.session.client.path;
+    this._path = options.path;
     this._debuggerService = options.debuggerService;
     this.onModelChanged();
     this._debuggerService.modelChanged.connect(() => this.onModelChanged());
@@ -98,7 +99,8 @@ export class EditorHandler implements IDisposable {
 
     void this._debuggerService.updateBreakpoints(
       this._editor.model.value.text,
-      breakpoints
+      breakpoints,
+      this._path
     );
   }
 
@@ -144,7 +146,7 @@ export class EditorHandler implements IDisposable {
     } else {
       breakpoints.push(
         Private.createBreakpoint(
-          this._debuggerService.session.client.name,
+          this._path ?? this._debuggerService.session.client.name,
           this.getEditorId(),
           info.line + 1
         )
@@ -153,7 +155,8 @@ export class EditorHandler implements IDisposable {
 
     void this._debuggerService.updateBreakpoints(
       this._editor.model.value.text,
-      breakpoints
+      breakpoints,
+      this._path
     );
   };
 
@@ -188,7 +191,7 @@ export class EditorHandler implements IDisposable {
   private getBreakpoints(): IDebugger.IBreakpoint[] {
     const code = this._editor.model.value.text;
     return this._debuggerModel.breakpointsModel.getBreakpoints(
-      this._debuggerService.getCodeId(code)
+      this._path ?? this._debuggerService.getCodeId(code)
     );
   }
 
@@ -197,6 +200,7 @@ export class EditorHandler implements IDisposable {
   private breakpointsModel: Breakpoints.Model;
   private _debuggerService: IDebugger;
   private _id: string;
+  private _path: string;
   private _editorMonitor: ActivityMonitor<
     IObservableString,
     IObservableString.IChangedArgs
@@ -207,6 +211,7 @@ export namespace EditorHandler {
   export interface IOptions {
     debuggerService: IDebugger;
     editor: CodeEditor.IEditor;
+    path?: string;
   }
 
   /**

@@ -108,7 +108,8 @@ export class Sources extends Panel {
 
     this.editorHandler = new EditorHandler({
       debuggerService: this.debuggerService,
-      editor: this.editor.editor
+      editor: this.editor.editor,
+      path
     });
 
     this.model.currentSource = {
