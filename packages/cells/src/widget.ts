@@ -1091,6 +1091,8 @@ export namespace CodeCell {
           return true;
         };
         cell.outputArea.future.registerMessageHook(recordTimingHook);
+      } else {
+        model.metadata.delete('execution');
       }
       // Save this execution's future so we can compare in the catch below.
       future = cell.outputArea.future;
