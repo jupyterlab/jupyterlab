@@ -25,7 +25,7 @@ from .commands import (
 from .coreconfig import CoreConfig
 
 from jupyter_server.extension.application import ExtensionApp
-from nbclassic.shimconfig import shim_configs
+from nbclassic.shimconfig import merge_notebook_configs
 
 build_aliases = dict(base_aliases)
 build_aliases['app-dir'] = 'LabBuildApp.app_dir'
@@ -417,13 +417,13 @@ class LabApp(ExtensionApp):
     template_paths = []
 
     def initialize_settings(self):
-        merged_config = shim_configs(
-            notebook_config_name = 'jupyter_notebook', 
-            server_config_name = 'jupyter_nbclassic', 
-            extension_config_name = 'jupyter_lab', 
+        merged_config = merge_notebook_configs(
+            notebook_config_name = 'jupyter_notebook',
+            server_config_name = 'jupyter_server',
+            extension_config_name = 'jupyter_lab',
             argv = sys.argv
             )
-        self.config = merged_config
+        self.settings['ServerApp'] = merged_config['ServerApp']
         
     def initialize_handlers(self):
         """Load any extensions specified by config.
