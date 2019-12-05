@@ -1,4 +1,4 @@
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { defaultIconRegistry } from '@jupyterlab/ui-components';
 

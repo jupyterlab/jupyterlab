@@ -1,4 +1,4 @@
-import { PanelLayout } from '@phosphor/widgets';
+import { PanelLayout } from '@lumino/widgets';
 
 import { NotebookTools, INotebookTracker } from '@jupyterlab/notebook';
 
