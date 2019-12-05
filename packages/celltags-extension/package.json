@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typescript": "~3.5.1"
+    "typescript": "~3.7.2"
   },
   "jupyterlab": {
     "extension": true
