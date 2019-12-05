@@ -459,6 +459,8 @@ def clean(app_dir=None, logger=None, app_options=None):
                 logger.info('%s not present, skipping...', name)
 
     logger.info('Success!')
+    if app_options.all or app_options.extensions:
+        logger.info('All of your extensions have been removed, and will need to be reinstalled')
 
 
 def build(app_dir=None, name=None, version=None, static_url=None,

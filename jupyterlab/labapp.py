@@ -101,11 +101,15 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
 clean_aliases = dict(base_aliases)
 clean_aliases['app-dir'] = 'LabCleanApp.app_dir'
 
+ext_warn_msg = "WARNING: this will delete all of your extensions, which will need to be reinstalled"
+
 clean_flags = dict(base_flags)
-clean_flags['extensions'] = ({'LabCleanApp': {'extensions': True}}, 'Also delete <app-dir>/extensions')
+clean_flags['extensions'] = ({'LabCleanApp': {'extensions': True}},
+    'Also delete <app-dir>/extensions.\n%s' % ext_warn_msg)
 clean_flags['settings'] = ({'LabCleanApp': {'settings': True}}, 'Also delete <app-dir>/settings')
 clean_flags['static'] = ({'LabCleanApp': {'static': True}}, 'Also delete <app-dir>/static')
-clean_flags['all'] = ({'LabCleanApp': {'all': True}}, 'Delete the entire contents of the app directory')
+clean_flags['all'] = ({'LabCleanApp': {'all': True}},
+    'Delete the entire contents of the app directory.\n%s' % ext_warn_msg)
 
 
 class LabCleanAppOptions(AppOptions):
@@ -133,13 +137,15 @@ class LabCleanApp(JupyterApp):
 
     app_dir = Unicode('', config=True, help='The app directory to clean')
 
-    extensions = Bool(False, config=True, help="Also delete <app-dir>/extensions")
+    extensions = Bool(False, config=True,
+        help="Also delete <app-dir>/extensions.\n%s" % ext_warn_msg)
 
     settings = Bool(False, config=True, help="Also delete <app-dir>/settings")
 
     static = Bool(False, config=True, help="Also delete <app-dir>/static")
 
-    all = Bool(False, config=True, help="Delete the entire contents of the app directory")
+    all = Bool(False, config=True,
+        help="Delete the entire contents of the app directory.\n%s" % ext_warn_msg)
 
     def start(self):
         app_options = LabCleanAppOptions(
