@@ -33,7 +33,7 @@ export class Sources extends Panel {
     header.toolbar.addItem(
       'open',
       new ToolbarButton({
-        iconClassName: 'jp-LauncherIcon',
+        iconClassName: 'jp-ViewBreakpointIcon',
         onClick: () => this.model.open(),
         tooltip: 'Open in the Main Area'
       })
