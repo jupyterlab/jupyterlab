@@ -230,6 +230,13 @@ if [[ $GROUP == usage ]]; then
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
+
+    # Make sure we can clean various bits of the app dir
+    jupyter lab clean
+    jupyter lab clean --extensions
+    jupyter lab clean --settings
+    jupyter lab clean --static
+    jupyter lab clean --all
 fi
 
 if [[ $GROUP == nonode ]]; then
