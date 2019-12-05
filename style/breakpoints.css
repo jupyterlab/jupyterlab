@@ -44,6 +44,7 @@
   top: -1px;
 }
 
+[data-jp-debugger='true'].jp-Editor .CodeMirror-gutter-wrapper:hover::after,
 [data-jp-debugger='true']
   .jp-Notebook
   .jp-CodeCell.jp-mod-selected

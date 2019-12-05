@@ -23,15 +23,6 @@ export interface IDebugger {
   readonly isDebuggingEnabled: boolean;
 
   /**
-   * The mode of the debugger UI.
-   *
-   * #### Notes
-   * There is only ever one debugger instance. If it is `expanded`, it exists
-   * as a `MainAreaWidget`, otherwise it is a sidebar.
-   */
-  mode: IDebugger.Mode;
-
-  /**
    * The current debugger session.
    */
   session: IDebugger.ISession;
@@ -135,20 +126,13 @@ export interface IDebugger {
    * Retrieve the content of a source file.
    * @param source The source object containing the path to the file.
    */
-  getSource(
-    source: DebugProtocol.Source
-  ): Promise<DebugProtocol.SourceResponse>;
+  getSource(source: DebugProtocol.Source): Promise<IDebugger.ISource>;
 }
 
 /**
  * A namespace for visual debugger types.
  */
 export namespace IDebugger {
-  /**
-   * The mode of the debugger UI.
-   */
-  export type Mode = 'condensed' | 'expanded';
-
   /**
    * A visual debugger session.
    */
@@ -205,6 +189,26 @@ export namespace IDebugger {
    */
   export interface IBreakpoint extends DebugProtocol.Breakpoint {
     active: boolean;
+  }
+
+  /**
+   * The interface for a source file.
+   */
+  export interface ISource {
+    /**
+     * The path of the source.
+     */
+    path: string;
+
+    /**
+     * The content of the source.
+     */
+    content: string;
+
+    /**
+     * The mimeType of the source.
+     */
+    mimeType?: string;
   }
 
   /**

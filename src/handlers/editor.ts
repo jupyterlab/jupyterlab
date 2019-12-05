@@ -205,7 +205,6 @@ export class EditorHandler implements IDisposable {
 
 export namespace EditorHandler {
   export interface IOptions {
-    debuggerModel: Debugger.Model;
     debuggerService: IDebugger;
     editor: CodeEditor.IEditor;
   }

@@ -8,12 +8,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import {
-  IClientSession,
-  ICommandPalette,
-  MainAreaWidget,
-  WidgetTracker
-} from '@jupyterlab/apputils';
+import { IClientSession, ICommandPalette } from '@jupyterlab/apputils';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
@@ -28,8 +23,6 @@ import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { Session } from '@jupyterlab/services';
-
-import { UUID } from '@phosphor/coreutils';
 
 import { Debugger } from './debugger';
 
@@ -70,8 +63,6 @@ export namespace CommandIDs {
   export const debugConsole = 'debugger:debug-console';
 
   export const mount = 'debugger:mount';
-
-  export const changeMode = 'debugger:change-mode';
 
   export const closeDebugger = 'debugger:close';
 }
@@ -230,16 +221,19 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 const tracker: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:tracker',
   autoStart: true,
-  requires: [IDebugger],
+  requires: [IDebugger, IEditorServices],
   optional: [INotebookTracker, IConsoleTracker, IEditorTracker],
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
+    editorServices: IEditorServices,
     notebookTracker: INotebookTracker,
     consoleTracker: IConsoleTracker,
     editorTracker: IEditorTracker
   ) => {
     new TrackerHandler({
+      shell: app.shell,
+      editorServices,
       debuggerService: debug,
       notebookTracker,
       consoleTracker,
@@ -269,28 +263,17 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
     const service = new DebugService();
 
-    const tracker = new WidgetTracker<MainAreaWidget<Debugger>>({
-      namespace: 'debugger'
-    });
-
-    const defaultMode = 'condensed';
-
-    let widget: MainAreaWidget<Debugger>;
+    let sidebar: Debugger.Sidebar;
 
     commands.addCommand(CommandIDs.closeDebugger, {
       label: 'Close Debugger',
-      execute: args => {
-        if (!widget) {
+      execute: () => {
+        if (!sidebar) {
           return;
         }
-        widget.content.sidebar.close();
-        widget.dispose();
+        sidebar.close();
+        sidebar.dispose();
       }
-    });
-
-    app.contextMenu.addItem({
-      command: CommandIDs.changeMode,
-      selector: '.jp-DebuggerSidebar'
     });
 
     app.contextMenu.addItem({
@@ -299,41 +282,12 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     });
 
     commands.addCommand(CommandIDs.mount, {
-      execute: async args => {
-        if (!widget) {
+      execute: async () => {
+        if (!sidebar) {
           return;
         }
 
-        const mode = (args.mode as IDebugger.Mode) || defaultMode;
-
-        const { sidebar } = widget.content;
-        if (!mode) {
-          throw new Error(`Could not mount debugger in mode: "${mode}"`);
-        }
-        if (mode === 'expanded') {
-          if (widget.isAttached) {
-            return;
-          }
-
-          if (sidebar.isAttached) {
-            sidebar.parent = null;
-          }
-
-          // edge case when reload page after set condensed mode
-          widget.title.label = 'Debugger';
-          shell.add(widget, 'main');
-          return;
-        }
-
-        // mode = 'condensed'
-        if (widget.isAttached) {
-          widget.parent = null;
-        }
-
-        sidebar.id = 'jp-debugger-sidebar';
-        sidebar.title.label = 'Environment';
-
-        shell.add(sidebar, 'right', { activate: false });
+        shell.add(sidebar, 'right');
         if (labShell.currentWidget) {
           labShell.currentWidget.activate();
         }
@@ -408,26 +362,9 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
-    commands.addCommand(CommandIDs.changeMode, {
-      label: 'Change Mode',
-      isEnabled: () => {
-        return !!tracker.currentWidget;
-      },
-      execute: () => {
-        const currentMode = tracker.currentWidget.content.model.mode;
-        const mode = currentMode === 'expanded' ? 'condensed' : 'expanded';
-        tracker.currentWidget.content.model.mode = mode;
-        void commands.execute(CommandIDs.mount, { mode });
-      }
-    });
-
     commands.addCommand(CommandIDs.create, {
       label: 'Debugger',
-      execute: async args => {
-        const id = (args.id as string) || UUID.uuid4();
-        const savedMode = (await state.fetch('mode')) as IDebugger.Mode;
-        const mode = savedMode ? savedMode : defaultMode;
-
+      execute: async () => {
         const callstackCommands = {
           registry: commands,
           continue: CommandIDs.debugContinue,
@@ -437,47 +374,26 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
           stepOut: CommandIDs.stepOut
         };
 
-        if (tracker.currentWidget) {
-          widget = tracker.currentWidget;
-        } else {
-          widget = new MainAreaWidget({
-            content: new Debugger({
-              debugService: service,
-              connector: state,
-              callstackCommands,
-              editorServices
-            })
-          });
-          widget.id = id;
+        sidebar = new Debugger.Sidebar({
+          service,
+          callstackCommands,
+          editorServices
+        });
 
-          void tracker.add(widget);
-
-          widget.content.model.mode = mode;
-
-          widget.content.model.modeChanged.connect((_, mode) => {
-            void state.save('mode', mode);
-          });
-        }
-
-        console.log('Debugger ID: ', widget.id);
-
-        widget.content.service.eventMessage.connect(_ => {
+        sidebar.service.eventMessage.connect(_ => {
           commands.notifyCommandChanged();
         });
 
-        widget.content.service.sessionChanged.connect(_ => {
+        sidebar.service.sessionChanged.connect(_ => {
           commands.notifyCommandChanged();
         });
-
-        await commands.execute(CommandIDs.mount, { mode });
-        return widget;
+        await commands.execute(CommandIDs.mount);
       }
     });
 
     if (palette) {
       const category = 'Debugger';
       [
-        CommandIDs.changeMode,
         CommandIDs.create,
         CommandIDs.debugContinue,
         CommandIDs.terminate,
@@ -489,16 +405,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       });
     }
 
-    if (restorer) {
-      // Handle state restoration.
-      void restorer.restore(tracker, {
-        command: CommandIDs.create,
-        args: widget => ({
-          id: widget.id
-        }),
-        name: widget => widget.id
-      });
-    }
+    void commands.execute(CommandIDs.create);
 
     return service;
   }

@@ -8,17 +8,7 @@
 
 @import './icons.css';
 @import './sidebar.css';
-@import './editors.css';
-
-.jp-Debugger {
-  background: var(--jp-layout-color1);
-  top: 0;
-  bottom: 0;
-}
-
-.jp-Debugger .p-SplitPanel-handle {
-  background-color: var(--jp-border-color2);
-}
+@import './sources.css';
 
 /* font awesome */
 
