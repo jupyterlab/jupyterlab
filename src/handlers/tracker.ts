@@ -138,7 +138,8 @@ export class TrackerHandler implements IDisposable {
     const editor = editorWrapper.editor;
     const editorHandler = new EditorHandler({
       debuggerService: this.debuggerService,
-      editor
+      editor,
+      path
     });
     const widget = new MainAreaWidget<CodeEditorWrapper>({
       content: editorWrapper
@@ -264,7 +265,7 @@ export class TrackerHandler implements IDisposable {
 
       const code = editor.model.value.text;
       const codeId = this.debuggerService.getCodeId(code);
-      if (source !== codeId) {
+      if (widget.title.caption !== source && source !== codeId) {
         return;
       }
       editors.push(editor);

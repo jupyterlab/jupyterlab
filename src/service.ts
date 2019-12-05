@@ -297,19 +297,24 @@ export class DebugService implements IDebugger, IDisposable {
    * Update all breakpoints at once.
    * @param code - The code in the cell where the breakpoints are set.
    * @param breakpoints - The list of breakpoints to set.
+   * @param path - Optional path to the file where to set the breakpoints.
    */
-  async updateBreakpoints(code: string, breakpoints: IDebugger.IBreakpoint[]) {
+  async updateBreakpoints(
+    code: string,
+    breakpoints: IDebugger.IBreakpoint[],
+    path?: string
+  ) {
     if (!this.session.isStarted) {
       return;
     }
     // Workaround: this should not be called before the session has started
     await this.ensureSessionReady();
-    const dumpedCell = await this.dumpCell(code);
+    if (!path) {
+      const dumpedCell = await this.dumpCell(code);
+      path = dumpedCell.sourcePath;
+    }
     const sourceBreakpoints = Private.toSourceBreakpoints(breakpoints);
-    const reply = await this.setBreakpoints(
-      sourceBreakpoints,
-      dumpedCell.sourcePath
-    );
+    const reply = await this.setBreakpoints(sourceBreakpoints, path);
     let kernelBreakpoints = reply.body.breakpoints.map(breakpoint => {
       return {
         ...breakpoint,
@@ -322,10 +327,7 @@ export class DebugService implements IDebugger, IDisposable {
       (breakpoint, i, arr) =>
         arr.findIndex(el => el.line === breakpoint.line) === i
     );
-    this._model.breakpointsModel.setBreakpoints(
-      dumpedCell.sourcePath,
-      kernelBreakpoints
-    );
+    this._model.breakpointsModel.setBreakpoints(path, kernelBreakpoints);
     await this.session.sendRequest('configurationDone', {});
   }
 

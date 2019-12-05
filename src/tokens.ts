@@ -111,10 +111,12 @@ export interface IDebugger {
    * Update all breakpoints of a cell at once.
    * @param code - The code in the cell where the breakpoints are set.
    * @param breakpoints - The list of breakpoints to set.
+   * @param path - Optional path to the file where to set the breakpoints.
    */
   updateBreakpoints(
     code: string,
-    breakpoints: IDebugger.IBreakpoint[]
+    breakpoints: IDebugger.IBreakpoint[],
+    path?: string
   ): Promise<void>;
 
   /**
