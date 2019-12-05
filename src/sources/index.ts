@@ -51,12 +51,10 @@ export class Sources extends Panel {
 
     this.model.currentFrameChanged.connect(async (_, frame) => {
       if (!frame) {
-        this.model.currentSource = null;
-        this.editor.hide();
+        this.clearEditor();
         return;
       }
 
-      this.editor.show();
       void this.showSource(frame);
     });
 
@@ -80,6 +78,11 @@ export class Sources extends Panel {
     Signal.clearData(this);
   }
 
+  private clearEditor() {
+    this.model.currentSource = null;
+    this.editor.hide();
+  }
+
   private async showSource(frame: Callstack.IFrame) {
     const path = frame.source.path;
     const source = await this.debuggerService.getSource({
@@ -87,7 +90,8 @@ export class Sources extends Panel {
       path
     });
 
-    if (!source) {
+    if (!source?.content) {
+      this.clearEditor();
       return;
     }
 
@@ -116,6 +120,8 @@ export class Sources extends Panel {
     requestAnimationFrame(() => {
       EditorHandler.showCurrentLine(this.editor.editor, frame.line);
     });
+
+    this.editor.show();
   }
 
   private debuggerService: IDebugger;
