@@ -88,7 +88,7 @@ export class DebugService implements IDebugger, IDisposable {
     }
     this._session = session;
 
-    this._session.eventMessage.connect((_, event) => {
+    this._session?.eventMessage.connect((_, event) => {
       if (event.event === 'stopped') {
         this._model.stoppedThreads.add(event.body.threadId);
         void this.getAllFrames();
