@@ -24,7 +24,7 @@ utils.writePackageData(path.join(staging, 'package.json'), data);
 
 // Update our staging files.
 const notice =
-  '// This file is auto-generated from the corresponding file in dev_mode\n';
+  '// This file is auto-generated from the corresponding file in /dev_mode\n';
 
 [
   'index.js',
@@ -37,7 +37,7 @@ const notice =
   const dest = path.join('.', 'jupyterlab', 'staging', name);
   fs.copySync(path.join('.', 'dev_mode', name), dest);
 
-  if (path.extname(name) === 'js') {
+  if (path.extname(name) === '.js') {
     const oldContent = fs.readFileSync(dest);
     const newContent = notice + oldContent;
     fs.writeFileSync(dest, newContent);
