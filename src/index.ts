@@ -112,6 +112,7 @@ class DebuggerHandler<
         return;
       }
       await debug.stop();
+      debug.session = null;
       handlerIds.forEach(id => {
         this.handlers[id].dispose();
       });
