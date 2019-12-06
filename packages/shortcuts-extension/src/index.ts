@@ -19,97 +19,6 @@ import {
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 
 /**
- * The ASCII record separator character.
- */
-const RECORD_SEPARATOR = String.fromCharCode(30);
-
-/**
- * This plugin and its schema are deprecated and will be removed in a future
- * version of JupyterLab. This plugin will load old keyboard shortcuts and add
- * them to the new keyboard shortcuts plugin below before removing the old
- * shortcuts.
- */
-const plugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/shortcuts-extension:plugin',
-  requires: [ISettingRegistry],
-  activate: async (app: JupyterFrontEnd, registry: ISettingRegistry) => {
-    try {
-      const old = await registry.load(plugin.id);
-      const settings = await registry.load(shortcuts.id);
-      const keys = Object.keys(old.user);
-      const deprecated: ISettingRegistry.IShortcut[] = [];
-      const port = (deprecated: ISettingRegistry.IShortcut[]) => {
-        if (!deprecated.length) {
-          return;
-        }
-
-        const memo: {
-          [keys: string]: { [selector: string]: null };
-        } = {};
-        const shortcuts = settings.user
-          .shortcuts as ISettingRegistry.IShortcut[];
-
-        // Add the current shortcuts into the memo.
-        shortcuts.forEach(shortcut => {
-          const keys = shortcut.keys.join(RECORD_SEPARATOR);
-          const { selector } = shortcut;
-
-          if (!keys) {
-            return;
-          }
-          if (!(keys in memo)) {
-            memo[keys] = {};
-          }
-          if (!(selector in memo[keys])) {
-            memo[keys][selector] = null;
-          }
-        });
-
-        // Add deprecated shortcuts that don't exist to the current list.
-        deprecated.forEach(shortcut => {
-          const { selector } = shortcut;
-          const keys = shortcut.keys.join(RECORD_SEPARATOR);
-
-          if (!(keys in memo)) {
-            memo[keys] = {};
-          }
-          if (!(selector in memo[keys])) {
-            memo[keys][selector] = null;
-            shortcuts.push(shortcut);
-          }
-        });
-
-        // Save the reconciled list.
-        void settings.set('shortcuts', shortcuts);
-      };
-
-      if (!keys.length) {
-        return;
-      }
-      keys.forEach(key => {
-        const { command, keys, selector } = old.user[
-          key
-        ] as ISettingRegistry.IShortcut;
-
-        // Only port shortcuts over if they are valid.
-        if (command && selector && keys && keys.length) {
-          deprecated.push({ command, keys, selector });
-        }
-      });
-
-      // Port the deprecated shortcuts to the new plugin.
-      port(deprecated);
-
-      // Remove all old shortcuts;
-      void old.save('{}');
-    } catch (error) {
-      console.error(`Loading ${plugin.id} failed.`, error);
-    }
-  },
-  autoStart: true
-};
-
-/**
  * The default shortcuts extension.
  *
  * #### Notes
@@ -259,11 +168,9 @@ List of Keyboard Shortcuts`;
 };
 
 /**
- * Export the plugins as default.
+ * Export the shortcut plugin as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [plugin, shortcuts];
-
-export default plugins;
+export default shortcuts;
 
 /**
  * A namespace for private module data.

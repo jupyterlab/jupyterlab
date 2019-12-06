@@ -21,9 +21,9 @@ import {
 
 import {
   Debouncer,
-  IRateLimiter,
   ISettingRegistry,
   IStateDB,
+  PageConfig,
   SettingRegistry,
   StateDB,
   Throttler,
@@ -37,6 +37,8 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 
 import { Palette } from './palette';
+
+import { SettingConnector } from './settingconnector';
 
 import { themesPlugin, themesPaletteMenuPlugin } from './themeplugins';
 
@@ -90,10 +92,40 @@ const paletteRestorer: JupyterFrontEndPlugin<void> = {
 const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
   activate: async (app: JupyterFrontEnd): Promise<ISettingRegistry> => {
-    const connector = app.serviceManager.settings;
-    const plugins = (await connector.list()).values;
+    const { isDisabled } = PageConfig.Extension;
+    const connector = new SettingConnector(app.serviceManager.settings);
 
-    return new SettingRegistry({ connector, plugins });
+    const registry = new SettingRegistry({
+      connector,
+      plugins: (await connector.list('active')).values
+    });
+
+    // If there are plugins that have schemas that are not in the setting
+    // registry after the application has restored, try to load them manually
+    // because otherwise, its settings will never become available in the
+    // setting registry.
+    void app.restored.then(async () => {
+      const plugins = await connector.list('all');
+      plugins.ids.forEach(async (id, index) => {
+        if (isDisabled(id) || id in registry.plugins) {
+          return;
+        }
+
+        try {
+          await registry.load(id);
+        } catch (error) {
+          console.warn(`Settings failed to load for (${id})`, error);
+          if (plugins.values[index].schema['jupyter.lab.transform']) {
+            console.warn(
+              `This may happen if {autoStart: false} in (${id}) ` +
+                `or if it is one of the deferredExtensions in page config.`
+            );
+          }
+        }
+      });
+    });
+
+    return registry;
   },
   autoStart: true,
   provides: ISettingRegistry
@@ -190,7 +222,7 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
 
     // Create debounced recovery dialog function.
     let dialog: Dialog<any>;
-    const recovery: IRateLimiter = new Throttler(async () => {
+    const recovery = new Throttler(async () => {
       if (dialog) {
         return;
       }
