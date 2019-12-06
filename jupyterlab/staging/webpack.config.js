@@ -1,3 +1,4 @@
+// This file is auto-generated from the corresponding file in /dev_mode
 /*-----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
