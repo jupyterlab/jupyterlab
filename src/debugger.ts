@@ -37,7 +37,7 @@ export namespace Debugger {
     constructor(options: Sidebar.IOptions) {
       super();
       this.id = 'jp-debugger-sidebar';
-      this.title.label = 'Environment';
+      this.title.iconClass = 'jp-BugIcon jp-SideBar-tabIcon';
       this.orientation = 'vertical';
 
       this.addClass('jp-DebuggerSidebar');
