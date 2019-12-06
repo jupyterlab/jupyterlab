@@ -42,7 +42,6 @@ export class AddWidget extends Widget {
       marginRight: '-5px'
     });
     this.addClass('unapplied-tag');
-    //this.button = img;
     tag.appendChild(img);
     this.node.appendChild(tag);
   }
@@ -52,7 +51,6 @@ export class AddWidget extends Widget {
    */
   onAfterAttach() {
     this.node.addEventListener('mousedown', this);
-    //this.button.addEventListener('mousedown', this);
     this.input.addEventListener('keydown', this);
     this.input.addEventListener('blur', this);
   }
@@ -62,7 +60,6 @@ export class AddWidget extends Widget {
    */
   onBeforeDetach() {
     this.node.removeEventListener('mousedown', this);
-    //this.button.removeEventListener('mousedown', this);
     this.input.removeEventListener('keydown', this);
     this.input.removeEventListener('blur', this);
   }
@@ -86,7 +83,7 @@ export class AddWidget extends Widget {
         this._evtKeyDown(event as KeyboardEvent);
         break;
       case 'blur':
-        this._evtFocusOut();
+        this._evtBlur();
         break;
       default:
         break;
@@ -125,7 +122,7 @@ export class AddWidget extends Widget {
       let value = this.input.value;
       (this.parent as TagTool).addTag(value);
       this.input.blur();
-      this._evtFocusOut();
+      this._evtBlur();
     }
   }
 
@@ -134,7 +131,7 @@ export class AddWidget extends Widget {
    *
    * @param event - The DOM event sent to the widget
    */
-  private _evtFocusOut() {
+  private _evtBlur() {
     if (this.editing) {
       this.editing = false;
       this.input.value = 'Add Tag';
@@ -144,6 +141,5 @@ export class AddWidget extends Widget {
 
   public parent: TagTool;
   private editing: boolean;
-  //private button: HTMLElement;
   private input: HTMLInputElement;
 }
