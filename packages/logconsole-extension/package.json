@@ -36,7 +36,7 @@
     "@jupyterlab/application": "^2.0.0-alpha.3",
     "@jupyterlab/apputils": "^2.0.0-alpha.3",
     "@jupyterlab/coreutils": "^4.0.0-alpha.3",
-    "@jupyterlab/logconsole": "^1.0.0-alpha.1",
+    "@jupyterlab/logconsole": "^2.0.0-alpha.3",
     "@jupyterlab/mainmenu": "^2.0.0-alpha.3",
     "@jupyterlab/notebook": "^2.0.0-alpha.3",
     "@jupyterlab/rendermime": "^2.0.0-alpha.3",
