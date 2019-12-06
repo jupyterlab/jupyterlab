@@ -100,6 +100,11 @@ export class AddWidget extends Widget {
       this.editing = true;
       this.input.value = '';
       this.input.focus();
+    } else if (event.target !== this.input) {
+      let value = this.input.value;
+      (this.parent as TagTool).addTag(value);
+      this.input.blur();
+      this._evtBlur();
     }
     event.preventDefault();
   }
