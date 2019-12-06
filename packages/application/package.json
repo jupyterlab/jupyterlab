@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application",
-  "version": "2.0.0-alpha.2",
+  "version": "2.0.0-alpha.3",
   "description": "JupyterLab - Application",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,13 +36,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.0.0-alpha.2",
-    "@jupyterlab/coreutils": "^4.0.0-alpha.2",
-    "@jupyterlab/docregistry": "^2.0.0-alpha.2",
-    "@jupyterlab/rendermime": "^2.0.0-alpha.2",
-    "@jupyterlab/rendermime-interfaces": "^2.0.0-alpha.2",
-    "@jupyterlab/services": "^5.0.0-alpha.2",
-    "@jupyterlab/ui-components": "^2.0.0-alpha.2",
+    "@jupyterlab/apputils": "^2.0.0-alpha.3",
+    "@jupyterlab/coreutils": "^4.0.0-alpha.3",
+    "@jupyterlab/docregistry": "^2.0.0-alpha.3",
+    "@jupyterlab/rendermime": "^2.0.0-alpha.3",
+    "@jupyterlab/rendermime-interfaces": "^2.0.0-alpha.3",
+    "@jupyterlab/services": "^5.0.0-alpha.3",
+    "@jupyterlab/ui-components": "^2.0.0-alpha.3",
     "@lumino/algorithm": "^1.2.0",
     "@lumino/application": "^1.7.0",
     "@lumino/commands": "^1.7.0",
