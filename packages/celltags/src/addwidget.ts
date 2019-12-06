@@ -52,6 +52,7 @@ export class AddWidget extends Widget {
   onAfterAttach() {
     this.node.addEventListener('mousedown', this);
     this.input.addEventListener('keydown', this);
+    this.input.addEventListener('focus', this);
     this.input.addEventListener('blur', this);
   }
 
@@ -61,6 +62,7 @@ export class AddWidget extends Widget {
   onBeforeDetach() {
     this.node.removeEventListener('mousedown', this);
     this.input.removeEventListener('keydown', this);
+    this.input.removeEventListener('focus', this);
     this.input.removeEventListener('blur', this);
   }
 
@@ -85,6 +87,9 @@ export class AddWidget extends Widget {
       case 'blur':
         this._evtBlur();
         break;
+      case 'focus':
+        this._evtFocus();
+        break;
       default:
         break;
     }
@@ -101,12 +106,25 @@ export class AddWidget extends Widget {
       this.input.value = '';
       this.input.focus();
     } else if (event.target !== this.input) {
-      let value = this.input.value;
-      (this.parent as TagTool).addTag(value);
-      this.input.blur();
-      this._evtBlur();
+      if (this.input.value !== '') {
+        let value = this.input.value;
+        (this.parent as TagTool).addTag(value);
+        this.input.blur();
+        this._evtBlur();
+      }
     }
     event.preventDefault();
+  }
+
+  /**
+   * Handle the `'focus'` event for the input box.
+   *
+   * @param event - The DOM event sent to the widget
+   */
+  private _evtFocus() {
+    if (!this.editing) {
+      this.input.blur();
+    }
   }
 
   /**
