@@ -15,6 +15,7 @@
 .jp-DebuggerSidebar > div > header {
   border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
   border-top: solid var(--jp-border-width) var(--jp-border-color1);
+  box-shadow: var(--jp-toolbar-box-shadow);
   display: flex;
   flex-direction: row;
   align-items: center;
