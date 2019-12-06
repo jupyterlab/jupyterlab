@@ -135,7 +135,7 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 - Steven Silvester, AWS (co-creator, release management, packaging,
   prolific contributions throughout the code base).
 - Vidar T. Fauske, JPMorgan Chase (general development, extensions).
-- Max Klein (UI Package, build system, general development, extensions).
+- Max Klein, JPMorgan Chase (UI Package, build system, general development, extensions).
 
 Maintainer emeritus:
 
