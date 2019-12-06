@@ -62,8 +62,6 @@ export namespace CommandIDs {
 
   export const debugConsole = 'debugger:debug-console';
 
-  export const mount = 'debugger:mount';
-
   export const closeDebugger = 'debugger:close';
 }
 
@@ -274,31 +272,13 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         }
         sidebar.close();
         sidebar.dispose();
+        sidebar = null;
       }
     });
 
     app.contextMenu.addItem({
       command: CommandIDs.closeDebugger,
       selector: '.jp-DebuggerSidebar'
-    });
-
-    commands.addCommand(CommandIDs.mount, {
-      execute: async () => {
-        if (!sidebar) {
-          return;
-        }
-
-        shell.add(sidebar, 'right');
-        if (labShell.currentWidget) {
-          labShell.currentWidget.activate();
-        }
-
-        if (restorer) {
-          restorer.add(sidebar, 'debugger-sidebar');
-        }
-
-        await service.restoreState(true);
-      }
     });
 
     commands.addCommand(CommandIDs.debugContinue, {
@@ -366,6 +346,10 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.create, {
       label: 'Debugger',
       execute: async () => {
+        if (sidebar) {
+          return;
+        }
+
         const callstackCommands = {
           registry: commands,
           continue: CommandIDs.debugContinue,
@@ -388,7 +372,17 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         sidebar.service.sessionChanged.connect(_ => {
           commands.notifyCommandChanged();
         });
-        await commands.execute(CommandIDs.mount);
+
+        shell.add(sidebar, 'right');
+        if (labShell.currentWidget) {
+          labShell.currentWidget.activate();
+        }
+
+        if (restorer) {
+          restorer.add(sidebar, 'debugger-sidebar');
+        }
+
+        await service.restoreState(true);
       }
     });
 
