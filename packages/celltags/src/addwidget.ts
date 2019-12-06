@@ -27,6 +27,7 @@ export class AddWidget extends Widget {
     text.contentEditable = 'true';
     text.className = 'add-tag';
     text.style.width = '49px';
+    this.input = text;
     let tag = document.createElement('div');
     tag.className = 'tag-holder';
     tag.appendChild(text);
@@ -41,6 +42,7 @@ export class AddWidget extends Widget {
       marginRight: '-5px'
     });
     this.addClass('unapplied-tag');
+    //this.button = img;
     tag.appendChild(img);
     this.node.appendChild(tag);
   }
@@ -50,8 +52,9 @@ export class AddWidget extends Widget {
    */
   onAfterAttach() {
     this.node.addEventListener('mousedown', this);
-    this.node.addEventListener('keypress', this);
-    this.node.addEventListener('focusout', this);
+    //this.button.addEventListener('mousedown', this);
+    this.input.addEventListener('keydown', this);
+    this.input.addEventListener('blur', this);
   }
 
   /**
@@ -59,8 +62,9 @@ export class AddWidget extends Widget {
    */
   onBeforeDetach() {
     this.node.removeEventListener('mousedown', this);
-    this.node.removeEventListener('keypress', this);
-    this.node.removeEventListener('focusout', this);
+    //this.button.removeEventListener('mousedown', this);
+    this.input.removeEventListener('keydown', this);
+    this.input.removeEventListener('blur', this);
   }
 
   /**
@@ -78,10 +82,10 @@ export class AddWidget extends Widget {
       case 'mousedown':
         this._evtMouseDown(event as MouseEvent);
         break;
-      case 'keypress':
-        this._evtKeyPress(event as KeyboardEvent);
+      case 'keydown':
+        this._evtKeyDown(event as KeyboardEvent);
         break;
-      case 'focusout':
+      case 'blur':
         this._evtFocusOut();
         break;
       default:
@@ -97,31 +101,30 @@ export class AddWidget extends Widget {
   private _evtMouseDown(event: MouseEvent) {
     if (!this.editing) {
       this.editing = true;
-      let target = event.target as HTMLInputElement;
-      target.value = '';
-      target.autofocus = true;
+      this.input.value = '';
+      this.input.focus();
     }
+    event.preventDefault();
   }
 
   /**
-   * Handle the `'keypress'` event for the input box.
+   * Handle the `'keydown'` event for the input box.
    *
    * @param event - The DOM event sent to the widget
    */
-  private _evtKeyPress(event: KeyboardEvent) {
-    let inputElement = event.target as HTMLInputElement;
+  private _evtKeyDown(event: KeyboardEvent) {
     let tmp = document.createElement('span');
-    tmp.className = 'tag';
-    tmp.innerHTML = inputElement.value;
+    tmp.className = 'add-tag';
+    tmp.innerHTML = this.input.value;
     // set width to the pixel length of the text
     document.body.appendChild(tmp);
-    inputElement.style.width = tmp.getBoundingClientRect().width + 8 + 'px';
+    this.input.style.width = tmp.getBoundingClientRect().width + 8 + 'px';
     document.body.removeChild(tmp);
     // if they hit Enter, add the tag and reset state
     if (event.keyCode === 13) {
-      let value = inputElement.value;
+      let value = this.input.value;
       (this.parent as TagTool).addTag(value);
-      inputElement.blur();
+      this.input.blur();
       this._evtFocusOut();
     }
   }
@@ -134,12 +137,13 @@ export class AddWidget extends Widget {
   private _evtFocusOut() {
     if (this.editing) {
       this.editing = false;
-      let target = event.target as HTMLInputElement;
-      target.value = 'Add Tag';
-      target.style.width = '49px';
+      this.input.value = 'Add Tag';
+      this.input.style.width = '49px';
     }
   }
 
   public parent: TagTool;
   private editing: boolean;
+  //private button: HTMLElement;
+  private input: HTMLInputElement;
 }
