@@ -351,6 +351,23 @@ export function addCommands(
       term.title.icon = TERMINAL_ICON_CLASS;
       term.title.label = '...';
 
+      const folder = args['cd'] as string;
+      const command = args['command'] as string;
+      let execute: string = '';
+      if (command) {
+        execute += `${command}\n`;
+      }
+      if (folder) {
+        execute += `cd ${folder}\n`;
+      }
+
+      if (execute) {
+        session.send({
+          type: 'stdin',
+          content: [execute]
+        });
+      }
+
       let main = new MainAreaWidget({ content: term });
       app.shell.add(main);
       void tracker.add(main);
