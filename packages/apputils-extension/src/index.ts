@@ -9,7 +9,6 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   Dialog,
   ICommandPalette,
@@ -18,28 +17,20 @@ import {
   WindowResolver,
   Printing
 } from '@jupyterlab/apputils';
-
 import {
   Debouncer,
-  ISettingRegistry,
   IStateDB,
-  PageConfig,
-  SettingRegistry,
   StateDB,
   Throttler,
   URLExt
 } from '@jupyterlab/coreutils';
-
 import { defaultIconRegistry } from '@jupyterlab/ui-components';
 
 import { PromiseDelegate } from '@lumino/coreutils';
-
 import { DisposableDelegate } from '@lumino/disposable';
 
 import { Palette } from './palette';
-
-import { SettingConnector } from './settingconnector';
-
+import { settingsPlugin } from './settingsplugin';
 import { themesPlugin, themesPaletteMenuPlugin } from './themeplugins';
 
 /**
@@ -84,51 +75,6 @@ const paletteRestorer: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:palette-restorer',
   requires: [ILayoutRestorer],
   autoStart: true
-};
-
-/**
- * The default setting registry provider.
- */
-const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
-  id: '@jupyterlab/apputils-extension:settings',
-  activate: async (app: JupyterFrontEnd): Promise<ISettingRegistry> => {
-    const { isDisabled } = PageConfig.Extension;
-    const connector = new SettingConnector(app.serviceManager.settings);
-
-    const registry = new SettingRegistry({
-      connector,
-      plugins: (await connector.list('active')).values
-    });
-
-    // If there are plugins that have schemas that are not in the setting
-    // registry after the application has restored, try to load them manually
-    // because otherwise, its settings will never become available in the
-    // setting registry.
-    void app.restored.then(async () => {
-      const plugins = await connector.list('all');
-      plugins.ids.forEach(async (id, index) => {
-        if (isDisabled(id) || id in registry.plugins) {
-          return;
-        }
-
-        try {
-          await registry.load(id);
-        } catch (error) {
-          console.warn(`Settings failed to load for (${id})`, error);
-          if (plugins.values[index].schema['jupyter.lab.transform']) {
-            console.warn(
-              `This may happen if {autoStart: false} in (${id}) ` +
-                `or if it is one of the deferredExtensions in page config.`
-            );
-          }
-        }
-      });
-    });
-
-    return registry;
-  },
-  autoStart: true,
-  provides: ISettingRegistry
 };
 
 /**
@@ -497,13 +443,13 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   palette,
   paletteRestorer,
+  print,
   resolver,
-  settings,
+  settingsPlugin,
   state,
   splash,
   themesPlugin,
-  themesPaletteMenuPlugin,
-  print
+  themesPaletteMenuPlugin
 ];
 export default plugins;
 
