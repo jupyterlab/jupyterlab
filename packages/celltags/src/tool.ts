@@ -247,7 +247,7 @@ export class TagTool extends NotebookTools.Tool {
     this.validateTags(this.tracker.activeCell, taglist);
   }
 
+  public tracker: INotebookTracker = null;
   private tagList: string[] = [];
   private header: boolean = false;
-  public tracker: INotebookTracker = null;
 }

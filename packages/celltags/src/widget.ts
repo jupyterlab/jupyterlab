@@ -83,10 +83,10 @@ export class TagWidget extends Widget {
         this._evtClick();
         break;
       case 'mouseover':
-        this._evtMouseOver(event as MouseEvent);
+        this._evtMouseOver();
         break;
       case 'mouseout':
-        this._evtMouseOut(event as MouseEvent);
+        this._evtMouseOut();
         break;
       default:
         break;
@@ -123,8 +123,6 @@ export class TagWidget extends Widget {
 
   /**
    * Handle the `'click'` event for the widget.
-   *
-   * @param event - The DOM event sent to the widget
    */
   private _evtClick() {
     if (this.applied) {
@@ -137,19 +135,15 @@ export class TagWidget extends Widget {
 
   /**
    * Handle the `'mouseover'` event for the widget.
-   *
-   * @param event - The DOM event sent to the widget
    */
-  private _evtMouseOver(event: MouseEvent) {
+  private _evtMouseOver() {
     (this.node as HTMLElement).classList.add('tag-hover');
   }
 
   /**
    * Handle the `'mouseout'` event for the widget.
-   *
-   * @param event - The DOM event sent to the widget
    */
-  private _evtMouseOut(event: MouseEvent) {
+  private _evtMouseOut() {
     (this.node as HTMLElement).classList.remove('tag-hover');
   }
 

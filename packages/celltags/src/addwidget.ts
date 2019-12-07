@@ -118,8 +118,6 @@ export class AddWidget extends Widget {
 
   /**
    * Handle the `'focus'` event for the input box.
-   *
-   * @param event - The DOM event sent to the widget
    */
   private _evtFocus() {
     if (!this.editing) {
@@ -151,8 +149,6 @@ export class AddWidget extends Widget {
 
   /**
    * Handle the `'focusout'` event for the input box.
-   *
-   * @param event - The DOM event sent to the widget
    */
   private _evtBlur() {
     if (this.editing) {

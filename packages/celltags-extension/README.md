@@ -1,3 +1,4 @@
-# celltags
+# @jupyterlab/celltags-extension
 
-A refactor of jupyterlab-celltags intended to be merged into core.
+A JupyterLab extension which provides an entry point for
+[@jupyterlab/celltags](../celltags).

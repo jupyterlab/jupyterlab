@@ -1,3 +1,4 @@
-# celltags
+# @jupyterlab/celltags
 
-A refactor of jupyterlab-celltags intended to be merged into core.
+A JupyterLab package which provides an interface for viewing and manipulating
+descriptive tags in notebook cell metadata.
