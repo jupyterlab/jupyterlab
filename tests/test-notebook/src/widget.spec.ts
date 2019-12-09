@@ -3,9 +3,9 @@
 
 import { expect } from 'chai';
 
-import { MessageLoop, Message } from '@phosphor/messaging';
+import { MessageLoop, Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { generate, simulate } from 'simulate-event';
 

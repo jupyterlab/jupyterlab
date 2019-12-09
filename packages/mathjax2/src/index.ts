@@ -5,7 +5,7 @@
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 // Stub for window MathJax.
 declare var MathJax: any;
@@ -71,8 +71,14 @@ export class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
   private _onLoad(): void {
     MathJax.Hub.Config({
       tex2jax: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        inlineMath: [
+          ['$', '$'],
+          ['\\(', '\\)']
+        ],
+        displayMath: [
+          ['$$', '$$'],
+          ['\\[', '\\]']
+        ],
         processEscapes: true,
         processEnvironments: true
       },

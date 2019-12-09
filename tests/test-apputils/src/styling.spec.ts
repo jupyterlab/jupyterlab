@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { VirtualDOM, h } from '@phosphor/virtualdom';
+import { VirtualDOM, h } from '@lumino/virtualdom';
 
 import { simulate } from 'simulate-event';
 

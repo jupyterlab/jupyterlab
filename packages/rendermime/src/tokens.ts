@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Token, ReadonlyJSONObject } from '@phosphor/coreutils';
+import { Token, ReadonlyJSONObject } from '@lumino/coreutils';
 
 import { ISanitizer } from '@jupyterlab/apputils';
 

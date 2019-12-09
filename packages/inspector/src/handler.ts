@@ -7,11 +7,11 @@ import { IDataConnector, Text, Debouncer } from '@jupyterlab/coreutils';
 
 import { MimeModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { IInspector } from './tokens';
 

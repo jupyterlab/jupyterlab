@@ -1,18 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { each, map, toArray } from '@phosphor/algorithm';
+import { each, map, toArray } from '@lumino/algorithm';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 
 import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
-import { JSONExt } from '@phosphor/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
 /**
  * The model for an output area.
@@ -307,7 +307,11 @@ export class OutputAreaModel implements IOutputAreaModel {
     if (
       nbformat.isStream(value) &&
       this._lastStream &&
-      value.name === this._lastName
+      value.name === this._lastName &&
+      this.shouldCombine({
+        value,
+        lastModel: this.list.get(this.length - 1)
+      })
     ) {
       // In order to get a list change event, we add the previous
       // text to the current item and replace the previous item.
@@ -340,6 +344,19 @@ export class OutputAreaModel implements IOutputAreaModel {
 
     // Add the item to our list and return the new length.
     return this.list.push(item);
+  }
+
+  /**
+   * Whether a new value should be consolidated with the previous output.
+   *
+   * This will only be called if the minimal criteria of both being stream
+   * messages of the same type.
+   */
+  protected shouldCombine(options: {
+    value: nbformat.IOutput;
+    lastModel: IOutputModel;
+  }) {
+    return true;
   }
 
   /**

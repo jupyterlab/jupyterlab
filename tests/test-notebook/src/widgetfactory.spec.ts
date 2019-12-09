@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
 import { ToolbarButton } from '@jupyterlab/apputils';
 

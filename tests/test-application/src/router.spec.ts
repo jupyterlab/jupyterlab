@@ -5,9 +5,9 @@ import { expect } from 'chai';
 
 import { Router } from '@jupyterlab/application';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
 import { signalToPromise } from '@jupyterlab/testutils';
 

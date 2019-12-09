@@ -1,24 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ArrayExt,
-  each,
-  map,
-  find,
-  filter,
-  toArray
-} from '@phosphor/algorithm';
+import { ArrayExt, each, map, find, filter, toArray } from '@lumino/algorithm';
 
-import { DisposableSet, IDisposable } from '@phosphor/disposable';
+import { DisposableSet, IDisposable } from '@lumino/disposable';
 
-import { IMessageHandler, Message, MessageLoop } from '@phosphor/messaging';
+import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 
-import { AttachedProperty } from '@phosphor/properties';
+import { AttachedProperty } from '@lumino/properties';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { Time } from '@jupyterlab/coreutils';
 

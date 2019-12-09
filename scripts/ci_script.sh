@@ -6,7 +6,9 @@
 set -ex
 set -o pipefail
 
-python -c "from jupyterlab.commands import build_check; build_check()"
+if [[ $GROUP != nonode ]]; then
+    python -c "from jupyterlab.commands import build_check; build_check()"
+fi
 
 
 if [[ $GROUP == python ]]; then
@@ -219,6 +221,30 @@ if [[ $GROUP == usage ]]; then
     ./test_install/bin/python -m jupyterlab.browser_check
     # Make sure we can run the build
     ./test_install/bin/jupyter lab build
+
+    # Make sure we can start and kill the lab server
+    ./test_install/bin/jupyter lab --no-browser &
+    TASK_PID=$!
+    # Make sure the task is running
+    ps -p $TASK_PID || exit 1
+    sleep 5
+    kill $TASK_PID
+    wait $TASK_PID
+
+    # Make sure we can clean various bits of the app dir
+    jupyter lab clean
+    jupyter lab clean --extensions
+    jupyter lab clean --settings
+    jupyter lab clean --static
+    jupyter lab clean --all
+fi
+
+if [[ $GROUP == nonode ]]; then
+    # Make sure we can install the wheel
+    virtualenv -p $(which python3) test_install
+    ./test_install/bin/pip install -v --pre --no-cache-dir --no-deps jupyterlab --no-index --find-links=dist  # Install latest jupyterlab
+    ./test_install/bin/pip install jupyterlab  # Install jupyterlab dependencies
+    ./test_install/bin/python -m jupyterlab.browser_check --no-chrome-test
 
     # Make sure we can start and kill the lab server
     ./test_install/bin/jupyter lab --no-browser &

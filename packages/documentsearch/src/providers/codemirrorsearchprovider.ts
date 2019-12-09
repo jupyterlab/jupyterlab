@@ -39,8 +39,8 @@ import { FileEditor } from '@jupyterlab/fileeditor';
 
 import * as CodeMirror from 'codemirror';
 
-import { ISignal, Signal } from '@phosphor/signaling';
-import { Widget } from '@phosphor/widgets';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 
 // The type for which canSearchFor returns true
 export type CMMainAreaWidget = MainAreaWidget<FileEditor> & {

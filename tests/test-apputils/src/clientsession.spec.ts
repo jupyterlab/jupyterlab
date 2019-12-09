@@ -7,7 +7,7 @@ import { SessionManager } from '@jupyterlab/services';
 
 import { ClientSession, Dialog, IClientSession } from '@jupyterlab/apputils';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import {
   acceptDialog,

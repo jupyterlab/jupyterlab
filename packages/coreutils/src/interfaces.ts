@@ -1,22 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { ReadonlyJSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
 
-import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
+import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@phosphor/signaling';
+import { ISignal } from '@lumino/signaling';
 
 /**
  * A generic interface for change emitter payloads.
  */
-export interface IChangedArgs<T> {
+export interface IChangedArgs<T, U extends string = string> {
   /**
    * The name of the changed attribute.
    */
-  name: string;
+  name: U;
 
   /**
    * The old value of the changed attribute.
@@ -41,8 +41,11 @@ export interface IChangedArgs<T> {
  * @typeparam V - The basic token applied to a request, conventionally a string
  * ID or filter, but may be set to a different type when an implementation
  * requires it. Defaults to `string`.
+ *
+ * @typeparam W - The type of the optional `query` parameter of the `list`
+ * method. Defaults to `string`;
  */
-export interface IDataConnector<T, U = T, V = string> {
+export interface IDataConnector<T, U = T, V = string, W = string> {
   /**
    * Retrieve an item from the data connector.
    *
@@ -69,7 +72,7 @@ export interface IDataConnector<T, U = T, V = string> {
    * retrieving the data. The two lists will always be the same size. If there
    * is no data, this method will succeed with empty `ids` and `values`.
    */
-  list(query?: any): Promise<{ ids: V[]; values: T[] }>;
+  list(query?: W): Promise<{ ids: V[]; values: T[] }>;
 
   /**
    * Remove a value using the data connector.

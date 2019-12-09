@@ -1,15 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { nbformat } from '@jupyterlab/coreutils';
+import { nbformat, IChangedArgs } from '@jupyterlab/coreutils';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { ISignal } from '@phosphor/signaling';
+import { ISignal } from '@lumino/signaling';
+import { IDisposable } from '@lumino/disposable';
 
 /* tslint:disable */
 /**
@@ -24,7 +25,7 @@ export type ILoggerRegistryChange = 'append';
 /**
  * A Logger Registry that registers and provides loggers by source.
  */
-export interface ILoggerRegistry {
+export interface ILoggerRegistry extends IDisposable {
   /**
    * Get the logger for the specified source.
    *
@@ -47,6 +48,11 @@ export interface ILoggerRegistry {
 }
 
 /**
+ * Log severity level
+ */
+export type LogLevel = 'critical' | 'error' | 'warning' | 'info' | 'debug';
+
+/**
  * The base log payload type.
  */
 export interface ILogPayloadBase {
@@ -54,6 +60,11 @@ export interface ILogPayloadBase {
    * Type of log data.
    */
   type: string;
+
+  /**
+   * Log level
+   */
+  level: LogLevel;
 
   /**
    * Data
@@ -108,7 +119,11 @@ export interface IOutputLog extends ILogPayloadBase {
  */
 export type ILogPayload = ITextLog | IHtmlLog | IOutputLog;
 
-export type ILoggerChange = 'append' | 'clear';
+export type IContentChange = 'append' | 'clear';
+
+export type IStateChange =
+  | IChangedArgs<IRenderMimeRegistry, 'rendermime'>
+  | IChangedArgs<LogLevel, 'level'>;
 
 export interface ILoggerOutputAreaModel extends IOutputAreaModel {
   /**
@@ -120,7 +135,7 @@ export interface ILoggerOutputAreaModel extends IOutputAreaModel {
 /**
  * A Logger that manages logs from a particular source.
  */
-export interface ILogger {
+export interface ILogger extends IDisposable {
   /**
    * Number of outputs logged.
    */
@@ -130,17 +145,21 @@ export interface ILogger {
    */
   maxLength: number;
   /**
+   * Log level.
+   */
+  level: LogLevel;
+  /**
    * Rendermime to use when rendering outputs logged.
    */
   rendermime: IRenderMimeRegistry;
   /**
    * A signal emitted when the log model changes.
    */
-  readonly logChanged: ISignal<this, ILoggerChange>;
+  readonly contentChanged: ISignal<this, IContentChange>;
   /**
    * A signal emitted when the rendermime changes.
    */
-  readonly rendermimeChanged: ISignal<this, void>;
+  readonly stateChanged: ISignal<this, IStateChange>;
   /**
    * The name of the log source.
    */
@@ -159,6 +178,10 @@ export interface ILogger {
    * @param log - The output to be logged.
    */
   log(log: ILogPayload): void;
+  /**
+   * Add a checkpoint in the log.
+   */
+  checkpoint(): void;
   /**
    * Clear all outputs logged.
    */

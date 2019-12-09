@@ -7,13 +7,13 @@ import {
   ServerConnection
 } from '@jupyterlab/services';
 
-import { JSONValue, PromiseDelegate } from '@phosphor/coreutils';
+import { JSONValue, PromiseDelegate } from '@lumino/coreutils';
 
-import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import {
   showDialog,
@@ -268,6 +268,25 @@ export class Context<T extends DocumentRegistry.IModel>
             return this._finishSaveAs(newPath);
           });
       });
+  }
+
+  /**
+   * Download a file.
+   *
+   * @param path - The path of the file to be downloaded.
+   *
+   * @returns A promise which resolves when the file has begun
+   *   downloading.
+   */
+  async download(): Promise<void> {
+    const url = await this._manager.contents.getDownloadUrl(this._path);
+    let element = document.createElement('a');
+    element.href = url;
+    element.download = '';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    return void 0;
   }
 
   /**

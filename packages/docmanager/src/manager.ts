@@ -5,7 +5,7 @@ import { IClientSession } from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import {
   DocumentRegistry,
@@ -15,15 +15,15 @@ import {
 
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
 
-import { ArrayExt, find } from '@phosphor/algorithm';
+import { ArrayExt, find } from '@lumino/algorithm';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { AttachedProperty } from '@phosphor/properties';
+import { AttachedProperty } from '@lumino/properties';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { SaveHandler } from './savehandler';
 

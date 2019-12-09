@@ -5,7 +5,7 @@
 // https://nbformat.readthedocs.io/en/latest/format_description.html
 // https://github.com/jupyter/nbformat/blob/master/nbformat/v4/nbformat.v4.schema.json
 
-import { JSONObject, JSONExt } from '@phosphor/coreutils';
+import { JSONObject, JSONExt } from '@lumino/coreutils';
 
 /**
  * A namespace for nbformat interfaces.

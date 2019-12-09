@@ -10,7 +10,7 @@
  * Another way to print is to use the `printURL` function, which takes a URL and prints that page.
  */
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 import { ServerConnection } from '@jupyterlab/services';
 
 export namespace Printing {
@@ -70,11 +70,9 @@ export namespace Printing {
    * @param url URL to load into an iframe.
    */
   export async function printURL(url: string): Promise<void> {
-    const text = await (await ServerConnection.makeRequest(
-      url,
-      {},
-      settings
-    )).text();
+    const text = await (
+      await ServerConnection.makeRequest(url, {}, settings)
+    ).text();
     return printContent(text);
   }
 

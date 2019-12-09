@@ -8,9 +8,9 @@ import {
   each,
   toArray,
   ArrayIterator
-} from '@phosphor/algorithm';
+} from '@lumino/algorithm';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { ICellModel } from '@jupyterlab/cells';
 

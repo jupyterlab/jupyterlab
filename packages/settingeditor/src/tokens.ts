@@ -3,7 +3,7 @@
 
 import { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
 import { SettingEditor } from './settingeditor';
 

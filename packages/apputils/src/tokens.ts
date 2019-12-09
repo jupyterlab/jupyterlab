@@ -3,11 +3,11 @@
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@phosphor/signaling';
+import { ISignal } from '@lumino/signaling';
 
 /* tslint:disable */
 /**

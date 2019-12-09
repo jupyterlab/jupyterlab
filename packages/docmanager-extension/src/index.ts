@@ -33,13 +33,13 @@ import { Contents, Kernel } from '@jupyterlab/services';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { each, map, some, toArray } from '@phosphor/algorithm';
+import { each, map, some, toArray } from '@lumino/algorithm';
 
-import { JSONExt } from '@phosphor/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the document manager plugin.
@@ -66,6 +66,8 @@ namespace CommandIDs {
   export const saveAll = 'docmanager:save-all';
 
   export const saveAs = 'docmanager:save-as';
+
+  export const download = 'docmanager:download';
 
   export const toggleAutosave = 'docmanager:toggle-autosave';
 
@@ -576,6 +578,18 @@ function addCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.download, {
+    label: 'Download',
+    caption: 'Download the file to your computer',
+    isEnabled,
+    execute: () => {
+      if (isEnabled()) {
+        let context = docManager.contextForWidget(shell.currentWidget);
+        return context.download();
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.toggleAutosave, {
     label: 'Autosave Documents',
     isToggled: () => docManager.autosave,
@@ -605,6 +619,7 @@ function addCommands(
       CommandIDs.restoreCheckpoint,
       CommandIDs.save,
       CommandIDs.saveAs,
+      CommandIDs.download,
       CommandIDs.toggleAutosave
     ].forEach(command => {
       palette.addItem({ command, category });
@@ -613,6 +628,7 @@ function addCommands(
 
   if (mainMenu) {
     mainMenu.settingsMenu.addGroup([{ command: CommandIDs.toggleAutosave }], 5);
+    mainMenu.fileMenu.addGroup([{ command: CommandIDs.download }], 6);
   }
 }
 

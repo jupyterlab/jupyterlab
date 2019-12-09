@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message } from '@phosphor/messaging';
-import { ISignal, Signal } from '@phosphor/signaling';
-import { Widget, Panel, PanelLayout, Title } from '@phosphor/widgets';
+import { Message } from '@lumino/messaging';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Widget, Panel, PanelLayout, Title } from '@lumino/widgets';
 
 /**
  * A panel that supports a collapsible header made from the widget's title.

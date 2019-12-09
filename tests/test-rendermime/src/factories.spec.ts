@@ -3,9 +3,9 @@
 
 import { expect } from 'chai';
 
-import { JSONObject, JSONValue } from '@phosphor/coreutils';
+import { JSONObject, JSONValue } from '@lumino/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { defaultSanitizer } from '@jupyterlab/apputils';
 

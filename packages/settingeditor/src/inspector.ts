@@ -13,7 +13,7 @@ import {
   standardRendererFactories
 } from '@jupyterlab/rendermime';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 
 import { RawEditor } from './raweditor';
 

@@ -5,8 +5,8 @@ import { SearchInstance } from './searchinstance';
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import { Debouncer } from '@jupyterlab/coreutils';
-import { Signal } from '@phosphor/signaling';
-import { Widget } from '@phosphor/widgets';
+import { Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';

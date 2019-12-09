@@ -20,13 +20,13 @@ import {
   MarkdownCell
 } from '@jupyterlab/cells';
 
-import { ArrayExt, each, toArray } from '@phosphor/algorithm';
+import { ArrayExt, each, toArray } from '@lumino/algorithm';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject, JSONExt } from '@lumino/coreutils';
 
-import { ElementExt } from '@phosphor/domutils';
+import { ElementExt } from '@lumino/domutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import * as React from 'react';
 
@@ -88,13 +88,13 @@ export class NotebookActions {
  */
 export namespace NotebookActions {
   /**
-   * Split the active cell into two cells.
+   * Split the active cell into two or more cells.
    *
    * @param widget - The target notebook widget.
    *
    * #### Notes
    * It will preserve the existing mode.
-   * The second cell will be activated.
+   * The last cell will be activated.
    * The existing selection will be cleared.
    * The leading whitespace in the second cell will be removed.
    * If there is no content, two empty cells will be created.
@@ -114,35 +114,58 @@ export namespace NotebookActions {
     const index = notebook.activeCellIndex;
     const child = notebook.widgets[index];
     const editor = child.editor;
-    const position = editor.getCursorPosition();
-    const offset = editor.getOffsetAt(position);
+    const selections = editor.getSelections();
     const orig = child.model.value.text;
 
-    // Create new models to preserve history.
-    const clone0 = Private.cloneCell(nbModel, child.model);
-    const clone1 = Private.cloneCell(nbModel, child.model);
+    let offsets = [0];
 
-    if (clone0.type === 'code') {
-      (clone0 as ICodeCellModel).outputs.clear();
+    for (let i = 0; i < selections.length; i++) {
+      // append start and end to handle selections
+      // cursors will have same start and end
+      let start = editor.getOffsetAt(selections[i].start);
+      let end = editor.getOffsetAt(selections[i].end);
+      if (start < end) {
+        offsets.push(start);
+        offsets.push(end);
+      } else if (end < start) {
+        offsets.push(end);
+        offsets.push(start);
+      } else {
+        offsets.push(start);
+      }
     }
-    clone0.value.text = orig
-      .slice(0, offset)
-      .replace(/^\n+/, '')
-      .replace(/\n+$/, '');
-    clone1.value.text = orig
-      .slice(offset)
-      .replace(/^\n+/, '')
-      .replace(/\n+$/, '');
 
-    // Make the changes while preserving history.
+    offsets.push(orig.length);
+
+    let clones: ICellModel[] = [];
+    for (let i = 0; i + 1 < offsets.length; i++) {
+      let clone = Private.cloneCell(nbModel, child.model);
+      clones.push(clone);
+    }
+
+    for (let i = 0; i < clones.length; i++) {
+      if (i !== clones.length - 1 && clones[i].type === 'code') {
+        (clones[i] as ICodeCellModel).outputs.clear();
+      }
+      clones[i].value.text = orig
+        .slice(offsets[i], offsets[i + 1])
+        .replace(/^\n+/, '')
+        .replace(/\n+$/, '');
+    }
+
     const cells = nbModel.cells;
 
     cells.beginCompoundOperation();
-    cells.set(index, clone0);
-    cells.insert(index + 1, clone1);
+    for (let i = 0; i < clones.length; i++) {
+      if (i === 0) {
+        cells.set(index, clones[i]);
+      } else {
+        cells.insert(index + i, clones[i]);
+      }
+    }
     cells.endCompoundOperation();
 
-    notebook.activeCellIndex++;
+    notebook.activeCellIndex = index + clones.length - 1;
     Private.handleState(notebook, state);
   }
 
@@ -999,19 +1022,6 @@ export namespace NotebookActions {
   }
 
   /**
-   * Toggle whether to record cell timing execution.
-   *
-   * @param notebook - The target notebook widget.
-   */
-  export function toggleRecordTiming(notebook: Notebook): void {
-    if (!notebook.model) {
-      return;
-    }
-    const currentValue = notebook.model.metadata.get('record_timing') || false;
-    notebook.model.metadata.set('record_timing', !currentValue);
-  }
-
-  /**
    * Clear the code outputs of the selected cells.
    *
    * @param notebook - The target notebook widget.
@@ -1030,9 +1040,8 @@ export namespace NotebookActions {
       const child = notebook.widgets[index];
 
       if (notebook.isSelectedOrActive(child) && cell.type === 'code') {
-        cell.outputs.clear();
+        cell.clearExecution();
         (child as CodeCell).outputHidden = false;
-        cell.executionCount = null;
       }
     });
     Private.handleState(notebook, state);
@@ -1057,8 +1066,7 @@ export namespace NotebookActions {
       const child = notebook.widgets[index];
 
       if (cell.type === 'code') {
-        cell.outputs.clear();
-        cell.executionCount = null;
+        cell.clearExecution();
         (child as CodeCell).outputHidden = false;
       }
     });
@@ -1263,6 +1271,43 @@ export namespace NotebookActions {
       }
     });
     Private.handleState(notebook, state);
+  }
+
+  /**
+   * Go to the last cell that is run or current if it is running.
+   *
+   * Note: This requires execution timing to be toggled on or this will have
+   * no effect.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function selectLastRunCell(notebook: Notebook): void {
+    let latestTime: Date = null;
+    let latestCellIdx: number = null;
+    notebook.widgets.forEach((cell, cellIndx) => {
+      if (cell.model.type === 'code') {
+        const execution = (cell as CodeCell).model.metadata.get('execution');
+        if (
+          execution &&
+          JSONExt.isObject(execution) &&
+          execution['iopub.status.busy'] !== undefined
+        ) {
+          // The busy status is used as soon as a request is received:
+          // https://jupyter-client.readthedocs.io/en/stable/messaging.html
+          const timestamp = execution['iopub.status.busy'].toString();
+          if (timestamp) {
+            const startTime = new Date(timestamp);
+            if (!latestTime || startTime >= latestTime) {
+              latestTime = startTime;
+              latestCellIdx = cellIndx;
+            }
+          }
+        }
+      }
+    });
+    if (latestCellIdx !== null) {
+      notebook.activeCellIndex = latestCellIdx;
+    }
   }
 
   /**
@@ -1504,7 +1549,7 @@ namespace Private {
         if (session) {
           return CodeCell.execute(cell as CodeCell, session, {
             deletedCells: notebook.model.deletedCells,
-            recordTiming: notebook.model.metadata.get('record_timing') || false
+            recordTiming: notebook.notebookConfig.recordTiming
           })
             .then(reply => {
               notebook.model.deletedCells.splice(
@@ -1532,11 +1577,10 @@ namespace Private {
               }
             })
             .catch(reason => {
-              if (reason.message !== 'Canceled') {
-                throw reason;
+              if (cell.isDisposed || reason.message.startsWith('Canceled')) {
+                return false;
               }
-
-              return false;
+              throw reason;
             })
             .then(ran => {
               if (ran) {
@@ -1546,7 +1590,7 @@ namespace Private {
               return ran;
             });
         }
-        (cell.model as ICodeCellModel).executionCount = null;
+        (cell.model as ICodeCellModel).clearExecution();
         break;
       default:
         break;

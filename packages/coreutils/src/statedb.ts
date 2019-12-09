@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReadonlyJSONObject, ReadonlyJSONValue } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { IDataConnector } from './interfaces';
 
@@ -149,13 +149,10 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
 
     const { ids, values } = await this._list();
 
-    return values.reduce(
-      (acc, val, idx) => {
-        acc[ids[idx]] = val;
-        return acc;
-      },
-      {} as { [id: string]: T }
-    );
+    return values.reduce((acc, val, idx) => {
+      acc[ids[idx]] = val;
+      return acc;
+    }, {} as { [id: string]: T });
   }
 
   /**

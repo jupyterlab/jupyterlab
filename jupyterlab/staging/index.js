@@ -1,3 +1,4 @@
+// This file is auto-generated from the corresponding file in /dev_mode
 /*-----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
@@ -21,89 +22,38 @@ require('./imports.css');
  */
 function main() {
   var JupyterLab = require('@jupyterlab/application').JupyterLab;
-
-  // Get the disabled extensions.
-  var disabled = { patterns: [], matches: [] };
-  var disabledExtensions = [];
-  try {
-    var tempDisabled = PageConfig.getOption('disabledExtensions');
-    if (tempDisabled) {
-      disabledExtensions = JSON.parse(tempDisabled).map(function(pattern) {
-        disabled.patterns.push(pattern);
-        return { raw: pattern, rule: new RegExp(pattern) };
-      });
-    }
-  } catch (error) {
-    console.warn('Unable to parse disabled extensions.', error);
-  }
-
-  // Get the deferred extensions.
-  var deferred = { patterns: [], matches: [] };
-  var deferredExtensions = [];
+  var disabled = [];
+  var deferred = [];
   var ignorePlugins = [];
-  try {
-    var tempDeferred = PageConfig.getOption('deferredExtensions');
-    if (tempDeferred) {
-      deferredExtensions = JSON.parse(tempDeferred).map(function(pattern) {
-        deferred.patterns.push(pattern);
-        return { raw: pattern, rule: new RegExp(pattern) };
-      });
-    }
-  } catch (error) {
-    console.warn('Unable to parse deferred extensions.', error);
-  }
-
-  function isDeferred(value) {
-    return deferredExtensions.some(function(pattern) {
-      return pattern.raw === value || pattern.rule.test(value);
-    });
-  }
-
-  function isDisabled(value) {
-    return disabledExtensions.some(function(pattern) {
-      return pattern.raw === value || pattern.rule.test(value);
-    });
-  }
-
   var register = [];
 
   // Handle the registered mime extensions.
   var mimeExtensions = [];
   var extension;
   var extMod;
+  var plugins = [];
   {{#each jupyterlab_mime_extensions}}
   try {
-    if (isDeferred('{{key}}')) {
-      deferred.matches.push('{{key}}');
-      ignorePlugins.push('{{key}}');
-    }
-    if (isDisabled('{{@key}}')) {
-      disabled.matches.push('{{@key}}');
-    } else {
-      extMod = require('{{@key}}/{{this}}');
-      extension = extMod.default;
+    extMod = require('{{@key}}/{{this}}');
+    extension = extMod.default;
 
-      // Handle CommonJS exports.
-      if (!extMod.hasOwnProperty('__esModule')) {
-        extension = extMod;
-      }
-
-      if (Array.isArray(extension)) {
-        extension.forEach(function(plugin) {
-          if (isDeferred(plugin.id)) {
-            deferred.matches.push(plugin.id);
-            ignorePlugins.push(plugin.id);
-          }
-          if (isDisabled(plugin.id)) {
-            disabled.matches.push(plugin.id);
-            return;
-          }
-          mimeExtensions.push(plugin);
-        });
-      } else {
-        mimeExtensions.push(extension);
-      }
+    // Handle CommonJS exports.
+    if (!extMod.hasOwnProperty('__esModule')) {
+      extension = extMod;
     }
+
+    plugins = Array.isArray(extension) ? extension : [extension];
+    plugins.forEach(function(plugin) {
+      if (PageConfig.Extension.isDeferred(plugin.id)) {
+        deferred.push(plugin.id);
+        ignorePlugins.push(plugin.id);
+      }
+      if (PageConfig.Extension.isDisabled(plugin.id)) {
+        disabled.push(plugin.id);
+        return;
+      }
+      mimeExtensions.push(plugin);
+    });
   } catch (e) {
     console.error(e);
   }
@@ -112,46 +62,42 @@ function main() {
   // Handled the registered standard extensions.
   {{#each jupyterlab_extensions}}
   try {
-    if (isDeferred('{{key}}')) {
-      deferred.matches.push('{{key}}');
-      ignorePlugins.push('{{key}}');
-    }
-    if (isDisabled('{{@key}}')) {
-      disabled.matches.push('{{@key}}');
-    } else {
-      extMod = require('{{@key}}/{{this}}');
-      extension = extMod.default;
+    extMod = require('{{@key}}/{{this}}');
+    extension = extMod.default;
 
-      // Handle CommonJS exports.
-      if (!extMod.hasOwnProperty('__esModule')) {
-        extension = extMod;
-      }
-
-      if (Array.isArray(extension)) {
-        extension.forEach(function(plugin) {
-          if (isDeferred(plugin.id)) {
-            deferred.matches.push(plugin.id);
-            ignorePlugins.push(plugin.id);
-          }
-          if (isDisabled(plugin.id)) {
-            disabled.matches.push(plugin.id);
-            return;
-          }
-          register.push(plugin);
-        });
-      } else {
-        register.push(extension);
-      }
+    // Handle CommonJS exports.
+    if (!extMod.hasOwnProperty('__esModule')) {
+      extension = extMod;
     }
+
+    plugins = Array.isArray(extension) ? extension : [extension];
+    plugins.forEach(function(plugin) {
+      if (PageConfig.Extension.isDeferred(plugin.id)) {
+        deferred.push(plugin.id);
+        ignorePlugins.push(plugin.id);
+      }
+      if (PageConfig.Extension.isDisabled(plugin.id)) {
+        disabled.push(plugin.id);
+        return;
+      }
+      register.push(plugin);
+    });
   } catch (e) {
     console.error(e);
   }
   {{/each}}
-
   var lab = new JupyterLab({
     mimeExtensions: mimeExtensions,
-    disabled: disabled,
-    deferred: deferred
+    disabled: {
+      matches: disabled,
+      patterns: PageConfig.Extension.disabled
+        .map(function (val) { return val.raw; })
+    },
+    deferred: {
+      matches: deferred,
+      patterns: PageConfig.Extension.deferred
+        .map(function (val) { return val.raw; })
+    },
   });
   register.forEach(function(item) { lab.registerPluginModule(item); });
   lab.start({ ignorePlugins: ignorePlugins });

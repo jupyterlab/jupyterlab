@@ -11,7 +11,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { TextItem } from '@jupyterlab/statusbar';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * A namespace for SavingStatusComponent statics.

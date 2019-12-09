@@ -7,7 +7,7 @@ import { WidgetTracker } from '@jupyterlab/apputils';
 
 import { signalToPromise, testEmission } from '@jupyterlab/testutils';
 
-import { Panel, Widget } from '@phosphor/widgets';
+import { Panel, Widget } from '@lumino/widgets';
 
 import { simulate } from 'simulate-event';
 

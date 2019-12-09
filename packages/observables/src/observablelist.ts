@@ -8,11 +8,11 @@ import {
   IterableOrArrayLike,
   each,
   toArray
-} from '@phosphor/algorithm';
+} from '@lumino/algorithm';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * A list which can be observed for changes.

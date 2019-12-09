@@ -1,14 +1,14 @@
 /**
  * Set up keyboard shortcuts & commands for notebook
  */
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 import { CompletionHandler } from '@jupyterlab/completer';
 import { NotebookPanel, NotebookActions } from '@jupyterlab/notebook';
 import {
   SearchInstance,
   NotebookSearchProvider
 } from '@jupyterlab/documentsearch';
-import { CommandPalette } from '@phosphor/widgets';
+import { CommandPalette } from '@lumino/widgets';
 
 /**
  * The map of command ids used by the notebook.

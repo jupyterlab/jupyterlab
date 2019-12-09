@@ -3,9 +3,9 @@
 
 import { expect } from 'chai';
 
-import { ArrayExt } from '@phosphor/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
 import { JupyterLabMenu } from '@jupyterlab/mainmenu';
 

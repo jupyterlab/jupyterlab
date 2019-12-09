@@ -1,15 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
 import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 
-import { ReadonlyJSONObject, Token } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@phosphor/signaling';
+import { ISignal } from '@lumino/signaling';
 
 /**
  * A token for which a plugin can provide to respond to connection failures

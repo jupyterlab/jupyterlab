@@ -15,7 +15,7 @@ import {
   TextItem
 } from '@jupyterlab/statusbar';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 
 /**
  * A namespace for TabSpaceComponent statics.

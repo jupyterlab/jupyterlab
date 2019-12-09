@@ -3,10 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-LogConsoleIcon {
-  background-image: var(--jp-icon-list);
-}
-
 @keyframes flash {
   0% {
     background-color: var(--jp-brand-color1);
@@ -35,7 +31,32 @@
   color: white;
 }
 
-.jp-LogConsole .clear-icon {
+.jp-LogConsole .jp-ClearIcon {
   transform: rotate(90deg);
   margin-top: -1px;
+}
+
+.jp-Toolbar-item.jp-LogConsole-toolbarLogLevel {
+  align-items: center;
+  padding: 0px 6px;
+}
+
+/* Matches the disabled style elsewhere in JupyterLab */
+.jp-LogConsole-toolbarLogLevel-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Copied from the notebook cell type dropdown styling */
+.jp-LogConsole-toolbarLogLevelDropdown select {
+  height: 24px;
+  font-size: var(--jp-ui-font-size1);
+  line-height: 14px;
+  border-radius: 0;
+  display: block;
+}
+
+/* Copied from the notebook cell type dropdown styling */
+.jp-LogConsole-toolbarLogLevelDropdown span {
+  top: 5px !important;
 }

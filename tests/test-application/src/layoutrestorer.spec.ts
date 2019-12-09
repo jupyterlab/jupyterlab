@@ -9,11 +9,11 @@ import { WidgetTracker } from '@jupyterlab/apputils';
 
 import { StateDB } from '@jupyterlab/coreutils';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { DockPanel, Widget } from '@phosphor/widgets';
+import { DockPanel, Widget } from '@lumino/widgets';
 
 describe('apputils', () => {
   describe('LayoutRestorer', () => {

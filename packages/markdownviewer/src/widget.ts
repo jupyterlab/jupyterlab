@@ -17,13 +17,13 @@ import {
   MimeModel
 } from '@jupyterlab/rendermime';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
-import { StackedLayout, Widget } from '@phosphor/widgets';
+import { StackedLayout, Widget } from '@lumino/widgets';
 
 /**
  * The class name added to a markdown viewer.
@@ -204,7 +204,7 @@ export class MarkdownViewer extends Widget {
 
   private _config = { ...MarkdownViewer.defaultConfig };
   private _fragment = '';
-  private _monitor: ActivityMonitor<any, any> | null;
+  private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null;
   private _ready = new PromiseDelegate<void>();
   private _isRendering = false;
   private _renderRequested = false;

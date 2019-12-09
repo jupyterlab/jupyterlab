@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/theme-light-extension",
-  "version": "2.0.0-alpha.1",
+  "version": "2.0.0-alpha.3",
   "description": "JupyterLab - Default Light Theme",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,13 +32,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.0.0-alpha.1",
-    "@jupyterlab/apputils": "^2.0.0-alpha.1"
+    "@jupyterlab/application": "^2.0.0-alpha.3",
+    "@jupyterlab/apputils": "^2.0.0-alpha.3"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
-    "typedoc": "^0.14.2",
-    "typescript": "~3.5.1"
+    "typedoc": "^0.15.2",
+    "typescript": "~3.7.2"
   },
   "publishConfig": {
     "access": "public"

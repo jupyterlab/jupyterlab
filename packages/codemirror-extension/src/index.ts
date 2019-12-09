@@ -3,7 +3,7 @@
 
 import CodeMirror from 'codemirror';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 
 import {
   ILabShell,

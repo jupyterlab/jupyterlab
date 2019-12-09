@@ -8,7 +8,6 @@ import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import {
   ConnectionLost,
   IConnectionLost,
-  IRouter,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -35,7 +34,6 @@ export namespace CommandIDs {
  */
 function activateHubExtension(
   app: JupyterFrontEnd,
-  router: IRouter,
   paths: JupyterFrontEnd.IPaths,
   palette: ICommandPalette,
   mainMenu: IMainMenu
@@ -103,7 +101,7 @@ function activateHubExtension(
 const hubExtension: JupyterFrontEndPlugin<void> = {
   activate: activateHubExtension,
   id: 'jupyter.extensions.hub-extension',
-  requires: [IRouter, JupyterFrontEnd.IPaths, ICommandPalette, IMainMenu],
+  requires: [JupyterFrontEnd.IPaths, ICommandPalette, IMainMenu],
   autoStart: true
 };
 

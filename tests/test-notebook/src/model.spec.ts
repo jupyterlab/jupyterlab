@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { ArrayExt, toArray } from '@phosphor/algorithm';
+import { ArrayExt, toArray } from '@lumino/algorithm';
 
 import { CodeCellModel } from '@jupyterlab/cells';
 
