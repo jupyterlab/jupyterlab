@@ -430,6 +430,15 @@ class SearchOverlay extends React.Component<
   }
 
   render() {
+    const filter = (
+      <FilterSelection
+        searchOutput={this.state.filters.output}
+        searchInput={this.state.filters.input}
+        toggleInput={this._toggleSearchInput}
+        toggleOutput={this._toggleSearchOutput}
+      />
+    );
+    const showReplace = !this.props.isReadOnly && this.state.replaceEntryShown;
     return [
       <div className={OVERLAY_ROW_CLASS} key={0}>
         {this.props.isReadOnly ? (
@@ -473,16 +482,11 @@ class SearchOverlay extends React.Component<
           currentIndex={this.props.overlayState.currentIndex}
           totalMatches={this.props.overlayState.totalMatches}
         />
-        <FilterSelection
-          searchOutput={this.state.filters.output}
-          searchInput={this.state.filters.input}
-          toggleInput={this._toggleSearchInput}
-          toggleOutput={this._toggleSearchOutput}
-        />
         <UpDownButtons
           onHighlightPrevious={() => this._executeSearch(false)}
           onHightlightNext={() => this._executeSearch(true)}
         />
+        {showReplace ? null : filter}
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this._onClose()}
@@ -495,17 +499,22 @@ class SearchOverlay extends React.Component<
         </button>
       </div>,
       <div className={OVERLAY_ROW_CLASS} key={1}>
-        {!this.props.isReadOnly && this.state.replaceEntryShown ? (
-          <ReplaceEntry
-            onReplaceKeydown={(e: KeyboardEvent) => this._onReplaceKeydown(e)}
-            onChange={(e: React.ChangeEvent) => this._onReplaceChange(e)}
-            onReplaceCurrent={() =>
-              this.props.onReplaceCurrent(this.state.replaceText)
-            }
-            onReplaceAll={() => this.props.onReplaceAll(this.state.replaceText)}
-            replaceText={this.state.replaceText}
-            ref="replaceEntry"
-          />
+        {showReplace ? (
+          <>
+            <ReplaceEntry
+              onReplaceKeydown={(e: KeyboardEvent) => this._onReplaceKeydown(e)}
+              onChange={(e: React.ChangeEvent) => this._onReplaceChange(e)}
+              onReplaceCurrent={() =>
+                this.props.onReplaceCurrent(this.state.replaceText)
+              }
+              onReplaceAll={() =>
+                this.props.onReplaceAll(this.state.replaceText)
+              }
+              replaceText={this.state.replaceText}
+              ref="replaceEntry"
+            />
+            {filter}
+          </>
         ) : null}
       </div>,
       <div
