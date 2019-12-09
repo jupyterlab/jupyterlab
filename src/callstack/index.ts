@@ -17,9 +17,8 @@ export class Callstack extends Panel {
 
     this.model = model;
     this.addClass('jp-DebuggerCallstack');
-    this.title.label = 'Callstack';
 
-    const header = new CallstackHeader(this.title.label);
+    const header = new CallstackHeader();
     const body = new Body(this.model);
 
     this.addWidget(header);
@@ -70,15 +69,15 @@ export class Callstack extends Panel {
 }
 
 class CallstackHeader extends Widget {
-  constructor(title: string) {
+  constructor() {
     super({ node: document.createElement('header') });
 
     const layout = new PanelLayout();
-    const span = new Widget({ node: document.createElement('h2') });
+    const title = new Widget({ node: document.createElement('h2') });
 
     this.layout = layout;
-    span.node.textContent = title;
-    layout.addWidget(span);
+    title.node.textContent = 'Callstack';
+    layout.addWidget(title);
     layout.addWidget(this.toolbar);
   }
 
