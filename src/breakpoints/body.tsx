@@ -94,6 +94,7 @@ const BreakpointComponent = ({
     <div
       className={`breakpoint`}
       onClick={() => model.clicked.emit(breakpoint)}
+      title={breakpoint.source.path}
     >
       <span className={'marker'}>●</span>
       <span className={'source'}>{breakpoint.source.path}</span>
