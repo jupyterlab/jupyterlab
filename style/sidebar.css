@@ -27,7 +27,7 @@
   border-top: none;
 }
 
-.jp-DebuggerSidebar > div > header > span {
+.jp-DebuggerSidebar > div > header > h2 {
   text-transform: uppercase;
   font-weight: 600;
   font-size: var(--jp-ui-font-size0);

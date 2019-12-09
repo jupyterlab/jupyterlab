@@ -47,7 +47,7 @@ class BreakpointsHeader extends Widget {
     super({ node: document.createElement('header') });
 
     const layout = new PanelLayout();
-    const span = new Widget({ node: document.createElement('span') });
+    const span = new Widget({ node: document.createElement('h2') });
 
     this.layout = layout;
     span.node.textContent = title;

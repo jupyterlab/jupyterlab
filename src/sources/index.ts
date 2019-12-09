@@ -29,7 +29,7 @@ export class Sources extends Panel {
     this.debuggerService = options.service;
     this.mimeTypeService = options.editorServices.mimeTypeService;
 
-    const header = new SourcesHeader('Source');
+    const header = new SourcesHeader(this.model);
     header.toolbar.addItem(
       'open',
       new ToolbarButton({
@@ -132,16 +132,26 @@ export class Sources extends Panel {
 }
 
 class SourcesHeader extends Widget {
-  constructor(title: string) {
+  constructor(model: Sources.Model) {
     super({ node: document.createElement('header') });
+    this.addClass('jp-DebuggerSources');
 
     const layout = new PanelLayout();
-    const span = new Widget({ node: document.createElement('span') });
-
     this.layout = layout;
-    span.node.textContent = title;
-    layout.addWidget(span);
+
+    const title = new Widget({ node: document.createElement('h2') });
+    title.node.textContent = 'Source';
+
+    const sourcePath = new Widget({ node: document.createElement('span') });
+    model.currentSourceChanged.connect((_, source) => {
+      const path = source?.path ?? '';
+      sourcePath.node.textContent = path;
+      sourcePath.node.title = path;
+    });
+
+    layout.addWidget(title);
     layout.addWidget(this.toolbar);
+    layout.addWidget(sourcePath);
   }
 
   readonly toolbar = new Toolbar();
@@ -171,12 +181,17 @@ export namespace Sources {
       return this._currentSourceOpened;
     }
 
+    get currentSourceChanged(): ISignal<Sources.Model, IDebugger.ISource> {
+      return this._currentSourceChanged;
+    }
+
     get currentSource() {
       return this._currentSource;
     }
 
     set currentSource(source: IDebugger.ISource | null) {
       this._currentSource = source;
+      this._currentSourceChanged.emit(source);
     }
 
     open() {
@@ -187,6 +202,10 @@ export namespace Sources {
     private _currentSourceOpened = new Signal<Sources.Model, IDebugger.ISource>(
       this
     );
+    private _currentSourceChanged = new Signal<
+      Sources.Model,
+      IDebugger.ISource
+    >(this);
   }
 
   export namespace Model {
