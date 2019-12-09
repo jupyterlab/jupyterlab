@@ -17,7 +17,7 @@
   top: 0;
   right: 0;
   z-index: 7;
-  min-width: 300px;
+  width: 405px;
   padding: 2px;
   font-size: var(--jp-ui-font-size1);
 }
@@ -134,6 +134,7 @@
 .jp-DocumentSearch-up-down-wrapper {
   display: inline-block;
   padding-right: 2px;
+  margin-left: auto;
 }
 
 .jp-DocumentSearch-up-down-wrapper button {
