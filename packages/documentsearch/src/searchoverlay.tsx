@@ -246,7 +246,6 @@ class FilterSelection extends React.Component<
   }
 
   _toggleExpanded() {
-    // @ts-ignore
     this.setState({ expanded: !this.state.expanded });
   }
 
