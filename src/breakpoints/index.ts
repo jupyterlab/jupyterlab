@@ -17,9 +17,8 @@ export class Breakpoints extends Panel {
     this.model = options.model;
     this.service = options.service;
     this.addClass('jp-DebuggerBreakpoints');
-    this.title.label = 'Breakpoints';
 
-    const header = new BreakpointsHeader(this.title.label);
+    const header = new BreakpointsHeader();
     this.body = new Body(this.model);
 
     this.addWidget(header);
@@ -43,15 +42,15 @@ export class Breakpoints extends Panel {
 }
 
 class BreakpointsHeader extends Widget {
-  constructor(title: string) {
+  constructor() {
     super({ node: document.createElement('header') });
 
     const layout = new PanelLayout();
-    const span = new Widget({ node: document.createElement('span') });
+    const title = new Widget({ node: document.createElement('h2') });
 
     this.layout = layout;
-    span.node.textContent = title;
-    layout.addWidget(span);
+    title.node.textContent = 'Breakpoints';
+    layout.addWidget(title);
     layout.addWidget(this.toolbar);
   }
 

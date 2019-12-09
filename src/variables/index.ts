@@ -15,9 +15,8 @@ export class Variables extends Panel {
 
     this.model = options.model;
     this.addClass('jp-DebuggerVariables');
-    this.title.label = 'Variables';
 
-    this.header = new VariablesHeader(this.title.label);
+    this.header = new VariablesHeader();
     this.body = new Body(this.model);
 
     this.addWidget(this.header);
@@ -40,14 +39,14 @@ export class Variables extends Panel {
 }
 
 class VariablesHeader extends Widget {
-  constructor(title: string) {
+  constructor() {
     super({ node: document.createElement('header') });
     const layout = new PanelLayout();
-    const span = new Widget({ node: document.createElement('span') });
+    const title = new Widget({ node: document.createElement('h2') });
 
     this.layout = layout;
-    span.node.textContent = title;
-    layout.addWidget(span);
+    title.node.textContent = 'Variables';
+    layout.addWidget(title);
   }
 }
 

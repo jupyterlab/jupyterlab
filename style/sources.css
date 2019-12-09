@@ -6,3 +6,11 @@
 [data-jp-debugger='true'].jp-Editor {
   height: 100%;
 }
+
+.jp-DebuggerSources > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color1);
+}
