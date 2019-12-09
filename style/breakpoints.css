@@ -7,19 +7,23 @@
   padding: 10px;
 }
 
-.jp-DebuggerBreakpoints-body .breakpoint span::before {
+.jp-DebuggerBreakpoints-body .breakpoint .marker {
   font-size: 20px;
   padding-right: 5px;
   content: '●';
   color: var(--jp-error-color1);
 }
 
-.jp-DebuggerBreakpoints-body .breakpoint span {
+.jp-DebuggerBreakpoints-body .breakpoint {
   display: flex;
   align-items: center;
 }
 
-.jp-DebuggerBreakpoints-body .breakpoint span:hover {
+.jp-DebuggerBreakpoints-body .breakpoint .source {
+  flex-grow: 1;
+}
+
+.jp-DebuggerBreakpoints-body .breakpoint:hover {
   background: var(--jp-layout-color2);
   cursor: pointer;
 }
