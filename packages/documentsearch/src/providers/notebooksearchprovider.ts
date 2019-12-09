@@ -2,15 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 import { ISearchProvider, ISearchMatch } from '../index';
 import { CodeMirrorSearchProvider } from './codemirrorsearchprovider';
-import { ISearchProvider, ISearchMatch } from '../index';
 import { GenericSearchProvider } from './genericsearchprovider';
 
 import { Cell, MarkdownCell, CodeCell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { NotebookPanel } from '@jupyterlab/notebook';
-import { Cell, MarkdownCell } from '@jupyterlab/cells';
 
-import { ArrayExt } from '@ lumino/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 import { Signal, ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
