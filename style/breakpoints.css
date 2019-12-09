@@ -21,6 +21,8 @@
 
 .jp-DebuggerBreakpoints-body .breakpoint .source {
   flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .jp-DebuggerBreakpoints-body .breakpoint:hover {
