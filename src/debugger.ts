@@ -3,10 +3,6 @@
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { IDataConnector } from '@jupyterlab/coreutils';
-
-import { ReadonlyJSONValue } from '@phosphor/coreutils';
-
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import { SplitPanel } from '@phosphor/widgets';
@@ -27,12 +23,6 @@ import { Variables } from './variables';
  * A namespace for `Debugger` statics.
  */
 export namespace Debugger {
-  export interface IOptions {
-    editorServices: IEditorServices;
-    callstackCommands: Callstack.ICommands;
-    connector?: IDataConnector<ReadonlyJSONValue>;
-  }
-
   export class Sidebar extends SplitPanel {
     constructor(options: Sidebar.IOptions) {
       super();
