@@ -357,6 +357,16 @@ export class SettingRegistry implements ISettingRegistry {
     const plugins = this.plugins;
     const registry = this;
 
+    if (fetched === undefined) {
+      throw [
+        {
+          dataPath: '',
+          keyword: 'id',
+          message: `Could not fetch settings for ${plugin}.`,
+          schemaPath: ''
+        } as ISchemaValidator.IError
+      ];
+    }
     await this._load(await this._transform('fetch', fetched));
     this._pluginChanged.emit(plugin);
 
@@ -553,6 +563,16 @@ export class SettingRegistry implements ISettingRegistry {
 
     // Fetch and reload the data to guarantee server and client are in sync.
     const fetched = await this.connector.fetch(plugin);
+    if (fetched === undefined) {
+      throw [
+        {
+          dataPath: '',
+          keyword: 'id',
+          message: `Could not fetch settings for ${plugin}.`,
+          schemaPath: ''
+        } as ISchemaValidator.IError
+      ];
+    }
     await this._load(await this._transform('fetch', fetched));
     this._pluginChanged.emit(plugin);
   }
