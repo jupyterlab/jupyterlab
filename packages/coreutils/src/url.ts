@@ -28,7 +28,9 @@ export namespace URLExt {
   /**
    * Normalize a url.
    */
-  export function normalize(url: string): string {
+  export function normalize(url: string): string;
+  export function normalize(url: undefined): undefined;
+  export function normalize(url: string | undefined): string | undefined {
     return url && parse(url).toString();
   }
 
