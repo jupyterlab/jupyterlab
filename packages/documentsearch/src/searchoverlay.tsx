@@ -24,6 +24,7 @@ const CASE_BUTTON_CLASS_ON =
 const INDEX_COUNTER_CLASS = 'jp-DocumentSearch-index-counter';
 const UP_DOWN_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-up-down-wrapper';
 const UP_BUTTON_CLASS = 'jp-DocumentSearch-up-button';
+const ELLIPSES_BUTTON_CLASS = 'jp-DocumentSearch-ellipses-button';
 const DOWN_BUTTON_CLASS = 'jp-DocumentSearch-down-button';
 const CLOSE_BUTTON_CLASS = 'jp-DocumentSearch-close-button';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
@@ -38,7 +39,6 @@ const TOGGLE_WRAPPER = 'jp-DocumentSearch-toggle-wrapper';
 const TOGGLE_PLACEHOLDER = 'jp-DocumentSearch-toggle-placeholder';
 const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
 const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
-const FILTER_CLASS = 'fa fa-filter';
 const SPACER_CLASS = 'jp-DocumentSearch-spacer';
 
 interface ISearchEntryProps {
@@ -259,7 +259,7 @@ class FilterSelection extends React.Component<
           // style={{position: 'relative'}}
         >
           <span
-            className={`${FILTER_CLASS} ${BUTTON_CONTENT_CLASS}`}
+            className={`${ELLIPSES_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
             tabIndex={-1}
           />
         </button>

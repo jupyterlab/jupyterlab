@@ -160,6 +160,10 @@
   background-image: var(--jp-icon-search-arrow-down);
 }
 
+.jp-DocumentSearch-ellipses-button {
+  background-image: var(--jp-icon-ellipses);
+}
+
 .jp-DocumentSearch-close-button {
   display: inline-block;
   background-size: 16px;
