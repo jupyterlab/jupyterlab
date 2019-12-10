@@ -26,7 +26,9 @@ interface IServerStatusProps {
 }
 
 function ServerStatus(props: IServerStatusProps) {
-  let list = props.server.spec.languages.map(language => <li>{language}</li>);
+  let list = props.server.spec.languages.map((language, i) => (
+    <li key={i}>{language}</li>
+  ));
   return (
     <div className={'lsp-server-status'}>
       <h5>{props.server.spec.display_name}</h5>
@@ -98,20 +100,22 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
       return null;
     }
     const servers_available = this.model.servers_available_not_in_use.map(
-      (session: IServer) => <ServerStatus server={session} />
+      (session: IServer, i) => <ServerStatus key={i} server={session} />
     );
 
     let running_servers = new Array<any>();
+    let key = -1;
     for (let [
       session,
       documents_by_language
     ] of this.model.documents_by_server.entries()) {
+      key += 1;
       let documents_html = new Array<any>();
       for (let [language, documents] of documents_by_language) {
         // TODO user readable document ids: filename, [cell id]
         // TODO: stop button
         // TODO: add a config buttons next to the language header
-        let list = documents.map(document => {
+        let list = documents.map((document, i) => {
           let connection = this.model.adapter.connection_manager.connections.get(
             document.id_path
           );
@@ -126,7 +130,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
           }
 
           return (
-            <li>
+            <li key={i}>
               {document.id_path}
               <span className={'lsp-document-status'}>
                 {status}
@@ -144,7 +148,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
         });
 
         documents_html.push(
-          <div className={'lsp-documents-by-language'}>
+          <div key={key} className={'lsp-documents-by-language'}>
             <h5>
               {language}{' '}
               <span className={'lsp-language-server-name'}>
@@ -156,12 +160,16 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
         );
       }
 
-      running_servers.push(<div>{documents_html}</div>);
+      running_servers.push(<div key={key}>{documents_html}</div>);
     }
 
-    const missing_languages = this.model.missing_languages.map(language => (
-      <div className={'lsp-missing-server'}>{language}</div>
-    ));
+    const missing_languages = this.model.missing_languages.map(
+      (language, i) => (
+        <div key={i} className={'lsp-missing-server'}>
+          {language}
+        </div>
+      )
+    );
     return (
       <div className={'lsp-popover-content'}>
         <div className={'lsp-servers-menu'}>
@@ -169,6 +177,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
           <div className={'lsp-servers-lists'}>
             {servers_available.length ? (
               <CollapsibleList
+                key={'available'}
                 title={'Available'}
                 list={servers_available}
                 startCollapsed={true}
@@ -177,12 +186,20 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
               ''
             )}
             {running_servers.length ? (
-              <CollapsibleList title={'Running'} list={running_servers} />
+              <CollapsibleList
+                key={'running'}
+                title={'Running'}
+                list={running_servers}
+              />
             ) : (
               ''
             )}
             {missing_languages.length ? (
-              <CollapsibleList title={'Missing'} list={missing_languages} />
+              <CollapsibleList
+                key={'missing'}
+                title={'Missing'}
+                list={missing_languages}
+              />
             ) : (
               ''
             )}
