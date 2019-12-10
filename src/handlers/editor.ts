@@ -53,9 +53,9 @@ export class EditorHandler implements IDisposable {
     if (!this._debuggerModel) {
       return;
     }
-    this.breakpointsModel = this._debuggerModel.breakpointsModel;
+    this.breakpointsModel = this._debuggerModel.breakpoints;
 
-    this._debuggerModel.callstackModel.currentFrameChanged.connect(() => {
+    this._debuggerModel.callstack.currentFrameChanged.connect(() => {
       EditorHandler.clearHighlight(this._editor);
     });
 
@@ -190,7 +190,7 @@ export class EditorHandler implements IDisposable {
 
   private getBreakpoints(): IDebugger.IBreakpoint[] {
     const code = this._editor.model.value.text;
-    return this._debuggerModel.breakpointsModel.getBreakpoints(
+    return this._debuggerModel.breakpoints.getBreakpoints(
       this._path ?? this._debuggerService.getCodeId(code)
     );
   }
