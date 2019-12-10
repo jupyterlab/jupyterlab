@@ -24,11 +24,17 @@ export class ConsoleHandler implements IDisposable {
     this._cellMap = new ObservableMap<EditorHandler>();
 
     const codeConsole = this.consolePanel.console;
-    each(codeConsole.cells, cell => this.addEditorHandler(cell));
+
     this.addEditorHandler(codeConsole.promptCell);
     codeConsole.promptCellCreated.connect((_: CodeConsole, cell: CodeCell) => {
       this.addEditorHandler(cell);
     });
+
+    const addHandlers = () => {
+      each(codeConsole.cells, cell => this.addEditorHandler(cell));
+    };
+    addHandlers();
+    this.consolePanel.console.cells.changed.connect(addHandlers);
   }
 
   isDisposed: boolean;
@@ -44,7 +50,8 @@ export class ConsoleHandler implements IDisposable {
   }
 
   protected addEditorHandler(cell: Cell) {
-    if (cell.model.type !== 'code') {
+    const modelId = cell.model.id;
+    if (cell.model.type !== 'code' || this._cellMap.has(modelId)) {
       return;
     }
     const codeCell = cell as CodeCell;
@@ -52,7 +59,6 @@ export class ConsoleHandler implements IDisposable {
       debuggerService: this.debuggerService,
       editor: codeCell.editor
     });
-    const modelId = cell.model.id;
     codeCell.disposed.connect(() => {
       this._cellMap.delete(modelId);
       editorHandler.dispose();
