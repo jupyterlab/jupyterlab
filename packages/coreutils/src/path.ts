@@ -69,13 +69,15 @@ export namespace PathExt {
    * @returns the last part of the path, sans extension.
    */
   export function stem(path: string): string {
+    // TODO: This will always fail?
+    // TODO: Exclamation marks are only here to allow it to compile
     return path
       .split('\\')
-      .pop()
+      .pop()!
       .split('/')
-      .pop()
+      .pop()!
       .split('.')
-      .shift();
+      .shift()!;
   }
 
   /**
