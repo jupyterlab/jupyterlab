@@ -137,7 +137,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     const kernelPreference = this.context.sessionContext.kernelPreference;
     this.context.sessionContext.kernelPreference = {
       ...kernelPreference,
-      shutdownOnClose: config.kernelShutdown
+      shutdownOnDispose: config.kernelShutdown
     };
   }
 

@@ -17,7 +17,7 @@ import { AttachedProperty } from '@phosphor/properties';
 
 import { PanelLayout, Widget } from '@phosphor/widgets';
 
-import { ISessionContext } from './clientsession';
+import { ISessionContext } from './sessioncontext';
 
 import * as React from 'react';
 import { ReadonlyJSONObject } from '@phosphor/coreutils';

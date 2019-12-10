@@ -200,12 +200,12 @@ export function sleep<T>(milliseconds: number = 0, value?: T): Promise<T> {
 export async function createSessionContext(
   options: Partial<SessionContext.IOptions> = {}
 ): Promise<SessionContext> {
-  const manager = options.manager ?? Private.getManager().sessions;
+  const manager = options.sessionManager ?? Private.getManager().sessions;
   const specsManager = options.specsManager ?? Private.getManager().kernelspecs;
 
   await manager.ready;
   return new SessionContext({
-    manager,
+    sessionManager: manager,
     specsManager,
     path: options.path || UUID.uuid4(),
     name: options.name,
@@ -269,7 +269,7 @@ export async function initNotebookContext(
     kernelPreference: {
       shouldStart: startKernel,
       canStart: startKernel,
-      shutdownOnClose: true,
+      shutdownOnDispose: true,
       name: manager.kernelspecs.specs.default
     }
   });

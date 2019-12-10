@@ -59,7 +59,7 @@ export class ConsolePanel extends Panel {
     }
 
     let sessionContext = (this._sessionContext = new SessionContext({
-      manager: manager.sessions,
+      sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,
       path,
       name: name || `Console ${count}`,

@@ -28,79 +28,15 @@ import { showDialog, Dialog } from './dialog';
 import { KernelSpec } from '@jupyterlab/services/lib/kernelspec';
 
 /**
- * The interface of client session object.
+ * A context object to manage a widget's kernel session connection.
  *
- * OLD: The client session represents the link between a path and its kernel
- * for the duration of the lifetime of the session object.  The session can
- * have no current kernel, and can start a new kernel at any time.
- *
- * NEW: A client session represents a single object that proxies the session
- * information for the session an object is connected to. This is a
- * convenience object that points to a specific session (which in turn points
- * to a specific kernel). The signals here are proxied from the current
- * kernel.
- *
- * For any session-specific operations, use the .session attribute. For any
- * kernel-specific things, use .session.kernel. For convenience, we proxy the
- * current kernel and session signals to the client session (so you don't have
- * to handle session or kernel changes in your slots).
- *
- * A session represents a persistent resource to address a kernel. The kernel
- * can be restarted or changed.
- *
- * A clientSession represents a client-side handle to a single session.
- * Essentially, the main thing it adds is a sessionChanged signal, which
- * represents pointing your clientSession to a different session.
- *
- * For example, a variable explorer contains a clientSession. That points the
- * current session the variable explorer is hooked to, and gives notifications
- * when changing sessions. The clientSession object on the variable explorer
- * is a single object whose lifecycle matches the variable explorer widget.
- * The session object matches the persistent
- *
- * A kernel represents a computational process. Its lifecycle is determined by
- * explicit restarts and shutdowns, computational conditions (such as OOM
- * errors), etc.
- *
- * A session represents a connection to semantic kernel. It is initiated
- * explicitly, and persists beyond kernel shutdowns, and provides a single
- * handle for multiple activities talking to the same computational resource
- * kernel (even if that kernel is restarted or changed). For example, a
- * console and a notebook can point to the same session, which means they will
- * continue pointing to the same kernel even if the session's kernel is
- * switched. Sessions are stored on the server side in the rest API.
- *
- * A clientSession represents a mapping of a widget to a session. Its
- * lifecycle is the widget lifecycle.
- *
- * A plugin for a widget would grab the widget's clientSession to have a
- * persistent handle on whatever computation resource was tied to the widget.
- * The session a clientSession points to may be restored as part of the widget
- * restoration process (so refreshing a page will point the widget to the
- * right session). The Running tab UI should provide a way to point a widget's
- * clientSession to a new session. It should also provide a way to explicitly
- * manage the kernel associated with the session (restart, change, interrupt,
- * etc.).
- *
- * For many things, we only care about kernel signals from the current kernel,
- * no matter how many times the session or kernel changes. Since it is
- * inconvenient to disconnect and connect handlers every time a session or
- * kernel changes, we proxy the kernel signals to the session, and the session
- * signals to the clientSession. So to act on whatever the current kernel's
- * iopubmessage signal, just hook up to the clientSession's iopubmessage
- * signal.
- *
- * Another possibility would be to offer a utility function to
- * connect/disconnect a specific function on a signal. Use one signal to
- * affect the connection/disconnection of another signal. For example, given a
- * change signal and a slot and an initial object, on any change signal, it
- * would disconnect the slot from the old value and connect it to the new
- * value.
- *
- * To manage a kernel lifecycle, you can change the kernel for a session
- * (which affects all connections to that session), or you can create a
- * connection to a new session (which does not affect other connections to a
- * session).
+ * #### Notes
+ * The current session connection is `.session`, the current session's kernel
+ * connection is `.session.kernel`. For convenience, we proxy several kernel
+ * connection and and session connection signals up to the session context so
+ * that you do not have to manage slots as sessions and kernels change. For
+ * example, to act on whatever the current kernel's iopubMessage signal is
+ * producing, connect to the session context `.iopubMessage` signal.
  *
  */
 export interface ISessionContext extends IObservableDisposable {
@@ -166,13 +102,6 @@ export interface ISessionContext extends IObservableDisposable {
   readonly kernelDisplayName: string;
 
   /**
-   * Change the current kernel associated with the document.
-   *
-   * TODO: this currently changes a kernel if the session exists, otherwise
-   * starts a new session, so it is kind of a shorthand convenience function.
-   */
-
-  /**
    * Kill the kernel and shutdown the session.
    *
    * @returns A promise that resolves when the session is shut down.
@@ -182,31 +111,31 @@ export interface ISessionContext extends IObservableDisposable {
   /**
    * Use a UX to select a new kernel for the session.
    *
-   * TODO: should this select a new kernel for the session, or make a new session?
-   *
-   * TODO: Make this function an optional constructor option, so that we can customize it.
+   * TODO: make this function an optional constructor option so we can easily customize the UX
    */
   selectKernel(): Promise<void>;
 
   /**
-   * Restart the session.
+   * Restart the kernel, with confirmation UX.
    *
    * @returns A promise that resolves with whether the kernel has restarted.
    *
    * #### Notes
-   * The purpose here is to make it easy to get a new kernel running in a
-   * session when we once had a kernel running.
+   * This method makes it easy to get a new kernel running in a session where
+   * we used to have a session running.
+   *
+   * * If there is a running kernel, present a confirmation dialog.
+   * * If there is no kernel, start a kernel with the last-run kernel name.
+   * * If no kernel has ever been started, this is a no-op, and resolves with
+   *   `false`.
+   *
+   * TODO: be able to pass in a factory for the restart dialog so we can
+   * override the default.
    *
    * TODO: We keep the last kernel that this session ran here, in case the
    * session lifetime is tied to the kernel lifetime.
    *
-   * * If there is a running kernel, present a dialog.
-   * * If there is no kernel, we start a kernel with the last run kernel name
-   *   and resolves with `true`.
-   * * If no kernel has been started, this is a no-op, and resolves with
-   *   `false`.
-   *
-   * TODO: be able to pass in a factory for the restart dialog so we can override the default.
+   * TODO: perhaps if there wasn't a kernel in memory, call out to selectKernel?
    */
   restart(): Promise<boolean>;
 }
@@ -217,6 +146,11 @@ export interface ISessionContext extends IObservableDisposable {
 export namespace ISessionContext {
   /**
    * A kernel preference.
+   *
+   * #### Notes
+   * Preferences for a kernel are considered in the order `id`, `name`,
+   * `language`. If no matching kernels can be found and `autoStartDefault` is
+   * `true`, then the default kernel for the server is preferred.
    */
   export interface IKernelPreference {
     /**
@@ -235,22 +169,23 @@ export namespace ISessionContext {
     readonly id?: string;
 
     /**
-     * Whether to prefer starting a kernel.
+     * A kernel should be started automatically (default `true`).
      */
     readonly shouldStart?: boolean;
 
     /**
-     * Whether a kernel can be started.
+     * A kernel can be started (default `true`).
      */
     readonly canStart?: boolean;
 
     /**
-     * Whether a kernel needs to be close with the associated session
+     * Shut down the session when session context is disposed (default `false`).
      */
-    readonly shutdownOnClose?: boolean;
+    readonly shutdownOnDispose?: boolean;
 
     /**
-     * Whether to auto-start the default kernel if no matching kernel is found.
+     * Automatically start the default kernel if no other matching kernel is
+     * found (default `true`).
      */
     readonly autoStartDefault?: boolean;
   }
@@ -264,13 +199,13 @@ export class SessionContext implements ISessionContext {
    * Construct a new client session.
    */
   constructor(options: SessionContext.IOptions) {
-    this.manager = options.manager;
+    this.manager = options.sessionManager;
     this.specsManager = options.specsManager;
-    this._path = options.path || UUID.uuid4();
-    this._type = options.type || '';
-    this._name = options.name || '';
+    this._path = options.path ?? UUID.uuid4();
+    this._type = options.type ?? '';
+    this._name = options.name ?? '';
     this._setBusy = options.setBusy;
-    this._kernelPreference = options.kernelPreference || {};
+    this._kernelPreference = options.kernelPreference ?? {};
   }
 
   /**
@@ -395,7 +330,7 @@ export class SessionContext implements ISessionContext {
     }
     this._isDisposed = true;
     if (this._session) {
-      if (this.kernelPreference.shutdownOnClose) {
+      if (this.kernelPreference.shutdownOnDispose) {
         // Fire and forget the session shutdown request
         this._session.shutdown().catch(reason => {
           console.error(`Kernel not shut down ${reason}`);
@@ -840,12 +775,14 @@ export namespace SessionContext {
     /**
      * A session manager instance.
      */
-    manager: Session.IManager;
+    sessionManager: Session.IManager;
 
     /**
-     * A manager for kernel specs
+     * A kernel spec manager instance.
      */
     specsManager: KernelSpec.IManager;
+
+    // TODO: Should we just accept a Partial<Session.IModel>?
 
     /**
      * The initial path of the file.
