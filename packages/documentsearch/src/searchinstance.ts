@@ -204,7 +204,8 @@ export class SearchInstance implements IDisposable {
     forceFocus: true,
     replaceText: '',
     replaceEntryShown: false,
-    filters: { input: true, output: true }
+    filters: { output: true },
+    filtersOpen: false
   };
 
   private _displayUpdateSignal = new Signal<this, IDisplayState>(this);

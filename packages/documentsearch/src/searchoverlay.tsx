@@ -224,63 +224,54 @@ function SearchIndices(props: ISearchIndexProps) {
   );
 }
 
+interface IFilterToggleProps {
+  enabled: boolean;
+  toggleEnabled: () => void;
+}
+
+interface IFilterToggleState {}
+
+class FilterToggle extends React.Component<
+  IFilterToggleProps,
+  IFilterToggleState
+> {
+  render() {
+    return (
+      <button
+        className={BUTTON_WRAPPER_CLASS}
+        onClick={() => this.props.toggleEnabled()}
+      >
+        <span
+          className={`${ELLIPSES_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
+          tabIndex={-1}
+        />
+      </button>
+    );
+  }
+}
+
 interface IFilterSelectionProps {
   searchOutput: boolean;
-  searchInput: boolean;
-  toggleInput: () => void;
   toggleOutput: () => void;
 }
 
-interface IFilterSelectionState {
-  expanded: boolean;
-}
+interface IFilterSelectionState {}
 
 class FilterSelection extends React.Component<
   IFilterSelectionProps,
   IFilterSelectionState
 > {
-  constructor(props: IFilterSelectionProps) {
-    super(props);
-    this.state = {
-      expanded: false
-    };
-  }
-
-  _toggleExpanded() {
-    this.setState({ expanded: !this.state.expanded });
-  }
-
   render() {
     return (
       <div>
-        <button
-          className={BUTTON_WRAPPER_CLASS}
-          onClick={() => this._toggleExpanded()}
-          // style={{position: 'relative'}}
-        >
-          <span
-            className={`${ELLIPSES_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-            tabIndex={-1}
+        <span>
+          <input
+            type="checkbox"
+            checked={this.props.searchOutput}
+            onChange={this.props.toggleOutput}
           />
-        </button>
-        {this.state.expanded ? (
-          <span>
-            <br />
-            <input
-              type="checkbox"
-              checked={this.props.searchInput}
-              onChange={this.props.toggleInput}
-            />
-            Input
-            <br />
-            <input
-              type="checkbox"
-              checked={this.props.searchOutput}
-              onChange={this.props.toggleOutput}
-            />
-            Output
-          </span>
-        ) : null}
+          Output
+        </span>
       </div>
     );
   }
@@ -306,7 +297,6 @@ class SearchOverlay extends React.Component<
     super(props);
     this.state = props.overlayState;
 
-    this._toggleSearchInput = this._toggleSearchInput.bind(this);
     this._toggleSearchOutput = this._toggleSearchOutput.bind(this);
   }
 
@@ -404,19 +394,6 @@ class SearchOverlay extends React.Component<
       this.setState({ searchInputFocused: false });
     }
   }
-
-  private _toggleSearchInput() {
-    this.setState(
-      prevState => ({
-        ...prevState,
-        filters: {
-          ...prevState.filters,
-          input: !prevState.filters.input
-        }
-      }),
-      () => this._executeSearch(true, undefined, true)
-    );
-  }
   private _toggleSearchOutput() {
     this.setState(
       prevState => ({
@@ -429,13 +406,22 @@ class SearchOverlay extends React.Component<
       () => this._executeSearch(true, undefined, true)
     );
   }
+  private _toggleFiltersOpen() {
+    this.setState(prevState => ({
+      filtersOpen: !prevState.filtersOpen
+    }));
+  }
 
   render() {
+    const filterToggle = (
+      <FilterToggle
+        enabled={this.state.filtersOpen}
+        toggleEnabled={() => this._toggleFiltersOpen()}
+      />
+    );
     const filter = (
       <FilterSelection
         searchOutput={this.state.filters.output}
-        searchInput={this.state.filters.input}
-        toggleInput={this._toggleSearchInput}
         toggleOutput={this._toggleSearchOutput}
       />
     );
@@ -487,7 +473,7 @@ class SearchOverlay extends React.Component<
           onHighlightPrevious={() => this._executeSearch(false)}
           onHightlightNext={() => this._executeSearch(true)}
         />
-        {showReplace ? null : filter}
+        {showReplace ? null : filterToggle}
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this._onClose()}
@@ -515,10 +501,11 @@ class SearchOverlay extends React.Component<
               ref="replaceEntry"
             />
             <div className={SPACER_CLASS}></div>
-            {filter}
+            {filterToggle}
           </>
         ) : null}
       </div>,
+      this.state.filtersOpen ? filter : <></>,
       <div
         className={REGEX_ERROR_CLASS}
         hidden={this.state.errorMessage && this.state.errorMessage.length === 0}

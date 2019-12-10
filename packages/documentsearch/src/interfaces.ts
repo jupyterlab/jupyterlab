@@ -5,7 +5,7 @@ import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 export interface IFiltersType {
-  [key: string]: boolean;
+  output: boolean;
 }
 
 export interface IDisplayState {
@@ -73,6 +73,11 @@ export interface IDisplayState {
    * What should we include when we search?
    */
   filters: IFiltersType;
+
+  /**
+   * Is the filters view open?
+   */
+  filtersOpen: boolean;
 }
 
 export interface ISearchMatch {
