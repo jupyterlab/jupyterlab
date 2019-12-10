@@ -212,18 +212,16 @@ export class TrackerHandler implements IDisposable {
         return;
       }
 
-      const editor = consoleWidget?.console.promptCell?.editor ?? null;
-      if (!editor) {
-        return;
-      }
-
-      const code = editor.model.value.text;
-      const codeId = this.debuggerService.getCodeId(code);
-      if (source !== codeId) {
-        return;
-      }
-      editors.push(editor);
-      this.shell.activateById(consoleWidget.id);
+      const cells = consoleWidget.console.cells;
+      each(cells, cell => {
+        const code = cell.model.value.text;
+        const codeId = this.debuggerService.getCodeId(code);
+        if (source !== codeId) {
+          return;
+        }
+        editors.push(cell.editor);
+        this.shell.activateById(consoleWidget.id);
+      });
     });
     return editors;
   }
