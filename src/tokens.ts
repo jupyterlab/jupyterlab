@@ -145,11 +145,6 @@ export namespace IDebugger {
     client: IClientSession | Session.ISession;
 
     /**
-     * The current enabled debugger of client.
-     */
-    currentStateClient: string;
-
-    /**
      * Whether the debug session is started
      */
     readonly isStarted: boolean;
@@ -167,6 +162,13 @@ export namespace IDebugger {
      * kernel to be ready.
      */
     requestKernelInfo(): Promise<IDebugger.ISession.IInfoReply | null>;
+
+    /**
+     * Add/Delete client to Set of lifecycle debugger.
+     *  @param clientName name of client.
+     *  @param onlyCheck set true if only want to check if client exist in Set.
+     */
+    statesClient(clientName: string, onlyCheck?: boolean): boolean;
 
     /**
      * Start a new debug session.

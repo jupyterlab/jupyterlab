@@ -37,6 +37,7 @@ export class NotebookHandler implements IDisposable {
     this._cellMap.values().forEach(handler => handler.dispose());
     this._cellMap.dispose();
     Signal.clearData(this);
+    this.notebookPanel.node.setAttribute('data-jp-debugger', 'false');
   }
 
   protected addEditorHandler(cell: Cell) {

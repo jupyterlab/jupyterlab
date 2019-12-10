@@ -73,12 +73,16 @@ export class DebugSession implements IDebugger.ISession {
     }
   }
 
-  get currentStateClient() {
-    return this._statesClient;
-  }
-
-  set currentStateClient(state: string) {
-    this._statesClient = state;
+  statesClient(clientName: string, onlyCheck?: boolean) {
+    if (onlyCheck) {
+      return this._statesClient.has(clientName);
+    }
+    if (this._statesClient.delete(clientName)) {
+      return false;
+    } else {
+      this._statesClient.add(clientName);
+      return true;
+    }
   }
 
   /**
@@ -229,7 +233,7 @@ export class DebugSession implements IDebugger.ISession {
     IDebugger.ISession.Event
   >(this);
   private _seq: number = 0;
-  private _statesClient: string;
+  private _statesClient: Set<string> = new Set();
 }
 
 /**

@@ -132,8 +132,8 @@ export class DebugService implements IDebugger, IDisposable {
   /**
    * Checking lifecycle state of debugger in current widget
    */
-  isActualKernelState(): boolean {
-    return this.session.client.name === this.session.currentStateClient;
+  isLifeCycleOnKernelState(): boolean {
+    return this.session.statesClient(this.session.client.name, true);
   }
 
   /**
@@ -238,7 +238,7 @@ export class DebugService implements IDebugger, IDisposable {
       await this.start();
     }
 
-    if (this.isActualKernelState()) {
+    if (this.isLifeCycleOnKernelState()) {
       if (stoppedThreads.size !== 0) {
         await this._getAllFrames();
       } else {

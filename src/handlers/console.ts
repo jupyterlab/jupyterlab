@@ -47,6 +47,7 @@ export class ConsoleHandler implements IDisposable {
     this._cellMap.values().forEach(handler => handler.dispose());
     this._cellMap.dispose();
     Signal.clearData(this);
+    this.consolePanel.node.setAttribute('data-jp-debugger', 'false');
   }
 
   protected addEditorHandler(cell: Cell) {

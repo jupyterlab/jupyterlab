@@ -97,10 +97,11 @@ function updateToolbar(
   handler: any
 ): void {
   const isConsolePanel = widget instanceof ConsolePanel;
-  const checkState = () =>
-    debug.session.client.name === debug.session.currentStateClient;
 
-  widget.node.setAttribute('data-debugger-on', checkState().toString());
+  widget.node.setAttribute(
+    'data-debugger-on',
+    debug.session.statesClient(debug.session.client.name, true).toString()
+  );
 
   const getToolbar = (): Toolbar => {
     if (isConsolePanel) {
@@ -121,16 +122,10 @@ function updateToolbar(
         className: 'jp-debugger-switch-button',
         iconClassName: 'jp-toggle-switch',
         onClick: async () => {
-          if (debug.model == null && !checkState()) {
-            await commands.execute(CommandIDs.create);
-            handler.update(debug, widget);
-          }
-          if (!checkState()) {
-            debug.session.currentStateClient = debug.session.client.name;
-          } else {
-            debug.session.currentStateClient = null;
-          }
-          widget.node.setAttribute('data-debugger-on', checkState().toString());
+          widget.node.setAttribute(
+            'data-debugger-on',
+            debug.session.statesClient(debug.session.client.name).toString()
+          );
         },
         tooltip: 'Enable / Disable Debugger'
       })
@@ -160,11 +155,13 @@ class DebuggerHandler<
       return;
     }
 
+    widget.node.setAttribute('data-jp-debugger', 'true');
+
     const handler = new this.builder({
       debuggerService: debug,
       widget
     });
-    widget.node.setAttribute('data-jp-debugger', 'true');
+
     this.handlers[widget.id] = handler;
 
     widget.disposed.connect(() => {

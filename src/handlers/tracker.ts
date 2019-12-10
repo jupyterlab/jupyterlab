@@ -58,14 +58,19 @@ export class TrackerHandler implements IDisposable {
     this.consoleTracker = options.consoleTracker;
     this.editorTracker = options.editorTracker;
 
-    this.readOnlyEditorFactory = new ReadOnlyEditorFactory({
-      editorServices: options.editorServices
-    });
+    this.debuggerService.modelChanged.connect(() => {
+      const debuggerModel = this.debuggerService.model as Debugger.Model;
+      if (debuggerModel) {
+        debuggerModel.callstack.currentFrameChanged.connect(
+          this.onCurrentFrameChanged,
+          this
+        );
 
-    this.readOnlyEditorTracker = new WidgetTracker<
-      MainAreaWidget<CodeEditorWrapper>
-    >({
-      namespace: '@jupyterlab/debugger'
+        debuggerModel.breakpoints.clicked.connect((_, breakpoint) => {
+          const debugSessionPath = this.debuggerService.session.client.path;
+          this.find(debugSessionPath, breakpoint.source.path);
+        });
+      }
     });
 
     this.onModelChanged();
@@ -253,7 +258,7 @@ export class TrackerHandler implements IDisposable {
 
   protected findInReadOnlyEditors(_: string, source: string) {
     let editors: CodeEditor.IEditor[] = [];
-    this.readOnlyEditorTracker.forEach(widget => {
+    this.readOnlyEditorTracker?.forEach(widget => {
       const editor = widget.content?.editor;
       if (!editor) {
         return;
