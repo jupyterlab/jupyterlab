@@ -21,10 +21,6 @@ interface ICellSearchPair {
 
 export interface INotebookFilters {
   /**
-   * Should cell input be searched?
-   */
-  input: boolean;
-  /**
    * Should cell output be searched?
    */
   output: boolean;
@@ -65,7 +61,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     this._query = query;
     this._filters =
       !filters || Object.entries(filters).length === 0
-        ? { input: true, output: true }
+        ? { output: true }
         : filters;
     // Listen for cell model change to redo the search in case of
     // new/pasted/deleted cells
@@ -81,61 +77,59 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
 
     for (let cell of cells) {
       const cmEditor = cell.editor as CodeMirrorEditor;
-      if (this._filters.input) {
-        const cmSearchProvider = new CodeMirrorSearchProvider();
-        cmSearchProvider.isSubProvider = true;
+      const cmSearchProvider = new CodeMirrorSearchProvider();
+      cmSearchProvider.isSubProvider = true;
 
-        // If a rendered MarkdownCell contains a match, unrender it so that
-        // CodeMirror can show the match(es).  If the MarkdownCell is not
-        // rendered, putting CodeMirror on the page, CodeMirror will not run
-        // the mode, which will prevent the search from occurring.
-        // Keep track so that the cell can be rerendered when the search is ended
-        // or if there are no matches
-        let cellShouldReRender = false;
-        if (cell instanceof MarkdownCell && cell.rendered) {
-          cell.rendered = false;
-          cellShouldReRender = true;
-        }
-
-        // Unhide hidden cells for the same reason as above
-        if (cell.inputHidden) {
-          cell.inputHidden = false;
-        }
-        // chain promises to ensure indexing is sequential
-        const matchesFromCell = await cmSearchProvider.startQueryCodeMirror(
-          query,
-          cmEditor
-        );
-        if (cell instanceof MarkdownCell) {
-          if (matchesFromCell.length !== 0) {
-            // un-render markdown cells with matches
-            this._unRenderedMarkdownCells.push(cell);
-          } else if (cellShouldReRender) {
-            // was rendered previously, no need to refresh
-            cell.rendered = true;
-          }
-        }
-        if (matchesFromCell.length !== 0) {
-          cmSearchProvider.refreshOverlay();
-          this._cellsWithMatches.push(cell);
-        }
-
-        // update the match indices to reflect the whole document index values
-        matchesFromCell.forEach(match => {
-          match.index = match.index + indexTotal;
-        });
-        indexTotal += matchesFromCell.length;
-
-        // search has been initialized, connect the changed signal
-        cmSearchProvider.changed.connect(this._onSearchProviderChanged, this);
-
-        allMatches.concat(matchesFromCell);
-
-        this._searchProviders.push({
-          cell: cell,
-          provider: cmSearchProvider
-        });
+      // If a rendered MarkdownCell contains a match, unrender it so that
+      // CodeMirror can show the match(es).  If the MarkdownCell is not
+      // rendered, putting CodeMirror on the page, CodeMirror will not run
+      // the mode, which will prevent the search from occurring.
+      // Keep track so that the cell can be rerendered when the search is ended
+      // or if there are no matches
+      let cellShouldReRender = false;
+      if (cell instanceof MarkdownCell && cell.rendered) {
+        cell.rendered = false;
+        cellShouldReRender = true;
       }
+
+      // Unhide hidden cells for the same reason as above
+      if (cell.inputHidden) {
+        cell.inputHidden = false;
+      }
+      // chain promises to ensure indexing is sequential
+      const matchesFromCell = await cmSearchProvider.startQueryCodeMirror(
+        query,
+        cmEditor
+      );
+      if (cell instanceof MarkdownCell) {
+        if (matchesFromCell.length !== 0) {
+          // un-render markdown cells with matches
+          this._unRenderedMarkdownCells.push(cell);
+        } else if (cellShouldReRender) {
+          // was rendered previously, no need to refresh
+          cell.rendered = true;
+        }
+      }
+      if (matchesFromCell.length !== 0) {
+        cmSearchProvider.refreshOverlay();
+        this._cellsWithMatches.push(cell);
+      }
+
+      // update the match indices to reflect the whole document index values
+      matchesFromCell.forEach(match => {
+        match.index = match.index + indexTotal;
+      });
+      indexTotal += matchesFromCell.length;
+
+      // search has been initialized, connect the changed signal
+      cmSearchProvider.changed.connect(this._onSearchProviderChanged, this);
+
+      allMatches.concat(matchesFromCell);
+
+      this._searchProviders.push({
+        cell: cell,
+        provider: cmSearchProvider
+      });
 
       if (cell instanceof CodeCell && this._filters.output) {
         const outputProivder = new GenericSearchProvider();
