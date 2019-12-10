@@ -51,8 +51,8 @@ export namespace URLExt {
     // Parse the top element into a header collection.
     const header = top.match(/(\w+)(:)(\/\/)?/);
     const protocol = header && header[1];
-    const colon = protocol && header[2];
-    const slashes = colon && header[3];
+    const colon = protocol && header![2];
+    const slashes = colon && header![3];
 
     // Construct the URL prefix.
     const prefix = shorthand
@@ -146,7 +146,10 @@ export namespace URLExt {
   export function isLocal(url: string): boolean {
     const { protocol } = parse(url);
 
-    return url.toLowerCase().indexOf(protocol) !== 0 && url.indexOf('/') !== 0;
+    return (
+      (!protocol || url.toLowerCase().indexOf(protocol) !== 0) &&
+      url.indexOf('/') !== 0
+    );
   }
 
   /**

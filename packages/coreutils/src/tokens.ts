@@ -70,7 +70,7 @@ export interface ISettingRegistry {
   get(
     plugin: string,
     key: string
-  ): Promise<{ composite: JSONValue; user: JSONValue }>;
+  ): Promise<{ composite: JSONValue | undefined; user: JSONValue | undefined }>;
 
   /**
    * Load a plugin's settings into the setting registry.
@@ -378,7 +378,12 @@ export namespace ISettingRegistry {
      *
      * @returns The setting value.
      */
-    get(key: string): { composite: ReadonlyJSONValue; user: ReadonlyJSONValue };
+    get(
+      key: string
+    ): {
+      composite: ReadonlyJSONValue | undefined;
+      user: ReadonlyJSONValue | undefined;
+    };
 
     /**
      * Remove a single setting.
