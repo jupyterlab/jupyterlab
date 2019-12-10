@@ -5,6 +5,8 @@ import Ajv from 'ajv';
 
 import * as json from 'json5';
 
+import { CommandRegistry } from '@lumino/commands';
+
 import {
   JSONExt,
   JSONObject,
@@ -880,7 +882,9 @@ export namespace SettingRegistry {
 
     // If a user shortcut collides with another user shortcut warn and filter.
     user = user.filter(shortcut => {
-      const keys = normalizeKeys(shortcut).join(RECORD_SEPARATOR);
+      const keys = CommandRegistry.normalizeKeys(shortcut).join(
+        RECORD_SEPARATOR
+      );
       const { selector } = shortcut;
 
       if (!keys) {
@@ -910,7 +914,9 @@ export namespace SettingRegistry {
     // out too (this includes shortcuts that are disabled by user preferences).
     defaults = defaults.filter(shortcut => {
       const { disabled } = shortcut;
-      const keys = normalizeKeys(shortcut).join(RECORD_SEPARATOR);
+      const keys = CommandRegistry.normalizeKeys(shortcut).join(
+        RECORD_SEPARATOR
+      );
 
       if (disabled || !keys) {
         return false;
