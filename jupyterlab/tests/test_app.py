@@ -312,7 +312,7 @@ class KarmaTestApp(ProcessTestApp):
         with open(karma_inject_file, 'w') as fid:
             fid.write("""
             require('es6-promise/dist/es6-promise.js');
-            require('@phosphor/widgets/style/index.css');
+            require('@lumino/widgets/style/index.css');
 
             var node = document.createElement('script');
             node.id = 'jupyter-config-data';

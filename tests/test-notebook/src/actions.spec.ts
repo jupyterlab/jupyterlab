@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { ClientSession } from '@jupyterlab/apputils';
 
-import { each } from '@phosphor/algorithm';
+import { each } from '@lumino/algorithm';
 
 import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
 
@@ -22,7 +22,7 @@ import {
   sleep,
   NBTestUtils
 } from '@jupyterlab/testutils';
-import { JSONObject, JSONArray } from '@phosphor/coreutils';
+import { JSONObject, JSONArray } from '@lumino/coreutils';
 
 const ERROR_INPUT = 'a = foo';
 

@@ -33,7 +33,7 @@ def _only_nonlab(collection):
 
     This is useful to take the default values of e.g. singletons and filter
     away the '@jupyterlab/' namespace packages, but leave any others (e.g.
-    phosphor and react).
+    lumino and react).
     """
     if isinstance(collection, dict):
         return dict(

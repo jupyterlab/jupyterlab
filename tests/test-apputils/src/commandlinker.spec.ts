@@ -3,9 +3,9 @@
 
 import { expect } from 'chai';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { h, VirtualNode, VirtualDOM } from '@phosphor/virtualdom';
+import { h, VirtualNode, VirtualDOM } from '@lumino/virtualdom';
 
 import { simulate } from 'simulate-event';
 

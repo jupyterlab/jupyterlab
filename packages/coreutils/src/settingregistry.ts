@@ -11,11 +11,11 @@ import {
   JSONValue,
   ReadonlyJSONObject,
   ReadonlyJSONValue
-} from '@phosphor/coreutils';
+} from '@lumino/coreutils';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { IDataConnector } from './interfaces';
 
@@ -33,7 +33,7 @@ const copy = JSONExt.deepCopy;
  * will wait before timing out if it requires a transformation that has not been
  * registered.
  */
-const DEFAULT_TRANSFORM_TIMEOUT = 7000;
+const DEFAULT_TRANSFORM_TIMEOUT = 1000;
 
 /**
  * The ASCII record separator character.

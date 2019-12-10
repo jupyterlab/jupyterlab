@@ -3,9 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 

@@ -9,13 +9,13 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { BoxLayout, Widget } from '@phosphor/widgets';
+import { BoxLayout, Widget } from '@lumino/widgets';
 
 import { createInspector } from './inspector';
 

@@ -3,13 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONExt, JSONObject } from '@phosphor/coreutils';
+import { JSONExt, JSONObject } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { ElementDataset } from '@phosphor/virtualdom';
+import { ElementDataset } from '@lumino/virtualdom';
 
 /**
  * The command data attribute added to nodes that are connected.

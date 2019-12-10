@@ -15,7 +15,7 @@ import {
 
 import { Session } from '@jupyterlab/services';
 import { PathExt } from '@jupyterlab/coreutils';
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
 /**
  * The class name added to a notebook icon.

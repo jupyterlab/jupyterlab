@@ -26,17 +26,17 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { KernelMessage } from '@jupyterlab/services';
 
-import { each } from '@phosphor/algorithm';
+import { each } from '@lumino/algorithm';
 
-import { MimeData, JSONObject } from '@phosphor/coreutils';
+import { MimeData, JSONObject } from '@lumino/coreutils';
 
-import { Drag } from '@phosphor/dragdrop';
+import { Drag } from '@lumino/dragdrop';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
+import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 
 import { ConsoleHistory, IConsoleHistory } from './history';
 

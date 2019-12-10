@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MimeData } from '@phosphor/coreutils';
+import { MimeData } from '@lumino/coreutils';
 
-import { IDragEvent } from '@phosphor/dragdrop';
+import { IDragEvent } from '@lumino/dragdrop';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { CodeEditor } from './';
 

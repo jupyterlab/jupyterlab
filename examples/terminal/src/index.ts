@@ -10,7 +10,7 @@ import '@jupyterlab/terminal/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';
 import '../index.css';
 
-import { DockPanel, Widget } from '@phosphor/widgets';
+import { DockPanel, Widget } from '@lumino/widgets';
 
 import { TerminalSession } from '@jupyterlab/services';
 

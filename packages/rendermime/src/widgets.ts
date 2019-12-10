@@ -4,11 +4,11 @@
 |----------------------------------------------------------------------------*/
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import * as renderers from './renderers';
 

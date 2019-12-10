@@ -20,13 +20,13 @@ import {
   MarkdownCell
 } from '@jupyterlab/cells';
 
-import { ArrayExt, each, toArray } from '@phosphor/algorithm';
+import { ArrayExt, each, toArray } from '@lumino/algorithm';
 
-import { JSONObject, JSONExt } from '@phosphor/coreutils';
+import { JSONObject, JSONExt } from '@lumino/coreutils';
 
-import { ElementExt } from '@phosphor/domutils';
+import { ElementExt } from '@lumino/domutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import * as React from 'react';
 
@@ -1022,19 +1022,6 @@ export namespace NotebookActions {
   }
 
   /**
-   * Toggle whether to record cell timing execution.
-   *
-   * @param notebook - The target notebook widget.
-   */
-  export function toggleRecordTiming(notebook: Notebook): void {
-    if (!notebook.model) {
-      return;
-    }
-    const currentValue = notebook.model.metadata.get('record_timing') || false;
-    notebook.model.metadata.set('record_timing', !currentValue);
-  }
-
-  /**
    * Clear the code outputs of the selected cells.
    *
    * @param notebook - The target notebook widget.
@@ -1562,7 +1549,7 @@ namespace Private {
         if (session) {
           return CodeCell.execute(cell as CodeCell, session, {
             deletedCells: notebook.model.deletedCells,
-            recordTiming: notebook.model.metadata.get('record_timing') || false
+            recordTiming: notebook.notebookConfig.recordTiming
           })
             .then(reply => {
               notebook.model.deletedCells.splice(

@@ -5,7 +5,7 @@ import * as React from 'react';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { NotebookActions } from './actions';
 

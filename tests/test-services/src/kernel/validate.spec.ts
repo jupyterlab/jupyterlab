@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 

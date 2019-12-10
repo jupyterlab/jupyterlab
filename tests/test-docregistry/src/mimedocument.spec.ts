@@ -3,9 +3,9 @@
 
 import { expect } from 'chai';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { BoxLayout } from '@phosphor/widgets';
+import { BoxLayout } from '@lumino/widgets';
 
 import {
   DocumentRegistry,

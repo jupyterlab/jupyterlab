@@ -7,7 +7,7 @@ import { Base64ModelFactory } from '@jupyterlab/docregistry';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
 import { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
 

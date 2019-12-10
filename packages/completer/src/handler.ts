@@ -5,13 +5,13 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IDataConnector, Text } from '@jupyterlab/coreutils';
 
-import { ReadonlyJSONObject, JSONObject, JSONArray } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, JSONObject, JSONArray } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { Completer } from './widget';
 

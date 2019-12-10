@@ -3,9 +3,9 @@
 
 import { Poll } from '@jupyterlab/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { Builder, BuildManager } from './builder';
 

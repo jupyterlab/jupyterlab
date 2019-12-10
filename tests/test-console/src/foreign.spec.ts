@@ -3,13 +3,13 @@
 
 import { expect } from 'chai';
 
-import { PromiseDelegate, UUID } from '@phosphor/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { Panel } from '@phosphor/widgets';
+import { Panel } from '@lumino/widgets';
 
 import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 

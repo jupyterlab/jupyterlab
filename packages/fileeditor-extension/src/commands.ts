@@ -31,11 +31,11 @@ import {
   IViewMenu
 } from '@jupyterlab/mainmenu';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { JSONObject, ReadonlyJSONObject } from '@phosphor/coreutils';
+import { JSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 
 /**
  * The command IDs used by the fileeditor plugin.

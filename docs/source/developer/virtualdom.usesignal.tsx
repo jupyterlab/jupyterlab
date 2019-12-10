@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 function MyComponent() {
   return <div>My Widget</div>;

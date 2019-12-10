@@ -1,17 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt } from '@phosphor/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 
 import {
   DisposableDelegate,
   DisposableSet,
   IDisposable
-} from '@phosphor/disposable';
+} from '@lumino/disposable';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget, Panel, PanelLayout } from '@phosphor/widgets';
+import { Widget, Panel, PanelLayout } from '@lumino/widgets';
 
 import {
   statusBar as barStyle,

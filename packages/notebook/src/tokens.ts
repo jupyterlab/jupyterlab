@@ -3,9 +3,9 @@
 
 import { IWidgetTracker } from '@jupyterlab/apputils';
 import { Cell } from '@jupyterlab/cells';
-import { Token } from '@phosphor/coreutils';
-import { ISignal } from '@phosphor/signaling';
-import { Widget } from '@phosphor/widgets';
+import { Token } from '@lumino/coreutils';
+import { ISignal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 import { NotebookPanel } from './panel';
 import { NotebookTools } from './notebooktools';
 

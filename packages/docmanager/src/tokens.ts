@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@phosphor/signaling';
+import { ISignal } from '@lumino/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 

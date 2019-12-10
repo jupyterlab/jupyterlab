@@ -3,13 +3,13 @@
 
 import { expect } from 'chai';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import {
   ABCWidgetFactory,

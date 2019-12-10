@@ -3,9 +3,9 @@
 
 import { KernelMessage } from '@jupyterlab/services';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { IClientSession } from '@jupyterlab/apputils';
 

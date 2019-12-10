@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt } from '@phosphor/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { Menu, MenuBar } from '@phosphor/widgets';
+import { Menu, MenuBar } from '@lumino/widgets';
 
 import { FileMenu } from './file';
 

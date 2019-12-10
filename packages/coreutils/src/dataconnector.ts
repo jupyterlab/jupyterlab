@@ -16,14 +16,17 @@ import { IDataConnector } from './interfaces';
  * ID or filter, but may be set to a different type when an implementation
  * requires it. Defaults to `string`.
  *
+ * @typeparam W - The type of the optional `query` parameter of the `list`
+ * method. Defaults to `string`.
+ *
  * #### Notes
  * The only abstract method in this class is the `fetch` method, which must be
  * reimplemented by all subclasses. The `remove` and `save` methods have a
  * default implementation that returns a promise that will always reject. This
  * class is a convenience superclass for connectors that only need to `fetch`.
  */
-export abstract class DataConnector<T, U = T, V = string>
-  implements IDataConnector<T, U, V> {
+export abstract class DataConnector<T, U = T, V = string, W = string>
+  implements IDataConnector<T, U, V, W> {
   /**
    * Retrieve an item from the data connector.
    *
@@ -47,7 +50,7 @@ export abstract class DataConnector<T, U = T, V = string>
    * #### Notes
    * Subclasses should reimplement if they support a back-end that can list.
    */
-  async list(query?: any): Promise<{ ids: V[]; values: T[] }> {
+  async list(query?: W): Promise<{ ids: V[]; values: T[] }> {
     throw new Error('DataConnector#list method has not been implemented.');
   }
 

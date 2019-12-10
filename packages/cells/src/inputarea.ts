@@ -3,9 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { PanelLayout } from '@phosphor/widgets';
+import { PanelLayout } from '@lumino/widgets';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 

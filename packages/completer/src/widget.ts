@@ -5,19 +5,19 @@ import { HoverBox, defaultSanitizer } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IIterator, IterableOrArrayLike, toArray } from '@phosphor/algorithm';
+import { IIterator, IterableOrArrayLike, toArray } from '@lumino/algorithm';
 
-import { JSONObject, JSONExt } from '@phosphor/coreutils';
+import { JSONObject, JSONExt } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ElementExt } from '@phosphor/domutils';
+import { ElementExt } from '@lumino/domutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The class name added to completer menu items.

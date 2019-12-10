@@ -5,13 +5,13 @@ import { isMarkdownCellModel } from '@jupyterlab/cells';
 
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 
-import { each } from '@phosphor/algorithm';
+import { each } from '@lumino/algorithm';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import {
   IClientSession,
