@@ -3,7 +3,11 @@
 
 import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
 
-import { CodeCell } from '@jupyterlab/cells';
+import { Cell, CodeCell } from '@jupyterlab/cells';
+
+import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
+
+import { each } from '@phosphor/algorithm';
 
 import { IDisposable } from '@phosphor/disposable';
 
@@ -17,17 +21,20 @@ export class ConsoleHandler implements IDisposable {
   constructor(options: DebuggerConsoleHandler.IOptions) {
     this.debuggerService = options.debuggerService;
     this.consolePanel = options.widget;
+    this._cellMap = new ObservableMap<EditorHandler>();
 
-    const promptCell = this.consolePanel.console.promptCell;
-    this.editorHandler = new EditorHandler({
-      debuggerService: this.debuggerService,
-      editor: promptCell.editor
+    const codeConsole = this.consolePanel.console;
+
+    this.addEditorHandler(codeConsole.promptCell);
+    codeConsole.promptCellCreated.connect((_: CodeConsole, cell: CodeCell) => {
+      this.addEditorHandler(cell);
     });
 
-    this.consolePanel.console.promptCellCreated.connect(
-      this.promptCellCreated,
-      this
-    );
+    const addHandlers = () => {
+      each(codeConsole.cells, cell => this.addEditorHandler(cell));
+    };
+    addHandlers();
+    this.consolePanel.console.cells.changed.connect(addHandlers);
   }
 
   isDisposed: boolean;
@@ -37,18 +44,31 @@ export class ConsoleHandler implements IDisposable {
       return;
     }
     this.isDisposed = true;
-    this.editorHandler.dispose();
+    this._cellMap.values().forEach(handler => handler.dispose());
+    this._cellMap.dispose();
     Signal.clearData(this);
   }
 
-  protected promptCellCreated(sender: CodeConsole, update: CodeCell) {
-    // TODO: check if the previous editor must be disposed
-    // for the console
+  protected addEditorHandler(cell: Cell) {
+    const modelId = cell.model.id;
+    if (cell.model.type !== 'code' || this._cellMap.has(modelId)) {
+      return;
+    }
+    const codeCell = cell as CodeCell;
+    const editorHandler = new EditorHandler({
+      debuggerService: this.debuggerService,
+      editor: codeCell.editor
+    });
+    codeCell.disposed.connect(() => {
+      this._cellMap.delete(modelId);
+      editorHandler.dispose();
+    });
+    this._cellMap.set(modelId, editorHandler);
   }
 
   private consolePanel: ConsolePanel;
   private debuggerService: IDebugger;
-  private editorHandler: EditorHandler;
+  private _cellMap: IObservableMap<EditorHandler> = null;
 }
 
 export namespace DebuggerConsoleHandler {
