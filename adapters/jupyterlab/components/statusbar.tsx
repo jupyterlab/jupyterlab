@@ -7,6 +7,8 @@ import React from 'react';
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 import '../../../../style/statusbar.css';
 
+import * as SCHEMA from '../../../_schema';
+
 import {
   interactiveItem,
   Popup,
@@ -22,7 +24,7 @@ import { LSPConnection } from '../../../connection';
 import { PageConfig } from '@jupyterlab/coreutils';
 
 interface IServerStatusProps {
-  server: IServer;
+  server: SCHEMA.LanguageServerSession;
 }
 
 function ServerStatus(props: IServerStatusProps) {
@@ -98,7 +100,9 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
       return null;
     }
     const servers_available = this.model.servers_available_not_in_use.map(
-      (session: IServer) => <ServerStatus server={session} />
+      (session: SCHEMA.LanguageServerSession) => (
+        <ServerStatus server={session} />
+      )
     );
 
     let running_servers = new Array<any>();
@@ -301,28 +305,12 @@ const shortMessageByStatus: StatusMap = {
   connecting: 'Connecting...'
 };
 
-// TODO ideally, this would be generated from schema
-export interface IServerSpecification {
-  display_name: string;
-  install: object;
-  urls: object;
-  languages: string[];
-}
-
-export interface IServer {
-  spec: IServerSpecification;
-  status: string;
-  handler_count: number;
-  last_server_message_at: string;
-  last_handler_message_at: string;
-}
-
 export namespace LSPStatus {
   /**
    * A VDomModel for the LSP of current file editor/notebook.
    */
   export class Model extends VDomModel {
-    server_extension_status: any = null;
+    server_extension_status: SCHEMA.ServersResponse = null;
 
     constructor() {
       super();
@@ -337,13 +325,16 @@ export namespace LSPStatus {
           }
           response
             .json()
-            .then(data => (this.server_extension_status = data))
+            .then(
+              (data: SCHEMA.ServersResponse) =>
+                (this.server_extension_status = data)
+            )
             .catch(console.warn);
         })
         .catch(console.error);
     }
 
-    get available_servers(): Array<IServer> {
+    get available_servers(): Array<SCHEMA.LanguageServerSession> {
       return this.server_extension_status.sessions;
     }
 
@@ -357,7 +348,7 @@ export namespace LSPStatus {
       return languages;
     }
 
-    private is_server_running(server: IServer): boolean {
+    private is_server_running(server: SCHEMA.LanguageServerSession): boolean {
       for (let language of server.spec.languages) {
         if (this.detected_languages.has(language.toLocaleLowerCase())) {
           return true;
@@ -366,7 +357,10 @@ export namespace LSPStatus {
       return false;
     }
 
-    get documents_by_server(): Map<IServer, Map<string, VirtualDocument[]>> {
+    get documents_by_server(): Map<
+      SCHEMA.LanguageServerSession,
+      Map<string, VirtualDocument[]>
+    > {
       let data = new Map();
       if (!this.adapter) {
         return new Map();
@@ -404,7 +398,7 @@ export namespace LSPStatus {
       return data;
     }
 
-    get servers_available_not_in_use(): Array<IServer> {
+    get servers_available_not_in_use(): Array<SCHEMA.LanguageServerSession> {
       return this.available_servers.filter(
         server => !this.is_server_running(server)
       );
