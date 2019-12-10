@@ -35,6 +35,7 @@ export class NotebookHandler implements IDisposable {
     this.isDisposed = true;
     this.cleanAllCells();
     this._cellMap.values().forEach(handler => handler.dispose());
+    this._cellMap.dispose();
     Signal.clearData(this);
   }
 
