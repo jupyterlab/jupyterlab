@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONObject } from '@lumino/coreutils';
+import { PartialJSONObject } from '@lumino/coreutils';
 
 import urlparse from 'url-parse';
 
@@ -97,7 +97,7 @@ export namespace URLExt {
    * #### Notes
    * Modified version of [stackoverflow](http://stackoverflow.com/a/30707423).
    */
-  export function objectToQueryString(value: JSONObject): string {
+  export function objectToQueryString(value: PartialJSONObject): string {
     const keys = Object.keys(value).filter(key => key.length > 0);
 
     if (!keys.length) {

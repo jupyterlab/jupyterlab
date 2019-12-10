@@ -5,7 +5,7 @@
 // https://nbformat.readthedocs.io/en/latest/format_description.html
 // https://github.com/jupyter/nbformat/blob/master/nbformat/v4/nbformat.v4.schema.json
 
-import { JSONObject, JSONExt } from '@lumino/coreutils';
+import { PartialJSONObject, JSONExt } from '@lumino/coreutils';
 
 /**
  * A namespace for nbformat interfaces.
@@ -24,7 +24,7 @@ export namespace nbformat {
   /**
    * The kernelspec metadata.
    */
-  export interface IKernelspecMetadata extends JSONObject {
+  export interface IKernelspecMetadata extends PartialJSONObject {
     name: string;
     display_name: string;
   }
@@ -32,9 +32,9 @@ export namespace nbformat {
   /**
    * The language info metatda
    */
-  export interface ILanguageInfoMetadata extends JSONObject {
+  export interface ILanguageInfoMetadata extends PartialJSONObject {
     name: string;
-    codemirror_mode?: string | JSONObject;
+    codemirror_mode?: string | PartialJSONObject;
     file_extension?: string;
     mimetype?: string;
     pygments_lexer?: string;
@@ -43,7 +43,7 @@ export namespace nbformat {
   /**
    * The default metadata for the notebook.
    */
-  export interface INotebookMetadata extends JSONObject {
+  export interface INotebookMetadata extends PartialJSONObject {
     kernelspec?: IKernelspecMetadata;
     language_info?: ILanguageInfoMetadata;
     orig_nbformat: number;
@@ -52,7 +52,7 @@ export namespace nbformat {
   /**
    * The notebook content.
    */
-  export interface INotebookContent extends JSONObject {
+  export interface INotebookContent extends PartialJSONObject {
     metadata: INotebookMetadata;
     nbformat_minor: number;
     nbformat: number;
@@ -67,8 +67,8 @@ export namespace nbformat {
   /**
    * A mime-type keyed dictionary of data.
    */
-  export interface IMimeBundle extends JSONObject {
-    [key: string]: MultilineString | JSONObject;
+  export interface IMimeBundle extends PartialJSONObject {
+    [key: string]: MultilineString | PartialJSONObject;
   }
 
   /**
@@ -86,7 +86,7 @@ export namespace nbformat {
   /**
    * Cell output metadata.
    */
-  export type OutputMetadata = JSONObject;
+  export type OutputMetadata = PartialJSONObject;
 
   /**
    * Validate a mime type/value pair.
@@ -99,7 +99,7 @@ export namespace nbformat {
    */
   export function validateMimeValue(
     type: string,
-    value: MultilineString | JSONObject
+    value: MultilineString | PartialJSONObject
   ): boolean {
     // Check if "application/json" or "application/foo+json"
     const jsonTest = /^application\/(.*?)+\+json$/;
@@ -146,7 +146,7 @@ export namespace nbformat {
   /**
    * The Jupyter metadata namespace.
    */
-  export interface IBaseCellJupyterMetadata extends JSONObject {
+  export interface IBaseCellJupyterMetadata extends PartialJSONObject {
     /**
      * Whether the source is hidden.
      */
@@ -156,7 +156,7 @@ export namespace nbformat {
   /**
    * Cell-level metadata.
    */
-  export interface IBaseCellMetadata extends JSONObject {
+  export interface IBaseCellMetadata extends PartialJSONObject {
     /**
      * Whether the cell is trusted.
      *
@@ -187,7 +187,7 @@ export namespace nbformat {
   /**
    * The base cell interface.
    */
-  export interface IBaseCell extends JSONObject {
+  export interface IBaseCell extends PartialJSONObject {
     /**
      * String identifying the type of cell.
      */
@@ -356,7 +356,7 @@ export namespace nbformat {
   /**
    * The base output type.
    */
-  export interface IBaseOutput extends JSONObject {
+  export interface IBaseOutput extends PartialJSONObject {
     /**
      * Type of cell output.
      */
