@@ -59,8 +59,8 @@
     "@phosphor/disposable": "^1.2.0",
     "@phosphor/widgets": "^1.8.0",
     "murmurhash-js": "^1.0.0",
-    "vscode-debugprotocol": "1.35.0",
-    "react-inspector": "^2.0.0"
+    "react-inspector": "^2.0.0",
+    "vscode-debugprotocol": "^1.37.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
