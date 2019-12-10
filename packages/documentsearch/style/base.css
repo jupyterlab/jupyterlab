@@ -137,6 +137,10 @@
   margin-left: auto;
 }
 
+.jp-DocumentSearch-spacer {
+  margin-left: auto;
+}
+
 .jp-DocumentSearch-up-down-wrapper button {
   outline: 0;
   border: none;

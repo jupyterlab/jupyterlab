@@ -39,6 +39,7 @@ const TOGGLE_PLACEHOLDER = 'jp-DocumentSearch-toggle-placeholder';
 const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
 const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
 const FILTER_CLASS = 'fa fa-filter';
+const SPACER_CLASS = 'jp-DocumentSearch-spacer';
 
 interface ISearchEntryProps {
   onCaseSensitiveToggled: Function;
@@ -513,6 +514,7 @@ class SearchOverlay extends React.Component<
               replaceText={this.state.replaceText}
               ref="replaceEntry"
             />
+            <div className={SPACER_CLASS}></div>
             {filter}
           </>
         ) : null}
