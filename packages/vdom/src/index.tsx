@@ -5,7 +5,7 @@ import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-import { IClientSession, IWidgetTracker } from '@jupyterlab/apputils';
+import { ISessionContext, IWidgetTracker } from '@jupyterlab/apputils';
 
 import { DocumentRegistry, MimeDocument } from '@jupyterlab/docregistry';
 
@@ -55,7 +55,7 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
     this.addClass('jp-RenderedHTMLCommon');
     this._mimeType = options.mimeType;
     if (context) {
-      this._session = context.session;
+      this._sessionContext = context.sessionContext;
     }
   }
 
@@ -104,10 +104,10 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
     if (this._timer) {
       window.clearTimeout(this._timer);
     }
-    if (this._session) {
+    if (this._sessionContext) {
       this._timer = window.setTimeout(() => {
         if (!this._comms[targetName]) {
-          this._comms[targetName] = this._session.kernel.connectToComm(
+          this._comms[targetName] = this._sessionContext.kernel.connectToComm(
             targetName
           );
           this._comms[targetName].open();
@@ -118,7 +118,7 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
   };
 
   private _mimeType: string;
-  private _session?: IClientSession;
+  private _sessionContext?: ISessionContext;
   private _comms: { [targetName: string]: Kernel.IComm } = {};
   private _timer: number;
 }

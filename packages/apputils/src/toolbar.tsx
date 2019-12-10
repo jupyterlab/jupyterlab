@@ -17,7 +17,7 @@ import { AttachedProperty } from '@phosphor/properties';
 
 import { PanelLayout, Widget } from '@phosphor/widgets';
 
-import { IClientSession } from './clientsession';
+import { ISessionContext } from './clientsession';
 
 import * as React from 'react';
 import { ReadonlyJSONObject } from '@phosphor/coreutils';
@@ -365,11 +365,13 @@ export namespace Toolbar {
   /**
    * Create an interrupt toolbar item.
    */
-  export function createInterruptButton(session: IClientSession): Widget {
+  export function createInterruptButton(
+    sessionContext: ISessionContext
+  ): Widget {
     return new ToolbarButton({
       iconClassName: 'jp-StopIcon',
       onClick: () => {
-        void session.session?.kernel?.interrupt();
+        void sessionContext.session?.kernel?.interrupt();
       },
       tooltip: 'Interrupt the kernel'
     });
@@ -378,11 +380,11 @@ export namespace Toolbar {
   /**
    * Create a restart toolbar item.
    */
-  export function createRestartButton(session: IClientSession): Widget {
+  export function createRestartButton(sessionContext: ISessionContext): Widget {
     return new ToolbarButton({
       iconClassName: 'jp-RefreshIcon',
       onClick: () => {
-        void session.restart();
+        void sessionContext.restart();
       },
       tooltip: 'Restart the kernel'
     });
@@ -407,9 +409,11 @@ export namespace Toolbar {
    * or `'No Kernel!'` if there is no kernel.
    * It can handle a change in context or kernel.
    */
-  export function createKernelNameItem(session: IClientSession): Widget {
+  export function createKernelNameItem(
+    sessionContext: ISessionContext
+  ): Widget {
     const el = ReactWidget.create(
-      <Private.KernelNameComponent session={session} />
+      <Private.KernelNameComponent sessionContext={sessionContext} />
     );
     el.addClass('jp-KernelName');
     return el;
@@ -423,8 +427,10 @@ export namespace Toolbar {
    * It will show the current status in the node title.
    * It can handle a change to the context or the kernel.
    */
-  export function createKernelStatusItem(session: IClientSession): Widget {
-    return new Private.KernelStatus(session);
+  export function createKernelStatusItem(
+    sessionContext: ISessionContext
+  ): Widget {
+    return new Private.KernelStatus(sessionContext);
   }
 }
 
@@ -652,7 +658,7 @@ namespace Private {
      * Interface for KernelNameComponent props.
      */
     export interface IProps {
-      session: IClientSession;
+      sessionContext: ISessionContext;
     }
   }
 
@@ -666,15 +672,17 @@ namespace Private {
   export function KernelNameComponent(props: KernelNameComponent.IProps) {
     return (
       <UseSignal
-        signal={props.session.kernelChanged}
-        initialSender={props.session}
+        signal={props.sessionContext.kernelChanged}
+        initialSender={props.sessionContext}
       >
-        {session => (
+        {sessionContext => (
           <ToolbarButtonComponent
             className={TOOLBAR_KERNEL_NAME_CLASS}
-            onClick={props.session.selectKernel.bind(props.session)}
+            onClick={props.sessionContext.selectKernel.bind(
+              props.sessionContext
+            )}
             tooltip={'Switch kernel'}
-            label={session.kernelDisplayName}
+            label={sessionContext.kernelDisplayName}
           />
         )}
       </UseSignal>
@@ -688,21 +696,21 @@ namespace Private {
     /**
      * Construct a new kernel status widget.
      */
-    constructor(session: IClientSession) {
+    constructor(sessionContext: ISessionContext) {
       super();
       this.addClass(TOOLBAR_KERNEL_STATUS_CLASS);
-      this._onStatusChanged(session);
-      session.statusChanged.connect(this._onStatusChanged, this);
+      this._onStatusChanged(sessionContext);
+      sessionContext.statusChanged.connect(this._onStatusChanged, this);
     }
 
     /**
      * Handle a status on a kernel.
      */
-    private _onStatusChanged(session: IClientSession) {
+    private _onStatusChanged(sessionContext: ISessionContext) {
       if (this.isDisposed) {
         return;
       }
-      let status = session.session?.kernel?.status ?? 'unknown';
+      let status = sessionContext.session?.kernel?.status ?? 'unknown';
       const busy = this._isBusy(status);
       this.toggleClass(TOOLBAR_BUSY_CLASS, busy);
       this.toggleClass(TOOLBAR_IDLE_CLASS, !busy);

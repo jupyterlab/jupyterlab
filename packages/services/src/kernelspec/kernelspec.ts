@@ -2,28 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ServerConnection } from '..';
-import * as restapi from './restapi';
 import { ISignal } from '@phosphor/signaling';
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISpecModel, ISpecModels } from './restapi';
 export { ISpecModel, ISpecModels };
-
-/**
- * Fetch all of the kernel specs.
- *
- * @param settings - The optional server settings.
- *
- * @returns A promise that resolves with the kernel specs.
- *
- * #### Notes
- * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
- */
-export function getSpecs(
-  settings?: ServerConnection.ISettings
-): Promise<ISpecModels> {
-  return restapi.getSpecs(settings);
-}
 
 /**
  * Object which manages kernel instances for a given base url.

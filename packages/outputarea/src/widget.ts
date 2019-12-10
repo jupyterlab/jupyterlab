@@ -17,7 +17,7 @@ import { Panel, PanelLayout } from '@phosphor/widgets';
 
 import { Widget } from '@phosphor/widgets';
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
 import { nbformat } from '@jupyterlab/coreutils';
 
@@ -611,7 +611,7 @@ export namespace OutputArea {
   export async function execute(
     code: string,
     output: OutputArea,
-    session: IClientSession,
+    sessionContext: ISessionContext,
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg> {
     // Override the default for `stop_on_error`.
@@ -628,10 +628,14 @@ export namespace OutputArea {
       stop_on_error: stopOnError
     };
 
-    if (!session.kernel) {
+    if (!sessionContext.session?.kernel) {
       throw new Error('Session has no kernel.');
     }
-    let future = session.kernel.requestExecute(content, false, metadata);
+    let future = sessionContext.session?.kernel?.requestExecute(
+      content,
+      false,
+      metadata
+    );
     output.future = future;
     return future.done;
   }

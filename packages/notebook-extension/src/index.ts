@@ -927,7 +927,7 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAndAdvance(content, context.session);
+        return NotebookActions.runAndAdvance(content, context.sessionContext);
       }
     },
     isEnabled
@@ -940,7 +940,7 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.run(content, context.session);
+        return NotebookActions.run(content, context.sessionContext);
       }
     },
     isEnabled
@@ -953,7 +953,7 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAndInsert(content, context.session);
+        return NotebookActions.runAndInsert(content, context.sessionContext);
       }
     },
     isEnabled
@@ -1007,10 +1007,12 @@ function addCommands(
         let lastLine = firstLine + 1;
         while (true) {
           code = srcLines.slice(firstLine, lastLine).join('\n');
-          let reply = await current.context.session.kernel.requestIsComplete({
-            // ipython needs an empty line at the end to correctly identify completeness of indented code
-            code: code + '\n\n'
-          });
+          let reply = await current.context.sessionContext.kernel.requestIsComplete(
+            {
+              // ipython needs an empty line at the end to correctly identify completeness of indented code
+              code: code + '\n\n'
+            }
+          );
           if (reply.content.status === 'complete') {
             if (curLine < lastLine) {
               // we find a block of complete statement containing the current line, great!
@@ -1083,7 +1085,7 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAll(content, context.session);
+        return NotebookActions.runAll(content, context.sessionContext);
       }
     },
     isEnabled
@@ -1096,7 +1098,7 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAllAbove(content, context.session);
+        return NotebookActions.runAllAbove(content, context.sessionContext);
       }
     },
     isEnabled: () => {
@@ -1116,7 +1118,7 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAllBelow(content, context.session);
+        return NotebookActions.runAllBelow(content, context.sessionContext);
       }
     },
     isEnabled: () => {
@@ -1135,7 +1137,10 @@ function addCommands(
       const current = getCurrent(args);
       if (current) {
         const { context, content } = current;
-        return NotebookActions.renderAllMarkdown(content, context.session);
+        return NotebookActions.renderAllMarkdown(
+          content,
+          context.sessionContext
+        );
       }
     },
     isEnabled
@@ -1146,7 +1151,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return current.session.restart();
+        return current.sessionContext.restart();
       }
     },
     isEnabled
@@ -1168,7 +1173,7 @@ function addCommands(
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          return current.context.session.shutdown().then(() => {
+          return current.context.sessionContext.shutdown().then(() => {
             current.dispose();
           });
         }
@@ -1228,9 +1233,9 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        const { content, session } = current;
+        const { content, sessionContext } = current;
 
-        return session.restart().then(() => {
+        return sessionContext.restart().then(() => {
           NotebookActions.clearAllOutputs(content);
         });
       }
@@ -1243,11 +1248,11 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        const { context, content, session } = current;
+        const { context, content, sessionContext } = current;
 
-        return session.restart().then(restarted => {
+        return sessionContext.restart().then(restarted => {
           if (restarted) {
-            void NotebookActions.runAll(content, context.session);
+            void NotebookActions.runAll(content, context.sessionContext);
           }
           return restarted;
         });
@@ -1286,7 +1291,7 @@ function addCommands(
         return;
       }
 
-      const kernel = current.context.session.kernel;
+      const kernel = current.context.sessionContext.kernel;
 
       if (kernel) {
         return kernel.interrupt();
@@ -1619,7 +1624,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return current.context.session.selectKernel();
+        return current.context.sessionContext.selectKernel();
       }
     },
     isEnabled
@@ -1633,7 +1638,7 @@ function addCommands(
         return;
       }
 
-      const kernel = current.context.session.kernel;
+      const kernel = current.context.sessionContext.kernel;
 
       if (kernel) {
         return kernel.reconnect();
@@ -2030,7 +2035,7 @@ function populateMenus(
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          return current.context.session.shutdown().then(() => {
+          return current.context.sessionContext.shutdown().then(() => {
             current.dispose();
           });
         }
@@ -2079,24 +2084,24 @@ function populateMenus(
   mainMenu.kernelMenu.kernelUsers.add({
     tracker,
     interruptKernel: current => {
-      let kernel = current.session.kernel;
+      let kernel = current.sessionContext.kernel;
       if (kernel) {
         return kernel.interrupt();
       }
       return Promise.resolve(void 0);
     },
     noun: 'All Outputs',
-    restartKernel: current => current.session.restart(),
+    restartKernel: current => current.sessionContext.restart(),
     restartKernelAndClear: current => {
-      return current.session.restart().then(restarted => {
+      return current.sessionContext.restart().then(restarted => {
         if (restarted) {
           NotebookActions.clearAllOutputs(current.content);
         }
         return restarted;
       });
     },
-    changeKernel: current => current.session.selectKernel(),
-    shutdownKernel: current => current.session.shutdown()
+    changeKernel: current => current.sessionContext.selectKernel(),
+    shutdownKernel: current => current.sessionContext.shutdown()
   } as IKernelMenu.IKernelUser<NotebookPanel>);
 
   // Add a console creator the the Kernel menu
@@ -2149,21 +2154,22 @@ function populateMenus(
     noun: 'Cells',
     run: current => {
       const { context, content } = current;
-      return NotebookActions.runAndAdvance(content, context.session).then(
-        () => void 0
-      );
+      return NotebookActions.runAndAdvance(
+        content,
+        context.sessionContext
+      ).then(() => void 0);
     },
     runAll: current => {
       const { context, content } = current;
-      return NotebookActions.runAll(content, context.session).then(
+      return NotebookActions.runAll(content, context.sessionContext).then(
         () => void 0
       );
     },
     restartAndRunAll: current => {
       const { context, content } = current;
-      return context.session.restart().then(restarted => {
+      return context.sessionContext.restart().then(restarted => {
         if (restarted) {
-          void NotebookActions.runAll(content, context.session);
+          void NotebookActions.runAll(content, context.sessionContext);
         }
         return restarted;
       });
@@ -2238,7 +2244,7 @@ function populateMenus(
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({
     tracker,
-    getKernel: current => current.session.kernel
+    getKernel: current => current.sessionContext.kernel
   } as IHelpMenu.IKernelUser<NotebookPanel>);
 }
 

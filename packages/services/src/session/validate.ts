@@ -10,27 +10,24 @@ import { validateProperty } from '../validate';
 /**
  * Validate an `Session.IModel` object.
  */
-export function validateModel(data: any): Session.IModel {
-  let model = {
-    id: data.id,
-    kernel: data.kernel,
-    name: data.name,
-    path: data.path,
-    type: data.type
-  };
-  // Support legacy session model.
+export function validateModel(data: any): asserts data is Session.IModel {
+  validateProperty(data, 'id', 'string');
+  validateProperty(data, 'type', 'string');
+  validateProperty(data, 'name', 'string');
+  validateProperty(data, 'path', 'string');
+  validateProperty(data, 'kernel', 'object');
+  validateKernelModel(data.kernel);
+}
+
+/**
+ * Update model from legacy session data.
+ */
+export function updateLegacySessionModel(data: any): void {
   if (data.path === undefined && data.notebook !== undefined) {
-    model.path = data.notebook.path;
-    model.type = 'notebook';
-    model.name = '';
+    data.path = data.notebook.path;
+    data.type = 'notebook';
+    data.name = '';
   }
-  validateProperty(model, 'id', 'string');
-  validateProperty(model, 'type', 'string');
-  validateProperty(model, 'name', 'string');
-  validateProperty(model, 'path', 'string');
-  validateProperty(model, 'kernel', 'object');
-  validateKernelModel(model.kernel);
-  return model;
 }
 
 /**

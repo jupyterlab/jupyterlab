@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
 import {
   Cell,
@@ -118,7 +118,7 @@ export class CodeConsole extends Widget {
       options.contentFactory || CodeConsole.defaultContentFactory;
     this.modelFactory = options.modelFactory || CodeConsole.defaultModelFactory;
     this.rendermime = options.rendermime;
-    this.session = options.session;
+    this.sessionContext = options.sessionContext;
     this._mimeTypeService = options.mimeTypeService;
 
     // Add top-level CSS classes.
@@ -130,13 +130,16 @@ export class CodeConsole extends Widget {
     layout.addWidget(this._input);
 
     this._history = new ConsoleHistory({
-      session: this.session
+      sessionContext: this.sessionContext
     });
 
     void this._onKernelChanged();
 
-    this.session.kernelChanged.connect(this._onKernelChanged, this);
-    this.session.statusChanged.connect(this._onKernelStatusChanged, this);
+    this.sessionContext.kernelChanged.connect(this._onKernelChanged, this);
+    this.sessionContext.statusChanged.connect(
+      this._onKernelStatusChanged,
+      this
+    );
   }
 
   /**
@@ -171,7 +174,7 @@ export class CodeConsole extends Widget {
   /**
    * The client session used by the console.
    */
-  readonly session: IClientSession;
+  readonly sessionContext: ISessionContext;
 
   /**
    * The list of content cells in the console.
@@ -289,7 +292,7 @@ export class CodeConsole extends Widget {
    * incomplete before attempting submission anyway. The default value is `250`.
    */
   async execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
-    if (this.session.kernel.status === 'dead') {
+    if (this.sessionContext.kernel.status === 'dead') {
       return;
     }
 
@@ -682,7 +685,10 @@ export class CodeConsole extends Widget {
       cell.model.contentChanged.disconnect(this.update, this);
       this.update();
     };
-    return CodeCell.execute(cell, this.session).then(onSuccess, onFailure);
+    return CodeCell.execute(cell, this.sessionContext).then(
+      onSuccess,
+      onFailure
+    );
   }
 
   /**
@@ -740,7 +746,7 @@ export class CodeConsole extends Widget {
       let timer = setTimeout(() => {
         resolve(true);
       }, timeout);
-      let kernel = this.session.kernel;
+      let kernel = this.sessionContext.kernel;
       if (!kernel) {
         resolve(false);
         return;
@@ -782,16 +788,16 @@ export class CodeConsole extends Widget {
       this._banner = null;
     }
     this.addBanner();
-    this._handleInfo(await this.session.kernel.info);
+    this._handleInfo(await this.sessionContext.kernel.info);
   }
 
   /**
    * Handle a change to the kernel status.
    */
   private async _onKernelStatusChanged(): Promise<void> {
-    if (this.session.kernel.status === 'restarting') {
+    if (this.sessionContext.kernel.status === 'restarting') {
       this.addBanner();
-      this._handleInfo(await this.session.kernel.info);
+      this._handleInfo(await this.sessionContext.kernel.info);
     }
   }
 
@@ -837,7 +843,7 @@ export namespace CodeConsole {
     /**
      * The client session for the console widget.
      */
-    session: IClientSession;
+    sessionContext: ISessionContext;
 
     /**
      * The service used to look up mime types.

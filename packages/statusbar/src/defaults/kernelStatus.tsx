@@ -3,7 +3,7 @@
 
 import React from 'react';
 
-import { IClientSession, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+import { ISessionContext, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import { Text } from '@jupyterlab/coreutils';
 
@@ -134,19 +134,21 @@ export namespace KernelStatus {
     /**
      * The current client session associated with the kernel status indicator.
      */
-    get session(): IClientSession | null {
-      return this._session;
+    get sessionContext(): ISessionContext | null {
+      return this._sessionContext;
     }
-    set session(session: IClientSession | null) {
-      this._session?.statusChanged.disconnect(this._onKernelStatusChanged);
-      this._session?.kernelChanged.disconnect(this._onKernelChanged);
+    set sessionContext(sessionContext: ISessionContext | null) {
+      this._sessionContext?.statusChanged.disconnect(
+        this._onKernelStatusChanged
+      );
+      this._sessionContext?.kernelChanged.disconnect(this._onKernelChanged);
 
       const oldState = this._getAllState();
-      this._session = session;
-      this._kernelStatus = session?.session?.kernel?.status ?? 'unknown';
-      this._kernelName = session?.kernelDisplayName ?? 'unknown';
-      session?.statusChanged.connect(this._onKernelStatusChanged);
-      session?.kernelChanged.connect(this._onKernelChanged);
+      this._sessionContext = sessionContext;
+      this._kernelStatus = sessionContext?.session?.kernel?.status ?? 'unknown';
+      this._kernelName = sessionContext?.kernelDisplayName ?? 'unknown';
+      sessionContext?.statusChanged.connect(this._onKernelStatusChanged);
+      sessionContext?.kernelChanged.connect(this._onKernelChanged);
       this._triggerChange(oldState, this._getAllState());
     }
 
@@ -154,7 +156,7 @@ export namespace KernelStatus {
      * React to changes to the kernel status.
      */
     private _onKernelStatusChanged = (
-      _session: IClientSession,
+      _sessionContext: ISessionContext,
       status: Kernel.Status
     ) => {
       this._kernelStatus = status;
@@ -165,7 +167,7 @@ export namespace KernelStatus {
      * React to changes in the kernel.
      */
     private _onKernelChanged = (
-      _session: IClientSession,
+      _sessionContext: ISessionContext,
       change: Session.IKernelChangedArgs
     ) => {
       const oldState = this._getAllState();
@@ -205,7 +207,7 @@ export namespace KernelStatus {
     private _activityName: string = 'activity';
     private _kernelName: string = 'unknown';
     private _kernelStatus: Kernel.Status = 'unknown';
-    private _session: IClientSession | null = null;
+    private _sessionContext: ISessionContext | null = null;
   }
 
   /**

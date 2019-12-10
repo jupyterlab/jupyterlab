@@ -12,9 +12,6 @@ import { validateProperty } from '../validate';
  */
 const HEADER_FIELDS = ['username', 'version', 'session', 'msg_id', 'msg_type'];
 
-// TODO: use the typescript 3.7 assert functionality in validation functions
-// when we upgrade typescript.
-
 /**
  * Required fields and types for contents of various types of `kernel.IMessage`
  * messages on the iopub channel.
@@ -55,6 +52,9 @@ function validateHeader(
 
 /**
  * Validate a kernel message object.
+ *
+ * TODO: when we pull this out to a separate package, make the arguments more
+ * broadly typed, like JSONObject or something.
  */
 export function validateMessage(
   msg: KernelMessage.IMessage

@@ -184,6 +184,10 @@ export class SessionConnection implements Session.ISessionConnection {
 
   /**
    * Update the session based on a session model from the server.
+   *
+   * #### Notes
+   * This does not make a server request. Use setPath, setName, setType, and
+   * changeKernel to change these values on the server.
    */
   update(model: Session.IModel): void {
     let oldModel = this.model;
@@ -276,13 +280,7 @@ export class SessionConnection implements Session.ISessionConnection {
     if (this.isDisposed) {
       throw new Error('Session is disposed');
     }
-    this.kernel.dispose();
 
-    // This status is not technically correct, but it may be useful to refresh
-    // clients TODO: evaluate whether we want to do this, or tell people to
-    // listen to the kernelChanged signal.
-    // this._statusChanged.emit('restarting');
-    // TODO: probably change this to adjusting the kernel connection status.
     await this._patch({ kernel: options });
     return this.kernel;
   }

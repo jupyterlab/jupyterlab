@@ -26,7 +26,7 @@ import {
 import * as serialize from './serialize';
 
 import * as validate from './validate';
-import { KernelSpec } from '../kernelspec';
+import { KernelSpec, KernelSpecAPI } from '../kernelspec';
 
 import * as restapi from './restapi';
 
@@ -230,9 +230,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (this._specPromise) {
       return this._specPromise;
     }
-    this._specPromise = KernelSpec.getSpecs(this.serverSettings).then(specs => {
-      return specs.kernelspecs[this._name];
-    });
+    this._specPromise = KernelSpecAPI.getSpecs(this.serverSettings).then(
+      specs => {
+        return specs.kernelspecs[this._name];
+      }
+    );
     return this._specPromise;
   }
 
@@ -445,41 +447,19 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Any existing Future or Comm objects are cleared once the kernel has
    * actually be restarted.
    *
-   * The promise is fulfilled on a valid server response and rejected otherwise.
-   * Note that this does not mean the kernel has been restarted, only that a
-   * restart has been requested.
+   * The promise is fulfilled on a valid server response (after the kernel restarts)
+   * and rejected otherwise.
    *
    * It is assumed that the API call does not mutate the kernel id or name.
    *
    * The promise will be rejected if the request fails or the response is
    * invalid.
    */
-  restart(): Promise<void> {
-    // Handle the restart on all of the kernels with the same id.
-    // TODO:
-    // await Promise.all(
-    //   runningKernels.filter(k => k.id === kernel.id).map(k => k.handleRestart())
-    // );
+  async restart(): Promise<void> {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
     return restapi.restartKernel(this.id, this.serverSettings);
-  }
-
-  /**
-   * Handle a restart on the kernel.  This is not part of the `IKernel`
-   * interface.
-   */
-  async handleRestart(): Promise<void> {
-    this._clearState();
-    this._updateStatus('restarting');
-
-    // Kick off an async kernel request to eventually reset the kernel status.
-    // We do this with a setTimeout to avoid race conditions with the
-    // restarting/autostarting logic.
-    setTimeout(() => {
-      void this.requestKernelInfo();
-    }, 0);
   }
 
   /**
@@ -579,10 +559,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
       throw new Error('Kernel info reply errored');
     }
 
-    // TODO: Since we never make another _info promise delegate, this only
-    // resolves to the *first* return, and ignores all calls after that. Is
-    // that what we want, or do we want this info updated when another request
-    // is made?
     this._info.resolve(reply.content);
     return reply;
   }
@@ -1010,6 +986,22 @@ export class KernelConnection implements Kernel.IKernelConnection {
   }
 
   /**
+   * Handle a restart on the kernel.  This is not part of the `IKernel`
+   * interface.
+   */
+  private async _handleRestart(): Promise<void> {
+    this._clearState();
+    this._updateStatus('restarting');
+
+    // Kick off an async kernel request to eventually reset the kernel status.
+    // We do this with a setTimeout to avoid race conditions with the
+    // restarting/autostarting logic.
+    setTimeout(() => {
+      void this.requestKernelInfo();
+    }, 0);
+  }
+
+  /**
    * Clear the socket state.
    *
    * TODO: does this not apply anymore.
@@ -1061,11 +1053,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this._pendingMessages.length > 0
     ) {
       this._sendMessage(this._pendingMessages[0], false);
-      // TODO: remove debuging console.log below.
-      // console.log(
-      //   `SENT pending message to ${this.id}`,
-      //   this._pendingMessages[0]
-      // );
 
       // We shift the message off the queue after the message is sent so that
       // if there is an exception, the message is still pending.
@@ -1356,7 +1343,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
               // handleRestart changes the status to 'restarting', so we call it
               // first so that the status won't flip back and forth between
               // 'restarting' and 'autorestarting'.
-              await this.handleRestart();
+              await this._handleRestart();
               this._updateStatus('autorestarting');
             });
           }
@@ -1461,29 +1448,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
  * A private namespace for the Kernel.
  */
 namespace Private {
-  /**
-   * TODO: We need some way to coordinate between kernels which one is
-   * handling comms. If we are going to keep track of each kernel and whether
-   * it has comms handled - we might as well keep track of the actual kernel
-   * connections themselves. And if we do that, we might as well update the
-   * kernel connections in listRunning, etc.
-   *
-   * The other option is to have persistent kernel models, but then we require
-   * a persistent list of models which would be maintained in the manager, but
-   * that means that we really need the manager here.
-   *
-   * A lot of this goes away if we just insist that people use a manager with
-   * persistent models.
-   * 
-   * Let's just say you must manually guarantee this.
-   * 
-   *       // If there is already a kernel connection handling comms, don't handle
-      // them in our clone, since the comm message protocol has implicit
-      // assumptions that only one connection is handling comm messages.
-      // See https://github.com/jupyter/jupyter_client/issues/263
-
-   */
-
   /**
    * Log the current kernel status.
    */

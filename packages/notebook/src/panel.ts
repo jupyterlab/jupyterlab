@@ -14,7 +14,7 @@ import { Message } from '@phosphor/messaging';
 import { ISignal, Signal } from '@phosphor/signaling';
 
 import {
-  IClientSession,
+  ISessionContext,
   Printing,
   showDialog,
   Dialog
@@ -57,8 +57,11 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
 
     // Set up things related to the context
     this.content.model = this.context.model;
-    this.context.session.kernelChanged.connect(this._onKernelChanged, this);
-    this.context.session.statusChanged.connect(
+    this.context.sessionContext.kernelChanged.connect(
+      this._onKernelChanged,
+      this
+    );
+    this.context.sessionContext.statusChanged.connect(
       this._onSessionStatusChanged,
       this
     );
@@ -104,10 +107,10 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   /**
-   * The client session used by the panel.
+   * The session context used by the panel.
    */
-  get session(): IClientSession {
-    return this.context.session;
+  get sessionContext(): ISessionContext {
+    return this.context.sessionContext;
   }
 
   /**
@@ -131,8 +134,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     this.content.editorConfig = config.editorConfig;
     this.content.notebookConfig = config.notebookConfig;
     // Update kernel shutdown behavior
-    const kernelPreference = this.context.session.kernelPreference;
-    this.context.session.kernelPreference = {
+    const kernelPreference = this.context.sessionContext.kernelPreference;
+    this.context.sessionContext.kernelPreference = {
       ...kernelPreference,
       shutdownOnClose: config.kernelShutdown
     };
@@ -197,7 +200,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     }
     let { newValue } = args;
     void newValue.info.then(info => {
-      if (this.model && this.context.session.kernel === newValue) {
+      if (this.model && this.context.sessionContext.kernel === newValue) {
         this._updateLanguage(info.language_info);
       }
     });
@@ -205,7 +208,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   private _onSessionStatusChanged(
-    sender: IClientSession,
+    sender: ISessionContext,
     status: Kernel.Status
   ) {
     // If the status is autorestarting, and we aren't already in a series of
@@ -215,7 +218,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       // they know why their kernel state is gone.
       void showDialog({
         title: 'Kernel Restarting',
-        body: `The kernel for ${this.session.session?.path} appears to have died. It will restart automatically.`,
+        body: `The kernel for ${this.sessionContext.session?.path} appears to have died. It will restart automatically.`,
         buttons: [Dialog.okButton()]
       });
       this._autorestarting = true;

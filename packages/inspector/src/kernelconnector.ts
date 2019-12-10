@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
 import { DataConnector } from '@jupyterlab/coreutils';
 
@@ -24,7 +24,7 @@ export class KernelConnector extends DataConnector<
    */
   constructor(options: KernelConnector.IOptions) {
     super();
-    this._session = options.session;
+    this._sessionContext = options.sessionContext;
   }
 
   /**
@@ -35,7 +35,7 @@ export class KernelConnector extends DataConnector<
   fetch(
     request: InspectionHandler.IRequest
   ): Promise<InspectionHandler.IReply> {
-    const kernel = this._session.kernel;
+    const kernel = this._sessionContext.kernel;
 
     if (!kernel) {
       return Promise.reject(new Error('Inspection fetch requires a kernel.'));
@@ -58,7 +58,7 @@ export class KernelConnector extends DataConnector<
     });
   }
 
-  private _session: IClientSession;
+  private _sessionContext: ISessionContext;
 }
 
 /**
@@ -70,8 +70,8 @@ export namespace KernelConnector {
    */
   export interface IOptions {
     /**
-     * The session used to make API requests to the kernel.
+     * The session context used to make API requests to the kernel.
      */
-    session: IClientSession;
+    sessionContext: ISessionContext;
   }
 }

@@ -311,7 +311,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   /**
    * Handle a session starting.
    */
-  private _onStarted(sessionConnection: Session.ISessionConnection): void {
+  private _onStarted(sessionConnection: SessionConnection): void {
     this._sessionConnections.add(sessionConnection);
     sessionConnection.disposed.connect(this._onDisposed);
     sessionConnection.propertyChanged.connect(this._onChanged);
@@ -319,7 +319,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   }
 
   private _isReady = false;
-  private _sessionConnections = new Set<Session.ISessionConnection>();
+  private _sessionConnections = new Set<SessionConnection>();
   private _models = new Map<string, Session.IModel>();
   private _pollModels: Poll;
   private _ready: Promise<void>;
@@ -327,9 +327,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   private _connectionFailure = new Signal<this, Error>(this);
 
   // We define these here so they bind `this` correctly
-  private readonly _onDisposed = (
-    sessionConnection: Session.ISessionConnection
-  ) => {
+  private readonly _onDisposed = (sessionConnection: SessionConnection) => {
     this._sessionConnections.delete(sessionConnection);
     // A session termination emission could mean the server session is deleted,
     // or that the session JS object is disposed and the session still exists on
@@ -348,7 +346,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   };
 
   private readonly _connectToKernel = (
-    options: Kernel.IKernelConnection.IOptions
+    options: Omit<Kernel.IKernelConnection.IOptions, 'serverSettings'>
   ) => {
     return this._kernelManager.connectTo(options);
   };

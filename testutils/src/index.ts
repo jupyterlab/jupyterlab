@@ -5,7 +5,7 @@ import { simulate } from 'simulate-event';
 
 import { ServiceManager, Session } from '@jupyterlab/services';
 
-import { ClientSession } from '@jupyterlab/apputils';
+import { SessionContext } from '@jupyterlab/apputils';
 
 import { PromiseDelegate, UUID } from '@phosphor/coreutils';
 
@@ -197,14 +197,14 @@ export function sleep<T>(milliseconds: number = 0, value?: T): Promise<T> {
 /**
  * Create a client session object.
  */
-export async function createClientSession(
-  options: Partial<ClientSession.IOptions> = {}
-): Promise<ClientSession> {
+export async function createSessionContext(
+  options: Partial<SessionContext.IOptions> = {}
+): Promise<SessionContext> {
   const manager = options.manager ?? Private.getManager().sessions;
   const specsManager = options.specsManager ?? Private.getManager().kernelspecs;
 
   await manager.ready;
-  return new ClientSession({
+  return new SessionContext({
     manager,
     specsManager,
     path: options.path || UUID.uuid4(),
@@ -276,8 +276,8 @@ export async function initNotebookContext(
   await context.initialize(true);
 
   if (startKernel) {
-    await context.session.initialize();
-    await context.session.kernel.info;
+    await context.sessionContext.initialize();
+    await context.sessionContext.kernel.info;
   }
 
   return context;

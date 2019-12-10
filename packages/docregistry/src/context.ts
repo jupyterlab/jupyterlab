@@ -17,9 +17,9 @@ import { Widget } from '@phosphor/widgets';
 
 import {
   showDialog,
-  ClientSession,
+  SessionContext,
   Dialog,
-  IClientSession,
+  ISessionContext,
   showErrorMessage
 } from '@jupyterlab/apputils';
 
@@ -65,7 +65,7 @@ export class Context<T extends DocumentRegistry.IModel>
     });
 
     let ext = PathExt.extname(this._path);
-    this.session = new ClientSession({
+    this.sessionContext = new SessionContext({
       manager: manager.sessions,
       specsManager: manager.kernelspecs,
       path: this._path,
@@ -74,11 +74,11 @@ export class Context<T extends DocumentRegistry.IModel>
       kernelPreference: options.kernelPreference || { shouldStart: false },
       setBusy: options.setBusy
     });
-    this.session.propertyChanged.connect(this._onSessionChanged, this);
+    this.sessionContext.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
 
     this.urlResolver = new RenderMimeRegistry.UrlResolver({
-      session: this.session,
+      session: this.sessionContext,
       contents: manager.contents
     });
   }
@@ -121,7 +121,7 @@ export class Context<T extends DocumentRegistry.IModel>
   /**
    * The client session object associated with the context.
    */
-  readonly session: ClientSession;
+  readonly sessionContext: SessionContext;
 
   /**
    * The current path associated with the document.
@@ -175,7 +175,7 @@ export class Context<T extends DocumentRegistry.IModel>
       return;
     }
     this._isDisposed = true;
-    this.session.dispose();
+    this.sessionContext.dispose();
     if (this._modelDB) {
       this._modelDB.dispose();
     }
@@ -404,13 +404,13 @@ export class Context<T extends DocumentRegistry.IModel>
         };
       }
       this._path = newPath;
-      void this.session.session?.setPath(newPath);
+      void this.sessionContext.session?.setPath(newPath);
       const updateModel = {
         ...this._contentsModel,
         ...changeModel
       };
       const localPath = this._manager.contents.localPath(newPath);
-      void this.session.session?.setName(PathExt.basename(localPath));
+      void this.sessionContext.session?.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
       this._pathChanged.emit(this._path);
     }
@@ -419,11 +419,11 @@ export class Context<T extends DocumentRegistry.IModel>
   /**
    * Handle a change to a session property.
    */
-  private _onSessionChanged(sender: IClientSession, type: string): void {
+  private _onSessionChanged(sender: ISessionContext, type: string): void {
     if (type !== 'path') {
       return;
     }
-    let path = this.session.session?.path;
+    let path = this.sessionContext.session?.path;
     if (path !== this._path) {
       this._path = path;
       this._pathChanged.emit(path);
@@ -467,16 +467,17 @@ export class Context<T extends DocumentRegistry.IModel>
       }
       // Update the kernel preference.
       let name =
-        this._model.defaultKernelName || this.session.kernelPreference.name;
-      this.session.kernelPreference = {
-        ...this.session.kernelPreference,
+        this._model.defaultKernelName ||
+        this.sessionContext.kernelPreference.name;
+      this.sessionContext.kernelPreference = {
+        ...this.sessionContext.kernelPreference,
         name,
         language: this._model.defaultKernelLanguage
       };
       // Note: we don't wait on the session to initialize
       // so that the user can be shown the content before
       // any kernel has started.
-      void this.session.initialize();
+      void this.sessionContext.initialize();
     });
   }
 
@@ -769,10 +770,10 @@ export class Context<T extends DocumentRegistry.IModel>
    */
   private async _finishSaveAs(newPath: string): Promise<void> {
     this._path = newPath;
-    return this.session.session
+    return this.sessionContext.session
       ?.setPath(newPath)
       .then(() => {
-        void this.session.session?.setName(newPath.split('/').pop()!);
+        void this.sessionContext.session?.setName(newPath.split('/').pop()!);
         return this.save();
       })
       .then(() => {
@@ -829,7 +830,7 @@ export namespace Context {
     /**
      * The kernel preference associated with the context.
      */
-    kernelPreference?: IClientSession.IKernelPreference;
+    kernelPreference?: ISessionContext.IKernelPreference;
 
     /**
      * An IModelDB factory method which may be used for the document.

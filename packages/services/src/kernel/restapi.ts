@@ -13,7 +13,7 @@ import { validateModel, validateModels } from './validate';
  */
 export interface IModel {
   /**
-   * Unique identifier of the kernel server session.
+   * Unique identifier of the kernel on the server.
    */
   readonly id: string;
 
@@ -100,7 +100,7 @@ export interface IKernelOptions {
  * #### Notes
  * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
  *
- * The promise is fulfilled on a valid response and rejected otherwise.
+ * The promise is fulfilled on a valid response (and thus after a restart) and rejected otherwise.
  */
 export async function restartKernel(
   id: string,

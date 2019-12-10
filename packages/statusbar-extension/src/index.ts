@@ -7,7 +7,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { IClientSession, ICommandPalette } from '@jupyterlab/apputils';
+import { ISessionContext, ICommandPalette } from '@jupyterlab/apputils';
 
 import { Cell, CodeCell } from '@jupyterlab/cells';
 
@@ -133,7 +133,7 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
   ) => {
     // When the status item is clicked, launch the kernel
     // selection dialog for the current session.
-    let currentSession: IClientSession | null = null;
+    let currentSession: ISessionContext | null = null;
     const changeKernel = async () => {
       if (!currentSession) {
         return;
@@ -167,9 +167,9 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
 
       // Grab the session off of the current widget, if it exists.
       if (newValue && consoleTracker.has(newValue)) {
-        currentSession = (newValue as ConsolePanel).session;
+        currentSession = (newValue as ConsolePanel).sessionContext;
       } else if (newValue && notebookTracker.has(newValue)) {
-        currentSession = (newValue as NotebookPanel).session;
+        currentSession = (newValue as NotebookPanel).sessionContext;
       } else {
         currentSession = null;
       }

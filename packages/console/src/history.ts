@@ -7,7 +7,7 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { Signal } from '@phosphor/signaling';
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -16,9 +16,9 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
  */
 export interface IConsoleHistory extends IDisposable {
   /**
-   * The client session used by the foreign handler.
+   * The session context used by the foreign handler.
    */
-  readonly session: IClientSession;
+  readonly sessionContext: ISessionContext;
 
   /**
    * The current editor used by the history widget.
@@ -78,15 +78,15 @@ export class ConsoleHistory implements IConsoleHistory {
    * Construct a new console history object.
    */
   constructor(options: ConsoleHistory.IOptions) {
-    this.session = options.session;
+    this.sessionContext = options.sessionContext;
     void this._handleKernel();
-    this.session.kernelChanged.connect(this._handleKernel, this);
+    this.sessionContext.kernelChanged.connect(this._handleKernel, this);
   }
 
   /**
    * The client session used by the foreign handler.
    */
-  readonly session: IClientSession;
+  readonly sessionContext: ISessionContext;
 
   /**
    * The current editor used by the history manager.
@@ -297,7 +297,7 @@ export class ConsoleHistory implements IConsoleHistory {
    * Handle the current kernel changing.
    */
   private async _handleKernel(): Promise<void> {
-    let kernel = this.session.kernel;
+    let kernel = this.sessionContext.kernel;
     if (!kernel) {
       this._history.length = 0;
       return;
@@ -354,7 +354,7 @@ export namespace ConsoleHistory {
     /**
      * The client session used by the foreign handler.
      */
-    session: IClientSession;
+    sessionContext: ISessionContext;
   }
 }
 

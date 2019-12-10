@@ -107,14 +107,19 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    * @param model - The model of the target kernel.
    *
    * @returns A promise that resolves with the new kernel instance.
+   *
+   * #### Notes
+   * This will use the manager's server settings and ignore any server
+   * settings passed in the options.
    */
   connectTo(
-    options: Kernel.IKernelConnection.IOptions
+    options: Omit<Kernel.IKernelConnection.IOptions, 'serverSettings'>
   ): Kernel.IKernelConnection {
     const { id } = options.model;
-    let handleComms = true;
+
+    let handleComms = options.handleComms ?? true;
     // By default, handle comms only if no other kernel connection is.
-    if (!options.handleComms) {
+    if (options.handleComms === undefined) {
       for (let kc of this._kernelConnections) {
         if (kc.id === id && kc.handleComms) {
           handleComms = false;
@@ -122,7 +127,11 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
         }
       }
     }
-    let kernelConnection = new KernelConnection({ handleComms, ...options });
+    let kernelConnection = new KernelConnection({
+      handleComms,
+      ...options,
+      serverSettings: this.serverSettings
+    });
     this._onStarted(kernelConnection);
     if (!this._models.has(id)) {
       // We trust the user to connect to an existing kernel, but we verify
@@ -166,6 +175,9 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    *
    * #### Notes
    * The manager `serverSettings` will be always be used.
+   *
+   * TODO: make this ignoring logic everywhere for managers. Also Omit the
+   * server settings from the IKernelConnection.IOptions in these cases.
    */
   async startNew(
     options: IKernelOptions &
@@ -177,8 +189,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
     );
     return this.connectTo({
       ...options,
-      model,
-      serverSettings: this.serverSettings
+      model
     });
   }
 

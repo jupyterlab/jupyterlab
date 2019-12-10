@@ -103,7 +103,7 @@ import { KernelSpec } from '@jupyterlab/services/lib/kernelspec';
  * session).
  *
  */
-export interface IClientSession extends IObservableDisposable {
+export interface ISessionContext extends IObservableDisposable {
   /**
    * The current session connection.
    */
@@ -155,7 +155,7 @@ export interface IClientSession extends IObservableDisposable {
   /**
    * The kernel preference for starting new kernels.
    */
-  kernelPreference: IClientSession.IKernelPreference;
+  kernelPreference: ISessionContext.IKernelPreference;
 
   /**
    * The sensible display name for the kernel, or 'No Kernel'
@@ -183,6 +183,8 @@ export interface IClientSession extends IObservableDisposable {
    * Use a UX to select a new kernel for the session.
    *
    * TODO: should this select a new kernel for the session, or make a new session?
+   *
+   * TODO: Make this function an optional constructor option, so that we can customize it.
    */
   selectKernel(): Promise<void>;
 
@@ -203,14 +205,16 @@ export interface IClientSession extends IObservableDisposable {
    *   and resolves with `true`.
    * * If no kernel has been started, this is a no-op, and resolves with
    *   `false`.
+   *
+   * TODO: be able to pass in a factory for the restart dialog so we can override the default.
    */
   restart(): Promise<boolean>;
 }
 
 /**
- * The namespace for Client Session related interfaces.
+ * The namespace for session context related interfaces.
  */
-export namespace IClientSession {
+export namespace ISessionContext {
   /**
    * A kernel preference.
    */
@@ -255,11 +259,11 @@ export namespace IClientSession {
 /**
  * The default implementation of client session object.
  */
-export class ClientSession implements IClientSession {
+export class SessionContext implements ISessionContext {
   /**
    * Construct a new client session.
    */
-  constructor(options: ClientSession.IOptions) {
+  constructor(options: SessionContext.IOptions) {
     this.manager = options.manager;
     this.specsManager = options.specsManager;
     this._path = options.path || UUID.uuid4();
@@ -334,10 +338,10 @@ export class ClientSession implements IClientSession {
    * This is used when selecting a new kernel, and should reflect the sort of
    * kernel the activity prefers.
    */
-  get kernelPreference(): IClientSession.IKernelPreference {
+  get kernelPreference(): ISessionContext.IKernelPreference {
     return this._kernelPreference;
   }
-  set kernelPreference(value: IClientSession.IKernelPreference) {
+  set kernelPreference(value: ISessionContext.IKernelPreference) {
     this._kernelPreference = value;
   }
 
@@ -473,7 +477,7 @@ export class ClientSession implements IClientSession {
         // Bail if there is no previous kernel to start.
         return Promise.reject('No kernel to restart');
       }
-      return ClientSession.restartKernel(kernel);
+      return SessionContext.restartKernel(kernel);
     });
   }
 
@@ -531,7 +535,7 @@ export class ClientSession implements IClientSession {
         .then(() => undefined)
         .catch(() => this._selectKernel(false));
     }
-    let name = ClientSession.getDefaultKernel({
+    let name = SessionContext.getDefaultKernel({
       specs: this.specsManager.specs,
       sessions: this.manager.running(),
       preference
@@ -803,7 +807,7 @@ export class ClientSession implements IClientSession {
   private _name = '';
   private _type = '';
   private _prevKernelName = '';
-  private _kernelPreference: IClientSession.IKernelPreference;
+  private _kernelPreference: ISessionContext.IKernelPreference;
   private _isDisposed = false;
   private _disposed = new Signal<this, void>(this);
   private _session: Session.ISessionConnection | null = null;
@@ -828,7 +832,7 @@ export class ClientSession implements IClientSession {
 /**
  * A namespace for `ClientSession` statics.
  */
-export namespace ClientSession {
+export namespace SessionContext {
   /**
    * The options used to initialize a context.
    */
@@ -861,7 +865,7 @@ export namespace ClientSession {
     /**
      * A kernel preference.
      */
-    kernelPreference?: IClientSession.IKernelPreference;
+    kernelPreference?: ISessionContext.IKernelPreference;
 
     /**
      * A function to call when the session becomes busy.
@@ -907,7 +911,7 @@ export namespace ClientSession {
     /**
      * The kernel preference.
      */
-    preference: IClientSession.IKernelPreference;
+    preference: ISessionContext.IKernelPreference;
 
     /**
      * The current running sessions.
@@ -961,7 +965,7 @@ namespace Private {
     /**
      * Create a new kernel selector widget.
      */
-    constructor(session: ClientSession) {
+    constructor(session: SessionContext) {
       super({ node: createSelectorNode(session) });
     }
 
@@ -977,7 +981,7 @@ namespace Private {
   /**
    * Create a node for a kernel selector widget.
    */
-  function createSelectorNode(clientSession: ClientSession) {
+  function createSelectorNode(clientSession: SessionContext) {
     // Create the dialog body.
     let body = document.createElement('div');
     let text = document.createElement('label');
@@ -986,7 +990,7 @@ namespace Private {
 
     let options = getKernelSearch(clientSession);
     let selector = document.createElement('select');
-    ClientSession.populateKernelSelect(selector, options);
+    SessionContext.populateKernelSelect(selector, options);
     body.appendChild(selector);
     return body;
   }
@@ -995,7 +999,7 @@ namespace Private {
    * Get the default kernel name given select options.
    */
   export function getDefaultKernel(
-    options: ClientSession.IKernelSearch
+    options: SessionContext.IKernelSearch
   ): string | null {
     let { specs, preference } = options;
     let {
@@ -1060,7 +1064,7 @@ namespace Private {
    */
   export function populateKernelSelect(
     node: HTMLSelectElement,
-    options: ClientSession.IKernelSearch
+    options: SessionContext.IKernelSearch
   ): void {
     while (node.firstChild) {
       node.removeChild(node.firstChild);
@@ -1206,8 +1210,8 @@ namespace Private {
    * Get the kernel search options given a client session and sesion manager.
    */
   function getKernelSearch(
-    session: ClientSession
-  ): ClientSession.IKernelSearch {
+    session: SessionContext
+  ): SessionContext.IKernelSearch {
     return {
       specs: session.specsManager.specs,
       sessions: session.manager.running(),

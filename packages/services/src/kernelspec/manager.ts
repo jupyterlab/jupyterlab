@@ -114,7 +114,7 @@ export class KernelSpecManager extends BaseManager
    * Execute a request to the server to poll specs and update state.
    */
   protected async requestSpecs(): Promise<void> {
-    const specs = await KernelSpec.getSpecs(this.serverSettings);
+    const specs = await restapi.getSpecs(this.serverSettings);
     if (this.isDisposed) {
       return;
     }

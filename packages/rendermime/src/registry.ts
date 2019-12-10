@@ -9,7 +9,7 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import {
-  IClientSession,
+  ISessionContext,
   ISanitizer,
   defaultSanitizer
 } from '@jupyterlab/apputils';
@@ -359,7 +359,7 @@ export namespace RenderMimeRegistry {
       return URLExt.isLocal(url) || !!this._contents.driveName(path);
     }
 
-    private _session: IClientSession | Session.ISessionConnection;
+    private _session: ISessionContext | Session.ISessionConnection;
     private _contents: Contents.IManager;
   }
 
@@ -370,7 +370,7 @@ export namespace RenderMimeRegistry {
     /**
      * The session used by the resolver.
      */
-    session: IClientSession | Session.ISessionConnection;
+    session: ISessionContext | Session.ISessionConnection;
 
     /**
      * The contents manager used by the resolver.
@@ -413,10 +413,10 @@ namespace Private {
   }
 
   export function sessionConnection(
-    s: Session.ISessionConnection | IClientSession
-  ): Session.ISessionConnection {
+    s: Session.ISessionConnection | ISessionContext
+  ): Session.ISessionConnection | undefined {
     return (s as any).sessionChanged
-      ? (s as IClientSession).session
+      ? (s as ISessionContext).session
       : (s as Session.ISessionConnection);
   }
 }

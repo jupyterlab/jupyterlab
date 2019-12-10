@@ -1,7 +1,7 @@
 import { ServerConnection } from '../serverconnection';
 import { Session } from '.';
 import { URLExt } from '@jupyterlab/coreutils';
-import { validateModel } from './validate';
+import { validateModel, updateLegacySessionModel } from './validate';
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -27,10 +27,10 @@ export async function listRunning(
   if (!Array.isArray(data)) {
     throw new Error('Invalid Session list');
   }
-  for (let i = 0; i < data.length; i++) {
-    data[i] = validateModel(data[i]);
-  }
-
+  data.forEach(m => {
+    updateLegacySessionModel(m);
+    validateModel(m);
+  });
   return data;
 }
 
@@ -80,7 +80,9 @@ export async function getSessionModel(
     throw new ServerConnection.ResponseError(response);
   }
   let data = await response.json();
-  return validateModel(data);
+  updateLegacySessionModel(data);
+  validateModel(data);
+  return data;
 }
 
 /**
@@ -101,7 +103,9 @@ export async function startSession(
     throw new ServerConnection.ResponseError(response);
   }
   let data = await response.json();
-  return validateModel(data);
+  updateLegacySessionModel(data);
+  validateModel(data);
+  return data;
 }
 
 /**
@@ -121,34 +125,7 @@ export async function updateSession(
     throw new ServerConnection.ResponseError(response);
   }
   let data = await response.json();
-  return validateModel(data);
-}
-
-/**
- * Find a session by path.
- *
- * #### Notes
- * TODO: This is a convenience function. Should we just delete it as too
- * simple to keep around?
- */
-export async function findByPath(
-  path: string,
-  settings?: ServerConnection.ISettings
-): Promise<Session.IModel | undefined> {
-  const models = await listRunning(settings);
-  return models.find(value => value.path === path);
-}
-
-/**
- * Shut down all sessions.
- *
- * #### Notes
- * TODO: This is a convenience function. Should we just delete it as too
- * simple to keep around?
- */
-export async function shutdownAll(
-  settings?: ServerConnection.ISettings
-): Promise<void> {
-  const running = await listRunning(settings);
-  await Promise.all(running.map(s => shutdownSession(s.id, settings)));
+  updateLegacySessionModel(data);
+  validateModel(data);
+  return data;
 }

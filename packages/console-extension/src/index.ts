@@ -10,7 +10,7 @@ import {
 
 import {
   Dialog,
-  IClientSession,
+  ISessionContext,
   ICommandPalette,
   showDialog,
   WidgetTracker
@@ -388,8 +388,9 @@ async function activateConsole(
       } else if (args['isLauncher'] && args['kernelPreference']) {
         const kernelPreference = args[
           'kernelPreference'
-        ] as IClientSession.IKernelPreference;
-        return manager.kernelspecs.specs.kernelspecs[kernelPreference.name].display_name;
+        ] as ISessionContext.IKernelPreference;
+        return manager.kernelspecs.specs.kernelspecs[kernelPreference.name]
+          .display_name;
       }
       return 'Console';
     },
