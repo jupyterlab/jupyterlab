@@ -107,7 +107,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
 
         const anchor = parent.console;
         const editor = anchor.promptCell.editor;
-        const kernel = anchor.session.kernel;
+        const kernel = anchor.sessionContext.kernel;
         const rendermime = anchor.rendermime;
 
         // If all components necessary for rendering exist, create a tooltip.
@@ -142,7 +142,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 
         const anchor = parent.content;
         const editor = anchor.activeCell.editor;
-        const kernel = parent.session.kernel;
+        const kernel = parent.sessionContext.kernel;
         const rendermime = anchor.rendermime;
 
         // If all components necessary for rendering exist, create a tooltip.

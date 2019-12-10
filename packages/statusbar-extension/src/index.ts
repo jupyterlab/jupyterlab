@@ -173,7 +173,7 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
       } else {
         currentSession = null;
       }
-      item.model!.session = currentSession;
+      item.model!.sessionContext = currentSession;
     });
 
     statusBar.registerStatusItem(

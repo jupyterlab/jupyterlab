@@ -135,9 +135,9 @@ const consoles: JupyterFrontEndPlugin<void> = {
 
     // Create a handler for each console that is created.
     consoles.widgetAdded.connect((sender, parent) => {
-      const session = parent.console.session;
+      const sessionContext = parent.console.sessionContext;
       const rendermime = parent.console.rendermime;
-      const connector = new KernelConnector({ session });
+      const connector = new KernelConnector({ sessionContext });
       const handler = new InspectionHandler({ connector, rendermime });
 
       // Associate the handler to the widget.
@@ -196,9 +196,9 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 
     // Create a handler for each notebook that is created.
     notebooks.widgetAdded.connect((sender, parent) => {
-      const session = parent.session;
+      const sessionContext = parent.sessionContext;
       const rendermime = parent.content.rendermime;
-      const connector = new KernelConnector({ session });
+      const connector = new KernelConnector({ sessionContext });
       const handler = new InspectionHandler({ connector, rendermime });
 
       // Associate the handler to the widget.

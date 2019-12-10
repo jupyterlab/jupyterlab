@@ -369,6 +369,9 @@ export namespace RenderMimeRegistry {
   export interface IUrlResolverOptions {
     /**
      * The session used by the resolver.
+     *
+     * #### Notes
+     * For convenience, this can be a session context as well.
      */
     session: ISessionContext | Session.ISessionConnection;
 

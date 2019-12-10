@@ -148,14 +148,14 @@ async function activateConsole(
   void restorer.restore(tracker, {
     command: CommandIDs.create,
     args: panel => ({
-      path: panel.console.session.session?.path,
-      name: panel.console.session.session?.name,
+      path: panel.console.sessionContext.session?.path,
+      name: panel.console.sessionContext.session?.name,
       kernelPreference: {
-        name: panel.console.session.kernelPreference.name,
-        language: panel.console.session.kernelPreference.language
+        name: panel.console.sessionContext.kernelPreference.name,
+        language: panel.console.sessionContext.kernelPreference.language
       }
     }),
-    name: panel => panel.console.session.session?.path,
+    name: panel => panel.console.sessionContext.session?.path,
     when: manager.ready
   });
 
@@ -248,7 +248,7 @@ async function activateConsole(
     // Add the console panel to the tracker. We want the panel to show up before
     // any kernel selection dialog, so we do not await panel.session.ready;
     await tracker.add(panel);
-    panel.session.propertyChanged.connect(() => tracker.save(panel));
+    panel.sessionContext.propertyChanged.connect(() => tracker.save(panel));
 
     // TODO: experiment in having convenience functions to hook things up, to make it clearer to users what is really going on (that sessions do not have an iopub signal, for example).
     // I think the complexity here is greater than just having proxied signals.
@@ -359,7 +359,7 @@ async function activateConsole(
     execute: (args: IOpenOptions) => {
       let path = args['path'];
       let widget = tracker.find(value => {
-        return value.console.session.session?.path === path;
+        return value.console.sessionContext.session?.path === path;
       });
       if (widget) {
         if (args['activate'] !== false) {
@@ -469,7 +469,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      let kernel = current.console.session.kernel;
+      let kernel = current.console.sessionContext.kernel;
       if (kernel) {
         return kernel.interrupt();
       }
@@ -484,7 +484,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return current.console.session.restart();
+      return current.console.sessionContext.restart();
     },
     isEnabled
   });
@@ -502,7 +502,7 @@ async function activateConsole(
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          return current.console.session.shutdown().then(() => {
+          return current.console.sessionContext.shutdown().then(() => {
             current.dispose();
             return true;
           });
@@ -518,7 +518,7 @@ async function activateConsole(
     execute: args => {
       let path = args['path'];
       tracker.find(widget => {
-        if (widget.console.session.session?.path === path) {
+        if (widget.console.sessionContext.session?.path === path) {
           if (args['activate'] !== false) {
             shell.activateById(widget.id);
           }
@@ -541,7 +541,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return current.console.session.selectKernel();
+      return current.console.sessionContext.selectKernel();
     },
     isEnabled
   });
@@ -576,7 +576,7 @@ async function activateConsole(
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          return current.console.session.shutdown().then(() => {
+          return current.console.sessionContext.shutdown().then(() => {
             current.dispose();
           });
         } else {
@@ -590,24 +590,24 @@ async function activateConsole(
   mainMenu.kernelMenu.kernelUsers.add({
     tracker,
     interruptKernel: current => {
-      let kernel = current.console.session.kernel;
+      let kernel = current.console.sessionContext.kernel;
       if (kernel) {
         return kernel.interrupt();
       }
       return Promise.resolve(void 0);
     },
     noun: 'Console',
-    restartKernel: current => current.console.session.restart(),
+    restartKernel: current => current.console.sessionContext.restart(),
     restartKernelAndClear: current => {
-      return current.console.session.restart().then(restarted => {
+      return current.console.sessionContext.restart().then(restarted => {
         if (restarted) {
           current.console.clear();
         }
         return restarted;
       });
     },
-    changeKernel: current => current.console.session.selectKernel(),
-    shutdownKernel: current => current.console.session.shutdown()
+    changeKernel: current => current.console.sessionContext.selectKernel(),
+    shutdownKernel: current => current.console.sessionContext.shutdown()
   } as IKernelMenu.IKernelUser<ConsolePanel>);
 
   // Add a code runner to the Run menu.
@@ -678,7 +678,7 @@ async function activateConsole(
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({
     tracker,
-    getKernel: current => current.session.kernel
+    getKernel: current => current.sessionContext.kernel
   } as IHelpMenu.IKernelUser<ConsolePanel>);
 
   app.contextMenu.addItem({

@@ -139,8 +139,8 @@ const consoles: JupyterFrontEndPlugin<void> = {
       const anchor = panel.console;
       const cell = anchor.promptCell;
       const editor = cell && cell.editor;
-      // TODO: make sure the logic here is right as the client session switches to different sessions.
-      const session = anchor.session?.session;
+      // TODO: make sure the logic here is right as the session context switches to different sessions.
+      const session = anchor.sessionContext.session;
       const parent = panel;
       const connector = new CompletionConnector({ session, editor });
       const handler = manager.register({ connector, editor, parent });
@@ -200,8 +200,8 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     notebooks.widgetAdded.connect((sender, panel) => {
       const cell = panel.content.activeCell;
       const editor = cell && cell.editor;
-      // TODO: Make sure the logic here is right as the clientsession switches between sessions
-      const session = panel.session?.session;
+      // TODO: Make sure the logic here is right as the session context switches between sessions
+      const session = panel.sessionContext.session;
       const parent = panel;
       const connector = new CompletionConnector({ session, editor });
       const handler = manager.register({ connector, editor, parent });

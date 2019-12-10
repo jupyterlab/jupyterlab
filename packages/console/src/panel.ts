@@ -69,7 +69,7 @@ export class ConsolePanel extends Panel {
     }));
 
     let resolver = new RenderMimeRegistry.UrlResolver({
-      sessionContext: sessionContext,
+      session: sessionContext,
       contents: manager.contents
     });
     rendermime = rendermime.clone({ resolver });
