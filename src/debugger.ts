@@ -34,7 +34,7 @@ export namespace Debugger {
 
       const { callstackCommands, editorServices, service } = options;
 
-      this.model = new Debugger.Model({});
+      this.model = new Debugger.Model();
       this.service = service as DebugService;
       this.service.model = this.model;
 
@@ -78,7 +78,7 @@ export namespace Debugger {
   }
 
   export class Model implements IDebugger.IModel {
-    constructor(options: Debugger.Model.IOptions) {
+    constructor() {
       this.breakpoints = new Breakpoints.Model();
       this.callstack = new Callstack.Model([]);
       this.variables = new Variables.Model([]);
@@ -133,9 +133,5 @@ export namespace Debugger {
       callstackCommands: Callstack.ICommands;
       editorServices: IEditorServices;
     }
-  }
-
-  export namespace Model {
-    export interface IOptions {}
   }
 }

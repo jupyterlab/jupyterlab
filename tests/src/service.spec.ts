@@ -73,7 +73,7 @@ describe('DebugService', () => {
     await (client as ClientSession).initialize();
     await client.kernel.ready;
     session = new DebugSession({ client });
-    model = new Debugger.Model({});
+    model = new Debugger.Model();
     service = new DebugService();
   });
 
