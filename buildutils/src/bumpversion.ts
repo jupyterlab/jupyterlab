@@ -81,7 +81,17 @@ commander
       },
       true
     );
-    utils.run(cmd);
+    // For a preminor release, we bump 10 minor versions so that we do
+    // not conflict with versions during minor releases of the top
+    // level package.
+    if (lernaVersion === 'preminor') {
+      for (let i = 0; i < 10; i++) {
+        utils.run(cmd);
+      }
+    } else {
+      utils.run(cmd);
+    }
+
     let newVersion = utils.run(
       'git rev-parse HEAD',
       {
