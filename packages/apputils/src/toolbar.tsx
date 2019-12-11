@@ -15,7 +15,7 @@ import { AttachedProperty } from '@lumino/properties';
 
 import { PanelLayout, Widget } from '@lumino/widgets';
 
-import { ISessionContext } from './sessioncontext';
+import { ISessionContext, sessionContextDialogs } from './sessioncontext';
 
 import * as React from 'react';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
@@ -383,11 +383,14 @@ export namespace Toolbar {
   /**
    * Create a restart toolbar item.
    */
-  export function createRestartButton(sessionContext: ISessionContext): Widget {
+  export function createRestartButton(
+    sessionContext: ISessionContext,
+    dialogs?: ISessionContext.IDialogs
+  ): Widget {
     return new ToolbarButton({
       iconClassName: 'jp-RefreshIcon',
       onClick: () => {
-        void sessionContext.restart();
+        void (dialogs || sessionContextDialogs).restart(sessionContext);
       },
       tooltip: 'Restart the kernel'
     });
@@ -412,10 +415,14 @@ export namespace Toolbar {
    * handle a change in context or kernel.
    */
   export function createKernelNameItem(
-    sessionContext: ISessionContext
+    sessionContext: ISessionContext,
+    dialogs?: ISessionContext.IDialogs
   ): Widget {
     const el = ReactWidget.create(
-      <Private.KernelNameComponent sessionContext={sessionContext} />
+      <Private.KernelNameComponent
+        sessionContext={sessionContext}
+        dialogs={dialogs || sessionContextDialogs}
+      />
     );
     el.addClass('jp-KernelName');
     return el;
@@ -661,6 +668,7 @@ namespace Private {
      */
     export interface IProps {
       sessionContext: ISessionContext;
+      dialogs: ISessionContext.IDialogs;
     }
   }
 
@@ -672,6 +680,9 @@ namespace Private {
    */
 
   export function KernelNameComponent(props: KernelNameComponent.IProps) {
+    const callback = () => {
+      void props.dialogs.selectKernel(props.sessionContext);
+    };
     return (
       <UseSignal
         signal={props.sessionContext.kernelChanged}
@@ -680,9 +691,7 @@ namespace Private {
         {sessionContext => (
           <ToolbarButtonComponent
             className={TOOLBAR_KERNEL_NAME_CLASS}
-            onClick={props.sessionContext.selectKernel.bind(
-              props.sessionContext
-            )}
+            onClick={callback}
             tooltip={'Switch kernel'}
             label={sessionContext?.kernelDisplayName}
           />

@@ -51,7 +51,7 @@ export interface ISessionContext extends IObservableDisposable {
    * #### Notes
    * This includes starting up an initial kernel if needed.
    */
-  initialize(): Promise<void>;
+  initialize(): Promise<boolean>;
 
   /**
    * Whether the session context is ready.
@@ -164,6 +164,21 @@ export interface ISessionContext extends IObservableDisposable {
   readonly name: string;
 
   /**
+   * The previous kernel name.
+   */
+  readonly prevKernelName: string;
+
+  /**
+   * The session manager used by the session.
+   */
+  readonly sessionManager: Session.IManager;
+
+  /**
+   * The kernel spec manager
+   */
+  readonly specsManager: KernelSpec.IManager;
+
+  /**
    * Kill the kernel and shutdown the session.
    *
    * @returns A promise that resolves when the session is shut down.
@@ -171,25 +186,15 @@ export interface ISessionContext extends IObservableDisposable {
   shutdown(): Promise<void>;
 
   /**
-   * Use a UX to select a new kernel for the session.
+   * Change the kernel associated with the session.
+   *
+   * @param options The optional kernel model parameters to use for the new kernel.
+   *
+   * @returns A promise that resolves with the new kernel connection.
    */
-  selectKernel(): Promise<void>;
-
-  /**
-   * Restart the kernel, with confirmation UX.
-   *
-   * @returns A promise that resolves with whether the kernel has restarted.
-   *
-   * #### Notes
-   * This method makes it easy to get a new kernel running in a session where
-   * we used to have a session running.
-   *
-   * * If there is a running kernel, present a confirmation dialog.
-   * * If there is no kernel, start a kernel with the last-run kernel name.
-   * * If no kernel has ever been started, this is a no-op, and resolves with
-   *   `false`.
-   */
-  restart(): Promise<boolean>;
+  changeKernel(
+    options?: Partial<Kernel.IModel>
+  ): Promise<Kernel.IKernelConnection>;
 }
 
 /**
@@ -247,6 +252,29 @@ export namespace ISessionContext {
     | Kernel.ConnectionStatus
     | 'initializing'
     | '';
+
+  /**
+   * An interface for a session context dialog provider.
+   */
+  export interface IDialogs {
+    /**
+     * Select a kernel for the session.
+     */
+    selectKernel(session: ISessionContext): Promise<void>;
+
+    /**
+     * Restart the session context.
+     *
+     * @returns A promise that resolves with whether the kernel has restarted.
+     *
+     * #### Notes
+     * If there is a running kernel, present a dialog.
+     * If there is no kernel, we start a kernel with the last run
+     * kernel name and resolves with `true`. If no kernel has been started,
+     * this is a no-op, and resolves with `false`.
+     */
+    restart(session: ISessionContext): Promise<boolean>;
+  }
 }
 
 /**
@@ -454,7 +482,14 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
-   * Test whether the client session is disposed.
+   * The name of the previously started kernel.
+   */
+  get prevKernelName(): string {
+    return this._prevKernelName;
+  }
+
+  /**
+   * Test whether the context is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
@@ -512,18 +547,7 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
-   * Select a kernel for the session.
-   */
-  async selectKernel(): Promise<void> {
-    await this.initialize();
-    if (this.isDisposed) {
-      throw new Error('Disposed');
-    }
-    return this._selectKernel(true);
-  }
-
-  /**
-   * Shut down the session and kernel.
+   * Kill the kernel and shutdown the session.
    *
    * @returns A promise that resolves when the session is shut down.
    */
@@ -532,36 +556,9 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
-   * Restart the session.
-   *
-   * @returns A promise that resolves with whether the kernel has restarted.
-   *
-   * #### Notes
-   * If there is a running kernel, present a dialog.
-   * If there is no kernel, we start a kernel with the last run
-   * kernel name and resolves with `true`.
-   */
-  async restart(): Promise<boolean> {
-    await this.initialize();
-    if (this.isDisposed) {
-      throw new Error('session already disposed');
-    }
-    let kernel = this.session?.kernel;
-    if (kernel) {
-      return SessionContext.restartKernel(kernel);
-    }
-
-    if (this._prevKernelName) {
-      await this.changeKernel({ name: this._prevKernelName });
-      return true;
-    }
-
-    // Bail if there is no previous kernel to start.
-    throw new Error('No kernel to restart');
-  }
-
-  /**
    * Initialize the session.
+   *
+   * @returns Whether we need to ask the user to select a kernel.
    *
    * #### Notes
    * If a server session exists on the current path, we will connect to it.
@@ -571,9 +568,10 @@ export class SessionContext implements ISessionContext {
    * If a default kernel is available, we connect to it.
    * Otherwise we ask the user to select a kernel.
    */
-  async initialize(): Promise<void> {
+  async initialize(): Promise<boolean> {
     if (this._initializing || this._isReady) {
-      return this._ready.promise;
+      await this._ready.promise;
+      return false;
     }
     this._initializing = true;
     let manager = this.sessionManager;
@@ -590,15 +588,18 @@ export class SessionContext implements ISessionContext {
         return Promise.reject(err);
       }
     }
-    await this._startIfNecessary();
+    const needsSelection = await this._startIfNecessary();
     this._isReady = true;
     this._ready.resolve(undefined);
+    return needsSelection;
   }
 
   /**
    * Start the session if necessary.
+   *
+   * @returns Whether to ask the user to pick a kernel.
    */
-  private async _startIfNecessary(): Promise<void> {
+  private async _startIfNecessary(): Promise<boolean> {
     let preference = this.kernelPreference;
     if (
       this.isDisposed ||
@@ -607,7 +608,7 @@ export class SessionContext implements ISessionContext {
       preference.canStart === false
     ) {
       // Not necessary to start a kernel
-      return;
+      return false;
     }
 
     let options: Partial<Kernel.IModel> | undefined;
@@ -627,14 +628,14 @@ export class SessionContext implements ISessionContext {
     if (options) {
       try {
         await this._changeKernel(options);
-        return;
+        return false;
       } catch (err) {
         /* no-op */
       }
     }
 
     // Always fall back to selecting a kernel
-    await this._selectKernel(false);
+    return true;
   }
 
   /**
@@ -656,43 +657,6 @@ export class SessionContext implements ISessionContext {
       }
     } else {
       return this._startSession(options);
-    }
-  }
-
-  /**
-   * Select a kernel.
-   *
-   * @param cancelable: whether the dialog should have a cancel button.
-   */
-  private async _selectKernel(cancelable: boolean): Promise<void> {
-    if (this.isDisposed) {
-      return Promise.resolve();
-    }
-    const buttons = cancelable
-      ? [Dialog.cancelButton(), Dialog.okButton({ label: 'Select' })]
-      : [
-          Dialog.cancelButton({ label: 'No Kernel' }),
-          Dialog.okButton({ label: 'Select' })
-        ];
-
-    let dialog = (this._dialog = new Dialog({
-      title: 'Select Kernel',
-      body: new Private.KernelSelector(this),
-      buttons
-    }));
-
-    let result = await dialog.launch();
-    dialog.dispose();
-    this._dialog = null;
-
-    if (this.isDisposed || !result.button.accept) {
-      return;
-    }
-    let model = result.value;
-    if (model === null && this._session) {
-      await this.shutdown();
-    } else if (model) {
-      await this._changeKernel(model);
     }
   }
 
@@ -970,32 +934,6 @@ export namespace SessionContext {
   }
 
   /**
-   * Restart a kernel if the user accepts the risk.
-   *
-   * Returns a promise resolving with whether the kernel was restarted.
-   */
-  export async function restartKernel(
-    kernel: Kernel.IKernelConnection
-  ): Promise<boolean> {
-    let restartBtn = Dialog.warnButton({ label: 'Restart' });
-    const result = await showDialog({
-      title: 'Restart Kernel?',
-      body:
-        'Do you want to restart the current kernel? All variables will be lost.',
-      buttons: [Dialog.cancelButton(), restartBtn]
-    });
-
-    if (kernel.isDisposed) {
-      return false;
-    }
-    if (result.button.accept) {
-      await kernel.restart();
-      return true;
-    }
-    return false;
-  }
-
-  /**
    * An interface for populating a kernel selector.
    */
   export interface IKernelSearch {
@@ -1021,34 +959,95 @@ export namespace SessionContext {
   export function getDefaultKernel(options: IKernelSearch): string | null {
     return Private.getDefaultKernel(options);
   }
+}
+
+/**
+ * The default implementation of the client sesison dialog provider.
+ */
+export const sessionContextDialogs: ISessionContext.IDialogs = {
+  /**
+   * Select a kernel for the session.
+   */
+  async selectKernel(sessionContext: ISessionContext): Promise<void> {
+    const session = sessionContext.session;
+    if (session.isDisposed) {
+      return Promise.resolve();
+    }
+    // If there is no existing kernel, offer the option
+    // to keep no kernel.
+    let label = 'Cancel';
+    if (!session.kernel) {
+      label = 'No Kernel';
+    }
+    const buttons = [
+      Dialog.cancelButton({ label }),
+      Dialog.okButton({ label: 'Select' })
+    ];
+
+    let dialog = new Dialog({
+      title: 'Select Kernel',
+      body: new Private.KernelSelector(sessionContext),
+      buttons
+    });
+
+    const result = await dialog.launch();
+    if (session.isDisposed || !result.button.accept) {
+      return;
+    }
+    let model = result.value;
+    if (model === null && session.kernel) {
+      return session.shutdown();
+    }
+    if (model) {
+      await session.changeKernel(model);
+    }
+  },
 
   /**
-   * Populate a kernel dropdown list.
+   * Restart the session.
    *
-   * @param node - The node to populate.
-   *
-   * @param options - The options used to populate the kernels.
+   * @returns A promise that resolves with whether the kernel has restarted.
    *
    * #### Notes
-   * Populates the list with separated sections:
-   *   - Kernels matching the preferred language (display names).
-   *   - "None" signifying no kernel.
-   *   - The remaining kernels.
-   *   - Sessions matching the preferred language (file names).
-   *   - The remaining sessions.
-   * If no preferred language is given or no kernels are found using
-   * the preferred language, the default kernel is used in the first
-   * section.  Kernels are sorted by display name.  Sessions display the
-   * base name of the file with an ellipsis overflow and a tooltip with
-   * the explicit session information.
+   * If there is a running kernel, present a dialog.
+   * If there is no kernel, we start a kernel with the last run
+   * kernel name and resolves with `true`.
    */
-  export function populateKernelSelect(
-    node: HTMLSelectElement,
-    options: IKernelSearch
-  ): void {
-    return Private.populateKernelSelect(node, options);
+  async restart(sessionContext: ISessionContext): Promise<boolean> {
+    await sessionContext.initialize();
+    if (sessionContext.isDisposed) {
+      throw new Error('session already disposed');
+    }
+    let kernel = sessionContext.session?.kernel;
+    if (!kernel && sessionContext.prevKernelName) {
+      await sessionContext.changeKernel({
+        name: sessionContext.prevKernelName
+      });
+      return true;
+    }
+    // Bail if there is no previous kernel to start.
+    if (!kernel) {
+      throw new Error('No kernel to restart');
+    }
+
+    let restartBtn = Dialog.warnButton({ label: 'Restart' });
+    const result = await showDialog({
+      title: 'Restart Kernel?',
+      body:
+        'Do you want to restart the current kernel? All variables will be lost.',
+      buttons: [Dialog.cancelButton(), restartBtn]
+    });
+
+    if (kernel.isDisposed) {
+      return false;
+    }
+    if (result.button.accept) {
+      await kernel.restart();
+      return true;
+    }
+    return false;
   }
-}
+};
 
 /**
  * The namespace for module private data.
@@ -1061,7 +1060,7 @@ namespace Private {
     /**
      * Create a new kernel selector widget.
      */
-    constructor(sessionContext: SessionContext) {
+    constructor(sessionContext: ISessionContext) {
       super({ node: createSelectorNode(sessionContext) });
     }
 
@@ -1077,7 +1076,7 @@ namespace Private {
   /**
    * Create a node for a kernel selector widget.
    */
-  function createSelectorNode(sessionContext: SessionContext) {
+  function createSelectorNode(sessionContext: ISessionContext) {
     // Create the dialog body.
     let body = document.createElement('div');
     let text = document.createElement('label');
@@ -1086,7 +1085,7 @@ namespace Private {
 
     let options = getKernelSearch(sessionContext);
     let selector = document.createElement('select');
-    SessionContext.populateKernelSelect(selector, options);
+    populateKernelSelect(selector, options);
     body.appendChild(selector);
     return body;
   }
@@ -1306,10 +1305,10 @@ namespace Private {
   }
 
   /**
-   * Get the kernel search options given a session context.
+   * Get the kernel search options given a session context and session manager.
    */
   function getKernelSearch(
-    sessionContext: SessionContext
+    sessionContext: ISessionContext
   ): SessionContext.IKernelSearch {
     return {
       specs: sessionContext.specsManager.specs,

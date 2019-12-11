@@ -7,7 +7,12 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { ISessionContext, ICommandPalette } from '@jupyterlab/apputils';
+import {
+  ISessionContext,
+  ICommandPalette,
+  ISessionContextDialogs,
+  sessionContextDialogs
+} from '@jupyterlab/apputils';
 
 import { Cell, CodeCell } from '@jupyterlab/cells';
 
@@ -124,12 +129,14 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:kernel-status',
   autoStart: true,
   requires: [IStatusBar, INotebookTracker, IConsoleTracker, ILabShell],
+  optional: [ISessionContextDialogs],
   activate: (
     app: JupyterFrontEnd,
     statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
     consoleTracker: IConsoleTracker,
-    labShell: ILabShell
+    labShell: ILabShell,
+    sessionDialogs: ISessionContextDialogs | null
   ) => {
     // When the status item is clicked, launch the kernel
     // selection dialog for the current session.
@@ -138,7 +145,9 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
       if (!currentSession) {
         return;
       }
-      await currentSession.selectKernel();
+      await (sessionDialogs || sessionContextDialogs).selectKernel(
+        currentSession
+      );
     };
 
     // Create the status item.

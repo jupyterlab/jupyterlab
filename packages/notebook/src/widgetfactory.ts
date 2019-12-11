@@ -15,6 +15,11 @@ import { NotebookPanel } from './panel';
 
 import { StaticNotebook } from './widget';
 
+import {
+  ISessionContextDialogs,
+  sessionContextDialogs
+} from '@jupyterlab/apputils';
+
 /**
  * A widget factory for notebook panels.
  */
@@ -37,6 +42,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
       options.editorConfig || StaticNotebook.defaultEditorConfig;
     this._notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
+    this._sessionDialogs = options.sessionDialogs || sessionContextDialogs;
   }
 
   /*
@@ -106,11 +112,12 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
   protected defaultToolbarFactory(
     widget: NotebookPanel
   ): DocumentRegistry.IToolbarItem[] {
-    return ToolbarItems.getDefaultItems(widget);
+    return ToolbarItems.getDefaultItems(widget, this._sessionDialogs);
   }
 
   private _editorConfig: StaticNotebook.IEditorConfig;
   private _notebookConfig: StaticNotebook.INotebookConfig;
+  private _sessionDialogs: ISessionContextDialogs;
 }
 
 /**
@@ -146,5 +153,10 @@ export namespace NotebookWidgetFactory {
      * The notebook configuration.
      */
     notebookConfig?: StaticNotebook.INotebookConfig;
+
+    /**
+     * The session context dialogs.
+     */
+    sessionDialogs?: ISessionContextDialogs;
   }
 }

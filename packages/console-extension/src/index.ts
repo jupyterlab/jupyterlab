@@ -11,8 +11,10 @@ import {
 import {
   Dialog,
   ISessionContext,
+  ISessionContextDialogs,
   ICommandPalette,
   MainAreaWidget,
+  sessionContextDialogs,
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -105,7 +107,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     IRenderMimeRegistry,
     ISettingRegistry
   ],
-  optional: [ILauncher, ILabStatus],
+  optional: [ILauncher, ILabStatus, ISessionContextDialogs],
   activate: activateConsole,
   autoStart: true
 };
@@ -144,11 +146,13 @@ async function activateConsole(
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
   launcher: ILauncher | null,
-  status: ILabStatus | null
+  status: ILabStatus | null,
+  sessionDialogs: ISessionContextDialogs | null
 ): Promise<IConsoleTracker> {
   const manager = app.serviceManager;
   const { commands, shell } = app;
   const category = 'Console';
+  sessionDialogs = sessionDialogs || sessionContextDialogs;
 
   // Create a widget tracker for all console panels.
   const tracker = new WidgetTracker<MainAreaWidget<ConsolePanel>>({
@@ -447,7 +451,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return current.console.sessionContext.restart();
+      return sessionDialogs.restart(current.console.sessionContext);
     },
     isEnabled
   });
@@ -504,7 +508,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return current.console.sessionContext.selectKernel();
+      return sessionDialogs.selectKernel(current.console.sessionContext);
     },
     isEnabled
   });
@@ -560,10 +564,11 @@ async function activateConsole(
       return Promise.resolve(void 0);
     },
     noun: 'Console',
-    restartKernel: current => current.content.console.sessionContext.restart(),
+    restartKernel: current =>
+      sessionDialogs.restart(current.content.console.sessionContext),
     restartKernelAndClear: current => {
-      return current.content.console.sessionContext
-        .restart()
+      return sessionDialogs
+        .restart(current.content.console.sessionContext)
         .then(restarted => {
           if (restarted) {
             current.content.console.clear();
@@ -572,7 +577,7 @@ async function activateConsole(
         });
     },
     changeKernel: current =>
-      current.content.console.sessionContext.selectKernel(),
+      sessionDialogs.selectKernel(current.content.console.sessionContext),
     shutdownKernel: current => current.content.console.sessionContext.shutdown()
   } as IKernelMenu.IKernelUser<MainAreaWidget<ConsolePanel>>);
 

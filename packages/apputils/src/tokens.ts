@@ -9,6 +9,22 @@ import { IDisposable } from '@lumino/disposable';
 
 import { ISignal } from '@lumino/signaling';
 
+import { ISessionContext } from './sessioncontext';
+
+/**
+ * An interface for the session context dialogs.
+ */
+export interface ISessionContextDialogs extends ISessionContext.IDialogs {}
+
+/* tslint:disable */
+/**
+ * The session context dialogs token.
+ */
+export const ISessionContextDialogs = new Token<ISessionContext.IDialogs>(
+  '@jupyterlab/apputils:ISessionContextDialogs'
+);
+/* tslint:enable */
+
 /* tslint:disable */
 /**
  * The theme manager token.

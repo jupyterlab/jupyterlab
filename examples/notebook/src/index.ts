@@ -112,7 +112,7 @@ function createApp(manager: ServiceManager.IManager): void {
   const model = new CompleterModel();
   const completer = new Completer({ editor, model });
   const connector = new KernelConnector({
-    session: nbWidget.sessionContext.session
+    session: nbWidget.context.sessionContext.session
   });
   const handler = new CompletionHandler({ completer, connector });
 
