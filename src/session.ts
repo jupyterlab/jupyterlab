@@ -62,8 +62,14 @@ export class DebugSession implements IDebugger.ISession {
 
     this._client = client;
 
-    if (client) {
+    if (this._client) {
       this._client.iopubMessage.connect(this._handleEvent, this);
+
+      if (this.client instanceof ClientSession) {
+        this._ready = this.client.ready;
+      } else {
+        this._ready = this.client.kernel.ready;
+      }
     }
   }
 
@@ -71,11 +77,7 @@ export class DebugSession implements IDebugger.ISession {
    * Return the kernel info for the debug session.
    */
   get kernelInfo(): IDebugger.ISession.IInfoReply | null {
-    const kernel = this.client.kernel;
-    if (!kernel) {
-      return null;
-    }
-    return kernel.info as IDebugger.ISession.IInfoReply;
+    return (this.client.kernel?.info as IDebugger.ISession.IInfoReply) ?? null;
   }
 
   /**
@@ -108,6 +110,7 @@ export class DebugSession implements IDebugger.ISession {
    * Start a new debug session
    */
   async start(): Promise<void> {
+    await this._ready;
     await this.sendRequest('initialize', {
       clientID: 'jupyterlab',
       clientName: 'JupyterLab',
@@ -130,6 +133,7 @@ export class DebugSession implements IDebugger.ISession {
    * Stop the running debug session.
    */
   async stop(): Promise<void> {
+    await this._ready;
     await this.sendRequest('disconnect', {
       restart: false,
       terminateDebuggee: true
@@ -141,11 +145,7 @@ export class DebugSession implements IDebugger.ISession {
    * Restore the state of a debug session.
    */
   async restoreState(): Promise<IDebugger.ISession.Response['debugInfo']> {
-    if (this.client instanceof ClientSession) {
-      await this.client.ready;
-    } else {
-      await this.client.kernel.ready;
-    }
+    await this._ready;
     const message = await this.sendRequest('debugInfo', {});
     this._isStarted = message.body.isStarted;
     return message;
@@ -160,6 +160,7 @@ export class DebugSession implements IDebugger.ISession {
     command: K,
     args: IDebugger.ISession.Request[K]
   ): Promise<IDebugger.ISession.Response[K]> {
+    await this._ready;
     const message = await this._sendDebugMessage({
       type: 'request',
       seq: this._seq++,
@@ -209,6 +210,7 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   private _client: IClientSession | Session.ISession;
+  private _ready: Promise<void>;
   private _disposed = new Signal<this, void>(this);
   private _isDisposed: boolean = false;
   private _isStarted: boolean = false;
