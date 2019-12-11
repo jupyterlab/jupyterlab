@@ -33,8 +33,6 @@ import { Debugger } from './debugger';
 
 import { ConsoleHandler } from './handlers/console';
 
-import { CommandRegistry } from '@phosphor/commands';
-
 import { FileHandler } from './handlers/file';
 
 import { NotebookHandler } from './handlers/notebook';
@@ -90,18 +88,23 @@ async function setDebugSession(
   app.commands.notifyCommandChanged();
 }
 
-function updateToolbar(
+async function updateToolbar(
   widget: NotebookPanel | ConsolePanel | FileEditor,
-  debug: IDebugger,
-  commands: CommandRegistry,
-  handler: any
-): void {
+  debug: IDebugger
+) {
+  const isDebuggingEnabled = await debug.requestDebuggingEnabled();
+  if (!isDebuggingEnabled) {
+    return;
+  }
   const isConsolePanel = widget instanceof ConsolePanel;
 
-  widget.node.setAttribute(
-    'data-debugger-on',
-    debug.session.statesClient(debug.session.client.name, true).toString()
-  );
+  const changeAtribute = () => {
+    if (debug.session.debuggedClients.has(debug.session.client.name)) {
+      widget.node.setAttribute('data-jp-debugger', 'true');
+    } else {
+      widget.node.removeAttribute('data-jp-debugger');
+    }
+  };
 
   const getToolbar = (): Toolbar => {
     if (isConsolePanel) {
@@ -122,10 +125,15 @@ function updateToolbar(
         className: 'jp-debugger-switch-button',
         iconClassName: 'jp-toggle-switch',
         onClick: async () => {
-          widget.node.setAttribute(
-            'data-debugger-on',
-            debug.session.statesClient(debug.session.client.name).toString()
-          );
+          if (
+            !debug.session.debuggedClients.delete(debug.session.client.name)
+          ) {
+            debug.session.debuggedClients.add(debug.session.client.name);
+            await debug.start();
+          } else {
+            await debug.stop();
+          }
+          changeAtribute();
         },
         tooltip: 'Enable / Disable Debugger'
       })
@@ -137,6 +145,7 @@ function updateToolbar(
   if (insertItemAndCheckIfExist(toolbar) && isConsolePanel) {
     (widget as ConsolePanel).insertWidget(0, toolbar);
   }
+  changeAtribute();
 }
 
 class DebuggerHandler<
@@ -149,13 +158,14 @@ class DebuggerHandler<
   async update<W extends ConsolePanel | NotebookPanel | FileEditor>(
     debug: IDebugger,
     widget: W
-  ) {
+  ): Promise<void> {
     const debuggingEnabled = await debug.requestDebuggingEnabled();
     if (!debug.model || this.handlers[widget.id] || !debuggingEnabled) {
+      if (!debug.session.debuggedClients.has(debug.session.client.name)) {
+        return debug.stop();
+      }
       return;
     }
-
-    widget.node.setAttribute('data-jp-debugger', 'true');
 
     const handler = new this.builder({
       debuggerService: debug,
@@ -181,6 +191,10 @@ class DebuggerHandler<
       });
       this.handlers = {};
     });
+
+    if (!debug.session.debuggedClients.has(debug.session.client.name)) {
+      return debug.stop();
+    }
   }
 
   private handlers: { [id: string]: H } = {};
@@ -204,6 +218,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
       }
       await setDebugSession(app, debug, widget.session);
       void handler.update(debug, widget);
+      void updateToolbar(widget, debug);
     });
   }
 };
@@ -275,8 +290,8 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       }
 
       await setDebugSession(app, debug, widget.session);
-      handler.update(debug, widget);
-      updateToolbar(widget, debug, app.commands, handler);
+      void handler.update(debug, widget);
+      void updateToolbar(widget, debug);
     });
   }
 };

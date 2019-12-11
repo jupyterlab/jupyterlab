@@ -130,10 +130,10 @@ export class DebugService implements IDebugger, IDisposable {
   }
 
   /**
-   * Checking lifecycle state of debugger in current widget
+   * Checking lifecycle state of debugger of current client
    */
   isLifeCycleOnKernelState(): boolean {
-    return this.session.statesClient(this.session.client.name, true);
+    return this.session.debuggedClients.has(this.session.client.name);
   }
 
   /**
@@ -229,7 +229,11 @@ export class DebugService implements IDebugger, IDisposable {
         );
       });
     }
-    this._model.breakpoints.restoreBreakpoints(bpMap);
+
+    // able resotre breakpoints after realod if had before breakpoints and enable lifecycle debugging
+    if (bpMap.size > 0 && autoStart) {
+      this.session.debuggedClients.add(this.session.client.name);
+    }
 
     const stoppedThreads = new Set(reply.body.stoppedThreads);
     this._model.stoppedThreads = stoppedThreads;
@@ -239,6 +243,7 @@ export class DebugService implements IDebugger, IDisposable {
     }
 
     if (this.isLifeCycleOnKernelState()) {
+      this._model.breakpoints.restoreBreakpoints(bpMap);
       if (stoppedThreads.size !== 0) {
         await this._getAllFrames();
       } else {

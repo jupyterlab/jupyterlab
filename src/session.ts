@@ -73,16 +73,8 @@ export class DebugSession implements IDebugger.ISession {
     }
   }
 
-  statesClient(clientName: string, onlyCheck?: boolean) {
-    if (onlyCheck) {
-      return this._statesClient.has(clientName);
-    }
-    if (this._statesClient.delete(clientName)) {
-      return false;
-    } else {
-      this._statesClient.add(clientName);
-      return true;
-    }
+  get debuggedClients(): Set<string> {
+    return this._statesClient;
   }
 
   /**

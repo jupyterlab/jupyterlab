@@ -121,11 +121,11 @@
   border-radius: 50%;
 }
 
-[data-debugger-on='true'] .jp-toggle-switch {
+[data-jp-debugger='true'] .jp-toggle-switch {
   background-color: #f17c00;
 }
 
-[data-debugger-on='true'] .jp-toggle-switch::before {
+[data-jp-debugger='true'] .jp-toggle-switch::before {
   margin-left: 50%;
   margin-right: 5px;
 }
