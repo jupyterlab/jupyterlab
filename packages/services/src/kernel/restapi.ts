@@ -30,6 +30,10 @@ export const KERNEL_SERVICE_URL = 'api/kernels';
 /**
  * Fetch the running kernels.
  *
+ * @param settings - The optional server settings.
+ *
+ * @returns A promise that resolves with the list of running kernels.
+ *
  * #### Notes
  * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
  *
@@ -50,6 +54,10 @@ export async function listRunning(
 
 /**
  * Start a new kernel.
+ *
+ * @param options - The options used to create the kernel.
+ *
+ * @returns A promise that resolves with a kernel connection object.
  *
  * #### Notes
  * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
@@ -148,7 +156,14 @@ export async function interruptKernel(
 }
 
 /**
- * Delete a kernel.
+ * Shut down a kernel.
+ * 
+ * @param id - The id of the running kernel.
+ *
+ * @param settings - The server settings for the request.
+ *
+ * @returns A promise that resolves when the kernel is shut down.
+ *
  *
  * #### Notes
  * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.

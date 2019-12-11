@@ -25,30 +25,6 @@ export { Status } from './messages';
 export { IModel };
 
 /**
- * TODO: how should models be managed, or in other words, how should we manage
- * kernels without having a connection, through the API. Currently we can:
- *
- * - invoke a Kernel namespace method
- * - invoke a method on the manager
- * - invoke a method on the kernel connection
- *
- * The manager is really only good for polling the server and having signals
- * for new kernels. That's the only value it adds. The manager doesn't
- * actually use the rest api, just defers to the default kernel
- *
- * We need:
- *
- * - users to be able to use the rest api without needing to poll (i.e., without needing to use the manager)
- * - have cached state from the rest api (like a list of kernels)
- * - make it easy to poll to update the cached state and get notifications of updates of the cached state.
- *
- * How about a set of functions to query the rest api, which the manager uses. The manager manages a cache of state that is automatically updated. You can create a new kernel connection from a model (managed by the manager, or directly obtained). Each kernel connection listens to the model disposed signal. The model can have metadata, for example if there is a connection which handles comms.
- *
- * Perhaps
- *
- */
-
-/**
  * Interface of a Kernel connection that is managed by a session.
  *
  * #### Notes
@@ -581,92 +557,6 @@ export namespace IKernelConnection {
      */
     clientId?: string;
   }
-}
-
-// TODO: Should we delete the findById, listRunning, startNew, and shutdown
-// convenience functions, and point people to the rest api?
-
-/**
- * Find a kernel by id.
- *
- * @param id - The id of the kernel of interest.
- *
- * @param settings - The optional server settings.
- *
- * @returns A promise that resolves with the model for the kernel.
- *
- * #### Notes
- * If the kernel was already started via `startNewKernel`, we return its
- * `IModel`. Otherwise, we attempt to find the existing kernel.
- *
- * TODO: Delete as unnecessary?
- */
-export function findById(
-  id: string,
-  settings?: ServerConnection.ISettings
-): Promise<IModel | undefined> {
-  return restapi.getKernelModel(id, settings);
-}
-
-/**
- * Fetch the running kernels.
- *
- * @param settings - The optional server settings.
- *
- * @returns A promise that resolves with the list of running kernels.
- *
- * #### Notes
- * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
- *
- * The promise is fulfilled on a valid response and rejected otherwise.
- */
-export function listRunning(
-  settings?: ServerConnection.ISettings
-): Promise<IModel[]> {
-  return restapi.listRunning(settings);
-}
-
-/**
- * A convenience function to start a kernel and connect to it.
- *
- * @param options - The options used to create the kernel.
- *
- * @returns A promise that resolves with a kernel object.
- *
- * #### Notes
- * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
- *
- * If no options are given or the kernel name is not given, the
- * default kernel will by started by the server.
- */
-export async function startNew(
-  options: restapi.IKernelOptions &
-    Omit<IKernelConnection.IOptions, 'model'> = {}
-): Promise<IKernelConnection> {
-  const model = await restapi.startNew(
-    { name: options.name, env: options.env },
-    options.serverSettings
-  );
-  return new KernelConnection({ ...options, model });
-}
-
-/**
- * Shut down a kernel by id.
- *
- * @param id - The id of the running kernel.
- *
- * @param settings - The server settings for the request.
- *
- * @returns A promise that resolves when the kernel is shut down.
- *
- * #### Notes
- * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
- */
-export function shutdown(
-  id: string,
-  settings?: ServerConnection.ISettings
-): Promise<void> {
-  return restapi.shutdownKernel(id, settings);
 }
 
 /**
