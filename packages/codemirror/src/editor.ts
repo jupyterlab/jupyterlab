@@ -5,27 +5,25 @@
 
 import CodeMirror from 'codemirror';
 
-import { ArrayExt } from '@lumino/algorithm';
-
-import { JSONExt } from '@lumino/coreutils';
-
-import { Poll } from '@lumino/polling';
-
-import { IDisposable, DisposableDelegate } from '@lumino/disposable';
-
-import { Signal } from '@lumino/signaling';
-
 import { showDialog } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
-import { UUID } from '@lumino/coreutils';
 
 import {
   IObservableMap,
   IObservableString,
   ICollaborator
 } from '@jupyterlab/observables';
+
+import { ArrayExt } from '@lumino/algorithm';
+
+import { JSONExt, UUID } from '@lumino/coreutils';
+
+import { Poll } from '@lumino/polling';
+
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
+
+import { Signal } from '@lumino/signaling';
 
 import { Mode } from './mode';
 
