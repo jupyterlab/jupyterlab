@@ -88,26 +88,24 @@ export class TrackerHandler implements IDisposable {
       return;
     }
 
-    this.debuggerModel.callstackModel.currentFrameChanged.connect(
+    this.debuggerModel.callstack.currentFrameChanged.connect(
       this.onCurrentFrameChanged,
       this
     );
 
-    this.debuggerModel.sourcesModel.currentSourceOpened.connect(
+    this.debuggerModel.sources.currentSourceOpened.connect(
       this.onCurrentSourceOpened,
       this
     );
 
-    this.debuggerModel.breakpointsModel.clicked.connect(
-      async (_, breakpoint) => {
-        const path = breakpoint.source.path;
-        let source = await this.debuggerService.getSource({
-          sourceReference: 0,
-          path
-        });
-        this.onCurrentSourceOpened(null, source);
-      }
-    );
+    this.debuggerModel.breakpoints.clicked.connect(async (_, breakpoint) => {
+      const path = breakpoint.source.path;
+      let source = await this.debuggerService.getSource({
+        sourceReference: 0,
+        path
+      });
+      this.onCurrentSourceOpened(null, source);
+    });
   }
 
   protected onCurrentFrameChanged(_: Callstack.Model, frame: Callstack.IFrame) {
@@ -153,7 +151,7 @@ export class TrackerHandler implements IDisposable {
     this.shell.add(widget, 'main');
     void this.readOnlyEditorTracker.add(widget);
 
-    const frame = this.debuggerModel?.callstackModel.frame;
+    const frame = this.debuggerModel?.callstack.frame;
     if (frame) {
       EditorHandler.showCurrentLine(editor, frame.line);
     }

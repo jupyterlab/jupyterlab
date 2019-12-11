@@ -176,7 +176,7 @@ export class DebugService implements IDebugger, IDisposable {
    * Precondition: isStarted().
    */
   async restart(): Promise<void> {
-    const breakpoints = this._model.breakpointsModel.breakpoints;
+    const breakpoints = this._model.breakpoints.breakpoints;
     await this.stop();
     this.clearModel();
     await this.start();
@@ -223,7 +223,7 @@ export class DebugService implements IDebugger, IDisposable {
         );
       });
     }
-    this._model.breakpointsModel.restoreBreakpoints(bpMap);
+    this._model.breakpoints.restoreBreakpoints(bpMap);
 
     const stoppedThreads = new Set(reply.body.stoppedThreads);
     this._model.stoppedThreads = stoppedThreads;
@@ -327,7 +327,7 @@ export class DebugService implements IDebugger, IDisposable {
       (breakpoint, i, arr) =>
         arr.findIndex(el => el.line === breakpoint.line) === i
     );
-    this._model.breakpointsModel.setBreakpoints(path, kernelBreakpoints);
+    this._model.breakpoints.setBreakpoints(path, kernelBreakpoints);
     await this.session.sendRequest('configurationDone', {});
   }
 
@@ -336,14 +336,14 @@ export class DebugService implements IDebugger, IDisposable {
       return;
     }
 
-    this._model.breakpointsModel.breakpoints.forEach(
+    this._model.breakpoints.breakpoints.forEach(
       async (breakpoints, path, _) => {
         await this.setBreakpoints([], path);
       }
     );
 
     let bpMap = new Map<string, IDebugger.IBreakpoint[]>();
-    this._model.breakpointsModel.restoreBreakpoints(bpMap);
+    this._model.breakpoints.restoreBreakpoints(bpMap);
   }
 
   /**
@@ -359,11 +359,11 @@ export class DebugService implements IDebugger, IDisposable {
   }
 
   async getAllFrames() {
-    this._model.callstackModel.currentFrameChanged.connect(this.onChangeFrame);
-    this._model.variablesModel.variableExpanded.connect(this.getVariable);
+    this._model.callstack.currentFrameChanged.connect(this.onChangeFrame);
+    this._model.variables.variableExpanded.connect(this.getVariable);
 
     const stackFrames = await this.getFrames(this.currentThread());
-    this._model.callstackModel.frames = stackFrames;
+    this._model.callstack.frames = stackFrames;
   }
 
   onChangeFrame = async (_: Callstack.Model, frame: Callstack.IFrame) => {
@@ -373,7 +373,7 @@ export class DebugService implements IDebugger, IDisposable {
     const scopes = await this.getScopes(frame);
     const variables = await this.getVariables(scopes);
     const variableScopes = this.convertScope(scopes, variables);
-    this._model.variablesModel.scopes = variableScopes;
+    this._model.variables.scopes = variableScopes;
   };
 
   dumpCell = async (code: string) => {
@@ -409,7 +409,7 @@ export class DebugService implements IDebugger, IDisposable {
       newVariable = { [variable.name]: variable, ...newVariable };
     });
 
-    const newScopes = this._model.variablesModel.scopes.map(scope => {
+    const newScopes = this._model.variables.scopes.map(scope => {
       const findIndex = scope.variables.findIndex(
         ele => ele.variablesReference === variable.variablesReference
       );
@@ -417,7 +417,7 @@ export class DebugService implements IDebugger, IDisposable {
       return { ...scope };
     });
 
-    this._model.variablesModel.scopes = [...newScopes];
+    this._model.variables.scopes = [...newScopes];
 
     return reply.body.variables;
   };
@@ -468,15 +468,13 @@ export class DebugService implements IDebugger, IDisposable {
   }
 
   private clearModel() {
-    this._model.callstackModel.frames = [];
-    this._model.variablesModel.scopes = [];
+    this._model.callstack.frames = [];
+    this._model.variables.scopes = [];
   }
 
   private clearSignals() {
-    this._model.callstackModel.currentFrameChanged.disconnect(
-      this.onChangeFrame
-    );
-    this._model.variablesModel.variableExpanded.disconnect(this.getVariable);
+    this._model.callstack.currentFrameChanged.disconnect(this.onChangeFrame);
+    this._model.variables.variableExpanded.disconnect(this.getVariable);
   }
 
   private currentThread(): number {

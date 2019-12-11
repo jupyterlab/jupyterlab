@@ -34,21 +34,21 @@ export namespace Debugger {
 
       const { callstackCommands, editorServices, service } = options;
 
-      this.model = new Debugger.Model({});
+      this.model = new Debugger.Model();
       this.service = service as DebugService;
       this.service.model = this.model;
 
-      this.variables = new Variables({ model: this.model.variablesModel });
+      this.variables = new Variables({ model: this.model.variables });
       this.callstack = new Callstack({
         commands: callstackCommands,
-        model: this.model.callstackModel
+        model: this.model.callstack
       });
       this.breakpoints = new Breakpoints({
         service,
-        model: this.model.breakpointsModel
+        model: this.model.breakpoints
       });
       this.sources = new Sources({
-        model: this.model.sourcesModel,
+        model: this.model.sources,
         service,
         editorServices
       });
@@ -78,19 +78,19 @@ export namespace Debugger {
   }
 
   export class Model implements IDebugger.IModel {
-    constructor(options: Debugger.Model.IOptions) {
-      this.breakpointsModel = new Breakpoints.Model();
-      this.callstackModel = new Callstack.Model([]);
-      this.variablesModel = new Variables.Model([]);
-      this.sourcesModel = new Sources.Model({
-        currentFrameChanged: this.callstackModel.currentFrameChanged
+    constructor() {
+      this.breakpoints = new Breakpoints.Model();
+      this.callstack = new Callstack.Model([]);
+      this.variables = new Variables.Model([]);
+      this.sources = new Sources.Model({
+        currentFrameChanged: this.callstack.currentFrameChanged
       });
     }
 
-    readonly breakpointsModel: Breakpoints.Model;
-    readonly callstackModel: Callstack.Model;
-    readonly variablesModel: Variables.Model;
-    readonly sourcesModel: Sources.Model;
+    readonly breakpoints: Breakpoints.Model;
+    readonly callstack: Callstack.Model;
+    readonly variables: Variables.Model;
+    readonly sources: Sources.Model;
 
     dispose(): void {
       this._isDisposed = true;
@@ -133,9 +133,5 @@ export namespace Debugger {
       callstackCommands: Callstack.ICommands;
       editorServices: IEditorServices;
     }
-  }
-
-  export namespace Model {
-    export interface IOptions {}
   }
 }
