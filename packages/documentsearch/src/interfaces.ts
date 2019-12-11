@@ -213,4 +213,10 @@ export interface ISearchProvider<T extends Widget = Widget> {
    * the replace option.
    */
   readonly isReadOnly: boolean;
+
+  /**
+   * Set to true if the widget under search has outputs to search.
+   * Defaults to false.
+   */
+  readonly hasOutputs?: boolean;
 }

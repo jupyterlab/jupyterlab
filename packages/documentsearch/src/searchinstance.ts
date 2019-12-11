@@ -31,7 +31,8 @@ export class SearchInstance implements IDisposable {
       onReplaceCurrent: this._replaceCurrent.bind(this),
       onReplaceAll: this._replaceAll.bind(this),
       onEndSearch: this.dispose.bind(this),
-      isReadOnly: this._activeProvider.isReadOnly
+      isReadOnly: this._activeProvider.isReadOnly,
+      hasOutputs: this._activeProvider.hasOutputs || false
     });
 
     this._widget.disposed.connect(() => {

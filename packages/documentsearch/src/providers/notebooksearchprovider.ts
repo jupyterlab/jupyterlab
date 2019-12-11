@@ -379,6 +379,8 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    */
   readonly isReadOnly = false;
 
+  readonly hasOutputs = true;
+
   private _updatedCurrentProvider(reverse: boolean) {
     if (
       this._currentProvider &&

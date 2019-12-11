@@ -252,6 +252,7 @@ class FilterToggle extends React.Component<
 
 interface IFilterSelectionProps {
   searchOutput: boolean;
+  canToggleOutput: boolean;
   toggleOutput: () => void;
 }
 
@@ -267,6 +268,7 @@ class FilterSelection extends React.Component<
         <span>
           <input
             type="checkbox"
+            disabled={!this.props.canToggleOutput}
             checked={this.props.searchOutput}
             onChange={this.props.toggleOutput}
           />
@@ -287,6 +289,7 @@ interface ISearchOverlayProps {
   onReplaceCurrent: Function;
   onReplaceAll: Function;
   isReadOnly: boolean;
+  hasOutputs: boolean;
 }
 
 class SearchOverlay extends React.Component<
@@ -421,6 +424,8 @@ class SearchOverlay extends React.Component<
     );
     const filter = (
       <FilterSelection
+        key={'filter'}
+        canToggleOutput={this.props.hasOutputs}
         searchOutput={this.state.filters.output}
         toggleOutput={this._toggleSearchOutput}
       />
@@ -505,7 +510,7 @@ class SearchOverlay extends React.Component<
           </>
         ) : null}
       </div>,
-      this.state.filtersOpen ? filter : <></>,
+      this.state.filtersOpen ? filter : null,
       <div
         className={REGEX_ERROR_CLASS}
         hidden={this.state.errorMessage && this.state.errorMessage.length === 0}
@@ -535,7 +540,8 @@ export function createSearchOverlay(
     onReplaceCurrent,
     onReplaceAll,
     onEndSearch,
-    isReadOnly
+    isReadOnly,
+    hasOutputs
   } = options;
   const widget = ReactWidget.create(
     <UseSignal signal={widgetChanged} initialArgs={overlayState}>
@@ -552,6 +558,7 @@ export function createSearchOverlay(
             onReplaceAll={onReplaceAll}
             overlayState={args}
             isReadOnly={isReadOnly}
+            hasOutputs={hasOutputs}
           />
         );
       }}
@@ -574,6 +581,7 @@ namespace createSearchOverlay {
     onReplaceCurrent: Function;
     onReplaceAll: Function;
     isReadOnly: boolean;
+    hasOutputs: boolean;
   }
 }
 
