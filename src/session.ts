@@ -111,7 +111,7 @@ export class DebugSession implements IDebugger.ISession {
     await this.sendRequest('initialize', {
       clientID: 'jupyterlab',
       clientName: 'JupyterLab',
-      adapterID: 'python',
+      adapterID: this.client.kernel?.name ?? '',
       pathFormat: 'path',
       linesStartAt1: true,
       columnsStartAt1: true,
