@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IClientSession } from '@jupyterlab/apputils';
-
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -307,8 +305,6 @@ export class DebugService implements IDebugger, IDisposable {
     if (!this.session.isStarted) {
       return;
     }
-    // Workaround: this should not be called before the session has started
-    await this.ensureSessionReady();
     if (!path) {
       const dumpedCell = await this.dumpCell(code);
       path = dumpedCell.sourcePath;
@@ -436,8 +432,6 @@ export class DebugService implements IDebugger, IDisposable {
     breakpoints: DebugProtocol.SourceBreakpoint[],
     path: string
   ) => {
-    // Workaround: this should not be called before the session has started
-    await this.ensureSessionReady();
     return await this.session.sendRequest('setBreakpoints', {
       breakpoints: breakpoints,
       source: { path },
@@ -461,11 +455,6 @@ export class DebugService implements IDebugger, IDisposable {
       };
     });
   };
-
-  private async ensureSessionReady(): Promise<void> {
-    const client = this.session.client as IClientSession;
-    return client.ready;
-  }
 
   private clearModel() {
     this._model.callstack.frames = [];
