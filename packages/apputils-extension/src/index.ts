@@ -9,6 +9,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+
 import {
   Dialog,
   ICommandPalette,
@@ -17,20 +18,21 @@ import {
   WindowResolver,
   Printing
 } from '@jupyterlab/apputils';
-import {
-  Debouncer,
-  IStateDB,
-  StateDB,
-  Throttler,
-  URLExt
-} from '@jupyterlab/coreutils';
+
+import { IStateDB, StateDB, URLExt } from '@jupyterlab/coreutils';
+
 import { defaultIconRegistry } from '@jupyterlab/ui-components';
 
 import { PromiseDelegate } from '@lumino/coreutils';
+
 import { DisposableDelegate } from '@lumino/disposable';
 
+import { Debouncer, Throttler } from '@lumino/polling';
+
 import { Palette } from './palette';
+
 import { settingsPlugin } from './settingsplugin';
+
 import { themesPlugin, themesPaletteMenuPlugin } from './themeplugins';
 
 /**

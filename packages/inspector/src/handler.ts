@@ -3,13 +3,15 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IDataConnector, Text, Debouncer } from '@jupyterlab/coreutils';
+import { IDataConnector, Text } from '@jupyterlab/coreutils';
 
 import { MimeModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
+
+import { Debouncer } from '@lumino/polling';
 
 import { ISignal, Signal } from '@lumino/signaling';
 

@@ -5,17 +5,17 @@
 
 import CodeMirror from 'codemirror';
 
+import { ArrayExt } from '@lumino/algorithm';
+
 import { JSONExt } from '@lumino/coreutils';
 
-import { ArrayExt } from '@lumino/algorithm';
+import { Poll } from '@lumino/polling';
 
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
 import { showDialog } from '@jupyterlab/apputils';
-
-import { Poll } from '@jupyterlab/coreutils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
