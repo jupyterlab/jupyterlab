@@ -28,6 +28,9 @@ const ELLIPSES_BUTTON_CLASS = 'jp-DocumentSearch-ellipses-button';
 const DOWN_BUTTON_CLASS = 'jp-DocumentSearch-down-button';
 const CLOSE_BUTTON_CLASS = 'jp-DocumentSearch-close-button';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
+const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
+const SEARCH_OPTION_INPUT_CLASS = 'jp-DocumentSearch-search-option-input';
+const SEARCH_OPTIONS_HEADER_CLASS = 'jp-DocumentSearch-search-options-header';
 const REPLACE_ENTRY_CLASS = 'jp-DocumentSearch-replace-entry';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
@@ -264,16 +267,19 @@ class FilterSelection extends React.Component<
 > {
   render() {
     return (
-      <div>
-        <span>
+      <div className={SEARCH_OPTIONS_CLASS}>
+        <p className={SEARCH_OPTIONS_HEADER_CLASS}>
+          <b>Search Options</b>
+        </p>
+        <p className={SEARCH_OPTION_INPUT_CLASS}>
+          Search Cell Outputs
           <input
             type="checkbox"
             disabled={!this.props.canToggleOutput}
             checked={this.props.searchOutput}
             onChange={this.props.toggleOutput}
           />
-          Output
-        </span>
+        </p>
       </div>
     );
   }

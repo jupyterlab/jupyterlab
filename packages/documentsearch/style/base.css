@@ -178,6 +178,25 @@
   background-image: var(--jp-icon-close-circle);
 }
 
+.jp-DocumentSearch-search-options {
+  margin-left: 3px;
+}
+
+.jp-DocumentSearch-search-options-header {
+  padding-top: 8px;
+}
+
+.jp-DocumentSearch-search-options p {
+  padding-bottom: 8px;
+}
+
+.jp-DocumentSearch-search-option-input {
+  width: 200px;
+}
+.jp-DocumentSearch-search-option-input input {
+  float: right;
+}
+
 .jp-DocumentSearch-regex-error {
   color: var(--jp-error-color0);
 }
