@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Debouncer } from '@jupyterlab/coreutils';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { DockPanelSvg, TabBarSvg } from '@jupyterlab/ui-components';
@@ -12,6 +10,8 @@ import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
 import { PromiseDelegate, Token } from '@lumino/coreutils';
 
 import { Message, MessageLoop, IMessageHandler } from '@lumino/messaging';
+
+import { Debouncer } from '@lumino/polling';
 
 import { ISignal, Signal } from '@lumino/signaling';
 

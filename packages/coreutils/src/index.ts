@@ -8,8 +8,6 @@ export * from './markdowncodeblocks';
 export * from './nbformat';
 export * from './pageconfig';
 export * from './path';
-export * from './poll';
-export * from './ratelimiter';
 export * from './restorablepool';
 export * from './settingregistry';
 export * from './statedb';

@@ -1,13 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { IDisplayState } from './interfaces';
-import { SearchInstance } from './searchinstance';
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
-import { Debouncer } from '@jupyterlab/coreutils';
+
+import { Debouncer } from '@lumino/polling';
+
 import { Signal } from '@lumino/signaling';
+
 import { Widget } from '@lumino/widgets';
+
 import * as React from 'react';
+
+import { IDisplayState } from './interfaces';
+
+import { SearchInstance } from './searchinstance';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';

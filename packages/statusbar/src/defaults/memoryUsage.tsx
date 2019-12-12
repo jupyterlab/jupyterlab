@@ -5,11 +5,13 @@ import React from 'react';
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
-import { URLExt, Poll } from '@jupyterlab/coreutils';
-
-import { TextItem } from '..';
+import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
+
+import { Poll } from '@lumino/polling';
+
+import { TextItem } from '..';
 
 /**
  * A VDomRenderer for showing memory usage by a kernel.

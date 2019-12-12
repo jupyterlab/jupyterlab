@@ -7,8 +7,7 @@ import {
   IChangedArgs,
   IStateDB,
   PathExt,
-  PageConfig,
-  Poll
+  PageConfig
 } from '@jupyterlab/coreutils';
 
 import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
@@ -30,6 +29,8 @@ import {
 import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
+
+import { Poll } from '@lumino/polling';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
