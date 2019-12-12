@@ -1590,6 +1590,11 @@
   resolved "https://registry.yarnpkg.com/@lumino/algorithm/-/algorithm-1.2.0.tgz#74e20e2ccf8c1452dde3dbc7887d9c01d0584031"
   integrity sha512-QZpTDiqY53HmoPVDjsqJ3H6k8uhKIrbrOLV15wEkQMJJW38SzMnm+GxCXHRJ6J5ivL2L7lzyZ5UIVTUirscMMA==
 
+"@lumino/algorithm@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@lumino/algorithm/-/algorithm-1.2.1.tgz#bd29f37455f53231f405aa9559b2dba7c3eee6ea"
+  integrity sha512-hv1DR4h4PFUJv+Jeh70t94Z8Tep101FKoh0on3XOOuPVjI3+KIpzpFCP+XiuxUh7ksO0cT8d3RJztD922gY6FQ==
+
 "@lumino/application@^1.7.0":
   version "1.7.3"
   resolved "https://registry.yarnpkg.com/@lumino/application/-/application-1.7.3.tgz#830f7808cef351d25f3efd76ce8e7d49ef990b00"
@@ -1623,6 +1628,11 @@
   resolved "https://registry.yarnpkg.com/@lumino/coreutils/-/coreutils-1.3.1.tgz#1260c59a70d8b0d4717c734c3db34e0dfff5fa53"
   integrity sha512-mC773HmUvn7aiHXZbTqzd9jriRrexO9cRdDFlckdH0Tj+TYDDOohVhJCVL/3u54I6WYHB2o13i+aAK8VSfdYyg==
 
+"@lumino/coreutils@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@lumino/coreutils/-/coreutils-1.4.0.tgz#fc0816465d2b4206552dc9fc1975cfd00180d11d"
+  integrity sha512-D7s4AcOY2HohajsH70iSCBmEznoN1kS8nZ479TyeL5S1UzqGz5f8lPeRU/p98G18A8KhqvFWNUOTFKOXyFwQoQ==
+
 "@lumino/datagrid@^0.3.0":
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/@lumino/datagrid/-/datagrid-0.3.1.tgz#60df7ce9811f756553cc089ee396a918b9a0fb27"
@@ -1644,6 +1654,14 @@
   dependencies:
     "@lumino/algorithm" "^1.2.0"
     "@lumino/signaling" "^1.3.1"
+
+"@lumino/disposable@^1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@lumino/disposable/-/disposable-1.3.2.tgz#c8839fde4bc5b9b78525c1f1d8a8fb686258ca9f"
+  integrity sha512-fxwd2mvGbHn9qLn40eerAFJaKhNXayx49HlSLCRuuAyhbafWsD7KenhWuI/fEFI5zfH29h1h5RrwXFdTwO8Uyw==
+  dependencies:
+    "@lumino/algorithm" "^1.2.1"
+    "@lumino/signaling" "^1.3.2"
 
 "@lumino/domutils@^1.1.3", "@lumino/domutils@^1.1.4":
   version "1.1.4"
@@ -1671,6 +1689,15 @@
     "@lumino/algorithm" "^1.2.0"
     "@lumino/collections" "^1.2.0"
 
+"@lumino/polling@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@lumino/polling/-/polling-1.0.1.tgz#1b2eb83e898b7038faaf455b3ee9c99a832030b3"
+  integrity sha512-4T5u+kIRav1Afdw62XGWByGi+H6BRiWwBDxp4UQiSOAqNT0MFWL6bDbYicKox2HmQEw/PlNHkRx3tup12cKgHA==
+  dependencies:
+    "@lumino/coreutils" "^1.4.0"
+    "@lumino/disposable" "^1.3.2"
+    "@lumino/signaling" "^1.3.2"
+
 "@lumino/properties@^1.1.3":
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/@lumino/properties/-/properties-1.1.3.tgz#0226be58d29692e065fa0da84b397d3149e606d5"
@@ -1682,6 +1709,13 @@
   integrity sha512-0qdBI7/3k7/wYs3afhXd1Q6tBEFM1WzChWRc3xQSsbTrqrVfQLmIhJwKorcTD2lImbVIIXs9DhHHXLxdLqddEg==
   dependencies:
     "@lumino/algorithm" "^1.2.0"
+
+"@lumino/signaling@^1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@lumino/signaling/-/signaling-1.3.2.tgz#3af3c48cfddb15c5a0276e0a5d37bc3113ee9d9b"
+  integrity sha512-ZFJldziAqfCkfs4V5u/K1vi/lroZTSBmcIkaisTBE7tGsocbvKuWpNU4JYgeKPc8VZD+z3UwhGj57wFCIDSPtg==
+  dependencies:
+    "@lumino/algorithm" "^1.2.1"
 
 "@lumino/virtualdom@^1.2.0":
   version "1.2.0"
@@ -5502,6 +5536,11 @@ fast-glob@^2.2.6:
     is-glob "^4.0.0"
     merge2 "^1.2.3"
     micromatch "^3.1.10"
+
+fast-json-patch@^3.0.0-1:
+  version "3.0.0-1"
+  resolved "https://registry.yarnpkg.com/fast-json-patch/-/fast-json-patch-3.0.0-1.tgz#4c68f2e7acfbab6d29d1719c44be51899c93dabb"
+  integrity sha512-6pdFb07cknxvPzCeLsFHStEy+MysPJPgZQ9LbQ/2O67unQF93SNqfdSqnPPl71YMHX+AD8gbl7iuoGFzHEdDuw==
 
 fast-json-stable-stringify@2.x, fast-json-stable-stringify@^2.0.0, fast-json-stable-stringify@~2.0.0:
   version "2.0.0"
@@ -12677,6 +12716,18 @@ vega-embed@^4.2.0:
     vega-themes "^2.3.2"
     vega-tooltip "^0.18.1"
 
+vega-embed@^6.2.0:
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/vega-embed/-/vega-embed-6.2.0.tgz#9016147d109a92a0ca4a8df54fd33ed13f23cfc8"
+  integrity sha512-dEjp6ZA5gbJH9uaVS5vJNeVHGsTez1cYrgjtf+ZiF3eNtRbxT2u/bTTI2JoqhZxybbVhiOhG3HuIawO4DPd1tQ==
+  dependencies:
+    fast-json-patch "^3.0.0-1"
+    json-stringify-pretty-compact "^2.0.0"
+    semver "^6.3.0"
+    vega-schema-url-parser "^1.1.0"
+    vega-themes "^2.5.0"
+    vega-tooltip "^0.19.1"
+
 vega-encode@4.5.1:
   version "4.5.1"
   resolved "https://registry.yarnpkg.com/vega-encode/-/vega-encode-4.5.1.tgz#85581f230e26958e0371c85aa4a3b6cddb43bce5"
@@ -13005,7 +13056,7 @@ vega-statistics@1.7.1, vega-statistics@^1.2.1, vega-statistics@^1.2.3, vega-stat
   dependencies:
     d3-array "^2.4.0"
 
-vega-themes@^2.3.2:
+vega-themes@^2.3.2, vega-themes@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/vega-themes/-/vega-themes-2.5.0.tgz#464d0715a54c48591cd6340c28b0c4c9d39b1571"
   integrity sha512-mkyYhcRhmMBWLfvCBPTVx0S/OnxeIfVY/TmFfYP5sPdW8X1kMyHtLI34bMhzosPrkhNyHsC8FNHJyU/dOQnX4A==
@@ -13026,6 +13077,13 @@ vega-tooltip@^0.18.1:
   integrity sha512-g/i69QLTVhGeHNT8k646Qr8SFss9kbnt6XmU9ujjqgaW5B/p1FPUrMzFh/88rMF704EHYyBH7Aj3t0ds1cCHbQ==
   dependencies:
     vega-util "^1.10.0"
+
+vega-tooltip@^0.19.1:
+  version "0.19.1"
+  resolved "https://registry.yarnpkg.com/vega-tooltip/-/vega-tooltip-0.19.1.tgz#b0534b90a7df21fee9e693bf4e4556312f89296e"
+  integrity sha512-BNZ5T866SLOai+NZyGxg60U6hZhNINHuX313/z1TrUTeCprYLfCR1Ex4qRozY1WPY3HfxQcd5czLJMhoAFDotQ==
+  dependencies:
+    vega-util "^1.11.1"
 
 vega-transforms@4.6.0:
   version "4.6.0"
@@ -13073,6 +13131,11 @@ vega-util@1.12.1, vega-util@^1.10.0, vega-util@^1.11.0, vega-util@^1.12.0, vega-
   version "1.12.1"
   resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.12.1.tgz#ade1c27ab30e6e330d4d3a99d108d2365ac08db0"
   integrity sha512-1WrfAULiInWUfgv+xsdCknYfxg0CDl6eFZf/7bSKsyn2agrQGOAm1YXEeWqkpwnWRmwt3gPs4IfTARVFwttcIw==
+
+vega-util@^1.11.1:
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.12.0.tgz#fe46198b5294a68d32bedddcc539bb2522de3cba"
+  integrity sha512-eN1PAQVDyEOcwild2Fk1gbkzkqgDHNujG2/akYRtBzkhtz2EttrVIDwBkWqV/Q+VvEINEksb7TI3Wv7qVQFR5g==
 
 vega-util@~1.10.0:
   version "1.10.0"
