@@ -147,11 +147,15 @@ export namespace Commands {
 
   /**
    * Update the settings of a widget.
+   * Skip global settings for transient editor specific configs.
    */
   export function updateWidget(widget: FileEditor): void {
+    const transientConfigs = ['lineNumbers', 'lineWrap', 'matchBrackets'];
     const editor = widget.editor;
     Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-      editor.setOption(key, config[key]);
+      if (!transientConfigs.includes(key)) {
+        editor.setOption(key, config[key]);
+      }
     });
   }
 

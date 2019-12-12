@@ -40,5 +40,9 @@ export class SettingConnector extends DataConnector<
     };
   }
 
+  async save(id: string, raw: string): Promise<void> {
+    await this._connector.save(id, raw);
+  }
+
   private _connector: IDataConnector<ISettingRegistry.IPlugin, string>;
 }
