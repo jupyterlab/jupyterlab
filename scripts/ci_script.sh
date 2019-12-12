@@ -85,6 +85,7 @@ if [[ $GROUP == integrity ]]; then
     git clean -df
     jlpm bumpversion minor --force
     jlpm bumpversion major --force
+    jlpm bumpversion release --force # switch to beta
     jlpm bumpversion release --force # switch to rc
     jlpm bumpversion build --force
     VERSION=$(python setup.py --version)
