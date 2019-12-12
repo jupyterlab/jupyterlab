@@ -185,7 +185,7 @@
   display: block;
 }
 .jp-DocumentSearch-search-options-disabled {
-  color: var(--jp-ui-font-color2);
+  color: var(--jp-ui-font-color3);
 }
 
 .jp-DocumentSearch-search-options input {
