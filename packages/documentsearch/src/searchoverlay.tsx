@@ -25,6 +25,8 @@ const INDEX_COUNTER_CLASS = 'jp-DocumentSearch-index-counter';
 const UP_DOWN_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-up-down-wrapper';
 const UP_BUTTON_CLASS = 'jp-DocumentSearch-up-button';
 const ELLIPSES_BUTTON_CLASS = 'jp-DocumentSearch-ellipses-button';
+const ELLIPSES_BUTTON_ENABLED_CLASS =
+  'jp-DocumentSearch-ellipses-button-enabled';
 const DOWN_BUTTON_CLASS = 'jp-DocumentSearch-down-button';
 const CLOSE_BUTTON_CLASS = 'jp-DocumentSearch-close-button';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
@@ -239,15 +241,16 @@ class FilterToggle extends React.Component<
   IFilterToggleState
 > {
   render() {
+    let className = `${ELLIPSES_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`;
+    if (this.props.enabled) {
+      className = `${className} ${ELLIPSES_BUTTON_ENABLED_CLASS}`;
+    }
     return (
       <button
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => this.props.toggleEnabled()}
       >
-        <span
-          className={`${ELLIPSES_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-          tabIndex={-1}
-        />
+        <span className={className} tabIndex={-1} />
       </button>
     );
   }

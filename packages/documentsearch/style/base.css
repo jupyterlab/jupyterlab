@@ -162,6 +162,11 @@
 
 .jp-DocumentSearch-ellipses-button {
   background-image: var(--jp-icon-ellipses);
+  border-radius: var(--jp-border-radius);
+}
+
+.jp-DocumentSearch-ellipses-button-enabled {
+  background-color: var(--jp-ui-font-color3);
 }
 
 .jp-DocumentSearch-close-button {
