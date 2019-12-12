@@ -422,21 +422,22 @@ class SearchOverlay extends React.Component<
   }
 
   render() {
-    const filterToggle = (
+    const showReplace = !this.props.isReadOnly && this.state.replaceEntryShown;
+    const showFilter = this.props.hasOutputs;
+    const filterToggle = showFilter ? (
       <FilterToggle
         enabled={this.state.filtersOpen}
         toggleEnabled={() => this._toggleFiltersOpen()}
       />
-    );
-    const filter = (
+    ) : null;
+    const filter = showFilter ? (
       <FilterSelection
         key={'filter'}
-        canToggleOutput={this.props.hasOutputs}
+        canToggleOutput={!showReplace}
         searchOutput={this.state.filters.output}
         toggleOutput={this._toggleSearchOutput}
       />
-    );
-    const showReplace = !this.props.isReadOnly && this.state.replaceEntryShown;
+    ) : null;
     return [
       <div className={OVERLAY_ROW_CLASS} key={0}>
         {this.props.isReadOnly ? (
