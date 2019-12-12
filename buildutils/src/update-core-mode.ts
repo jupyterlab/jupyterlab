@@ -20,6 +20,16 @@ data['jupyterlab']['staticDir'] = '../static';
 data['jupyterlab']['linkedPackages'] = {};
 
 let staging = './jupyterlab/staging';
+
+// Ensure a clean staging directory.
+const keep = ['yarn.js', '.yarnrc'];
+fs.readdirSync(staging).forEach(name => {
+  if (keep.indexOf(name) === -1) {
+    fs.removeSync(path.join(staging, name));
+  }
+});
+fs.ensureDirSync(staging);
+
 utils.writePackageData(path.join(staging, 'package.json'), data);
 
 // Update our staging files.
@@ -45,7 +55,6 @@ const notice =
 });
 
 // Create a new yarn.lock file to ensure it is correct.
-fs.removeSync(path.join(staging, 'yarn.lock'));
 utils.run('jlpm', { cwd: staging });
 try {
   utils.run('jlpm yarn-deduplicate -s fewer', { cwd: staging });
