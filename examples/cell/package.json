@@ -15,7 +15,7 @@
     "@jupyterlab/rendermime": "^2.0.0-alpha.3",
     "@jupyterlab/services": "^5.0.0-alpha.3",
     "@jupyterlab/theme-light-extension": "^2.0.0-alpha.3",
-    "@lumino/commands": "^1.7.0",
+    "@lumino/commands": "^1.8.0",
     "@lumino/widgets": "^1.9.0",
     "es6-promise": "~4.2.6"
   },
