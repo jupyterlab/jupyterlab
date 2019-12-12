@@ -5,7 +5,10 @@ import { expect } from 'chai';
 
 import { Session } from '@jupyterlab/services';
 
-import { validateModel } from '@jupyterlab/services/lib/session/validate';
+import {
+  validateModel,
+  updateLegacySessionModel
+} from '@jupyterlab/services/lib/session/validate';
 
 describe('session/validate', () => {
   describe('#validateModel()', () => {
@@ -20,17 +23,6 @@ describe('session/validate', () => {
       validateModel(model);
     });
 
-    it('should pass a deprecated model', () => {
-      const model = {
-        id: 'foo',
-        kernel: { name: 'foo', id: '123' },
-        notebook: {
-          path: 'bar'
-        }
-      };
-      validateModel(model);
-    });
-
     it('should fail on missing data', () => {
       const model: any = {
         id: 'foo',
@@ -39,6 +31,20 @@ describe('session/validate', () => {
         name: ''
       };
       expect(() => validateModel(model)).to.throw();
+    });
+  });
+
+  describe('#updateLegacySessionModel()', () => {
+    it('should update a deprecated model', () => {
+      const model = {
+        id: 'foo',
+        kernel: { name: 'foo', id: '123' },
+        notebook: {
+          path: 'bar'
+        }
+      };
+      updateLegacySessionModel(model);
+      validateModel(model);
     });
   });
 });
