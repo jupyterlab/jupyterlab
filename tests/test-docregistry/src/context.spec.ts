@@ -46,7 +46,7 @@ describe('docregistry/context', () => {
     });
 
     afterEach(async () => {
-      await context.session.shutdown();
+      await context.sessionContext.shutdown();
       context.dispose();
     });
 
@@ -233,7 +233,7 @@ describe('docregistry/context', () => {
 
     describe('#session', () => {
       it('should be a client session object', () => {
-        expect(context.session.session.path).to.equal(context.path);
+        expect(context.sessionContext.session.path).to.equal(context.path);
       });
     });
 

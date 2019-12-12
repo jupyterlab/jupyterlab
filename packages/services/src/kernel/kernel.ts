@@ -616,7 +616,7 @@ export interface IManager extends IBaseManager {
    * The manager `serverSettings` will be always be used.
    */
   startNew(
-    options: restapi.IKernelOptions &
+    options?: restapi.IKernelOptions &
       Omit<IKernelConnection.IOptions, 'model' | 'serverSettings'>
   ): Promise<IKernelConnection>;
 

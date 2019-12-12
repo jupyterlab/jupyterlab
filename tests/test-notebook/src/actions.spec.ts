@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { ClientSession } from '@jupyterlab/apputils';
+import { SessionContext } from '@jupyterlab/apputils';
 
 import { each } from '@phosphor/algorithm';
 
@@ -17,7 +17,7 @@ import { Notebook } from '@jupyterlab/notebook';
 
 import {
   acceptDialog,
-  createClientSession,
+  createSessionContext,
   dismissDialog,
   sleep,
   NBTestUtils
@@ -33,15 +33,15 @@ describe('@jupyterlab/notebook', () => {
 
   describe('NotebookActions', () => {
     let widget: Notebook;
-    let session: ClientSession;
-    let ipySession: ClientSession;
+    let session: SessionContext;
+    let ipySession: SessionContext;
 
     before(async function() {
       // tslint:disable-next-line:no-invalid-this
       this.timeout(60000);
       [session, ipySession] = await Promise.all([
-        createClientSession(),
-        createClientSession({ kernelPreference: { name: 'ipython' } })
+        createSessionContext(),
+        createSessionContext({ kernelPreference: { name: 'ipython' } })
       ]);
       await Promise.all([ipySession.initialize(), session.initialize()]);
       await Promise.all([ipySession.kernel.info, session.kernel.info]);

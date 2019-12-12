@@ -16,12 +16,12 @@ import { ForeignHandler } from '@jupyterlab/console';
 import { CodeCellModel, CodeCell } from '@jupyterlab/cells';
 
 import {
-  createClientSession,
+  createSessionContext,
   createSession,
   defaultRenderMime,
   NBTestUtils
 } from '@jupyterlab/testutils';
-import { IClientSession } from '@jupyterlab/apputils/src';
+import { ISessionContext } from '@jupyterlab/apputils/src';
 
 class TestParent extends Panel implements ForeignHandler.IReceiver {
   addCell(cell: CodeCell, msgId?: string): void {
@@ -59,7 +59,7 @@ class TestHandler extends ForeignHandler {
   methods: string[] = [];
 
   protected onIOPubMessage(
-    sender: IClientSession,
+    sender: ISessionContext,
     msg: KernelMessage.IIOPubMessage
   ): boolean {
     const injected = super.onIOPubMessage(sender, msg);
@@ -72,7 +72,7 @@ class TestHandler extends ForeignHandler {
       const session = (msg.parent_header as KernelMessage.IHeader).session;
       const msgType = msg.header.msg_type;
       if (
-        session !== this.session.kernel.clientId &&
+        session !== this.sessionContext.kernel.clientId &&
         relevantTypes.has(msgType)
       ) {
         this.rejected.emit(msg);
@@ -100,20 +100,20 @@ describe('@jupyterlab/console', () => {
   describe('ForeignHandler', () => {
     let foreign: Session.ISessionConnection;
     let handler: TestHandler;
-    let session: IClientSession;
+    let sessionContext: ISessionContext;
 
     before(async () => {
       const path = UUID.uuid4();
-      [session, foreign] = await Promise.all([
-        createClientSession({ path, type: 'test' }),
-        createSession({ path, type: 'test' })
+      [sessionContext, foreign] = await Promise.all([
+        createSessionContext({ path, type: 'test' }),
+        createSession({ name: '', path, type: 'test' })
       ]);
-      await session.kernel.info;
+      await sessionContext.kernel.info;
     });
 
     beforeEach(() => {
       const parent = new TestParent();
-      handler = new TestHandler({ session, parent });
+      handler = new TestHandler({ sessionContext, parent });
     });
 
     afterEach(() => {
@@ -122,8 +122,8 @@ describe('@jupyterlab/console', () => {
 
     after(async () => {
       foreign.dispose();
-      await session.shutdown();
-      session.dispose();
+      await sessionContext.shutdown();
+      sessionContext.dispose();
     });
 
     describe('#constructor()', () => {
@@ -170,7 +170,7 @@ describe('@jupyterlab/console', () => {
 
     describe('#session', () => {
       it('should be a client session object', () => {
-        expect(handler.session.session.path).to.be.ok;
+        expect(handler.sessionContext.session.path).to.be.ok;
       });
     });
 
@@ -178,7 +178,7 @@ describe('@jupyterlab/console', () => {
       it('should be set upon instantiation', () => {
         const parent = new TestParent();
         handler = new TestHandler({
-          session: handler.session,
+          sessionContext: handler.sessionContext,
           parent
         });
         expect(handler.parent).to.equal(parent);

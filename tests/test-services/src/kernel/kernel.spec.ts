@@ -7,7 +7,7 @@ import { UUID } from '@phosphor/coreutils';
 
 import { toArray } from '@phosphor/algorithm';
 
-import { Kernel } from '@jupyterlab/services';
+import { KernelAPI } from '@jupyterlab/services';
 
 import { expectFailure, testEmission } from '@jupyterlab/testutils';
 
@@ -32,62 +32,53 @@ describe('kernel', () => {
   });
 
   afterEach(async () => {
-    let models = await Kernel.listRunning();
-    await Promise.all(models.map(m => Kernel.shutdown(m.id)));
+    let models = await KernelAPI.listRunning();
+    await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
   });
 
   describe('Kernel.listRunning()', () => {
     it('should yield a list of valid kernel ids', async () => {
-      expect(toArray(await Kernel.listRunning()).length).to.equal(0);
-      const kernel = await Kernel.startNew();
-      await kernel.info;
-      expect(toArray(await Kernel.listRunning()).length).to.be.greaterThan(0);
-      await kernel.shutdown();
+      expect(toArray(await KernelAPI.listRunning()).length).to.equal(0);
+      const kernel = await KernelAPI.startNew();
+      expect(toArray(await KernelAPI.listRunning()).length).to.be.greaterThan(
+        0
+      );
+      await KernelAPI.shutdownKernel(kernel.id);
     });
 
     it('should accept server settings', async () => {
       const serverSettings = makeSettings();
-      const kernel = await Kernel.startNew({ serverSettings });
-      await kernel.info;
-      const response = await Kernel.listRunning(serverSettings);
+      const k = await KernelAPI.startNew({}, serverSettings);
+      const response = await KernelAPI.listRunning(serverSettings);
       expect(toArray(response).length).to.be.greaterThan(0);
-      await kernel.shutdown();
+      await KernelAPI.shutdownKernel(k.id);
     });
 
     it('should throw an error for an invalid model', async () => {
       const data = { id: UUID.uuid4(), name: 'test' };
       const settings = getRequestHandler(200, data);
-      const promise = Kernel.listRunning(settings);
+      const promise = KernelAPI.listRunning(settings);
       await expectFailure(promise, 'Invalid kernel list');
     });
 
     it('should throw an error for an invalid response', async () => {
       const settings = getRequestHandler(201, {});
-      const promise = Kernel.listRunning(settings);
+      const promise = KernelAPI.listRunning(settings);
       await expectFailure(promise, 'Invalid response: 201 Created');
     });
 
     it('should throw an error for an error response', async () => {
       const settings = getRequestHandler(500, {});
-      const promise = Kernel.listRunning(settings);
+      const promise = KernelAPI.listRunning(settings);
       await expectFailure(promise, '');
     });
   });
 
-  describe('Kernel.startNew()', () => {
-    it('should create an Kernel.IKernel object', async () => {
-      const kernel = await Kernel.startNew({});
-      expect(kernel.status).to.equal('unknown');
-      await kernel.info;
-      await kernel.shutdown();
-    });
-
+  describe('KernelAPI.startNew()', () => {
     it('should accept ajax options', async () => {
       const serverSettings = makeSettings();
-      const kernel = await Kernel.startNew({ serverSettings });
-      expect(kernel.status).to.equal('unknown');
-      await kernel.info;
-      await kernel.shutdown();
+      const k = await KernelAPI.startNew({}, serverSettings);
+      await KernelAPI.shutdownKernel(k.id);
     });
 
     // TODO: fix this test. The idea here is that if a kernel immediately
@@ -110,7 +101,7 @@ describe('kernel', () => {
 
     it('should throw an error for an invalid kernel id', async () => {
       const serverSettings = getRequestHandler(201, { id: UUID.uuid4() });
-      const kernelPromise = Kernel.startNew({ serverSettings });
+      const kernelPromise = KernelAPI.startNew({}, serverSettings);
       await expectFailure(kernelPromise);
     });
 
@@ -119,20 +110,20 @@ describe('kernel', () => {
         id: UUID.uuid4(),
         name: 1
       });
-      const kernelPromise = Kernel.startNew({ serverSettings });
+      const kernelPromise = KernelAPI.startNew({}, serverSettings);
       await expectFailure(kernelPromise);
     });
 
     it('should throw an error for an invalid response', async () => {
       const data = { id: UUID.uuid4(), name: 'foo' };
       const serverSettings = getRequestHandler(200, data);
-      const kernelPromise = Kernel.startNew({ serverSettings });
+      const kernelPromise = KernelAPI.startNew({}, serverSettings);
       await expectFailure(kernelPromise, 'Invalid response: 200 OK');
     });
 
     it('should throw an error for an error response', async () => {
       const serverSettings = getRequestHandler(500, {});
-      const kernelPromise = Kernel.startNew({ serverSettings });
+      const kernelPromise = KernelAPI.startNew({}, serverSettings);
       await expectFailure(kernelPromise, '');
     });
 
@@ -151,12 +142,14 @@ describe('kernel', () => {
 
   describe('Kernel.shutdown()', () => {
     it('should shut down a kernel by id', async () => {
-      const k = await Kernel.startNew();
-      await Kernel.shutdown(k.id);
+      const kernel = await KernelAPI.startNew();
+      await KernelAPI.shutdownKernel(kernel.id);
+      const kernels = await KernelAPI.listRunning();
+      expect(kernels.find(k => k.id === kernel.id)).to.be.undefined;
     });
 
     it('should handle a 404 error', () => {
-      return Kernel.shutdown(UUID.uuid4());
+      return KernelAPI.shutdownKernel(UUID.uuid4());
     });
   });
 });

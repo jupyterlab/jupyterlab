@@ -213,6 +213,7 @@ describe('filebrowser/model', () => {
       it('should be the session models for the active notebooks', async () => {
         const contents = await manager.newUntitled({ type: 'notebook' });
         const session = await serviceManager.sessions.startNew({
+          name: '',
           path: contents.path,
           type: 'test'
         });

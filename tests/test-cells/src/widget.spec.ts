@@ -5,7 +5,7 @@ import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
 
-import { ClientSession, IClientSession } from '@jupyterlab/apputils';
+import { SessionContext, ISessionContext } from '@jupyterlab/apputils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
@@ -27,7 +27,7 @@ import {
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 
 import {
-  createClientSession,
+  createSessionContext,
   framePromise,
   NBTestUtils
 } from '@jupyterlab/testutils';
@@ -723,11 +723,11 @@ describe('cells/widget', () => {
     });
 
     describe('.execute()', () => {
-      let session: IClientSession;
+      let session: ISessionContext;
 
       beforeEach(async () => {
-        session = await createClientSession();
-        await (session as ClientSession).initialize();
+        session = await createSessionContext();
+        await (session as SessionContext).initialize();
         await session.kernel.info;
       });
 

@@ -9,7 +9,14 @@ import { UUID } from '@phosphor/coreutils';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
-import { Kernel, KernelMessage, KernelSpec } from '@jupyterlab/services';
+import {
+  Kernel,
+  KernelMessage,
+  KernelSpec,
+  KernelSpecAPI,
+  KernelManager,
+  KernelAPI
+} from '@jupyterlab/services';
 
 import { expectFailure, testEmission, sleep } from '@jupyterlab/testutils';
 
@@ -18,14 +25,15 @@ import { KernelTester, handleRequest } from '../utils';
 describe('Kernel.IKernel', () => {
   let defaultKernel: Kernel.IKernelConnection;
   let specs: KernelSpec.ISpecModels;
+  let kernelManager = new KernelManager();
 
   beforeAll(async () => {
     jest.setTimeout(60000);
-    specs = await KernelSpec.getSpecs();
+    specs = await KernelSpecAPI.getSpecs();
   });
 
   beforeEach(async () => {
-    defaultKernel = await Kernel.startNew();
+    defaultKernel = await kernelManager.startNew();
     await defaultKernel.info;
   });
 
@@ -35,8 +43,8 @@ describe('Kernel.IKernel', () => {
   });
 
   afterAll(async () => {
-    const models = await Kernel.listRunning();
-    await Promise.all(models.map(m => Kernel.shutdown(m.id)));
+    const models = await KernelAPI.listRunning();
+    await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
   });
 
   describe('#disposed', () => {
@@ -558,7 +566,7 @@ describe('Kernel.IKernel', () => {
 
   describe('#interrupt()', () => {
     it('should interrupt and resolve with a valid server response', async () => {
-      const kernel = await Kernel.startNew();
+      const kernel = await kernelManager.startNew();
       await kernel.interrupt();
       await kernel.shutdown();
     });
@@ -664,7 +672,7 @@ describe('Kernel.IKernel', () => {
 
   describe('#shutdown()', () => {
     it('should shut down and resolve with a valid server response', async () => {
-      const kernel = await Kernel.startNew();
+      const kernel = await kernelManager.startNew();
       await kernel.shutdown();
     });
 
@@ -678,7 +686,7 @@ describe('Kernel.IKernel', () => {
     });
 
     it('should handle a 404 error', async () => {
-      const kernel = await Kernel.startNew();
+      const kernel = await kernelManager.startNew();
       handleRequest(kernel, 404, {});
       await kernel.shutdown();
     });
@@ -708,7 +716,7 @@ describe('Kernel.IKernel', () => {
       // messages back when we shut down a kernel that will say the kernel is
       // dead and we can dispose the connection. Perhaps it is just waiting in
       // the correct way for the message?
-      const kernel0 = await Kernel.startNew();
+      const kernel0 = await kernelManager.startNew();
       const kernel1 = kernel0.clone();
       await kernel0.info;
       await kernel1.info;

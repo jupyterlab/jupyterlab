@@ -9,7 +9,7 @@ import {
   KernelSpecManager
 } from '@jupyterlab/services';
 
-import { ClientSession, Dialog, IClientSession } from '@jupyterlab/apputils';
+import { SessionContext, Dialog, ISessionContext } from '@jupyterlab/apputils';
 
 import { UUID } from '@phosphor/coreutils';
 
@@ -20,17 +20,17 @@ import {
 } from '@jupyterlab/testutils';
 
 describe('@jupyterlab/apputils', () => {
-  describe('ClientSession', () => {
+  describe('SessionContext', () => {
     const kernelManager = new KernelManager();
-    const manager = new SessionManager({ kernelManager });
+    const sessionManager = new SessionManager({ kernelManager });
     const specsManager = new KernelSpecManager();
 
-    let session: ClientSession;
+    let session: SessionContext;
 
     beforeAll(
       async () =>
         await Promise.all([
-          manager.ready,
+          sessionManager.ready,
           kernelManager.ready,
           specsManager.ready
         ])
@@ -38,8 +38,8 @@ describe('@jupyterlab/apputils', () => {
 
     beforeEach(() => {
       Dialog.flush();
-      session = new ClientSession({
-        manager,
+      session = new SessionContext({
+        sessionManager,
         specsManager,
         kernelPreference: { name: specsManager.specs.default }
       });
@@ -57,7 +57,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#constructor()', () => {
       it('should create a client session', () => {
-        expect(session).to.be.an.instanceof(ClientSession);
+        expect(session).to.be.an.instanceof(SessionContext);
       });
     });
 
@@ -141,7 +141,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#kernelPreference', () => {
       it('should be the kernel preference of the session', () => {
-        const preference: IClientSession.IKernelPreference = {
+        const preference: ISessionContext.IKernelPreference = {
           name: 'foo',
           language: 'bar',
           id: '1234',
@@ -155,7 +155,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#manager', () => {
       it('should be the session manager used by the session', () => {
-        expect(session.manager).to.equal(manager);
+        expect(session.manager).to.equal(sessionManager);
       });
     });
 
@@ -166,7 +166,8 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should connect to an existing session on the path', async () => {
-        const other = await manager.startNew({
+        const other = await sessionManager.startNew({
+          name: '',
           path: session.session.path,
           type: 'test'
         });
@@ -182,14 +183,15 @@ describe('@jupyterlab/apputils', () => {
         await session.shutdown();
         session.dispose();
 
-        const other = await manager.startNew({
+        const other = await sessionManager.startNew({
+          name: '',
           path: UUID.uuid4(),
           type: 'test'
         });
         const kernelPreference = { id: other.kernel.id };
 
-        session = new ClientSession({
-          manager,
+        session = new SessionContext({
+          sessionManager,
           specsManager,
           kernelPreference
         });
@@ -348,7 +350,7 @@ describe('@jupyterlab/apputils', () => {
         });
         await session.initialize();
 
-        const restart = ClientSession.restartKernel(session.kernel);
+        const restart = SessionContext.restartKernel(session.kernel);
 
         await acceptDialog();
         expect(await restart).to.equal(true);
@@ -365,7 +367,7 @@ describe('@jupyterlab/apputils', () => {
         });
         await session.initialize();
 
-        const restart = ClientSession.restartKernel(session.kernel);
+        const restart = SessionContext.restartKernel(session.kernel);
 
         await dismissDialog();
         expect(await restart).to.equal(false);
@@ -380,7 +382,7 @@ describe('@jupyterlab/apputils', () => {
 
       it('should return null if no options are given', () => {
         expect(
-          ClientSession.getDefaultKernel({
+          SessionContext.getDefaultKernel({
             specs: specsManager.specs,
             preference: {}
           })
@@ -391,7 +393,7 @@ describe('@jupyterlab/apputils', () => {
         const spec = specsManager.specs.kernelspecs[specsManager.specs.default];
 
         expect(
-          ClientSession.getDefaultKernel({
+          SessionContext.getDefaultKernel({
             specs: specsManager.specs,
             preference: { name: spec.name }
           })
@@ -400,7 +402,7 @@ describe('@jupyterlab/apputils', () => {
 
       it('should return null if no match is found', () => {
         expect(
-          ClientSession.getDefaultKernel({
+          SessionContext.getDefaultKernel({
             specs: specsManager.specs,
             preference: { name: 'foo' }
           })
@@ -413,7 +415,7 @@ describe('@jupyterlab/apputils', () => {
 
         kernelspecs[spec.name] = spec;
         expect(
-          ClientSession.getDefaultKernel({
+          SessionContext.getDefaultKernel({
             specs: {
               default: spec.name,
               kernelspecs
@@ -430,7 +432,7 @@ describe('@jupyterlab/apputils', () => {
         kernelspecs['foo'] = spec;
         kernelspecs['bar'] = spec;
         expect(
-          ClientSession.getDefaultKernel({
+          SessionContext.getDefaultKernel({
             specs: {
               default: spec.name,
               kernelspecs
@@ -449,7 +451,7 @@ describe('@jupyterlab/apputils', () => {
       it('should populate the select div', () => {
         const div = document.createElement('select');
 
-        ClientSession.populateKernelSelect(div, {
+        SessionContext.populateKernelSelect(div, {
           specs: specsManager.specs,
           preference: {}
         });
@@ -460,7 +462,7 @@ describe('@jupyterlab/apputils', () => {
       it('should select the null option', () => {
         const div = document.createElement('select');
 
-        ClientSession.populateKernelSelect(div, {
+        SessionContext.populateKernelSelect(div, {
           specs: specsManager.specs,
           preference: { shouldStart: false }
         });
@@ -471,7 +473,7 @@ describe('@jupyterlab/apputils', () => {
       it('should disable the node', () => {
         const div = document.createElement('select');
 
-        ClientSession.populateKernelSelect(div, {
+        SessionContext.populateKernelSelect(div, {
           specs: specsManager.specs,
           preference: { canStart: false }
         });

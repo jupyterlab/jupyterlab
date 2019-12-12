@@ -3,9 +3,9 @@
 
 import { expect } from 'chai';
 
-import { ClientSession } from '@jupyterlab/apputils';
+import { SessionContext } from '@jupyterlab/apputils';
 
-import { Kernel } from '@jupyterlab/services';
+import { KernelManager } from '@jupyterlab/services';
 
 import { Message } from '@phosphor/messaging';
 
@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/outputarea';
 
 import {
-  createClientSession,
+  createSessionContext,
   defaultRenderMime,
   NBTestUtils
 } from '@jupyterlab/testutils';
@@ -117,10 +117,10 @@ describe('outputarea/widget', () => {
     });
 
     describe('#future', () => {
-      let session: ClientSession;
+      let session: SessionContext;
 
       beforeEach(async () => {
-        session = await createClientSession();
+        session = await createSessionContext();
         await session.initialize();
         await session.kernel.info;
       });
@@ -231,10 +231,10 @@ describe('outputarea/widget', () => {
     });
 
     describe('.execute()', () => {
-      let session: ClientSession;
+      let session: SessionContext;
 
       beforeEach(async () => {
-        session = await createClientSession();
+        session = await createSessionContext();
         await session.initialize();
         await session.kernel.info;
       });
@@ -289,8 +289,8 @@ describe('outputarea/widget', () => {
           'display_with_id(4, "here")'
         ].join('\n');
 
-        let ipySession: ClientSession;
-        ipySession = await createClientSession({
+        let ipySession: SessionContext;
+        ipySession = await createSessionContext({
           kernelPreference: { name: 'ipython' }
         });
         await ipySession.initialize();
@@ -312,8 +312,8 @@ describe('outputarea/widget', () => {
       });
 
       it('should stop on an error', async () => {
-        let ipySession: ClientSession;
-        ipySession = await createClientSession({
+        let ipySession: SessionContext;
+        ipySession = await createSessionContext({
           kernelPreference: { name: 'ipython' }
         });
         await ipySession.initialize();
@@ -330,8 +330,8 @@ describe('outputarea/widget', () => {
       });
 
       it('should allow an error given "raises-exception" metadata tag', async () => {
-        let ipySession: ClientSession;
-        ipySession = await createClientSession({
+        let ipySession: SessionContext;
+        ipySession = await createSessionContext({
           kernelPreference: { name: 'ipython' }
         });
         await ipySession.initialize();
@@ -363,7 +363,8 @@ describe('outputarea/widget', () => {
 
       describe('#createStdin()', () => {
         it('should create a stdin widget', async () => {
-          const kernel = await Kernel.startNew();
+          const manager = new KernelManager();
+          const kernel = await manager.startNew();
           const factory = new OutputArea.ContentFactory();
           const future = kernel.requestExecute({ code: CODE });
           const options = {

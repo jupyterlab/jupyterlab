@@ -238,7 +238,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       afterEach(async () => {
-        await context.session.shutdown();
+        await context.sessionContext.shutdown();
         panel.dispose();
         context.dispose();
       });
@@ -258,7 +258,7 @@ describe('@jupyterlab/notebook', () => {
 
           Widget.attach(button, document.body);
           const p = new PromiseDelegate();
-          context.session.statusChanged.connect((sender, status) => {
+          context.sessionContext.statusChanged.connect((sender, status) => {
             // Find the right status idle message
             if (status === 'idle' && codeCell.model.outputs.length > 0) {
               expect(mdCell.rendered).to.equal(true);

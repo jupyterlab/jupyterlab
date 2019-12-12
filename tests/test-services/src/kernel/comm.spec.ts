@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
-import { KernelMessage, Kernel } from '@jupyterlab/services';
+import { KernelMessage, Kernel, KernelManager } from '@jupyterlab/services';
 
 import { isFulfilled } from '@jupyterlab/testutils';
 
@@ -48,10 +48,11 @@ get_ipython().kernel.comm_manager.register_target("test", target_func)
 `;
 
 describe('jupyter.services - Comm', () => {
+  const kernelManager = new KernelManager();
   let kernel: Kernel.IKernelConnection;
 
   beforeAll(async () => {
-    kernel = await Kernel.startNew({ name: 'ipython' });
+    kernel = await kernelManager.startNew({ name: 'ipython' });
   });
 
   afterEach(() => {
@@ -86,7 +87,7 @@ describe('jupyter.services - Comm', () => {
       });
 
       it('should throw an error when the kernel does not handle comms', async () => {
-        const kernel2 = await Kernel.startNew({
+        const kernel2 = await kernelManager.startNew({
           name: 'ipython',
           handleComms: false
         });
@@ -124,7 +125,7 @@ describe('jupyter.services - Comm', () => {
         const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
           promise.resolve([comm, msg]);
         };
-        const kernel2 = await Kernel.startNew({
+        const kernel2 = await kernelManager.startNew({
           name: 'ipython',
           handleComms: false
         });

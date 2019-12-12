@@ -26,11 +26,13 @@ describe('session', () => {
   let session: Session.IModel;
 
   beforeAll(async () => {
-    await SessionAPI.shutdownAll();
+    const sessions = await SessionAPI.listRunning();
+    await Promise.all(sessions.map(s => SessionAPI.shutdownSession(s.id)));
   });
 
   afterEach(async () => {
-    await SessionAPI.shutdownAll();
+    const sessions = await SessionAPI.listRunning();
+    await Promise.all(sessions.map(s => SessionAPI.shutdownSession(s.id)));
   });
 
   describe('Session.listRunning()', () => {
@@ -137,17 +139,6 @@ describe('session', () => {
       let model = await SessionAPI.startSession(sessionModel, serverSettings);
       console.log(model);
       expect(model.path).not.empty;
-    });
-  });
-
-  describe('Session.findByPath()', () => {
-    it('should find an existing session by path', async () => {
-      session = await SessionAPI.startSession({
-        path: UUID.uuid4(),
-        name: UUID.uuid4(),
-        type: 'test'
-      });
-      return SessionAPI.findByPath(session.path);
     });
   });
 

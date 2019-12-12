@@ -262,6 +262,12 @@ class SocketTester implements IService {
  * Kernel class test rig.
  */
 export class KernelTester extends SocketTester {
+  constructor() {
+    super();
+    this._kernelManager = new KernelManager({
+      serverSettings: this.serverSettings
+    });
+  }
   get initialStatus(): string {
     return this._initialStatus;
   }
@@ -448,8 +454,7 @@ export class KernelTester extends SocketTester {
     handleRequest(this, 201, { name: 'test', id: UUID.uuid4() });
 
     // Construct a new kernel.
-    const serverSettings = this.serverSettings;
-    this._kernel = await Kernel.startNew({ serverSettings });
+    this._kernel = await this._kernelManager.startNew();
 
     // Wait for the other side to signal it is connected
     await this.ready;
@@ -523,6 +528,7 @@ export class KernelTester extends SocketTester {
 
   readonly serverSessionId = UUID.uuid4();
   private _initialStatus = 'starting';
+  private _kernelManager: Kernel.IManager;
   private _kernel: Kernel.IKernelConnection | null = null;
   private _onMessage: (msg: KernelMessage.IMessage) => void = null;
 }

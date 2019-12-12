@@ -13,10 +13,10 @@ import { makeSettings } from '../utils';
 
 describe('kernel/manager', () => {
   let manager: KernelManager;
-  let kernel: Kernel.IKernelConnection;
+  let kernel: Kernel.IModel;
 
   beforeAll(async () => {
-    kernel = await Kernel.startNew();
+    kernel = await KernelAPI.startNew();
   });
 
   beforeEach(() => {
@@ -29,8 +29,8 @@ describe('kernel/manager', () => {
   });
 
   afterAll(async () => {
-    let models = await Kernel.listRunning();
-    await Promise.all(models.map(m => Kernel.shutdown(m.id)));
+    let models = await KernelAPI.listRunning();
+    await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
   });
 
   describe('KernelManager', () => {
@@ -72,7 +72,7 @@ describe('kernel/manager', () => {
           expect(toArray(args).length).to.be.greaterThan(0);
           called = true;
         });
-        await Kernel.startNew();
+        await KernelAPI.startNew();
         await manager.refreshRunning();
         expect(called).to.equal(true);
       });
@@ -146,7 +146,7 @@ describe('kernel/manager', () => {
     describe('#connectTo()', () => {
       it('should connect to an existing kernel', () => {
         const id = kernel.id;
-        const newConnection = manager.connectTo({ model: kernel.model });
+        const newConnection = manager.connectTo({ model: kernel });
         expect(newConnection.model.id).to.equal(id);
       });
     });

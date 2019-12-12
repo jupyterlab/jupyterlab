@@ -73,7 +73,7 @@ describe('console/panel', () => {
 
     describe('#session', () => {
       it('should be a client session object', () => {
-        expect(panel.session.sessionChanged).to.be.ok;
+        expect(panel.sessionContext.sessionChanged).to.be.ok;
       });
     });
 
@@ -90,7 +90,7 @@ describe('console/panel', () => {
       it('should start the session', async () => {
         Widget.attach(panel, document.body);
         await dismissDialog();
-        return panel.session.session.kernel.info;
+        return panel.sessionContext.session.kernel.info;
       });
     });
 
@@ -130,7 +130,7 @@ describe('console/panel', () => {
             contentFactory: contentFactory,
             rendermime,
             mimeTypeService,
-            session: panel.session
+            sessionContext: panel.sessionContext
           };
           expect(contentFactory.createConsole(options)).to.be.an.instanceof(
             CodeConsole

@@ -3,12 +3,13 @@
 
 import { expect } from 'chai';
 
-import { Kernel, KernelMessage } from '@jupyterlab/services';
+import { Kernel, KernelMessage, KernelAPI, KernelManager } from '@jupyterlab/services';
 
 import { KernelTester } from '../utils';
 
 describe('Kernel.IShellFuture', () => {
   let tester: KernelTester;
+  let kernelManager = new KernelManager();
 
   afterEach(() => {
     if (tester) {
@@ -17,12 +18,12 @@ describe('Kernel.IShellFuture', () => {
   });
 
   afterAll(async () => {
-    let models = await Kernel.listRunning();
-    await Promise.all(models.map(m => Kernel.shutdown(m.id)));
+    let models = await KernelAPI.listRunning();
+    await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
   });
 
   it('should have a msg attribute', async () => {
-    const kernel = await Kernel.startNew();
+    const kernel = await kernelManager.startNew();
     await kernel.info;
     const future = kernel.requestExecute({ code: 'print("hello")' });
     expect(typeof future.msg.header.msg_id).to.equal('string');

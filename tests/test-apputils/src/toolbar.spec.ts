@@ -4,10 +4,10 @@
 import { expect } from 'chai';
 
 import {
-  ClientSession,
   Toolbar,
   ToolbarButton,
-  CommandToolbarButton
+  CommandToolbarButton,
+  SessionContext
 } from '@jupyterlab/apputils';
 
 import { toArray } from '@phosphor/algorithm';
@@ -20,7 +20,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { simulate } from 'simulate-event';
 
-import { createClientSession, framePromise } from '@jupyterlab/testutils';
+import { createSessionContext, framePromise } from '@jupyterlab/testutils';
 
 describe('@jupyterlab/apputils', () => {
   let widget: Toolbar<Widget>;
@@ -275,9 +275,9 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('Kernel buttons', () => {
-      let session: ClientSession;
+      let session: SessionContext;
       beforeEach(async () => {
-        session = await createClientSession();
+        session = await createSessionContext();
       });
 
       afterEach(async () => {
@@ -363,7 +363,7 @@ describe('@jupyterlab/apputils', () => {
         it('should handle a starting session', async () => {
           await session.kernel.info;
           await session.shutdown();
-          session = await createClientSession();
+          session = await createSessionContext();
           const item = Toolbar.createKernelStatusItem(session);
           expect(item.node.title).to.equal('Kernel Starting');
           expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);

@@ -310,7 +310,11 @@ describe('rendermime/registry', () => {
         contents = manager.contents;
         contents.addDrive(drive);
         await manager.ready;
-        session = await manager.sessions.startNew({ path: path, type: 'test' });
+        session = await manager.sessions.startNew({
+          name: '',
+          path: path,
+          type: 'test'
+        });
         resolver = new RenderMimeRegistry.UrlResolver({
           session,
           contents: manager.contents

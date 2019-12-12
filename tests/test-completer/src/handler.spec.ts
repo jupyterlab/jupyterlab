@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { ClientSession, IClientSession } from '@jupyterlab/apputils';
+import { SessionContext, ISessionContext } from '@jupyterlab/apputils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
@@ -16,7 +16,7 @@ import {
   KernelConnector
 } from '@jupyterlab/completer';
 
-import { createClientSession } from '@jupyterlab/testutils';
+import { createSessionContext } from '@jupyterlab/testutils';
 
 function createEditorWidget(): CodeEditorWrapper {
   const model = new CodeEditor.Model();
@@ -56,11 +56,11 @@ class TestCompletionHandler extends CompletionHandler {
 
 describe('@jupyterlab/completer', () => {
   let connector: KernelConnector;
-  let session: IClientSession;
+  let session: ISessionContext;
 
   beforeAll(async () => {
-    session = await createClientSession();
-    await (session as ClientSession).initialize();
+    session = await createSessionContext();
+    await (session as SessionContext).initialize();
     connector = new KernelConnector({ session: session.session });
   });
 

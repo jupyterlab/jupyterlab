@@ -10,10 +10,10 @@ import { UUID } from '@phosphor/coreutils';
 import { Signal } from '@phosphor/signaling';
 
 import {
-  Kernel,
   KernelMessage,
   SessionManager,
-  KernelManager
+  KernelManager,
+  KernelAPI
 } from '@jupyterlab/services';
 
 import { Session } from '@jupyterlab/services';
@@ -357,13 +357,13 @@ describe('session', () => {
         session = await startNew();
         const previous = session.kernel;
         await previous.info;
-        const kernel = await Kernel.startNew();
+        const kernel = await KernelAPI.startNew();
         await session.changeKernel({ id: kernel.id });
         expect(session.kernel.id).to.equal(kernel.id);
         expect(session.kernel).to.not.equal(previous);
         expect(session.kernel).to.not.equal(kernel);
         previous.dispose();
-        kernel.dispose();
+        await KernelAPI.shutdownKernel(kernel.id);
       });
 
       it('should update the session path if it has changed', async () => {

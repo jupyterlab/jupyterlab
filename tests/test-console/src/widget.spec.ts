@@ -7,7 +7,7 @@ import { Message, MessageLoop } from '@phosphor/messaging';
 
 import { Widget } from '@phosphor/widgets';
 
-import { ClientSession } from '@jupyterlab/apputils';
+import {  SessionContext } from '@jupyterlab/apputils';
 
 import { CodeConsole } from '@jupyterlab/console';
 
@@ -18,7 +18,7 @@ import {
   RawCell
 } from '@jupyterlab/cells';
 
-import { createClientSession, NBTestUtils } from '@jupyterlab/testutils';
+import { createSessionContext, NBTestUtils } from '@jupyterlab/testutils';
 
 import {
   createConsoleFactory,
@@ -58,18 +58,18 @@ describe('console/widget', () => {
     let widget: TestConsole;
 
     beforeEach(async () => {
-      const session = await createClientSession();
+      const sessionContext = await createSessionContext();
       widget = new TestConsole({
         contentFactory,
         rendermime,
-        session,
+        sessionContext,
         mimeTypeService
       });
     });
 
     afterEach(async () => {
-      await widget.session.shutdown();
-      widget.session.dispose();
+      await widget.sessionContext.shutdown();
+      widget.sessionContext.dispose();
       widget.dispose();
     });
 
@@ -89,7 +89,7 @@ describe('console/widget', () => {
       it('should reflect the contents of the widget', async () => {
         const force = true;
         Widget.attach(widget, document.body);
-        await (widget.session as ClientSession).initialize();
+        await (widget.sessionContext as SessionContext).initialize();
         await widget.execute(force);
         expect(widget.cells.length).to.equal(1);
         widget.clear();
@@ -105,7 +105,7 @@ describe('console/widget', () => {
         widget.executed.connect((sender, time) => {
           called = time;
         });
-        await (widget.session as ClientSession).initialize();
+        await (widget.sessionContext as SessionContext).initialize();
         await widget.execute(force);
         expect(called).to.be.an.instanceof(Date);
       });
@@ -124,7 +124,7 @@ describe('console/widget', () => {
         const old = widget.promptCell;
         expect(old).to.be.an.instanceof(CodeCell);
 
-        await (widget.session as ClientSession).initialize();
+        await (widget.sessionContext as SessionContext).initialize();
         await widget.execute(force);
         expect(widget.promptCell).to.be.an.instanceof(CodeCell);
         expect(widget.promptCell).to.not.equal(old);
@@ -133,7 +133,7 @@ describe('console/widget', () => {
 
     describe('#session', () => {
       it('should be a client session object', () => {
-        expect(widget.session.sessionChanged).to.be.ok;
+        expect(widget.sessionContext.sessionChanged).to.be.ok;
       });
     });
 
@@ -165,7 +165,7 @@ describe('console/widget', () => {
       it('should clear all of the content cells except the banner', async () => {
         const force = true;
         Widget.attach(widget, document.body);
-        await (widget.session as ClientSession).initialize();
+        await (widget.sessionContext as SessionContext).initialize();
         await widget.execute(force);
         expect(widget.cells.length).to.be.greaterThan(0);
         widget.clear();
@@ -196,7 +196,7 @@ describe('console/widget', () => {
         const force = true;
         Widget.attach(widget, document.body);
         expect(widget.cells.length).to.equal(0);
-        await (widget.session as ClientSession).initialize();
+        await (widget.sessionContext as SessionContext).initialize();
         await widget.execute(force);
         expect(widget.cells.length).to.be.greaterThan(0);
       });
@@ -207,7 +207,7 @@ describe('console/widget', () => {
         Widget.attach(widget, document.body);
         widget.promptCell.model.value.text = 'for x in range(5):';
         expect(widget.cells.length).to.equal(0);
-        const session = widget.session as ClientSession;
+        const session = widget.sessionContext as SessionContext;
         session.kernelPreference = { name: 'ipython' };
         await session.initialize();
         await widget.execute(force, timeout);
@@ -267,7 +267,7 @@ describe('console/widget', () => {
         expect(old).to.be.an.instanceof(CodeCell);
         widget.methods = [];
 
-        await (widget.session as ClientSession).initialize();
+        await (widget.sessionContext as SessionContext).initialize();
         await widget.execute(force);
 
         expect(widget.promptCell).to.be.an.instanceof(CodeCell);

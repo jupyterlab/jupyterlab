@@ -48,7 +48,8 @@ describe('session/manager', () => {
   });
 
   afterAll(async () => {
-    await SessionAPI.shutdownAll();
+    let sessions = await SessionAPI.listRunning();
+    await Promise.all(sessions.map(s => SessionAPI.shutdownSession(s.id)));
   });
 
   describe('SessionManager', () => {
