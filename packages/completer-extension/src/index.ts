@@ -137,20 +137,24 @@ const consoles: JupyterFrontEndPlugin<void> = {
     // Create a handler for each console that is created.
     consoles.widgetAdded.connect((sender, panel) => {
       const anchor = panel.console;
-      const cell = anchor.promptCell;
-      const editor = cell && cell.editor;
-      // TODO: make sure the logic here is right as the session context switches to different sessions.
+      const editor = anchor.promptCell?.editor;
       const session = anchor.sessionContext.session;
-      const parent = panel;
+      // TODO: CompletionConnector assumes editor and session are not null
       const connector = new CompletionConnector({ session, editor });
-      const handler = manager.register({ connector, editor, parent });
+      const handler = manager.register({ connector, editor, parent: panel });
 
-      // Listen for prompt creation.
-      anchor.promptCellCreated.connect((sender, cell) => {
-        const editor = cell && cell.editor;
+      let updateConnector = () => {
+        const editor = anchor.promptCell?.editor ?? null;
+        const session = anchor.sessionContext.session;
+
         handler.editor = editor;
+        // TODO: CompletionConnector assumes editor and session are not null
         handler.connector = new CompletionConnector({ session, editor });
-      });
+      };
+
+      // Update the handler whenever the prompt or session changes
+      anchor.promptCellCreated.connect(updateConnector);
+      anchor.sessionContext.sessionChanged.connect(updateConnector);
     });
 
     // Add console completer invoke command.
@@ -198,20 +202,24 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   ): void => {
     // Create a handler for each notebook that is created.
     notebooks.widgetAdded.connect((sender, panel) => {
-      const cell = panel.content.activeCell;
-      const editor = cell && cell.editor;
-      // TODO: Make sure the logic here is right as the session context switches between sessions
+      const editor = panel.content.activeCell?.editor ?? null;
       const session = panel.sessionContext.session;
-      const parent = panel;
+      // TODO: CompletionConnector assumes editor and session are not null
       const connector = new CompletionConnector({ session, editor });
-      const handler = manager.register({ connector, editor, parent });
+      const handler = manager.register({ connector, editor, parent: panel });
 
-      // Listen for active cell changes.
-      panel.content.activeCellChanged.connect((sender, cell) => {
-        const editor = cell && cell.editor;
+      let updateConnector = () => {
+        const editor = panel.content.activeCell?.editor ?? null;
+        const session = panel.sessionContext.session;
+
         handler.editor = editor;
+        // TODO: CompletionConnector assumes editor and session are not null
         handler.connector = new CompletionConnector({ session, editor });
-      });
+      };
+
+      // Update the handler whenever the prompt or session changes
+      panel.content.activeCellChanged.connect(updateConnector);
+      panel.sessionContext.sessionChanged.connect(updateConnector);
     });
 
     // Add notebook completer command.

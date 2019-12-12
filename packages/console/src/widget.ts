@@ -589,6 +589,8 @@ export class CodeConsole extends Widget {
     promptCell = factory.createCodeCell(options);
     promptCell.model.mimeType = this._mimetype;
     promptCell.addClass(PROMPT_CLASS);
+
+    // Add the prompt cell to the DOM, making `this.promptCell` valid again.
     this._input.addWidget(promptCell);
 
     // Suppress the default "Enter" key handling.
