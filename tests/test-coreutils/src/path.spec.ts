@@ -79,17 +79,6 @@ describe('@jupyterlab/coreutils', () => {
       });
     });
 
-    describe('.stem()', () => {
-      it('almost always fails', () => {
-        // This works
-        let path = PathExt.stem('var\\foo/src.ext');
-        expect(path).to.equal('src');
-        // This fails
-        path = PathExt.stem('var/src');
-        expect(path).to.equal('src');
-      });
-    });
-
     describe('.normalizeExtension()', () => {
       it('should normalize a file extension to be of type `.foo`', () => {
         expect(PathExt.normalizeExtension('foo')).to.equal('.foo');

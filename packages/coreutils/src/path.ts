@@ -62,25 +62,6 @@ export namespace PathExt {
   }
 
   /**
-   * Get the last portion of a path, without its extension (if any).
-   *
-   * @param path - The file path.
-   *
-   * @returns the last part of the path, sans extension.
-   */
-  export function stem(path: string): string {
-    // TODO: This will always fail?
-    // TODO: Exclamation marks are only here to allow it to compile
-    return path
-      .split('\\')
-      .pop()!
-      .split('/')
-      .pop()!
-      .split('.')
-      .shift()!;
-  }
-
-  /**
    * Normalize a string path, reducing '..' and '.' parts.
    * When multiple slashes are found, they're replaced by a single one; when the path contains a trailing slash, it is preserved. On Windows backslashes are used.
    * When an empty path is given, returns the root path.
