@@ -92,18 +92,18 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/mocha": "^5.2.6",
+    "@types/mocha": "^5.2.7",
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-prettier": "^3.0.1",
-    "husky": "^2.3.0",
-    "lerna": "^3.13.2",
+    "husky": "^3.1.0",
+    "lerna": "^3.19.0",
     "lint-staged": "^8.1.5",
     "prettier": "^1.19.1",
     "tslint": "^5.15.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
     "tslint-react": "^4.0.0",
-    "yarn": "1.15.2"
+    "yarn": "1.21.1"
   }
 }

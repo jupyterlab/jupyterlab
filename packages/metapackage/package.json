@@ -112,10 +112,10 @@
     "@jupyterlab/vega5-extension": "^2.0.0-alpha.4"
   },
   "devDependencies": {
-    "fs-extra": "^8.0.1",
-    "rimraf": "~2.6.2",
-    "typedoc": "^0.15.2",
-    "typescript": "~3.7.2"
+    "fs-extra": "^8.1.0",
+    "rimraf": "~3.0.0",
+    "typedoc": "^0.15.4",
+    "typescript": "~3.7.3"
   },
   "publishConfig": {
     "access": "public"

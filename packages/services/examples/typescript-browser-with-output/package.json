@@ -22,11 +22,11 @@
     "@jupyterlab/services": "^5.0.0-alpha.4"
   },
   "devDependencies": {
-    "css-loader": "~2.1.1",
-    "rimraf": "~2.6.2",
-    "style-loader": "~0.23.1",
-    "typescript": "~3.7.2",
-    "webpack": "^4.32.2",
-    "webpack-cli": "^3.3.0"
+    "css-loader": "~3.3.2",
+    "rimraf": "~3.0.0",
+    "style-loader": "~1.0.1",
+    "typescript": "~3.7.3",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
   }
 }
