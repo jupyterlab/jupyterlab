@@ -144,7 +144,7 @@ export interface ISearchProvider<T extends Widget = Widget> {
   startQuery(
     query: RegExp,
     searchTarget: T,
-    filters: {}
+    filters: IFiltersType
   ): Promise<ISearchMatch[]>;
 
   /**
