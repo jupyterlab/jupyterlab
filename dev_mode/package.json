@@ -265,7 +265,6 @@
     ],
     "linkedPackages": {
       "@jupyterlab/application-top": "../dev_mode",
-      "@jupyterlab/example-app": "../examples/app",
       "@jupyterlab/example-cell": "../examples/cell",
       "@jupyterlab/example-console": "../examples/console",
       "@jupyterlab/example-filebrowser": "../examples/filebrowser",
