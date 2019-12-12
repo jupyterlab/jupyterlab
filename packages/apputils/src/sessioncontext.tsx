@@ -8,6 +8,7 @@ import { UUID } from '@phosphor/coreutils';
 import {
   Kernel,
   KernelMessage,
+  KernelSpec,
   ServerConnection,
   Session
 } from '@jupyterlab/services';
@@ -25,7 +26,6 @@ import { Widget } from '@phosphor/widgets';
 import * as React from 'react';
 
 import { showDialog, Dialog } from './dialog';
-import { KernelSpec } from '@jupyterlab/services/lib/kernelspec';
 
 /**
  * A context object to manage a widget's kernel session connection.

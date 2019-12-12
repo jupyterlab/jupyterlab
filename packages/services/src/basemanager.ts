@@ -14,7 +14,6 @@ import { ServerConnection } from './serverconnection';
 export interface IManager extends IObservableDisposable {
   /**
    * A signal emitted when there is a connection failure.
-   * TODO: figure out the relationship between this and the other connection status signals for kernels.
    */
   connectionFailure: ISignal<IManager, ServerConnection.NetworkError>;
 

@@ -11,8 +11,6 @@ import { ISignal } from '@phosphor/signaling';
 
 import { ServerConnection } from '..';
 
-import { KernelConnection } from './default';
-
 import * as KernelMessage from './messages';
 
 import { KernelSpec } from '../kernelspec';

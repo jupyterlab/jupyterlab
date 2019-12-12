@@ -18,18 +18,11 @@ type DeepPartial<T> = {
 /**
  * Session object for accessing the session REST api. The session
  * should be used to start kernels and then shut them down -- for
- * all other operations, the kernel object should be used.
+ * all other kernel operations, the kernel object should be used.
  */
 export class SessionConnection implements Session.ISessionConnection {
   /**
    * Construct a new session.
-   *
-   * TODO: the constructor here is a bit awkward, especially given that usually we have a model from the kernel we are trying to use. Perhaps we should take the model?
-   * * How do we make sure that the information here is what matches the server? A: we don't. we depend on the person creating the connection to keep the information up to date. The only reason we store the information like the path, type, etc., is as a convenience for the user so the user doesn't have to keep track of the model separately.
-   *
-   * Also, there is a conflict between the IOptions and the model passed in here. Which should we use?
-   *
-   * How about the session takes options. Options must have a session model, plus username, clientId, a connectToKernel function, and serverSettings. Perhaps serverSettings is a separate arg (audit where they are separate...).
    */
   constructor(options: Session.IOptions) {
     this._id = options.model.id;
@@ -44,6 +37,9 @@ export class SessionConnection implements Session.ISessionConnection {
     this.setupKernel(options.model.kernel);
   }
 
+  /**
+   * Whether this object is disposed.
+   */
   get disposed(): ISignal<this, void> {
     return this._disposed;
   }
@@ -86,8 +82,9 @@ export class SessionConnection implements Session.ISessionConnection {
   /**
    * A signal proxied from the kernel emitted for any kernel message.
    *
-   * Note: The behavior is undefined if the message is modified
-   * during message handling. As such, it should be treated as read-only.
+   * #### Notes
+   * The behavior is undefined if the message is modified during message
+   * handling. As such, it should be treated as read-only.
    */
   get anyMessage(): ISignal<this, Kernel.IAnyMessageArgs> {
     return this._anyMessage;
@@ -164,30 +161,12 @@ export class SessionConnection implements Session.ISessionConnection {
   }
 
   /**
-   * Clone the current session with a new clientId.
-   *
-   * TODO: remove?
-   */
-  // clone(): Session.ISessionConnection {
-  //   return new SessionConnection(
-  //     {
-  //       path: this._path,
-  //       name: this._name,
-  //       type: this._type,
-  //       serverSettings: this.serverSettings,
-  //       connectToKernel: this._connectToKernel
-  //     },
-  //     this._id,
-  //     { id: this.kernel.id, name: this.kernel.name }
-  //   );
-  // }
-
-  /**
    * Update the session based on a session model from the server.
    *
    * #### Notes
-   * This does not make a server request. Use setPath, setName, setType, and
-   * changeKernel to change these values on the server.
+   * This only upates this session connection instance. Use `setPath`,
+   * `setName`, `setType`, and `changeKernel` to change the session values on
+   * the server.
    */
   update(model: Session.IModel): void {
     let oldModel = this.model;

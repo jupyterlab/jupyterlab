@@ -55,8 +55,8 @@ export class ServiceManager implements ServiceManager.IManager {
     this.kernelspecs = new KernelSpecManager(normalized);
 
     // Relay connection failures from the service managers that poll
-    // the server for running sessions.
-    // TODO: should we also relay connection failures from other managers?
+    // the server for current information.
+    this.kernelspecs.connectionFailure.connect(this._onConnectionFailure, this);
     this.sessions.connectionFailure.connect(this._onConnectionFailure, this);
     this.terminals.connectionFailure.connect(this._onConnectionFailure, this);
 

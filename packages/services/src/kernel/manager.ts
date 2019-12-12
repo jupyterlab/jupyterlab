@@ -21,10 +21,6 @@ import {
 } from './restapi';
 import { KernelConnection } from './default';
 
-// TODO: Migrate kernel connection status etc. up to session
-// TODO: move session management work up to session manager rather than session objects
-// TODO: put session persistence in jlab server end (even if not in notebook)
-
 /**
  * An implementation of a kernel manager.
  */
@@ -175,10 +171,10 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    *
    * #### Notes
    * The manager `serverSettings` will be always be used.
-   *
-   * TODO: make this ignoring logic everywhere for managers. Also Omit the
-   * server settings from the IKernelConnection.IOptions in these cases.
    */
+  // TODO: make this ignoring logic everywhere for managers. Also Omit the
+  // server settings from the IKernelConnection.IOptions in these cases.
+
   async startNew(
     options: IKernelOptions &
       Omit<Kernel.IKernelConnection.IOptions, 'model' | 'serverSettings'> = {}
