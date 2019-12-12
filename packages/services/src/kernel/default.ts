@@ -459,7 +459,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
-    return restapi.restartKernel(this.id, this.serverSettings);
+    await restapi.restartKernel(this.id, this.serverSettings);
+    await this._handleRestart();
   }
 
   /**
@@ -994,8 +995,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._updateStatus('restarting');
 
     // Kick off an async kernel request to eventually reset the kernel status.
-    // We do this with a setTimeout to avoid race conditions with the
-    // restarting/autostarting logic.
+    // We do this with a setTimeout so that it comes after the microtask
+    // logic in _handleMessage for restarting/autostarting status updates.
     setTimeout(() => {
       void this.requestKernelInfo();
     }, 0);
@@ -1330,15 +1331,21 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (msg.channel === 'iopub') {
       switch (msg.header.msg_type) {
         case 'status':
+          console.log(
+            `status message: ${
+              (msg as KernelMessage.IStatusMsg).content.execution_state
+            }`
+          );
           // Updating the status is synchronous, and we call no async user code
           let executionState = (msg as KernelMessage.IStatusMsg).content
             .execution_state;
-          this._updateStatus(executionState);
           if (executionState === 'restarting') {
-            // After processing for this message is completely done, we want to
-            // handle this restart, so we don't await, but instead schedule the
-            // work as a microtask. We schedule this here so that it comes
-            // before any microtasks scheduled in the signal emission below.
+            // The kernel has been auto-restarted by the server. After
+            // processing for this message is completely done, we want to
+            // handle this restart, so we don't await, but instead schedule
+            // the work as a microtask (i.e., in a promise resolution). We
+            // schedule this here so that it comes before any microtasks that
+            // might be scheduled in the status signal emission below.
             void Promise.resolve().then(async () => {
               // handleRestart changes the status to 'restarting', so we call it
               // first so that the status won't flip back and forth between
@@ -1347,6 +1354,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
               this._updateStatus('autorestarting');
             });
           }
+          this._updateStatus(executionState);
           break;
         case 'comm_open':
           if (this.handleComms) {
