@@ -94,8 +94,6 @@ if [[ $GROUP == integrity ]]; then
     # make sure we can patch release
     jlpm bumpversion release --force  # switch to final
     jlpm patch:release --force
-    jlpm patch:release console --force
-    jlpm patch:release filebrowser notebook --force
 
     # make sure we can bump major JS releases
     jlpm bumpversion minor --force

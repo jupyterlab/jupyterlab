@@ -23,6 +23,7 @@ commander
     }
     if (
       prev.indexOf('a') === -1 &&
+      prev.indexOf('b') === -1 &&
       prev.indexOf('rc') === -1 &&
       spec === 'release'
     ) {
@@ -30,6 +31,7 @@ commander
     }
     if (
       prev.indexOf('a') === -1 &&
+      prev.indexOf('b') === -1 &&
       prev.indexOf('rc') === -1 &&
       spec === 'build'
     ) {
@@ -61,8 +63,11 @@ commander
     let lernaVersion = 'preminor';
     if (spec === 'build') {
       lernaVersion = 'prerelease';
-      // a -> rc
+      // a -> b
     } else if (spec === 'release' && prev.indexOf('a') !== -1) {
+      lernaVersion = 'prerelease --preid=beta';
+      // b -> rc
+    } else if (spec === 'release' && prev.indexOf('b') !== -1) {
       lernaVersion = 'prerelease --preid=rc';
       // rc -> final
     } else if (spec === 'release' && prev.indexOf('rc') !== -1) {
