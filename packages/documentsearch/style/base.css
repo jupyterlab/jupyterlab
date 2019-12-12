@@ -179,21 +179,12 @@
 }
 
 .jp-DocumentSearch-search-options {
+  padding: 0 8px;
   margin-left: 3px;
-}
-
-.jp-DocumentSearch-search-options-header {
-  padding-top: 8px;
-}
-
-.jp-DocumentSearch-search-options p {
-  padding-bottom: 8px;
-}
-
-.jp-DocumentSearch-search-option-input {
   width: 200px;
 }
-.jp-DocumentSearch-search-option-input input {
+
+.jp-DocumentSearch-search-options input {
   float: right;
 }
 
