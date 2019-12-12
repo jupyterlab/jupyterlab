@@ -65,8 +65,8 @@ export namespace Debugger {
       if (this.isDisposed) {
         return;
       }
-      this.service.model = null;
       this.model.dispose();
+      this.service.model = null;
     }
 
     readonly model: Debugger.Model;
