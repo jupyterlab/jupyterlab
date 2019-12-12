@@ -265,7 +265,7 @@ class FilterSelection extends React.Component<
 > {
   render() {
     return (
-      <div className={SEARCH_OPTIONS_CLASS}>
+      <label className={SEARCH_OPTIONS_CLASS}>
         Search Cell Outputs
         <input
           type="checkbox"
@@ -273,7 +273,7 @@ class FilterSelection extends React.Component<
           checked={this.props.searchOutput}
           onChange={this.props.toggleOutput}
         />
-      </div>
+      </label>
     );
   }
 }

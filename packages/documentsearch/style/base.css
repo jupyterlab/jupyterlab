@@ -182,6 +182,7 @@
   padding: 0 8px;
   margin-left: 3px;
   width: 200px;
+  display: block;
 }
 
 .jp-DocumentSearch-search-options input {
