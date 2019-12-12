@@ -102,6 +102,33 @@ export interface ISessionContext extends IObservableDisposable {
   readonly kernelDisplayName: string;
 
   /**
+   * The session path.
+   *
+   * #### Notes
+   * Typically `.session.path` should be used. This attribute is useful if
+   * there is no current session.
+   */
+  readonly path: string;
+
+  /**
+   * The session type.
+   *
+   * #### Notes
+   * Typically `.session.type` should be used. This attribute is useful if
+   * there is no current session.
+   */
+  readonly type: string;
+
+  /**
+   * The session name.
+   *
+   * #### Notes
+   * Typically `.session.name` should be used. This attribute is useful if
+   * there is no current session.
+   */
+  readonly name: string;
+
+  /**
    * Kill the kernel and shutdown the session.
    *
    * @returns A promise that resolves when the session is shut down.
@@ -220,6 +247,39 @@ export class SessionContext implements ISessionContext {
    */
   get session(): Session.ISessionConnection | null {
     return this._session ?? null;
+  }
+
+  /**
+   * The session path.
+   *
+   * #### Notes
+   * Typically `.session.path` should be used. This attribute is useful if
+   * there is no current session.
+   */
+  get path(): string {
+    return this._path;
+  }
+
+  /**
+   * The session type.
+   *
+   * #### Notes
+   * Typically `.session.type` should be used. This attribute is useful if
+   * there is no current session.
+   */
+  get type(): string {
+    return this._type;
+  }
+
+  /**
+   * The session name.
+   *
+   * #### Notes
+   * Typically `.session.name` should be used. This attribute is useful if
+   * there is no current session.
+   */
+  get name(): string {
+    return this._name;
   }
 
   /**
@@ -355,27 +415,25 @@ export class SessionContext implements ISessionContext {
   /**
    * Change the current kernel associated with the session.
    */
-  changeKernel(
+  async changeKernel(
     options: Partial<Kernel.IModel>
   ): Promise<Kernel.IKernelConnection> {
-    return this.initialize().then(() => {
-      if (this.isDisposed) {
-        return Promise.reject('Disposed');
-      }
-      return this._changeKernel(options);
-    });
+    await this.initialize();
+    if (this.isDisposed) {
+      throw new Error('Disposed');
+    }
+    return this._changeKernel(options);
   }
 
   /**
    * Select a kernel for the session.
    */
   async selectKernel(): Promise<void> {
-    return this.initialize().then(() => {
-      if (this.isDisposed) {
-        throw new Error('Disposed');
-      }
-      return this._selectKernel(true);
-    });
+    await this.initialize();
+    if (this.isDisposed) {
+      throw new Error('Disposed');
+    }
+    return this._selectKernel(true);
   }
 
   /**
@@ -398,22 +456,22 @@ export class SessionContext implements ISessionContext {
    * kernel name and resolves with `true`.
    */
   async restart(): Promise<boolean> {
-    return this.initialize().then(() => {
-      if (this.isDisposed) {
-        return Promise.reject('session already disposed');
-      }
-      let kernel = this.session?.kernel;
-      if (!kernel) {
-        if (this._prevKernelName) {
-          return this.changeKernel({ name: this._prevKernelName }).then(
-            () => true
-          );
-        }
-        // Bail if there is no previous kernel to start.
-        return Promise.reject('No kernel to restart');
-      }
+    await this.initialize();
+    if (this.isDisposed) {
+      throw new Error('session already disposed');
+    }
+    let kernel = this.session?.kernel;
+    if (kernel) {
       return SessionContext.restartKernel(kernel);
-    });
+    }
+
+    if (this._prevKernelName) {
+      await this.changeKernel({ name: this._prevKernelName });
+      return true;
+    }
+
+    // Bail if there is no previous kernel to start.
+    throw new Error('No kernel to restart');
   }
 
   /**
@@ -454,7 +512,7 @@ export class SessionContext implements ISessionContext {
   /**
    * Start the session if necessary.
    */
-  private _startIfNecessary(): Promise<void> {
+  private async _startIfNecessary(): Promise<void> {
     let preference = this.kernelPreference;
     if (
       this.isDisposed ||
@@ -462,42 +520,54 @@ export class SessionContext implements ISessionContext {
       preference.shouldStart === false ||
       preference.canStart === false
     ) {
-      return Promise.resolve();
+      // Not necessary to start a kernel
+      return;
     }
-    // Try to use an existing kernel.
+
+    let options: Partial<Kernel.IModel>;
     if (preference.id) {
-      return this._changeKernel({ id: preference.id })
-        .then(() => undefined)
-        .catch(() => this._selectKernel(false));
+      options = { id: preference.id };
+    } else {
+      let name = SessionContext.getDefaultKernel({
+        specs: this.specsManager.specs,
+        sessions: this.manager.running(),
+        preference
+      });
+      if (name) {
+        options = { name };
+      }
     }
-    let name = SessionContext.getDefaultKernel({
-      specs: this.specsManager.specs,
-      sessions: this.manager.running(),
-      preference
-    });
-    if (name) {
-      return this._changeKernel({ name })
-        .then(() => undefined)
-        .catch(() => this._selectKernel(false));
+
+    if (options) {
+      try {
+        await this._changeKernel(options);
+        return;
+      } catch (err) {
+        /* no-op */
+      }
     }
-    return this._selectKernel(false);
+
+    // Always fall back to selecting a kernel
+    await this._selectKernel(false);
   }
 
   /**
    * Change the kernel.
    */
-  private _changeKernel(
+  private async _changeKernel(
     options: Partial<Kernel.IModel>
   ): Promise<Kernel.IKernelConnection> {
     if (this.isDisposed) {
-      return Promise.reject('Disposed');
+      throw new Error('Disposed');
     }
     let session = this._session;
     if (session && session.kernel.status !== 'dead') {
-      return session.changeKernel(options).catch(err => {
+      try {
+        return session.changeKernel(options);
+      } catch (err) {
         void this._handleSessionError(err);
-        return Promise.reject(err);
-      });
+        throw err;
+      }
     } else {
       return this._startSession(options);
     }
@@ -508,7 +578,7 @@ export class SessionContext implements ISessionContext {
    *
    * @param cancelable: whether the dialog should have a cancel button.
    */
-  private _selectKernel(cancelable: boolean): Promise<void> {
+  private async _selectKernel(cancelable: boolean): Promise<void> {
     if (this.isDisposed) {
       return Promise.resolve();
     }
@@ -522,29 +592,25 @@ export class SessionContext implements ISessionContext {
       buttons
     }));
 
-    return dialog
-      .launch()
-      .then(result => {
-        if (this.isDisposed || !result.button.accept) {
-          return;
-        }
-        let model = result.value;
-        if (model === null && this._session) {
-          return this.shutdown().then(() => {
-            this._kernelChanged.emit({
-              oldValue: null,
-              newValue: null,
-              name: 'kernel'
-            });
-          });
-        }
-        if (model) {
-          return this._changeKernel(model).then(() => undefined);
-        }
-      })
-      .then(() => {
-        this._dialog = null;
-      });
+    let result = await dialog.launch();
+    dialog.dispose();
+    this._dialog = null;
+
+    if (this.isDisposed || !result.button.accept) {
+      return;
+    }
+    let model = result.value;
+    if (model === null && this._session) {
+      await this.shutdown();
+      // TODO: the shutdown above should emit the kernelChanged signal
+      // this._kernelChanged.emit({
+      //     oldValue: null,
+      //     newValue: null,
+      //     name: 'kernel'
+      //   });
+    } else if (model) {
+      await this._changeKernel(model);
+    }
   }
 
   /**
@@ -575,7 +641,7 @@ export class SessionContext implements ISessionContext {
    */
   private _handleNewSession(
     session: Session.ISessionConnection
-  ): Kernel.IKernelConnection {
+  ): Kernel.IKernelConnection | null {
     if (this.isDisposed) {
       throw Error('Disposed');
     }
@@ -583,18 +649,7 @@ export class SessionContext implements ISessionContext {
       this._session.dispose();
     }
     this._session = session;
-    if (session.path !== this._path) {
-      this._path = session.path;
-      this._propertyChanged.emit('path');
-    }
-    if (session.name !== this._name) {
-      this._name = session.name;
-      this._propertyChanged.emit('name');
-    }
-    if (session.type !== this._type) {
-      this._type = session.type;
-      this._propertyChanged.emit('type');
-    }
+    this._prevKernelName = session.kernel?.name;
 
     session.disposed.connect(this._onSessionDisposed, this);
     session.propertyChanged.connect(this._onPropertyChanged, this);
@@ -602,10 +657,19 @@ export class SessionContext implements ISessionContext {
     session.statusChanged.connect(this._onStatusChanged, this);
     session.iopubMessage.connect(this._onIopubMessage, this);
     session.unhandledMessage.connect(this._onUnhandledMessage, this);
-    this._prevKernelName = session.kernel.name;
 
-    // The session kernel was disposed above when the session was disposed, so
-    // the oldValue should be null.
+    if (session.path !== this._path) {
+      this._onPropertyChanged(session, 'path');
+    }
+    if (session.name !== this._name) {
+      this._onPropertyChanged(session, 'name');
+    }
+    if (session.type !== this._type) {
+      this._onPropertyChanged(session, 'type');
+    }
+
+    // Any existing kernel connection was disposed above when the session was
+    // disposed, so the oldValue should be null.
     this._kernelChanged.emit({
       oldValue: null,
       newValue: session.kernel,
@@ -617,47 +681,34 @@ export class SessionContext implements ISessionContext {
   /**
    * Handle an error in session startup.
    */
-  private _handleSessionError(
+  private async _handleSessionError(
     err: ServerConnection.ResponseError
   ): Promise<void> {
-    return err.response
-      .text()
-      .then(text => {
-        let message = err.message;
-        try {
-          message = JSON.parse(text)['traceback'];
-        } catch (err) {
-          // no-op
-        }
-        let dialog = (this._dialog = new Dialog({
-          title: 'Error Starting Kernel',
-          body: <pre>{message}</pre>,
-          buttons: [Dialog.okButton()]
-        }));
-        return dialog.launch();
-      })
-      .then(() => {
-        this._dialog = null;
-      });
+    let text = await err.response.text();
+    let message = err.message;
+    try {
+      message = JSON.parse(text)['traceback'];
+    } catch (err) {
+      // no-op
+    }
+    let dialog = (this._dialog = new Dialog({
+      title: 'Error Starting Kernel',
+      body: <pre>{message}</pre>,
+      buttons: [Dialog.okButton()]
+    }));
+    await dialog.launch();
+    this._dialog = null;
   }
 
   /**
    * Handle a session termination.
    */
   private _onSessionDisposed(): void {
-    let kernel = this.session.kernel;
     if (this._session) {
       this._session.dispose();
     }
     this._session = null;
     this._terminated.emit(undefined);
-    if (kernel) {
-      this._kernelChanged.emit({
-        oldValue: null,
-        newValue: null,
-        name: 'kernel'
-      });
-    }
   }
 
   /**
@@ -674,9 +725,11 @@ export class SessionContext implements ISessionContext {
       case 'name':
         this._name = sender.name;
         break;
-      default:
+      case 'type':
         this._type = sender.type;
         break;
+      default:
+        throw new Error(`unrecognized property ${property}`);
     }
     this._propertyChanged.emit(property);
   }
@@ -918,14 +971,14 @@ namespace Private {
   /**
    * Create a node for a kernel selector widget.
    */
-  function createSelectorNode(clientSession: SessionContext) {
+  function createSelectorNode(sessionContext: SessionContext) {
     // Create the dialog body.
     let body = document.createElement('div');
     let text = document.createElement('label');
-    text.textContent = `Select kernel for: "${clientSession.session.name}"`;
+    text.textContent = `Select kernel for: "${sessionContext.name}"`;
     body.appendChild(text);
 
-    let options = getKernelSearch(clientSession);
+    let options = getKernelSearch(sessionContext);
     let selector = document.createElement('select');
     SessionContext.populateKernelSelect(selector, options);
     body.appendChild(selector);
@@ -1147,12 +1200,12 @@ namespace Private {
    * Get the kernel search options given a client session and sesion manager.
    */
   function getKernelSearch(
-    session: SessionContext
+    sessionContext: SessionContext
   ): SessionContext.IKernelSearch {
     return {
-      specs: session.specsManager.specs,
-      sessions: session.manager.running(),
-      preference: session.kernelPreference
+      specs: sessionContext.specsManager.specs,
+      sessions: sessionContext.manager.running(),
+      preference: sessionContext.kernelPreference
     };
   }
 
