@@ -66,7 +66,7 @@ export class DebugSession implements IDebugger.ISession {
       this._client.iopubMessage.connect(this._handleEvent, this);
 
       if (this.client instanceof ClientSession) {
-        this._ready = this.client.ready;
+        this._ready = this.client.ready.then(_ => this.client.kernel.ready);
       } else {
         this._ready = this.client.kernel.ready;
       }
@@ -74,9 +74,11 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   /**
-   * Return the kernel info for the debug session.
+   * Return the kernel info for the debug session, waiting for the
+   * kernel to be ready.
    */
-  get kernelInfo(): IDebugger.ISession.IInfoReply | null {
+  async requestKernelInfo(): Promise<IDebugger.ISession.IInfoReply | null> {
+    await this._ready;
     return (this.client.kernel?.info as IDebugger.ISession.IInfoReply) ?? null;
   }
 

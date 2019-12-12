@@ -41,19 +41,21 @@ describe('Debugging Support', () => {
     await Promise.all([xpythonClient.shutdown(), ipykernelClient.shutdown()]);
   });
 
-  describe('#isDebuggingEnabled', () => {
-    it('should return true for kernels that have support for debugging', () => {
+  describe('#requestDebuggingEnabled', () => {
+    it('should return true for kernels that have support for debugging', async () => {
       const debugSession = new DebugSession({ client: xpythonClient });
       let service = new DebugService();
       service.session = debugSession;
-      expect(service.isDebuggingEnabled).to.be.true;
+      const enabled = await service.requestDebuggingEnabled();
+      expect(enabled).to.be.true;
     });
 
-    it('should return false for kernels that do not have support for debugging', () => {
+    it('should return false for kernels that do not have support for debugging', async () => {
       const debugSession = new DebugSession({ client: ipykernelClient });
       let service = new DebugService();
       service.session = debugSession;
-      expect(service.isDebuggingEnabled).to.be.false;
+      const enabled = await service.requestDebuggingEnabled();
+      expect(enabled).to.be.false;
     });
   });
 });

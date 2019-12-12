@@ -41,10 +41,11 @@ export class DebugService implements IDebugger, IDisposable {
   }
 
   /**
-   * Whether debugging is enabled for the current session.
+   * Request whether debugging is enabled for the current session.
    */
-  get isDebuggingEnabled(): boolean {
-    return this._session.kernelInfo?.debugger ?? false;
+  async requestDebuggingEnabled(): Promise<boolean> {
+    const kernelInfo = await this._session?.requestKernelInfo();
+    return kernelInfo?.debugger ?? false;
   }
 
   /**
