@@ -3,9 +3,11 @@
  */
 import React from 'react';
 import { action } from '@storybook/addon-actions';
+
+import { Button } from '../src';
+
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';
-import { Button } from '@blueprintjs/core/lib/cjs/components/button/buttons';
 
 export default {
   component: Button,
