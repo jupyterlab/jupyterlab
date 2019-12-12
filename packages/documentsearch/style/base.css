@@ -154,10 +154,28 @@
 
 .jp-DocumentSearch-up-button {
   background-image: var(--jp-icon-search-arrow-up);
+  border-radius: var(--jp-border-radius);
+}
+
+.jp-DocumentSearch-up-button:hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-DocumentSearch-up-button:active {
+  background-color: var(--jp-layout-color3);
 }
 
 .jp-DocumentSearch-down-button {
   background-image: var(--jp-icon-search-arrow-down);
+  border-radius: var(--jp-border-radius);
+}
+
+.jp-DocumentSearch-down-button:hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-DocumentSearch-up-down:active {
+  background-color: var(--jp-layout-color3);
 }
 
 .jp-DocumentSearch-ellipses-button {
@@ -165,8 +183,16 @@
   border-radius: var(--jp-border-radius);
 }
 
+.jp-DocumentSearch-ellipses-button:hover {
+  background-color: var(--jp-layout-color2);
+}
+
 .jp-DocumentSearch-ellipses-button-enabled {
-  background-color: var(--jp-ui-font-color3);
+  background-color: var(--jp-layout-color3);
+}
+
+.jp-DocumentSearch-ellipses-button-enabled:hover {
+  background-color: var(--jp-layout-color2);
 }
 
 .jp-DocumentSearch-close-button {
@@ -251,8 +277,18 @@
 
 .jp-DocumentSearch-replace-toggle-collapsed {
   background-image: var(--jp-image-caretright);
+  border-radius: var(--jp-border-radius);
+}
+
+.jp-DocumentSearch-replace-toggle-collapsed:hover {
+  background-color: var(--jp-layout-color2);
 }
 
 .jp-DocumentSearch-replace-toggle-expanded {
   background-image: var(--jp-image-caretdown);
+  border-radius: var(--jp-border-radius);
+}
+
+.jp-DocumentSearch-replace-toggle-expanded:hover {
+  background-color: var(--jp-layout-color2);
 }
