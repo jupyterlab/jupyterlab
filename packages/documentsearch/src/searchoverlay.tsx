@@ -29,6 +29,8 @@ const DOWN_BUTTON_CLASS = 'jp-DocumentSearch-down-button';
 const CLOSE_BUTTON_CLASS = 'jp-DocumentSearch-close-button';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
 const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
+const SEARCH_OPTIONS_DISABLED_CLASS =
+  'jp-DocumentSearch-search-options-disabled';
 const REPLACE_ENTRY_CLASS = 'jp-DocumentSearch-replace-entry';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
@@ -266,7 +268,13 @@ class FilterSelection extends React.Component<
   render() {
     return (
       <label className={SEARCH_OPTIONS_CLASS}>
-        Search Cell Outputs
+        <span
+          className={
+            this.props.canToggleOutput ? '' : SEARCH_OPTIONS_DISABLED_CLASS
+          }
+        >
+          Search Cell Outputs
+        </span>
         <input
           type="checkbox"
           disabled={!this.props.canToggleOutput}
