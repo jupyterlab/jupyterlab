@@ -130,13 +130,6 @@ export class DebugService implements IDebugger, IDisposable {
   }
 
   /**
-   * Checking lifecycle state of debugger of current client
-   */
-  isLifeCycleOnKernelState(): boolean {
-    return this.session.debuggedClients.has(this.session.client.name);
-  }
-
-  /**
    * Computes an id based on the given code.
    */
   getCodeId(code: string): string {
@@ -232,7 +225,7 @@ export class DebugService implements IDebugger, IDisposable {
 
     // able resotre breakpoints after realod if had before breakpoints and enable lifecycle debugging
     if (bpMap.size > 0 && autoStart) {
-      this.session.debuggedClients.add(this.session.client.name);
+      this.session.debuggedClients.add(this.session.client.path);
     }
 
     const stoppedThreads = new Set(reply.body.stoppedThreads);
@@ -242,14 +235,16 @@ export class DebugService implements IDebugger, IDisposable {
       await this.start();
     }
 
-    if (this.isLifeCycleOnKernelState()) {
-      this._model.breakpoints.restoreBreakpoints(bpMap);
-      if (stoppedThreads.size !== 0) {
-        await this._getAllFrames();
-      } else {
-        this._clearModel();
-        this._clearSignals();
-      }
+    if (!this.session.debuggedClients.has(this.session.client.path)) {
+      return;
+    }
+
+    this._model.breakpoints.restoreBreakpoints(bpMap);
+    if (stoppedThreads.size !== 0) {
+      await this._getAllFrames();
+    } else {
+      this._clearModel();
+      this._clearSignals();
     }
   }
 

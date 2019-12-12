@@ -89,17 +89,16 @@ async function setDebugSession(
 }
 
 async function updateToolbar(
-  widget: NotebookPanel | ConsolePanel | FileEditor,
+  widget: NotebookPanel | ConsolePanel | DocumentWidget,
   debug: IDebugger
 ) {
   const isDebuggingEnabled = await debug.requestDebuggingEnabled();
   if (!isDebuggingEnabled) {
     return;
   }
-  const isConsolePanel = widget instanceof ConsolePanel;
 
-  const changeAtribute = () => {
-    if (debug.session.debuggedClients.has(debug.session.client.name)) {
+  const toggleAttribute = () => {
+    if (debug.session.debuggedClients.has(debug.session.client.path)) {
       widget.node.setAttribute('data-jp-debugger', 'true');
     } else {
       widget.node.removeAttribute('data-jp-debugger');
@@ -107,45 +106,37 @@ async function updateToolbar(
   };
 
   const getToolbar = (): Toolbar => {
-    if (isConsolePanel) {
-      return (
-        ((widget as ConsolePanel).widgets.find(
-          widget => widget instanceof Toolbar
-        ) as Toolbar) || new Toolbar()
-      );
-    } else {
-      return (widget as NotebookPanel)?.toolbar;
+    if (!(widget instanceof ConsolePanel)) {
+      return widget.toolbar;
     }
-  };
-
-  const insertItemAndCheckIfExist = (toolbar: Toolbar) => {
-    return toolbar.addItem(
-      'debugger-lifeCycle-button',
-      new ToolbarButton({
-        className: 'jp-debugger-switch-button',
-        iconClassName: 'jp-toggle-switch',
-        onClick: async () => {
-          if (
-            !debug.session.debuggedClients.delete(debug.session.client.name)
-          ) {
-            debug.session.debuggedClients.add(debug.session.client.name);
-            await debug.start();
-          } else {
-            await debug.stop();
-          }
-          changeAtribute();
-        },
-        tooltip: 'Enable / Disable Debugger'
-      })
-    );
+    const toolbar = widget.widgets.find(w => w instanceof Toolbar) as Toolbar;
+    return toolbar ?? new Toolbar();
   };
 
   const toolbar = getToolbar();
 
-  if (insertItemAndCheckIfExist(toolbar) && isConsolePanel) {
-    (widget as ConsolePanel).insertWidget(0, toolbar);
+  const isToolbarNotExist = toolbar.addItem(
+    'debugger-lifeCycle-button',
+    new ToolbarButton({
+      className: 'jp-DebuggerSwitchButton',
+      iconClassName: 'jp-ToggleSwitch',
+      onClick: async () => {
+        if (!debug.session.debuggedClients.delete(debug.session.client.path)) {
+          debug.session.debuggedClients.add(debug.session.client.path);
+          await debug.start();
+        } else {
+          await debug.stop();
+        }
+        toggleAttribute();
+      },
+      tooltip: 'Enable / Disable Debugger'
+    })
+  );
+
+  if (isToolbarNotExist && widget instanceof ConsolePanel) {
+    widget.insertWidget(0, toolbar);
   }
-  changeAtribute();
+  toggleAttribute();
 }
 
 class DebuggerHandler<
@@ -160,10 +151,12 @@ class DebuggerHandler<
     widget: W
   ): Promise<void> {
     const debuggingEnabled = await debug.requestDebuggingEnabled();
-    if (!debug.model || this.handlers[widget.id] || !debuggingEnabled) {
-      if (!debug.session.debuggedClients.has(debug.session.client.name)) {
-        return debug.stop();
-      }
+    if (
+      !debug.model ||
+      this.handlers[widget.id] ||
+      !debuggingEnabled ||
+      !debug.isStarted
+    ) {
       return;
     }
 
@@ -192,7 +185,7 @@ class DebuggerHandler<
       this.handlers = {};
     });
 
-    if (!debug.session.debuggedClients.has(debug.session.client.name)) {
+    if (!debug.session.debuggedClients.has(debug.session.client.path)) {
       return debug.stop();
     }
   }
@@ -237,6 +230,7 @@ const files: JupyterFrontEndPlugin<void> = {
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler<FileHandler>(FileHandler);
+
     const activeSessions: {
       [id: string]: Session.ISession;
     } = {};
@@ -266,6 +260,7 @@ const files: JupyterFrontEndPlugin<void> = {
         }
         await setDebugSession(app, debug, session);
         void handler.update(debug, content);
+        void updateToolbar(widget, debug);
       } catch {
         return;
       }
@@ -288,7 +283,6 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       if (!(widget instanceof NotebookPanel)) {
         return;
       }
-
       await setDebugSession(app, debug, widget.session);
       void handler.update(debug, widget);
       void updateToolbar(widget, debug);

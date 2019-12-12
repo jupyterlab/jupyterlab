@@ -23,3 +23,7 @@
 .fa-caret-down:before {
   content: '\F0D7';
 }
+
+.jp-Document .jp-Toolbar {
+  justify-content: flex-end;
+}

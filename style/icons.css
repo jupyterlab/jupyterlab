@@ -87,7 +87,7 @@
   background-image: url('icons/md-dark/view-breakpoint.svg');
 }
 
-.jp-debugger-switch-button::before {
+.jp-DebuggerSwitchButton::before {
   content: '';
   width: 14px;
   height: 14px;
@@ -98,7 +98,7 @@
   background-image: var(--jp-icon-bug);
 }
 
-.jp-toggle-switch {
+.jp-ToggleSwitch {
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -109,7 +109,7 @@
   width: 35px;
 }
 
-.jp-toggle-switch::before {
+.jp-ToggleSwitch::before {
   content: '';
   height: 10px;
   width: 10px;
@@ -121,11 +121,11 @@
   border-radius: 50%;
 }
 
-[data-jp-debugger='true'] .jp-toggle-switch {
-  background-color: #f17c00;
+[data-jp-debugger='true'] .jp-ToggleSwitch {
+  background-color: var(--jp-warn-color0);
 }
 
-[data-jp-debugger='true'] .jp-toggle-switch::before {
+[data-jp-debugger='true'] .jp-ToggleSwitch::before {
   margin-left: 50%;
   margin-right: 5px;
 }
