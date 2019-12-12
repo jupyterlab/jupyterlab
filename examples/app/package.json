@@ -37,7 +37,10 @@
     "@jupyterlab/theme-dark-extension": "^2.0.0-alpha.4",
     "@jupyterlab/theme-light-extension": "^2.0.0-alpha.4",
     "@jupyterlab/tooltip-extension": "^2.0.0-alpha.4",
-    "es6-promise": "~4.2.6"
+    "@jupyterlab/ui-components-extension": "^2.0.0-alpha.4",
+    "es6-promise": "~4.2.6",
+    "react": "~16.8.4",
+    "react-dom": "~16.8.4","
   },
   "devDependencies": {
     "css-loader": "~2.1.1",
