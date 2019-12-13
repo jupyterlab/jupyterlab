@@ -51,6 +51,24 @@ export interface ISessionContext extends IObservableDisposable {
   kernel: Kernel.IKernelConnection | null;
 
   /**
+   * Initialize the session context.
+   *
+   * #### Notes
+   * This includes starting up an initial kernel if needed.
+   */
+  initialize(): Promise<void>;
+
+  /**
+   * Whether the session context is ready.
+   */
+  readonly isReady: boolean;
+
+  /**
+   * A promise that is fulfilled when the session context is ready.
+   */
+  readonly ready: Promise<void>;
+
+  /**
    * A signal emitted when the session connection changes.
    */
   readonly sessionChanged: ISignal<
@@ -338,6 +356,20 @@ export class SessionContext implements ISessionContext {
   }
   set kernelPreference(value: ISessionContext.IKernelPreference) {
     this._kernelPreference = value;
+  }
+
+  /**
+   * Whether the context is ready.
+   */
+  get isReady(): boolean {
+    return this._isReady;
+  }
+
+  /**
+   * A promise that is fulfilled when the context is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
   }
 
   /**
