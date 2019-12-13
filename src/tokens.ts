@@ -18,11 +18,6 @@ import { DebugProtocol } from 'vscode-debugprotocol';
  */
 export interface IDebugger {
   /**
-   * Whether debugging is enabled for the current session.
-   */
-  readonly isDebuggingEnabled: boolean;
-
-  /**
    * The current debugger session.
    */
   session: IDebugger.ISession;
@@ -46,6 +41,11 @@ export interface IDebugger {
    * Signal emitted for debug event messages.
    */
   readonly eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
+
+  /**
+   * Request whether debugging is enabled for the current session.
+   */
+  requestDebuggingEnabled(): Promise<boolean>;
 
   /**
    * Computes an id based on the given code.
@@ -145,11 +145,6 @@ export namespace IDebugger {
     client: IClientSession | Session.ISession;
 
     /**
-     * The kernel info for the debug session.
-     */
-    readonly kernelInfo: IDebugger.ISession.IInfoReply | null;
-
-    /**
      * Whether the debug session is started
      */
     readonly isStarted: boolean;
@@ -161,6 +156,12 @@ export namespace IDebugger {
       IDebugger.ISession,
       IDebugger.ISession.Event
     >;
+
+    /**
+     * Return the kernel info for the debug session, waiting for the
+     * kernel to be ready.
+     */
+    requestKernelInfo(): Promise<IDebugger.ISession.IInfoReply | null>;
 
     /**
      * Start a new debug session.

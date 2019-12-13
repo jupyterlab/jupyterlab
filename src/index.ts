@@ -75,6 +75,10 @@ async function setDebugSession(
   } else {
     debug.session.client = client;
   }
+  const debuggingEnabled = await debug.requestDebuggingEnabled();
+  if (!debuggingEnabled) {
+    return;
+  }
   await debug.restoreState(true);
   app.commands.notifyCommandChanged();
 }
@@ -86,11 +90,12 @@ class DebuggerHandler<
     this.builder = builder;
   }
 
-  update<W extends ConsolePanel | NotebookPanel | FileEditor>(
+  async update<W extends ConsolePanel | NotebookPanel | FileEditor>(
     debug: IDebugger,
     widget: W
-  ): void {
-    if (!debug.model || this.handlers[widget.id] || !debug.isDebuggingEnabled) {
+  ) {
+    const debuggingEnabled = await debug.requestDebuggingEnabled();
+    if (!debug.model || this.handlers[widget.id] || !debuggingEnabled) {
       return;
     }
     const handler = new this.builder({
@@ -139,7 +144,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
         return;
       }
       await setDebugSession(app, debug, widget.session);
-      handler.update(debug, widget);
+      void handler.update(debug, widget);
     });
   }
 };
@@ -186,7 +191,7 @@ const files: JupyterFrontEndPlugin<void> = {
           activeSessions[model.id] = session;
         }
         await setDebugSession(app, debug, session);
-        handler.update(debug, content);
+        void handler.update(debug, content);
       } catch {
         return;
       }
@@ -210,7 +215,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         return;
       }
       await setDebugSession(app, debug, widget.session);
-      handler.update(debug, widget);
+      void handler.update(debug, widget);
     });
   }
 };
