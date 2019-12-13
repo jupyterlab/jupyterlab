@@ -144,6 +144,7 @@ export class VirtualDocument {
     foreign_code_extractors: IForeignCodeExtractorsRegistry,
     standalone: boolean,
     protected file_extension: string,
+    public has_lsp_supported_file: boolean,
     private readonly parent?: VirtualDocument
   ) {
     this.language = language;
@@ -248,6 +249,7 @@ export class VirtualDocument {
       this.foreign_extractors_registry,
       standalone,
       file_extension,
+      false,
       this
     );
     this.foreign_document_opened.emit({

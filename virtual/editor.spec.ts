@@ -11,6 +11,8 @@ import * as CodeMirror from 'codemirror';
 class VirtualEditorImplementation extends VirtualEditor {
   private cm_editor: CodeMirror.Editor;
 
+  has_lsp_supported_file = true;
+
   get_cm_editor(position: IRootPosition): CodeMirror.Editor {
     return undefined;
   }

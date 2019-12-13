@@ -60,7 +60,8 @@ describe('VirtualDocument', () => {
     {},
     { python: [r_line_extractor_removing] },
     false,
-    'py'
+    'py',
+    false
   );
 
   describe('#extract_foreign_code', () => {

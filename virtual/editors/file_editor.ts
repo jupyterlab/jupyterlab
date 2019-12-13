@@ -8,6 +8,7 @@ import {
 
 export class VirtualFileEditor extends VirtualEditor {
   protected cm_editor: CodeMirror.Editor;
+  has_lsp_supported_file = true;
 
   constructor(
     language: () => string,
