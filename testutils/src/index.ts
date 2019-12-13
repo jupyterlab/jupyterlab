@@ -232,32 +232,32 @@ export async function createSession(
 /**
  * Create a context for a file.
  */
-export async function createFileContext(
-  path?: string,
-  manager?: ServiceManager.IManager,
-  kernel?: boolean
-): Promise<Context<DocumentRegistry.IModel>> {
+export function createFileContext(
+  path: string = UUID.uuid4() + '.txt',
+  manager: ServiceManager.IManager = Private.getManager()
+): Context<DocumentRegistry.IModel> {
   const factory = Private.textFactory;
+  return new Context({ manager, factory, path });
+}
 
-  manager = manager ?? Private.getManager();
-  path = path ?? UUID.uuid4() + '.txt';
+export async function createFileContextWithKernel(
+  path: string = UUID.uuid4() + '.txt',
+  manager: ServiceManager.IManager = Private.getManager()
+) {
+  const factory = Private.textFactory;
+  const specsManager = manager.kernelspecs;
+  await specsManager.ready;
 
-  const options: Context.IOptions<DocumentRegistry.ICodeModel> = {
+  return new Context({
     manager,
     factory,
-    path
-  };
-  if (kernel) {
-    const specsManager = Private.getManager().kernelspecs;
-    await specsManager.ready;
-    options.kernelPreference = {
+    path,
+    kernelPreference: {
       shouldStart: true,
       canStart: true,
       name: specsManager.specs.default
-    };
-  }
-
-  return new Context(options);
+    }
+  });
 }
 
 /**
