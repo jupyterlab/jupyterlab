@@ -366,28 +366,40 @@ export class DebugService implements IDebugger, IDisposable {
     return reply.body;
   }
 
+  /**
+   * Get all the frames from the kernel.
+   */
   private async _getAllFrames() {
     this._model.callstack.currentFrameChanged.connect(
       this._onChangeFrame,
       this
     );
-    this._model.variables.variableExpanded.connect(this._getVariable, this);
+    this._model.variables.variableExpanded.connect(
+      this._onVariableExpanded,
+      this
+    );
 
     const stackFrames = await this._getFrames(this._currentThread());
     this._model.callstack.frames = stackFrames;
   }
 
+  /**
+   * Handle a change of the current active frame.
+   */
   private async _onChangeFrame(_: Callstack.Model, frame: Callstack.IFrame) {
     if (!frame) {
       return;
     }
     const scopes = await this._getScopes(frame);
-    const variables = await this._getVariables(scopes);
-    const variableScopes = this._convertScope(scopes, variables);
+    const variables = await this._getVariables(scopes[0]);
+    const variableScopes = this._convertScopes(scopes, variables);
     this._model.variables.scopes = variableScopes;
   }
 
-  private async _getVariable(_: any, variable: DebugProtocol.Variable) {
+  /**
+   * Handle a variable expanded event and request variables from the kernel.
+   */
+  private async _onVariableExpanded(_: any, variable: DebugProtocol.Variable) {
     const reply = await this.session.sendRequest('variables', {
       variablesReference: variable.variablesReference
     });
@@ -410,6 +422,10 @@ export class DebugService implements IDebugger, IDisposable {
     return reply.body.variables;
   }
 
+  /**
+   * Get all the frames for the given thread id.
+   * @param threadId The thread id.
+   */
   private async _getFrames(threadId: number) {
     const reply = await this.session.sendRequest('stackTrace', {
       threadId
@@ -418,6 +434,10 @@ export class DebugService implements IDebugger, IDisposable {
     return stackFrames;
   }
 
+  /**
+   * Get all the scopes for the given frame.
+   * @param frame The frame.
+   */
   private async _getScopes(frame: DebugProtocol.StackFrame) {
     if (!frame) {
       return;
@@ -428,16 +448,25 @@ export class DebugService implements IDebugger, IDisposable {
     return reply.body.scopes;
   }
 
-  private async _getVariables(scopes: DebugProtocol.Scope[]) {
-    if (!scopes || scopes.length === 0) {
+  /**
+   * Get the variables for a given scope.
+   * @param scopes The scope.
+   */
+  private async _getVariables(scope: DebugProtocol.Scope) {
+    if (!scope) {
       return;
     }
     const reply = await this.session.sendRequest('variables', {
-      variablesReference: scopes[0].variablesReference
+      variablesReference: scope.variablesReference
     });
     return reply.body.variables;
   }
 
+  /**
+   * Set the breakpoints for a given file.
+   * @param breakpoints The list of breakpoints to set.
+   * @param path The path to where to set the breakpoints.
+   */
   private async _setBreakpoints(
     breakpoints: DebugProtocol.SourceBreakpoint[],
     path: string
@@ -449,7 +478,12 @@ export class DebugService implements IDebugger, IDisposable {
     });
   }
 
-  private _convertScope(
+  /**
+   * Map a list of scopes to a list of variables.
+   * @param scopes The list of scopes.
+   * @param variables The list of variables.
+   */
+  private _convertScopes(
     scopes: DebugProtocol.Scope[],
     variables: DebugProtocol.Variable[]
   ): Variables.IScope[] {
@@ -466,24 +500,41 @@ export class DebugService implements IDebugger, IDisposable {
     });
   }
 
+  /**
+   * Clear the current model.
+   */
   private _clearModel() {
     this._model.callstack.frames = [];
     this._model.variables.scopes = [];
   }
 
+  /**
+   * Clear the signals set on the model.
+   */
   private _clearSignals() {
     this._model.callstack.currentFrameChanged.disconnect(
       this._onChangeFrame,
       this
     );
-    this._model.variables.variableExpanded.disconnect(this._getVariable, this);
+    this._model.variables.variableExpanded.disconnect(
+      this._onVariableExpanded,
+      this
+    );
   }
 
+  /**
+   * Get the current thread from the model.
+   */
   private _currentThread(): number {
     // TODO: ask the model for the current thread ID
     return 1;
   }
 
+  /**
+   * Set the hash parameters for the current session.
+   * @param method The hash method.
+   * @param seed The seed for the hash method.
+   */
   private _setHashParameters(method: string, seed: number) {
     if (method === 'Murmur2') {
       this._hashMethod = (code: string) => {
@@ -494,6 +545,11 @@ export class DebugService implements IDebugger, IDisposable {
     }
   }
 
+  /**
+   * Set the parameters used for the temporary files (e.g. cells).
+   * @param prefix The prefix used for the temporary files.
+   * @param suffix The suffix used for the temporary files.
+   */
   private _setTmpFileParameters(prefix: string, suffix: string) {
     this._tmpFilePrefix = prefix;
     this._tmpFileSuffix = suffix;
@@ -511,6 +567,9 @@ export class DebugService implements IDebugger, IDisposable {
   private _tmpFileSuffix: string;
 }
 
+/**
+ * A namespace for module private data.
+ */
 namespace Private {
   /**
    * Convert a list of breakpoints to source breakpoints to be sent to the kernel.
