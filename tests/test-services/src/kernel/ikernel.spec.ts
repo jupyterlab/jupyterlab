@@ -18,7 +18,7 @@ import {
   KernelAPI
 } from '@jupyterlab/services';
 
-import { expectFailure, testEmission, sleep } from '@jupyterlab/testutils';
+import { expectFailure, testEmission } from '@jupyterlab/testutils';
 
 import { KernelTester, handleRequest } from '../utils';
 
@@ -28,7 +28,7 @@ describe('Kernel.IKernel', () => {
   let kernelManager = new KernelManager();
 
   beforeAll(async () => {
-    jest.setTimeout(60000);
+    jest.setTimeout(10000);
     specs = await KernelSpecAPI.getSpecs();
   });
 
@@ -332,8 +332,6 @@ describe('Kernel.IKernel', () => {
       const emission = testEmission(defaultKernel.statusChanged, {
         find: () => defaultKernel.status === 'restarting'
       });
-      // TODO: should restart cancel all existing futures and catch the
-      // errors?
       await defaultKernel.restart();
       await emission;
     });
@@ -709,25 +707,6 @@ describe('Kernel.IKernel', () => {
       await dead;
       await kernel.shutdown();
       tester.dispose();
-    });
-
-    it('should dispose of all kernel connection instances', async () => {
-      // TODO: for some reason, we don't seem to be getting the kernel status
-      // messages back when we shut down a kernel that will say the kernel is
-      // dead and we can dispose the connection. Perhaps it is just waiting in
-      // the correct way for the message?
-      const kernel0 = await kernelManager.startNew();
-      const kernel1 = kernel0.clone();
-      await kernel0.info;
-      await kernel1.info;
-      await kernel0.shutdown();
-      await sleep(1000);
-      expect(kernel0.status).to.equal('dead');
-      expect(kernel1.status).to.equal('dead');
-      console.log(kernel0.status);
-      console.log(kernel1.status);
-      expect(kernel0.isDisposed).to.equal(true);
-      expect(kernel1.isDisposed).to.equal(true);
     });
   });
 

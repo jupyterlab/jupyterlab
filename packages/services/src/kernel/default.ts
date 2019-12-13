@@ -509,10 +509,22 @@ export class KernelConnection implements Kernel.IKernelConnection {
    */
   async shutdown(): Promise<void> {
     if (this.status !== 'dead') {
-      console.log(await restapi.shutdownKernel(this.id, this.serverSettings));
-    } else {
-      this.dispose();
+      await restapi.shutdownKernel(this.id, this.serverSettings);
     }
+    this.handleShutdown();
+  }
+
+  /**
+   * Handles a kernel shutdown.
+   *
+   * #### Notes
+   * This method should be called if we know from outside information that a
+   * kernel is dead (for example, we cannot find the kernel model on the
+   * server).
+   */
+  handleShutdown(): void {
+    this._updateStatus('dead');
+    this.dispose();
   }
 
   /**

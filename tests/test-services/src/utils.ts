@@ -268,13 +268,8 @@ export class KernelTester extends SocketTester {
       serverSettings: this.serverSettings
     });
   }
-  get initialStatus(): string {
-    return this._initialStatus;
-  }
 
-  set initialStatus(status: string) {
-    this._initialStatus = status;
-  }
+  initialStatus: Kernel.Status = 'starting';
 
   /**
    * The parent header sent on messages.
@@ -459,8 +454,10 @@ export class KernelTester extends SocketTester {
     // Wait for the other side to signal it is connected
     await this.ready;
 
-    // Wait for the initial kernel info reply
-    await this._kernel.info;
+    // Wait for the initial kernel info reply if we have a normal status
+    if (this.initialStatus === 'starting') {
+      await this._kernel.info;
+    }
 
     return this._kernel;
   }
@@ -500,7 +497,7 @@ export class KernelTester extends SocketTester {
   protected onSocket(sock: WebSocket): void {
     super.onSocket(sock);
     // TODO: Does the kernel actually send the status in the original websocket? Can it ever send the status?
-    // this.sendStatus(this._initialStatus);
+    this.sendStatus(UUID.uuid4(), this.initialStatus);
     sock.on('message', (msg: any) => {
       if (msg instanceof Buffer) {
         msg = new Uint8Array(msg).buffer;
@@ -527,7 +524,6 @@ export class KernelTester extends SocketTester {
   }
 
   readonly serverSessionId = UUID.uuid4();
-  private _initialStatus = 'starting';
   private _kernelManager: Kernel.IManager;
   private _kernel: Kernel.IKernelConnection | null = null;
   private _onMessage: (msg: KernelMessage.IMessage) => void = null;
@@ -557,13 +553,8 @@ export class SessionTester extends SocketTester {
     });
     this._sessionManager = new SessionManager({ kernelManager });
   }
-  get initialStatus(): string {
-    return this._initialStatus;
-  }
 
-  set initialStatus(status: string) {
-    this._initialStatus = status;
-  }
+  initialStatus: Kernel.Status = 'starting';
 
   /**
    * Start a mock session.
@@ -666,7 +657,6 @@ export class SessionTester extends SocketTester {
   }
 
   readonly serverSessionId = UUID.uuid4();
-  private _initialStatus = 'starting';
   private _session: Session.ISessionConnection;
   private _onMessage: (msg: KernelMessage.IMessage) => void = null;
   private _sessionManager: Session.IManager = null;

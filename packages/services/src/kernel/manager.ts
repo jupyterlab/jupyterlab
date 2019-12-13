@@ -276,10 +276,11 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
 
     this._models = new Map(models.map(x => [x.id, x]));
 
-    // Dispose any kernel connections to a kernel that doesn't exist anymore.
+    // For any kernel connection to a kernel that doesn't exist, notify it of
+    // the shutdown.
     this._kernelConnections.forEach(kc => {
       if (!this._models.has(kc.id)) {
-        kc.dispose();
+        kc.handleShutdown();
       }
     });
 
@@ -289,13 +290,14 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   /**
    * Handle a kernel starting.
    */
-  private _onStarted(kernelConnection: Kernel.IKernelConnection): void {
+  private _onStarted(kernelConnection: KernelConnection): void {
     this._kernelConnections.add(kernelConnection);
+    kernelConnection.statusChanged.connect(this._onStatusChanged);
     kernelConnection.disposed.connect(this._onDisposed);
   }
 
   private _isReady = false;
-  private _kernelConnections = new Set<Kernel.IKernelConnection>();
+  private _kernelConnections = new Set<KernelConnection>();
   private _models = new Map<string, Kernel.IModel>();
   private _pollModels: Poll;
   private _ready: Promise<void>;
@@ -303,10 +305,21 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   private _connectionFailure = new Signal<this, Error>(this);
 
   // We define this here so that it binds to `this`
-  private readonly _onDisposed = (
-    kernelConnection: Kernel.IKernelConnection
-  ) => {
+  private readonly _onDisposed = (kernelConnection: KernelConnection) => {
     this._kernelConnections.delete(kernelConnection);
+  };
+  private readonly _onStatusChanged = (
+    kernelConnection: KernelConnection,
+    status: Kernel.Status
+  ) => {
+    if (status === 'dead') {
+      // We asynchronously update our list of kernels, which asynchronously
+      // will dispose them. We do not want to immediately dispose them because
+      // there may be other signal handlers that want to be called.
+      void this.refreshRunning().catch(() => {
+        /* no-op */
+      });
+    }
   };
 }
 

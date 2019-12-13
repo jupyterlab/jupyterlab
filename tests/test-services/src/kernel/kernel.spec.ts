@@ -81,21 +81,18 @@ describe('kernel', () => {
       await KernelAPI.shutdownKernel(k.id);
     });
 
-    // TODO: fix this test. The idea here is that if a kernel immediately
-    // replies that it is dead, we still construct the kernel object and give it
-    // a chance to handle the dead status. When is this going to happen? A
-    // kernel typically doesn't immediately send its status, does it? I suppose
-    // it should - if we are connecting to an existing kernel, it would be nice
-    // to know right off if it's busy/dead/etc.
-    it('should still start if the kernel dies', async () => {
+    it('should still construct connection if the kernel dies', async () => {
+      // If a kernel dies immediately, the kernel connection should still send
+      // out the status signal, then dispose the connection.
       tester = new KernelTester();
       tester.initialStatus = 'dead';
       const kernel = await tester.start();
-      await testEmission(kernel.statusChanged, {
-        test: (sender, state) => {
-          return state === 'dead';
-        }
+      const dead = testEmission(kernel.statusChanged, {
+        test: (sender, state) => state === 'dead'
       });
+      await dead;
+      expect(kernel.isDisposed).to.be.true;
+      expect(kernel.status).to.equal('dead');
       tester.dispose();
     });
 

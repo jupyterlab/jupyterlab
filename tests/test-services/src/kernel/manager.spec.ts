@@ -7,7 +7,7 @@ import { toArray } from '@phosphor/algorithm';
 
 import { KernelManager, Kernel, KernelAPI } from '@jupyterlab/services';
 
-import { testEmission } from '@jupyterlab/testutils';
+import { testEmission, sleep } from '@jupyterlab/testutils';
 
 import { makeSettings } from '../utils';
 
@@ -169,6 +169,21 @@ describe('kernel/manager', () => {
         await kernel.info;
         await manager.shutdown(kernel.id);
         await emission;
+      });
+
+      it('should dispose of all relevant kernel connections', async () => {
+        const kernel0 = await manager.startNew();
+        const kernel1 = manager.connectTo({ model: kernel0.model });
+        await kernel0.info;
+        await kernel1.info;
+        await kernel0.shutdown();
+        expect(kernel0.status).to.equal('dead');
+        expect(kernel0.isDisposed).to.equal(true);
+
+        // Wait for the round trip to the server to update the connections.
+        await sleep(100);
+        expect(kernel1.status).to.equal('dead');
+        expect(kernel1.isDisposed).to.equal(true);
       });
     });
   });
