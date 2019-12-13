@@ -24,8 +24,6 @@ import {
 
 import { defaultRenderMime, createFileContext } from '@jupyterlab/testutils';
 
-const RESOLVER: IRenderMime.IResolver = createFileContext().urlResolver;
-
 function createModel(data: JSONObject): IRenderMime.IMimeModel {
   return new MimeModel({ data });
 }
@@ -39,6 +37,18 @@ const fooFactory: IRenderMime.IRendererFactory = {
 
 describe('rendermime/registry', () => {
   let r: RenderMimeRegistry;
+  let RESOLVER: IRenderMime.IResolver;
+
+  before(async () => {
+    let fileContext = await createFileContext(undefined, undefined, true);
+    await fileContext.initialize(true);
+
+    // The context initialization kicks off a sessionContext initialization,
+    // but does not wait for it. We need to wait for it so our url resolver
+    // has access to the session.
+    await fileContext.sessionContext.initialize();
+    RESOLVER = fileContext.urlResolver;
+  });
 
   beforeEach(() => {
     r = defaultRenderMime();

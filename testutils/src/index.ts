@@ -207,10 +207,10 @@ export async function createSessionContext(
   return new SessionContext({
     sessionManager: manager,
     specsManager,
-    path: options.path || UUID.uuid4(),
+    path: options.path ?? UUID.uuid4(),
     name: options.name,
     type: options.type,
-    kernelPreference: options.kernelPreference || {
+    kernelPreference: options.kernelPreference ?? {
       shouldStart: true,
       canStart: true,
       name: specsManager.specs.default
@@ -232,16 +232,32 @@ export async function createSession(
 /**
  * Create a context for a file.
  */
-export function createFileContext(
+export async function createFileContext(
   path?: string,
-  manager?: ServiceManager.IManager
-): Context<DocumentRegistry.IModel> {
+  manager?: ServiceManager.IManager,
+  kernel?: boolean
+): Promise<Context<DocumentRegistry.IModel>> {
   const factory = Private.textFactory;
 
-  manager = manager || Private.getManager();
-  path = path || UUID.uuid4() + '.txt';
+  manager = manager ?? Private.getManager();
+  path = path ?? UUID.uuid4() + '.txt';
 
-  return new Context({ manager, factory, path });
+  const options: Context.IOptions<DocumentRegistry.ICodeModel> = {
+    manager,
+    factory,
+    path
+  };
+  if (kernel) {
+    const specsManager = Private.getManager().kernelspecs;
+    await specsManager.ready;
+    options.kernelPreference = {
+      shouldStart: true,
+      canStart: true,
+      name: specsManager.specs.default
+    };
+  }
+
+  return new Context(options);
 }
 
 /**
