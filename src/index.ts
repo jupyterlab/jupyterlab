@@ -151,13 +151,15 @@ class DebuggerHandler<
     widget: W
   ): Promise<void> {
     const debuggingEnabled = await debug.requestDebuggingEnabled();
-    if (
-      !debug.model ||
-      this.handlers[widget.id] ||
-      !debuggingEnabled ||
-      !debug.isStarted
-    ) {
+    if (!debug.model || !debuggingEnabled || !debug.isStarted) {
       return;
+    }
+
+    if (
+      this.handlers[widget.id] &&
+      !debug.session.debuggedClients.has(debug.session.client.path)
+    ) {
+      return debug.stop();
     }
 
     const handler = new this.builder({
