@@ -56,11 +56,11 @@ export class RestorablePool<
   get current(): T | null {
     return this._current;
   }
-  set current(obj: T) {
+  set current(obj: T | null) {
     if (this._current === obj) {
       return;
     }
-    if (this._objects.has(obj)) {
+    if (obj !== null && this._objects.has(obj)) {
       this._current = obj;
       this._currentChanged.emit(this._current);
     }
