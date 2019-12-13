@@ -1,9 +1,5 @@
 import * as lsProtocol from 'vscode-languageserver-protocol';
-import {
-  CodeMirrorLSPFeature,
-  CommandEntryPoint,
-  IFeatureCommand
-} from '../feature';
+import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
 import { InputDialog } from '@jupyterlab/apputils';
 
 export class Rename extends CodeMirrorLSPFeature {
@@ -23,11 +19,7 @@ export class Rename extends CodeMirrorLSPFeature {
           .catch(console.warn);
       },
       is_enabled: ({ connection }) => connection.isRenameSupported(),
-      label: 'Rename symbol',
-      attach_to: new Set<CommandEntryPoint>([
-        // notebooks are not supported yet
-        CommandEntryPoint.FileEditorContextMenu
-      ])
+      label: 'Rename symbol'
     }
   ];
 
