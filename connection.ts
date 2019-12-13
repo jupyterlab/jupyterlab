@@ -88,7 +88,7 @@ export class LSPConnection extends LspWsConnection {
   private _sendChange(
     changeEvents: lsProtocol.TextDocumentContentChangeEvent[]
   ) {
-    if (!this.isConnected) {
+    if (!this.isConnected || !this.isInitialized) {
       return;
     }
     const textDocumentChange: lsProtocol.DidChangeTextDocumentParams = {
