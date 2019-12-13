@@ -173,6 +173,17 @@ export function handleRequest(item: IService, status: number, body: any) {
 }
 
 /**
+ * Get a random integer between two values
+ *
+ * This implementation comes from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+ */
+function getRandomInt(min: number, max: number) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+}
+
+/**
  * Socket class test rig.
  */
 class SocketTester implements IService {
@@ -180,8 +191,23 @@ class SocketTester implements IService {
    * Create a new request and socket tester.
    */
   constructor() {
-    const port = 8081;
-    this._server = new WebSocket.Server({ port });
+    let port: number;
+
+    // Retry 6 random ports before giving up
+    for (let retry = 0; retry <= 5; retry++) {
+      try {
+        port = getRandomInt(9000, 20000);
+        this._server = new WebSocket.Server({ port });
+      } catch (err) {
+        if (retry === 5) {
+          throw err;
+        } else {
+          continue;
+        }
+      }
+      // We have a successful port
+      break;
+    }
     this.serverSettings = ServerConnection.makeSettings({
       wsUrl: `ws://localhost:${port}/`,
       WebSocket: WebSocket as any

@@ -122,13 +122,11 @@ describe('session', () => {
         // TODO: make a KernelTester, then make a session connection to that
         // kernel.
         const tester = new SessionTester();
-        await tester.ready;
         const session = await tester.startSession();
         const msgId = UUID.uuid4();
         const emission = testEmission(session.unhandledMessage, {
           find: (k, msg) => msg.header.msg_id === msgId
         });
-        void emission;
         const msg = KernelMessage.createMessage({
           msgType: 'kernel_info_request',
           channel: 'shell',
@@ -138,8 +136,8 @@ describe('session', () => {
         });
         msg.parent_header = { session: session.kernel.clientId };
         tester.send(msg);
-        // await emission;
-        // await tester.shutdown();
+        await emission;
+        await tester.shutdown();
         tester.dispose();
       });
     });
@@ -427,16 +425,6 @@ describe('session', () => {
         const session = sessionManager.connectTo(defaultSession.model);
         session.dispose();
         await expectFailure(session.shutdown(), 'Session is disposed');
-      });
-
-      it('should dispose of all session instances', async () => {
-        // TODO: we can only do this from the session manager, right? In
-        // general, how do we get a notification from the server that a
-        // session has shut down?
-        const session0 = await startNew();
-        const session1 = sessionManager.connectTo(session0.model);
-        await session0.shutdown();
-        expect(session1.isDisposed).to.equal(true);
       });
     });
   });

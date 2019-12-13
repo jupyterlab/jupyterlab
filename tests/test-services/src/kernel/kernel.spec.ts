@@ -38,7 +38,6 @@ describe('kernel', () => {
 
   describe('Kernel.listRunning()', () => {
     it('should yield a list of valid kernel ids', async () => {
-      expect(toArray(await KernelAPI.listRunning()).length).to.equal(0);
       const kernel = await KernelAPI.startNew();
       expect(toArray(await KernelAPI.listRunning()).length).to.be.greaterThan(
         0
