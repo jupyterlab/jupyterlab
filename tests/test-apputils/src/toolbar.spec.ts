@@ -364,9 +364,10 @@ describe('@jupyterlab/apputils', () => {
           await session.kernel.info;
           await session.shutdown();
           session = await createSessionContext();
+          await session.initialize();
           const item = Toolbar.createKernelStatusItem(session);
-          expect(item.node.title).to.equal('Kernel Starting');
-          expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
+          expect(item.node.title).to.equal('Kernel Connecting');
+          expect(item.hasClass('jp-FilledCircleIcon')).to.equal(false);
           await session.initialize();
           await session.kernel.info;
         });

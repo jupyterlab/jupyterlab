@@ -710,7 +710,14 @@ namespace Private {
       if (this.isDisposed) {
         return;
       }
-      let status = sessionContext.session?.kernel?.status ?? 'unknown';
+
+      let kernel = sessionContext.session?.kernel;
+      let status: Kernel.Status | Kernel.ConnectionStatus =
+        (kernel?.connectionStatus === 'connected'
+          ? kernel?.status
+          : kernel?.connectionStatus) ?? 'unknown';
+
+      sessionContext.session?.kernel?.status ?? 'unknown';
       const busy = this._isBusy(status);
       this.toggleClass(TOOLBAR_BUSY_CLASS, busy);
       this.toggleClass(TOOLBAR_IDLE_CLASS, !busy);
@@ -721,7 +728,7 @@ namespace Private {
     /**
      * Check if status should be shown as busy.
      */
-    private _isBusy(status: Kernel.Status): boolean {
+    private _isBusy(status: Kernel.Status | Kernel.ConnectionStatus): boolean {
       return (
         status === 'busy' || status === 'starting' || status === 'restarting'
       );
