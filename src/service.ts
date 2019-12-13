@@ -70,11 +70,11 @@ export class DebugService implements IDebugger, IDisposable {
     this._session?.eventMessage.connect((_, event) => {
       if (event.event === 'stopped') {
         this._model.stoppedThreads.add(event.body.threadId);
-        void this.getAllFrames();
+        void this._getAllFrames();
       } else if (event.event === 'continued') {
         this._model.stoppedThreads.delete(event.body.threadId);
-        this.clearModel();
-        this.clearSignals();
+        this._clearModel();
+        this._clearSignals();
       }
       this._eventMessage.emit(event);
     });
@@ -176,7 +176,7 @@ export class DebugService implements IDebugger, IDisposable {
   async restart(): Promise<void> {
     const breakpoints = this._model.breakpoints.breakpoints;
     await this.stop();
-    this.clearModel();
+    this._clearModel();
     await this.start();
 
     // No need to dump the cells again, we can simply
@@ -184,7 +184,7 @@ export class DebugService implements IDebugger, IDisposable {
     // the model.
     for (const [source, bps] of breakpoints) {
       const sourceBreakpoints = Private.toSourceBreakpoints(bps);
-      await this.setBreakpoints(sourceBreakpoints, source);
+      await this._setBreakpoints(sourceBreakpoints, source);
     }
   }
 
@@ -200,8 +200,8 @@ export class DebugService implements IDebugger, IDisposable {
 
     const reply = await this.session.restoreState();
 
-    this.setHashParameters(reply.body.hashMethod, reply.body.hashSeed);
-    this.setTmpFileParameters(
+    this._setHashParameters(reply.body.hashMethod, reply.body.hashSeed);
+    this._setTmpFileParameters(
       reply.body.tmpFilePrefix,
       reply.body.tmpFileSuffix
     );
@@ -231,10 +231,10 @@ export class DebugService implements IDebugger, IDisposable {
     }
 
     if (stoppedThreads.size !== 0) {
-      await this.getAllFrames();
+      await this._getAllFrames();
     } else {
-      this.clearModel();
-      this.clearSignals();
+      this._clearModel();
+      this._clearSignals();
     }
   }
 
@@ -244,9 +244,9 @@ export class DebugService implements IDebugger, IDisposable {
   async continue(): Promise<void> {
     try {
       await this.session.sendRequest('continue', {
-        threadId: this.currentThread()
+        threadId: this._currentThread()
       });
-      this._model.stoppedThreads.delete(this.currentThread());
+      this._model.stoppedThreads.delete(this._currentThread());
     } catch (err) {
       console.error('Error:', err.message);
     }
@@ -258,7 +258,7 @@ export class DebugService implements IDebugger, IDisposable {
   async next(): Promise<void> {
     try {
       await this.session.sendRequest('next', {
-        threadId: this.currentThread()
+        threadId: this._currentThread()
       });
     } catch (err) {
       console.error('Error:', err.message);
@@ -271,7 +271,7 @@ export class DebugService implements IDebugger, IDisposable {
   async stepIn(): Promise<void> {
     try {
       await this.session.sendRequest('stepIn', {
-        threadId: this.currentThread()
+        threadId: this._currentThread()
       });
     } catch (err) {
       console.error('Error:', err.message);
@@ -284,7 +284,7 @@ export class DebugService implements IDebugger, IDisposable {
   async stepOut(): Promise<void> {
     try {
       await this.session.sendRequest('stepOut', {
-        threadId: this.currentThread()
+        threadId: this._currentThread()
       });
     } catch (err) {
       console.error('Error:', err.message);
@@ -310,7 +310,7 @@ export class DebugService implements IDebugger, IDisposable {
       path = dumpedCell.sourcePath;
     }
     const sourceBreakpoints = Private.toSourceBreakpoints(breakpoints);
-    const reply = await this.setBreakpoints(sourceBreakpoints, path);
+    const reply = await this._setBreakpoints(sourceBreakpoints, path);
     let kernelBreakpoints = reply.body.breakpoints.map(breakpoint => {
       return {
         ...breakpoint,
@@ -327,6 +327,9 @@ export class DebugService implements IDebugger, IDisposable {
     await this.session.sendRequest('configurationDone', {});
   }
 
+  /**
+   * Clear all the breakpoints for the current session.
+   */
   async clearBreakpoints() {
     if (!this.session.isStarted) {
       return;
@@ -334,7 +337,7 @@ export class DebugService implements IDebugger, IDisposable {
 
     this._model.breakpoints.breakpoints.forEach(
       async (breakpoints, path, _) => {
-        await this.setBreakpoints([], path);
+        await this._setBreakpoints([], path);
       }
     );
 
@@ -354,48 +357,37 @@ export class DebugService implements IDebugger, IDisposable {
     return { ...reply.body, path: source.path };
   }
 
-  async getAllFrames() {
-    this._model.callstack.currentFrameChanged.connect(this.onChangeFrame);
-    this._model.variables.variableExpanded.connect(this.getVariable);
+  /**
+   * Dump the content of a cell.
+   * @param code The source code to dump.
+   */
+  async dumpCell(code: string) {
+    const reply = await this.session.sendRequest('dumpCell', { code });
+    return reply.body;
+  }
 
-    const stackFrames = await this.getFrames(this.currentThread());
+  private async _getAllFrames() {
+    this._model.callstack.currentFrameChanged.connect(
+      this._onChangeFrame,
+      this
+    );
+    this._model.variables.variableExpanded.connect(this._getVariable, this);
+
+    const stackFrames = await this._getFrames(this._currentThread());
     this._model.callstack.frames = stackFrames;
   }
 
-  onChangeFrame = async (_: Callstack.Model, frame: Callstack.IFrame) => {
+  private async _onChangeFrame(_: Callstack.Model, frame: Callstack.IFrame) {
     if (!frame) {
       return;
     }
-    const scopes = await this.getScopes(frame);
-    const variables = await this.getVariables(scopes);
-    const variableScopes = this.convertScope(scopes, variables);
+    const scopes = await this._getScopes(frame);
+    const variables = await this._getVariables(scopes);
+    const variableScopes = this._convertScope(scopes, variables);
     this._model.variables.scopes = variableScopes;
-  };
+  }
 
-  dumpCell = async (code: string) => {
-    const reply = await this.session.sendRequest('dumpCell', { code });
-    return reply.body;
-  };
-
-  getFrames = async (threadId: number) => {
-    const reply = await this.session.sendRequest('stackTrace', {
-      threadId
-    });
-    const stackFrames = reply.body.stackFrames;
-    return stackFrames;
-  };
-
-  getScopes = async (frame: DebugProtocol.StackFrame) => {
-    if (!frame) {
-      return;
-    }
-    const reply = await this.session.sendRequest('scopes', {
-      frameId: frame.id
-    });
-    return reply.body.scopes;
-  };
-
-  getVariable = async (_: any, variable: DebugProtocol.Variable) => {
+  private async _getVariable(_: any, variable: DebugProtocol.Variable) {
     const reply = await this.session.sendRequest('variables', {
       variablesReference: variable.variablesReference
     });
@@ -416,9 +408,27 @@ export class DebugService implements IDebugger, IDisposable {
     this._model.variables.scopes = [...newScopes];
 
     return reply.body.variables;
-  };
+  }
 
-  getVariables = async (scopes: DebugProtocol.Scope[]) => {
+  private async _getFrames(threadId: number) {
+    const reply = await this.session.sendRequest('stackTrace', {
+      threadId
+    });
+    const stackFrames = reply.body.stackFrames;
+    return stackFrames;
+  }
+
+  private async _getScopes(frame: DebugProtocol.StackFrame) {
+    if (!frame) {
+      return;
+    }
+    const reply = await this.session.sendRequest('scopes', {
+      frameId: frame.id
+    });
+    return reply.body.scopes;
+  }
+
+  private async _getVariables(scopes: DebugProtocol.Scope[]) {
     if (!scopes || scopes.length === 0) {
       return;
     }
@@ -426,23 +436,23 @@ export class DebugService implements IDebugger, IDisposable {
       variablesReference: scopes[0].variablesReference
     });
     return reply.body.variables;
-  };
+  }
 
-  setBreakpoints = async (
+  private async _setBreakpoints(
     breakpoints: DebugProtocol.SourceBreakpoint[],
     path: string
-  ) => {
+  ) {
     return await this.session.sendRequest('setBreakpoints', {
       breakpoints: breakpoints,
       source: { path },
       sourceModified: false
     });
-  };
+  }
 
-  protected convertScope = (
+  private _convertScope(
     scopes: DebugProtocol.Scope[],
     variables: DebugProtocol.Variable[]
-  ): Variables.IScope[] => {
+  ): Variables.IScope[] {
     if (!variables || !scopes) {
       return;
     }
@@ -454,24 +464,27 @@ export class DebugService implements IDebugger, IDisposable {
         })
       };
     });
-  };
+  }
 
-  private clearModel() {
+  private _clearModel() {
     this._model.callstack.frames = [];
     this._model.variables.scopes = [];
   }
 
-  private clearSignals() {
-    this._model.callstack.currentFrameChanged.disconnect(this.onChangeFrame);
-    this._model.variables.variableExpanded.disconnect(this.getVariable);
+  private _clearSignals() {
+    this._model.callstack.currentFrameChanged.disconnect(
+      this._onChangeFrame,
+      this
+    );
+    this._model.variables.variableExpanded.disconnect(this._getVariable, this);
   }
 
-  private currentThread(): number {
+  private _currentThread(): number {
     // TODO: ask the model for the current thread ID
     return 1;
   }
 
-  private setHashParameters(method: string, seed: number) {
+  private _setHashParameters(method: string, seed: number) {
     if (method === 'Murmur2') {
       this._hashMethod = (code: string) => {
         return murmur2(code, seed).toString();
@@ -481,17 +494,17 @@ export class DebugService implements IDebugger, IDisposable {
     }
   }
 
-  private setTmpFileParameters(prefix: string, suffix: string) {
+  private _setTmpFileParameters(prefix: string, suffix: string) {
     this._tmpFilePrefix = prefix;
     this._tmpFileSuffix = suffix;
   }
 
   private _isDisposed: boolean = false;
   private _session: IDebugger.ISession;
+  private _model: Debugger.Model;
   private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
   private _modelChanged = new Signal<IDebugger, IDebugger.IModel>(this);
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
-  private _model: Debugger.Model;
 
   private _hashMethod: (code: string) => string;
   private _tmpFilePrefix: string;
@@ -499,6 +512,10 @@ export class DebugService implements IDebugger, IDisposable {
 }
 
 namespace Private {
+  /**
+   * Convert a list of breakpoints to source breakpoints to be sent to the kernel.
+   * @param breakpoints The list of breakpoints.
+   */
   export function toSourceBreakpoints(breakpoints: IDebugger.IBreakpoint[]) {
     return breakpoints.map(breakpoint => {
       return {
