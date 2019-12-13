@@ -437,7 +437,7 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
-   * Kill the kernel and shutdown the session.
+   * Shut down the session and kernel.
    *
    * @returns A promise that resolves when the session is shut down.
    */

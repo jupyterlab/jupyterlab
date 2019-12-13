@@ -64,7 +64,7 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#disposed', () => {
-      it('should be emitted when the session is disposed', async () => {
+      it('should be emitted when the session context is disposed', async () => {
         await sessionContext.initialize();
         let called = false;
         sessionContext.disposed.connect((sender, args) => {
@@ -72,7 +72,7 @@ describe('@jupyterlab/apputils', () => {
           expect(args).to.be.undefined;
           called = true;
         });
-        await sessionContext.shutdown();
+        sessionContext.dispose();
         expect(called).to.be.true;
       });
     });
@@ -80,12 +80,14 @@ describe('@jupyterlab/apputils', () => {
     describe('#kernelChanged', () => {
       it('should be emitted when the kernel changes', async () => {
         let called = false;
-        sessionContext.kernelChanged.connect((sender, { oldValue, newValue }) => {
-          expect(sender).to.equal(sessionContext);
-          expect(oldValue).to.be.null;
-          expect(newValue).to.equal(sessionContext.kernel);
-          called = true;
-        });
+        sessionContext.kernelChanged.connect(
+          (sender, { oldValue, newValue }) => {
+            expect(sender).to.equal(sessionContext);
+            expect(oldValue).to.be.null;
+            expect(newValue).to.equal(sessionContext.kernel);
+            called = true;
+          }
+        );
         await sessionContext.initialize();
         expect(called).to.be.true;
       });
@@ -275,6 +277,7 @@ describe('@jupyterlab/apputils', () => {
         sessionContext.dispose();
         expect(sessionContext.isDisposed).to.equal(true);
       });
+      it.todo('should shut down the session when shutdownOnDispose is true');
     });
 
     describe('#changeKernel()', () => {
@@ -328,11 +331,12 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#restart()', () => {
-      it.only('should restart if the user accepts the dialog', async () => {
+      it('should restart if the user accepts the dialog', async () => {
         const emission = testEmission(sessionContext.statusChanged, {
           find: (_, args) => args === 'restarting'
         });
         await sessionContext.initialize();
+        await sessionContext.session?.kernel?.info;
         const restart = sessionContext.restart();
 
         await acceptDialog();
