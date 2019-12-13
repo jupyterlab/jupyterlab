@@ -61,10 +61,6 @@ export namespace Variables {
   }
 
   export class Model {
-    constructor(model: IScope[] = []) {
-      this._state = model;
-    }
-
     get changed(): ISignal<this, void> {
       return this._changed;
     }
@@ -86,7 +82,7 @@ export namespace Variables {
       this._variableExpanded.emit(variable);
     }
 
-    protected _state: IScope[];
+    protected _state: IScope[] = [];
     private _variableExpanded = new Signal<this, IVariable>(this);
     private _changed = new Signal<this, void>(this);
   }

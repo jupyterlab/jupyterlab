@@ -88,10 +88,6 @@ export namespace Callstack {
   export interface IFrame extends DebugProtocol.StackFrame {}
 
   export class Model {
-    constructor(model: IFrame[]) {
-      this._state = model;
-    }
-
     set frames(newFrames: IFrame[]) {
       this._state = newFrames;
       // default to the new frame is the previous one can't be found
@@ -122,7 +118,7 @@ export namespace Callstack {
       return this._currentFrameChanged;
     }
 
-    private _state: IFrame[];
+    private _state: IFrame[] = [];
     private _currentFrame: IFrame;
     private _framesChanged = new Signal<this, IFrame[]>(this);
     private _currentFrameChanged = new Signal<this, IFrame>(this);
