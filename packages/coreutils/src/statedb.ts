@@ -27,10 +27,6 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
       this._ready = Promise.resolve(undefined);
     } else {
       this._ready = transform.then(transformation => {
-        if (!transformation) {
-          return;
-        }
-
         const { contents, type } = transformation;
 
         switch (type) {
