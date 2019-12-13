@@ -30,8 +30,6 @@ export namespace Debugger {
       this.title.iconClass = 'jp-BugIcon jp-SideBar-tabIcon';
       this.orientation = 'vertical';
 
-      this.addClass('jp-DebuggerSidebar');
-
       const { callstackCommands, editorServices, service } = options;
 
       this.model = new Debugger.Model();
@@ -39,14 +37,17 @@ export namespace Debugger {
       this.service.model = this.model;
 
       this.variables = new Variables({ model: this.model.variables });
+
       this.callstack = new Callstack({
         commands: callstackCommands,
         model: this.model.callstack
       });
+
       this.breakpoints = new Breakpoints({
         service,
         model: this.model.breakpoints
       });
+
       this.sources = new Sources({
         model: this.model.sources,
         service,
@@ -57,6 +58,8 @@ export namespace Debugger {
       this.addWidget(this.callstack);
       this.addWidget(this.breakpoints);
       this.addWidget(this.sources);
+
+      this.addClass('jp-DebuggerSidebar');
     }
 
     isDisposed: boolean;
@@ -80,8 +83,8 @@ export namespace Debugger {
   export class Model implements IDebugger.IModel {
     constructor() {
       this.breakpoints = new Breakpoints.Model();
-      this.callstack = new Callstack.Model([]);
-      this.variables = new Variables.Model([]);
+      this.callstack = new Callstack.Model();
+      this.variables = new Variables.Model();
       this.sources = new Sources.Model({
         currentFrameChanged: this.callstack.currentFrameChanged
       });
