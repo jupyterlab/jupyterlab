@@ -260,14 +260,68 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
           let start = PositionConverter.lsp_to_cm(edit.range.start);
           let end = PositionConverter.lsp_to_cm(edit.range.end);
 
-          let start_editor = this.virtual_document.get_editor_at_virtual_line(
+          let document = this.virtual_document;
+
+          let start_editor = document.get_editor_at_virtual_line(
             start as IVirtualPosition
           );
-          let end_editor = this.virtual_document.get_editor_at_virtual_line(
+          let end_editor = document.get_editor_at_virtual_line(
             end as IVirtualPosition
           );
           if (start_editor !== end_editor) {
-            throw new Error('Edits not implemented for notebooks yet');
+            let last_editor = start_editor;
+            let fragment_start = start;
+            let fragment_end = { ...start };
+
+            function replace_fragment() {
+              let doc = last_editor.getDoc();
+              doc.replaceRange(
+                edit.newText
+                  .split('\n')
+                  .slice(
+                    fragment_start.line - start.line,
+                    fragment_end.line - start.line
+                  )
+                  .join('\n')
+                  .slice(0, -1),
+                { line: 0, ch: 0 },
+                {
+                  line: fragment_end.line - fragment_start.line + 1,
+                  ch: 0
+                }
+              );
+            }
+
+            let line = start.line;
+            let recently_replaced = false;
+            while (line <= end.line) {
+              line++;
+              let editor = document.get_editor_at_virtual_line({
+                line: line,
+                ch: 0
+              } as IVirtualPosition);
+
+              if (editor === last_editor) {
+                fragment_end.line = line;
+                fragment_end.ch = 0;
+                recently_replaced = false;
+              } else {
+                replace_fragment();
+                recently_replaced = true;
+                fragment_start = {
+                  line: line,
+                  ch: 0
+                };
+                fragment_end = {
+                  line: line,
+                  ch: 0
+                };
+                last_editor = editor;
+              }
+            }
+            if (!recently_replaced) {
+              replace_fragment();
+            }
           } else {
             applied_changes += 1;
             let doc = start_editor.getDoc();

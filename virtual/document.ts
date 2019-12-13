@@ -473,11 +473,22 @@ export class VirtualDocument {
       });
     }
 
+    this.last_virtual_line += lines.length;
+
     // one empty line is necessary to separate code blocks, next 'n' lines are to silence linters;
     // the final cell does not get the additional lines (thanks to the use of join, see below)
     this.lines.push(lines.join('\n') + '\n');
 
-    this.last_virtual_line += lines.length + this.blank_lines_between_cells;
+    // adding the virtual lines for the blank lines
+    for (let i = 0; i < this.blank_lines_between_cells; i++) {
+      this.virtual_lines.set(this.last_virtual_line + i, {
+        skip_inspect: [this.id_path],
+        editor: cm_editor,
+        source_line: null
+      });
+    }
+
+    this.last_virtual_line += this.blank_lines_between_cells;
     this.last_source_line += source_cell_lines.length;
   }
 
