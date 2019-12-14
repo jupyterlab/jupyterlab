@@ -35,7 +35,7 @@ export class KernelConnector extends DataConnector<
   fetch(
     request: InspectionHandler.IRequest
   ): Promise<InspectionHandler.IReply> {
-    const kernel = this._sessionContext.kernel;
+    const kernel = this._sessionContext.session?.kernel;
 
     if (!kernel) {
       return Promise.reject(new Error('Inspection fetch requires a kernel.'));

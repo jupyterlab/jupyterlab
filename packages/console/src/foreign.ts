@@ -83,7 +83,7 @@ export class ForeignHandler implements IDisposable {
     if (!this._enabled) {
       return false;
     }
-    let kernel = this.sessionContext.kernel;
+    let kernel = this.sessionContext.session?.kernel;
     if (!kernel) {
       return false;
     }

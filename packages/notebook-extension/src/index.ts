@@ -1008,7 +1008,7 @@ function addCommands(
         let lastLine = firstLine + 1;
         while (true) {
           code = srcLines.slice(firstLine, lastLine).join('\n');
-          let reply = await current.context.sessionContext.kernel.requestIsComplete(
+          let reply = await current.context.sessionContext.session?.kernel?.requestIsComplete(
             {
               // ipython needs an empty line at the end to correctly identify completeness of indented code
               code: code + '\n\n'
@@ -1292,7 +1292,7 @@ function addCommands(
         return;
       }
 
-      const kernel = current.context.sessionContext.kernel;
+      const kernel = current.context.sessionContext.session?.kernel;
 
       if (kernel) {
         return kernel.interrupt();
@@ -1628,7 +1628,7 @@ function addCommands(
         return;
       }
 
-      const kernel = current.context.sessionContext.kernel;
+      const kernel = current.context.sessionContext.session?.kernel;
 
       if (kernel) {
         return kernel.reconnect();
@@ -2084,7 +2084,7 @@ function populateMenus(
   mainMenu.kernelMenu.kernelUsers.add({
     tracker,
     interruptKernel: current => {
-      let kernel = current.sessionContext.kernel;
+      let kernel = current.sessionContext.session?.kernel;
       if (kernel) {
         return kernel.interrupt();
       }
@@ -2244,7 +2244,7 @@ function populateMenus(
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({
     tracker,
-    getKernel: current => current.sessionContext.kernel
+    getKernel: current => current.sessionContext.session?.kernel
   } as IHelpMenu.IKernelUser<NotebookPanel>);
 }
 

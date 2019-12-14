@@ -46,11 +46,6 @@ export interface ISessionContext extends IObservableDisposable {
   session: Session.ISessionConnection | null;
 
   /**
-   * The current kernel connection, proxied from the session connection for convenience
-   */
-  kernel: Kernel.IKernelConnection | null;
-
-  /**
    * Initialize the session context.
    *
    * #### Notes
@@ -254,13 +249,6 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
-   * The current kernel connection, proxied from the session connection for convenience
-   */
-  get kernel(): Kernel.IKernelConnection | null {
-    return this.session?.kernel ?? null;
-  }
-
-  /**
    * The current session connection.
    */
   get session(): Session.ISessionConnection | null {
@@ -389,7 +377,7 @@ export class SessionContext implements ISessionContext {
    * kernel. Perhaps it should be pushed down to the kernel connection?
    */
   get kernelDisplayName(): string {
-    let kernel = this.kernel;
+    let kernel = this.session?.kernel;
     if (!kernel) {
       return 'No Kernel!';
     }
@@ -987,8 +975,8 @@ namespace Private {
     /**
      * Create a new kernel selector widget.
      */
-    constructor(session: SessionContext) {
-      super({ node: createSelectorNode(session) });
+    constructor(sessionContext: SessionContext) {
+      super({ node: createSelectorNode(sessionContext) });
     }
 
     /**

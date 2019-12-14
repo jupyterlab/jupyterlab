@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { SessionContext } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
 import { each } from '@lumino/algorithm';
 
@@ -33,18 +33,24 @@ describe('@jupyterlab/notebook', () => {
 
   describe('NotebookActions', () => {
     let widget: Notebook;
-    let session: SessionContext;
-    let ipySession: SessionContext;
+    let sessionContext: ISessionContext;
+    let ipySessionContext: ISessionContext;
 
     before(async function() {
       // tslint:disable-next-line:no-invalid-this
       this.timeout(60000);
-      [session, ipySession] = await Promise.all([
+      [sessionContext, ipySessionContext] = await Promise.all([
         createSessionContext(),
         createSessionContext({ kernelPreference: { name: 'ipython' } })
       ]);
-      await Promise.all([ipySession.initialize(), session.initialize()]);
-      await Promise.all([ipySession.kernel.info, session.kernel.info]);
+      await Promise.all([
+        ipySessionContext.initialize(),
+        sessionContext.initialize()
+      ]);
+      await Promise.all([
+        ipySessionContext.session?.kernel?.info,
+        sessionContext.session?.kernel?.info
+      ]);
     });
 
     beforeEach(() => {
@@ -66,7 +72,10 @@ describe('@jupyterlab/notebook', () => {
     });
 
     after(async () => {
-      await Promise.all([session.shutdown(), ipySession.shutdown()]);
+      await Promise.all([
+        sessionContext.shutdown(),
+        ipySessionContext.shutdown()
+      ]);
     });
 
     describe('#executed', () => {
@@ -82,7 +91,7 @@ describe('@jupyterlab/notebook', () => {
           emitted += 1;
         });
 
-        await NotebookActions.run(widget, session);
+        await NotebookActions.run(widget, sessionContext);
         expect(emitted).to.equal(2);
         expect(next.rendered).to.equal(true);
       });
@@ -478,7 +487,7 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
-        const result = await NotebookActions.run(widget, session);
+        const result = await NotebookActions.run(widget, sessionContext);
         expect(result).to.equal(true);
         expect(cell.model.outputs.length).to.be.above(0);
         expect(next.rendered).to.equal(true);
@@ -487,7 +496,7 @@ describe('@jupyterlab/notebook', () => {
       it('should delete deletedCells metadata when cell run', () => {
         let cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
-        return NotebookActions.run(widget, session).then(result => {
+        return NotebookActions.run(widget, sessionContext).then(result => {
           expect(result).to.equal(true);
           expect(widget.model.deletedCells.length).to.equal(0);
         });
@@ -495,7 +504,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be a no-op if there is no model', async () => {
         widget.model = null;
-        const result = await NotebookActions.run(widget, session);
+        const result = await NotebookActions.run(widget, sessionContext);
         expect(result).to.equal(false);
       });
 
@@ -503,7 +512,7 @@ describe('@jupyterlab/notebook', () => {
         const other = widget.widgets[2];
         widget.select(other);
         other.model.value.text = 'a = 1';
-        const result = await NotebookActions.run(widget, session);
+        const result = await NotebookActions.run(widget, sessionContext);
         expect(result).to.equal(true);
         expect(widget.activeCell).to.equal(other);
       });
@@ -511,14 +520,14 @@ describe('@jupyterlab/notebook', () => {
       it('should clear the selection', async () => {
         const next = widget.widgets[1];
         widget.select(next);
-        const result = await NotebookActions.run(widget, session);
+        const result = await NotebookActions.run(widget, sessionContext);
         expect(result).to.equal(true);
         expect(widget.isSelected(widget.widgets[0])).to.equal(false);
       });
 
       it('should change to command mode', async () => {
         widget.mode = 'edit';
-        const result = await NotebookActions.run(widget, session);
+        const result = await NotebookActions.run(widget, sessionContext);
         expect(result).to.equal(true);
         expect(widget.mode).to.equal('command');
       });
@@ -538,10 +547,10 @@ describe('@jupyterlab/notebook', () => {
         cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        const result = await NotebookActions.run(widget, ipySession);
+        const result = await NotebookActions.run(widget, ipySessionContext);
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
-        await ipySession.kernel.restart();
+        await ipySessionContext.session?.kernel?.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
@@ -551,14 +560,14 @@ describe('@jupyterlab/notebook', () => {
         child.rendered = false;
         widget.select(child);
         widget.activeCell.model.value.text = ERROR_INPUT;
-        const result = await NotebookActions.run(widget, ipySession);
+        const result = await NotebookActions.run(widget, ipySessionContext);
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
         await sleep(100);
         expect(result).to.equal(false);
         expect(child.rendered).to.equal(true);
-        await ipySession.kernel.restart();
+        await ipySessionContext.session?.kernel?.restart();
       }).timeout(60000); // Allow for slower CI
     });
 
@@ -569,7 +578,10 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
-        const result = await NotebookActions.runAndAdvance(widget, session);
+        const result = await NotebookActions.runAndAdvance(
+          widget,
+          sessionContext
+        );
         expect(result).to.equal(true);
         expect(cell.model.outputs.length).to.be.above(0);
         expect(next.rendered).to.equal(true);
@@ -577,22 +589,31 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be a no-op if there is no model', async () => {
         widget.model = null;
-        const result = await NotebookActions.runAndAdvance(widget, session);
+        const result = await NotebookActions.runAndAdvance(
+          widget,
+          sessionContext
+        );
         expect(result).to.equal(false);
       });
 
       it('should clear the existing selection', async () => {
         const next = widget.widgets[2];
         widget.select(next);
-        const result = await NotebookActions.runAndAdvance(widget, ipySession);
+        const result = await NotebookActions.runAndAdvance(
+          widget,
+          ipySessionContext
+        );
         expect(result).to.equal(false);
         expect(widget.isSelected(widget.widgets[0])).to.equal(false);
-        await ipySession.kernel.restart();
+        await ipySessionContext.session?.kernel?.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should change to command mode', async () => {
         widget.mode = 'edit';
-        const result = await NotebookActions.runAndAdvance(widget, session);
+        const result = await NotebookActions.runAndAdvance(
+          widget,
+          sessionContext
+        );
         expect(result).to.equal(true);
         expect(widget.mode).to.equal('command');
       });
@@ -600,7 +621,10 @@ describe('@jupyterlab/notebook', () => {
       it('should activate the cell after the last selected cell', async () => {
         const next = widget.widgets[3] as MarkdownCell;
         widget.select(next);
-        const result = await NotebookActions.runAndAdvance(widget, session);
+        const result = await NotebookActions.runAndAdvance(
+          widget,
+          sessionContext
+        );
         expect(result).to.equal(true);
         expect(widget.activeCellIndex).to.equal(4);
       });
@@ -608,7 +632,10 @@ describe('@jupyterlab/notebook', () => {
       it('should create a new code cell in edit mode if necessary', async () => {
         const count = widget.widgets.length;
         widget.activeCellIndex = count - 1;
-        const result = await NotebookActions.runAndAdvance(widget, session);
+        const result = await NotebookActions.runAndAdvance(
+          widget,
+          sessionContext
+        );
         expect(result).to.equal(true);
         expect(widget.widgets.length).to.equal(count + 1);
         expect(widget.activeCell).to.be.an.instanceof(CodeCell);
@@ -618,7 +645,10 @@ describe('@jupyterlab/notebook', () => {
       it('should allow an undo of the new cell', async () => {
         const count = widget.widgets.length;
         widget.activeCellIndex = count - 1;
-        const result = await NotebookActions.runAndAdvance(widget, session);
+        const result = await NotebookActions.runAndAdvance(
+          widget,
+          sessionContext
+        );
         expect(result).to.equal(true);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).to.equal(count);
@@ -629,10 +659,13 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        const result = await NotebookActions.runAndAdvance(widget, ipySession);
+        const result = await NotebookActions.runAndAdvance(
+          widget,
+          ipySessionContext
+        );
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
-        await ipySession.kernel.restart();
+        await ipySessionContext.session?.kernel?.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
@@ -640,7 +673,10 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
-        const result = await NotebookActions.runAndAdvance(widget, ipySession);
+        const result = await NotebookActions.runAndAdvance(
+          widget,
+          ipySessionContext
+        );
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
@@ -648,7 +684,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
-        await ipySession.kernel.restart();
+        await ipySessionContext.session?.kernel?.restart();
       }).timeout(60000); // Allow for slower CI
     });
 
@@ -659,7 +695,10 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
-        const result = await NotebookActions.runAndInsert(widget, session);
+        const result = await NotebookActions.runAndInsert(
+          widget,
+          sessionContext
+        );
         expect(result).to.equal(true);
         expect(cell.model.outputs.length).to.be.above(0);
         expect(next.rendered).to.equal(true);
@@ -667,14 +706,20 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be a no-op if there is no model', async () => {
         widget.model = null;
-        const result = await NotebookActions.runAndInsert(widget, session);
+        const result = await NotebookActions.runAndInsert(
+          widget,
+          sessionContext
+        );
         expect(result).to.equal(false);
       });
 
       it('should clear the existing selection', async () => {
         const next = widget.widgets[1];
         widget.select(next);
-        const result = await NotebookActions.runAndInsert(widget, session);
+        const result = await NotebookActions.runAndInsert(
+          widget,
+          sessionContext
+        );
         expect(result).to.equal(true);
         expect(widget.isSelected(widget.widgets[0])).to.equal(false);
       });
@@ -684,7 +729,10 @@ describe('@jupyterlab/notebook', () => {
         widget.select(next);
         next.model.value.text = 'a = 1';
         const count = widget.widgets.length;
-        const result = await NotebookActions.runAndInsert(widget, session);
+        const result = await NotebookActions.runAndInsert(
+          widget,
+          sessionContext
+        );
         expect(result).to.equal(true);
         expect(widget.activeCell).to.be.an.instanceof(CodeCell);
         expect(widget.mode).to.equal('edit');
@@ -696,7 +744,10 @@ describe('@jupyterlab/notebook', () => {
         widget.select(next);
         next.model.value.text = 'a = 1';
         const count = widget.widgets.length;
-        const result = await NotebookActions.runAndInsert(widget, session);
+        const result = await NotebookActions.runAndInsert(
+          widget,
+          sessionContext
+        );
         expect(result).to.equal(true);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).to.equal(count);
@@ -707,10 +758,13 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        const result = await NotebookActions.runAndInsert(widget, ipySession);
+        const result = await NotebookActions.runAndInsert(
+          widget,
+          ipySessionContext
+        );
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
-        await ipySession.kernel.restart();
+        await ipySessionContext.session?.kernel?.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
@@ -718,7 +772,10 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
-        const result = await NotebookActions.runAndInsert(widget, ipySession);
+        const result = await NotebookActions.runAndInsert(
+          widget,
+          ipySessionContext
+        );
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
@@ -726,7 +783,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
-        await ipySession.kernel.restart();
+        await ipySessionContext.session?.kernel?.restart();
       }).timeout(60000); // Allow for slower CI
     });
 
@@ -741,7 +798,7 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
-        const result = await NotebookActions.runAll(widget, session);
+        const result = await NotebookActions.runAll(widget, sessionContext);
         expect(result).to.equal(true);
         expect(cell.model.outputs.length).to.be.above(0);
         expect(next.rendered).to.equal(true);
@@ -749,13 +806,13 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be a no-op if there is no model', async () => {
         widget.model = null;
-        const result = await NotebookActions.runAll(widget, session);
+        const result = await NotebookActions.runAll(widget, sessionContext);
         expect(result).to.equal(false);
       });
 
       it('should change to command mode', async () => {
         widget.mode = 'edit';
-        const result = await NotebookActions.runAll(widget, session);
+        const result = await NotebookActions.runAll(widget, sessionContext);
         expect(result).to.equal(true);
         expect(widget.mode).to.equal('command');
       }).timeout(30000); // Allow for slower CI
@@ -763,13 +820,13 @@ describe('@jupyterlab/notebook', () => {
       it('should clear the existing selection', async () => {
         const next = widget.widgets[2];
         widget.select(next);
-        const result = await NotebookActions.runAll(widget, session);
+        const result = await NotebookActions.runAll(widget, sessionContext);
         expect(result).to.equal(true);
         expect(widget.isSelected(widget.widgets[2])).to.equal(false);
       }).timeout(30000); // Allow for slower CI
 
       it('should activate the last cell', async () => {
-        await NotebookActions.runAll(widget, session);
+        await NotebookActions.runAll(widget, sessionContext);
         expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
       }).timeout(30000); // Allow for slower CI
 
@@ -777,25 +834,25 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         const cell = widget.model.contentFactory.createCodeCell({});
         widget.model.cells.push(cell);
-        const result = await NotebookActions.runAll(widget, ipySession);
+        const result = await NotebookActions.runAll(widget, ipySessionContext);
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
         expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
-        await ipySession.kernel.restart();
+        await ipySessionContext.session?.kernel?.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
         widget.activeCell.model.value.text = ERROR_INPUT;
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
-        const result = await NotebookActions.runAll(widget, ipySession);
+        const result = await NotebookActions.runAll(widget, ipySessionContext);
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
         await sleep(100);
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
-        await ipySession.kernel.restart();
+        await ipySessionContext.session?.kernel?.restart();
       }).timeout(60000); // Allow for slower CI
     });
 

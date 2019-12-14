@@ -292,7 +292,7 @@ export class CodeConsole extends Widget {
    * incomplete before attempting submission anyway. The default value is `250`.
    */
   async execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
-    if (this.sessionContext.kernel.status === 'dead') {
+    if (this.sessionContext.session?.kernel.status === 'dead') {
       return;
     }
 
@@ -748,7 +748,7 @@ export class CodeConsole extends Widget {
       let timer = setTimeout(() => {
         resolve(true);
       }, timeout);
-      let kernel = this.sessionContext.kernel;
+      let kernel = this.sessionContext.session?.kernel;
       if (!kernel) {
         resolve(false);
         return;
@@ -790,16 +790,17 @@ export class CodeConsole extends Widget {
       this._banner = null;
     }
     this.addBanner();
-    this._handleInfo(await this.sessionContext.kernel.info);
+    this._handleInfo(await this.sessionContext.session?.kernel.info);
   }
 
   /**
    * Handle a change to the kernel status.
    */
   private async _onKernelStatusChanged(): Promise<void> {
-    if (this.sessionContext.kernel.status === 'restarting') {
+    const kernel = this.sessionContext.session?.kernel;
+    if (kernel?.status === 'restarting') {
       this.addBanner();
-      this._handleInfo(await this.sessionContext.kernel.info);
+      this._handleInfo(await kernel?.info);
     }
   }
 

@@ -628,14 +628,11 @@ export namespace OutputArea {
       stop_on_error: stopOnError
     };
 
-    if (!sessionContext.session?.kernel) {
+    const kernel = sessionContext.session?.kernel;
+    if (!kernel) {
       throw new Error('Session has no kernel.');
     }
-    let future = sessionContext.session?.kernel?.requestExecute(
-      content,
-      false,
-      metadata
-    );
+    let future = kernel.requestExecute(content, false, metadata);
     output.future = future;
     return future.done;
   }

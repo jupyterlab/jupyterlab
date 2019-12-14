@@ -409,7 +409,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      let kernel = current.console.sessionContext.kernel;
+      let kernel = current.console.sessionContext.session?.kernel;
       if (kernel) {
         return kernel.interrupt();
       }
@@ -530,7 +530,7 @@ async function activateConsole(
   mainMenu.kernelMenu.kernelUsers.add({
     tracker,
     interruptKernel: current => {
-      let kernel = current.console.sessionContext.kernel;
+      let kernel = current.console.sessionContext.session?.kernel;
       if (kernel) {
         return kernel.interrupt();
       }
@@ -618,7 +618,7 @@ async function activateConsole(
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({
     tracker,
-    getKernel: current => current.sessionContext.kernel
+    getKernel: current => current.sessionContext.session?.kernel
   } as IHelpMenu.IKernelUser<ConsolePanel>);
 
   app.contextMenu.addItem({

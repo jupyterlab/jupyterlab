@@ -70,9 +70,9 @@ function main(): void {
     model: new CodeCellModel({})
   }).initializeState();
 
-  // Handle the mimeType for the current kernel.
+  // Handle the mimeType for the current kernel asynchronously.
   sessionContext.kernelChanged.connect(() => {
-    void sessionContext.kernel.info.then(info => {
+    void sessionContext.session?.kernel?.info.then(info => {
       const lang = info.language_info;
       const mimeType = mimeService.getMimeTypeByLanguage(lang);
       cellWidget.model.mimeType = mimeType;

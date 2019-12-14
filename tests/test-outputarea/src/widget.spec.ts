@@ -117,21 +117,23 @@ describe('outputarea/widget', () => {
     });
 
     describe('#future', () => {
-      let session: SessionContext;
+      let sessionContext: SessionContext;
 
       beforeEach(async () => {
-        session = await createSessionContext();
-        await session.initialize();
-        await session.kernel.info;
+        sessionContext = await createSessionContext();
+        await sessionContext.initialize();
+        await sessionContext.session?.kernel?.info;
       });
 
       afterEach(async () => {
-        await session.shutdown();
-        session.dispose();
+        await sessionContext.shutdown();
+        sessionContext.dispose();
       });
 
       it('should execute code on a kernel and send outputs to the model', async () => {
-        const future = session.kernel.requestExecute({ code: CODE });
+        const future = sessionContext.session?.kernel?.requestExecute({
+          code: CODE
+        });
         widget.future = future;
         const reply = await future.done;
         expect(reply.content.execution_count).to.be.ok;
@@ -141,7 +143,9 @@ describe('outputarea/widget', () => {
 
       it('should clear existing outputs', async () => {
         widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
-        const future = session.kernel.requestExecute({ code: CODE });
+        const future = sessionContext.session?.kernel?.requestExecute({
+          code: CODE
+        });
         widget.future = future;
         const reply = await future.done;
         expect(reply.content.execution_count).to.be.ok;
@@ -231,21 +235,21 @@ describe('outputarea/widget', () => {
     });
 
     describe('.execute()', () => {
-      let session: SessionContext;
+      let sessionContext: SessionContext;
 
       beforeEach(async () => {
-        session = await createSessionContext();
-        await session.initialize();
-        await session.kernel.info;
+        sessionContext = await createSessionContext();
+        await sessionContext.initialize();
+        await sessionContext.session?.kernel?.info;
       });
 
       afterEach(async () => {
-        await session.shutdown();
-        session.dispose();
+        await sessionContext.shutdown();
+        sessionContext.dispose();
       });
 
       it('should execute code on a kernel and send outputs to the model', async () => {
-        const reply = await OutputArea.execute(CODE, widget, session);
+        const reply = await OutputArea.execute(CODE, widget, sessionContext);
         expect(reply.content.execution_count).to.be.ok;
         expect(reply.content.status).to.equal('ok');
         expect(model.length).to.equal(1);
@@ -253,7 +257,7 @@ describe('outputarea/widget', () => {
 
       it('should clear existing outputs', async () => {
         widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
-        const reply = await OutputArea.execute(CODE, widget, session);
+        const reply = await OutputArea.execute(CODE, widget, sessionContext);
         expect(reply.content.execution_count).to.be.ok;
         expect(model.length).to.equal(1);
       });
@@ -289,17 +293,17 @@ describe('outputarea/widget', () => {
           'display_with_id(4, "here")'
         ].join('\n');
 
-        let ipySession: SessionContext;
-        ipySession = await createSessionContext({
+        let ipySessionContext: SessionContext;
+        ipySessionContext = await createSessionContext({
           kernelPreference: { name: 'ipython' }
         });
-        await ipySession.initialize();
-        const promise0 = OutputArea.execute(code0, widget0, ipySession);
-        const promise1 = OutputArea.execute(code1, widget1, ipySession);
+        await ipySessionContext.initialize();
+        const promise0 = OutputArea.execute(code0, widget0, ipySessionContext);
+        const promise1 = OutputArea.execute(code1, widget1, ipySessionContext);
         await Promise.all([promise0, promise1]);
         expect(model1.length).to.equal(3);
         expect(model1.toJSON()[1].data).to.deep.equal({ 'text/plain': '1' });
-        await OutputArea.execute(code2, widget2, ipySession);
+        await OutputArea.execute(code2, widget2, ipySessionContext);
 
         expect(model1.length).to.equal(3);
         expect(model1.toJSON()[1].data).to.deep.equal({ 'text/plain': '4' });
@@ -308,48 +312,48 @@ describe('outputarea/widget', () => {
         expect(outputs[0].data).to.deep.equal({ 'text/plain': '4' });
         expect(outputs[1].data).to.deep.equal({ 'text/plain': '3' });
         expect(outputs[2].data).to.deep.equal({ 'text/plain': '4' });
-        await ipySession.shutdown();
+        await ipySessionContext.shutdown();
       });
 
       it('should stop on an error', async () => {
-        let ipySession: SessionContext;
-        ipySession = await createSessionContext({
+        let ipySessionContext: SessionContext;
+        ipySessionContext = await createSessionContext({
           kernelPreference: { name: 'ipython' }
         });
-        await ipySession.initialize();
+        await ipySessionContext.initialize();
         const widget1 = new LogOutputArea({ rendermime, model });
-        const future1 = OutputArea.execute('a++1', widget, ipySession);
-        const future2 = OutputArea.execute('a=1', widget1, ipySession);
+        const future1 = OutputArea.execute('a++1', widget, ipySessionContext);
+        const future2 = OutputArea.execute('a=1', widget1, ipySessionContext);
         const reply = await future1;
         const reply2 = await future2;
         expect(reply.content.status).to.equal('error');
         expect(reply2.content.status).to.equal('aborted');
         expect(model.length).to.equal(1);
         widget1.dispose();
-        await ipySession.shutdown();
+        await ipySessionContext.shutdown();
       });
 
       it('should allow an error given "raises-exception" metadata tag', async () => {
-        let ipySession: SessionContext;
-        ipySession = await createSessionContext({
+        let ipySessionContext: SessionContext;
+        ipySessionContext = await createSessionContext({
           kernelPreference: { name: 'ipython' }
         });
-        await ipySession.initialize();
+        await ipySessionContext.initialize();
         const widget1 = new LogOutputArea({ rendermime, model });
         const metadata = { tags: ['raises-exception'] };
         const future1 = OutputArea.execute(
           'a++1',
           widget,
-          ipySession,
+          ipySessionContext,
           metadata
         );
-        const future2 = OutputArea.execute('a=1', widget1, ipySession);
+        const future2 = OutputArea.execute('a=1', widget1, ipySessionContext);
         const reply = await future1;
         const reply2 = await future2;
         expect(reply.content.status).to.equal('error');
         expect(reply2.content.status).to.equal('ok');
         widget1.dispose();
-        await ipySession.shutdown();
+        await ipySessionContext.shutdown();
       });
     });
 

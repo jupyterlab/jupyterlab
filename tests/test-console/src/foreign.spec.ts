@@ -72,7 +72,7 @@ class TestHandler extends ForeignHandler {
       const session = (msg.parent_header as KernelMessage.IHeader).session;
       const msgType = msg.header.msg_type;
       if (
-        session !== this.sessionContext.kernel.clientId &&
+        session !== this.sessionContext.session?.kernel?.clientId &&
         relevantTypes.has(msgType)
       ) {
         this.rejected.emit(msg);
@@ -112,7 +112,7 @@ describe('@jupyterlab/console', () => {
         createSession({ name: '', path, type: 'test' })
       ]);
       await sessionContext.initialize();
-      await sessionContext.kernel.info;
+      await sessionContext.session?.kernel?.info;
     });
 
     beforeEach(() => {

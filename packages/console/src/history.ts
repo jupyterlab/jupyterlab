@@ -297,7 +297,7 @@ export class ConsoleHistory implements IConsoleHistory {
    * Handle the current kernel changing.
    */
   private async _handleKernel(): Promise<void> {
-    let kernel = this.sessionContext.kernel;
+    let kernel = this.sessionContext.session?.kernel;
     if (!kernel) {
       this._history.length = 0;
       return;

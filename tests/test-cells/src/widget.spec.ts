@@ -723,23 +723,23 @@ describe('cells/widget', () => {
     });
 
     describe('.execute()', () => {
-      let session: ISessionContext;
+      let sessionContext: ISessionContext;
 
       beforeEach(async () => {
-        session = await createSessionContext();
-        await (session as SessionContext).initialize();
-        await session.kernel.info;
+        sessionContext = await createSessionContext();
+        await (sessionContext as SessionContext).initialize();
+        await sessionContext.session?.kernel?.info;
       });
 
       afterEach(() => {
-        return session.shutdown();
+        return sessionContext.shutdown();
       });
 
       it('should fulfill a promise if there is no code to execute', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
         widget.initializeState();
         try {
-          await CodeCell.execute(widget, session);
+          await CodeCell.execute(widget, sessionContext);
         } catch (error) {
           throw error;
         }
@@ -751,7 +751,7 @@ describe('cells/widget', () => {
         let originalCount: number;
         widget.model.value.text = 'foo';
         originalCount = widget.model.executionCount;
-        await CodeCell.execute(widget, session);
+        await CodeCell.execute(widget, sessionContext);
         const executionCount = widget.model.executionCount;
         expect(executionCount).not.toEqual(originalCount);
       });
@@ -766,12 +766,12 @@ describe('cells/widget', () => {
 
       it('should not save timing info by default', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
-        await CodeCell.execute(widget, session);
+        await CodeCell.execute(widget, sessionContext);
         expect(widget.model.metadata.get('execution')).toBeUndefined();
       });
       it('should save timing info if requested', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
-        await CodeCell.execute(widget, session, { recordTiming: true });
+        await CodeCell.execute(widget, sessionContext, { recordTiming: true });
         expect(widget.model.metadata.get('execution')).toBeDefined();
         const timingInfo = widget.model.metadata.get('execution') as any;
         for (const key of TIMING_KEYS) {
@@ -783,9 +783,9 @@ describe('cells/widget', () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
         widget.initializeState();
         widget.model.value.text = 'foo';
-        const future1 = CodeCell.execute(widget, session);
+        const future1 = CodeCell.execute(widget, sessionContext);
         expect(widget.promptNode.textContent).toEqual('[*]:');
-        const future2 = CodeCell.execute(widget, session);
+        const future2 = CodeCell.execute(widget, sessionContext);
         expect(widget.promptNode.textContent).toEqual('[*]:');
         await expect(future1).rejects.toThrow('Canceled');
         expect(widget.promptNode.textContent).toEqual('[*]:');

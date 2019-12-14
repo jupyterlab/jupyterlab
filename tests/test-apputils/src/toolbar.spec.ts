@@ -275,19 +275,19 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('Kernel buttons', () => {
-      let session: SessionContext;
+      let sessionContext: SessionContext;
       beforeEach(async () => {
-        session = await createSessionContext();
+        sessionContext = await createSessionContext();
       });
 
       afterEach(async () => {
-        await session.shutdown();
-        session.dispose();
+        await sessionContext.shutdown();
+        sessionContext.dispose();
       });
 
       describe('.createInterruptButton()', () => {
         it("should add an inline svg node with the 'stop' icon", async () => {
-          const button = Toolbar.createInterruptButton(session);
+          const button = Toolbar.createInterruptButton(sessionContext);
           Widget.attach(button, document.body);
           await framePromise();
           expect(button.node.querySelector("[data-icon='stop']")).to.exist;
@@ -296,7 +296,7 @@ describe('@jupyterlab/apputils', () => {
 
       describe('.createRestartButton()', () => {
         it("should add an inline svg node with the 'refresh' icon", async () => {
-          const button = Toolbar.createRestartButton(session);
+          const button = Toolbar.createRestartButton(sessionContext);
           Widget.attach(button, document.body);
           await framePromise();
           expect(button.node.querySelector("[data-icon='refresh']")).to.exist;
@@ -305,17 +305,17 @@ describe('@jupyterlab/apputils', () => {
 
       describe('.createKernelNameItem()', () => {
         it("should display the `'display_name'` of the kernel", async () => {
-          const item = Toolbar.createKernelNameItem(session);
-          await session.initialize();
+          const item = Toolbar.createKernelNameItem(sessionContext);
+          await sessionContext.initialize();
           Widget.attach(item, document.body);
           await framePromise();
           expect(
             (item.node.firstChild.lastChild as HTMLElement).textContent
-          ).to.equal(session.kernelDisplayName);
+          ).to.equal(sessionContext.kernelDisplayName);
         });
 
         it("should display `'No Kernel!'` if there is no kernel", async () => {
-          const item = Toolbar.createKernelNameItem(session);
+          const item = Toolbar.createKernelNameItem(sessionContext);
           Widget.attach(item, document.body);
           await framePromise();
           expect(
@@ -326,32 +326,36 @@ describe('@jupyterlab/apputils', () => {
 
       describe('.createKernelStatusItem()', () => {
         beforeEach(async () => {
-          await session.initialize();
-          await session.kernel.info;
+          await sessionContext.initialize();
+          await sessionContext.session?.kernel?.info;
         });
 
         it('should display a busy status if the kernel status is busy', async () => {
-          const item = Toolbar.createKernelStatusItem(session);
+          const item = Toolbar.createKernelStatusItem(sessionContext);
           let called = false;
-          session.statusChanged.connect((_, status) => {
+          sessionContext.statusChanged.connect((_, status) => {
             if (status === 'busy') {
               expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
               called = true;
             }
           });
-          const future = session.kernel.requestExecute({ code: 'a = 109\na' });
+          const future = sessionContext.session?.kernel?.requestExecute({
+            code: 'a = 109\na'
+          });
           await future.done;
           expect(called).to.equal(true);
         });
 
         it('should show the current status in the node title', async () => {
-          const item = Toolbar.createKernelStatusItem(session);
-          const status = session.kernel.status;
+          const item = Toolbar.createKernelStatusItem(sessionContext);
+          const status = sessionContext.session?.kernel?.status;
           expect(item.node.title.toLowerCase()).to.contain(status);
           let called = false;
-          const future = session.kernel.requestExecute({ code: 'a = 1' });
+          const future = sessionContext.session?.kernel?.requestExecute({
+            code: 'a = 1'
+          });
           future.onIOPub = msg => {
-            if (session.kernel.status === 'busy') {
+            if (sessionContext.session?.kernel?.status === 'busy') {
               expect(item.node.title.toLowerCase()).to.contain('busy');
               called = true;
             }
@@ -361,15 +365,15 @@ describe('@jupyterlab/apputils', () => {
         });
 
         it('should handle a starting session', async () => {
-          await session.kernel.info;
-          await session.shutdown();
-          session = await createSessionContext();
-          await session.initialize();
-          const item = Toolbar.createKernelStatusItem(session);
+          await sessionContext.session?.kernel?.info;
+          await sessionContext.shutdown();
+          sessionContext = await createSessionContext();
+          await sessionContext.initialize();
+          const item = Toolbar.createKernelStatusItem(sessionContext);
           expect(item.node.title).to.equal('Kernel Connecting');
           expect(item.hasClass('jp-FilledCircleIcon')).to.equal(false);
-          await session.initialize();
-          await session.kernel.info;
+          await sessionContext.initialize();
+          await sessionContext.session?.kernel?.info;
         });
       });
     });

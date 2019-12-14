@@ -56,15 +56,15 @@ class TestCompletionHandler extends CompletionHandler {
 
 describe('@jupyterlab/completer', () => {
   let connector: KernelConnector;
-  let session: ISessionContext;
+  let sessionContext: ISessionContext;
 
   beforeAll(async () => {
-    session = await createSessionContext();
-    await (session as SessionContext).initialize();
-    connector = new KernelConnector({ session: session.session });
+    sessionContext = await createSessionContext();
+    await (sessionContext as SessionContext).initialize();
+    connector = new KernelConnector({ session: sessionContext.session });
   });
 
-  afterAll(() => session.shutdown());
+  afterAll(() => sessionContext.shutdown());
 
   describe('CompletionHandler', () => {
     describe('#constructor()', () => {

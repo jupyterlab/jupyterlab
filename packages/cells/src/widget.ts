@@ -1036,7 +1036,7 @@ export namespace CodeCell {
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     let model = cell.model;
     let code = model.value.text;
-    if (!code.trim() || !sessionContext.kernel) {
+    if (!code.trim() || !sessionContext.session?.kernel) {
       model.clearExecution();
       return;
     }
