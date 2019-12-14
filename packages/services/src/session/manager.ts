@@ -15,26 +15,6 @@ import { startSession, shutdownSession, listRunning } from './restapi';
 import { Kernel } from '../kernel';
 
 /**
- * We have a session manager that maintains a list of models from the server.
- * Separately, we have a list of running sessions maintained by the
- * DefaultSessions
- *
- * Perhaps we have *one* list of models, with a separate possible session
- * connection for each model.
- *
- * Also, we should be able to modify the session information without a session
- * connection - that's just a server request, and doesn't require a kernel
- * connection.
- *
- * So how about this:
- *
- * - every session model has an associated ISession instance. Since we don't
- *   want to open up websockets for *every* session, an ISession instance may
- *   not have a kernel connection.
- * -
- */
-
-/**
  * An implementation of a session manager.
  */
 export class SessionManager extends BaseManager implements Session.IManager {

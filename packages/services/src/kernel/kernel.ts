@@ -624,7 +624,7 @@ export interface IManager extends IBaseManager {
    * Find a kernel by id.
    *
    * @param id - The id of the target kernel.
-   * TODO: should we return undefined or reject if we can't find the model?
+   *
    * @returns A promise that resolves with the kernel's model, or undefined if not found.
    */
   findById(id: string): Promise<IModel | undefined>;

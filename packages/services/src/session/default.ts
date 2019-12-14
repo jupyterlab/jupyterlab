@@ -164,7 +164,7 @@ export class SessionConnection implements Session.ISessionConnection {
    * Update the session based on a session model from the server.
    *
    * #### Notes
-   * This only upates this session connection instance. Use `setPath`,
+   * This only updates this session connection instance. Use `setPath`,
    * `setName`, `setType`, and `changeKernel` to change the session values on
    * the server.
    */
