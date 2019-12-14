@@ -83,6 +83,7 @@ function addKernelRunningSessionManager(
   app: JupyterFrontEnd
 ) {
   let manager = app.serviceManager.sessions;
+  let specsManager = app.serviceManager.kernelspecs;
   function filterSessions(m: Session.IModel) {
     return !!(
       (m.name || PathExt.basename(m.path)).indexOf('.') !== -1 || m.name
@@ -131,8 +132,8 @@ function addKernelRunningSessionManager(
     labelTitle() {
       let { kernel, path } = this._model;
       let kernelName = kernel.name;
-      if (manager.specs) {
-        const spec = manager.specs.kernelspecs[kernelName];
+      if (specsManager.specs) {
+        const spec = specsManager.specs.kernelspecs[kernelName];
         kernelName = spec ? spec.display_name : 'unknown';
       }
       return `Path: ${path}\nKernel: ${kernelName}`;
