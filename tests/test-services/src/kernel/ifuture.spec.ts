@@ -3,7 +3,12 @@
 
 import { expect } from 'chai';
 
-import { Kernel, KernelMessage, KernelAPI, KernelManager } from '@jupyterlab/services';
+import {
+  Kernel,
+  KernelMessage,
+  KernelAPI,
+  KernelManager
+} from '@jupyterlab/services';
 
 import { KernelTester } from '../utils';
 

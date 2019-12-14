@@ -157,7 +157,7 @@ export async function interruptKernel(
 
 /**
  * Shut down a kernel.
- * 
+ *
  * @param id - The id of the running kernel.
  *
  * @param settings - The server settings for the request.
