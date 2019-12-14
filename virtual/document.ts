@@ -421,12 +421,11 @@ export class VirtualDocument {
     return { cell_code_kept: cell_code, foreign_document_map };
   }
 
-  append_code_block(
+  prepare_code_block(
     cell_code: string,
     cm_editor: CodeMirror.Editor,
     editor_shift: CodeEditor.IPosition = { line: 0, column: 0 }
   ) {
-    let source_cell_lines = cell_code.split('\n');
     let lines: Array<string>;
     let skip_inspect: Array<Array<VirtualDocument.id_path>>;
 
@@ -452,6 +451,22 @@ export class VirtualDocument {
         skip ? [this.id_path] : []
       );
     }
+
+    return { lines, foreign_document_map, skip_inspect };
+  }
+
+  append_code_block(
+    cell_code: string,
+    cm_editor: CodeMirror.Editor,
+    editor_shift: CodeEditor.IPosition = { line: 0, column: 0 }
+  ) {
+    let source_cell_lines = cell_code.split('\n');
+
+    let { lines, foreign_document_map, skip_inspect } = this.prepare_code_block(
+      cell_code,
+      cm_editor,
+      editor_shift
+    );
 
     for (let i = 0; i < lines.length; i++) {
       this.virtual_lines.set(this.last_virtual_line + i, {

@@ -10,7 +10,6 @@ import {
   IJupyterLabComponentsManager,
   StatusMessage
 } from '../jupyterlab/jl_adapter';
-
 /// <reference path="../../../node_modules/@types/events/index.d.ts"/>
 // this appears to break when @types/node is around
 // import { Listener } from 'events';
@@ -257,87 +256,114 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
         throw new Error('Workspace-wide edits not implemented yet');
       } else {
         for (let edit of change.edits) {
-          let start = PositionConverter.lsp_to_cm(edit.range.start);
-          let end = PositionConverter.lsp_to_cm(edit.range.end);
-
-          let document = this.virtual_document;
-
-          let start_editor = document.get_editor_at_virtual_line(
-            start as IVirtualPosition
-          );
-          let end_editor = document.get_editor_at_virtual_line(
-            end as IVirtualPosition
-          );
-          if (start_editor !== end_editor) {
-            let last_editor = start_editor;
-            let fragment_start = start;
-            let fragment_end = { ...start };
-
-            function replace_fragment() {
-              let newFragmentText = edit.newText
-                .split('\n')
-                .slice(
-                  fragment_start.line - start.line,
-                  fragment_end.line - start.line
-                )
-                .join('\n')
-                .slice(0, -1);
-
-              let doc = last_editor.getDoc();
-
-              if (doc.getValue('\n') === newFragmentText) {
-                return;
-              }
-
-              applied_changes += 1;
-
-              doc.replaceRange(
-                newFragmentText,
-                { line: 0, ch: 0 },
-                {
-                  line: fragment_end.line - fragment_start.line + 1,
-                  ch: 0
-                }
-              );
-            }
-
-            let line = start.line;
-            let recently_replaced = false;
-            while (line <= end.line) {
-              line++;
-              let editor = document.get_editor_at_virtual_line({
-                line: line,
-                ch: 0
-              } as IVirtualPosition);
-
-              if (editor === last_editor) {
-                fragment_end.line = line;
-                fragment_end.ch = 0;
-                recently_replaced = false;
-              } else {
-                replace_fragment();
-                recently_replaced = true;
-                fragment_start = {
-                  line: line,
-                  ch: 0
-                };
-                fragment_end = {
-                  line: line,
-                  ch: 0
-                };
-                last_editor = editor;
-              }
-            }
-            if (!recently_replaced) {
-              replace_fragment();
-            }
-          } else {
-            applied_changes += 1;
-            let doc = start_editor.getDoc();
-            doc.replaceRange(edit.newText, start, end);
-          }
+          applied_changes += this.apply_single_edit(edit);
         }
       }
+    }
+    return applied_changes;
+  }
+
+  protected replace_fragment(
+    newText: string,
+    editor: CodeMirror.Editor,
+    fragment_start: CodeMirror.Position,
+    fragment_end: CodeMirror.Position,
+    start: CodeMirror.Position
+  ): number {
+    let document = this.virtual_document;
+    let newFragmentText = newText
+      .split('\n')
+      .slice(fragment_start.line - start.line, fragment_end.line - start.line)
+      .join('\n')
+      .slice(0, -1);
+
+    let doc = editor.getDoc();
+
+    let old_value = doc.getValue('\n');
+    // extract foreign documents and substitute magics,
+    // as it was done when the shadow virtual document was being created
+    let { lines } = document.prepare_code_block(old_value, editor);
+    old_value = lines.join('\n');
+
+    if (old_value === newFragmentText) {
+      return 0;
+    }
+
+    doc.replaceRange(
+      newFragmentText,
+      { line: 0, ch: 0 },
+      {
+        line: fragment_end.line - fragment_start.line + 1,
+        ch: 0
+      }
+    );
+
+    return 1;
+  }
+
+  protected apply_single_edit(edit: lsProtocol.TextEdit): number {
+    let document = this.virtual_document;
+    let applied_changes = 0;
+    let start = PositionConverter.lsp_to_cm(edit.range.start);
+    let end = PositionConverter.lsp_to_cm(edit.range.end);
+
+    let start_editor = document.get_editor_at_virtual_line(
+      start as IVirtualPosition
+    );
+    let end_editor = document.get_editor_at_virtual_line(
+      end as IVirtualPosition
+    );
+    if (start_editor !== end_editor) {
+      let last_editor = start_editor;
+      let fragment_start = start;
+      let fragment_end = { ...start };
+
+      let line = start.line;
+      let recently_replaced = false;
+      while (line <= end.line) {
+        line++;
+        let editor = document.get_editor_at_virtual_line({
+          line: line,
+          ch: 0
+        } as IVirtualPosition);
+
+        if (editor === last_editor) {
+          fragment_end.line = line;
+          fragment_end.ch = 0;
+          recently_replaced = false;
+        } else {
+          applied_changes += this.replace_fragment(
+            edit.newText,
+            last_editor,
+            fragment_start,
+            fragment_end,
+            start
+          );
+          recently_replaced = true;
+          fragment_start = {
+            line: line,
+            ch: 0
+          };
+          fragment_end = {
+            line: line,
+            ch: 0
+          };
+          last_editor = editor;
+        }
+      }
+      if (!recently_replaced) {
+        this.replace_fragment(
+          edit.newText,
+          last_editor,
+          fragment_start,
+          fragment_end,
+          start
+        );
+      }
+    } else {
+      let doc = start_editor.getDoc();
+      doc.replaceRange(edit.newText, start, end);
+      applied_changes += 1;
     }
     return applied_changes;
   }
