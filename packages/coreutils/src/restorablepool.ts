@@ -138,7 +138,7 @@ export class RestorablePool<
 
       if (objName) {
         const name = `${this.namespace}:${objName}`;
-        const data = this._restore.args(obj);
+        const data = this._restore.args?.(obj);
 
         Private.nameProperty.set(obj, name);
         await connector.save(name, { data });
@@ -298,7 +298,7 @@ export class RestorablePool<
     Private.nameProperty.set(obj, newName);
 
     if (newName) {
-      const data = this._restore.args(obj);
+      const data = this._restore.args?.(obj);
       await connector.save(newName, { data });
     }
 
