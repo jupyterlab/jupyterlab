@@ -274,16 +274,25 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
             let fragment_end = { ...start };
 
             function replace_fragment() {
+              let newFragmentText = edit.newText
+                .split('\n')
+                .slice(
+                  fragment_start.line - start.line,
+                  fragment_end.line - start.line
+                )
+                .join('\n')
+                .slice(0, -1);
+
               let doc = last_editor.getDoc();
+
+              if (doc.getValue('\n') === newFragmentText) {
+                return;
+              }
+
+              applied_changes += 1;
+
               doc.replaceRange(
-                edit.newText
-                  .split('\n')
-                  .slice(
-                    fragment_start.line - start.line,
-                    fragment_end.line - start.line
-                  )
-                  .join('\n')
-                  .slice(0, -1),
+                newFragmentText,
                 { line: 0, ch: 0 },
                 {
                   line: fragment_end.line - fragment_start.line + 1,
