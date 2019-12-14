@@ -2,9 +2,10 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-@import './variables.css';
-@import './callstack.css';
 @import './breakpoints.css';
+@import './editor.css';
+@import './callstack.css';
+@import './variables.css';
 
 @import './icons.css';
 @import './sidebar.css';

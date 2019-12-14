@@ -21,7 +21,7 @@ import { Debugger } from '../debugger';
 
 import { IDebugger } from '../tokens';
 
-const LINE_HIGHLIGHT_CLASS = 'jp-breakpoint-line-highlight';
+const LINE_HIGHLIGHT_CLASS = 'jp-DebuggerEditor-highlight';
 
 const EDITOR_CHANGED_TIMEOUT = 1000;
 
@@ -273,7 +273,7 @@ export interface ILineInfo {
 namespace Private {
   export function createMarkerNode() {
     let marker = document.createElement('div');
-    marker.className = 'jp-breakpoint-marker';
+    marker.className = 'jp-DebuggerEditor-marker';
     marker.innerHTML = '●';
     return marker;
   }
