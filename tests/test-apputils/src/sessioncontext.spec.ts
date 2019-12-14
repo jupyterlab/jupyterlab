@@ -379,6 +379,7 @@ describe('@jupyterlab/apputils', () => {
           }
         });
         await sessionContext.initialize();
+        await sessionContext.session.kernel.info;
 
         const restart = SessionContext.restartKernel(sessionContext.kernel);
 
@@ -396,6 +397,7 @@ describe('@jupyterlab/apputils', () => {
           }
         });
         await sessionContext.initialize();
+        await sessionContext.session.kernel.info;
 
         const restart = SessionContext.restartKernel(sessionContext.kernel);
 

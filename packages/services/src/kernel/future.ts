@@ -190,7 +190,9 @@ export abstract class KernelFutureHandler<
         /* no-op */
       });
       this._done.reject(
-        `Canceled future for ${this.msg.header.msg_type} message before replies were done`
+        new Error(
+          `Canceled future for ${this.msg.header.msg_type} message before replies were done`
+        )
       );
     }
     super.dispose();
