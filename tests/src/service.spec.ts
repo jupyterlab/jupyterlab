@@ -95,7 +95,7 @@ describe('DebugService', () => {
     it('should start the service if the session is set', async () => {
       service.session = session;
       await service.start();
-      expect(service.isStarted()).to.equal(true);
+      expect(service.isStarted).to.equal(true);
     });
 
     it('should throw an error if the session is not set', async () => {
@@ -112,7 +112,7 @@ describe('DebugService', () => {
       service.session = session;
       await service.start();
       await service.stop();
-      expect(service.isStarted()).to.equal(false);
+      expect(service.isStarted).to.equal(false);
     });
   });
 
