@@ -161,7 +161,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#kernel', () => {
       it('should be the current kernel of the the session', async () => {
-        expect(sessionContext.session?.kernel).to.be.null;
+        expect(sessionContext.session?.kernel).to.not.be.ok;
         await sessionContext.initialize();
         expect(sessionContext.session?.kernel).to.be.ok;
       });
@@ -330,9 +330,9 @@ describe('@jupyterlab/apputils', () => {
     describe('#shutdown', () => {
       it('should kill the kernel and shut down the session', async () => {
         await sessionContext.initialize();
-        expect(sessionContext.session?.kernel).to.not.equal(null);
+        expect(sessionContext.session?.kernel).to.be.ok;
         await sessionContext.shutdown();
-        expect(sessionContext.session?.kernel).to.be.null;
+        expect(sessionContext.session?.kernel).to.not.be.ok;
       });
     });
 
