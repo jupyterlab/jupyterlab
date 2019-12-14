@@ -15,9 +15,9 @@ import {
   ForeignHandler
 } from '@jupyterlab/console';
 
-import { AttachedProperty } from '@phosphor/properties';
+import { AttachedProperty } from '@lumino/properties';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 
 /**
  * The console widget tracker provider.

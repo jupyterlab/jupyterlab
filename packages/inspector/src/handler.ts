@@ -3,15 +3,17 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IDataConnector, Text, Debouncer } from '@jupyterlab/coreutils';
+import { IDataConnector, Text } from '@jupyterlab/coreutils';
 
 import { MimeModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { Debouncer } from '@lumino/polling';
+
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { IInspector } from './tokens';
 

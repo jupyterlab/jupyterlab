@@ -39,16 +39,16 @@ export class SettingManager extends DataConnector<
    * @returns A promise that resolves if successful.
    */
   async fetch(id: string): Promise<ISettingRegistry.IPlugin> {
+    if (!id) {
+      throw new Error('Plugin `id` parameter is required for settings fetch.');
+    }
+
     const { serverSettings } = this;
     const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
     const base = baseUrl + appUrl;
     const url = Private.url(base, id);
     const response = await makeRequest(url, {}, serverSettings);
-
-    if (!id) {
-      throw new Error('Plugin `id` parameter is required for settings fetch.');
-    }
 
     if (response.status !== 200) {
       throw new ResponseError(response);

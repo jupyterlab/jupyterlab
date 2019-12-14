@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { StateDB } from '@jupyterlab/coreutils';
 
-import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
+import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
 
 describe('StateDB', () => {
   describe('#constructor()', () => {

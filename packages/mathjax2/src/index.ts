@@ -5,7 +5,7 @@
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 // Stub for window MathJax.
 declare var MathJax: any;

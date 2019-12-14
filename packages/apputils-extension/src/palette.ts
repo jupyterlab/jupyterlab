@@ -3,12 +3,12 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { find } from '@phosphor/algorithm';
+import { find } from '@lumino/algorithm';
 
-import { CommandRegistry } from '@phosphor/commands';
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import { CommandRegistry } from '@lumino/commands';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
-import { CommandPalette } from '@phosphor/widgets';
+import { CommandPalette } from '@lumino/widgets';
 
 import { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
 

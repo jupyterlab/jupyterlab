@@ -33,13 +33,13 @@ import { Contents, Kernel } from '@jupyterlab/services';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { each, map, some, toArray } from '@phosphor/algorithm';
+import { each, map, some, toArray } from '@lumino/algorithm';
 
-import { JSONExt } from '@phosphor/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the document manager plugin.

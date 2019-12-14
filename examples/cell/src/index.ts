@@ -34,9 +34,9 @@ import {
   KernelSpecManager
 } from '@jupyterlab/services';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { BoxPanel, Widget } from '@phosphor/widgets';
+import { BoxPanel, Widget } from '@lumino/widgets';
 
 function main(): void {
   const kernelManager = new KernelManager();

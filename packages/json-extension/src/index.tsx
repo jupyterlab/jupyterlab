@@ -5,9 +5,9 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { Printing } from '@jupyterlab/apputils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import * as React from 'react';
 

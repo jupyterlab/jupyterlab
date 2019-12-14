@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Poll } from '@jupyterlab/coreutils';
+import { IDisposable } from '@lumino/disposable';
 
-import { IDisposable } from '@phosphor/disposable';
+import { Poll } from '@lumino/polling';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { Builder, BuildManager } from './builder';
 

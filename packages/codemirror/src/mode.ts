@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt } from '@phosphor/algorithm';
-import { JSONValue } from '@phosphor/coreutils';
+import { ArrayExt } from '@lumino/algorithm';
+import { JSONValue } from '@lumino/coreutils';
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 

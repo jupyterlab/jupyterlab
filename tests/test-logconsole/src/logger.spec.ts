@@ -10,7 +10,7 @@ import {
 
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { Signal, ISignal } from '@phosphor/signaling';
+import { Signal, ISignal } from '@lumino/signaling';
 
 class SignalLogger<SENDER, ARGS> {
   constructor(signal: ISignal<SENDER, ARGS>) {

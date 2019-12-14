@@ -31,9 +31,9 @@ import {
   URLExt
 } from '@jupyterlab/coreutils';
 
-import { each, iter, toArray } from '@phosphor/algorithm';
+import { each, iter, toArray } from '@lumino/algorithm';
 
-import { Widget, DockLayout } from '@phosphor/widgets';
+import { Widget, DockLayout } from '@lumino/widgets';
 
 import * as React from 'react';
 
@@ -110,6 +110,14 @@ const main: JupyterFrontEndPlugin<void> = {
     // trigger a refresh of the commands.
     app.shell.layoutModified.connect(() => {
       app.commands.notifyCommandChanged();
+    });
+
+    // when current tab changes, activate the new current tab
+    // if there isn't an active tab
+    app.shell.currentChanged.connect((sender, args) => {
+      if (!app.shell.activeWidget && args.newValue) {
+        app.shell.activateById(args.newValue.id);
+      }
     });
 
     // If the connection to the server is lost, handle it with the

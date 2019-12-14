@@ -1,13 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Poll } from '@jupyterlab/coreutils';
-
-import { IIterator, iter, every } from '@phosphor/algorithm';
-
-import { JSONExt, JSONObject } from '@phosphor/coreutils';
-
-import { ISignal, Signal } from '@phosphor/signaling';
+import { IIterator, iter, every } from '@lumino/algorithm';
+import { JSONExt, JSONObject } from '@lumino/coreutils';
+import { Poll } from '@lumino/polling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '../serverconnection';
 

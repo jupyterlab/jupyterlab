@@ -40,7 +40,7 @@ import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { Title, Widget } from '@phosphor/widgets';
+import { Title, Widget } from '@lumino/widgets';
 
 export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
 

@@ -7,9 +7,9 @@ import { ServiceManager, Session } from '@jupyterlab/services';
 
 import { SessionContext } from '@jupyterlab/apputils';
 
-import { PromiseDelegate, UUID } from '@phosphor/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import {
   TextModelFactory,
   DocumentRegistry,

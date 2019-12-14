@@ -7,7 +7,7 @@ import Highlight from 'react-highlighter';
 
 import JSONTree from 'react-json-tree';
 
-import { JSONArray, JSONObject, JSONValue } from '@phosphor/coreutils';
+import { JSONArray, JSONObject, JSONValue } from '@lumino/coreutils';
 
 import { InputGroup } from '@jupyterlab/ui-components';
 

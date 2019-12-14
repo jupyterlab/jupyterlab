@@ -5,17 +5,17 @@ import {
   JSONObject,
   PromiseDelegate,
   ReadonlyJSONObject
-} from '@phosphor/coreutils';
+} from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { AttachedProperty } from '@phosphor/properties';
+import { AttachedProperty } from '@lumino/properties';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { Panel, PanelLayout } from '@phosphor/widgets';
+import { Panel, PanelLayout } from '@lumino/widgets';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { ISessionContext } from '@jupyterlab/apputils';
 

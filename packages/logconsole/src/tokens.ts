@@ -7,10 +7,10 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { ISignal } from '@phosphor/signaling';
-import { IDisposable } from '@phosphor/disposable';
+import { ISignal } from '@lumino/signaling';
+import { IDisposable } from '@lumino/disposable';
 
 /* tslint:disable */
 /**

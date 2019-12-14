@@ -5,27 +5,25 @@
 
 import CodeMirror from 'codemirror';
 
-import { JSONExt } from '@phosphor/coreutils';
-
-import { ArrayExt } from '@phosphor/algorithm';
-
-import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
-
-import { Signal } from '@phosphor/signaling';
-
 import { showDialog } from '@jupyterlab/apputils';
 
-import { Poll } from '@jupyterlab/coreutils';
-
 import { CodeEditor } from '@jupyterlab/codeeditor';
-
-import { UUID } from '@phosphor/coreutils';
 
 import {
   IObservableMap,
   IObservableString,
   ICollaborator
 } from '@jupyterlab/observables';
+
+import { ArrayExt } from '@lumino/algorithm';
+
+import { JSONExt, UUID } from '@lumino/coreutils';
+
+import { Poll } from '@lumino/polling';
+
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
+
+import { Signal } from '@lumino/signaling';
 
 import { Mode } from './mode';
 

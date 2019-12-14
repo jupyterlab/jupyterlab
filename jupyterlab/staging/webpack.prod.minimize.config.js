@@ -1,3 +1,4 @@
+// This file is auto-generated from the corresponding file in /dev_mode
 const TerserPlugin = require('terser-webpack-plugin');
 var merge = require('webpack-merge');
 var config = require('./webpack.config');

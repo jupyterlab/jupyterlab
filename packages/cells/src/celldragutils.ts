@@ -9,10 +9,10 @@
  * Notebook widgets.
  */
 
-import { each, IterableOrArrayLike } from '@phosphor/algorithm';
+import { each, IterableOrArrayLike } from '@lumino/algorithm';
 import { ICodeCellModel } from './model';
 import { Cell } from './widget';
-import { h, VirtualDOM } from '@phosphor/virtualdom';
+import { h, VirtualDOM } from '@lumino/virtualdom';
 import { nbformat } from '@jupyterlab/coreutils';
 
 /**

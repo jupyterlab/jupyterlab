@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal } from '@phosphor/signaling';
+import { ISignal } from '@lumino/signaling';
 
 import { IManager as IBaseManager } from '../basemanager';
 import { ISpecModel, ISpecModels } from './restapi';

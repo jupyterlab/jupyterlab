@@ -3,11 +3,11 @@
 
 import { expect } from 'chai';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { TabPanel, Widget } from '@phosphor/widgets';
+import { TabPanel, Widget } from '@lumino/widgets';
 
-import { JSONValue } from '@phosphor/coreutils';
+import { JSONValue } from '@lumino/coreutils';
 
 import { simulate } from 'simulate-event';
 

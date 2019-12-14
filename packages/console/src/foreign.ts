@@ -9,9 +9,9 @@ import { nbformat } from '@jupyterlab/coreutils';
 
 import { KernelMessage } from '@jupyterlab/services';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
 const FOREIGN_CELL_CLASS = 'jp-CodeConsole-foreignCell';
 

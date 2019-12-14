@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 import { KernelMessage, Kernel, KernelManager } from '@jupyterlab/services';
 

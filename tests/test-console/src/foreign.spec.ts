@@ -3,13 +3,13 @@
 
 import { expect } from 'chai';
 
-import { PromiseDelegate, UUID } from '@phosphor/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { Panel } from '@phosphor/widgets';
+import { Panel } from '@lumino/widgets';
 
 import { ForeignHandler } from '@jupyterlab/console';
 
@@ -102,7 +102,10 @@ describe('@jupyterlab/console', () => {
     let handler: TestHandler;
     let sessionContext: ISessionContext;
 
-    before(async () => {
+    before(async function() {
+      // tslint:disable-next-line:no-invalid-this
+      this.timeout(60000);
+
       const path = UUID.uuid4();
       [sessionContext, foreign] = await Promise.all([
         createSessionContext({ path, type: 'test' }),

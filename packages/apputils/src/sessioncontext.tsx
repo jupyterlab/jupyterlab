@@ -3,7 +3,7 @@
 
 import { PathExt, IChangedArgs } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import {
   Kernel,
@@ -13,15 +13,15 @@ import {
   Session
 } from '@jupyterlab/services';
 
-import { IterableOrArrayLike, each, find } from '@phosphor/algorithm';
+import { IterableOrArrayLike, each, find } from '@lumino/algorithm';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { IDisposable, IObservableDisposable } from '@phosphor/disposable';
+import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import * as React from 'react';
 

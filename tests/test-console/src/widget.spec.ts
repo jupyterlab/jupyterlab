@@ -3,11 +3,11 @@
 
 import { expect } from 'chai';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
-import {  SessionContext } from '@jupyterlab/apputils';
+import { SessionContext } from '@jupyterlab/apputils';
 
 import { CodeConsole } from '@jupyterlab/console';
 

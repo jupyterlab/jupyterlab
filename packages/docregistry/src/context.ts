@@ -7,13 +7,13 @@ import {
   ServerConnection
 } from '@jupyterlab/services';
 
-import { JSONValue, PromiseDelegate } from '@phosphor/coreutils';
+import { JSONValue, PromiseDelegate } from '@lumino/coreutils';
 
-import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import {
   showDialog,

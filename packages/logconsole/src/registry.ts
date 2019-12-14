@@ -3,7 +3,7 @@
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { Logger } from './logger';
 

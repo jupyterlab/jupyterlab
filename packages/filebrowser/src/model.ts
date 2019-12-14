@@ -7,8 +7,7 @@ import {
   IChangedArgs,
   IStateDB,
   PathExt,
-  PageConfig,
-  Poll
+  PageConfig
 } from '@jupyterlab/coreutils';
 
 import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
@@ -25,13 +24,15 @@ import {
   IterableOrArrayLike,
   ArrayExt,
   filter
-} from '@phosphor/algorithm';
+} from '@lumino/algorithm';
 
-import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
+import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { Poll } from '@lumino/polling';
+
+import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * The default duration of the auto-refresh in ms

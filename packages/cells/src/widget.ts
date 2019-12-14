@@ -43,15 +43,15 @@ import {
   PromiseDelegate,
   JSONObject,
   UUID
-} from '@phosphor/coreutils';
+} from '@lumino/coreutils';
 
-import { some, filter, toArray } from '@phosphor/algorithm';
+import { some, filter, toArray } from '@lumino/algorithm';
 
-import { IDragEvent } from '@phosphor/dragdrop';
+import { IDragEvent } from '@lumino/dragdrop';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { PanelLayout, Panel, Widget } from '@phosphor/widgets';
+import { PanelLayout, Panel, Widget } from '@lumino/widgets';
 
 import { InputCollapser, OutputCollapser } from './collapser';
 
@@ -1037,8 +1037,7 @@ export namespace CodeCell {
     let model = cell.model;
     let code = model.value.text;
     if (!code.trim() || !sessionContext.kernel) {
-      model.executionCount = null;
-      model.outputs.clear();
+      model.clearExecution();
       return;
     }
     let cellId = { cellId: model.id };
@@ -1048,7 +1047,7 @@ export namespace CodeCell {
       ...cellId
     };
     const { recordTiming } = metadata;
-    model.executionCount = null;
+    model.clearExecution();
     cell.outputHidden = false;
     cell.setPrompt('*');
     model.trusted = true;
@@ -1083,12 +1082,17 @@ export namespace CodeCell {
           if (!value) {
             return;
           }
-          const timingInfo: any = model.metadata.get('execution') || {};
+          const timingInfo: any = Object.assign(
+            {},
+            model.metadata.get('execution')
+          );
           timingInfo[`iopub.${label}`] = value;
           model.metadata.set('execution', timingInfo);
           return true;
         };
         cell.outputArea.future.registerMessageHook(recordTimingHook);
+      } else {
+        model.metadata.delete('execution');
       }
       // Save this execution's future so we can compare in the catch below.
       future = cell.outputArea.future;
@@ -1096,7 +1100,10 @@ export namespace CodeCell {
       model.executionCount = msg.content.execution_count;
       const started = msg.metadata.started as string;
       if (recordTiming && started) {
-        const timingInfo = (model.metadata.get('execution') as any) || {};
+        const timingInfo = Object.assign(
+          {},
+          model.metadata.get('execution') as any
+        );
         if (started) {
           timingInfo['shell.execute_reply.started'] = started;
         }
@@ -1108,8 +1115,9 @@ export namespace CodeCell {
       }
       return msg;
     } catch (e) {
-      // If this is still the current execution, clear the prompt.
-      if (e.message === 'Canceled' && cell.outputArea.future === future) {
+      // If we started executing, and the cell is still indicating this
+      // execution, clear the prompt.
+      if (future && !cell.isDisposed && cell.outputArea.future === future) {
         cell.setPrompt('');
       }
       throw e;

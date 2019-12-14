@@ -1,8 +1,8 @@
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { h, VirtualElement } from '@phosphor/virtualdom';
+import { h, VirtualElement } from '@lumino/virtualdom';
 
-import { DockPanel, TabBar, Widget } from '@phosphor/widgets';
+import { DockPanel, TabBar, Widget } from '@lumino/widgets';
 
 import { IconKindType } from '../style/icon';
 import { defaultIconRegistry } from './iconregistry';

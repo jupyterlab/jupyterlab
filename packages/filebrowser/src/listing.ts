@@ -31,19 +31,19 @@ import {
   IIterator,
   map,
   toArray
-} from '@phosphor/algorithm';
+} from '@lumino/algorithm';
 
-import { MimeData, PromiseDelegate } from '@phosphor/coreutils';
+import { MimeData, PromiseDelegate } from '@lumino/coreutils';
 
-import { ElementExt } from '@phosphor/domutils';
+import { ElementExt } from '@lumino/domutils';
 
-import { Drag, IDragEvent } from '@phosphor/dragdrop';
+import { Drag, IDragEvent } from '@lumino/dragdrop';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { FileBrowserModel } from './model';
 

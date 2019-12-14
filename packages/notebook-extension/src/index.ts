@@ -30,11 +30,11 @@ import {
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
-import { ArrayExt } from '@phosphor/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 
-import { UUID, JSONObject } from '@phosphor/coreutils';
+import { UUID, JSONObject } from '@lumino/coreutils';
 
-import { DisposableSet } from '@phosphor/disposable';
+import { DisposableSet } from '@lumino/disposable';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -70,12 +70,12 @@ import { ServiceManager } from '@jupyterlab/services';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { ReadonlyJSONObject, JSONValue } from '@phosphor/coreutils';
+import { ReadonlyJSONObject, JSONValue } from '@lumino/coreutils';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { Panel, Menu } from '@phosphor/widgets';
-import { CommandRegistry } from '@phosphor/commands';
+import { Panel, Menu } from '@lumino/widgets';
+import { CommandRegistry } from '@lumino/commands';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -177,8 +177,6 @@ namespace CommandIDs {
 
   export const toggleAllLines = 'notebook:toggle-all-cell-line-numbers';
 
-  export const toggleRecordTiming = 'notebook:toggle-record-timing';
-
   export const undoCellAction = 'notebook:undo-cell-action';
 
   export const redoCellAction = 'notebook:redo-cell-action';
@@ -214,6 +212,8 @@ namespace CommandIDs {
   export const enableOutputScrolling = 'notebook:enable-output-scrolling';
 
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
+
+  export const selectLastRunCell = 'notebook:select-last-run-cell';
 }
 
 /**
@@ -629,7 +629,8 @@ function activateNotebookHandler(
     factory.editorConfig = { code, markdown, raw };
     factory.notebookConfig = {
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
-      defaultCell: settings.get('defaultCell').composite as nbformat.CellType
+      defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
+      recordTiming: settings.get('recordTiming').composite as boolean
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
@@ -1563,17 +1564,6 @@ function addCommands(
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.toggleRecordTiming, {
-    label: 'Toggle Recording Cell Timing',
-    execute: args => {
-      const current = getCurrent(args);
-
-      if (current) {
-        return NotebookActions.toggleRecordTiming(current.content);
-      }
-    },
-    isEnabled
-  });
   commands.addCommand(CommandIDs.commandMode, {
     label: 'Enter Command Mode',
     execute: args => {
@@ -1891,6 +1881,17 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.selectLastRunCell, {
+    label: 'Select current running or last run cell',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.selectLastRunCell(current.content);
+      }
+    },
+    isEnabled
+  });
 }
 
 /**
@@ -1914,7 +1915,6 @@ function populatePalette(
     CommandIDs.deselectAll,
     CommandIDs.clearAllOutputs,
     CommandIDs.toggleAllLines,
-    CommandIDs.toggleRecordTiming,
     CommandIDs.editMode,
     CommandIDs.commandMode,
     CommandIDs.changeKernel,

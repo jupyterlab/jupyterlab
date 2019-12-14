@@ -5,11 +5,11 @@
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 
-import { each } from '@phosphor/algorithm';
+import { each } from '@lumino/algorithm';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { generate, simulate } from 'simulate-event';
 

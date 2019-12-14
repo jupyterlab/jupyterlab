@@ -3,7 +3,7 @@
 
 import { Printing } from '@jupyterlab/apputils';
 
-import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
+import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 
 import { IInspector } from './tokens';
 

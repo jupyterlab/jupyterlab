@@ -7,7 +7,7 @@ import { WidgetTracker } from '@jupyterlab/apputils';
 
 import { IDataConnector, IRestorer } from '@jupyterlab/coreutils';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
 import {
   JSONExt,
@@ -15,11 +15,11 @@ import {
   PromiseDelegate,
   ReadonlyJSONValue,
   Token
-} from '@phosphor/coreutils';
+} from '@lumino/coreutils';
 
-import { AttachedProperty } from '@phosphor/properties';
+import { AttachedProperty } from '@lumino/properties';
 
-import { DockPanel, Widget } from '@phosphor/widgets';
+import { DockPanel, Widget } from '@lumino/widgets';
 
 import { ILabShell } from './shell';
 

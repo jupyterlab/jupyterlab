@@ -7,20 +7,20 @@ import { Kernel } from '@jupyterlab/services';
 
 import { Button, DefaultIconReact } from '@jupyterlab/ui-components';
 
-import { IIterator, find, map, some } from '@phosphor/algorithm';
+import { IIterator, find, map, some } from '@lumino/algorithm';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { AttachedProperty } from '@phosphor/properties';
+import { AttachedProperty } from '@lumino/properties';
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { ISessionContext } from './sessioncontext';
 
 import * as React from 'react';
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 
 /**
  * The class name added to toolbars.
@@ -327,9 +327,13 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    * Handle a DOM click event.
    */
   protected handleClick(event: Event) {
-    // Clicking a label focuses the corresponding control, so let it be.
+    // Clicking a label focuses the corresponding control
+    // that is linked with `for` attribute, so let it be.
     if (event.target instanceof HTMLLabelElement) {
-      return;
+      const forId = event.target.getAttribute('for');
+      if (forId && this.node.querySelector(`#${forId}`)) {
+        return;
+      }
     }
 
     // If this click already focused a control, let it be.

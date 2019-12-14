@@ -5,9 +5,9 @@ import { expect } from 'chai';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
 

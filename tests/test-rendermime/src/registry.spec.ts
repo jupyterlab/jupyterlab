@@ -3,15 +3,15 @@
 
 import { expect } from 'chai';
 
-import { UUID, JSONObject } from '@phosphor/coreutils';
+import { UUID, JSONObject } from '@lumino/coreutils';
 
 import { Contents, Drive, ServiceManager, Session } from '@jupyterlab/services';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
 

@@ -23,9 +23,9 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { Session } from '@jupyterlab/services';
 
-import { find, toArray } from '@phosphor/algorithm';
+import { find, toArray } from '@lumino/algorithm';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the completer plugin.

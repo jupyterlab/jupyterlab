@@ -3,9 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONExt, JSONObject, JSONValue } from '@phosphor/coreutils';
+import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { IAttachmentsModel, AttachmentsModel } from '@jupyterlab/attachments';
 
@@ -13,7 +13,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import {
   IObservableJSON,
@@ -101,6 +101,11 @@ export interface ICodeCellModel extends ICellModel {
    * The cell outputs.
    */
   readonly outputs: IOutputAreaModel;
+
+  /**
+   * Clear execution, outputs, and related metadata
+   */
+  clearExecution(): void;
 }
 
 /**
@@ -519,6 +524,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       return;
     }
     this.modelDB.setValue('executionCount', newValue || null);
+  }
+
+  clearExecution() {
+    this.outputs.clear();
+    this.executionCount = null;
+    this.metadata.delete('execution');
   }
 
   /**

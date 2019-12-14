@@ -5,9 +5,9 @@ import { expect } from 'chai';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
 import {
   KernelMessage,

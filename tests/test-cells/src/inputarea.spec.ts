@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 

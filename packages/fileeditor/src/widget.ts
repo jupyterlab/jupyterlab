@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { StackedLayout, Widget } from '@phosphor/widgets';
+import { StackedLayout, Widget } from '@lumino/widgets';
 
 import {
   ABCWidgetFactory,
@@ -17,9 +17,9 @@ import {
   CodeEditorWrapper
 } from '@jupyterlab/codeeditor';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
 /**
  * The data attribute added to a widget that can run code.

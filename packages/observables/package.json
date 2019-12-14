@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/observables",
-  "version": "3.0.0-alpha.1",
+  "version": "3.0.0-alpha.4",
   "description": "Data structures which may be observed for changes.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,11 +32,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@phosphor/algorithm": "^1.2.0",
-    "@phosphor/coreutils": "^1.3.1",
-    "@phosphor/disposable": "^1.3.0",
-    "@phosphor/messaging": "^1.3.0",
-    "@phosphor/signaling": "^1.3.0"
+    "@lumino/algorithm": "^1.2.0",
+    "@lumino/coreutils": "^1.3.1",
+    "@lumino/disposable": "^1.3.0",
+    "@lumino/messaging": "^1.3.0",
+    "@lumino/signaling": "^1.3.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

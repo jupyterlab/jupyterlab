@@ -3,11 +3,9 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID, JSONExt, JSONObject, PromiseDelegate } from '@lumino/coreutils';
 
-import { JSONExt, JSONObject, PromiseDelegate } from '@phosphor/coreutils';
-
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';
 

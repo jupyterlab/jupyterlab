@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 
-import { ISignal } from '@phosphor/signaling';
+import { ISignal } from '@lumino/signaling';
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 
 import {
@@ -12,9 +12,9 @@ import {
   ToolbarButtonComponent
 } from '@jupyterlab/apputils';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
 /**
  * The class name added to a running widget.

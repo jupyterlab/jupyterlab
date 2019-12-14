@@ -19,24 +19,19 @@ import {
   Printing
 } from '@jupyterlab/apputils';
 
-import {
-  Debouncer,
-  IRateLimiter,
-  ISettingRegistry,
-  IStateDB,
-  SettingRegistry,
-  StateDB,
-  Throttler,
-  URLExt
-} from '@jupyterlab/coreutils';
+import { IStateDB, StateDB, URLExt } from '@jupyterlab/coreutils';
 
 import { defaultIconRegistry } from '@jupyterlab/ui-components';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { DisposableDelegate } from '@phosphor/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
+
+import { Debouncer, Throttler } from '@lumino/polling';
 
 import { Palette } from './palette';
+
+import { settingsPlugin } from './settingsplugin';
 
 import { themesPlugin, themesPaletteMenuPlugin } from './themeplugins';
 
@@ -82,21 +77,6 @@ const paletteRestorer: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:palette-restorer',
   requires: [ILayoutRestorer],
   autoStart: true
-};
-
-/**
- * The default setting registry provider.
- */
-const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
-  id: '@jupyterlab/apputils-extension:settings',
-  activate: async (app: JupyterFrontEnd): Promise<ISettingRegistry> => {
-    const connector = app.serviceManager.settings;
-    const plugins = (await connector.list()).values;
-
-    return new SettingRegistry({ connector, plugins });
-  },
-  autoStart: true,
-  provides: ISettingRegistry
 };
 
 /**
@@ -190,7 +170,7 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
 
     // Create debounced recovery dialog function.
     let dialog: Dialog<any>;
-    const recovery: IRateLimiter = new Throttler(async () => {
+    const recovery = new Throttler(async () => {
       if (dialog) {
         return;
       }
@@ -465,13 +445,13 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   palette,
   paletteRestorer,
+  print,
   resolver,
-  settings,
+  settingsPlugin,
   state,
   splash,
   themesPlugin,
-  themesPaletteMenuPlugin,
-  print
+  themesPaletteMenuPlugin
 ];
 export default plugins;
 

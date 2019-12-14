@@ -3,7 +3,7 @@
 
 import { DataConnector, URLExt } from '@jupyterlab/coreutils';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 
 import { ServerConnection } from '../serverconnection';
 

@@ -7,7 +7,7 @@ import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
 import { PathExt, Time } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import {
   IRenderMimeRegistry,
@@ -16,14 +16,14 @@ import {
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Panel } from '@phosphor/widgets';
+import { Panel } from '@lumino/widgets';
 
 import { CodeConsole } from './widget';
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
 /**
  * The class name added to console panels.

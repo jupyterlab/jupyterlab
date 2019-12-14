@@ -1,12 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Poll } from '@jupyterlab/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import { Poll } from '@lumino/polling';
+import { ISignal, Signal } from '@lumino/signaling';
+
 import { ServerConnection } from '../serverconnection';
 import * as KernelSpec from './kernelspec';
 import * as restapi from './restapi';
-import { ISignal, Signal } from '@phosphor/signaling';
-import { JSONExt } from '@phosphor/coreutils';
 import { BaseManager } from '../basemanager';
 /**
  * An implementation of a kernel spec manager.

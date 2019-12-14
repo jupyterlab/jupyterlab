@@ -5,9 +5,9 @@ import { IDisplayState, ISearchProvider } from './interfaces';
 import { createSearchOverlay } from './searchoverlay';
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
-import { IDisposable } from '@phosphor/disposable';
-import { ISignal, Signal } from '@phosphor/signaling';
-import { Widget } from '@phosphor/widgets';
+import { IDisposable } from '@lumino/disposable';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 
 /**
  * Represents a search on a single widget.

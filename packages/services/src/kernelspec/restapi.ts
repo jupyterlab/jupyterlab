@@ -5,7 +5,7 @@ import { ServerConnection } from '../serverconnection';
 import { validateSpecModels } from './validate';
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
 /**
  * The url for the kernelspec service.

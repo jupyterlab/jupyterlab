@@ -13,7 +13,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { TextItem } from '@jupyterlab/statusbar';
 
-import { Widget, Title } from '@phosphor/widgets';
+import { Widget, Title } from '@lumino/widgets';
 
 /**
  * A namespace for PathStatusComponent statics.

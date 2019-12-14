@@ -1,9 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { nbformat } from '@jupyterlab/coreutils';
-
-import { UUID, JSONObject } from '@phosphor/coreutils';
+import { nbformat, UUID, JSONObject } from '@jupyterlab/coreutils';
 
 export interface IOptions<T extends Message> {
   session: string;

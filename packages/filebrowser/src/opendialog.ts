@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray } from '@phosphor/algorithm';
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { toArray } from '@lumino/algorithm';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { PathExt } from '@jupyterlab/coreutils';
 
 import { Dialog } from '@jupyterlab/apputils';

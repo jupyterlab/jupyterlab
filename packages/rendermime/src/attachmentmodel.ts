@@ -14,9 +14,9 @@ import {
   JSONObject,
   JSONValue,
   ReadonlyJSONObject
-} from '@phosphor/coreutils';
+} from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { MimeModel } from './mimemodel';
 

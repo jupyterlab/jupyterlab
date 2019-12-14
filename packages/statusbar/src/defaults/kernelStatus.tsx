@@ -11,7 +11,7 @@ import { Kernel, Session } from '@jupyterlab/services';
 
 import { interactiveItem, TextItem } from '..';
 
-import { JSONExt } from '@phosphor/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
 /**
  * A pure functional component for rendering kernel status.

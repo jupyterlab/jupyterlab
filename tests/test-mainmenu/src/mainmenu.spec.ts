@@ -3,11 +3,11 @@
 
 import { expect } from 'chai';
 
-import { find, ArrayExt } from '@phosphor/algorithm';
+import { find, ArrayExt } from '@lumino/algorithm';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 
 import {
   MainMenu,

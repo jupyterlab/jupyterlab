@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { StateDB, PageConfig } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 
@@ -32,7 +32,7 @@ import {
 
 import { defaultIconRegistry, IIconRegistry } from '@jupyterlab/ui-components';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
 /**
  * A contents manager that delays requests by less each time it is called

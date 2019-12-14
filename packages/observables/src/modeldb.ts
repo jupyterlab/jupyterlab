@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable, DisposableSet } from '@phosphor/disposable';
+import { IDisposable, DisposableSet } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { JSONExt, JSONValue, JSONObject } from '@phosphor/coreutils';
+import { JSONExt, JSONValue, JSONObject } from '@lumino/coreutils';
 
 import { ObservableMap } from './observablemap';
 

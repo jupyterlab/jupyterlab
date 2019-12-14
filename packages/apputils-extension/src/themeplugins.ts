@@ -19,7 +19,7 @@ import { ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 
 namespace CommandIDs {
   export const changeTheme = 'apputils:change-theme';

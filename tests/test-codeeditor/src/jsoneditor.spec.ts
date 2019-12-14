@@ -11,9 +11,9 @@ import { JSONEditor } from '@jupyterlab/codeeditor';
 
 import { framePromise } from '@jupyterlab/testutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { simulate } from 'simulate-event';
 

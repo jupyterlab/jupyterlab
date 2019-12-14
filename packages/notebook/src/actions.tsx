@@ -20,13 +20,13 @@ import {
   MarkdownCell
 } from '@jupyterlab/cells';
 
-import { ArrayExt, each, toArray } from '@phosphor/algorithm';
+import { ArrayExt, each, toArray } from '@lumino/algorithm';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject, JSONExt } from '@lumino/coreutils';
 
-import { ElementExt } from '@phosphor/domutils';
+import { ElementExt } from '@lumino/domutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import * as React from 'react';
 
@@ -1022,19 +1022,6 @@ export namespace NotebookActions {
   }
 
   /**
-   * Toggle whether to record cell timing execution.
-   *
-   * @param notebook - The target notebook widget.
-   */
-  export function toggleRecordTiming(notebook: Notebook): void {
-    if (!notebook.model) {
-      return;
-    }
-    const currentValue = notebook.model.metadata.get('record_timing') || false;
-    notebook.model.metadata.set('record_timing', !currentValue);
-  }
-
-  /**
    * Clear the code outputs of the selected cells.
    *
    * @param notebook - The target notebook widget.
@@ -1053,9 +1040,8 @@ export namespace NotebookActions {
       const child = notebook.widgets[index];
 
       if (notebook.isSelectedOrActive(child) && cell.type === 'code') {
-        cell.outputs.clear();
+        cell.clearExecution();
         (child as CodeCell).outputHidden = false;
-        cell.executionCount = null;
       }
     });
     Private.handleState(notebook, state);
@@ -1080,8 +1066,7 @@ export namespace NotebookActions {
       const child = notebook.widgets[index];
 
       if (cell.type === 'code') {
-        cell.outputs.clear();
-        cell.executionCount = null;
+        cell.clearExecution();
         (child as CodeCell).outputHidden = false;
       }
     });
@@ -1286,6 +1271,43 @@ export namespace NotebookActions {
       }
     });
     Private.handleState(notebook, state);
+  }
+
+  /**
+   * Go to the last cell that is run or current if it is running.
+   *
+   * Note: This requires execution timing to be toggled on or this will have
+   * no effect.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function selectLastRunCell(notebook: Notebook): void {
+    let latestTime: Date = null;
+    let latestCellIdx: number = null;
+    notebook.widgets.forEach((cell, cellIndx) => {
+      if (cell.model.type === 'code') {
+        const execution = (cell as CodeCell).model.metadata.get('execution');
+        if (
+          execution &&
+          JSONExt.isObject(execution) &&
+          execution['iopub.status.busy'] !== undefined
+        ) {
+          // The busy status is used as soon as a request is received:
+          // https://jupyter-client.readthedocs.io/en/stable/messaging.html
+          const timestamp = execution['iopub.status.busy'].toString();
+          if (timestamp) {
+            const startTime = new Date(timestamp);
+            if (!latestTime || startTime >= latestTime) {
+              latestTime = startTime;
+              latestCellIdx = cellIndx;
+            }
+          }
+        }
+      }
+    });
+    if (latestCellIdx !== null) {
+      notebook.activeCellIndex = latestCellIdx;
+    }
   }
 
   /**
@@ -1529,7 +1551,7 @@ namespace Private {
         if (sessionContext) {
           return CodeCell.execute(cell as CodeCell, sessionContext, {
             deletedCells: notebook.model.deletedCells,
-            recordTiming: notebook.model.metadata.get('record_timing') || false
+            recordTiming: notebook.notebookConfig.recordTiming
           })
             .then(reply => {
               notebook.model.deletedCells.splice(
@@ -1557,11 +1579,10 @@ namespace Private {
               }
             })
             .catch(reason => {
-              if (reason.message !== 'Canceled') {
-                throw reason;
+              if (cell.isDisposed || reason.message.startsWith('Canceled')) {
+                return false;
               }
-
-              return false;
+              throw reason;
             })
             .then(ran => {
               if (ran) {
@@ -1571,7 +1592,7 @@ namespace Private {
               return ran;
             });
         }
-        (cell.model as ICodeCellModel).executionCount = null;
+        (cell.model as ICodeCellModel).clearExecution();
         break;
       default:
         break;

@@ -7,9 +7,9 @@ import { PathExt } from '@jupyterlab/coreutils';
 
 import { Contents } from '@jupyterlab/services';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { IDocumentManager } from './';
 

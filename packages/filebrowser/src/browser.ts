@@ -7,9 +7,9 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { Contents, ServerConnection } from '@jupyterlab/services';
 
-import { IIterator } from '@phosphor/algorithm';
+import { IIterator } from '@lumino/algorithm';
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { BreadCrumbs } from './crumbs';
 

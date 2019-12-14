@@ -24,7 +24,7 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { KernelMessage } from '@jupyterlab/services';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 
 import * as React from 'react';
 
@@ -361,9 +361,13 @@ function activate(
     execute: args => {
       const url = args['url'] as string;
       const text = args['text'] as string;
+      const newBrowserTab = (args['newBrowserTab'] as boolean) || false;
 
       // If help resource will generate a mixed content error, load externally.
-      if (LAB_IS_SECURE && URLExt.parse(url).protocol !== 'https:') {
+      if (
+        newBrowserTab ||
+        (LAB_IS_SECURE && URLExt.parse(url).protocol !== 'https:')
+      ) {
         window.open(url);
         return;
       }

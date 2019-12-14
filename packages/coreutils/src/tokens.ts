@@ -7,11 +7,11 @@ import {
   ReadonlyJSONObject,
   ReadonlyJSONValue,
   Token
-} from '@phosphor/coreutils';
+} from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@phosphor/signaling';
+import { ISignal } from '@lumino/signaling';
 
 import { ISchemaValidator } from './settingregistry';
 
@@ -284,7 +284,7 @@ export namespace ISettingRegistry {
     'jupyter.lab.transform'?: boolean;
 
     /**
-     * The JupyterLab shortcuts that are creaed by a plugin's schema.
+     * The JupyterLab shortcuts that are created by a plugin's schema.
      */
     'jupyter.lab.shortcuts'?: IShortcut[];
 

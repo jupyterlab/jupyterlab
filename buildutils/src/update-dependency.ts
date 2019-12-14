@@ -12,7 +12,33 @@ import commander from 'commander';
 import semver from 'semver';
 
 let versionCache = new Map();
-const tags = /^([~^]?)([\w.]*)$/;
+const tags = /^([~^]?)([\w\-.]*)$/;
+
+async function getSpecifier(
+  currentSpecifier: string,
+  suggestedSpecifier: string
+) {
+  // we have an special case where `latest` will use the same current specifier
+  // e.g. when using latest:
+  //    ^current should result in ^new
+  //    ~current should result in ~new
+
+  if (semver.validRange(suggestedSpecifier) === null) {
+    // We have a tag, with possibly a range specifier, such as ^latest
+    let specifier = suggestedSpecifier;
+    if (specifier === 'latest') {
+      specifier = currentSpecifier;
+    }
+    let match = specifier.match(tags);
+    if (match === null) {
+      throw Error(`Invalid version specifier: ${specifier}`);
+    }
+    specifier = match[1] + suggestedSpecifier;
+    return specifier;
+  } else {
+    return suggestedSpecifier;
+  }
+}
 
 async function getVersion(pkg: string, specifier: string) {
   let key = JSON.stringify([pkg, specifier]);
@@ -60,13 +86,15 @@ function subset(range1: string, range2: string): boolean {
 async function handleDependency(
   dependencies: { [key: string]: string },
   dep: string,
-  specifier: string,
+  suggestedSpecifier: string,
   minimal: boolean
 ): Promise<{ updated: boolean; log: string[] }> {
   let log = [];
   let updated = false;
-  let newRange = await getVersion(dep, specifier);
   let oldRange = dependencies[dep];
+  let specifier = await getSpecifier(oldRange, suggestedSpecifier);
+  let newRange = await getVersion(dep, specifier);
+
   if (minimal && subset(newRange, oldRange)) {
     log.push(`SKIPPING ${dep} ${oldRange} -> ${newRange}`);
   } else {
@@ -189,6 +217,12 @@ Examples
   Only update if the update is substantial:
 
       update-dependency --minimal --regex '.*' ^latest
+
+  Update all packages, that does not start with '@jupyterlab',
+  to the latest version and use the same version specifier currently
+  being used
+
+      update:dependency --regex '^(?!@jupyterlab).*' latest --dry-run
 
   Print the log of the above without actually making any changes.
 

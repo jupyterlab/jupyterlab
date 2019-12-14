@@ -14,7 +14,7 @@ import {
   defaultSanitizer
 } from '@jupyterlab/apputils';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 
 import { MimeModel } from './mimemodel';
 

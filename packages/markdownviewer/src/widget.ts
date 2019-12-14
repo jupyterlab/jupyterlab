@@ -17,13 +17,13 @@ import {
   MimeModel
 } from '@jupyterlab/rendermime';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
-import { StackedLayout, Widget } from '@phosphor/widgets';
+import { StackedLayout, Widget } from '@lumino/widgets';
 
 /**
  * The class name added to a markdown viewer.
@@ -288,7 +288,7 @@ export class MarkdownDocument extends DocumentWidget<MarkdownViewer> {
  */
 export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
   /**
-   * Construct a new mimetype widget factory.
+   * Construct a new markdown viewer widget factory.
    */
   constructor(options: MarkdownViewerFactory.IOptions) {
     super(Private.createRegistryOptions(options));
@@ -319,11 +319,11 @@ export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
 }
 
 /**
- * The namespace for MimeDocumentFactory class statics.
+ * The namespace for MarkdownViewerFactory class statics.
  */
 export namespace MarkdownViewerFactory {
   /**
-   * The options used to initialize a MimeDocumentFactory.
+   * The options used to initialize a MarkdownViewerFactory.
    */
   export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
     /**

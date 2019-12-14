@@ -13,7 +13,7 @@ import {
 
 import { signalToPromise } from '@jupyterlab/testutils';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
 class TestConnector extends StateDB {
   schemas: { [key: string]: ISettingRegistry.ISchema } = {};
