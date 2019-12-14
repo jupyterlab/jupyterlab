@@ -24,6 +24,7 @@ import {
   initNotebookContext,
   NBTestUtils
 } from '@jupyterlab/testutils';
+import { SessionContext } from '@jupyterlab/apputils';
 
 describe('docregistry/context', () => {
   let manager: ServiceManager.IManager;
@@ -231,9 +232,9 @@ describe('docregistry/context', () => {
       });
     });
 
-    describe('#session', () => {
-      it('should be a client session object', () => {
-        expect(context.sessionContext.session.path).to.equal(context.path);
+    describe('#sessionContext', () => {
+      it('should be a ISessionContext object', () => {
+        expect(context.sessionContext).to.be.instanceOf(SessionContext);
       });
     });
 

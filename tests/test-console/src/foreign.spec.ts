@@ -21,7 +21,7 @@ import {
   defaultRenderMime,
   NBTestUtils
 } from '@jupyterlab/testutils';
-import { ISessionContext } from '@jupyterlab/apputils/src';
+import { ISessionContext } from '@jupyterlab/apputils';
 
 class TestParent extends Panel implements ForeignHandler.IReceiver {
   addCell(cell: CodeCell, msgId?: string): void {
@@ -108,6 +108,7 @@ describe('@jupyterlab/console', () => {
         createSessionContext({ path, type: 'test' }),
         createSession({ name: '', path, type: 'test' })
       ]);
+      await sessionContext.initialize();
       await sessionContext.kernel.info;
     });
 

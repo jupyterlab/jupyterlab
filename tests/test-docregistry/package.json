@@ -12,6 +12,7 @@
     "watch:src": "tsc -b --watch"
   },
   "dependencies": {
+    "@jupyterlab/apputils": "^2.0.0-alpha.1",
     "@jupyterlab/docregistry": "^2.0.0-alpha.1",
     "@jupyterlab/rendermime": "^2.0.0-alpha.1",
     "@jupyterlab/services": "^5.0.0-alpha.1",

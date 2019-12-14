@@ -22,7 +22,10 @@ import {
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
-import { defaultRenderMime, createFileContext } from '@jupyterlab/testutils';
+import {
+  defaultRenderMime,
+  createFileContextWithKernel
+} from '@jupyterlab/testutils';
 
 function createModel(data: JSONObject): IRenderMime.IMimeModel {
   return new MimeModel({ data });

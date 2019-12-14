@@ -11,7 +11,7 @@ import { Widget } from '@phosphor/widgets';
 
 import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
 
-import { dismissDialog } from '@jupyterlab/testutils';
+import { dismissDialog, acceptDialog } from '@jupyterlab/testutils';
 
 import {
   createConsolePanelFactory,
@@ -89,8 +89,9 @@ describe('console/panel', () => {
     describe('#onAfterAttach()', () => {
       it('should start the session', async () => {
         Widget.attach(panel, document.body);
-        await dismissDialog();
-        return panel.sessionContext.session.kernel.info;
+        await acceptDialog();
+        await panel.sessionContext.ready;
+        await panel.sessionContext.session.kernel.info;
       });
     });
 
