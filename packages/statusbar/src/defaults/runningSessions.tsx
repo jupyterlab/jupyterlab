@@ -111,7 +111,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
     }
     this.title.caption = `${this.model.terminals} Terminals, ${
       this.model!.sessions
-    } Kernels`;
+    } Kernel sessions`;
     return (
       <RunningSessionsComponent
         sessions={this.model.sessions}
