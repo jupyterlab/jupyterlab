@@ -252,7 +252,10 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
     let applied_changes = 0;
     for (let change of changes) {
       let uri = change.textDocument.uri;
-      if (uri !== current_uri && uri !== '/' + current_uri) {
+      if (
+        decodeURI(uri) !== decodeURI(current_uri) &&
+        decodeURI(uri) !== '/' + decodeURI(current_uri)
+      ) {
         throw new Error('Workspace-wide edits not implemented yet');
       } else {
         for (let edit of change.edits) {
