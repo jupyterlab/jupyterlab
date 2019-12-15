@@ -74,9 +74,15 @@ describe('rpy2 IPython overrides', () => {
       expect(override).to.equal(
         'rpy2.ipython.rmagic.RMagics.R("""print(1)\n""", "")'
       );
-
       let reverse = cell_magics_map.reverse.override_for(override);
       expect(reverse).to.equal(R_CELL_MAGIC);
+
+      override = cell_magics_map.override_for('%%R -i x -o y\nsome\ncode');
+      expect(override).to.equal(
+        'y = rpy2.ipython.rmagic.RMagics.R("""some\ncode""", "", x)'
+      );
+      reverse = cell_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal('%%R -i x -o y\nsome\ncode');
     });
   });
 

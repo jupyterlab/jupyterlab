@@ -42,6 +42,56 @@ function parse_r_args(args: string[], content_position: number) {
   };
 }
 
+function rpy2_reverse_pattern(quote = '"', multi_line = false): string {
+  return (
+    '(\\S+)?' +
+    '(?:, (\\S+))?'.repeat(9) +
+    '( = )?rpy2\\.ipython\\.rmagic\\.RMagics.R\\(' +
+    quote +
+    (multi_line ? '([\\s\\S]*)' : '(.*?)') +
+    quote +
+    ', "(.*?)"' +
+    '(?:, (\\S+))?'.repeat(10) +
+    '\\)'
+  );
+}
+
+function rpy2_reverse_replacement(match: string, ...args: string[]) {
+  let outputs = [];
+  for (let i = 0; i < 10; i++) {
+    if (typeof args[i] === 'undefined') {
+      break;
+    }
+    outputs.push(args[i]);
+  }
+  let inputs = [];
+  for (let i = 13; i < 23; i++) {
+    if (typeof args[i] === 'undefined') {
+      break;
+    }
+    inputs.push(args[i]);
+  }
+  let input_variables = inputs.join(' -i ');
+  if (input_variables) {
+    input_variables = ' -i ' + input_variables;
+  }
+  let output_variables = outputs.join(' -o ');
+  if (output_variables) {
+    output_variables = ' -o ' + output_variables;
+  }
+  let contents = args[11];
+  let other_args = args[12];
+  if (other_args) {
+    other_args = ' ' + other_args;
+  }
+  return {
+    input: input_variables,
+    output: output_variables,
+    other: other_args,
+    contents: contents
+  };
+}
+
 /**
  * Interactive kernels often provide additional functionality invoked by so-called magics,
  * which use distinctive syntax. This features may however not be interpreted correctly by
@@ -73,43 +123,10 @@ export const language_specific_overrides: IOverridesRegistry = {
           return `${r.outputs}rpy2.ipython.rmagic.RMagics.R("${r.content}", "${r.others}"${r.inputs})`;
         },
         reverse: {
-          pattern:
-            '(\\S+)?' +
-            '(?:, (\\S+))?'.repeat(9) +
-            '( = )?rpy2\\.ipython\\.rmagic\\.RMagics.R\\("(.*?)", "(.*?)"' +
-            '(?:, (\\S+))?'.repeat(10) +
-            '\\)',
+          pattern: rpy2_reverse_pattern(),
           replacement: (match, ...args) => {
-            let outputs = [];
-            for (let i = 0; i < 10; i++) {
-              if (typeof args[i] === 'undefined') {
-                break;
-              }
-              outputs.push(args[i]);
-            }
-            let inputs = [];
-            for (let i = 13; i < 23; i++) {
-              if (typeof args[i] === 'undefined') {
-                break;
-              }
-              inputs.push(args[i]);
-            }
-            let input_variables = inputs.join(' -i ');
-            if (input_variables) {
-              input_variables = ' -i ' + input_variables;
-            }
-            let output_variables = outputs.join(' -o ');
-            if (output_variables) {
-              output_variables = ' -o ' + output_variables;
-            }
-            let contents = args[11];
-            let other_args = args[12];
-            if (other_args) {
-              other_args = ' ' + other_args;
-            }
-            return (
-              '%R' + input_variables + output_variables + other_args + contents
-            );
+            let r = rpy2_reverse_replacement(match, ...args);
+            return '%R' + r.input + r.output + r.other + r.contents;
           }
         }
       },
@@ -131,12 +148,14 @@ export const language_specific_overrides: IOverridesRegistry = {
         pattern: '^%%R' + '(?: -(\\S) (\\S+))?'.repeat(10) + '(\n)?([\\s\\S]*)',
         replacement: (match, ...args) => {
           let r = parse_r_args(args, -3);
-          return `${r.outputs}rpy2.ipython.rmagic.RMagics.R("""${r.content}""", "${r.others}")${r.inputs}`;
+          return `${r.outputs}rpy2.ipython.rmagic.RMagics.R("""${r.content}""", "${r.others}"${r.inputs})`;
         },
         reverse: {
-          pattern:
-            'rpy2\\.ipython\\.rmagic\\.RMagics.R\\("""([\\s\\S]*)""", "(.*?)"\\)',
-          replacement: '%%R$2\n$1'
+          pattern: rpy2_reverse_pattern('"""', true),
+          replacement: (match, ...args) => {
+            let r = rpy2_reverse_replacement(match, ...args);
+            return '%%R' + r.input + r.output + r.other + '\n' + r.contents;
+          }
         }
       },
       {
