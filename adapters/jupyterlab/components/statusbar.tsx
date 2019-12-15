@@ -235,6 +235,7 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
     super();
     this.model = new LSPStatus.Model();
     this.addClass(interactiveItem);
+    this.addClass('lsp-statusbar-item');
     this.title.caption = 'LSP status';
   }
 
