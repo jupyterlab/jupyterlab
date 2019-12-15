@@ -2,17 +2,34 @@ import { expect } from 'chai';
 import { language_specific_overrides } from './defaults';
 import { CellMagicsMap, LineMagicsMap } from './maps';
 
-let CELL_MAGIC_EXISTS = `%%MAGIC
+const CELL_MAGIC_EXISTS = `%%MAGIC
 some text
 `;
 
-let NO_CELL_MAGIC = `%MAGIC
+const CELL_MAGIC_WITH_DOCSTRINGS = `%%MAGIC
+text
+"""a docstring"""
+'''a less common docstring'''
+'single quotes'
+"double quotes"
+text
+`;
+
+const ESCAPED_TEXT_WITH_DOCSTRINGS = `text
+\\"\\"\\"a docstring\\"\\"\\"
+'''a less common docstring'''
+'single quotes'
+"double quotes"
+text
+`;
+
+const NO_CELL_MAGIC = `%MAGIC
 some text
 %%MAGIC
 some text
 `;
 
-let LINE_MAGIC_WITH_SPACE = `%MAGIC line = dd`;
+const LINE_MAGIC_WITH_SPACE = `%MAGIC line = dd`;
 
 describe('Default IPython overrides', () => {
   describe('IPython cell magics', () => {
@@ -28,6 +45,42 @@ describe('Default IPython overrides', () => {
       let reverse = cell_magics_map.reverse.override_for(override);
       expect(reverse).to.equal(CELL_MAGIC_EXISTS);
     });
+
+    it('works for empty cells', () => {
+      // those are not correct syntax, but will happen when users are in the process of writing
+      const cell_magic_with_args = '%%MAGIC\n';
+      let override = cell_magics_map.override_for(cell_magic_with_args);
+      expect(override).to.equal(
+        'get_ipython().run_cell_magic("MAGIC", "", """""")'
+      );
+
+      let reverse = cell_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal(cell_magic_with_args);
+    });
+
+    it('escapes arguments in the first line', () => {
+      const cell_magic_with_args = '%%MAGIC "arg in quotes"\ntext';
+      let override = cell_magics_map.override_for(cell_magic_with_args);
+      expect(override).to.equal(
+        'get_ipython().run_cell_magic("MAGIC", " \\"arg in quotes\\"", """text""")'
+      );
+
+      let reverse = cell_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal(cell_magic_with_args);
+    });
+
+    it('escapes docstrings properly', () => {
+      let override = cell_magics_map.override_for(CELL_MAGIC_WITH_DOCSTRINGS);
+      expect(override).to.equal(
+        'get_ipython().run_cell_magic("MAGIC", "", """' +
+          ESCAPED_TEXT_WITH_DOCSTRINGS +
+          '""")'
+      );
+
+      let reverse = cell_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal(CELL_MAGIC_WITH_DOCSTRINGS);
+    });
+
     it('does not override cell-magic-like constructs', () => {
       let override = cell_magics_map.override_for(NO_CELL_MAGIC);
       expect(override).to.equal(null);
@@ -50,6 +103,7 @@ describe('Default IPython overrides', () => {
       let reverse = line_magics_map.reverse.override_for(override);
       expect(reverse).to.equal(LINE_MAGIC_WITH_SPACE);
     });
+
     it('overrides shell commands', () => {
       let override = line_magics_map.override_for('!ls -o');
       expect(override).to.equal('get_ipython().getoutput("ls -o")');

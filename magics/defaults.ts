@@ -5,11 +5,19 @@ import {
   rpy2_reverse_replacement
 } from './rpy2';
 
+function escape(x: string) {
+  return x.replace(/"/g, '\\"');
+}
+
+function unescape(x: string) {
+  return x.replace(/\\"/g, '"');
+}
+
 function empty_or_escaped(x: string) {
   if (!x) {
     return '';
   } else {
-    return x.replace('"', '\\"');
+    return escape(x);
   }
 }
 
@@ -80,19 +88,24 @@ export const language_specific_overrides: IOverridesRegistry = {
         }
       },
       {
-        pattern: '^%%(.+)?(.*)(\n)?([\\s\\S]*)',
-        replacement: (match, p1, p2, p3, p4, offset, entire) => {
-          let cell_magic_name = p1.replace('"', '\\"');
-          let first_line = empty_or_escaped(p2);
-          let content = p4.replace('""""', '\\"\\"\\"');
-          return `get_ipython().run_cell_magic("${cell_magic_name}", "${first_line}", """${content}""")`;
+        pattern: '^%%(\\S+)(.*\n)([\\s\\S]*)',
+        replacement: (match, name, first_line, content, offset, entire) => {
+          first_line = empty_or_escaped(first_line);
+          if (first_line) {
+            // remove the new line
+            first_line = first_line.slice(0, -1);
+          }
+          content = content.replace(/"""/g, '\\"\\"\\"');
+          return `get_ipython().run_cell_magic("${name}", "${first_line}", """${content}""")`;
         },
         reverse: {
-          // TODO un-escape content - but a low priority, as cell magics are unlikely to need reverse escape...
-          //  unless the argument handling would be implemented (but this would be in an R cell magic.
           pattern:
             '^get_ipython\\(\\).run_cell_magic\\("(.*?)", "(.*?)", """([\\s\\S]*)"""\\)',
-          replacement: '%%$1$2\n$3'
+          replacement: (match, name, line, content) => {
+            content = content.replace(/\\"\\"\\"/g, '"""');
+            line = unescape(line);
+            return `%%${name}${line}\n${content}`;
+          }
         }
       }
     ]
