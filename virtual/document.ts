@@ -423,11 +423,17 @@ export class VirtualDocument {
 
   decode_code_block(raw_code: string): string {
     // TODO: add back previously extracted foreign code
-    // TODO: reformat cell magics
-    let lines = this.line_magics_overrides.reverse_replace_all(
-      raw_code.split('\n')
+    let cell_override = this.cell_magics_overrides.reverse.override_for(
+      raw_code
     );
-    return lines.join('\n');
+    if (cell_override !== null) {
+      return cell_override;
+    } else {
+      let lines = this.line_magics_overrides.reverse_replace_all(
+        raw_code.split('\n')
+      );
+      return lines.join('\n');
+    }
   }
 
   prepare_code_block(
