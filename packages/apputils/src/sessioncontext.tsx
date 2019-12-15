@@ -150,8 +150,6 @@ export interface ISessionContext extends IObservableDisposable {
 
   /**
    * Use a UX to select a new kernel for the session.
-   *
-   * TODO: make this function an optional constructor option so we can easily customize the UX
    */
   selectKernel(): Promise<void>;
 
@@ -168,14 +166,6 @@ export interface ISessionContext extends IObservableDisposable {
    * * If there is no kernel, start a kernel with the last-run kernel name.
    * * If no kernel has ever been started, this is a no-op, and resolves with
    *   `false`.
-   *
-   * TODO: be able to pass in a factory for the restart dialog so we can
-   * override the default.
-   *
-   * TODO: We keep the last kernel that this session ran here, in case the
-   * session lifetime is tied to the kernel lifetime.
-   *
-   * TODO: perhaps if there wasn't a kernel in memory, call out to selectKernel?
    */
   restart(): Promise<boolean>;
 }
@@ -622,12 +612,6 @@ export class SessionContext implements ISessionContext {
     let model = result.value;
     if (model === null && this._session) {
       await this.shutdown();
-      // TODO: the shutdown above should emit the kernelChanged signal
-      // this._kernelChanged.emit({
-      //     oldValue: null,
-      //     newValue: null,
-      //     name: 'kernel'
-      //   });
     } else if (model) {
       await this._changeKernel(model);
     }

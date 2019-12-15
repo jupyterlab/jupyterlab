@@ -152,10 +152,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * actually be sent across the wire at a later time.
    *
    * The message emitted in this signal should not be modified in any way.
-   *
-   * TODO: should we only emit copies of the message? Is that prohibitively
-   * expensive? Note that we can't just do a JSON copy since the message may
-   * include binary buffers. We could minimally copy the top-level, though.
    */
   get anyMessage(): ISignal<this, Kernel.IAnyMessageArgs> {
     return this._anyMessage;
@@ -220,11 +216,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Get the kernel spec.
    *
-   * TODO: much better if this isn't a promise, if we just cache it and have it available when needed.
-   *
    * @returns A promise that resolves with the kernel spec.
    */
   getSpec(): Promise<KernelSpec.ISpecModel> {
+    // TODO: Instead of a promise, perhaps the spec should be cached (requested
+    // concurrent with the info promise?) and available as immediate values?
     if (this._specPromise) {
       return this._specPromise;
     }
