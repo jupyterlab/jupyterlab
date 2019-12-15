@@ -1,6 +1,12 @@
-export interface IMagicOverride {
+export type replacer = (...args: string[]) => string;
+
+export interface IMagicOverrideRule {
   pattern: string;
-  replacement: string;
+  replacement: string | replacer;
+}
+
+export interface IMagicOverride extends IMagicOverrideRule {
+  reverse: IMagicOverrideRule;
 }
 
 /**

@@ -421,6 +421,15 @@ export class VirtualDocument {
     return { cell_code_kept: cell_code, foreign_document_map };
   }
 
+  decode_code_block(raw_code: string): string {
+    // TODO: add back previously extracted foreign code
+    // TODO: reformat cell magics
+    let lines = this.line_magics_overrides.reverse_replace_all(
+      raw_code.split('\n')
+    );
+    return lines.join('\n');
+  }
+
   prepare_code_block(
     cell_code: string,
     cm_editor: CodeMirror.Editor,

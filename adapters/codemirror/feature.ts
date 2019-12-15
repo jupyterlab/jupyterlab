@@ -279,18 +279,20 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
 
     let doc = editor.getDoc();
 
-    let old_value = doc.getValue('\n');
+    let raw_value = doc.getValue('\n');
     // extract foreign documents and substitute magics,
     // as it was done when the shadow virtual document was being created
-    let { lines } = document.prepare_code_block(old_value, editor);
-    old_value = lines.join('\n');
+    let { lines } = document.prepare_code_block(raw_value, editor);
+    let old_value = lines.join('\n');
 
     if (old_value === newFragmentText) {
       return 0;
     }
 
+    let new_value = document.decode_code_block(newFragmentText);
+
     doc.replaceRange(
-      newFragmentText,
+      new_value,
       { line: 0, ch: 0 },
       {
         line: fragment_end.line - fragment_start.line + 1,
@@ -352,7 +354,7 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
         }
       }
       if (!recently_replaced) {
-        this.replace_fragment(
+        applied_changes += this.replace_fragment(
           edit.newText,
           last_editor,
           fragment_start,
@@ -361,9 +363,13 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
         );
       }
     } else {
-      let doc = start_editor.getDoc();
-      doc.replaceRange(edit.newText, start, end);
-      applied_changes += 1;
+      applied_changes += this.replace_fragment(
+        edit.newText,
+        start_editor,
+        start,
+        end,
+        start
+      );
     }
     return applied_changes;
   }

@@ -21,7 +21,12 @@ describe('Default IPython overrides', () => {
     );
     it('overrides cell magics', () => {
       let override = cell_magics_map.override_for(CELL_MAGIC_EXISTS);
-      expect(override).to.equal('MAGIC()');
+      expect(override).to.equal(
+        'get_ipython().run_cell_magic("MAGIC", "", """some text\n""")'
+      );
+
+      let reverse = cell_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal(CELL_MAGIC_EXISTS);
     });
     it('does not override cell-magic-like constructs', () => {
       let override = cell_magics_map.override_for(NO_CELL_MAGIC);
@@ -38,11 +43,81 @@ describe('Default IPython overrides', () => {
     );
     it('overrides line magics', () => {
       let override = line_magics_map.override_for(LINE_MAGIC_WITH_SPACE);
-      expect(override).to.equal('MAGIC()');
+      expect(override).to.equal(
+        'get_ipython().run_line_magic("MAGIC", " line = dd")'
+      );
+
+      let reverse = line_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal(LINE_MAGIC_WITH_SPACE);
     });
     it('overrides shell commands', () => {
       let override = line_magics_map.override_for('!ls -o');
-      expect(override).to.equal('ls()');
+      expect(override).to.equal('get_ipython().getoutput("ls -o")');
+
+      let reverse = line_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal('!ls -o');
+    });
+  });
+});
+
+let R_CELL_MAGIC = `%%R
+print(1)
+`;
+
+describe('rpy2 IPython overrides', () => {
+  describe('rpy2 cell magics', () => {
+    let cell_magics_map = new CellMagicsMap(
+      language_specific_overrides['python'].cell_magics
+    );
+    it('overrides cell magic', () => {
+      let override = cell_magics_map.override_for(R_CELL_MAGIC);
+      expect(override).to.equal(
+        'rpy2.ipython.rmagic.RMagics.R("""print(1)\n""")'
+      );
+
+      let reverse = cell_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal(R_CELL_MAGIC);
+    });
+  });
+
+  describe('rpy2 line magics', () => {
+    let line_magics_map = new LineMagicsMap(
+      language_specific_overrides['python'].line_magics
+    );
+    it('inputs and outputs', () => {
+      let line = '%R -i x';
+      let override = line_magics_map.override_for(line);
+      expect(override).to.equal('rpy2.ipython.rmagic.RMagics.R("", x)');
+      let reverse = line_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal(line);
+
+      line = '%R -o x';
+      override = line_magics_map.override_for(line);
+      expect(override).to.equal('x = rpy2.ipython.rmagic.RMagics.R("")');
+      reverse = line_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal(line);
+
+      line = '%R -i x other args';
+      override = line_magics_map.override_for(line);
+      expect(override).to.equal(
+        'rpy2.ipython.rmagic.RMagics.R(" other args", x)'
+      );
+      reverse = line_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal(line);
+
+      line = '%R -i x -o y -i z other args';
+      override = line_magics_map.override_for(line);
+      expect(override).to.equal(
+        'y = rpy2.ipython.rmagic.RMagics.R(" other args", x, z)'
+      );
+
+      line = '%R -i x -i z -o y -o w other args';
+      override = line_magics_map.override_for(line);
+      expect(override).to.equal(
+        'y, w = rpy2.ipython.rmagic.RMagics.R(" other args", x, z)'
+      );
+      reverse = line_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal(line);
     });
   });
 });
