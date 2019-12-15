@@ -177,7 +177,7 @@ describe('@jupyterlab/docmanager', () => {
         widget = manager.open(model.path, 'default');
         context = manager.contextForWidget(widget);
         await dismissDialog();
-        expect(context.sessionContext.session?.kernel).to.be.null;
+        expect(context.sessionContext.session?.kernel).to.be.not.ok;
       });
 
       it('should return undefined if the factory is not found', async () => {
@@ -243,7 +243,7 @@ describe('@jupyterlab/docmanager', () => {
         widget = manager.createNew(model.path, 'default');
         context = manager.contextForWidget(widget);
         await dismissDialog();
-        expect(context.sessionContext.session?.kernel).to.be.null;
+        expect(context.sessionContext.session?.kernel).to.be.not.ok;
       });
 
       it('should return undefined if the factory is not found', async () => {
