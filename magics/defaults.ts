@@ -11,6 +11,7 @@ function empty_or_escaped(x: string) {
 function parse_r_args(args: string[], content_position: number) {
   let inputs = [];
   let outputs = [];
+  let others = [];
   for (let i = 0; i < args.length; i = i + 2) {
     let arg = args[i];
     let variable = args[i + 1];
@@ -20,6 +21,8 @@ function parse_r_args(args: string[], content_position: number) {
       inputs.push(variable);
     } else if (arg === 'o') {
       outputs.push(variable);
+    } else {
+      others.push('-' + arg + ' ' + variable);
     }
   }
   let rest = args.slice(content_position, content_position + 1);
@@ -33,6 +36,7 @@ function parse_r_args(args: string[], content_position: number) {
   }
   return {
     content: rest,
+    others: others.join(' '),
     inputs: input_variables,
     outputs: output_variables
   };
@@ -66,13 +70,13 @@ export const language_specific_overrides: IOverridesRegistry = {
         pattern: '%R' + '(?: -(\\S+) (\\S+))?'.repeat(10) + '(.*)(\n)?',
         replacement: (match, ...args) => {
           let r = parse_r_args(args, -4);
-          return `${r.outputs}rpy2.ipython.rmagic.RMagics.R("${r.content}"${r.inputs})`;
+          return `${r.outputs}rpy2.ipython.rmagic.RMagics.R("${r.content}", "${r.others}"${r.inputs})`;
         },
         reverse: {
           pattern:
             '(\\S+)?' +
             '(?:, (\\S+))?'.repeat(9) +
-            '( = )?rpy2\\.ipython\\.rmagic\\.RMagics.R\\("(.*?)"' +
+            '( = )?rpy2\\.ipython\\.rmagic\\.RMagics.R\\("(.*?)", "(.*?)"' +
             '(?:, (\\S+))?'.repeat(10) +
             '\\)',
           replacement: (match, ...args) => {
@@ -84,7 +88,7 @@ export const language_specific_overrides: IOverridesRegistry = {
               outputs.push(args[i]);
             }
             let inputs = [];
-            for (let i = 12; i < 22; i++) {
+            for (let i = 13; i < 23; i++) {
               if (typeof args[i] === 'undefined') {
                 break;
               }
@@ -98,8 +102,14 @@ export const language_specific_overrides: IOverridesRegistry = {
             if (output_variables) {
               output_variables = ' -o ' + output_variables;
             }
-            let other_args = args[11];
-            return '%R' + input_variables + output_variables + other_args;
+            let contents = args[11];
+            let other_args = args[12];
+            if (other_args) {
+              other_args = ' ' + other_args;
+            }
+            return (
+              '%R' + input_variables + output_variables + other_args + contents
+            );
           }
         }
       },
@@ -121,11 +131,12 @@ export const language_specific_overrides: IOverridesRegistry = {
         pattern: '^%%R' + '(?: -(\\S) (\\S+))?'.repeat(10) + '(\n)?([\\s\\S]*)',
         replacement: (match, ...args) => {
           let r = parse_r_args(args, -3);
-          return `${r.outputs}rpy2.ipython.rmagic.RMagics.R("""${r.content}""")${r.inputs}`;
+          return `${r.outputs}rpy2.ipython.rmagic.RMagics.R("""${r.content}""", "${r.others}")${r.inputs}`;
         },
         reverse: {
-          pattern: 'rpy2\\.ipython\\.rmagic\\.RMagics.R\\("""([\\s\\S]*)"""\\)',
-          replacement: '%%R\n$1'
+          pattern:
+            'rpy2\\.ipython\\.rmagic\\.RMagics.R\\("""([\\s\\S]*)""", "(.*?)"\\)',
+          replacement: '%%R$2\n$1'
         }
       },
       {

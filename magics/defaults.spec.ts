@@ -72,7 +72,7 @@ describe('rpy2 IPython overrides', () => {
     it('overrides cell magic', () => {
       let override = cell_magics_map.override_for(R_CELL_MAGIC);
       expect(override).to.equal(
-        'rpy2.ipython.rmagic.RMagics.R("""print(1)\n""")'
+        'rpy2.ipython.rmagic.RMagics.R("""print(1)\n""", "")'
       );
 
       let reverse = cell_magics_map.reverse.override_for(override);
@@ -87,34 +87,42 @@ describe('rpy2 IPython overrides', () => {
     it('inputs and outputs', () => {
       let line = '%R -i x';
       let override = line_magics_map.override_for(line);
-      expect(override).to.equal('rpy2.ipython.rmagic.RMagics.R("", x)');
+      expect(override).to.equal('rpy2.ipython.rmagic.RMagics.R("", "", x)');
       let reverse = line_magics_map.reverse.override_for(override);
       expect(reverse).to.equal(line);
 
       line = '%R -o x';
       override = line_magics_map.override_for(line);
-      expect(override).to.equal('x = rpy2.ipython.rmagic.RMagics.R("")');
+      expect(override).to.equal('x = rpy2.ipython.rmagic.RMagics.R("", "")');
       reverse = line_magics_map.reverse.override_for(override);
       expect(reverse).to.equal(line);
 
-      line = '%R -i x other args';
+      line = '%R -i x command()';
       override = line_magics_map.override_for(line);
       expect(override).to.equal(
-        'rpy2.ipython.rmagic.RMagics.R(" other args", x)'
+        'rpy2.ipython.rmagic.RMagics.R(" command()", "", x)'
       );
       reverse = line_magics_map.reverse.override_for(override);
       expect(reverse).to.equal(line);
 
-      line = '%R -i x -o y -i z other args';
+      line = '%R -i x -w 800 -h 400 command()';
       override = line_magics_map.override_for(line);
       expect(override).to.equal(
-        'y = rpy2.ipython.rmagic.RMagics.R(" other args", x, z)'
+        'rpy2.ipython.rmagic.RMagics.R(" command()", "-w 800 -h 400", x)'
+      );
+      reverse = line_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal(line);
+
+      line = '%R -i x -o y -i z command()';
+      override = line_magics_map.override_for(line);
+      expect(override).to.equal(
+        'y = rpy2.ipython.rmagic.RMagics.R(" command()", "", x, z)'
       );
 
-      line = '%R -i x -i z -o y -o w other args';
+      line = '%R -i x -i z -o y -o w command()';
       override = line_magics_map.override_for(line);
       expect(override).to.equal(
-        'y, w = rpy2.ipython.rmagic.RMagics.R(" other args", x, z)'
+        'y, w = rpy2.ipython.rmagic.RMagics.R(" command()", "", x, z)'
       );
       reverse = line_magics_map.reverse.override_for(override);
       expect(reverse).to.equal(line);
