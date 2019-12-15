@@ -294,6 +294,8 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
 
     let new_value = document.decode_code_block(newFragmentText);
 
+    let cursor = doc.getCursor();
+
     doc.replaceRange(
       new_value,
       { line: 0, ch: 0 },
@@ -302,6 +304,17 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
         ch: 0
       }
     );
+
+    try {
+      // try to restore the cursor to the position prior to the edit
+      // (this might not be the best UX, but definitely better than
+      // the cursor jumping to the very end of the cell/file).
+      doc.setCursor(cursor, cursor.ch, { scroll: false });
+      // note: this does not matter for actions invoke from context menu
+      // as those loose focus anyways (this might be addressed elsewhere)
+    } catch (e) {
+      console.log('Could not place the cursor back', e);
+    }
 
     return 1;
   }
