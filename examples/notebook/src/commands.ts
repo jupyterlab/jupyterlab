@@ -121,26 +121,24 @@ export const SetupCommands = (
   });
   commands.addCommand(cmdIds.interrupt, {
     label: 'Interrupt',
-    execute: async () => {
-      if (nbWidget.context.session.kernel) {
-        await nbWidget.context.session.kernel.interrupt();
-      }
-    }
+    execute: async () =>
+      nbWidget.context.sessionContext.session?.kernel?.interrupt()
   });
   commands.addCommand(cmdIds.restart, {
     label: 'Restart Kernel',
-    execute: () => nbWidget.context.session.restart()
+    execute: async () =>
+      nbWidget.context.sessionContext.session?.kernel?.restart()
   });
   commands.addCommand(cmdIds.switchKernel, {
     label: 'Switch Kernel',
-    execute: () => nbWidget.context.session.selectKernel()
+    execute: async () => nbWidget.context.sessionContext.selectKernel()
   });
   commands.addCommand(cmdIds.runAndAdvance, {
     label: 'Run and Advance',
     execute: () => {
       return NotebookActions.runAndAdvance(
         nbWidget.content,
-        nbWidget.context.session
+        nbWidget.context.sessionContext
       );
     }
   });
