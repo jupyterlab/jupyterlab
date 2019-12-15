@@ -61,11 +61,18 @@ export const language_specific_overrides: IOverridesRegistry = {
       },
       {
         pattern: '%(\\S+)(.*)(\n)?',
-        replacement: 'get_ipython().run_line_magic("$1", "$2")$3',
+        replacement: (match, name, args, line_break) => {
+          args = empty_or_escaped(args);
+          line_break = line_break || '';
+          return `get_ipython().run_line_magic("${name}", "${args}")${line_break}`;
+        },
         reverse: {
           pattern:
             'get_ipython\\(\\).run_line_magic\\("(.*?)", "(.*?)"\\)(\n)?',
-          replacement: '%$1$2'
+          replacement: (match, name, args) => {
+            args = unescape(args);
+            return `%${name}${args}`;
+          }
         }
       }
     ],

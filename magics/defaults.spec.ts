@@ -104,6 +104,17 @@ describe('Default IPython overrides', () => {
       expect(reverse).to.equal(LINE_MAGIC_WITH_SPACE);
     });
 
+    it('escapes arguments', () => {
+      const line_magic_with_args = '%MAGIC "arg"';
+      let override = line_magics_map.override_for(line_magic_with_args);
+      expect(override).to.equal(
+        'get_ipython().run_line_magic("MAGIC", " \\"arg\\"")'
+      );
+
+      let reverse = line_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal(line_magic_with_args);
+    });
+
     it('overrides shell commands', () => {
       let override = line_magics_map.override_for('!ls -o');
       expect(override).to.equal('get_ipython().getoutput("ls -o")');
