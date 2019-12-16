@@ -146,13 +146,8 @@ class DebuggerHandler<
     widget: NotebookPanel | ConsolePanel | DocumentWidget,
     content: NotebookPanel | ConsolePanel | FileEditor
   ) {
-    const isEnabled = () => {
-      const currentPath = debug.session.client.path;
-      return debug.session.debuggedClients.has(currentPath);
-    };
-
     const toggleAttribute = () => {
-      if (!isEnabled()) {
+      if (!debug.isStarted) {
         widget.node.removeAttribute('data-jp-debugger');
         return;
       }
@@ -160,7 +155,7 @@ class DebuggerHandler<
     };
 
     const createHandler = async () => {
-      if (this._handlers[widget.id] || !isEnabled()) {
+      if (this._handlers[widget.id]) {
         return;
       }
       await debug.restoreState(true);
@@ -170,19 +165,20 @@ class DebuggerHandler<
       });
     };
 
+    const removeHandler = () => {
+      const handler = this._handlers[widget.id];
+      if (!handler) {
+        return;
+      }
+      handler.dispose();
+      delete this._handlers[widget.id];
+    };
+
     const toggleDebugging = async () => {
-      const currentPath = debug.session.client.path;
-      if (isEnabled()) {
-        debug.session.debuggedClients.delete(currentPath);
+      if (debug.isStarted) {
         await debug.stop();
-        const handler = this._handlers[widget.id];
-        if (!handler) {
-          return;
-        }
-        handler.dispose();
-        delete this._handlers[widget.id];
+        removeHandler();
       } else {
-        debug.session.debuggedClients.add(currentPath);
         await createHandler();
       }
       toggleAttribute();
@@ -215,7 +211,12 @@ class DebuggerHandler<
       }
     });
 
-    void createHandler();
+    if (debug.isStarted) {
+      void createHandler();
+    } else {
+      removeHandler();
+    }
+
     toggleAttribute();
   }
 

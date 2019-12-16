@@ -74,13 +74,6 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   /**
-   * Return the set of clients which have enabled debugging.
-   */
-  get debuggedClients(): Set<string> {
-    return this._debuggedClients;
-  }
-
-  /**
    * Return the kernel info for the debug session, waiting for the
    * kernel to be ready.
    */
@@ -111,7 +104,6 @@ export class DebugSession implements IDebugger.ISession {
       return;
     }
     this._isDisposed = true;
-    this.debuggedClients.clear();
     this._disposed.emit();
     Signal.clearData(this);
   }
@@ -221,7 +213,6 @@ export class DebugSession implements IDebugger.ISession {
 
   private _seq = 0;
   private _client: IClientSession | Session.ISession;
-  private _debuggedClients: Set<string> = new Set();
   private _ready: Promise<void>;
   private _isDisposed = false;
   private _isStarted = false;

@@ -233,10 +233,6 @@ export class DebugService implements IDebugger, IDisposable {
       await this.start();
     }
 
-    if (this.isStarted) {
-      this.session.debuggedClients.add(this.session.client.path);
-    }
-
     this._model.breakpoints.restoreBreakpoints(bpMap);
     if (stoppedThreads.size !== 0) {
       await this._getAllFrames();

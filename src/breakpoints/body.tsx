@@ -94,9 +94,9 @@ const BreakpointCellComponent = ({
         .sort((a, b) => {
           return a.line - b.line;
         })
-        .map((breakpoint: IDebugger.IBreakpoint) => (
+        .map((breakpoint: IDebugger.IBreakpoint, index) => (
           <BreakpointComponent
-            key={breakpoint.source.path + breakpoint.line}
+            key={breakpoint.source.path + index}
             breakpoint={breakpoint}
             model={model}
           />
