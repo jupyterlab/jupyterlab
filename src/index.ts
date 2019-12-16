@@ -133,7 +133,7 @@ class DebuggerHandler<
       this._handlers = {};
     });
 
-    // TODO: stop the debugger if started and the widget gets the focus
+    await debug.restoreState(false);
   }
 
   /**
