@@ -31,6 +31,7 @@ describe('session', () => {
   let defaultSession: Session.ISession;
 
   beforeAll(async () => {
+    jest.setTimeout(60000);
     defaultSession = await startNew();
     await defaultSession.kernel.ready;
   });
