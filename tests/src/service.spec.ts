@@ -4,6 +4,8 @@ import { ClientSession, IClientSession } from '@jupyterlab/apputils';
 
 import { createClientSession } from '@jupyterlab/testutils';
 
+import { PromiseDelegate } from '@phosphor/coreutils';
+
 import { Debugger } from '../../lib/debugger';
 
 import { DebugService } from '../../lib/service';
@@ -204,6 +206,31 @@ describe('DebugService', () => {
         breakpoints[0].id = 2;
         breakpoints[1].id = 3;
         expect(bpList).to.deep.eq(breakpoints);
+      });
+    });
+
+    describe('#hasStoppedThreads', () => {
+      it('should return false if the model is null', () => {
+        service.model = null;
+        const hasStoppedThreads = service.hasStoppedThreads();
+        expect(hasStoppedThreads).to.be.false;
+      });
+
+      it('should return true when the execution has stopped', async () => {
+        const variablesChanged = new PromiseDelegate<void>();
+        model.variables.changed.connect(() => {
+          variablesChanged.resolve();
+        });
+
+        // trigger a manual execute request
+        client.kernel.requestExecute({ code });
+
+        // wait for the first stopped event and variables changed
+        await variablesChanged.promise;
+
+        const hasStoppedThreads = service.hasStoppedThreads();
+        expect(hasStoppedThreads).to.be.true;
+        await service.restart();
       });
     });
   });
