@@ -2,24 +2,41 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ReactWidget } from '@jupyterlab/apputils';
+
 import React, { useEffect, useState } from 'react';
+
 import { Breakpoints } from '.';
+
 import { IDebugger } from '../tokens';
 
+/**
+ * The body for a Breakpoints Panel.
+ */
 export class Body extends ReactWidget {
+  /**
+   * Instantiate a new Body for the Breakpoints Panel.
+   * @param model The model for the breakpoints.
+   */
   constructor(model: Breakpoints.Model) {
     super();
-    this.model = model;
+    this._model = model;
     this.addClass('jp-DebuggerBreakpoints-body');
   }
 
+  /**
+   * Render the BreakpointsComponent.
+   */
   render() {
-    return <BreakpointsComponent model={this.model} />;
+    return <BreakpointsComponent model={this._model} />;
   }
 
-  readonly model: Breakpoints.Model;
+  private _model: Breakpoints.Model;
 }
 
+/**
+ * A React component to display a list of breakpoints.
+ * @param model The model for the breakpoints.
+ */
 const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
   const [breakpoints, setBreakpoints] = useState(
     Array.from(model.breakpoints.entries())
@@ -59,6 +76,11 @@ const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
   );
 };
 
+/**
+ * A React Component to display breakpoints grouped by source file.
+ * @param breakpoints The list of breakpoints.
+ * @param model The model for the breakpoints.
+ */
 const BreakpointCellComponent = ({
   breakpoints,
   model
@@ -83,6 +105,11 @@ const BreakpointCellComponent = ({
   );
 };
 
+/**
+ * A React Component to display a single breakpoint.
+ * @param breakpoints The breakpoint.
+ * @param model The model for the breakpoints.
+ */
 const BreakpointComponent = ({
   breakpoint,
   model
@@ -92,12 +119,14 @@ const BreakpointComponent = ({
 }) => {
   return (
     <div
-      className={`breakpoint`}
+      className={`jp-DebuggerBreakpoint`}
       onClick={() => model.clicked.emit(breakpoint)}
       title={breakpoint.source.path}
     >
-      <span className={'marker'}>●</span>
-      <span className={'source'}>{breakpoint.source.path}</span>
+      <span className={'jp-DebuggerBreakpoint-marker'}>●</span>
+      <span className={'jp-DebuggerBreakpoint-source'}>
+        {breakpoint.source.path}
+      </span>
       <span>{breakpoint.line}</span>
     </div>
   );

@@ -7,38 +7,27 @@
   padding: 10px;
 }
 
-.jp-DebuggerBreakpoints-body .breakpoint .marker {
+.jp-DebuggerBreakpoint {
+  display: flex;
+  align-items: center;
+}
+
+.jp-DebuggerBreakpoint:hover {
+  background: var(--jp-layout-color2);
+  cursor: pointer;
+}
+
+.jp-DebuggerBreakpoint-marker {
   font-size: 20px;
   padding-right: 5px;
   content: '●';
   color: var(--jp-error-color1);
 }
 
-.jp-DebuggerBreakpoints-body .breakpoint {
-  display: flex;
-  align-items: center;
-}
-
-.jp-DebuggerBreakpoints-body .breakpoint .source {
+.jp-DebuggerBreakpoint-source {
   flex-grow: 1;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.jp-DebuggerBreakpoints-body .breakpoint:hover {
-  background: var(--jp-layout-color2);
-  cursor: pointer;
-}
-
-.jp-breakpoint-marker {
-  position: absolute;
-  left: -34px;
-  top: -1px;
-  color: var(--jp-error-color1);
-}
-
-.jp-breakpoint-line-highlight {
-  background-color: var(--jp-warn-color0);
 }
 
 [data-jp-debugger='true'] .CodeMirror-gutter-wrapper::after {
