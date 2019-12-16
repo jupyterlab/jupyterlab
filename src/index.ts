@@ -83,6 +83,40 @@ async function setDebugSession(
   app.commands.notifyCommandChanged();
 }
 
+/**
+ * Add a button to the widget toolbar to enable and disable debugging.
+ * @param debug The debug service.
+ * @param widget The widget to add the debug toolbar button to.
+ */
+function updateToolbar(
+  widget: NotebookPanel | ConsolePanel | DocumentWidget,
+  onClick: () => void
+) {
+  const button = new ToolbarButton({
+    className: 'jp-DebuggerSwitchButton',
+    iconClassName: 'jp-ToggleSwitch',
+    onClick,
+    tooltip: 'Enable / Disable Debugger'
+  });
+
+  const getToolbar = (): Toolbar => {
+    if (!(widget instanceof ConsolePanel)) {
+      return widget.toolbar;
+    }
+    const toolbar = widget.widgets.find(w => w instanceof Toolbar) as Toolbar;
+    return toolbar ?? new Toolbar();
+  };
+
+  const toolbar = getToolbar();
+  const itemAdded = toolbar.addItem('debugger-button', button);
+  if (itemAdded && widget instanceof ConsolePanel) {
+    widget.insertWidget(0, toolbar);
+  }
+}
+
+/**
+ * A handler for debugging a widget.
+ */
 class DebuggerHandler<
   H extends ConsoleHandler | NotebookHandler | FileHandler
 > {
@@ -92,6 +126,23 @@ class DebuggerHandler<
    */
   constructor(builder: new (option: any) => H) {
     this._builder = builder;
+  }
+
+  /**
+   * Dispose all the handlers.
+   * @param debug The debug service.
+   */
+  async disposeAll(debug: IDebugger) {
+    const handlerIds = Object.keys(this._handlers);
+    if (handlerIds.length === 0) {
+      return;
+    }
+    debug.session.dispose();
+    debug.session = null;
+    handlerIds.forEach(id => {
+      this._handlers[id].dispose();
+    });
+    this._handlers = {};
   }
 
   /**
@@ -109,49 +160,7 @@ class DebuggerHandler<
       return;
     }
 
-    this._addToolbarButton(debug, widget, content);
-
-    await debug.restoreState(false);
-
-    const handler = this._handlers[widget.id];
-    if (handler) {
-      return;
-    }
-
-    content.disposed.connect(() => {
-      if (!handler) {
-        return;
-      }
-      handler.dispose();
-      delete this._handlers[widget.id];
-    });
-
-    debug.model.disposed.connect(async () => {
-      const handlerIds = Object.keys(this._handlers);
-      if (handlerIds.length === 0) {
-        return;
-      }
-      await debug.stop();
-      debug.session.dispose();
-      debug.session = null;
-      handlerIds.forEach(id => {
-        this._handlers[id].dispose();
-      });
-      this._handlers = {};
-    });
-  }
-
-  /**
-   * Add a button to the widget's toolbar to enable and disable debugging.
-   * @param debug The debug service.
-   * @param widget The widget to add the debug toolbar button to.
-   */
-  private _addToolbarButton(
-    debug: IDebugger,
-    widget: NotebookPanel | ConsolePanel | DocumentWidget,
-    content: NotebookPanel | ConsolePanel | FileEditor
-  ) {
-    const toggleAttribute = () => {
+    const updateAttribute = () => {
       if (!debug.isStarted) {
         widget.node.removeAttribute('data-jp-debugger');
         return;
@@ -168,6 +177,7 @@ class DebuggerHandler<
         debuggerService: debug,
         widget: content
       });
+      updateAttribute();
     };
 
     const removeHandler = () => {
@@ -177,6 +187,7 @@ class DebuggerHandler<
       }
       handler.dispose();
       delete this._handlers[widget.id];
+      updateAttribute();
     };
 
     const toggleDebugging = async () => {
@@ -186,37 +197,23 @@ class DebuggerHandler<
       } else {
         await createHandler();
       }
-      toggleAttribute();
     };
 
-    const button = new ToolbarButton({
-      className: 'jp-DebuggerSwitchButton',
-      iconClassName: 'jp-ToggleSwitch',
-      onClick: toggleDebugging,
-      tooltip: 'Enable / Disable Debugger'
-    });
+    await debug.restoreState(false);
+    updateToolbar(widget, toggleDebugging);
 
-    const getToolbar = (): Toolbar => {
-      if (!(widget instanceof ConsolePanel)) {
-        return widget.toolbar;
-      }
-      const toolbar = widget.widgets.find(w => w instanceof Toolbar) as Toolbar;
-      return toolbar ?? new Toolbar();
-    };
-
-    const toolbar = getToolbar();
-    const itemAdded = toolbar.addItem('debugger-button', button);
-    if (itemAdded && widget instanceof ConsolePanel) {
-      widget.insertWidget(0, toolbar);
-    }
-
-    if (debug.isStarted) {
-      void createHandler();
-    } else {
+    // check the state of the debug session
+    if (!debug.isStarted) {
       removeHandler();
+      return;
     }
 
-    toggleAttribute();
+    // if the debugger is started but there is no handler, create a new one
+    await createHandler();
+
+    // listen to the disposed signals
+    content.disposed.connect(removeHandler);
+    debug.model.disposed.connect(removeHandler);
   }
 
   private _handlers: { [id: string]: H } = {};
@@ -232,6 +229,9 @@ const consoles: JupyterFrontEndPlugin<void> = {
   requires: [IDebugger, ILabShell],
   activate: (app: JupyterFrontEnd, debug: IDebugger, labShell: ILabShell) => {
     const handler = new DebuggerHandler<ConsoleHandler>(ConsoleHandler);
+    debug.model.disposed.connect(() => {
+      void handler.disposeAll(debug);
+    });
 
     labShell.currentChanged.connect(async (_, update) => {
       const widget = update.newValue;
@@ -258,6 +258,9 @@ const files: JupyterFrontEndPlugin<void> = {
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler<FileHandler>(FileHandler);
+    debug.model.disposed.connect(() => {
+      void handler.disposeAll(debug);
+    });
 
     const activeSessions: {
       [id: string]: Session.ISession;
@@ -304,6 +307,9 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   requires: [IDebugger, ILabShell],
   activate: (app: JupyterFrontEnd, debug: IDebugger, labShell: ILabShell) => {
     const handler = new DebuggerHandler<NotebookHandler>(NotebookHandler);
+    debug.model.disposed.connect(() => {
+      void handler.disposeAll(debug);
+    });
 
     labShell.currentChanged.connect(async (_, update) => {
       const widget = update.newValue;
