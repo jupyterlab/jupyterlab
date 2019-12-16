@@ -116,7 +116,7 @@ async function updateToolbar(
   const toolbar = getToolbar();
 
   const isToolbarNotExist = toolbar.addItem(
-    'debugger-lifeCycle-button',
+    'debugger-button',
     new ToolbarButton({
       className: 'jp-DebuggerSwitchButton',
       iconClassName: 'jp-ToggleSwitch',
