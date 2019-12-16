@@ -145,7 +145,7 @@ export namespace IDebugger {
     client: IClientSession | Session.ISession;
 
     /**
-     * Set of clientes which have enabled debugging.
+     * Return the set of clients which have enabled debugging.
      */
     debuggedClients: Set<string>;
 

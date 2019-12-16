@@ -115,7 +115,7 @@ async function updateToolbar(
 
   const toolbar = getToolbar();
 
-  const isToolbarNotExist = toolbar.addItem(
+  const itemAdded = toolbar.addItem(
     'debugger-button',
     new ToolbarButton({
       className: 'jp-DebuggerSwitchButton',
@@ -133,9 +133,10 @@ async function updateToolbar(
     })
   );
 
-  if (isToolbarNotExist && widget instanceof ConsolePanel) {
+  if (itemAdded && widget instanceof ConsolePanel) {
     widget.insertWidget(0, toolbar);
   }
+
   toggleAttribute();
 }
 
