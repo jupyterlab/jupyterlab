@@ -28,6 +28,11 @@ export interface IDebugger {
   model: IDebugger.IModel;
 
   /**
+   * Whether the current debugger is started.
+   */
+  readonly isStarted: boolean;
+
+  /**
    * Signal emitted upon session changed.
    */
   readonly sessionChanged: ISignal<IDebugger, IDebugger.ISession>;
@@ -53,30 +58,25 @@ export interface IDebugger {
   getCodeId(code: string): string;
 
   /**
-   * Whether the current debugger is started.
-   */
-  isStarted(): boolean;
-
-  /**
    * Whether there exist a thread in stopped state.
    */
   hasStoppedThreads(): boolean;
 
   /**
    * Starts a debugger.
-   * Precondition: !isStarted()
+   * Precondition: !isStarted
    */
   start(): Promise<void>;
 
   /**
    * Stops the debugger.
-   * Precondition: isStarted()
+   * Precondition: isStarted
    */
   stop(): Promise<void>;
 
   /**
    * Restart the debugger.
-   * Precondition: isStarted()
+   * Precondition: isStarted
    */
   restart(): Promise<void>;
 

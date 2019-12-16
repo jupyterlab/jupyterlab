@@ -41,11 +41,10 @@ export class DebugService implements IDebugger, IDisposable {
   }
 
   /**
-   * Request whether debugging is enabled for the current session.
+   * Whether the current debugger is started.
    */
-  async requestDebuggingEnabled(): Promise<boolean> {
-    const kernelInfo = await this._session?.requestKernelInfo();
-    return kernelInfo?.debugger ?? false;
+  get isStarted(): boolean {
+    return this._session?.isStarted ?? false;
   }
 
   /**
@@ -138,17 +137,18 @@ export class DebugService implements IDebugger, IDisposable {
   }
 
   /**
-   * Whether the current debugger is started.
-   */
-  isStarted(): boolean {
-    return this._session?.isStarted ?? false;
-  }
-
-  /**
    * Whether there exists a thread in stopped state.
    */
   hasStoppedThreads(): boolean {
     return this._model?.stoppedThreads.size > 0 ?? false;
+  }
+
+  /**
+   * Request whether debugging is enabled for the current session.
+   */
+  async requestDebuggingEnabled(): Promise<boolean> {
+    const kernelInfo = await this._session?.requestKernelInfo();
+    return kernelInfo?.debugger ?? false;
   }
 
   /**
@@ -227,7 +227,7 @@ export class DebugService implements IDebugger, IDisposable {
     const stoppedThreads = new Set(reply.body.stoppedThreads);
     this._model.stoppedThreads = stoppedThreads;
 
-    if (!this.isStarted() && (autoStart || stoppedThreads.size !== 0)) {
+    if (!this.isStarted && (autoStart || stoppedThreads.size !== 0)) {
       await this.start();
     }
 
