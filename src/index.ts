@@ -80,112 +80,47 @@ async function setDebugSession(
   } else {
     debug.session.client = client;
   }
-  const debuggingEnabled = await debug.requestDebuggingEnabled();
-  if (!debuggingEnabled) {
-    return;
-  }
-  await debug.restoreState(true);
   app.commands.notifyCommandChanged();
-}
-
-async function updateToolbar(
-  widget: NotebookPanel | ConsolePanel | DocumentWidget,
-  debug: IDebugger
-) {
-  const isDebuggingEnabled = await debug.requestDebuggingEnabled();
-  if (!isDebuggingEnabled) {
-    return;
-  }
-
-  const toggleAttribute = () => {
-    if (
-      debug.session.isDisposed ||
-      !debug.session.debuggedClients.has(debug.session.client.path)
-    ) {
-      widget.node.removeAttribute('data-jp-debugger');
-      return;
-    }
-    widget.node.setAttribute('data-jp-debugger', 'true');
-  };
-
-  const getToolbar = (): Toolbar => {
-    if (!(widget instanceof ConsolePanel)) {
-      return widget.toolbar;
-    }
-    const toolbar = widget.widgets.find(w => w instanceof Toolbar) as Toolbar;
-    return toolbar ?? new Toolbar();
-  };
-
-  const toolbar = getToolbar();
-
-  const itemAdded = toolbar.addItem(
-    'debugger-button',
-    new ToolbarButton({
-      className: 'jp-DebuggerSwitchButton',
-      iconClassName: 'jp-ToggleSwitch',
-      onClick: async () => {
-        if (!debug.session.debuggedClients.delete(debug.session.client.path)) {
-          debug.session.debuggedClients.add(debug.session.client.path);
-          await debug.start();
-        } else {
-          await debug.stop();
-        }
-        toggleAttribute();
-      },
-      tooltip: 'Enable / Disable Debugger'
-    })
-  );
-
-  if (itemAdded && widget instanceof ConsolePanel) {
-    widget.insertWidget(0, toolbar);
-  }
-
-  debug.session.disposed.connect(() => {
-    if (widget && !widget.isDisposed) {
-      toggleAttribute();
-    }
-  });
-
-  toggleAttribute();
 }
 
 class DebuggerHandler<
   H extends ConsoleHandler | NotebookHandler | FileHandler
 > {
+  /**
+   * Instantiate a new DebuggerHandler.
+   * @param builder The debug handler builder.
+   */
   constructor(builder: new (option: any) => H) {
-    this.builder = builder;
+    this._builder = builder;
   }
 
-  async update<W extends ConsolePanel | NotebookPanel | FileEditor>(
-    debug: IDebugger,
-    widget: W
-  ): Promise<void> {
+  /**
+   * Update a debug handler for the given widget.
+   * @param debug The debug service.
+   * @param widget The widget to update.
+   * @param content The content widget to handle.
+   */
+  async update<
+    W extends ConsolePanel | NotebookPanel | DocumentWidget,
+    C extends ConsolePanel | NotebookPanel | FileEditor
+  >(debug: IDebugger, widget: W, content: C): Promise<void> {
     const debuggingEnabled = await debug.requestDebuggingEnabled();
-    if (!debug.model || !debuggingEnabled || !debug.isStarted) {
+    if (!debug.model || !debuggingEnabled) {
       return;
     }
+    this._addToolbarButton(debug, widget, content);
 
-    if (
-      this.handlers[widget.id] &&
-      !debug.session.debuggedClients.has(debug.session.client.path)
-    ) {
-      return debug.stop();
-    }
-
-    const handler = new this.builder({
-      debuggerService: debug,
-      widget
-    });
-
-    this.handlers[widget.id] = handler;
-
-    widget.disposed.connect(() => {
+    content.disposed.connect(() => {
+      const handler = this._handlers[widget.id];
+      if (!handler) {
+        return;
+      }
       handler.dispose();
-      delete this.handlers[widget.id];
+      delete this._handlers[widget.id];
     });
 
     debug.model.disposed.connect(async () => {
-      const handlerIds = Object.keys(this.handlers);
+      const handlerIds = Object.keys(this._handlers);
       if (handlerIds.length === 0) {
         return;
       }
@@ -193,18 +128,89 @@ class DebuggerHandler<
       debug.session.dispose();
       debug.session = null;
       handlerIds.forEach(id => {
-        this.handlers[id].dispose();
+        this._handlers[id].dispose();
       });
-      this.handlers = {};
+      this._handlers = {};
     });
 
-    if (!debug.session.debuggedClients.has(debug.session.client.path)) {
-      return debug.stop();
-    }
+    // TODO: stop the debugger if started and the widget gets the focus
   }
 
-  private handlers: { [id: string]: H } = {};
-  private builder: new (option: any) => H;
+  /**
+   * Add a button to the widget's toolbar to enable and disable debugging.
+   * @param debug The debug service.
+   * @param widget The widget to add the debug toolbar button to.
+   */
+  private _addToolbarButton(
+    debug: IDebugger,
+    widget: NotebookPanel | ConsolePanel | DocumentWidget,
+    content: NotebookPanel | ConsolePanel | FileEditor
+  ) {
+    const toggleAttribute = () => {
+      const currentPath = debug.session.client.path;
+      const enabled = debug.session.debuggedClients.has(currentPath);
+      if (!enabled) {
+        widget.node.removeAttribute('data-jp-debugger');
+        return;
+      }
+      widget.node.setAttribute('data-jp-debugger', 'true');
+    };
+
+    const toggleDebugging = async () => {
+      const currentPath = debug.session.client.path;
+      const enabled = debug.session.debuggedClients.has(currentPath);
+      if (enabled) {
+        debug.session.debuggedClients.delete(currentPath);
+        await debug.stop();
+        const handler = this._handlers[widget.id];
+        if (!handler) {
+          return;
+        }
+        handler.dispose();
+        delete this._handlers[widget.id];
+      } else {
+        debug.session.debuggedClients.add(currentPath);
+        await debug.restoreState(true);
+        this._handlers[widget.id] = new this._builder({
+          debuggerService: debug,
+          widget: content
+        });
+      }
+      toggleAttribute();
+    };
+
+    const button = new ToolbarButton({
+      className: 'jp-DebuggerSwitchButton',
+      iconClassName: 'jp-ToggleSwitch',
+      onClick: toggleDebugging,
+      tooltip: 'Enable / Disable Debugger'
+    });
+
+    const getToolbar = (): Toolbar => {
+      if (!(widget instanceof ConsolePanel)) {
+        return widget.toolbar;
+      }
+      const toolbar = widget.widgets.find(w => w instanceof Toolbar) as Toolbar;
+      return toolbar ?? new Toolbar();
+    };
+
+    const toolbar = getToolbar();
+    const itemAdded = toolbar.addItem('debugger-button', button);
+    if (itemAdded && widget instanceof ConsolePanel) {
+      widget.insertWidget(0, toolbar);
+    }
+
+    debug.session.disposed.connect(() => {
+      if (widget && !widget.isDisposed) {
+        void toggleDebugging();
+      }
+    });
+
+    toggleAttribute();
+  }
+
+  private _handlers: { [id: string]: H } = {};
+  private _builder: new (option: any) => H;
 }
 
 /**
@@ -223,8 +229,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
         return;
       }
       await setDebugSession(app, debug, widget.session);
-      void handler.update(debug, widget);
-      void updateToolbar(widget, debug);
+      void handler.update(debug, widget, widget);
     });
   }
 };
@@ -272,8 +277,7 @@ const files: JupyterFrontEndPlugin<void> = {
           activeSessions[model.id] = session;
         }
         await setDebugSession(app, debug, session);
-        void handler.update(debug, content);
-        void updateToolbar(widget, debug);
+        void handler.update(debug, widget, content);
       } catch {
         return;
       }
@@ -297,8 +301,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         return;
       }
       await setDebugSession(app, debug, widget.session);
-      void handler.update(debug, widget);
-      void updateToolbar(widget, debug);
+      void handler.update(debug, widget, widget);
     });
   }
 };
