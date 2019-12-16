@@ -73,8 +73,11 @@ export class DebugSession implements IDebugger.ISession {
     }
   }
 
+  /**
+   * Return the set of clients which have enabled debugging.
+   */
   get debuggedClients(): Set<string> {
-    return this._statesClient;
+    return this._debuggedClients;
   }
 
   /**
@@ -109,6 +112,7 @@ export class DebugSession implements IDebugger.ISession {
     }
     this._isDisposed = true;
     this._disposed.emit();
+    this.debuggedClients.clear();
     Signal.clearData(this);
   }
 
@@ -215,17 +219,17 @@ export class DebugSession implements IDebugger.ISession {
     return reply.promise;
   }
 
+  private _seq = 0;
   private _client: IClientSession | Session.ISession;
+  private _debuggedClients: Set<string> = new Set();
   private _ready: Promise<void>;
+  private _isDisposed = false;
+  private _isStarted = false;
   private _disposed = new Signal<this, void>(this);
-  private _isDisposed: boolean = false;
-  private _isStarted: boolean = false;
   private _eventMessage = new Signal<
     IDebugger.ISession,
     IDebugger.ISession.Event
   >(this);
-  private _seq: number = 0;
-  private _statesClient: Set<string> = new Set();
 }
 
 /**
