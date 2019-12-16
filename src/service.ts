@@ -166,7 +166,11 @@ export class DebugService implements IDebugger, IDisposable {
   async stop(): Promise<void> {
     await this.session.stop();
     if (this.model) {
+      // TODO: create a more generic cleanup method?
       this._model.stoppedThreads.clear();
+      const breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
+      this._model.breakpoints.restoreBreakpoints(breakpoints);
+      this._clearModel();
     }
   }
 
@@ -177,7 +181,6 @@ export class DebugService implements IDebugger, IDisposable {
   async restart(): Promise<void> {
     const breakpoints = this._model.breakpoints.breakpoints;
     await this.stop();
-    this._clearModel();
     await this.start();
 
     // No need to dump the cells again, we can simply
