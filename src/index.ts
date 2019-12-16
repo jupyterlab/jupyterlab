@@ -8,7 +8,12 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { IClientSession, ICommandPalette } from '@jupyterlab/apputils';
+import {
+  IClientSession,
+  ICommandPalette,
+  Toolbar,
+  ToolbarButton
+} from '@jupyterlab/apputils';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
@@ -83,6 +88,57 @@ async function setDebugSession(
   app.commands.notifyCommandChanged();
 }
 
+async function updateToolbar(
+  widget: NotebookPanel | ConsolePanel | DocumentWidget,
+  debug: IDebugger
+) {
+  const isDebuggingEnabled = await debug.requestDebuggingEnabled();
+  if (!isDebuggingEnabled) {
+    return;
+  }
+
+  const toggleAttribute = () => {
+    if (debug.session.debuggedClients.has(debug.session.client.path)) {
+      widget.node.setAttribute('data-jp-debugger', 'true');
+    } else {
+      widget.node.removeAttribute('data-jp-debugger');
+    }
+  };
+
+  const getToolbar = (): Toolbar => {
+    if (!(widget instanceof ConsolePanel)) {
+      return widget.toolbar;
+    }
+    const toolbar = widget.widgets.find(w => w instanceof Toolbar) as Toolbar;
+    return toolbar ?? new Toolbar();
+  };
+
+  const toolbar = getToolbar();
+
+  const isToolbarNotExist = toolbar.addItem(
+    'debugger-lifeCycle-button',
+    new ToolbarButton({
+      className: 'jp-DebuggerSwitchButton',
+      iconClassName: 'jp-ToggleSwitch',
+      onClick: async () => {
+        if (!debug.session.debuggedClients.delete(debug.session.client.path)) {
+          debug.session.debuggedClients.add(debug.session.client.path);
+          await debug.start();
+        } else {
+          await debug.stop();
+        }
+        toggleAttribute();
+      },
+      tooltip: 'Enable / Disable Debugger'
+    })
+  );
+
+  if (isToolbarNotExist && widget instanceof ConsolePanel) {
+    widget.insertWidget(0, toolbar);
+  }
+  toggleAttribute();
+}
+
 class DebuggerHandler<
   H extends ConsoleHandler | NotebookHandler | FileHandler
 > {
@@ -93,22 +149,30 @@ class DebuggerHandler<
   async update<W extends ConsolePanel | NotebookPanel | FileEditor>(
     debug: IDebugger,
     widget: W
-  ) {
+  ): Promise<void> {
     const debuggingEnabled = await debug.requestDebuggingEnabled();
-    if (!debug.model || this.handlers[widget.id] || !debuggingEnabled) {
+    if (!debug.model || !debuggingEnabled || !debug.isStarted) {
       return;
     }
+
+    if (
+      this.handlers[widget.id] &&
+      !debug.session.debuggedClients.has(debug.session.client.path)
+    ) {
+      return debug.stop();
+    }
+
     const handler = new this.builder({
       debuggerService: debug,
       widget
     });
-    widget.node.setAttribute('data-jp-debugger', 'true');
+
     this.handlers[widget.id] = handler;
+
     widget.disposed.connect(() => {
       handler.dispose();
       delete this.handlers[widget.id];
     });
-
     debug.model.disposed.connect(async () => {
       const handlerIds = Object.keys(this.handlers);
       if (handlerIds.length === 0) {
@@ -122,6 +186,10 @@ class DebuggerHandler<
       });
       this.handlers = {};
     });
+
+    if (!debug.session.debuggedClients.has(debug.session.client.path)) {
+      return debug.stop();
+    }
   }
 
   private handlers: { [id: string]: H } = {};
@@ -145,6 +213,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
       }
       await setDebugSession(app, debug, widget.session);
       void handler.update(debug, widget);
+      void updateToolbar(widget, debug);
     });
   }
 };
@@ -163,6 +232,7 @@ const files: JupyterFrontEndPlugin<void> = {
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler<FileHandler>(FileHandler);
+
     const activeSessions: {
       [id: string]: Session.ISession;
     } = {};
@@ -192,6 +262,7 @@ const files: JupyterFrontEndPlugin<void> = {
         }
         await setDebugSession(app, debug, session);
         void handler.update(debug, content);
+        void updateToolbar(widget, debug);
       } catch {
         return;
       }
@@ -216,6 +287,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       }
       await setDebugSession(app, debug, widget.session);
       void handler.update(debug, widget);
+      void updateToolbar(widget, debug);
     });
   }
 };

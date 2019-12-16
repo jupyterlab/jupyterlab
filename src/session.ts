@@ -73,6 +73,10 @@ export class DebugSession implements IDebugger.ISession {
     }
   }
 
+  get debuggedClients(): Set<string> {
+    return this._statesClient;
+  }
+
   /**
    * Return the kernel info for the debug session, waiting for the
    * kernel to be ready.
@@ -221,6 +225,7 @@ export class DebugSession implements IDebugger.ISession {
     IDebugger.ISession.Event
   >(this);
   private _seq: number = 0;
+  private _statesClient: Set<string> = new Set();
 }
 
 /**

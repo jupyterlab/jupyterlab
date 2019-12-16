@@ -222,7 +222,11 @@ export class DebugService implements IDebugger, IDisposable {
         );
       });
     }
-    this._model.breakpoints.restoreBreakpoints(bpMap);
+
+    // able resotre breakpoints after realod if had before breakpoints and enable lifecycle debugging
+    if (bpMap.size > 0 && autoStart) {
+      this.session.debuggedClients.add(this.session.client.path);
+    }
 
     const stoppedThreads = new Set(reply.body.stoppedThreads);
     this._model.stoppedThreads = stoppedThreads;
@@ -231,6 +235,11 @@ export class DebugService implements IDebugger, IDisposable {
       await this.start();
     }
 
+    if (!this.session.debuggedClients.has(this.session.client.path)) {
+      return;
+    }
+
+    this._model.breakpoints.restoreBreakpoints(bpMap);
     if (stoppedThreads.size !== 0) {
       await this._getAllFrames();
     } else {

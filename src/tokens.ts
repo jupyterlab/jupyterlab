@@ -145,6 +145,11 @@ export namespace IDebugger {
     client: IClientSession | Session.ISession;
 
     /**
+     * Set of clientes which have enabled debugging.
+     */
+    debuggedClients: Set<string>;
+
+    /**
      * Whether the debug session is started
      */
     readonly isStarted: boolean;
