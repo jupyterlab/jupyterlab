@@ -572,8 +572,7 @@ export interface IManager extends IBaseManager {
   runningChanged: ISignal<IManager, IModel[]>;
 
   /**
-   * A signal emitted when there is a connection failure.
-   * TODO: figure out the relationship between this and the other connection status signals for kernels.
+   * A signal emitted when there is a server API connection failure.
    */
   connectionFailure: ISignal<IManager, ServerConnection.NetworkError>;
 

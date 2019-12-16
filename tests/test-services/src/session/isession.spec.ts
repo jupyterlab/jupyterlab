@@ -119,8 +119,6 @@ describe('session', () => {
 
     describe('#unhandledMessage', () => {
       it('should be emitted for an unhandled message', async () => {
-        // TODO: make a KernelTester, then make a session connection to that
-        // kernel.
         const tester = new SessionTester();
         const session = await tester.startSession();
         const msgId = UUID.uuid4();
