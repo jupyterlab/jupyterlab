@@ -107,12 +107,12 @@ export class DebugSession implements IDebugger.ISession {
    * Dispose the debug session.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._isDisposed) {
       return;
     }
     this._isDisposed = true;
-    this._disposed.emit();
     this.debuggedClients.clear();
+    this._disposed.emit();
     Signal.clearData(this);
   }
 

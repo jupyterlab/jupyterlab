@@ -98,11 +98,14 @@ async function updateToolbar(
   }
 
   const toggleAttribute = () => {
-    if (debug.session.debuggedClients.has(debug.session.client.path)) {
-      widget.node.setAttribute('data-jp-debugger', 'true');
-    } else {
+    if (
+      debug.session.isDisposed ||
+      !debug.session.debuggedClients.has(debug.session.client.path)
+    ) {
       widget.node.removeAttribute('data-jp-debugger');
+      return;
     }
+    widget.node.setAttribute('data-jp-debugger', 'true');
   };
 
   const getToolbar = (): Toolbar => {
@@ -136,6 +139,12 @@ async function updateToolbar(
   if (itemAdded && widget instanceof ConsolePanel) {
     widget.insertWidget(0, toolbar);
   }
+
+  debug.session.disposed.connect(() => {
+    if (widget && !widget.isDisposed) {
+      toggleAttribute();
+    }
+  });
 
   toggleAttribute();
 }
@@ -174,6 +183,7 @@ class DebuggerHandler<
       handler.dispose();
       delete this.handlers[widget.id];
     });
+
     debug.model.disposed.connect(async () => {
       const handlerIds = Object.keys(this.handlers);
       if (handlerIds.length === 0) {
@@ -456,7 +466,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
           commands.notifyCommandChanged();
         });
 
-        shell.add(sidebar, 'right');
         if (labShell.currentWidget) {
           labShell.currentWidget.activate();
         }
@@ -464,6 +473,8 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         if (restorer) {
           restorer.add(sidebar, 'debugger-sidebar');
         }
+
+        shell.add(sidebar, 'right');
 
         await service.restoreState(true);
       }
