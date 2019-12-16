@@ -108,10 +108,17 @@ class DebuggerHandler<
     if (!debug.model || !debuggingEnabled) {
       return;
     }
+
     this._addToolbarButton(debug, widget, content);
 
+    await debug.restoreState(false);
+
+    const handler = this._handlers[widget.id];
+    if (handler) {
+      return;
+    }
+
     content.disposed.connect(() => {
-      const handler = this._handlers[widget.id];
       if (!handler) {
         return;
       }
@@ -132,8 +139,6 @@ class DebuggerHandler<
       });
       this._handlers = {};
     });
-
-    await debug.restoreState(false);
   }
 
   /**
@@ -204,12 +209,6 @@ class DebuggerHandler<
     if (itemAdded && widget instanceof ConsolePanel) {
       widget.insertWidget(0, toolbar);
     }
-
-    debug.session.disposed.connect(() => {
-      if (widget && !widget.isDisposed) {
-        void toggleDebugging();
-      }
-    });
 
     if (debug.isStarted) {
       void createHandler();
