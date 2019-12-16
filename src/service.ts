@@ -144,16 +144,8 @@ export class DebugService implements IDebugger, IDisposable {
   }
 
   /**
-   * Request whether debugging is enabled for the current session.
-   */
-  async requestDebuggingEnabled(): Promise<boolean> {
-    const kernelInfo = await this._session?.requestKernelInfo();
-    return kernelInfo?.debugger ?? false;
-  }
-
-  /**
    * Starts a debugger.
-   * Precondition: !isStarted()
+   * Precondition: !isStarted
    */
   async start(): Promise<void> {
     await this.session.start();
@@ -161,7 +153,7 @@ export class DebugService implements IDebugger, IDisposable {
 
   /**
    * Stops the debugger.
-   * Precondition: isStarted()
+   * Precondition: isStarted
    */
   async stop(): Promise<void> {
     await this.session.stop();
@@ -176,7 +168,7 @@ export class DebugService implements IDebugger, IDisposable {
 
   /**
    * Restarts the debugger.
-   * Precondition: isStarted().
+   * Precondition: isStarted.
    */
   async restart(): Promise<void> {
     const breakpoints = this._model.breakpoints.breakpoints;
@@ -190,6 +182,7 @@ export class DebugService implements IDebugger, IDisposable {
       const sourceBreakpoints = Private.toSourceBreakpoints(bps);
       await this._setBreakpoints(sourceBreakpoints, source);
     }
+    this._model.breakpoints.restoreBreakpoints(breakpoints);
   }
 
   /**

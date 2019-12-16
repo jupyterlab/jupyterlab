@@ -74,15 +74,6 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   /**
-   * Return the kernel info for the debug session, waiting for the
-   * kernel to be ready.
-   */
-  async requestKernelInfo(): Promise<IDebugger.ISession.IInfoReply | null> {
-    await this._ready;
-    return (this.client.kernel?.info as IDebugger.ISession.IInfoReply) ?? null;
-  }
-
-  /**
    * Whether the debug session is started
    */
   get isStarted(): boolean {
@@ -232,5 +223,20 @@ export namespace DebugSession {
      * The client session used by the debug session.
      */
     client: IClientSession | Session.ISession;
+  }
+
+  /**
+   * Request whether debugging is enabled for the given client.
+   * @param client The client session.
+   */
+  export async function requestDebuggingEnabled(
+    client: IClientSession | Session.ISession
+  ) {
+    if (client instanceof ClientSession) {
+      await client.ready;
+    }
+    await client.kernel.ready;
+    const info = (client.kernel?.info as IDebugger.ISession.IInfoReply) ?? null;
+    return info?.debugger ?? false;
   }
 }

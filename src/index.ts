@@ -70,19 +70,6 @@ export namespace CommandIDs {
   export const close = 'debugger:close';
 }
 
-async function setDebugSession(
-  app: JupyterFrontEnd,
-  debug: IDebugger,
-  client: IClientSession | Session.ISession
-) {
-  if (!debug.session) {
-    debug.session = new DebugSession({ client: client });
-  } else {
-    debug.session.client = client;
-  }
-  app.commands.notifyCommandChanged();
-}
-
 /**
  * Add a button to the widget toolbar to enable and disable debugging.
  * @param debug The debug service.
@@ -154,10 +141,22 @@ class DebuggerHandler<
   async update<
     W extends ConsolePanel | NotebookPanel | DocumentWidget,
     C extends ConsolePanel | NotebookPanel | FileEditor
-  >(debug: IDebugger, widget: W, content: C): Promise<void> {
-    const debuggingEnabled = await debug.requestDebuggingEnabled();
+  >(
+    debug: IDebugger,
+    widget: W,
+    content: C,
+    client: IClientSession | Session.ISession
+  ): Promise<void> {
+    const debuggingEnabled = await DebugSession.requestDebuggingEnabled(client);
     if (!debug.model || !debuggingEnabled) {
       return;
+    }
+
+    // update the active debug session
+    if (!debug.session) {
+      debug.session = new DebugSession({ client: client });
+    } else {
+      debug.session.client = client;
     }
 
     const updateAttribute = () => {
@@ -238,8 +237,8 @@ const consoles: JupyterFrontEndPlugin<void> = {
       if (!(widget instanceof ConsolePanel)) {
         return;
       }
-      await setDebugSession(app, debug, widget.session);
-      void handler.update(debug, widget, widget);
+      await handler.update(debug, widget, widget, widget.session);
+      app.commands.notifyCommandChanged();
     });
   }
 };
@@ -289,8 +288,8 @@ const files: JupyterFrontEndPlugin<void> = {
           session = sessions.connectTo(model);
           activeSessions[model.id] = session;
         }
-        await setDebugSession(app, debug, session);
-        void handler.update(debug, widget, content);
+        void handler.update(debug, widget, content, session);
+        app.commands.notifyCommandChanged();
       } catch {
         return;
       }
@@ -316,8 +315,8 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       if (!(widget instanceof NotebookPanel)) {
         return;
       }
-      await setDebugSession(app, debug, widget.session);
-      void handler.update(debug, widget, widget);
+      void handler.update(debug, widget, widget, widget.session);
+      app.commands.notifyCommandChanged();
     });
   }
 };
@@ -494,8 +493,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         }
 
         shell.add(sidebar, 'right');
-
-        await service.restoreState(true);
       }
     });
 

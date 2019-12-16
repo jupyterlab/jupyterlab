@@ -48,11 +48,6 @@ export interface IDebugger {
   readonly eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
 
   /**
-   * Request whether debugging is enabled for the current session.
-   */
-  requestDebuggingEnabled(): Promise<boolean>;
-
-  /**
    * Computes an id based on the given code.
    */
   getCodeId(code: string): string;
@@ -156,12 +151,6 @@ export namespace IDebugger {
       IDebugger.ISession,
       IDebugger.ISession.Event
     >;
-
-    /**
-     * Return the kernel info for the debug session, waiting for the
-     * kernel to be ready.
-     */
-    requestKernelInfo(): Promise<IDebugger.ISession.IInfoReply | null>;
 
     /**
      * Start a new debug session.
