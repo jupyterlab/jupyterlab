@@ -327,9 +327,13 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    * Handle a DOM click event.
    */
   protected handleClick(event: Event) {
-    // Clicking a label focuses the corresponding control, so let it be.
+    // Clicking a label focuses the corresponding control
+    // that is linked with `for` attribute, so let it be.
     if (event.target instanceof HTMLLabelElement) {
-      return;
+      const forId = event.target.getAttribute('for');
+      if (forId && this.node.querySelector(`#${forId}`)) {
+        return;
+      }
     }
 
     // If this click already focused a control, let it be.

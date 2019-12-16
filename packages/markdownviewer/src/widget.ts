@@ -288,7 +288,7 @@ export class MarkdownDocument extends DocumentWidget<MarkdownViewer> {
  */
 export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
   /**
-   * Construct a new mimetype widget factory.
+   * Construct a new markdown viewer widget factory.
    */
   constructor(options: MarkdownViewerFactory.IOptions) {
     super(Private.createRegistryOptions(options));
@@ -319,11 +319,11 @@ export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
 }
 
 /**
- * The namespace for MimeDocumentFactory class statics.
+ * The namespace for MarkdownViewerFactory class statics.
  */
 export namespace MarkdownViewerFactory {
   /**
-   * The options used to initialize a MimeDocumentFactory.
+   * The options used to initialize a MarkdownViewerFactory.
    */
   export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
     /**
