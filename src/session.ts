@@ -73,19 +73,6 @@ export class DebugSession implements IDebugger.ISession {
     }
   }
 
-  get debuggedClients(): Set<string> {
-    return this._statesClient;
-  }
-
-  /**
-   * Return the kernel info for the debug session, waiting for the
-   * kernel to be ready.
-   */
-  async requestKernelInfo(): Promise<IDebugger.ISession.IInfoReply | null> {
-    await this._ready;
-    return (this.client.kernel?.info as IDebugger.ISession.IInfoReply) ?? null;
-  }
-
   /**
    * Whether the debug session is started
    */
@@ -104,7 +91,7 @@ export class DebugSession implements IDebugger.ISession {
    * Dispose the debug session.
    */
   dispose(): void {
-    if (this.isDisposed) {
+    if (this._isDisposed) {
       return;
     }
     this._isDisposed = true;
@@ -215,17 +202,16 @@ export class DebugSession implements IDebugger.ISession {
     return reply.promise;
   }
 
+  private _seq = 0;
   private _client: IClientSession | Session.ISession;
   private _ready: Promise<void>;
+  private _isDisposed = false;
+  private _isStarted = false;
   private _disposed = new Signal<this, void>(this);
-  private _isDisposed: boolean = false;
-  private _isStarted: boolean = false;
   private _eventMessage = new Signal<
     IDebugger.ISession,
     IDebugger.ISession.Event
   >(this);
-  private _seq: number = 0;
-  private _statesClient: Set<string> = new Set();
 }
 
 /**

@@ -43,7 +43,7 @@ export class EditorHandler implements IDisposable {
       this.sendEditorBreakpoints();
     }, this);
 
-    this.setup();
+    this.setupEditor();
   }
 
   isDisposed: boolean;
@@ -79,9 +79,9 @@ export class EditorHandler implements IDisposable {
       return;
     }
     this._editorMonitor.dispose();
-    this.removeGutterClick();
-    Signal.clearData(this);
+    this.clearEditor();
     this.isDisposed = true;
+    Signal.clearData(this);
   }
 
   protected sendEditorBreakpoints() {
@@ -104,7 +104,7 @@ export class EditorHandler implements IDisposable {
     );
   }
 
-  protected setup() {
+  protected setupEditor() {
     if (!this._editor || this._editor.isDisposed) {
       return;
     }
@@ -120,11 +120,13 @@ export class EditorHandler implements IDisposable {
     editor.editor.on('gutterClick', this.onGutterClick);
   }
 
-  protected removeGutterClick() {
+  protected clearEditor() {
     if (!this._editor || this._editor.isDisposed) {
       return;
     }
     const editor = this._editor as CodeMirrorEditor;
+    editor.setOption('lineNumbers', false);
+    editor.editor.setOption('gutters', []);
     editor.editor.off('gutterClick', this.onGutterClick);
   }
 

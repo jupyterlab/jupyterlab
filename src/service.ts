@@ -1,6 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ClientSession, IClientSession } from '@jupyterlab/apputils';
+
+import { Session } from '@jupyterlab/services';
+
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -119,6 +123,21 @@ export class DebugService implements IDebugger, IDisposable {
   }
 
   /**
+   * Request whether debugging is available for the given client.
+   * @param client The client session.
+   */
+  async isAvailable(
+    client: IClientSession | Session.ISession
+  ): Promise<boolean> {
+    if (client instanceof ClientSession) {
+      await client.ready;
+    }
+    await client.kernel.ready;
+    const info = (client.kernel?.info as IDebugger.ISession.IInfoReply) ?? null;
+    return !!(info?.debugger ?? false);
+  }
+
+  /**
    * Dispose the debug service.
    */
   dispose(): void {
@@ -144,16 +163,8 @@ export class DebugService implements IDebugger, IDisposable {
   }
 
   /**
-   * Request whether debugging is enabled for the current session.
-   */
-  async requestDebuggingEnabled(): Promise<boolean> {
-    const kernelInfo = await this._session?.requestKernelInfo();
-    return kernelInfo?.debugger ?? false;
-  }
-
-  /**
    * Starts a debugger.
-   * Precondition: !isStarted()
+   * Precondition: !isStarted
    */
   async start(): Promise<void> {
     await this.session.start();
@@ -161,23 +172,26 @@ export class DebugService implements IDebugger, IDisposable {
 
   /**
    * Stops the debugger.
-   * Precondition: isStarted()
+   * Precondition: isStarted
    */
   async stop(): Promise<void> {
     await this.session.stop();
     if (this.model) {
+      // TODO: create a more generic cleanup method?
       this._model.stoppedThreads.clear();
+      const breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
+      this._model.breakpoints.restoreBreakpoints(breakpoints);
+      this._clearModel();
     }
   }
 
   /**
    * Restarts the debugger.
-   * Precondition: isStarted().
+   * Precondition: isStarted.
    */
   async restart(): Promise<void> {
     const breakpoints = this._model.breakpoints.breakpoints;
     await this.stop();
-    this._clearModel();
     await this.start();
 
     // No need to dump the cells again, we can simply
@@ -187,6 +201,7 @@ export class DebugService implements IDebugger, IDisposable {
       const sourceBreakpoints = Private.toSourceBreakpoints(bps);
       await this._setBreakpoints(sourceBreakpoints, source);
     }
+    this._model.breakpoints.restoreBreakpoints(breakpoints);
   }
 
   /**
@@ -223,20 +238,11 @@ export class DebugService implements IDebugger, IDisposable {
       });
     }
 
-    // able resotre breakpoints after realod if had before breakpoints and enable lifecycle debugging
-    if (bpMap.size > 0 && autoStart) {
-      this.session.debuggedClients.add(this.session.client.path);
-    }
-
     const stoppedThreads = new Set(reply.body.stoppedThreads);
     this._model.stoppedThreads = stoppedThreads;
 
     if (!this.isStarted && (autoStart || stoppedThreads.size !== 0)) {
       await this.start();
-    }
-
-    if (!this.session.debuggedClients.has(this.session.client.path)) {
-      return;
     }
 
     this._model.breakpoints.restoreBreakpoints(bpMap);

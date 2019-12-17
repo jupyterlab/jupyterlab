@@ -48,9 +48,10 @@ export interface IDebugger {
   readonly eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
 
   /**
-   * Request whether debugging is enabled for the current session.
+   * Request whether debugging is available for the given client.
+   * @param client The client session.
    */
-  requestDebuggingEnabled(): Promise<boolean>;
+  isAvailable(client: IClientSession | Session.ISession): Promise<boolean>;
 
   /**
    * Computes an id based on the given code.
@@ -145,11 +146,6 @@ export namespace IDebugger {
     client: IClientSession | Session.ISession;
 
     /**
-     * Set of clientes which have enabled debugging.
-     */
-    debuggedClients: Set<string>;
-
-    /**
      * Whether the debug session is started
      */
     readonly isStarted: boolean;
@@ -161,12 +157,6 @@ export namespace IDebugger {
       IDebugger.ISession,
       IDebugger.ISession.Event
     >;
-
-    /**
-     * Return the kernel info for the debug session, waiting for the
-     * kernel to be ready.
-     */
-    requestKernelInfo(): Promise<IDebugger.ISession.IInfoReply | null>;
 
     /**
      * Start a new debug session.

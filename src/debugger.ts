@@ -96,6 +96,9 @@ export namespace Debugger {
     readonly sources: Sources.Model;
 
     dispose(): void {
+      if (this._isDisposed) {
+        return;
+      }
       this._isDisposed = true;
       this._disposed.emit();
     }

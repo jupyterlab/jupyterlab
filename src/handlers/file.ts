@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DocumentWidget } from '@jupyterlab/docregistry';
+
 import { FileEditor } from '@jupyterlab/fileeditor';
 
 import { IDisposable } from '@phosphor/disposable';
@@ -14,7 +16,7 @@ import { IDebugger } from '../tokens';
 export class FileHandler implements IDisposable {
   constructor(options: DebuggerFileHandler.IOptions) {
     this.debuggerService = options.debuggerService;
-    this.fileEditor = options.widget;
+    this.fileEditor = options.widget.content;
 
     this.editorHandler = new EditorHandler({
       debuggerService: this.debuggerService,
@@ -41,6 +43,6 @@ export class FileHandler implements IDisposable {
 export namespace DebuggerFileHandler {
   export interface IOptions {
     debuggerService: IDebugger;
-    widget: FileEditor;
+    widget: DocumentWidget<FileEditor>;
   }
 }

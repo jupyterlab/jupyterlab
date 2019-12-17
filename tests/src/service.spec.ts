@@ -14,7 +14,8 @@ import { DebugSession } from '../../lib/session';
 
 import { IDebugger } from '../../lib/tokens';
 
-describe('Debugging Support', () => {
+describe('Debugging support', () => {
+  const service = new DebugService();
   let xpythonClient: IClientSession;
   let ipykernelClient: IClientSession;
 
@@ -43,20 +44,14 @@ describe('Debugging Support', () => {
     await Promise.all([xpythonClient.shutdown(), ipykernelClient.shutdown()]);
   });
 
-  describe('#requestDebuggingEnabled', () => {
+  describe('#isAvailable', () => {
     it('should return true for kernels that have support for debugging', async () => {
-      const debugSession = new DebugSession({ client: xpythonClient });
-      let service = new DebugService();
-      service.session = debugSession;
-      const enabled = await service.requestDebuggingEnabled();
+      const enabled = await service.isAvailable(xpythonClient);
       expect(enabled).to.be.true;
     });
 
     it('should return false for kernels that do not have support for debugging', async () => {
-      const debugSession = new DebugSession({ client: ipykernelClient });
-      let service = new DebugService();
-      service.session = debugSession;
-      const enabled = await service.requestDebuggingEnabled();
+      const enabled = await service.isAvailable(ipykernelClient);
       expect(enabled).to.be.false;
     });
   });
