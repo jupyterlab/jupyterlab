@@ -145,18 +145,20 @@ export class SessionManager extends BaseManager implements Session.IManager {
   /**
    * Start a new session.  See also [[startNewSession]].
    *
-   * @param options - Overrides for the default options, must include a `path`.
+   * @param createOptions - Options for creating the session
+   * 
+   * @param connectOptions - Options for connecting to the session
    */
   async startNew(
-    options: Session.ISessionOptions &
-      Omit<
-        Session.ISessionConnection.IOptions,
-        'model' | 'connectToKernel' | 'serverSettings'
-      >
+    createOptions: Session.ISessionOptions,
+    connectOptions: Omit<
+      Session.ISessionConnection.IOptions,
+      'model' | 'connectToKernel' | 'serverSettings'
+    > = {}
   ): Promise<Session.ISessionConnection> {
-    const model = await startSession(options, this.serverSettings);
+    const model = await startSession(createOptions, this.serverSettings);
     await this.refreshRunning();
-    return this.connectTo({ ...options, model });
+    return this.connectTo({ ...connectOptions, model });
   }
 
   /**

@@ -429,7 +429,7 @@ export class SessionContext implements ISessionContext {
    * Change the current kernel associated with the session.
    */
   async changeKernel(
-    options: Partial<Kernel.IModel>
+    options: Partial<Kernel.IModel> = {}
   ): Promise<Kernel.IKernelConnection> {
     await this.initialize();
     if (this.isDisposed) {
@@ -568,7 +568,7 @@ export class SessionContext implements ISessionContext {
    * Change the kernel.
    */
   private async _changeKernel(
-    options: Partial<Kernel.IModel>
+    options: Partial<Kernel.IModel> = {}
   ): Promise<Kernel.IKernelConnection> {
     if (this.isDisposed) {
       throw new Error('Disposed');
@@ -624,7 +624,7 @@ export class SessionContext implements ISessionContext {
    * Start a session and set up its signals.
    */
   private async _startSession(
-    model: Partial<Kernel.IModel>
+    model: Partial<Kernel.IModel> = {}
   ): Promise<Kernel.IKernelConnection> {
     if (this.isDisposed) {
       throw 'Client session is disposed.';

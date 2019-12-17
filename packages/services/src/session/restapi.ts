@@ -93,13 +93,13 @@ export async function getSessionModel(
  * already exists.
  */
 export async function startSession(
-  model: Session.ISessionOptions,
+  options: Session.ISessionOptions,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Session.IModel> {
   let url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
   let init = {
     method: 'POST',
-    body: JSON.stringify(model)
+    body: JSON.stringify(options)
   };
   let response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 201) {
@@ -115,7 +115,7 @@ export async function startSession(
  * Send a PATCH to the server, updating the session path or the kernel.
  */
 export async function updateSession(
-  model: Pick<Session.IModel, 'id'> & DeepPartial<Session.IModel>,
+  model: Pick<Session.IModel, 'id'> & DeepPartial<Omit<Session.IModel, 'id'>>,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Session.IModel> {
   let url = getSessionUrl(settings.baseUrl, model.id);

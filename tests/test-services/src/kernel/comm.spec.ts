@@ -85,10 +85,10 @@ describe('jupyter.services - Comm', () => {
       });
 
       it('should throw an error when the kernel does not handle comms', async () => {
-        const kernel2 = await kernelManager.startNew({
-          name: 'ipython',
-          handleComms: false
-        });
+        const kernel2 = await kernelManager.startNew(
+          { name: 'ipython' },
+          { handleComms: false }
+        );
         expect(kernel2.handleComms).to.be.false;
         expect(() => kernel2.createComm('test', '1234')).to.throw();
       });
@@ -133,10 +133,10 @@ describe('jupyter.services - Comm', () => {
         const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
           promise.resolve([comm, msg]);
         };
-        const kernel2 = await kernelManager.startNew({
-          name: 'ipython',
-          handleComms: false
-        });
+        const kernel2 = await kernelManager.startNew(
+          { name: 'ipython' },
+          { handleComms: false }
+        );
         kernel2.registerCommTarget('test', hook);
 
         // Request the comm creation.

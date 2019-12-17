@@ -21,7 +21,7 @@ async function main() {
   let sessionManager = new SessionManager({ kernelManager });
 
   // Start a new session.
-  let options: Session.IRequest = {
+  let options: Session.ISessionOptions = {
     kernel: {
       name: 'python'
     },

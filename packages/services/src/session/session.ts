@@ -257,14 +257,22 @@ export interface IManager extends IDisposable {
   /**
    * Start a new session.
    *
-   * @param options - The session request options to use.
+   * @param createOptions - Options for creating the session
+   * 
+   * @param connectOptions - Options for connecting to the session
    *
-   * @returns A promise that resolves with the session instance.
+   * @returns A promise that resolves with a session connection instance.
    *
    * #### Notes
-   * The `serverSettings` of the manager will be used.
+   * The `serverSettings` and `connectToKernel` options of the manager will be used.
    */
-  startNew(options: ISessionOptions): Promise<ISessionConnection>;
+  startNew(
+    createOptions: ISessionOptions,
+    connectOptions?: Omit<
+      ISessionConnection.IOptions,
+      'model' | 'connectToKernel' | 'serverSettings'
+    >
+  ): Promise<ISessionConnection>;
 
   /**
    * Find a session by id.
@@ -367,4 +375,4 @@ export interface IModel {
  */
 export type ISessionOptions = Pick<IModel, 'path' | 'type' | 'name'> & {
   kernel?: Partial<Pick<Kernel.IModel, 'name'>>;
-}
+};

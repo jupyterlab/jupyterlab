@@ -72,7 +72,7 @@ export async function startNew(
   let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
   let init = {
     method: 'POST',
-    body: JSON.stringify({ name: options.name, env: options.env })
+    body: JSON.stringify(options)
   };
   let response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 201) {
@@ -86,14 +86,7 @@ export async function startNew(
 /**
  * The options object used to initialize a kernel.
  */
-export type IKernelOptions = Partial<Pick<IModel, 'name'>> & {
-  /**
-   * Environment variables passed to the kernelspec (used in Enterprise Gateway)
-   */
-  env?: {
-    [key: string]: string;
-  };
-};
+export type IKernelOptions = Partial<Pick<IModel, 'name'>>;
 
 /**
  * Restart a kernel.

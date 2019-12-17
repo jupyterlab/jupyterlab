@@ -16,11 +16,10 @@ import * as KernelMessage from './messages';
 import { KernelSpec } from '../kernelspec';
 import { IManager as IBaseManager } from '../basemanager';
 
-import * as restapi from './restapi';
-import { IModel } from './restapi';
+import { IModel, IKernelOptions } from './restapi';
 
 export { Status } from './messages';
-export { IModel };
+export { IModel, IKernelOptions };
 
 /**
  * Interface of a Kernel connection that is managed by a session.
@@ -612,16 +611,21 @@ export interface IManager extends IBaseManager {
   /**
    * Start a new kernel.
    *
-   * @param options - The kernel options to use.
+   * @param createOptions - The kernel creation options
    *
-   * @returns A promise that resolves with the kernel instance.
+   * @param connectOptions - The kernel connection options
+   *
+   * @returns A promise that resolves with the kernel connection.
    *
    * #### Notes
    * The manager `serverSettings` will be always be used.
    */
   startNew(
-    options?: restapi.IKernelOptions &
-      Omit<IKernelConnection.IOptions, 'model' | 'serverSettings'>
+    createOptions?: IKernelOptions,
+    connectOptions?: Omit<
+      IKernelConnection.IOptions,
+      'model' | 'serverSettings'
+    >
   ): Promise<IKernelConnection>;
 
   /**
