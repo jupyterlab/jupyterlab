@@ -19,6 +19,8 @@ import {
   testEmission
 } from '@jupyterlab/testutils';
 
+import { SessionAPI } from '@jupyterlab/services';
+
 describe('@jupyterlab/apputils', () => {
   describe('SessionContext', () => {
     const kernelManager = new KernelManager();
@@ -283,7 +285,26 @@ describe('@jupyterlab/apputils', () => {
         sessionContext.dispose();
         expect(sessionContext.isDisposed).to.equal(true);
       });
-      it.todo('should shut down the session when shutdownOnDispose is true');
+
+      it('should not shut down the session by default', async () => {
+        await sessionContext.initialize();
+        const id = sessionContext.session.id;
+        sessionContext.dispose();
+        const sessions = await SessionAPI.listRunning();
+        expect(sessions.find(s => s.id === id)).to.be.ok;
+      });
+
+      it('should shut down the session when shutdownOnDispose is true', async () => {
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          shutdownOnDispose: true
+        };
+        await sessionContext.initialize();
+        const id = sessionContext.session.id;
+        sessionContext.dispose();
+        const sessions = await SessionAPI.listRunning();
+        expect(sessions.find(s => s.id === id)).to.be.undefined;
+      });
     });
 
     describe('#changeKernel()', () => {
