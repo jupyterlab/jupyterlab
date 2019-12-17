@@ -136,15 +136,10 @@ class DebuggerHandler<
    * Update a debug handler for the given widget.
    * @param debug The debug service.
    * @param widget The widget to update.
-   * @param content The content widget to handle.
    */
-  async update<
-    W extends ConsolePanel | NotebookPanel | DocumentWidget,
-    C extends ConsolePanel | NotebookPanel | FileEditor
-  >(
+  async update<W extends ConsolePanel | NotebookPanel | DocumentWidget>(
     debug: IDebugger,
     widget: W,
-    content: C,
     client: IClientSession | Session.ISession
   ): Promise<void> {
     const debuggingEnabled = await DebugSession.requestDebuggingEnabled(client);
@@ -174,7 +169,7 @@ class DebuggerHandler<
       await debug.restoreState(true);
       this._handlers[widget.id] = new this._builder({
         debuggerService: debug,
-        widget: content
+        widget
       });
       updateAttribute();
     };
@@ -211,7 +206,7 @@ class DebuggerHandler<
     await createHandler();
 
     // listen to the disposed signals
-    content.disposed.connect(removeHandler);
+    widget.disposed.connect(removeHandler);
     debug.model.disposed.connect(removeHandler);
   }
 
@@ -237,7 +232,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
       if (!(widget instanceof ConsolePanel)) {
         return;
       }
-      await handler.update(debug, widget, widget, widget.session);
+      await handler.update(debug, widget, widget.session);
       app.commands.notifyCommandChanged();
     });
   }
@@ -288,7 +283,7 @@ const files: JupyterFrontEndPlugin<void> = {
           session = sessions.connectTo(model);
           activeSessions[model.id] = session;
         }
-        void handler.update(debug, widget, content, session);
+        void handler.update(debug, widget, session);
         app.commands.notifyCommandChanged();
       } catch {
         return;
@@ -315,7 +310,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       if (!(widget instanceof NotebookPanel)) {
         return;
       }
-      void handler.update(debug, widget, widget, widget.session);
+      void handler.update(debug, widget, widget.session);
       app.commands.notifyCommandChanged();
     });
   }
