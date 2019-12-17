@@ -81,7 +81,6 @@ describe('jupyter.services - Comm', () => {
       });
 
       it('should throw an error if there is an existing comm', () => {
-        kernel.createComm('test', '1234');
         expect(() => kernel.createComm('test', '1234')).to.throw();
       });
 
