@@ -119,7 +119,7 @@ class DebuggerHandler<
    * Dispose all the handlers.
    * @param debug The debug service.
    */
-  async disposeAll(debug: IDebugger) {
+  disposeAll(debug: IDebugger) {
     const handlerIds = Object.keys(this._handlers);
     if (handlerIds.length === 0) {
       return;
@@ -224,7 +224,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
   activate: (app: JupyterFrontEnd, debug: IDebugger, labShell: ILabShell) => {
     const handler = new DebuggerHandler<ConsoleHandler>(ConsoleHandler);
     debug.model.disposed.connect(() => {
-      void handler.disposeAll(debug);
+      handler.disposeAll(debug);
     });
 
     labShell.currentChanged.connect(async (_, update) => {
@@ -253,7 +253,7 @@ const files: JupyterFrontEndPlugin<void> = {
   ) => {
     const handler = new DebuggerHandler<FileHandler>(FileHandler);
     debug.model.disposed.connect(() => {
-      void handler.disposeAll(debug);
+      handler.disposeAll(debug);
     });
 
     const activeSessions: {
@@ -302,7 +302,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   activate: (app: JupyterFrontEnd, debug: IDebugger, labShell: ILabShell) => {
     const handler = new DebuggerHandler<NotebookHandler>(NotebookHandler);
     debug.model.disposed.connect(() => {
-      void handler.disposeAll(debug);
+      handler.disposeAll(debug);
     });
 
     labShell.currentChanged.connect(async (_, update) => {
