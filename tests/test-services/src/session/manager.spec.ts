@@ -211,14 +211,12 @@ describe('session/manager', () => {
         expect(session.isDisposed).to.equal(true);
       });
 
-      it.skip('should dispose of all session instances', async () => {
-        // TODO: we can only do this from the session manager, right? In
-        // general, how do we get a notification from the server that a
-        // session has shut down?
+      it('should dispose of all session instances asynchronously', async () => {
         const session0 = await startNew(manager);
         const session1 = manager.connectTo(session0.model);
+        const emission = testEmission(session1.disposed);
         await session0.shutdown();
-        expect(session1.isDisposed).to.equal(true);
+        await emission;
       });
     });
   });
