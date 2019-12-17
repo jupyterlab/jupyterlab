@@ -224,19 +224,4 @@ export namespace DebugSession {
      */
     client: IClientSession | Session.ISession;
   }
-
-  /**
-   * Request whether debugging is enabled for the given client.
-   * @param client The client session.
-   */
-  export async function requestDebuggingEnabled(
-    client: IClientSession | Session.ISession
-  ): Promise<boolean> {
-    if (client instanceof ClientSession) {
-      await client.ready;
-    }
-    await client.kernel.ready;
-    const info = (client.kernel?.info as IDebugger.ISession.IInfoReply) ?? null;
-    return !!(info?.debugger ?? false);
-  }
 }

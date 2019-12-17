@@ -1,6 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ClientSession, IClientSession } from '@jupyterlab/apputils';
+
+import { Session } from '@jupyterlab/services';
+
 import { IDisposable } from '@phosphor/disposable';
 
 import { ISignal, Signal } from '@phosphor/signaling';
@@ -116,6 +120,21 @@ export class DebugService implements IDebugger, IDisposable {
    */
   get eventMessage(): ISignal<IDebugger, IDebugger.ISession.Event> {
     return this._eventMessage;
+  }
+
+  /**
+   * Request whether debugging is available for the given client.
+   * @param client The client session.
+   */
+  async isAvailable(
+    client: IClientSession | Session.ISession
+  ): Promise<boolean> {
+    if (client instanceof ClientSession) {
+      await client.ready;
+    }
+    await client.kernel.ready;
+    const info = (client.kernel?.info as IDebugger.ISession.IInfoReply) ?? null;
+    return !!(info?.debugger ?? false);
   }
 
   /**

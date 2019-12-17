@@ -48,6 +48,12 @@ export interface IDebugger {
   readonly eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
 
   /**
+   * Request whether debugging is available for the given client.
+   * @param client The client session.
+   */
+  isAvailable(client: IClientSession | Session.ISession): Promise<boolean>;
+
+  /**
    * Computes an id based on the given code.
    */
   getCodeId(code: string): string;

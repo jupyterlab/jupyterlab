@@ -142,7 +142,7 @@ class DebuggerHandler<
     widget: W,
     client: IClientSession | Session.ISession
   ): Promise<void> {
-    const debuggingEnabled = await DebugSession.requestDebuggingEnabled(client);
+    const debuggingEnabled = await debug.isAvailable(client);
     if (!debug.model || !debuggingEnabled) {
       return;
     }
