@@ -268,7 +268,9 @@ describe('session', () => {
       });
 
       it('should fail if the session is disposed', async () => {
-        const session = sessionManager.connectTo(defaultSession.model);
+        const session = sessionManager.connectTo({
+          model: defaultSession.model
+        });
         session.dispose();
         const promise = session.setPath(UUID.uuid4());
         await expectFailure(promise, 'Session is disposed');
@@ -300,7 +302,9 @@ describe('session', () => {
       });
 
       it('should fail if the session is disposed', async () => {
-        const session = sessionManager.connectTo(defaultSession.model);
+        const session = sessionManager.connectTo({
+          model: defaultSession.model
+        });
         session.dispose();
         const promise = session.setPath(UUID.uuid4());
         await expectFailure(promise, 'Session is disposed');
@@ -330,7 +334,9 @@ describe('session', () => {
       });
 
       it('should fail if the session is disposed', async () => {
-        const session = sessionManager.connectTo(defaultSession.model);
+        const session = sessionManager.connectTo({
+          model: defaultSession.model
+        });
         session.dispose();
         const promise = session.setPath(UUID.uuid4());
         await expectFailure(promise, 'Session is disposed');
@@ -420,7 +426,9 @@ describe('session', () => {
       });
 
       it('should fail if the session is disposed', async () => {
-        const session = sessionManager.connectTo(defaultSession.model);
+        const session = sessionManager.connectTo({
+          model: defaultSession.model
+        });
         session.dispose();
         await expectFailure(session.shutdown(), 'Session is disposed');
       });

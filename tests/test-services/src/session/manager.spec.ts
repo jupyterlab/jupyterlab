@@ -181,7 +181,7 @@ describe('session/manager', () => {
 
     describe('#connectTo()', () => {
       it('should connect to a running session', () => {
-        const newSession = manager.connectTo(session.model);
+        const newSession = manager.connectTo({ model: session.model });
         expect(newSession.id).to.equal(session.id);
         expect(newSession.kernel.id).to.equal(session.kernel.id);
         expect(newSession).to.not.equal(session);
@@ -213,7 +213,7 @@ describe('session/manager', () => {
 
       it('should dispose of all session instances asynchronously', async () => {
         const session0 = await startNew(manager);
-        const session1 = manager.connectTo(session0.model);
+        const session1 = manager.connectTo({ model: session0.model });
         const emission = testEmission(session1.disposed);
         await session0.shutdown();
         await emission;
