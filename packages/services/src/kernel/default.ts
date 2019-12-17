@@ -1427,7 +1427,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Handle a websocket close event.
    */
   private _onWSClose = (evt: CloseEvent) => {
-    this._reconnect();
+    if (!this.isDisposed) {
+      this._reconnect();
+    }
   };
 
   private _id = '';
