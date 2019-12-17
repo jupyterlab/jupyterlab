@@ -52,9 +52,6 @@ function validateHeader(
 
 /**
  * Validate a kernel message object.
- *
- * TODO: when we pull this out to a separate package, make the arguments more
- * broadly typed, like JSONObject or something.
  */
 export function validateMessage(
   msg: KernelMessage.IMessage

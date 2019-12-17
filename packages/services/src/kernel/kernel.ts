@@ -77,10 +77,6 @@ export interface IKernelConnection extends IObservableDisposable {
 
   /**
    * The current connection status of the kernel.
-   *
-   * TODO: Should we have a flag that indicates the reason for the
-   * disconnection, that is set when the connection status is set to
-   * disconnected?
    */
   readonly connectionStatus: ConnectionStatus;
 
