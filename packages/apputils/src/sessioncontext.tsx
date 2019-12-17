@@ -839,8 +839,6 @@ export namespace SessionContext {
      */
     specsManager: KernelSpec.IManager;
 
-    // TODO: Should we just accept a Partial<Session.IModel>?
-
     /**
      * The initial path of the file.
      */
