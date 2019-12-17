@@ -166,7 +166,6 @@ class DebuggerHandler<
       if (this._handlers[widget.id]) {
         return;
       }
-      await debug.restoreState(true);
       this._handlers[widget.id] = new this._builder({
         debuggerService: debug,
         widget
@@ -189,6 +188,7 @@ class DebuggerHandler<
         await debug.stop();
         removeHandler();
       } else {
+        await debug.restoreState(true);
         await createHandler();
       }
     };
@@ -283,7 +283,7 @@ const files: JupyterFrontEndPlugin<void> = {
           session = sessions.connectTo(model);
           activeSessions[model.id] = session;
         }
-        void handler.update(debug, widget, session);
+        await handler.update(debug, widget, session);
         app.commands.notifyCommandChanged();
       } catch {
         return;
@@ -310,7 +310,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       if (!(widget instanceof NotebookPanel)) {
         return;
       }
-      void handler.update(debug, widget, widget.session);
+      await handler.update(debug, widget, widget.session);
       app.commands.notifyCommandChanged();
     });
   }
