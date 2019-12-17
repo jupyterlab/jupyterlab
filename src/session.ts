@@ -231,12 +231,12 @@ export namespace DebugSession {
    */
   export async function requestDebuggingEnabled(
     client: IClientSession | Session.ISession
-  ) {
+  ): Promise<boolean> {
     if (client instanceof ClientSession) {
       await client.ready;
     }
     await client.kernel.ready;
     const info = (client.kernel?.info as IDebugger.ISession.IInfoReply) ?? null;
-    return info?.debugger ?? false;
+    return !!(info?.debugger ?? false);
   }
 }
