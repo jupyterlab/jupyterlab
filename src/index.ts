@@ -66,8 +66,6 @@ export namespace CommandIDs {
   export const stepOut = 'debugger:stepOut';
 
   export const debugConsole = 'debugger:debug-console';
-
-  export const close = 'debugger:close';
 }
 
 async function setDebugSession(
@@ -336,27 +334,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     const service = new DebugService();
 
     let sidebar: Debugger.Sidebar;
-
-    commands.addCommand(CommandIDs.close, {
-      label: 'Close Debugger',
-      isEnabled: () => {
-        return !!sidebar;
-      },
-      execute: () => {
-        if (!sidebar) {
-          return;
-        }
-        sidebar.close();
-        sidebar.dispose();
-        sidebar = null;
-        commands.notifyCommandChanged();
-      }
-    });
-
-    app.contextMenu.addItem({
-      command: CommandIDs.close,
-      selector: '.jp-DebuggerSidebar'
-    });
 
     commands.addCommand(CommandIDs.debugContinue, {
       label: 'Continue',
