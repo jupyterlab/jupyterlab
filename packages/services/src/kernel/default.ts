@@ -261,7 +261,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._isDisposed = true;
     this._disposed.emit();
 
-    // Took out this._status = 'dead' - figure out ramifications of this.
     this._updateConnectionStatus('disconnected');
     this._clearState();
     this._clearSocket();
@@ -387,23 +386,19 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Send a message on the websocket.
    *
-   * If pending is true, queue the message for later sending if we cannot send
+   * If queue is true, queue the message for later sending if we cannot send
    * now. Otherwise throw an error.
    */
-  private _sendMessage(msg: KernelMessage.IMessage, pending = true) {
+  private _sendMessage(msg: KernelMessage.IMessage, queue = true) {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
-    }
-
-    if (this.connectionStatus === 'disconnected') {
-      throw new Error('Kernel connection is disconnected');
     }
 
     // Send if the ws allows it, otherwise buffer the message.
     if (this.connectionStatus === 'connected') {
       this._ws.send(serialize.serialize(msg));
       // console.log(`SENT WS message to ${this.id}`, msg);
-    } else if (pending) {
+    } else if (queue) {
       this._pendingMessages.push(msg);
       // console.log(`PENDING WS message to ${this.id}`, msg);
     } else {
@@ -458,33 +453,37 @@ export class KernelConnection implements Kernel.IKernelConnection {
   }
 
   /**
-   * Reconnect to a disconnected kernel.
+   * Reconnect to a kernel.
    *
    * #### Notes
-   * Used when the websocket connection to the kernel is lost.
-   *
-   * TODO: should we remove this method? It doesn't play well with
-   * 'disconnected' being a terminal state. We already have the automatic
-   * reconnection.
+   * This may try multiple times to reconnect to a kernel, and will sever any
+   * existing connection.
    */
   reconnect(): Promise<void> {
-    this._updateConnectionStatus('connecting');
+    this._errorIfDisposed();
     let result = new PromiseDelegate<void>();
 
-    // TODO: can we use one of the test functions that has this pattern of a
-    // promise resolving on a single signal emission?
+    // Set up a listener for the connection status changing, which accepts or
+    // rejects after the retries are done.
     let fulfill = (sender: this, status: Kernel.ConnectionStatus) => {
       if (status === 'connected') {
         result.resolve();
       } else if (status === 'disconnected') {
         result.reject(new Error('Kernel connection disconnected'));
       }
-      this.connectionStatusChanged.disconnect(fulfill);
+      this.connectionStatusChanged.disconnect(fulfill, this);
     };
-    this.connectionStatusChanged.connect(fulfill);
+    this.connectionStatusChanged.connect(fulfill, this);
 
-    this._clearSocket();
-    this._createSocket();
+    // Reset the reconnect limit so we start the connection attempts fresh
+    this._reconnectAttempt = 0;
+
+    // Start the reconnection process, which will also clear any existing
+    // connection.
+    this._reconnect();
+
+    // Return the promise that should resolve on connection or reject if the
+    // retries don't work.
     return result.promise;
   }
 
@@ -552,9 +551,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
         throw e;
       }
     }
-    if (this.isDisposed) {
-      throw new Error('Disposed kernel');
-    }
+    this._errorIfDisposed();
+
     // Kernels sometimes do not include a status field on kernel_info_reply
     // messages, so set a default for now.
     // See https://github.com/jupyterlab/jupyterlab/issues/6760
@@ -1007,14 +1005,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
   }
 
   /**
-   * Clear the socket state.
-   *
-   * TODO: does this not apply anymore.
+   * Forcefully clear the socket state.
    *
    * #### Notes
-   * When calling this, you should also set the connectionStatus to
-   * 'connecting' if you are going to try to reconnect, or 'disconnected' if
-   * not.
+   * This will clear all socket state without calling any handlers and will
+   * not update the connection status. If you call this method, you are
+   * responsible for updating the connection status as needed and recreating
+   * the socket if you plan to reconnect.
    */
   private _clearSocket(): void {
     if (this._ws !== null) {
@@ -1101,9 +1098,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * processing if the message no longer is valid.
    */
   private _assertCurrentMessage(msg: KernelMessage.IMessage) {
-    if (this.isDisposed) {
-      throw new Error('Kernel object is disposed');
-    }
+    this._errorIfDisposed();
 
     if (msg.header.session !== this._kernelSession) {
       throw new Error(
@@ -1194,11 +1189,14 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
   /**
    * Create the kernel websocket connection and add socket status handlers.
+   *
+   * #### Notes
+   * You are responsible for clearing the old socket so that the handlers
+   * from it are gone. For example, calling ._clearSocket(), etc.
    */
   private _createSocket = () => {
-    if (this.isDisposed) {
-      return;
-    }
+    this._errorIfDisposed();
+
     let settings = this.serverSettings;
     let partialUrl = URLExt.join(
       settings.wsUrl,
@@ -1207,7 +1205,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
     );
 
     // Strip any authentication from the display string.
-    // TODO - Audit tests for extra websockets started
     let display = partialUrl.replace(/^((?:\w+:)?\/\/)(?:[^@\/]+@)/, '$1');
     console.log(`Starting WebSocket: ${display}`);
 
@@ -1233,49 +1230,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
   };
 
   /**
-   * Handle a websocket open event.
-   */
-  private _onWSOpen = (evt: Event) => {
-    this._reconnectAttempt = 0;
-    this._updateConnectionStatus('connected');
-  };
-
-  /**
-   * Handle a websocket message, validating and routing appropriately.
-   */
-  private _onWSMessage = (evt: MessageEvent) => {
-    // Notify immediately if there is an error with the message.
-    let msg: KernelMessage.IMessage;
-    try {
-      msg = serialize.deserialize(evt.data);
-      validate.validateMessage(msg);
-    } catch (error) {
-      error.message = `Kernel message validation error: ${error.message}`;
-      // We throw the error so that it bubbles up to the top, and displays the right stack.
-      throw error;
-    }
-
-    // Update the current kernel session id
-    this._kernelSession = msg.header.session;
-
-    // Handle the message asynchronously, in the order received.
-    this._msgChain = this._msgChain
-      .then(() => {
-        // Return so that any promises from handling a message are fulfilled
-        // before proceeding to the next message.
-        return this._handleMessage(msg);
-      })
-      .catch(error => {
-        // Log any errors in handling the message, thus resetting the _msgChain
-        // promise so we can process more messages.
-        console.error(error);
-      });
-
-    // Emit the message receive signal
-    this._anyMessage.emit({ msg, direction: 'recv' });
-  };
-
-  /**
    * Handle connection status changes.
    *
    * #### Notes
@@ -1284,10 +1238,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _updateConnectionStatus(
     connectionStatus: Kernel.ConnectionStatus
   ): void {
-    if (
-      this._connectionStatus === connectionStatus ||
-      this._connectionStatus === 'disconnected'
-    ) {
+    if (this._connectionStatus === connectionStatus) {
       return;
     }
 
@@ -1388,17 +1339,27 @@ export class KernelConnection implements Kernel.IKernelConnection {
   }
 
   /**
-   * Handle a websocket close event.
+   * Attempt a connection if we have not exhausted connection attempts.
    */
-  private _onWSClose = (evt: Event) => {
+  private _reconnect() {
+    this._errorIfDisposed();
+
     // Update the connection status and schedule a possible reconnection.
     if (this._reconnectAttempt < this._reconnectLimit) {
       this._updateConnectionStatus('connecting');
-      let timeout = Math.pow(2, this._reconnectAttempt);
+
+      // The first reconnect attempt should happen immediately, and subsequent
+      // attemps should pick a random number in a growing range so that we
+      // don't overload the server with synchronized reconnection attempts
+      // across multiple kernels.
+      let timeout = Private.getRandomIntInclusive(
+        0,
+        1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
+      );
       console.error(
         'Connection lost, reconnecting in ' + timeout + ' seconds.'
       );
-      setTimeout(this._createSocket, 1e3 * timeout);
+      setTimeout(this._createSocket, timeout);
       this._reconnectAttempt += 1;
     } else {
       this._updateConnectionStatus('disconnected');
@@ -1406,6 +1367,67 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     // Clear the websocket event handlers and the socket itself.
     this._clearSocket();
+  }
+
+  /**
+   * Utility function to throw an error if this instance is disposed.
+   */
+  private _errorIfDisposed() {
+    if (this.isDisposed) {
+      throw new Error('Kernel connection is disposed');
+    }
+  }
+
+  // Make websocket callbacks arrow functions so they bind `this`.
+
+  /**
+   * Handle a websocket open event.
+   */
+  private _onWSOpen = (evt: Event) => {
+    this._reconnectAttempt = 0;
+    this._updateConnectionStatus('connected');
+  };
+
+  /**
+   * Handle a websocket message, validating and routing appropriately.
+   */
+  private _onWSMessage = (evt: MessageEvent) => {
+    // Notify immediately if there is an error with the message.
+    let msg: KernelMessage.IMessage;
+    try {
+      msg = serialize.deserialize(evt.data);
+      validate.validateMessage(msg);
+    } catch (error) {
+      error.message = `Kernel message validation error: ${error.message}`;
+      // We throw the error so that it bubbles up to the top, and displays the right stack.
+      throw error;
+    }
+
+    // Update the current kernel session id
+    this._kernelSession = msg.header.session;
+
+    // Handle the message asynchronously, in the order received.
+    this._msgChain = this._msgChain
+      .then(() => {
+        // Return so that any promises from handling a message are fulfilled
+        // before proceeding to the next message.
+        return this._handleMessage(msg);
+      })
+      .catch(error => {
+        // Log any errors in handling the message, thus resetting the _msgChain
+        // promise so we can process more messages.
+        console.error(error);
+      });
+
+    // Emit the message receive signal
+    this._anyMessage.emit({ msg, direction: 'recv' });
+  };
+
+  /**
+   * Handle a websocket close event.
+   */
+  private _onWSClose = (evt: CloseEvent) => {
+    this._reconnect();
   };
 
   private _id = '';
@@ -1526,5 +1548,22 @@ namespace Private {
         }
       }
     });
+  }
+
+  /**
+   * Get a random integer between min and max, inclusive of both.
+   *
+   * #### Notes
+   * From
+   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random#Getting_a_random_integer_between_two_values_inclusive
+   *
+   * From the MDN page: It might be tempting to use Math.round() to accomplish
+   * that, but doing so would cause your random numbers to follow a non-uniform
+   * distribution, which may not be acceptable for your needs.
+   */
+  export function getRandomIntInclusive(min: number, max: number) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 }
