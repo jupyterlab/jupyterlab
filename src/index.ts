@@ -224,13 +224,8 @@ const consoles: JupyterFrontEndPlugin<void> = {
 const files: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:files',
   autoStart: true,
-  requires: [IDebugger, IEditorTracker, ILabShell],
-  activate: (
-    app: JupyterFrontEnd,
-    debug: IDebugger,
-    tracker: IEditorTracker,
-    labShell: ILabShell
-  ) => {
+  requires: [IDebugger, ILabShell],
+  activate: (app: JupyterFrontEnd, debug: IDebugger, labShell: ILabShell) => {
     const handler = new DebuggerHandler<FileHandler>(FileHandler);
 
     const activeSessions: {
