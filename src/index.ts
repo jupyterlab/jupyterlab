@@ -422,7 +422,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     });
 
     commands.addCommand(CommandIDs.create, {
-      label: 'Debugger',
       execute: async () => {
         if (sidebar) {
           return;
@@ -466,7 +465,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     if (palette) {
       const category = 'Debugger';
       [
-        CommandIDs.create,
         CommandIDs.debugContinue,
         CommandIDs.terminate,
         CommandIDs.next,
