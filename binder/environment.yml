@@ -2,7 +2,7 @@ name: jupyterlab-debugger
 channels:
 - conda-forge
 dependencies:
-- jupyterlab=1.1
+- jupyterlab=1.2
 - nodejs
 - notebook=6
 - ptvsd

@@ -9,7 +9,7 @@ A JupyterLab debugger UI extension.
 
 ## Prerequisites
 
-- JupyterLab 1.1+
+- JupyterLab 1.2+
 - xeus-python 0.6.7+
 
 ## Installation
