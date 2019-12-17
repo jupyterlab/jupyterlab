@@ -641,7 +641,6 @@ describe('Kernel.IKernel', () => {
       await defaultKernel.restart();
       await defaultKernel.info;
       expect(future.isDisposed).to.equal(true);
-      // TODO: sometimes this next test fails.
       expect(comm.isDisposed).to.equal(true);
     });
   });
