@@ -33,7 +33,7 @@ export namespace ITerminal {
     /**
      * The terminal session associated with the widget.
      */
-    session: TerminalSession.ISession;
+    session: TerminalSession.ITerminalConnection;
 
     /**
      * Get a config option for the terminal.

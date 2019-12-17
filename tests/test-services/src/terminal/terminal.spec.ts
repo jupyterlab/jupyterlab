@@ -14,8 +14,8 @@ import { testEmission } from '@jupyterlab/testutils';
 import { handleRequest } from '../utils';
 
 describe('terminal', () => {
-  let defaultSession: TerminalSession.ISession;
-  let session: TerminalSession.ISession;
+  let defaultSession: TerminalSession.ITerminalConnection;
+  let session: TerminalSession.ITerminalConnection;
 
   beforeAll(async () => {
     defaultSession = await TerminalSession.startNew();

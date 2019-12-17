@@ -37,7 +37,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * @param options - The terminal configuration options.
    */
   constructor(
-    session: TerminalSession.ISession,
+    session: TerminalSession.ITerminalConnection,
     options: Partial<ITerminal.IOptions> = {}
   ) {
     super();
@@ -87,7 +87,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   /**
    * The terminal session associated with the widget.
    */
-  readonly session: TerminalSession.ISession;
+  readonly session: TerminalSession.ITerminalConnection;
 
   /**
    * Get a config option for the terminal.
@@ -283,7 +283,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Handle a message from the terminal session.
    */
   private _onMessage(
-    sender: TerminalSession.ISession,
+    sender: TerminalSession.ITerminalConnection,
     msg: TerminalSession.IMessage
   ): void {
     switch (msg.type) {
