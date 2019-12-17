@@ -244,6 +244,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
         err.response?.status === 503
       ) {
         this._connectionFailure.emit(err);
+        // TODO: why do we care about resetting models if we are throwing right away?
         models = [];
       }
       throw err;
@@ -285,26 +286,18 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    */
   private _onStarted(kernelConnection: KernelConnection): void {
     this._kernelConnections.add(kernelConnection);
-    kernelConnection.statusChanged.connect(this._onStatusChanged);
-    kernelConnection.disposed.connect(this._onDisposed);
+    kernelConnection.statusChanged.connect(this._onStatusChanged, this);
+    kernelConnection.disposed.connect(this._onDisposed, this);
   }
 
-  private _isReady = false;
-  private _kernelConnections = new Set<KernelConnection>();
-  private _models = new Map<string, Kernel.IModel>();
-  private _pollModels: Poll;
-  private _ready: Promise<void>;
-  private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
-  private _connectionFailure = new Signal<this, Error>(this);
-
-  // We define this here so that it binds to `this`
-  private readonly _onDisposed = (kernelConnection: KernelConnection) => {
+  private _onDisposed(kernelConnection: KernelConnection) {
     this._kernelConnections.delete(kernelConnection);
-  };
-  private readonly _onStatusChanged = (
+  }
+
+  private _onStatusChanged(
     kernelConnection: KernelConnection,
     status: Kernel.Status
-  ) => {
+  ) {
     if (status === 'dead') {
       // We asynchronously update our list of kernels, which asynchronously
       // will dispose them. We do not want to immediately dispose them because
@@ -313,7 +306,15 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
         /* no-op */
       });
     }
-  };
+  }
+
+  private _isReady = false;
+  private _ready: Promise<void>;
+  private _kernelConnections = new Set<KernelConnection>();
+  private _models = new Map<string, Kernel.IModel>();
+  private _pollModels: Poll;
+  private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
+  private _connectionFailure = new Signal<this, Error>(this);
 }
 
 /**

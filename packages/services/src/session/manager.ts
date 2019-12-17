@@ -254,6 +254,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
         err.response?.status === 503
       ) {
         this._connectionFailure.emit(err);
+        // TODO: why do we care about resetting models if we are throwing right away?
         models = [];
       }
       throw err;
@@ -295,10 +296,29 @@ export class SessionManager extends BaseManager implements Session.IManager {
    */
   private _onStarted(sessionConnection: SessionConnection): void {
     this._sessionConnections.add(sessionConnection);
-    sessionConnection.disposed.connect(this._onDisposed);
-    sessionConnection.propertyChanged.connect(this._onChanged);
-    sessionConnection.kernelChanged.connect(this._onChanged);
+    sessionConnection.disposed.connect(this._onDisposed, this);
+    sessionConnection.propertyChanged.connect(this._onChanged, this);
+    sessionConnection.kernelChanged.connect(this._onChanged, this);
   }
+
+  private _onDisposed(sessionConnection: SessionConnection) {
+    this._sessionConnections.delete(sessionConnection);
+    // A session termination emission could mean the server session is deleted,
+    // or that the session JS object is disposed and the session still exists on
+    // the server, so we refresh from the server to make sure we reflect the
+    // server state.
+
+    void this.refreshRunning().catch(() => {
+      /* no-op */
+    });
+  }
+
+  private _onChanged () {
+    void this.refreshRunning().catch(() => {
+      /* no-op */
+    });
+  }
+
 
   private _isReady = false;
   private _sessionConnections = new Set<SessionConnection>();
@@ -309,24 +329,6 @@ export class SessionManager extends BaseManager implements Session.IManager {
   private _connectionFailure = new Signal<this, Error>(this);
 
   // We define these here so they bind `this` correctly
-  private readonly _onDisposed = (sessionConnection: SessionConnection) => {
-    this._sessionConnections.delete(sessionConnection);
-    // A session termination emission could mean the server session is deleted,
-    // or that the session JS object is disposed and the session still exists on
-    // the server, so we refresh from the server to make sure we reflect the
-    // server state.
-
-    void this.refreshRunning().catch(() => {
-      /* no-op */
-    });
-  };
-
-  private readonly _onChanged = () => {
-    void this.refreshRunning().catch(() => {
-      /* no-op */
-    });
-  };
-
   private readonly _connectToKernel = (
     options: Omit<Kernel.IKernelConnection.IOptions, 'serverSettings'>
   ) => {

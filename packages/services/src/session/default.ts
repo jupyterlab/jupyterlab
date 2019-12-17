@@ -38,7 +38,7 @@ export class SessionConnection implements Session.ISessionConnection {
   }
 
   /**
-   * Whether this object is disposed.
+   * A signal emitted when the session is disposed.
    */
   get disposed(): ISignal<this, void> {
     return this._disposed;
