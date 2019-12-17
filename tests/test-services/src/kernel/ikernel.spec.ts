@@ -646,25 +646,35 @@ describe('Kernel.IKernel', () => {
   });
 
   describe('#reconnect()', () => {
-    it('should reconnect the websocket', () => {
-      return defaultKernel.reconnect();
+    it('should create a new websocket and resolve the returned promise', async () => {
+      const oldWS = (defaultKernel as any)._ws;
+      await defaultKernel.reconnect();
+      expect((defaultKernel as any)._ws).to.not.equal(oldWS);
     });
 
-    it('should emit `"reconnecting"`, then `"connected"` status', async () => {
-      await defaultKernel.info;
-      let connectedEmission: Promise<void>;
-      const emission = testEmission(defaultKernel.statusChanged, {
-        find: () => defaultKernel.status === 'unknown',
-        test: () => {
-          connectedEmission = testEmission(defaultKernel.statusChanged, {
-            find: () => defaultKernel.status === 'idle'
+    it('should emit `"connecting"`, then `"connected"` status', async () => {
+      const emission = testEmission(defaultKernel.connectionStatusChanged, {
+        find: () => defaultKernel.connectionStatus === 'connecting',
+        test: async () => {
+          await testEmission(defaultKernel.connectionStatusChanged, {
+            find: () => defaultKernel.connectionStatus === 'connected'
           });
         }
       });
-
       await defaultKernel.reconnect();
       await emission;
-      await connectedEmission;
+    });
+
+    it('return promise should reject if the kernel is disposed or disconnected', async () => {
+      const connection = defaultKernel.reconnect();
+      defaultKernel.dispose();
+      try {
+        await connection;
+        // If the connection did not reject, so test fails.
+        throw new Error('Reconnection promise did not reject');
+      } catch (e) {
+        /* Connection promise reject - test passes */
+      }
     });
   });
 

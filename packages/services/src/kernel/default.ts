@@ -262,10 +262,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._disposed.emit();
 
     this._updateConnectionStatus('disconnected');
-    this._clearState();
+    this._clearKernelState();
     this._clearSocket();
-    this._kernelSession = '';
-    this._msgChain = null;
+    clearTimeout(this._reconnectTimeout);
+
+    // Clear Lumino signals
     Signal.clearData(this);
   }
 
@@ -468,10 +469,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
     let fulfill = (sender: this, status: Kernel.ConnectionStatus) => {
       if (status === 'connected') {
         result.resolve();
+        this.connectionStatusChanged.disconnect(fulfill, this);
       } else if (status === 'disconnected') {
         result.reject(new Error('Kernel connection disconnected'));
+        this.connectionStatusChanged.disconnect(fulfill, this);
       }
-      this.connectionStatusChanged.disconnect(fulfill, this);
     };
     this.connectionStatusChanged.connect(fulfill, this);
 
@@ -993,7 +995,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * interface.
    */
   private async _handleRestart(): Promise<void> {
-    this._clearState();
+    this._clearKernelState();
     this._updateStatus('restarting');
 
     // Kick off an async kernel request to eventually reset the kernel status.
@@ -1065,7 +1067,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Clear the internal state.
    */
-  private _clearState(): void {
+  private _clearKernelState(): void {
     this._pendingMessages = [];
     this._futures.forEach(future => {
       future.dispose();
@@ -1231,9 +1233,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
   /**
    * Handle connection status changes.
-   *
-   * #### Notes
-   * The 'disconnected' state is considered a terminal state.
    */
   private _updateConnectionStatus(
     connectionStatus: Kernel.ConnectionStatus
@@ -1344,6 +1343,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _reconnect() {
     this._errorIfDisposed();
 
+    // Clear any existing reconnection attempt
+    clearTimeout(this._reconnectTimeout);
+
     // Update the connection status and schedule a possible reconnection.
     if (this._reconnectAttempt < this._reconnectLimit) {
       this._updateConnectionStatus('connecting');
@@ -1357,9 +1359,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
         1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
       );
       console.error(
-        'Connection lost, reconnecting in ' + timeout + ' seconds.'
+        `Connection lost, reconnecting in ${Math.floor(
+          timeout / 1000
+        )} seconds.`
       );
-      setTimeout(this._createSocket, timeout);
+      this._reconnectTimeout = setTimeout(this._createSocket, timeout);
       this._reconnectAttempt += 1;
     } else {
       this._updateConnectionStatus('disconnected');
@@ -1446,6 +1450,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _username = '';
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
+  private _reconnectTimeout: any = null;
 
   private _futures = new Map<
     string,
