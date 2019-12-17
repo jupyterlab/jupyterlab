@@ -6,6 +6,7 @@ import {
   JSONValue,
   ReadonlyJSONObject,
   ReadonlyJSONValue,
+  PartialJSONObject,
   Token
 } from '@lumino/coreutils';
 
@@ -69,7 +70,7 @@ export interface ISettingRegistry {
   get(
     plugin: string,
     key: string
-  ): Promise<{ composite: JSONValue; user: JSONValue }>;
+  ): Promise<{ composite: JSONValue | undefined; user: JSONValue | undefined }>;
 
   /**
    * Load a plugin's settings into the setting registry.
@@ -171,7 +172,7 @@ export namespace ISettingRegistry {
   /**
    * The settings for a specific plugin.
    */
-  export interface IPlugin extends JSONObject {
+  export interface IPlugin extends PartialJSONObject {
     /**
      * The name of the plugin.
      */
@@ -217,7 +218,7 @@ export namespace ISettingRegistry {
   /**
    * A minimal subset of the formal JSON Schema that describes a property.
    */
-  export interface IProperty extends JSONObject {
+  export interface IProperty extends PartialJSONObject {
     /**
      * The default value, if any.
      */
@@ -377,7 +378,12 @@ export namespace ISettingRegistry {
      *
      * @returns The setting value.
      */
-    get(key: string): { composite: ReadonlyJSONValue; user: ReadonlyJSONValue };
+    get(
+      key: string
+    ): {
+      composite: ReadonlyJSONValue | undefined;
+      user: ReadonlyJSONValue | undefined;
+    };
 
     /**
      * Remove a single setting.
@@ -423,7 +429,7 @@ export namespace ISettingRegistry {
   /**
    * An interface describing a JupyterLab keyboard shortcut.
    */
-  export interface IShortcut extends JSONObject {
+  export interface IShortcut extends PartialJSONObject {
     /**
      * The optional arguments passed into the shortcut's command.
      */
