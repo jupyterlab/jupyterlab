@@ -28,8 +28,8 @@ export { defaultRenderMime } from './rendermime';
  * @param signal - The signal we are listening to.
  * @param find - An optional function to determine which emission to test,
  * defaulting to the first emission.
- * @param test - An optional function which contains the tests for the emission.
- * @param value - An optional value that the promise resolves to if it is
+ * @param test - An optional function which contains the tests for the emission, and should throw an error if the tests fail.
+ * @param value - An optional value that the promise resolves to if the test is
  * successful.
  *
  * @returns a promise that rejects if the function throws an error (e.g., if an
@@ -54,12 +54,12 @@ export async function testEmission<T, U, V>(
     find?: (a: T, b: U) => boolean;
     test?: (a: T, b: U) => void;
     value?: V;
-  }
+  } = {}
 ): Promise<V> {
   const done = new PromiseDelegate<V>();
   const object = {};
   signal.connect((sender: T, args: U) => {
-    if (!options.find || options.find(sender, args)) {
+    if (options.find?.(sender, args) ?? true) {
       try {
         Signal.disconnectReceiver(object);
         if (options.test) {
@@ -68,7 +68,7 @@ export async function testEmission<T, U, V>(
       } catch (e) {
         done.reject(e);
       }
-      done.resolve(options.value || undefined);
+      done.resolve(options.value ?? undefined);
     }
   }, object);
   return done.promise;
