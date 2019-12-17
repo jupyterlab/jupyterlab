@@ -245,16 +245,15 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * Update the kernel spec.
    */
-  private _updateSpec(kernel: Kernel.IKernelConnection): Promise<void> {
-    return kernel.getSpec().then(spec => {
-      if (this.isDisposed) {
-        return;
-      }
-      this.model.metadata.set('kernelspec', {
-        name: kernel.name,
-        display_name: spec.display_name,
-        language: spec.language
-      });
+  private async _updateSpec(kernel: Kernel.IKernelConnection): Promise<void> {
+    const spec = await kernel.spec;
+    if (this.isDisposed) {
+      return;
+    }
+    this.model.metadata.set('kernelspec', {
+      name: kernel.name,
+      display_name: spec.display_name,
+      language: spec.language
     });
   }
 
