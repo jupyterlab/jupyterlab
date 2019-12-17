@@ -376,9 +376,9 @@ describe('Kernel.IKernel', () => {
     });
   });
 
-  describe('#getSpec()', () => {
+  describe('#spec', () => {
     it('should resolve with the spec', async () => {
-      const spec = await defaultKernel.getSpec();
+      const spec = await defaultKernel.spec;
       expect(spec.name).to.equal(specs.default);
     });
   });

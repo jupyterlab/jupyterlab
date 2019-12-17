@@ -84,9 +84,20 @@ export interface IKernelConnection extends IObservableDisposable {
    * The kernel info
    *
    * #### Notes
-   * This promise only resolves at startup, and not on every restart.
+   * This promise only resolves at startup, and is not refreshed on every
+   * restart.
    */
   readonly info: Promise<KernelMessage.IInfoReply>;
+
+  /**
+   * Get the kernel spec.
+   *
+   * @returns A promise that resolves with the kernel spec for this kernel.
+   *
+   * #### Notes
+   * This may make a server request to retrieve the spec.
+   */
+  readonly spec: Promise<KernelSpec.ISpecModel>;
 
   /**
    * Whether the kernel connection handles comm messages.
@@ -99,13 +110,6 @@ export interface IKernelConnection extends IObservableDisposable {
    * See https://github.com/jupyter/jupyter_client/issues/263
    */
   handleComms: boolean;
-
-  /**
-   * Get the kernel spec.
-   *
-   * @returns A promise that resolves with the kernel spec for this kernel.
-   */
-  getSpec(): Promise<KernelSpec.ISpecModel>;
 
   /**
    * Send a shell message to the kernel.

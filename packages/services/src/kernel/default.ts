@@ -208,19 +208,19 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
   /**
    * The cached kernel info.
+   *
+   * @returns A promise that resolves to the kernel info.
    */
   get info(): Promise<KernelMessage.IInfoReply> {
     return this._info.promise;
   }
 
   /**
-   * Get the kernel spec.
+   * The kernel spec.
    *
-   * @returns A promise that resolves with the kernel spec.
+   * @returns A promise that resolves to the kernel spec.
    */
-  getSpec(): Promise<KernelSpec.ISpecModel> {
-    // TODO: Instead of a promise, perhaps the spec should be cached (requested
-    // concurrent with the info promise?) and available as immediate values?
+  get spec(): Promise<KernelSpec.ISpecModel> {
     if (this._specPromise) {
       return this._specPromise;
     }
