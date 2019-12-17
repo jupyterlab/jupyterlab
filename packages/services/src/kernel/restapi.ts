@@ -22,6 +22,7 @@ export interface IModel {
    */
   readonly name: string;
 }
+
 /**
  * The url for the kernel service.
  */
@@ -85,22 +86,14 @@ export async function startNew(
 /**
  * The options object used to initialize a kernel.
  */
-export interface IKernelOptions {
-  /**
-   * The kernel name to start.
-   *
-   * #### Notes
-   * If not given, the server default kernel is used.
-   */
-  name?: string;
-
+export type IKernelOptions = Partial<Pick<IModel, 'name'>> & {
   /**
    * Environment variables passed to the kernelspec (used in Enterprise Gateway)
    */
   env?: {
     [key: string]: string;
   };
-}
+};
 
 /**
  * Restart a kernel.

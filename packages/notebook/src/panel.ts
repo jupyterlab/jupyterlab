@@ -193,7 +193,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   private _onKernelChanged(
     sender: any,
-    args: Session.IKernelChangedArgs
+    args: Session.ISessionConnection.IKernelChangedArgs
   ): void {
     if (!this.model || !args.newValue) {
       return;

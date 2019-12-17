@@ -168,7 +168,7 @@ export namespace KernelStatus {
      */
     private _onKernelChanged = (
       _sessionContext: ISessionContext,
-      change: Session.IKernelChangedArgs
+      change: Session.ISessionConnection.IKernelChangedArgs
     ) => {
       const oldState = this._getAllState();
       const { newValue } = change;

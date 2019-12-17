@@ -73,7 +73,7 @@ describe('session', () => {
 
     describe('#kernelChanged', () => {
       it('should emit when the kernel changes', async () => {
-        let called: Session.IKernelChangedArgs | null = null;
+        let called: Session.ISessionConnection.IKernelChangedArgs | null = null;
         const object = {};
         defaultSession.kernelChanged.connect((s, args) => {
           called = args;

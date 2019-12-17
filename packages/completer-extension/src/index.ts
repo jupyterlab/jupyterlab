@@ -298,7 +298,7 @@ const files: JupyterFrontEndPlugin<void> = {
             delete activeSessions[widget.id];
             oldSession.dispose();
           }
-          const session = sessions.connectTo(model);
+          const session = sessions.connectTo({ model });
           handler.connector = new CompletionConnector({ session, editor });
           activeSessions[widget.id] = session;
         } else {

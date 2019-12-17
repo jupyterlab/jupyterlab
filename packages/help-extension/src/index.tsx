@@ -190,7 +190,7 @@ function activate(
     if (kernelInfoCache.has(sessionModel.kernel.name)) {
       return;
     }
-    const session = serviceManager.sessions.connectTo(sessionModel);
+    const session = serviceManager.sessions.connectTo({ model: sessionModel });
 
     void session.kernel.info.then(kernelInfo => {
       // Check the cache second time so that, if two callbacks get scheduled,

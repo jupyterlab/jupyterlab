@@ -93,7 +93,7 @@ export async function getSessionModel(
  * already exists.
  */
 export async function startSession(
-  model: Session.IRequest,
+  model: Session.ISessionOptions,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Session.IModel> {
   let url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);

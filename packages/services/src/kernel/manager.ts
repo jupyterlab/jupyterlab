@@ -9,12 +9,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { ServerConnection } from '..';
 import * as Kernel from './kernel';
 import { BaseManager } from '../basemanager';
-import {
-  shutdownKernel,
-  startNew,
-  listRunning,
-  IKernelOptions
-} from './restapi';
+import { shutdownKernel, startNew, listRunning } from './restapi';
 import { KernelConnection } from './default';
 
 /**
@@ -96,9 +91,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   /**
    * Connect to an existing kernel.
    *
-   * @param model - The model of the target kernel.
-   *
-   * @returns A promise that resolves with the new kernel instance.
+   * @returns The new kernel connection.
    *
    * #### Notes
    * This will use the manager's server settings and ignore any server
@@ -168,17 +161,11 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    * #### Notes
    * The manager `serverSettings` will be always be used.
    */
-  // TODO: make this ignoring logic everywhere for managers. Also Omit the
-  // server settings from the IKernelConnection.IOptions in these cases.
-
   async startNew(
-    options: IKernelOptions &
+    options: Partial<Pick<Kernel.IModel, 'name'>> &
       Omit<Kernel.IKernelConnection.IOptions, 'model' | 'serverSettings'> = {}
   ): Promise<Kernel.IKernelConnection> {
-    const model = await startNew(
-      { name: options.name, env: options.env },
-      this.serverSettings
-    );
+    const model = await startNew({ name: options.name }, this.serverSettings);
     return this.connectTo({
       ...options,
       model

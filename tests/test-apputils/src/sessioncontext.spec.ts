@@ -185,7 +185,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#manager', () => {
       it('should be the session manager used by the session', () => {
-        expect(sessionContext.manager).to.equal(sessionManager);
+        expect(sessionContext.sessionManager).to.equal(sessionManager);
       });
     });
 

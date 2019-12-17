@@ -196,7 +196,7 @@ const files: JupyterFrontEndPlugin<void> = {
             delete activeSessions[file.id];
             oldSession.dispose();
           }
-          const session = sessions.connectTo(model);
+          const session = sessions.connectTo({ model });
           activeSessions[file.id] = session;
         } else {
           const session = activeSessions[file.id];

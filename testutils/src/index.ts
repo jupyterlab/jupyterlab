@@ -222,7 +222,7 @@ export async function createSessionContext(
  * Create a session and return a session connection.
  */
 export async function createSession(
-  options: Session.IRequest
+  options: Session.ISessionOptions
 ): Promise<Session.ISessionConnection> {
   const manager = Private.getManager().sessions;
   await manager.ready;

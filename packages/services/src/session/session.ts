@@ -13,10 +13,6 @@ import { ServerConnection } from '..';
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
-type DeepPartial<T> = {
-  [P in keyof T]?: DeepPartial<T[P]>;
-};
-
 /**
  * Interface of a session object.
  *
@@ -176,57 +172,46 @@ export interface ISessionConnection extends IObservableDisposable {
   shutdown(): Promise<void>;
 }
 
-/**
- * The session initialization options.
- */
-export interface IOptions {
+export namespace ISessionConnection {
   /**
-   * Session model.
+   * The session initialization options.
    */
-  model: IModel;
+  export interface IOptions {
+    /**
+     * Session model.
+     */
+    model: IModel;
+
+    /**
+     * The server settings.
+     */
+    serverSettings?: ServerConnection.ISettings;
+
+    /**
+     * The username of the session client.
+     */
+    username?: string;
+
+    /**
+     * The unique identifier for the session client.
+     */
+    clientId?: string;
+
+    /**
+     * Connects to an existing kernel
+     */
+    connectToKernel(
+      options: Kernel.IKernelConnection.IOptions
+    ): Kernel.IKernelConnection;
+  }
 
   /**
-   * The server settings.
+   * An arguments object for the kernel changed signal.
    */
-  serverSettings?: ServerConnection.ISettings;
-
-  /**
-   * The username of the session client.
-   */
-  username?: string;
-
-  /**
-   * The unique identifier for the session client.
-   */
-  clientId?: string;
-
-  /**
-   * Connects to an existing kernel
-   */
-  connectToKernel(
-    options: Kernel.IKernelConnection.IOptions
-  ): Kernel.IKernelConnection;
-}
-
-/**
- * An arguments object for the kernel changed signal.
- */
-export interface IKernelChangedArgs
-  extends IChangedArgs<Kernel.IKernelConnection | null> {
-  /**
-   * The property name
-   */
-  name: 'kernel';
-
-  /**
-   * The old kernel.
-   */
-  oldValue: Kernel.IKernelConnection | null;
-
-  /**
-   * The new kernel.
-   */
-  newValue: Kernel.IKernelConnection | null;
+  export type IKernelChangedArgs = IChangedArgs<
+    Kernel.IKernelConnection | null,
+    'kernel'
+  >;
 }
 
 /**
@@ -279,7 +264,7 @@ export interface IManager extends IDisposable {
    * #### Notes
    * The `serverSettings` of the manager will be used.
    */
-  startNew(options: IRequest): Promise<ISessionConnection>;
+  startNew(options: ISessionOptions): Promise<ISessionConnection>;
 
   /**
    * Find a session by id.
@@ -308,7 +293,12 @@ export interface IManager extends IDisposable {
    *
    * @returns The new session instance.
    */
-  connectTo(model: IModel): ISessionConnection;
+  connectTo(
+    options: Omit<
+      ISessionConnection.IOptions,
+      'connectToKernel' | 'serverSettings'
+    >
+  ): ISessionConnection;
 
   /**
    * Shut down a session by id.
@@ -375,5 +365,6 @@ export interface IModel {
  *
  * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/sessions).
  */
-export type IRequest = Pick<IModel, 'path' | 'type' | 'name'> &
-  DeepPartial<Omit<IModel, 'path' | 'type' | 'name'>>;
+export type ISessionOptions = Pick<IModel, 'path' | 'type' | 'name'> & {
+  kernel?: Partial<Pick<Kernel.IModel, 'name'>>;
+}

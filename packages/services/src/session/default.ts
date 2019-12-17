@@ -24,7 +24,7 @@ export class SessionConnection implements Session.ISessionConnection {
   /**
    * Construct a new session.
    */
-  constructor(options: Session.IOptions) {
+  constructor(options: Session.ISessionConnection.IOptions) {
     this._id = options.model.id;
     this._name = options.model.name;
     this._path = options.model.path;
@@ -47,7 +47,10 @@ export class SessionConnection implements Session.ISessionConnection {
   /**
    * A signal emitted when the kernel changes.
    */
-  get kernelChanged(): ISignal<this, Session.IKernelChangedArgs> {
+  get kernelChanged(): ISignal<
+    this,
+    Session.ISessionConnection.IKernelChangedArgs
+  > {
     return this._kernelChanged;
   }
 
@@ -394,7 +397,10 @@ export class SessionConnection implements Session.ISessionConnection {
   private _kernel: Kernel.IKernelConnection;
   private _isDisposed = false;
   private _disposed = new Signal<this, void>(this);
-  private _kernelChanged = new Signal<this, Session.IKernelChangedArgs>(this);
+  private _kernelChanged = new Signal<
+    this,
+    Session.ISessionConnection.IKernelChangedArgs
+  >(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
     this

@@ -97,19 +97,18 @@ export class SessionManager extends BaseManager implements Session.IManager {
    * Connect to a running session.  See also [[connectToSession]].
    */
   connectTo(
-    model: Session.IModel,
-    username?: string,
-    clientId?: string
+    options: Omit<
+      Session.ISessionConnection.IOptions,
+      'connectToKernel' | 'serverSettings'
+    >
   ): Session.ISessionConnection {
     const sessionConnection = new SessionConnection({
-      model,
-      username,
-      clientId,
+      ...options,
       connectToKernel: this._connectToKernel,
       serverSettings: this.serverSettings
     });
     this._onStarted(sessionConnection);
-    if (!this._models.has(model.id)) {
+    if (!this._models.has(options.model.id)) {
       // We trust the user to connect to an existing session, but we verify
       // asynchronously.
       void this.refreshRunning().catch(() => {
@@ -149,11 +148,15 @@ export class SessionManager extends BaseManager implements Session.IManager {
    * @param options - Overrides for the default options, must include a `path`.
    */
   async startNew(
-    options: Session.IRequest
+    options: Session.ISessionOptions &
+      Omit<
+        Session.ISessionConnection.IOptions,
+        'model' | 'connectToKernel' | 'serverSettings'
+      >
   ): Promise<Session.ISessionConnection> {
     const model = await startSession(options, this.serverSettings);
     await this.refreshRunning();
-    return this.connectTo(model);
+    return this.connectTo({ ...options, model });
   }
 
   /**

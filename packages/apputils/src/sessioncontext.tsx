@@ -229,7 +229,7 @@ export class SessionContext implements ISessionContext {
    * Construct a new client session.
    */
   constructor(options: SessionContext.IOptions) {
-    this.manager = options.sessionManager;
+    this.sessionManager = options.sessionManager;
     this.specsManager = options.specsManager;
     this._path = options.path ?? UUID.uuid4();
     this._type = options.type ?? '';
@@ -281,7 +281,10 @@ export class SessionContext implements ISessionContext {
   /**
    * A signal emitted when the kernel connection changes, proxied from the session connection.
    */
-  get kernelChanged(): ISignal<this, Session.IKernelChangedArgs> {
+  get kernelChanged(): ISignal<
+    this,
+    Session.ISessionConnection.IKernelChangedArgs
+  > {
     return this._kernelChanged;
   }
 
@@ -353,7 +356,7 @@ export class SessionContext implements ISessionContext {
   /**
    * The session manager used by the session.
    */
-  readonly manager: Session.IManager;
+  readonly sessionManager: Session.IManager;
 
   /**
    * The kernel spec manager
@@ -364,7 +367,7 @@ export class SessionContext implements ISessionContext {
    * The display name of the current kernel, or a sensible alternative.
    *
    * This is a convenience function to have a consistent sensible name for the
-   * kernel. Perhaps it should be pushed down to the kernel connection?
+   * kernel.
    */
   get kernelDisplayName(): string {
     let kernel = this.session?.kernel;
@@ -500,14 +503,14 @@ export class SessionContext implements ISessionContext {
       return this._ready.promise;
     }
     this._initializing = true;
-    let manager = this.manager;
+    let manager = this.sessionManager;
     await manager.ready;
     let model = find(manager.running(), item => {
       return item.path === this._path;
     });
     if (model) {
       try {
-        let session = manager.connectTo(model);
+        let session = manager.connectTo({ model });
         this._handleNewSession(session);
       } catch (err) {
         void this._handleSessionError(err);
@@ -540,7 +543,7 @@ export class SessionContext implements ISessionContext {
     } else {
       let name = SessionContext.getDefaultKernel({
         specs: this.specsManager.specs,
-        sessions: this.manager.running(),
+        sessions: this.sessionManager.running(),
         preference
       });
       if (name) {
@@ -627,7 +630,7 @@ export class SessionContext implements ISessionContext {
       throw 'Client session is disposed.';
     }
     try {
-      const session = await this.manager.startNew({
+      const session = await this.sessionManager.startNew({
         path: this._path,
         type: this._type,
         name: this._name,
@@ -743,7 +746,7 @@ export class SessionContext implements ISessionContext {
    */
   private _onKernelChanged(
     sender: Session.ISessionConnection,
-    args: Session.IKernelChangedArgs
+    args: Session.ISessionConnection.IKernelChangedArgs
   ): void {
     this._kernelChanged.emit(args);
   }
@@ -807,7 +810,10 @@ export class SessionContext implements ISessionContext {
   private _initializing = false;
   private _isReady = false;
   private _terminated = new Signal<this, void>(this);
-  private _kernelChanged = new Signal<this, Session.IKernelChangedArgs>(this);
+  private _kernelChanged = new Signal<
+    this,
+    Session.ISessionConnection.IKernelChangedArgs
+  >(this);
   private _sessionChanged = new Signal<
     this,
     IChangedArgs<Session.ISessionConnection | null, 'session'>
@@ -1206,7 +1212,7 @@ namespace Private {
   ): SessionContext.IKernelSearch {
     return {
       specs: sessionContext.specsManager.specs,
-      sessions: sessionContext.manager.running(),
+      sessions: sessionContext.sessionManager.running(),
       preference: sessionContext.kernelPreference
     };
   }
