@@ -37,6 +37,9 @@
       "path": "../notebook"
     },
     {
+      "path": "../property-inspector"
+    },
+    {
       "path": "../rendermime"
     },
     {

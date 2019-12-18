@@ -70,12 +70,14 @@ import { ServiceManager } from '@jupyterlab/services';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { ReadonlyJSONObject, JSONValue } from '@lumino/coreutils';
+import { JSONValue } from '@lumino/coreutils';
 
 import { Message, MessageLoop } from '@lumino/messaging';
 
 import { Panel, Menu } from '@lumino/widgets';
 import { CommandRegistry } from '@lumino/commands';
+
+import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -227,11 +229,6 @@ const NOTEBOOK_ICON_CLASS = 'jp-NotebookIcon';
 const FACTORY = 'Notebook';
 
 /**
- * The rank of the notebook tools tab in the sidebar
- */
-const NOTEBOOK_TOOLS_RANK = 400;
-
-/**
  * The exluded Export To ...
  * (returned from nbconvert's export list)
  */
@@ -302,8 +299,12 @@ const tools: JupyterFrontEndPlugin<INotebookTools> = {
   provides: INotebookTools,
   id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
-  requires: [INotebookTracker, IEditorServices, IStateDB],
-  optional: [ILabShell]
+  requires: [
+    INotebookTracker,
+    IEditorServices,
+    IStateDB
+  ],
+  optional: [ILabShell, IPropertyInspectorProvider]
 };
 
 /**
@@ -405,7 +406,8 @@ function activateNotebookTools(
   tracker: INotebookTracker,
   editorServices: IEditorServices,
   state: IStateDB,
-  labShell: ILabShell | null
+  labShell: ILabShell | null,
+  inspectorProvider: IPropertyInspectorProvider | null
 ): INotebookTools {
   const id = 'notebook-tools';
   const notebookTools = new NotebookTools({ tracker });
@@ -475,44 +477,12 @@ function activateNotebookTools(
 
   MessageLoop.installMessageHook(notebookTools, hook);
 
-  // Wait until the application has finished restoring before rendering.
-  void Promise.all([state.fetch(id), app.restored]).then(([value]) => {
-    const open = !!(
-      value && ((value as ReadonlyJSONObject)['open'] as boolean)
-    );
-
-    // After initial restoration, check if the notebook tools should render.
-    if (tracker.size) {
-      app.shell.add(notebookTools, 'left', { rank: NOTEBOOK_TOOLS_RANK });
-      if (open) {
-        app.shell.activateById(notebookTools.id);
-      }
-    }
-
-    const updateTools = () => {
-      // If there are any open notebooks, add notebook tools to the side panel if
-      // it is not already there.
-      if (labShell && tracker.size) {
-        if (!notebookTools.isAttached) {
-          labShell.add(notebookTools, 'left', { rank: NOTEBOOK_TOOLS_RANK });
-        }
-        return;
-      }
-      // If there are no notebooks, close notebook tools.
-      notebookTools.close();
-    };
-
-    // For all subsequent widget changes, check if the notebook tools should render.
-    if (labShell) {
-      labShell.currentChanged.connect((sender, args) => {
-        updateTools();
-      });
-    }
-    // A notebook widget could be closed without a change to labShell.currentWidget
-    tracker.currentChanged.connect((sender, args) => {
-      updateTools();
+  if (inspectorProvider) {
+    tracker.widgetAdded.connect((sender, panel) => {
+      const inspector = inspectorProvider.register(panel);
+      inspector.render(notebookTools);
     });
-  });
+  }
 
   return notebookTools;
 }

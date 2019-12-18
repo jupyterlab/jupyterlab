@@ -86,6 +86,7 @@
     "@jupyterlab/observables": "^3.0.0-alpha.4",
     "@jupyterlab/outputarea": "^2.0.0-alpha.4",
     "@jupyterlab/pdf-extension": "^2.0.0-alpha.4",
+    "@jupyterlab/property-inspector": "^2.0.0-alpha.4",
     "@jupyterlab/rendermime": "^2.0.0-alpha.4",
     "@jupyterlab/rendermime-extension": "^2.0.0-alpha.4",
     "@jupyterlab/rendermime-interfaces": "^2.0.0-alpha.4",

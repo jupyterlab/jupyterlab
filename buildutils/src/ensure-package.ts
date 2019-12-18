@@ -193,6 +193,9 @@ export async function ensurePackage(
 
     // write out cssIndexContents, if needed
     const cssIndexPath = path.join(pkgPath, 'style/index.css');
+    if (!fs.existsSync(cssIndexPath)) {
+      fs.ensureFileSync(cssIndexPath);
+    }
     messages.push(...ensureFile(cssIndexPath, cssIndexContents, false));
   }
 
