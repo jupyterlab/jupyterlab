@@ -33,7 +33,6 @@ export class NotebookHandler implements IDisposable {
       return;
     }
     this.isDisposed = true;
-    this.cleanAllCells();
     this._cellMap.values().forEach(handler => handler.dispose());
     this._cellMap.dispose();
     Signal.clearData(this);
@@ -49,14 +48,6 @@ export class NotebookHandler implements IDisposable {
       editor: codeCell.editor
     });
     this._cellMap.set(cell.model.id, editorHandler);
-  }
-
-  protected cleanAllCells() {
-    const cells = this.notebookPanel.content.widgets;
-    cells.forEach(cell => {
-      EditorHandler.clearHighlight(cell.editor);
-      EditorHandler.clearGutter(cell.editor);
-    });
   }
 
   protected onActiveCellChanged(notebook: Notebook, cell: Cell) {
