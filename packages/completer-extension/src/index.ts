@@ -276,6 +276,15 @@ const files: JupyterFrontEndPlugin<void> = {
       const editor = widget.content.editor;
       const contextConnector = new ContextConnector({ editor });
 
+      // Initially create the handler with the contextConnector.
+      // If a kernel session is found matching this file editor,
+      // it will be replaced in onRunningChanged().
+      const handler = manager.register({
+        connector: contextConnector,
+        editor,
+        parent: widget
+      });
+
       // When the list of running sessions changes,
       // check to see if there are any kernels with a
       // matching path for this file editor.
@@ -314,15 +323,6 @@ const files: JupyterFrontEndPlugin<void> = {
       };
       onRunningChanged(sessions, toArray(sessions.running()));
       sessions.runningChanged.connect(onRunningChanged);
-
-      // Initially create the handler with the contextConnector.
-      // If a kernel session is found matching this file editor,
-      // it will be replaced in onRunningChanged().
-      const handler = manager.register({
-        connector: contextConnector,
-        editor,
-        parent: widget
-      });
 
       // When the widget is disposed, do some cleanup.
       widget.disposed.connect(() => {
