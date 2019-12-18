@@ -1285,11 +1285,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (msg.channel === 'iopub') {
       switch (msg.header.msg_type) {
         case 'status':
-          console.log(
-            `status message: ${
-              (msg as KernelMessage.IStatusMsg).content.execution_state
-            }`
-          );
           // Updating the status is synchronous, and we call no async user code
           let executionState = (msg as KernelMessage.IStatusMsg).content
             .execution_state;
