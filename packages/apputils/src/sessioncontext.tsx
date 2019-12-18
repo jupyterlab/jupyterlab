@@ -87,6 +87,11 @@ export interface ISessionContext extends IObservableDisposable {
   readonly statusChanged: ISignal<this, Kernel.Status>;
 
   /**
+   * A signal emitted when the kernel connection status changes, proxied from the session connection.
+   */
+  readonly connectionStatusChanged: ISignal<this, Kernel.ConnectionStatus>;
+
+  /**
    * A signal emitted for a kernel messages, proxied from the session connection.
    */
   readonly iopubMessage: ISignal<this, KernelMessage.IMessage>;
@@ -303,6 +308,13 @@ export class SessionContext implements ISessionContext {
    */
   get statusChanged(): ISignal<this, Kernel.Status> {
     return this._statusChanged;
+  }
+
+  /**
+   * A signal emitted when the kernel status changes, proxied from the kernel.
+   */
+  get connectionStatusChanged(): ISignal<this, Kernel.ConnectionStatus> {
+    return this._connectionStatusChanged;
   }
 
   /**
@@ -662,6 +674,10 @@ export class SessionContext implements ISessionContext {
     session.propertyChanged.connect(this._onPropertyChanged, this);
     session.kernelChanged.connect(this._onKernelChanged, this);
     session.statusChanged.connect(this._onStatusChanged, this);
+    session.connectionStatusChanged.connect(
+      this._onConnectionStatusChanged,
+      this
+    );
     session.iopubMessage.connect(this._onIopubMessage, this);
     session.unhandledMessage.connect(this._onUnhandledMessage, this);
 
@@ -779,6 +795,17 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
+   * Handle a change to the session status.
+   */
+  private _onConnectionStatusChanged(
+    sender: Session.ISessionConnection,
+    status: Kernel.ConnectionStatus
+  ): void {
+    // Proxy the signal
+    this._connectionStatusChanged.emit(status);
+  }
+
+  /**
    * Handle an iopub message.
    */
   private _onIopubMessage(
@@ -819,6 +846,9 @@ export class SessionContext implements ISessionContext {
     IChangedArgs<Session.ISessionConnection | null, 'session'>
   >(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
+  private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
+    this
+  );
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
