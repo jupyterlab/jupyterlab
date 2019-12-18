@@ -84,25 +84,16 @@ if [[ $GROUP == integrity ]]; then
     git checkout -b commit_${BUILD_SOURCEVERSION}
     git clean -df
     jlpm bumpversion minor --force
-    git commit -a -m "minor"
     jlpm bumpversion major --force
-    git commit -a -m "major"
+    jlpm bumpversion release --force # switch to beta
     jlpm bumpversion release --force # switch to rc
-    git commit -a -m "release"
     jlpm bumpversion build --force
-    git commit -a -m "build"
     VERSION=$(python setup.py --version)
     if [[ $VERSION != *rc1 ]]; then exit 1; fi
 
     # make sure we can patch release
     jlpm bumpversion release --force  # switch to final
-    git commit -a -m "release"
     jlpm patch:release --force
-    git commit -a -m "patched"
-    jlpm patch:release console --force
-    git commit -a -m "patched single"
-    jlpm patch:release filebrowser notebook --force
-    git commit -a -m "patched multiple"
 
     # make sure we can bump major JS releases
     jlpm bumpversion minor --force
