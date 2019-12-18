@@ -132,7 +132,11 @@ export class DebugService implements IDebugger, IDisposable {
     if (client instanceof ClientSession) {
       await client.ready;
     }
-    await client.kernel.ready;
+    const kernel = client.kernel;
+    if (!kernel) {
+      return false;
+    }
+    await kernel.ready;
     const info = (client.kernel?.info as IDebugger.ISession.IInfoReply) ?? null;
     return !!(info?.debugger ?? false);
   }
