@@ -125,6 +125,8 @@ export class EditorHandler implements IDisposable {
       return;
     }
     const editor = this._editor as CodeMirrorEditor;
+    EditorHandler.clearHighlight(editor);
+    EditorHandler.clearGutter(editor);
     editor.setOption('lineNumbers', false);
     editor.editor.setOption('gutters', []);
     editor.editor.off('gutterClick', this.onGutterClick);
