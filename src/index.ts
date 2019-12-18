@@ -212,13 +212,15 @@ class DebuggerHandler<
       updateAttribute();
     };
 
-    const removeHandler = () => {
+    const removeHandlers = () => {
       const handler = this._handlers[widget.id];
       if (!handler) {
         return;
       }
       handler.dispose();
       delete this._handlers[widget.id];
+      delete this._kernelChangedHandlers[widget.id];
+      delete this._statusChangedHandlers[widget.id];
 
       // clear the model if the handler being removed corresponds
       // to the current active debug session
@@ -252,7 +254,7 @@ class DebuggerHandler<
     const toggleDebugging = async () => {
       if (debug.isStarted) {
         await debug.stop();
-        removeHandler();
+        removeHandlers();
       } else {
         await debug.restoreState(true);
         await createHandler();
@@ -261,7 +263,7 @@ class DebuggerHandler<
 
     const debuggingEnabled = await debug.isAvailable(client);
     if (!debuggingEnabled) {
-      removeHandler();
+      removeHandlers();
       removeToolbarButton();
       return;
     }
@@ -278,7 +280,7 @@ class DebuggerHandler<
 
     // check the state of the debug session
     if (!debug.isStarted) {
-      removeHandler();
+      removeHandlers();
       return;
     }
 
@@ -286,8 +288,8 @@ class DebuggerHandler<
     await createHandler();
 
     // listen to the disposed signals
-    widget.disposed.connect(removeHandler);
-    debug.model.disposed.connect(removeHandler);
+    widget.disposed.connect(removeHandlers);
+    debug.model.disposed.connect(removeHandlers);
   }
 
   private _handlers: { [id: string]: H } = {};
