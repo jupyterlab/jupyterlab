@@ -55,10 +55,6 @@ if [[ $GROUP == integrity ]]; then
     # Lint our files.
     jlpm run lint:check || (echo 'Please run `jlpm run lint` locally and push changes' && exit 1)
 
-
-    # Build the vega bundles
-    jlpm run build:vega
-
     # Build the packages individually.
     jlpm run build:src
 
