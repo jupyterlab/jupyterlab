@@ -38,15 +38,16 @@
     "@jupyterlab/apputils": "^2.0.0-alpha.4",
     "@jupyterlab/services": "^5.0.0-alpha.4",
     "@lumino/coreutils": "^1.4.0",
-    "@lumino/domutils": "^1.1.3",
-    "@lumino/messaging": "^1.3.0",
-    "@lumino/widgets": "^1.9.0",
-    "xterm": "~3.13.2"
+    "@lumino/domutils": "^1.1.5",
+    "@lumino/messaging": "^1.3.1",
+    "@lumino/widgets": "^1.9.4",
+    "xterm": "~4.2.0",
+    "xterm-addon-fit": "~0.3.0"
   },
   "devDependencies": {
-    "rimraf": "~2.6.2",
-    "typedoc": "^0.15.2",
-    "typescript": "~3.7.2"
+    "rimraf": "~3.0.0",
+    "typedoc": "^0.15.4",
+    "typescript": "~3.7.3"
   },
   "publishConfig": {
     "access": "public"
@@ -54,7 +55,7 @@
   "jupyterlab": {
     "extraStyles": {
       "xterm": [
-        "src/xterm.css"
+        "css/xterm.css"
       ]
     }
   }

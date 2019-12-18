@@ -36,16 +36,16 @@
   "dependencies": {
     "@jupyterlab/rendermime-interfaces": "^2.0.0-alpha.4",
     "@lumino/coreutils": "^1.4.0",
-    "@lumino/widgets": "^1.9.0"
+    "@lumino/widgets": "^1.9.4"
   },
   "devDependencies": {
-    "@types/webpack-env": "^1.13.9",
-    "rimraf": "~2.6.2",
-    "typedoc": "^0.15.2",
-    "typescript": "~3.7.2",
-    "vega": "^5.4.0",
-    "vega-embed": "^6.2.0",
-    "vega-lite": "^3.3.0"
+    "@types/webpack-env": "^1.14.1",
+    "rimraf": "~3.0.0",
+    "typedoc": "^0.15.4",
+    "typescript": "~3.7.3",
+    "vega": "^5.9.0",
+    "vega-embed": "^6.2.1",
+    "vega-lite": "^4.0.0"
   },
   "publishConfig": {
     "access": "public"

@@ -40,8 +40,8 @@
     "@jupyterlab/services": "^5.0.0-alpha.4"
   },
   "devDependencies": {
-    "rimraf": "~2.6.2",
-    "typescript": "~3.7.2"
+    "rimraf": "~3.0.0",
+    "typescript": "~3.7.3"
   },
   "publishConfig": {
     "access": "public"

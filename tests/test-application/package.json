@@ -16,21 +16,21 @@
     "@jupyterlab/apputils": "^2.0.0-alpha.4",
     "@jupyterlab/coreutils": "^4.0.0-alpha.4",
     "@jupyterlab/testutils": "^2.0.0-alpha.4",
-    "@lumino/algorithm": "^1.2.0",
-    "@lumino/commands": "^1.7.0",
+    "@lumino/algorithm": "^1.2.1",
+    "@lumino/commands": "^1.8.0",
     "@lumino/coreutils": "^1.4.0",
-    "@lumino/messaging": "^1.3.0",
-    "@lumino/widgets": "^1.9.0",
+    "@lumino/messaging": "^1.3.1",
+    "@lumino/widgets": "^1.9.4",
     "chai": "^4.2.0",
-    "jest": "^24.7.1",
-    "jest-junit": "^6.3.0",
+    "jest": "^24.9.0",
+    "jest-junit": "^10.0.0",
     "simulate-event": "~1.4.0",
-    "ts-jest": "^24.0.2"
+    "ts-jest": "^24.2.0"
   },
   "devDependencies": {
-    "@types/chai": "^4.1.7",
-    "@types/jest": "^24.0.13",
-    "rimraf": "~2.6.2",
-    "typescript": "~3.7.2"
+    "@types/chai": "^4.2.7",
+    "@types/jest": "^24.0.23",
+    "rimraf": "~3.0.0",
+    "typescript": "~3.7.3"
   }
 }
