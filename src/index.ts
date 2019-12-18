@@ -95,6 +95,7 @@ function updateToolbar(
   if (itemAdded && widget instanceof ConsolePanel) {
     widget.insertWidget(0, toolbar);
   }
+  return button;
 }
 
 /**
@@ -129,7 +130,8 @@ class DebuggerHandler<
   }
 
   /**
-   * Update a debug handler for the given widget.
+   * Update a debug handler for the given widget, and
+   * handle kernel changed events.
    * @param debug The debug service.
    * @param widget The widget to update.
    */
@@ -138,20 +140,36 @@ class DebuggerHandler<
     widget: W,
     client: IClientSession | Session.ISession
   ): Promise<void> {
-    const debuggingEnabled = await debug.isAvailable(client);
-    if (!debug.model || !debuggingEnabled) {
+    const kernelChangedHandler = this._kernelChangedHandlers[client.path];
+    if (kernelChangedHandler) {
+      client.kernelChanged.disconnect(kernelChangedHandler);
+    }
+    const updateHandler = () => {
+      void this._update(debug, widget, client);
+    };
+    client.kernelChanged.connect(updateHandler, this);
+    this._kernelChangedHandlers[client.path] = updateHandler;
+    return this._update(debug, widget, client);
+  }
+
+  /**
+   * Update a debug handler for the given widget.
+   * @param debug The debug service.
+   * @param widget The widget to update.
+   */
+  private async _update<
+    W extends ConsolePanel | NotebookPanel | DocumentWidget
+  >(
+    debug: IDebugger,
+    widget: W,
+    client: IClientSession | Session.ISession
+  ): Promise<void> {
+    if (!debug.model) {
       return;
     }
 
-    // update the active debug session
-    if (!debug.session) {
-      debug.session = new DebugSession({ client: client });
-    } else {
-      debug.session.client = client;
-    }
-
     const updateAttribute = () => {
-      if (!debug.isStarted) {
+      if (!this._handlers[widget.id]) {
         widget.node.removeAttribute('data-jp-debugger');
         return;
       }
@@ -179,6 +197,25 @@ class DebuggerHandler<
       updateAttribute();
     };
 
+    const addToolbarButton = () => {
+      const button = this._buttons[widget.id];
+      if (button) {
+        return;
+      }
+      const newButton = updateToolbar(widget, toggleDebugging);
+      this._buttons[widget.id] = newButton;
+    };
+
+    const removeToolbarButton = () => {
+      const button = this._buttons[widget.id];
+      if (!button) {
+        return;
+      }
+      button.parent = null;
+      button.dispose();
+      delete this._buttons[widget.id];
+    };
+
     const toggleDebugging = async () => {
       if (debug.isStarted) {
         await debug.stop();
@@ -189,8 +226,22 @@ class DebuggerHandler<
       }
     };
 
+    const debuggingEnabled = await debug.isAvailable(client);
+    if (!debuggingEnabled) {
+      removeHandler();
+      removeToolbarButton();
+      return;
+    }
+
+    // update the active debug session
+    if (!debug.session) {
+      debug.session = new DebugSession({ client: client });
+    } else {
+      debug.session.client = client;
+    }
+
     await debug.restoreState(false);
-    updateToolbar(widget, toggleDebugging);
+    addToolbarButton();
 
     // check the state of the debug session
     if (!debug.isStarted) {
@@ -207,6 +258,8 @@ class DebuggerHandler<
   }
 
   private _handlers: { [id: string]: H } = {};
+  private _kernelChangedHandlers: { [id: string]: () => void } = {};
+  private _buttons: { [id: string]: ToolbarButton } = {};
   private _builder: new (option: any) => H;
 }
 
