@@ -556,7 +556,7 @@ async function activateConsole(
     changeKernel: current =>
       current.content.console.sessionContext.selectKernel(),
     shutdownKernel: current => current.content.console.sessionContext.shutdown()
-  } as IKernelMenu.IKernelUser<ConsolePanel>);
+  } as IKernelMenu.IKernelUser<MainAreaWidget<ConsolePanel>>);
 
   // Add a code runner to the Run menu.
   mainMenu.runMenu.codeRunners.add({
@@ -627,7 +627,7 @@ async function activateConsole(
   mainMenu.helpMenu.kernelUsers.add({
     tracker,
     getKernel: current => current.content.sessionContext.session?.kernel
-  } as IHelpMenu.IKernelUser<ConsolePanel>);
+  } as IHelpMenu.IKernelUser<MainAreaWidget<ConsolePanel>>);
 
   app.contextMenu.addItem({
     command: CommandIDs.clear,
