@@ -25,7 +25,6 @@ type Dict<T> = { [key: string]: T };
 let MISSING: Dict<string[]> = {
   '@jupyterlab/buildutils': ['path'],
   '@jupyterlab/testutils': ['fs'],
-  '@jupyterlab/vega4-extension': ['vega-embed'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
 
@@ -36,7 +35,6 @@ let UNUSED: Dict<string[]> = {
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/testutils': ['node-fetch', 'identity-obj-proxy'],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
-  '@jupyterlab/vega4-extension': ['vega', 'vega-lite'],
   '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],
   '@jupyterlab/ui-components': ['@blueprintjs/icons']
 };
