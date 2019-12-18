@@ -40,10 +40,10 @@
   "dependencies": {
     "@jupyterlab/application": "^2.0.0-alpha.4",
     "@jupyterlab/celltags": "^2.0.0-alpha.4",
-    "@jupyterlab/notebook": "^2.0.0-alpha.4",
-    "@types/node": "^12.12.17"
+    "@jupyterlab/notebook": "^2.0.0-alpha.4"
   },
   "devDependencies": {
+    "@types/node": "^12.12.17",
     "rimraf": "~3.0.0",
     "typescript": "~3.7.3"
   },

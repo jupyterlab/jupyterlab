@@ -42,12 +42,6 @@
     "@jupyterlab/rendermime": "^2.0.0-alpha.4"
   },
   "devDependencies": {
-    "@jupyterlab/apputils": "^2.0.0-alpha.4",
-    "@jupyterlab/cells": "^2.0.0-alpha.4",
-    "@jupyterlab/codemirror": "^2.0.0-alpha.4",
-    "@jupyterlab/notebook": "^2.0.0-alpha.4",
-    "@jupyterlab/outputarea": "^2.0.0-alpha.4",
-    "@jupyterlab/rendermime": "^2.0.0-alpha.4",
     "css-loader": "~3.2.0",
     "file-loader": "~5.0.2",
     "mini-css-extract-plugin": "~0.8.0",
