@@ -725,7 +725,8 @@ function activateNotebookHandler(
 
         for (let name in specs.kernelspecs) {
           let rank = name === specs.default ? 0 : Infinity;
-          let kernelIconUrl = specs.kernelspecs[name]?.resources['logo-64x64'];
+          const spec = specs.kernelspecs[name]!;
+          let kernelIconUrl = spec.resources['logo-64x64'];
           if (kernelIconUrl) {
             let index = kernelIconUrl.indexOf('kernelspecs');
             kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
@@ -736,7 +737,8 @@ function activateNotebookHandler(
               args: { isLauncher: true, kernelName: name },
               category: 'Notebook',
               rank,
-              kernelIconUrl
+              kernelIconUrl,
+              metadata: spec.metadata
             })
           );
         }
