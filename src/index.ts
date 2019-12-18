@@ -49,8 +49,6 @@ import { IDebugger } from './tokens';
  * The command IDs used by the debugger plugin.
  */
 export namespace CommandIDs {
-  export const create = 'debugger:create';
-
   export const start = 'debugger:start';
 
   export const stop = 'debugger:stop';
@@ -357,8 +355,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
     const service = new DebugService();
 
-    let sidebar: Debugger.Sidebar;
-
     commands.addCommand(CommandIDs.debugContinue, {
       label: 'Continue',
       caption: 'Continue',
@@ -421,52 +417,38 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       }
     });
 
-    commands.addCommand(CommandIDs.create, {
-      label: 'Debugger',
-      execute: async () => {
-        if (sidebar) {
-          return;
-        }
+    const callstackCommands = {
+      registry: commands,
+      continue: CommandIDs.debugContinue,
+      terminate: CommandIDs.terminate,
+      next: CommandIDs.next,
+      stepIn: CommandIDs.stepIn,
+      stepOut: CommandIDs.stepOut
+    };
 
-        const callstackCommands = {
-          registry: commands,
-          continue: CommandIDs.debugContinue,
-          terminate: CommandIDs.terminate,
-          next: CommandIDs.next,
-          stepIn: CommandIDs.stepIn,
-          stepOut: CommandIDs.stepOut
-        };
-
-        sidebar = new Debugger.Sidebar({
-          service,
-          callstackCommands,
-          editorServices
-        });
-
-        sidebar.service.eventMessage.connect(_ => {
-          commands.notifyCommandChanged();
-        });
-
-        sidebar.service.sessionChanged.connect(_ => {
-          commands.notifyCommandChanged();
-        });
-
-        if (labShell.currentWidget) {
-          labShell.currentWidget.activate();
-        }
-
-        if (restorer) {
-          restorer.add(sidebar, 'debugger-sidebar');
-        }
-
-        shell.add(sidebar, 'right');
-      }
+    const sidebar = new Debugger.Sidebar({
+      service,
+      callstackCommands,
+      editorServices
     });
+
+    sidebar.service.eventMessage.connect(_ => {
+      commands.notifyCommandChanged();
+    });
+
+    sidebar.service.sessionChanged.connect(_ => {
+      commands.notifyCommandChanged();
+    });
+
+    if (restorer) {
+      restorer.add(sidebar, 'debugger-sidebar');
+    }
+
+    shell.add(sidebar, 'right');
 
     if (palette) {
       const category = 'Debugger';
       [
-        CommandIDs.create,
         CommandIDs.debugContinue,
         CommandIDs.terminate,
         CommandIDs.next,
@@ -476,8 +458,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         palette.addItem({ command, category });
       });
     }
-
-    void commands.execute(CommandIDs.create);
 
     return service;
   }
