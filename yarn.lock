@@ -13490,9 +13490,9 @@ resolve@1.1.7, resolve@1.1.x:
   integrity sha1-IDEU2CrSxe2ejgQRs5ModeiJ6Xs=
 
 resolve@1.x, resolve@^1.1.10, resolve@^1.1.6, resolve@^1.10.0, resolve@^1.11.0, resolve@^1.12.0, resolve@^1.3.2, resolve@^1.8.1:
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.13.1.tgz#be0aa4c06acd53083505abb35f4d66932ab35d16"
-  integrity sha512-CxqObCX8K8YtAhOBRg+lrcdn+LK+WYOS8tSjqSFbjtrI5PnS63QPhZl4+yKfrU9tdsbMu9Anr/amegT87M9Z6w==
+  version "1.14.0"
+  resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.14.0.tgz#6d14c6f9db9f8002071332b600039abf82053f64"
+  integrity sha512-uviWSi5N67j3t3UKFxej1loCH0VZn5XuqdNxoLShPcYPw6cUZn74K1VRj+9myynRX03bxIBEkwlkob/ujLsJVw==
   dependencies:
     path-parse "^1.0.6"
 
@@ -16359,10 +16359,10 @@ xterm-addon-fit@~0.3.0:
   resolved "https://registry.yarnpkg.com/xterm-addon-fit/-/xterm-addon-fit-0.3.0.tgz#341710741027de9d648a9f84415a01ddfdbbe715"
   integrity sha512-kvkiqHVrnMXgyCH9Xn0BOBJ7XaWC/4BgpSWQy3SueqximgW630t/QOankgqkvk11iTOCwWdAY9DTyQBXUMN3lw==
 
-xterm@~4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/xterm/-/xterm-4.3.0.tgz#9a302efefe75172d4f7ea3afc20f9bd983f05027"
-  integrity sha512-6dnrC4nxgnRKQzIWwC5HA0mnT9/rpDPZflUIr24gdcdSMTKM1QQcor4qQ/xz4Zerz6AIL/CuuBPypFfzsB63dQ==
+xterm@~4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/xterm/-/xterm-4.2.0.tgz#b9980b2ae18c64ed31bcc95eace3bcecffebbbd9"
+  integrity sha512-oNfLqt+LmghLPOt5UcskP5Km1fXpTBHsTZ99nxJKY2N0MNFXBKIVXUcNNhHCa74JGZFMGhLT58A/UN3HcPXSfg==
 
 y18n@^3.2.0:
   version "3.2.1"
