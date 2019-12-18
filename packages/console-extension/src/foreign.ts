@@ -38,8 +38,8 @@ function activateForeign(
   palette: ICommandPalette | null
 ) {
   const { shell } = app;
-  tracker.widgetAdded.connect((sender, panel) => {
-    const console = panel.console;
+  tracker.widgetAdded.connect((sender, widget) => {
+    const console = widget.content.console;
 
     const handler = new ForeignHandler({
       session: console.session,
@@ -62,7 +62,7 @@ function activateForeign(
     if (activate && widget) {
       shell.activateById(widget.id);
     }
-    return widget;
+    return widget.content;
   }
 
   commands.addCommand(toggleShowAllActivity, {
@@ -77,7 +77,8 @@ function activateForeign(
     },
     isToggled: () =>
       tracker.currentWidget !== null &&
-      Private.foreignHandlerProperty.get(tracker.currentWidget.console).enabled,
+      Private.foreignHandlerProperty.get(tracker.currentWidget.content.console)
+        .enabled,
     isEnabled: () =>
       tracker.currentWidget !== null &&
       tracker.currentWidget === shell.currentWidget

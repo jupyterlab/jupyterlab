@@ -105,7 +105,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
           return;
         }
 
-        const anchor = parent.console;
+        const anchor = parent.content.console;
         const editor = anchor.promptCell.editor;
         const kernel = anchor.session.kernel;
         const rendermime = anchor.rendermime;
