@@ -135,8 +135,9 @@ const consoles: JupyterFrontEndPlugin<void> = {
 
     // Create a handler for each console that is created.
     consoles.widgetAdded.connect((sender, parent) => {
-      const session = parent.console.session;
-      const rendermime = parent.console.rendermime;
+      const content = parent.content;
+      const session = content.console.session;
+      const rendermime = content.console.rendermime;
       const connector = new KernelConnector({ session });
       const handler = new InspectionHandler({ connector, rendermime });
 
@@ -144,11 +145,11 @@ const consoles: JupyterFrontEndPlugin<void> = {
       handlers[parent.id] = handler;
 
       // Set the initial editor.
-      let cell = parent.console.promptCell;
+      let cell = content.console.promptCell;
       handler.editor = cell && cell.editor;
 
       // Listen for prompt creation.
-      parent.console.promptCellCreated.connect((sender, cell) => {
+      content.console.promptCellCreated.connect((sender, cell) => {
         handler.editor = cell && cell.editor;
       });
 

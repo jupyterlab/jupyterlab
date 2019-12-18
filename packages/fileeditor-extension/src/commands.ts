@@ -865,15 +865,17 @@ export namespace Commands {
       tracker,
       noun: 'Code',
       isEnabled: current =>
-        !!consoleTracker.find(c => c.session.path === current.context.path),
+        !!consoleTracker.find(
+          widget => widget.content.session.path === current.context.path
+        ),
       run: () => commands.execute(CommandIDs.runCode),
       runAll: () => commands.execute(CommandIDs.runAllCode),
       restartAndRunAll: current => {
-        const console = consoleTracker.find(
-          console => console.session.path === current.context.path
+        const widget = consoleTracker.find(
+          widget => widget.content.session.path === current.context.path
         );
-        if (console) {
-          return console.session.restart().then(restarted => {
+        if (widget) {
+          return widget.content.session.restart().then(restarted => {
             if (restarted) {
               void commands.execute(CommandIDs.runAllCode);
             }
