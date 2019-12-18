@@ -3,8 +3,6 @@
 
 import { UseSignal, ReactWidget } from './vdom';
 
-import { Kernel } from '@jupyterlab/services';
-
 import { Button, DefaultIconReact } from '@jupyterlab/ui-components';
 
 import { IIterator, find, map, some } from '@lumino/algorithm';
@@ -21,6 +19,7 @@ import { ISessionContext } from './sessioncontext';
 
 import * as React from 'react';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
+import { Text } from '@jupyterlab/coreutils';
 
 /**
  * The class name added to toolbars.
@@ -715,24 +714,19 @@ namespace Private {
         return;
       }
 
-      let kernel = sessionContext.session?.kernel;
-      let status: Kernel.Status | Kernel.ConnectionStatus =
-        (kernel?.connectionStatus === 'connected'
-          ? kernel?.status
-          : kernel?.connectionStatus) ?? 'unknown';
+      let status = sessionContext.kernelDisplayStatus;
 
-      sessionContext.session?.kernel?.status ?? 'unknown';
       const busy = this._isBusy(status);
       this.toggleClass(TOOLBAR_BUSY_CLASS, busy);
       this.toggleClass(TOOLBAR_IDLE_CLASS, !busy);
-      let title = 'Kernel ' + status[0].toUpperCase() + status.slice(1);
+      let title = `Kernel ${Text.titleCase(status)}`;
       this.node.title = title;
     }
 
     /**
      * Check if status should be shown as busy.
      */
-    private _isBusy(status: Kernel.Status | Kernel.ConnectionStatus): boolean {
+    private _isBusy(status: ISessionContext.KernelDisplayStatus): boolean {
       return (
         status === 'busy' || status === 'starting' || status === 'restarting'
       );

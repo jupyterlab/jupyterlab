@@ -7,7 +7,7 @@ import { ISessionContext, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import { Text } from '@jupyterlab/coreutils';
 
-import { Kernel, Session } from '@jupyterlab/services';
+import { Session } from '@jupyterlab/services';
 
 import { interactiveItem, TextItem } from '..';
 
@@ -55,7 +55,7 @@ namespace KernelStatusComponent {
     /**
      * The status of the kernel.
      */
-    status: Kernel.Status;
+    status: string;
   }
 }
 
@@ -145,21 +145,22 @@ export namespace KernelStatus {
 
       const oldState = this._getAllState();
       this._sessionContext = sessionContext;
-      this._kernelStatus = sessionContext?.session?.kernel?.status ?? 'unknown';
-      this._kernelName = sessionContext?.kernelDisplayName ?? 'unknown';
-      sessionContext?.statusChanged.connect(this._onKernelStatusChanged);
-      sessionContext?.kernelChanged.connect(this._onKernelChanged);
+      this._kernelStatus = sessionContext?.kernelDisplayStatus;
+      this._kernelName = sessionContext?.kernelDisplayName ?? 'No Kernel!';
+      sessionContext?.statusChanged.connect(this._onKernelStatusChanged, this);
+      sessionContext?.connectionStatusChanged.connect(
+        this._onKernelStatusChanged,
+        this
+      );
+      sessionContext?.kernelChanged.connect(this._onKernelChanged, this);
       this._triggerChange(oldState, this._getAllState());
     }
 
     /**
      * React to changes to the kernel status.
      */
-    private _onKernelStatusChanged = (
-      _sessionContext: ISessionContext,
-      status: Kernel.Status
-    ) => {
-      this._kernelStatus = status;
+    private _onKernelStatusChanged = () => {
+      this._kernelStatus = this._sessionContext?.kernelDisplayStatus;
       this.stateChanged.emit(void 0);
     };
 
@@ -174,12 +175,12 @@ export namespace KernelStatus {
       const { newValue } = change;
       if (newValue !== null) {
         // sync setting of status and display name
-        this._kernelStatus = newValue.status;
+        this._kernelStatus = this._sessionContext?.kernelDisplayStatus;
         this._kernelName = _sessionContext.kernelDisplayName;
         this._triggerChange(oldState, this._getAllState());
       } else {
-        this._kernelStatus = 'unknown';
-        this._kernelName = 'unknown';
+        this._kernelStatus = '';
+        this._kernelName = 'No Kernel!';
         this._triggerChange(oldState, this._getAllState());
       }
     };
@@ -198,8 +199,8 @@ export namespace KernelStatus {
     }
 
     private _activityName: string = 'activity';
-    private _kernelName: string = 'unknown';
-    private _kernelStatus: Kernel.Status = 'unknown';
+    private _kernelName: string = 'No Kernel!';
+    private _kernelStatus: string = '';
     private _sessionContext: ISessionContext | null = null;
   }
 

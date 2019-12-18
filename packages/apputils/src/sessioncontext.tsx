@@ -114,10 +114,19 @@ export interface ISessionContext extends IObservableDisposable {
   /**
    * The sensible display name for the kernel, or 'No Kernel'
    *
+   * #### Notes
    * This is at this level since the underlying kernel connection does not
    * have access to the kernel spec manager.
    */
   readonly kernelDisplayName: string;
+
+  /**
+   * A sensible status to display
+   *
+   * #### Notes
+   * This combines the status and connection status into a single status for the user.
+   */
+  readonly kernelDisplayStatus: ISessionContext.KernelDisplayStatus;
 
   /**
    * The session path.
@@ -224,6 +233,12 @@ export namespace ISessionContext {
      */
     readonly autoStartDefault?: boolean;
   }
+
+  export type KernelDisplayStatus =
+    | Kernel.Status
+    | Kernel.ConnectionStatus
+    | 'initializing'
+    | '';
 }
 
 /**
@@ -378,17 +393,51 @@ export class SessionContext implements ISessionContext {
   /**
    * The display name of the current kernel, or a sensible alternative.
    *
+   * #### Notes
    * This is a convenience function to have a consistent sensible name for the
    * kernel.
    */
   get kernelDisplayName(): string {
     let kernel = this.session?.kernel;
+    if (
+      !kernel &&
+      !this.isReady &&
+      this.kernelPreference.canStart &&
+      this.kernelPreference.shouldStart
+    ) {
+      return 'Kernel';
+    }
     if (!kernel) {
       return 'No Kernel!';
     }
     return (
       this.specsManager.specs?.kernelspecs[kernel.name]?.display_name ??
       kernel.name
+    );
+  }
+
+  /**
+   * A sensible status to display
+   *
+   * #### Notes
+   * This combines the status and connection status into a single status for
+   * the user.
+   */
+  get kernelDisplayStatus(): ISessionContext.KernelDisplayStatus {
+    let kernel = this.session?.kernel;
+    if (
+      !kernel &&
+      !this.isReady &&
+      this.kernelPreference.canStart &&
+      this.kernelPreference.shouldStart
+    ) {
+      return 'initializing';
+    }
+
+    return (
+      (kernel?.connectionStatus === 'connected'
+        ? kernel?.status
+        : kernel?.connectionStatus) ?? ''
     );
   }
 
