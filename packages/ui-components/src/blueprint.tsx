@@ -46,7 +46,7 @@ export const Button = (props: IButtonProps & CommonProps<any>) => (
     {...props}
     className={combineClasses(
       props.className,
-      props.minimal && 'minimal',
+      props.minimal ? 'minimal' : '',
       'jp-Button'
     )}
   />

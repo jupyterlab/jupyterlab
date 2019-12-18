@@ -125,17 +125,17 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 
 - Afshin Darian, Two Sigma (co-creator, application/high-level architecture,
   prolific contributions throughout the code base).
+- Vidar T. Fauske, JPMorgan Chase (general development, extensions).
 - Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
 - Brian Granger, AWS (co-creator, strategy, vision, management, UI/UX design,
   architecture).
 - Jason Grout, Bloomberg (co-creator, vision, general development).
+- Max Klein, JPMorgan Chase (UI Package, build system, general development, extensions).
 - Fernando Perez, UC Berkeley (co-creator, vision).
 - Ian Rose, Quansight/City of LA (general core development, extensions).
 - Saul Shanabrook, Quansight (general development, extensions)
 - Steven Silvester, AWS (co-creator, release management, packaging,
   prolific contributions throughout the code base).
-- Vidar T. Fauske, JPMorgan Chase (general development, extensions).
-- Max Klein, JPMorgan Chase (UI Package, build system, general development, extensions).
 
 Maintainer emeritus:
 

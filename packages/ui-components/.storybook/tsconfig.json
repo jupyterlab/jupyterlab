@@ -1,0 +1,15 @@
+{
+  "extends": "../../../tsconfigbase.json",
+  "compilerOptions": {
+    "lib": ["es6", "dom"],
+    "allowJs": false,
+    "rootDir": "../",
+    "outDir": "dist",
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "skipLibCheck": true
+  },
+  "include": ["../src/**/*"],
+  "exclude": ["node_modules"]
+}

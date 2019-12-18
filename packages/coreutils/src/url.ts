@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONObject } from '@lumino/coreutils';
+import { PartialJSONObject } from '@lumino/coreutils';
 
 import urlparse from 'url-parse';
 
@@ -28,7 +28,9 @@ export namespace URLExt {
   /**
    * Normalize a url.
    */
-  export function normalize(url: string): string {
+  export function normalize(url: string): string;
+  export function normalize(url: undefined): undefined;
+  export function normalize(url: string | undefined): string | undefined {
     return url && parse(url).toString();
   }
 
@@ -51,8 +53,8 @@ export namespace URLExt {
     // Parse the top element into a header collection.
     const header = top.match(/(\w+)(:)(\/\/)?/);
     const protocol = header && header[1];
-    const colon = protocol && header[2];
-    const slashes = colon && header[3];
+    const colon = protocol && header![2];
+    const slashes = colon && header![3];
 
     // Construct the URL prefix.
     const prefix = shorthand
@@ -97,7 +99,7 @@ export namespace URLExt {
    * #### Notes
    * Modified version of [stackoverflow](http://stackoverflow.com/a/30707423).
    */
-  export function objectToQueryString(value: JSONObject): string {
+  export function objectToQueryString(value: PartialJSONObject): string {
     const keys = Object.keys(value).filter(key => key.length > 0);
 
     if (!keys.length) {
@@ -146,7 +148,10 @@ export namespace URLExt {
   export function isLocal(url: string): boolean {
     const { protocol } = parse(url);
 
-    return url.toLowerCase().indexOf(protocol) !== 0 && url.indexOf('/') !== 0;
+    return (
+      (!protocol || url.toLowerCase().indexOf(protocol) !== 0) &&
+      url.indexOf('/') !== 0
+    );
   }
 
   /**

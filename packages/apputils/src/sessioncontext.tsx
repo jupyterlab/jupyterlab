@@ -658,7 +658,10 @@ export class SessionContext implements ISessionContext {
     }
     const buttons = cancelable
       ? [Dialog.cancelButton(), Dialog.okButton({ label: 'Select' })]
-      : [Dialog.okButton({ label: 'Select' })];
+      : [
+          Dialog.cancelButton({ label: 'No Kernel' }),
+          Dialog.okButton({ label: 'Select' })
+        ];
 
     let dialog = (this._dialog = new Dialog({
       title: 'Select Kernel',

@@ -15,7 +15,7 @@ import { NestedCSSProperties } from 'typestyle/lib/types';
  * - splash: The icon used for the splash screen
  * - tabManager: The icons for the tabManager in the sidebar
  */
-export type IconKindType =
+export type IconKindTypeStr =
   | 'breadCrumb'
   | 'dockPanelBar'
   | 'launcherCard'
@@ -26,8 +26,9 @@ export type IconKindType =
   | 'splash'
   | 'statusBar'
   | 'tabManager'
-  | 'toolbarButton'
-  | 'unset';
+  | 'toolbarButton';
+
+export type IconKindType = IconKindTypeStr | undefined;
 
 export interface IIconStyle extends NestedCSSProperties {
   /**
@@ -133,7 +134,7 @@ const iconCSSToolbarButton: NestedCSSProperties = {
   width: '16px'
 };
 
-const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
+const iconCSSKind: { [k in IconKindTypeStr]: NestedCSSProperties } = {
   breadCrumb: iconCSSBreadCrumb,
   dockPanelBar: iconCSSDockPanelBar,
   launcherCard: iconCSSLauncherCard,
@@ -144,8 +145,7 @@ const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   splash: iconCSSSplash,
   statusBar: iconCSSStatusBar,
   tabManager: iconCSSTabManager,
-  toolbarButton: iconCSSToolbarButton,
-  unset: {}
+  toolbarButton: iconCSSToolbarButton
 };
 
 /**
@@ -226,7 +226,7 @@ const containerCSSToolbarButton: NestedCSSProperties = {
   verticalAlign: 'middle'
 };
 
-const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
+const containerCSSKind: { [k in IconKindTypeStr]: NestedCSSProperties } = {
   breadCrumb: {},
   dockPanelBar: containerCSSDockPanelBar,
   launcherCard: containerCSSLauncherCard,
@@ -237,8 +237,7 @@ const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   splash: containerCSSSplash,
   statusBar: {},
   tabManager: containerCSSTabManager,
-  toolbarButton: containerCSSToolbarButton,
-  unset: {}
+  toolbarButton: containerCSSToolbarButton
 };
 
 /**

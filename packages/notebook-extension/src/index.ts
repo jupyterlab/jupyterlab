@@ -1673,8 +1673,9 @@ function addCommands(
       const updateCloned = () => {
         void clonedOutputs.save(widget);
       };
+
       current.context.pathChanged.connect(updateCloned);
-      current.content.model.cells.changed.connect(updateCloned);
+      current.context.model.cells.changed.connect(updateCloned);
 
       // Add the cloned output to the output widget tracker.
       void clonedOutputs.add(widget);
@@ -1682,7 +1683,7 @@ function addCommands(
       // Remove the output view if the parent notebook is closed.
       current.content.disposed.connect(() => {
         current.context.pathChanged.disconnect(updateCloned);
-        current.content.model.cells.changed.disconnect(updateCloned);
+        current.context.model.cells.changed.disconnect(updateCloned);
         widget.dispose();
       });
     },

@@ -780,7 +780,6 @@ namespace Private {
     marked.setOptions({
       gfm: true,
       sanitize: false,
-      tables: true,
       // breaks: true; We can't use GFM breaks as it causes problems with tables
       langPrefix: `cm-s-${CodeMirrorEditor.defaultConfig.theme} language-`,
       highlight: (code, lang, callback) => {
