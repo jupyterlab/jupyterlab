@@ -49,12 +49,12 @@
     "@lumino/virtualdom": "^1.2.1",
     "@lumino/widgets": "^1.9.4",
     "@types/react": "~16.9.16",
-    "react": "~16.12.0",
-    "react-dom": "~16.12.0",
+    "react": "~16.9.0",
+    "react-dom": "~16.9.0",
     "sanitize-html": "~1.20.1"
   },
   "devDependencies": {
-    "@types/react-dom": "^16.9.4",
+    "@types/react-dom": "~16.9.4",
     "@types/sanitize-html": "^1.20.2",
     "rimraf": "~3.0.0",
     "typedoc": "^0.15.4",

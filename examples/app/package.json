@@ -39,8 +39,8 @@
     "@jupyterlab/tooltip-extension": "^2.0.0-alpha.4",
     "@jupyterlab/ui-components-extension": "^2.0.0-alpha.4",
     "es6-promise": "~4.2.8",
-    "react": "~16.12.0",
-    "react-dom": "~16.12.0"
+    "react": "~16.9.0",
+    "react-dom": "~16.9.0"
   },
   "devDependencies": {
     "css-loader": "~3.2.0",
