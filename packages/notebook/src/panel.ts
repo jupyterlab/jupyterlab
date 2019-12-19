@@ -63,19 +63,19 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       this
     );
     this.context.saveState.connect(this._onSave, this);
-
     void this.revealed.then(() => {
       if (this.isDisposed) {
         // this widget has already been disposed, bail
         return;
       }
 
-      // Set the document edit mode on initial open if it looks like a new document.
-      if (this.content.widgets.length === 1) {
-        let cellModel = this.content.widgets[0].model;
-        if (cellModel.type === 'code' && cellModel.value.text === '') {
+      // If the notebook model is empty (new file), set it to edit mode.
+      if (this.content.model.cells.length === 0) {
+        // Wait for an animation frame so the spinner is hidden and the
+        // widget can be focused.
+        requestAnimationFrame(() => {
           this.content.mode = 'edit';
-        }
+        });
       }
     });
   }
