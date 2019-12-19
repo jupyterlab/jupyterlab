@@ -27,7 +27,7 @@
     "lib": "lib/"
   },
   "scripts": {
-    "build": "tsc -b && cd ../../prebuild/vega5 && jlpm && jlpm run build",
+    "build": "tsc -b",
     "clean": "rimraf lib",
     "docs": "typedoc src",
     "prepublishOnly": "npm run build",
@@ -45,7 +45,7 @@
     "typescript": "~3.7.3",
     "vega": "^5.9.0",
     "vega-embed": "^6.2.1",
-    "vega-lite": "^4.0.0"
+    "vega-lite": "^4.0.2"
   },
   "publishConfig": {
     "access": "public"
