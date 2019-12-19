@@ -264,9 +264,52 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#kernelDisplayName', () => {
       it('should be the display name of the current kernel', async () => {
-        expect(sessionContext.kernelDisplayName).to.equal('No Kernel!');
         await sessionContext.initialize();
-        expect(sessionContext.kernelDisplayName).to.not.equal('No Kernel!');
+        let spec = await sessionContext.session.kernel.spec;
+        expect(sessionContext.kernelDisplayName).to.equal(spec.display_name);
+      });
+
+      it('should display "No Kernel!" when there is no kernel', async () => {
+        sessionContext.kernelPreference = {
+          canStart: false,
+          shouldStart: false
+        };
+        expect(sessionContext.kernelDisplayName).to.equal('No Kernel!');
+      });
+
+      it('should display "Kernel" when it looks like we are starting a kernel', async () => {
+        sessionContext.kernelPreference = {};
+        expect(sessionContext.kernelDisplayName).to.equal('Kernel');
+      });
+    });
+
+    describe('#kernelDisplayStatus', () => {
+      it('should be the status of the current kernel if connected', async () => {
+        await sessionContext.initialize();
+        await sessionContext.session.kernel.info;
+        expect(sessionContext.kernelDisplayStatus).to.be.equal(
+          sessionContext.session?.kernel?.status
+        );
+      });
+
+      it('should be the connection status of the current kernel if not connected', async () => {
+        await sessionContext.initialize();
+        let reconnect = sessionContext.session.kernel.reconnect();
+        expect(sessionContext.kernelDisplayStatus).to.be.equal(
+          sessionContext.session?.kernel?.connectionStatus
+        );
+        await reconnect;
+      });
+
+      it('should be "initializing" if it looks like we are trying to start a kernel', async () => {
+        sessionContext.kernelPreference = {};
+        expect(sessionContext.kernelDisplayStatus).to.be.equal('initializing');
+      });
+
+      it('should be "" if there is no current kernel', async () => {
+        await sessionContext.initialize();
+        await sessionContext.shutdown();
+        expect(sessionContext.kernelDisplayStatus).to.be.equal('');
       });
     });
 
