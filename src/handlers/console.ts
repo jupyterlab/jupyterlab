@@ -17,28 +17,41 @@ import { EditorHandler } from '../handlers/editor';
 
 import { IDebugger } from '../tokens';
 
+/**
+ * A handler for consoles.
+ */
 export class ConsoleHandler implements IDisposable {
-  constructor(options: DebuggerConsoleHandler.IOptions) {
-    this.debuggerService = options.debuggerService;
-    this.consolePanel = options.widget;
+  /**
+   * Instantiate a new ConsoleHandler.
+   * @param options The instantiation options for a ConsoleHandler.
+   */
+  constructor(options: ConsoleHandler.IOptions) {
+    this._debuggerService = options.debuggerService;
+    this._consolePanel = options.widget;
     this._cellMap = new ObservableMap<EditorHandler>();
 
-    const codeConsole = this.consolePanel.console;
+    const codeConsole = this._consolePanel.console;
 
-    this.addEditorHandler(codeConsole.promptCell);
+    this._addEditorHandler(codeConsole.promptCell);
     codeConsole.promptCellCreated.connect((_: CodeConsole, cell: CodeCell) => {
-      this.addEditorHandler(cell);
+      this._addEditorHandler(cell);
     });
 
     const addHandlers = () => {
-      each(codeConsole.cells, cell => this.addEditorHandler(cell));
+      each(codeConsole.cells, cell => this._addEditorHandler(cell));
     };
     addHandlers();
-    this.consolePanel.console.cells.changed.connect(addHandlers);
+    this._consolePanel.console.cells.changed.connect(addHandlers);
   }
 
+  /**
+   * Whether the handler is disposed.
+   */
   isDisposed: boolean;
 
+  /**
+   * Dispose the handler.
+   */
   dispose(): void {
     if (this.isDisposed) {
       return;
@@ -49,14 +62,18 @@ export class ConsoleHandler implements IDisposable {
     Signal.clearData(this);
   }
 
-  protected addEditorHandler(cell: Cell) {
+  /**
+   * Add a new editor handler for the given cell.
+   * @param cell The cell to add the handler to.
+   */
+  private _addEditorHandler(cell: Cell) {
     const modelId = cell.model.id;
     if (cell.model.type !== 'code' || this._cellMap.has(modelId)) {
       return;
     }
     const codeCell = cell as CodeCell;
     const editorHandler = new EditorHandler({
-      debuggerService: this.debuggerService,
+      debuggerService: this._debuggerService,
       editor: codeCell.editor
     });
     codeCell.disposed.connect(() => {
@@ -66,14 +83,27 @@ export class ConsoleHandler implements IDisposable {
     this._cellMap.set(modelId, editorHandler);
   }
 
-  private consolePanel: ConsolePanel;
-  private debuggerService: IDebugger;
+  private _consolePanel: ConsolePanel;
+  private _debuggerService: IDebugger;
   private _cellMap: IObservableMap<EditorHandler> = null;
 }
 
-export namespace DebuggerConsoleHandler {
+/**
+ * A namespace for ConsoleHandler `statics`.
+ */
+export namespace ConsoleHandler {
+  /**
+   * Instantiation options for `ConsoleHandler`.
+   */
   export interface IOptions {
+    /**
+     * The debugger service.
+     */
     debuggerService: IDebugger;
+
+    /**
+     * The widget to handle.
+     */
     widget: ConsolePanel;
   }
 }

@@ -13,36 +13,62 @@ import { EditorHandler } from '../handlers/editor';
 
 import { IDebugger } from '../tokens';
 
+/**
+ * A handler for files.
+ */
 export class FileHandler implements IDisposable {
-  constructor(options: DebuggerFileHandler.IOptions) {
-    this.debuggerService = options.debuggerService;
-    this.fileEditor = options.widget.content;
+  /**
+   * Instantiate a new FileHandler.
+   * @param options The instantiation options for a FileHandler.
+   */
+  constructor(options: FileHandler.IOptions) {
+    this._debuggerService = options.debuggerService;
+    this._fileEditor = options.widget.content;
 
-    this.editorHandler = new EditorHandler({
-      debuggerService: this.debuggerService,
-      editor: this.fileEditor.editor
+    this._editorHandler = new EditorHandler({
+      debuggerService: this._debuggerService,
+      editor: this._fileEditor.editor
     });
   }
 
+  /**
+   * Whether the handler is disposed.
+   */
   isDisposed: boolean;
 
+  /**
+   * Dispose the handler.
+   */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
     this.isDisposed = true;
-    this.editorHandler.dispose();
+    this._editorHandler.dispose();
     Signal.clearData(this);
   }
 
-  private fileEditor: FileEditor;
-  private debuggerService: IDebugger;
-  private editorHandler: EditorHandler;
+  private _fileEditor: FileEditor;
+  private _debuggerService: IDebugger;
+  private _editorHandler: EditorHandler;
 }
 
-export namespace DebuggerFileHandler {
+/**
+ * A namespace for FileHandler `statics`.
+ */
+export namespace FileHandler {
+  /**
+   * Instantiation options for `FileHandler`.
+   */
   export interface IOptions {
+    /**
+     * The debugger service.
+     */
     debuggerService: IDebugger;
+
+    /**
+     * The widget to handle.
+     */
     widget: DocumentWidget<FileEditor>;
   }
 }

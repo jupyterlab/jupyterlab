@@ -15,19 +15,32 @@ import { EditorHandler } from './editor';
 
 import { IDebugger } from '../tokens';
 
+/**
+ * A handler for notebooks.
+ */
 export class NotebookHandler implements IDisposable {
+  /**
+   * Instantiate a new NotebookHandler.
+   * @param options The instantiation options for a NotebookHandler.
+   */
   constructor(options: NotebookHandler.IOptions) {
-    this.debuggerService = options.debuggerService;
-    this.notebookPanel = options.widget;
+    this._debuggerService = options.debuggerService;
+    this._notebookPanel = options.widget;
     this._cellMap = new ObservableMap<EditorHandler>();
 
-    const notebook = this.notebookPanel.content;
-    notebook.widgets.forEach(cell => this.addEditorHandler(cell));
-    notebook.activeCellChanged.connect(this.onActiveCellChanged, this);
+    const notebook = this._notebookPanel.content;
+    notebook.widgets.forEach(cell => this._addEditorHandler(cell));
+    notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
   }
 
+  /**
+   * Whether the handler is disposed.
+   */
   isDisposed: boolean;
 
+  /**
+   * Dispose the handler.
+   */
   dispose(): void {
     if (this.isDisposed) {
       return;
@@ -38,27 +51,36 @@ export class NotebookHandler implements IDisposable {
     Signal.clearData(this);
   }
 
-  protected addEditorHandler(cell: Cell) {
+  /**
+   * Add a new editor handler for the given cell.
+   * @param cell The cell to add the handler to.
+   */
+  private _addEditorHandler(cell: Cell) {
     if (cell.model.type !== 'code' || this._cellMap.has(cell.model.id)) {
       return;
     }
     const codeCell = cell as CodeCell;
     const editorHandler = new EditorHandler({
-      debuggerService: this.debuggerService,
+      debuggerService: this._debuggerService,
       editor: codeCell.editor
     });
     this._cellMap.set(cell.model.id, editorHandler);
   }
 
-  protected onActiveCellChanged(notebook: Notebook, cell: Cell) {
-    if (this.notebookPanel.content !== notebook) {
+  /**
+   * Handle a new active cell.
+   * @param notebook The notebook for which the active cell has changed.
+   * @param cell The new active cell.
+   */
+  private _onActiveCellChanged(notebook: Notebook, cell: Cell) {
+    if (this._notebookPanel.content !== notebook) {
       return;
     }
-    this.addEditorHandler(cell);
+    this._addEditorHandler(cell);
   }
 
-  private debuggerService: IDebugger;
-  private notebookPanel: NotebookPanel;
+  private _debuggerService: IDebugger;
+  private _notebookPanel: NotebookPanel;
   private _cellMap: IObservableMap<EditorHandler> = null;
 }
 
@@ -66,8 +88,18 @@ export class NotebookHandler implements IDisposable {
  * A namespace for NotebookHandler statics.
  */
 export namespace NotebookHandler {
+  /**
+   * Instantiation options for `NotebookHandler`.
+   */
   export interface IOptions {
+    /**
+     * The debugger service.
+     */
     debuggerService: IDebugger;
+
+    /**
+     * The widget to handle.
+     */
     widget: NotebookPanel;
   }
 }
