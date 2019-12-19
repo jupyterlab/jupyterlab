@@ -1402,6 +1402,9 @@ namespace Private {
   /**
    * Get the list of active gutters
    *
+   * This logic is somewhat naunced and is required in order to handle the
+   * way in which setOption over-rides previous options
+   *
    * @param config Editor configuration
    */
   function getActiveGutters(config: CodeMirrorEditor.IConfig): string[] {
@@ -1410,14 +1413,20 @@ namespace Private {
       'CodeMirror-linenumbers': 'lineNumbers',
       'CodeMirror-foldgutter': 'codeFolding'
     };
+    const configGutters = config.gutters || [];
+    const predefinedGuttersToAdd = Object.keys(classToSwitch).filter(gutter => {
+      return !configGutters.includes(gutter) && config[classToSwitch[gutter]];
+    });
 
-    // do not remove custom gutters
-    const customGutters = (config.gutters || []).filter(
-      gutter => !classToSwitch[gutter]
-    );
-    return Object.keys(classToSwitch)
-      .filter(gutter => config[classToSwitch[gutter]])
-      .concat(customGutters);
+    return configGutters
+      .filter(gutter => {
+        // if the gutter is custom, then keep it
+        const customGutters = !classToSwitch[gutter];
+        // keep or remove gutters already specified
+        const configSpecified = config[classToSwitch[gutter]];
+        return customGutters || configSpecified;
+      })
+      .concat(predefinedGuttersToAdd);
   }
 
   /**
