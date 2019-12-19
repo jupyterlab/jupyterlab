@@ -402,8 +402,8 @@ export class SessionContext implements ISessionContext {
     if (
       !kernel &&
       !this.isReady &&
-      this.kernelPreference.canStart &&
-      this.kernelPreference.shouldStart
+      this.kernelPreference.canStart !== false &&
+      this.kernelPreference.shouldStart !== false
     ) {
       return 'Kernel';
     }
@@ -428,8 +428,8 @@ export class SessionContext implements ISessionContext {
     if (
       !kernel &&
       !this.isReady &&
-      this.kernelPreference.canStart &&
-      this.kernelPreference.shouldStart
+      this.kernelPreference.canStart !== false &&
+      this.kernelPreference.shouldStart !== false
     ) {
       return 'initializing';
     }
