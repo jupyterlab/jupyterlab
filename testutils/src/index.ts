@@ -203,7 +203,7 @@ export async function createSessionContext(
   const manager = options.sessionManager ?? Private.getManager().sessions;
   const specsManager = options.specsManager ?? Private.getManager().kernelspecs;
 
-  await manager.ready;
+  await Promise.all([manager.ready, specsManager.ready]);
   return new SessionContext({
     sessionManager: manager,
     specsManager,
