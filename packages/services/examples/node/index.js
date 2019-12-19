@@ -9,14 +9,21 @@ var services = require('@jupyterlab/services');
 
 // Start a new session.
 var options = {
-  kernelName: 'python',
-  path: 'foo.ipynb'
+  path: 'foo.ipynb',
+  type: 'notebook',
+  name: 'foo.ipynb',
+  kernel: {
+    name: 'python'
+  }
 };
 
 /* eslint-disable no-console */
 console.log('Starting session...');
+var kernelManager = new services.KernelManager();
+var sessionManager = new services.SessionManager({ kernelManager });
 var session;
-services.Session.startNew(options)
+sessionManager
+  .startNew(options)
   .then(function(s) {
     // Rename the session.
     session = s;
