@@ -507,11 +507,11 @@ function activateNotebookTools(
       labShell.currentChanged.connect((sender, args) => {
         updateTools();
       });
-    } else {
-      tracker.currentChanged.connect((sender, args) => {
-        updateTools();
-      });
     }
+    // A notebook widget could be closed without a change to labShell.currentWidget
+    tracker.currentChanged.connect((sender, args) => {
+      updateTools();
+    });
   });
 
   return notebookTools;
