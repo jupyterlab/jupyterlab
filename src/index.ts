@@ -144,12 +144,12 @@ class DebuggerHandler<
     if (kernelChangedHandler) {
       client.kernelChanged.disconnect(kernelChangedHandler);
     }
-    const updateHandler = () => {
-      void this._update(debug, widget, client);
+    const updateHandler = async () => {
+      return this._update(debug, widget, client);
     };
     client.kernelChanged.connect(updateHandler, this);
     this._kernelChangedHandlers[client.path] = updateHandler;
-    return this._update(debug, widget, client);
+    return updateHandler();
   }
 
   /**
@@ -194,6 +194,14 @@ class DebuggerHandler<
       }
       handler.dispose();
       delete this._handlers[widget.id];
+
+      // clear the model if the handler being removed corresponds
+      // to the current active debug session
+      if (debug.session?.client?.path === client.path) {
+        const model = debug.model as Debugger.Model;
+        model.clear();
+      }
+
       updateAttribute();
     };
 

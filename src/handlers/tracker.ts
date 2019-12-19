@@ -109,7 +109,10 @@ export class TrackerHandler implements IDisposable {
   }
 
   protected onCurrentFrameChanged(_: Callstack.Model, frame: Callstack.IFrame) {
-    const debugSessionPath = this.debuggerService.session.client.path;
+    const debugSessionPath = this.debuggerService.session?.client?.path;
+    if (!debugSessionPath) {
+      return;
+    }
     const source = frame?.source.path ?? null;
     each(this.find(debugSessionPath, source), editor => {
       requestAnimationFrame(() => {

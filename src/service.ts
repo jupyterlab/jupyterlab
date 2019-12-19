@@ -180,12 +180,8 @@ export class DebugService implements IDebugger, IDisposable {
    */
   async stop(): Promise<void> {
     await this.session.stop();
-    if (this.model) {
-      // TODO: create a more generic cleanup method?
-      this._model.stoppedThreads.clear();
-      const breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
-      this._model.breakpoints.restoreBreakpoints(breakpoints);
-      this._clearModel();
+    if (this._model) {
+      this._model.clear();
     }
   }
 

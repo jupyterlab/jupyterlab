@@ -128,6 +128,18 @@ export namespace Debugger {
       this._stoppedThreads = threads;
     }
 
+    /**
+     * Clear the model.
+     */
+    clear() {
+      this._stoppedThreads.clear();
+      const breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
+      this.breakpoints.restoreBreakpoints(breakpoints);
+      this.callstack.frames = [];
+      this.variables.scopes = [];
+      this.sources.currentSource = null;
+    }
+
     private _isDisposed = false;
     private _stoppedThreads = new Set<number>();
     private _disposed = new Signal<this, void>(this);
