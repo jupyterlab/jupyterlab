@@ -109,10 +109,12 @@ export const jupyterFaviconIcon = new JLIcon(
 );
 export const kernelIcon = new JLIcon('kernelIcon', kernelSvg);
 export const lineFormIcon = new JLIcon('lineFormIcon', lineFormSvg);
+export const listIcon = new JLIcon('listIcon', listSvg);
 export const notTrustedIcon = new JLIcon('notTrustedIcon', notTrustedSvg);
 export const terminalIcon = new JLIcon('terminalIcon', terminalSvg);
 export const trustedIcon = new JLIcon('trustedIcon', trustedSvg);
 export const addIcon = new JLIcon('addIcon', addSvg);
+export const checkIcon = new JLIcon('checkIcon', checkSvg);
 export const copyIcon = new JLIcon('copyIcon', copySvg);
 export const cutIcon = new JLIcon('cutIcon', cutSvg);
 export const pasteIcon = new JLIcon('pasteIcon', pasteSvg);
