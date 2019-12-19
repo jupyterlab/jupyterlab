@@ -146,7 +146,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
    * Start a new session.  See also [[startNewSession]].
    *
    * @param createOptions - Options for creating the session
-   * 
+   *
    * @param connectOptions - Options for connecting to the session
    */
   async startNew(
@@ -313,12 +313,11 @@ export class SessionManager extends BaseManager implements Session.IManager {
     });
   }
 
-  private _onChanged () {
+  private _onChanged() {
     void this.refreshRunning().catch(() => {
       /* no-op */
     });
   }
-
 
   private _isReady = false;
   private _sessionConnections = new Set<SessionConnection>();

@@ -258,7 +258,7 @@ export interface IManager extends IDisposable {
    * Start a new session.
    *
    * @param createOptions - Options for creating the session
-   * 
+   *
    * @param connectOptions - Options for connecting to the session
    *
    * @returns A promise that resolves with a session connection instance.
