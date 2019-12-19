@@ -313,15 +313,6 @@ describe('@jupyterlab/apputils', () => {
             (item.node.firstChild.lastChild as HTMLElement).textContent
           ).to.equal(sessionContext.kernelDisplayName);
         });
-
-        it("should display `'No Kernel!'` if there is no kernel", async () => {
-          const item = Toolbar.createKernelNameItem(sessionContext);
-          Widget.attach(item, document.body);
-          await framePromise();
-          expect(
-            (item.node.firstChild.lastChild as HTMLElement).textContent
-          ).to.equal('No Kernel!');
-        });
       });
 
       describe('.createKernelStatusItem()', () => {

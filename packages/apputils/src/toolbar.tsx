@@ -408,9 +408,8 @@ export namespace Toolbar {
    * Create a kernel name indicator item.
    *
    * #### Notes
-   * It will display the `'display_name`' of the current kernel,
-   * or `'No Kernel!'` if there is no kernel.
-   * It can handle a change in context or kernel.
+   * It will display the `'display_name`' of the session context. It can
+   * handle a change in context or kernel.
    */
   export function createKernelNameItem(
     sessionContext: ISessionContext
