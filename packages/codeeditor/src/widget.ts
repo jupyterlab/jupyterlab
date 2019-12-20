@@ -141,7 +141,7 @@ export class CodeEditorWrapper extends Widget {
    * A message handler invoked on an `'after-show'` message.
    */
   protected onAfterShow(msg: Message): void {
-    if (this._updateOnShow) {
+    if (this._updateOnShow || !this._hasRefreshed) {
       this.update();
     }
   }
@@ -161,7 +161,10 @@ export class CodeEditorWrapper extends Widget {
    * A message handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
-    this.editor.refresh();
+    if (this.isVisible) {
+      this._hasRefreshed = true;
+      this.editor.refresh();
+    }
   }
 
   /**
@@ -275,6 +278,7 @@ export class CodeEditorWrapper extends Widget {
   }
 
   private _updateOnShow: boolean;
+  private _hasRefreshed = false;
 }
 
 /**
