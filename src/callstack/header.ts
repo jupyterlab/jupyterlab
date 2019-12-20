@@ -10,7 +10,7 @@ import { PanelLayout, Widget } from '@phosphor/widgets';
  */
 export class CallstackHeader extends Widget {
   /**
-   * Instantiate a new BreakpointsHeader.
+   * Instantiate a new CallstackHeader.
    */
   constructor() {
     super({ node: document.createElement('header') });

@@ -24,6 +24,7 @@ import { SourcesModel } from './sources/model';
 import { IDebugger } from './tokens';
 
 import { Variables } from './variables';
+
 import { VariablesModel } from './variables/model';
 
 /**

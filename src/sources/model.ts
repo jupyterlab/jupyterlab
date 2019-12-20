@@ -75,7 +75,7 @@ export class SourcesModel {
  */
 export namespace SourcesModel {
   /**
-   * The options used to initialize a Sources.Model object.
+   * The options used to initialize a SourcesModel object.
    */
   export interface IOptions {
     /**

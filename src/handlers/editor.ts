@@ -21,8 +21,14 @@ import { IDebugger } from '../tokens';
 
 import { BreakpointsModel } from '../breakpoints/model';
 
+/**
+ * The class name added to the current line.
+ */
 const LINE_HIGHLIGHT_CLASS = 'jp-DebuggerEditor-highlight';
 
+/**
+ * The timeout for listening to editor content changes.
+ */
 const EDITOR_CHANGED_TIMEOUT = 1000;
 
 /**
@@ -117,7 +123,7 @@ export class EditorHandler implements IDisposable {
       'CodeMirror-linenumbers',
       'breakpoints'
     ]);
-    editor.editor.on('gutterClick', this.onGutterClick);
+    editor.editor.on('gutterClick', this._onGutterClick);
   }
 
   /**
@@ -132,7 +138,7 @@ export class EditorHandler implements IDisposable {
     EditorHandler.clearGutter(editor);
     editor.setOption('lineNumbers', false);
     editor.editor.setOption('gutters', []);
-    editor.editor.off('gutterClick', this.onGutterClick);
+    editor.editor.off('gutterClick', this._onGutterClick);
   }
 
   /**
@@ -162,7 +168,7 @@ export class EditorHandler implements IDisposable {
    * @param editor The editor from where the click originated.
    * @param lineNumber The line corresponding to the click event.
    */
-  private onGutterClick = (editor: Editor, lineNumber: number) => {
+  private _onGutterClick = (editor: Editor, lineNumber: number) => {
     const info = editor.lineInfo(lineNumber);
 
     if (!info || this._id !== this._debuggerService.session.client.path) {

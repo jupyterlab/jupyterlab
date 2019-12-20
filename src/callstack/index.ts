@@ -79,6 +79,9 @@ export class Callstack extends Panel {
  * A namespace for Callstack `statics`.
  */
 export namespace Callstack {
+  /**
+   * The toolbar commands and registry for the callstack.
+   */
   export interface ICommands {
     /**
      * The command registry.
