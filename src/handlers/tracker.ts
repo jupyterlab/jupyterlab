@@ -49,31 +49,38 @@ import { IDebugger } from '../tokens';
  */
 export class TrackerHandler implements IDisposable {
   /**
-   * Constructs a new TrackerHandler.
+   * Instantiate a new TrackerHandler.
+   * @param options The instantiation options for a TrackerHandler.
    */
-  constructor(options: DebuggerTrackerHandler.IOptions) {
-    this.debuggerService = options.debuggerService;
-    this.shell = options.shell;
-    this.notebookTracker = options.notebookTracker;
-    this.consoleTracker = options.consoleTracker;
-    this.editorTracker = options.editorTracker;
+  constructor(options: TrackerHandler.IOptions) {
+    this._debuggerService = options.debuggerService;
+    this._shell = options.shell;
+    this._notebookTracker = options.notebookTracker;
+    this._consoleTracker = options.consoleTracker;
+    this._editorTracker = options.editorTracker;
 
-    this.readOnlyEditorFactory = new ReadOnlyEditorFactory({
+    this._readOnlyEditorFactory = new ReadOnlyEditorFactory({
       editorServices: options.editorServices
     });
 
-    this.readOnlyEditorTracker = new WidgetTracker<
+    this._readOnlyEditorTracker = new WidgetTracker<
       MainAreaWidget<CodeEditorWrapper>
     >({
       namespace: '@jupyterlab/debugger'
     });
 
-    this.onModelChanged();
-    this.debuggerService.modelChanged.connect(this.onModelChanged, this);
+    this._onModelChanged();
+    this._debuggerService.modelChanged.connect(this._onModelChanged, this);
   }
 
+  /**
+   * Whether the handler is disposed.
+   */
   isDisposed: boolean;
 
+  /**
+   * Dispose the handler.
+   */
   dispose(): void {
     if (this.isDisposed) {
       return;
@@ -82,63 +89,73 @@ export class TrackerHandler implements IDisposable {
     Signal.clearData(this);
   }
 
-  protected onModelChanged() {
-    this.debuggerModel = this.debuggerService.model as Debugger.Model;
-    if (!this.debuggerModel) {
+  /**
+   * Handle when the debug model changes.
+   */
+  private _onModelChanged() {
+    this._debuggerModel = this._debuggerService.model as Debugger.Model;
+    if (!this._debuggerModel) {
       return;
     }
 
-    this.debuggerModel.callstack.currentFrameChanged.connect(
-      this.onCurrentFrameChanged,
+    this._debuggerModel.callstack.currentFrameChanged.connect(
+      this._onCurrentFrameChanged,
       this
     );
 
-    this.debuggerModel.sources.currentSourceOpened.connect(
-      this.onCurrentSourceOpened,
+    this._debuggerModel.sources.currentSourceOpened.connect(
+      this._onCurrentSourceOpened,
       this
     );
 
-    this.debuggerModel.breakpoints.clicked.connect(async (_, breakpoint) => {
+    this._debuggerModel.breakpoints.clicked.connect(async (_, breakpoint) => {
       const path = breakpoint.source.path;
-      let source = await this.debuggerService.getSource({
+      const source = await this._debuggerService.getSource({
         sourceReference: 0,
         path
       });
-      this.onCurrentSourceOpened(null, source);
+      this._onCurrentSourceOpened(null, source);
     });
   }
 
-  protected onCurrentFrameChanged(_: Callstack.Model, frame: Callstack.IFrame) {
-    const debugSessionPath = this.debuggerService.session?.client?.path;
-    if (!debugSessionPath) {
-      return;
-    }
+  /**
+   * Handle a current frame changed event.
+   * @param _ The sender.
+   * @param frame The current frame.
+   */
+  private _onCurrentFrameChanged(_: Callstack.Model, frame: Callstack.IFrame) {
+    const debugSessionPath = this._debuggerService.session?.client?.path;
     const source = frame?.source.path ?? null;
-    each(this.find(debugSessionPath, source), editor => {
+    each(this._find(debugSessionPath, source), editor => {
       requestAnimationFrame(() => {
         EditorHandler.showCurrentLine(editor, frame.line);
       });
     });
   }
 
-  protected onCurrentSourceOpened(_: Sources.Model, source: IDebugger.ISource) {
+  /**
+   * Handle a source open event.
+   * @param _ The sender.
+   * @param source The source to open.
+   */
+  private _onCurrentSourceOpened(_: Sources.Model, source: IDebugger.ISource) {
     if (!source) {
       return;
     }
-    const debugSessionPath = this.debuggerService.session.client.path;
+    const debugSessionPath = this._debuggerService.session.client.path;
     const { content, mimeType, path } = source;
-    const results = this.find(debugSessionPath, path);
+    const results = this._find(debugSessionPath, path);
     if (results.next()) {
       return;
     }
-    const editorWrapper = this.readOnlyEditorFactory.createNewEditor({
+    const editorWrapper = this._readOnlyEditorFactory.createNewEditor({
       content,
       mimeType,
       path
     });
     const editor = editorWrapper.editor;
     const editorHandler = new EditorHandler({
-      debuggerService: this.debuggerService,
+      debuggerService: this._debuggerService,
       editor,
       path
     });
@@ -151,30 +168,43 @@ export class TrackerHandler implements IDisposable {
     widget.title.caption = path;
     widget.title.iconClass = 'jp-MaterialIcon jp-TextEditorIcon';
     widget.disposed.connect(() => editorHandler.dispose());
-    this.shell.add(widget, 'main');
-    void this.readOnlyEditorTracker.add(widget);
+    this._shell.add(widget, 'main');
+    void this._readOnlyEditorTracker.add(widget);
 
-    const frame = this.debuggerModel?.callstack.frame;
+    const frame = this._debuggerModel?.callstack.frame;
     if (frame) {
       EditorHandler.showCurrentLine(editor, frame.line);
     }
   }
 
-  protected find(debugSessionPath: string, source: string) {
+  /**
+   * Find the editor for a source matching the current debug session
+   * by iterating through all the widgets in each of the notebook,
+   * console, file editor, and read-only file editor trackers.
+   * @param debugSessionPath The path for the current debug session.
+   * @param source The source to find.
+   */
+  private _find(debugSessionPath: string, source: string) {
     return chain(
-      this.findInNotebooks(debugSessionPath, source),
-      this.findInConsoles(debugSessionPath, source),
-      this.findInEditors(debugSessionPath, source),
-      this.findInReadOnlyEditors(debugSessionPath, source)
+      this._findInNotebooks(debugSessionPath, source),
+      this._findInConsoles(debugSessionPath, source),
+      this._findInEditors(debugSessionPath, source),
+      this._findInReadOnlyEditors(debugSessionPath, source)
     );
   }
 
-  protected findInNotebooks(debugSessionPath: string, source: string) {
-    if (!this.notebookTracker) {
+  /**
+   * Find the editor for a source matching the current debug session
+   * from the notebook tracker.
+   * @param debugSessionPath The path for the current debug session.
+   * @param source The source to find.
+   */
+  private _findInNotebooks(debugSessionPath: string, source: string) {
+    if (!this._notebookTracker) {
       return [];
     }
-    let editors: CodeEditor.IEditor[] = [];
-    this.notebookTracker.forEach(notebookPanel => {
+    const editors: CodeEditor.IEditor[] = [];
+    this._notebookTracker.forEach(notebookPanel => {
       const session = notebookPanel.session;
 
       if (session.path !== debugSessionPath) {
@@ -187,7 +217,7 @@ export class TrackerHandler implements IDisposable {
       cells.forEach((cell, i) => {
         // check the event is for the correct cell
         const code = cell.model.value.text;
-        const cellId = this.debuggerService.getCodeId(code);
+        const cellId = this._debuggerService.getCodeId(code);
         if (source !== cellId) {
           return;
         }
@@ -195,18 +225,24 @@ export class TrackerHandler implements IDisposable {
         const rect = notebook.activeCell.inputArea.node.getBoundingClientRect();
         notebook.scrollToPosition(rect.bottom, 45);
         editors.push(cell.editor);
-        this.shell.activateById(notebookPanel.id);
+        this._shell.activateById(notebookPanel.id);
       });
     });
     return editors;
   }
 
-  protected findInConsoles(debugSessionPath: string, source: string) {
-    if (!this.consoleTracker) {
+  /**
+   * Find the editor for a source matching the current debug session
+   * from the console tracker.
+   * @param debugSessionPath The path for the current debug session.
+   * @param source The source to find.
+   */
+  private _findInConsoles(debugSessionPath: string, source: string) {
+    if (!this._consoleTracker) {
       return [];
     }
-    let editors: CodeEditor.IEditor[] = [];
-    this.consoleTracker.forEach(consoleWidget => {
+    const editors: CodeEditor.IEditor[] = [];
+    this._consoleTracker.forEach(consoleWidget => {
       const session = consoleWidget.session;
 
       if (session.path !== debugSessionPath) {
@@ -216,23 +252,29 @@ export class TrackerHandler implements IDisposable {
       const cells = consoleWidget.console.cells;
       each(cells, cell => {
         const code = cell.model.value.text;
-        const codeId = this.debuggerService.getCodeId(code);
+        const codeId = this._debuggerService.getCodeId(code);
         if (source !== codeId) {
           return;
         }
         editors.push(cell.editor);
-        this.shell.activateById(consoleWidget.id);
+        this._shell.activateById(consoleWidget.id);
       });
     });
     return editors;
   }
 
-  protected findInEditors(debugSessionPath: string, source: string) {
-    if (!this.editorTracker) {
+  /**
+   * Find the editor for a source matching the current debug session
+   * from the editor tracker.
+   * @param debugSessionPath The path for the current debug session.
+   * @param source The source to find.
+   */
+  private _findInEditors(debugSessionPath: string, source: string) {
+    if (!this._editorTracker) {
       return;
     }
-    let editors: CodeEditor.IEditor[] = [];
-    this.editorTracker.forEach(doc => {
+    const editors: CodeEditor.IEditor[] = [];
+    this._editorTracker.forEach(doc => {
       const fileEditor = doc.content;
       if (debugSessionPath !== fileEditor.context.path) {
         return;
@@ -244,60 +286,87 @@ export class TrackerHandler implements IDisposable {
       }
 
       const code = editor.model.value.text;
-      const codeId = this.debuggerService.getCodeId(code);
+      const codeId = this._debuggerService.getCodeId(code);
       if (source !== codeId) {
         return;
       }
       editors.push(editor);
-      this.shell.activateById(doc.id);
+      this._shell.activateById(doc.id);
     });
     return editors;
   }
 
-  protected findInReadOnlyEditors(_: string, source: string) {
-    let editors: CodeEditor.IEditor[] = [];
-    this.readOnlyEditorTracker.forEach(widget => {
+  /**
+   * Find an editor for a source from the read-only editor tracker.
+   * @param source The source to find.
+   */
+  private _findInReadOnlyEditors(_: string, source: string) {
+    const editors: CodeEditor.IEditor[] = [];
+    this._readOnlyEditorTracker.forEach(widget => {
       const editor = widget.content?.editor;
       if (!editor) {
         return;
       }
 
       const code = editor.model.value.text;
-      const codeId = this.debuggerService.getCodeId(code);
+      const codeId = this._debuggerService.getCodeId(code);
       if (widget.title.caption !== source && source !== codeId) {
         return;
       }
       editors.push(editor);
-      this.shell.activateById(widget.id);
+      this._shell.activateById(widget.id);
     });
     return editors;
   }
 
-  private debuggerService: IDebugger;
-  private debuggerModel: Debugger.Model;
-  private shell: JupyterFrontEnd.IShell;
-  private readOnlyEditorFactory: ReadOnlyEditorFactory;
-  private readOnlyEditorTracker: WidgetTracker<
+  private _debuggerService: IDebugger;
+  private _debuggerModel: Debugger.Model;
+  private _shell: JupyterFrontEnd.IShell;
+  private _readOnlyEditorFactory: ReadOnlyEditorFactory;
+  private _readOnlyEditorTracker: WidgetTracker<
     MainAreaWidget<CodeEditorWrapper>
   >;
-  private notebookTracker: INotebookTracker | null;
-  private consoleTracker: IConsoleTracker | null;
-  private editorTracker: IEditorTracker | null;
+  private _notebookTracker: INotebookTracker | null;
+  private _consoleTracker: IConsoleTracker | null;
+  private _editorTracker: IEditorTracker | null;
 }
 
 /**
- * A namespace for DebuggerTrackerHandler statics.
+ * A namespace for TrackerHandler statics.
  */
-export namespace DebuggerTrackerHandler {
+export namespace TrackerHandler {
   /**
-   * The options used to initialize a DebuggerTrackerHandler object.
+   * The options used to initialize a TrackerHandler object.
    */
   export interface IOptions {
+    /**
+     * The debugger service.
+     */
     debuggerService: IDebugger;
+
+    /**
+     * The editor services.
+     */
     editorServices: IEditorServices;
+
+    /**
+     * The application shell.
+     */
     shell: JupyterFrontEnd.IShell;
+
+    /**
+     * An optional tracker for notebooks.
+     */
     notebookTracker?: INotebookTracker;
+
+    /**
+     * An optional tracker for consoles.
+     */
     consoleTracker?: IConsoleTracker;
+
+    /**
+     * An optional tracker for file editors.
+     */
     editorTracker?: IEditorTracker;
   }
 
