@@ -42,7 +42,7 @@ function activateForeign(
     const console = widget.content.console;
 
     const handler = new ForeignHandler({
-      session: console.session,
+      sessionContext: console.sessionContext,
       parent: console
     });
     Private.foreignHandlerProperty.set(console, handler);

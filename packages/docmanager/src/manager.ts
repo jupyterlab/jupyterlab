@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
@@ -439,7 +439,7 @@ export class DocumentManager implements IDocumentManager {
   private _createContext(
     path: string,
     factory: DocumentRegistry.ModelFactory,
-    kernelPreference: IClientSession.IKernelPreference
+    kernelPreference: ISessionContext.IKernelPreference
   ): Private.IContext {
     // TODO: Make it impossible to open two different contexts for the same
     // path. Or at least prompt the closing of all widgets associated with the

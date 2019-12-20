@@ -1,14 +1,14 @@
 require(['jquery', '@jupyterlab/services'], function($, services) {
   /* eslint-disable no-console */
   console.log('Starting example');
-  var startNewKernel = services.Kernel.startNew;
+  var kernelManager = new services.KernelManager();
 
   var kernelOptions = {
     name: 'python'
   };
 
   // start a single kernel for the page
-  startNewKernel(kernelOptions).then(function(kernel) {
+  kernelManager.startNew(kernelOptions).then(function(kernel) {
     console.log('Kernel started:', kernel);
     kernel.requestKernelInfo().then(function(reply) {
       var content = reply.content;

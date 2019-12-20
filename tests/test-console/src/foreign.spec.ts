@@ -11,17 +11,17 @@ import { Signal } from '@lumino/signaling';
 
 import { Panel } from '@lumino/widgets';
 
-import { ClientSession, IClientSession } from '@jupyterlab/apputils';
-
 import { ForeignHandler } from '@jupyterlab/console';
 
 import { CodeCellModel, CodeCell } from '@jupyterlab/cells';
 
 import {
-  createClientSession,
+  createSessionContext,
+  createSession,
   defaultRenderMime,
   NBTestUtils
 } from '@jupyterlab/testutils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
 class TestParent extends Panel implements ForeignHandler.IReceiver {
   addCell(cell: CodeCell, msgId?: string): void {
@@ -59,7 +59,7 @@ class TestHandler extends ForeignHandler {
   methods: string[] = [];
 
   protected onIOPubMessage(
-    sender: IClientSession,
+    sender: ISessionContext,
     msg: KernelMessage.IIOPubMessage
   ): boolean {
     const injected = super.onIOPubMessage(sender, msg);
@@ -72,7 +72,7 @@ class TestHandler extends ForeignHandler {
       const session = (msg.parent_header as KernelMessage.IHeader).session;
       const msgType = msg.header.msg_type;
       if (
-        session !== this.session.kernel.clientId &&
+        session !== this.sessionContext.session?.kernel?.clientId &&
         relevantTypes.has(msgType)
       ) {
         this.rejected.emit(msg);
@@ -98,32 +98,26 @@ const relevantTypes = [
 
 describe('@jupyterlab/console', () => {
   describe('ForeignHandler', () => {
-    let local: Session.ISession;
-    let foreign: Session.ISession;
+    let foreign: Session.ISessionConnection;
     let handler: TestHandler;
-    let session: IClientSession;
+    let sessionContext: ISessionContext;
 
     before(async function() {
       // tslint:disable-next-line:no-invalid-this
-      this.timeout(60000);
+      this.timeout(120000);
 
       const path = UUID.uuid4();
-      [local, foreign, session] = await Promise.all([
-        Session.startNew({ path }),
-        Session.startNew({ path }),
-        createClientSession({ path })
+      [sessionContext, foreign] = await Promise.all([
+        createSessionContext({ path, type: 'test' }),
+        createSession({ name: '', path, type: 'test' })
       ]);
-
-      // check path prop
-      expect(local.path).to.equal(path);
-
-      await (session as ClientSession).initialize();
-      await session.kernel.ready;
+      await sessionContext.initialize();
+      await sessionContext.session?.kernel?.info;
     });
 
     beforeEach(() => {
       const parent = new TestParent();
-      handler = new TestHandler({ session, parent });
+      handler = new TestHandler({ sessionContext, parent });
     });
 
     afterEach(() => {
@@ -131,12 +125,9 @@ describe('@jupyterlab/console', () => {
     });
 
     after(async () => {
-      // local, foreign, and session share state, so only one shutdown
-      await session.shutdown();
-
-      local.dispose();
       foreign.dispose();
-      session.dispose();
+      await sessionContext.shutdown();
+      sessionContext.dispose();
     });
 
     describe('#constructor()', () => {
@@ -183,7 +174,7 @@ describe('@jupyterlab/console', () => {
 
     describe('#session', () => {
       it('should be a client session object', () => {
-        expect(handler.session.path).to.be.ok;
+        expect(handler.sessionContext.session.path).to.be.ok;
       });
     });
 
@@ -191,7 +182,7 @@ describe('@jupyterlab/console', () => {
       it('should be set upon instantiation', () => {
         const parent = new TestParent();
         handler = new TestHandler({
-          session: handler.session,
+          sessionContext: handler.sessionContext,
           parent
         });
         expect(handler.parent).to.equal(parent);

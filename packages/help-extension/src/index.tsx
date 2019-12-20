@@ -190,8 +190,9 @@ function activate(
     if (kernelInfoCache.has(sessionModel.kernel.name)) {
       return;
     }
-    const session = serviceManager.sessions.connectTo(sessionModel);
-    void session.kernel.ready.then(() => {
+    const session = serviceManager.sessions.connectTo({ model: sessionModel });
+
+    void session.kernel.info.then(kernelInfo => {
       // Check the cache second time so that, if two callbacks get scheduled,
       // they don't try to add the same commands.
       if (kernelInfoCache.has(sessionModel.kernel.name)) {
@@ -199,7 +200,6 @@ function activate(
       }
       // Set the Kernel Info cache.
       const name = session.kernel.name;
-      const kernelInfo = session.kernel.info;
       kernelInfoCache.set(name, kernelInfo);
 
       // Utility function to check if the current widget
@@ -224,7 +224,7 @@ function activate(
 
       // Add the kernel banner to the Help Menu.
       const bannerCommand = `help-menu-${name}:banner`;
-      const spec = serviceManager.specs.kernelspecs[name];
+      const spec = serviceManager.kernelspecs.specs.kernelspecs[name];
       if (!spec) {
         return;
       }
@@ -266,7 +266,7 @@ function activate(
 
       // Add the kernel info help_links to the Help menu.
       const kernelGroup: Menu.IItemOptions[] = [];
-      (session.kernel.info.help_links || []).forEach(link => {
+      (kernelInfo.help_links || []).forEach(link => {
         const commandId = `help-menu-${name}:${link.text}`;
         commands.addCommand(commandId, {
           label: link.text,

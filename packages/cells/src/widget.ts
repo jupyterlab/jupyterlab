@@ -5,7 +5,7 @@
 
 import { AttachmentsResolver } from '@jupyterlab/attachments';
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
 import {
   IChangedArgs,
@@ -1031,12 +1031,12 @@ export namespace CodeCell {
    */
   export async function execute(
     cell: CodeCell,
-    session: IClientSession,
+    sessionContext: ISessionContext,
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     let model = cell.model;
     let code = model.value.text;
-    if (!code.trim() || !session.kernel) {
+    if (!code.trim() || !sessionContext.session?.kernel) {
       model.clearExecution();
       return;
     }
@@ -1059,7 +1059,7 @@ export namespace CodeCell {
       const msgPromise = OutputArea.execute(
         code,
         cell.outputArea,
-        session,
+        sessionContext,
         metadata
       );
       // cell.outputArea.future assigned synchronously in `execute`

@@ -5,9 +5,9 @@ import { JSONObject } from '@lumino/coreutils';
 
 import { DisposableDelegate } from '@lumino/disposable';
 
-import { Kernel } from './kernel';
+import * as Kernel from './kernel';
 
-import { KernelMessage } from './messages';
+import * as KernelMessage from './messages';
 
 /**
  * Comm channel handler.
@@ -19,7 +19,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
   constructor(
     target: string,
     id: string,
-    kernel: Kernel.IKernel,
+    kernel: Kernel.IKernelConnection,
     disposeCb: () => void
   ) {
     super(disposeCb);
@@ -115,7 +115,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       content: {
         comm_id: this._id,
         target_name: this._target,
-        data: data || {}
+        data: data ?? {}
       },
       metadata,
       buffers
@@ -152,7 +152,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       metadata,
       buffers
     });
-    return this._kernel.sendShellMessage(msg, false, true);
+    return this._kernel.sendShellMessage(msg, false, disposeOnDone);
   }
 
   /**
@@ -181,7 +181,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       session: this._kernel.clientId,
       content: {
         comm_id: this._id,
-        data: data || {}
+        data: data ?? {}
       },
       metadata,
       buffers
@@ -196,7 +196,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
         session: this._kernel.clientId,
         content: {
           comm_id: this._id,
-          data: data || {}
+          data: data ?? {}
         },
         metadata,
         buffers
@@ -211,7 +211,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
 
   private _target = '';
   private _id = '';
-  private _kernel: Kernel.IKernel;
+  private _kernel: Kernel.IKernelConnection;
   private _onClose: (
     msg: KernelMessage.ICommCloseMsg<'iopub'>
   ) => void | PromiseLike<void>;

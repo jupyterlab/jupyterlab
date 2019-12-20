@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
 import {
   Cell,
@@ -118,7 +118,7 @@ export class CodeConsole extends Widget {
       options.contentFactory || CodeConsole.defaultContentFactory;
     this.modelFactory = options.modelFactory || CodeConsole.defaultModelFactory;
     this.rendermime = options.rendermime;
-    this.session = options.session;
+    this.sessionContext = options.sessionContext;
     this._mimeTypeService = options.mimeTypeService;
 
     // Add top-level CSS classes.
@@ -130,12 +130,16 @@ export class CodeConsole extends Widget {
     layout.addWidget(this._input);
 
     this._history = new ConsoleHistory({
-      session: this.session
+      sessionContext: this.sessionContext
     });
 
-    this._onKernelChanged();
-    this.session.kernelChanged.connect(this._onKernelChanged, this);
-    this.session.statusChanged.connect(this._onKernelStatusChanged, this);
+    void this._onKernelChanged();
+
+    this.sessionContext.kernelChanged.connect(this._onKernelChanged, this);
+    this.sessionContext.statusChanged.connect(
+      this._onKernelStatusChanged,
+      this
+    );
   }
 
   /**
@@ -170,7 +174,7 @@ export class CodeConsole extends Widget {
   /**
    * The client session used by the console.
    */
-  readonly session: IClientSession;
+  readonly sessionContext: ISessionContext;
 
   /**
    * The list of content cells in the console.
@@ -287,38 +291,38 @@ export class CodeConsole extends Widget {
    * should wait for the API to determine whether code being submitted is
    * incomplete before attempting submission anyway. The default value is `250`.
    */
-  execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
-    if (this.session.status === 'dead') {
-      return Promise.resolve(void 0);
+  async execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
+    if (this.sessionContext.session?.kernel.status === 'dead') {
+      return;
     }
 
     const promptCell = this.promptCell;
     if (!promptCell) {
-      return Promise.reject('Cannot execute without a prompt cell');
+      throw new Error('Cannot execute without a prompt cell');
     }
     promptCell.model.trusted = true;
 
     if (force) {
       // Create a new prompt cell before kernel execution to allow typeahead.
       this.newPromptCell();
-      return this._execute(promptCell);
+      await this._execute(promptCell);
+      return;
     }
 
     // Check whether we should execute.
-    return this._shouldExecute(timeout).then(should => {
-      if (this.isDisposed) {
-        return;
-      }
-      if (should) {
-        // Create a new prompt cell before kernel execution to allow typeahead.
-        this.newPromptCell();
-        this.promptCell!.editor.focus();
-        return this._execute(promptCell);
-      } else {
-        // add a newline if we shouldn't execute
-        promptCell.editor.newIndentedLine();
-      }
-    });
+    let shouldExecute = await this._shouldExecute(timeout);
+    if (this.isDisposed) {
+      return;
+    }
+    if (shouldExecute) {
+      // Create a new prompt cell before kernel execution to allow typeahead.
+      this.newPromptCell();
+      this.promptCell!.editor.focus();
+      await this._execute(promptCell);
+    } else {
+      // add a newline if we shouldn't execute
+      promptCell.editor.newIndentedLine();
+    }
   }
 
   /**
@@ -585,6 +589,8 @@ export class CodeConsole extends Widget {
     promptCell = factory.createCodeCell(options);
     promptCell.model.mimeType = this._mimetype;
     promptCell.addClass(PROMPT_CLASS);
+
+    // Add the prompt cell to the DOM, making `this.promptCell` valid again.
     this._input.addWidget(promptCell);
 
     // Suppress the default "Enter" key handling.
@@ -681,7 +687,10 @@ export class CodeConsole extends Widget {
       cell.model.contentChanged.disconnect(this.update, this);
       this.update();
     };
-    return CodeCell.execute(cell, this.session).then(onSuccess, onFailure);
+    return CodeCell.execute(cell, this.sessionContext).then(
+      onSuccess,
+      onFailure
+    );
   }
 
   /**
@@ -739,7 +748,7 @@ export class CodeConsole extends Widget {
       let timer = setTimeout(() => {
         resolve(true);
       }, timeout);
-      let kernel = this.session.kernel;
+      let kernel = this.sessionContext.session?.kernel;
       if (!kernel) {
         resolve(false);
         return;
@@ -774,38 +783,24 @@ export class CodeConsole extends Widget {
   /**
    * Handle a change to the kernel.
    */
-  private _onKernelChanged(): void {
+  private async _onKernelChanged(): Promise<void> {
     this.clear();
     if (this._banner) {
       this._banner.dispose();
       this._banner = null;
     }
     this.addBanner();
+    this._handleInfo(await this.sessionContext.session?.kernel.info);
   }
 
   /**
    * Handle a change to the kernel status.
    */
-  private _onKernelStatusChanged(): void {
-    if (this.session.status === 'connected') {
-      // we just had a kernel restart or reconnect - reset banner
-      let kernel = this.session.kernel;
-      if (!kernel) {
-        return;
-      }
-      kernel.ready
-        .then(() => {
-          if (this.isDisposed || !kernel || !kernel.info) {
-            return;
-          }
-          this._handleInfo(this.session.kernel.info);
-        })
-        .catch(err => {
-          console.error('could not get kernel info');
-        });
-    } else if (this.session.status === 'restarting') {
+  private async _onKernelStatusChanged(): Promise<void> {
+    const kernel = this.sessionContext.session?.kernel;
+    if (kernel?.status === 'restarting') {
       this.addBanner();
-      this._handleInfo(this.session.kernel.info);
+      this._handleInfo(await kernel?.info);
     }
   }
 
@@ -851,7 +846,7 @@ export namespace CodeConsole {
     /**
      * The client session for the console widget.
      */
-    session: IClientSession;
+    sessionContext: ISessionContext;
 
     /**
      * The service used to look up mime types.

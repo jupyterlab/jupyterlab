@@ -35,7 +35,7 @@
   "typings": "lib/index.d.ts",
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf docs && rimraf lib && rimraf test/build && rimraf test/coverage",
+    "clean": "rimraf docs && rimraf lib",
     "docs": "typedoc src",
     "prepublishOnly": "jlpm run build && webpack",
     "watch": "tsc -b --watch"

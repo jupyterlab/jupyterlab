@@ -80,7 +80,7 @@ class DefaultConfigSection implements IConfigSection {
    */
   constructor(options: ConfigSection.IOptions) {
     let settings = (this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings());
+      options.serverSettings ?? ServerConnection.makeSettings());
     this._url = URLExt.join(
       settings.baseUrl,
       SERVICE_CONFIG_URL,
@@ -165,8 +165,8 @@ export class ConfigWithDefaults {
    */
   constructor(options: ConfigWithDefaults.IOptions) {
     this._section = options.section;
-    this._defaults = options.defaults || {};
-    this._className = options.className || '';
+    this._defaults = options.defaults ?? {};
+    this._className = options.className ?? '';
   }
 
   /**

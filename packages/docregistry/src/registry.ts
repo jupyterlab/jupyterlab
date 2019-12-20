@@ -21,7 +21,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { DockLayout, Widget } from '@lumino/widgets';
 
-import { IClientSession, Toolbar } from '@jupyterlab/apputils';
+import { ISessionContext, Toolbar } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -565,7 +565,7 @@ export class DocumentRegistry implements IDisposable {
     path: string,
     widgetName: string,
     kernel?: Partial<Kernel.IModel>
-  ): IClientSession.IKernelPreference | undefined {
+  ): ISessionContext.IKernelPreference | undefined {
     widgetName = widgetName.toLowerCase();
     let widgetFactory = this._widgetFactories[widgetName];
     if (!widgetFactory) {
@@ -584,7 +584,7 @@ export class DocumentRegistry implements IDisposable {
       language,
       shouldStart: widgetFactory.preferKernel,
       canStart: widgetFactory.canStartKernel,
-      shutdownOnClose: widgetFactory.shutdownOnClose
+      shutdownOnDispose: widgetFactory.shutdownOnClose
     };
   }
 
@@ -832,9 +832,9 @@ export namespace DocumentRegistry {
     readonly model: T;
 
     /**
-     * The client session object associated with the context.
+     * The session context object associated with the context.
      */
-    readonly session: IClientSession;
+    readonly sessionContext: ISessionContext;
 
     /**
      * The current path associated with the document.

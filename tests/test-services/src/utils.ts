@@ -14,7 +14,9 @@ import { Response } from 'node-fetch';
 import {
   Contents,
   TerminalSession,
-  ServerConnection
+  ServerConnection,
+  KernelManager,
+  SessionManager
 } from '@jupyterlab/services';
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
@@ -73,11 +75,6 @@ const EXAMPLE_KERNEL_INFO: KernelMessage.IInfoReplyMsg['content'] = {
       url: 'https://very.helpful.website'
     }
   ]
-};
-
-export const KERNEL_OPTIONS: Kernel.IOptions = {
-  name: 'python',
-  username: 'testUser'
 };
 
 export const PYTHON_SPEC: JSONObject = {
@@ -172,6 +169,17 @@ export function handleRequest(item: IService, status: number, body: any) {
 }
 
 /**
+ * Get a random integer between two values
+ *
+ * This implementation comes from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+ */
+function getRandomInt(min: number, max: number) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min; // The maximum is exclusive and the minimum is inclusive
+}
+
+/**
  * Socket class test rig.
  */
 class SocketTester implements IService {
@@ -179,8 +187,23 @@ class SocketTester implements IService {
    * Create a new request and socket tester.
    */
   constructor() {
-    const port = 8081;
-    this._server = new WebSocket.Server({ port });
+    let port: number;
+
+    // Retry 6 random ports before giving up
+    for (let retry = 0; retry <= 5; retry++) {
+      try {
+        port = getRandomInt(9000, 20000);
+        this._server = new WebSocket.Server({ port });
+      } catch (err) {
+        if (retry === 5) {
+          throw err;
+        } else {
+          continue;
+        }
+      }
+      // We have a successful port
+      break;
+    }
     this.serverSettings = ServerConnection.makeSettings({
       wsUrl: `ws://localhost:${port}/`,
       WebSocket: WebSocket as any
@@ -189,7 +212,7 @@ class SocketTester implements IService {
     this._server.on('connection', ws => {
       this._ws = ws;
       this.onSocket(ws);
-      this._ready.resolve(undefined);
+      this._ready.resolve();
       const connect = this._onConnect;
       if (connect) {
         connect(ws);
@@ -261,13 +284,14 @@ class SocketTester implements IService {
  * Kernel class test rig.
  */
 export class KernelTester extends SocketTester {
-  get initialStatus(): string {
-    return this._initialStatus;
+  constructor() {
+    super();
+    this._kernelManager = new KernelManager({
+      serverSettings: this.serverSettings
+    });
   }
 
-  set initialStatus(status: string) {
-    this._initialStatus = status;
-  }
+  initialStatus: Kernel.Status = 'starting';
 
   /**
    * The parent header sent on messages.
@@ -442,15 +466,21 @@ export class KernelTester extends SocketTester {
   /**
    * Start a client-side kernel talking to our websocket server.
    */
-  async start(): Promise<Kernel.IKernel> {
+  async start(): Promise<Kernel.IKernelConnection> {
     // Set up the kernel request response.
     handleRequest(this, 201, { name: 'test', id: UUID.uuid4() });
 
     // Construct a new kernel.
-    const serverSettings = this.serverSettings;
-    this._kernel = await Kernel.startNew({ serverSettings });
+    this._kernel = await this._kernelManager.startNew();
+
+    // Wait for the other side to signal it is connected
     await this.ready;
-    await this._kernel.ready;
+
+    // Wait for the initial kernel info reply if we have a normal status
+    if (this.initialStatus === 'starting') {
+      await this._kernel.info;
+    }
+
     return this._kernel;
   }
 
@@ -488,8 +518,7 @@ export class KernelTester extends SocketTester {
    */
   protected onSocket(sock: WebSocket): void {
     super.onSocket(sock);
-    // TODO: Does the kernel actually send the status in the original websocket? Can it ever send the status?
-    // this.sendStatus(this._initialStatus);
+    this.sendStatus(UUID.uuid4(), this.initialStatus);
     sock.on('message', (msg: any) => {
       if (msg instanceof Buffer) {
         msg = new Uint8Array(msg).buffer;
@@ -516,8 +545,8 @@ export class KernelTester extends SocketTester {
   }
 
   readonly serverSessionId = UUID.uuid4();
-  private _initialStatus = 'starting';
-  private _kernel: Kernel.IKernel | null = null;
+  private _kernelManager: Kernel.IManager;
+  private _kernel: Kernel.IKernelConnection | null = null;
   private _onMessage: (msg: KernelMessage.IMessage) => void = null;
 }
 
@@ -538,26 +567,27 @@ export function createSessionModel(id?: string): Session.IModel {
  * Session test rig.
  */
 export class SessionTester extends SocketTester {
-  get initialStatus(): string {
-    return this._initialStatus;
+  constructor() {
+    super();
+    const kernelManager = new KernelManager({
+      serverSettings: this.serverSettings
+    });
+    this._sessionManager = new SessionManager({ kernelManager });
   }
 
-  set initialStatus(status: string) {
-    this._initialStatus = status;
-  }
+  initialStatus: Kernel.Status = 'starting';
 
   /**
    * Start a mock session.
    */
-  async startSession(): Promise<Session.ISession> {
+  async startSession(): Promise<Session.ISessionConnection> {
     handleRequest(this, 201, createSessionModel());
-    const serverSettings = this.serverSettings;
-    this._session = await Session.startNew({
+    this._session = await this._sessionManager.startNew({
       path: UUID.uuid4(),
-      serverSettings
+      name: UUID.uuid4(),
+      type: 'test'
     });
     await this.ready;
-    await this._session.kernel.ready;
     return this._session;
   }
 
@@ -648,9 +678,9 @@ export class SessionTester extends SocketTester {
   }
 
   readonly serverSessionId = UUID.uuid4();
-  private _initialStatus = 'starting';
-  private _session: Session.ISession;
+  private _session: Session.ISessionConnection;
   private _onMessage: (msg: KernelMessage.IMessage) => void = null;
+  private _sessionManager: Session.IManager = null;
 }
 
 /**

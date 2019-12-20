@@ -22,7 +22,7 @@ export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
   constructor(options: WorkspaceManager.IOptions = {}) {
     super();
     this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+      options.serverSettings ?? ServerConnection.makeSettings();
   }
 
   /**

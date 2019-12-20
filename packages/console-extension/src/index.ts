@@ -10,7 +10,7 @@ import {
 
 import {
   Dialog,
-  IClientSession,
+  ISessionContext,
   ICommandPalette,
   MainAreaWidget,
   showDialog,
@@ -151,14 +151,15 @@ async function activateConsole(
   void restorer.restore(tracker, {
     command: CommandIDs.create,
     args: widget => ({
-      path: widget.content.console.session.path,
-      name: widget.content.console.session.name,
+      path: widget.content.console.sessionContext.session?.path,
+      name: widget.content.console.sessionContext.session?.name,
       kernelPreference: {
-        name: widget.content.console.session.kernelPreference.name,
-        language: widget.content.console.session.kernelPreference.language
+        name: widget.content.console.sessionContext.kernelPreference.name,
+        language:
+          widget.content.console.sessionContext.kernelPreference.language
       }
     }),
-    name: widget => widget.content.console.session.path,
+    name: widget => widget.content.console.sessionContext.session?.path,
     when: manager.ready
   });
 
@@ -171,7 +172,7 @@ async function activateConsole(
           disposables.dispose();
           disposables = null;
         }
-        const specs = manager.specs;
+        const specs = manager.kernelspecs.specs;
         if (!specs) {
           return;
         }
@@ -196,7 +197,7 @@ async function activateConsole(
         }
       };
       onSpecsChanged();
-      manager.specsChanged.connect(onSpecsChanged);
+      manager.kernelspecs.specsChanged.connect(onSpecsChanged);
     });
   }
 
@@ -252,7 +253,7 @@ async function activateConsole(
     // Add the console panel to the tracker. We want the panel to show up before
     // any kernel selection dialog, so we do not await panel.session.ready;
     await tracker.add(widget);
-    panel.session.propertyChanged.connect(() => tracker.save(widget));
+    panel.sessionContext.propertyChanged.connect(() => tracker.save(widget));
 
     shell.add(panel, 'main', {
       ref: options.ref,
@@ -303,7 +304,7 @@ async function activateConsole(
     execute: (args: IOpenOptions) => {
       let path = args['path'];
       let widget = tracker.find(value => {
-        return value.content.console.session.path === path;
+        return value.content.console.sessionContext.session?.path === path;
       });
       if (widget) {
         if (args['activate'] !== false) {
@@ -332,8 +333,9 @@ async function activateConsole(
       } else if (args['isLauncher'] && args['kernelPreference']) {
         const kernelPreference = args[
           'kernelPreference'
-        ] as IClientSession.IKernelPreference;
-        return manager.specs.kernelspecs[kernelPreference.name].display_name;
+        ] as ISessionContext.IKernelPreference;
+        return manager.kernelspecs.specs.kernelspecs[kernelPreference.name]
+          .display_name;
       }
       return 'Console';
     },
@@ -412,7 +414,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      let kernel = current.console.session.kernel;
+      let kernel = current.console.sessionContext.session?.kernel;
       if (kernel) {
         return kernel.interrupt();
       }
@@ -427,7 +429,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return current.console.session.restart();
+      return current.console.sessionContext.restart();
     },
     isEnabled
   });
@@ -445,7 +447,7 @@ async function activateConsole(
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          return current.console.session.shutdown().then(() => {
+          return current.console.sessionContext.shutdown().then(() => {
             current.dispose();
             return true;
           });
@@ -461,7 +463,7 @@ async function activateConsole(
     execute: args => {
       let path = args['path'];
       tracker.find(widget => {
-        if (widget.content.console.session.path === path) {
+        if (widget.content.console.sessionContext.session?.path === path) {
           if (args['activate'] !== false) {
             shell.activateById(widget.id);
           }
@@ -484,7 +486,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return current.console.session.selectKernel();
+      return current.console.sessionContext.selectKernel();
     },
     isEnabled
   });
@@ -519,7 +521,7 @@ async function activateConsole(
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          return current.content.console.session.shutdown().then(() => {
+          return current.content.console.sessionContext.shutdown().then(() => {
             current.dispose();
           });
         } else {
@@ -533,24 +535,27 @@ async function activateConsole(
   mainMenu.kernelMenu.kernelUsers.add({
     tracker,
     interruptKernel: current => {
-      let kernel = current.content.console.session.kernel;
+      let kernel = current.content.console.sessionContext.session?.kernel;
       if (kernel) {
         return kernel.interrupt();
       }
       return Promise.resolve(void 0);
     },
     noun: 'Console',
-    restartKernel: current => current.content.console.session.restart(),
+    restartKernel: current => current.content.console.sessionContext.restart(),
     restartKernelAndClear: current => {
-      return current.content.console.session.restart().then(restarted => {
-        if (restarted) {
-          current.content.console.clear();
-        }
-        return restarted;
-      });
+      return current.content.console.sessionContext
+        .restart()
+        .then(restarted => {
+          if (restarted) {
+            current.content.console.clear();
+          }
+          return restarted;
+        });
     },
-    changeKernel: current => current.content.console.session.selectKernel(),
-    shutdownKernel: current => current.content.console.session.shutdown()
+    changeKernel: current =>
+      current.content.console.sessionContext.selectKernel(),
+    shutdownKernel: current => current.content.console.sessionContext.shutdown()
   } as IKernelMenu.IKernelUser<MainAreaWidget<ConsolePanel>>);
 
   // Add a code runner to the Run menu.
@@ -621,7 +626,7 @@ async function activateConsole(
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({
     tracker,
-    getKernel: current => current.content.session.kernel
+    getKernel: current => current.content.sessionContext.session?.kernel
   } as IHelpMenu.IKernelUser<MainAreaWidget<ConsolePanel>>);
 
   app.contextMenu.addItem({

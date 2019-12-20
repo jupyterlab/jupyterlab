@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-export * from './clientsession';
 export * from './clipboard';
 export * from './collapse';
 export * from './commandlinker';
@@ -14,6 +13,7 @@ export * from './inputdialog';
 export * from './mainareawidget';
 export * from './printing';
 export * from './sanitizer';
+export * from './sessioncontext';
 export * from './spinner';
 export * from './splash';
 export * from './styling';

@@ -4,7 +4,7 @@
 import { KernelMessage } from '@jupyterlab/services';
 
 import {
-  IClientSession,
+  ISessionContext,
   Clipboard,
   Dialog,
   showDialog
@@ -424,7 +424,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    *
-   * @param session - The optional client session object.
+   * @param sessionContext - The optional client session object.
    *
    * #### Notes
    * The last selected cell will be activated, but not scrolled into view.
@@ -434,14 +434,14 @@ export namespace NotebookActions {
    */
   export function run(
     notebook: Notebook,
-    session?: IClientSession
+    sessionContext?: ISessionContext
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
     }
 
     const state = Private.getState(notebook);
-    const promise = Private.runSelected(notebook, session);
+    const promise = Private.runSelected(notebook, sessionContext);
 
     Private.handleRunState(notebook, state, false);
     return promise;
@@ -452,7 +452,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    *
-   * @param session - The optional client session object.
+   * @param sessionContext - The optional client session object.
    *
    * #### Notes
    * The existing selection will be cleared.
@@ -464,14 +464,14 @@ export namespace NotebookActions {
    */
   export function runAndAdvance(
     notebook: Notebook,
-    session?: IClientSession
+    sessionContext?: ISessionContext
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
     }
 
     const state = Private.getState(notebook);
-    const promise = Private.runSelected(notebook, session);
+    const promise = Private.runSelected(notebook, sessionContext);
     const model = notebook.model;
 
     if (notebook.activeCellIndex === notebook.widgets.length - 1) {
@@ -495,7 +495,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    *
-   * @param session - The optional client session object.
+   * @param sessionContext - The optional client session object.
    *
    * #### Notes
    * An execution error will prevent the remaining code cells from executing.
@@ -507,14 +507,14 @@ export namespace NotebookActions {
    */
   export function runAndInsert(
     notebook: Notebook,
-    session?: IClientSession
+    sessionContext?: ISessionContext
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
     }
 
     const state = Private.getState(notebook);
-    const promise = Private.runSelected(notebook, session);
+    const promise = Private.runSelected(notebook, sessionContext);
     const model = notebook.model;
     const cell = model.contentFactory.createCell(
       notebook.notebookConfig.defaultCell,
@@ -533,7 +533,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    *
-   * @param session - The optional client session object.
+   * @param sessionContext - The optional client session object.
    *
    * #### Notes
    * The existing selection will be cleared.
@@ -543,7 +543,7 @@ export namespace NotebookActions {
    */
   export function runAll(
     notebook: Notebook,
-    session?: IClientSession
+    sessionContext?: ISessionContext
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
@@ -555,7 +555,7 @@ export namespace NotebookActions {
       notebook.select(child);
     });
 
-    const promise = Private.runSelected(notebook, session);
+    const promise = Private.runSelected(notebook, sessionContext);
 
     Private.handleRunState(notebook, state, true);
     return promise;
@@ -563,7 +563,7 @@ export namespace NotebookActions {
 
   export function renderAllMarkdown(
     notebook: Notebook,
-    session?: IClientSession
+    sessionContext?: ISessionContext
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
@@ -581,7 +581,7 @@ export namespace NotebookActions {
     if (notebook.activeCell.model.type !== 'markdown') {
       return Promise.resolve(true);
     }
-    const promise = Private.runSelected(notebook, session);
+    const promise = Private.runSelected(notebook, sessionContext);
     notebook.activeCellIndex = previousIndex;
     Private.handleRunState(notebook, state, true);
     return promise;
@@ -592,7 +592,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    *
-   * @param session - The optional client session object.
+   * @param sessionContext - The optional client session object.
    *
    * #### Notes
    * The existing selection will be cleared.
@@ -602,7 +602,7 @@ export namespace NotebookActions {
    */
   export function runAllAbove(
     notebook: Notebook,
-    session?: IClientSession
+    sessionContext?: ISessionContext
   ): Promise<boolean> {
     const { activeCell, activeCellIndex, model } = notebook;
 
@@ -618,7 +618,7 @@ export namespace NotebookActions {
       notebook.select(notebook.widgets[i]);
     }
 
-    const promise = Private.runSelected(notebook, session);
+    const promise = Private.runSelected(notebook, sessionContext);
 
     notebook.activeCellIndex++;
     Private.handleRunState(notebook, state, true);
@@ -630,7 +630,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    *
-   * @param session - The optional client session object.
+   * @param sessionContext - The optional client session object.
    *
    * #### Notes
    * The existing selection will be cleared.
@@ -640,7 +640,7 @@ export namespace NotebookActions {
    */
   export function runAllBelow(
     notebook: Notebook,
-    session?: IClientSession
+    sessionContext?: ISessionContext
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
@@ -653,7 +653,7 @@ export namespace NotebookActions {
       notebook.select(notebook.widgets[i]);
     }
 
-    const promise = Private.runSelected(notebook, session);
+    const promise = Private.runSelected(notebook, sessionContext);
 
     Private.handleRunState(notebook, state, true);
     return promise;
@@ -1481,7 +1481,7 @@ namespace Private {
    */
   export function runSelected(
     notebook: Notebook,
-    session?: IClientSession
+    sessionContext?: ISessionContext
   ): Promise<boolean> {
     notebook.mode = 'command';
 
@@ -1499,7 +1499,9 @@ namespace Private {
     notebook.activeCellIndex = lastIndex;
     notebook.deselectAll();
 
-    return Promise.all(selected.map(child => runCell(notebook, child, session)))
+    return Promise.all(
+      selected.map(child => runCell(notebook, child, sessionContext))
+    )
       .then(results => {
         if (notebook.isDisposed) {
           return false;
@@ -1537,7 +1539,7 @@ namespace Private {
   function runCell(
     notebook: Notebook,
     cell: Cell,
-    session?: IClientSession
+    sessionContext?: ISessionContext
   ): Promise<boolean> {
     switch (cell.model.type) {
       case 'markdown':
@@ -1546,8 +1548,8 @@ namespace Private {
         executed.emit({ notebook, cell });
         break;
       case 'code':
-        if (session) {
-          return CodeCell.execute(cell as CodeCell, session, {
+        if (sessionContext) {
+          return CodeCell.execute(cell as CodeCell, sessionContext, {
             deletedCells: notebook.model.deletedCells,
             recordTiming: notebook.notebookConfig.recordTiming
           })
