@@ -48,7 +48,7 @@ describe('Kernel.IKernel', () => {
   });
 
   describe('#disposed', () => {
-    it('should be emitted when the kernel is disposed', async () => {
+    it('should be emitted when the kernel is disposed', () => {
       let called = false;
       defaultKernel.disposed.connect((sender, args) => {
         expect(sender).to.equal(defaultKernel);
@@ -501,6 +501,7 @@ describe('Kernel.IKernel', () => {
       });
       tester.sendStatus(UUID.uuid4(), 'dead');
       await dead;
+      expect(kernel.status).to.equal('dead');
 
       const msg = KernelMessage.createMessage({
         msgType: 'kernel_info_request',
@@ -511,7 +512,6 @@ describe('Kernel.IKernel', () => {
       });
       expect(() => {
         kernel.sendShellMessage(msg, true);
-        expect(false).to.equal(true);
       }).to.throw(/Kernel is dead/);
     });
 
