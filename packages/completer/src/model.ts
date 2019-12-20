@@ -482,7 +482,10 @@ namespace Private {
   export function findOrderedTypes(typeMap: Completer.TypeMap): string[] {
     const filtered = Object.keys(typeMap)
       .map(key => typeMap[key])
-      .filter(value => value && !(value in KNOWN_MAP))
+      .filter(
+        (value: string | null): value is string =>
+          !!value && !(value in KNOWN_MAP)
+      )
       .sort((a, b) => a.localeCompare(b));
 
     return KNOWN_TYPES.concat(filtered);

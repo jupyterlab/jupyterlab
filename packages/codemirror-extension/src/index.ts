@@ -348,7 +348,7 @@ function activateEditorCommands(
       }
       modeMenu.addItem({
         command: CommandIDs.changeMode,
-        args: { ...spec }
+        args: { ...spec } as any // TODO: Casting to `any` until lumino typings are fixed
       });
     });
 

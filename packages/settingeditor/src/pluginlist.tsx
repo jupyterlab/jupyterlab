@@ -53,8 +53,8 @@ export class PluginList extends Widget {
   /**
    * The selection value of the plugin list.
    */
-  get scrollTop(): number {
-    return this.node.querySelector('ul').scrollTop;
+  get scrollTop(): number | undefined {
+    return this.node.querySelector('ul')?.scrollTop;
   }
 
   /**
