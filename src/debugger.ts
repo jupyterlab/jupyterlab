@@ -96,22 +96,22 @@ export namespace Debugger {
     readonly service: DebuggerService;
 
     /**
-     * The variables model.
+     * The variables widget.
      */
     readonly variables: Variables;
 
     /**
-     * The callstack model.
+     * The callstack widget.
      */
     readonly callstack: Callstack;
 
     /**
-     * The breakpoints model.
+     * The breakpoints widget.
      */
     readonly breakpoints: Breakpoints;
 
     /**
-     * The sources model.
+     * The sources widget.
      */
     readonly sources: Sources;
   }
