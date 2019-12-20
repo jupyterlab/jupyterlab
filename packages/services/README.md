@@ -216,7 +216,7 @@ A _session context_ is an object which has the same lifecycle as the client.
 The session context owns a session connection (which may be null if the client
 is not currently associated with a session). The session context proxies the
 current session connection's signals for convenience. The session context
-primarily serves as a stable object for a client to keep track of the ckurrent
+primarily serves as a stable object for a client to keep track of the current
 session connection. The session context also contains some convenience
 functionality, such as preferences for whether a kernel should be started and
 a user-friendly kernel name and status.
