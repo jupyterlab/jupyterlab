@@ -93,8 +93,7 @@ export class NotebookTrustStatus extends VDomRenderer<
    * Construct a new status item.
    */
   constructor() {
-    super();
-    this.model = new NotebookTrustStatus.Model();
+    super(new NotebookTrustStatus.Model());
   }
 
   /**

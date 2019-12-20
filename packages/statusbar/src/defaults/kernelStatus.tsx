@@ -67,9 +67,8 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
    * Construct the kernel status widget.
    */
   constructor(opts: KernelStatus.IOptions) {
-    super();
+    super(new KernelStatus.Model());
     this._handleClick = opts.onClick;
-    this.model = new KernelStatus.Model();
     this.addClass(interactiveItem);
   }
 

@@ -81,9 +81,8 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
    * @param options - The status widget initialization options.
    */
   constructor(options: LogConsoleStatus.IOptions) {
-    super();
+    super(new LogConsoleStatus.Model(options.loggerRegistry));
     this._handleClick = options.handleClick;
-    this.model = new LogConsoleStatus.Model(options.loggerRegistry);
     this.addClass(interactiveItem);
     this.addClass('jp-LogConsoleStatusItem');
   }

@@ -95,8 +95,15 @@ export abstract class ReactWidget extends Widget {
  * An abstract ReactWidget with a model.
  */
 export abstract class VDomRenderer<
-  T extends VDomRenderer.IModel | null
+  T extends VDomRenderer.IModel | null = null
 > extends ReactWidget {
+  /**
+   * Create a new VDomRenderer
+   */
+  constructor(model: T extends null ? void : T) {
+    super();
+    this.model = ((model ?? null) as unknown) as T;
+  }
   /**
    * A signal emitted when the model changes.
    */
@@ -107,7 +114,7 @@ export abstract class VDomRenderer<
   /**
    * Set the model and fire changed signals.
    */
-  set model(newValue: T | null) {
+  set model(newValue: T) {
     if (this._model === newValue) {
       return;
     }
@@ -126,7 +133,7 @@ export abstract class VDomRenderer<
   /**
    * Get the current model.
    */
-  get model(): T | null {
+  get model(): T {
     return this._model;
   }
 
@@ -134,11 +141,14 @@ export abstract class VDomRenderer<
    * Dispose this widget.
    */
   dispose() {
-    this._model = null;
+    if (this.isDisposed) {
+      return;
+    }
+    this._model = null!;
     super.dispose();
   }
 
-  private _model: T | null;
+  private _model: T;
   private _modelChanged = new Signal<this, void>(this);
 }
 

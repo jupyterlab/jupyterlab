@@ -21,8 +21,7 @@ export class MemoryUsage extends VDomRenderer<MemoryUsage.Model> {
    * Construct a new memory usage status item.
    */
   constructor() {
-    super();
-    this.model = new MemoryUsage.Model({ refreshRate: 5000 });
+    super(new MemoryUsage.Model({ refreshRate: 5000 }));
   }
 
   /**
