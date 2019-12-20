@@ -1,93 +1,65 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
+import { Panel, Widget } from '@phosphor/widgets';
 
-import { Body } from './body';
+import { VariablesBody } from './body';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { VariablesHeader } from './header';
 
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { VariablesModel } from './model';
 
+/**
+ * A Panel to show a variable explorer.
+ */
 export class Variables extends Panel {
+  /**
+   * Instantiate a new Variables Panel.
+   * @param options The instantiation options for a Variables Panel.
+   */
   constructor(options: Variables.IOptions) {
     super();
+    this._header = new VariablesHeader();
+    this._body = new VariablesBody(options.model);
 
-    this.model = options.model;
+    this.addWidget(this._header);
+    this.addWidget(this._body);
+
     this.addClass('jp-DebuggerVariables');
-
-    this.header = new VariablesHeader();
-    this.body = new Body(this.model);
-
-    this.addWidget(this.header);
-    this.addWidget(this.body);
   }
 
-  readonly model: Variables.Model;
-  readonly header: VariablesHeader;
-  readonly body: Widget;
+  private _header: VariablesHeader;
+  private _body: Widget;
 
+  /**
+   * A message handler invoked on a `'resize'` message.
+   */
   protected onResize(msg: Widget.ResizeMessage): void {
     super.onResize(msg);
-    this.resizeBody(msg);
+    this._resizeBody(msg);
   }
 
-  private resizeBody(msg: Widget.ResizeMessage) {
-    const height = msg.height - this.header.node.offsetHeight;
-    this.body.node.style.height = `${height}px`;
-  }
-}
-
-class VariablesHeader extends Widget {
-  constructor() {
-    super({ node: document.createElement('header') });
-    const layout = new PanelLayout();
-    const title = new Widget({ node: document.createElement('h2') });
-
-    this.layout = layout;
-    title.node.textContent = 'Variables';
-    layout.addWidget(title);
+  /**
+   * Resize the body.
+   * @param msg The resize message.
+   */
+  private _resizeBody(msg: Widget.ResizeMessage) {
+    const height = msg.height - this._header.node.offsetHeight;
+    this._body.node.style.height = `${height}px`;
   }
 }
 
+/**
+ * A namespace for Variables `statics`.
+ */
 export namespace Variables {
-  export interface IVariable extends DebugProtocol.Variable {
-    expanded?: boolean;
-  }
-
-  export interface IScope {
-    name: string;
-    variables: IVariable[];
-  }
-
-  export class Model {
-    get changed(): ISignal<this, void> {
-      return this._changed;
-    }
-
-    get scopes(): IScope[] {
-      return this._state;
-    }
-
-    set scopes(scopes: IScope[]) {
-      this._state = scopes;
-      this._changed.emit();
-    }
-
-    get variableExpanded(): ISignal<this, IVariable> {
-      return this._variableExpanded;
-    }
-
-    expandVariable(variable: IVariable) {
-      this._variableExpanded.emit(variable);
-    }
-
-    protected _state: IScope[] = [];
-    private _variableExpanded = new Signal<this, IVariable>(this);
-    private _changed = new Signal<this, void>(this);
-  }
-
+  /**
+   * Instantiation options for `Variables`.
+   */
   export interface IOptions extends Panel.IOptions {
-    model: Model;
+    /**
+     * The variables model.
+     */
+    model: VariablesModel;
   }
 }

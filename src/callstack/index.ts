@@ -111,6 +111,9 @@ export namespace Callstack {
     stepOut: string;
   }
 
+  /**
+   * Instantiation options for `Callstack`.
+   */
   export interface IOptions extends Panel.IOptions {
     /**
      * The toolbar commands interface for the callstack.

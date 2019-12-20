@@ -24,6 +24,7 @@ import { SourcesModel } from './sources/model';
 import { IDebugger } from './tokens';
 
 import { Variables } from './variables';
+import { VariablesModel } from './variables/model';
 
 /**
  * A namespace for `Debugger` statics.
@@ -90,7 +91,7 @@ export namespace Debugger {
     constructor() {
       this.breakpoints = new BreakpointsModel();
       this.callstack = new CallstackModel();
-      this.variables = new Variables.Model();
+      this.variables = new VariablesModel();
       this.sources = new SourcesModel({
         currentFrameChanged: this.callstack.currentFrameChanged
       });
@@ -98,7 +99,7 @@ export namespace Debugger {
 
     readonly breakpoints: BreakpointsModel;
     readonly callstack: CallstackModel;
-    readonly variables: Variables.Model;
+    readonly variables: VariablesModel;
     readonly sources: SourcesModel;
 
     dispose(): void {

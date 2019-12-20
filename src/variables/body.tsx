@@ -1,36 +1,50 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Variables } from '../index';
-
-import { ITheme, ObjectInspector, ObjectRootLabel } from 'react-inspector';
-
 import { ReactWidget } from '@jupyterlab/apputils';
 
 import { ArrayExt } from '@phosphor/algorithm';
 
+import { ITheme, ObjectInspector, ObjectRootLabel } from 'react-inspector';
+
 import React, { useEffect, useState } from 'react';
 
-export class Body extends ReactWidget {
-  constructor(model: Variables.Model) {
+import { VariablesModel } from './model';
+
+/**
+ * The body for a Variables Panel.
+ */
+export class VariablesBody extends ReactWidget {
+  /**
+   * Instantiate a new Body for the Variables Panel.
+   * @param model The model for the variables.
+   */
+  constructor(model: VariablesModel) {
     super();
-    this.model = model;
+    this._model = model;
     this.addClass('jp-DebuggerVariables-body');
   }
 
-  model: Variables.Model;
-
+  /**
+   * Render the VariablesComponent.
+   */
   render() {
-    return <VariableComponent model={this.model} />;
+    return <VariablesComponent model={this._model} />;
   }
+
+  private _model: VariablesModel;
 }
 
-const VariableComponent = ({ model }: { model: Variables.Model }) => {
+/**
+ * A React component to display a list of variables.
+ * @param model The model for the variables.
+ */
+const VariablesComponent = ({ model }: { model: VariablesModel }) => {
   const [data, setData] = useState(model.scopes);
 
   // TODO: this should be simplified and extracted from the component
   const filterVariable = (
-    variable: Variables.IVariable,
+    variable: VariablesModel.IVariable,
     isObject?: boolean,
     keyObj?: string
   ): Object => {
@@ -70,7 +84,7 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
     return filteredObj;
   };
 
-  const convertForObjectInspector = (scopes: Variables.IScope[]) => {
+  const convertForObjectInspector = (scopes: VariablesModel.IScope[]) => {
     return scopes.map(scope => {
       const newVariable = scope.variables.map(variable => {
         if (variable.expanded || variable.variablesReference === 0) {
@@ -87,7 +101,7 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
   };
 
   useEffect(() => {
-    const updateScopes = (self: Variables.Model) => {
+    const updateScopes = (self: VariablesModel) => {
       if (ArrayExt.shallowEqual(data, self.scopes)) {
         return;
       }
@@ -119,7 +133,11 @@ const VariableComponent = ({ model }: { model: Variables.Model }) => {
   return <>{List()}</>;
 };
 
-const convertType = (variable: Variables.IVariable) => {
+/**
+ * Convert a variable to a primitive type.
+ * @param variable The variable.
+ */
+const convertType = (variable: VariablesModel.IVariable) => {
   const { type, value } = variable;
   switch (type) {
     case 'int':
@@ -135,6 +153,9 @@ const convertType = (variable: Variables.IVariable) => {
   }
 };
 
+/**
+ * Default renderer for the variable tree view.
+ */
 const defaultNodeRenderer = ({
   depth,
   name,
@@ -178,6 +199,9 @@ const defaultNodeRenderer = ({
   );
 };
 
+/**
+ * Default theme for the variable tree view.
+ */
 const THEME = {
   BASE_FONT_FAMILY: 'var(--jp-code-font-family)',
   BASE_FONT_SIZE: 'var(--jp-code-font-size)',

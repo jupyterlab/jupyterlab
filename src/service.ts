@@ -19,7 +19,7 @@ import { Debugger } from './debugger';
 
 import { IDebugger } from './tokens';
 
-import { Variables } from './variables';
+import { VariablesModel } from './variables/model';
 
 /**
  * A concrete implementation of IDebugger.
@@ -508,7 +508,7 @@ export class DebugService implements IDebugger, IDisposable {
   private _convertScopes(
     scopes: DebugProtocol.Scope[],
     variables: DebugProtocol.Variable[]
-  ): Variables.IScope[] {
+  ): VariablesModel.IScope[] {
     if (!variables || !scopes) {
       return;
     }
