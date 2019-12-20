@@ -52,24 +52,23 @@ export class DebugSession implements IDebugger.ISession {
    * @param client - The new API client session.
    */
   set client(client: IClientSession | Session.ISession | null) {
-    if (this._client === client) {
-      return;
-    }
-
     if (this._client) {
       this._client.iopubMessage.disconnect(this._handleEvent, this);
     }
 
     this._client = client;
 
-    if (this._client) {
-      this._client.iopubMessage.connect(this._handleEvent, this);
+    if (!this._client) {
+      this._isStarted = false;
+      return;
+    }
 
-      if (this.client instanceof ClientSession) {
-        this._ready = this.client.ready.then(_ => this.client.kernel.ready);
-      } else {
-        this._ready = this.client.kernel.ready;
-      }
+    this._client.iopubMessage.connect(this._handleEvent, this);
+
+    if (this.client instanceof ClientSession) {
+      this._ready = this.client.ready.then(_ => this.client.kernel.ready);
+    } else {
+      this._ready = this.client.kernel.ready;
     }
   }
 

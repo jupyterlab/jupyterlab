@@ -140,15 +140,40 @@ class DebuggerHandler<
     widget: W,
     client: IClientSession | Session.ISession
   ): Promise<void> {
+    const updateHandler = async () => {
+      return this._update(debug, widget, client);
+    };
+
+    // setup handler when the kernel changes
     const kernelChangedHandler = this._kernelChangedHandlers[client.path];
     if (kernelChangedHandler) {
       client.kernelChanged.disconnect(kernelChangedHandler);
     }
-    const updateHandler = async () => {
-      return this._update(debug, widget, client);
-    };
-    client.kernelChanged.connect(updateHandler, this);
+    client.kernelChanged.connect(updateHandler);
     this._kernelChangedHandlers[client.path] = updateHandler;
+
+    // setup handler when the status of the kernel changes (restart)
+    // TODO: is there a better way to handle restarts?
+    let restarted = false;
+    const statusChanged = async () => {
+      // wait for the first `idle` status after a restart
+      if (restarted && client.status === 'idle') {
+        restarted = false;
+        return updateHandler();
+      }
+      // handle `starting`, `restarting` and `autorestarting`
+      if (client.status.endsWith('starting')) {
+        restarted = true;
+      }
+    };
+
+    const statusChangedHandler = this._statusChangedHandlers[client.path];
+    if (statusChangedHandler) {
+      client.statusChanged.disconnect(statusChangedHandler);
+    }
+    client.statusChanged.connect(statusChanged);
+    this._statusChangedHandlers[client.path] = statusChanged;
+
     return updateHandler();
   }
 
@@ -187,13 +212,15 @@ class DebuggerHandler<
       updateAttribute();
     };
 
-    const removeHandler = () => {
+    const removeHandlers = () => {
       const handler = this._handlers[widget.id];
       if (!handler) {
         return;
       }
       handler.dispose();
       delete this._handlers[widget.id];
+      delete this._kernelChangedHandlers[widget.id];
+      delete this._statusChangedHandlers[widget.id];
 
       // clear the model if the handler being removed corresponds
       // to the current active debug session
@@ -227,7 +254,7 @@ class DebuggerHandler<
     const toggleDebugging = async () => {
       if (debug.isStarted) {
         await debug.stop();
-        removeHandler();
+        removeHandlers();
       } else {
         await debug.restoreState(true);
         await createHandler();
@@ -236,7 +263,7 @@ class DebuggerHandler<
 
     const debuggingEnabled = await debug.isAvailable(client);
     if (!debuggingEnabled) {
-      removeHandler();
+      removeHandlers();
       removeToolbarButton();
       return;
     }
@@ -253,7 +280,7 @@ class DebuggerHandler<
 
     // check the state of the debug session
     if (!debug.isStarted) {
-      removeHandler();
+      removeHandlers();
       return;
     }
 
@@ -261,12 +288,13 @@ class DebuggerHandler<
     await createHandler();
 
     // listen to the disposed signals
-    widget.disposed.connect(removeHandler);
-    debug.model.disposed.connect(removeHandler);
+    widget.disposed.connect(removeHandlers);
+    debug.model.disposed.connect(removeHandlers);
   }
 
   private _handlers: { [id: string]: H } = {};
   private _kernelChangedHandlers: { [id: string]: () => void } = {};
+  private _statusChangedHandlers: { [id: string]: () => void } = {};
   private _buttons: { [id: string]: ToolbarButton } = {};
   private _builder: new (option: any) => H;
 }
