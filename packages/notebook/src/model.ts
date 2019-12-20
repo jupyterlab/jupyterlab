@@ -285,6 +285,10 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    */
   initialize(): void {
     super.initialize();
+    if (!this.cells.length) {
+      let factory = this.contentFactory;
+      this.cells.push(factory.createCodeCell({}));
+    }
     this.cells.clearUndo();
   }
 
