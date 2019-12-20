@@ -64,8 +64,6 @@ export namespace CommandIDs {
   export const stepIn = 'debugger:stepIn';
 
   export const stepOut = 'debugger:stepOut';
-
-  export const debugConsole = 'debugger:debug-console';
 }
 
 /**
