@@ -1,9 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, IIterator, iter } from '@lumino/algorithm';
-
-import { JSONExt, JSONObject } from '@lumino/coreutils';
+import { IIterator, iter } from '@lumino/algorithm';
 
 import { Poll } from '@lumino/polling';
 

@@ -11,7 +11,6 @@ import { ISignal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';
 
-import { TerminalConnection } from './default';
 import { IManager as IBaseManager } from '../basemanager';
 
 import { IModel, isAvailable } from './restapi';
@@ -42,14 +41,14 @@ export interface ITerminalConnection extends IObservableDisposable {
   readonly serverSettings: ServerConnection.ISettings;
 
   /**
-   * Test whether the session is ready.
+   * The current connection status of the terminal.
    */
-  readonly isReady: boolean;
+  readonly connectionStatus: ConnectionStatus;
 
   /**
-   * A promise that fulfills when the session is initially ready.
+   * A signal emitted when the terminal connection status changes.
    */
-  readonly ready: Promise<void>;
+  connectionStatusChanged: ISignal<this, ConnectionStatus>;
 
   /**
    * Send a message to the terminal session.
@@ -83,41 +82,41 @@ export namespace ITerminalConnection {
   }
 }
 
-/**
- * Start a new terminal session.
- *
- * @param options - The session options to use.
- *
- * @returns A promise that resolves with the session instance.
- */
-export function startNew(options?: IOptions): Promise<ITerminalConnection> {
-  return TerminalConnection.startNew(options);
-}
+// /**
+//  * Start a new terminal session.
+//  *
+//  * @param options - The session options to use.
+//  *
+//  * @returns A promise that resolves with the session instance.
+//  */
+// export function startNew(options?: IOptions): Promise<ITerminalConnection> {
+//   return TerminalConnection.startNew(options);
+// }
 
-/*
- * Connect to a running session.
- *
- * @param name - The name of the target session.
- *
- * @param options - The session options to use.
- *
- * @returns A promise that resolves with the new session instance.
- *
- * #### Notes
- * If the session was already started via `startNew`, the existing
- * session object is used as the fulfillment value.
- *
- * Otherwise, if `options` are given, we resolve the promise after
- * confirming that the session exists on the server.
- *
- * If the session does not exist on the server, the promise is rejected.
- */
-export function connectTo(
-  name: string,
-  options?: IOptions
-): Promise<ITerminalConnection> {
-  return TerminalConnection.connectTo(name, options);
-}
+// /*
+//  * Connect to a running session.
+//  *
+//  * @param name - The name of the target session.
+//  *
+//  * @param options - The session options to use.
+//  *
+//  * @returns A promise that resolves with the new session instance.
+//  *
+//  * #### Notes
+//  * If the session was already started via `startNew`, the existing
+//  * session object is used as the fulfillment value.
+//  *
+//  * Otherwise, if `options` are given, we resolve the promise after
+//  * confirming that the session exists on the server.
+//  *
+//  * If the session does not exist on the server, the promise is rejected.
+//  */
+// export function connectTo(
+//   name: string,
+//   options?: IOptions
+// ): Promise<ITerminalConnection> {
+//   return TerminalConnection.connectTo(name, options);
+// }
 
 /**
  * A message from the terminal session.
@@ -189,7 +188,9 @@ export interface IManager extends IBaseManager {
    * #### Notes
    * The manager `serverSettings` will be always be used.
    */
-  startNew(options?: IOptions): Promise<ITerminalConnection>;
+  startNew(
+    options?: ITerminalConnection.IOptions
+  ): Promise<ITerminalConnection>;
 
   /*
    * Connect to a running session.
@@ -229,3 +230,16 @@ export interface IManager extends IBaseManager {
    */
   refreshRunning(): Promise<void>;
 }
+
+/**
+ * The valid terminal connection states.
+ *
+ * #### Notes
+ * The status states are:
+ * * `connected`: The terminal connection is live.
+ * * `connecting`: The terminal connection is not live, but we are attempting
+ *   to reconnect to the terminal.
+ * * `disconnected`: The terminal connection is down, we are not
+ *   trying to reconnect.
+ */
+export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';

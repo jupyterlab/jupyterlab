@@ -19,7 +19,7 @@ import { Session, SessionManager } from './session';
 
 import { Setting, SettingManager } from './setting';
 
-import { TerminalSession, TerminalManager } from './terminal';
+import { Terminal, TerminalManager } from './terminal';
 
 import { ServerConnection } from './serverconnection';
 
@@ -219,7 +219,7 @@ export namespace ServiceManager {
     /**
      * The terminals manager for the manager.
      */
-    readonly terminals: TerminalSession.IManager;
+    readonly terminals: Terminal.IManager;
 
     /**
      * The workspace manager for the manager.

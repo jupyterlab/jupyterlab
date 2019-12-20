@@ -90,7 +90,7 @@ export async function shutdownTerminal(
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<void> {
   Private.errorIfNotAvailable();
-  let url = Private.getTerminalUrl(settings.baseUrl, name);
+  let url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL, name);
   let init = { method: 'DELETE' };
   let response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status === 404) {
@@ -105,20 +105,6 @@ export async function shutdownTerminal(
 }
 
 namespace Private {
-  /**
-   * Get the base url.
-   */
-  export function getServiceUrl(baseUrl: string): string {
-    return URLExt.join(baseUrl, TERMINAL_SERVICE_URL);
-  }
-
-  /**
-   * Get the url for a terminal.
-   */
-  export function getTerminalUrl(baseUrl: string, name: string): string {
-    return URLExt.join(baseUrl, TERMINAL_SERVICE_URL, name);
-  }
-
   /**
    * Throw an error if terminals are not available.
    */
