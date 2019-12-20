@@ -111,7 +111,9 @@ function createApp(manager: ServiceManager.IManager): void {
     nbWidget.content.activeCell && nbWidget.content.activeCell.editor;
   const model = new CompleterModel();
   const completer = new Completer({ editor, model });
-  const connector = new KernelConnector({ session: nbWidget.session });
+  const connector = new KernelConnector({
+    session: nbWidget.sessionContext.session
+  });
   const handler = new CompletionHandler({ completer, connector });
 
   // Set the handler's editor.

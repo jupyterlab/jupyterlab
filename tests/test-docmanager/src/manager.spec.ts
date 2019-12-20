@@ -155,13 +155,18 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        const session = await services.sessions.startNew({ path: model.path });
-        const id = session.kernel.id;
+        const session = await services.sessions.startNew({
+          name: '',
+          path: model.path,
+          type: 'test'
+        });
+        const id = session.kernel!.id;
         widget = manager.open(session.path, 'default', { id })!;
         context = manager.contextForWidget(widget)!;
-        await context.session.ready;
-        expect(context.session.kernel).to.be.ok;
-        await context.session.shutdown();
+        await context.ready;
+        await context.sessionContext.ready;
+        expect(context.sessionContext.session?.kernel).to.be.ok;
+        await context.sessionContext.shutdown();
       });
 
       it('should not auto-start a kernel if there is none given', async () => {
@@ -172,7 +177,7 @@ describe('@jupyterlab/docmanager', () => {
         widget = manager.open(model.path, 'default')!;
         context = manager.contextForWidget(widget)!;
         await dismissDialog();
-        expect(context.session.kernel).to.be.null;
+        expect(context.sessionContext.session?.kernel).to.be.not.ok;
       });
 
       it('should return undefined if the factory is not found', async () => {
@@ -216,13 +221,18 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        const session = await services.sessions.startNew({ path: model.path });
-        const id = session.kernel.id;
+        const session = await services.sessions.startNew({
+          name: '',
+          path: model.path,
+          type: 'test'
+        });
+        const id = session.kernel!.id;
         widget = manager.createNew(session.path, 'default', { id })!;
         context = manager.contextForWidget(widget)!;
-        await context.session.ready;
-        expect(context.session.kernel!.id).to.equal(id);
-        await context.session.shutdown();
+        await context.ready;
+        await context.sessionContext.ready;
+        expect(context.sessionContext.session!.kernel!.id).to.equal(id);
+        await context.sessionContext.shutdown();
       });
 
       it('should not start a kernel if not given', async () => {
@@ -233,7 +243,7 @@ describe('@jupyterlab/docmanager', () => {
         widget = manager.createNew(model.path, 'default')!;
         context = manager.contextForWidget(widget)!;
         await dismissDialog();
-        expect(context.session.kernel).to.be.null;
+        expect(context.sessionContext.session?.kernel).to.be.not.ok;
       });
 
       it('should return undefined if the factory is not found', async () => {

@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import { KernelMessage, Kernel } from '@jupyterlab/services';
+import { KernelMessage, Kernel, KernelManager } from '@jupyterlab/services';
 
 import { isFulfilled } from '@jupyterlab/testutils';
 
@@ -48,10 +48,11 @@ get_ipython().kernel.comm_manager.register_target("test", target_func)
 `;
 
 describe('jupyter.services - Comm', () => {
-  let kernel: Kernel.IKernel;
+  const kernelManager = new KernelManager();
+  let kernel: Kernel.IKernelConnection;
 
   beforeAll(async () => {
-    kernel = await Kernel.startNew({ name: 'ipython' });
+    kernel = await kernelManager.startNew({ name: 'ipython' });
   });
 
   afterEach(() => {
@@ -66,32 +67,40 @@ describe('jupyter.services - Comm', () => {
   });
 
   describe('Kernel', () => {
-    describe('#connectToComm()', () => {
+    describe('#createComm()', () => {
       it('should create an instance of IComm', () => {
-        const comm = kernel.connectToComm('test');
+        const comm = kernel.createComm('test');
         expect(comm.targetName).to.equal('test');
         expect(typeof comm.commId).to.equal('string');
       });
 
       it('should use the given id', () => {
-        const comm = kernel.connectToComm('test', '1234');
+        const comm = kernel.createComm('test', '1234');
         expect(comm.targetName).to.equal('test');
         expect(comm.commId).to.equal('1234');
       });
 
-      it('should reuse an existing comm', () => {
-        const comm = kernel.connectToComm('test', '1234');
-        const comm2 = kernel.connectToComm('test', '1234');
-        expect(comm).to.equal(comm2);
+      it('should throw an error if there is an existing comm', () => {
+        expect(() => kernel.createComm('test', '1234')).to.throw();
       });
 
       it('should throw an error when the kernel does not handle comms', async () => {
-        const kernel2 = await Kernel.startNew({
-          name: 'ipython',
-          handleComms: false
-        });
+        const kernel2 = await kernelManager.startNew(
+          { name: 'ipython' },
+          { handleComms: false }
+        );
         expect(kernel2.handleComms).to.be.false;
-        expect(() => kernel2.connectToComm('test', '1234')).to.throw();
+        expect(() => kernel2.createComm('test', '1234')).to.throw();
+      });
+    });
+
+    describe('#hasComm()', () => {
+      it('should test if there is a registered comm', () => {
+        expect(kernel.hasComm('test comm')).to.false;
+        const comm = kernel.createComm('test', 'test comm');
+        expect(kernel.hasComm('test comm')).to.true;
+        comm.dispose();
+        expect(kernel.hasComm('test comm')).to.false;
       });
     });
 
@@ -124,10 +133,10 @@ describe('jupyter.services - Comm', () => {
         const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
           promise.resolve([comm, msg]);
         };
-        const kernel2 = await Kernel.startNew({
-          name: 'ipython',
-          handleComms: false
-        });
+        const kernel2 = await kernelManager.startNew(
+          { name: 'ipython' },
+          { handleComms: false }
+        );
         kernel2.registerCommTarget('test', hook);
 
         // Request the comm creation.
@@ -142,7 +151,7 @@ describe('jupyter.services - Comm', () => {
           true
         ).done;
         // If the assert was false, we would get an 'error' status
-        expect(reply.content.status).to.equal('ok');
+        expect(reply!.content.status).to.equal('ok');
 
         // Clean up
         kernel2.removeCommTarget('test', hook);
@@ -194,14 +203,14 @@ describe('jupyter.services - Comm', () => {
 
     describe('#isDisposed', () => {
       it('should be true after we dispose of the comm', () => {
-        const comm = kernel.connectToComm('test');
+        const comm = kernel.createComm('test');
         expect(comm.isDisposed).to.equal(false);
         comm.dispose();
         expect(comm.isDisposed).to.equal(true);
       });
 
       it('should be safe to call multiple times', () => {
-        const comm = kernel.connectToComm('test');
+        const comm = kernel.createComm('test');
         expect(comm.isDisposed).to.equal(false);
         expect(comm.isDisposed).to.equal(false);
         comm.dispose();
@@ -212,7 +221,7 @@ describe('jupyter.services - Comm', () => {
 
     describe('#dispose()', () => {
       it('should dispose of the resources held by the comm', () => {
-        const comm = kernel.connectToComm('foo');
+        const comm = kernel.createComm('foo');
         comm.dispose();
         expect(comm.isDisposed).to.equal(true);
       });
@@ -223,7 +232,7 @@ describe('jupyter.services - Comm', () => {
     let comm: Kernel.IComm;
 
     beforeEach(() => {
-      comm = kernel.connectToComm('test');
+      comm = kernel.createComm('test');
     });
 
     describe('#id', () => {

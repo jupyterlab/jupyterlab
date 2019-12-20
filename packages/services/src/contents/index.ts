@@ -5,7 +5,7 @@ import { URLExt, PathExt } from '@jupyterlab/coreutils';
 
 import { ModelDB } from '@jupyterlab/observables';
 
-import { JSONObject } from '@lumino/coreutils';
+import { PartialJSONObject } from '@lumino/coreutils';
 
 import { each } from '@lumino/algorithm';
 
@@ -549,8 +549,8 @@ export class ContentsManager implements Contents.IManager {
    */
   constructor(options: ContentsManager.IOptions = {}) {
     let serverSettings = (this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings());
-    this._defaultDrive = options.defaultDrive || new Drive({ serverSettings });
+      options.serverSettings ?? ServerConnection.makeSettings());
+    this._defaultDrive = options.defaultDrive ?? new Drive({ serverSettings });
     this._defaultDrive.fileChanged.connect(this._onFileChanged, this);
   }
 
@@ -594,12 +594,12 @@ export class ContentsManager implements Contents.IManager {
 
   /**
    * Given a path, get a ModelDB.IFactory from the
-   * relevant backend. Returns `null` if the backend
+   * relevant backend. Returns `undefined` if the backend
    * does not provide one.
    */
   getModelDBFactory(path: string): ModelDB.IFactory | null {
     let [drive] = this._driveForPath(path);
-    return (drive && drive.modelDBFactory) || null;
+    return drive?.modelDBFactory ?? null;
   }
 
   /**
@@ -911,7 +911,7 @@ export class ContentsManager implements Contents.IManager {
     const driveName = this.driveName(path);
     const localPath = this.localPath(path);
     if (driveName) {
-      return [this._additionalDrives.get(driveName), localPath];
+      return [this._additionalDrives.get(driveName)!, localPath];
     } else {
       return [this._defaultDrive, localPath];
     }
@@ -928,13 +928,13 @@ export class ContentsManager implements Contents.IManager {
     } else {
       let newValue: Partial<Contents.IModel> | null = null;
       let oldValue: Partial<Contents.IModel> | null = null;
-      if (args.newValue && args.newValue.path) {
+      if (args.newValue?.path) {
         newValue = {
           ...args.newValue,
           path: this._toGlobalPath(sender, args.newValue.path)
         };
       }
-      if (args.oldValue && args.oldValue.path) {
+      if (args.oldValue?.path) {
         oldValue = {
           ...args.oldValue,
           path: this._toGlobalPath(sender, args.oldValue.path)
@@ -965,10 +965,10 @@ export class Drive implements Contents.IDrive {
    * @param options - The options used to initialize the object.
    */
   constructor(options: Drive.IOptions = {}) {
-    this.name = options.name || 'Default';
-    this._apiEndpoint = options.apiEndpoint || SERVICE_DRIVE_URL;
+    this.name = options.name ?? 'Default';
+    this._apiEndpoint = options.apiEndpoint ?? SERVICE_DRIVE_URL;
     this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+      options.serverSettings ?? ServerConnection.makeSettings();
   }
 
   /**
@@ -1029,7 +1029,7 @@ export class Drive implements Contents.IDrive {
         delete options['format'];
       }
       let content = options.content ? '1' : '0';
-      let params: JSONObject = { ...options, content };
+      let params: PartialJSONObject = { ...options, content };
       url += URLExt.objectToQueryString(params);
     }
 
@@ -1090,7 +1090,7 @@ export class Drive implements Contents.IDrive {
     }
 
     let settings = this.serverSettings;
-    let url = this._getUrl(options.path || '');
+    let url = this._getUrl(options.path ?? '');
     let init = {
       method: 'POST',
       body

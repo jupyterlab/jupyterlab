@@ -866,16 +866,18 @@ export namespace Commands {
       noun: 'Code',
       isEnabled: current =>
         !!consoleTracker.find(
-          widget => widget.content.session.path === current.context.path
+          widget =>
+            widget.content.sessionContext.session?.path === current.context.path
         ),
       run: () => commands.execute(CommandIDs.runCode),
       runAll: () => commands.execute(CommandIDs.runAllCode),
       restartAndRunAll: current => {
         const widget = consoleTracker.find(
-          widget => widget.content.session.path === current.context.path
+          widget =>
+            widget.content.sessionContext.session?.path === current.context.path
         );
         if (widget) {
-          return widget.content.session.restart().then(restarted => {
+          return widget.content.sessionContext.restart().then(restarted => {
             if (restarted) {
               void commands.execute(CommandIDs.runAllCode);
             }

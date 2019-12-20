@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { KernelMessage } from './messages';
+import * as KernelMessage from './messages';
 
 /**
  * Deserialize and return the unpacked message.
@@ -30,7 +30,7 @@ export function deserialize(
  */
 export function serialize(msg: KernelMessage.IMessage): string | ArrayBuffer {
   let value: string | ArrayBuffer;
-  if (msg.buffers && msg.buffers.length) {
+  if (msg.buffers?.length) {
     value = serializeBinary(msg);
   } else {
     value = JSON.stringify(msg);

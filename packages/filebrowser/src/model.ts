@@ -12,7 +12,7 @@ import {
 
 import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
 
-import { Contents, Kernel, Session } from '@jupyterlab/services';
+import { Contents, KernelSpec, Session } from '@jupyterlab/services';
 
 import { IIconRegistry } from '@jupyterlab/ui-components';
 
@@ -176,8 +176,8 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Get the kernel spec models.
    */
-  get specs(): Kernel.ISpecModels | null {
-    return this.manager.services.sessions.specs;
+  get specs(): KernelSpec.ISpecModels | null {
+    return this.manager.services.kernelspecs.specs;
   }
 
   /**

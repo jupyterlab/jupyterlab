@@ -1,59 +1,58 @@
-/*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2015, Jupyter Development Team.
-|
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 // @ts-ignore
 __webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
 
-import { Session } from '@jupyterlab/services';
+import * as comm from './comm';
+import * as config from './config';
+import * as contents from './contents';
+import * as kernel from './kernel';
+import * as kernelspec from './kernelspec';
+import * as session from './session';
+import * as terminal from './terminal';
 
-function log(text: string): void {
-  let el = document.getElementById('output');
-  el.textContent = el.textContent + '\n' + text;
-  console.log(text);
-}
+import { log } from './log';
 
-function main() {
-  // Start a new session.
-  let options: Session.IOptions = {
-    kernelName: 'python',
-    path: 'foo.ipynb'
-  };
-  let session: Session.ISession;
+async function main() {
+  try {
+    log('Starting tests');
 
-  log('Starting session');
-  Session.startNew(options)
-    .then(s => {
-      log('Session started');
-      session = s;
-      // Rename the session.
-      return session.setPath('bar.ipynb');
-    })
-    .then(() => {
-      log(`Session renamed to ${session.path}`);
-      // Execute and handle replies on the kernel.
-      let future = session.kernel.requestExecute({ code: 'a = 1' });
-      future.onReply = reply => {
-        log('Got execute reply');
-      };
-      return future.done;
-    })
-    .then(() => {
-      log('Future is fulfilled');
-      // Shut down the session.
-      return session.shutdown();
-    })
-    .then(() => {
-      log('Session shut down');
-      log('Test Complete!');
-    })
-    .catch(err => {
-      console.error(err);
-      log('Test Failed! See the console output for details');
-    });
+    log('Executing kernel spec example');
+    await kernelspec.main();
+    log('kernel spec example complete!');
+
+    log('Executing kernel example');
+    await kernel.main();
+    log('kernel example complete!');
+
+    log('Executing comm example');
+    await comm.main();
+    log('comm example complete!');
+
+    log('Executing session example');
+    await session.main();
+    log('session example complete!');
+
+    log('Executing contents example');
+    await contents.main();
+    log('contents example complete!');
+
+    log('Executing config example');
+    await config.main();
+    log('config example complete!');
+
+    log('Executing terminal example');
+    await terminal.main();
+    log('terminal example complete!');
+
+    log('Test Complete!');
+  } catch (err) {
+    console.error(err);
+    log('Test Failed! See the console output for details');
+    throw err;
+  }
 }
 
 window.onload = main;

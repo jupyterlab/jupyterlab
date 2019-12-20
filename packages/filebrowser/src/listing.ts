@@ -785,11 +785,11 @@ export class DirListing extends Widget {
     each(this._model.sessions(), session => {
       let index = ArrayExt.firstIndexOf(paths, session.path);
       let node = nodes[index];
-      let name = session.kernel.name;
+      let name = session.kernel?.name;
       let specs = this._model.specs;
 
       node.classList.add(RUNNING_CLASS);
-      if (specs) {
+      if (specs && name) {
         const spec = specs.kernelspecs[name];
         name = spec ? spec.display_name : 'unknown';
       }

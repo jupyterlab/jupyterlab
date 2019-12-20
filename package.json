@@ -79,7 +79,9 @@
     "update:dependency": "node buildutils/lib/update-dependency.js --lerna",
     "watch": "python scripts/watch_dev.py",
     "watch:main": "jlpm run watch",
-    "watch:packages": "python scripts/watch_packages.py"
+    "watch:packages": "python scripts/watch_packages.py",
+    "test:summary": "lerna run test --scope \"@jupyterlab/test-*\" --parallel --no-bail | grep -Ei '.* test.*(failed|passed|total|completed|skipped)' | sort",
+    "test:all": "lerna run test --scope \"@jupyterlab/test-*\" --concurrency 1 --stream --no-bail"
   },
   "husky": {
     "hooks": {

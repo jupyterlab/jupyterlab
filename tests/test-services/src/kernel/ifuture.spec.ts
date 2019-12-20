@@ -3,12 +3,18 @@
 
 import { expect } from 'chai';
 
-import { Kernel, KernelMessage } from '@jupyterlab/services';
+import {
+  Kernel,
+  KernelMessage,
+  KernelAPI,
+  KernelManager
+} from '@jupyterlab/services';
 
 import { KernelTester } from '../utils';
 
 describe('Kernel.IShellFuture', () => {
   let tester: KernelTester;
+  let kernelManager = new KernelManager();
 
   afterEach(() => {
     if (tester) {
@@ -16,13 +22,18 @@ describe('Kernel.IShellFuture', () => {
     }
   });
 
-  afterAll(() => Kernel.shutdownAll());
+  afterAll(async () => {
+    let models = await KernelAPI.listRunning();
+    await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
+  });
 
   it('should have a msg attribute', async () => {
-    const kernel = await Kernel.startNew();
+    const kernel = await kernelManager.startNew();
+    await kernel.info;
     const future = kernel.requestExecute({ code: 'print("hello")' });
     expect(typeof future.msg.header.msg_id).to.equal('string');
     await future.done;
+    await kernel.shutdown();
   });
 
   describe('Message hooks', () => {
@@ -38,7 +49,7 @@ describe('Kernel.IShellFuture', () => {
       const calls: string[] = [];
       tester = new KernelTester();
       let future: Kernel.IShellFuture;
-      let kernel: Kernel.IKernel;
+      let kernel: Kernel.IKernelConnection;
 
       tester.onMessage(message => {
         // send a reply
@@ -96,7 +107,7 @@ describe('Kernel.IShellFuture', () => {
             ).to.equal('idle');
           }
           // not returning should also continue handling
-          return void 0;
+          return void 0 as any;
         });
 
         future.onIOPub = () => {
@@ -131,7 +142,7 @@ describe('Kernel.IShellFuture', () => {
       const calls: string[] = [];
       tester = new KernelTester();
       let future: Kernel.IShellFuture;
-      let kernel: Kernel.IKernel;
+      let kernel: Kernel.IKernelConnection;
 
       tester.onMessage(message => {
         // send a reply

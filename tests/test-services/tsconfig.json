@@ -3,7 +3,6 @@
   "compilerOptions": {
     "types": ["jest", "ws", "node"],
     "outDir": "build",
-    "strictNullChecks": false,
     "rootDir": "src"
   },
   "include": ["src/**/*"],

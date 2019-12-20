@@ -12,6 +12,7 @@ import { ISignal } from '@lumino/signaling';
 import { ServerConnection } from '..';
 
 import { DefaultTerminalSession } from './default';
+import { IManager as IBaseManager } from '../basemanager';
 
 /**
  * The namespace for ISession statics.
@@ -204,7 +205,7 @@ export namespace TerminalSession {
    * The manager is responsible for maintaining the state of running
    * terminal sessions.
    */
-  export interface IManager extends IDisposable {
+  export interface IManager extends IBaseManager {
     /**
      * A signal emitted when the running terminals change.
      */
@@ -214,11 +215,6 @@ export namespace TerminalSession {
      * A signal emitted when there is a connection failure.
      */
     connectionFailure: ISignal<IManager, ServerConnection.NetworkError>;
-
-    /**
-     * The server settings for the manager.
-     */
-    readonly serverSettings: ServerConnection.ISettings;
 
     /**
      * Test whether the manager is ready.
