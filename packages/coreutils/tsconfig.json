@@ -4,7 +4,6 @@
     "outDir": "lib",
     "rootDir": "src",
     "module": "commonjs",
-    "strictNullChecks": true,
     "types": ["node"]
   },
   "files": ["src/plugin-schema.json"],

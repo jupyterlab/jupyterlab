@@ -15,6 +15,7 @@
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
     "sourceMap": true,
+    "strictNullChecks": true,
     "target": "es2017",
     "types": []
   }
