@@ -2,12 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject,
-  JSONValue,
-  ReadonlyJSONObject,
-  ReadonlyJSONValue,
   PartialJSONObject,
-  Token
+  Token,
+  PartialJSONValue,
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
@@ -470,8 +469,9 @@ export const IStateDB = new Token<IStateDB>('@jupyterlab/coreutils:IStateDB');
 /**
  * The description of a state database.
  */
-export interface IStateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
-  extends IDataConnector<T> {
+export interface IStateDB<
+  T extends ReadonlyPartialJSONValue = ReadonlyPartialJSONValue
+> extends IDataConnector<T> {
   /**
    * Return a serialized copy of the state database's entire contents.
    *

@@ -42,7 +42,8 @@ import {
   JSONValue,
   PromiseDelegate,
   JSONObject,
-  UUID
+  UUID,
+  PartialJSONValue
 } from '@lumino/coreutils';
 
 import { some, filter, toArray } from '@lumino/algorithm';
@@ -511,8 +512,8 @@ export class Cell extends Widget {
    * Handle changes in the metadata.
    */
   protected onMetadataChanged(
-    model: IObservableMap<JSONValue>,
-    args: IObservableMap.IChangedArgs<JSONValue>
+    model: IObservableJSON,
+    args: IObservableMap.IChangedArgs<PartialJSONValue | undefined>
   ): void {
     switch (args.key) {
       case 'jupyter':
@@ -965,7 +966,7 @@ export class CodeCell extends Cell {
    * Handle changes in the metadata.
    */
   protected onMetadataChanged(
-    model: IObservableMap<JSONValue>,
+    model: IObservableJSON,
     args: IObservableMap.IChangedArgs<JSONValue>
   ): void {
     if (this._savingMetadata) {

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReadonlyJSONValue } from '@lumino/coreutils';
+import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -12,8 +12,9 @@ import { IStateDB } from './tokens';
 /**
  * The default concrete implementation of a state database.
  */
-export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
-  implements IStateDB<T> {
+export class StateDB<
+  T extends ReadonlyPartialJSONValue = ReadonlyPartialJSONValue
+> implements IStateDB<T> {
   /**
    * Create a new state database.
    *
@@ -248,7 +249,9 @@ export namespace StateDB {
   /**
    * A data transformation that can be applied to a state database.
    */
-  export type DataTransform<T extends ReadonlyJSONValue = ReadonlyJSONValue> = {
+  export type DataTransform<
+    T extends ReadonlyPartialJSONValue = ReadonlyPartialJSONValue
+  > = {
     /*
      * The change operation being applied.
      */
@@ -263,12 +266,14 @@ export namespace StateDB {
   /**
    * Database content map
    */
-  export type Content<T> = { [id: string]: T };
+  export type Content<T> = { [id: string]: T | undefined };
 
   /**
    * The instantiation options for a state database.
    */
-  export interface IOptions<T extends ReadonlyJSONValue = ReadonlyJSONValue> {
+  export interface IOptions<
+    T extends ReadonlyPartialJSONValue = ReadonlyPartialJSONValue
+  > {
     /**
      * Optional string key/value connector. Defaults to in-memory connector.
      */
@@ -334,5 +339,5 @@ namespace Private {
   /**
    * An envelope around a JSON value stored in the state database.
    */
-  export type Envelope = { readonly v: ReadonlyJSONValue };
+  export type Envelope = { readonly v: ReadonlyPartialJSONValue };
 }
