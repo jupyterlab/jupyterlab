@@ -252,7 +252,7 @@ export class DocumentWidgetManager implements IDisposable {
    *
    * @param widget - The target widget.
    */
-  protected setCaption(widget: Widget): Promise<void> {
+  protected async setCaption(widget: Widget): Promise<void> {
     let context = Private.contextProperty.get(widget);
     if (!context) {
       return;

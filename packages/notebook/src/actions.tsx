@@ -1757,7 +1757,7 @@ namespace Private {
 
       if (notebook.isSelectedOrActive(child) && deletable) {
         toDelete.push(index);
-        notebook.model.deletedCells.push(child.model.id);
+        model.deletedCells.push(child.model.id);
       }
     });
 

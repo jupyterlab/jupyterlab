@@ -312,8 +312,9 @@ export class SettingRegistry implements ISettingRegistry {
       const { composite, user } = plugins[plugin].data;
 
       return {
-        composite: key in composite ? copy(composite[key]) : undefined,
-        user: key in user ? copy(user[key]) : undefined
+        composite:
+          composite[key] !== undefined ? copy(composite[key]!) : undefined,
+        user: user[key] !== undefined ? copy(user[key]!) : undefined
       };
     }
 
@@ -785,8 +786,9 @@ export class Settings implements ISettingRegistry.ISettings {
     const { composite, user } = this;
 
     return {
-      composite: key in composite ? copy(composite[key]) : undefined,
-      user: key in user ? copy(user[key]) : undefined
+      composite:
+        composite[key] !== undefined ? copy(composite[key]!) : undefined,
+      user: user[key] !== undefined ? copy(user[key]!) : undefined
     };
   }
 

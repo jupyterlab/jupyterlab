@@ -355,7 +355,11 @@ export class LogConsolePanel extends StackedPanel {
         const viewId = `source:${sender.source}`;
         const outputArea = this._outputAreas.get(viewId);
         if (outputArea) {
-          outputArea.rendermime = change.newValue;
+          if (change.newValue) {
+            outputArea.rendermime = change.newValue;
+          } else {
+            outputArea.dispose();
+          }
         }
       }, this);
 

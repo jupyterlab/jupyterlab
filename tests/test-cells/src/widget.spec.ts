@@ -357,10 +357,10 @@ describe('cells/widget', () => {
       it('should not throw an error (full test in input area)', () => {
         const widget = new Cell({ model, contentFactory }).initializeState();
         expect(() => {
-          widget.setPrompt(void 0);
+          widget.setPrompt(void 0 as any);
         }).not.toThrow();
         expect(() => {
-          widget.setPrompt(null);
+          widget.setPrompt(null as any);
         }).not.toThrow();
         expect(() => {
           widget.setPrompt('');

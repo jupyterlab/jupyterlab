@@ -341,18 +341,15 @@ export function ensureUnixPathSep(source: string) {
 /**
  * Get the last portion of a path, without its extension (if any).
  *
- * @param path - The file path.
+ * @param pathArg - The file path.
  *
  * @returns the last part of the path, sans extension.
  */
-export function stem(path: string): string {
+export function stem(pathArg: string): string {
   return path
-    .split('\\')
-    .pop()
-    .split('/')
-    .pop()
+    .basename(pathArg)
     .split('.')
-    .shift();
+    .shift()!;
 }
 
 /**

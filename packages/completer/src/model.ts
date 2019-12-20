@@ -101,7 +101,7 @@ export class CompleterModel implements Completer.IModel {
       return;
     }
 
-    const { start, end } = this._cursor;
+    const { start, end } = cursor;
     // Clip the front of the current line.
     let query = current.text.substring(start);
     // Clip the back of the current line by calculating the end of the original.

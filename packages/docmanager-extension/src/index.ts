@@ -468,6 +468,13 @@ function addCommands(
       }
       const context = docManager.contextForWidget(shell.currentWidget!);
       const type = fileType(shell.currentWidget!, docManager);
+      if (!context) {
+        return showDialog({
+          title: 'Cannot Reload',
+          body: 'No context found for current widget!',
+          buttons: [Dialog.okButton()]
+        });
+      }
       return showDialog({
         title: `Reload ${type} from Disk`,
         body: `Are you sure you want to reload
@@ -492,6 +499,13 @@ function addCommands(
         return;
       }
       const context = docManager.contextForWidget(shell.currentWidget!);
+      if (!context) {
+        return showDialog({
+          title: 'Cannot Revert',
+          body: 'No context found for current widget!',
+          buttons: [Dialog.okButton()]
+        });
+      }
       return context.listCheckpoints().then(checkpoints => {
         if (checkpoints.length < 1) {
           return;
@@ -531,6 +545,13 @@ function addCommands(
       // Checks that shell.currentWidget is valid:
       if (isEnabled()) {
         let context = docManager.contextForWidget(shell.currentWidget!);
+        if (!context) {
+          return showDialog({
+            title: 'Cannot Save',
+            body: 'No context found for current widget!',
+            buttons: [Dialog.okButton()]
+          });
+        }
         if (context.model.readOnly) {
           return showDialog({
             title: 'Cannot Save',
@@ -583,6 +604,13 @@ function addCommands(
       // Checks that shell.currentWidget is valid:
       if (isEnabled()) {
         let context = docManager.contextForWidget(shell.currentWidget!);
+        if (!context) {
+          return showDialog({
+            title: 'Cannot Save',
+            body: 'No context found for current widget!',
+            buttons: [Dialog.okButton()]
+          });
+        }
         return context.saveAs();
       }
     }
@@ -596,6 +624,13 @@ function addCommands(
       // Checks that shell.currentWidget is valid:
       if (isEnabled()) {
         let context = docManager.contextForWidget(shell.currentWidget!);
+        if (!context) {
+          return showDialog({
+            title: 'Cannot Download',
+            body: 'No context found for current widget!',
+            buttons: [Dialog.okButton()]
+          });
+        }
         return context.download();
       }
     }

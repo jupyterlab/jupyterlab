@@ -412,7 +412,7 @@ export class CodeMirrorSearchProvider
 
           // if the last thing on the line was a match, make sure we still
           // emit the changed signal so the display can pick up the updates
-          if (stream.eol) {
+          if (stream.eol()) {
             this._changed.emit(undefined);
           }
           return 'searching';

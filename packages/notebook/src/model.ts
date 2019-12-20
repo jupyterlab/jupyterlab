@@ -182,7 +182,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    */
   toJSON(): nbformat.INotebookContent {
     let cells: nbformat.ICell[] = [];
-    for (let i = 0; i < this.cells.length; i++) {
+    for (let i = 0; i < (this.cells?.length || 0); i++) {
       let cell = this.cells.get(i);
       cells.push(cell.toJSON());
     }

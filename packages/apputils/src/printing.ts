@@ -90,10 +90,11 @@ export namespace Printing {
       await resolveWhenLoaded(iframe);
     } else {
       iframe.src = 'about:blank';
+      await resolveWhenLoaded(iframe);
       setIFrameNode(iframe, textOrEl as HTMLElement);
     }
     const printed = resolveAfterEvent();
-    launchPrint(iframe.contentWindow);
+    launchPrint(iframe.contentWindow!);
     // Once the print dialog has been dismissed, we regain event handling,
     // and it should be safe to discard the hidden iframe.
     await printed;

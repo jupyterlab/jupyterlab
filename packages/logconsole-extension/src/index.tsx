@@ -270,7 +270,7 @@ function activateLogConsole(
     } else {
       source = null;
     }
-    if (logConsoleWidget) {
+    if (logConsolePanel) {
       logConsolePanel.source = source;
     }
     status.model.source = source;

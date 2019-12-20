@@ -685,7 +685,7 @@ export namespace NotebookTools {
         this._validCellTypes.length &&
         this._validCellTypes.indexOf(cellType) === -1
       ) {
-        select.value = undefined;
+        select.value = '';
         select.disabled = true;
         return;
       }

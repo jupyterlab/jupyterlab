@@ -70,8 +70,8 @@ export namespace Clipboard {
 
     // Save the current selection.
     let savedRanges: any[] = [];
-    for (let i = 0, len = sel.rangeCount; i < len; ++i) {
-      savedRanges[i] = sel.getRangeAt(i).cloneRange();
+    for (let i = 0, len = sel?.rangeCount || 0; i < len; ++i) {
+      savedRanges[i] = sel!.getRangeAt(i).cloneRange();
     }
 
     // Select the node content.
