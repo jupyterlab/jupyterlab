@@ -282,6 +282,10 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
 
   /**
    * Initialize the model with its current state.
+   *
+   * # Notes
+   * Adds an empty code cell if the model is empty
+   * and clears undo state.
    */
   initialize(): void {
     super.initialize();
