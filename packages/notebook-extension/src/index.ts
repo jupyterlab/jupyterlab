@@ -1679,8 +1679,8 @@ function addCommands(
 
       // Remove the output view if the parent notebook is closed.
       current.content.disposed.connect(() => {
-        current.context.pathChanged.disconnect(updateCloned);
-        current.context.model.cells.changed.disconnect(updateCloned);
+        current!.context.pathChanged.disconnect(updateCloned);
+        current!.context.model?.cells.changed.disconnect(updateCloned);
         widget.dispose();
       });
     },

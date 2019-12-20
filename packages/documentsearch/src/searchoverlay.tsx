@@ -459,7 +459,7 @@ export function createSearchOverlay(
             onEndSearch={onEndSearch}
             onReplaceCurrent={onReplaceCurrent}
             onReplaceAll={onReplaceAll}
-            overlayState={args}
+            overlayState={args!}
             isReadOnly={isReadOnly}
           />
         );

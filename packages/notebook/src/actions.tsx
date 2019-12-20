@@ -1294,7 +1294,7 @@ export namespace NotebookActions {
         ) {
           // The busy status is used as soon as a request is received:
           // https://jupyter-client.readthedocs.io/en/stable/messaging.html
-          const timestamp = execution['iopub.status.busy'].toString();
+          const timestamp = execution['iopub.status.busy']!.toString();
           if (timestamp) {
             const startTime = new Date(timestamp);
             if (!latestTime || startTime >= latestTime) {
@@ -1627,8 +1627,8 @@ namespace Private {
     }
 
     // Create a new code cell and add as the next cell.
-    const newCell = notebook.model.contentFactory.createCodeCell({});
-    const cells = notebook.model.cells;
+    const newCell = notebook.model!.contentFactory.createCodeCell({});
+    const cells = notebook.model!.cells;
     const index = ArrayExt.firstIndexOf(toArray(cells), cell.model);
 
     newCell.value.text = text;
@@ -1693,7 +1693,7 @@ namespace Private {
     notebook: Notebook,
     value: nbformat.CellType
   ): void {
-    const model = notebook.model;
+    const model = notebook.model!;
     const cells = model.cells;
 
     cells.beginCompoundOperation();
@@ -1745,7 +1745,7 @@ namespace Private {
    * This action can be undone.
    */
   export function deleteCells(notebook: Notebook): void {
-    const model = notebook.model;
+    const model = notebook.model!;
     const cells = model.cells;
     const toDelete: number[] = [];
 

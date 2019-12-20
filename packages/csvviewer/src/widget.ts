@@ -124,7 +124,7 @@ export class GridSearchService {
    * incrementally look for searchText.
    */
   find(query: RegExp, reverse = false): boolean {
-    const model = this._grid.dataModel;
+    const model = this._grid.dataModel!;
     const rowCount = model.rowCount('body');
     const columnCount = model.columnCount('body');
 
@@ -205,7 +205,7 @@ export class GridSearchService {
    * Wrap indices if needed to just before the start or just after the end.
    */
   private _wrapRows(reverse = false) {
-    const model = this._grid.dataModel;
+    const model = this._grid.dataModel!;
     const rowCount = model.rowCount('body');
     const columnCount = model.columnCount('body');
 
@@ -441,7 +441,7 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
     this.toolbar.addItem('delimiter', csvDelimiter);
     csvDelimiter.delimiterChanged.connect(
       (sender: CSVDelimiter, delimiter: string) => {
-        content.delimiter = delimiter;
+        content!.delimiter = delimiter;
       }
     );
   }

@@ -476,14 +476,14 @@ export namespace NotebookTools {
      * Handle a change to the current editor value.
      */
     private _onValueChanged(): void {
-      this._model.value.text = this._cellModel.value.text.split('\n')[0];
+      this._model.value.text = this._cellModel!.value.text.split('\n')[0];
     }
 
     /**
      * Handle a change to the current editor mimetype.
      */
     private _onMimeTypeChanged(): void {
-      this._model.mimeType = this._cellModel.mimeType;
+      this._model.mimeType = this._cellModel!.mimeType;
     }
 
     private _model = new CodeEditor.Model();

@@ -264,7 +264,7 @@ export namespace LogConsoleStatus {
       if (source === null || version === null) {
         return;
       }
-      const versions = this._sourceVersion.get(source);
+      const versions = this._sourceVersion.get(source)!;
       let change = false;
       if (versions.lastDisplayed < version) {
         versions.lastDisplayed = version;
@@ -290,8 +290,8 @@ export namespace LogConsoleStatus {
         return;
       }
       const versions = this._sourceVersion.get(source);
-      if (versions.lastNotified < version) {
-        versions.lastNotified = version;
+      if (versions!.lastNotified < version) {
+        versions!.lastNotified = version;
         if (source === this._source) {
           this.stateChanged.emit();
         }

@@ -251,7 +251,7 @@ export class Cell extends Widget {
     if (!this._inputHidden) {
       return this._input.promptNode;
     } else {
-      return (this._inputPlaceholder.node as HTMLElement)
+      return (this._inputPlaceholder!.node as HTMLElement)
         .firstElementChild as HTMLElement;
     }
   }
@@ -924,7 +924,7 @@ export class CodeCell extends Cell {
    */
   cloneOutputArea(): OutputArea {
     return new SimplifiedOutputArea({
-      model: this.model.outputs,
+      model: this.model.outputs!,
       contentFactory: this.contentFactory,
       rendermime: this._rendermime
     });

@@ -695,8 +695,9 @@ function addLabCommands(
     label: () => `Rename ${fileType(contextMenuWidget(), docManager)}…`,
     isEnabled,
     execute: () => {
+      // Implies contextMenuWidget() !== null
       if (isEnabled()) {
-        let context = docManager.contextForWidget(contextMenuWidget());
+        let context = docManager.contextForWidget(contextMenuWidget()!);
         return renameDialog(docManager, context!.path);
       }
     }

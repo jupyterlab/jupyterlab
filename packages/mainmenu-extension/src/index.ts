@@ -861,7 +861,7 @@ namespace Private {
       // Typescript 2.8, we can possibly use conditional types to get Typescript
       // to recognize this is a function.
       let f = (extender[executor] as any) as (w: Widget) => Promise<any>;
-      return f(widget);
+      return f(widget!);
     };
   }
 

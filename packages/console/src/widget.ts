@@ -464,11 +464,11 @@ export class CodeConsole extends Widget {
     clientX: number,
     clientY: number
   ): Promise<void> {
-    const cellModel = this._focusedCell.model as ICodeCellModel;
+    const cellModel = this._focusedCell!.model as ICodeCellModel;
     let selected: nbformat.ICell[] = [cellModel.toJSON()];
 
     const dragImage = CellDragUtils.createCellDragImage(
-      this._focusedCell,
+      this._focusedCell!,
       selected
     );
 
@@ -690,10 +690,10 @@ export class CodeConsole extends Widget {
    */
   private _handleInfo(info: KernelMessage.IInfoReplyMsg['content']): void {
     if (info.status !== 'ok') {
-      this._banner.model.value.text = 'Error in getting kernel banner';
+      this._banner!.model.value.text = 'Error in getting kernel banner';
       return;
     }
-    this._banner.model.value.text = info.banner;
+    this._banner!.model.value.text = info.banner;
     let lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);
     if (this.promptCell) {
@@ -806,7 +806,7 @@ export class CodeConsole extends Widget {
         });
     } else if (this.session.status === 'restarting') {
       this.addBanner();
-      this._handleInfo(this.session.kernel.info);
+      this._handleInfo(this.session.kernel!.info!);
     }
   }
 

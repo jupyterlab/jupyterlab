@@ -471,7 +471,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
     if (change.type === 'add' || change.type === 'set') {
       each(change.newValues, id => {
         if (!this._cellMap.has(id)) {
-          let cellDB = this._factory.modelDB;
+          let cellDB = this._factory.modelDB!;
           let cellType = cellDB.createValue(id + '.type');
           let cell: ICellModel;
           switch (cellType.get()) {

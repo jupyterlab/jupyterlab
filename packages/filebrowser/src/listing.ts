@@ -1242,7 +1242,7 @@ export class DirListing extends Widget {
                 void 0,
                 options
               );
-              this._manager.openOrReveal(item.path);
+              this._manager.openOrReveal(item!.path);
             });
           });
           firstWidgetPlaced.resolve(void 0);
@@ -1498,7 +1498,7 @@ export class DirListing extends Widget {
 
     void this.selectItemByName(name)
       .then(() => {
-        if (!this.isDisposed && newValue.type === 'directory') {
+        if (!this.isDisposed && newValue!.type === 'directory') {
           return this._doRename();
         }
       })

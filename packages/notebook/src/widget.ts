@@ -912,7 +912,7 @@ export class Notebook extends StaticNotebook {
       if (activeCell instanceof MarkdownCell) {
         activeCell.rendered = false;
       }
-      activeCell.inputHidden = false;
+      activeCell!.inputHidden = false;
     } else {
       // Focus on the notebook document, which blurs the active cell.
       this.node.focus();
@@ -1519,7 +1519,7 @@ export class Notebook extends StaticNotebook {
       this.activeCellIndex--;
       // Move the cursor to the first position on the last line.
       if (this.activeCellIndex < prev) {
-        let editor = this.activeCell.editor;
+        let editor = this.activeCell!.editor;
         let lastLine = editor.lineCount - 1;
         editor.setCursorPosition({ line: lastLine, column: 0 });
       }
@@ -1527,7 +1527,7 @@ export class Notebook extends StaticNotebook {
       this.activeCellIndex++;
       // Move the cursor to the first character.
       if (this.activeCellIndex > prev) {
-        let editor = this.activeCell.editor;
+        let editor = this.activeCell!.editor;
         editor.setCursorPosition({ line: 0, column: 0 });
       }
     }

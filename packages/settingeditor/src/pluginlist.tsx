@@ -149,7 +149,7 @@ export class PluginList extends Widget {
     this._confirm()
       .then(() => {
         this._scrollTop = this.scrollTop;
-        this._selection = id;
+        this._selection = id!;
         this._changed.emit(undefined);
         this.update();
       })

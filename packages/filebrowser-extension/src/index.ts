@@ -509,7 +509,7 @@ function addCommands(
           // The normal contents service errors on paths ending in slash
           path = path.slice(0, path.length - 1);
         }
-        const browserForPath = Private.getBrowserForPath(path, factory);
+        const browserForPath = Private.getBrowserForPath(path, factory)!;
         const { services } = browserForPath.model.manager;
         const item = await services.contents.get(path, {
           content: false
@@ -611,7 +611,7 @@ function addCommands(
       }
 
       return widget.model.manager.services.contents
-        .getDownloadUrl(widget.selectedItems().next().path)
+        .getDownloadUrl(widget.selectedItems().next()!.path)
         .then(url => {
           Clipboard.copyToSystem(url);
         });
