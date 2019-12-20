@@ -60,12 +60,11 @@ export class ServiceManager implements ServiceManager.IManager {
     this.sessions.connectionFailure.connect(this._onConnectionFailure, this);
     this.terminals.connectionFailure.connect(this._onConnectionFailure, this);
 
-    this._readyPromise = this.sessions.ready.then(() => {
-      if (this.terminals.isAvailable()) {
-        return this.terminals.ready;
-      }
-    });
-    void this._readyPromise.then(() => {
+    let readyList = [this.sessions.ready, this.kernelspecs.ready];
+    if (this.terminals.isAvailable()) {
+      readyList.push(this.terminals.ready);
+    }
+    this._readyPromise = Promise.all(readyList).then(() => {
       this._isReady = true;
     });
   }
