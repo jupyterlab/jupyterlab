@@ -13,7 +13,7 @@ import {
   map
 } from '@lumino/algorithm';
 
-import { JSONValue } from '@lumino/coreutils';
+import { PartialJSONValue, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
@@ -393,7 +393,7 @@ export class DocumentRegistry implements IDisposable {
     // Get the matching file types.
     let fts = this.getFileTypesForPath(PathExt.basename(path));
 
-    let factory: DocumentRegistry.WidgetFactory = undefined;
+    let factory: DocumentRegistry.WidgetFactory | undefined = undefined;
     // Find if a there is a default rendered factory for this type.
     for (let ft of fts) {
       if (ft.name in this._defaultRenderedWidgetFactories) {
@@ -612,7 +612,7 @@ export class DocumentRegistry implements IDisposable {
       default:
         // Find the best matching extension.
         if (model.name || model.path) {
-          let name = model.name || PathExt.basename(model.path);
+          let name = model.name || PathExt.basename(model.path!);
           let fts = this.getFileTypesForPath(name);
           if (fts.length > 0) {
             return fts[0];
@@ -635,7 +635,7 @@ export class DocumentRegistry implements IDisposable {
 
     // Look for a pattern match first.
     let ft = find(this._fileTypes, ft => {
-      return ft.pattern && ft.pattern.match(name) !== null;
+      return !!(ft.pattern && ft.pattern.match(name) !== null);
     });
     if (ft) {
       fts.push(ft);
@@ -777,7 +777,7 @@ export namespace DocumentRegistry {
     /**
      * Serialize the model to JSON.
      */
-    toJSON(): JSONValue;
+    toJSON(): PartialJSONValue;
 
     /**
      * Deserialize the model from JSON.
@@ -785,7 +785,7 @@ export namespace DocumentRegistry {
      * #### Notes
      * Should emit a [contentChanged] signal.
      */
-    fromJSON(value: any): void;
+    fromJSON(value: ReadonlyPartialJSONValue): void;
 
     /**
      * Initialize model state after initial data load.
@@ -1211,7 +1211,7 @@ export namespace DocumentRegistry {
     /**
      * The name of the item or the widget factory being extended.
      */
-    readonly name: string;
+    readonly name?: string;
 
     /**
      * Whether the item was added or removed.

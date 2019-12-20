@@ -89,8 +89,8 @@ function activateLogConsole(
   settingRegistry: ISettingRegistry | null,
   statusBar: IStatusBar | null
 ): ILoggerRegistry {
-  let logConsoleWidget: MainAreaWidget<LogConsolePanel> = null;
-  let logConsolePanel: LogConsolePanel = null;
+  let logConsoleWidget: MainAreaWidget<LogConsolePanel> | null = null;
+  let logConsolePanel: LogConsolePanel | null = null;
 
   const loggerRegistry = new LoggerRegistry({
     defaultRendermime: rendermime,
@@ -115,7 +115,7 @@ function activateLogConsole(
       if (!logConsoleWidget) {
         createLogConsoleWidget({
           insertMode: 'split-bottom',
-          ref: app.shell.currentWidget.id
+          ref: app.shell.currentWidget?.id
         });
       } else {
         app.shell.activateById(logConsoleWidget.id);
@@ -210,7 +210,7 @@ function activateLogConsole(
     execute: () => {
       logConsolePanel.logger.checkpoint();
     },
-    isEnabled: () => logConsolePanel && logConsolePanel.source !== null,
+    isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
     iconClass: 'jp-AddIcon'
   });
 
@@ -219,7 +219,7 @@ function activateLogConsole(
     execute: () => {
       logConsolePanel.logger.clear();
     },
-    isEnabled: () => logConsolePanel && logConsolePanel.source !== null,
+    isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
     // TODO: figure out how this jp-clearIcon class should work, analagous to jp-AddIcon
     iconClass: 'fa fa-ban jp-ClearIcon'
   });
@@ -233,7 +233,7 @@ function activateLogConsole(
     execute: (args: { level: LogLevel }) => {
       logConsolePanel.logger.level = args.level;
     },
-    isEnabled: () => logConsolePanel && logConsolePanel.source !== null
+    isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null
     // TODO: find good icon class
   });
 
@@ -256,7 +256,7 @@ function activateLogConsole(
     });
   }
 
-  function setSource(newValue: Widget) {
+  function setSource(newValue: Widget | null) {
     if (logConsoleWidget && newValue === logConsoleWidget) {
       // Do not change anything if we are just focusing on ourselves
       return;
@@ -371,7 +371,7 @@ export class LogLevelSwitcher extends ReactWidget {
           className="jp-LogConsole-toolbarLogLevelDropdown"
           onChange={this.handleChange}
           onKeyDown={this.handleKeyDown}
-          value={logger !== null && logger.level}
+          value={logger?.level}
           iconProps={{
             icon: <span className="jp-MaterialIcon jp-DownCaretIcon bp3-icon" />
           }}
@@ -393,7 +393,7 @@ export class LogLevelSwitcher extends ReactWidget {
       </>
     );
   }
-  private _logConsole: LogConsolePanel = null;
+  private _logConsole: LogConsolePanel;
   private _id = `level-${UUID.uuid4()}`;
 }
 

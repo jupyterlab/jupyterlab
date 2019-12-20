@@ -485,7 +485,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     // Sync `collapsed` and `jupyter.outputs_hidden` for the first time, giving
     // preference to `collapsed`.
     if (this.metadata.has('collapsed')) {
-      let collapsed = this.metadata.get('collapsed');
+      let collapsed = this.metadata.get('collapsed') as boolean | undefined;
       Private.collapseChanged(this.metadata, {
         type: 'change',
         key: 'collapsed',

@@ -59,7 +59,7 @@ export const SetupCommands = (
   commands.addCommand(cmdIds.invokeNotebook, {
     label: 'Invoke Notebook',
     execute: () => {
-      if (nbWidget.content.activeCell.model.type === 'code') {
+      if (nbWidget.content.activeCell?.model.type === 'code') {
         return commands.execute(cmdIds.invoke);
       }
     }
@@ -67,7 +67,7 @@ export const SetupCommands = (
   commands.addCommand(cmdIds.selectNotebook, {
     label: 'Select Notebook',
     execute: () => {
-      if (nbWidget.content.activeCell.model.type === 'code') {
+      if (nbWidget.content.activeCell?.model.type === 'code') {
         return commands.execute(cmdIds.select);
       }
     }
@@ -77,7 +77,7 @@ export const SetupCommands = (
     execute: () => nbWidget.context.save()
   });
 
-  let searchInstance: SearchInstance;
+  let searchInstance: SearchInstance | undefined;
   commands.addCommand(cmdIds.startSearch, {
     label: 'Find...',
     execute: () => {

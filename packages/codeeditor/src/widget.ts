@@ -180,7 +180,7 @@ export class CodeEditorWrapper extends Widget {
 
       if (
         this.editor
-          .getLine(end.line)
+          .getLine(end.line)!
           .slice(0, end.column)
           .match(leadingWhitespaceRe)
       ) {

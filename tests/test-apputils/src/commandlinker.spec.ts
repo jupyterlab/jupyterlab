@@ -44,7 +44,7 @@ describe('@jupyterlab/apputils', () => {
         });
 
         document.body.appendChild(node);
-        linker.connectNode(node, command, null);
+        linker.connectNode(node, command, undefined);
 
         expect(called).to.equal(false);
         simulate(node, 'click');
@@ -70,7 +70,7 @@ describe('@jupyterlab/apputils', () => {
         });
 
         document.body.appendChild(node);
-        linker.connectNode(node, command, null);
+        linker.connectNode(node, command, undefined);
 
         // Make sure connection is working.
         expect(called).to.equal(false);
@@ -115,7 +115,9 @@ describe('@jupyterlab/apputils', () => {
           }
         });
 
-        vnode = h.div({ dataset: linker.populateVNodeDataset(command, null) });
+        vnode = h.div({
+          dataset: linker.populateVNodeDataset(command, undefined)
+        });
         node = VirtualDOM.realize(vnode);
         document.body.appendChild(node);
 

@@ -100,8 +100,8 @@ describe('LogConsolePanel', () => {
         level: 'warning'
       });
       logConsole.source = 'A';
-      const nodeA = logConsole.node.querySelector('#A');
-      const nodeB = logConsole.node.querySelector('#B');
+      const nodeA = logConsole.node.querySelector('#A')!;
+      const nodeB = logConsole.node.querySelector('#B')!;
       expect(nodeA).not.toBeNull();
       expect(anyAncestor(nodeA, isHiddenLumino)).toBe(false);
       expect(nodeB).not.toBeNull();

@@ -55,7 +55,7 @@ export interface ISettingRegistry {
    * The collection of setting registry plugins.
    */
   readonly plugins: {
-    [name: string]: ISettingRegistry.IPlugin;
+    [name: string]: ISettingRegistry.IPlugin | undefined;
   };
 
   /**
@@ -70,7 +70,10 @@ export interface ISettingRegistry {
   get(
     plugin: string,
     key: string
-  ): Promise<{ composite: JSONValue | undefined; user: JSONValue | undefined }>;
+  ): Promise<{
+    composite: PartialJSONValue | undefined;
+    user: PartialJSONValue | undefined;
+  }>;
 
   /**
    * Load a plugin's settings into the setting registry.
@@ -115,7 +118,7 @@ export interface ISettingRegistry {
    * @returns A promise that resolves when the setting has been saved.
    *
    */
-  set(plugin: string, key: string, value: JSONValue): Promise<void>;
+  set(plugin: string, key: string, value: PartialJSONValue): Promise<void>;
 
   /**
    * Register a plugin transform function to act on a specific plugin.
@@ -222,7 +225,7 @@ export namespace ISettingRegistry {
     /**
      * The default value, if any.
      */
-    default?: any;
+    default?: PartialJSONValue;
 
     /**
      * The schema description.
@@ -298,19 +301,19 @@ export namespace ISettingRegistry {
   /**
    * The setting values for a plugin.
    */
-  export interface ISettingBundle extends JSONObject {
+  export interface ISettingBundle extends PartialJSONObject {
     /**
      * A composite of the user setting values and the plugin schema defaults.
      *
      * #### Notes
      * The `composite` values will always be a superset of the `user` values.
      */
-    composite: JSONObject;
+    composite: PartialJSONObject;
 
     /**
      * The user setting values.
      */
-    user: JSONObject;
+    user: PartialJSONObject;
   }
 
   /**
@@ -325,7 +328,7 @@ export namespace ISettingRegistry {
     /**
      * The composite of user settings and extension defaults.
      */
-    readonly composite: ReadonlyJSONObject;
+    readonly composite: ReadonlyPartialJSONObject;
 
     /**
      * The plugin's ID.
@@ -350,7 +353,7 @@ export namespace ISettingRegistry {
     /**
      * The user settings.
      */
-    readonly user: ReadonlyJSONObject;
+    readonly user: ReadonlyPartialJSONObject;
 
     /**
      * The published version of the NPM package containing these settings.
@@ -369,7 +372,7 @@ export namespace ISettingRegistry {
      *
      * @returns A calculated default JSON value for a specific setting.
      */
-    default(key: string): JSONValue | undefined;
+    default(key: string): PartialJSONValue | undefined;
 
     /**
      * Get an individual setting.
@@ -381,8 +384,8 @@ export namespace ISettingRegistry {
     get(
       key: string
     ): {
-      composite: ReadonlyJSONValue | undefined;
-      user: ReadonlyJSONValue | undefined;
+      composite: ReadonlyPartialJSONValue | undefined;
+      user: ReadonlyPartialJSONValue | undefined;
     };
 
     /**
@@ -414,7 +417,7 @@ export namespace ISettingRegistry {
      * #### Notes
      * This function is asynchronous because it writes to the setting registry.
      */
-    set(key: string, value: JSONValue): Promise<void>;
+    set(key: string, value: PartialJSONValue): Promise<void>;
 
     /**
      * Validates raw settings with comments.
@@ -433,7 +436,7 @@ export namespace ISettingRegistry {
     /**
      * The optional arguments passed into the shortcut's command.
      */
-    args?: JSONObject;
+    args?: PartialJSONObject;
 
     /**
      * The command invoked by the shortcut.

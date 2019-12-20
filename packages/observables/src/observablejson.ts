@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
+import {
+  JSONExt,
+  JSONObject,
+  PartialJSONObject,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
 
 import { Message } from '@lumino/messaging';
 
@@ -10,11 +15,12 @@ import { IObservableMap, ObservableMap } from './observablemap';
 /**
  * An observable JSON value.
  */
-export interface IObservableJSON extends IObservableMap<JSONValue> {
+export interface IObservableJSON
+  extends IObservableMap<ReadonlyPartialJSONValue | undefined> {
   /**
    * Serialize the model to JSON.
    */
-  toJSON(): JSONObject;
+  toJSON(): PartialJSONObject;
 }
 
 /**
@@ -24,13 +30,15 @@ export namespace IObservableJSON {
   /**
    * A type alias for observable JSON changed args.
    */
-  export type IChangedArgs = IObservableMap.IChangedArgs<JSONValue>;
+  export type IChangedArgs = IObservableMap.IChangedArgs<
+    ReadonlyPartialJSONValue
+  >;
 }
 
 /**
  * A concrete Observable map for JSON data.
  */
-export class ObservableJSON extends ObservableMap<JSONValue> {
+export class ObservableJSON extends ObservableMap<ReadonlyPartialJSONValue> {
   /**
    * Construct a new observable JSON object.
    */
@@ -44,15 +52,15 @@ export class ObservableJSON extends ObservableMap<JSONValue> {
   /**
    * Serialize the model to JSON.
    */
-  toJSON(): JSONObject {
-    const out: JSONObject = Object.create(null);
+  toJSON(): PartialJSONObject {
+    const out: PartialJSONObject = Object.create(null);
     const keys = this.keys();
 
     for (let key of keys) {
       const value = this.get(key);
 
       if (value !== undefined) {
-        out[key] = JSONExt.deepCopy(value);
+        out[key] = JSONExt.deepCopy(value) as PartialJSONObject;
       }
     }
     return out;

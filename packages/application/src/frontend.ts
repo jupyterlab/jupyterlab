@@ -122,7 +122,7 @@ export abstract class JupyterFrontEnd<
     ) {
       return undefined;
     }
-    let node = this._contextMenuEvent.target;
+    let node: Node | null = this._contextMenuEvent.target;
     do {
       if (node instanceof HTMLElement && test(node)) {
         return node;
@@ -241,7 +241,7 @@ export namespace JupyterFrontEnd {
      * Different shell implementations have latitude to decide what "current"
      * or "focused" mean, depending on their user interface characteristics.
      */
-    readonly currentWidget: Widget;
+    readonly currentWidget: Widget | null;
 
     /**
      * Returns an iterator for the widgets inside the application shell.

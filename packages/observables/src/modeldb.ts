@@ -5,7 +5,12 @@ import { IDisposable, DisposableSet } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { JSONExt, JSONValue, JSONObject } from '@lumino/coreutils';
+import {
+  JSONExt,
+  JSONValue,
+  PartialJSONValue,
+  JSONObject
+} from '@lumino/coreutils';
 
 import { ObservableMap } from './observablemap';
 
@@ -54,12 +59,12 @@ export interface IObservableValue extends IObservable {
   /**
    * Get the current value, or `undefined` if it has not been set.
    */
-  get(): JSONValue | undefined;
+  get(): PartialJSONValue | undefined;
 
   /**
    * Set the value.
    */
-  set(value: JSONValue): void;
+  set(value: PartialJSONValue): void;
 }
 
 /**

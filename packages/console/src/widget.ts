@@ -444,6 +444,7 @@ export class CodeConsole extends Widget {
   private _evtMouseMove(event: MouseEvent) {
     const data = this._dragData;
     if (
+      data &&
       CellDragUtils.shouldStartDrag(
         data.pressX,
         data.pressY,
@@ -809,7 +810,7 @@ export class CodeConsole extends Widget {
     }
   }
 
-  private _banner: RawCell = null;
+  private _banner: RawCell | null = null;
   private _cells: IObservableList<Cell>;
   private _content: Panel;
   private _executed = new Signal<this, Date>(this);
@@ -820,9 +821,13 @@ export class CodeConsole extends Widget {
   private _msgIds = new Map<string, CodeCell>();
   private _msgIdCells = new Map<CodeCell, string>();
   private _promptCellCreated = new Signal<this, CodeCell>(this);
-  private _dragData: { pressX: number; pressY: number; index: number } = null;
-  private _drag: Drag = null;
-  private _focusedCell: Cell = null;
+  private _dragData: {
+    pressX: number;
+    pressY: number;
+    index: number;
+  } | null = null;
+  private _drag: Drag | null = null;
+  private _focusedCell: Cell | null = null;
 }
 
 /**

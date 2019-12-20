@@ -369,7 +369,7 @@ export class OutputAreaModel implements IOutputAreaModel {
    * An observable list containing the output models
    * for this output area.
    */
-  protected list: IObservableList<IOutputModel> = null;
+  protected list: IObservableList<IOutputModel>;
 
   /**
    * Create an output item and hook up its signals.
@@ -463,8 +463,8 @@ namespace Private {
   function fixCarriageReturn(txt: string): string {
     txt = txt.replace(/\r+\n/gm, '\n'); // \r followed by \n --> newline
     while (txt.search(/\r[^$]/g) > -1) {
-      const base = txt.match(/^(.*)\r+/m)[1];
-      let insert = txt.match(/\r+(.*)$/m)[1];
+      const base = txt.match(/^(.*)\r+/m)![1];
+      let insert = txt.match(/\r+(.*)$/m)![1];
       insert = insert + base.slice(insert.length, base.length);
       txt = txt.replace(/\r+.*$/m, '\r').replace(/^.*\r/m, insert);
     }

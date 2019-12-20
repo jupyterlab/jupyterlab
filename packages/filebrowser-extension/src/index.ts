@@ -226,7 +226,7 @@ function activateFactory(
       manager: docManager,
       driveName: options.driveName || '',
       refreshInterval: options.refreshInterval,
-      state: options.state === null ? null : options.state || state
+      state: options.state === null ? undefined : options.state || state
     });
     const widget = new FileBrowser({
       id,
@@ -336,7 +336,7 @@ function activateBrowser(
           const { path } = context;
           try {
             await Private.navigateToPath(path, factory);
-            labShell.currentWidget.activate();
+            labShell.currentWidget?.activate();
           } catch (reason) {
             console.warn(
               `${CommandIDs.goToPath} failed to open: ${path}`,
@@ -361,14 +361,15 @@ function activateShareFile(
   commands.addCommand(CommandIDs.share, {
     execute: () => {
       const widget = tracker.currentWidget;
-      if (!widget) {
+      const model = widget?.selectedItems().next();
+      if (!model) {
         return;
       }
-      const path = encodeURI(widget.selectedItems().next().path);
+      const path = encodeURI(model.path);
       Clipboard.copyToSystem(URLExt.join(PageConfig.getTreeUrl(), path));
     },
     isVisible: () =>
-      tracker.currentWidget &&
+      !!tracker.currentWidget &&
       toArray(tracker.currentWidget.selectedItems()).length === 1,
     iconClass: 'jp-MaterialIcon jp-LinkIcon',
     label: 'Copy Shareable Link'
@@ -487,14 +488,15 @@ function addCommands(
     caption: args => (args.path ? `Open ${args.path}` : 'Open from path'),
     execute: async ({ path }: { path?: string }) => {
       if (!path) {
-        path = (
-          await InputDialog.getText({
-            label: 'Path',
-            placeholder: '/path/relative/to/jlab/root',
-            title: 'Open Path',
-            okLabel: 'Open'
-          })
-        ).value;
+        path =
+          (
+            await InputDialog.getText({
+              label: 'Path',
+              placeholder: '/path/relative/to/jlab/root',
+              title: 'Open Path',
+              okLabel: 'Open'
+            })
+          ).value ?? undefined;
       }
       if (!path) {
         return;
@@ -565,13 +567,9 @@ function addCommands(
       if (factory) {
         // if an explicit factory is passed...
         const ft = registry.getFileType(factory);
-        if (ft) {
-          // ...set an icon if the factory name corresponds to a file type name...
-          return ft.iconClass;
-        } else {
-          // ...or leave the icon blank
-          return '';
-        }
+        // ...set an icon if the factory name corresponds to a file type name...
+        // ...or leave the icon blank
+        return ft?.iconClass ?? '';
       } else {
         return 'jp-MaterialIcon jp-FolderIcon';
       }
@@ -703,7 +701,7 @@ function addCommands(
       Clipboard.copyToSystem(item.path);
     },
     isVisible: () =>
-      tracker.currentWidget &&
+      !!tracker.currentWidget &&
       tracker.currentWidget.selectedItems().next !== undefined,
     iconClass: 'jp-MaterialIcon jp-FileIcon',
     label: 'Copy Path'
@@ -805,11 +803,13 @@ function addCommands(
 
       // get the widget factories that could be used to open all of the items
       // in the current filebrowser selection
-      let factories = OpenWithMenu._intersection(
-        map(tracker.currentWidget.selectedItems(), i => {
-          return OpenWithMenu._getFactories(i);
-        })
-      );
+      let factories = tracker.currentWidget
+        ? OpenWithMenu._intersection(
+            map(tracker.currentWidget.selectedItems(), i => {
+              return OpenWithMenu._getFactories(i);
+            })
+          )
+        : undefined;
 
       if (factories) {
         // make new menu items from the widget factories
@@ -828,8 +828,9 @@ function addCommands(
       let factories = registry
         .preferredWidgetFactories(item.path)
         .map(f => f.name);
-      const notebookFactory = registry.getWidgetFactory('notebook').name;
+      const notebookFactory = registry.getWidgetFactory('notebook')?.name;
       if (
+        notebookFactory &&
         item.type === 'notebook' &&
         factories.indexOf(notebookFactory) === -1
       ) {
@@ -1000,7 +1001,7 @@ namespace Private {
   export function getBrowserForPath(
     path: string,
     factory: IFileBrowserFactory
-  ): FileBrowser {
+  ): FileBrowser | undefined {
     const { defaultBrowser: browser, tracker } = factory;
     const driveName = browser.model.manager.services.contents.driveName(path);
 
@@ -1032,6 +1033,9 @@ namespace Private {
     factory: IFileBrowserFactory
   ): Promise<Contents.IModel> {
     const browserForPath = Private.getBrowserForPath(path, factory);
+    if (!browserForPath) {
+      throw new Error('No browser for path');
+    }
     const { services } = browserForPath.model.manager;
     const localPath = services.contents.localPath(path);
 

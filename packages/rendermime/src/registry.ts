@@ -14,7 +14,7 @@ import {
   defaultSanitizer
 } from '@jupyterlab/apputils';
 
-import { ReadonlyJSONObject } from '@lumino/coreutils';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { MimeModel } from './mimemodel';
 
@@ -92,7 +92,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
    *   or `undefined` if the mime type cannot be rendered.
    */
   preferredMimeType(
-    bundle: ReadonlyJSONObject,
+    bundle: ReadonlyPartialJSONObject,
     safe: 'ensure' | 'prefer' | 'any' = 'ensure'
   ): string | undefined {
     // Try to find a safe factory first, if preferred.
@@ -166,7 +166,8 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
       resolver: options.resolver || this.resolver || undefined,
       sanitizer: options.sanitizer || this.sanitizer || undefined,
       linkHandler: options.linkHandler || this.linkHandler || undefined,
-      latexTypesetter: options.latexTypesetter || this.latexTypesetter
+      latexTypesetter:
+        options.latexTypesetter || this.latexTypesetter || undefined
     });
 
     // Clone the internal state.

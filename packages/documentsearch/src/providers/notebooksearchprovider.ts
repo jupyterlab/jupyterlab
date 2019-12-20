@@ -24,11 +24,13 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: NotebookPanel): any {
+  getInitialQuery(searchTarget: NotebookPanel): unknown {
     const activeCell = searchTarget.content.activeCell;
-    const selection = (activeCell.editor as CodeMirrorEditor).doc.getSelection();
+    const selection = (activeCell?.editor as
+      | CodeMirrorEditor
+      | undefined)?.doc.getSelection();
     // if there are newlines, just return empty string
-    return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
+    return selection?.search(/\r?\n|\r/g) === -1 ? selection : '';
   }
 
   /**
@@ -314,7 +316,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    * The same list of matches provided by the startQuery promise resoluton
    */
   get matches(): ISearchMatch[] {
-    return [].concat(...this._getMatchesFromCells());
+    return ([] as ISearchMatch[]).concat(...this._getMatchesFromCells());
   }
 
   /**
@@ -327,7 +329,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   /**
    * The current index of the selected match.
    */
-  get currentMatchIndex(): number {
+  get currentMatchIndex(): number | null {
     if (!this._currentMatch) {
       return null;
     }
@@ -426,10 +428,10 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     );
   }
 
-  private _searchTarget: NotebookPanel;
+  private _searchTarget: NotebookPanel | undefined | null;
   private _query: RegExp;
   private _cmSearchProviders: ICellSearchPair[] = [];
-  private _currentMatch: ISearchMatch;
+  private _currentMatch: ISearchMatch | undefined | null;
   private _unRenderedMarkdownCells: MarkdownCell[] = [];
   private _cellsWithMatches: Cell[] = [];
   private _changed = new Signal<this, void>(this);

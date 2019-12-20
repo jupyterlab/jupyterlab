@@ -5,7 +5,7 @@ import { CommandRegistry } from '@lumino/commands';
 
 import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 
-import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
+import { Token, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
 
@@ -132,7 +132,7 @@ export namespace IRouter {
      * The search element, including leading question mark (`'?'`), if any,
      * of the path.
      */
-    search: string;
+    search?: string;
   }
 
   /**

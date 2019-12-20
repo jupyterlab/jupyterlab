@@ -21,8 +21,10 @@ export class ExperimentalRenderedJavascript extends RenderedJavaScript {
   render(model: IRenderMime.IMimeModel): Promise<void> {
     const renderJavascript = () => {
       try {
-        const data = model.data[this.mimeType] as string;
-        evalInContext(data, this.node, document, window);
+        const data = model.data[this.mimeType] as string | undefined;
+        if (data) {
+          evalInContext(data, this.node, document, window);
+        }
         return Promise.resolve();
       } catch (error) {
         return Promise.reject(error);

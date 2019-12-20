@@ -19,7 +19,7 @@ export class NotebookTracker extends WidgetTracker<NotebookPanel>
    * This is a read-only property. If there is no cell with the focus, then this
    * value is `null`.
    */
-  get activeCell(): Cell {
+  get activeCell(): Cell | null {
     let widget = this.currentWidget;
     if (!widget) {
       return null;
@@ -33,7 +33,7 @@ export class NotebookTracker extends WidgetTracker<NotebookPanel>
    * #### Notes
    * If there is no cell with the focus, then `null` will be emitted.
    */
-  get activeCellChanged(): ISignal<this, Cell> {
+  get activeCellChanged(): ISignal<this, Cell | null> {
     return this._activeCellChanged;
   }
 
@@ -99,6 +99,6 @@ export class NotebookTracker extends WidgetTracker<NotebookPanel>
   }
 
   private _activeCell: Cell | null = null;
-  private _activeCellChanged = new Signal<this, Cell>(this);
+  private _activeCellChanged = new Signal<this, Cell | null>(this);
   private _selectionChanged = new Signal<this, void>(this);
 }

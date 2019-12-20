@@ -169,7 +169,7 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
     splash.appendChild(galaxy);
 
     // Create debounced recovery dialog function.
-    let dialog: Dialog<any>;
+    let dialog: Dialog<unknown> | null;
     const recovery = new Throttler(async () => {
       if (dialog) {
         return;

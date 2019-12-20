@@ -172,7 +172,7 @@ export namespace MemoryUsage {
     private _currentMemory: number = 0;
     private _memoryLimit: number | null = null;
     private _metricsAvailable: boolean = false;
-    private _poll: Poll<Private.IMetricRequestResult>;
+    private _poll: Poll<Private.IMetricRequestResult | null>;
     private _units: MemoryUnit = 'B';
   }
 

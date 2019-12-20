@@ -14,7 +14,7 @@ import { toArray } from '@lumino/algorithm';
 
 import { CommandRegistry } from '@lumino/commands';
 
-import { ReadonlyJSONObject } from '@lumino/coreutils';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { Widget } from '@lumino/widgets';
 
@@ -127,7 +127,7 @@ describe('@jupyterlab/apputils', () => {
     describe('.createFromCommand', () => {
       const commands = new CommandRegistry();
       const testLogCommandId = 'test:toolbar-log';
-      const logArgs: ReadonlyJSONObject[] = [];
+      const logArgs: ReadonlyPartialJSONObject[] = [];
       let enabled = false;
       let toggled = true;
       let visible = false;
@@ -246,13 +246,13 @@ describe('@jupyterlab/apputils', () => {
 
       it('should update the node content on command change event', async () => {
         const id = 'to-be-removed';
-        let iconClassValue: string | null = null;
+        let iconClassValue: string = '';
         const cmd = commands.addCommand(id, {
           execute: () => {
             /* no op */
           },
           label: 'Label-only button',
-          iconClass: () => iconClassValue
+          iconClass: () => iconClassValue ?? ''
         });
         const button = new CommandToolbarButton({
           commands,
@@ -310,7 +310,7 @@ describe('@jupyterlab/apputils', () => {
           Widget.attach(item, document.body);
           await framePromise();
           expect(
-            (item.node.firstChild.lastChild as HTMLElement).textContent
+            (item.node.firstChild!.lastChild as HTMLElement).textContent
           ).to.equal(session.kernelDisplayName);
         });
 
@@ -319,7 +319,7 @@ describe('@jupyterlab/apputils', () => {
           Widget.attach(item, document.body);
           await framePromise();
           expect(
-            (item.node.firstChild.lastChild as HTMLElement).textContent
+            (item.node.firstChild!.lastChild as HTMLElement).textContent
           ).to.equal('No Kernel!');
         });
       });
@@ -327,7 +327,7 @@ describe('@jupyterlab/apputils', () => {
       describe('.createKernelStatusItem()', () => {
         beforeEach(async () => {
           await session.initialize();
-          await session.kernel.ready;
+          await session.kernel!.ready;
         });
 
         it('should display a busy status if the kernel status is busy', async () => {
@@ -339,7 +339,7 @@ describe('@jupyterlab/apputils', () => {
               called = true;
             }
           });
-          const future = session.kernel.requestExecute({ code: 'a = 109\na' });
+          const future = session.kernel!.requestExecute({ code: 'a = 109\na' });
           await future.done;
           expect(called).to.equal(true);
         });
@@ -349,7 +349,7 @@ describe('@jupyterlab/apputils', () => {
           const status = session.status;
           expect(item.node.title.toLowerCase()).to.contain(status);
           let called = false;
-          const future = session.kernel.requestExecute({ code: 'a = 1' });
+          const future = session.kernel!.requestExecute({ code: 'a = 1' });
           future.onIOPub = msg => {
             if (session.status === 'busy') {
               expect(item.node.title.toLowerCase()).to.contain('busy');
@@ -361,14 +361,14 @@ describe('@jupyterlab/apputils', () => {
         });
 
         it('should handle a starting session', async () => {
-          await session.kernel.ready;
+          await session.kernel!.ready;
           await session.shutdown();
           session = await createClientSession();
           const item = Toolbar.createKernelStatusItem(session);
           expect(item.node.title).to.equal('Kernel Starting');
           expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
           await session.initialize();
-          await session.kernel.ready;
+          await session.kernel!.ready;
         });
       });
     });

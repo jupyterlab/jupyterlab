@@ -186,7 +186,7 @@ describe('@jupyterlab/docmanager', () => {
     describe('#cloneWidget()', () => {
       it('should create a new widget with the same context using the same factory', () => {
         const widget = manager.createWidget(widgetFactory, context);
-        const clone = manager.cloneWidget(widget);
+        const clone = manager.cloneWidget(widget)!;
 
         expect(clone.hasClass('WidgetFactory')).to.equal(true);
         expect(clone.hasClass('jp-Document')).to.equal(true);
@@ -201,7 +201,7 @@ describe('@jupyterlab/docmanager', () => {
     describe('#closeWidgets()', () => {
       it('should close all of the widgets associated with a context', async () => {
         const widget = manager.createWidget(widgetFactory, context);
-        const clone = manager.cloneWidget(widget);
+        const clone = manager.cloneWidget(widget)!;
 
         await manager.closeWidgets(context);
         expect(widget.isDisposed).to.equal(true);

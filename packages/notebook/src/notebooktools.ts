@@ -451,7 +451,7 @@ export namespace NotebookTools {
       }
       let promptNode = activeCell.promptNode
         ? (activeCell.promptNode.cloneNode(true) as HTMLElement)
-        : null;
+        : undefined;
       let prompt = new Widget({ node: promptNode });
       let factory = activeCell.contentFactory.editorFactory;
 
@@ -485,7 +485,7 @@ export namespace NotebookTools {
     }
 
     private _model = new CodeEditor.Model();
-    private _cellModel: CodeEditor.IModel;
+    private _cellModel: CodeEditor.IModel | null;
   }
 
   /**

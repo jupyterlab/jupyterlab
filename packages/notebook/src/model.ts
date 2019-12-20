@@ -151,7 +151,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    */
   dispose(): void {
     // Do nothing if already disposed.
-    if (this.cells === null) {
+    if (this.isDisposed) {
       return;
     }
     let cells = this.cells;
@@ -371,7 +371,7 @@ export namespace NotebookModel {
     /**
      * The IModelDB in which to put data for the notebook model.
      */
-    modelDB: IModelDB;
+    modelDB: IModelDB | undefined;
 
     /**
      * Create a new cell by cell type.

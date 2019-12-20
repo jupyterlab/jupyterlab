@@ -135,7 +135,7 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
   }
 
   private _mimeType: string;
-  private _resolver: IRenderMime.IResolver;
+  private _resolver: IRenderMime.IResolver | null;
 }
 
 /**

@@ -274,7 +274,7 @@ export interface IInputPrompt extends Widget {
   /**
    * The execution count of the prompt.
    */
-  executionCount: string;
+  executionCount: string | null;
 }
 
 /**
@@ -292,10 +292,10 @@ export class InputPrompt extends Widget implements IInputPrompt {
   /**
    * The execution count for the prompt.
    */
-  get executionCount(): string {
+  get executionCount(): string | null {
     return this._executionCount;
   }
-  set executionCount(value: string) {
+  set executionCount(value: string | null) {
     this._executionCount = value;
     if (value === null) {
       this.node.textContent = ' ';
@@ -304,5 +304,5 @@ export class InputPrompt extends Widget implements IInputPrompt {
     }
   }
 
-  private _executionCount: string = null;
+  private _executionCount: string | null = null;
 }

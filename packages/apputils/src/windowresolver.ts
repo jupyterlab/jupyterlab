@@ -28,6 +28,9 @@ export interface IWindowResolver {
 export class WindowResolver implements IWindowResolver {
   /**
    * The resolved window name.
+   *
+   * #### Notes
+   * If the `resolve` promise has not resolved, the behavior is undefined.
    */
   get name(): string {
     return this._name;
@@ -51,7 +54,7 @@ export class WindowResolver implements IWindowResolver {
     });
   }
 
-  private _name: string | null = null;
+  private _name: string;
 }
 
 /*
@@ -164,7 +167,7 @@ namespace Private {
   /**
    * Ping peers with payload.
    */
-  function ping(payload: string): void {
+  function ping(payload: string | null): void {
     if (payload === null) {
       return;
     }

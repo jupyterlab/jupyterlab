@@ -236,7 +236,7 @@ async function activateConsole(
       contentFactory,
       mimeTypeService: editorServices.mimeTypeService,
       rendermime,
-      setBusy: status && (() => status.setBusy()),
+      setBusy: (status && (() => status.setBusy())) ?? undefined,
       ...(options as Partial<ConsolePanel.IOptions>)
     });
     const widget = new MainAreaWidget<ConsolePanel>({ content: panel });
@@ -348,13 +348,13 @@ async function activateConsole(
   });
 
   // Get the current widget and activate unless the args specify otherwise.
-  function getCurrent(args: ReadonlyJSONObject): ConsolePanel | null {
+  function getCurrent(args: ReadonlyPartialJSONObject): ConsolePanel | null {
     let widget = tracker.currentWidget;
     let activate = args['activate'] !== false;
     if (activate && widget) {
       shell.activateById(widget.id);
     }
-    return widget.content;
+    return widget?.content ?? null;
   }
 
   commands.addCommand(CommandIDs.clear, {

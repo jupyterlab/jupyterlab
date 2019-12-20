@@ -118,8 +118,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * The model for the widget.
    */
-  get model(): INotebookModel {
-    return this.content ? this.content.model : null;
+  get model(): INotebookModel | null {
+    return this.content.model;
   }
 
   /**

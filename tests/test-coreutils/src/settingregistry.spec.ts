@@ -110,7 +110,7 @@ describe('@jupyterlab/coreutils', () => {
         expect(errors).to.equal(null);
         expect(plugin.data.user.bar).to.equal(undefined);
         expect(plugin.data.composite.bar).to.equal(
-          schema.properties.bar.default
+          schema.properties!.bar.default
         );
       });
     });
@@ -208,7 +208,7 @@ describe('@jupyterlab/coreutils', () => {
         });
 
         const saved = await registry.get(id, key);
-        expect(saved.composite).to.equal(schema.properties[key].default);
+        expect(saved.composite).to.equal(schema.properties![key].default);
         expect(saved.composite).to.not.equal(saved.user);
       });
 
@@ -230,8 +230,8 @@ describe('@jupyterlab/coreutils', () => {
         const saved = await registry.get(id, key);
         expect(saved.composite).to.equal(value);
         expect(saved.user).to.equal(value);
-        expect(saved.composite).to.not.equal(schema.properties[key].default);
-        expect(saved.user).to.not.equal(schema.properties[key].default);
+        expect(saved.composite).to.not.equal(schema.properties![key].default);
+        expect(saved.user).to.not.equal(schema.properties![key].default);
       });
 
       it('should reject if a plugin does not exist', async () => {
@@ -395,7 +395,7 @@ describe('@jupyterlab/coreutils', () => {
   describe('Settings', () => {
     const connector = new TestConnector();
     let registry: SettingRegistry;
-    let settings: Settings;
+    let settings: Settings | null;
 
     afterEach(() => {
       if (settings) {
@@ -657,7 +657,7 @@ describe('@jupyterlab/coreutils', () => {
         settings = (await registry.load(id)) as Settings;
         const saved = settings.get(key);
 
-        expect(saved.composite).to.equal(schema.properties[key].default);
+        expect(saved.composite).to.equal(schema.properties![key].default);
         expect(saved.composite).to.not.equal(saved.user);
       });
 
@@ -680,8 +680,8 @@ describe('@jupyterlab/coreutils', () => {
         const saved = settings.get(key);
         expect(saved.composite).to.equal(value);
         expect(saved.user).to.equal(value);
-        expect(saved.composite).to.not.equal(schema.properties[key].default);
-        expect(saved.user).to.not.equal(schema.properties[key].default);
+        expect(saved.composite).to.not.equal(schema.properties![key].default);
+        expect(saved.user).to.not.equal(schema.properties![key].default);
       });
 
       it('should be `undefined` if a key does not exist', async () => {

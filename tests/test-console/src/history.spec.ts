@@ -15,7 +15,7 @@ import { ConsoleHistory } from '@jupyterlab/console';
 
 import { createClientSession, signalToPromise } from '@jupyterlab/testutils';
 
-const mockHistory: KernelMessage.IHistoryReplyMsg = {
+const mockHistory = ({
   header: null,
   parent_header: {
     date: '',
@@ -37,7 +37,7 @@ const mockHistory: KernelMessage.IHistoryReplyMsg = {
       [0, 0, 'qux']
     ]
   }
-};
+} as unknown) as KernelMessage.IHistoryReplyMsg;
 
 class TestHistory extends ConsoleHistory {
   methods: string[] = [];

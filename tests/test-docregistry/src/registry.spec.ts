@@ -32,7 +32,7 @@ class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
 
 class WidgetExtension implements DocumentRegistry.WidgetExtension {
   createNew(widget: Widget, context: DocumentRegistry.Context): IDisposable {
-    return new DisposableDelegate(null);
+    return new DisposableDelegate(() => undefined);
   }
 }
 
@@ -216,7 +216,7 @@ describe('docregistry/registry', () => {
         registry = new DocumentRegistry({ initialFileTypes: [] });
         const fileType = { name: 'notebook', extensions: ['.ipynb'] };
         registry.addFileType(fileType);
-        expect(registry.fileTypes().next().name).to.equal(fileType.name);
+        expect(registry.fileTypes().next()!.name).to.equal(fileType.name);
       });
 
       it('should be removed from the registry when disposed', () => {
@@ -233,7 +233,7 @@ describe('docregistry/registry', () => {
         registry.addFileType(fileType);
         const disposable = registry.addFileType(fileType);
         disposable.dispose();
-        expect(registry.fileTypes().next().name).to.equal(fileType.name);
+        expect(registry.fileTypes().next()!.name).to.equal(fileType.name);
       });
     });
 
@@ -482,9 +482,9 @@ describe('docregistry/registry', () => {
         registry.addFileType(fileTypes[1]);
         registry.addFileType(fileTypes[2]);
         const values = registry.fileTypes();
-        expect(values.next().name).to.equal(fileTypes[0].name);
-        expect(values.next().name).to.equal(fileTypes[1].name);
-        expect(values.next().name).to.equal(fileTypes[2].name);
+        expect(values.next()!.name).to.equal(fileTypes[0].name);
+        expect(values.next()!.name).to.equal(fileTypes[1].name);
+        expect(values.next()!.name).to.equal(fileTypes[2].name);
       });
     });
 
@@ -515,14 +515,14 @@ describe('docregistry/registry', () => {
           })
         );
         let pref = registry.getKernelPreference('.c', 'global');
-        expect(pref.language).to.equal('clike');
-        expect(pref.shouldStart).to.equal(false);
-        expect(pref.canStart).to.equal(false);
+        expect(pref!.language).to.equal('clike');
+        expect(pref!.shouldStart).to.equal(false);
+        expect(pref!.canStart).to.equal(false);
 
         pref = registry.getKernelPreference('.py', 'python');
-        expect(pref.language).to.equal('python');
-        expect(pref.shouldStart).to.equal(true);
-        expect(pref.canStart).to.equal(true);
+        expect(pref!.language).to.equal('python');
+        expect(pref!.shouldStart).to.equal(true);
+        expect(pref!.canStart).to.equal(true);
 
         pref = registry.getKernelPreference('.py', 'baz');
         expect(pref).to.be.undefined;

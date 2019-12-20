@@ -93,7 +93,7 @@ namespace Private {
     const memo = matches.reduce((acc, val) => {
       acc[val] = null;
       return acc;
-    }, {} as { [key: string]: string });
+    }, {} as { [key: string]: string | null });
 
     // Add each context match that is not in the memo to the result.
     context.matches.forEach(match => {

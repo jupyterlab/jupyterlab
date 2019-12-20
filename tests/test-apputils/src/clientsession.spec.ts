@@ -26,7 +26,7 @@ describe('@jupyterlab/apputils', () => {
       Dialog.flush();
       session = new ClientSession({
         manager,
-        kernelPreference: { name: manager.specs.default }
+        kernelPreference: { name: manager.specs?.default }
       });
     });
 
@@ -188,14 +188,14 @@ describe('@jupyterlab/apputils', () => {
     describe('#initialize()', () => {
       it('should start the default kernel', async () => {
         await session.initialize();
-        expect(session.kernel.name).to.equal(manager.specs.default);
+        expect(session.kernel?.name).to.equal(manager.specs?.default);
       });
 
       it('should connect to an existing session on the path', async () => {
         const other = await manager.startNew({ path: session.path });
 
         await session.initialize();
-        expect(other.kernel.id).to.equal(session.kernel.id);
+        expect(other.kernel.id).to.equal(session.kernel?.id);
         await other.shutdown();
         other.dispose();
       });
@@ -210,7 +210,7 @@ describe('@jupyterlab/apputils', () => {
 
         session = new ClientSession({ manager, kernelPreference });
         await session.initialize();
-        expect(session.kernel.id).to.equal(other.kernel.id);
+        expect(session.kernel?.id).to.equal(other.kernel.id);
         // We don't call other.shutdown() here because that
         // is handled by the afterEach() handler above.
         other.dispose();
@@ -224,7 +224,7 @@ describe('@jupyterlab/apputils', () => {
 
         await session.initialize();
         await accept;
-        expect(session.kernel.name).to.equal(manager.specs.default);
+        expect(session.kernel?.name).to.equal(manager.specs?.default);
       });
 
       it('should be a no-op if if the shouldStart kernelPreference is false', async () => {
@@ -269,8 +269,8 @@ describe('@jupyterlab/apputils', () => {
       it('should change the current kernel', async () => {
         await session.initialize();
 
-        const name = session.kernel.name;
-        const id = session.kernel.id;
+        const name = session.kernel?.name;
+        const id = session.kernel?.id;
         const kernel = await session.changeKernel({ name });
 
         expect(kernel.id).to.not.equal(id);
@@ -282,27 +282,27 @@ describe('@jupyterlab/apputils', () => {
       it('should select a kernel for the session', async () => {
         await session.initialize();
 
-        const { id, name } = session.kernel;
+        const { id, name } = session.kernel!;
         const accept = acceptDialog();
 
         await session.selectKernel();
         await accept;
 
-        expect(session.kernel.id).to.not.equal(id);
-        expect(session.kernel.name).to.equal(name);
+        expect(session.kernel?.id).to.not.equal(id);
+        expect(session.kernel?.name).to.equal(name);
       });
 
       it('should keep the existing kernel if dismissed', async () => {
         await session.initialize();
 
-        const { id, name } = session.kernel;
+        const { id, name } = session.kernel!;
         const dismiss = dismissDialog();
 
         await session.selectKernel();
         await dismiss;
 
-        expect(session.kernel.id).to.equal(id);
-        expect(session.kernel.name).to.equal(name);
+        expect(session.kernel?.id).to.equal(id);
+        expect(session.kernel?.name).to.equal(name);
       });
     });
 
@@ -321,14 +321,14 @@ describe('@jupyterlab/apputils', () => {
           find: (_, args) => args === 'restarting'
         });
         await session.initialize();
-        await session.kernel.ready;
+        await session.kernel?.ready;
         const restart = session.restart();
 
         await acceptDialog();
         expect(await restart).to.equal(true);
         await emission;
         // Wait for the restarted kernel to be ready
-        await session.kernel.ready;
+        await session.kernel?.ready;
       });
 
       it('should not restart if the user rejects the dialog', async () => {
@@ -390,9 +390,9 @@ describe('@jupyterlab/apputils', () => {
           }
         });
         await session.initialize();
-        await session.kernel.ready;
+        await session.kernel?.ready;
 
-        const restart = ClientSession.restartKernel(session.kernel);
+        const restart = ClientSession.restartKernel(session.kernel!);
 
         await acceptDialog();
         expect(await restart).to.equal(true);
@@ -408,9 +408,9 @@ describe('@jupyterlab/apputils', () => {
           }
         });
         await session.initialize();
-        await session.kernel.ready;
+        await session.kernel?.ready;
 
-        const restart = ClientSession.restartKernel(session.kernel);
+        const restart = ClientSession.restartKernel(session.kernel!);
 
         await dismissDialog();
         expect(await restart).to.equal(false);
@@ -433,7 +433,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return a matching name', () => {
-        const spec = manager.specs.kernelspecs[manager.specs.default];
+        const spec = manager.specs!.kernelspecs[manager.specs!.default];
 
         expect(
           ClientSession.getDefaultKernel({
@@ -453,10 +453,10 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return a matching language', () => {
-        const spec = manager.specs.kernelspecs[manager.specs.default];
+        const spec = manager.specs!.kernelspecs[manager.specs!.default];
         const kernelspecs: any = {};
 
-        kernelspecs[spec.name] = spec;
+        kernelspecs[spec!.name] = spec;
         expect(
           ClientSession.getDefaultKernel({
             specs: {
@@ -469,7 +469,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return null if a language matches twice', () => {
-        const spec = manager.specs.kernelspecs[manager.specs.default];
+        const spec = manager.specs!.kernelspecs[manager.specs!.default];
         const kernelspecs: any = {};
 
         kernelspecs['foo'] = spec;

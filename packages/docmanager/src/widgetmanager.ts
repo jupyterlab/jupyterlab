@@ -270,12 +270,12 @@ export class DocumentWidgetManager implements IDisposable {
         }
         let last = checkpoints[checkpoints.length - 1];
         let checkpoint = last ? Time.format(last.last_modified) : 'None';
-        let caption = `Name: ${model.name}\nPath: ${model.path}\n`;
-        if (context.model.readOnly) {
+        let caption = `Name: ${model!.name}\nPath: ${model!.path}\n`;
+        if (context!.model.readOnly) {
           caption += 'Read-only';
         } else {
           caption +=
-            `Last Saved: ${Time.format(model.last_modified)}\n` +
+            `Last Saved: ${Time.format(model!.last_modified)}\n` +
             `Last Checkpoint: ${checkpoint}`;
         }
         widget.title.caption = caption;

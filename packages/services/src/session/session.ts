@@ -3,7 +3,7 @@
 
 import { IIterator } from '@lumino/algorithm';
 
-import { JSONObject } from '@lumino/coreutils';
+import { PartialJSONObject } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
 
@@ -511,7 +511,7 @@ export namespace Session {
    * #### Notes
    * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/sessions).
    */
-  export interface IModel extends JSONObject {
+  export interface IModel extends PartialJSONObject {
     /**
      * The unique identifier for the session client.
      */

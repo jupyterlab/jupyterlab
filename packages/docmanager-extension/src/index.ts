@@ -111,8 +111,10 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
 
         // Handle dirty state for open documents.
         let context = docManager.contextForWidget(widget);
-        if (!contexts.has(context)) {
-          handleContext(status, context);
+        if (context && !contexts.has(context)) {
+          if (status) {
+            handleContext(status, context);
+          }
           contexts.add(context);
         }
       }
@@ -124,7 +126,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       manager,
       opener,
       when,
-      setBusy: status && (() => status.setBusy())
+      setBusy: (status && (() => status.setBusy())) ?? undefined
     });
 
     // Register the file operations commands.
@@ -224,7 +226,7 @@ ${factories}
 Available file types:
 ${fileTypes}`;
         const schema = JSONExt.deepCopy(plugin.schema);
-        schema.properties.defaultViewers.description = description;
+        schema.properties!.defaultViewers.description = description;
         return { ...plugin, schema };
       }
     });
@@ -330,7 +332,7 @@ class RevertConfirmWidget extends Widget {
 }
 
 // Returns the file type for a widget.
-function fileType(widget: Widget, docManager: IDocumentManager): string {
+function fileType(widget: Widget | null, docManager: IDocumentManager): string {
   if (!widget) {
     return 'File';
   }
@@ -442,8 +444,12 @@ function addCommands(
 
       return docManager.services.contents.getDownloadUrl(path).then(url => {
         const opened = window.open();
-        opened.opener = null;
-        opened.location.href = url;
+        if (opened) {
+          opened.opener = null;
+          opened.location.href = url;
+        } else {
+          throw new Error('Failed to open new browser tab.');
+        }
       });
     },
     icon: args => (args['icon'] as string) || '',
@@ -456,11 +462,12 @@ function addCommands(
     caption: 'Reload contents from disk',
     isEnabled,
     execute: () => {
+      // Checks that shell.currentWidget is valid:
       if (!isEnabled()) {
         return;
       }
-      const context = docManager.contextForWidget(shell.currentWidget);
-      const type = fileType(shell.currentWidget, docManager);
+      const context = docManager.contextForWidget(shell.currentWidget!);
+      const type = fileType(shell.currentWidget!, docManager);
       return showDialog({
         title: `Reload ${type} from Disk`,
         body: `Are you sure you want to reload
@@ -480,10 +487,11 @@ function addCommands(
     caption: 'Revert contents to previous checkpoint',
     isEnabled,
     execute: () => {
+      // Checks that shell.currentWidget is valid:
       if (!isEnabled()) {
         return;
       }
-      const context = docManager.contextForWidget(shell.currentWidget);
+      const context = docManager.contextForWidget(shell.currentWidget!);
       return context.listCheckpoints().then(checkpoints => {
         if (checkpoints.length < 1) {
           return;
@@ -520,8 +528,9 @@ function addCommands(
     caption: 'Save and create checkpoint',
     isEnabled: isWritable,
     execute: () => {
+      // Checks that shell.currentWidget is valid:
       if (isEnabled()) {
-        let context = docManager.contextForWidget(shell.currentWidget);
+        let context = docManager.contextForWidget(shell.currentWidget!);
         if (context.model.readOnly) {
           return showDialog({
             title: 'Cannot Save',
@@ -531,7 +540,7 @@ function addCommands(
         }
         return context
           .save()
-          .then(() => context.createCheckpoint())
+          .then(() => context!.createCheckpoint())
           .catch(err => {
             // If the save was canceled by user-action, do nothing.
             if (err.message === 'Cancel') {
@@ -549,7 +558,7 @@ function addCommands(
     isEnabled: () => {
       return some(
         map(shell.widgets('main'), w => docManager.contextForWidget(w)),
-        c => c && c.contentsModel && c.contentsModel.writable
+        c => c?.contentsModel?.writable ?? false
       );
     },
     execute: () => {
@@ -571,8 +580,9 @@ function addCommands(
     caption: 'Save with new path',
     isEnabled,
     execute: () => {
+      // Checks that shell.currentWidget is valid:
       if (isEnabled()) {
-        let context = docManager.contextForWidget(shell.currentWidget);
+        let context = docManager.contextForWidget(shell.currentWidget!);
         return context.saveAs();
       }
     }
@@ -583,8 +593,9 @@ function addCommands(
     caption: 'Download the file to your computer',
     isEnabled,
     execute: () => {
+      // Checks that shell.currentWidget is valid:
       if (isEnabled()) {
-        let context = docManager.contextForWidget(shell.currentWidget);
+        let context = docManager.contextForWidget(shell.currentWidget!);
         return context.download();
       }
     }
@@ -642,18 +653,17 @@ function addLabCommands(
   const { commands } = app;
 
   // Returns the doc widget associated with the most recent contextmenu event.
-  const contextMenuWidget = (): Widget => {
+  const contextMenuWidget = (): Widget | null => {
     const pathRe = /[Pp]ath:\s?(.*)\n?/;
-    const test = (node: HTMLElement) =>
-      node['title'] && !!node['title'].match(pathRe);
+    const test = (node: HTMLElement) => !!node['title']?.match(pathRe);
     const node = app.contextMenuHitTest(test);
 
-    if (!node) {
+    const pathMatch = node?.['title'].match(pathRe);
+    return (
+      (pathMatch && docManager.findWidget(pathMatch[1], null)) ??
       // Fall back to active doc widget if path cannot be obtained from event.
-      return labShell.currentWidget;
-    }
-    const pathMatch = node['title'].match(pathRe);
-    return docManager.findWidget(pathMatch[1], null);
+      labShell.currentWidget
+    );
   };
 
   // Returns `true` if the current widget has a document context.
@@ -696,7 +706,8 @@ function addLabCommands(
     label: () => `Show in File Browser`,
     isEnabled,
     execute: async () => {
-      let context = docManager.contextForWidget(contextMenuWidget());
+      let widget = contextMenuWidget();
+      let context = widget && docManager.contextForWidget(widget);
       if (!context) {
         return;
       }

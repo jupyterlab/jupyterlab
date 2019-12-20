@@ -41,7 +41,7 @@ export abstract class ReactWidget extends Widget {
    *
    * Subclasses should define this method and return the root React nodes here.
    */
-  protected abstract render(): ReactRenderElement;
+  protected abstract render(): ReactRenderElement | null;
 
   /**
    * Called to update the state of the widget.
@@ -81,7 +81,7 @@ export abstract class ReactWidget extends Widget {
       // signature.
       if (Array.isArray(vnode)) {
         ReactDOM.render(vnode, this.node, resolve);
-      } else {
+      } else if (vnode) {
         ReactDOM.render(vnode, this.node, resolve);
       }
     });

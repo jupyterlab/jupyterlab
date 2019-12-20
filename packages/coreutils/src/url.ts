@@ -123,7 +123,7 @@ export namespace URLExt {
    */
   export function queryStringToObject(
     value: string
-  ): { [key: string]: string } {
+  ): { [key: string]: string | undefined } {
     return value
       .replace(/^\?/, '')
       .split('&')
@@ -162,40 +162,40 @@ export namespace URLExt {
      * The full URL string that was parsed with both the protocol and host
      * components converted to lower-case.
      */
-    href?: string;
+    href: string;
 
     /**
      * Identifies the URL's lower-cased protocol scheme.
      */
-    protocol?: string;
+    protocol: string;
 
     /**
      * The full lower-cased host portion of the URL, including the port if
      * specified.
      */
-    host?: string;
+    host: string;
 
     /**
      * The lower-cased host name portion of the host component without the
      * port included.
      */
-    hostname?: string;
+    hostname: string;
 
     /**
      * The numeric port portion of the host component.
      */
-    port?: string;
+    port: string;
 
     /**
      * The entire path section of the URL.
      */
-    pathname?: string;
+    pathname: string;
 
     /**
      * The "fragment" portion of the URL including the leading ASCII hash
      * `(#)` character
      */
-    hash?: string;
+    hash: string;
 
     /**
      * The search element, including leading question mark (`'?'`), if any,

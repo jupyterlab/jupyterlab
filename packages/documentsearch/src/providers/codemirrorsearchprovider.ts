@@ -83,8 +83,6 @@ export class CodeMirrorSearchProvider
     // canSearchOn is a type guard that guarantees the type of .editor
     this._cm = searchTarget.content.editor;
     return this._startQuery(query);
-
-    throw new Error('Cannot find Codemirror instance to search');
   }
 
   /**
@@ -123,9 +121,9 @@ export class CodeMirrorSearchProvider
     }
     if (!this.isSubProvider) {
       const cursorMatch = this._findNext(false);
-      const match = this._matchState[cursorMatch.from.line][
-        cursorMatch.from.ch
-      ];
+      const match =
+        cursorMatch &&
+        this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
       this._currentMatch = match;
     }
     return matches;
@@ -236,7 +234,7 @@ export class CodeMirrorSearchProvider
       this._cm.operation(() => {
         const cursor = this._cm.getSearchCursor(
           this._query,
-          null,
+          undefined,
           !this._query.ignoreCase
         );
         while (cursor.findNext()) {
@@ -282,7 +280,7 @@ export class CodeMirrorSearchProvider
   /**
    * The current index of the selected match.
    */
-  get currentMatchIndex(): number {
+  get currentMatchIndex(): number | null {
     if (!this._currentMatch) {
       return null;
     }
@@ -297,7 +295,7 @@ export class CodeMirrorSearchProvider
   readonly isReadOnly = false;
 
   clearSelection(): void {
-    return null;
+    return undefined;
   }
 
   /**
@@ -321,7 +319,7 @@ export class CodeMirrorSearchProvider
       this._cm.removeOverlay(this._overlay);
       this._overlay = this._getSearchOverlay();
       this._cm.addOverlay(this._overlay);
-      this._changed.emit(null);
+      this._changed.emit(undefined);
     });
   }
 
@@ -430,7 +428,7 @@ export class CodeMirrorSearchProvider
     };
   }
 
-  private _findNext(reverse: boolean): Private.ICodeMirrorMatch {
+  private _findNext(reverse: boolean): Private.ICodeMirrorMatch | null {
     return this._cm.operation(() => {
       const caseSensitive = this._query.ignoreCase;
 
@@ -552,7 +550,7 @@ export class CodeMirrorSearchProvider
 
   private _query: RegExp;
   private _cm: CodeMirrorEditor;
-  private _currentMatch: ISearchMatch;
+  private _currentMatch: ISearchMatch | null;
   private _matchState: MatchMap = {};
   private _changed = new Signal<this, void>(this);
   private _overlay: any;

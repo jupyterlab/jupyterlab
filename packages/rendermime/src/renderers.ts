@@ -581,7 +581,7 @@ namespace Private {
    */
   export function handleDefaults(
     node: HTMLElement,
-    resolver?: IRenderMime.IResolver
+    resolver?: IRenderMime.IResolver | null
   ): void {
     // Handle anchor elements.
     let anchors = node.getElementsByTagName('a');
@@ -912,15 +912,15 @@ namespace Private {
     let n = numbers.shift();
     if (n === 2 && numbers.length >= 3) {
       // 24-bit RGB
-      r = numbers.shift();
-      g = numbers.shift();
-      b = numbers.shift();
+      r = numbers.shift()!;
+      g = numbers.shift()!;
+      b = numbers.shift()!;
       if ([r, g, b].some(c => c < 0 || 255 < c)) {
         throw new RangeError('Invalid range for RGB colors');
       }
     } else if (n === 5 && numbers.length >= 1) {
       // 256 colors
-      let idx = numbers.shift();
+      let idx = numbers.shift()!;
       if (idx < 0) {
         throw new RangeError('Color index must be >= 0');
       } else if (idx < 16) {

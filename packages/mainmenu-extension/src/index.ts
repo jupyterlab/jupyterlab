@@ -742,7 +742,7 @@ export function createTabsMenu(
     },
     isToggled: args => {
       const id = args['id'] || '';
-      return app.shell.currentWidget && app.shell.currentWidget.id === id;
+      return !!app.shell.currentWidget && app.shell.currentWidget.id === id;
     },
     execute: args => app.shell.activateById((args['id'] as string) || '')
   });

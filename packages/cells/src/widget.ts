@@ -18,7 +18,7 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { DirListing } from '@jupyterlab/filebrowser';
 
-import { IObservableMap } from '@jupyterlab/observables';
+import { IObservableMap, IObservableJSON } from '@jupyterlab/observables';
 
 import {
   OutputArea,
@@ -218,7 +218,7 @@ export class Cell extends Widget {
     if (options.editorConfig) {
       Object.keys(options.editorConfig).forEach(
         (key: keyof CodeEditor.IConfig) => {
-          this.editor.setOption(key, options.editorConfig[key]);
+          this.editor.setOption(key, options.editorConfig?.[key] ?? null);
         }
       );
     }
@@ -1051,10 +1051,12 @@ export namespace CodeCell {
     cell.outputHidden = false;
     cell.setPrompt('*');
     model.trusted = true;
-    let future: Kernel.IFuture<
-      KernelMessage.IExecuteRequestMsg,
-      KernelMessage.IExecuteReplyMsg
-    >;
+    let future:
+      | Kernel.IFuture<
+          KernelMessage.IExecuteRequestMsg,
+          KernelMessage.IExecuteReplyMsg
+        >
+      | undefined;
     try {
       const msgPromise = OutputArea.execute(
         code,
@@ -1076,11 +1078,11 @@ export namespace CodeCell {
               label = 'execute_input';
               break;
             default:
-              return;
+              return false;
           }
           const value = msg.header.date;
           if (!value) {
-            return;
+            return false;
           }
           const timingInfo: any = Object.assign(
             {},
@@ -1096,7 +1098,7 @@ export namespace CodeCell {
       }
       // Save this execution's future so we can compare in the catch below.
       future = cell.outputArea.future;
-      const msg = await msgPromise;
+      const msg = (await msgPromise)!;
       model.executionCount = msg.content.execution_count;
       const started = msg.metadata.started as string;
       if (recordTiming && started) {
@@ -1313,7 +1315,7 @@ export abstract class AttachmentsCell extends Cell {
       }
       const dataURIRegex = /([\w+\/\+]+)?(?:;(charset=[\w\d-]*|base64))?,(.*)/;
       const matches = dataURIRegex.exec(href);
-      if (matches.length !== 4) {
+      if (!matches || matches.length !== 4) {
         return;
       }
       const mimeType = matches[1];
@@ -1357,7 +1359,7 @@ export class MarkdownCell extends AttachmentsCell {
     // Ensure we can resolve attachments:
     this._rendermime = options.rendermime.clone({
       resolver: new AttachmentsResolver({
-        parent: options.rendermime.resolver,
+        parent: options.rendermime.resolver ?? undefined,
         model: this.model.attachments
       })
     });
@@ -1376,7 +1378,7 @@ export class MarkdownCell extends AttachmentsCell {
     void this._updateRenderedInput().then(() => {
       this._ready.resolve(void 0);
     });
-    this.renderInput(this._renderer);
+    this.renderInput(this._renderer!);
   }
 
   /**
@@ -1454,7 +1456,7 @@ export class MarkdownCell extends AttachmentsCell {
       // TODO: It would be nice for the cell to provide a way for
       // its consumers to hook into when the rendering is done.
       void this._updateRenderedInput();
-      this.renderInput(this._renderer);
+      this.renderInput(this._renderer!);
     }
   }
 
@@ -1489,8 +1491,8 @@ export class MarkdownCell extends AttachmentsCell {
     });
   }
 
-  private _monitor: ActivityMonitor<ICellModel, void> = null;
-  private _renderer: IRenderMime.IRenderer = null;
+  private _monitor: ActivityMonitor<ICellModel, void>;
+  private _renderer: IRenderMime.IRenderer | null = null;
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
   private _prevText = '';

@@ -157,7 +157,7 @@ export class PluginList extends Widget {
 
   private _changed = new Signal<this, void>(this);
   private _confirm: () => Promise<void>;
-  private _scrollTop = 0;
+  private _scrollTop: number | undefined = 0;
   private _selection = '';
 }
 
@@ -298,7 +298,7 @@ namespace Private {
    */
   function sortPlugins(registry: ISettingRegistry): ISettingRegistry.IPlugin[] {
     return Object.keys(registry.plugins)
-      .map(plugin => registry.plugins[plugin])
+      .map(plugin => registry.plugins[plugin]!)
       .sort((a, b) => {
         return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
       });

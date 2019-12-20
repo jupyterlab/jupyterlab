@@ -32,7 +32,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { ArrayExt } from '@lumino/algorithm';
 
-import { UUID, JSONObject } from '@lumino/coreutils';
+import { UUID, JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { DisposableSet } from '@lumino/disposable';
 
@@ -337,8 +337,8 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
       align: 'right',
       rank: 4,
       isActive: () =>
-        shell.currentWidget &&
-        tracker.currentWidget &&
+        !!shell.currentWidget &&
+        !!tracker.currentWidget &&
         shell.currentWidget === tracker.currentWidget
     });
   }
@@ -377,8 +377,8 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
         align: 'right',
         rank: 3,
         isActive: () =>
-          shell.currentWidget &&
-          tracker.currentWidget &&
+          !!shell.currentWidget &&
+          !!tracker.currentWidget &&
           shell.currentWidget === tracker.currentWidget
       }
     );
@@ -492,7 +492,7 @@ function activateNotebookTools(
     const updateTools = () => {
       // If there are any open notebooks, add notebook tools to the side panel if
       // it is not already there.
-      if (tracker.size) {
+      if (labShell && tracker.size) {
         if (!notebookTools.isAttached) {
           labShell.add(notebookTools, 'left', { rank: NOTEBOOK_TOOLS_RANK });
         }
@@ -685,7 +685,7 @@ function activateNotebookHandler(
   commands.addCommand(CommandIDs.createNew, {
     label: args => {
       const kernelName = (args['kernelName'] as string) || '';
-      if (args['isLauncher'] && args['kernelName']) {
+      if (args['isLauncher'] && args['kernelName'] && services.specs) {
         return services.specs.kernelspecs[kernelName].display_name;
       }
       if (args['isPalette']) {
@@ -880,7 +880,7 @@ function addCommands(
   const { commands, shell } = app;
 
   // Get the current widget and activate unless the args specify otherwise.
-  function getCurrent(args: ReadonlyJSONObject): NotebookPanel | null {
+  function getCurrent(args: ReadonlyPartialJSONObject): NotebookPanel | null {
     const widget = tracker.currentWidget;
     const activate = args['activate'] !== false;
 
@@ -908,7 +908,7 @@ function addCommands(
     if (!isEnabled()) {
       return false;
     }
-    const { content } = tracker.currentWidget;
+    const { content } = tracker.currentWidget!;
     const index = content.activeCellIndex;
     // If there are selections that are not the active cell,
     // this command is confusing, so disable it.
@@ -973,7 +973,7 @@ function addCommands(
       const { context, content } = current;
 
       let cell = content.activeCell;
-      let metadata = cell.model.metadata.toJSON();
+      let metadata = cell?.model.metadata.toJSON();
       let path = context.path;
       // ignore action in non-code cell
       if (!cell || cell.model.type !== 'code') {
@@ -1008,11 +1008,11 @@ function addCommands(
         let lastLine = firstLine + 1;
         while (true) {
           code = srcLines.slice(firstLine, lastLine).join('\n');
-          let reply = await current.context.session.kernel.requestIsComplete({
+          let reply = await current.context.session.kernel?.requestIsComplete({
             // ipython needs an empty line at the end to correctly identify completeness of indented code
             code: code + '\n\n'
           });
-          if (reply.content.status === 'complete') {
+          if (reply?.content.status === 'complete') {
             if (curLine < lastLine) {
               // we find a block of complete statement containing the current line, great!
               while (
@@ -1105,7 +1105,7 @@ function addCommands(
       // or if we are at the top of the notebook.
       return (
         isEnabledAndSingleSelected() &&
-        tracker.currentWidget.content.activeCellIndex !== 0
+        tracker.currentWidget!.content.activeCellIndex !== 0
       );
     }
   });
@@ -1125,8 +1125,8 @@ function addCommands(
       // or if we are at the bottom of the notebook.
       return (
         isEnabledAndSingleSelected() &&
-        tracker.currentWidget.content.activeCellIndex !==
-          tracker.currentWidget.content.widgets.length - 1
+        tracker.currentWidget!.content.activeCellIndex !==
+          tracker.currentWidget!.content.widgets.length - 1
       );
     }
   });
@@ -1635,7 +1635,7 @@ function addCommands(
     label: 'Create New View for Output',
     execute: async args => {
       let cell: CodeCell | undefined;
-      let current: NotebookPanel | undefined;
+      let current: NotebookPanel | undefined | null;
       // If we are given a notebook path and cell index, then
       // use that, otherwise use the current active cell.
       let path = args.path as string | undefined | null;

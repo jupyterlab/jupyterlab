@@ -190,7 +190,7 @@ export class FileBrowserModel implements IDisposable {
   /**
    * A signal emitted when an upload progresses.
    */
-  get uploadChanged(): ISignal<this, IChangedArgs<IUploadModel>> {
+  get uploadChanged(): ISignal<this, IChangedArgs<IUploadModel | null>> {
     return this._uploadChanged;
   }
 
@@ -480,7 +480,7 @@ export class FileBrowserModel implements IDisposable {
       }
     }
 
-    let finalModel: Contents.IModel;
+    let finalModel: Contents.IModel | undefined;
 
     let upload = { path, progress: 0 };
     this._uploadChanged.emit({
@@ -631,8 +631,10 @@ export class FileBrowserModel implements IDisposable {
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();
   private _uploads: IUploadModel[] = [];
-  private _uploadChanged = new Signal<this, IChangedArgs<IUploadModel>>(this);
-  private _unloadEventListener: (e: Event) => string;
+  private _uploadChanged = new Signal<this, IChangedArgs<IUploadModel | null>>(
+    this
+  );
+  private _unloadEventListener: (e: Event) => string | undefined;
   private _poll: Poll;
 }
 

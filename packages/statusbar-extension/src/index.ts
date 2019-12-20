@@ -185,7 +185,7 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
         isActive: () => {
           const current = labShell.currentWidget;
           return (
-            current &&
+            !!current &&
             (notebookTracker.has(current) || consoleTracker.has(current))
           );
         }
@@ -272,7 +272,7 @@ export const lineColItem: JupyterFrontEndPlugin<void> = {
         isActive: () => {
           const current = labShell.currentWidget;
           return (
-            current &&
+            !!current &&
             (notebookTracker.has(current) ||
               editorTracker.has(current) ||
               consoleTracker.has(current))

@@ -89,7 +89,7 @@ class LogConsoleOutputArea extends OutputArea {
   /**
    * The rendermime instance used by the widget.
    */
-  rendermime: IRenderMimeRegistry;
+  rendermime: IRenderMimeRegistry | null;
   /**
    * Output area model used by the widget.
    */
@@ -215,7 +215,7 @@ export class ScrollingWidget<T extends Widget> extends Widget {
   }
 
   private _content: T;
-  private _observer: IntersectionObserver = null;
+  private _observer: IntersectionObserver | null = null;
   private _scrollHeight: number;
   private _sentinel: HTMLDivElement;
   private _tracking: boolean;
@@ -303,7 +303,10 @@ export class LogConsolePanel extends StackedPanel {
   /**
    * Signal for source changes
    */
-  get sourceChanged(): ISignal<this, IChangedArgs<string | null, 'source'>> {
+  get sourceChanged(): ISignal<
+    this,
+    IChangedArgs<string | null, string | null, 'source'>
+  > {
     return this._sourceChanged;
   }
 
@@ -464,7 +467,7 @@ export class LogConsolePanel extends StackedPanel {
   private _source: string | null = null;
   private _sourceChanged = new Signal<
     this,
-    IChangedArgs<string | null, 'source'>
+    IChangedArgs<string | null, string | null, 'source'>
   >(this);
   private _sourceDisplayed = new Signal<this, ISourceDisplayed>(this);
   private _placeholder: Widget;
@@ -472,6 +475,6 @@ export class LogConsolePanel extends StackedPanel {
 }
 
 export interface ISourceDisplayed {
-  source: string;
-  version: number;
+  source: string | null;
+  version: number | null;
 }

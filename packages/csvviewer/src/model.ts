@@ -190,6 +190,8 @@ export class DSVModel extends DataModel implements IDisposable {
       return;
     }
 
+    this._isDisposed = true;
+
     this._columnCount = undefined;
     this._rowCount = undefined;
     this._rowOffsets = null;
@@ -575,8 +577,8 @@ export class DSVModel extends DataModel implements IDisposable {
 
   // Data values
   private _data: string;
-  private _rowCount: number = 1;
-  private _columnCount: number;
+  private _rowCount: number | undefined = 1;
+  private _columnCount: number | undefined;
 
   // Cache information
   /**
@@ -610,7 +612,7 @@ export class DSVModel extends DataModel implements IDisposable {
   private _initialRows: number;
 
   // Bookkeeping variables.
-  private _delayedParse: number = null;
+  private _delayedParse: number | null = null;
   private _startedParsing: boolean = false;
   private _doneParsing: boolean = false;
   private _isDisposed: boolean = false;

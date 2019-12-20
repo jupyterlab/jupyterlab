@@ -11,7 +11,7 @@ import {
   MimeModel
 } from '@jupyterlab/rendermime';
 
-import { JSONObject, PromiseDelegate, JSONExt } from '@lumino/coreutils';
+import { PromiseDelegate, JSONExt, PartialJSONObject } from '@lumino/coreutils';
 
 import { Message, MessageLoop } from '@lumino/messaging';
 
@@ -143,7 +143,7 @@ export class MimeContent extends Widget {
     this._renderRequested = false;
     let context = this._context;
     let model = context.model;
-    let data: JSONObject = {};
+    let data: PartialJSONObject = {};
     if (this._dataType === 'string') {
       data[this.mimeType] = model.toString();
     } else {
@@ -270,7 +270,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
    */
   protected createNewWidget(context: DocumentRegistry.Context): MimeDocument {
     const ft = this._fileType;
-    const mimeType = ft.mimeTypes.length ? ft.mimeTypes[0] : 'text/plain';
+    const mimeType = ft?.mimeTypes.length ? ft.mimeTypes[0] : 'text/plain';
 
     const rendermime = this._rendermime.clone({
       resolver: context.urlResolver
@@ -285,8 +285,8 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
       dataType: this._dataType
     });
 
-    content.title.iconClass = ft.iconClass;
-    content.title.iconLabel = ft.iconLabel;
+    content.title.iconClass = ft?.iconClass ?? '';
+    content.title.iconLabel = ft?.iconLabel ?? '';
 
     const widget = new MimeDocument({ content, context });
 
@@ -296,7 +296,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
   private _rendermime: IRenderMimeRegistry;
   private _renderTimeout: number;
   private _dataType: 'string' | 'json';
-  private _fileType: DocumentRegistry.IFileType;
+  private _fileType: DocumentRegistry.IFileType | undefined;
 }
 
 /**
@@ -311,7 +311,7 @@ export namespace MimeDocumentFactory {
     /**
      * The primary file type associated with the document.
      */
-    primaryFileType: DocumentRegistry.IFileType;
+    primaryFileType: DocumentRegistry.IFileType | undefined;
 
     /**
      * The rendermime instance.

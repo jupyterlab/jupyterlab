@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONExt, JSONObject } from '@lumino/coreutils';
+import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
 
@@ -73,7 +73,7 @@ export class CommandLinker implements IDisposable {
   connectNode(
     node: HTMLElement,
     command: string,
-    args?: JSONObject
+    args?: ReadonlyPartialJSONObject
   ): HTMLElement {
     node.setAttribute(`data-${COMMAND_ATTR}`, command);
     if (args !== void 0) {
@@ -154,7 +154,10 @@ export class CommandLinker implements IDisposable {
    * }, 'some text');
    * ```
    */
-  populateVNodeDataset(command: string, args?: JSONObject): ElementDataset {
+  populateVNodeDataset(
+    command: string,
+    args?: ReadonlyPartialJSONObject
+  ): ElementDataset {
     let dataset: ElementDataset;
     if (args !== void 0) {
       dataset = { [ARGS_ATTR]: JSON.stringify(args), [COMMAND_ATTR]: command };

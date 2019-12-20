@@ -219,7 +219,7 @@ export class GridSearchService {
     }
   }
 
-  get query(): RegExp {
+  get query(): RegExp | null {
     return this._query;
   }
 

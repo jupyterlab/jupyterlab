@@ -164,7 +164,7 @@ function activate(
 
   // Contextual help in its own group
   const contextualHelpGroup = [
-    inspector ? 'inspector:open' : null
+    inspector ? 'inspector:open' : undefined
   ].map(command => ({ command }));
   helpMenu.addGroup(contextualHelpGroup, 0);
 
@@ -191,6 +191,7 @@ function activate(
       return;
     }
     const session = serviceManager.sessions.connectTo(sessionModel);
+    // Note: .ready implies session.kernel.info is non-null
     void session.kernel.ready.then(() => {
       // Check the cache second time so that, if two callbacks get scheduled,
       // they don't try to add the same commands.
@@ -199,7 +200,7 @@ function activate(
       }
       // Set the Kernel Info cache.
       const name = session.kernel.name;
-      const kernelInfo = session.kernel.info;
+      const kernelInfo = session.kernel.info!;
       kernelInfoCache.set(name, kernelInfo);
 
       // Utility function to check if the current widget
@@ -211,11 +212,7 @@ function activate(
           return result;
         }
         helpMenu.kernelUsers.forEach(u => {
-          if (
-            u.tracker.has(widget) &&
-            u.getKernel(widget) &&
-            u.getKernel(widget).name === name
-          ) {
+          if (u.tracker.has(widget) && u.getKernel(widget)?.name === name) {
             result = true;
           }
         });
@@ -224,7 +221,7 @@ function activate(
 
       // Add the kernel banner to the Help Menu.
       const bannerCommand = `help-menu-${name}:banner`;
-      const spec = serviceManager.specs.kernelspecs[name];
+      const spec = serviceManager.specs?.kernelspecs[name];
       if (!spec) {
         return;
       }
@@ -266,7 +263,7 @@ function activate(
 
       // Add the kernel info help_links to the Help menu.
       const kernelGroup: Menu.IItemOptions[] = [];
-      (session.kernel.info.help_links || []).forEach(link => {
+      (session.kernel.info!.help_links || []).forEach(link => {
         const commandId = `help-menu-${name}:${link.text}`;
         commands.addCommand(commandId, {
           label: link.text,

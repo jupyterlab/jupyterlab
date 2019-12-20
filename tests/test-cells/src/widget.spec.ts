@@ -728,7 +728,7 @@ describe('cells/widget', () => {
       beforeEach(async () => {
         session = await createClientSession();
         await (session as ClientSession).initialize();
-        await session.kernel.ready;
+        await session.kernel!.ready;
       });
 
       afterEach(() => {
@@ -750,7 +750,7 @@ describe('cells/widget', () => {
         widget.initializeState();
         let originalCount: number;
         widget.model.value.text = 'foo';
-        originalCount = widget.model.executionCount;
+        originalCount = widget.model.executionCount!;
         await CodeCell.execute(widget, session);
         const executionCount = widget.model.executionCount;
         expect(executionCount).not.toEqual(originalCount);

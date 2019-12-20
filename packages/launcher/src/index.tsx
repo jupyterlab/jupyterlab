@@ -151,7 +151,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
   /**
    * Render the launcher to virtual DOM nodes.
    */
-  protected render(): React.ReactElement<any> {
+  protected render(): React.ReactElement<any> | null {
     // Bail if there is no model.
     if (!this.model) {
       return null;

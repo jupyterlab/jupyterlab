@@ -191,6 +191,6 @@ export namespace ForeignHandler {
     /**
      * Get a cell associated with a message id.
      */
-    getCell(msgId: string): CodeCell;
+    getCell(msgId: string): CodeCell | undefined;
   }
 }

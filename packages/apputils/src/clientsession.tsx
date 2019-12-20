@@ -837,7 +837,7 @@ export class ClientSession implements IClientSession {
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
   private _dialog: Dialog<any> | null = null;
-  private _setBusy: () => IDisposable | undefined;
+  private _setBusy: (() => IDisposable) | undefined;
   private _busyDisposable: IDisposable | null = null;
 }
 

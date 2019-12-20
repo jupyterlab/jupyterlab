@@ -3,7 +3,7 @@
 
 import { IIterator } from '@lumino/algorithm';
 
-import { JSONObject, JSONValue } from '@lumino/coreutils';
+import { PartialJSONObject, JSONValue } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
 
@@ -284,7 +284,7 @@ export namespace Kernel {
     requestExecute(
       content: KernelMessage.IExecuteRequestMsg['content'],
       disposeOnDone?: boolean,
-      metadata?: JSONObject
+      metadata?: PartialJSONObject
     ): Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
@@ -643,7 +643,7 @@ export namespace Kernel {
      * Environment variables passed to the kernelspec (used in Enterprise Gateway)
      */
     env?: {
-      [key: string]: string;
+      [key: string]: string | undefined;
     };
 
     /**
@@ -951,7 +951,7 @@ export namespace Kernel {
      */
     open(
       data?: JSONValue,
-      metadata?: JSONObject,
+      metadata?: PartialJSONObject,
       buffers?: (ArrayBuffer | ArrayBufferView)[]
     ): IShellFuture;
 
@@ -973,7 +973,7 @@ export namespace Kernel {
      */
     send(
       data: JSONValue,
-      metadata?: JSONObject,
+      metadata?: PartialJSONObject,
       buffers?: (ArrayBuffer | ArrayBufferView)[],
       disposeOnDone?: boolean
     ): IShellFuture;
@@ -995,7 +995,7 @@ export namespace Kernel {
      */
     close(
       data?: JSONValue,
-      metadata?: JSONObject,
+      metadata?: PartialJSONObject,
       buffers?: (ArrayBuffer | ArrayBufferView)[]
     ): IShellFuture;
   }
@@ -1020,7 +1020,7 @@ export namespace Kernel {
    * #### Notes
    * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
    */
-  export interface IModel extends JSONObject {
+  export interface IModel extends PartialJSONObject {
     /**
      * Unique identifier of the kernel server session.
      */
@@ -1038,7 +1038,7 @@ export namespace Kernel {
    * #### Notes
    * See [Kernel specs](https://jupyter-client.readthedocs.io/en/latest/kernels.html#kernelspecs).
    */
-  export interface ISpecModel extends JSONObject {
+  export interface ISpecModel extends PartialJSONObject {
     /**
      * The name of the kernel spec.
      */
@@ -1062,7 +1062,7 @@ export namespace Kernel {
     /**
      * A dictionary of environment variables to set for the kernel.
      */
-    readonly env?: JSONObject;
+    readonly env?: PartialJSONObject;
 
     /**
      * A mapping of resource file name to download path.
@@ -1072,7 +1072,7 @@ export namespace Kernel {
     /**
      * A dictionary of additional attributes about this kernel; used by clients to aid in kernel selection.
      */
-    readonly metadata?: JSONObject;
+    readonly metadata?: PartialJSONObject;
   }
 
   /**
@@ -1081,7 +1081,7 @@ export namespace Kernel {
    * #### Notes
    * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
    */
-  export interface ISpecModels extends JSONObject {
+  export interface ISpecModels extends PartialJSONObject {
     /**
      * The name of the default kernel spec.
      */

@@ -67,7 +67,7 @@ namespace LogConsoleStatusComponent {
     /**
      * Log source name
      */
-    source: string;
+    source: string | null;
   }
 }
 
@@ -326,7 +326,7 @@ export namespace LogConsoleStatus {
     public flashEnabledChanged = new Signal<this, void>(this);
     private _flashEnabled: boolean = true;
     private _loggerRegistry: ILoggerRegistry;
-    private _source: string = null;
+    private _source: string | null = null;
     /**
      * The view status of each source.
      *

@@ -10,7 +10,10 @@ import {
   JSONObject,
   JSONValue,
   ReadonlyJSONObject,
-  ReadonlyJSONValue
+  PartialJSONValue,
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue,
+  PartialJSONObject
 } from '@lumino/coreutils';
 
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
@@ -297,8 +300,8 @@ export class SettingRegistry implements ISettingRegistry {
     plugin: string,
     key: string
   ): Promise<{
-    composite: JSONValue | undefined;
-    user: JSONValue | undefined;
+    composite: PartialJSONValue | undefined;
+    user: PartialJSONValue | undefined;
   }> {
     // Wait for data preload before allowing normal operation.
     await this._ready;
@@ -689,7 +692,7 @@ export class Settings implements ISettingRegistry.ISettings {
   /**
    * The composite of user settings and extension defaults.
    */
-  get composite(): ReadonlyJSONObject {
+  get composite(): ReadonlyPartialJSONObject {
     return this.plugin.data.composite;
   }
 
@@ -701,7 +704,7 @@ export class Settings implements ISettingRegistry.ISettings {
   }
 
   get plugin(): ISettingRegistry.IPlugin {
-    return this.registry.plugins[this.id];
+    return this.registry.plugins[this.id]!;
   }
 
   /**
@@ -721,7 +724,7 @@ export class Settings implements ISettingRegistry.ISettings {
   /**
    * The user settings.
    */
-  get user(): ReadonlyJSONObject {
+  get user(): ReadonlyPartialJSONObject {
     return this.plugin.data.user;
   }
 
@@ -746,7 +749,7 @@ export class Settings implements ISettingRegistry.ISettings {
    *
    * @returns A calculated default JSON value for a specific setting.
    */
-  default(key: string): JSONValue | undefined {
+  default(key: string): PartialJSONValue | undefined {
     return Private.reifyDefault(this.schema, key);
   }
 
@@ -776,8 +779,8 @@ export class Settings implements ISettingRegistry.ISettings {
   get(
     key: string
   ): {
-    composite: ReadonlyJSONValue | undefined;
-    user: ReadonlyJSONValue | undefined;
+    composite: ReadonlyPartialJSONValue | undefined;
+    user: ReadonlyPartialJSONValue | undefined;
   } {
     const { composite, user } = this;
 
@@ -1124,7 +1127,7 @@ namespace Private {
   export function reifyDefault(
     schema: ISettingRegistry.IProperty,
     root?: string
-  ): JSONValue | undefined {
+  ): PartialJSONValue | undefined {
     // If the property is at the root level, traverse its schema.
     schema = (root ? schema.properties?.[root] : schema) || {};
 
@@ -1134,7 +1137,7 @@ namespace Private {
     }
 
     // Make a copy of the default value to populate.
-    const result = JSONExt.deepCopy(schema.default);
+    const result = JSONExt.deepCopy(schema.default as PartialJSONObject);
 
     // Iterate through and populate each child property.
     const props = schema.properties || {};

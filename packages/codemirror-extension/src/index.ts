@@ -99,8 +99,8 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
         align: 'left',
         rank: 0,
         isActive: () =>
-          labShell.currentWidget &&
-          tracker.currentWidget &&
+          !!labShell.currentWidget &&
+          !!tracker.currentWidget &&
           labShell.currentWidget === tracker.currentWidget
       }
     );
@@ -166,7 +166,9 @@ function activateEditorCommands(
     }
 
     theme = (settings.get('theme').composite as string | null) || theme;
-    scrollPastEnd = settings.get('scrollPastEnd').composite as boolean | null;
+    scrollPastEnd =
+      (settings.get('scrollPastEnd').composite as boolean | null) ??
+      scrollPastEnd;
     styleActiveLine =
       (settings.get('styleActiveLine').composite as
         | boolean

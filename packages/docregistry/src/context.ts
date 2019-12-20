@@ -7,7 +7,7 @@ import {
   ServerConnection
 } from '@jupyterlab/services';
 
-import { JSONValue, PromiseDelegate } from '@lumino/coreutils';
+import { PromiseDelegate, PartialJSONValue } from '@lumino/coreutils';
 
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
@@ -387,7 +387,7 @@ export class Context<T extends DocumentRegistry.IModel>
     let oldPath = change.oldValue && change.oldValue.path;
     let newPath = change.newValue && change.newValue.path;
 
-    if (newPath && this._path.indexOf(oldPath) === 0) {
+    if (newPath && this._path.indexOf(oldPath || '') === 0) {
       let changeModel = change.newValue;
       // When folder name changed, `oldPath` is `foo`, `newPath` is `bar` and `this._path` is `foo/test`,
       // we should update `foo/test` to `bar/test` as well
@@ -398,7 +398,7 @@ export class Context<T extends DocumentRegistry.IModel>
 
         // Update client file model from folder change
         changeModel = {
-          last_modified: change.newValue.created,
+          last_modified: change.newValue?.created,
           path: newPath
         };
       }
@@ -485,7 +485,7 @@ export class Context<T extends DocumentRegistry.IModel>
   private _save(): Promise<void> {
     this._saveState.emit('started');
     let model = this._model;
-    let content: JSONValue;
+    let content: PartialJSONValue;
     if (this._factory.fileFormat === 'json') {
       content = model.toJSON();
     } else {
@@ -628,8 +628,8 @@ export class Context<T extends DocumentRegistry.IModel>
         // (our last save)
         // In some cases the filesystem reports an inconsistent time,
         // so we allow 0.5 seconds difference before complaining.
-        let modified = this.contentsModel && this.contentsModel.last_modified;
-        let tClient = new Date(modified);
+        let modified = this.contentsModel?.last_modified;
+        let tClient = modified ? new Date(modified) : new Date();
         let tDisk = new Date(model.last_modified);
         if (modified && tDisk.getTime() - tClient.getTime() > 500) {
           // 500 ms
@@ -681,14 +681,12 @@ export class Context<T extends DocumentRegistry.IModel>
       return promise;
     }
     if (force) {
-      promise = this.createCheckpoint();
+      promise = this.createCheckpoint().then(/* no-op */);
     } else {
       promise = this.listCheckpoints().then(checkpoints => {
         writable = this._contentsModel && this._contentsModel.writable;
         if (!this.isDisposed && !checkpoints.length && writable) {
-          return this.createCheckpoint().then(() => {
-            /* no-op */
-          });
+          return this.createCheckpoint().then(/* no-op */);
         }
       });
     }
@@ -862,7 +860,7 @@ namespace Private {
       buttons: [Dialog.cancelButton(), saveBtn]
     }).then(result => {
       if (result.button.label === 'Save') {
-        return result.value;
+        return result.value ?? undefined;
       }
       return;
     });

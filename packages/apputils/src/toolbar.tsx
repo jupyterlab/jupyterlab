@@ -466,14 +466,14 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
     // Fire action only when left button is pressed.
     if (event.button === 0) {
       event.preventDefault();
-      props.onClick();
+      props.onClick?.();
     }
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;
     if (key === 'Enter' || key === ' ') {
-      props.onClick();
+      props.onClick?.();
     }
   };
 
@@ -680,7 +680,7 @@ namespace Private {
             className={TOOLBAR_KERNEL_NAME_CLASS}
             onClick={props.session.selectKernel.bind(props.session)}
             tooltip={'Switch kernel'}
-            label={session.kernelDisplayName}
+            label={session?.kernelDisplayName}
           />
         )}
       </UseSignal>

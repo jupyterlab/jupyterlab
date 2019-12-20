@@ -20,7 +20,7 @@ export class SettingConnector extends DataConnector<
     this._connector = connector;
   }
 
-  fetch(id: string): Promise<ISettingRegistry.IPlugin> {
+  fetch(id: string): Promise<ISettingRegistry.IPlugin | undefined> {
     return this._connector.fetch(id);
   }
 
