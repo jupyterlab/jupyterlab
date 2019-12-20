@@ -208,7 +208,7 @@ function activateLogConsole(
   app.commands.addCommand(CommandIDs.addCheckpoint, {
     label: 'Add Checkpoint',
     execute: () => {
-      logConsolePanel.logger.checkpoint();
+      logConsolePanel?.logger?.checkpoint();
     },
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
     iconClass: 'jp-AddIcon'
@@ -217,7 +217,7 @@ function activateLogConsole(
   app.commands.addCommand(CommandIDs.clear, {
     label: 'Clear Log',
     execute: () => {
-      logConsolePanel.logger.clear();
+      logConsolePanel?.logger?.clear();
     },
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
     // TODO: figure out how this jp-clearIcon class should work, analagous to jp-AddIcon
@@ -231,7 +231,9 @@ function activateLogConsole(
   app.commands.addCommand(CommandIDs.setLevel, {
     label: args => `Set Log Level to ${toTitleCase(args.level as string)}`,
     execute: (args: { level: LogLevel }) => {
-      logConsolePanel.logger.level = args.level;
+      if (logConsolePanel?.logger) {
+        logConsolePanel.logger.level = args.level;
+      }
     },
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null
     // TODO: find good icon class
@@ -339,7 +341,9 @@ export class LogLevelSwitcher extends ReactWidget {
    * Handle `change` events for the HTMLSelect component.
    */
   handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
-    this._logConsole.logger.level = event.target.value as LogLevel;
+    if (this._logConsole.logger) {
+      this._logConsole.logger.level = event.target.value as LogLevel;
+    }
     this.update();
   };
 

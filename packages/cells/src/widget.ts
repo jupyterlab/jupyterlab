@@ -1224,7 +1224,9 @@ export abstract class AttachmentsCell extends Cell {
    * Handle the `paste` event for the widget
    */
   private _evtPaste(event: ClipboardEvent): void {
-    this._attachFiles(event.clipboardData.items);
+    if (event.clipboardData) {
+      this._attachFiles(event.clipboardData.items);
+    }
     event.preventDefault();
   }
 
@@ -1232,7 +1234,9 @@ export abstract class AttachmentsCell extends Cell {
    * Handle the `drop` event for the widget
    */
   private _evtNativeDrop(event: DragEvent): void {
-    this._attachFiles(event.dataTransfer.items);
+    if (event.dataTransfer) {
+      this._attachFiles(event.dataTransfer.items);
+    }
     event.preventDefault();
   }
 
@@ -1297,7 +1301,9 @@ export abstract class AttachmentsCell extends Cell {
       const item = items[i];
       if (item.kind === 'file') {
         const blob = item.getAsFile();
-        this._attachFile(blob);
+        if (blob) {
+          this._attachFile(blob);
+        }
       }
     }
   }

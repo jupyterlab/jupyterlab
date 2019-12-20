@@ -106,6 +106,7 @@ export class GridSearchService {
           return config.matchBackgroundColor;
         }
       }
+      return '';
     };
   }
 

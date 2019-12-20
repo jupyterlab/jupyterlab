@@ -799,7 +799,7 @@ export class CodeConsole extends Widget {
           if (this.isDisposed || !kernel || !kernel.info) {
             return;
           }
-          this._handleInfo(this.session.kernel.info);
+          this._handleInfo(kernel.info);
         })
         .catch(err => {
           console.error('could not get kernel info');

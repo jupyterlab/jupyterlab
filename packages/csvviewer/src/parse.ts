@@ -468,7 +468,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     }
   }
 
-  return { nrows, ncols: columnOffsets ? ncols : 0, offsets };
+  return { nrows, ncols: columnOffsets ? ncols ?? 0 : 0, offsets };
 }
 
 /**
@@ -571,5 +571,5 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
     currRow = rowEnd + rowDelimiterLength;
   }
 
-  return { nrows, ncols: columnOffsets ? ncols : 0, offsets };
+  return { nrows, ncols: columnOffsets ? ncols ?? 0 : 0, offsets };
 }

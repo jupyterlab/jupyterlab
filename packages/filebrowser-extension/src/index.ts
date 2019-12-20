@@ -469,11 +469,13 @@ function addCommands(
         const item = await Private.navigateToPath(path, factory);
         if (item.type !== 'directory') {
           const browserForPath = Private.getBrowserForPath(path, factory);
-          browserForPath.clearSelectedItems();
-          const parts = path.split('/');
-          const name = parts[parts.length - 1];
-          if (name) {
-            await browserForPath.selectItemByName(name);
+          if (browserForPath) {
+            browserForPath.clearSelectedItems();
+            const parts = path.split('/');
+            const name = parts[parts.length - 1];
+            if (name) {
+              await browserForPath.selectItemByName(name);
+            }
           }
         }
       } catch (reason) {
@@ -989,7 +991,9 @@ namespace Private {
       .execute('launcher:create', { cwd: model.path })
       .then((launcher: MainAreaWidget<Launcher>) => {
         model.pathChanged.connect(() => {
-          launcher.content.cwd = model.path;
+          if (launcher.content) {
+            launcher.content.cwd = model.path;
+          }
         }, launcher);
         return launcher;
       });

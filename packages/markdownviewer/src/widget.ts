@@ -112,7 +112,9 @@ export class MarkdownViewer extends Widget {
         style.setProperty('paddingRight', padding);
         break;
       case 'renderTimeout':
-        this._monitor.timeout = value as number;
+        if (this._monitor) {
+          this._monitor.timeout = value as number;
+        }
         break;
       default:
         break;

@@ -88,6 +88,9 @@ export class DocumentManager implements IDocumentManager {
     // For each existing context, start/stop the autosave handler as needed.
     this._contexts.forEach(context => {
       const handler = Private.saveHandlerProperty.get(context);
+      if (!handler) {
+        return;
+      }
       if (value === true && !handler.isActive) {
         handler.start();
       } else if (value === false && handler.isActive) {
@@ -109,6 +112,9 @@ export class DocumentManager implements IDocumentManager {
     // For each existing context, set the save interval as needed.
     this._contexts.forEach(context => {
       const handler = Private.saveHandlerProperty.get(context);
+      if (!handler) {
+        return;
+      }
       handler.saveInterval = value || 120;
     });
   }

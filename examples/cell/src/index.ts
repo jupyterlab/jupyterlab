@@ -62,11 +62,13 @@ function main(): void {
 
   // Handle the mimeType for the current kernel.
   session.kernelChanged.connect(() => {
-    void session.kernel.ready.then(() => {
-      const lang = session.kernel.info.language_info;
-      const mimeType = mimeService.getMimeTypeByLanguage(lang);
-      cellWidget.model.mimeType = mimeType;
-    });
+    if (session.kernel) {
+      void session.kernel.ready.then(() => {
+        const lang = session.kernel!.info!.language_info;
+        const mimeType = mimeService.getMimeTypeByLanguage(lang);
+        cellWidget.model.mimeType = mimeType;
+      });
+    }
   });
 
   // Use the default kernel.

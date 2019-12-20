@@ -106,7 +106,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
         }
 
         const anchor = parent.content.console;
-        const editor = anchor.promptCell.editor;
+        const editor = anchor.promptCell?.editor;
         const kernel = anchor.session.kernel;
         const rendermime = anchor.rendermime;
 
@@ -141,7 +141,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         }
 
         const anchor = parent.content;
-        const editor = anchor.activeCell.editor;
+        const editor = anchor.activeCell?.editor;
         const kernel = parent.session.kernel;
         const rendermime = anchor.rendermime;
 

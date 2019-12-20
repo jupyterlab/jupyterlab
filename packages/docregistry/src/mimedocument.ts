@@ -188,10 +188,12 @@ export class MimeContent extends Widget {
       if (data !== this._context.model.toString()) {
         this._context.model.fromString(data);
       }
-    } else {
-      if (!JSONExt.deepEqual(data, this._context.model.toJSON())) {
-        this._context.model.fromJSON(data);
-      }
+    } else if (
+      data !== null &&
+      data !== undefined &&
+      !JSONExt.deepEqual(data, this._context.model.toJSON())
+    ) {
+      this._context.model.fromJSON(data);
     }
   };
 

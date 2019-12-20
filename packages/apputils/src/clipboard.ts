@@ -77,17 +77,21 @@ export namespace Clipboard {
     // Select the node content.
     let range = document.createRange();
     range.selectNodeContents(node);
-    sel.removeAllRanges();
-    sel.addRange(range);
+    if (sel) {
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
 
     // Execute the command.
     document.execCommand(type);
 
     // Restore the previous selection.
     sel = window.getSelection();
-    sel.removeAllRanges();
-    for (let i = 0, len = savedRanges.length; i < len; ++i) {
-      sel.addRange(savedRanges[i]);
+    if (sel) {
+      sel.removeAllRanges();
+      for (let i = 0, len = savedRanges.length; i < len; ++i) {
+        sel.addRange(savedRanges[i]);
+      }
     }
   }
 }

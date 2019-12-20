@@ -117,13 +117,12 @@ List of Keyboard Shortcuts`;
           populate(canonical);
         }
 
-        const defaults = canonical.properties.shortcuts.default;
+        const defaults = canonical.properties?.shortcuts?.default ?? [];
         const user = {
           shortcuts: plugin.data.user.shortcuts ?? []
         };
         const composite = {
           shortcuts: SettingRegistry.reconcileShortcuts(
-            defaults,
             defaults as ISettingRegistry.IShortcut[],
             user.shortcuts as ISettingRegistry.IShortcut[]
           )

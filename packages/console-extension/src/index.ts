@@ -40,7 +40,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { find } from '@lumino/algorithm';
 
-import { ReadonlyJSONObject, JSONObject } from '@lumino/coreutils';
+import { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { DisposableSet } from '@lumino/disposable';
 
@@ -333,7 +333,11 @@ async function activateConsole(
         const kernelPreference = args[
           'kernelPreference'
         ] as IClientSession.IKernelPreference;
-        return manager.specs.kernelspecs[kernelPreference.name].display_name;
+        return (
+          // TODO: Lumino command functions should probably be allowed to return undefined?
+          manager.specs?.kernelspecs[kernelPreference.name || '']
+            ?.display_name ?? ''
+        );
       }
       return 'Console';
     },

@@ -423,7 +423,7 @@ export class StaticNotebook extends Widget {
           // Add the cell in a new context to avoid triggering another
           // cell changed event during the handling of this signal.
           requestAnimationFrame(() => {
-            if (!model.isDisposed && !model.cells.length) {
+            if (model && !model.isDisposed && !model.cells.length) {
               model.cells.push(
                 model.contentFactory.createCell(
                   this.notebookConfig.defaultCell,
@@ -1421,7 +1421,7 @@ export class Notebook extends StaticNotebook {
       }
     });
     if (count > 1) {
-      activeCell.addClass(OTHER_SELECTED_CLASS);
+      activeCell?.addClass(OTHER_SELECTED_CLASS);
     }
     if (this._fragment) {
       let el;
@@ -1998,7 +1998,7 @@ export class Notebook extends StaticNotebook {
     let activeCell = this.activeCell;
     let dragImage: HTMLElement | null = null;
     let countString: string;
-    if (activeCell.model.type === 'code') {
+    if (activeCell?.model.type === 'code') {
       let executionCount = (activeCell.model as ICodeCellModel).executionCount;
       countString = ' ';
       if (executionCount) {
@@ -2012,7 +2012,7 @@ export class Notebook extends StaticNotebook {
     dragImage = Private.createDragImage(
       selected.length,
       countString,
-      activeCell.model.value.text.split('\n')[0].slice(0, 26)
+      activeCell?.model.value.text.split('\n')[0].slice(0, 26) ?? ''
     );
 
     // Set up the drag event.

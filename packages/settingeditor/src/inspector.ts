@@ -125,7 +125,7 @@ namespace Private {
     switch (error.keyword) {
       case 'additionalProperties':
         return `**\`[additional property error]\`**
-          \`${error.params.additionalProperty}\` is not a valid property`;
+          \`${error.params?.additionalProperty}\` is not a valid property`;
       case 'syntax':
         return `**\`[syntax error]\`** *${error.message}*`;
       case 'type':

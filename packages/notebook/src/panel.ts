@@ -81,7 +81,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   _onSave(sender: DocumentRegistry.Context, state: DocumentRegistry.SaveState) {
-    if (state === 'started') {
+    if (state === 'started' && this.model) {
       // Find markdown cells
       const { cells } = this.model;
       each(cells, cell => {
@@ -197,7 +197,11 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     }
     let { newValue } = args;
     void newValue.ready.then(() => {
-      if (this.model && this.context.session.kernel === newValue) {
+      if (
+        this.model &&
+        this.context.session.kernel === newValue &&
+        newValue.info
+      ) {
         this._updateLanguage(newValue.info.language_info);
       }
     });

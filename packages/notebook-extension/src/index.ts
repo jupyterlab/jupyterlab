@@ -1209,15 +1209,17 @@ function addCommands(
       const child = window.open('', '_blank');
       const { context } = current;
 
-      child.opener = null;
+      if (child) {
+        child.opener = null;
+      }
       if (context.model.dirty && !context.model.readOnly) {
         return context.save().then(() => {
-          child.location.assign(url);
+          child?.location.assign(url);
         });
       }
 
       return new Promise<void>(resolve => {
-        child.location.assign(url);
+        child?.location.assign(url);
         resolve(undefined);
       });
     },
@@ -1670,7 +1672,7 @@ function addCommands(
       };
 
       current.context.pathChanged.connect(updateCloned);
-      current.context.model.cells.changed.connect(updateCloned);
+      current.context.model?.cells.changed.connect(updateCloned);
 
       // Add the cloned output to the output widget tracker.
       void clonedOutputs.add(widget);
@@ -1995,10 +1997,10 @@ function populateMenus(
   mainMenu.editMenu.undoers.add({
     tracker,
     undo: widget => {
-      widget.content.activeCell.editor.undo();
+      widget.content.activeCell?.editor.undo();
     },
     redo: widget => {
-      widget.content.activeCell.editor.redo();
+      widget.content.activeCell?.editor.redo();
     }
   } as IEditMenu.IUndoer<NotebookPanel>);
 

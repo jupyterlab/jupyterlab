@@ -73,10 +73,15 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
    * Render Vega/Vega-Lite into this widget's node.
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    const spec = model.data[this._mimeType] as JSONObject;
-    const metadata = model.metadata[this._mimeType] as {
-      embed_options?: VegaModuleType.EmbedOptions;
-    };
+    const spec = model.data[this._mimeType] as JSONObject | undefined;
+    if (spec === undefined) {
+      return;
+    }
+    const metadata = model.metadata[this._mimeType] as
+      | {
+          embed_options?: VegaModuleType.EmbedOptions;
+        }
+      | undefined;
     const embedOptions =
       metadata && metadata.embed_options ? metadata.embed_options : {};
     const mode: VegaModuleType.Mode =
@@ -101,7 +106,7 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     const sanitize = async (uri: string, options: any) => {
       // Use the resolver for any URIs it wants to handle
       const resolver = this._resolver;
-      if (resolver.isLocal(uri)) {
+      if (resolver?.isLocal && resolver.isLocal(uri)) {
         const absPath = await resolver.resolveUrl(uri);
         uri = await resolver.getDownloadUrl(absPath);
       }

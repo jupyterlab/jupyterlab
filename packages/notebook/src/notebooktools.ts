@@ -124,7 +124,7 @@ export class NotebookTools extends Widget implements INotebookTools {
    */
   addItem(options: NotebookTools.IAddOptions): void {
     let tool = options.tool;
-    let rank = 'rank' in options ? options.rank : 100;
+    let rank = options.rank ?? 100;
 
     let section: RankedPanel<NotebookTools.Tool>;
     if (options.section === 'advanced') {
@@ -310,7 +310,9 @@ export namespace NotebookTools {
 
     dispose() {
       super.dispose();
-      this.notebookTools = null;
+      if (this.notebookTools) {
+        this.notebookTools = null!;
+      }
     }
 
     /**
@@ -568,7 +570,7 @@ export namespace NotebookTools {
       const nb =
         this.notebookTools.activeNotebookPanel &&
         this.notebookTools.activeNotebookPanel.content;
-      this.editor.source = nb ? nb.model.metadata : null;
+      this.editor.source = nb?.model?.metadata ?? null;
     }
   }
 

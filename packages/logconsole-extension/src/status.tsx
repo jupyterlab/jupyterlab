@@ -218,7 +218,7 @@ export namespace LogConsoleStatus {
       if (this._source === null) {
         return 0;
       }
-      return this._sourceVersion.get(this.source).lastDisplayed;
+      return this._sourceVersion.get(this._source)?.lastDisplayed ?? 0;
     }
 
     /**
@@ -228,7 +228,7 @@ export namespace LogConsoleStatus {
       if (this._source === null) {
         return 0;
       }
-      return this._sourceVersion.get(this.source).lastNotified;
+      return this._sourceVersion.get(this._source)?.lastNotified ?? 0;
     }
 
     /**
@@ -260,8 +260,8 @@ export namespace LogConsoleStatus {
      * This will also update the last notified version so that the last
      * notified version is always at least the last displayed version.
      */
-    sourceDisplayed(source: string | null, version: number) {
-      if (source === null) {
+    sourceDisplayed(source: string | null, version: number | null) {
+      if (source === null || version === null) {
         return;
       }
       const versions = this._sourceVersion.get(source);

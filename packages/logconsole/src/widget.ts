@@ -297,7 +297,9 @@ export class LogConsolePanel extends StackedPanel {
    */
   get sourceVersion(): number | null {
     const source = this.source;
-    return source && this._loggerRegistry.getLogger(source).version;
+    return source !== null
+      ? this._loggerRegistry.getLogger(source).version
+      : null;
   }
 
   /**
@@ -369,7 +371,7 @@ export class LogConsolePanel extends StackedPanel {
       (outputArea: LogConsoleOutputArea, name: string) => {
         // Show/hide the output area parents, the scrolling windows.
         if (outputArea.id === viewId) {
-          outputArea.parent.show();
+          outputArea.parent?.show();
           if (outputArea.isVisible) {
             this._sourceDisplayed.emit({
               source: this.source,
@@ -377,7 +379,7 @@ export class LogConsolePanel extends StackedPanel {
             });
           }
         } else {
-          outputArea.parent.hide();
+          outputArea.parent?.hide();
         }
       }
     );
@@ -456,7 +458,7 @@ export class LogConsolePanel extends StackedPanel {
     for (let viewId of viewIds) {
       if (!loggerIds.has(viewId)) {
         const outputArea = this._outputAreas.get(viewId);
-        outputArea.dispose();
+        outputArea?.dispose();
         this._outputAreas.delete(viewId);
       }
     }

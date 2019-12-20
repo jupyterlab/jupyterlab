@@ -114,7 +114,10 @@ export class PluginList extends Widget {
     const selection = this._selection;
 
     Private.populateList(registry, selection, node);
-    node.querySelector('ul').scrollTop = this._scrollTop;
+    const ul = node.querySelector('ul');
+    if (ul && this._scrollTop !== undefined) {
+      ul.scrollTop = this._scrollTop;
+    }
   }
 
   /**

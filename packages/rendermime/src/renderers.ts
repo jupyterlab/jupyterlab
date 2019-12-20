@@ -73,7 +73,9 @@ export function renderHTML(options: renderHTML.IOptions): Promise<void> {
       runButton.onclick = event => {
         host.innerHTML = originalSource;
         Private.evalInnerHTMLScriptTags(host);
-        host.removeChild(host.firstChild);
+        if (host.firstChild) {
+          host.removeChild(host.firstChild);
+        }
       };
       container.appendChild(warning);
       container.appendChild(runButton);
@@ -666,7 +668,7 @@ namespace Private {
       let headers = node.getElementsByTagName(headerType);
       for (let i = 0; i < headers.length; i++) {
         let header = headers[i];
-        header.id = header.textContent.replace(/ /g, '-');
+        header.id = (header.textContent ?? '').replace(/ /g, '-');
         let anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';

@@ -158,7 +158,7 @@ namespace Private {
       known[reported] = null;
 
       // If a reported window name and candidate collide, reject the candidate.
-      if (candidate in known) {
+      if (!candidate || candidate in known) {
         reject();
       }
     });
@@ -212,7 +212,7 @@ namespace Private {
 
       // If the window name has not already been resolved, check one last time
       // to confirm it is not a duplicate before resolving.
-      if (candidate in known) {
+      if (!candidate || candidate in known) {
         return reject();
       }
 

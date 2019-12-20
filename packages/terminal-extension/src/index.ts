@@ -171,7 +171,7 @@ function activate(
   // Subscribe to changes in theme. This is needed as the theme
   // is computed dynamically based on the string value and DOM
   // properties.
-  themeManager.themeChanged.connect((sender, args) => {
+  themeManager?.themeChanged.connect((sender, args) => {
     tracker.forEach(widget => {
       const terminal = widget.content;
       if (terminal.getOption('theme') === 'inherit') {

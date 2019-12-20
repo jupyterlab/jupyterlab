@@ -190,7 +190,9 @@ export class StateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
    */
   private async _merge(contents: StateDB.Content<T>): Promise<void> {
     await Promise.all(
-      Object.keys(contents).map(key => this._save(key, contents[key]))
+      Object.keys(contents).map(
+        key => contents[key] && this._save(key, contents[key]!)
+      )
     );
   }
 

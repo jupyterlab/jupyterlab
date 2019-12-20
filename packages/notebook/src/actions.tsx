@@ -1547,15 +1547,13 @@ namespace Private {
         break;
       case 'code':
         if (session) {
+          const deletedCells = notebook.model?.deletedCells ?? [];
           return CodeCell.execute(cell as CodeCell, session, {
-            deletedCells: notebook.model.deletedCells,
+            deletedCells,
             recordTiming: notebook.notebookConfig.recordTiming
           })
             .then(reply => {
-              notebook.model.deletedCells.splice(
-                0,
-                notebook.model.deletedCells.length
-              );
+              deletedCells.splice(0, deletedCells.length);
               if (cell.isDisposed) {
                 return false;
               }
