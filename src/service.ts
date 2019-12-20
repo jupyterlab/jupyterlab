@@ -13,18 +13,21 @@ import { murmur2 } from 'murmurhash-js';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
+import { CallstackModel } from './callstack/model';
+
 import { Debugger } from './debugger';
 
 import { IDebugger } from './tokens';
 
 import { Variables } from './variables';
 
-import { Callstack } from './callstack';
-
 /**
  * A concrete implementation of IDebugger.
  */
 export class DebugService implements IDebugger, IDisposable {
+  /**
+   * Instantiate a new DebugService.
+   */
   constructor() {
     // Avoids setting session with invalid client
     // session should be set only when a notebook or
@@ -402,7 +405,10 @@ export class DebugService implements IDebugger, IDisposable {
   /**
    * Handle a change of the current active frame.
    */
-  private async _onChangeFrame(_: Callstack.Model, frame: Callstack.IFrame) {
+  private async _onChangeFrame(
+    _: CallstackModel,
+    frame: CallstackModel.IFrame
+  ) {
     if (!frame) {
       return;
     }

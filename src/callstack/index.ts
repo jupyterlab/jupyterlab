@@ -1,28 +1,32 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandToolbarButton, Toolbar } from '@jupyterlab/apputils';
+import { CommandToolbarButton } from '@jupyterlab/apputils';
 
 import { CommandRegistry } from '@phosphor/commands';
-import { ISignal, Signal } from '@phosphor/signaling';
-import { Panel, PanelLayout, Widget } from '@phosphor/widgets';
-import { DebugProtocol } from 'vscode-debugprotocol';
-import { Body } from './body';
 
+import { Panel } from '@phosphor/widgets';
+
+import { CallstackBody } from './body';
+
+import { CallstackHeader } from './header';
+
+import { CallstackModel } from './model';
+
+/**
+ * A Panel to show a callstack.
+ */
 export class Callstack extends Panel {
+  /**
+   * Instantiate a new Callstack Panel.
+   * @param options The instantiation options for a Callstack Panel.
+   */
   constructor(options: Callstack.IOptions) {
     super();
-
     const { commands, model } = options;
 
-    this.model = model;
-    this.addClass('jp-DebuggerCallstack');
-
     const header = new CallstackHeader();
-    const body = new Body(this.model);
-
-    this.addWidget(header);
-    this.addWidget(body);
+    const body = new CallstackBody(model);
 
     header.toolbar.addItem(
       'continue',
@@ -63,67 +67,18 @@ export class Callstack extends Panel {
         id: commands.stepOut
       })
     );
-  }
 
-  readonly model: Callstack.Model;
+    this.addWidget(header);
+    this.addWidget(body);
+
+    this.addClass('jp-DebuggerCallstack');
+  }
 }
 
-class CallstackHeader extends Widget {
-  constructor() {
-    super({ node: document.createElement('header') });
-
-    const layout = new PanelLayout();
-    const title = new Widget({ node: document.createElement('h2') });
-
-    this.layout = layout;
-    title.node.textContent = 'Callstack';
-    layout.addWidget(title);
-    layout.addWidget(this.toolbar);
-  }
-
-  readonly toolbar = new Toolbar();
-}
-
+/**
+ * A namespace for Callstack `statics`.
+ */
 export namespace Callstack {
-  export interface IFrame extends DebugProtocol.StackFrame {}
-
-  export class Model {
-    set frames(newFrames: IFrame[]) {
-      this._state = newFrames;
-      // default to the new frame is the previous one can't be found
-      if (!this.frame || !newFrames.find(frame => frame.id === this.frame.id)) {
-        this.frame = newFrames[0];
-      }
-      this._framesChanged.emit(newFrames);
-    }
-
-    get frames(): IFrame[] {
-      return this._state;
-    }
-
-    set frame(frame: IFrame) {
-      this._currentFrame = frame;
-      this._currentFrameChanged.emit(frame);
-    }
-
-    get frame(): IFrame {
-      return this._currentFrame;
-    }
-
-    get framesChanged(): ISignal<this, IFrame[]> {
-      return this._framesChanged;
-    }
-
-    get currentFrameChanged(): ISignal<this, IFrame> {
-      return this._currentFrameChanged;
-    }
-
-    private _state: IFrame[] = [];
-    private _currentFrame: IFrame;
-    private _framesChanged = new Signal<this, IFrame[]>(this);
-    private _currentFrameChanged = new Signal<this, IFrame>(this);
-  }
-
   export interface ICommands {
     /**
      * The command registry.
@@ -162,6 +117,9 @@ export namespace Callstack {
      */
     commands: ICommands;
 
-    model: Model;
+    /**
+     * The model for the callstack.
+     */
+    model: CallstackModel;
   }
 }

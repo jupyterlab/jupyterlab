@@ -1,13 +1,17 @@
-[data-jp-debugger='true'].jp-Editor .jp-mod-readOnly {
+.jp-DebuggerSources-body [data-jp-debugger='true'].jp-Editor .jp-mod-readOnly {
   background: var(--jp-layout-color2);
   height: 100%;
 }
 
-[data-jp-debugger='true'].jp-Editor {
+.jp-DebuggerSources-body [data-jp-debugger='true'].jp-Editor {
   height: 100%;
 }
 
-.jp-DebuggerSources > span {
+.jp-DebuggerSources-body {
+  height: 100%;
+}
+
+.jp-DebuggerSources-header > span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -34,13 +34,15 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { Signal } from '@phosphor/signaling';
 
-import { Callstack } from '../callstack';
-
 import { EditorHandler } from './editor';
+
+import { CallstackModel } from '../callstack/model';
 
 import { Debugger } from '../debugger';
 
-import { ReadOnlyEditorFactory, Sources } from '../sources';
+import { ReadOnlyEditorFactory } from '../sources/factory';
+
+import { SourcesModel } from '../sources/model';
 
 import { IDebugger } from '../tokens';
 
@@ -123,7 +125,10 @@ export class TrackerHandler implements IDisposable {
    * @param _ The sender.
    * @param frame The current frame.
    */
-  private _onCurrentFrameChanged(_: Callstack.Model, frame: Callstack.IFrame) {
+  private _onCurrentFrameChanged(
+    _: CallstackModel,
+    frame: CallstackModel.IFrame
+  ) {
     const debugSessionPath = this._debuggerService.session?.client?.path;
     const source = frame?.source.path ?? null;
     each(this._find(debugSessionPath, source), editor => {
@@ -138,7 +143,7 @@ export class TrackerHandler implements IDisposable {
    * @param _ The sender.
    * @param source The source to open.
    */
-  private _onCurrentSourceOpened(_: Sources.Model, source: IDebugger.ISource) {
+  private _onCurrentSourceOpened(_: SourcesModel, source: IDebugger.ISource) {
     if (!source) {
       return;
     }

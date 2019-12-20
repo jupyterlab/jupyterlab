@@ -9,11 +9,17 @@ import { SplitPanel } from '@phosphor/widgets';
 
 import { Breakpoints } from './breakpoints';
 
+import { BreakpointsModel } from './breakpoints/model';
+
 import { Callstack } from './callstack';
+
+import { CallstackModel } from './callstack/model';
+
+import { DebugService } from './service';
 
 import { Sources } from './sources';
 
-import { DebugService } from './service';
+import { SourcesModel } from './sources/model';
 
 import { IDebugger } from './tokens';
 
@@ -82,18 +88,18 @@ export namespace Debugger {
 
   export class Model implements IDebugger.IModel {
     constructor() {
-      this.breakpoints = new Breakpoints.Model();
-      this.callstack = new Callstack.Model();
+      this.breakpoints = new BreakpointsModel();
+      this.callstack = new CallstackModel();
       this.variables = new Variables.Model();
-      this.sources = new Sources.Model({
+      this.sources = new SourcesModel({
         currentFrameChanged: this.callstack.currentFrameChanged
       });
     }
 
-    readonly breakpoints: Breakpoints.Model;
-    readonly callstack: Callstack.Model;
+    readonly breakpoints: BreakpointsModel;
+    readonly callstack: CallstackModel;
     readonly variables: Variables.Model;
-    readonly sources: Sources.Model;
+    readonly sources: SourcesModel;
 
     dispose(): void {
       if (this._isDisposed) {

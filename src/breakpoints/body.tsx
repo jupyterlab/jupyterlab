@@ -5,19 +5,19 @@ import { ReactWidget } from '@jupyterlab/apputils';
 
 import React, { useEffect, useState } from 'react';
 
-import { Breakpoints } from '.';
-
 import { IDebugger } from '../tokens';
+
+import { BreakpointsModel } from './model';
 
 /**
  * The body for a Breakpoints Panel.
  */
-export class Body extends ReactWidget {
+export class CallstackBody extends ReactWidget {
   /**
    * Instantiate a new Body for the Breakpoints Panel.
    * @param model The model for the breakpoints.
    */
-  constructor(model: Breakpoints.Model) {
+  constructor(model: BreakpointsModel) {
     super();
     this._model = model;
     this.addClass('jp-DebuggerBreakpoints-body');
@@ -30,27 +30,27 @@ export class Body extends ReactWidget {
     return <BreakpointsComponent model={this._model} />;
   }
 
-  private _model: Breakpoints.Model;
+  private _model: BreakpointsModel;
 }
 
 /**
  * A React component to display a list of breakpoints.
  * @param model The model for the breakpoints.
  */
-const BreakpointsComponent = ({ model }: { model: Breakpoints.Model }) => {
+const BreakpointsComponent = ({ model }: { model: BreakpointsModel }) => {
   const [breakpoints, setBreakpoints] = useState(
     Array.from(model.breakpoints.entries())
   );
 
   useEffect(() => {
     const updateBreakpoints = (
-      _: Breakpoints.Model,
+      _: BreakpointsModel,
       updates: IDebugger.IBreakpoint[]
     ) => {
       setBreakpoints(Array.from(model.breakpoints.entries()));
     };
 
-    const restoreBreakpoints = (_: Breakpoints.Model) => {
+    const restoreBreakpoints = (_: BreakpointsModel) => {
       setBreakpoints(Array.from(model.breakpoints.entries()));
     };
 
@@ -86,7 +86,7 @@ const BreakpointCellComponent = ({
   model
 }: {
   breakpoints: IDebugger.IBreakpoint[];
-  model: Breakpoints.Model;
+  model: BreakpointsModel;
 }) => {
   return (
     <>
@@ -115,7 +115,7 @@ const BreakpointComponent = ({
   model
 }: {
   breakpoint: IDebugger.IBreakpoint;
-  model: Breakpoints.Model;
+  model: BreakpointsModel;
 }) => {
   return (
     <div

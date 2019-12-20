@@ -15,11 +15,11 @@ import { Signal } from '@phosphor/signaling';
 
 import { Editor } from 'codemirror';
 
-import { Breakpoints } from '../breakpoints';
-
 import { Debugger } from '../debugger';
 
 import { IDebugger } from '../tokens';
+
+import { BreakpointsModel } from '../breakpoints/model';
 
 const LINE_HIGHLIGHT_CLASS = 'jp-DebuggerEditor-highlight';
 
@@ -238,7 +238,7 @@ export class EditorHandler implements IDisposable {
   private _path: string;
   private _editor: CodeEditor.IEditor;
   private _debuggerModel: Debugger.Model;
-  private _breakpointsModel: Breakpoints.Model;
+  private _breakpointsModel: BreakpointsModel;
   private _debuggerService: IDebugger;
   private _editorMonitor: ActivityMonitor<
     IObservableString,
