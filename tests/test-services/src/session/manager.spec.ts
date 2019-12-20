@@ -36,6 +36,10 @@ describe('session/manager', () => {
   let manager: SessionManager;
   let session: Session.ISessionConnection;
 
+  beforeAll(() => {
+    jest.setTimeout(120000);
+  });
+
   beforeEach(async () => {
     manager = new SessionManager({ kernelManager, standby: 'never' });
     await manager.ready;

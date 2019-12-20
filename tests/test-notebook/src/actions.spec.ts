@@ -566,7 +566,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(child.rendered).to.equal(true);
         await ipySessionContext.session.kernel.restart();
-      }).timeout(60000); // Allow for slower CI
+      }).timeout(120000); // Allow for slower CI
     });
 
     describe('#runAndAdvance()', () => {
@@ -683,7 +683,7 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
         await ipySessionContext.session.kernel.restart();
-      }).timeout(60000); // Allow for slower CI
+      }).timeout(120000); // Allow for slower CI
     });
 
     describe('#runAndInsert()', () => {
@@ -782,7 +782,7 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
         await ipySessionContext.session.kernel.restart();
-      }).timeout(60000); // Allow for slower CI
+      }).timeout(120000); // Allow for slower CI
     });
 
     describe('#runAll()', () => {
@@ -851,7 +851,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         await ipySessionContext.session.kernel.restart();
-      }).timeout(60000); // Allow for slower CI
+      }).timeout(120000); // Allow for slower CI
     });
 
     describe('#selectAbove()', () => {

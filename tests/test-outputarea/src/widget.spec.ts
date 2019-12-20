@@ -52,7 +52,7 @@ describe('outputarea/widget', () => {
   let model: OutputAreaModel;
 
   beforeAll(async () => {
-    jest.setTimeout(60000);
+    jest.setTimeout(120000);
   });
 
   beforeEach(() => {

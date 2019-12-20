@@ -104,7 +104,7 @@ describe('@jupyterlab/console', () => {
 
     before(async function() {
       // tslint:disable-next-line:no-invalid-this
-      this.timeout(60000);
+      this.timeout(120000);
 
       const path = UUID.uuid4();
       [sessionContext, foreign] = await Promise.all([

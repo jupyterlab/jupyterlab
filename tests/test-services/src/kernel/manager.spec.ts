@@ -16,6 +16,7 @@ describe('kernel/manager', () => {
   let kernel: Kernel.IModel;
 
   beforeAll(async () => {
+    jest.setTimeout(120000);
     kernel = await KernelAPI.startNew();
   });
 
