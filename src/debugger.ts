@@ -11,7 +11,7 @@ import { Callstack } from './callstack';
 
 import { DebuggerModel } from './model';
 
-import { DebugService } from './service';
+import { DebuggerService } from './service';
 
 import { Sources } from './sources';
 
@@ -40,7 +40,7 @@ export namespace Debugger {
       const { callstackCommands, editorServices, service } = options;
 
       this.model = new DebuggerModel();
-      this.service = service as DebugService;
+      this.service = service as DebuggerService;
       this.service.model = this.model;
 
       this.variables = new Variables({ model: this.model.variables });
@@ -93,7 +93,7 @@ export namespace Debugger {
     /**
      * The debugger service.
      */
-    readonly service: DebugService;
+    readonly service: DebuggerService;
 
     /**
      * The variables model.

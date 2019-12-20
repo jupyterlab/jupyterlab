@@ -24,9 +24,9 @@ import { VariablesModel } from './variables/model';
 /**
  * A concrete implementation of IDebugger.
  */
-export class DebugService implements IDebugger, IDisposable {
+export class DebuggerService implements IDebugger, IDisposable {
   /**
-   * Instantiate a new DebugService.
+   * Instantiate a new DebuggerService.
    */
   constructor() {
     // Avoids setting session with invalid client

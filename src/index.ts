@@ -41,7 +41,7 @@ import { TrackerHandler } from './handlers/tracker';
 
 import { DebuggerModel } from './model';
 
-import { DebugService } from './service';
+import { DebuggerService } from './service';
 
 import { DebugSession } from './session';
 
@@ -416,7 +416,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
   ): IDebugger => {
     const { commands, shell } = app;
 
-    const service = new DebugService();
+    const service = new DebuggerService();
 
     commands.addCommand(CommandIDs.debugContinue, {
       label: 'Continue',

@@ -8,14 +8,14 @@ import { PromiseDelegate } from '@phosphor/coreutils';
 
 import { DebuggerModel } from '../../lib/model';
 
-import { DebugService } from '../../lib/service';
+import { DebuggerService } from '../../lib/service';
 
 import { DebugSession } from '../../lib/session';
 
 import { IDebugger } from '../../lib/tokens';
 
 describe('Debugging support', () => {
-  const service = new DebugService();
+  const service = new DebuggerService();
   let xpythonClient: IClientSession;
   let ipykernelClient: IClientSession;
 
@@ -57,7 +57,7 @@ describe('Debugging support', () => {
   });
 });
 
-describe('DebugService', () => {
+describe('DebuggerService', () => {
   let client: IClientSession;
   let model: DebuggerModel;
   let session: IDebugger.ISession;
@@ -73,18 +73,18 @@ describe('DebugService', () => {
     await client.kernel.ready;
     session = new DebugSession({ client });
     model = new DebuggerModel();
-    service = new DebugService();
+    service = new DebuggerService();
   });
 
   afterEach(async () => {
     await client.shutdown();
     session.dispose();
-    (service as DebugService).dispose();
+    (service as DebuggerService).dispose();
   });
 
   describe('#constructor()', () => {
     it('should create a new instance', () => {
-      expect(service).to.be.an.instanceOf(DebugService);
+      expect(service).to.be.an.instanceOf(DebuggerService);
     });
   });
 

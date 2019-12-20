@@ -9,12 +9,12 @@ import { CommandRegistry } from '@phosphor/commands';
 
 import { Debugger } from '../../lib/debugger';
 
-import { DebugService } from '../../lib/service';
+import { DebuggerService } from '../../lib/service';
 
 class TestSidebar extends Debugger.Sidebar {}
 
 describe('Debugger', () => {
-  const service = new DebugService();
+  const service = new DebuggerService();
   const registry = new CommandRegistry();
   const factoryService = new CodeMirrorEditorFactory();
   const mimeTypeService = new CodeMirrorMimeTypeService();
