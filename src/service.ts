@@ -15,7 +15,7 @@ import { DebugProtocol } from 'vscode-debugprotocol';
 
 import { CallstackModel } from './callstack/model';
 
-import { Debugger } from './debugger';
+import { DebuggerModel } from './model';
 
 import { IDebugger } from './tokens';
 
@@ -100,7 +100,7 @@ export class DebugService implements IDebugger, IDisposable {
    * @param model - The new debugger model.
    */
   set model(model: IDebugger.IModel) {
-    this._model = model as Debugger.Model;
+    this._model = model as DebuggerModel;
     this._modelChanged.emit(model);
   }
 
@@ -579,7 +579,7 @@ export class DebugService implements IDebugger, IDisposable {
 
   private _isDisposed: boolean = false;
   private _session: IDebugger.ISession;
-  private _model: Debugger.Model;
+  private _model: DebuggerModel;
   private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
   private _modelChanged = new Signal<IDebugger, IDebugger.IModel>(this);
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);

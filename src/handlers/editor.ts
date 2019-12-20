@@ -15,11 +15,11 @@ import { Signal } from '@phosphor/signaling';
 
 import { Editor } from 'codemirror';
 
-import { Debugger } from '../debugger';
-
 import { IDebugger } from '../tokens';
 
 import { BreakpointsModel } from '../breakpoints/model';
+
+import { DebuggerModel } from '../model';
 
 /**
  * The class name added to the current line.
@@ -82,7 +82,7 @@ export class EditorHandler implements IDisposable {
    * Handle when the debug model changes.
    */
   private _onModelChanged() {
-    this._debuggerModel = this._debuggerService.model as Debugger.Model;
+    this._debuggerModel = this._debuggerService.model as DebuggerModel;
     if (!this._debuggerModel) {
       return;
     }
@@ -243,7 +243,7 @@ export class EditorHandler implements IDisposable {
   private _id: string;
   private _path: string;
   private _editor: CodeEditor.IEditor;
-  private _debuggerModel: Debugger.Model;
+  private _debuggerModel: DebuggerModel;
   private _breakpointsModel: BreakpointsModel;
   private _debuggerService: IDebugger;
   private _editorMonitor: ActivityMonitor<

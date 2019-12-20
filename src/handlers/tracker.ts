@@ -38,13 +38,13 @@ import { EditorHandler } from './editor';
 
 import { CallstackModel } from '../callstack/model';
 
-import { Debugger } from '../debugger';
-
 import { ReadOnlyEditorFactory } from '../sources/factory';
 
 import { SourcesModel } from '../sources/model';
 
 import { IDebugger } from '../tokens';
+
+import { DebuggerModel } from '../model';
 
 /**
  * A class which handles notebook, console and editor trackers.
@@ -95,7 +95,7 @@ export class TrackerHandler implements IDisposable {
    * Handle when the debug model changes.
    */
   private _onModelChanged() {
-    this._debuggerModel = this._debuggerService.model as Debugger.Model;
+    this._debuggerModel = this._debuggerService.model as DebuggerModel;
     if (!this._debuggerModel) {
       return;
     }
@@ -325,7 +325,7 @@ export class TrackerHandler implements IDisposable {
   }
 
   private _debuggerService: IDebugger;
-  private _debuggerModel: Debugger.Model;
+  private _debuggerModel: DebuggerModel;
   private _shell: JupyterFrontEnd.IShell;
   private _readOnlyEditorFactory: ReadOnlyEditorFactory;
   private _readOnlyEditorTracker: WidgetTracker<

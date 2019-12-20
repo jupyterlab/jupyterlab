@@ -39,6 +39,8 @@ import { NotebookHandler } from './handlers/notebook';
 
 import { TrackerHandler } from './handlers/tracker';
 
+import { DebuggerModel } from './model';
+
 import { DebugService } from './service';
 
 import { DebugSession } from './session';
@@ -198,7 +200,7 @@ class DebuggerHandler<
       // clear the model if the handler being removed corresponds
       // to the current active debug session
       if (debug.session?.client?.path === client.path) {
-        const model = debug.model as Debugger.Model;
+        const model = debug.model as DebuggerModel;
         model.clear();
       }
 
