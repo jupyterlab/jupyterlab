@@ -12,7 +12,7 @@ import { BreakpointsModel } from './model';
 /**
  * The body for a Breakpoints Panel.
  */
-export class CallstackBody extends ReactWidget {
+export class BreakpointsBody extends ReactWidget {
   /**
    * Instantiate a new Body for the Breakpoints Panel.
    * @param model The model for the breakpoints.

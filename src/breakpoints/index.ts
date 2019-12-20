@@ -7,7 +7,7 @@ import { Panel } from '@phosphor/widgets';
 
 import { IDebugger } from '../tokens';
 
-import { CallstackBody } from './body';
+import { BreakpointsBody } from './body';
 
 import { BreakpointsHeader } from './header';
 
@@ -26,7 +26,7 @@ export class Breakpoints extends Panel {
     const { model, service } = options;
 
     const header = new BreakpointsHeader();
-    const body = new CallstackBody(model);
+    const body = new BreakpointsBody(model);
 
     header.toolbar.addItem(
       'closeAll',
