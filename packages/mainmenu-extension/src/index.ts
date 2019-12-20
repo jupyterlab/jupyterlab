@@ -723,6 +723,8 @@ export function createTabsMenu(
     [
       { command: 'application:activate-next-tab' },
       { command: 'application:activate-previous-tab' },
+      { command: 'application:activate-next-tab-bar' },
+      { command: 'application:activate-previous-tab-bar' },
       { command: CommandIDs.activatePreviouslyUsedTab }
     ],
     0
