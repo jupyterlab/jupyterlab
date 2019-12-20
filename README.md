@@ -7,6 +7,8 @@
 
 A JupyterLab debugger UI extension.
 
+![screencast](./screencast.gif)
+
 ## Prerequisites
 
 - JupyterLab 1.2+
