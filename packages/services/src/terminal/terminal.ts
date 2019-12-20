@@ -82,42 +82,6 @@ export namespace ITerminalConnection {
   }
 }
 
-// /**
-//  * Start a new terminal session.
-//  *
-//  * @param options - The session options to use.
-//  *
-//  * @returns A promise that resolves with the session instance.
-//  */
-// export function startNew(options?: IOptions): Promise<ITerminalConnection> {
-//   return TerminalConnection.startNew(options);
-// }
-
-// /*
-//  * Connect to a running session.
-//  *
-//  * @param name - The name of the target session.
-//  *
-//  * @param options - The session options to use.
-//  *
-//  * @returns A promise that resolves with the new session instance.
-//  *
-//  * #### Notes
-//  * If the session was already started via `startNew`, the existing
-//  * session object is used as the fulfillment value.
-//  *
-//  * Otherwise, if `options` are given, we resolve the promise after
-//  * confirming that the session exists on the server.
-//  *
-//  * If the session does not exist on the server, the promise is rejected.
-//  */
-// export function connectTo(
-//   name: string,
-//   options?: IOptions
-// ): Promise<ITerminalConnection> {
-//   return TerminalConnection.connectTo(name, options);
-// }
-
 /**
  * A message from the terminal session.
  */
