@@ -87,9 +87,9 @@ export class Collapse<T extends Widget = Widget> extends Widget {
     }
 
     // Delete references we explicitly hold to other widgets.
-    delete this._header;
-    delete this._widget;
-    delete this._content;
+    this._header = null!;
+    this._widget = null!;
+    this._content = null!;
 
     super.dispose();
   }

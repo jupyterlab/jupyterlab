@@ -270,8 +270,8 @@ export class CodeConsole extends Widget {
       return;
     }
     this._cells.clear();
-    this._msgIdCells = null;
-    this._msgIds = null;
+    this._msgIdCells = null!;
+    this._msgIds = null!;
     this._history.dispose();
 
     super.dispose();

@@ -200,7 +200,7 @@ export class OutputArea extends Widget {
   dispose(): void {
     if (this._future) {
       this._future.dispose();
-      delete this._future;
+      this._future = null!;
     }
     this._displayIdMap.clear();
     super.dispose();

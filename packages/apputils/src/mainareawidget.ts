@@ -83,9 +83,9 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget
           this.node.removeChild(spinner.node);
           spinner.dispose();
           content.dispose();
-          this._content = null;
+          this._content = null!;
           toolbar.dispose();
-          this._toolbar = null;
+          this._toolbar = null!;
           layout.addWidget(error);
           this._isRevealed = true;
           throw error;

@@ -138,15 +138,15 @@ export class InputArea extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._prompt = null;
-    this._editor = null;
-    this._rendered = null;
+    this._prompt = null!;
+    this._editor = null!;
+    this._rendered = null!;
     super.dispose();
   }
 
-  private _prompt: IInputPrompt = null;
-  private _editor: CodeEditorWrapper = null;
-  private _rendered: Widget = null;
+  private _prompt: IInputPrompt;
+  private _editor: CodeEditorWrapper;
+  private _rendered: Widget;
 }
 
 /**
@@ -223,7 +223,7 @@ export namespace InputArea {
       return new InputPrompt();
     }
 
-    private _editor: CodeEditor.Factory = null;
+    private _editor: CodeEditor.Factory;
   }
 
   /**

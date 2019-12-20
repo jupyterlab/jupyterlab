@@ -194,9 +194,9 @@ export class DSVModel extends DataModel implements IDisposable {
 
     this._columnCount = undefined;
     this._rowCount = undefined;
-    this._rowOffsets = null;
-    this._columnOffsets = null;
-    this._data = null;
+    this._rowOffsets = null!;
+    this._columnOffsets = null!;
+    this._data = null!;
 
     // Clear out state associated with the asynchronous parsing.
     if (this._doneParsing === false) {

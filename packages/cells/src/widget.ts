@@ -464,10 +464,10 @@ export class Cell extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._input = null;
-    this._model = null;
-    this._inputWrapper = null;
-    this._inputPlaceholder = null;
+    this._input = null!;
+    this._model = null!;
+    this._inputWrapper = null!;
+    this._inputPlaceholder = null!;
     super.dispose();
   }
 
@@ -531,11 +531,11 @@ export class Cell extends Widget {
   }
 
   private _readOnly = false;
-  private _model: ICellModel = null;
+  private _model: ICellModel;
   private _inputHidden = false;
-  private _input: InputArea = null;
-  private _inputWrapper: Widget = null;
-  private _inputPlaceholder: InputPlaceholder = null;
+  private _input: InputArea;
+  private _inputWrapper: Widget;
+  private _inputPlaceholder: InputPlaceholder;
   private _syncCollapse = false;
   private _syncEditable = false;
 }
@@ -648,7 +648,7 @@ export namespace Cell {
       return new Stdin(options);
     }
 
-    private _editorFactory: CodeEditor.Factory = null;
+    private _editorFactory: CodeEditor.Factory;
   }
 
   /**
@@ -941,10 +941,10 @@ export class CodeCell extends Cell {
       this._outputLengthHandler,
       this
     );
-    this._rendermime = null;
-    this._output = null;
-    this._outputWrapper = null;
-    this._outputPlaceholder = null;
+    this._rendermime = null!;
+    this._output = null!;
+    this._outputWrapper = null!;
+    this._outputPlaceholder = null!;
     super.dispose();
   }
 
@@ -997,12 +997,12 @@ export class CodeCell extends Cell {
     this.toggleClass(NO_OUTPUTS_CLASS, force);
   }
 
-  private _rendermime: IRenderMimeRegistry = null;
+  private _rendermime: IRenderMimeRegistry;
   private _outputHidden = false;
   private _outputsScrolled: boolean;
-  private _outputWrapper: Widget = null;
-  private _outputPlaceholder: OutputPlaceholder = null;
-  private _output: OutputArea = null;
+  private _outputWrapper: Widget;
+  private _outputPlaceholder: OutputPlaceholder;
+  private _output: OutputArea;
   private _syncScrolled = false;
   private _savingMetadata = false;
 }

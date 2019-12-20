@@ -354,7 +354,7 @@ export class AttachmentsCellModel extends CellModel {
     return cell;
   }
 
-  private _attachments: IAttachmentsModel | null = null;
+  private _attachments: IAttachmentsModel;
 }
 
 /**
@@ -547,7 +547,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       return;
     }
     this._outputs.dispose();
-    this._outputs = null;
+    this._outputs = null!;
     super.dispose();
   }
 
@@ -593,7 +593,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     });
   }
 
-  private _outputs: IOutputAreaModel = null;
+  private _outputs: IOutputAreaModel;
 }
 
 /**

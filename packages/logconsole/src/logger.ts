@@ -384,7 +384,7 @@ export class Logger implements ILogger {
     }
     this._isDisposed = true;
     this.clear();
-    this._rendermime = null;
+    this._rendermime = null!;
     Signal.clearData(this);
   }
 

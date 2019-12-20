@@ -422,7 +422,7 @@ export namespace NotebookTools {
         return;
       }
       this._model.dispose();
-      this._model = null;
+      this._model = null!;
       super.dispose();
     }
 
