@@ -15,7 +15,7 @@ import { ISignal } from '@lumino/signaling';
 /**
  * A generic interface for change emitter payloads.
  */
-export interface IChangedArgs<T, U extends string = string> {
+export interface IChangedArgs<T, OldT = T, U extends string = string> {
   /**
    * The name of the changed attribute.
    */
@@ -24,7 +24,7 @@ export interface IChangedArgs<T, U extends string = string> {
   /**
    * The old value of the changed attribute.
    */
-  oldValue: T;
+  oldValue: OldT;
 
   /**
    * The new value of the changed attribute.
