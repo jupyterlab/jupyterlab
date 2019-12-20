@@ -28,23 +28,14 @@ conda install notebook  # notebook 4.3+ required
 
 **Prerequisites**
 
-- [git](http://git-scm.com/)
-- [node 0.12+](http://nodejs.org/)
-- [python](https://www.anaconda.com/distribution/)
-
-```bash
-git clone https://github.com/jupyterlab/jupyterlab.git
-cd packages/services
-npm install
-npm run build
-conda install notebook  # notebook 4.3+ required
-```
+See the [building instructions for JupyterLab](../../CONTRIBUTING.md), which
+will build this module as part of the build process.
 
 **Rebuild**
 
 ```bash
-npm run clean
-npm run build
+yarn run clean
+yarn run build
 ```
 
 ## Run Tests
@@ -52,7 +43,7 @@ npm run build
 Follow the source build instructions first.
 
 ```bash
-npm test
+yarn run test
 ```
 
 ## Build Docs
@@ -60,20 +51,19 @@ npm test
 Follow the source build instructions first.
 
 ```bash
-npm run docs
+yarn run docs
 ```
 
 Navigate to `docs/index.html`.
 
 ## Supported Runtimes
 
-The runtime versions which are currently _known to work_ are listed below.
-Earlier versions may also work, but come with no guarantees.
+The runtime versions which should work are listed below. Earlier versions may
+also work, but come with no guarantees.
 
-- Node 0.12.7+
-- IE 11+
-- Firefox 32+
-- Chrome 38+
+- Node 10
+- Firefox 52+
+- Chrome 55+
 
 Note: "requirejs" may need be included in a global context for `Comm` targets
 using the a `target_module` (in the classic Notebook).
@@ -91,15 +81,17 @@ The library requires a running Jupyter Notebook server, launched as:
 jupyter notebook
 ```
 
+or
+
+```bash
+jupyter lab
+```
+
 ## Bundling for the Browser
 
 Follow the package install instructions first.
 
 See `examples/browser` for an example of using Webpack to bundle the library.
-
-Note: Some browsers (such as IE11), require a polyfill for Promises.
-The example demonstrates the use of the polyfill. See also notes about
-the `fetch` API polyfill above.
 
 ## Usage from Node.js
 
@@ -109,10 +101,9 @@ See `examples/node` for an example of using an ES5 node script.
 
 ## Usage Examples
 
-**Note:** This module is fully compatible with Node/Babel/ES6/ES5. The
-examples below are written in TypeScript using ES6 syntax. Simply
-omit the type declarations when using a language other than TypeScript.
-A translator such as Babel can be used to convert from ES6 -> ES5.
+**Note:** This package is compiled to ES2017 JavaScript syntax from
+TypeScript. Here are some examples of using parts of this package. See the
+other `examples` subdirectories for more examples.
 
 - [Comms](./examples/browser/src/comm.ts)
 - [Config](./examples/browser/src/config.ts)
@@ -122,6 +113,10 @@ A translator such as Babel can be used to convert from ES6 -> ES5.
 - [Terminal](./examples/browser/src/terminal.ts)
 
 ## Overview
+
+This package introduces a number of concepts, such as session context, etc.
+Here we give a brief overview of some of the top-level concepts in this
+package.
 
 ### Clients
 
@@ -154,12 +149,23 @@ kernel is shut down.
 A _kernel connection_ represents a single client connecting to a kernel over a
 websocket. Typically only one kernel connection handles comms for any given
 kernel. The kernel connection is disposed when the client no longer has a need
-for the connection. Disposing a kernel does not cause the kernel to shut down.
-However, if a kernel is shut down, (eventually) all of its kernel connections
-will be disposed.
+for the connection. Disposing a kernel connection does not cause the kernel to
+shut down. However, if a kernel is shut down, (eventually) all of its kernel
+connections should be disposed if they were initiated from a kernel manager.
+If the kernel connections were instantiated outside of a manager, you are
+responsible for cleaning them up.
 
 A kernel connection has a number of signals, such as kernel status, kernel
 connection status, etc.
+
+#### Kernel manager
+
+A _kernel manager_ is an object that maintains a list of kernel models by
+regular polling. The kernel manager can instantiate a kernel connection and
+will manage its lifecycle (e.g., when the kernel is shut down, the connections
+will be disposed). The manager provides some minimal bookkeepping around
+kernels and their connections. Generally, it is easiest to interact with
+kernels on a server through a manager.
 
 ### Sessions
 
@@ -168,7 +174,7 @@ session's `path`) to a kernel. A session has a few other pieces of information
 to allow for easy categorization and searching of sessions.
 
 The primary usecase of a session is to enable persisting a connection to a
-kernel. For example, a notebook viewer may start a session with session name
+kernel. For example, a notebook viewer may start a session with session path
 of the notebook's file path. When a browser is refreshed, the notebook viewer
 can connect to the same kernel by asking the server for the session
 corresponding with the notebook file path.
@@ -195,11 +201,22 @@ kernel changes). The session connection can be disposed when the client no
 longer is connected to that session's kernel, and disposal will not cause the
 session model to be deleted.
 
+#### Session manager
+
+A _session manager_ is an object that maintains a list of session models by
+regular polling. The session manager can instantiate a session connection and
+will manage its lifecycle (e.g., when the session is shut down, the connections
+will be disposed). The manager provides some minimal bookkeepping around
+sessions and their connections. Generally, it is easiest to interact with
+sessions on a server through a manager.
+
 ### Session Context
 
 A _session context_ is an object which has the same lifecycle as the client.
 The session context owns a session connection (which may be null if the client
 is not currently associated with a session). The session context proxies the
 current session connection's signals for convenience. The session context
-primarily serves as a stable object for a client to keep track of the current
-session connection.
+primarily serves as a stable object for a client to keep track of the ckurrent
+session connection. The session context also contains some convenience
+functionality, such as preferences for whether a kernel should be started and
+a user-friendly kernel name and status.
