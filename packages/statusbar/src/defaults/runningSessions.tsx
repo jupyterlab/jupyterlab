@@ -7,7 +7,7 @@ import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import {
   ServiceManager,
-  TerminalSession,
+  Terminal,
   TerminalManager,
   SessionManager,
   Session
@@ -152,7 +152,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
    */
   private _onTerminalsRunningChanged(
     manager: TerminalManager,
-    terminals: TerminalSession.IModel[]
+    terminals: Terminal.IModel[]
   ): void {
     this.model!.terminals = terminals.length;
   }

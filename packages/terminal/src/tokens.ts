@@ -7,7 +7,7 @@ import { Token } from '@lumino/coreutils';
 
 import { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 
-import { TerminalSession } from '@jupyterlab/services';
+import { Terminal } from '@jupyterlab/services';
 
 /**
  * A class that tracks editor widgets.
@@ -33,7 +33,7 @@ export namespace ITerminal {
     /**
      * The terminal session associated with the widget.
      */
-    session: TerminalSession.ITerminalConnection;
+    session: Terminal.ITerminalConnection;
 
     /**
      * Get a config option for the terminal.

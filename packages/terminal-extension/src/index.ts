@@ -16,7 +16,7 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 
-import { TerminalSession } from '@jupyterlab/services';
+import { Terminal } from '@jupyterlab/services';
 
 import { ILauncher } from '@jupyterlab/launcher';
 
@@ -293,7 +293,7 @@ function addRunningSessionManager(
   });
 
   class RunningTerminal implements IRunningSessions.IRunningItem {
-    constructor(model: TerminalSession.IModel) {
+    constructor(model: Terminal.IModel) {
       this._model = model;
     }
     open() {
@@ -309,7 +309,7 @@ function addRunningSessionManager(
       return manager.shutdown(this._model.name);
     }
 
-    private _model: TerminalSession.IModel;
+    private _model: Terminal.IModel;
   }
 }
 
@@ -342,7 +342,7 @@ export function addCommands(
 
       const session = await (name
         ? serviceManager.terminals
-            .connectTo(name)
+            .connectTo({ model: { name } })
             .catch(() => serviceManager.terminals.startNew())
         : serviceManager.terminals.startNew());
 

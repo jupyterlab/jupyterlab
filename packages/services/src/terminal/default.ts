@@ -276,6 +276,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
     this._ws.onerror = this._onWSClose;
   };
 
+  // Websocket messages events are defined as variables to bind `this`
   private _onWSMessage = (event: MessageEvent) => {
     if (this._isDisposed) {
       return;
@@ -284,7 +285,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
 
     // Handle a disconnect message.
     if (data[0] === 'disconnect') {
-      this._updateConnectionStatus('disconnected');
+      this.dispose();
     }
 
     if (this._connectionStatus === 'connecting') {
