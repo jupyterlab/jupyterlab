@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { ISessionContext } from '@jupyterlab/apputils';
+import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 
 import { each } from '@lumino/algorithm';
 
@@ -38,18 +38,16 @@ describe('@jupyterlab/notebook', () => {
 
     before(async function() {
       // tslint:disable-next-line:no-invalid-this
-      this.timeout(60000);
+      this.timeout(100000);
+      async function createContext(options?: Partial<SessionContext.IOptions>) {
+        const context = await createSessionContext(options);
+        await context.initialize();
+        await context.session?.kernel?.info;
+        return context;
+      }
       [sessionContext, ipySessionContext] = await Promise.all([
-        createSessionContext(),
-        createSessionContext({ kernelPreference: { name: 'ipython' } })
-      ]);
-      await Promise.all([
-        ipySessionContext.initialize(),
-        sessionContext.initialize()
-      ]);
-      await Promise.all([
-        ipySessionContext.session?.kernel?.info,
-        sessionContext.session?.kernel?.info
+        createContext(),
+        createContext({ kernelPreference: { name: 'ipython' } })
       ]);
     });
 
@@ -550,7 +548,7 @@ describe('@jupyterlab/notebook', () => {
         const result = await NotebookActions.run(widget, ipySessionContext);
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
-        await ipySessionContext.session?.kernel?.restart();
+        await ipySessionContext.session.kernel.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
@@ -567,7 +565,7 @@ describe('@jupyterlab/notebook', () => {
         await sleep(100);
         expect(result).to.equal(false);
         expect(child.rendered).to.equal(true);
-        await ipySessionContext.session?.kernel?.restart();
+        await ipySessionContext.session.kernel.restart();
       }).timeout(60000); // Allow for slower CI
     });
 
@@ -605,7 +603,7 @@ describe('@jupyterlab/notebook', () => {
         );
         expect(result).to.equal(false);
         expect(widget.isSelected(widget.widgets[0])).to.equal(false);
-        await ipySessionContext.session?.kernel?.restart();
+        await ipySessionContext.session.kernel.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should change to command mode', async () => {
@@ -665,7 +663,7 @@ describe('@jupyterlab/notebook', () => {
         );
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
-        await ipySessionContext.session?.kernel?.restart();
+        await ipySessionContext.session.kernel.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
@@ -684,7 +682,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
-        await ipySessionContext.session?.kernel?.restart();
+        await ipySessionContext.session.kernel.restart();
       }).timeout(60000); // Allow for slower CI
     });
 
@@ -764,7 +762,7 @@ describe('@jupyterlab/notebook', () => {
         );
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
-        await ipySessionContext.session?.kernel?.restart();
+        await ipySessionContext.session.kernel.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
@@ -783,7 +781,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
-        await ipySessionContext.session?.kernel?.restart();
+        await ipySessionContext.session.kernel.restart();
       }).timeout(60000); // Allow for slower CI
     });
 
@@ -838,7 +836,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
         expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
-        await ipySessionContext.session?.kernel?.restart();
+        await ipySessionContext.session.kernel.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
@@ -852,7 +850,7 @@ describe('@jupyterlab/notebook', () => {
         await sleep(100);
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
-        await ipySessionContext.session?.kernel?.restart();
+        await ipySessionContext.session.kernel.restart();
       }).timeout(60000); // Allow for slower CI
     });
 
