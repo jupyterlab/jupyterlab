@@ -68,7 +68,11 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     session.messageReceived.connect(this._onMessage, this);
     session.disposed.connect(this.dispose, this);
 
-    session.connectionStatusChanged.connect(this._initialConnection, this);
+    if (session.connectionStatus === 'connected') {
+      this._initialConnection();
+    } else {
+      session.connectionStatusChanged.connect(this._initialConnection, this);
+    }
   }
 
   private _initialConnection() {
