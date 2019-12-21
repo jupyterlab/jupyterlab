@@ -38,11 +38,13 @@ describe('terminal', () => {
     describe('#messageReceived', () => {
       it('should be emitted when a message is received', async () => {
         session = await manager.startNew();
-        await testEmission(session.messageReceived, {
+        let emission = testEmission(session.messageReceived, {
           test: (sender, msg) => {
             return msg.type === 'stdout';
           }
         });
+        session.send({ type: 'stdin', content: ['cd\r'] });
+        await emission;
       });
     });
 
