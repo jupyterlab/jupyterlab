@@ -548,7 +548,9 @@ export class Context<T extends DocumentRegistry.IModel>
           throw err;
         }
       )
-      .catch();
+      .catch(() => {
+        /* no-op */
+      });
   }
 
   /**
