@@ -64,19 +64,17 @@ export class FileBrowser extends Widget {
     this._manager = model.manager;
     this._crumbs = new BreadCrumbs({ model });
     this.toolbar = new Toolbar<Widget>();
-
     this._directoryPending = false;
-    let newFolder = new ToolbarButton({
+
+    const newFolder = new ToolbarButton({
       iconClassName: 'jp-NewFolderIcon',
       onClick: () => {
         this.createNewDirectory();
       },
       tooltip: 'New Folder'
     });
-
-    let uploader = new Uploader({ model });
-
-    let refresher = new ToolbarButton({
+    const uploader = new Uploader({ model });
+    const refresher = new ToolbarButton({
       iconClassName: 'jp-RefreshIcon',
       onClick: () => {
         void model.refresh();
@@ -94,13 +92,16 @@ export class FileBrowser extends Widget {
     this.toolbar.addClass(TOOLBAR_CLASS);
     this._listing.addClass(LISTING_CLASS);
 
-    let layout = new PanelLayout();
+    const layout = new PanelLayout();
+
     layout.addWidget(this.toolbar);
     layout.addWidget(this._crumbs);
     layout.addWidget(this._listing);
-
     this.layout = layout;
-    void model.restore(this.id);
+
+    if (options.restore !== false) {
+      void model.restore(this.id);
+    }
   }
 
   /**
@@ -309,5 +310,12 @@ export namespace FileBrowser {
      * The default is a shared instance of `DirListing.Renderer`.
      */
     renderer?: DirListing.IRenderer;
+
+    /**
+     * Whether a file browser automatically restores state when instantiated.
+     *
+     * The default is `true`.
+     */
+    restore?: boolean;
   }
 }
