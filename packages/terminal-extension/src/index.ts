@@ -341,9 +341,7 @@ export function addCommands(
       const name = args['name'] as string;
 
       const session = await (name
-        ? serviceManager.terminals
-            .connectTo({ model: { name } })
-            .catch(() => serviceManager.terminals.startNew())
+        ? serviceManager.terminals.connectTo({ model: { name } })
         : serviceManager.terminals.startNew());
 
       const term = new Terminal(session, options);
