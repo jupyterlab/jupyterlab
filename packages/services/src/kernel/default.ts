@@ -1439,7 +1439,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _status: KernelMessage.Status = 'unknown';
   private _connectionStatus: Kernel.ConnectionStatus = 'connecting';
   private _kernelSession = '';
-  private _clientId = '';
+  private _clientId: string;
   private _isDisposed = false;
   /**
    * Websocket to communicate with kernel.

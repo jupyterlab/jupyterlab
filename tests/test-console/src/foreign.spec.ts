@@ -63,7 +63,6 @@ class TestHandler extends ForeignHandler {
     msg: KernelMessage.IIOPubMessage
   ): boolean {
     const injected = super.onIOPubMessage(sender, msg);
-    this.received.emit(msg);
     if (injected) {
       this.injected.emit(msg);
     } else {
@@ -72,12 +71,15 @@ class TestHandler extends ForeignHandler {
       const session = (msg.parent_header as KernelMessage.IHeader).session;
       const msgType = msg.header.msg_type;
       if (
-        session !== this.sessionContext.session?.kernel?.clientId &&
+        session !== this.sessionContext.session!.kernel!.clientId &&
         relevantTypes.has(msgType)
       ) {
         this.rejected.emit(msg);
+      } else {
+        console.log(session, this.sessionContext.session?.kernel?.clientId);
       }
     }
+    this.received.emit(msg);
     return injected;
   }
 }

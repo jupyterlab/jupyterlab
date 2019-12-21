@@ -10,6 +10,7 @@ import { ServerConnection } from '..';
 import * as Session from './session';
 
 import { shutdownSession, updateSession } from './restapi';
+import { UUID } from '@lumino/coreutils';
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -29,8 +30,8 @@ export class SessionConnection implements Session.ISessionConnection {
     this._name = options.model.name;
     this._path = options.model.path;
     this._type = options.model.type;
-    this._username = options.username ?? this._username;
-    this._clientId = options.clientId ?? this._clientId;
+    this._username = options.username ?? '';
+    this._clientId = options.clientId ?? UUID.uuid4();
     this._connectToKernel = options.connectToKernel;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
@@ -393,8 +394,8 @@ export class SessionConnection implements Session.ISessionConnection {
   private _path = '';
   private _name = '';
   private _type = '';
-  private _username = '';
-  private _clientId = '';
+  private _username: string;
+  private _clientId: string;
   private _kernel: Kernel.IKernelConnection | null = null;
   private _isDisposed = false;
   private _disposed = new Signal<this, void>(this);
