@@ -228,10 +228,7 @@ function activateFactory(
       refreshInterval: options.refreshInterval,
       state: options.state === null ? undefined : options.state || state
     });
-    const widget = new FileBrowser({
-      id,
-      model
-    });
+    const widget = new FileBrowser({ id, model });
 
     // Add a launcher toolbar item.
     let launcher = new ToolbarButton({
@@ -263,8 +260,8 @@ function activateBrowser(
   labShell: ILabShell,
   restorer: ILayoutRestorer,
   settingRegistry: ISettingRegistry,
-  commandPalette: ICommandPalette,
-  mainMenu: IMainMenu
+  commandPalette: ICommandPalette | null,
+  mainMenu: IMainMenu | null
 ): void {
   const browser = factory.defaultBrowser;
   const { commands } = app;
