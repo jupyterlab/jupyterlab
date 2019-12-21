@@ -102,7 +102,7 @@ describe('terminal', () => {
         const promise = session.reconnect();
         expect(session.connectionStatus).to.equal('connecting');
         await promise;
-        // expect(session.connectionStatus).to.equal('connected');
+        expect(session.connectionStatus).to.equal('connected');
       });
     });
 

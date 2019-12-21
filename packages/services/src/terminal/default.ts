@@ -194,9 +194,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
           timeout / 1000
         )} seconds.`
       );
-      this._reconnectTimeout = setTimeout(() => {
-        this._createSocket;
-      }, timeout);
+      this._reconnectTimeout = setTimeout(this._createSocket, timeout);
       this._reconnectAttempt += 1;
     } else {
       this._updateConnectionStatus('disconnected');
