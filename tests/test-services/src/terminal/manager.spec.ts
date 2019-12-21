@@ -7,69 +7,69 @@ import { toArray } from '@lumino/algorithm';
 
 import {
   ServerConnection,
-  TerminalSession,
-  TerminalManager
+  Terminal,
+  TerminalManager,
+  TerminalAPI
 } from '@jupyterlab/services';
 
 import { testEmission } from '@jupyterlab/testutils';
 
 describe('terminal', () => {
-  let manager: TerminalSession.IManager;
-  let session: TerminalSession.ITerminalConnection;
+  let manager: Terminal.IManager;
 
-  beforeAll(async () => {
-    session = await TerminalSession.startNew();
-  });
-
-  beforeEach(() => {
+  beforeEach(async () => {
     manager = new TerminalManager({ standby: 'never' });
-    return manager.ready;
+    await manager.ready;
   });
 
   afterEach(() => {
     manager.dispose();
   });
 
-  afterAll(() => {
-    return TerminalSession.shutdownAll();
+  afterAll(async () => {
+    let models = await TerminalAPI.listRunning();
+    await Promise.all(models.map(m => TerminalAPI.shutdownTerminal(m.name)));
   });
 
   describe('TerminalManager', () => {
     describe('#constructor()', () => {
-      it('should accept no options', () => {
-        manager.dispose();
-        manager = new TerminalManager({ standby: 'never' });
+      it('should accept no options', async () => {
+        const manager = new TerminalManager({ standby: 'never' });
+        await manager.ready;
         expect(manager).to.be.an.instanceof(TerminalManager);
+        manager.dispose();
       });
 
-      it('should accept options', () => {
-        manager.dispose();
-        manager = new TerminalManager({
+      it('should accept options', async () => {
+        const manager = new TerminalManager({
           serverSettings: ServerConnection.makeSettings(),
           standby: 'never'
         });
+        await manager.ready;
         expect(manager).to.be.an.instanceof(TerminalManager);
+        manager.dispose();
       });
     });
 
     describe('#serverSettings', () => {
-      it('should get the server settings', () => {
-        manager.dispose();
+      it('should get the server settings', async () => {
         const serverSettings = ServerConnection.makeSettings();
         const standby = 'never';
         const token = serverSettings.token;
-        manager = new TerminalManager({ serverSettings, standby });
+        const manager = new TerminalManager({ serverSettings, standby });
+        await manager.ready;
         expect(manager.serverSettings.token).to.equal(token);
+        manager.dispose();
       });
     });
 
     describe('#isReady', () => {
       it('should test whether the manager is ready', async () => {
-        manager.dispose();
-        manager = new TerminalManager({ standby: 'never' });
+        const manager = new TerminalManager({ standby: 'never' });
         expect(manager.isReady).to.equal(false);
         await manager.ready;
         expect(manager.isReady).to.equal(true);
+        manager.dispose();
       });
     });
 
@@ -81,12 +81,13 @@ describe('terminal', () => {
 
     describe('#isAvailable()', () => {
       it('should test whether terminal sessions are available', () => {
-        expect(TerminalSession.isAvailable()).to.equal(true);
+        expect(Terminal.isAvailable()).to.equal(true);
       });
     });
 
     describe('#running()', () => {
       it('should give an iterator over the list of running models', async () => {
+        await TerminalAPI.startNew();
         await manager.refreshRunning();
         const running = toArray(manager.running());
         expect(running.length).to.be.greaterThan(0);
@@ -95,7 +96,7 @@ describe('terminal', () => {
 
     describe('#startNew()', () => {
       it('should startNew a new terminal session', async () => {
-        session = await manager.startNew();
+        let session = await manager.startNew();
         expect(session.name).to.be.ok;
       });
 
@@ -111,9 +112,10 @@ describe('terminal', () => {
 
     describe('#connectTo()', () => {
       it('should connect to an existing session', async () => {
-        const name = session.name;
-        session = await manager.connectTo(name);
-        expect(session.name).to.equal(name);
+        let session = await manager.startNew();
+        let session2 = manager.connectTo({ model: session.model });
+        expect(session).to.not.equal(session2);
+        expect(session2.name).to.equal(session.name);
       });
     });
 
@@ -125,14 +127,13 @@ describe('terminal', () => {
       });
 
       it('should emit a runningChanged signal', async () => {
-        session = await manager.startNew();
-        const emission = testEmission(manager.runningChanged, {
-          test: () => {
-            expect(session.isDisposed).to.equal(false);
-          }
+        let session = await manager.startNew();
+        let called = false;
+        manager.runningChanged.connect(() => {
+          called = true;
         });
         await manager.shutdown(session.name);
-        await emission;
+        expect(called).to.be.true;
       });
     });
 
@@ -151,10 +152,8 @@ describe('terminal', () => {
 
     describe('#refreshRunning()', () => {
       it('should update the running session models', async () => {
-        let model: TerminalSession.IModel;
         const before = toArray(manager.running()).length;
-        session = await TerminalSession.startNew();
-        model = session.model;
+        let model = await TerminalAPI.startNew();
         await manager.refreshRunning();
         const running = toArray(manager.running());
         expect(running.length).to.equal(before + 1);

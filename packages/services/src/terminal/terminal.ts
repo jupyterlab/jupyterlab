@@ -165,7 +165,7 @@ export interface IManager extends IBaseManager {
    */
   connectTo(
     options: Omit<ITerminalConnection.IOptions, 'serverSettings'>
-  ): Promise<ITerminalConnection>;
+  ): ITerminalConnection;
 
   /**
    * Shut down a terminal session by name.

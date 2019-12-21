@@ -94,6 +94,9 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
    * Dispose of the resources used by the manager.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
     this._names.length = 0;
     this._terminalConnections.forEach(x => x.dispose());
     this._pollModels.dispose();
@@ -119,14 +122,21 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
    * #### Notes
    * The manager `serverSettings` will be used.
    */
-  async connectTo(
+  connectTo(
     options: Omit<Terminal.ITerminalConnection.IOptions, 'serverSettings'>
-  ): Promise<Terminal.ITerminalConnection> {
+  ): Terminal.ITerminalConnection {
     const terminalConnection = new TerminalConnection({
       ...options,
       serverSettings: this.serverSettings
     });
     this._onStarted(terminalConnection);
+    if (!this._names.includes(options.model.name)) {
+      // We trust the user to connect to an existing session, but we verify
+      // asynchronously.
+      void this.refreshRunning().catch(() => {
+        /* no-op */
+      });
+    }
     return terminalConnection;
   }
 
