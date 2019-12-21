@@ -87,6 +87,9 @@ export class SessionManager extends BaseManager implements Session.IManager {
    * Dispose of the resources used by the manager.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
     this._models.clear();
     this._sessionConnections.forEach(x => x.dispose());
     this._pollModels.dispose();

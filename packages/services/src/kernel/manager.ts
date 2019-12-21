@@ -87,6 +87,9 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    * Dispose of the resources used by the manager.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
     this._models.clear();
     this._kernelConnections.forEach(x => x.dispose());
     this._pollModels.dispose();
@@ -292,6 +295,14 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
 
   private _onDisposed(kernelConnection: KernelConnection) {
     this._kernelConnections.delete(kernelConnection);
+    // A dispose emission could mean the server session is deleted, or that
+    // the kernel JS object is disposed and the kernel still exists on the
+    // server, so we refresh from the server to make sure we reflect the
+    // server state.
+
+    void this.refreshRunning().catch(() => {
+      /* no-op */
+    });
   }
 
   private _onStatusChanged(
