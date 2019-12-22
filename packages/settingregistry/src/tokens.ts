@@ -19,7 +19,6 @@ import { IDataConnector } from '@jupyterlab/statedb';
 
 import { ISchemaValidator } from './settingregistry';
 
-
 /* tslint:disable */
 /**
  * The setting registry token.
@@ -338,8 +337,8 @@ export namespace ISettingRegistry {
     readonly id: string;
 
     /*
-      * The underlying plugin.
-      */
+     * The underlying plugin.
+     */
     readonly plugin: ISettingRegistry.IPlugin;
 
     /**

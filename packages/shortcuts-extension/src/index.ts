@@ -6,10 +6,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import {
-  ISettingRegistry,
-  SettingRegistry
-} from '@jupyterlab/settingregistry';
+import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 
 import { CommandRegistry } from '@lumino/commands';
 

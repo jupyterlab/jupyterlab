@@ -10,10 +10,7 @@ import {
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
-import {
-  SettingRegistry,
-  ISettingRegistry
-} from '@jupyterlab/settingregistry';
+import { SettingRegistry, ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { SettingConnector } from './settingconnector';
 

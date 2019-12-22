@@ -3,14 +3,10 @@
   "compilerOptions": {
     "outDir": "build",
     "rootDir": "src",
-    "types": [
-      "jest"
-    ],
+    "types": ["jest"],
     "composite": false
   },
-  "include": [
-    "src/*"
-  ],
+  "include": ["src/*"],
   "references": [
     {
       "path": "../../packages/nbformat"

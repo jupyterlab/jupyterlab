@@ -2,16 +2,11 @@
   "extends": "../../tsconfigbase",
   "compilerOptions": {
     "outDir": "build",
-    "types": [
-      "mocha",
-      "node"
-    ],
+    "types": ["mocha", "node"],
     "composite": false,
     "rootDir": "src"
   },
-  "include": [
-    "src/*"
-  ],
+  "include": ["src/*"],
   "references": [
     {
       "path": "../../packages/apputils"

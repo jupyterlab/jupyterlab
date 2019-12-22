@@ -2,15 +2,11 @@
   "extends": "../../tsconfigbase",
   "compilerOptions": {
     "outDir": "build",
-    "types": [
-      "jest"
-    ],
+    "types": ["jest"],
     "composite": false,
     "rootDir": "src"
   },
-  "include": [
-    "src/*"
-  ],
+  "include": ["src/*"],
   "references": [
     {
       "path": "../../packages/apputils"

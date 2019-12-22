@@ -5,9 +5,7 @@
     "rootDir": "src",
     "strictNullChecks": false
   },
-  "include": [
-    "src/*"
-  ],
+  "include": ["src/*"],
   "references": [
     {
       "path": "../coreutils"
