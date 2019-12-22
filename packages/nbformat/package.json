@@ -26,10 +26,11 @@
     "lib": "lib/"
   },
   "scripts": {
-    "build": "tsc",
-    "clean": "rimraf lib",
+    "build": "tsc -b",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "docs": "typedoc src --tsconfig typedoc-tsconfig.json",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -w --listEmittedFiles"
+    "watch": "tsc -b -w --listEmittedFiles"
   },
   "dependencies": {
     "@lumino/coreutils": "^1.4.0"
