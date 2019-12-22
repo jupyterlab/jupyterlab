@@ -3,7 +3,9 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IDataConnector, Text } from '@jupyterlab/coreutils';
+import { Text } from '@jupyterlab/coreutils';
+
+import { IDataConnector } from '@jupyterlab/statedb';
 
 import { MimeModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 

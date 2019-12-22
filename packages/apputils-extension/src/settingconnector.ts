@@ -1,8 +1,6 @@
-import {
-  DataConnector,
-  IDataConnector,
-  PageConfig
-} from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
+
+import { DataConnector, IDataConnector } from '@jupyterlab/statedb';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 

@@ -24,6 +24,9 @@
       "path": "../settingregistry"
     },
     {
+      "path": "../statedb"
+    },
+    {
       "path": "../ui-components"
     }
   ]

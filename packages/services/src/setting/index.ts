@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DataConnector, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { DataConnector } from '@jupyterlab/statedb';
 
 import { ServerConnection } from '../serverconnection';
 

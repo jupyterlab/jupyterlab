@@ -3,7 +3,7 @@
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 
-import { IStateDB } from '@jupyterlab/coreutils';
+import { IStateDB } from '@jupyterlab/statedb';
 
 import { Token } from '@lumino/coreutils';
 

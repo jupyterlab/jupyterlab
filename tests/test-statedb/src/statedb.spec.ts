@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { StateDB } from '@jupyterlab/coreutils';
+import { StateDB } from '@jupyterlab/statedb';
 
 import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
 

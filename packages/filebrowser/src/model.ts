@@ -3,16 +3,13 @@
 
 import { showDialog, Dialog } from '@jupyterlab/apputils';
 
-import {
-  IChangedArgs,
-  IStateDB,
-  PathExt,
-  PageConfig
-} from '@jupyterlab/coreutils';
+import { IChangedArgs, PathExt, PageConfig } from '@jupyterlab/coreutils';
 
 import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
 
 import { Contents, KernelSpec, Session } from '@jupyterlab/services';
+
+import { IStateDB } from '@jupyterlab/statedb';
 
 import { IIconRegistry } from '@jupyterlab/ui-components';
 

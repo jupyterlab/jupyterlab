@@ -12,7 +12,7 @@
   ],
   "references": [
     {
-      "path": "../coreutils"
+      "path": "../statedb"
     }
   ]
 }

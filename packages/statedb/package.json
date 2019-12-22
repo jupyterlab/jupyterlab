@@ -17,9 +17,7 @@
     "schema/*.json",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
   ],
-  "sideEffects": [
-    "style/**/*"
-  ],
+  "sideEffects": false,
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "directories": {
@@ -32,8 +30,16 @@
     "prepublishOnly": "npm run build",
     "watch": "tsc -b -w --listEmittedFiles"
   },
+  "dependencies": {
+    "@lumino/commands": "^1.9.0",
+    "@lumino/coreutils": "^1.4.0",
+    "@lumino/disposable": "^1.3.2",
+    "@lumino/properties": "^1.1.4",
+    "@lumino/signaling": "^1.3.2"
+  },
   "devDependencies": {
     "rimraf": "~3.0.0",
+    "typedoc": "^0.15.4",
     "typescript": "~3.7.3"
   },
   "publishConfig": {

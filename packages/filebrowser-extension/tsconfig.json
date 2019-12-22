@@ -36,6 +36,9 @@
       "path": "../settingregistry"
     },
     {
+      "path": "../statedb"
+    },
+    {
       "path": "../statusbar"
     },
     {

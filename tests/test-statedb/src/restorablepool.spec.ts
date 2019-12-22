@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { RestorablePool } from '@jupyterlab/coreutils';
+import { RestorablePool } from '@jupyterlab/statedb';
 
 import { signalToPromise } from '@jupyterlab/testutils';
 

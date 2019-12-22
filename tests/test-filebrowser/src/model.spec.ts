@@ -3,13 +3,15 @@
 
 import { expect } from 'chai';
 
-import { StateDB, PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 import { UUID } from '@lumino/coreutils';
 
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
+
+import { StateDB } from '@jupyterlab/statedb';
 
 import {
   FileBrowserModel,

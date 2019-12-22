@@ -207,6 +207,9 @@
       "path": "../shortcuts-extension"
     },
     {
+      "path": "../statedb"
+    },
+    {
       "path": "../statusbar"
     },
     {
@@ -247,9 +250,6 @@
     },
     {
       "path": "../vega5-extension"
-    },
-    {
-      "path": "../statedb"
     }
   ]
 }

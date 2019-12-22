@@ -13,9 +13,6 @@
   ],
   "references": [
     {
-      "path": "../../packages/settingregistry"
-    },
-    {
       "path": "../../packages/statedb"
     },
     {

@@ -15,7 +15,7 @@ import { IDisposable } from '@lumino/disposable';
 
 import { ISignal } from '@lumino/signaling';
 
-import { IDataConnector } from '@jupyterlab/coreutils';
+import { IDataConnector } from '@jupyterlab/statedb';
 
 import { ISchemaValidator } from './settingregistry';
 

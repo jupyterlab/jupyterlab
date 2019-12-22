@@ -390,6 +390,7 @@
       "@jupyterlab/test-rendermime": "../tests/test-rendermime",
       "@jupyterlab/test-services": "../tests/test-services",
       "@jupyterlab/test-settingregistry": "../tests/test-settingregistry",
+      "@jupyterlab/test-statedb": "../tests/test-statedb",
       "@jupyterlab/test-statusbar": "../tests/test-statusbar",
       "@jupyterlab/test-terminal": "../tests/test-terminal",
       "@jupyterlab/testutils": "../testutils",

@@ -3,10 +3,14 @@
   "compilerOptions": {
     "composite": false,
     "outDir": "build",
-    "types": ["jest"],
+    "types": [
+      "jest"
+    ],
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../../packages/application"
@@ -15,7 +19,7 @@
       "path": "../../packages/apputils"
     },
     {
-      "path": "../../packages/coreutils"
+      "path": "../../packages/statedb"
     },
     {
       "path": "../../testutils"

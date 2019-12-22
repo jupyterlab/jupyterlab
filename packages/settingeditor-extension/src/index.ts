@@ -17,7 +17,7 @@ import {
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { IStateDB } from '@jupyterlab/coreutils';
+import { IStateDB } from '@jupyterlab/statedb';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 

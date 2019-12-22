@@ -3,7 +3,7 @@
 
 import { ISessionContext } from '@jupyterlab/apputils';
 
-import { DataConnector } from '@jupyterlab/coreutils';
+import { DataConnector } from '@jupyterlab/statedb';
 
 import { KernelMessage } from '@jupyterlab/services';
 

@@ -3,14 +3,14 @@
 
 import { expect } from 'chai';
 
-import { StateDB } from '@jupyterlab/coreutils';
-
 import {
   DefaultSchemaValidator,
   ISettingRegistry,
   SettingRegistry,
   Settings
 } from '@jupyterlab/settingregistry';
+
+import { StateDB } from '@jupyterlab/statedb';
 
 import { signalToPromise } from '@jupyterlab/testutils';
 

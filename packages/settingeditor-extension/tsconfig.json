@@ -18,9 +18,6 @@
       "path": "../codeeditor"
     },
     {
-      "path": "../coreutils"
-    },
-    {
       "path": "../rendermime"
     },
     {
@@ -28,6 +25,9 @@
     },
     {
       "path": "../settingregistry"
+    },
+    {
+      "path": "../statedb"
     }
   ]
 }

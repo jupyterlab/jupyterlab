@@ -2,11 +2,15 @@
   "extends": "../../tsconfigbase",
   "compilerOptions": {
     "outDir": "build",
-    "types": ["mocha"],
+    "types": [
+      "mocha"
+    ],
     "composite": false,
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../../packages/coreutils"
@@ -22,6 +26,9 @@
     },
     {
       "path": "../../packages/services"
+    },
+    {
+      "path": "../../packages/statedb"
     },
     {
       "path": "../../testutils"
