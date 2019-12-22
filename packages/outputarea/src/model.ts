@@ -7,7 +7,7 @@ import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 

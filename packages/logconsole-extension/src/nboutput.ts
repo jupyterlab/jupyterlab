@@ -6,7 +6,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { ILoggerRegistry, LogLevel } from '@jupyterlab/logconsole';
 

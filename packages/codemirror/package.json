@@ -36,6 +36,7 @@
     "@jupyterlab/apputils": "^2.0.0-alpha.4",
     "@jupyterlab/codeeditor": "^2.0.0-alpha.4",
     "@jupyterlab/coreutils": "^4.0.0-alpha.4",
+    "@jupyterlab/nbformat": "^2.0.0-alpha.4",
     "@jupyterlab/observables": "^3.0.0-alpha.4",
     "@jupyterlab/statusbar": "^2.0.0-alpha.4",
     "@lumino/algorithm": "^1.2.1",

@@ -31,6 +31,9 @@
     "prepublishOnly": "npm run build",
     "watch": "tsc -w --listEmittedFiles"
   },
+  "dependencies": {
+    "@lumino/coreutils": "^1.4.0"
+  },
   "devDependencies": {
     "rimraf": "~3.0.0",
     "typescript": "~3.7.3"

@@ -4,12 +4,19 @@
     "outDir": "lib",
     "rootDir": "src",
     "module": "commonjs",
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*"
+  ],
   "references": [
     {
       "path": "../coreutils"
+    },
+    {
+      "path": "../nbformat"
     },
     {
       "path": "../observables"

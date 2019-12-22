@@ -5,7 +5,7 @@ import { ISessionContext } from '@jupyterlab/apputils';
 
 import { CodeCell } from '@jupyterlab/cells';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { KernelMessage } from '@jupyterlab/services';
 

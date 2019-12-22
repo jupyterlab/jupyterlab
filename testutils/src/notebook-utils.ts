@@ -7,7 +7,7 @@ import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { Clipboard } from '@jupyterlab/apputils';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { Context } from '@jupyterlab/docregistry';
 

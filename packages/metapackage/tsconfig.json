@@ -156,6 +156,9 @@
       "path": "../mathjax2-extension"
     },
     {
+      "path": "../nbformat"
+    },
+    {
       "path": "../notebook"
     },
     {
@@ -241,9 +244,6 @@
     },
     {
       "path": "../vega5-extension"
-    },
-    {
-      "path": "../nbformat"
     }
   ]
 }

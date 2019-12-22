@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { nbformat, IChangedArgs } from '@jupyterlab/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
+
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { OutputArea, IOutputPrompt } from '@jupyterlab/outputarea';
 

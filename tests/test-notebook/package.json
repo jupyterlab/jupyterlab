@@ -23,6 +23,7 @@
     "@jupyterlab/codemirror": "^2.0.0-alpha.4",
     "@jupyterlab/coreutils": "^4.0.0-alpha.4",
     "@jupyterlab/docregistry": "^2.0.0-alpha.4",
+    "@jupyterlab/nbformat": "^2.0.0-alpha.4",
     "@jupyterlab/notebook": "^2.0.0-alpha.4",
     "@jupyterlab/observables": "^3.0.0-alpha.4",
     "@jupyterlab/testutils": "^2.0.0-alpha.4",

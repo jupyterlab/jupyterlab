@@ -23,12 +23,13 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 import {
   ISettingRegistry,
   IStateDB,
-  nbformat,
   PageConfig,
   URLExt
 } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
+
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { ArrayExt } from '@lumino/algorithm';
 

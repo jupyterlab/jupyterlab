@@ -4,9 +4,13 @@
     "outDir": "lib",
     "rootDir": "src",
     "module": "commonjs",
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../packages/apputils"
@@ -34,6 +38,9 @@
     },
     {
       "path": "../packages/services"
+    },
+    {
+      "path": "../packages/nbformat"
     }
   ]
 }

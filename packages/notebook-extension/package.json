@@ -45,6 +45,7 @@
     "@jupyterlab/filebrowser": "^2.0.0-alpha.4",
     "@jupyterlab/launcher": "^2.0.0-alpha.4",
     "@jupyterlab/mainmenu": "^2.0.0-alpha.4",
+    "@jupyterlab/nbformat": "^2.0.0-alpha.4",
     "@jupyterlab/notebook": "^2.0.0-alpha.4",
     "@jupyterlab/property-inspector": "^2.0.0-alpha.4",
     "@jupyterlab/rendermime": "^2.0.0-alpha.4",

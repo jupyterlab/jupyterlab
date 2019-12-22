@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { toArray } from '@lumino/algorithm';
 
-import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import {
   CellModel,
@@ -13,6 +13,8 @@ import {
   MarkdownCellModel,
   CodeCellModel
 } from '@jupyterlab/cells';
+
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { OutputAreaModel } from '@jupyterlab/outputarea';
 

@@ -5,7 +5,6 @@ export * from './activitymonitor';
 export * from './dataconnector';
 export * from './interfaces';
 export * from './markdowncodeblocks';
-export * from './nbformat';
 export * from './pageconfig';
 export * from './path';
 export * from './restorablepool';

@@ -20,7 +20,7 @@ import { Widget } from '@lumino/widgets';
 
 import { ISessionContext } from '@jupyterlab/apputils';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 

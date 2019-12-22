@@ -20,7 +20,7 @@ import {
   ToolbarButton
 } from '@jupyterlab/apputils';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { HTMLSelect } from '@jupyterlab/ui-components';
 

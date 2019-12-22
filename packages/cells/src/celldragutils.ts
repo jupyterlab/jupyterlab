@@ -13,7 +13,7 @@ import { each, IterableOrArrayLike } from '@lumino/algorithm';
 import { ICodeCellModel } from './model';
 import { Cell } from './widget';
 import { h, VirtualDOM } from '@lumino/virtualdom';
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 /**
  * Constants for drag

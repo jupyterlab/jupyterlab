@@ -4,7 +4,9 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../apputils"
@@ -23,6 +25,9 @@
     },
     {
       "path": "../filebrowser"
+    },
+    {
+      "path": "../nbformat"
     },
     {
       "path": "../observables"
