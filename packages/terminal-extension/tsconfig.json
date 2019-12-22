@@ -3,18 +3,19 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "types": ["webpack-env"]
+    "types": [
+      "webpack-env"
+    ]
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../application"
     },
     {
       "path": "../apputils"
-    },
-    {
-      "path": "../coreutils"
     },
     {
       "path": "../launcher"
@@ -27,6 +28,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../settingregistry"
     },
     {
       "path": "../terminal"

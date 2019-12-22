@@ -96,7 +96,7 @@
     "@jupyterlab/services": "^5.0.0-alpha.4",
     "@jupyterlab/settingeditor": "^2.0.0-alpha.4",
     "@jupyterlab/settingeditor-extension": "^2.0.0-alpha.4",
-    "@jupyterlab/settingsregistry": "^2.0.0-alpha.4",
+    "@jupyterlab/settingregistry": "^2.0.0-alpha.4",
     "@jupyterlab/shortcuts-extension": "^2.0.0-alpha.4",
     "@jupyterlab/statusbar": "^2.0.0-alpha.4",
     "@jupyterlab/statusbar-extension": "^2.0.0-alpha.4",

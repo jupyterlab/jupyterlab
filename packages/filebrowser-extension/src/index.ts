@@ -19,13 +19,7 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
-import {
-  IStateDB,
-  PageConfig,
-  PathExt,
-  URLExt,
-  ISettingRegistry
-} from '@jupyterlab/coreutils';
+import { IStateDB, PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
@@ -41,6 +35,8 @@ import { Launcher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { Contents } from '@jupyterlab/services';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 

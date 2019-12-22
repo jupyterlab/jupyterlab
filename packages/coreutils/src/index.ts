@@ -8,7 +8,6 @@ export * from './markdowncodeblocks';
 export * from './pageconfig';
 export * from './path';
 export * from './restorablepool';
-export * from './settingregistry';
 export * from './statedb';
 export * from './text';
 export * from './time';

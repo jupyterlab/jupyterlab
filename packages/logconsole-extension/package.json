@@ -42,6 +42,7 @@
     "@jupyterlab/notebook": "^2.0.0-alpha.4",
     "@jupyterlab/rendermime": "^2.0.0-alpha.4",
     "@jupyterlab/services": "^5.0.0-alpha.4",
+    "@jupyterlab/settingregistry": "^2.0.0-alpha.4",
     "@jupyterlab/statusbar": "^2.0.0-alpha.4",
     "@jupyterlab/ui-components": "^2.0.0-alpha.4",
     "@lumino/coreutils": "^1.4.0",

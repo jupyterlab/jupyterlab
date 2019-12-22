@@ -36,9 +36,9 @@ import {
   StatusBar
 } from '@jupyterlab/statusbar';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { Title, Widget } from '@lumino/widgets';
 

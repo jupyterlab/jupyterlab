@@ -201,6 +201,9 @@
       "path": "../settingeditor-extension"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../shortcuts-extension"
     },
     {
@@ -244,9 +247,6 @@
     },
     {
       "path": "../vega5-extension"
-    },
-    {
-      "path": "../settingsregistry"
     }
   ]
 }

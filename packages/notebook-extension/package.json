@@ -50,6 +50,7 @@
     "@jupyterlab/property-inspector": "^2.0.0-alpha.4",
     "@jupyterlab/rendermime": "^2.0.0-alpha.4",
     "@jupyterlab/services": "^5.0.0-alpha.4",
+    "@jupyterlab/settingregistry": "^2.0.0-alpha.4",
     "@jupyterlab/statusbar": "^2.0.0-alpha.4",
     "@lumino/algorithm": "^1.2.1",
     "@lumino/commands": "^1.9.0",

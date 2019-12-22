@@ -22,11 +22,11 @@ import {
   Mode
 } from '@jupyterlab/codemirror';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 

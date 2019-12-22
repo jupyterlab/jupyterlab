@@ -35,7 +35,6 @@
     "@jupyterlab/cells": "^2.0.0-alpha.4",
     "@jupyterlab/codeeditor": "^2.0.0-alpha.4",
     "@jupyterlab/codemirror": "^2.0.0-alpha.4",
-    "@jupyterlab/coreutils": "^4.0.0-alpha.4",
     "@jupyterlab/docregistry": "^2.0.0-alpha.4",
     "@jupyterlab/nbformat": "^2.0.0-alpha.4",
     "@jupyterlab/notebook": "^2.0.0-alpha.4",

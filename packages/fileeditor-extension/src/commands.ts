@@ -9,11 +9,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
-import {
-  ISettingRegistry,
-  MarkdownCodeBlocks,
-  PathExt
-} from '@jupyterlab/coreutils';
+import { MarkdownCodeBlocks, PathExt } from '@jupyterlab/coreutils';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
@@ -30,6 +26,8 @@ import {
   IRunMenu,
   IViewMenu
 } from '@jupyterlab/mainmenu';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { CommandRegistry } from '@lumino/commands';
 

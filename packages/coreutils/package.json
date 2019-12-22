@@ -37,8 +37,6 @@
     "@lumino/disposable": "^1.3.2",
     "@lumino/properties": "^1.1.4",
     "@lumino/signaling": "^1.3.2",
-    "ajv": "^6.10.2",
-    "json5": "^2.1.1",
     "minimist": "~1.2.0",
     "moment": "^2.24.0",
     "path-posix": "~1.0.0",

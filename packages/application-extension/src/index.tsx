@@ -24,12 +24,9 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
-import {
-  PathExt,
-  IStateDB,
-  ISettingRegistry,
-  URLExt
-} from '@jupyterlab/coreutils';
+import { PathExt, IStateDB, URLExt } from '@jupyterlab/coreutils';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import {
   IPropertyInspectorProvider,

@@ -51,6 +51,9 @@
       "path": "../services"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../statusbar"
     }
   ]

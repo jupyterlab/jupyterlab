@@ -13,8 +13,6 @@ import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
@@ -29,6 +27,8 @@ import {
 import { ILauncher } from '@jupyterlab/launcher';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 

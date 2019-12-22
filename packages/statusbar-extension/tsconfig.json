@@ -4,7 +4,9 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*"
+  ],
   "references": [
     {
       "path": "../application"
@@ -19,9 +21,6 @@
       "path": "../console"
     },
     {
-      "path": "../coreutils"
-    },
-    {
       "path": "../docregistry"
     },
     {
@@ -32,6 +31,9 @@
     },
     {
       "path": "../notebook"
+    },
+    {
+      "path": "../settingregistry"
     },
     {
       "path": "../statusbar"

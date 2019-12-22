@@ -16,9 +16,6 @@
       "path": "../../packages/coreutils"
     },
     {
-      "path": "../../packages/nbformat"
-    },
-    {
       "path": "../../testutils"
     }
   ]

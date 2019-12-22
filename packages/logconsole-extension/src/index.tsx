@@ -16,7 +16,7 @@ import {
   ReactWidget
 } from '@jupyterlab/apputils';
 
-import { ISettingRegistry, IChangedArgs } from '@jupyterlab/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import {
   ILoggerRegistry,
@@ -30,6 +30,8 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 

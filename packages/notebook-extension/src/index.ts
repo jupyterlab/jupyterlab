@@ -20,16 +20,13 @@ import { CodeCell } from '@jupyterlab/cells';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import {
-  ISettingRegistry,
-  IStateDB,
-  PageConfig,
-  URLExt
-} from '@jupyterlab/coreutils';
+import { IStateDB, PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import * as nbformat from '@jupyterlab/nbformat';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { ArrayExt } from '@lumino/algorithm';
 

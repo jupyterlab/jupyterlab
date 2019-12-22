@@ -17,7 +17,7 @@ import {
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
+import { IStateDB } from '@jupyterlab/coreutils';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -25,6 +25,8 @@ import {
   ISettingEditorTracker,
   SettingEditor
 } from '@jupyterlab/settingeditor';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * The command IDs used by the setting editor.

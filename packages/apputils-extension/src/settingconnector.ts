@@ -1,9 +1,10 @@
 import {
   DataConnector,
   IDataConnector,
-  ISettingRegistry,
   PageConfig
 } from '@jupyterlab/coreutils';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * A data connector for fetching settings.

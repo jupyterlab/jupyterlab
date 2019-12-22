@@ -9,19 +9,19 @@ import {
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
-import {
-  IRenderMimeRegistry,
-  markdownRendererFactory
-} from '@jupyterlab/rendermime';
-
 import {
   MarkdownViewer,
   MarkdownViewerFactory,
   MarkdownDocument,
   IMarkdownViewerTracker
 } from '@jupyterlab/markdownviewer';
+
+import {
+  IRenderMimeRegistry,
+  markdownRendererFactory
+} from '@jupyterlab/rendermime';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * The command IDs used by the markdownviewer plugin.

@@ -4,7 +4,9 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ],
   "references": [
     {
       "path": "../application"
@@ -13,13 +15,13 @@
       "path": "../apputils"
     },
     {
-      "path": "../coreutils"
-    },
-    {
       "path": "../extensionmanager"
     },
     {
       "path": "../mainmenu"
+    },
+    {
+      "path": "../settingregistry"
     }
   ]
 }

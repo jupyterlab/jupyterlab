@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
@@ -17,6 +15,8 @@ import {
 } from '@jupyterlab/apputils';
 
 import { Terminal } from '@jupyterlab/services';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { ILauncher } from '@jupyterlab/launcher';
 
