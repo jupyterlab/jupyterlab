@@ -98,6 +98,7 @@
     "@jupyterlab/settingeditor-extension": "^2.0.0-alpha.4",
     "@jupyterlab/settingregistry": "^2.0.0-alpha.4",
     "@jupyterlab/shortcuts-extension": "^2.0.0-alpha.4",
+    "@jupyterlab/statedb": "^2.0.0-alpha.4",
     "@jupyterlab/statusbar": "^2.0.0-alpha.4",
     "@jupyterlab/statusbar-extension": "^2.0.0-alpha.4",
     "@jupyterlab/tabmanager-extension": "^2.0.0-alpha.4",
