@@ -16,10 +16,10 @@
       "path": "../../packages/coreutils"
     },
     {
-      "path": "../../testutils"
+      "path": "../../packages/nbformat"
     },
     {
-      "path": "../../packages/nbformat"
+      "path": "../../testutils"
     }
   ]
 }

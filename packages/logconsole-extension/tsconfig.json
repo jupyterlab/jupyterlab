@@ -25,6 +25,9 @@
       "path": "../mainmenu"
     },
     {
+      "path": "../nbformat"
+    },
+    {
       "path": "../notebook"
     },
     {
@@ -38,9 +41,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../nbformat"
     }
   ]
 }

@@ -28,6 +28,9 @@
       "path": "../../packages/docregistry"
     },
     {
+      "path": "../../packages/nbformat"
+    },
+    {
       "path": "../../packages/notebook"
     },
     {
@@ -35,9 +38,6 @@
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../../packages/nbformat"
     }
   ]
 }

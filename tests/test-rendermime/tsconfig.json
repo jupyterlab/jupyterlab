@@ -23,6 +23,9 @@
       "path": "../../packages/mathjax2"
     },
     {
+      "path": "../../packages/nbformat"
+    },
+    {
       "path": "../../packages/rendermime"
     },
     {
@@ -30,9 +33,6 @@
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../../packages/nbformat"
     }
   ]
 }

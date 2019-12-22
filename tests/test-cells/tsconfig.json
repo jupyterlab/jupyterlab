@@ -25,13 +25,13 @@
       "path": "../../packages/coreutils"
     },
     {
+      "path": "../../packages/nbformat"
+    },
+    {
       "path": "../../packages/outputarea"
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../../packages/nbformat"
     }
   ]
 }

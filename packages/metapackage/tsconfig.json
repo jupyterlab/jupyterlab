@@ -244,6 +244,9 @@
     },
     {
       "path": "../vega5-extension"
+    },
+    {
+      "path": "../settingsregistry"
     }
   ]
 }
