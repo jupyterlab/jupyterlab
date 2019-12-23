@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { TerminalSession } from '@jupyterlab/services';
+import { Terminal as TerminalNS } from '@jupyterlab/services';
 
 import { Platform } from '@lumino/domutils';
 
@@ -37,7 +37,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * @param options - The terminal configuration options.
    */
   constructor(
-    session: TerminalSession.ISession,
+    session: TerminalNS.ITerminalConnection,
     options: Partial<ITerminal.IOptions> = {}
   ) {
     super();
@@ -66,28 +66,44 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     this.title.label = 'Terminal';
 
     session.messageReceived.connect(this._onMessage, this);
-    session.terminated.connect(this.dispose, this);
+    session.disposed.connect(this.dispose, this);
 
-    void session.ready.then(() => {
-      if (this.isDisposed) {
-        return;
-      }
+    if (session.connectionStatus === 'connected') {
+      this._initialConnection();
+    } else {
+      session.connectionStatusChanged.connect(this._initialConnection, this);
+    }
+  }
 
-      this.title.label = `Terminal ${session.name}`;
-      this._setSessionSize();
-      if (this._options.initialCommand) {
-        this.session.send({
-          type: 'stdin',
-          content: [this._options.initialCommand + '\r']
-        });
-      }
-    });
+  private _initialConnection() {
+    if (this.isDisposed) {
+      return;
+    }
+
+    if (this.session.connectionStatus !== 'connected') {
+      return;
+    }
+
+    this.title.label = `Terminal ${this.session.name}`;
+    this._setSessionSize();
+    if (this._options.initialCommand) {
+      this.session.send({
+        type: 'stdin',
+        content: [this._options.initialCommand + '\r']
+      });
+    }
+
+    // Only run this initial connection logic once.
+    this.session.connectionStatusChanged.disconnect(
+      this._initialConnection,
+      this
+    );
   }
 
   /**
    * The terminal session associated with the widget.
    */
-  readonly session: TerminalSession.ISession;
+  readonly session: TerminalNS.ITerminalConnection;
 
   /**
    * Get a config option for the terminal.
@@ -283,8 +299,8 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Handle a message from the terminal session.
    */
   private _onMessage(
-    sender: TerminalSession.ISession,
-    msg: TerminalSession.IMessage
+    sender: TerminalNS.ITerminalConnection,
+    msg: TerminalNS.IMessage
   ): void {
     switch (msg.type) {
       case 'stdout':

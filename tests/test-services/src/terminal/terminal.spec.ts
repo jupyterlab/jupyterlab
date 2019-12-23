@@ -5,20 +5,19 @@ import { expect } from 'chai';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
-import { UUID } from '@lumino/coreutils';
-
-import { TerminalSession } from '@jupyterlab/services';
+import { Terminal, TerminalManager } from '@jupyterlab/services';
 
 import { testEmission } from '@jupyterlab/testutils';
 
 import { handleRequest } from '../utils';
 
 describe('terminal', () => {
-  let defaultSession: TerminalSession.ISession;
-  let session: TerminalSession.ISession;
+  let defaultSession: Terminal.ITerminalConnection;
+  let session: Terminal.ITerminalConnection;
+  let manager = new TerminalManager();
 
   beforeAll(async () => {
-    defaultSession = await TerminalSession.startNew();
+    defaultSession = await manager.startNew();
   });
 
   afterEach(async () => {
@@ -27,79 +26,25 @@ describe('terminal', () => {
     }
   });
 
-  describe('TerminalSession', () => {
+  describe('Terminal', () => {
     describe('.isAvailable()', () => {
       it('should test whether terminal sessions are available', () => {
-        expect(TerminalSession.isAvailable()).to.equal(true);
-      });
-    });
-
-    describe('.startNew()', () => {
-      it('should startNew a terminal session', async () => {
-        session = await TerminalSession.startNew();
-        expect(session.name).to.be.ok;
-      });
-    });
-
-    describe('.connectTo', () => {
-      it('should give back an existing session', async () => {
-        const newSession = await TerminalSession.connectTo(defaultSession.name);
-        expect(newSession.name).to.equal(defaultSession.name);
-        expect(newSession).to.not.equal(defaultSession);
-      });
-
-      it('should reject if the session does not exist on the server', async () => {
-        try {
-          await TerminalSession.connectTo(UUID.uuid4());
-          throw Error('should not get here');
-        } catch (e) {
-          expect(e.message).to.not.equal('should not get here');
-        }
-      });
-    });
-
-    describe('.shutdown()', () => {
-      it('should shut down a terminal session by name', async () => {
-        session = await TerminalSession.startNew();
-        await TerminalSession.shutdown(session.name);
-      });
-
-      it('should handle a 404 status', () => {
-        return TerminalSession.shutdown('ThisTerminalDoesNotExist');
-      });
-    });
-
-    describe('.listRunning()', () => {
-      it('should list the running session models', async () => {
-        const models = await TerminalSession.listRunning();
-        expect(models.length).to.be.greaterThan(0);
+        expect(Terminal.isAvailable()).to.equal(true);
       });
     });
   });
 
-  describe('.ISession', () => {
-    describe('#terminated', () => {
-      it('should be emitted when the session is disposed', async () => {
-        session = await TerminalSession.startNew();
-        let called = false;
-        session.terminated.connect((sender, args) => {
-          expect(sender).to.equal(session);
-          expect(args).to.be.undefined;
-          called = true;
-        });
-        session.dispose();
-        expect(called).to.equal(true);
-      });
-    });
-
+  describe('.ITerminalConnection', () => {
     describe('#messageReceived', () => {
       it('should be emitted when a message is received', async () => {
-        session = await TerminalSession.startNew();
-        await testEmission(session.messageReceived, {
+        session = await manager.startNew();
+        let emission = testEmission(session.messageReceived, {
           test: (sender, msg) => {
             return msg.type === 'stdout';
           }
         });
+        session.send({ type: 'stdin', content: ['cd\r'] });
+        await emission;
       });
     });
 
@@ -119,69 +64,53 @@ describe('terminal', () => {
 
     describe('#isDisposed', () => {
       it('should test whether the object is disposed', async () => {
-        session = await TerminalSession.startNew();
+        session = await manager.startNew();
         const name = session.name;
         expect(session.isDisposed).to.equal(false);
         session.dispose();
         expect(session.isDisposed).to.equal(true);
-        await TerminalSession.shutdown(name);
+        await manager.shutdown(name);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the session', async () => {
-        session = await TerminalSession.startNew();
+        session = await manager.startNew();
         const name = session.name;
         session.dispose();
         expect(session.isDisposed).to.equal(true);
-        await TerminalSession.shutdown(name);
+        await manager.shutdown(name);
       });
 
       it('should be safe to call more than once', async () => {
-        session = await TerminalSession.startNew();
+        session = await manager.startNew();
         const name = session.name;
         session.dispose();
         session.dispose();
         expect(session.isDisposed).to.equal(true);
-        await TerminalSession.shutdown(name);
-      });
-    });
-
-    describe('#isReady', () => {
-      it('should test whether the terminal is ready', async () => {
-        session = await TerminalSession.startNew();
-        expect(session.isReady).to.equal(false);
-        await session.ready;
-        expect(session.isReady).to.equal(true);
-      });
-    });
-
-    describe('#ready', () => {
-      it('should resolve when the terminal is ready', () => {
-        return defaultSession.ready;
+        await manager.shutdown(name);
       });
     });
 
     describe('#send()', () => {
       it('should send a message to the socket', async () => {
-        await defaultSession.ready;
         session.send({ type: 'stdin', content: [1, 2] });
       });
     });
 
     describe('#reconnect()', () => {
       it('should reconnect to the socket', async () => {
-        const session = await TerminalSession.startNew();
+        const session = await manager.startNew();
         const promise = session.reconnect();
-        expect(session.isReady).to.equal(false);
+        expect(session.connectionStatus).to.equal('connecting');
         await promise;
-        expect(session.isReady).to.equal(true);
+        expect(session.connectionStatus).to.equal('connected');
       });
     });
 
     describe('#shutdown()', () => {
       it('should shut down the terminal session', async () => {
-        session = await TerminalSession.startNew();
+        session = await manager.startNew();
         await session.shutdown();
       });
 

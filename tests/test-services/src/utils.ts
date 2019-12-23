@@ -13,7 +13,7 @@ import { Response } from 'node-fetch';
 
 import {
   Contents,
-  TerminalSession,
+  Terminal,
   ServerConnection,
   KernelManager,
   SessionManager
@@ -692,7 +692,7 @@ export class TerminalTester extends SocketTester {
   /**
    * Register the message callback with the websocket server.
    */
-  onMessage(cb: (msg: TerminalSession.IMessage) => void) {
+  onMessage(cb: (msg: Terminal.IMessage) => void) {
     this._onMessage = cb;
   }
 
@@ -702,8 +702,8 @@ export class TerminalTester extends SocketTester {
       const onMessage = this._onMessage;
       if (onMessage) {
         const data = JSON.parse(msg) as JSONPrimitive[];
-        const termMsg: TerminalSession.IMessage = {
-          type: data[0] as TerminalSession.MessageType,
+        const termMsg: Terminal.IMessage = {
+          type: data[0] as Terminal.MessageType,
           content: data.slice(1)
         };
         onMessage(termMsg);
@@ -711,7 +711,7 @@ export class TerminalTester extends SocketTester {
     });
   }
 
-  private _onMessage: ((msg: TerminalSession.IMessage) => void) | null = null;
+  private _onMessage: ((msg: Terminal.IMessage) => void) | null = null;
 }
 
 /**

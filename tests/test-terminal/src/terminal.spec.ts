@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { TerminalSession } from '@jupyterlab/services';
+import { Terminal as TerminalNS, TerminalManager } from '@jupyterlab/services';
 
 import { Message, MessageLoop } from '@lumino/messaging';
 
@@ -11,7 +11,7 @@ import { Widget } from '@lumino/widgets';
 
 import { Terminal } from '@jupyterlab/terminal';
 
-import { framePromise } from '@jupyterlab/testutils';
+import { framePromise, testEmission } from '@jupyterlab/testutils';
 
 class LogTerminal extends Terminal {
   methods: string[] = [];
@@ -50,10 +50,11 @@ class LogTerminal extends Terminal {
 describe('terminal/index', () => {
   describe('Terminal', () => {
     let widget: LogTerminal;
-    let session: TerminalSession.ISession;
+    let session: TerminalNS.ITerminalConnection;
+    let manager = new TerminalManager();
 
     before(async () => {
-      session = await TerminalSession.startNew();
+      session = await manager.startNew();
     });
 
     beforeEach(() => {
@@ -78,7 +79,11 @@ describe('terminal/index', () => {
       });
 
       it('should set the title when ready', async () => {
-        await session.ready;
+        if (session.connectionStatus !== 'connected') {
+          await testEmission(session.connectionStatusChanged, {
+            find: (_, status) => status === 'connected'
+          });
+        }
         expect(widget.title.label).to.contain(session.name);
       });
     });

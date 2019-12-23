@@ -52,22 +52,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._username = options.username ?? '';
     this.handleComms = options.handleComms ?? true;
 
-    this.connectionStatusChanged.connect((sender, connectionStatus) => {
-      // Send pending messages and update status to be consistent.
-      if (connectionStatus === 'connected' && this.status !== 'dead') {
-        // Make sure we send at least one message to get kernel status back.
-        if (this._pendingMessages.length > 0) {
-          this._sendPending();
-        } else {
-          void this.requestKernelInfo();
-        }
-      } else {
-        // If the connection is down, then we don't know what is happening with
-        // the kernel, so set the status to unknown.
-        this._updateStatus('unknown');
-      }
-    });
-
     this._createSocket();
 
     // Immediately queue up a request for initial kernel info.
@@ -264,7 +248,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._updateConnectionStatus('disconnected');
     this._clearKernelState();
     this._clearSocket();
-    clearTimeout(this._reconnectTimeout);
 
     // Clear Lumino signals
     Signal.clearData(this);
@@ -398,10 +381,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // Send if the ws allows it, otherwise buffer the message.
     if (this.connectionStatus === 'connected') {
       this._ws!.send(serialize.serialize(msg));
-      // console.log(`SENT WS message to ${this.id}`, msg);
     } else if (queue) {
       this._pendingMessages.push(msg);
-      // console.log(`PENDING WS message to ${this.id}`, msg);
     } else {
       throw new Error('Could not send message');
     }
@@ -1034,8 +1015,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Handle status iopub messages from the kernel.
    */
   private _updateStatus(status: KernelMessage.Status): void {
-    // "unknown" | "starting" | "idle" | "busy" | "restarting" | "autorestarting" | "dead"
-
     if (this._status === status || this._status === 'dead') {
       return;
     }
@@ -1194,13 +1173,15 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
   /**
    * Create the kernel websocket connection and add socket status handlers.
-   *
-   * #### Notes
-   * You are responsible for clearing the old socket so that the handlers
-   * from it are gone. For example, calling ._clearSocket(), etc.
    */
   private _createSocket = () => {
     this._errorIfDisposed();
+
+    // Make sure the socket is clear
+    this._clearSocket();
+
+    // Update the connection status to reflect opening a new connection.
+    this._updateConnectionStatus('connecting');
 
     let settings = this.serverSettings;
     let partialUrl = URLExt.join(
@@ -1245,6 +1226,28 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
 
     this._connectionStatus = connectionStatus;
+
+    // If we are not 'connecting', reset any reconnection attempts.
+    if (connectionStatus !== 'connecting') {
+      this._reconnectAttempt = 0;
+      clearTimeout(this._reconnectTimeout);
+    }
+
+    if (this.status !== 'dead') {
+      if (connectionStatus === 'connected') {
+        // Send pending messages, and make sure we send at least one message
+        // to get kernel status back.
+        if (this._pendingMessages.length > 0) {
+          this._sendPending();
+        } else {
+          void this.requestKernelInfo();
+        }
+      } else {
+        // If the connection is down, then we do not know what is happening
+        // with the kernel, so set the status to unknown.
+        this._updateStatus('unknown');
+      }
+    }
 
     // Notify others that the connection status changed.
     this._connectionStatusChanged.emit(connectionStatus);
@@ -1386,7 +1389,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Handle a websocket open event.
    */
   private _onWSOpen = (evt: Event) => {
-    this._reconnectAttempt = 0;
     this._updateConnectionStatus('connected');
   };
 
