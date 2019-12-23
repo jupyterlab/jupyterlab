@@ -318,7 +318,6 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
     // If a route is handled by the router without the tree command being
     // invoked, resolve to `null` and clean up artifacts.
     const listener = () => {
-      console.log('listener in tree plugin', set.isDisposed);
       if (set.isDisposed) {
         return;
       }
