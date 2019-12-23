@@ -242,11 +242,11 @@ export namespace ISessionContext {
 }
 
 /**
- * The default implementation of client session object.
+ * The default implementation for a session context object.
  */
 export class SessionContext implements ISessionContext {
   /**
-   * Construct a new client session.
+   * Construct a new session context.
    */
   constructor(options: SessionContext.IOptions) {
     this.sessionManager = options.sessionManager;
@@ -910,7 +910,7 @@ export class SessionContext implements ISessionContext {
 }
 
 /**
- * A namespace for `ClientSession` statics.
+ * A namespace for `SessionContext` statics.
  */
 export namespace SessionContext {
   /**
@@ -1287,7 +1287,7 @@ namespace Private {
   }
 
   /**
-   * Get the kernel search options given a client session and sesion manager.
+   * Get the kernel search options given a session context.
    */
   function getKernelSearch(
     sessionContext: SessionContext
