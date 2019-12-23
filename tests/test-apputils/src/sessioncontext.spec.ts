@@ -453,28 +453,28 @@ describe('@jupyterlab/apputils', () => {
           await sessionContext.initialize();
           const session = sessionContext?.session;
 
-          const { id, name } = session.kernel;
+          const { id, name } = session!.kernel!;
           const accept = acceptDialog();
 
           await sessionContextDialogs.selectKernel(sessionContext);
           await accept;
 
-          expect(session.kernel?.id).to.not.equal(id);
-          expect(session.kernel?.name).to.equal(name);
+          expect(session!.kernel!.id).to.not.equal(id);
+          expect(session!.kernel!.name).to.equal(name);
         });
 
         it('should keep the existing kernel if dismissed', async () => {
           await sessionContext.initialize();
           const session = sessionContext!.session;
 
-          const { id, name } = session.kernel;
+          const { id, name } = session!.kernel!;
           const dismiss = dismissDialog();
 
           await sessionContextDialogs.selectKernel(sessionContext);
           await dismiss;
 
-          expect(session.kernel?.id).to.equal(id);
-          expect(session.kernel?.name).to.equal(name);
+          expect(session!.kernel!.id).to.equal(id);
+          expect(session!.kernel!.name).to.equal(name);
         });
       });
 
