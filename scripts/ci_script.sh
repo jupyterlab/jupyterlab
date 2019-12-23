@@ -180,12 +180,6 @@ if [[ $GROUP == usage ]]; then
     env JUPYTERLAB_DIR=./link_app_dir jupyter lab path | grep link_app_dir
     popd
 
-    # Build the examples.
-    jlpm run build:examples
-
-    # Test the examples
-    jlpm run test:examples
-
     # Make sure we can successfully load the dev app.
     python -m jupyterlab.browser_check --dev-mode
 

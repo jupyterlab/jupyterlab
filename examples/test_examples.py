@@ -11,7 +11,6 @@ checked before the browser.close() call).
 import argparse
 import glob
 import os.path as osp
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -45,9 +44,8 @@ def main():
     for path in sorted(paths):
         if osp.basename(path) == 'node':
             with tempfile.TemporaryDirectory() as cwd:
-                shutil.copytree(path, cwd)
                 header(path)
-                runner = osp.join(cwd, 'main.py')
+                runner = osp.join(path, 'main.py')
                 subprocess.check_call([sys.executable, runner], cwd=cwd)
                 count += 1
         elif osp.exists(osp.join(path, 'main.py')):
