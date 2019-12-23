@@ -305,6 +305,39 @@ export namespace JupyterFrontEnd {
       readonly workspaces: string;
     };
   }
+
+  /**
+   * The application tree resolver token.
+   *
+   * #### Notes
+   * Not all Jupyter front-end applications will have a tree resolver
+   * implemented on the client-side. This token should not be required as a
+   * dependency if it is possible to make it an optional dependency.
+   */
+  export const ITreeResolver = new Token<ITreeResolver>(
+    '@jupyterlab/application:ITreeResolver'
+  );
+
+  /**
+   * An interface for a front-end tree route resolver.
+   */
+  export interface ITreeResolver {
+    /**
+     * A promise that resolves to the routed tree paths or null.
+     */
+    readonly paths: Promise<ITreeResolver.Paths>;
+  }
+
+  /**
+   * A namespace for tree resolver types.
+   */
+  export namespace ITreeResolver {
+    /**
+     * The browser and file paths if the tree resolver encountered and handled
+     * a tree URL or `null` if not.
+     */
+    export type Paths = { browser: string; file: string } | null;
+  }
 }
 
 /**
