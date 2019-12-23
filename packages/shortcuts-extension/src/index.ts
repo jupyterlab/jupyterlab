@@ -71,10 +71,8 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
         })
         .reduce((acc, val) => acc.concat(val), [])
         .sort((a, b) => a.command.localeCompare(b.command));
-      schema.properties!.shortcuts.title =
-        'List of Commands (followed by shortcuts)';
 
-      const disableShortcutInstructions = `Note: To disable a system default shortcut,
+      schema.properties!.shortcuts.description = `Note: To disable a system default shortcut,
 copy it to User Preferences and add the
 "disabled" key, for example:
 {
@@ -84,12 +82,12 @@ copy it to User Preferences and add the
     ],
     "selector": "body",
     "disabled": true
-}`;
-      schema.properties!.shortcuts.description = `${commands}
+}
 
-${disableShortcutInstructions}
+List of commands followed by keyboard shortcuts:
+${commands}
 
-List of Keyboard Shortcuts`;
+List of keyboard shortcuts:`;
     }
 
     registry.pluginChanged.connect(async (sender, plugin) => {

@@ -5,6 +5,8 @@ import Ajv from 'ajv';
 
 import * as json from 'json5';
 
+import { CommandRegistry } from '@lumino/commands';
+
 import {
   JSONExt,
   JSONObject,
@@ -913,11 +915,16 @@ export namespace SettingRegistry {
 
     // If a user shortcut collides with another user shortcut warn and filter.
     user = user.filter(shortcut => {
-      const keys = shortcut.keys.join(RECORD_SEPARATOR);
+      const keys = CommandRegistry.normalizeKeys(shortcut).join(
+        RECORD_SEPARATOR
+      );
       const { selector } = shortcut;
 
       if (!keys) {
-        console.warn('Shortcut skipped because `keys` are [""].', shortcut);
+        console.warn(
+          'Skipping this shortcut because there are no actionable keys on this platform',
+          shortcut
+        );
         return false;
       }
       if (!(keys in memo)) {
@@ -928,7 +935,10 @@ export namespace SettingRegistry {
         return true;
       }
 
-      console.warn('Shortcut skipped due to collision.', shortcut);
+      console.warn(
+        'Skipping this shortcut because it collides with another shortcut.',
+        shortcut
+      );
       return false;
     });
 
@@ -937,7 +947,9 @@ export namespace SettingRegistry {
     // out too (this includes shortcuts that are disabled by user preferences).
     defaults = defaults.filter(shortcut => {
       const { disabled } = shortcut;
-      const keys = shortcut.keys.join(RECORD_SEPARATOR);
+      const keys = CommandRegistry.normalizeKeys(shortcut).join(
+        RECORD_SEPARATOR
+      );
 
       if (disabled || !keys) {
         return false;
@@ -955,7 +967,10 @@ export namespace SettingRegistry {
 
       // Only warn if a default shortcut collides with another default shortcut.
       if (memo[keys][selector]) {
-        console.warn('Shortcut skipped due to collision.', shortcut);
+        console.warn(
+          'Skipping this shortcut because it collides with another shortcut.',
+          shortcut
+        );
       }
 
       return false;
