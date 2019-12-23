@@ -19,11 +19,10 @@ here = osp.abspath(osp.dirname(__file__))
 
 def header(path):
     test_name = osp.basename(path)
-    test_dir = osp.dirname(path)
     print('\n'.join((
         '\n',
         '*' * 40,
-        'Starting %s test in %s' % (test_name, test_dir),
+        'Starting %s test in %s' % (test_name, path),
         '*' * 40
     )), flush=True)
 
@@ -47,7 +46,7 @@ def main():
             with tempfile.TemporaryDirectory() as cwd:
                 header(path)
                 runner = osp.join(path, 'main.py')
-                subprocess.check_call([sys.executable, runner])
+                subprocess.check_call([sys.executable, runner], cwd=cwd)
                 count += 1
         elif osp.exists(osp.join(path, 'main.py')):
             with tempfile.TemporaryDirectory() as cwd:
