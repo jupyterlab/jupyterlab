@@ -121,6 +121,9 @@ export class CodeEditorWrapper extends Widget {
     node.addEventListener('p-dragleave', this);
     node.addEventListener('p-dragover', this);
     node.addEventListener('p-drop', this);
+    // We have to refresh at least once after attaching,
+    // while visible.
+    this._hasRefreshedSinceAttach = false;
     if (this.isVisible) {
       this.update();
     }
@@ -141,7 +144,7 @@ export class CodeEditorWrapper extends Widget {
    * A message handler invoked on an `'after-show'` message.
    */
   protected onAfterShow(msg: Message): void {
-    if (this._updateOnShow || !this._hasRefreshed) {
+    if (this._updateOnShow || !this._hasRefreshedSinceAttach) {
       this.update();
     }
   }
@@ -162,7 +165,7 @@ export class CodeEditorWrapper extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     if (this.isVisible) {
-      this._hasRefreshed = true;
+      this._hasRefreshedSinceAttach = true;
       this.editor.refresh();
     }
   }
@@ -278,7 +281,7 @@ export class CodeEditorWrapper extends Widget {
   }
 
   private _updateOnShow: boolean;
-  private _hasRefreshed = false;
+  private _hasRefreshedSinceAttach = false;
 }
 
 /**
