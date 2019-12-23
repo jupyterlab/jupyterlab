@@ -42,13 +42,13 @@
     "@jupyterlab/inspector": "^2.0.0-alpha.4",
     "@jupyterlab/mainmenu": "^2.0.0-alpha.4",
     "@jupyterlab/services": "^5.0.0-alpha.4",
-    "@lumino/widgets": "^1.9.0",
-    "react": "~16.8.4"
+    "@lumino/widgets": "^1.9.4",
+    "react": "~16.9.0"
   },
   "devDependencies": {
-    "rimraf": "~2.6.2",
-    "typedoc": "^0.15.2",
-    "typescript": "~3.7.2"
+    "rimraf": "~3.0.0",
+    "typedoc": "^0.15.4",
+    "typescript": "~3.7.3"
   },
   "publishConfig": {
     "access": "public"

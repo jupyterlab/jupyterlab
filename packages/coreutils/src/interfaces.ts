@@ -3,7 +3,10 @@
 
 import { CommandRegistry } from '@lumino/commands';
 
-import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
+import {
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
 
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
@@ -12,7 +15,7 @@ import { ISignal } from '@lumino/signaling';
 /**
  * A generic interface for change emitter payloads.
  */
-export interface IChangedArgs<T, U extends string = string> {
+export interface IChangedArgs<T, OldT = T, U extends string = string> {
   /**
    * The name of the changed attribute.
    */
@@ -21,7 +24,7 @@ export interface IChangedArgs<T, U extends string = string> {
   /**
    * The old value of the changed attribute.
    */
-  oldValue: T;
+  oldValue: OldT;
 
   /**
    * The new value of the changed attribute.
@@ -227,7 +230,7 @@ export namespace IRestorer {
     /**
      * A function that returns the args needed to restore an instance.
      */
-    args?: (obj: T) => ReadonlyJSONObject;
+    args?: (obj: T) => ReadonlyPartialJSONObject;
 
     /**
      * A function that returns a unique persistent name for this instance.
@@ -279,7 +282,7 @@ export namespace IRestorable {
     /**
      * The data connector to fetch restore data.
      */
-    connector: IDataConnector<ReadonlyJSONValue>;
+    connector: IDataConnector<ReadonlyPartialJSONValue>;
 
     /**
      * The command registry which holds the restore command.

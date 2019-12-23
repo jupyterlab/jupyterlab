@@ -1,6 +1,0 @@
-{
-  "excludeNotExported": true,
-  "mode": "file",
-  "out": "../../docs/api/vega4-extension",
-  "theme": "../../typedoc-theme"
-}

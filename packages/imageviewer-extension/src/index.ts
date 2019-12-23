@@ -105,8 +105,8 @@ function activate(
     const types = app.docRegistry.getFileTypesForPath(widget.context.path);
 
     if (types.length > 0) {
-      widget.title.iconClass = types[0].iconClass;
-      widget.title.iconLabel = types[0].iconLabel;
+      widget.title.iconClass = types[0].iconClass ?? '';
+      widget.title.iconLabel = types[0].iconLabel ?? '';
     }
   });
 
@@ -196,7 +196,7 @@ export function addCommands(app: JupyterFrontEnd, tracker: IImageTracker) {
   });
 
   function zoomIn(): void {
-    const widget = tracker.currentWidget.content;
+    const widget = tracker.currentWidget?.content;
 
     if (widget) {
       widget.scale = widget.scale > 1 ? widget.scale + 0.5 : widget.scale * 2;
@@ -204,7 +204,7 @@ export function addCommands(app: JupyterFrontEnd, tracker: IImageTracker) {
   }
 
   function zoomOut(): void {
-    const widget = tracker.currentWidget.content;
+    const widget = tracker.currentWidget?.content;
 
     if (widget) {
       widget.scale = widget.scale > 1 ? widget.scale - 0.5 : widget.scale / 2;
@@ -212,7 +212,7 @@ export function addCommands(app: JupyterFrontEnd, tracker: IImageTracker) {
   }
 
   function resetImage(): void {
-    const widget = tracker.currentWidget.content;
+    const widget = tracker.currentWidget?.content;
 
     if (widget) {
       widget.scale = 1;
@@ -222,7 +222,7 @@ export function addCommands(app: JupyterFrontEnd, tracker: IImageTracker) {
   }
 
   function rotateClockwise(): void {
-    const widget = tracker.currentWidget.content;
+    const widget = tracker.currentWidget?.content;
 
     if (widget) {
       widget.rotateClockwise();
@@ -230,7 +230,7 @@ export function addCommands(app: JupyterFrontEnd, tracker: IImageTracker) {
   }
 
   function rotateCounterclockwise(): void {
-    const widget = tracker.currentWidget.content;
+    const widget = tracker.currentWidget?.content;
 
     if (widget) {
       widget.rotateCounterclockwise();
@@ -238,7 +238,7 @@ export function addCommands(app: JupyterFrontEnd, tracker: IImageTracker) {
   }
 
   function flipHorizontal(): void {
-    const widget = tracker.currentWidget.content;
+    const widget = tracker.currentWidget?.content;
 
     if (widget) {
       widget.flipHorizontal();
@@ -246,7 +246,7 @@ export function addCommands(app: JupyterFrontEnd, tracker: IImageTracker) {
   }
 
   function flipVertical(): void {
-    const widget = tracker.currentWidget.content;
+    const widget = tracker.currentWidget?.content;
 
     if (widget) {
       widget.flipVertical();
@@ -254,7 +254,7 @@ export function addCommands(app: JupyterFrontEnd, tracker: IImageTracker) {
   }
 
   function invertColors(): void {
-    const widget = tracker.currentWidget.content;
+    const widget = tracker.currentWidget?.content;
 
     if (widget) {
       widget.colorinversion += 1;

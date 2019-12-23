@@ -152,7 +152,7 @@ describe('filebrowser/model', () => {
           expect(sender).to.equal(model);
           expect(args.type).to.equal('new');
           expect(args.oldValue).to.be.null;
-          expect(args.newValue.type).to.equal('file');
+          expect(args.newValue!.type).to.equal('file');
           called = true;
         });
         await manager.newUntitled({ type: 'file' });
@@ -164,8 +164,8 @@ describe('filebrowser/model', () => {
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.equal(model);
           expect(args.type).to.equal('rename');
-          expect(args.oldValue.path).to.equal(name);
-          expect(args.newValue.path).to.equal(name + '.bak');
+          expect(args.oldValue!.path).to.equal(name);
+          expect(args.newValue!.path).to.equal(name + '.bak');
           called = true;
         });
         await manager.rename(name, name + '.bak');
@@ -177,7 +177,7 @@ describe('filebrowser/model', () => {
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.equal(model);
           expect(args.type).to.equal('delete');
-          expect(args.oldValue.path).to.equal(name);
+          expect(args.oldValue!.path).to.equal(name);
           expect(args.newValue).to.be.null;
           called = true;
         });
@@ -213,7 +213,9 @@ describe('filebrowser/model', () => {
       it('should be the session models for the active notebooks', async () => {
         const contents = await manager.newUntitled({ type: 'notebook' });
         const session = await serviceManager.sessions.startNew({
-          path: contents.path
+          name: '',
+          path: contents.path,
+          type: 'test'
         });
         await model.cd();
         expect(model.sessions().next()).to.be.ok;
@@ -361,7 +363,7 @@ describe('filebrowser/model', () => {
           expect(sender).to.equal(model);
           expect(args.type).to.equal('save');
           expect(args.oldValue).to.be.null;
-          expect(args.newValue.path).to.equal(fname);
+          expect(args.newValue!.path).to.equal(fname);
           called = true;
         });
         const file = new File(['<p>Hello world!</p>'], fname, {

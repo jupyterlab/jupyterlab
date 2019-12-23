@@ -2,7 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import { ReadonlyJSONObject } from '@lumino/coreutils';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { Widget } from '@lumino/widgets';
 
@@ -22,7 +22,7 @@ export namespace IRenderMime {
     /**
      * The data associated with the model.
      */
-    readonly data: ReadonlyJSONObject;
+    readonly data: ReadonlyPartialJSONObject;
 
     /**
      * The metadata associated with the model.
@@ -30,7 +30,7 @@ export namespace IRenderMime {
      * Among others, it can include an attribute named `fragment`
      * that stores a URI fragment identifier for the MIME resource.
      */
-    readonly metadata: ReadonlyJSONObject;
+    readonly metadata: ReadonlyPartialJSONObject;
 
     /**
      * Set the data associated with the model.
@@ -54,12 +54,12 @@ export namespace IRenderMime {
       /**
        * The new data object.
        */
-      data?: ReadonlyJSONObject;
+      data?: ReadonlyPartialJSONObject;
 
       /**
        * The new metadata object.
        */
-      metadata?: ReadonlyJSONObject;
+      metadata?: ReadonlyPartialJSONObject;
     }
   }
 
@@ -113,7 +113,7 @@ export namespace IRenderMime {
     /**
      * A function returning a list of toolbar items to add to the toolbar.
      */
-    readonly toolbarFactory?: (widget: IRenderer) => IToolbarItem[];
+    readonly toolbarFactory?: (widget?: IRenderer) => IToolbarItem[];
   }
 
   /**

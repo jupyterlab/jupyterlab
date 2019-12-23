@@ -64,8 +64,7 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
    * Construct a new VDomRenderer for the status item.
    */
   constructor(opts: EditorSyntaxStatus.IOptions) {
-    super();
-    this.model = new EditorSyntaxStatus.Model();
+    super(new EditorSyntaxStatus.Model());
     this._commands = opts.commands;
     this.addClass(interactiveItem);
     this.title.caption = 'Change text editor syntax highlighting';

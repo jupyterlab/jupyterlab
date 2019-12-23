@@ -61,10 +61,10 @@ function activateNBOutput(
     // There is overlap here since unhandled messages are also emitted in the
     // iopubMessage signal. However, unhandled messages warrant a higher log
     // severity, so we'll accept that they are logged twice.
-    nb.context.session.iopubMessage.connect(
+    nb.context.sessionContext.iopubMessage.connect(
       (_, msg: KernelMessage.IIOPubMessage) => logOutput(msg, 'info', 'info')
     );
-    nb.context.session.unhandledMessage.connect(
+    nb.context.sessionContext.unhandledMessage.connect(
       (_, msg: KernelMessage.IIOPubMessage) =>
         logOutput(msg, 'warning', 'error')
     );

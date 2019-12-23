@@ -190,10 +190,10 @@ describe('@jupyterlab/apputils', () => {
           const prompt = dialog.launch();
 
           await waitForDialog();
-          expect(document.activeElement.className).toContain('jp-mod-accept');
+          expect(document.activeElement!.className).toContain('jp-mod-accept');
           simulate(dialog.node, 'keydown', { keyCode: 9 });
-          expect(document.activeElement.className).toContain('jp-mod-reject');
-          simulate(document.activeElement, 'click');
+          expect(document.activeElement!.className).toContain('jp-mod-reject');
+          simulate(document.activeElement!, 'click');
           expect((await prompt).button.accept).toBe(false);
         });
       });
@@ -229,7 +229,7 @@ describe('@jupyterlab/apputils', () => {
           const prompt = dialog.launch();
 
           await waitForDialog();
-          simulate(dialog.node.querySelector('.jp-mod-reject'), 'click');
+          simulate(dialog.node.querySelector('.jp-mod-reject')!, 'click');
           expect((await prompt).button.accept).toBe(false);
         });
       });
@@ -251,7 +251,7 @@ describe('@jupyterlab/apputils', () => {
           await waitForDialog();
           simulate(target, 'focus');
           expect(document.activeElement).not.toBe(target);
-          expect(document.activeElement.className).toContain('jp-mod-accept');
+          expect(document.activeElement!.className).toContain('jp-mod-accept');
           dialog.resolve();
           await prompt;
           dialog.dispose();
@@ -271,7 +271,7 @@ describe('@jupyterlab/apputils', () => {
 
       it('should focus the default button', () => {
         Widget.attach(dialog, document.body);
-        expect(document.activeElement.className).toContain('jp-mod-accept');
+        expect(document.activeElement!.className).toContain('jp-mod-accept');
       });
 
       it('should focus the primary element', () => {
@@ -283,7 +283,7 @@ describe('@jupyterlab/apputils', () => {
         const dialog = new TestDialog({ body, focusNodeSelector: 'input' });
 
         Widget.attach(dialog, document.body);
-        expect(document.activeElement.localName).toBe('input');
+        expect(document.activeElement!.localName).toBe('input');
         dialog.dispose();
       });
     });
@@ -354,7 +354,7 @@ describe('@jupyterlab/apputils', () => {
           const widget = renderer.createBody('foo');
 
           expect(widget.hasClass('jp-Dialog-body')).toBe(true);
-          expect(widget.node.firstChild.textContent).toBe('foo');
+          expect(widget.node.firstChild!.textContent).toBe('foo');
         });
 
         it('should create the body from a virtual node', () => {
@@ -368,9 +368,9 @@ describe('@jupyterlab/apputils', () => {
             </div>
           );
           const widget = renderer.createBody(vnode);
-          const button = widget.node.querySelector('button');
-          const input = widget.node.querySelector('input');
-          const select = widget.node.querySelector('select');
+          const button = widget.node.querySelector('button')!;
+          const input = widget.node.querySelector('input')!;
+          const select = widget.node.querySelector('select')!;
 
           Widget.attach(widget, document.body);
           expect(button.className).toContain('jp-mod-styled');

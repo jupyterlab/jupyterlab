@@ -7,7 +7,7 @@ import {
   ServerConnection
 } from '@jupyterlab/services';
 
-import { JSONValue, PromiseDelegate } from '@lumino/coreutils';
+import { PromiseDelegate, PartialJSONValue } from '@lumino/coreutils';
 
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
@@ -17,9 +17,9 @@ import { Widget } from '@lumino/widgets';
 
 import {
   showDialog,
-  ClientSession,
+  SessionContext,
   Dialog,
-  IClientSession,
+  ISessionContext,
   showErrorMessage
 } from '@jupyterlab/apputils';
 
@@ -65,19 +65,20 @@ export class Context<T extends DocumentRegistry.IModel>
     });
 
     let ext = PathExt.extname(this._path);
-    this.session = new ClientSession({
-      manager: manager.sessions,
+    this.sessionContext = new SessionContext({
+      sessionManager: manager.sessions,
+      specsManager: manager.kernelspecs,
       path: this._path,
       type: ext === '.ipynb' ? 'notebook' : 'file',
       name: PathExt.basename(localPath),
       kernelPreference: options.kernelPreference || { shouldStart: false },
       setBusy: options.setBusy
     });
-    this.session.propertyChanged.connect(this._onSessionChanged, this);
+    this.sessionContext.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
 
     this.urlResolver = new RenderMimeRegistry.UrlResolver({
-      session: this.session,
+      session: this.sessionContext,
       contents: manager.contents
     });
   }
@@ -120,7 +121,7 @@ export class Context<T extends DocumentRegistry.IModel>
   /**
    * The client session object associated with the context.
    */
-  readonly session: ClientSession;
+  readonly sessionContext: SessionContext;
 
   /**
    * The current path associated with the document.
@@ -174,7 +175,7 @@ export class Context<T extends DocumentRegistry.IModel>
       return;
     }
     this._isDisposed = true;
-    this.session.dispose();
+    this.sessionContext.dispose();
     if (this._modelDB) {
       this._modelDB.dispose();
     }
@@ -387,7 +388,7 @@ export class Context<T extends DocumentRegistry.IModel>
     let oldPath = change.oldValue && change.oldValue.path;
     let newPath = change.newValue && change.newValue.path;
 
-    if (newPath && this._path.indexOf(oldPath) === 0) {
+    if (newPath && this._path.indexOf(oldPath || '') === 0) {
       let changeModel = change.newValue;
       // When folder name changed, `oldPath` is `foo`, `newPath` is `bar` and `this._path` is `foo/test`,
       // we should update `foo/test` to `bar/test` as well
@@ -398,18 +399,18 @@ export class Context<T extends DocumentRegistry.IModel>
 
         // Update client file model from folder change
         changeModel = {
-          last_modified: change.newValue.created,
+          last_modified: change.newValue?.created,
           path: newPath
         };
       }
       this._path = newPath;
-      void this.session.setPath(newPath);
+      void this.sessionContext.session?.setPath(newPath);
       const updateModel = {
         ...this._contentsModel,
         ...changeModel
       };
       const localPath = this._manager.contents.localPath(newPath);
-      void this.session.setName(PathExt.basename(localPath));
+      void this.sessionContext.session?.setName(PathExt.basename(localPath));
       this._updateContentsModel(updateModel as Contents.IModel);
       this._pathChanged.emit(this._path);
     }
@@ -418,11 +419,11 @@ export class Context<T extends DocumentRegistry.IModel>
   /**
    * Handle a change to a session property.
    */
-  private _onSessionChanged(sender: IClientSession, type: string): void {
+  private _onSessionChanged(sender: ISessionContext, type: string): void {
     if (type !== 'path') {
       return;
     }
-    let path = this.session.path;
+    let path = this.sessionContext.session!.path;
     if (path !== this._path) {
       this._path = path;
       this._pathChanged.emit(path);
@@ -466,16 +467,17 @@ export class Context<T extends DocumentRegistry.IModel>
       }
       // Update the kernel preference.
       let name =
-        this._model.defaultKernelName || this.session.kernelPreference.name;
-      this.session.kernelPreference = {
-        ...this.session.kernelPreference,
+        this._model.defaultKernelName ||
+        this.sessionContext.kernelPreference.name;
+      this.sessionContext.kernelPreference = {
+        ...this.sessionContext.kernelPreference,
         name,
         language: this._model.defaultKernelLanguage
       };
       // Note: we don't wait on the session to initialize
       // so that the user can be shown the content before
       // any kernel has started.
-      void this.session.initialize();
+      void this.sessionContext.initialize();
     });
   }
 
@@ -485,7 +487,7 @@ export class Context<T extends DocumentRegistry.IModel>
   private _save(): Promise<void> {
     this._saveState.emit('started');
     let model = this._model;
-    let content: JSONValue;
+    let content: PartialJSONValue;
     if (this._factory.fileFormat === 'json') {
       content = model.toJSON();
     } else {
@@ -628,8 +630,8 @@ export class Context<T extends DocumentRegistry.IModel>
         // (our last save)
         // In some cases the filesystem reports an inconsistent time,
         // so we allow 0.5 seconds difference before complaining.
-        let modified = this.contentsModel && this.contentsModel.last_modified;
-        let tClient = new Date(modified);
+        let modified = this.contentsModel?.last_modified;
+        let tClient = modified ? new Date(modified) : new Date();
         let tDisk = new Date(model.last_modified);
         if (modified && tDisk.getTime() - tClient.getTime() > 500) {
           // 500 ms
@@ -681,14 +683,12 @@ export class Context<T extends DocumentRegistry.IModel>
       return promise;
     }
     if (force) {
-      promise = this.createCheckpoint();
+      promise = this.createCheckpoint().then(/* no-op */);
     } else {
       promise = this.listCheckpoints().then(checkpoints => {
         writable = this._contentsModel && this._contentsModel.writable;
         if (!this.isDisposed && !checkpoints.length && writable) {
-          return this.createCheckpoint().then(() => {
-            /* no-op */
-          });
+          return this.createCheckpoint().then(/* no-op */);
         }
       });
     }
@@ -766,12 +766,12 @@ export class Context<T extends DocumentRegistry.IModel>
   /**
    * Finish a saveAs operation given a new path.
    */
-  private _finishSaveAs(newPath: string): Promise<void> {
+  private async _finishSaveAs(newPath: string): Promise<void> {
     this._path = newPath;
-    return this.session
-      .setPath(newPath)
+    return this.sessionContext.session
+      ?.setPath(newPath)
       .then(() => {
-        void this.session.setName(newPath.split('/').pop()!);
+        void this.sessionContext.session?.setName(newPath.split('/').pop()!);
         return this.save();
       })
       .then(() => {
@@ -828,7 +828,7 @@ export namespace Context {
     /**
      * The kernel preference associated with the context.
      */
-    kernelPreference?: IClientSession.IKernelPreference;
+    kernelPreference?: ISessionContext.IKernelPreference;
 
     /**
      * An IModelDB factory method which may be used for the document.
@@ -862,7 +862,7 @@ namespace Private {
       buttons: [Dialog.cancelButton(), saveBtn]
     }).then(result => {
       if (result.button.label === 'Save') {
-        return result.value;
+        return result.value ?? undefined;
       }
       return;
     });

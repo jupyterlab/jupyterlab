@@ -64,11 +64,11 @@ describe('ImageViewer', () => {
   beforeAll(async () => {
     manager = new ServiceManager({ standby: 'never' });
     await manager.ready;
-    return manager.contents.save(IMAGE.path, IMAGE);
+    return manager.contents.save(IMAGE.path!, IMAGE);
   });
 
   beforeEach(() => {
-    context = new Context({ manager, factory, path: IMAGE.path });
+    context = new Context({ manager, factory, path: IMAGE.path! });
     widget = new LogImage(context);
     return context.initialize(false);
   });
@@ -139,7 +139,7 @@ describe('ImageViewer', () => {
 
   describe('#onUpdateRequest()', () => {
     it('should render the image', async () => {
-      const img: HTMLImageElement = widget.node.querySelector('img');
+      const img: HTMLImageElement = widget.node.querySelector('img')!;
       await widget.ready;
       MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
       expect(widget.methods).to.contain('onUpdateRequest');

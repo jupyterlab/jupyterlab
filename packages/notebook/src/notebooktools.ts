@@ -3,7 +3,10 @@
 
 import { ArrayExt, each, chain } from '@lumino/algorithm';
 
-import { JSONObject, JSONValue } from '@lumino/coreutils';
+import {
+  ReadonlyPartialJSONValue,
+  ReadonlyPartialJSONObject
+} from '@lumino/coreutils';
 
 import { ConflatableMessage, Message, MessageLoop } from '@lumino/messaging';
 
@@ -124,7 +127,7 @@ export class NotebookTools extends Widget implements INotebookTools {
    */
   addItem(options: NotebookTools.IAddOptions): void {
     let tool = options.tool;
-    let rank = 'rank' in options ? options.rank : 100;
+    let rank = options.rank ?? 100;
 
     let section: RankedPanel<NotebookTools.Tool>;
     if (options.section === 'advanced') {
@@ -209,8 +212,8 @@ export class NotebookTools extends Widget implements INotebookTools {
    * Handle a change in the active cell metadata.
    */
   private _onActiveNotebookPanelMetadataChanged(
-    sender: IObservableMap<JSONValue>,
-    args: IObservableMap.IChangedArgs<JSONValue>
+    sender: IObservableMap<ReadonlyPartialJSONValue | undefined>,
+    args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>
   ): void {
     let message = new ObservableJSON.ChangeMessage(
       'activenotebookpanel-metadata-changed',
@@ -225,8 +228,8 @@ export class NotebookTools extends Widget implements INotebookTools {
    * Handle a change in the notebook model metadata.
    */
   private _onActiveCellMetadataChanged(
-    sender: IObservableMap<JSONValue>,
-    args: IObservableMap.IChangedArgs<JSONValue>
+    sender: IObservableMap<ReadonlyPartialJSONValue | undefined>,
+    args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>
   ): void {
     let message = new ObservableJSON.ChangeMessage(
       'activecell-metadata-changed',
@@ -310,7 +313,9 @@ export namespace NotebookTools {
 
     dispose() {
       super.dispose();
-      this.notebookTools = null;
+      if (this.notebookTools) {
+        this.notebookTools = null!;
+      }
     }
 
     /**
@@ -420,7 +425,7 @@ export namespace NotebookTools {
         return;
       }
       this._model.dispose();
-      this._model = null;
+      this._model = null!;
       super.dispose();
     }
 
@@ -451,7 +456,7 @@ export namespace NotebookTools {
       }
       let promptNode = activeCell.promptNode
         ? (activeCell.promptNode.cloneNode(true) as HTMLElement)
-        : null;
+        : undefined;
       let prompt = new Widget({ node: promptNode });
       let factory = activeCell.contentFactory.editorFactory;
 
@@ -474,18 +479,18 @@ export namespace NotebookTools {
      * Handle a change to the current editor value.
      */
     private _onValueChanged(): void {
-      this._model.value.text = this._cellModel.value.text.split('\n')[0];
+      this._model.value.text = this._cellModel!.value.text.split('\n')[0];
     }
 
     /**
      * Handle a change to the current editor mimetype.
      */
     private _onMimeTypeChanged(): void {
-      this._model.mimeType = this._cellModel.mimeType;
+      this._model.mimeType = this._cellModel!.mimeType;
     }
 
     private _model = new CodeEditor.Model();
-    private _cellModel: CodeEditor.IModel;
+    private _cellModel: CodeEditor.IModel | null;
   }
 
   /**
@@ -568,7 +573,7 @@ export namespace NotebookTools {
       const nb =
         this.notebookTools.activeNotebookPanel &&
         this.notebookTools.activeNotebookPanel.content;
-      this.editor.source = nb ? nb.model.metadata : null;
+      this.editor.source = nb?.model?.metadata ?? null;
     }
   }
 
@@ -683,7 +688,7 @@ export namespace NotebookTools {
         this._validCellTypes.length &&
         this._validCellTypes.indexOf(cellType) === -1
       ) {
-        select.value = undefined;
+        select.value = '';
         select.disabled = true;
         return;
       }
@@ -740,7 +745,10 @@ export namespace NotebookTools {
     /**
      * Set the value for the data.
      */
-    private _setValue = (cell: Cell, value: JSONValue) => {
+    private _setValue = (
+      cell: Cell,
+      value: ReadonlyPartialJSONValue | undefined
+    ) => {
       if (value === this._default) {
         cell.model.metadata.delete(this.key);
       } else {
@@ -750,9 +758,12 @@ export namespace NotebookTools {
 
     private _changeGuard = false;
     private _validCellTypes: string[];
-    private _getter: (cell: Cell) => JSONValue;
-    private _setter: (cell: Cell, value: JSONValue) => void;
-    private _default: JSONValue;
+    private _getter: (cell: Cell) => ReadonlyPartialJSONValue | undefined;
+    private _setter: (
+      cell: Cell,
+      value: ReadonlyPartialJSONValue | undefined
+    ) => void;
+    private _default: ReadonlyPartialJSONValue | undefined;
   }
 
   /**
@@ -775,7 +786,7 @@ export namespace NotebookTools {
        * If a value equals the default, choosing it may erase the key from the
        * metadata.
        */
-      optionsMap: { [key: string]: JSONValue };
+      optionsMap: ReadonlyPartialJSONObject;
 
       /**
        * The optional title of the selector - defaults to capitalized `key`.
@@ -794,7 +805,7 @@ export namespace NotebookTools {
        *
        * @returns The appropriate value for the selector.
        */
-      getter?: (cell: Cell) => JSONValue;
+      getter?: (cell: Cell) => ReadonlyPartialJSONValue | undefined;
 
       /**
        * An optional value setter for the selector.
@@ -807,12 +818,15 @@ export namespace NotebookTools {
        * The setter should set the appropriate metadata value given the value of
        * the selector.
        */
-      setter?: (cell: Cell, value: JSONValue) => void;
+      setter?: (
+        cell: Cell,
+        value: ReadonlyPartialJSONValue | undefined
+      ) => void;
 
       /**
        * Default value for default setters and getters if value is not found.
        */
-      default?: JSONValue;
+      default?: ReadonlyPartialJSONValue;
     }
   }
 
@@ -832,8 +846,10 @@ export namespace NotebookTools {
         Notes: 'notes'
       },
       getter: cell => {
-        let value = cell.model.metadata.get('slideshow');
-        return value && (value as JSONObject)['slide_type'];
+        let value = cell.model.metadata.get('slideshow') as
+          | ReadonlyPartialJSONObject
+          | undefined;
+        return value && value['slide_type'];
       },
       setter: (cell, value) => {
         let data = cell.model.metadata.get('slideshow') || Object.create(null);
@@ -857,9 +873,9 @@ export namespace NotebookTools {
   /**
    * Create an nbconvert selector.
    */
-  export function createNBConvertSelector(optionsMap: {
-    [key: string]: JSONValue;
-  }): KeySelector {
+  export function createNBConvertSelector(
+    optionsMap: ReadonlyPartialJSONObject
+  ): KeySelector {
     return new KeySelector({
       key: 'raw_mimetype',
       title: 'Raw NBConvert Format',

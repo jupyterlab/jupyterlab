@@ -69,7 +69,7 @@ export class ThemeManager implements IThemeManager {
   /**
    * A signal fired when the application theme changes.
    */
-  get themeChanged(): ISignal<this, IChangedArgs<string>> {
+  get themeChanged(): ISignal<this, IChangedArgs<string, string | null>> {
     return this._themeChanged;
   }
 
@@ -435,7 +435,9 @@ export class ThemeManager implements IThemeManager {
   private _settings: ISettingRegistry.ISettings;
   private _splash: ISplashScreen | null;
   private _themes: { [key: string]: IThemeManager.ITheme } = {};
-  private _themeChanged = new Signal<this, IChangedArgs<string>>(this);
+  private _themeChanged = new Signal<this, IChangedArgs<string, string | null>>(
+    this
+  );
 }
 
 export namespace ThemeManager {

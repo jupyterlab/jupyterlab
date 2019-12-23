@@ -9,6 +9,9 @@
   "include": ["src/*"],
   "references": [
     {
+      "path": "../../packages/apputils"
+    },
+    {
       "path": "../../packages/docregistry"
     },
     {

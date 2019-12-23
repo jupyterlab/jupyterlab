@@ -429,8 +429,7 @@ export namespace CollapsibleSection {
  */
 export class ExtensionView extends VDomRenderer<ListModel> {
   constructor(serviceManager: ServiceManager) {
-    super();
-    this.model = new ListModel(serviceManager);
+    super(new ListModel(serviceManager));
     this.addClass('jp-extensionmanager-view');
   }
 

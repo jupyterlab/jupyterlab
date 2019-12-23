@@ -1,0 +1,53 @@
+{
+  "name": "@jupyterlab/celltags-extension",
+  "version": "2.0.0-alpha.4",
+  "description": "An extension for manipulating tags in cell metadata",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension"
+  ],
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "files": [
+    "lib/*.{d.ts,js}",
+    "style/*.css"
+  ],
+  "sideEffects": [
+    "style/*.css"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "directories": {
+    "lib": "lib/"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "prepare": "npm run clean && npm run build",
+    "prepublishOnly": "npm run build",
+    "watch": "tsc -b --watch"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^2.0.0-alpha.4",
+    "@jupyterlab/celltags": "^2.0.0-alpha.4",
+    "@jupyterlab/notebook": "^2.0.0-alpha.4"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.17",
+    "rimraf": "~3.0.0",
+    "typescript": "~3.7.3"
+  },
+  "jupyterlab": {
+    "extension": true
+  }
+}

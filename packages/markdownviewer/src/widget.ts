@@ -95,24 +95,26 @@ export class MarkdownViewer extends Widget {
     const { style } = this.renderer.node;
     switch (option) {
       case 'fontFamily':
-        style.fontFamily = value as string | null;
+        style.setProperty(option, value as string | null);
         break;
       case 'fontSize':
-        style.fontSize = value ? value + 'px' : null;
+        style.setProperty(option, value ? value + 'px' : null);
         break;
       case 'hideFrontMatter':
         this.update();
         break;
       case 'lineHeight':
-        style.lineHeight = value ? value.toString() : null;
+        style.setProperty(option, value ? value.toString() : null);
         break;
       case 'lineWidth':
         const padding = value ? `calc(50% - ${(value as number) / 2}ch)` : null;
-        style.paddingLeft = padding;
-        style.paddingRight = padding;
+        style.setProperty('paddingLeft', padding);
+        style.setProperty('paddingRight', padding);
         break;
       case 'renderTimeout':
-        this._monitor.timeout = value as number;
+        if (this._monitor) {
+          this._monitor.timeout = value as number;
+        }
         break;
       default:
         break;
@@ -288,7 +290,7 @@ export class MarkdownDocument extends DocumentWidget<MarkdownViewer> {
  */
 export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
   /**
-   * Construct a new mimetype widget factory.
+   * Construct a new markdown viewer widget factory.
    */
   constructor(options: MarkdownViewerFactory.IOptions) {
     super(Private.createRegistryOptions(options));
@@ -307,29 +309,29 @@ export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
     });
     const renderer = rendermime.createRenderer(MIMETYPE);
     const content = new MarkdownViewer({ context, renderer });
-    content.title.iconClass = this._fileType.iconClass;
-    content.title.iconLabel = this._fileType.iconLabel;
+    content.title.iconClass = this._fileType?.iconClass ?? '';
+    content.title.iconLabel = this._fileType?.iconLabel ?? '';
     const widget = new MarkdownDocument({ content, context });
 
     return widget;
   }
 
-  private _fileType: DocumentRegistry.IFileType;
+  private _fileType: DocumentRegistry.IFileType | undefined;
   private _rendermime: IRenderMimeRegistry;
 }
 
 /**
- * The namespace for MimeDocumentFactory class statics.
+ * The namespace for MarkdownViewerFactory class statics.
  */
 export namespace MarkdownViewerFactory {
   /**
-   * The options used to initialize a MimeDocumentFactory.
+   * The options used to initialize a MarkdownViewerFactory.
    */
   export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
     /**
      * The primary file type associated with the document.
      */
-    primaryFileType: DocumentRegistry.IFileType;
+    primaryFileType: DocumentRegistry.IFileType | undefined;
 
     /**
      * The rendermime instance.

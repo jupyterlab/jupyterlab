@@ -100,7 +100,7 @@ describe('defaultSanitizer', () => {
       let input: HTMLInputElement;
 
       div.innerHTML = html;
-      input = div.querySelector('input');
+      input = div.querySelector('input')!;
 
       expect(input.disabled).to.equal(true);
     });

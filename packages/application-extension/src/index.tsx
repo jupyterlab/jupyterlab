@@ -112,6 +112,14 @@ const main: JupyterFrontEndPlugin<void> = {
       app.commands.notifyCommandChanged();
     });
 
+    // when current tab changes, activate the new current tab
+    // if there isn't an active tab
+    app.shell.currentChanged.connect((sender, args) => {
+      if (!app.shell.activeWidget && args.newValue) {
+        app.shell.activateById(args.newValue.id);
+      }
+    });
+
     // If the connection to the server is lost, handle it with the
     // connection lost handler.
     connectionLost = connectionLost || ConnectionLost;
@@ -262,9 +270,9 @@ const tree: JupyterFrontEndPlugin<void> = {
         const treeMatch = args.path.match(treePattern);
         const workspaceMatch = args.path.match(workspacePattern);
         const match = treeMatch || workspaceMatch;
-        const path = decodeURI(match[1]);
+        const path = match ? decodeURI(match[1]) : undefined;
         const workspace = PathExt.basename(resolver.name);
-        const query = URLExt.queryStringToObject(args.search);
+        const query = URLExt.queryStringToObject(args.search ?? '');
         const fileBrowserPath = query['file-browser-path'];
 
         // Remove the file browser path from the query string.
@@ -356,7 +364,7 @@ const busy: JupyterFrontEndPlugin<void> = {
 
         // Firefox doesn't seem to recognize just changing rel, so we also
         // reinsert the link into the DOM.
-        newFavicon.parentNode.replaceChild(newFavicon, newFavicon);
+        newFavicon.parentNode!.replaceChild(newFavicon, newFavicon);
       }
     });
   },
@@ -408,13 +416,13 @@ const sidebar: JupyterFrontEndPlugin<void> = {
       execute: () => {
         // First, try to find the correct panel based on the
         // application context menu click.
-        const contextNode: HTMLElement = app.contextMenuHitTest(
+        const contextNode: HTMLElement | undefined = app.contextMenuHitTest(
           node => !!node.dataset.id
         );
         let id: string;
         let side: 'left' | 'right';
         if (contextNode) {
-          id = contextNode.dataset['id'];
+          id = contextNode.dataset['id']!;
           const leftPanel = document.getElementById('jp-left-stack');
           const node = document.getElementById(id);
           if (leftPanel && node && leftPanel.contains(node)) {
@@ -452,7 +460,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   const category = 'Main Area';
 
   // Returns the widget associated with the most recent contextmenu event.
-  const contextMenuWidget = (): Widget => {
+  const contextMenuWidget = (): Widget | null => {
     const test = (node: HTMLElement) => !!node.dataset.id;
     const node = app.contextMenuHitTest(test);
 
@@ -486,7 +494,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       case 'split-area':
         const iterator = iter(area.children);
         let tab: DockLayout.ITabAreaConfig | null = null;
-        let value: DockLayout.AreaConfig | null = null;
+        let value: DockLayout.AreaConfig | undefined;
         do {
           value = iterator.next();
           if (value) {
@@ -505,10 +513,10 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   // Find the tab area for a widget within the main dock area.
   const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
     const { mainArea } = shell.saveLayout();
-    if (mainArea.mode !== 'multiple-document') {
+    if (!mainArea || mainArea.mode !== 'multiple-document') {
       return null;
     }
-    let area = mainArea.dock.main;
+    let area = mainArea.dock?.main;
     if (!area) {
       return null;
     }
@@ -603,7 +611,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   commands.addCommand(CommandIDs.closeRightTabs, {
     label: () => `Close Tabs to Right`,
     isEnabled: () =>
-      contextMenuWidget() && widgetsRightOf(contextMenuWidget()).length > 0,
+      !!contextMenuWidget() && widgetsRightOf(contextMenuWidget()!).length > 0,
     execute: () => {
       const widget = contextMenuWidget();
       if (!widget) {

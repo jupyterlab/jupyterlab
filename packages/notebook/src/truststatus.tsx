@@ -93,8 +93,7 @@ export class NotebookTrustStatus extends VDomRenderer<
    * Construct a new status item.
    */
   constructor() {
-    super();
-    this.model = new NotebookTrustStatus.Model();
+    super(new NotebookTrustStatus.Model());
   }
 
   /**
@@ -225,8 +224,11 @@ export namespace NotebookTrustStatus {
      * Given a notebook model, figure out how many of the cells are trusted.
      */
     private _deriveCellTrustState(
-      model: INotebookModel
+      model: INotebookModel | null
     ): { total: number; trusted: number } {
+      if (model === null) {
+        return { total: 0, trusted: 0 };
+      }
       let cells = toArray(model.cells);
 
       let trusted = cells.reduce((accum, current) => {

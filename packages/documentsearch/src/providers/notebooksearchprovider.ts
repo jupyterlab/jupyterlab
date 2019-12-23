@@ -33,11 +33,13 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    *
    * @returns Initial value used to populate the search box.
    */
-  getInitialQuery(searchTarget: NotebookPanel): any {
+  getInitialQuery(searchTarget: NotebookPanel): unknown {
     const activeCell = searchTarget.content.activeCell;
-    const selection = (activeCell.editor as CodeMirrorEditor).doc.getSelection();
+    const selection = (activeCell?.editor as
+      | CodeMirrorEditor
+      | undefined)?.doc.getSelection();
     // if there are newlines, just return empty string
-    return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
+    return selection?.search(/\r?\n|\r/g) === -1 ? selection : '';
   }
 
   /**
@@ -65,7 +67,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
         : filters;
     // Listen for cell model change to redo the search in case of
     // new/pasted/deleted cells
-    const cellList = this._searchTarget.model.cells;
+    const cellList = this._searchTarget.model!.cells;
     cellList.changed.connect(this._restartQuery.bind(this), this);
 
     // hide the current notebook widget to prevent expensive layout re-calculation operations
@@ -159,7 +161,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     this._searchTarget.show();
 
     this._currentMatch = await this._stepNext(
-      this._updatedCurrentProvider(false)
+      this._updatedCurrentProvider(false)!
     );
     this._refreshCurrentCellEditor();
 
@@ -190,8 +192,8 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    * Refresh the editor in the cell for the current match.
    */
   private _refreshCurrentCellEditor() {
-    const notebook = this._searchTarget.content;
-    notebook.activeCell.editor.refresh();
+    const notebook = this._searchTarget!.content;
+    notebook.activeCell!.editor.refresh();
   }
 
   /**
@@ -202,14 +204,14 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    * begin a new search.
    */
   async endQuery(): Promise<void> {
-    this._searchTarget.hide();
+    this._searchTarget!.hide();
 
     const queriesEnded: Promise<void>[] = [];
     this._searchProviders.forEach(({ provider }) => {
       queriesEnded.push(provider.endQuery());
       provider.changed.disconnect(this._onSearchProviderChanged, this);
     });
-    Signal.disconnectBetween(this._searchTarget.model.cells, this);
+    Signal.disconnectBetween(this._searchTarget!.model!.cells, this);
 
     this._searchProviders = [];
     this._currentProvider = null;
@@ -221,7 +223,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     });
     this._unRenderedMarkdownCells = [];
     await Promise.all(queriesEnded);
-    this._searchTarget.show();
+    this._searchTarget!.show();
 
     this._refreshCurrentCellEditor();
     // re-render all non-markdown cells with matches (which were rendered, thus do not need refreshing)
@@ -239,10 +241,10 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    * @returns A promise that resolves when all state has been cleaned up.
    */
   async endSearch(): Promise<void> {
-    this._searchTarget.hide();
-    Signal.disconnectBetween(this._searchTarget.model.cells, this);
+    this._searchTarget!.hide();
+    Signal.disconnectBetween(this._searchTarget!.model!.cells, this);
 
-    const index = this._searchTarget.content.activeCellIndex;
+    const index = this._searchTarget!.content.activeCellIndex;
     const searchEnded: Promise<void>[] = [];
     this._searchProviders.forEach(({ provider }) => {
       searchEnded.push(provider.endSearch());
@@ -256,11 +258,11 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     });
     this._unRenderedMarkdownCells = [];
 
-    this._searchTarget.content.activeCellIndex = index;
-    this._searchTarget.content.mode = 'edit';
+    this._searchTarget!.content.activeCellIndex = index;
+    this._searchTarget!.content.mode = 'edit';
     this._currentMatch = null;
     await Promise.all(searchEnded);
-    this._searchTarget.show();
+    this._searchTarget!.show();
     this._refreshCurrentCellEditor();
     this._searchTarget = null;
 
@@ -280,7 +282,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    */
   async highlightNext(): Promise<ISearchMatch | undefined> {
     this._currentMatch = await this._stepNext(
-      this._updatedCurrentProvider(false)
+      this._updatedCurrentProvider(false)!
     );
     return this._currentMatch;
   }
@@ -292,7 +294,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    */
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
     this._currentMatch = await this._stepNext(
-      this._updatedCurrentProvider(true),
+      this._updatedCurrentProvider(true)!,
       true
     );
     return this._currentMatch;
@@ -304,11 +306,11 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
   async replaceCurrentMatch(newText: string): Promise<boolean> {
-    const notebook = this._searchTarget.content;
-    const editor = notebook.activeCell.editor as CodeMirrorEditor;
+    const notebook = this._searchTarget!.content;
+    const editor = notebook.activeCell!.editor as CodeMirrorEditor;
     let replaceOccurred = false;
     if (this._currentMatchIsSelected(editor)) {
-      const { provider } = this._currentProvider;
+      const { provider } = this._currentProvider!;
       replaceOccurred = await provider.replaceCurrentMatch(newText);
       if (replaceOccurred) {
         this._currentMatch = provider.currentMatch;
@@ -352,7 +354,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
    * The same list of matches provided by the startQuery promise resolution
    */
   get matches(): ISearchMatch[] {
-    return [].concat(...this._getMatchesFromCells());
+    return ([] as ISearchMatch[]).concat(...this._getMatchesFromCells());
   }
 
   /**
@@ -365,7 +367,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   /**
    * The current index of the selected match.
    */
-  get currentMatchIndex(): number {
+  get currentMatchIndex(): number | null {
     if (!this._currentMatch) {
       return null;
     }
@@ -384,7 +386,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   private _updatedCurrentProvider(reverse: boolean) {
     if (
       this._currentProvider &&
-      this._currentProvider.cell === this._searchTarget.content.activeCell
+      this._currentProvider.cell === this._searchTarget!.content.activeCell
     ) {
       return this._currentProvider;
     }
@@ -393,7 +395,7 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       const find = reverse ? ArrayExt.findLastValue : ArrayExt.findFirstValue;
       provider = find(
         this._searchProviders,
-        provider => this._searchTarget.content.activeCell === provider.cell
+        provider => this._searchTarget!.content.activeCell === provider.cell
       );
     } else {
       const currentProviderIndex = ArrayExt.firstIndexOf(
@@ -454,14 +456,14 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
       return this._stepNext(nextSearchPair, reverse, steps + 1);
     }
 
-    const notebook = this._searchTarget.content;
+    const notebook = this._searchTarget!.content;
     notebook.activeCellIndex = notebook.widgets.indexOf(currentSearchPair.cell);
     return match;
   }
 
   private async _restartQuery() {
     await this.endQuery();
-    await this.startQuery(this._query, this._searchTarget, this._filters);
+    await this.startQuery(this._query, this._searchTarget!, this._filters);
     this._changed.emit(undefined);
   }
 
@@ -500,12 +502,12 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     );
   }
 
-  private _searchTarget: NotebookPanel;
+  private _searchTarget: NotebookPanel | undefined | null;
   private _query: RegExp;
   private _filters: INotebookFilters;
   private _searchProviders: ICellSearchPair[] = [];
-  private _currentProvider: ICellSearchPair;
-  private _currentMatch: ISearchMatch;
+  private _currentProvider: ICellSearchPair | null | undefined;
+  private _currentMatch: ISearchMatch | undefined | null;
   private _unRenderedMarkdownCells: MarkdownCell[] = [];
   private _cellsWithMatches: Cell[] = [];
   private _changed = new Signal<this, void>(this);

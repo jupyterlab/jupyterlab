@@ -62,7 +62,7 @@ describe('@jupyterlab/docmanager', () => {
   let manager: DocumentManager;
   let services: ServiceManager.IManager;
   let context: DocumentRegistry.Context;
-  let widget: Widget;
+  let widget: Widget | undefined;
   const textModelFactory = new TextModelFactory();
   const widgetFactory = new WidgetFactory({
     name: 'test',
@@ -145,7 +145,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.open(model.path);
+        widget = manager.open(model.path)!;
         expect(widget.hasClass('WidgetFactory')).to.equal(true);
         await dismissDialog();
       });
@@ -155,13 +155,18 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        const session = await services.sessions.startNew({ path: model.path });
-        const id = session.kernel.id;
-        widget = manager.open(session.path, 'default', { id });
-        context = manager.contextForWidget(widget);
-        await context.session.ready;
-        expect(context.session.kernel).to.be.ok;
-        await context.session.shutdown();
+        const session = await services.sessions.startNew({
+          name: '',
+          path: model.path,
+          type: 'test'
+        });
+        const id = session.kernel!.id;
+        widget = manager.open(session.path, 'default', { id })!;
+        context = manager.contextForWidget(widget)!;
+        await context.ready;
+        await context.sessionContext.ready;
+        expect(context.sessionContext.session?.kernel).to.be.ok;
+        await context.sessionContext.shutdown();
       });
 
       it('should not auto-start a kernel if there is none given', async () => {
@@ -169,10 +174,10 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.open(model.path, 'default');
-        context = manager.contextForWidget(widget);
+        widget = manager.open(model.path, 'default')!;
+        context = manager.contextForWidget(widget)!;
         await dismissDialog();
-        expect(context.session.kernel).to.be.null;
+        expect(context.sessionContext.session?.kernel).to.be.not.ok;
       });
 
       it('should return undefined if the factory is not found', async () => {
@@ -206,7 +211,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.createNew(model.path);
+        widget = manager.createNew(model.path)!;
         expect(widget.hasClass('WidgetFactory')).to.equal(true);
         await dismissDialog();
       });
@@ -216,13 +221,18 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        const session = await services.sessions.startNew({ path: model.path });
-        const id = session.kernel.id;
-        widget = manager.createNew(session.path, 'default', { id });
-        context = manager.contextForWidget(widget);
-        await context.session.ready;
-        expect(context.session.kernel.id).to.equal(id);
-        await context.session.shutdown();
+        const session = await services.sessions.startNew({
+          name: '',
+          path: model.path,
+          type: 'test'
+        });
+        const id = session.kernel!.id;
+        widget = manager.createNew(session.path, 'default', { id })!;
+        context = manager.contextForWidget(widget)!;
+        await context.ready;
+        await context.sessionContext.ready;
+        expect(context.sessionContext.session!.kernel!.id).to.equal(id);
+        await context.sessionContext.shutdown();
       });
 
       it('should not start a kernel if not given', async () => {
@@ -230,10 +240,10 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.createNew(model.path, 'default');
-        context = manager.contextForWidget(widget);
+        widget = manager.createNew(model.path, 'default')!;
+        context = manager.contextForWidget(widget)!;
         await dismissDialog();
-        expect(context.session.kernel).to.be.null;
+        expect(context.sessionContext.session?.kernel).to.be.not.ok;
       });
 
       it('should return undefined if the factory is not found', async () => {
@@ -322,8 +332,8 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.createNew(model.path);
-        context = manager.contextForWidget(widget);
+        widget = manager.createNew(model.path)!;
+        context = manager.contextForWidget(widget)!;
         expect(context.path).to.equal(model.path);
         await dismissDialog();
       });
@@ -340,8 +350,8 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.createNew(model.path);
-        const clone = manager.cloneWidget(widget);
+        widget = manager.createNew(model.path)!;
+        const clone = manager.cloneWidget(widget)!;
         expect(manager.contextForWidget(widget)).to.equal(
           manager.contextForWidget(clone)
         );
@@ -354,7 +364,7 @@ describe('@jupyterlab/docmanager', () => {
       });
 
       it('should allow widget factories to have custom clone behavior', () => {
-        widget = manager.createNew('foo', 'CloneTestWidget');
+        widget = manager.createNew('foo', 'CloneTestWidget')!;
         const clonedWidget: CloneTestWidget = manager.cloneWidget(
           widget
         ) as CloneTestWidget;
@@ -379,8 +389,8 @@ describe('@jupyterlab/docmanager', () => {
           ext: '.txt'
         });
         path = model.path;
-        widget = manager.createNew(path);
-        const clone = manager.cloneWidget(widget);
+        widget = manager.createNew(path)!;
+        const clone = manager.cloneWidget(widget)!;
 
         widget.disposed.connect(() => {
           called++;
@@ -407,12 +417,12 @@ describe('@jupyterlab/docmanager', () => {
           ext: '.txt'
         });
         path = model.path;
-        const widget0 = manager.createNew(path);
+        const widget0 = manager.createNew(path)!;
         widget0.disposed.connect(() => {
           called++;
         });
         await dismissDialog();
-        const widget1 = manager.createNew(path);
+        const widget1 = manager.createNew(path)!;
         widget1.disposed.connect(() => {
           called++;
         });

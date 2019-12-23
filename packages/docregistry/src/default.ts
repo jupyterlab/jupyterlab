@@ -5,7 +5,7 @@ import { Mode } from '@jupyterlab/codemirror';
 
 import { Contents } from '@jupyterlab/services';
 
-import { JSONValue } from '@lumino/coreutils';
+import { PartialJSONValue } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -119,7 +119,7 @@ export class DocumentModel extends CodeEditor.Model
   /**
    * Serialize the model to JSON.
    */
-  toJSON(): JSONValue {
+  toJSON(): PartialJSONValue {
     return JSON.parse(this.value.text || 'null');
   }
 
@@ -129,7 +129,7 @@ export class DocumentModel extends CodeEditor.Model
    * #### Notes
    * Should emit a [contentChanged] signal.
    */
-  fromJSON(value: JSONValue): void {
+  fromJSON(value: PartialJSONValue): void {
     this.fromString(JSON.stringify(value));
   }
 
@@ -421,9 +421,9 @@ export abstract class ABCWidgetFactory<
     return [];
   }
 
-  private _toolbarFactory: (
-    widget: T
-  ) => DocumentRegistry.IToolbarItem[] | undefined;
+  private _toolbarFactory:
+    | ((widget: T) => DocumentRegistry.IToolbarItem[])
+    | undefined;
   private _isDisposed = false;
   private _name: string;
   private _readOnly: boolean;

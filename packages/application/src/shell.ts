@@ -742,7 +742,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     let ref: Widget | null = this.currentWidget;
 
     if (options.ref) {
-      ref = find(dock.widgets(), value => value.id === options.ref!) || null;
+      ref = find(dock.widgets(), value => value.id === options!.ref!) || null;
     }
 
     // Add widget ID to tab so that we can get a handle on the tab's widget
@@ -802,7 +802,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       return;
     }
     options = options || {};
-    const rank = 'rank' in options ? options.rank : DEFAULT_RANK;
+    const rank = options.rank ?? DEFAULT_RANK;
     this._topHandler.addWidget(widget, rank);
     this._onLayoutModified();
     if (this._topHandler.panel.isHidden) {

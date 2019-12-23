@@ -10,7 +10,10 @@ import {
   JSONObject,
   JSONValue,
   ReadonlyJSONObject,
-  ReadonlyJSONValue
+  PartialJSONValue,
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue,
+  PartialJSONObject
 } from '@lumino/coreutils';
 
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
@@ -147,7 +150,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
     // Parse the raw commented JSON into a user map.
     let user: JSONObject;
     try {
-      user = json.parse(plugin.raw, null) as JSONObject;
+      user = json.parse(plugin.raw) as JSONObject;
     } catch (error) {
       if (error instanceof SyntaxError) {
         return [
@@ -296,7 +299,10 @@ export class SettingRegistry implements ISettingRegistry {
   async get(
     plugin: string,
     key: string
-  ): Promise<{ composite: JSONValue; user: JSONValue }> {
+  ): Promise<{
+    composite: PartialJSONValue | undefined;
+    user: PartialJSONValue | undefined;
+  }> {
     // Wait for data preload before allowing normal operation.
     await this._ready;
 
@@ -306,8 +312,9 @@ export class SettingRegistry implements ISettingRegistry {
       const { composite, user } = plugins[plugin].data;
 
       return {
-        composite: key in composite ? copy(composite[key]) : undefined,
-        user: key in user ? copy(user[key]) : undefined
+        composite:
+          composite[key] !== undefined ? copy(composite[key]!) : undefined,
+        user: user[key] !== undefined ? copy(user[key]!) : undefined
       };
     }
 
@@ -354,6 +361,16 @@ export class SettingRegistry implements ISettingRegistry {
     const plugins = this.plugins;
     const registry = this;
 
+    if (fetched === undefined) {
+      throw [
+        {
+          dataPath: '',
+          keyword: 'id',
+          message: `Could not fetch settings for ${plugin}.`,
+          schemaPath: ''
+        } as ISchemaValidator.IError
+      ];
+    }
     await this._load(await this._transform('fetch', fetched));
     this._pluginChanged.emit(plugin);
 
@@ -379,7 +396,7 @@ export class SettingRegistry implements ISettingRegistry {
       return;
     }
 
-    const raw = json.parse(plugins[plugin].raw, null);
+    const raw = json.parse(plugins[plugin].raw);
 
     // Delete both the value and any associated comment.
     delete raw[key];
@@ -412,7 +429,7 @@ export class SettingRegistry implements ISettingRegistry {
     }
 
     // Parse the raw JSON string removing all comments and return an object.
-    const raw = json.parse(plugins[plugin].raw, null);
+    const raw = json.parse(plugins[plugin].raw);
 
     plugins[plugin].raw = Private.annotatedPlugin(plugins[plugin], {
       ...raw,
@@ -550,6 +567,16 @@ export class SettingRegistry implements ISettingRegistry {
 
     // Fetch and reload the data to guarantee server and client are in sync.
     const fetched = await this.connector.fetch(plugin);
+    if (fetched === undefined) {
+      throw [
+        {
+          dataPath: '',
+          keyword: 'id',
+          message: `Could not fetch settings for ${plugin}.`,
+          schemaPath: ''
+        } as ISchemaValidator.IError
+      ];
+    }
     await this._load(await this._transform('fetch', fetched));
     this._pluginChanged.emit(plugin);
   }
@@ -666,7 +693,7 @@ export class Settings implements ISettingRegistry.ISettings {
   /**
    * The composite of user settings and extension defaults.
    */
-  get composite(): ReadonlyJSONObject {
+  get composite(): ReadonlyPartialJSONObject {
     return this.plugin.data.composite;
   }
 
@@ -678,7 +705,7 @@ export class Settings implements ISettingRegistry.ISettings {
   }
 
   get plugin(): ISettingRegistry.IPlugin {
-    return this.registry.plugins[this.id];
+    return this.registry.plugins[this.id]!;
   }
 
   /**
@@ -698,7 +725,7 @@ export class Settings implements ISettingRegistry.ISettings {
   /**
    * The user settings.
    */
-  get user(): ReadonlyJSONObject {
+  get user(): ReadonlyPartialJSONObject {
     return this.plugin.data.user;
   }
 
@@ -723,7 +750,7 @@ export class Settings implements ISettingRegistry.ISettings {
    *
    * @returns A calculated default JSON value for a specific setting.
    */
-  default(key: string): JSONValue | undefined {
+  default(key: string): PartialJSONValue | undefined {
     return Private.reifyDefault(this.schema, key);
   }
 
@@ -750,12 +777,18 @@ export class Settings implements ISettingRegistry.ISettings {
    * This method returns synchronously because it uses a cached copy of the
    * plugin settings that is synchronized with the registry.
    */
-  get(key: string): { composite: ReadonlyJSONValue; user: ReadonlyJSONValue } {
+  get(
+    key: string
+  ): {
+    composite: ReadonlyPartialJSONValue | undefined;
+    user: ReadonlyPartialJSONValue | undefined;
+  } {
     const { composite, user } = this;
 
     return {
-      composite: key in composite ? copy(composite[key]) : undefined,
-      user: key in user ? copy(user[key]) : undefined
+      composite:
+        composite[key] !== undefined ? copy(composite[key]!) : undefined,
+      user: user[key] !== undefined ? copy(user[key]!) : undefined
     };
   }
 
@@ -980,7 +1013,9 @@ namespace Private {
     plugin: string
   ): string {
     const { description, properties, title } = schema;
-    const keys = Object.keys(properties).sort((a, b) => a.localeCompare(b));
+    const keys = properties
+      ? Object.keys(properties).sort((a, b) => a.localeCompare(b))
+      : [];
     const length = Math.max((description || nondescript).length, plugin.length);
 
     return [
@@ -1094,9 +1129,9 @@ namespace Private {
   export function reifyDefault(
     schema: ISettingRegistry.IProperty,
     root?: string
-  ): JSONValue | undefined {
+  ): PartialJSONValue | undefined {
     // If the property is at the root level, traverse its schema.
-    schema = (root ? schema.properties[root] : schema) || {};
+    schema = (root ? schema.properties?.[root] : schema) || {};
 
     // If the property has no default or is a primitive, return.
     if (!('default' in schema) || schema.type !== 'object') {
@@ -1104,11 +1139,12 @@ namespace Private {
     }
 
     // Make a copy of the default value to populate.
-    const result = JSONExt.deepCopy(schema.default);
+    const result = JSONExt.deepCopy(schema.default as PartialJSONObject);
 
     // Iterate through and populate each child property.
-    for (let property in schema.properties || {}) {
-      result[property] = reifyDefault(schema.properties[property]);
+    const props = schema.properties || {};
+    for (let property in props) {
+      result[property] = reifyDefault(props[property]);
     }
 
     return result;

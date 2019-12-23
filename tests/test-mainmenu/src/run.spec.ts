@@ -63,7 +63,7 @@ describe('@jupyterlab/mainmenu', () => {
           },
           restartAndRunAll: widget => {
             widget.state = 'restartAndRunAll';
-            return Promise.resolve(void 0);
+            return Promise.resolve(false);
           }
         };
         menu.codeRunners.add(runner);

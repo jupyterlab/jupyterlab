@@ -51,7 +51,7 @@ export class TabBarSvg<T> extends TabBar<T> {
     }
   }
 
-  protected _kind: IconKindType;
+  protected _kind: IconKindType | undefined;
 }
 
 export namespace TabBarSvg {
@@ -136,6 +136,6 @@ export namespace DockPanelSvg {
       return bar;
     }
 
-    _kind: IconKindType;
+    _kind: IconKindType | undefined;
   }
 }

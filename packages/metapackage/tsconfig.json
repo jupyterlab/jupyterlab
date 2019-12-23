@@ -25,6 +25,12 @@
       "path": "../cells"
     },
     {
+      "path": "../celltags"
+    },
+    {
+      "path": "../celltags-extension"
+    },
+    {
       "path": "../codeeditor"
     },
     {
@@ -227,9 +233,6 @@
     },
     {
       "path": "../vdom-extension"
-    },
-    {
-      "path": "../vega4-extension"
     },
     {
       "path": "../vega5-extension"

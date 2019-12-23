@@ -95,7 +95,7 @@ export namespace CellDragUtils {
     cell: Cell,
     target: HTMLElement
   ): ICellTargetArea {
-    let targetArea: ICellTargetArea = null;
+    let targetArea: ICellTargetArea;
     if (cell) {
       if (cell.editorWidget.node.contains(target)) {
         targetArea = 'input';

@@ -121,7 +121,9 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
         align: 'right',
         rank: 1,
         isActive: () => {
-          return shell.currentWidget && editorTracker.has(shell.currentWidget);
+          return (
+            !!shell.currentWidget && editorTracker.has(shell.currentWidget)
+          );
         }
       }
     );

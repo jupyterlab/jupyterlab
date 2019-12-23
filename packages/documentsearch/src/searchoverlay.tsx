@@ -107,7 +107,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
     return (
       <div className={wrapperClass}>
         <input
-          placeholder={this.props.searchText ? null : 'Find'}
+          placeholder={this.props.searchText ? undefined : 'Find'}
           className={INPUT_CLASS}
           value={this.props.searchText}
           onChange={e => this.props.onChange(e)}
@@ -151,7 +151,7 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
     return (
       <div className={REPLACE_WRAPPER_CLASS}>
         <input
-          placeholder={this.props.replaceText ? null : 'Replace'}
+          placeholder={this.props.replaceText ? undefined : 'Replace'}
           className={REPLACE_ENTRY_CLASS}
           value={this.props.replaceText}
           onKeyDown={e => this.props.onReplaceKeydown(e)}
@@ -221,7 +221,7 @@ function UpDownButtons(props: IUpDownProps) {
 }
 
 interface ISearchIndexProps {
-  currentIndex: number;
+  currentIndex: number | null;
   totalMatches: number;
 }
 
@@ -230,7 +230,9 @@ function SearchIndices(props: ISearchIndexProps) {
     <div className={INDEX_COUNTER_CLASS}>
       {props.totalMatches === 0
         ? '-/-'
-        : `${props.currentIndex + 1}/${props.totalMatches}`}
+        : `${props.currentIndex === null ? '-' : props.currentIndex + 1}/${
+            props.totalMatches
+          }`}
     </div>
   );
 }
@@ -530,7 +532,9 @@ class SearchOverlay extends React.Component<
       this.state.filtersOpen ? filter : null,
       <div
         className={REGEX_ERROR_CLASS}
-        hidden={this.state.errorMessage && this.state.errorMessage.length === 0}
+        hidden={
+          !!this.state.errorMessage && this.state.errorMessage.length === 0
+        }
         key={3}
       >
         {this.state.errorMessage}
@@ -573,7 +577,7 @@ export function createSearchOverlay(
             onEndSearch={onEndSearch}
             onReplaceCurrent={onReplaceCurrent}
             onReplaceAll={onReplaceAll}
-            overlayState={args}
+            overlayState={args!}
             isReadOnly={isReadOnly}
             hasOutputs={hasOutputs}
           />
@@ -621,7 +625,7 @@ namespace Private {
     return ret;
   }
 
-  export function regexEqual(a: RegExp, b: RegExp) {
+  export function regexEqual(a: RegExp | null, b: RegExp | null) {
     if (!a || !b) {
       return false;
     }

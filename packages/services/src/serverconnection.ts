@@ -18,10 +18,10 @@ if (typeof window === 'undefined') {
   // browser assets.
   /* tslint:disable */
   let fetchMod = require('node-fetch');
-  FETCH = global.fetch || fetchMod;
-  REQUEST = global.Request || fetchMod.Request;
-  HEADERS = global.Headers || fetchMod.Headers;
-  WEBSOCKET = global.WebSocket || require('ws');
+  FETCH = global.fetch ?? fetchMod;
+  REQUEST = global.Request ?? fetchMod.Request;
+  HEADERS = global.Headers ?? fetchMod.Headers;
+  WEBSOCKET = global.WebSocket ?? require('ws');
   /* tslint:enable */
 } else {
   FETCH = fetch;
@@ -146,10 +146,10 @@ export namespace ServerConnection {
     /**
      * Create a new response error.
      */
-    constructor(response: Response, message?: string) {
-      message =
-        message ||
-        `Invalid response: ${response.status} ${response.statusText}`;
+    constructor(
+      response: Response,
+      message = `Invalid response: ${response.status} ${response.statusText}`
+    ) {
       super(message);
       this.response = response;
     }
@@ -212,7 +212,7 @@ namespace Private {
       wsUrl = 'ws' + baseUrl.slice(4);
     }
     // Otherwise fall back on the default wsUrl.
-    wsUrl = wsUrl || defaultSettings.wsUrl;
+    wsUrl = wsUrl ?? defaultSettings.wsUrl;
     return {
       ...defaultSettings,
       ...options,
@@ -245,7 +245,7 @@ namespace Private {
 
     // Use explicit cache buster when `no-store` is set since
     // not all browsers use it properly.
-    const cache = init.cache || settings.init.cache;
+    const cache = init.cache ?? settings.init.cache;
     if (cache === 'no-store') {
       // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Bypassing_the_cache
       url += (/\?/.test(url) ? '&' : '?') + new Date().getTime();
@@ -260,7 +260,7 @@ namespace Private {
       authenticated = true;
       request.headers.append('Authorization', `token ${settings.token}`);
     }
-    if (typeof document !== 'undefined' && document && document.cookie) {
+    if (typeof document !== 'undefined' && document?.cookie) {
       const xsrfToken = getCookie('_xsrf');
       if (xsrfToken !== undefined) {
         authenticated = true;
@@ -279,6 +279,8 @@ namespace Private {
       // Convert the TypeError into a more specific error.
       throw new ServerConnection.NetworkError(e);
     });
+    // TODO: *this* is probably where we need a system-wide connectionFailure
+    // signal we can hook into.
   }
 
   /**
@@ -287,6 +289,6 @@ namespace Private {
   function getCookie(name: string): string | undefined {
     // From http://www.tornadoweb.org/en/stable/guide/security.html
     const matches = document.cookie.match('\\b' + name + '=([^;]*)\\b');
-    return matches ? matches[1] : undefined;
+    return matches?.[1];
   }
 }

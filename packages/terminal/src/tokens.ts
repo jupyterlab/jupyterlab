@@ -57,7 +57,7 @@ export namespace ITerminal {
     /**
      * The font family used to render text.
      */
-    fontFamily: string | null;
+    fontFamily?: string;
 
     /**
      * The font size of the terminal in pixels.
@@ -67,7 +67,7 @@ export namespace ITerminal {
     /**
      * The line height used to render text.
      */
-    lineHeight: number | null;
+    lineHeight?: number;
 
     /**
      * The theme of the terminal.
@@ -78,7 +78,7 @@ export namespace ITerminal {
      * The amount of buffer scrollback to be used
      * with the terminal
      */
-    scrollback: number | null;
+    scrollback?: number;
 
     /**
      * Whether to shut down the session when closing a terminal or not.

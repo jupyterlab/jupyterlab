@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
 import { CodeCell } from '@jupyterlab/cells';
 
@@ -24,8 +24,8 @@ export class ForeignHandler implements IDisposable {
    * Construct a new foreign message handler.
    */
   constructor(options: ForeignHandler.IOptions) {
-    this.session = options.session;
-    this.session.iopubMessage.connect(this.onIOPubMessage, this);
+    this.sessionContext = options.sessionContext;
+    this.sessionContext.iopubMessage.connect(this.onIOPubMessage, this);
     this._parent = options.parent;
   }
 
@@ -42,7 +42,7 @@ export class ForeignHandler implements IDisposable {
   /**
    * The client session used by the foreign handler.
    */
-  readonly session: IClientSession;
+  readonly sessionContext: ISessionContext;
 
   /**
    * The foreign handler's parent receiver.
@@ -76,14 +76,14 @@ export class ForeignHandler implements IDisposable {
    * previously injected cell being updated and `false` for all other messages.
    */
   protected onIOPubMessage(
-    sender: IClientSession,
+    sender: ISessionContext,
     msg: KernelMessage.IIOPubMessage
   ): boolean {
     // Only process messages if foreign cell injection is enabled.
     if (!this._enabled) {
       return false;
     }
-    let kernel = this.session.kernel;
+    let kernel = this.sessionContext.session?.kernel;
     if (!kernel) {
       return false;
     }
@@ -161,7 +161,7 @@ export namespace ForeignHandler {
     /**
      * The client session used by the foreign handler.
      */
-    session: IClientSession;
+    sessionContext: ISessionContext;
 
     /**
      * The parent into which the handler will inject code cells.
@@ -191,6 +191,6 @@ export namespace ForeignHandler {
     /**
      * Get a cell associated with a message id.
      */
-    getCell(msgId: string): CodeCell;
+    getCell(msgId: string): CodeCell | undefined;
   }
 }

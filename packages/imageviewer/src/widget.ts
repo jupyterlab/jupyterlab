@@ -46,7 +46,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
       if (this.isDisposed) {
         return;
       }
-      const contents = context.contentsModel;
+      const contents = context.contentsModel!;
       this._format = contents.format === 'base64' ? ';base64' : '';
       this._mimeType = contents.mimetype;
       this._render();

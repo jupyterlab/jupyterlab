@@ -70,7 +70,7 @@ export interface IObservableList<T> extends IDisposable {
    * #### Undefined Behavior
    * An `index` which is non-integral or out of range.
    */
-  get(index: number): T | undefined;
+  get(index: number): T;
 
   /**
    * Insert a value into the list at a specific index.
@@ -383,7 +383,7 @@ export class ObservableList<T> implements IObservableList<T> {
    * #### Undefined Behavior
    * An `index` which is non-integral or out of range.
    */
-  get(index: number): T | undefined {
+  get(index: number): T {
     return this._array[index];
   }
 

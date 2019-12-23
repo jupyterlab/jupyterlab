@@ -12,17 +12,18 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { ServerConnection } from '..';
 
 import { TerminalSession } from './terminal';
+import { BaseManager } from '../basemanager';
 
 /**
  * A terminal session manager.
  */
-export class TerminalManager implements TerminalSession.IManager {
+export class TerminalManager extends BaseManager
+  implements TerminalSession.IManager {
   /**
    * Construct a new terminal manager.
    */
   constructor(options: TerminalManager.IOptions = {}) {
-    this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+    super(options);
 
     // Check if terminals are available
     if (!TerminalSession.isAvailable()) {
@@ -52,7 +53,7 @@ export class TerminalManager implements TerminalSession.IManager {
         max: 300 * 1000
       },
       name: `@jupyterlab/services:TerminalManager#models`,
-      standby: options.standby || 'when-hidden'
+      standby: options.standby ?? 'when-hidden'
     });
     void this.ready.then(() => {
       void this._pollModels.start();
@@ -74,13 +75,6 @@ export class TerminalManager implements TerminalSession.IManager {
   }
 
   /**
-   * Test whether the terminal manager is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
    * The server settings of the manager.
    */
   readonly serverSettings: ServerConnection.ISettings;
@@ -96,13 +90,9 @@ export class TerminalManager implements TerminalSession.IManager {
    * Dispose of the resources used by the manager.
    */
   dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
     this._models.length = 0;
     this._pollModels.dispose();
-    Signal.clearData(this);
+    super.dispose();
   }
 
   /**
@@ -250,7 +240,7 @@ export class TerminalManager implements TerminalSession.IManager {
         // by a JupyterHub when a server is shut down.
         if (
           err instanceof ServerConnection.NetworkError ||
-          (err.response && err.response.status === 503)
+          err.response?.status === 503
         ) {
           this._connectionFailure.emit(err);
           return [] as TerminalSession.IModel[];
@@ -323,7 +313,6 @@ export class TerminalManager implements TerminalSession.IManager {
     });
   }
 
-  private _isDisposed = false;
   private _isReady = false;
   private _models: TerminalSession.IModel[] = [];
   private _pollModels: Poll;
@@ -340,12 +329,7 @@ export namespace TerminalManager {
   /**
    * The options used to initialize a terminal manager.
    */
-  export interface IOptions {
-    /**
-     * The server settings used by the manager.
-     */
-    serverSettings?: ServerConnection.ISettings;
-
+  export interface IOptions extends BaseManager.IOptions {
     /**
      * When the manager stops polling the API. Defaults to `when-hidden`.
      */

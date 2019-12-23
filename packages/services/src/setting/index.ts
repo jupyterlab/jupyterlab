@@ -23,7 +23,7 @@ export class SettingManager extends DataConnector<
   constructor(options: SettingManager.IOptions = {}) {
     super();
     this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+      options.serverSettings ?? ServerConnection.makeSettings();
   }
 
   /**
@@ -76,12 +76,11 @@ export class SettingManager extends DataConnector<
     }
 
     const json = await response.json();
-    const values = ((json || {})['settings'] || []).map(
-      (plugin: ISettingRegistry.IPlugin) => {
+    const values: ISettingRegistry.IPlugin[] =
+      json?.['settings']?.map((plugin: ISettingRegistry.IPlugin) => {
         plugin.data = { composite: {}, user: {} };
         return plugin;
-      }
-    ) as ISettingRegistry.IPlugin[];
+      }) ?? [];
     const ids = values.map(plugin => plugin.id);
 
     return { ids, values };

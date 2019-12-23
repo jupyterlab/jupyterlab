@@ -28,23 +28,14 @@ conda install notebook  # notebook 4.3+ required
 
 **Prerequisites**
 
-- [git](http://git-scm.com/)
-- [node 0.12+](http://nodejs.org/)
-- [python](https://www.anaconda.com/distribution/)
-
-```bash
-git clone https://github.com/jupyterlab/jupyterlab.git
-cd packages/services
-npm install
-npm run build
-conda install notebook  # notebook 4.3+ required
-```
+See the [building instructions for JupyterLab](../../CONTRIBUTING.md), which
+will build this module as part of the build process.
 
 **Rebuild**
 
 ```bash
-npm run clean
-npm run build
+yarn run clean
+yarn run build
 ```
 
 ## Run Tests
@@ -52,7 +43,7 @@ npm run build
 Follow the source build instructions first.
 
 ```bash
-npm test
+yarn run test
 ```
 
 ## Build Docs
@@ -60,20 +51,19 @@ npm test
 Follow the source build instructions first.
 
 ```bash
-npm run docs
+yarn run docs
 ```
 
 Navigate to `docs/index.html`.
 
 ## Supported Runtimes
 
-The runtime versions which are currently _known to work_ are listed below.
-Earlier versions may also work, but come with no guarantees.
+The runtime versions which should work are listed below. Earlier versions may
+also work, but come with no guarantees.
 
-- Node 0.12.7+
-- IE 11+
-- Firefox 32+
-- Chrome 38+
+- Node 10
+- Firefox 52+
+- Chrome 55+
 
 Note: "requirejs" may need be included in a global context for `Comm` targets
 using the a `target_module` (in the classic Notebook).
@@ -91,15 +81,17 @@ The library requires a running Jupyter Notebook server, launched as:
 jupyter notebook
 ```
 
+or
+
+```bash
+jupyter lab
+```
+
 ## Bundling for the Browser
 
 Follow the package install instructions first.
 
 See `examples/browser` for an example of using Webpack to bundle the library.
-
-Note: Some browsers (such as IE11), require a polyfill for Promises.
-The example demonstrates the use of the polyfill. See also notes about
-the `fetch` API polyfill above.
 
 ## Usage from Node.js
 
@@ -109,240 +101,122 @@ See `examples/node` for an example of using an ES5 node script.
 
 ## Usage Examples
 
-**Note:** This module is fully compatible with Node/Babel/ES6/ES5. The
-examples below are written in TypeScript using ES6 syntax. Simply
-omit the type declarations when using a language other than TypeScript.
-A translator such as Babel can be used to convert from ES6 -> ES5.
+**Note:** This package is compiled to ES2017 JavaScript syntax from
+TypeScript. Here are some examples of using parts of this package. See the
+other `examples` subdirectories for more examples.
 
-**Kernel**
+- [Comms](./examples/browser/src/comm.ts)
+- [Config](./examples/browser/src/config.ts)
+- [Contents](./examples/browser/src/contents.ts)
+- [Kernel](./examples/browser/src/kernel.ts)
+- [Session](./examples/browser/src/session.ts)
+- [Terminal](./examples/browser/src/terminal.ts)
 
-```typescript
-import { KernelMessage, Kernel } from '@jupyterlab/services';
+## Overview
 
-// Get a list of available kernels and connect to one.
-Kernel.listRunning().then(kernelModels => {
-  const kernel = Kernel.connectTo(kernelModels[0]);
-  console.log(kernel.name);
-});
+This package introduces a number of concepts, such as session context, etc.
+Here we give a brief overview of some of the top-level concepts in this
+package.
 
-// Get info about the available kernels and start a new one.
-Kernel.getSpecs().then(kernelSpecs => {
-  console.log('Default spec:', kernelSpecs.default);
-  console.log('Available specs', Object.keys(kernelSpecs.kernelspecs));
-  // use the default name
-  let options: Kernel.IOptions = {
-    name: kernelSpecs.default
-  };
-  Kernel.startNew(options).then(kernel => {
-    // Execute and handle replies.
-    let future = kernel.requestExecute({ code: 'a = 1' });
-    future.done.then(() => {
-      console.log('Future is fulfilled');
-    });
-    future.onIOPub = msg => {
-      console.log(msg.content); // Print rich output data.
-    };
+### Clients
 
-    // Restart the kernel and then send an inspect message.
-    kernel.restart().then(() => {
-      let request: KernelMessage.IInspectRequest = {
-        code: 'hello',
-        cursor_pos: 4,
-        detail_level: 0
-      };
-      kernel.requestInspect(request).then(reply => {
-        console.log(reply.content.data);
-      });
-    });
+A _client_ is a single entity connected to a kernel. Since kernel messages
+include the client id, it is easy for a client to filter kernel messages for
+just messages between it and the kernel. In JupyterLab, different activities
+(such as a console and a notebook) are usually considered separate clients when
+connected to the same kernel.
 
-    // Interrupt the kernel and then send a complete message.
-    kernel.interrupt().then(() => {
-      kernel.requestComplete({ code: 'impor', cursor_pos: 4 }).then(reply => {
-        console.log(reply.content.matches);
-      });
-    });
+### Kernel specs
 
-    // Register a callback for when the kernel changes state.
-    kernel.statusChanged.connect(status => {
-      console.log('status', status);
-    });
+A _kernel spec_ is the data about an available kernel on the system. We can
+retrieve a current list of kernel specs from the server.
 
-    // Kill the kernel.
-    kernel.shutdown().then(() => {
-      console.log('Kernel shut down');
-    });
-  });
-});
-```
+### Kernels
 
-**Session**
+A _kernel_ represents a running process on the server that implements the
+Jupyter kernel messaging protocol.
 
-```typescript
-import { Session } from '@jupyterlab/services';
+#### Kernel model
 
-// Get a list of available sessions and connect to one.
-Session.listRunning().then(sessionModels => {
-  const session = Session.connectTo(sessionModels[0]);
-  console.log(session.kernel.name);
-});
+A _kernel model_ mirrors the server kernel models, and represents a single
+running kernel on the server. A kernel can be created, restarted, shut down,
+etc., through calls to the server. A kernel model's lifecycle mirrors the
+server kernel model's lifecycle, and it will be disposed when the server
+kernel is shut down.
 
-// Start a new session.
-let options = {
-  kernelName: 'python',
-  path: '/tmp/foo.ipynb'
-};
+#### Kernel connection
 
-Session.startNew(options).then(session => {
-  // Execute and handle replies on the kernel.
-  let future = session.kernel.requestExecute({ code: 'a = 1' });
-  future.done.then(() => {
-    console.log('Future is fulfilled');
-  });
+A _kernel connection_ represents a single client connecting to a kernel over a
+websocket. Typically only one kernel connection handles comms for any given
+kernel. The kernel connection is disposed when the client no longer has a need
+for the connection. Disposing a kernel connection does not cause the kernel to
+shut down. However, if a kernel is shut down, (eventually) all of its kernel
+connections should be disposed if they were initiated from a kernel manager.
+If the kernel connections were instantiated outside of a manager, you are
+responsible for cleaning them up.
 
-  // Rename the session.
-  session.setPath('/local/bar.ipynb').then(() => {
-    console.log('Session renamed to', session.path);
-  });
+A kernel connection has a number of signals, such as kernel status, kernel
+connection status, etc.
 
-  // Register a callback for when the session dies.
-  session.terminated.connect(() => {
-    console.log('session died');
-  });
+#### Kernel manager
 
-  // Kill the session.
-  session.shutdown().then(() => {
-    console.log('session closed');
-  });
-});
-```
+A _kernel manager_ is an object that maintains a list of kernel models by
+regular polling. The kernel manager can instantiate a kernel connection and
+will manage its lifecycle (e.g., when the kernel is shut down, the connections
+will be disposed). The manager provides some minimal bookkeepping around
+kernels and their connections. Generally, it is easiest to interact with
+kernels on a server through a manager.
 
-**Comm**
+### Sessions
 
-```typescript
-import { Kernel } from '@jupyterlab/services';
+A _session_ is a mapping on the server from an identifying string (the
+session's `path`) to a kernel. A session has a few other pieces of information
+to allow for easy categorization and searching of sessions.
 
-// Create a comm from the server side.
-//
-// Get info about the available kernels and connect to one.
-Kernel.getSpecs()
-  .then(kernelSpecs => {
-    return Kernel.startNew({
-      name: kernelSpecs.default
-    });
-  })
-  .then(kernel => {
-    let comm = kernel.connectToComm('test').then(comm => {
-      comm.open('initial state');
-      comm.send('test');
-      comm.close('bye');
-    });
-  });
+The primary usecase of a session is to enable persisting a connection to a
+kernel. For example, a notebook viewer may start a session with session path
+of the notebook's file path. When a browser is refreshed, the notebook viewer
+can connect to the same kernel by asking the server for the session
+corresponding with the notebook file path.
 
-// Create a comm from the client side.
-Kernel.getSpecs()
-  .then(kernelSpecs => {
-    return Kernel.startNew({
-      name: kernelSpecs.default
-    });
-  })
-  .then(kernel => {
-    kernel.registerCommTarget('test2', (comm, commMsg) => {
-      if (commMsg.content.target_name !== 'test2') {
-        return;
-      }
-      comm.onMsg = msg => {
-        console.log(msg); // 'hello'
-      };
-      comm.onClose = msg => {
-        console.log(msg); // 'bye'
-      };
-    });
+#### Session model
 
-    let code = [
-      'from ipykernel.comm import Comm',
-      'comm = Comm(target_name="test2")',
-      'comm.send(data="hello")',
-      'comm.close(data="bye")'
-    ].join('\n');
-    kernel.requestExecute({ code: code });
-  });
-```
+A _session model_ mirrors a server session. The session models can be
+refreshed from the server, created, changed (including creating a new session
+kernel), and shut down (which implies that the kernel will be shut down). A
+session model's lifecycle mirrors the server session's lifecycle, and it will
+be disposed when the server session is shut down.
 
-**Contents**
+#### Session connection
 
-```typescript
-import { ContentsManager } from '@jupyterlab/services';
+A _session connection_ represents a single client connected to a session's
+kernel. A session's kernel connection can change and may be null to signify no
+current kernel connection. A session connection owns the kernel connection,
+meaning the kernel connection is created and disposed by the session
+connection as needed. The session connection proxies signals from the kernel
+connection for convenience (e.g., you can listen to the session's status
+signal to get status changes for whatever the current kernel is, without
+having to disconnect and reconnect your signal handlers every time the session
+kernel changes). The session connection can be disposed when the client no
+longer is connected to that session's kernel, and disposal will not cause the
+session model to be deleted.
 
-let contents = new ContentsManager();
+#### Session manager
 
-// Create a new python file.
-contents.newUntitled({ path: '/foo', type: 'file', ext: 'py' }).then(model => {
-  console.log('new file:', model.path);
-});
+A _session manager_ is an object that maintains a list of session models by
+regular polling. The session manager can instantiate a session connection and
+will manage its lifecycle (e.g., when the session is shut down, the connections
+will be disposed). The manager provides some minimal bookkeepping around
+sessions and their connections. Generally, it is easiest to interact with
+sessions on a server through a manager.
 
-// Get the contents of a directory.
-contents.get('/foo/bar').then(model => {
-  console.log('files:', model.content);
-});
+### Session Context
 
-// Rename a file.
-contents.rename('/foo/bar.txt', '/foo/baz.txt');
-
-// Save a file.
-contents.save('/foo/test.ipynb');
-
-// Delete a file.
-contents.delete('/foo/bar.txt');
-
-// Copy a file.
-contents.copy('/foo/bar.txt', '/baz').then(model => {
-  console.log('new path', model.path);
-});
-
-// Create a checkpoint.
-contents.createCheckpoint('/foo/bar.ipynb').then(model => {
-  let checkpoint = model;
-
-  // Restore a checkpoint.
-  contents.restoreCheckpoint('/foo/bar.ipynb', checkpoint.id);
-
-  // Delete a checkpoint.
-  contents.deleteCheckpoint('/foo/bar.ipynb', checkpoint.id);
-});
-
-// List checkpoints for a file.
-contents.listCheckpoints('/foo/bar.txt').then(models => {
-  console.log(models[0].id);
-});
-```
-
-**Configuration**
-
-```typescript
-import { ConfigWithDefaults, ConfigSection } from '@jupyterlab/services';
-
-// The base url of the Jupyter server.
-
-ConfigSection.create({ name: 'notebook' }).then(section => {
-  let config = new ConfigWithDefaults({
-    section,
-    defaults: { default_cell_type: 'code' },
-    className: 'Notebook'
-  });
-  console.log(config.get('default_cell_type')); // 'code'
-  config.set('foo', 'bar').then(data => {
-    console.log(data); // "{ 'foo': 'bar' }"
-  });
-});
-```
-
-**Terminals**
-
-```typescript
-import { TerminalSession } from '@jupyterlab/services';
-
-// Create a named terminal session and send some data.
-TerminalSession.startNew().then(session => {
-  session.send({ type: 'stdin', content: ['foo'] });
-});
-```
+A _session context_ is an object which has the same lifecycle as the client.
+The session context owns a session connection (which may be null if the client
+is not currently associated with a session). The session context proxies the
+current session connection's signals for convenience. The session context
+primarily serves as a stable object for a client to keep track of the current
+session connection. The session context also contains some convenience
+functionality, such as preferences for whether a kernel should be started and
+a user-friendly kernel name and status.
