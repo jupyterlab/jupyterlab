@@ -184,7 +184,6 @@ if [[ $GROUP == usage ]]; then
     jlpm run build:examples
 
     # Test the examples
-    python packages/services/examples/node/main.py
     jlpm run test:examples
 
     # Make sure we can successfully load the dev app.
