@@ -64,6 +64,8 @@ import {
   NotebookTrustStatus
 } from '@jupyterlab/notebook';
 
+import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
+
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { ServiceManager } from '@jupyterlab/services';
@@ -76,8 +78,6 @@ import { Message, MessageLoop } from '@lumino/messaging';
 
 import { Panel, Menu } from '@lumino/widgets';
 import { CommandRegistry } from '@lumino/commands';
-
-import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
 
 /**
  * The command IDs used by the notebook plugin.

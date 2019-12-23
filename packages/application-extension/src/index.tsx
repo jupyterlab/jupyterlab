@@ -771,7 +771,7 @@ const paths: JupyterFrontEndPlugin<JupyterFrontEnd.IPaths> = {
 };
 
 /**
- * Initialization data for the property_inspector extension.
+ * The default property inspector provider.
  */
 const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
   id: '@jupyterlab/application-extension:property-inspector',
