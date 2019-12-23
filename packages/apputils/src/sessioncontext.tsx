@@ -698,7 +698,7 @@ export class SessionContext implements ISessionContext {
       this._session.dispose();
     }
     this._session = session;
-    this._prevKernelName = session.kernel?.name || '';
+    this._prevKernelName = session.kernel?.name ?? '';
 
     session.disposed.connect(this._onSessionDisposed, this);
     session.propertyChanged.connect(this._onPropertyChanged, this);

@@ -390,7 +390,7 @@ export namespace Toolbar {
     return new ToolbarButton({
       iconClassName: 'jp-RefreshIcon',
       onClick: () => {
-        void (dialogs || sessionContextDialogs).restart(sessionContext);
+        void (dialogs ?? sessionContextDialogs).restart(sessionContext);
       },
       tooltip: 'Restart the kernel'
     });
@@ -421,7 +421,7 @@ export namespace Toolbar {
     const el = ReactWidget.create(
       <Private.KernelNameComponent
         sessionContext={sessionContext}
-        dialogs={dialogs || sessionContextDialogs}
+        dialogs={dialogs ?? sessionContextDialogs}
       />
     );
     el.addClass('jp-KernelName');

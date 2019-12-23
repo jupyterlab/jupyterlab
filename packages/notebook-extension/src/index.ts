@@ -872,7 +872,7 @@ function addCommands(
 ): void {
   const { commands, shell } = app;
 
-  sessionDialogs = sessionDialogs || sessionContextDialogs;
+  sessionDialogs = sessionDialogs ?? sessionContextDialogs;
 
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: ReadonlyPartialJSONObject): NotebookPanel | null {

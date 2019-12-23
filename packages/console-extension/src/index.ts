@@ -152,7 +152,7 @@ async function activateConsole(
   const manager = app.serviceManager;
   const { commands, shell } = app;
   const category = 'Console';
-  sessionDialogs = sessionDialogs || sessionContextDialogs;
+  sessionDialogs = sessionDialogs ?? sessionContextDialogs;
 
   // Create a widget tracker for all console panels.
   const tracker = new WidgetTracker<MainAreaWidget<ConsolePanel>>({
