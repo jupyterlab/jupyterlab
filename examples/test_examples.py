@@ -42,6 +42,8 @@ def main():
 
     count = 0
     for path in sorted(paths):
+        if 'node' in path:
+            continue
         if osp.exists(osp.join(path, 'main.py')):
             with tempfile.TemporaryDirectory() as cwd:
                 header(path)
