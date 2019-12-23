@@ -107,8 +107,8 @@ abstract class PropertyInspectorProvider extends Widget
         break;
       case 'dispose':
         if (owner) {
-         this._tracker.remove(owner);
-         this._inspectors.delete(owner);
+          this._tracker.remove(owner);
+          this._inspectors.delete(owner);
         }
         break;
       case 'show-panel':
@@ -144,9 +144,9 @@ abstract class PropertyInspectorProvider extends Widget
  * JupyterLab sidebar.
  */
 export class SideBarPropertyInspectorProvider extends PropertyInspectorProvider {
-/**
- * Construct a new Side Bar Property Inspector.
- */
+  /**
+   * Construct a new Side Bar Property Inspector.
+   */
   constructor(labshell: ILabShell, placeholder?: Widget) {
     super();
     this._labshell = labshell;

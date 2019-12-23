@@ -299,11 +299,7 @@ const tools: JupyterFrontEndPlugin<INotebookTools> = {
   provides: INotebookTools,
   id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
-  requires: [
-    INotebookTracker,
-    IEditorServices,
-    IStateDB
-  ],
+  requires: [INotebookTracker, IEditorServices, IStateDB],
   optional: [ILabShell, IPropertyInspectorProvider]
 };
 
