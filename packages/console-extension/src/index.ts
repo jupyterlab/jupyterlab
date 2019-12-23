@@ -194,7 +194,7 @@ async function activateConsole(
               category: 'Console',
               rank,
               kernelIconUrl,
-              metadata: spec.metadata
+              metadata: { kernel: spec.metadata }
             })
           );
         }

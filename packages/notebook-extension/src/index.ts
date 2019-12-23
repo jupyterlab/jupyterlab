@@ -738,7 +738,7 @@ function activateNotebookHandler(
               category: 'Notebook',
               rank,
               kernelIconUrl,
-              metadata: spec.metadata
+              metadata: { kernel: spec.metadata }
             })
           );
         }
