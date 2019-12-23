@@ -6,16 +6,16 @@ import { createClientSession } from '@jupyterlab/testutils';
 
 import { PromiseDelegate } from '@phosphor/coreutils';
 
-import { Debugger } from '../../lib/debugger';
+import { DebuggerModel } from '../../lib/model';
 
-import { DebugService } from '../../lib/service';
+import { DebuggerService } from '../../lib/service';
 
 import { DebugSession } from '../../lib/session';
 
 import { IDebugger } from '../../lib/tokens';
 
 describe('Debugging support', () => {
-  const service = new DebugService();
+  const service = new DebuggerService();
   let xpythonClient: IClientSession;
   let ipykernelClient: IClientSession;
 
@@ -57,9 +57,9 @@ describe('Debugging support', () => {
   });
 });
 
-describe('DebugService', () => {
+describe('DebuggerService', () => {
   let client: IClientSession;
-  let model: Debugger.Model;
+  let model: DebuggerModel;
   let session: IDebugger.ISession;
   let service: IDebugger;
 
@@ -72,19 +72,19 @@ describe('DebugService', () => {
     await (client as ClientSession).initialize();
     await client.kernel.ready;
     session = new DebugSession({ client });
-    model = new Debugger.Model();
-    service = new DebugService();
+    model = new DebuggerModel();
+    service = new DebuggerService();
   });
 
   afterEach(async () => {
     await client.shutdown();
     session.dispose();
-    (service as DebugService).dispose();
+    (service as DebuggerService).dispose();
   });
 
   describe('#constructor()', () => {
     it('should create a new instance', () => {
-      expect(service).to.be.an.instanceOf(DebugService);
+      expect(service).to.be.an.instanceOf(DebuggerService);
     });
   });
 
@@ -115,7 +115,7 @@ describe('DebugService', () => {
 
   describe('#session', () => {
     it('should emit the sessionChanged signal when setting the session', () => {
-      let sessionChangedEvents: IDebugger.ISession[] = [];
+      const sessionChangedEvents: IDebugger.ISession[] = [];
       service.sessionChanged.connect((_, newSession) => {
         sessionChangedEvents.push(newSession);
       });
@@ -127,9 +127,9 @@ describe('DebugService', () => {
 
   describe('#model', () => {
     it('should emit the modelChanged signal when setting the model', () => {
-      let modelChangedEvents: Debugger.Model[] = [];
+      const modelChangedEvents: DebuggerModel[] = [];
       service.modelChanged.connect((_, newModel) => {
-        modelChangedEvents.push(newModel as Debugger.Model);
+        modelChangedEvents.push(newModel as DebuggerModel);
       });
       service.model = model;
       expect(modelChangedEvents.length).to.equal(1);

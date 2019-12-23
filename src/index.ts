@@ -39,7 +39,9 @@ import { NotebookHandler } from './handlers/notebook';
 
 import { TrackerHandler } from './handlers/tracker';
 
-import { DebugService } from './service';
+import { DebuggerModel } from './model';
+
+import { DebuggerService } from './service';
 
 import { DebugSession } from './session';
 
@@ -62,8 +64,6 @@ export namespace CommandIDs {
   export const stepIn = 'debugger:stepIn';
 
   export const stepOut = 'debugger:stepOut';
-
-  export const debugConsole = 'debugger:debug-console';
 }
 
 /**
@@ -225,7 +225,7 @@ class DebuggerHandler<
       // clear the model if the handler being removed corresponds
       // to the current active debug session
       if (debug.session?.client?.path === client.path) {
-        const model = debug.model as Debugger.Model;
+        const model = debug.model as DebuggerModel;
         model.clear();
       }
 
@@ -442,7 +442,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
   ): IDebugger => {
     const { commands, shell } = app;
 
-    const service = new DebugService();
+    const service = new DebuggerService();
 
     commands.addCommand(CommandIDs.debugContinue, {
       label: 'Continue',

@@ -3,17 +3,17 @@
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { ISignal, Signal } from '@phosphor/signaling';
-
 import { SplitPanel } from '@phosphor/widgets';
 
 import { Breakpoints } from './breakpoints';
 
 import { Callstack } from './callstack';
 
-import { Sources } from './sources';
+import { DebuggerModel } from './model';
 
-import { DebugService } from './service';
+import { DebuggerService } from './service';
+
+import { Sources } from './sources';
 
 import { IDebugger } from './tokens';
 
@@ -23,7 +23,14 @@ import { Variables } from './variables';
  * A namespace for `Debugger` statics.
  */
 export namespace Debugger {
+  /**
+   * A debugger sidebar.
+   */
   export class Sidebar extends SplitPanel {
+    /**
+     * Instantiate a new Debugger.Sidebar
+     * @param options The instantiation options for a Debugger.Sidebar
+     */
     constructor(options: Sidebar.IOptions) {
       super();
       this.id = 'jp-debugger-sidebar';
@@ -32,8 +39,8 @@ export namespace Debugger {
 
       const { callstackCommands, editorServices, service } = options;
 
-      this.model = new Debugger.Model();
-      this.service = service as DebugService;
+      this.model = new DebuggerModel();
+      this.service = service as DebuggerService;
       this.service.model = this.model;
 
       this.variables = new Variables({ model: this.model.variables });
@@ -62,8 +69,14 @@ export namespace Debugger {
       this.addClass('jp-DebuggerSidebar');
     }
 
+    /**
+     * Whether the sidebar is disposed.
+     */
     isDisposed: boolean;
 
+    /**
+     * Dispose the sidebar.
+     */
     dispose(): void {
       if (this.isDisposed) {
         return;
@@ -72,83 +85,58 @@ export namespace Debugger {
       this.service.model = null;
     }
 
-    readonly model: Debugger.Model;
-    readonly service: DebugService;
+    /**
+     * The debugger model.
+     */
+    readonly model: DebuggerModel;
+
+    /**
+     * The debugger service.
+     */
+    readonly service: DebuggerService;
+
+    /**
+     * The variables widget.
+     */
     readonly variables: Variables;
+
+    /**
+     * The callstack widget.
+     */
     readonly callstack: Callstack;
+
+    /**
+     * The breakpoints widget.
+     */
     readonly breakpoints: Breakpoints;
+
+    /**
+     * The sources widget.
+     */
     readonly sources: Sources;
   }
 
-  export class Model implements IDebugger.IModel {
-    constructor() {
-      this.breakpoints = new Breakpoints.Model();
-      this.callstack = new Callstack.Model();
-      this.variables = new Variables.Model();
-      this.sources = new Sources.Model({
-        currentFrameChanged: this.callstack.currentFrameChanged
-      });
-    }
-
-    readonly breakpoints: Breakpoints.Model;
-    readonly callstack: Callstack.Model;
-    readonly variables: Variables.Model;
-    readonly sources: Sources.Model;
-
-    dispose(): void {
-      if (this._isDisposed) {
-        return;
-      }
-      this._isDisposed = true;
-      this._disposed.emit();
-    }
-
-    /**
-     * A signal emitted when the debugger widget is disposed.
-     */
-    get disposed(): ISignal<this, void> {
-      return this._disposed;
-    }
-
-    get isDisposed(): boolean {
-      return this._isDisposed;
-    }
-
-    /**
-     * The set of threads in stopped state.
-     */
-    get stoppedThreads(): Set<number> {
-      return this._stoppedThreads;
-    }
-
-    /**
-     * Assigns the parameters to the set of threads in stopped state.
-     */
-    set stoppedThreads(threads: Set<number>) {
-      this._stoppedThreads = threads;
-    }
-
-    /**
-     * Clear the model.
-     */
-    clear() {
-      this._stoppedThreads.clear();
-      const breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
-      this.breakpoints.restoreBreakpoints(breakpoints);
-      this.callstack.frames = [];
-      this.variables.scopes = [];
-      this.sources.currentSource = null;
-    }
-
-    private _isDisposed = false;
-    private _stoppedThreads = new Set<number>();
-    private _disposed = new Signal<this, void>(this);
-  }
-
+  /**
+   * A namespace for Sidebar `statics`
+   */
   export namespace Sidebar {
+    /**
+     * Instantiation options for `Sidebar`.
+     */
     export interface IOptions {
+      /**
+       * The debug service.
+       */
       service: IDebugger;
+
+      /**
+       * The callstack toolbar commands.
+       */
       callstackCommands: Callstack.ICommands;
+
+      /**
+       * The editor services.
+       */
       editorServices: IEditorServices;
     }
   }

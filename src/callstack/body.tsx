@@ -1,27 +1,41 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React, { useEffect, useState } from 'react';
-
-import { Callstack } from '.';
-
 import { ReactWidget } from '@jupyterlab/apputils';
 
-export class Body extends ReactWidget {
-  constructor(model: Callstack.Model) {
+import React, { useEffect, useState } from 'react';
+
+import { CallstackModel } from './model';
+
+/**
+ * The body for a Callstack Panel.
+ */
+export class CallstackBody extends ReactWidget {
+  /**
+   * Instantiate a new Body for the Callstack Panel.
+   * @param model The model for the callstack.
+   */
+  constructor(model: CallstackModel) {
     super();
-    this.model = model;
+    this._model = model;
     this.addClass('jp-DebuggerCallstack-body');
   }
 
+  /**
+   * Render the FramesComponent.
+   */
   render() {
-    return <FramesComponent model={this.model} />;
+    return <FramesComponent model={this._model} />;
   }
 
-  readonly model: Callstack.Model;
+  private _model: CallstackModel;
 }
 
-const FramesComponent = ({ model }: { model: Callstack.Model }) => {
+/**
+ * A React component to display a list of frames in a callstack.
+ * @param model The model for the callstack.
+ */
+const FramesComponent = ({ model }: { model: CallstackModel }) => {
   const [frames, setFrames] = useState(model.frames);
   const [selected, setSelected] = useState(model.frame);
 

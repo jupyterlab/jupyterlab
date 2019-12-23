@@ -34,15 +34,17 @@ import { IDisposable } from '@phosphor/disposable';
 
 import { Signal } from '@phosphor/signaling';
 
-import { Callstack } from '../callstack';
-
 import { EditorHandler } from './editor';
 
-import { Debugger } from '../debugger';
+import { CallstackModel } from '../callstack/model';
 
-import { ReadOnlyEditorFactory, Sources } from '../sources';
+import { ReadOnlyEditorFactory } from '../sources/factory';
+
+import { SourcesModel } from '../sources/model';
 
 import { IDebugger } from '../tokens';
+
+import { DebuggerModel } from '../model';
 
 /**
  * A class which handles notebook, console and editor trackers.
@@ -93,7 +95,7 @@ export class TrackerHandler implements IDisposable {
    * Handle when the debug model changes.
    */
   private _onModelChanged() {
-    this._debuggerModel = this._debuggerService.model as Debugger.Model;
+    this._debuggerModel = this._debuggerService.model as DebuggerModel;
     if (!this._debuggerModel) {
       return;
     }
@@ -123,7 +125,10 @@ export class TrackerHandler implements IDisposable {
    * @param _ The sender.
    * @param frame The current frame.
    */
-  private _onCurrentFrameChanged(_: Callstack.Model, frame: Callstack.IFrame) {
+  private _onCurrentFrameChanged(
+    _: CallstackModel,
+    frame: CallstackModel.IFrame
+  ) {
     const debugSessionPath = this._debuggerService.session?.client?.path;
     const source = frame?.source.path ?? null;
     each(this._find(debugSessionPath, source), editor => {
@@ -138,7 +143,7 @@ export class TrackerHandler implements IDisposable {
    * @param _ The sender.
    * @param source The source to open.
    */
-  private _onCurrentSourceOpened(_: Sources.Model, source: IDebugger.ISource) {
+  private _onCurrentSourceOpened(_: SourcesModel, source: IDebugger.ISource) {
     if (!source) {
       return;
     }
@@ -320,7 +325,7 @@ export class TrackerHandler implements IDisposable {
   }
 
   private _debuggerService: IDebugger;
-  private _debuggerModel: Debugger.Model;
+  private _debuggerModel: DebuggerModel;
   private _shell: JupyterFrontEnd.IShell;
   private _readOnlyEditorFactory: ReadOnlyEditorFactory;
   private _readOnlyEditorTracker: WidgetTracker<

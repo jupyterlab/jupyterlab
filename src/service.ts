@@ -13,18 +13,21 @@ import { murmur2 } from 'murmurhash-js';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
-import { Debugger } from './debugger';
+import { CallstackModel } from './callstack/model';
+
+import { DebuggerModel } from './model';
 
 import { IDebugger } from './tokens';
 
-import { Variables } from './variables';
-
-import { Callstack } from './callstack';
+import { VariablesModel } from './variables/model';
 
 /**
  * A concrete implementation of IDebugger.
  */
-export class DebugService implements IDebugger, IDisposable {
+export class DebuggerService implements IDebugger, IDisposable {
+  /**
+   * Instantiate a new DebuggerService.
+   */
   constructor() {
     // Avoids setting session with invalid client
     // session should be set only when a notebook or
@@ -97,7 +100,7 @@ export class DebugService implements IDebugger, IDisposable {
    * @param model - The new debugger model.
    */
   set model(model: IDebugger.IModel) {
-    this._model = model as Debugger.Model;
+    this._model = model as DebuggerModel;
     this._modelChanged.emit(model);
   }
 
@@ -402,7 +405,10 @@ export class DebugService implements IDebugger, IDisposable {
   /**
    * Handle a change of the current active frame.
    */
-  private async _onChangeFrame(_: Callstack.Model, frame: Callstack.IFrame) {
+  private async _onChangeFrame(
+    _: CallstackModel,
+    frame: CallstackModel.IFrame
+  ) {
     if (!frame) {
       return;
     }
@@ -502,7 +508,7 @@ export class DebugService implements IDebugger, IDisposable {
   private _convertScopes(
     scopes: DebugProtocol.Scope[],
     variables: DebugProtocol.Variable[]
-  ): Variables.IScope[] {
+  ): VariablesModel.IScope[] {
     if (!variables || !scopes) {
       return;
     }
@@ -573,7 +579,7 @@ export class DebugService implements IDebugger, IDisposable {
 
   private _isDisposed: boolean = false;
   private _session: IDebugger.ISession;
-  private _model: Debugger.Model;
+  private _model: DebuggerModel;
   private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
   private _modelChanged = new Signal<IDebugger, IDebugger.IModel>(this);
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
