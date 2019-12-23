@@ -348,38 +348,43 @@ export class FileBrowserModel implements IDisposable {
    * times, all subsequent invocations are no-ops.
    */
   async restore(id: string, populate = true): Promise<void> {
+    const { manager } = this;
     const key = `file-browser-${id}:cwd`;
     const state = this._state;
-    const restored = this._key !== key;
+    const restored = !!this._key;
+
+    if (restored) {
+      return;
+    }
 
     // Set the file browser key for state database fetch/save.
     this._key = key;
 
-    if (!populate || !state || restored) {
+    if (!populate || !state) {
       this._restored.resolve(undefined);
       return;
     }
 
-    const manager = this.manager;
-    const ready = manager.services.ready;
-    return Promise.all([state.fetch(key), ready])
-      .then(async ([value]) => {
-        if (!value) {
-          this._restored.resolve(undefined);
-          return;
-        }
+    await manager.services.ready;
 
-        const path = (value as ReadonlyJSONObject)['path'] as string;
-        const localPath = manager.services.contents.localPath(path);
-        return manager.services.contents
-          .get(path)
-          .then(() => this.cd(localPath))
-          .catch(() => state.remove(key));
-      })
-      .catch(() => state.remove(key))
-      .then(() => {
+    try {
+      const value = await state.fetch(key);
+
+      if (!value) {
         this._restored.resolve(undefined);
-      });
+        return;
+      }
+
+      const path = (value as ReadonlyJSONObject)['path'] as string;
+      const localPath = manager.services.contents.localPath(path);
+
+      await manager.services.contents.get(path);
+      await this.cd(localPath);
+    } catch (error) {
+      await state.remove(key);
+    }
+
+    this._restored.resolve(undefined);
   }
 
   /**
