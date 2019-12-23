@@ -451,7 +451,7 @@ describe('@jupyterlab/apputils', () => {
       describe('#selectKernel()', () => {
         it('should select a kernel for the session', async () => {
           await sessionContext.initialize();
-          const session = sessionContext.session;
+          const session = sessionContext?.session;
 
           const { id, name } = session.kernel;
           const accept = acceptDialog();
@@ -459,13 +459,13 @@ describe('@jupyterlab/apputils', () => {
           await sessionContextDialogs.selectKernel(sessionContext);
           await accept;
 
-          expect(session.kernel.id).to.not.equal(id);
-          expect(session.kernel.name).to.equal(name);
+          expect(session.kernel?.id).to.not.equal(id);
+          expect(session.kernel?.name).to.equal(name);
         });
 
         it('should keep the existing kernel if dismissed', async () => {
           await sessionContext.initialize();
-          const session = sessionContext.session;
+          const session = sessionContext!.session;
 
           const { id, name } = session.kernel;
           const dismiss = dismissDialog();
@@ -473,8 +473,8 @@ describe('@jupyterlab/apputils', () => {
           await sessionContextDialogs.selectKernel(sessionContext);
           await dismiss;
 
-          expect(session.kernel.id).to.equal(id);
-          expect(session.kernel.name).to.equal(name);
+          expect(session.kernel?.id).to.equal(id);
+          expect(session.kernel?.name).to.equal(name);
         });
       });
 
@@ -484,7 +484,7 @@ describe('@jupyterlab/apputils', () => {
             find: (_, args) => args === 'restarting'
           });
           await sessionContext.initialize();
-          await sessionContext.session?.kernel?.info;
+          await sessionContext!.session?.kernel?.info;
           const restart = sessionContextDialogs.restart(sessionContext);
 
           await acceptDialog();
@@ -512,7 +512,7 @@ describe('@jupyterlab/apputils', () => {
           await sessionContext.initialize();
           await sessionContext.shutdown();
           await sessionContextDialogs.restart(sessionContext);
-          expect(sessionContext.session?.kernel).to.be.ok;
+          expect(sessionContext?.session?.kernel).to.be.ok;
         });
       });
     });
