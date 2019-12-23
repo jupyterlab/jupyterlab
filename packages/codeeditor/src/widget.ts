@@ -180,7 +180,7 @@ export class CodeEditorWrapper extends Widget {
 
       if (
         this.editor
-          .getLine(end.line)
+          .getLine(end.line)!
           .slice(0, end.column)
           .match(leadingWhitespaceRe)
       ) {
@@ -252,13 +252,6 @@ export class CodeEditorWrapper extends Widget {
     if (data === undefined) {
       return;
     }
-    this.removeClass(DROP_TARGET_CLASS);
-    event.preventDefault();
-    event.stopPropagation();
-    if (event.proposedAction === 'none') {
-      event.dropAction = 'none';
-      return;
-    }
     const coordinate = {
       top: event.y,
       bottom: event.y,
@@ -270,6 +263,16 @@ export class CodeEditorWrapper extends Widget {
       height: 0
     };
     const position = this.editor.getPositionForCoordinate(coordinate);
+    if (position === null) {
+      return;
+    }
+    this.removeClass(DROP_TARGET_CLASS);
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.proposedAction === 'none') {
+      event.dropAction = 'none';
+      return;
+    }
     const offset = this.editor.getOffsetAt(position);
     this.model.value.insert(offset, data);
   }

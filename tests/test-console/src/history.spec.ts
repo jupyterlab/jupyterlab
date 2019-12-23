@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
 import { KernelMessage } from '@jupyterlab/services';
 
@@ -13,9 +13,9 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ConsoleHistory } from '@jupyterlab/console';
 
-import { createClientSession, signalToPromise } from '@jupyterlab/testutils';
+import { createSessionContext, signalToPromise } from '@jupyterlab/testutils';
 
-const mockHistory: KernelMessage.IHistoryReplyMsg = {
+const mockHistory = ({
   header: null,
   parent_header: {
     date: '',
@@ -37,7 +37,7 @@ const mockHistory: KernelMessage.IHistoryReplyMsg = {
       [0, 0, 'qux']
     ]
   }
-};
+} as unknown) as KernelMessage.IHistoryReplyMsg;
 
 class TestHistory extends ConsoleHistory {
   methods: string[] = [];
@@ -62,25 +62,25 @@ class TestHistory extends ConsoleHistory {
 }
 
 describe('console/history', () => {
-  let session: IClientSession;
+  let sessionContext: ISessionContext;
 
   beforeEach(async () => {
-    session = await createClientSession();
+    sessionContext = await createSessionContext();
   });
 
-  after(() => session.shutdown());
+  after(() => sessionContext.shutdown());
 
   describe('ConsoleHistory', () => {
     describe('#constructor()', () => {
       it('should create a console history object', () => {
-        const history = new ConsoleHistory({ session });
+        const history = new ConsoleHistory({ sessionContext });
         expect(history).to.be.an.instanceof(ConsoleHistory);
       });
     });
 
     describe('#isDisposed', () => {
       it('should get whether the object is disposed', () => {
-        const history = new ConsoleHistory({ session });
+        const history = new ConsoleHistory({ sessionContext });
         expect(history.isDisposed).to.equal(false);
         history.dispose();
         expect(history.isDisposed).to.equal(true);
@@ -89,21 +89,21 @@ describe('console/history', () => {
 
     describe('#session', () => {
       it('should be the client session object', () => {
-        const history = new ConsoleHistory({ session });
-        expect(history.session).to.equal(session);
+        const history = new ConsoleHistory({ sessionContext });
+        expect(history.sessionContext).to.equal(sessionContext);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose the history object', () => {
-        const history = new ConsoleHistory({ session });
+        const history = new ConsoleHistory({ sessionContext });
         expect(history.isDisposed).to.equal(false);
         history.dispose();
         expect(history.isDisposed).to.equal(true);
       });
 
       it('should be safe to dispose multiple times', () => {
-        const history = new ConsoleHistory({ session });
+        const history = new ConsoleHistory({ sessionContext });
         expect(history.isDisposed).to.equal(false);
         history.dispose();
         history.dispose();
@@ -113,13 +113,13 @@ describe('console/history', () => {
 
     describe('#back()', () => {
       it('should return an empty string if no history exists', async () => {
-        const history = new ConsoleHistory({ session });
+        const history = new ConsoleHistory({ sessionContext });
         const result = await history.back('');
         expect(result).to.equal('');
       });
 
       it('should return previous items if they exist', async () => {
-        const history = new TestHistory({ session });
+        const history = new TestHistory({ sessionContext });
         history.onHistory(mockHistory);
         const result = await history.back('');
         if (mockHistory.content.status !== 'ok') {
@@ -133,13 +133,13 @@ describe('console/history', () => {
 
     describe('#forward()', () => {
       it('should return an empty string if no history exists', async () => {
-        const history = new ConsoleHistory({ session });
+        const history = new ConsoleHistory({ sessionContext });
         const result = await history.forward('');
         expect(result).to.equal('');
       });
 
       it('should return next items if they exist', async () => {
-        const history = new TestHistory({ session });
+        const history = new TestHistory({ sessionContext });
         history.onHistory(mockHistory);
         await Promise.all([history.back(''), history.back('')]);
         const result = await history.forward('');
@@ -154,7 +154,7 @@ describe('console/history', () => {
 
     describe('#push()', () => {
       it('should allow addition of history items', async () => {
-        const history = new ConsoleHistory({ session });
+        const history = new ConsoleHistory({ sessionContext });
         const item = 'foo';
         history.push(item);
         const result = await history.back('');
@@ -164,7 +164,7 @@ describe('console/history', () => {
 
     describe('#onTextChange()', () => {
       it('should be called upon an editor text change', () => {
-        const history = new TestHistory({ session });
+        const history = new TestHistory({ sessionContext });
         expect(history.methods).to.not.contain('onTextChange');
         const model = new CodeEditor.Model();
         const host = document.createElement('div');
@@ -177,7 +177,7 @@ describe('console/history', () => {
 
     describe('#onEdgeRequest()', () => {
       it('should be called upon an editor edge request', async () => {
-        const history = new TestHistory({ session });
+        const history = new TestHistory({ sessionContext });
         expect(history.methods).to.not.contain('onEdgeRequest');
         const host = document.createElement('div');
         const model = new CodeEditor.Model();

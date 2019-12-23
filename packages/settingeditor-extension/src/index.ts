@@ -130,18 +130,18 @@ function activate(
 
   commands.addCommand(CommandIDs.revert, {
     execute: () => {
-      tracker.currentWidget.content.revert();
+      tracker.currentWidget?.content.revert();
     },
     iconClass: 'jp-MaterialIcon jp-UndoIcon',
     label: 'Revert User Settings',
-    isEnabled: () => tracker.currentWidget.content.canRevertRaw
+    isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false
   });
 
   commands.addCommand(CommandIDs.save, {
-    execute: () => tracker.currentWidget.content.save(),
+    execute: () => tracker.currentWidget?.content.save(),
     iconClass: 'jp-MaterialIcon jp-SaveIcon',
     label: 'Save User Settings',
-    isEnabled: () => tracker.currentWidget.content.canSaveRaw
+    isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false
   });
 
   return tracker;

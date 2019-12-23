@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Token, ReadonlyJSONObject } from '@lumino/coreutils';
+import { Token, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { ISanitizer } from '@jupyterlab/apputils';
 
@@ -59,7 +59,7 @@ export interface IRenderMimeRegistry {
    *   or `undefined` if the mime type cannot be rendered.
    */
   preferredMimeType(
-    bundle: ReadonlyJSONObject,
+    bundle: ReadonlyPartialJSONObject,
     safe?: 'ensure' | 'prefer' | 'any'
   ): string | undefined;
 

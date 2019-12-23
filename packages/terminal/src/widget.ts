@@ -11,7 +11,7 @@ import { Widget } from '@lumino/widgets';
 
 import { Terminal as Xterm } from 'xterm';
 
-import { fit } from 'xterm/lib/addons/fit/fit';
+import { FitAddon } from 'xterm-addon-fit';
 
 import { ITerminal } from '.';
 
@@ -57,6 +57,9 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
 
     // Create the xterm.
     this._term = new Xterm(xtermOptions);
+    this._fitAddon = new FitAddon();
+    this._term.loadAddon(this._fitAddon);
+
     this._initializeTerm();
 
     this.id = `jp-Terminal-${Private.id++}`;
@@ -211,7 +214,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     // Open the terminal if necessary.
     if (!this._termOpened) {
       this._term.open(this.node);
-      this._term.element.classList.add(TERMINAL_BODY_CLASS);
+      this._term.element?.classList.add(TERMINAL_BODY_CLASS);
       this._termOpened = true;
     }
 
@@ -240,7 +243,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    */
   private _initializeTerm(): void {
     const term = this._term;
-    term.on('data', (data: string) => {
+    term.onData((data: string) => {
       if (this.isDisposed) {
         return;
       }
@@ -250,7 +253,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       });
     });
 
-    term.on('title', (title: string) => {
+    term.onTitleChange((title: string) => {
       this.title.label = title;
     });
 
@@ -301,7 +304,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Resize the terminal based on computed geometry.
    */
   private _resizeTerminal() {
-    fit(this._term);
+    this._fitAddon.fit();
     if (this._offsetWidth === -1) {
       this._offsetWidth = this.node.offsetWidth;
     }
@@ -328,6 +331,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   }
 
   private readonly _term: Xterm;
+  private readonly _fitAddon: FitAddon;
   private _needsResize = true;
   private _termOpened = false;
   private _offsetWidth = -1;

@@ -3,7 +3,11 @@
 
 import { VDomModel } from '@jupyterlab/apputils';
 
-import { ServerConnection, ServiceManager, Kernel } from '@jupyterlab/services';
+import {
+  KernelSpec,
+  ServerConnection,
+  ServiceManager
+} from '@jupyterlab/services';
 
 import * as semver from 'semver';
 
@@ -319,7 +323,7 @@ export class ListModel extends VDomModel {
           for (let kernelInfo of discovery.kernel) {
             let matches = Private.matchSpecs(
               kernelInfo,
-              this.serviceManager.specs
+              this.serviceManager.kernelspecs.specs
             );
             kernelCompanions.push({ kernelInfo, kernels: matches });
           }
@@ -752,12 +756,12 @@ namespace Private {
    */
   export function matchSpecs(
     kernelInfo: IKernelInstallInfo,
-    specs: Kernel.ISpecModels | null
-  ): Kernel.ISpecModel[] {
+    specs: KernelSpec.ISpecModels | null
+  ): KernelSpec.ISpecModel[] {
     if (!specs) {
       return [];
     }
-    let matches: Kernel.ISpecModel[] = [];
+    let matches: KernelSpec.ISpecModel[] = [];
     let reLang: RegExp | null = null;
     let reName: RegExp | null = null;
     if (kernelInfo.kernel_spec.language) {
@@ -767,7 +771,7 @@ namespace Private {
       reName = new RegExp(kernelInfo.kernel_spec.display_name);
     }
     for (let key of Object.keys(specs.kernelspecs)) {
-      let spec = specs.kernelspecs[key];
+      let spec = specs.kernelspecs[key]!;
       let match = false;
       if (reLang) {
         match = reLang.test(spec.language);

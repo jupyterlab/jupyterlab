@@ -71,8 +71,8 @@ describe('apputils', () => {
         await restorer.restored;
         await restorer.save(dehydrated);
         const layout = await restorer.fetch();
-        expect(layout.mainArea.currentWidget).to.equal(currentWidget);
-        expect(layout.mainArea.mode).to.equal(mode);
+        expect(layout.mainArea?.currentWidget).to.equal(currentWidget);
+        expect(layout.mainArea?.mode).to.equal(mode);
       });
     });
 

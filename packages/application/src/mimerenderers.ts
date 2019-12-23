@@ -129,7 +129,7 @@ export function createRendermimePlugin(
 
       options.forEach(option => {
         const toolbarFactory = option.toolbarFactory
-          ? (w: MimeDocument) => option.toolbarFactory(w.content.renderer)
+          ? (w: MimeDocument) => option.toolbarFactory!(w.content.renderer)
           : undefined;
         let factory = new MimeDocumentFactory({
           renderTimeout: item.renderTimeout,
@@ -166,10 +166,11 @@ namespace Private {
    * An attached property for keeping the factory name
    * that was used to create a mimedocument.
    */
-  export const factoryNameProperty = new AttachedProperty<MimeDocument, string>(
-    {
-      name: 'factoryName',
-      create: () => undefined
-    }
-  );
+  export const factoryNameProperty = new AttachedProperty<
+    MimeDocument,
+    string | undefined
+  >({
+    name: 'factoryName',
+    create: () => undefined
+  });
 }

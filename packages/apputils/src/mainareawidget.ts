@@ -83,9 +83,9 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget
           this.node.removeChild(spinner.node);
           spinner.dispose();
           content.dispose();
-          this._content = null;
+          this._content = null!;
           toolbar.dispose();
-          this._toolbar = null;
+          this._toolbar = null!;
           layout.addWidget(error);
           this._isRevealed = true;
           throw error;
@@ -103,6 +103,9 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget
    * Print method. Defered to content.
    */
   [Printing.symbol](): Printing.OptionalAsyncThunk {
+    if (!this._content) {
+      return null;
+    }
     return Printing.getPrintFunction(this._content);
   }
 
@@ -158,14 +161,16 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget
    * Handle `'update-request'` messages by forwarding them to the content.
    */
   protected onUpdateRequest(msg: Message): void {
-    MessageLoop.sendMessage(this._content, msg);
+    if (this._content) {
+      MessageLoop.sendMessage(this._content, msg);
+    }
   }
 
   /**
    * Update the title based on the attributes of the child widget.
    */
   private _updateTitle(): void {
-    if (this._changeGuard) {
+    if (this._changeGuard || !this.content) {
       return;
     }
     this._changeGuard = true;
@@ -184,7 +189,7 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget
    * Update the content title based on attributes of the main widget.
    */
   private _updateContentTitle(): void {
-    if (this._changeGuard) {
+    if (this._changeGuard || !this.content) {
       return;
     }
     this._changeGuard = true;
@@ -203,6 +208,9 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget
    * Give focus to the content.
    */
   private _focusContent(): void {
+    if (!this.content) {
+      return;
+    }
     // Focus the content node if we aren't already focused on it or a
     // descendent.
     if (!this.content.node.contains(document.activeElement)) {

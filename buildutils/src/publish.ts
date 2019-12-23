@@ -22,11 +22,17 @@ commander
     if (utils.checkStatus('npm whoami') !== 0) {
       console.error('Please run `npm login`');
     }
+    const distDir = './dist';
 
     // Optionally clean and build the python packages.
     if (!options.skipBuild) {
       // Ensure a clean state.
       utils.run('npm run clean:slate');
+    } else {
+      // Still clean the dist directory.
+      if (fs.existsSync(distDir)) {
+        fs.removeSync(distDir);
+      }
     }
 
     // Publish JS to the appropriate tag.
@@ -57,11 +63,11 @@ commander
     utils.run('python -m pip install -U twine');
     utils.run('twine check dist/*');
 
-    const files = fs.readdirSync('./dist/');
+    const files = fs.readdirSync(distDir);
     const hashes = new Map<string, string>();
     files.forEach(file => {
       const shasum = crypto.createHash('sha256');
-      const hash = shasum.update(fs.readFileSync('./dist/' + file));
+      const hash = shasum.update(fs.readFileSync(path.join(distDir, file)));
       hashes.set(file, hash.digest('hex'));
     });
 
@@ -69,15 +75,17 @@ commander
       .map(entry => `${entry[0]}: ${entry[1]}`)
       .join('" -m "');
 
+    // Make the commit and the tag.
+    utils.run(
+      `git commit -am "Publish ${curr}" -m "SHA256 hashes:" -m "${hashString}"`
+    );
+    utils.run(`git tag v${curr}`);
+
     // Prompt the user to finalize.
     console.log('*'.repeat(40));
     console.log('*'.repeat(40));
     console.log('Ready to publish!');
     console.log('Run these command when ready:');
-    console.log(
-      `git commit -am "Publish ${curr}" -m "SHA256 hashes:" -m "${hashString}"`
-    );
-    console.log(`git tag v${curr}`);
     console.log('twine upload dist/*');
     console.log('git push origin <BRANCH> --tags');
   });

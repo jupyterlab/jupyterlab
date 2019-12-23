@@ -3,9 +3,9 @@
 
 import { simulate } from 'simulate-event';
 
-import { ServiceManager } from '@jupyterlab/services';
+import { ServiceManager, Session } from '@jupyterlab/services';
 
-import { ClientSession } from '@jupyterlab/apputils';
+import { SessionContext } from '@jupyterlab/apputils';
 
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
@@ -28,8 +28,8 @@ export { defaultRenderMime } from './rendermime';
  * @param signal - The signal we are listening to.
  * @param find - An optional function to determine which emission to test,
  * defaulting to the first emission.
- * @param test - An optional function which contains the tests for the emission.
- * @param value - An optional value that the promise resolves to if it is
+ * @param test - An optional function which contains the tests for the emission, and should throw an error if the tests fail.
+ * @param value - An optional value that the promise resolves to if the test is
  * successful.
  *
  * @returns a promise that rejects if the function throws an error (e.g., if an
@@ -54,12 +54,12 @@ export async function testEmission<T, U, V>(
     find?: (a: T, b: U) => boolean;
     test?: (a: T, b: U) => void;
     value?: V;
-  }
-): Promise<V> {
-  const done = new PromiseDelegate<V>();
+  } = {}
+): Promise<V | undefined> {
+  const done = new PromiseDelegate<V | undefined>();
   const object = {};
   signal.connect((sender: T, args: U) => {
-    if (!options.find || options.find(sender, args)) {
+    if (options.find?.(sender, args) ?? true) {
       try {
         Signal.disconnectReceiver(object);
         if (options.test) {
@@ -68,7 +68,7 @@ export async function testEmission<T, U, V>(
       } catch (e) {
         done.reject(e);
       }
-      done.resolve(options.value || undefined);
+      done.resolve(options.value ?? undefined);
     }
   }, object);
   return done.promise;
@@ -197,38 +197,67 @@ export function sleep<T>(milliseconds: number = 0, value?: T): Promise<T> {
 /**
  * Create a client session object.
  */
-export async function createClientSession(
-  options: Partial<ClientSession.IOptions> = {}
-): Promise<ClientSession> {
-  const manager = options.manager || Private.getManager().sessions;
+export async function createSessionContext(
+  options: Partial<SessionContext.IOptions> = {}
+): Promise<SessionContext> {
+  const manager = options.sessionManager ?? Private.getManager().sessions;
+  const specsManager = options.specsManager ?? Private.getManager().kernelspecs;
 
-  await manager.ready;
-  return new ClientSession({
-    manager,
-    path: options.path || UUID.uuid4(),
+  await Promise.all([manager.ready, specsManager.ready]);
+  return new SessionContext({
+    sessionManager: manager,
+    specsManager,
+    path: options.path ?? UUID.uuid4(),
     name: options.name,
     type: options.type,
-    kernelPreference: options.kernelPreference || {
+    kernelPreference: options.kernelPreference ?? {
       shouldStart: true,
       canStart: true,
-      name: manager.specs.default
+      name: specsManager.specs?.default
     }
   });
+}
+
+/**
+ * Create a session and return a session connection.
+ */
+export async function createSession(
+  options: Session.ISessionOptions
+): Promise<Session.ISessionConnection> {
+  const manager = Private.getManager().sessions;
+  await manager.ready;
+  return manager.startNew(options);
 }
 
 /**
  * Create a context for a file.
  */
 export function createFileContext(
-  path?: string,
-  manager?: ServiceManager.IManager
+  path: string = UUID.uuid4() + '.txt',
+  manager: ServiceManager.IManager = Private.getManager()
 ): Context<DocumentRegistry.IModel> {
   const factory = Private.textFactory;
-
-  manager = manager || Private.getManager();
-  path = path || UUID.uuid4() + '.txt';
-
   return new Context({ manager, factory, path });
+}
+
+export async function createFileContextWithKernel(
+  path: string = UUID.uuid4() + '.txt',
+  manager: ServiceManager.IManager = Private.getManager()
+) {
+  const factory = Private.textFactory;
+  const specsManager = manager.kernelspecs;
+  await specsManager.ready;
+
+  return new Context({
+    manager,
+    factory,
+    path,
+    kernelPreference: {
+      shouldStart: true,
+      canStart: true,
+      name: specsManager.specs?.default
+    }
+  });
 }
 
 /**
@@ -256,15 +285,15 @@ export async function initNotebookContext(
     kernelPreference: {
       shouldStart: startKernel,
       canStart: startKernel,
-      shutdownOnClose: true,
-      name: manager.specs.default
+      shutdownOnDispose: true,
+      name: manager.kernelspecs.specs?.default
     }
   });
   await context.initialize(true);
 
   if (startKernel) {
-    await context.session.initialize();
-    await context.session.kernel.ready;
+    await context.sessionContext.initialize();
+    await context.sessionContext.session?.kernel?.info;
   }
 
   return context;

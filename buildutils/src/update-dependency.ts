@@ -70,12 +70,12 @@ async function getVersion(pkg: string, specifier: string) {
  */
 function subset(range1: string, range2: string): boolean {
   try {
-    const [, r1, version1] = range1.match(tags);
-    const [, r2] = range2.match(tags);
+    const [, r1, version1] = range1.match(tags)!;
+    const [, r2] = range2.match(tags)!;
     return (
       ['', '~', '^'].indexOf(r1) >= 0 &&
       r1 === r2 &&
-      semver.valid(version1) &&
+      !!semver.valid(version1) &&
       semver.satisfies(version1, range2)
     );
   } catch (e) {

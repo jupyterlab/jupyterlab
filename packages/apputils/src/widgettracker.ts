@@ -336,7 +336,7 @@ export class WidgetTracker<T extends Widget = Widget>
     /* no-op */
   }
 
-  private _currentChanged = new Signal<this, T>(this);
+  private _currentChanged = new Signal<this, T | null>(this);
   private _focusTracker: FocusTracker<T>;
   private _pool: RestorablePool<T>;
   private _isDisposed = false;

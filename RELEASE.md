@@ -54,15 +54,20 @@ version, and we keep the JS versions and tags in sync with the release cycle.
 Here is an example of how version numbers progress through a release process.
 Choose and run an appropriate command to bump version numbers for this release.
 
-| Command                            | Python Version Change | NPM Version change                 |
-| ---------------------------------- | --------------------- | ---------------------------------- |
-| `jlpm bumpversion minor`           | x.y.z-> x.(y+1).0.a0  | All a.b.c -> a.(b+1).0-alpha.0     |
-| `jlpm bumpversion build`           | x.y.z.a0-> x.y.z.a1   | All a.b.c-alpha.0 -> a.b.c-alpha.1 |
-| `jlpm bumpversion release`         | x.y.z.a1-> x.y.z.rc0  | All a.b.c-alpha.1 -> a.b.c-rc.0    |
-| `jlpm bumpversion release`         | x.y.z.rc0-> x.y.z     | All a.b.c-rc0 -> a.b.c             |
-| `jlpm patch:release [...packages]` | x.y.z -> x.y.(z+1)    | Selected a.b.c -> a.b.(c+1)        |
+| Command                    | Python Version Change | NPM Version change                 |
+| -------------------------- | --------------------- | ---------------------------------- |
+| `jlpm bumpversion minor`   | x.y.z-> x.(y+1).0.a0  | All a.b.c -> a.(b+10).0-alpha.0    |
+| `jlpm bumpversion build`   | x.y.z.a0-> x.y.z.a1   | All a.b.c-alpha.0 -> a.b.c-alpha.1 |
+| `jlpm bumpversion release` | x.y.z.a1-> x.y.z.b0   | All a.b.c-alpha.1 -> a.b.c-beta.0  |
+| `jlpm bumpversion release` | x.y.z.a1-> x.y.z.rc0  | All a.b.c-alpha.1 -> a.b.c-rc.0    |
+| `jlpm bumpversion release` | x.y.z.rc0-> x.y.z     | All a.b.c-rc0 -> a.b.c             |
+| `jlpm patch:release`       | x.y.z -> x.y.(z+1)    | Changed a.b.c -> a.b.(c+1)         |
 
-Note: if you are making a patch release, and want to update whatever JS packages changed, just do `jlpm patch:release js` (in fact, _any_ argument, not just `js`, forces all JS packages to be examined).
+Note: For a minor release, we bump the JS packages by 10 versions so that
+we are not competing amongst the minor releases for version numbers.
+We are essentially sub-dividing semver to allow us to bump minor versions
+of the JS packages as many times as we need to for minor releases of the
+top level JupyterLab application.
 
 ### JS major release(s)
 
@@ -78,15 +83,9 @@ Results:
 - Python package is not affected.
 - JS dependencies are also bumped a major version.
 - Packages that have already had a major bump in this prerelease cycle are not affected.
-- All affected packages changed to match the current release type of the Python package (`alpha` or `rc`).
+- All affected packages changed to match the current release type of the Python package (`alpha`, `beta`, or `rc`).
 
 ## Publishing Packages
-
-Currently we end up with some uncommitted changes at this step. We'll need to commit them before running the publish.
-
-```bash
-git commit -am "bump version"
-```
 
 Now publish the JS packages and build the python packages
 
@@ -109,11 +108,9 @@ IntSlider()
 
 ## Finish
 
-Follow instructions printed at the end of the publish step above, including:
+Follow instructions printed at the end of the publish step above:
 
-- committing changes
-- tagging the release
-- and uploading to pypi with twine
+- upload to pypi with twine
 - double-check what branch you are on, then push changes to the correct upstream branch with the `--tags` option.
 
 ## Post release candidate checklist

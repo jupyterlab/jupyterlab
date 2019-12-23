@@ -12,8 +12,8 @@ import { CommandRegistry } from '@lumino/commands';
 
 import {
   JSONExt,
-  ReadonlyJSONObject,
-  ReadonlyJSONValue
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
 
 import { DisposableSet, IDisposable } from '@lumino/disposable';
@@ -52,7 +52,7 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
   requires: [ISettingRegistry],
   activate: async (app: JupyterFrontEnd, registry: ISettingRegistry) => {
     const { commands } = app;
-    let canonical: ISettingRegistry.ISchema;
+    let canonical: ISettingRegistry.ISchema | null;
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
 
     /**
@@ -62,17 +62,17 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
       const commands = app.commands.listCommands().join('\n');
 
       loaded = {};
-      schema.properties.shortcuts.default = Object.keys(registry.plugins)
+      schema.properties!.shortcuts.default = Object.keys(registry.plugins)
         .map(plugin => {
           let shortcuts =
-            registry.plugins[plugin].schema['jupyter.lab.shortcuts'] || [];
+            registry.plugins[plugin]!.schema['jupyter.lab.shortcuts'] || [];
           loaded[plugin] = shortcuts;
           return shortcuts;
         })
         .reduce((acc, val) => acc.concat(val), [])
         .sort((a, b) => a.command.localeCompare(b.command));
 
-      schema.properties.shortcuts.description = `Note: To disable a system default shortcut,
+      schema.properties!.shortcuts.description = `Note: To disable a system default shortcut,
 copy it to User Preferences and add the
 "disabled" key, for example:
 {
@@ -95,7 +95,7 @@ List of keyboard shortcuts:`;
         // If the plugin changed its shortcuts, reload everything.
         let oldShortcuts = loaded[plugin];
         let newShortcuts =
-          registry.plugins[plugin].schema['jupyter.lab.shortcuts'] || [];
+          registry.plugins[plugin]!.schema['jupyter.lab.shortcuts'] || [];
         if (
           oldShortcuts === undefined ||
           !JSONExt.deepEqual(oldShortcuts, newShortcuts)
@@ -115,13 +115,13 @@ List of keyboard shortcuts:`;
           populate(canonical);
         }
 
-        const defaults = canonical.properties.shortcuts.default;
+        const defaults = canonical.properties?.shortcuts?.default ?? [];
         const user = {
-          shortcuts: ((plugin.data && plugin.data.user) || {}).shortcuts || []
+          shortcuts: plugin.data.user.shortcuts ?? []
         };
         const composite = {
           shortcuts: SettingRegistry.reconcileShortcuts(
-            defaults,
+            defaults as ISettingRegistry.IShortcut[],
             user.shortcuts as ISettingRegistry.IShortcut[]
           )
         };
@@ -184,9 +184,10 @@ namespace Private {
    */
   export function loadShortcuts(
     commands: CommandRegistry,
-    composite: ReadonlyJSONObject
+    composite: ReadonlyPartialJSONObject | undefined
   ): void {
-    const shortcuts = composite.shortcuts as ISettingRegistry.IShortcut[];
+    const shortcuts = (composite?.shortcuts ??
+      []) as ISettingRegistry.IShortcut[];
 
     if (disposables) {
       disposables.dispose();
@@ -206,7 +207,9 @@ namespace Private {
    * Normalize potential keyboard shortcut options.
    */
   function normalizeOptions(
-    value: ReadonlyJSONValue | Partial<CommandRegistry.IKeyBindingOptions>
+    value:
+      | ReadonlyPartialJSONValue
+      | Partial<CommandRegistry.IKeyBindingOptions>
   ): CommandRegistry.IKeyBindingOptions | undefined {
     if (!value || typeof value !== 'object') {
       return undefined;

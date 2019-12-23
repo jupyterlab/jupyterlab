@@ -3,7 +3,7 @@
 
 import { DataConnector, URLExt } from '@jupyterlab/coreutils';
 
-import { ReadonlyJSONObject } from '@lumino/coreutils';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { ServerConnection } from '../serverconnection';
 
@@ -22,7 +22,7 @@ export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
   constructor(options: WorkspaceManager.IOptions = {}) {
     super();
     this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+      options.serverSettings ?? ServerConnection.makeSettings();
   }
 
   /**
@@ -150,7 +150,7 @@ export namespace Workspace {
     /**
      * The workspace data.
      */
-    data: ReadonlyJSONObject;
+    data: ReadonlyPartialJSONObject;
 
     /**
      * The metadata for a workspace.

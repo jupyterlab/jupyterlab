@@ -74,7 +74,7 @@ function activate(
    */
   function updateWidget(widget: MarkdownViewer): void {
     Object.keys(config).forEach((k: keyof MarkdownViewer.IConfig) => {
-      widget.setOption(k, config[k]);
+      widget.setOption(k, config[k] ?? null);
     });
   }
 

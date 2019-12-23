@@ -11,7 +11,7 @@ import { Widget } from '@lumino/widgets';
 
 import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
 
-import { dismissDialog } from '@jupyterlab/testutils';
+import { dismissDialog, acceptDialog } from '@jupyterlab/testutils';
 
 import {
   createConsolePanelFactory,
@@ -73,7 +73,7 @@ describe('console/panel', () => {
 
     describe('#session', () => {
       it('should be a client session object', () => {
-        expect(panel.session.path).to.be.ok;
+        expect(panel.sessionContext.sessionChanged).to.be.ok;
       });
     });
 
@@ -89,8 +89,9 @@ describe('console/panel', () => {
     describe('#onAfterAttach()', () => {
       it('should start the session', async () => {
         Widget.attach(panel, document.body);
-        await dismissDialog();
-        return panel.session.ready;
+        await acceptDialog();
+        await panel.sessionContext.ready;
+        await panel.sessionContext.session!.kernel!.info;
       });
     });
 
@@ -100,7 +101,7 @@ describe('console/panel', () => {
         Widget.attach(panel, document.body);
         MessageLoop.sendMessage(panel, Widget.Msg.ActivateRequest);
         expect(panel.methods).to.contain('onActivateRequest');
-        expect(panel.console.promptCell.editor.hasFocus()).to.equal(true);
+        expect(panel.console.promptCell!.editor.hasFocus()).to.equal(true);
         return dismissDialog();
       });
     });
@@ -130,7 +131,7 @@ describe('console/panel', () => {
             contentFactory: contentFactory,
             rendermime,
             mimeTypeService,
-            session: panel.session
+            sessionContext: panel.sessionContext
           };
           expect(contentFactory.createConsole(options)).to.be.an.instanceof(
             CodeConsole

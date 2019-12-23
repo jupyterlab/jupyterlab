@@ -393,8 +393,8 @@ describe('LabShell', () => {
       shell.add(foo, 'main');
       const state = shell.saveLayout();
       shell.activateById('foo');
-      expect(state.mainArea.mode).to.equal('multiple-document');
-      expect(state.mainArea.currentWidget).to.equal(null);
+      expect(state.mainArea?.mode).to.equal('multiple-document');
+      expect(state.mainArea?.currentWidget).to.equal(null);
     });
   });
 
@@ -403,7 +403,7 @@ describe('LabShell', () => {
       const state = shell.saveLayout();
       shell.mode = 'single-document';
       shell.restoreLayout(state);
-      expect(state.mainArea.mode).to.equal('multiple-document');
+      expect(state.mainArea?.mode).to.equal('multiple-document');
     });
   });
 });

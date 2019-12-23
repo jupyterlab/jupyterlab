@@ -33,7 +33,7 @@ import {
 
 import { CommandRegistry } from '@lumino/commands';
 
-import { JSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
+import { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { Menu } from '@lumino/widgets';
 
@@ -95,16 +95,16 @@ export namespace Commands {
     commands: CommandRegistry
   ): (
     widget: IDocumentWidget<FileEditor>,
-    args?: ReadonlyJSONObject
+    args?: ReadonlyPartialJSONObject
   ) => Promise<void> {
     return async function createConsole(
       widget: IDocumentWidget<FileEditor>,
-      args?: ReadonlyJSONObject
+      args?: ReadonlyPartialJSONObject
     ): Promise<void> {
       const options = args || {};
       const console = await commands.execute('console:create', {
         activate: options['activate'],
-        name: widget.context.contentsModel.name,
+        name: widget.context.contentsModel?.name,
         path: widget.context.path,
         preferredLanguage: widget.context.model.defaultKernelLanguage,
         ref: widget.id,
@@ -113,7 +113,7 @@ export namespace Commands {
 
       widget.context.pathChanged.connect((sender, value) => {
         console.session.setPath(value);
-        console.session.setName(widget.context.contentsModel.name);
+        console.session.setName(widget.context.contentsModel?.name);
       });
     };
   }
@@ -392,13 +392,13 @@ export namespace Commands {
     commands.addCommand(CommandIDs.runCode, {
       execute: () => {
         // Run the appropriate code, taking into account a ```fenced``` code block.
-        const widget = tracker.currentWidget.content;
+        const widget = tracker.currentWidget?.content;
 
         if (!widget) {
           return;
         }
 
-        let code = '';
+        let code: string | undefined = '';
         const editor = widget.editor;
         const path = widget.context.path;
         const extension = PathExt.extname(path);
@@ -461,7 +461,7 @@ export namespace Commands {
   ) {
     commands.addCommand(CommandIDs.runAllCode, {
       execute: () => {
-        let widget = tracker.currentWidget.content;
+        let widget = tracker.currentWidget?.content;
 
         if (!widget) {
           return;
@@ -865,15 +865,19 @@ export namespace Commands {
       tracker,
       noun: 'Code',
       isEnabled: current =>
-        !!consoleTracker.find(c => c.session.path === current.context.path),
+        !!consoleTracker.find(
+          widget =>
+            widget.content.sessionContext.session?.path === current.context.path
+        ),
       run: () => commands.execute(CommandIDs.runCode),
       runAll: () => commands.execute(CommandIDs.runAllCode),
       restartAndRunAll: current => {
-        const console = consoleTracker.find(
-          console => console.session.path === current.context.path
+        const widget = consoleTracker.find(
+          widget =>
+            widget.content.sessionContext.session?.path === current.context.path
         );
-        if (console) {
-          return console.session.restart().then(restarted => {
+        if (widget) {
+          return widget.content.sessionContext.restart().then(restarted => {
             if (restarted) {
               void commands.execute(CommandIDs.runAllCode);
             }

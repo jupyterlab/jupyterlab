@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ClientSession, IClientSession } from '@jupyterlab/apputils';
+import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
@@ -58,8 +58,9 @@ export class ConsolePanel extends Panel {
       path = `${basePath || ''}/console-${count}-${UUID.uuid4()}`;
     }
 
-    let session = (this._session = new ClientSession({
-      manager: manager.sessions,
+    let sessionContext = (this._sessionContext = new SessionContext({
+      sessionManager: manager.sessions,
+      specsManager: manager.kernelspecs,
       path,
       name: name || `Console ${count}`,
       type: 'console',
@@ -68,29 +69,29 @@ export class ConsolePanel extends Panel {
     }));
 
     let resolver = new RenderMimeRegistry.UrlResolver({
-      session,
+      session: sessionContext,
       contents: manager.contents
     });
     rendermime = rendermime.clone({ resolver });
 
     this.console = contentFactory.createConsole({
       rendermime,
-      session,
+      sessionContext: sessionContext,
       mimeTypeService,
       contentFactory,
       modelFactory
     });
     this.addWidget(this.console);
 
-    void session.initialize().then(() => {
+    void sessionContext.initialize().then(() => {
       this._connected = new Date();
       this._updateTitle();
     });
 
     this.console.executed.connect(this._onExecuted, this);
     this._updateTitle();
-    session.kernelChanged.connect(this._updateTitle, this);
-    session.propertyChanged.connect(this._updateTitle, this);
+    sessionContext.kernelChanged.connect(this._updateTitle, this);
+    sessionContext.propertyChanged.connect(this._updateTitle, this);
 
     this.title.icon = CONSOLE_ICON_CLASS;
     this.title.closable = true;
@@ -110,15 +111,15 @@ export class ConsolePanel extends Panel {
   /**
    * The session used by the panel.
    */
-  get session(): IClientSession {
-    return this._session;
+  get sessionContext(): ISessionContext {
+    return this._sessionContext;
   }
 
   /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    this.session.dispose();
+    this.sessionContext.dispose();
     this.console.dispose();
     super.dispose();
   }
@@ -158,7 +159,7 @@ export class ConsolePanel extends Panel {
 
   private _executed: Date | null = null;
   private _connected: Date | null = null;
-  private _session: ClientSession;
+  private _sessionContext: SessionContext;
 }
 
 /**
@@ -202,7 +203,7 @@ export namespace ConsolePanel {
     /**
      * A kernel preference.
      */
-    kernelPreference?: IClientSession.IKernelPreference;
+    kernelPreference?: ISessionContext.IKernelPreference;
 
     /**
      * The model factory for the console widget.
@@ -285,18 +286,23 @@ namespace Private {
     connected: Date | null,
     executed: Date | null
   ) {
-    let session = panel.console.session;
-    let caption =
-      `Name: ${session.name}\n` +
-      `Directory: ${PathExt.dirname(session.path)}\n` +
-      `Kernel: ${session.kernelDisplayName}`;
-    if (connected) {
-      caption += `\nConnected: ${Time.format(connected.toISOString())}`;
+    let sessionContext = panel.console.sessionContext.session;
+    if (sessionContext) {
+      let caption =
+        `Name: ${sessionContext.name}\n` +
+        `Directory: ${PathExt.dirname(sessionContext.path)}\n` +
+        `Kernel: ${panel.console.sessionContext.kernelDisplayName}`;
+      if (connected) {
+        caption += `\nConnected: ${Time.format(connected.toISOString())}`;
+      }
+      if (executed) {
+        caption += `\nLast Execution: ${Time.format(executed.toISOString())}`;
+      }
+      panel.title.label = sessionContext.name;
+      panel.title.caption = caption;
+    } else {
+      panel.title.label = 'Console';
+      panel.title.caption = '';
     }
-    if (executed) {
-      caption += `\nLast Execution: ${Time.format(executed.toISOString())}`;
-    }
-    panel.title.label = session.name || 'Console';
-    panel.title.caption = caption;
   }
 }

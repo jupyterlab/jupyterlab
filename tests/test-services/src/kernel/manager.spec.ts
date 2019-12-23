@@ -5,44 +5,23 @@ import { expect } from 'chai';
 
 import { toArray } from '@lumino/algorithm';
 
-import { JSONExt } from '@lumino/coreutils';
+import { KernelManager, Kernel, KernelAPI } from '@jupyterlab/services';
 
-import { KernelManager, Kernel } from '@jupyterlab/services';
+import { testEmission, sleep } from '@jupyterlab/testutils';
 
-import { testEmission } from '@jupyterlab/testutils';
-
-import {
-  PYTHON_SPEC,
-  KERNELSPECS,
-  handleRequest,
-  makeSettings
-} from '../utils';
-
-class TestManager extends KernelManager {
-  intercept: Kernel.ISpecModels | null = null;
-  protected async requestSpecs(): Promise<void> {
-    if (this.intercept) {
-      handleRequest(this, 200, this.intercept);
-    }
-    return super.requestSpecs();
-  }
-}
-
-const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
-PYTHON3_SPEC.name = 'Python3';
-PYTHON3_SPEC.display_name = 'python3';
+import { makeSettings } from '../utils';
 
 describe('kernel/manager', () => {
   let manager: KernelManager;
-  let kernel: Kernel.IKernel;
+  let kernel: Kernel.IModel;
 
   beforeAll(async () => {
-    kernel = await Kernel.startNew();
+    jest.setTimeout(120000);
+    kernel = await KernelAPI.startNew();
   });
 
   beforeEach(() => {
     manager = new KernelManager({ standby: 'never' });
-    expect(manager.specs).to.be.null;
     return manager.ready;
   });
 
@@ -50,37 +29,33 @@ describe('kernel/manager', () => {
     manager.dispose();
   });
 
-  afterAll(() => {
-    return Kernel.shutdownAll();
+  afterAll(async () => {
+    let models = await KernelAPI.listRunning();
+    await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
   });
 
   describe('KernelManager', () => {
     describe('#constructor()', () => {
-      it('should take the options as an argument', () => {
+      it('should take the options as an argument', async () => {
         manager.dispose();
         manager = new KernelManager({
           serverSettings: makeSettings(),
           standby: 'never'
         });
         expect(manager instanceof KernelManager).to.equal(true);
+        await manager.ready;
       });
     });
 
     describe('#serverSettings', () => {
-      it('should get the server settings', () => {
+      it('should get the server settings', async () => {
         manager.dispose();
         const serverSettings = makeSettings();
         const standby = 'never';
         const token = serverSettings.token;
         manager = new KernelManager({ serverSettings, standby });
-        expect(manager.serverSettings.token).to.equal(token);
-      });
-    });
-
-    describe('#specs', () => {
-      it('should get the kernel specs', async () => {
         await manager.ready;
-        expect(manager.specs.default).to.be.ok;
+        expect(manager.serverSettings.token).to.equal(token);
       });
     });
 
@@ -90,25 +65,6 @@ describe('kernel/manager', () => {
         expect(toArray(manager.running()).length).to.be.greaterThan(0);
       });
     });
-
-    describe('#specsChanged', () => {
-      it('should be emitted when the specs change', async () => {
-        const manager = new TestManager({ standby: 'never' });
-        const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
-        let called = false;
-        manager.specsChanged.connect(() => {
-          called = true;
-        });
-        await manager.ready;
-        expect(manager.specs.default).to.equal('echo');
-        specs.default = 'shell';
-        manager.intercept = specs;
-        await manager.refreshSpecs();
-        expect(manager.specs.default).to.equal('shell');
-        expect(called).to.equal(true);
-      });
-    });
-
     describe('#runningChanged', () => {
       it('should be emitted in refreshRunning when the running kernels changed', async () => {
         let called = false;
@@ -117,18 +73,19 @@ describe('kernel/manager', () => {
           expect(toArray(args).length).to.be.greaterThan(0);
           called = true;
         });
-        await Kernel.startNew();
+        await KernelAPI.startNew();
         await manager.refreshRunning();
         expect(called).to.equal(true);
       });
 
       it('should be emitted when a kernel is shut down', async () => {
         const kernel = await manager.startNew();
+        await kernel.info;
         let called = false;
         manager.runningChanged.connect(() => {
           called = true;
         });
-        await kernel.shutdown();
+        await manager.shutdown(kernel.id);
         expect(called).to.equal(true);
       });
     });
@@ -149,23 +106,17 @@ describe('kernel/manager', () => {
       });
     });
 
-    describe('#refreshSpecs()', () => {
-      it('should update list of kernel specs', async () => {
-        const manager = new TestManager({ standby: 'never' });
-        const specs = JSONExt.deepCopy(KERNELSPECS) as Kernel.ISpecModels;
-        await manager.ready;
-        specs.default = 'shell';
-        manager.intercept = specs;
-        expect(manager.specs.default).not.to.equal('shell');
-        await manager.refreshSpecs();
-        expect(manager.specs.default).to.equal('shell');
-      });
-    });
-
     describe('#refreshRunning()', () => {
       it('should update the running kernels', async () => {
         await manager.refreshRunning();
         expect(toArray(manager.running()).length).to.be.greaterThan(0);
+      });
+
+      it('should update the running kernels when one is shut down', async () => {
+        const old = toArray(manager.running()).length;
+        await KernelAPI.startNew();
+        await manager.refreshRunning();
+        expect(toArray(manager.running()).length).to.be.greaterThan(old);
       });
     });
 
@@ -179,7 +130,8 @@ describe('kernel/manager', () => {
         manager.runningChanged.connect(() => {
           called = true;
         });
-        await manager.startNew();
+        let kernel = await manager.startNew();
+        await kernel.info;
         expect(called).to.equal(true);
       });
     });
@@ -188,32 +140,22 @@ describe('kernel/manager', () => {
       it('should find an existing kernel by id', async () => {
         const id = kernel.id;
         const model = await manager.findById(id);
-        expect(model.id).to.equal(id);
+        expect(model!.id).to.equal(id);
       });
     });
 
     describe('#connectTo()', () => {
       it('should connect to an existing kernel', () => {
         const id = kernel.id;
-        const newConnection = manager.connectTo(kernel.model);
+        const newConnection = manager.connectTo({ model: kernel });
         expect(newConnection.model.id).to.equal(id);
-      });
-
-      it('should emit a runningChanged signal', async () => {
-        let called = false;
-        manager.runningChanged.connect(() => {
-          called = true;
-        });
-        const k = await Kernel.startNew();
-        manager.connectTo(k.model);
-        expect(called).to.equal(true);
       });
     });
 
     describe('shutdown()', () => {
       it('should shut down a kernel by id', async () => {
         const kernel = await manager.startNew();
-        await kernel.ready;
+        await kernel.info;
         await manager.shutdown(kernel.id);
         expect(kernel.isDisposed).to.equal(true);
       });
@@ -225,8 +167,24 @@ describe('kernel/manager', () => {
             expect(kernel.isDisposed).to.equal(false);
           }
         });
+        await kernel.info;
         await manager.shutdown(kernel.id);
         await emission;
+      });
+
+      it('should dispose of all relevant kernel connections', async () => {
+        const kernel0 = await manager.startNew();
+        const kernel1 = manager.connectTo({ model: kernel0.model });
+        await kernel0.info;
+        await kernel1.info;
+        await kernel0.shutdown();
+        expect(kernel0.status).to.equal('dead');
+        expect(kernel0.isDisposed).to.equal(true);
+
+        // Wait for the round trip to the server to update the connections.
+        await sleep(100);
+        expect(kernel1.status).to.equal('dead');
+        expect(kernel1.isDisposed).to.equal(true);
       });
     });
   });

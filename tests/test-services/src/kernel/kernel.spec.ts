@@ -7,7 +7,7 @@ import { UUID } from '@lumino/coreutils';
 
 import { toArray } from '@lumino/algorithm';
 
-import { Kernel } from '@jupyterlab/services';
+import { KernelAPI } from '@jupyterlab/services';
 
 import { expectFailure, testEmission } from '@jupyterlab/testutils';
 
@@ -23,14 +23,7 @@ PYTHON3_SPEC.name = 'Python3';
 PYTHON3_SPEC.display_name = 'python3';
 
 describe('kernel', () => {
-  let defaultKernel: Kernel.IKernel;
   let tester: KernelTester;
-
-  beforeAll(async () => {
-    defaultKernel = await Kernel.startNew();
-    // Start another kernel.
-    await Kernel.startNew();
-  });
 
   afterEach(() => {
     if (tester) {
@@ -38,79 +31,73 @@ describe('kernel', () => {
     }
   });
 
-  afterEach(() => {
-    return Kernel.shutdownAll();
+  afterEach(async () => {
+    let models = await KernelAPI.listRunning();
+    await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
   });
 
   describe('Kernel.listRunning()', () => {
     it('should yield a list of valid kernel ids', async () => {
-      const response = await Kernel.listRunning();
-      expect(toArray(response).length).to.be.greaterThan(0);
+      const kernel = await KernelAPI.startNew();
+      expect(toArray(await KernelAPI.listRunning()).length).to.be.greaterThan(
+        0
+      );
+      await KernelAPI.shutdownKernel(kernel.id);
     });
 
     it('should accept server settings', async () => {
       const serverSettings = makeSettings();
-      const kernel = await Kernel.startNew({ serverSettings });
-      const response = await Kernel.listRunning(serverSettings);
+      const k = await KernelAPI.startNew({}, serverSettings);
+      const response = await KernelAPI.listRunning(serverSettings);
       expect(toArray(response).length).to.be.greaterThan(0);
-      await kernel.shutdown();
+      await KernelAPI.shutdownKernel(k.id);
     });
 
     it('should throw an error for an invalid model', async () => {
       const data = { id: UUID.uuid4(), name: 'test' };
       const settings = getRequestHandler(200, data);
-      const promise = Kernel.listRunning(settings);
+      const promise = KernelAPI.listRunning(settings);
       await expectFailure(promise, 'Invalid kernel list');
     });
 
     it('should throw an error for an invalid response', async () => {
       const settings = getRequestHandler(201, {});
-      const promise = Kernel.listRunning(settings);
+      const promise = KernelAPI.listRunning(settings);
       await expectFailure(promise, 'Invalid response: 201 Created');
     });
 
     it('should throw an error for an error response', async () => {
       const settings = getRequestHandler(500, {});
-      const promise = Kernel.listRunning(settings);
+      const promise = KernelAPI.listRunning(settings);
       await expectFailure(promise, '');
     });
   });
 
-  describe('Kernel.startNew()', () => {
-    it('should create an Kernel.IKernel object', async () => {
-      const kernel = await Kernel.startNew({});
-      expect(kernel.status).to.equal('unknown');
-      await kernel.shutdown();
-    });
-
+  describe('KernelAPI.startNew()', () => {
     it('should accept ajax options', async () => {
       const serverSettings = makeSettings();
-      const kernel = await Kernel.startNew({ serverSettings });
-      expect(kernel.status).to.equal('unknown');
-      await kernel.shutdown();
+      const k = await KernelAPI.startNew({}, serverSettings);
+      await KernelAPI.shutdownKernel(k.id);
     });
 
-    // TODO: fix this test. The idea here is that if a kernel immediately
-    // replies that it is dead, we still construct the kernel object and give it
-    // a chance to handle the dead status. When is this going to happen? A
-    // kernel typically doesn't immediately send its status, does it? I suppose
-    // it should - if we are connecting to an existing kernel, it would be nice
-    // to know right off if it's busy/dead/etc.
-    it.skip('should still start if the kernel dies', async () => {
+    it('should still construct connection if the kernel dies', async () => {
+      // If a kernel dies immediately, the kernel connection should still send
+      // out the status signal, then dispose the connection.
       tester = new KernelTester();
       tester.initialStatus = 'dead';
       const kernel = await tester.start();
-      await testEmission(kernel.statusChanged, {
-        test: (sender, state) => {
-          return state === 'dead';
-        }
+      const dead = testEmission(kernel.statusChanged, {
+        test: (sender, state) => state === 'dead'
       });
+      await dead;
+      expect(kernel.isDisposed).to.be.true;
+      expect(kernel.status).to.equal('dead');
       tester.dispose();
     });
 
     it('should throw an error for an invalid kernel id', async () => {
       const serverSettings = getRequestHandler(201, { id: UUID.uuid4() });
-      const kernelPromise = Kernel.startNew({ serverSettings });
+      const kernelPromise = KernelAPI.startNew({}, serverSettings);
       await expectFailure(kernelPromise);
     });
 
@@ -119,220 +106,46 @@ describe('kernel', () => {
         id: UUID.uuid4(),
         name: 1
       });
-      const kernelPromise = Kernel.startNew({ serverSettings });
+      const kernelPromise = KernelAPI.startNew({}, serverSettings);
       await expectFailure(kernelPromise);
     });
 
     it('should throw an error for an invalid response', async () => {
       const data = { id: UUID.uuid4(), name: 'foo' };
       const serverSettings = getRequestHandler(200, data);
-      const kernelPromise = Kernel.startNew({ serverSettings });
+      const kernelPromise = KernelAPI.startNew({}, serverSettings);
       await expectFailure(kernelPromise, 'Invalid response: 200 OK');
     });
 
     it('should throw an error for an error response', async () => {
       const serverSettings = getRequestHandler(500, {});
-      const kernelPromise = Kernel.startNew({ serverSettings });
+      const kernelPromise = KernelAPI.startNew({}, serverSettings);
       await expectFailure(kernelPromise, '');
     });
 
     it('should auto-reconnect on websocket error', async () => {
       tester = new KernelTester();
       const kernel = await tester.start();
-      await kernel.ready;
+      await kernel.info;
 
-      const emission = testEmission(kernel.statusChanged, {
-        find: (k, status) => status === 'reconnecting'
+      const emission = testEmission(kernel.connectionStatusChanged, {
+        find: (k, status) => status === 'connecting'
       });
       await tester.close();
       await emission;
     });
   });
 
-  describe('Kernel.connectTo()', () => {
-    it('should connect to an existing kernel', () => {
-      const id = defaultKernel.id;
-      const kernel = Kernel.connectTo(defaultKernel.model);
-      expect(kernel.id).to.equal(id);
-      kernel.dispose();
-    });
-
-    it('should accept server settings', () => {
-      const id = defaultKernel.id;
-      const serverSettings = makeSettings();
-      const kernel = Kernel.connectTo(defaultKernel.model, serverSettings);
-      expect(kernel.id).to.equal(id);
-      kernel.dispose();
-    });
-
-    it('should turn off comm handling in the new connection if it was enabled in first kernel', async () => {
-      const kernel = await Kernel.startNew();
-      expect(kernel.handleComms).to.be.true;
-      const kernel2 = Kernel.connectTo(kernel.model);
-      expect(kernel2.handleComms).to.be.false;
-      kernel.dispose();
-      kernel2.dispose();
-    });
-
-    it('should turn on comm handling in the new connection if it was disabled in all other connections', async () => {
-      const kernel = await Kernel.startNew({ handleComms: false });
-      expect(kernel.handleComms).to.be.false;
-      const kernel2 = Kernel.connectTo(defaultKernel.model);
-      expect(kernel2.handleComms).to.be.true;
-      kernel.dispose();
-      kernel2.dispose();
-    });
-  });
-
   describe('Kernel.shutdown()', () => {
     it('should shut down a kernel by id', async () => {
-      const k = await Kernel.startNew();
-      await Kernel.shutdown(k.id);
+      const kernel = await KernelAPI.startNew();
+      await KernelAPI.shutdownKernel(kernel.id);
+      const kernels = await KernelAPI.listRunning();
+      expect(kernels.find(k => k.id === kernel.id)).to.be.undefined;
     });
 
     it('should handle a 404 error', () => {
-      return Kernel.shutdown(UUID.uuid4());
-    });
-  });
-
-  describe('Kernel.getSpecs()', () => {
-    it('should load the kernelspecs', async () => {
-      const specs = await Kernel.getSpecs();
-      expect(specs.default).to.be.ok;
-    });
-
-    it('should accept ajax options', async () => {
-      const serverSettings = makeSettings();
-      const specs = await Kernel.getSpecs(serverSettings);
-      expect(specs.default).to.be.ok;
-    });
-
-    it('should handle a missing default parameter', async () => {
-      const serverSettings = getRequestHandler(200, {
-        kernelspecs: { python: PYTHON_SPEC }
-      });
-      const specs = await Kernel.getSpecs(serverSettings);
-      expect(specs.default).to.be.ok;
-    });
-
-    it('should throw for a missing kernelspecs parameter', async () => {
-      const serverSettings = getRequestHandler(200, {
-        default: PYTHON_SPEC.name
-      });
-      const promise = Kernel.getSpecs(serverSettings);
-      await expectFailure(promise, 'No kernelspecs found');
-    });
-
-    it('should omit an invalid kernelspec', async () => {
-      const R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
-      R_SPEC.name = 1;
-      const serverSettings = getRequestHandler(200, {
-        default: 'python',
-        kernelspecs: {
-          R: R_SPEC,
-          python: PYTHON_SPEC
-        }
-      });
-      const specs = await Kernel.getSpecs(serverSettings);
-      expect(specs.default).to.equal('python');
-      expect(specs.kernelspecs['R']).to.be.undefined;
-    });
-
-    it('should handle an improper name', async () => {
-      const R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
-      R_SPEC.name = 1;
-      const serverSettings = getRequestHandler(200, {
-        default: 'R',
-        kernelspecs: { R: R_SPEC }
-      });
-      const promise = Kernel.getSpecs(serverSettings);
-      await expectFailure(promise, 'No valid kernelspecs found');
-    });
-
-    it('should handle an improper language', async () => {
-      const R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
-      R_SPEC.spec.language = 1;
-      const serverSettings = getRequestHandler(200, {
-        default: 'R',
-        kernelspecs: { R: R_SPEC }
-      });
-      const promise = Kernel.getSpecs(serverSettings);
-      await expectFailure(promise, 'No valid kernelspecs found');
-    });
-
-    it('should handle an improper argv', async () => {
-      const R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
-      R_SPEC.spec.argv = 'hello';
-      const serverSettings = getRequestHandler(200, {
-        default: 'R',
-        kernelspecs: { R: R_SPEC }
-      });
-      const promise = Kernel.getSpecs(serverSettings);
-      await expectFailure(promise, 'No valid kernelspecs found');
-    });
-
-    it('should handle an improper display_name', async () => {
-      const R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
-      R_SPEC.spec.display_name = ['hello'];
-      const serverSettings = getRequestHandler(200, {
-        default: 'R',
-        kernelspecs: { R: R_SPEC }
-      });
-      const promise = Kernel.getSpecs(serverSettings);
-      await expectFailure(promise, 'No valid kernelspecs found');
-    });
-
-    it('should handle missing resources', async () => {
-      const R_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
-      delete R_SPEC.resources;
-      const serverSettings = getRequestHandler(200, {
-        default: 'R',
-        kernelspecs: { R: R_SPEC }
-      });
-      const promise = Kernel.getSpecs(serverSettings);
-      await expectFailure(promise, 'No valid kernelspecs found');
-    });
-
-    it('should throw an error for an invalid response', async () => {
-      const serverSettings = getRequestHandler(201, {});
-      const promise = Kernel.getSpecs(serverSettings);
-      await expectFailure(promise, 'Invalid response: 201 Created');
-    });
-
-    it('should handle metadata', async () => {
-      const PYTHON_SPEC_W_MD = JSON.parse(JSON.stringify(PYTHON_SPEC));
-      PYTHON_SPEC_W_MD.spec.metadata = { some_application: { key: 'value' } };
-      const serverSettings = getRequestHandler(200, {
-        default: 'python',
-        kernelspecs: { python: PYTHON_SPEC_W_MD }
-      });
-      const specs = await Kernel.getSpecs(serverSettings);
-
-      expect(specs.kernelspecs['python']).to.have.property('metadata');
-      const metadata = specs.kernelspecs['python'].metadata;
-      expect(metadata).to.have.property('some_application');
-      expect((metadata as any).some_application).to.have.property(
-        'key',
-        'value'
-      );
-    });
-
-    it('should handle env values', async () => {
-      const PYTHON_SPEC_W_ENV = JSON.parse(JSON.stringify(PYTHON_SPEC));
-      PYTHON_SPEC_W_ENV.spec.env = {
-        SOME_ENV: 'some_value',
-        LANG: 'en_US.UTF-8'
-      };
-      const serverSettings = getRequestHandler(200, {
-        default: 'python',
-        kernelspecs: { python: PYTHON_SPEC_W_ENV }
-      });
-      const specs = await Kernel.getSpecs(serverSettings);
-
-      expect(specs.kernelspecs['python']).to.have.property('env');
-      const env = specs.kernelspecs['python'].env;
-      expect(env).to.have.property('SOME_ENV', 'some_value');
-      expect(env).to.have.property('LANG', 'en_US.UTF-8');
+      return KernelAPI.shutdownKernel(UUID.uuid4());
     });
   });
 });

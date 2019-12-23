@@ -172,7 +172,7 @@ export namespace ToolbarItems {
     return new ToolbarButton({
       iconClassName: TOOLBAR_RUN_CLASS,
       onClick: () => {
-        void NotebookActions.runAndAdvance(panel.content, panel.session);
+        void NotebookActions.runAndAdvance(panel.content, panel.sessionContext);
       },
       tooltip: 'Run the selected cells and advance'
     });
@@ -208,21 +208,21 @@ export namespace ToolbarItems {
       { name: 'run', widget: createRunButton(panel) },
       {
         name: 'interrupt',
-        widget: Toolbar.createInterruptButton(panel.session)
+        widget: Toolbar.createInterruptButton(panel.sessionContext)
       },
       {
         name: 'restart',
-        widget: Toolbar.createRestartButton(panel.session)
+        widget: Toolbar.createRestartButton(panel.sessionContext)
       },
       { name: 'cellType', widget: createCellTypeItem(panel) },
       { name: 'spacer', widget: Toolbar.createSpacerItem() },
       {
         name: 'kernelName',
-        widget: Toolbar.createKernelNameItem(panel.session)
+        widget: Toolbar.createKernelNameItem(panel.sessionContext)
       },
       {
         name: 'kernelStatus',
-        widget: Toolbar.createKernelStatusItem(panel.session)
+        widget: Toolbar.createKernelStatusItem(panel.sessionContext)
       }
     ];
   }
@@ -302,5 +302,5 @@ export class CellTypeSwitcher extends ReactWidget {
     );
   }
 
-  private _notebook: Notebook = null;
+  private _notebook: Notebook;
 }

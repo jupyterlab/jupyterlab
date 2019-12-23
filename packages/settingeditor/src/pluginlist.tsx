@@ -53,8 +53,8 @@ export class PluginList extends Widget {
   /**
    * The selection value of the plugin list.
    */
-  get scrollTop(): number {
-    return this.node.querySelector('ul').scrollTop;
+  get scrollTop(): number | undefined {
+    return this.node.querySelector('ul')?.scrollTop;
   }
 
   /**
@@ -114,7 +114,10 @@ export class PluginList extends Widget {
     const selection = this._selection;
 
     Private.populateList(registry, selection, node);
-    node.querySelector('ul').scrollTop = this._scrollTop;
+    const ul = node.querySelector('ul');
+    if (ul && this._scrollTop !== undefined) {
+      ul.scrollTop = this._scrollTop;
+    }
   }
 
   /**
@@ -146,7 +149,7 @@ export class PluginList extends Widget {
     this._confirm()
       .then(() => {
         this._scrollTop = this.scrollTop;
-        this._selection = id;
+        this._selection = id!;
         this._changed.emit(undefined);
         this.update();
       })
@@ -157,7 +160,7 @@ export class PluginList extends Widget {
 
   private _changed = new Signal<this, void>(this);
   private _confirm: () => Promise<void>;
-  private _scrollTop = 0;
+  private _scrollTop: number | undefined = 0;
   private _selection = '';
 }
 
@@ -298,7 +301,7 @@ namespace Private {
    */
   function sortPlugins(registry: ISettingRegistry): ISettingRegistry.IPlugin[] {
     return Object.keys(registry.plugins)
-      .map(plugin => registry.plugins[plugin])
+      .map(plugin => registry.plugins[plugin]!)
       .sort((a, b) => {
         return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
       });

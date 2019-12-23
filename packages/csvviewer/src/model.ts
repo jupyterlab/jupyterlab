@@ -83,9 +83,9 @@ export class DSVModel extends DataModel implements IDisposable {
     this._parseAsync();
 
     // Cache the header row.
-    if (header === true && this._columnCount > 0) {
+    if (header === true && this._columnCount! > 0) {
       let h = [];
-      for (let c = 0; c < this._columnCount; c++) {
+      for (let c = 0; c < this._columnCount!; c++) {
         h.push(this._getField(0, c));
       }
       this._header = h;
@@ -116,9 +116,9 @@ export class DSVModel extends DataModel implements IDisposable {
   rowCount(region: DataModel.RowRegion): number {
     if (region === 'body') {
       if (this._header.length === 0) {
-        return this._rowCount;
+        return this._rowCount!;
       } else {
-        return this._rowCount - 1;
+        return this._rowCount! - 1;
       }
     }
     return 1;
@@ -133,7 +133,7 @@ export class DSVModel extends DataModel implements IDisposable {
    */
   columnCount(region: DataModel.ColumnRegion): number {
     if (region === 'body') {
-      return this._columnCount;
+      return this._columnCount!;
     }
     return 1;
   }
@@ -190,11 +190,13 @@ export class DSVModel extends DataModel implements IDisposable {
       return;
     }
 
+    this._isDisposed = true;
+
     this._columnCount = undefined;
     this._rowCount = undefined;
-    this._rowOffsets = null;
-    this._columnOffsets = null;
-    this._data = null;
+    this._rowOffsets = null!;
+    this._columnOffsets = null!;
+    this._data = null!;
 
     // Clear out state associated with the asynchronous parsing.
     if (this._doneParsing === false) {
@@ -224,7 +226,7 @@ export class DSVModel extends DataModel implements IDisposable {
   private _computeRowOffsets(endRow = 4294967295): void {
     // If we've already parsed up to endRow, or if we've already parsed the
     // entire data set, return early.
-    if (this._rowCount >= endRow || this._doneParsing === true) {
+    if (this._rowCount! >= endRow || this._doneParsing === true) {
       return;
     }
 
@@ -245,12 +247,12 @@ export class DSVModel extends DataModel implements IDisposable {
     // last row offset we have.
     let { nrows, offsets } = PARSERS[this._parser]({
       data: this._data,
-      startIndex: this._rowOffsets[this._rowCount - 1],
+      startIndex: this._rowOffsets[this._rowCount! - 1],
       delimiter: this._delimiter,
       rowDelimiter: this._rowDelimiter,
       quote: this._quote,
       columnOffsets: false,
-      maxRows: endRow - this._rowCount + 1
+      maxRows: endRow - this._rowCount! + 1
     });
 
     // Return if we didn't actually get any new rows beyond the one we've
@@ -264,7 +266,7 @@ export class DSVModel extends DataModel implements IDisposable {
     this._startedParsing = true;
 
     // Update the row count.
-    let oldRowCount = this._rowCount;
+    let oldRowCount = this._rowCount!;
     this._rowCount = oldRowCount + nrows - 1;
 
     // If we didn't reach the requested row, we must be done.
@@ -354,9 +356,9 @@ export class DSVModel extends DataModel implements IDisposable {
     // Find the end of the slice (the start of the next field), and how much we
     // should adjust to trim off a trailing field or row delimiter. First check
     // if we are getting the last column.
-    if (column === this._columnCount - 1) {
+    if (column === this._columnCount! - 1) {
       // Check if we are getting any row but the last.
-      if (row < this._rowCount - 1) {
+      if (row < this._rowCount! - 1) {
         // Set the next offset to the next row, column 0.
         nextIndex = this._getOffsetIndex(row + 1, 0);
 
@@ -415,7 +417,7 @@ export class DSVModel extends DataModel implements IDisposable {
    */
   private _getOffsetIndex(row: number, column: number): number {
     // Declare local variables.
-    const ncols = this._columnCount;
+    const ncols = this._columnCount!;
 
     // Check to see if row *should* be in the cache, based on the cache size.
     let rowIndex = (row - this._columnOffsetsStartingRow) * ncols;
@@ -575,8 +577,8 @@ export class DSVModel extends DataModel implements IDisposable {
 
   // Data values
   private _data: string;
-  private _rowCount: number = 1;
-  private _columnCount: number;
+  private _rowCount: number | undefined = 1;
+  private _columnCount: number | undefined;
 
   // Cache information
   /**
@@ -610,7 +612,7 @@ export class DSVModel extends DataModel implements IDisposable {
   private _initialRows: number;
 
   // Bookkeeping variables.
-  private _delayedParse: number = null;
+  private _delayedParse: number | null = null;
   private _startedParsing: boolean = false;
   private _doneParsing: boolean = false;
   private _isDisposed: boolean = false;

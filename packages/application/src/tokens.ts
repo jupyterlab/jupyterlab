@@ -5,7 +5,7 @@ import { CommandRegistry } from '@lumino/commands';
 
 import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 
-import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
+import { Token, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
 
@@ -109,7 +109,7 @@ export namespace IRouter {
   /**
    * The parsed location currently being routed.
    */
-  export interface ILocation extends ReadonlyJSONObject {
+  export interface ILocation extends ReadonlyPartialJSONObject {
     /**
      * The location hash.
      */
@@ -132,7 +132,7 @@ export namespace IRouter {
      * The search element, including leading question mark (`'?'`), if any,
      * of the path.
      */
-    search: string;
+    search?: string;
   }
 
   /**

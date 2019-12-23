@@ -23,7 +23,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { Session } from '@jupyterlab/services';
 
-import { find } from '@lumino/algorithm';
+import { find, toArray } from '@lumino/algorithm';
 
 import { Widget } from '@lumino/widgets';
 
@@ -135,21 +135,26 @@ const consoles: JupyterFrontEndPlugin<void> = {
     consoles: IConsoleTracker
   ): void => {
     // Create a handler for each console that is created.
-    consoles.widgetAdded.connect((sender, panel) => {
-      const anchor = panel.console;
-      const cell = anchor.promptCell;
-      const editor = cell && cell.editor;
-      const session = anchor.session;
-      const parent = panel;
+    consoles.widgetAdded.connect((sender, widget) => {
+      const anchor = widget.content.console;
+      const editor = anchor.promptCell?.editor ?? null;
+      const session = anchor.sessionContext.session;
+      // TODO: CompletionConnector assumes editor and session are not null
       const connector = new CompletionConnector({ session, editor });
-      const handler = manager.register({ connector, editor, parent });
+      const handler = manager.register({ connector, editor, parent: widget });
 
-      // Listen for prompt creation.
-      anchor.promptCellCreated.connect((sender, cell) => {
-        const editor = cell && cell.editor;
+      let updateConnector = () => {
+        const editor = anchor.promptCell?.editor ?? null;
+        const session = anchor.sessionContext.session;
+
         handler.editor = editor;
+        // TODO: CompletionConnector assumes editor and session are not null
         handler.connector = new CompletionConnector({ session, editor });
-      });
+      };
+
+      // Update the handler whenever the prompt or session changes
+      anchor.promptCellCreated.connect(updateConnector);
+      anchor.sessionContext.sessionChanged.connect(updateConnector);
     });
 
     // Add console completer invoke command.
@@ -197,26 +202,31 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   ): void => {
     // Create a handler for each notebook that is created.
     notebooks.widgetAdded.connect((sender, panel) => {
-      const cell = panel.content.activeCell;
-      const editor = cell && cell.editor;
-      const session = panel.session;
-      const parent = panel;
+      const editor = panel.content.activeCell?.editor ?? null;
+      const session = panel.sessionContext.session;
+      // TODO: CompletionConnector assumes editor and session are not null
       const connector = new CompletionConnector({ session, editor });
-      const handler = manager.register({ connector, editor, parent });
+      const handler = manager.register({ connector, editor, parent: panel });
 
-      // Listen for active cell changes.
-      panel.content.activeCellChanged.connect((sender, cell) => {
-        const editor = cell && cell.editor;
+      let updateConnector = () => {
+        const editor = panel.content.activeCell?.editor ?? null;
+        const session = panel.sessionContext.session;
+
         handler.editor = editor;
+        // TODO: CompletionConnector assumes editor and session are not null
         handler.connector = new CompletionConnector({ session, editor });
-      });
+      };
+
+      // Update the handler whenever the prompt or session changes
+      panel.content.activeCellChanged.connect(updateConnector);
+      panel.sessionContext.sessionChanged.connect(updateConnector);
     });
 
     // Add notebook completer command.
     app.commands.addCommand(CommandIDs.invokeNotebook, {
       execute: () => {
         const panel = notebooks.currentWidget;
-        if (panel && panel.content.activeCell.model.type === 'code') {
+        if (panel && panel.content.activeCell?.model.type === 'code') {
           return app.commands.execute(CommandIDs.invoke, { id: panel.id });
         }
       }
@@ -257,7 +267,7 @@ const files: JupyterFrontEndPlugin<void> = {
     // Keep a list of active ISessions so that we can
     // clean them up when they are no longer needed.
     const activeSessions: {
-      [id: string]: Session.ISession;
+      [id: string]: Session.ISessionConnection;
     } = {};
 
     // When a new file editor is created, make the completer for it.
@@ -265,6 +275,15 @@ const files: JupyterFrontEndPlugin<void> = {
       const sessions = app.serviceManager.sessions;
       const editor = widget.content.editor;
       const contextConnector = new ContextConnector({ editor });
+
+      // Initially create the handler with the contextConnector.
+      // If a kernel session is found matching this file editor,
+      // it will be replaced in onRunningChanged().
+      const handler = manager.register({
+        connector: contextConnector,
+        editor,
+        parent: widget
+      });
 
       // When the list of running sessions changes,
       // check to see if there are any kernels with a
@@ -288,7 +307,7 @@ const files: JupyterFrontEndPlugin<void> = {
             delete activeSessions[widget.id];
             oldSession.dispose();
           }
-          const session = sessions.connectTo(model);
+          const session = sessions.connectTo({ model });
           handler.connector = new CompletionConnector({ session, editor });
           activeSessions[widget.id] = session;
         } else {
@@ -302,19 +321,8 @@ const files: JupyterFrontEndPlugin<void> = {
           }
         }
       };
-      void Session.listRunning().then(models => {
-        onRunningChanged(sessions, models);
-      });
+      onRunningChanged(sessions, toArray(sessions.running()));
       sessions.runningChanged.connect(onRunningChanged);
-
-      // Initially create the handler with the contextConnector.
-      // If a kernel session is found matching this file editor,
-      // it will be replaced in onRunningChanged().
-      const handler = manager.register({
-        connector: contextConnector,
-        editor,
-        parent: widget
-      });
 
       // When the widget is disposed, do some cleanup.
       widget.disposed.connect(() => {

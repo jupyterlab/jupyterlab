@@ -28,7 +28,7 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
   constructor(name: string, options: TerminalSession.IOptions = {}) {
     this._name = name;
     this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+      options.serverSettings ?? ServerConnection.makeSettings();
     this._readyPromise = this._initializeSocket();
   }
 
@@ -315,7 +315,7 @@ export namespace DefaultTerminalSession {
       throw Private.unavailableMsg;
     }
     let serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+      options.serverSettings ?? ServerConnection.makeSettings();
     let url = Private.getServiceUrl(serverSettings.baseUrl);
     let init = { method: 'POST' };
 
@@ -358,7 +358,7 @@ export namespace DefaultTerminalSession {
       return Promise.reject(Private.unavailableMsg);
     }
     let serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+      options.serverSettings ?? ServerConnection.makeSettings();
     let url = Private.getTermUrl(serverSettings.baseUrl, name);
     if (url in Private.running) {
       return Promise.resolve(Private.running[url].clone());
@@ -386,12 +386,11 @@ export namespace DefaultTerminalSession {
    * @returns A promise that resolves with the list of running session models.
    */
   export function listRunning(
-    settings?: ServerConnection.ISettings
+    settings: ServerConnection.ISettings = ServerConnection.makeSettings()
   ): Promise<TerminalSession.IModel[]> {
     if (!TerminalSession.isAvailable()) {
       return Promise.reject(Private.unavailableMsg);
     }
-    settings = settings || ServerConnection.makeSettings();
     let url = Private.getServiceUrl(settings.baseUrl);
     return ServerConnection.makeRequest(url, {}, settings)
       .then(response => {
@@ -431,12 +430,11 @@ export namespace DefaultTerminalSession {
    */
   export function shutdown(
     name: string,
-    settings?: ServerConnection.ISettings
+    settings: ServerConnection.ISettings = ServerConnection.makeSettings()
   ): Promise<void> {
     if (!TerminalSession.isAvailable()) {
       return Promise.reject(Private.unavailableMsg);
     }
-    settings = settings || ServerConnection.makeSettings();
     let url = Private.getTermUrl(settings.baseUrl, name);
     let init = { method: 'DELETE' };
     return ServerConnection.makeRequest(url, init, settings).then(response => {
@@ -459,9 +457,8 @@ export namespace DefaultTerminalSession {
    * @returns A promise that resolves when all the sessions are shut down.
    */
   export async function shutdownAll(
-    settings?: ServerConnection.ISettings
+    settings: ServerConnection.ISettings = ServerConnection.makeSettings()
   ): Promise<void> {
-    settings = settings || ServerConnection.makeSettings();
     const running = await listRunning(settings);
     await Promise.all(running.map(s => shutdown(s.name, settings)));
   }

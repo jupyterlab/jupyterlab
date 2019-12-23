@@ -59,8 +59,8 @@ describe('@jupyterlab/apputils', () => {
         });
 
         await waitForDialog(node);
-        const body = node.getElementsByClassName('jp-Input-Dialog').item(0);
-        const input = body.getElementsByTagName('input').item(0);
+        const body = node.getElementsByClassName('jp-Input-Dialog').item(0)!;
+        const input = body.getElementsByTagName('input').item(0)!;
         input.checked = true;
 
         await acceptDialog();
@@ -131,8 +131,8 @@ describe('@jupyterlab/apputils', () => {
         });
 
         await waitForDialog(node);
-        const body = node.getElementsByClassName('jp-Input-Dialog').item(0);
-        const input = body.getElementsByTagName('input').item(0);
+        const body = node.getElementsByClassName('jp-Input-Dialog').item(0)!;
+        const input = body.getElementsByTagName('input').item(0)!;
         input.value = 'item3';
 
         await acceptDialog();
@@ -195,8 +195,8 @@ describe('@jupyterlab/apputils', () => {
         });
 
         await waitForDialog(node);
-        const body = node.getElementsByClassName('jp-Input-Dialog').item(0);
-        const input = body.getElementsByTagName('input').item(0);
+        const body = node.getElementsByClassName('jp-Input-Dialog').item(0)!;
+        const input = body.getElementsByTagName('input').item(0)!;
         input.value = 'my answer';
 
         await acceptDialog();
@@ -259,8 +259,8 @@ describe('@jupyterlab/apputils', () => {
         });
 
         await waitForDialog(node);
-        const body = node.getElementsByClassName('jp-Input-Dialog').item(0);
-        const input = body.getElementsByTagName('input').item(0);
+        const body = node.getElementsByClassName('jp-Input-Dialog').item(0)!;
+        const input = body.getElementsByTagName('input').item(0)!;
         input.value = '25';
 
         await acceptDialog();
@@ -284,8 +284,8 @@ describe('@jupyterlab/apputils', () => {
         });
 
         await waitForDialog(node);
-        const body = node.getElementsByClassName('jp-Input-Dialog').item(0);
-        const input = body.getElementsByTagName('input').item(0);
+        const body = node.getElementsByClassName('jp-Input-Dialog').item(0)!;
+        const input = body.getElementsByTagName('input').item(0)!;
         input.value = '';
 
         await acceptDialog();

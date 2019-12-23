@@ -3,15 +3,15 @@
 
 import React from 'react';
 
-import { IClientSession, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+import { ISessionContext, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import { Text } from '@jupyterlab/coreutils';
 
-import { Kernel, Session } from '@jupyterlab/services';
+import { Session } from '@jupyterlab/services';
 
 import { interactiveItem, TextItem } from '..';
 
-import { JSONExt } from '@lumino/coreutils';
+import { JSONExt, JSONArray } from '@lumino/coreutils';
 
 /**
  * A pure functional component for rendering kernel status.
@@ -22,7 +22,9 @@ function KernelStatusComponent(
   return (
     <TextItem
       onClick={props.handleClick}
-      source={`${props.kernelName} | ${Text.titleCase(props.status)}`}
+      source={`${props.kernelName} | ${Text.titleCase(
+        props.status ?? 'undefined'
+      )}`}
       title={`Change kernel for ${props.activityName}`}
     />
   );
@@ -55,7 +57,7 @@ namespace KernelStatusComponent {
     /**
      * The status of the kernel.
      */
-    status: Kernel.Status;
+    status?: string;
   }
 }
 
@@ -67,9 +69,8 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
    * Construct the kernel status widget.
    */
   constructor(opts: KernelStatus.IOptions) {
-    super();
+    super(new KernelStatus.Model());
     this._handleClick = opts.onClick;
-    this.model = new KernelStatus.Model();
     this.addClass(interactiveItem);
   }
 
@@ -134,40 +135,33 @@ export namespace KernelStatus {
     /**
      * The current client session associated with the kernel status indicator.
      */
-    get session(): IClientSession | null {
-      return this._session;
+    get sessionContext(): ISessionContext | null {
+      return this._sessionContext;
     }
-    set session(session: IClientSession | null) {
-      const oldSession = this._session;
-      if (oldSession !== null) {
-        oldSession.statusChanged.disconnect(this._onKernelStatusChanged);
-        oldSession.kernelChanged.disconnect(this._onKernelChanged);
-      }
+    set sessionContext(sessionContext: ISessionContext | null) {
+      this._sessionContext?.statusChanged.disconnect(
+        this._onKernelStatusChanged
+      );
+      this._sessionContext?.kernelChanged.disconnect(this._onKernelChanged);
 
       const oldState = this._getAllState();
-      this._session = session;
-      if (this._session === null) {
-        this._kernelStatus = 'unknown';
-        this._kernelName = 'unknown';
-      } else {
-        this._kernelStatus = this._session.status;
-        this._kernelName = this._session.kernelDisplayName;
-
-        this._session.statusChanged.connect(this._onKernelStatusChanged);
-        this._session.kernelChanged.connect(this._onKernelChanged);
-      }
-
+      this._sessionContext = sessionContext;
+      this._kernelStatus = sessionContext?.kernelDisplayStatus;
+      this._kernelName = sessionContext?.kernelDisplayName ?? 'No Kernel!';
+      sessionContext?.statusChanged.connect(this._onKernelStatusChanged, this);
+      sessionContext?.connectionStatusChanged.connect(
+        this._onKernelStatusChanged,
+        this
+      );
+      sessionContext?.kernelChanged.connect(this._onKernelChanged, this);
       this._triggerChange(oldState, this._getAllState());
     }
 
     /**
      * React to changes to the kernel status.
      */
-    private _onKernelStatusChanged = (
-      _session: IClientSession,
-      status: Kernel.Status
-    ) => {
-      this._kernelStatus = status;
+    private _onKernelStatusChanged = () => {
+      this._kernelStatus = this._sessionContext?.kernelDisplayStatus;
       this.stateChanged.emit(void 0);
     };
 
@@ -175,47 +169,37 @@ export namespace KernelStatus {
      * React to changes in the kernel.
      */
     private _onKernelChanged = (
-      _session: IClientSession,
-      change: Session.IKernelChangedArgs
+      _sessionContext: ISessionContext,
+      change: Session.ISessionConnection.IKernelChangedArgs
     ) => {
       const oldState = this._getAllState();
       const { newValue } = change;
       if (newValue !== null) {
-        newValue
-          .getSpec()
-          .then(spec => {
-            // sync setting of status and display name
-            this._kernelStatus = newValue.status;
-            this._kernelName = spec.display_name;
-            this._triggerChange(oldState, this._getAllState());
-          })
-          .catch(err => {
-            throw err;
-          });
+        // sync setting of status and display name
+        this._kernelStatus = this._sessionContext?.kernelDisplayStatus;
+        this._kernelName = _sessionContext.kernelDisplayName;
+        this._triggerChange(oldState, this._getAllState());
       } else {
-        this._kernelStatus = 'unknown';
-        this._kernelName = 'unknown';
+        this._kernelStatus = '';
+        this._kernelName = 'No Kernel!';
         this._triggerChange(oldState, this._getAllState());
       }
     };
 
-    private _getAllState(): [string, string, string] {
+    private _getAllState(): Private.State {
       return [this._kernelName, this._kernelStatus, this._activityName];
     }
 
-    private _triggerChange(
-      oldState: [string, string, string],
-      newState: [string, string, string]
-    ) {
-      if (JSONExt.deepEqual(oldState, newState)) {
+    private _triggerChange(oldState: Private.State, newState: Private.State) {
+      if (JSONExt.deepEqual(oldState as JSONArray, newState as JSONArray)) {
         this.stateChanged.emit(void 0);
       }
     }
 
     private _activityName: string = 'activity';
-    private _kernelName: string = 'unknown';
-    private _kernelStatus: Kernel.Status = 'unknown';
-    private _session: IClientSession | null = null;
+    private _kernelName: string = 'No Kernel!';
+    private _kernelStatus: string | undefined = '';
+    private _sessionContext: ISessionContext | null = null;
   }
 
   /**
@@ -228,4 +212,8 @@ export namespace KernelStatus {
      */
     onClick: () => void;
   }
+}
+
+namespace Private {
+  export type State = [string, string | undefined, string];
 }

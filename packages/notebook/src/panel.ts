@@ -14,7 +14,7 @@ import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 
 import {
-  IClientSession,
+  ISessionContext,
   Printing,
   showDialog,
   Dialog
@@ -57,13 +57,15 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
 
     // Set up things related to the context
     this.content.model = this.context.model;
-    this.context.session.kernelChanged.connect(this._onKernelChanged, this);
-    this.context.session.statusChanged.connect(
+    this.context.sessionContext.kernelChanged.connect(
+      this._onKernelChanged,
+      this
+    );
+    this.context.sessionContext.statusChanged.connect(
       this._onSessionStatusChanged,
       this
     );
     this.context.saveState.connect(this._onSave, this);
-
     void this.revealed.then(() => {
       if (this.isDisposed) {
         // this widget has already been disposed, bail
@@ -81,7 +83,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   _onSave(sender: DocumentRegistry.Context, state: DocumentRegistry.SaveState) {
-    if (state === 'started') {
+    if (state === 'started' && this.model) {
       // Find markdown cells
       const { cells } = this.model;
       each(cells, cell => {
@@ -104,10 +106,10 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   /**
-   * The client session used by the panel.
+   * The session context used by the panel.
    */
-  get session(): IClientSession {
-    return this.context.session;
+  get sessionContext(): ISessionContext {
+    return this.context.sessionContext;
   }
 
   /**
@@ -118,8 +120,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * The model for the widget.
    */
-  get model(): INotebookModel {
-    return this.content ? this.content.model : null;
+  get model(): INotebookModel | null {
+    return this.content.model;
   }
 
   /**
@@ -131,10 +133,10 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     this.content.editorConfig = config.editorConfig;
     this.content.notebookConfig = config.notebookConfig;
     // Update kernel shutdown behavior
-    const kernelPreference = this.context.session.kernelPreference;
-    this.context.session.kernelPreference = {
+    const kernelPreference = this.context.sessionContext.kernelPreference;
+    this.context.sessionContext.kernelPreference = {
       ...kernelPreference,
-      shutdownOnClose: config.kernelShutdown
+      shutdownOnDispose: config.kernelShutdown
     };
   }
 
@@ -190,22 +192,25 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   private _onKernelChanged(
     sender: any,
-    args: Session.IKernelChangedArgs
+    args: Session.ISessionConnection.IKernelChangedArgs
   ): void {
     if (!this.model || !args.newValue) {
       return;
     }
     let { newValue } = args;
-    void newValue.ready.then(() => {
-      if (this.model && this.context.session.kernel === newValue) {
-        this._updateLanguage(newValue.info.language_info);
+    void newValue.info.then(info => {
+      if (
+        this.model &&
+        this.context.sessionContext.session?.kernel === newValue
+      ) {
+        this._updateLanguage(info.language_info);
       }
     });
     void this._updateSpec(newValue);
   }
 
   private _onSessionStatusChanged(
-    sender: IClientSession,
+    sender: ISessionContext,
     status: Kernel.Status
   ) {
     // If the status is autorestarting, and we aren't already in a series of
@@ -215,7 +220,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       // they know why their kernel state is gone.
       void showDialog({
         title: 'Kernel Restarting',
-        body: `The kernel for ${this.session.path} appears to have died. It will restart automatically.`,
+        body: `The kernel for ${this.sessionContext.session?.path} appears to have died. It will restart automatically.`,
         buttons: [Dialog.okButton()]
       });
       this._autorestarting = true;
@@ -233,22 +238,21 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Update the kernel language.
    */
   private _updateLanguage(language: KernelMessage.ILanguageInfo): void {
-    this.model.metadata.set('language_info', language);
+    this.model!.metadata.set('language_info', language);
   }
 
   /**
    * Update the kernel spec.
    */
-  private _updateSpec(kernel: Kernel.IKernelConnection): Promise<void> {
-    return kernel.getSpec().then(spec => {
-      if (this.isDisposed) {
-        return;
-      }
-      this.model.metadata.set('kernelspec', {
-        name: kernel.name,
-        display_name: spec.display_name,
-        language: spec.language
-      });
+  private async _updateSpec(kernel: Kernel.IKernelConnection): Promise<void> {
+    const spec = await kernel.spec;
+    if (this.isDisposed) {
+      return;
+    }
+    this.model!.metadata.set('kernelspec', {
+      name: kernel.name,
+      display_name: spec?.display_name,
+      language: spec?.language
     });
   }
 

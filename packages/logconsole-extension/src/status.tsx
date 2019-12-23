@@ -32,10 +32,15 @@ function LogConsoleStatusComponent(
     title = `${props.newMessages} new messages, `;
   }
   title += `${props.logEntries} log entries for ${props.source}`;
+  // inline conditional doesn't seem to work with strict TS currently...
+  let cond: JSX.Element = (false as unknown) as JSX.Element;
+  if (props.newMessages > 0) {
+    cond = <TextItem source={props.newMessages} />;
+  }
   return (
     <GroupItem spacing={0} onClick={props.handleClick} title={title}>
       <DefaultIconReact name={'list'} top={'2px'} kind={'statusBar'} />
-      {props.newMessages > 0 && <TextItem source={props.newMessages} />}
+      {cond}
     </GroupItem>
   );
 }
@@ -67,7 +72,7 @@ namespace LogConsoleStatusComponent {
     /**
      * Log source name
      */
-    source: string;
+    source: string | null;
   }
 }
 
@@ -81,9 +86,8 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
    * @param options - The status widget initialization options.
    */
   constructor(options: LogConsoleStatus.IOptions) {
-    super();
+    super(new LogConsoleStatus.Model(options.loggerRegistry));
     this._handleClick = options.handleClick;
-    this.model = new LogConsoleStatus.Model(options.loggerRegistry);
     this.addClass(interactiveItem);
     this.addClass('jp-LogConsoleStatusItem');
   }
@@ -218,7 +222,7 @@ export namespace LogConsoleStatus {
       if (this._source === null) {
         return 0;
       }
-      return this._sourceVersion.get(this.source).lastDisplayed;
+      return this._sourceVersion.get(this._source)?.lastDisplayed ?? 0;
     }
 
     /**
@@ -228,7 +232,7 @@ export namespace LogConsoleStatus {
       if (this._source === null) {
         return 0;
       }
-      return this._sourceVersion.get(this.source).lastNotified;
+      return this._sourceVersion.get(this._source)?.lastNotified ?? 0;
     }
 
     /**
@@ -260,11 +264,11 @@ export namespace LogConsoleStatus {
      * This will also update the last notified version so that the last
      * notified version is always at least the last displayed version.
      */
-    sourceDisplayed(source: string | null, version: number) {
-      if (source === null) {
+    sourceDisplayed(source: string | null, version: number | null) {
+      if (source === null || version === null) {
         return;
       }
-      const versions = this._sourceVersion.get(source);
+      const versions = this._sourceVersion.get(source)!;
       let change = false;
       if (versions.lastDisplayed < version) {
         versions.lastDisplayed = version;
@@ -290,8 +294,8 @@ export namespace LogConsoleStatus {
         return;
       }
       const versions = this._sourceVersion.get(source);
-      if (versions.lastNotified < version) {
-        versions.lastNotified = version;
+      if (versions!.lastNotified < version) {
+        versions!.lastNotified = version;
         if (source === this._source) {
           this.stateChanged.emit();
         }
@@ -326,7 +330,7 @@ export namespace LogConsoleStatus {
     public flashEnabledChanged = new Signal<this, void>(this);
     private _flashEnabled: boolean = true;
     private _loggerRegistry: ILoggerRegistry;
-    private _source: string = null;
+    private _source: string | null = null;
     /**
      * The view status of each source.
      *

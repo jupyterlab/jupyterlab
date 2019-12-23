@@ -2,11 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JSONObject,
-  JSONValue,
-  ReadonlyJSONObject,
-  ReadonlyJSONValue,
-  Token
+  PartialJSONObject,
+  Token,
+  PartialJSONValue,
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
@@ -54,7 +54,7 @@ export interface ISettingRegistry {
    * The collection of setting registry plugins.
    */
   readonly plugins: {
-    [name: string]: ISettingRegistry.IPlugin;
+    [name: string]: ISettingRegistry.IPlugin | undefined;
   };
 
   /**
@@ -69,7 +69,10 @@ export interface ISettingRegistry {
   get(
     plugin: string,
     key: string
-  ): Promise<{ composite: JSONValue; user: JSONValue }>;
+  ): Promise<{
+    composite: PartialJSONValue | undefined;
+    user: PartialJSONValue | undefined;
+  }>;
 
   /**
    * Load a plugin's settings into the setting registry.
@@ -114,7 +117,7 @@ export interface ISettingRegistry {
    * @returns A promise that resolves when the setting has been saved.
    *
    */
-  set(plugin: string, key: string, value: JSONValue): Promise<void>;
+  set(plugin: string, key: string, value: PartialJSONValue): Promise<void>;
 
   /**
    * Register a plugin transform function to act on a specific plugin.
@@ -171,7 +174,7 @@ export namespace ISettingRegistry {
   /**
    * The settings for a specific plugin.
    */
-  export interface IPlugin extends JSONObject {
+  export interface IPlugin extends PartialJSONObject {
     /**
      * The name of the plugin.
      */
@@ -217,11 +220,11 @@ export namespace ISettingRegistry {
   /**
    * A minimal subset of the formal JSON Schema that describes a property.
    */
-  export interface IProperty extends JSONObject {
+  export interface IProperty extends PartialJSONObject {
     /**
      * The default value, if any.
      */
-    default?: any;
+    default?: PartialJSONValue;
 
     /**
      * The schema description.
@@ -297,19 +300,19 @@ export namespace ISettingRegistry {
   /**
    * The setting values for a plugin.
    */
-  export interface ISettingBundle extends JSONObject {
+  export interface ISettingBundle extends PartialJSONObject {
     /**
      * A composite of the user setting values and the plugin schema defaults.
      *
      * #### Notes
      * The `composite` values will always be a superset of the `user` values.
      */
-    composite: JSONObject;
+    composite: PartialJSONObject;
 
     /**
      * The user setting values.
      */
-    user: JSONObject;
+    user: PartialJSONObject;
   }
 
   /**
@@ -324,7 +327,7 @@ export namespace ISettingRegistry {
     /**
      * The composite of user settings and extension defaults.
      */
-    readonly composite: ReadonlyJSONObject;
+    readonly composite: ReadonlyPartialJSONObject;
 
     /**
      * The plugin's ID.
@@ -349,7 +352,7 @@ export namespace ISettingRegistry {
     /**
      * The user settings.
      */
-    readonly user: ReadonlyJSONObject;
+    readonly user: ReadonlyPartialJSONObject;
 
     /**
      * The published version of the NPM package containing these settings.
@@ -368,7 +371,7 @@ export namespace ISettingRegistry {
      *
      * @returns A calculated default JSON value for a specific setting.
      */
-    default(key: string): JSONValue | undefined;
+    default(key: string): PartialJSONValue | undefined;
 
     /**
      * Get an individual setting.
@@ -377,7 +380,12 @@ export namespace ISettingRegistry {
      *
      * @returns The setting value.
      */
-    get(key: string): { composite: ReadonlyJSONValue; user: ReadonlyJSONValue };
+    get(
+      key: string
+    ): {
+      composite: ReadonlyPartialJSONValue | undefined;
+      user: ReadonlyPartialJSONValue | undefined;
+    };
 
     /**
      * Remove a single setting.
@@ -408,7 +416,7 @@ export namespace ISettingRegistry {
      * #### Notes
      * This function is asynchronous because it writes to the setting registry.
      */
-    set(key: string, value: JSONValue): Promise<void>;
+    set(key: string, value: PartialJSONValue): Promise<void>;
 
     /**
      * Validates raw settings with comments.
@@ -423,11 +431,11 @@ export namespace ISettingRegistry {
   /**
    * An interface describing a JupyterLab keyboard shortcut.
    */
-  export interface IShortcut extends JSONObject {
+  export interface IShortcut extends PartialJSONObject {
     /**
      * The optional arguments passed into the shortcut's command.
      */
-    args?: JSONObject;
+    args?: PartialJSONObject;
 
     /**
      * The command invoked by the shortcut.
@@ -461,8 +469,9 @@ export const IStateDB = new Token<IStateDB>('@jupyterlab/coreutils:IStateDB');
 /**
  * The description of a state database.
  */
-export interface IStateDB<T extends ReadonlyJSONValue = ReadonlyJSONValue>
-  extends IDataConnector<T> {
+export interface IStateDB<
+  T extends ReadonlyPartialJSONValue = ReadonlyPartialJSONValue
+> extends IDataConnector<T> {
   /**
    * Return a serialized copy of the state database's entire contents.
    *

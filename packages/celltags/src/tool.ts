@@ -215,7 +215,7 @@ export class TagTool extends NotebookTools.Tool {
       this.header = true;
     }
     if (this.tracker.currentWidget) {
-      this.tracker.currentWidget.context.ready.then(() => {
+      void this.tracker.currentWidget.context.ready.then(() => {
         this.refreshTags();
         this.loadActiveTags();
       });

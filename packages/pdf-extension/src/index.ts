@@ -27,10 +27,10 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
     this.node.appendChild(iframe);
     // The iframe content window is not available until the onload event.
     iframe.onload = () => {
-      const body = iframe.contentWindow.document.createElement('body');
+      const body = iframe.contentWindow!.document.createElement('body');
       body.style.margin = '0px';
-      iframe.contentWindow.document.body = body;
-      this._object = iframe.contentWindow.document.createElement('object');
+      iframe.contentWindow!.document.body = body;
+      this._object = iframe.contentWindow!.document.createElement('object');
       this._object.type = MIME_TYPE;
       this._object.width = '100%';
       this._object.height = '100%';
@@ -44,7 +44,7 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     await this._ready.promise;
-    let data = model.data[MIME_TYPE] as string;
+    let data = model.data[MIME_TYPE] as string | undefined;
     if (
       !data ||
       (data.length === this._base64.length && data === this._base64)

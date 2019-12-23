@@ -101,7 +101,7 @@ export class CompleterModel implements Completer.IModel {
       return;
     }
 
-    const { start, end } = this._cursor;
+    const { start, end } = cursor;
     // Clip the front of the current line.
     let query = current.text.substring(start);
     // Clip the back of the current line by calculating the end of the original.
@@ -325,15 +325,16 @@ export class CompleterModel implements Completer.IModel {
   createPatch(patch: string): Completer.IPatch | undefined {
     const original = this._original;
     const cursor = this._cursor;
+    const current = this._current;
 
-    if (!original || !cursor) {
+    if (!original || !cursor || !current) {
       return undefined;
     }
 
     let { start, end } = cursor;
     // Also include any filtering/additional-typing that has occurred
     // since the completion request in the patched length.
-    end = end + (this.current.text.length - this.original.text.length);
+    end = end + (current.text.length - original.text.length);
 
     return { start, end, value: patch };
   }
@@ -481,7 +482,10 @@ namespace Private {
   export function findOrderedTypes(typeMap: Completer.TypeMap): string[] {
     const filtered = Object.keys(typeMap)
       .map(key => typeMap[key])
-      .filter(value => value && !(value in KNOWN_MAP))
+      .filter(
+        (value: string | null): value is string =>
+          !!value && !(value in KNOWN_MAP)
+      )
       .sort((a, b) => a.localeCompare(b));
 
     return KNOWN_TYPES.concat(filtered);

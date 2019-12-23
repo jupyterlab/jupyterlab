@@ -33,7 +33,7 @@ const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
   ) => {
     // If a given widget is searchable, apply the searchable class.
     // If it's not searchable, remove the class.
-    const transformWidgetSearchability = (widget: Widget) => {
+    const transformWidgetSearchability = (widget: Widget | null) => {
       if (!widget) {
         return;
       }
@@ -96,7 +96,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
       isEnabled: () => {
         const currentWidget = app.shell.currentWidget;
         if (!currentWidget) {
-          return;
+          return false;
         }
         return registry.getProviderForWidget(currentWidget) !== undefined;
       },
@@ -133,7 +133,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
       isEnabled: () => {
         const currentWidget = app.shell.currentWidget;
         if (!currentWidget) {
-          return;
+          return false;
         }
         return activeSearches.has(currentWidget.id);
       },
@@ -157,7 +157,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
       isEnabled: () => {
         const currentWidget = app.shell.currentWidget;
         if (!currentWidget) {
-          return;
+          return false;
         }
         return activeSearches.has(currentWidget.id);
       },

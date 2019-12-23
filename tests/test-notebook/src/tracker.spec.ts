@@ -54,7 +54,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be `null` if a tracked notebook has no active cell', () => {
         const tracker = new NotebookTracker({ namespace });
         const panel = NBTestUtils.createNotebookPanel(context);
-        panel.content.model.cells.clear();
+        panel.content.model!.cells.clear();
         void tracker.add(panel);
         expect(tracker.activeCell).to.be.null;
       });
@@ -63,7 +63,7 @@ describe('@jupyterlab/notebook', () => {
         const tracker = new NotebookTracker({ namespace });
         const panel = NBTestUtils.createNotebookPanel(context);
         await tracker.add(panel);
-        panel.content.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
+        panel.content.model!.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         expect(tracker.activeCell).to.be.an.instanceof(Cell);
         panel.dispose();
       });
@@ -77,7 +77,7 @@ describe('@jupyterlab/notebook', () => {
         tracker.activeCellChanged.connect(() => {
           count++;
         });
-        panel.content.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
+        panel.content.model!.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         await tracker.add(panel);
         expect(count).to.equal(1);
         panel.content.activeCellIndex = 1;
