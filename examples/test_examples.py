@@ -42,13 +42,7 @@ def main():
 
     count = 0
     for path in sorted(paths):
-        if osp.basename(path) == 'node':
-            with tempfile.TemporaryDirectory() as cwd:
-                header(path)
-                runner = osp.join(path, 'main.py')
-                subprocess.check_call([sys.executable, runner], cwd=cwd)
-                count += 1
-        elif osp.exists(osp.join(path, 'main.py')):
+        if osp.exists(osp.join(path, 'main.py')):
             with tempfile.TemporaryDirectory() as cwd:
                 header(path)
                 runner = osp.join(here, 'example_check.py')
